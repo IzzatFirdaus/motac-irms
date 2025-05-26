@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\SoftDeletes; // Assuming you want soft deletes 
  * @property string $name
  * @property string $branch_type Enum: 'state', 'headquarters'
  * @property string|null $code
+ * @property int|null $head_user_id Foreign key for Head of Department User
  * @property int|null $created_by
  * @property int|null $updated_by
  * @property int|null $deleted_by
@@ -22,6 +23,7 @@ use Illuminate\Database\Eloquent\SoftDeletes; // Assuming you want soft deletes 
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
+ * @property-read \App\Models\User|null $headOfDepartmentUser Accessor for HOD
  * @property-read \App\Models\User|null $creatorInfo
  * @property-read \App\Models\User|null $updaterInfo
  * @property-read \App\Models\User|null $deleterInfo
@@ -44,6 +46,7 @@ class Department extends Model
         'name',
         'branch_type',
         'code',
+        'head_user_id', // Added to fillable if you plan to set it via mass assignment
         // created_by, updated_by handled by BlameableObserver
     ];
 
@@ -62,6 +65,14 @@ class Department extends Model
     public function positions(): HasMany // If positions are directly tied to departments
     {
         return $this->hasMany(Position::class);
+    }
+
+    /**
+     * Get the user who is the head of this department.
+     */
+    public function headOfDepartmentUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'head_user_id');
     }
 
     public function creatorInfo(): BelongsTo

@@ -1,287 +1,114 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Livewire;
 
-use App\Jobs\sendPendingMessages;
-use App\Models\Center;
-use App\Models\Changelog;
-use App\Models\Employee;
-use App\Models\EmployeeLeave;
-use App\Models\Leave;
-use App\Models\Message;
-use Carbon\Carbon;
+use App\Models\User;
+use App\Models\LoanApplication;
+use App\Models\EmailApplication;
+use App\Helpers\Helpers;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Number;
+use Illuminate\Support\Facades\Log;
+use Illuminate\View\View;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Layout;
 use Livewire\Component;
-use Throwable;
 
+#[Layout('layouts.app')] // Bootstrap main layout
 class Dashboard extends Component
 {
-    public $accountBalance = ['status' => 400, 'balance' => '---', 'is_active' => '---'];
+    // MOTAC Dashboard Properties
+    public string $displayUserName = '';
+    public int $pendingLoanRequestsCount = 0;  // User's pending loan applications
+    public int $activeLoansCount = 0;          // User's active (issued) loans
+    public int $pendingEmailRequestsCount = 0; // User's pending email applications
+    public EloquentCollection $userRecentLoanApplications;
+    public EloquentCollection $userRecentEmailApplications;
 
-    public $messagesStatus = ['sent' => 0, 'unsent' => 0];
-
-    public $changelogs;
-
-    public $activeEmployees;
-
-    public $center;
-
-    public $selectedEmployeeId;
-
-    public $leaveTypes;
-
-    public $employeeLeaveId;
-
-    public $employeeLeaveRecord;
-
-    public $isEdit = false;
-
-    public $confirmedId;
-
-    public $leaveRecords = [];
-
-    public $newLeaveInfo = [
-        'LeaveId' => '',
-        'fromDate' => null,
-        'toDate' => null,
-        'startAt' => null,
-        'endAt' => null,
-        'note' => null,
-    ];
-
-    public $fromDateLimit;
-
-    public $employeePhoto = 'profile-photos/.default-photo.jpg';
-
-    public function mount()
+    public function __construct()
     {
-        $user = Employee::find(Auth::user()->employee_id);
-        $center = Center::find(
-            $user
-                ->timelines()
-                ->where('end_date', null)
-                ->first()->center_id
-        );
-        $this->activeEmployees = $center->activeEmployees();
+        // Initialize collections to prevent errors if mount fails or user is not authenticated early
+        $this->userRecentLoanApplications = new EloquentCollection();
+        $this->userRecentEmailApplications = new EloquentCollection();
+    }
 
-        $this->selectedEmployeeId = Auth::user()->employee_id;
-        $this->employeePhoto = $user->profile_photo_path;
-
-        $this->leaveTypes = Leave::all();
-
-        try {
-            $this->accountBalance = $this->CheckAccountBalance();
-        } catch (Throwable $th) {
-            //
+    /**
+     * Computed property for configuration data used by the layout.
+     * Ensures data is suitable for a Bootstrap layout.
+     */
+    #[Computed]
+    public function configData(): array
+    {
+        if (class_exists(Helpers::class) && method_exists(Helpers::class, 'appClasses')) {
+            return Helpers::appClasses();
         }
-
-        $this->fromDateLimit = Carbon::now()
-            ->subDays(30)
-            ->format('Y-m-d');
-        $this->changelogs = Changelog::latest()->get();
+        // Minimal fallback for layout compatibility
+        return ['textDirection' => 'ltr', 'templateName' => config('app.name', 'MOTAC RMS')];
     }
 
-    public function render()
+    /**
+     * Mount component and fetch initial data.
+     */
+    public function mount(): void
     {
-        $this->messagesStatus = Message::selectRaw(
-            'SUM(CASE WHEN is_sent = 1 THEN 1 ELSE 0 END) AS sent, SUM(CASE WHEN is_sent = 0 THEN 1 ELSE 0 END) AS unsent'
-        )->first();
-        $this->messagesStatus = [
-            'sent' => Number::format($this->messagesStatus['sent'] != null ? $this->messagesStatus['sent'] : 0),
-            'unsent' => Number::format($this->messagesStatus['unsent'] != null ? $this->messagesStatus['unsent'] : 0),
-        ];
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
 
-        $this->leaveRecords = EmployeeLeave::where('created_by', Auth::user()->name)
-            ->whereDate('created_at', Carbon::today()->toDate())
-            ->orderBy('created_at')
-            ->get();
+        if ($user) {
+            $this->displayUserName = $user->name ?? __('Pengguna');
 
-        return view('livewire.dashboard');
-    }
+            // Fetch counts specific to the authenticated user
+            $this->pendingLoanRequestsCount = LoanApplication::where('user_id', $user->id)
+                ->whereIn('status', [
+                    LoanApplication::STATUS_PENDING_SUPPORT,
+                    LoanApplication::STATUS_PENDING_HOD_REVIEW,
+                    LoanApplication::STATUS_PENDING_BPM_REVIEW,
+                    LoanApplication::STATUS_APPROVED, // Considered pending until issued
+                ])->count();
 
-    public function updatedSelectedEmployeeId()
-    {
-        $employee = Employee::find($this->selectedEmployeeId);
+            $this->activeLoansCount = LoanApplication::where('user_id', $user->id)
+                ->whereIn('status', [
+                    LoanApplication::STATUS_ISSUED,
+                    LoanApplication::STATUS_PARTIALLY_ISSUED,
+                    LoanApplication::STATUS_OVERDUE,
+                ])->count();
 
-        if ($employee) {
-            $this->employeePhoto = $employee->profile_photo_path;
+            $this->pendingEmailRequestsCount = EmailApplication::where('user_id', $user->id)
+                ->whereIn('status', [
+                    EmailApplication::STATUS_PENDING_SUPPORT,
+                    EmailApplication::STATUS_PENDING_ADMIN,
+                    // EmailApplication::STATUS_APPROVED, // Might be considered pending until fully processed by IT
+                ])->count();
+
+            // Fetch recent applications for the user
+            $this->userRecentLoanApplications = LoanApplication::where('user_id', $user->id)
+                ->with(['user', 'applicationItems']) // 'user' might be redundant if already $user
+                ->latest() // Order by created_at descending
+                ->limit(3)
+                ->get();
+
+            $this->userRecentEmailApplications = EmailApplication::where('user_id', $user->id)
+                ->with(['user']) // 'user' might be redundant
+                ->latest()
+                ->limit(3)
+                ->get();
         } else {
-            $this->reset('employeePhoto');
+            $this->displayUserName = __('Pengguna Tetamu');
+            Log::warning('MOTAC Dashboard: User not authenticated during mount. Dashboard data will be limited.');
+            // Initialize counts to 0 if user is not authenticated
+            $this->pendingLoanRequestsCount = 0;
+            $this->activeLoansCount = 0;
+            $this->pendingEmailRequestsCount = 0;
         }
     }
 
-    public function sendPendingMessages()
+    /**
+     * Render the component's view.
+     */
+    public function render(): View
     {
-        if ($this->messagesStatus['unsent'] != 0) {
-            sendPendingMessages::dispatch();
-            session()->flash('info', __('Let\'s go! Personal on their way!'));
-        } else {
-            $this->dispatch('toastr', type: 'info' /* , title: 'Done!' */, message: __('Everything has sent already!'));
-        }
-    }
-
-    public function showCreateLeaveModal()
-    {
-        $this->dispatch('clearSelect2Values');
-        $this->reset('newLeaveInfo', 'isEdit');
-    }
-
-    public function createLeave()
-    {
-        EmployeeLeave::firstOrCreate([
-            'employee_id' => $this->selectedEmployeeId,
-            'leave_id' => $this->newLeaveInfo['LeaveId'],
-            'from_date' => $this->newLeaveInfo['fromDate'],
-            'to_date' => $this->newLeaveInfo['toDate'],
-            'start_at' => $this->newLeaveInfo['startAt'],
-            'end_at' => $this->newLeaveInfo['endAt'],
-            'note' => $this->newLeaveInfo['note'],
-        ]);
-
-        session()->flash('success', __('Success, record created successfully!'));
-        $this->dispatch('scrollToTop');
-
-        $this->dispatch('closeModal', elementId: '#leaveModal');
-        $this->dispatch('toastr', type: 'success' /* , title: 'Done!' */, message: __('Going Well!'));
-    }
-
-    public function showEditLeaveModal($id)
-    {
-        $this->reset('newLeaveInfo');
-
-        $this->isEdit = true;
-        $this->employeeLeaveId = $id;
-
-        $record = DB::table('employee_leave')
-            ->where('id', $this->employeeLeaveId)
-            ->first();
-
-        $this->selectedEmployeeId = $record->employee_id;
-        $this->newLeaveInfo = [
-            'LeaveId' => $record->leave_id,
-            'fromDate' => $record->from_date,
-            'toDate' => $record->to_date,
-            'startAt' => $record->start_at,
-            'endAt' => $record->end_at,
-            'note' => $record->note,
-        ];
-
-        $this->dispatch('setSelect2Values', employeeId: $this->selectedEmployeeId, leaveId: $record->leave_id);
-    }
-
-    public function updateLeave()
-    {
-        EmployeeLeave::find($this->employeeLeaveId)->update([
-            'employee_id' => $this->selectedEmployeeId,
-            'leave_id' => $this->newLeaveInfo['LeaveId'],
-            'from_date' => $this->newLeaveInfo['fromDate'],
-            'to_date' => $this->newLeaveInfo['toDate'],
-            'start_at' => $this->newLeaveInfo['startAt'],
-            'end_at' => $this->newLeaveInfo['endAt'],
-            'note' => $this->newLeaveInfo['note'],
-        ]);
-
-        session()->flash('success', __('Success, record updated successfully!'));
-        $this->dispatch('scrollToTop');
-
-        $this->dispatch('closeModal', elementId: '#leaveModal');
-        $this->dispatch('toastr', type: 'success' /* , title: 'Done!' */, message: __('Going Well!'));
-
-        $this->reset('isEdit', 'newLeaveInfo');
-    }
-
-    public function submitLeave()
-    {
-        $this->validate(
-            [
-                'selectedEmployeeId' => 'required',
-                'newLeaveInfo.LeaveId' => 'required',
-                'newLeaveInfo.fromDate' => 'required|date',
-                'newLeaveInfo.toDate' => 'required|date',
-            ],
-            null,
-            [
-                'selectedEmployeeId' => 'Employee',
-                'newLeaveInfo.LeaveId' => 'Type',
-                'newLeaveInfo.fromDate' => 'From Date',
-                'newLeaveInfo.toDate' => 'To Date',
-            ]
-        );
-
-        if (
-            substr($this->newLeaveInfo['LeaveId'], 1, 1) == 1 &&
-            ($this->newLeaveInfo['startAt'] != null || $this->newLeaveInfo['endAt'] != null)
-        ) {
-            session()->flash('error', __('Can\'t add daily leave with time!'));
-            $this->dispatch('closeModal', elementId: '#leaveModal');
-            $this->dispatch('toastr', type: 'error' /* , title: 'Done!' */, message: __('Requires Attention!'));
-
-            return;
-        }
-
-        if (
-            substr($this->newLeaveInfo['LeaveId'], 1, 1) == 2 &&
-            ($this->newLeaveInfo['startAt'] == null || $this->newLeaveInfo['endAt'] == null)
-        ) {
-            session()->flash('error', __('Can\'t add hourly leave without time!'));
-            $this->dispatch('closeModal', elementId: '#leaveModal');
-            $this->dispatch('toastr', type: 'error' /* , title: 'Done!' */, message: __('Requires Attention!'));
-
-            return;
-        }
-
-        if (
-            substr($this->newLeaveInfo['LeaveId'], 1, 1) == 2 &&
-            $this->newLeaveInfo['fromDate'] != $this->newLeaveInfo['toDate']
-        ) {
-            session()->flash('error', __('Hourly leave must be on the same day'));
-            $this->dispatch('closeModal', elementId: '#leaveModal');
-            $this->dispatch('toastr', type: 'error' /* , title: 'Done!' */, message: __('Requires Attention!'));
-
-            return;
-        }
-
-        if ($this->newLeaveInfo['fromDate'] > $this->newLeaveInfo['toDate']) {
-            session()->flash('error', __('Check the dates entered. "From Date" can not be greater than "To Date"'));
-            $this->dispatch('closeModal', elementId: '#leaveModal');
-            $this->dispatch('toastr', type: 'error' /* , title: 'Done!' */, message: __('Requires Attention!'));
-
-            return;
-        }
-
-        if ($this->newLeaveInfo['startAt'] > $this->newLeaveInfo['endAt']) {
-            session()->flash('error', __('Check the times entered. "Start At" can not be greater than "End To"'));
-            $this->dispatch('closeModal', elementId: '#leaveModal');
-            $this->dispatch('toastr', type: 'error' /* , title: 'Done!' */, message: __('Requires Attention!'));
-
-            return;
-        }
-
-        $this->isEdit ? $this->updateLeave() : $this->createLeave();
-    }
-
-    public function confirmDestroyLeave($id)
-    {
-        $this->confirmedId = $id;
-    }
-
-    public function destroyLeave()
-    {
-        EmployeeLeave::find($this->confirmedId)->delete();
-
-        $this->dispatch('toastr', type: 'success' /* , title: 'Done!' */, message: __('Going Well!'));
-        $this->confirmedId = null;
-    }
-
-    public function getEmployeeName($id)
-    {
-        return Employee::find($id)->FullName;
-    }
-
-    public function getLeaveType($id)
-    {
-        return Leave::find($id)->name;
+        return view('livewire.dashboard')->title(__('Papan Pemuka Pengguna'));
     }
 }
