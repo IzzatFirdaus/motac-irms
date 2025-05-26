@@ -1,0 +1,162 @@
+{
+  "menu": [
+    {
+      "url": "/dashboard",
+      "name": "Dashboard",
+      "icon": "menu-icon tf-icons ti ti-dashboard",
+      "slug": "dashboard",
+      "role": ["AM", "CC", "CR", "HR"]
+    },
+    {
+      "menuHeader": "Human resource",
+      "role": ["HR", "CC"]
+    },
+    {
+      "name": "Attendance",
+      "icon": "menu-icon tf-icons ti ti-door-exit",
+      "slug": "attendance",
+      "role": ["HR", "CC"],
+      "submenu": [
+        {
+          "url": "attendance/fingerprints",
+          "name": "Fingerprints",
+          "slug": "attendance-fingerprints",
+          "role": ["HR"]
+        },
+        {
+          "url": "attendance/leaves",
+          "name": "Leaves",
+          "slug": "attendance-leaves",
+          "role": ["HR", "CC"]
+        }
+      ]
+    },
+    {
+      "name": "Structure",
+      "icon": "menu-icon tf-icons ti ti-hierarchy",
+      "slug": "structure",
+      "role": ["HR"],
+      "submenu": [
+        {
+          "url": "structure/centers",
+          "name": "Centers",
+          "slug": "structure-centers",
+          "role": ["HR"]
+        },
+        {
+          "url": "structure/departments",
+          "name": "Departments",
+          "slug": "structure-departments",
+          "role": ["HR"]
+        },
+        {
+          "url": "structure/positions",
+          "name": "Positions",
+          "slug": "structure-positions",
+          "role": ["HR"]
+        },
+        {
+          "url": "structure/employees",
+          "name": "Employees",
+          "slug": "structure-employees",
+          "role": ["HR"]
+        }
+      ]
+    },
+    {
+      "name": "Messages",
+      "icon": "menu-icon tf-icons ti ti-message-dots",
+      "slug": "messages",
+      "role": ["HR", "CC"],
+      "submenu": [
+        {
+          "url": "messages/bulk",
+          "name": "Bulk",
+          "slug": "messages-bulk",
+          "role": ["HR", "CC"]
+        },
+        {
+          "url": "messages/personal",
+          "name": "Personal",
+          "slug": "messages-personal",
+          "role": ["HR"]
+        }
+      ]
+    },
+    {
+      "url": "/discounts",
+      "name": "Discounts",
+      "icon": "menu-icon tf-icons ti ti-coin",
+      "slug": "discounts",
+      "role": ["HR"]
+    },
+    {
+      "url": "/holidays",
+      "name": "Holidays",
+      "icon": "menu-icon tf-icons ti ti-christmas-tree",
+      "slug": "holidays",
+      "role": ["HR"]
+    },
+    {
+      "url": "/statistics",
+      "name": "Statistics",
+      "icon": "menu-icon tf-icons ti ti-device-desktop-analytics",
+      "slug": "statistics",
+      "role": ["HR"]
+    },
+    {
+      "name": "Settings",
+      "icon": "menu-icon tf-icons ti ti-adjustments-alt",
+      "slug": "settings",
+      "role": ["Admin"],
+      "submenu": [
+        {
+          "url": "settings/users",
+          "name": "Users",
+          "slug": "settings-users"
+        },
+        {
+          "url": "settings/roles",
+          "name": "Roles",
+          "slug": "settings-roles"
+        },
+        {
+          "url": "settings/permissions",
+          "name": "Permissions",
+          "slug": "settings-permissions"
+        },
+        {
+          "url": "log-viewer",
+          "name": "Logs",
+          "slug": "settings-logs",
+          "target": "_blank"
+        }
+      ]
+    },
+    {
+      "menuHeader": "Assets",
+      "role": ["AM", "HR"]
+    },
+    {
+      "url": "/assets/inventory",
+      "name": "Inventory",
+      "icon": "menu-icon tf-icons ti ti-barcode",
+      "slug": "products",
+      "role": ["AM"]
+    },
+    {
+      "url": "/assets/categories",
+      "name": "Categories",
+      "icon": "menu-icon tf-icons ti ti-category",
+      "slug": "categories",
+      "role": ["AM"]
+    },
+    {
+      "url": "/assets/reports",
+      "name": "Reports",
+      "icon": "menu-icon tf-icons ti ti-file-analytics",
+      "slug": "reports",
+      "role": ["AM", "HR"]
+    }
+  ]
+}
