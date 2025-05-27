@@ -68,9 +68,9 @@ class Equipment extends Model
     public const ASSET_TYPE_LAPTOP = 'laptop';
     public const ASSET_TYPE_PROJECTOR = 'projector';
     public const ASSET_TYPE_PRINTER = 'printer';
-    public const ASSET_TYPE_DESKTOP_PC = 'desktop_pc'; // From model, good addition
-    public const ASSET_TYPE_MONITOR = 'monitor'; // From model, good addition
-    public const ASSET_TYPE_OTHER = 'other_ict'; // From model
+    public const ASSET_TYPE_DESKTOP_PC = 'desktop_pc';
+    public const ASSET_TYPE_MONITOR = 'monitor';
+    public const ASSET_TYPE_OTHER = 'other_ict';
 
     public static array $ASSET_TYPES_LABELS = [
         self::ASSET_TYPE_LAPTOP => 'Komputer Riba',
@@ -98,14 +98,14 @@ class Equipment extends Model
         self::STATUS_DAMAGED_NEEDS_REPAIR => 'Rosak (Perlu Pembaikan)',
     ];
 
-    // Physical condition statuses based on system design doc (4.3) and model
-    // EquipmentPolicy uses CONDITION_NEW, CONDITION_GOOD, CONDITION_FAIR
-    public const CONDITION_NEW = 'new'; // Used by policy, added to align
+    // Physical condition statuses
+    public const CONDITION_NEW = 'new';
     public const CONDITION_GOOD = 'good';
     public const CONDITION_FAIR = 'fair';
     public const CONDITION_MINOR_DAMAGE = 'minor_damage';
     public const CONDITION_MAJOR_DAMAGE = 'major_damage';
     public const CONDITION_UNSERVICEABLE = 'unserviceable';
+    public const CONDITION_LOST = 'lost'; // Added to resolve diagnostic
 
     public static array $CONDITION_STATUSES_LABELS = [
         self::CONDITION_NEW => 'Baru',
@@ -114,9 +114,10 @@ class Equipment extends Model
         self::CONDITION_MINOR_DAMAGE => 'Rosak Ringan',
         self::CONDITION_MAJOR_DAMAGE => 'Rosak Teruk',
         self::CONDITION_UNSERVICEABLE => 'Tidak Boleh Digunakan',
+        self::CONDITION_LOST => 'Hilang (Keadaan)', // Label for condition 'lost'
     ];
 
-    // Constants from uploaded model, not in core System Design 4.3 for equipment table
+    // Acquisition Types
     public const ACQUISITION_TYPE_PURCHASE = 'purchase';
     public const ACQUISITION_TYPE_LEASE = 'lease';
     public const ACQUISITION_TYPE_DONATION = 'donation';
@@ -131,6 +132,7 @@ class Equipment extends Model
         self::ACQUISITION_TYPE_OTHER => 'Lain-lain (Perolehan)',
     ];
 
+    // Classifications
     public const CLASSIFICATION_ASSET = 'asset';
     public const CLASSIFICATION_INVENTORY = 'inventory';
     public const CLASSIFICATION_CONSUMABLE = 'consumable';
@@ -146,15 +148,14 @@ class Equipment extends Model
     protected $table = 'equipment';
 
     protected $fillable = [
-        // Core fields from System Design 4.3
         'asset_type', 'brand', 'model', 'serial_number', 'tag_id',
         'purchase_date', 'warranty_expiry_date', 'status',
-        'current_location',
+        'current_location', // Design doc specifies this. If location_id is primary, this might be derived or a quick note.
         'notes', 'condition_status',
-        // Additional fields from your provided model
         'department_id', 'equipment_category_id',
         'sub_category_id', 'item_code', 'description', 'purchase_price',
         'acquisition_type', 'classification', 'funded_by', 'supplier_name', 'location_id',
+        // created_by, updated_by are handled by BlameableObserver
     ];
 
     protected $casts = [
@@ -165,7 +166,7 @@ class Equipment extends Model
 
     protected $attributes = [
         'status' => self::STATUS_AVAILABLE,
-        'condition_status' => self::CONDITION_GOOD, // Defaulting to GOOD, can be NEW if appropriate
+        'condition_status' => self::CONDITION_GOOD,
     ];
 
     protected static function newFactory(): EquipmentFactory
@@ -179,22 +180,22 @@ class Equipment extends Model
         return $this->hasMany(LoanTransactionItem::class, 'equipment_id');
     }
 
-    public function department(): BelongsTo // From uploaded model
+    public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class, 'department_id');
     }
 
-    public function equipmentCategory(): BelongsTo // From uploaded model
+    public function equipmentCategory(): BelongsTo
     {
         return $this->belongsTo(EquipmentCategory::class, 'equipment_category_id');
     }
 
-    public function subCategory(): BelongsTo // From uploaded model
+    public function subCategory(): BelongsTo
     {
         return $this->belongsTo(SubCategory::class, 'sub_category_id');
     }
 
-    public function definedLocation(): BelongsTo // From uploaded model
+    public function definedLocation(): BelongsTo // Changed from location to definedLocation
     {
         return $this->belongsTo(Location::class, 'location_id');
     }
@@ -219,7 +220,9 @@ class Equipment extends Model
     {
         return self::$ASSET_TYPES_LABELS[$this->asset_type] ?? Str::title(str_replace('_', ' ', (string) $this->asset_type));
     }
+    // Alias for consistency if used elsewhere
     public function getAssetTypeDisplayAttribute(): string { return $this->getAssetTypeLabelAttribute(); }
+
     public function getStatusLabelAttribute(): string
     {
         return self::$STATUSES_LABELS[$this->status] ?? Str::title(str_replace('_', ' ', (string) $this->status));
@@ -265,14 +268,25 @@ class Equipment extends Model
         }
         $oldStatus = $this->status;
         $this->status = $newStatus;
-        $actingUserName = $actingUserId ? (User::find($actingUserId)?->name ?? 'System') : 'System';
+        $actingUserName = $actingUserId ? (User::find($actingUserId)?->name ?? 'System/Tidak Diketahui') : 'Sistem';
 
         if ($reason) {
-            $this->notes = ($this->notes ? $this->notes . "\n" : '') . "Status changed from {$oldStatus} to {$newStatus} by {$actingUserName}: {$reason} on " . now()->toDateTimeString();
+            $this->notes = ($this->notes ? $this->notes . "\n" : '') . "Status Operasi ditukar dari '{$oldStatus}' kepada '{$newStatus}' oleh {$actingUserName} pada " . now()->translatedFormat('d/m/Y H:i A') . ". Sebab: {$reason}";
         }
-        $this->save(); // Save before logging to ensure it's committed
-        Log::info("Equipment ID {$this->id} operational status updated.", ['old_status' => $oldStatus, 'new_status' => $newStatus, 'user_id' => $actingUserId]);
-        return true;
+        // BlameableObserver will handle updated_by if Auth::id() matches $actingUserId or if $actingUserId is null and Auth::id() is set.
+        // If $actingUserId is specific and different from Auth::id(), updated_by needs explicit handling if Observer logic is strict to Auth::id().
+        // However, BlameableObserver usually relies on Auth::id().
+        if ($actingUserId && $this->updated_by !== $actingUserId) { // To ensure if acting user is specific, it is recorded
+            $this->updated_by = $actingUserId;
+        }
+
+        $saved = $this->save();
+        if($saved) {
+            Log::info("Equipment ID {$this->id} operational status updated.", ['old_status' => $oldStatus, 'new_status' => $newStatus, 'user_id' => $actingUserId]);
+        } else {
+            Log::error("Equipment ID {$this->id}: Failed to save operational status update.", ['old_status' => $oldStatus, 'new_status' => $newStatus, 'user_id' => $actingUserId]);
+        }
+        return $saved;
     }
 
     public function updatePhysicalConditionStatus(string $newCondition, ?string $reason = null, ?int $actingUserId = null): bool
@@ -283,13 +297,20 @@ class Equipment extends Model
         }
         $oldCondition = $this->condition_status;
         $this->condition_status = $newCondition;
-        $actingUserName = $actingUserId ? (User::find($actingUserId)?->name ?? 'System') : 'System';
+        $actingUserName = $actingUserId ? (User::find($actingUserId)?->name ?? 'System/Tidak Diketahui') : 'Sistem';
 
         if ($reason) {
-            $this->notes = ($this->notes ? $this->notes . "\n" : '') . "Condition changed from {$oldCondition} to {$newCondition} by {$actingUserName}: {$reason} on " . now()->toDateTimeString();
+             $this->notes = ($this->notes ? $this->notes . "\n" : '') . "Status Keadaan Fizikal ditukar dari '{$oldCondition}' kepada '{$newCondition}' oleh {$actingUserName} pada " . now()->translatedFormat('d/m/Y H:i A') . ". Sebab: {$reason}";
         }
-        $this->save(); // Save before logging
-        Log::info("Equipment ID {$this->id} condition status updated.", ['old_condition' => $oldCondition, 'new_condition' => $newCondition, 'user_id' => $actingUserId]);
-        return true;
+        if ($actingUserId && $this->updated_by !== $actingUserId) {
+            $this->updated_by = $actingUserId;
+        }
+        $saved = $this->save();
+        if($saved) {
+            Log::info("Equipment ID {$this->id} condition status updated.", ['old_condition' => $oldCondition, 'new_condition' => $newCondition, 'user_id' => $actingUserId]);
+        } else {
+            Log::error("Equipment ID {$this->id}: Failed to save physical condition status update.", ['old_condition' => $oldCondition, 'new_condition' => $newCondition, 'user_id' => $actingUserId]);
+        }
+        return $saved;
     }
 }

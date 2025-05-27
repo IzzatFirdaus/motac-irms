@@ -175,7 +175,7 @@ class EmailApplication extends Model
      * @param User|null $user The user attempting to submit. If null, uses authenticated user.
      * @return bool
      */
-    public function canBeSubmitted(User $user = null): bool
+    public function canBeSubmitted(?User $user = null): bool // Changed User to ?User
     {
         $user = $user ?? auth()->user();
         if (!$user) {

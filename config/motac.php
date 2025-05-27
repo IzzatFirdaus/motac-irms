@@ -53,7 +53,8 @@ return [
       'Turus III' => 'Turus III', 'JUSA A' => 'JUSA A', 'JUSA B' => 'JUSA B', 'JUSA C' => 'JUSA C',
       '54' => '54', '52' => '52', '48' => '48', '44' => '44', '41' => '41',
       '38' => '38', '32' => '32', '29' => '29', '26' => '26', '22' => '22', '19' => '19',
-      '14' => '14', /*'13' => '13', '12' => '12', '10' => '10',*/ // Values from supplementary doc are Gred name not just number for some
+      '14' => '14', '13' => '13', '12' => '12', '10' => '10', '9' => '9',
+      /*'13' => '13', '12' => '12', '10' => '10',*/ // Values from supplementary doc are Gred name not just number for some
       // Corrected based on supplementary doc values which are more descriptive than just numbers for higher grades
       // The supplementary doc has '14', '13', '12', '10', '9' as separate distinct options in the list for "Gred Penyokong".
       // Keep these if they represent distinct selectable options.
@@ -61,7 +62,7 @@ return [
       // For grades like "14", the supplementary document text is just "14". So, '14' => '14' is correct.
       // It appears "supporting_officer_grades" in the config is intended to be a simplified list compared to the exhaustive user grade list.
       // The original config list for supporting_officer_grades is restored as it's likely a curated list for the specific dropdown.
-      '14' => '14', '13' => '13', '12' => '12', '10' => '10', '9' => '9',
+
     ],
   ],
 

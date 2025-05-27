@@ -15,7 +15,6 @@ use Illuminate\Support\Str;
 
 /**
  * Loan Transaction Model.
- * (PHPDoc from your provided file, updated for timestamp fields)
  * @property int $id
  * @property int $loan_application_id
  * @property string $type Enum: 'issue', 'return'
@@ -65,14 +64,16 @@ class LoanTransaction extends Model
     ];
 
     // Statuses for a transaction itself
-    public const STATUS_PENDING = 'pending'; // Transaction initiated but not completed (e.g. items being gathered for issue)
-    public const STATUS_ISSUED = 'issued'; // Issue transaction completed, items handed over
-    public const STATUS_RETURNED_PENDING_INSPECTION = 'returned_pending_inspection'; // Return transaction, items received but pending check
-    public const STATUS_RETURNED_GOOD = 'returned_good'; // Return transaction completed, items good
-    public const STATUS_RETURNED_DAMAGED = 'returned_damaged'; // Return transaction completed, items damaged
-    public const STATUS_ITEMS_REPORTED_LOST = 'items_reported_lost'; // Return transaction where items were confirmed lost
-    public const STATUS_COMPLETED = 'completed'; // Generic completion state, can be used if more specific states are not suitable
-    public const STATUS_CANCELLED = 'cancelled'; // Transaction was voided/cancelled
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_ISSUED = 'issued';
+    public const STATUS_RETURNED_PENDING_INSPECTION = 'returned_pending_inspection';
+    public const STATUS_RETURNED_GOOD = 'returned_good';
+    public const STATUS_RETURNED_DAMAGED = 'returned_damaged';
+    public const STATUS_ITEMS_REPORTED_LOST = 'items_reported_lost'; // If all items in TX are lost, or primary outcome
+    public const STATUS_RETURNED_WITH_LOSS = 'returned_with_loss'; // Added
+    public const STATUS_RETURNED_WITH_DAMAGE_AND_LOSS = 'returned_with_damage_and_loss'; // Added
+    public const STATUS_COMPLETED = 'completed';
+    public const STATUS_CANCELLED = 'cancelled';
 
     public static array $STATUSES_LABELS = [
         self::STATUS_PENDING => 'Menunggu Tindakan',
@@ -81,6 +82,8 @@ class LoanTransaction extends Model
         self::STATUS_RETURNED_GOOD => 'Dipulangkan (Keadaan Baik)',
         self::STATUS_RETURNED_DAMAGED => 'Dipulangkan (Ada Kerosakan)',
         self::STATUS_ITEMS_REPORTED_LOST => 'Item Dilaporkan Hilang',
+        self::STATUS_RETURNED_WITH_LOSS => 'Dipulangkan (Dengan Kehilangan)',
+        self::STATUS_RETURNED_WITH_DAMAGE_AND_LOSS => 'Dipulangkan (Dengan Kerosakan & Kehilangan)',
         self::STATUS_COMPLETED => 'Selesai',
         self::STATUS_CANCELLED => 'Dibatalkan',
     ];
@@ -90,24 +93,24 @@ class LoanTransaction extends Model
     protected $fillable = [
         'loan_application_id', 'type', 'transaction_date',
         'issuing_officer_id', 'receiving_officer_id',
-        'accessories_checklist_on_issue', 'issue_notes', 'issue_timestamp', // Re-added issue_timestamp
+        'accessories_checklist_on_issue', 'issue_notes', 'issue_timestamp',
         'returning_officer_id', 'return_accepting_officer_id',
-        'accessories_checklist_on_return', 'return_notes', 'return_timestamp', // Re-added return_timestamp
+        'accessories_checklist_on_return', 'return_notes', 'return_timestamp',
         'related_transaction_id', 'status',
-        // created_by, updated_by handled by BlameableObserver
     ];
 
     protected $casts = [
         'transaction_date' => 'datetime',
-        'issue_timestamp' => 'datetime', // Re-added cast
-        'return_timestamp' => 'datetime', // Re-added cast
+        'issue_timestamp' => 'datetime',
+        'return_timestamp' => 'datetime',
         'accessories_checklist_on_issue' => 'array',
         'accessories_checklist_on_return' => 'array',
     ];
 
-    protected $attributes = [
-        // Default status might be set by the service creating the transaction
-    ];
+    // Default attributes can be set if a common initial status is desired
+    // protected $attributes = [
+    // 'status' => self::STATUS_PENDING,
+    // ];
 
     protected static function newFactory(): LoanTransactionFactory
     {
@@ -117,7 +120,7 @@ class LoanTransaction extends Model
     // Relationships
     public function loanApplication(): BelongsTo { return $this->belongsTo(LoanApplication::class, 'loan_application_id'); }
     public function loanTransactionItems(): HasMany { return $this->hasMany(LoanTransactionItem::class, 'loan_transaction_id'); }
-    public function items(): HasMany { return $this->loanTransactionItems(); } // Alias
+    public function items(): HasMany { return $this->loanTransactionItems(); }
 
     public function issuingOfficer(): BelongsTo { return $this->belongsTo(User::class, 'issuing_officer_id'); }
     public function receivingOfficer(): BelongsTo { return $this->belongsTo(User::class, 'receiving_officer_id'); }
@@ -126,7 +129,6 @@ class LoanTransaction extends Model
 
     public function relatedIssueTransaction(): BelongsTo { return $this->belongsTo(LoanTransaction::class, 'related_transaction_id'); }
 
-    // Blameable
     public function creator(): BelongsTo { return $this->belongsTo(User::class, 'created_by'); }
     public function updater(): BelongsTo { return $this->belongsTo(User::class, 'updated_by'); }
     public function deleter(): BelongsTo { return $this->belongsTo(User::class, 'deleted_by'); }
@@ -144,14 +146,20 @@ class LoanTransaction extends Model
 
     // Static helpers
     public static function getTypesOptions(): array { return self::$TYPES_LABELS; }
-    public static function getTypesList(): array { return self::$TYPES_LABELS; } // For factory
     public static function getStatusOptions(): array { return self::$STATUSES_LABELS; }
-    public static function getStatusesList(): array { return self::$STATUSES_LABELS; } // For factory
+    public static function getStatusesList(): array { return array_keys(self::$STATUSES_LABELS); } // Corrected to return keys for list
 
     /**
-     * Logic to update LoanApplication status after this transaction is saved/updated.
-     * This should be called from an observer (e.g., LoanTransactionObserver).
+     * Placeholder for static method to define default eager loaded relations.
+     * Implement this to return an array of relation names.
+     * e.g., return ['loanApplication.user', 'issuingOfficer', ...];
      */
+    public static function getDefinedDefaultRelationsStatic(): array
+    {
+        return ['loanApplication.user', 'loanTransactionItems.equipment', 'issuingOfficer', 'receivingOfficer', 'returningOfficer', 'returnAcceptingOfficer'];
+    }
+
+
     public function updateParentLoanApplicationStatus(): void
     {
         if ($this->loanApplication) {

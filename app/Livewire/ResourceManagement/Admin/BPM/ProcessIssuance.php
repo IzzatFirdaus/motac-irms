@@ -3,11 +3,13 @@
 namespace App\Livewire\ResourceManagement\Admin\BPM;
 
 use App\Models\LoanApplication;
-use App\Models\Equipment; //
-use App\Services\LoanTransactionService; // Assuming you have this service
+use App\Models\Equipment;
+use App\Models\User; // Make sure User model is imported
+use App\Services\LoanTransactionService;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
 
 class ProcessIssuance extends Component
 {
@@ -15,14 +17,14 @@ class ProcessIssuance extends Component
     public array $selectedEquipmentIds = [];
     public array $accessories = [];
     public string $issue_notes = '';
-    public array $allAccessoriesList = []; // Populate this in mount
+    public array $allAccessoriesList = [];
     public $availableEquipment = [];
 
     protected function rules(): array
     {
         return [
             'selectedEquipmentIds' => ['required', 'array', 'min:1'],
-            'selectedEquipmentIds.*' => ['required', 'integer', Rule::exists('equipment', 'id')->where('status', Equipment::STATUS_AVAILABLE)], //
+            'selectedEquipmentIds.*' => ['required', 'integer', Rule::exists('equipment', 'id')->where('status', Equipment::STATUS_AVAILABLE)],
             'accessories' => ['nullable', 'array'],
             'accessories.*' => ['string'],
             'issue_notes' => ['nullable', 'string'],
@@ -31,22 +33,21 @@ class ProcessIssuance extends Component
 
     public function mount(int $loanApplicationId): void
     {
-        $this->loanApplication = LoanApplication::with('items', 'user')->findOrFail($loanApplicationId);
-        // Example: Populate from config or a helper
+        // It's good practice to also eager load relations used in the view or processing
+        $this->loanApplication = LoanApplication::with([
+            'applicationItems.equipment', // If you display equipment details from application items
+            'user' // Applicant details
+        ])->findOrFail($loanApplicationId);
         $this->allAccessoriesList = config('motac.loan_accessories_list', ['Power Cable', 'Bag', 'Mouse', 'HDMI Cable']);
         $this->loadAvailableEquipment();
     }
 
     public function loadAvailableEquipment(): void
     {
-        // Basic filtering: only available equipment.
-        // Advanced: Filter by types requested in $this->loanApplication->items
-        // and ensure quantity approved is not exceeded by already issued + currently selected.
-        // This requires more complex logic, potentially interacting with quantities in $this->loanApplication->items.
-        $requestedTypes = $this->loanApplication->items->pluck('equipment_type')->unique()->toArray();
+        $requestedTypes = $this->loanApplication->applicationItems->pluck('equipment_type')->unique()->toArray();
 
-        $this->availableEquipment = Equipment::where('status', Equipment::STATUS_AVAILABLE) //
-            // ->whereIn('asset_type', $requestedTypes) // Uncomment if you want to filter by requested types
+        $this->availableEquipment = Equipment::where('status', Equipment::STATUS_AVAILABLE)
+            // ->whereIn('asset_type', $requestedTypes) // Consider uncommenting if needed
             ->orderBy('brand')
             ->orderBy('model')
             ->get();
@@ -55,31 +56,41 @@ class ProcessIssuance extends Component
     public function updatedSelectedEquipmentIds($value)
     {
         // Placeholder for any logic if needed when equipment selection changes
-        // e.g., verify quantity against approved quantity for the type.
     }
 
     public function submitIssue(LoanTransactionService $loanTransactionService): void
     {
         $this->validate();
 
+        /** @var \App\Models\User|null $issuingOfficer */
+        $issuingOfficer = Auth::user();
+
+        if (!$issuingOfficer) {
+            session()->flash('error', 'Pengguna tidak disahkan. Sila log masuk semula.');
+            Log::warning('ProcessIssuance: Attempted to submit issue without authenticated user.', [
+                'loan_application_id' => $this->loanApplication->id,
+            ]);
+            return;
+        }
+
         try {
-            // The service should handle:
-            // 1. Creating LoanTransaction (type: issue)
-            // 2. Creating LoanTransactionItem(s) for each selectedEquipmentId
-            // 3. Updating Equipment status to 'on_loan'
-            // 4. Updating LoanApplicationItem->quantity_issued
-            // 5. Updating LoanApplication status (e.g., to 'issued' or 'partially_issued')
             $loanTransactionService->processNewIssue(
                 $this->loanApplication,
                 $this->selectedEquipmentIds,
                 $this->accessories,
                 $this->issue_notes,
-                Auth::id()
+                $issuingOfficer // Pass the User object instead of Auth::id()
             );
 
             session()->flash('success', 'Peralatan berjaya dikeluarkan.');
-            $this->redirectRoute('resource-management.admin.bpm.issued-loans'); // Or to loan application show page
+            // Consider redirecting to a page showing the details of the transaction or the updated application
+            $this->redirectRoute('resource-management.admin.bpm.loan-applications.view', ['id' => $this->loanApplication->id]); // Example redirect
         } catch (\Exception $e) {
+            Log::error('Error processing issuance in ProcessIssuance Livewire: ' . $e->getMessage(), [
+                'loan_application_id' => $this->loanApplication->id,
+                'user_id' => $issuingOfficer->id, // Use ID from the fetched user object
+                'exception' => $e
+            ]);
             session()->flash('error', 'Gagal mengeluarkan peralatan: ' . $e->getMessage());
         }
     }

@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 // use Illuminate\Support\Facades\Auth; // Only needed if inline blameable in boot() is used
+// Remove: use App\Models\Device; // If it was explicitly imported
 
 /**
  * Location Model.
@@ -36,8 +37,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\User|null $deleter
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Equipment> $equipment
  * @property-read int|null $equipment_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Device> $devices
- * @property-read int|null $devices_count
+ * // Removed: @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Device> $devices
+ * // Removed: @property-read int|null $devices_count
  *
  * @method static Builder<static>|Location active()
  * @method static Builder<static>|Location byCity(string $city)
@@ -125,15 +126,14 @@ class Location extends Model
         return $this->hasMany(Equipment::class, 'location_id');
     }
 
-    /** @return HasMany<Device> */
-    public function devices(): HasMany
-    {
-        // Assuming 'devices' table has a 'location_id' foreign key,
-        // and the Device model exists.
-        // The original comment noted 'devices' migration had a string 'location'.
-        // This relationship assumes 'location_id' (FK) exists or will be added to 'devices' table.
-        return $this->hasMany(Device::class, 'location_id');
-    }
+    /**
+     * Removed devices relationship as Device model is not part of MOTAC system.
+     * @return HasMany
+     */
+    // public function devices(): HasMany
+    // {
+    //     return $this->hasMany(Device::class, 'location_id');
+    // }
 
     // Blameable relationships
     public function creator(): BelongsTo { return $this->belongsTo(User::class, 'created_by'); }

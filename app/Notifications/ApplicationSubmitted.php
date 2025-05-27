@@ -170,7 +170,7 @@ final class ApplicationSubmitted extends Notification implements ShouldQueue
       $data['loan_start_date'] = $this->formatDate($loanApp->loan_start_date);
       $data['loan_end_date'] = $this->formatDate($loanApp->loan_end_date);
       // Ensure LoanApplication::STATUS_PENDING constant exists or use a string 'pending'
-      $data['status_key'] = defined(LoanApplication::class . '::STATUS_PENDING') ? LoanApplication::STATUS_PENDING : 'pending_approval';
+      $data['status_key'] = defined(LoanApplication::class . '::STATUS_PENDING') ? LoanApplication::STATUS_PENDING_SUPPORT : 'pending_approval';
     } else {
       /** @var EmailApplication $emailApp */
       $emailApp = $this->application;

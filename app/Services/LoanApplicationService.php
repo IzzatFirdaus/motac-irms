@@ -7,17 +7,17 @@ namespace App\Services;
 use App\Models\Approval;
 use App\Models\LoanApplication;
 use App\Models\LoanApplicationItem;
-use App\Models\LoanTransaction; // Assuming this is used elsewhere or can be removed if not
+use App\Models\LoanTransaction;
+use App\Models\LoanTransactionItem as AppLoanTransactionItemModel; // Alias for clarity
 use App\Models\User;
-use App\Notifications\LoanApplicationSubmitted; // Added for submit notification
+use App\Notifications\ApplicationSubmitted; // Assuming this notification class exists
 use Illuminate\Auth\Access\AuthorizationException as IlluminateAuthorizationException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Arr;
-// Keep alias if used
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Notification as NotificationFacade; // For sending notifications
+use Illuminate\Support\Facades\Notification as NotificationFacade;
 use InvalidArgumentException;
 use RuntimeException;
 use Throwable;
@@ -28,6 +28,16 @@ final class LoanApplicationService
     private ApprovalService $approvalService;
     private LoanTransactionService $loanTransactionService;
 
+    // Default relations to eager load for LoanApplication
+    private array $defaultLoanApplicationRelations = [
+        'user:id,name,department_id', 'user.department:id,name',
+        'responsibleOfficer:id,name', 'supportingOfficer:id,name',
+        'applicationItems', 'approvals.officer:id,name',
+        // Add other frequently accessed relations here
+        'loanTransactions', // Useful to have for status updates
+    ];
+
+
     public function __construct(ApprovalService $approvalService, LoanTransactionService $loanTransactionService)
     {
         $this->approvalService = $approvalService;
@@ -37,9 +47,9 @@ final class LoanApplicationService
     public function getApplicationsForUser(User $user, array $filters = []): LengthAwarePaginator
     {
         Log::debug(self::LOG_AREA . 'Fetching loan applications for user.', ['user_id' => $user->id, 'filters' => $filters]);
-        $query = LoanApplication::query()->withDefaultRelations(); // Assuming a withDefaultRelations scope in Model
+        $query = LoanApplication::query()->with($this->defaultLoanApplicationRelations);
 
-        $isPrivilegedUser = $user->hasAnyRole(['Admin', 'BPMStaff']); // 'Approver' role is too broad for general list
+        $isPrivilegedUser = $user->hasAnyRole(['Admin', 'BPMStaff']);
 
         if (isset($filters['user_id']) && !empty($filters['user_id'])) {
             if (!$isPrivilegedUser && (int) $filters['user_id'] !== $user->id) {
@@ -67,7 +77,7 @@ final class LoanApplicationService
         }
 
         $perPage = isset($filters['per_page']) && is_numeric($filters['per_page']) ? (int) $filters['per_page'] : 15;
-        return $query->latest('updated_at')->paginate($perPage); // Sort by latest update
+        return $query->latest('updated_at')->paginate($perPage);
     }
 
     /**
@@ -96,9 +106,7 @@ final class LoanApplicationService
             throw new ModelNotFoundException(__('Pegawai Penyokong yang dipilih tidak sah.'));
         }
 
-        // Validate if supportingOfficer is eligible (e.g., grade >= 41 as per ICT form)
-        $minSupportGradeLevel = config('motac.approval.min_loan_support_grade_level', 41); // Default to 41
-        // Assuming 'level' on grade model is the numerical grade value and higher is better.
+        $minSupportGradeLevel = config('motac.approval.min_loan_support_grade_level', 41);
         if (!$supportingOfficer->grade || (int) $supportingOfficer->grade->level < $minSupportGradeLevel) {
              Log::warning(self::LOG_AREA."Supporting Officer ID {$supportingOfficer->id} (Grade: {$supportingOfficer->grade?->name}) does not meet minimum grade requirement of {$minSupportGradeLevel} for LoanApplication for User ID: {$applicantId}.");
              throw new InvalidArgumentException(__("Pegawai Penyokong yang dipilih tidak memenuhi syarat minima gred (:minGrade).", ['minGrade' => $minSupportGradeLevel]));
@@ -109,14 +117,12 @@ final class LoanApplicationService
             $applicationData = Arr::except($validatedData, ['items', 'applicant_confirmation']);
             $applicationData['user_id'] = $applicantId;
             $applicationData['responsible_officer_id'] = $validatedData['responsible_officer_id'] ?? $applicantId;
-            // supporting_officer_id from $validatedData
-            $applicationData['status'] = LoanApplication::STATUS_DRAFT; // Create as draft first
+            $applicationData['status'] = LoanApplication::STATUS_DRAFT;
 
             /** @var LoanApplication $application */
             $application = LoanApplication::create($applicationData);
 
             foreach ($validatedData['items'] as $item) {
-                // No specific item status on LoanApplicationItem as per core design. Progress tracked by quantities.
                 $application->applicationItems()->create([
                     'equipment_type' => $item['equipment_type'],
                     'quantity_requested' => (int) $item['quantity_requested'],
@@ -124,18 +130,17 @@ final class LoanApplicationService
                 ]);
             }
 
-            $application->applicant_confirmation_timestamp = now(); // Set confirmation timestamp
-            $application->save();
+            $application->applicant_confirmation_timestamp = now();
+            // $application->save(); // Will be saved by transitionToStatus or next save
 
-            // Now transition to pending support and initiate workflow
             $application->transitionToStatus(LoanApplication::STATUS_PENDING_SUPPORT, __('Permohonan dihantar oleh pengguna untuk kelulusan pegawai penyokong.'), $applicantId);
 
             $this->approvalService->initiateApprovalWorkflow($application, $applicant, Approval::STAGE_LOAN_SUPPORT_REVIEW, $supportingOfficer);
 
             DB::commit();
             Log::info(self::LOG_AREA . 'Loan application created and submitted successfully.', ['application_id' => $application->id]);
-            NotificationFacade::send($applicant, new LoanApplicationSubmitted($application));
-            return $application->fresh(['applicationItems', 'user', 'responsibleOfficer', 'supportingOfficer', 'approvals']);
+            NotificationFacade::send($applicant, new ApplicationSubmitted($application));
+            return $application->fresh($this->defaultLoanApplicationRelations);
         } catch (Throwable $e) {
             DB::rollBack();
             Log::error(self::LOG_AREA . 'Failed to create and submit loan application for User ID: ' . $applicantId, ['error_message' => $e->getMessage(), 'data' => $validatedData]);
@@ -144,12 +149,9 @@ final class LoanApplicationService
         }
     }
 
-     /**
-     * Submits a previously drafted or rejected loan application for approval.
-     */
     public function submitApplicationForApproval(LoanApplication $application, User $submitter): LoanApplication
     {
-        if ((int) $application->user_id !== (int) $submitter->id && !$submitter->can('manage', $application)) { // Assuming 'manage' for admin submit
+        if ((int) $application->user_id !== (int) $submitter->id && !$submitter->can('manage', $application)) {
             throw new IlluminateAuthorizationException(__('Anda hanya boleh menghantar permohonan anda sendiri.'));
         }
         if (!$application->isDraft() && $application->status !== LoanApplication::STATUS_REJECTED) {
@@ -159,15 +161,14 @@ final class LoanApplicationService
             throw new RuntimeException(__('Pegawai Penyokong mesti ditetapkan sebelum permohonan boleh dihantar.'));
         }
         /** @var User $supportingOfficer */
-        $supportingOfficer = User::findOrFail($application->supporting_officer_id); // Throws ModelNotFound if not found
+        $supportingOfficer = User::findOrFail($application->supporting_officer_id);
 
-        // Validate supportingOfficer's grade for loan application
         $minSupportGradeLevel = config('motac.approval.min_loan_support_grade_level', 41);
         if (!$supportingOfficer->grade || (int) $supportingOfficer->grade->level < $minSupportGradeLevel) {
             Log::warning(self::LOG_AREA."Supporting Officer ID {$supportingOfficer->id} (Grade: {$supportingOfficer->grade?->name}) does not meet minimum grade requirement of {$minSupportGradeLevel} for resubmitting LoanApplication ID: {$application->id}.");
             throw new InvalidArgumentException(__("Pegawai Penyokong yang ditetapkan tidak memenuhi syarat minima gred (:minGrade).", ['minGrade' => $minSupportGradeLevel]));
         }
-        // Ensure applicant_confirmation is set
+
         if (empty($application->applicant_confirmation_timestamp)) {
              throw new RuntimeException(__('Perakuan pemohon mesti diterima sebelum penghantaran. Sila kemaskini draf.'));
         }
@@ -180,13 +181,12 @@ final class LoanApplicationService
             $existingPendingSupportApproval = $application->approvals()
                 ->where('stage', Approval::STAGE_LOAN_SUPPORT_REVIEW)
                 ->where('status', Approval::STATUS_PENDING)
-                ->where('officer_id', $supportingOfficer->id) // Ensure it's for the correct officer
+                ->where('officer_id', $supportingOfficer->id)
                 ->first();
 
             if (!$existingPendingSupportApproval) {
                 $this->approvalService->initiateApprovalWorkflow($application, $submitter, Approval::STAGE_LOAN_SUPPORT_REVIEW, $supportingOfficer);
             } else {
-                // Optionally, re-notify the existing officer
                 if (class_exists(\App\Notifications\ApplicationNeedsAction::class)) {
                     $supportingOfficer->notify(new \App\Notifications\ApplicationNeedsAction($existingPendingSupportApproval, $application));
                 }
@@ -194,8 +194,8 @@ final class LoanApplicationService
 
             DB::commit();
             Log::info(self::LOG_AREA . "LoanApplication ID: {$application->id} resubmitted. Status: {$application->status}.");
-            NotificationFacade::send($submitter, new LoanApplicationSubmitted($application));
-            return $application->fresh(['user', 'supportingOfficer', 'approvals']);
+            NotificationFacade::send($submitter, new ApplicationSubmitted($application));
+            return $application->fresh($this->defaultLoanApplicationRelations);
         } catch (Throwable $e) {
             DB::rollBack();
             Log::error(self::LOG_AREA . "Failed to resubmit LoanApplication ID: {$application->id}.", ['error' => $e->getMessage()]);
@@ -208,16 +208,14 @@ final class LoanApplicationService
      */
     public function updateApplication(LoanApplication $application, array $validatedData, User $user): LoanApplication
     {
-        // Authorization to update is handled by controller/policy ($user->can('update', $application))
         Log::info(self::LOG_AREA . "Updating loan application ID: {$application->id} by user ID: {$user->id}.");
 
-        // If supporting_officer_id is being changed, validate the new one including grade
-        if (isset($validatedData['supporting_officer_id']) && $validatedData['supporting_officer_id'] !== $application->supporting_officer_id) {
+        if (isset($validatedData['supporting_officer_id']) && (int)$validatedData['supporting_officer_id'] !== (int)$application->supporting_officer_id) {
+            /** @var User|null $newSupportingOfficer */
             $newSupportingOfficer = User::find($validatedData['supporting_officer_id']);
             if (!$newSupportingOfficer) {
                 throw new ModelNotFoundException(__('Pegawai Penyokong yang dipilih untuk kemaskini tidak sah.'));
             }
-            // Validate new supportingOfficer's grade
             $minSupportGradeLevel = config('motac.approval.min_loan_support_grade_level', 41);
             if (!$newSupportingOfficer->grade || (int) $newSupportingOfficer->grade->level < $minSupportGradeLevel) {
                 Log::warning(self::LOG_AREA."New Supporting Officer ID {$newSupportingOfficer->id} (Grade: {$newSupportingOfficer->grade?->name}) does not meet minimum grade requirement of {$minSupportGradeLevel} for updating LoanApplication ID: {$application->id}.");
@@ -230,40 +228,36 @@ final class LoanApplicationService
             $applicationData = Arr::except($validatedData, ['items', 'applicant_confirmation']);
             $application->fill($applicationData);
 
-            // Handle applicant_confirmation if provided
             if (isset($validatedData['applicant_confirmation']) && $validatedData['applicant_confirmation'] === true && !$application->applicant_confirmation_timestamp) {
                 $application->applicant_confirmation_timestamp = now();
             } elseif (isset($validatedData['applicant_confirmation']) && $validatedData['applicant_confirmation'] === false) {
-                $application->applicant_confirmation_timestamp = null; // Clear if unchecked
+                $application->applicant_confirmation_timestamp = null;
             }
 
             $application->save();
 
             if (isset($validatedData['items']) && is_array($validatedData['items'])) {
-                $this->syncApplicationItems($application, $validatedData['items']); // Removed $user, not needed by current sync logic
+                $this->syncApplicationItems($application, $validatedData['items']);
             }
             DB::commit();
             Log::info(self::LOG_AREA . "Loan application ID {$application->id} updated successfully.");
-            return $application->fresh(['applicationItems', 'user', 'responsibleOfficer', 'supportingOfficer']);
+            return $application->fresh($this->defaultLoanApplicationRelations);
         } catch (Throwable $e) {
             DB::rollBack();
             Log::error(self::LOG_AREA . "Failed to update loan application ID: {$application->id}.", ['error_message' => $e->getMessage(), 'data' => $validatedData]);
-            if ($e instanceof IlluminateAuthorizationException || $e instanceof ModelNotFoundException) throw $e;
+            if ($e instanceof IlluminateAuthorizationException || $e instanceof ModelNotFoundException || $e instanceof InvalidArgumentException) throw $e;
             throw new RuntimeException(__('Gagal mengemaskini permohonan pinjaman: ') . $e->getMessage(), (int) $e->getCode(), $e);
         }
     }
 
     public function deleteApplication(LoanApplication $application, User $user): bool
     {
-        // Authorization to delete handled by controller/policy ($user->can('delete', $application))
         Log::info(self::LOG_AREA . "Deleting loan application ID: {$application->id} by user ID: {$user->id}");
         DB::beginTransaction();
         try {
-            // Delete related items first.
-            $application->applicationItems()->delete(); // Soft delete items
-            // Soft delete approvals associated with this application
+            $application->applicationItems()->delete();
             $application->approvals()->delete();
-            $deleted = $application->delete(); // Soft delete application itself
+            $deleted = $application->delete();
             DB::commit();
             Log::info(self::LOG_AREA . "Loan application ID {$application->id} and its items/approvals soft deleted successfully.");
             return (bool) $deleted;
@@ -296,9 +290,9 @@ final class LoanApplicationService
             $serviceItemData[] = [
                 'equipment_id' => $item['equipment_id'],
                 'loan_application_item_id' => $item['loan_application_item_id'],
-                'quantity' => $item['quantity_issued'], // This maps to quantity_transacted in LoanTransactionItem
+                'quantity' => $item['quantity_issued'],
                 'notes' => $item['issue_item_notes'] ?? null,
-                'accessories_data' => $item['accessories_checklist_item'] ?? null, // This will be 'accessories_issued' in LTS
+                'accessories_data' => $item['accessories_checklist_item'] ?? null,
             ];
         }
 
@@ -306,7 +300,7 @@ final class LoanApplicationService
             'receiving_officer_id' => $transactionDetails['receiving_officer_id'],
             'transaction_date' => $transactionDetails['transaction_date'] ?? now(),
             'issue_notes' => $transactionDetails['issue_notes'] ?? null,
-            'status' => LoanTransaction::STATUS_ISSUED, // Default status for a new issue transaction
+            'status' => LoanTransaction::STATUS_ISSUED,
         ];
 
         return $this->loanTransactionService->createTransaction($loanApplication, LoanTransaction::TYPE_ISSUE, $issuingOfficer, $serviceItemData, $extraServiceDetails);
@@ -318,7 +312,7 @@ final class LoanApplicationService
      */
     public function createReturnTransaction(LoanTransaction $issueTransaction, array $itemsDetails, User $returnAcceptingOfficer, array $transactionDetails): LoanTransaction
     {
-        $loanApplication = $issueTransaction->loanApplication()->firstOrFail(); // Get parent LA
+        $loanApplication = $issueTransaction->loanApplication()->firstOrFail();
         $appIdLog = $loanApplication->id;
         Log::info(self::LOG_AREA . "Creating return transaction for LA ID: {$appIdLog} (against Issue Tx ID: {$issueTransaction->id}) by Officer ID: {$returnAcceptingOfficer->id}");
 
@@ -328,21 +322,21 @@ final class LoanApplicationService
 
         $serviceItemData = [];
         foreach ($itemsDetails as $item) {
-            $originalIssuedItem = LoanTransactionItem::findOrFail($item['loan_transaction_item_id']);
-            // Ensure this item belongs to the provided issueTransaction and has the correct equipment_id
+            /** @var AppLoanTransactionItemModel $originalIssuedItem */
+            $originalIssuedItem = AppLoanTransactionItemModel::findOrFail($item['loan_transaction_item_id']);
             if ($originalIssuedItem->loan_transaction_id !== $issueTransaction->id || $originalIssuedItem->equipment_id !== $item['equipment_id']) {
                  throw new InvalidArgumentException(__("Item rujukan pengeluaran tidak sepadan atau tidak sah: ID #:id", ['id' => $item['loan_transaction_item_id']]));
             }
 
             $serviceItemData[] = [
-                'equipment_id' => $item['equipment_id'], // Equipment being returned
-                'original_loan_transaction_item_id' => $item['loan_transaction_item_id'], // Link to the item line in the issue TX
-                'loan_application_item_id' => $originalIssuedItem->loan_application_item_id, // Link to the overall application item
+                'equipment_id' => $item['equipment_id'],
+                'original_loan_transaction_item_id' => $item['loan_transaction_item_id'],
+                'loan_application_item_id' => $originalIssuedItem->loan_application_item_id,
                 'quantity' => $item['quantity_returned'],
                 'condition_on_return' => $item['condition_on_return'],
-                'item_status_on_return' => $item['item_status_on_return'], // Status of the item in this return tx (e.g., returned_good)
+                'item_status_on_return' => $item['item_status_on_return'],
                 'notes' => $item['return_item_notes'] ?? null,
-                'accessories_data' => $item['accessories_checklist_item'] ?? null, // This will be 'accessories_returned' in LTS
+                'accessories_data' => $item['accessories_checklist_item'] ?? null,
             ];
         }
 
@@ -350,24 +344,28 @@ final class LoanApplicationService
             'returning_officer_id' => $transactionDetails['returning_officer_id'],
             'transaction_date' => $transactionDetails['transaction_date'] ?? now(),
             'return_notes' => $transactionDetails['return_notes'] ?? null,
-            'related_transaction_id' => $issueTransaction->id, // Link this return TX to the issue TX
-            'status' => LoanTransaction::STATUS_RETURNED_PENDING_INSPECTION, // Initial status for a return
+            'related_transaction_id' => $issueTransaction->id,
+            'status' => LoanTransaction::STATUS_RETURNED_PENDING_INSPECTION,
         ];
 
         return $this->loanTransactionService->createTransaction($loanApplication, LoanTransaction::TYPE_RETURN, $returnAcceptingOfficer, $serviceItemData, $extraServiceDetails);
     }
 
-    // This method seems more appropriate for a ReportService or a specialized query scope/repository
     public function getIssuedLoanTransactionsSummary(array $filters = []): LengthAwarePaginator
     {
         Log::debug(self::LOG_AREA . 'Fetching summary of issued loan applications (active loans).', ['filters' => $filters]);
         $query = LoanApplication::query()
             ->whereIn('status', [LoanApplication::STATUS_ISSUED, LoanApplication::STATUS_PARTIALLY_ISSUED, LoanApplication::STATUS_OVERDUE])
-            ->withDefaultRelations(); // Ensure default relations include items for summary
+            ->with($this->defaultLoanApplicationRelations);
 
-        // Apply filters as in getApplicationsForUser or more specific ones for active loans
         if (!empty($filters['search_term'])) {
-            // ... search logic ...
+             $term = '%' . $filters['search_term'] . '%';
+             $query->where(function ($q) use ($term) {
+                $q->where('id', 'like', $term)
+                  ->orWhere('purpose', 'like', $term)
+                  ->orWhereHas('user', fn($uq) => $uq->where('name', 'like', $term))
+                  ->orWhereHas('responsibleOfficer', fn($roq) => $roq->where('name', 'like', $term));
+            });
         }
         $perPage = isset($filters['per_page']) && is_numeric($filters['per_page']) ? (int) $filters['per_page'] : 15;
         return $query->latest('updated_at')->paginate($perPage);
@@ -375,20 +373,23 @@ final class LoanApplicationService
 
     public function findLoanApplication(int $id, array $with = []): ?LoanApplication
     {
-        $query = LoanApplication::query();
-        $defaultWith = LoanApplication::getDefaultRelations(); // Assuming scope on model
-        $finalWith = array_unique(array_merge($defaultWith, $with));
+        Log::debug(self::LOG_AREA . "Finding loan application ID {$id}.", ['with_relations' => $with]);
+        $finalWith = array_unique(array_merge($this->defaultLoanApplicationRelations, $with));
 
-        if (!empty($finalWith)) {
-            $query->with($finalWith);
+        // Corrected to fetch the model instance
+        /** @var LoanApplication|null $application */
+        $application = LoanApplication::with($finalWith)->find($id);
+
+        if (!$application) {
+            Log::notice(self::LOG_AREA . "Loan application ID {$id} not found.");
         }
-        return $query->find($id);
+        return $application;
     }
 
     /**
      * @param array<array{id?:int|null, equipment_type:string, quantity_requested:int, notes?:string|null, _delete?:bool}> $itemsData
      */
-    protected function syncApplicationItems(LoanApplication $application, array $itemsData): void // Removed User $user parameter
+    protected function syncApplicationItems(LoanApplication $application, array $itemsData): void
     {
         $existingItemIds = $application->applicationItems()->pluck('id')->all();
         $processedItemIds = [];
@@ -404,25 +405,23 @@ final class LoanApplicationService
                 'equipment_type' => $itemData['equipment_type'],
                 'quantity_requested' => (int)$itemData['quantity_requested'],
                 'notes' => $itemData['notes'] ?? null,
-                // Quantities (approved, issued, returned) are updated via other processes, not direct sync here.
-                // This method syncs the *requested* items list.
             ];
 
             if ($itemId && in_array($itemId, $existingItemIds, true)) {
                 if (!empty($itemData['_delete'])) {
-                    LoanApplicationItem::find($itemId)?->delete(); // Soft delete
+                    LoanApplicationItem::find($itemId)?->delete();
                 } else {
                     LoanApplicationItem::find($itemId)?->update($itemPayload);
                     $processedItemIds[] = $itemId;
                 }
-            } elseif (empty($itemData['_delete'])) { // New item
+            } elseif (empty($itemData['_delete'])) {
                 $createdItem = $application->applicationItems()->create($itemPayload);
                 $processedItemIds[] = $createdItem->id;
             }
         }
         $idsToDelete = array_diff($existingItemIds, $processedItemIds);
         if (!empty($idsToDelete)) {
-            $application->applicationItems()->whereIn('id', $idsToDelete)->delete(); // Soft delete
+            $application->applicationItems()->whereIn('id', $idsToDelete)->delete();
         }
     }
 }
