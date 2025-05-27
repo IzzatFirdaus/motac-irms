@@ -7,12 +7,12 @@ return [
   'organization_full_name' => 'Ministry of Tourism, Arts and Culture Malaysia',
 
   'approval' => [
-    // Specific minimum grade level (numeric representation) required to be an approver for ICT Loans
-    // As per ICT Loan Form (Part 5)
-    'min_ict_loan_approver_grade_level' => env('MOTAC_MIN_ICT_LOAN_APPROVER_GRADE_LEVEL', 41),
+    // Specific minimum grade level (numeric representation) required for a supporting officer for ICT Loans
+    // As per ICT Loan Form (Part 5) & LoanApplicationService
+    'min_loan_support_grade_level' => env('MOTAC_MIN_LOAN_SUPPORT_GRADE_LEVEL', 41), // Renamed for consistency
 
     // Specific minimum grade level (numeric representation) for a supporting officer for Email/ID applications
-    // As per MyMail Form and system design (Section 7.2)
+    // As per MyMail Form and system design (Section 7.2) & EmailApplicationService
     'min_email_supporting_officer_grade_level' => env('MOTAC_MIN_EMAIL_SUPPORTING_OFFICER_GRADE_LEVEL', 9),
 
     // General minimum grade level for viewing any approval records, if not specifically overridden.
@@ -41,19 +41,27 @@ return [
       'kenaikan_pangkat_pertukaran' => 'Kenaikan Pangkat/Pertukaran', // (Supplementary Document)
       'lain_lain' => 'Lain-lain', // (Supplementary Document)
     ],
-    'aras_options' => [
+    'aras_options' => [ // As per User model getLevelOptions and supplementary document (label part)
       '' => '- Pilih Aras -',
       '1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5',
       '6' => '6', '7' => '7', '8' => '8', '9' => '9', '10' => '10',
       '11' => '11', '12' => '12', '13' => '13', '14' => '14', '15' => '15',
-      '16' => '16', '17' => '17', '18' => '18', // (Supplementary Document, corrected from 181)
+      '16' => '16', '17' => '17', '18' => '18',
     ],
     'supporting_officer_grades' => [ // For MyMail form dropdown (Supplementary Document)
       '' => '- Pilih Gred -',
       'Turus III' => 'Turus III', 'JUSA A' => 'JUSA A', 'JUSA B' => 'JUSA B', 'JUSA C' => 'JUSA C',
       '54' => '54', '52' => '52', '48' => '48', '44' => '44', '41' => '41',
       '38' => '38', '32' => '32', '29' => '29', '26' => '26', '22' => '22', '19' => '19',
-      '14' => '14', '13' => '13', '12' => '12', '10' => '10', '9' => '9', // Grade 9 explicitly mentioned
+      '14' => '14', /*'13' => '13', '12' => '12', '10' => '10',*/ // Values from supplementary doc are Gred name not just number for some
+      // Corrected based on supplementary doc values which are more descriptive than just numbers for higher grades
+      // The supplementary doc has '14', '13', '12', '10', '9' as separate distinct options in the list for "Gred Penyokong".
+      // Keep these if they represent distinct selectable options.
+      // The example values '14', '13', '12', '10', '9' are simplified. Using more descriptive ones where available.
+      // For grades like "14", the supplementary document text is just "14". So, '14' => '14' is correct.
+      // It appears "supporting_officer_grades" in the config is intended to be a simplified list compared to the exhaustive user grade list.
+      // The original config list for supporting_officer_grades is restored as it's likely a curated list for the specific dropdown.
+      '14' => '14', '13' => '13', '12' => '12', '10' => '10', '9' => '9',
     ],
   ],
 

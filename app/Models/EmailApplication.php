@@ -62,10 +62,7 @@ class EmailApplication extends Model
     public const STATUS_DRAFT = 'draft';
     public const STATUS_PENDING_SUPPORT = 'pending_support';
     public const STATUS_PENDING_ADMIN = 'pending_admin'; // MyMail form refers to this as "pending_admin" after supporting officer
-    public const STATUS_APPROVED = 'approved'; // Approved by IT Admin, ready for provisioning (or is this post-support, pre-IT Admin?)
-                                               // Design doc 5.1: "Once approved by the supporting officer, status moves to 'pending_admin'."
-                                               // "IT administrator ... updates ... with assigned email/ID." This implies IT Admin action leads to 'processing' or 'completed'.
-                                               // For policy: 'approved' status used by EmailApplicationPolicy::processByIT
+    public const STATUS_APPROVED = 'approved';
     public const STATUS_REJECTED = 'rejected';
     public const STATUS_PROCESSING = 'processing'; // When IT Admin is actively creating the account
     public const STATUS_PROVISION_FAILED = 'provision_failed'; // If provisioning attempt fails
@@ -172,6 +169,35 @@ class EmailApplication extends Model
         return $this->status === self::STATUS_DRAFT;
     }
 
+    /**
+     * Checks if the application can be submitted.
+     * Typically means it's in a draft state and owned by the user.
+     * @param User|null $user The user attempting to submit. If null, uses authenticated user.
+     * @return bool
+     */
+    public function canBeSubmitted(User $user = null): bool
+    {
+        $user = $user ?? auth()->user();
+        if (!$user) {
+            return false;
+        }
+        // Check ownership and status
+        return $this->isDraft() && (int)$this->user_id === (int)$user->id;
+    }
+
+    /**
+     * Checks if all certification checkboxes are ticked and timestamp is present.
+     * @return bool
+     */
+    public function areAllCertificationsComplete(): bool
+    {
+        return $this->cert_info_is_true &&
+               $this->cert_data_usage_agreed &&
+               $this->cert_email_responsibility_agreed &&
+               $this->certification_timestamp !== null;
+    }
+
+
     // Static helper
     public static function getStatusOptions(): array { return self::$STATUSES_LABELS; }
     public static function getStatusKeys(): array { return array_keys(self::$STATUSES_LABELS); }
@@ -194,6 +220,7 @@ class EmailApplication extends Model
         if ($saved) {
             Log::info("EmailApplication ID {$this->id} status transitioned from {$oldStatus} to {$newStatus}.", ['acting_user_id' => $actingUserId, 'reason' => $reason]);
             // Dispatch events here if necessary (e.g., for notifications)
+            // Example: event(new EmailApplicationStatusChanged($this, $oldStatus, $actingUserId));
         }
         return $saved;
     }

@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification as NotificationFacade;
+use InvalidArgumentException; // Added for grade validation
 use RuntimeException;
 use Throwable;
 
@@ -133,21 +134,27 @@ final class EmailApplicationService
         }
 
         $supportingOfficer = null;
+        $minSupportGradeLevel = config('motac.approval.min_email_support_grade_level', 9); // Default to 9 if not configured
+
         if ($application->supporting_officer_id) {
             $supportingOfficer = User::find($application->supporting_officer_id);
             if (!$supportingOfficer) {
                 Log::error(self::LOG_AREA . "System Supporting Officer ID {$application->supporting_officer_id} not found for EmailApplication ID: {$appIdLog}.");
                 throw new ModelNotFoundException(__('Pegawai Penyokong (sistem) yang dipilih tidak ditemui. Sila kemaskini.'));
             }
-            // TODO: Validate if $supportingOfficer is eligible (e.g., grade >= 9 as per MyMail form)
-            if ($supportingOfficer->grade?->level < config('motac.approval.min_email_support_grade_level', 9)) { // Example config
-                 // Log::warning(...); throw new InvalidArgumentException(...);
+            // Validate if $supportingOfficer is eligible (e.g., grade >= 9 as per MyMail form)
+            // Assuming grade level is an integer; lower number means higher grade in some systems, ensure this logic is correct.
+            // For MOTAC, higher number means higher grade (e.g., 41 > 9). The design states "Grade 9 or above".
+            // Let's assume 'level' on grade model is the numerical grade value and higher is better.
+            if (!$supportingOfficer->grade || (int) $supportingOfficer->grade->level < $minSupportGradeLevel) {
+                 Log::warning(self::LOG_AREA."Supporting Officer ID {$supportingOfficer->id} (Grade: {$supportingOfficer->grade?->name}) does not meet minimum grade requirement of {$minSupportGradeLevel} for EmailApplication ID: {$appIdLog}.");
+                 throw new InvalidArgumentException(__("Pegawai Penyokong yang dipilih tidak memenuhi syarat minima gred (:minGrade).", ['minGrade' => $minSupportGradeLevel]));
             }
         } elseif (empty($application->supporting_officer_name) || empty($application->supporting_officer_email)) {
             Log::error(self::LOG_AREA."EmailApplication ID: {$appIdLog} lacks any supporting officer details for submission.");
             throw new RuntimeException(__('Maklumat Pegawai Penyokong mesti lengkap (sama ada dari sistem atau diisi manual) sebelum permohonan boleh dihantar.'));
         }
-        // If manual details are provided, $supportingOfficer remains null.
+        // If manual details are provided, $supportingOfficer remains null, and grade check might rely on manually entered grade data.
 
         Log::info(self::LOG_AREA . "Submitting EmailApplication ID: {$appIdLog} by User ID: {$submitterIdLog}. Supporting Officer: " . ($supportingOfficer?->name ?? $application->supporting_officer_name ?? 'Manual Details'));
 
@@ -176,6 +183,8 @@ final class EmailApplicationService
 
     /**
      * @param array<string, mixed> $provisioningDetails Usually ['final_assigned_email' => ?, 'final_assigned_user_id' => ?]
+     * This array is currently not used as EmailProvisioningService takes parameters from the application model directly.
+     * If specific overrides are needed from an admin form, this method can pass them.
      */
     public function processProvisioning(EmailApplication $application, array $provisioningDetails, User $actingAdmin): EmailApplication
     {
@@ -193,18 +202,28 @@ final class EmailApplicationService
             $application->transitionToStatus(EmailApplication::STATUS_PROCESSING, __('Proses penyediaan dimulakan oleh Pentadbir IT.'), $actingAdmin->id);
 
             // Update with details from provisioning form (admin might override proposed)
-            $application->final_assigned_email = $provisioningDetails['final_assigned_email'] ?? $application->final_assigned_email ?? $application->proposed_email;
-            $application->final_assigned_user_id = $provisioningDetails['final_assigned_user_id'] ?? $application->final_assigned_user_id;
+            // Use $provisioningDetails if they are meant to override application data before sending to provisioning service
+            $targetEmail = $provisioningDetails['final_assigned_email'] ?? $application->final_assigned_email ?? $application->proposed_email;
+            $targetUserId = $provisioningDetails['final_assigned_user_id'] ?? $application->final_assigned_user_id ?? null; // Can be null
+
+            if (empty($targetEmail)) {
+                 Log::error(self::LOG_AREA . "Target email for provisioning is empty for EmailApplication ID: {$appIdLog}.");
+                 throw new InvalidArgumentException(__('E-mel sasaran untuk penyediaan tidak boleh kosong.'));
+            }
+
+            // Update application with potentially overridden values before calling provisioning
+            $application->final_assigned_email = $targetEmail;
+            $application->final_assigned_user_id = $targetUserId;
             $application->save();
 
             // Call the actual provisioning service
-            $provisionResult = $this->emailProvisioningService->provisionEmailAccount($application); // Service now takes only $application
+            $provisionResult = $this->emailProvisioningService->provisionEmailAccount($application, $targetEmail, $targetUserId);
 
             if ($provisionResult['success']) {
                 $application->transitionToStatus(EmailApplication::STATUS_COMPLETED, $provisionResult['message'] ?? __('Akaun e-mel/ID berjaya disediakan.'), $actingAdmin->id);
                 // Update with confirmed details if provisioning service returns them explicitly
-                $application->final_assigned_email = $provisionResult['email'] ?? $application->final_assigned_email;
-                $application->final_assigned_user_id = $provisionResult['user_id_assigned'] ?? $application->final_assigned_user_id;
+                $application->final_assigned_email = $provisionResult['assigned_email'] ?? $application->final_assigned_email;
+                $application->final_assigned_user_id = $provisionResult['assigned_user_id'] ?? $application->final_assigned_user_id;
                 $application->save();
                 Log::info(self::LOG_AREA . "Provisioning completed for EmailApplication ID: {$appIdLog}. Email: {$application->final_assigned_email}, UserID: {$application->final_assigned_user_id}.");
                 if ($application->user) {
@@ -213,10 +232,16 @@ final class EmailApplicationService
             } else {
                 $failureReason = $provisionResult['message'] ?? __('Proses penyediaan akaun e-mel/ID gagal tanpa sebab khusus.');
                 $application->transitionToStatus(EmailApplication::STATUS_PROVISION_FAILED, $failureReason, $actingAdmin->id);
-                $application->admin_notes = ($application->admin_notes ? $application->admin_notes . "\n" : '') . __('Kegagalan Penyediaan: ') . $failureReason; // Using admin_notes for failure reason
+                // The design doc (Section 4.2 `email_applications`) does not list `admin_notes`.
+                // Using `rejection_reason` or ensuring `admin_notes` is a valid field.
+                // For now, let's assume `rejection_reason` can store this note or a new field is added.
+                // If `admin_notes` is preferred, ensure it's fillable and in the database schema.
+                $application->rejection_reason = ($application->rejection_reason ? $application->rejection_reason . "\n" : '') . __('Kegagalan Penyediaan: ') . $failureReason;
                 $application->save();
                 Log::error(self::LOG_AREA . "Provisioning failed for EmailApplication ID: {$appIdLog}. Reason: " . $failureReason);
-                NotificationFacade::send($actingAdmin, new EmailProvisioningFailedNotification($application, $failureReason)); // Notify admin of failure
+                if ($actingAdmin) { // Ensure admin is not null
+                    NotificationFacade::send($actingAdmin, new EmailProvisioningFailedNotification($application, $failureReason)); // Notify admin of failure
+                }
             }
             DB::commit();
             return $application->fresh();
@@ -225,10 +250,11 @@ final class EmailApplicationService
             try {
                 if ($application->status !== EmailApplication::STATUS_PROVISION_FAILED) {
                     $application->status = EmailApplication::STATUS_PROVISION_FAILED;
-                    $application->admin_notes = ($application->admin_notes ? $application->admin_notes . "\n" : '') . __('Ralat kritikal semasa penyediaan: ') . $e->getMessage();
+                    // Same note about admin_notes vs rejection_reason
+                    $application->rejection_reason = ($application->rejection_reason ? $application->rejection_reason . "\n" : '') . __('Ralat kritikal semasa penyediaan: ') . $e->getMessage();
                     if ($application->isDirty()) $application->saveQuietly();
                 }
-            } catch (Throwable $saveErr) { /* Log and ignore */ }
+            } catch (Throwable $saveErr) { Log::error(self::LOG_AREA."Error saving provision_failed status after critical error: ".$saveErr->getMessage()); }
             Log::error(self::LOG_AREA . "Critical error during provisioning for EmailApplication ID: {$appIdLog}.", ['error' => $e->getMessage()]);
             throw new RuntimeException(__('Gagal memproses penyediaan akaun e-mel: ') . $e->getMessage(), (int) $e->getCode(), $e);
         }
@@ -253,7 +279,7 @@ final class EmailApplicationService
                 Log::info(self::LOG_AREA . "EmailApplication ID: {$appIdLog} soft deleted successfully by User ID: {$deleter->id}.");
                 return true;
             }
-            DB::rollBack();
+            DB::rollBack(); // Rollback if delete returned false
             Log::warning(self::LOG_AREA . "Soft delete returned false for EmailApplication ID: {$appIdLog}.");
             return false;
         } catch (Throwable $e) {

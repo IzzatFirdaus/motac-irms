@@ -3,7 +3,12 @@
 namespace App\Providers;
 
 use App\Helpers\Helpers; // Assuming this helper class exists and is used
-use App\Services\LoanApplicationService; // Specific to MOTAC system
+use App\Services\LoanApplicationService;
+use App\Services\EmailApplicationService; // MOTAC specific
+use App\Services\EquipmentService;       // MOTAC specific
+use App\Services\UserService;             // MOTAC specific
+use App\Services\ApprovalService;         // MOTAC specific
+use App\Services\NotificationService;     // MOTAC specific
 // SMS Service is out of scope based on MOTAC design, so it's not registered.
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Lang;
@@ -22,10 +27,11 @@ class AppServiceProvider extends ServiceProvider
     {
         // Register MOTAC specific services
         $this->app->singleton(LoanApplicationService::class);
-
-        // Example of how other services would be registered:
-        // $this->app->singleton(EmailApplicationService::class);
-        // $this->app->singleton(EquipmentService::class);
+        $this->app->singleton(EmailApplicationService::class); // Added
+        $this->app->singleton(EquipmentService::class);       // Added
+        $this->app->singleton(UserService::class);             // Added
+        $this->app->singleton(ApprovalService::class);         // Added
+        $this->app->singleton(NotificationService::class);     // Added
     }
 
     /**

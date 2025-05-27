@@ -7,14 +7,14 @@ namespace App\Services;
 use App\Models\Approval;
 use App\Models\LoanApplication;
 use App\Models\LoanApplicationItem;
-use App\Models\LoanTransaction;
-use App\Models\LoanTransactionItem;
+use App\Models\LoanTransaction; // Assuming this is used elsewhere or can be removed if not
 use App\Models\User;
 use App\Notifications\LoanApplicationSubmitted; // Added for submit notification
 use Illuminate\Auth\Access\AuthorizationException as IlluminateAuthorizationException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Arr;
+// Keep alias if used
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification as NotificationFacade; // For sending notifications
@@ -89,15 +89,20 @@ final class LoanApplicationService
              throw new InvalidArgumentException(__('Perakuan pemohon mesti diterima sebelum penghantaran.'));
         }
 
-
         /** @var User|null $supportingOfficer */
         $supportingOfficer = User::find($validatedData['supporting_officer_id']);
         if (!$supportingOfficer) {
             Log::error(self::LOG_AREA . "Supporting Officer ID {$validatedData['supporting_officer_id']} not found for User ID: {$applicantId}.");
             throw new ModelNotFoundException(__('Pegawai Penyokong yang dipilih tidak sah.'));
         }
-        // TODO: Validate if supportingOfficer is eligible (e.g., grade >= 41 as per ICT form)
-        // if ($supportingOfficer->grade?->level < config('motac.approval.min_loan_support_grade_level', 41)) { ... }
+
+        // Validate if supportingOfficer is eligible (e.g., grade >= 41 as per ICT form)
+        $minSupportGradeLevel = config('motac.approval.min_loan_support_grade_level', 41); // Default to 41
+        // Assuming 'level' on grade model is the numerical grade value and higher is better.
+        if (!$supportingOfficer->grade || (int) $supportingOfficer->grade->level < $minSupportGradeLevel) {
+             Log::warning(self::LOG_AREA."Supporting Officer ID {$supportingOfficer->id} (Grade: {$supportingOfficer->grade?->name}) does not meet minimum grade requirement of {$minSupportGradeLevel} for LoanApplication for User ID: {$applicantId}.");
+             throw new InvalidArgumentException(__("Pegawai Penyokong yang dipilih tidak memenuhi syarat minima gred (:minGrade).", ['minGrade' => $minSupportGradeLevel]));
+        }
 
         DB::beginTransaction();
         try {
@@ -156,11 +161,16 @@ final class LoanApplicationService
         /** @var User $supportingOfficer */
         $supportingOfficer = User::findOrFail($application->supporting_officer_id); // Throws ModelNotFound if not found
 
+        // Validate supportingOfficer's grade for loan application
+        $minSupportGradeLevel = config('motac.approval.min_loan_support_grade_level', 41);
+        if (!$supportingOfficer->grade || (int) $supportingOfficer->grade->level < $minSupportGradeLevel) {
+            Log::warning(self::LOG_AREA."Supporting Officer ID {$supportingOfficer->id} (Grade: {$supportingOfficer->grade?->name}) does not meet minimum grade requirement of {$minSupportGradeLevel} for resubmitting LoanApplication ID: {$application->id}.");
+            throw new InvalidArgumentException(__("Pegawai Penyokong yang ditetapkan tidak memenuhi syarat minima gred (:minGrade).", ['minGrade' => $minSupportGradeLevel]));
+        }
         // Ensure applicant_confirmation is set
         if (empty($application->applicant_confirmation_timestamp)) {
              throw new RuntimeException(__('Perakuan pemohon mesti diterima sebelum penghantaran. Sila kemaskini draf.'));
         }
-
 
         Log::info(self::LOG_AREA . "Submitting LoanApplication ID: {$application->id} for approval by User ID: {$submitter->id}.");
         DB::beginTransaction();
@@ -201,13 +211,18 @@ final class LoanApplicationService
         // Authorization to update is handled by controller/policy ($user->can('update', $application))
         Log::info(self::LOG_AREA . "Updating loan application ID: {$application->id} by user ID: {$user->id}.");
 
-        // If supporting_officer_id is being changed, validate the new one
+        // If supporting_officer_id is being changed, validate the new one including grade
         if (isset($validatedData['supporting_officer_id']) && $validatedData['supporting_officer_id'] !== $application->supporting_officer_id) {
             $newSupportingOfficer = User::find($validatedData['supporting_officer_id']);
             if (!$newSupportingOfficer) {
                 throw new ModelNotFoundException(__('Pegawai Penyokong yang dipilih untuk kemaskini tidak sah.'));
             }
-            // TODO: Additional eligibility checks for the new supporting officer if needed
+            // Validate new supportingOfficer's grade
+            $minSupportGradeLevel = config('motac.approval.min_loan_support_grade_level', 41);
+            if (!$newSupportingOfficer->grade || (int) $newSupportingOfficer->grade->level < $minSupportGradeLevel) {
+                Log::warning(self::LOG_AREA."New Supporting Officer ID {$newSupportingOfficer->id} (Grade: {$newSupportingOfficer->grade?->name}) does not meet minimum grade requirement of {$minSupportGradeLevel} for updating LoanApplication ID: {$application->id}.");
+                throw new InvalidArgumentException(__("Pegawai Penyokong baharu yang dipilih tidak memenuhi syarat minima gred (:minGrade).", ['minGrade' => $minSupportGradeLevel]));
+            }
         }
 
         DB::beginTransaction();
@@ -283,7 +298,7 @@ final class LoanApplicationService
                 'loan_application_item_id' => $item['loan_application_item_id'],
                 'quantity' => $item['quantity_issued'], // This maps to quantity_transacted in LoanTransactionItem
                 'notes' => $item['issue_item_notes'] ?? null,
-                'accessories_data' => $item['accessories_checklist_item'] ?? null,
+                'accessories_data' => $item['accessories_checklist_item'] ?? null, // This will be 'accessories_issued' in LTS
             ];
         }
 
@@ -327,7 +342,7 @@ final class LoanApplicationService
                 'condition_on_return' => $item['condition_on_return'],
                 'item_status_on_return' => $item['item_status_on_return'], // Status of the item in this return tx (e.g., returned_good)
                 'notes' => $item['return_item_notes'] ?? null,
-                'accessories_data' => $item['accessories_checklist_item'] ?? null,
+                'accessories_data' => $item['accessories_checklist_item'] ?? null, // This will be 'accessories_returned' in LTS
             ];
         }
 
