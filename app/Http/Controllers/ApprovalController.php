@@ -1,20 +1,21 @@
 <?php
 
-// File: app/Http/Controllers/ApprovalController.php
+// File: app/Http\Controllers/ApprovalController.php
 
 namespace App\Http\Controllers;
 
-use App\Models\Approval;
-use App\Models\EmailApplication;
-use App\Models\LoanApplication;
-use App\Services\ApprovalService;
+use App\Http\Requests\RecordApprovalDecisionRequest; // Using the new Form Request
+use App\Models\Approval;                                //
+use App\Models\EmailApplication;                       //
+use App\Models\LoanApplication;                        //
+use App\Models\User;                                   //
+use App\Services\ApprovalService;                      //
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
-use Throwable; // Recommended over global Exception for broader catch
+use Throwable;
 
 class ApprovalController extends Controller
 {
@@ -28,228 +29,153 @@ class ApprovalController extends Controller
 
     /**
      * Display a listing of pending approval tasks assigned to the current user.
-     * This is the NON-Livewire version.
      */
     public function index(): View|RedirectResponse
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
-        if (! $user) {
-            Log::warning('ApprovalController@index: User not authenticated.');
+        // The 'auth' middleware should prevent $user from being null.
 
-            return redirect()
-                ->route('login')
-                ->with('error', __('Authentication required.'));
-        }
+        // Optional: General policy check if the user can access the approvals section at all.
+        // $this->authorize('viewAny', Approval::class); //
 
-        Log::debug(
-            "ApprovalController@index: Fetching 'pending' approval tasks for officer ID {$user->id}."
-        );
+        Log::debug("ApprovalController@index: Fetching 'pending' approval tasks for officer ID {$user->id}.");
 
         $pendingApprovals = Approval::where('officer_id', $user->id)
-            ->where('status', Approval::STATUS_PENDING) // Use model constant
+            ->where('status', Approval::STATUS_PENDING) //
             ->with([
-                'approvable' => function ($morphTo): void {
+                'approvable' => function ($morphTo) {
                     $morphTo->morphWith([
-                        EmailApplication::class => ['user:id,full_name'], // Select specific columns
-                        LoanApplication::class => ['user:id,full_name'],
+                        EmailApplication::class => ['user:id,name'], // Ensure 'name' is the correct attribute on User model
+                        LoanApplication::class => ['user:id,name'],  // Ensure 'name' is the correct attribute on User model
                     ]);
                 },
-                // 'officer:id,full_name', // Current user, already have $user
+                // 'officer:id,name', // The officer is the current $user, so no need to eager load this specifically.
             ])
             ->orderBy('created_at', 'asc')
-            ->paginate(10); // Or your preferred pagination size
+            ->paginate(config('pagination.default_size', 15));
 
-        Log::debug(
-            "ApprovalController@index: Fetched {$pendingApprovals->total()} pending approval tasks."
-        );
+        Log::debug("ApprovalController@index: Fetched {$pendingApprovals->total()} pending approval tasks.");
 
         return view('approvals.index', ['approvals' => $pendingApprovals]);
     }
 
     /**
      * Display a listing of completed approval tasks for the current user.
-     * This method corresponds to the route for /approvals/history.
+     * Reminder: Ensure a route is defined for this method in web.php, e.g.,
+     * Route::get('/history', [ApprovalController::class, 'showHistory'])->name('history');
+     * within the 'approvals' route group.
      */
     public function showHistory(): View|RedirectResponse
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
-        if (! $user) {
-            Log::warning('ApprovalController@showHistory: User not authenticated.');
 
-            return redirect()
-                ->route('login')
-                ->with('error', __('Authentication required.'));
-        }
+        // Optional: General policy check
+        // $this->authorize('viewAny', Approval::class); //
 
-        Log::debug(
-            "ApprovalController@showHistory: Fetching 'completed' (approved/rejected) approval tasks for officer ID {$user->id}."
-        );
+        Log::debug("ApprovalController@showHistory: Fetching 'completed' approval tasks for officer ID {$user->id}.");
 
         $completedApprovals = Approval::where('officer_id', $user->id)
-            ->whereIn('status', [Approval::STATUS_APPROVED, Approval::STATUS_REJECTED]) // Use model constants
+            ->whereIn('status', [Approval::STATUS_APPROVED, Approval::STATUS_REJECTED]) //
             ->with([
-                'approvable' => function ($morphTo): void {
+                'approvable' => function ($morphTo) {
                     $morphTo->morphWith([
-                        EmailApplication::class => ['user:id,full_name'],
-                        LoanApplication::class => ['user:id,full_name'],
+                        EmailApplication::class => ['user:id,name'], //
+                        LoanApplication::class => ['user:id,name'],  //
                     ]);
                 },
             ])
-            ->orderBy('updated_at', 'desc') // Order by when the decision was made
-            ->paginate(10); // Or your preferred pagination size
+            ->orderBy('updated_at', 'desc')
+            ->paginate(config('pagination.default_size', 15));
 
-        Log::debug(
-            "ApprovalController@showHistory: Fetched {$completedApprovals->total()} completed approval tasks."
-        );
+        Log::debug("ApprovalController@showHistory: Fetched {$completedApprovals->total()} completed approval tasks.");
 
-        // You will need to create this Blade view: resources/views/approvals/history.blade.php
         return view('approvals.history', ['approvals' => $completedApprovals]);
     }
 
     /**
      * Display the specified approval task.
      *
-     * @param  Approval  $approval  Route model bound instance.
+     * @param  \App\Models\Approval  $approval  Route model bound instance.
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
     public function show(Approval $approval): View|RedirectResponse
     {
         try {
-            $this->authorize('view', $approval);
+            $this->authorize('view', $approval); // Uses ApprovalPolicy
         } catch (AuthorizationException $e) {
             Log::warning(
-                "ApprovalController@show: Authorization failed for Approval ID {$approval->id}. User ID: ".
-                  Auth::id().
-                  ". Error: {$e->getMessage()}"
+                "ApprovalController@show: Authorization failed for Approval ID {$approval->id}. User ID: ".Auth::id().". Error: {$e->getMessage()}"
             );
-
-            return redirect()
-                ->route('approvals.index')
-                ->with(
-                    'error',
-                    __('You are not authorized to view this approval task.')
-                );
+            return redirect()->route('approvals.index')->with('error', __('Anda tidak mempunyai kebenaran untuk melihat tugasan kelulusan ini.'));
         }
 
-        Log::debug(
-            "ApprovalController@show: Loading approval task ID {$approval->id} with eager loaded relationships."
-        );
+        Log::debug("ApprovalController@show: Loading approval task ID {$approval->id}.");
 
-        $approval->loadDefaultRelationships(); // Assuming you add a method in Approval model for common loads
+        // Assumes loadDefaultRelationships() is implemented in App\Models\Approval as discussed
+        $approval->loadDefaultRelationships(); //
 
         return view('approvals.show', compact('approval'));
     }
 
     /**
      * Record a decision for the specified approval task.
-     * This method is for form submissions if not using Livewire for this action.
      *
-     * @param  Approval  $approval  Route model bound instance.
+     * @param  \App\Http\Requests\RecordApprovalDecisionRequest  $request
+     * @param  \App\Models\Approval  $approval  Route model bound instance.
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function recordDecision(
-        Request $request,
+        RecordApprovalDecisionRequest $request, // Use the Form Request for validation & authorization
         Approval $approval
     ): RedirectResponse {
-        $user = Auth::user();
-        if (! $user) {
-            Log::error(
-                'ApprovalController@recordDecision: Authenticated user is null during decision recording.'
-            );
+        /** @var User $processingUser Authenticated user who is making the decision */
+        $processingUser = $request->user();
+        $validatedData = $request->validated();
 
-            return redirect()
-                ->route('login')
-                ->with('error', __('Authentication required.'));
-        }
-
-        Log::debug(
-            "ApprovalController@recordDecision: Attempting to record decision for Approval Task ID {$approval->id} by User ID {$user->id}."
+        Log::info(
+            "ApprovalController@recordDecision: User ID {$processingUser->id} attempting to record decision for Approval Task ID {$approval->id}.",
+            ['decision' => $validatedData['decision'], 'has_comments' => !empty($validatedData['comments'])]
         );
 
-        try {
-            $this->authorize('update', $approval); // Policy check for updating (acting on) the approval
-        } catch (AuthorizationException $e) {
-            Log::warning(
-                "ApprovalController@recordDecision: Authorization failed for Approval ID {$approval->id}. User ID: {$user->id}. Error: {$e->getMessage()}"
-            );
-
-            return redirect()
-                ->back()
-                ->withInput()
-                ->with(
-                    'error',
-                    __('You are not authorized to act on this approval task.')
-                );
-        }
-
-        $validated = $request->validate([
-            'decision' => [
-                'required',
-                'in:'.Approval::STATUS_APPROVED.','.Approval::STATUS_REJECTED,
-            ],
-            'comments' => $request->input('decision') === Approval::STATUS_REJECTED
-              ? ['required', 'string', 'min:10', 'max:2000']
-              : ['nullable', 'string', 'max:2000'],
-        ]);
+        // Authorization to 'update' the $approval is handled by RecordApprovalDecisionRequest::authorize()
 
         try {
             $this->approvalService->processApprovalDecision(
                 $approval,
-                $validated['decision'],
-                $user, // Pass the authenticated user who is processing
-                $validated['comments']
-            );
+                $validatedData['decision'],
+                $processingUser,
+                $validatedData['comments'] ?? null
+            ); //
 
-            $decisionText =
-              $validated['decision'] === Approval::STATUS_APPROVED
-              ? __('APPROVED')
-              : __('REJECTED');
-            $message =
-              __('Decision for task #').
-              $approval->id.
-              __(' has been successfully recorded as ').
-              $decisionText.
-              '.';
+            $decisionText = $validatedData['decision'] === Approval::STATUS_APPROVED ? __('DILULUSKAN') : __('DITOLAK');
+            $message = __('Keputusan untuk tugasan #:taskId telah berjaya direkodkan sebagai :decision.', ['taskId' => $approval->id, 'decision' => $decisionText]);
+
             Log::info(
-                "ApprovalController@recordDecision: Decision '{$validated['decision']}' recorded successfully for Approval ID {$approval->id} by User ID {$user->id}."
+                "Decision '{$validatedData['decision']}' recorded successfully for Approval ID {$approval->id} by User ID {$processingUser->id}."
             );
 
-            // Redirect to Livewire dashboard or a relevant page
-            return redirect()
-                ->route('approval.dashboard') // Ensure 'approval.dashboard' route name exists
-                ->with('success', $message);
-        } catch (Throwable $e) {
-            // Catching Throwable is broader
+            // Redirects to 'approval.dashboard' which is assumed to exist (likely a Livewire page)
+            return redirect()->route('approval.dashboard')->with('success', $message);
+        } catch (AuthorizationException $e) {
+            // This catch block might be redundant if FormRequest handles all auth,
+            // but can be kept as a fallback or if service throws its own AuthorizationException.
             Log::error(
-                "ApprovalController@recordDecision: Error processing approval decision for ID {$approval->id}.",
+                "ApprovalController@recordDecision: Authorization error for Approval ID {$approval->id}. User ID: {$processingUser->id}.",
+                ['error' => $e->getMessage()]
+            );
+            return redirect()->back()->withInput()->with('error', __('Anda tidak mempunyai kebenaran untuk membuat keputusan ini.'));
+        } catch (Throwable $e) {
+            Log::error(
+                "ApprovalController@recordDecision: Error processing approval decision for ID {$approval->id}. User ID: {$processingUser->id}.",
                 [
                     'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString(), // Include stack trace for detailed debugging
-                    'user_id' => $user->id,
-                    'request_data' => $request->all(),
+                    'trace_snippet' => substr($e->getTraceAsString(), 0, 500),
+                    'request_data' => $request->except(['_token', '_method', 'password', 'password_confirmation']), // Sanitize logged data
                 ]
             );
-
-            return redirect()
-                ->back()
-                ->withInput()
-                ->with(
-                    'error',
-                    __('Failed to record decision due to an error: ').$e->getMessage()
-                );
+            return redirect()->back()->withInput()->with('error', __('Gagal merekod keputusan disebabkan oleh ralat sistem: ') . $e->getMessage());
         }
     }
-
-    // Example: Method in Approval model for default loads
-    // public function loadDefaultRelationships() {
-    //     $this->load([
-    //        'approvable' => function ($morphTo) {
-    //            $morphTo->morphWith([
-    //                EmailApplication::class => ['user:id,full_name', 'user.department:id,name', /* other relations */],
-    //                LoanApplication::class => ['user:id,full_name', 'user.department:id,name', 'items', /* other relations */],
-    //            ]);
-    //        },
-    //        'officer:id,full_name',
-    //        'creator:id,full_name',
-    //        'updater:id,full_name',
-    //    ]);
-    // }
 }

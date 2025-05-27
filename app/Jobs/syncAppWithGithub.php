@@ -5,7 +5,7 @@ namespace App\Jobs;
 use Spatie\WebhookClient\Jobs\ProcessWebhookJob;
 use Symfony\Component\Process\Process;
 
-class syncAppWithGithub extends ProcessWebhookJob
+class SyncAppWithGithub extends ProcessWebhookJob
 {
     public function handle()
     {

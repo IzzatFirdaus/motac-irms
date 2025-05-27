@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreLoanApplicationRequest;
-use App\Http\Requests\UpdateLoanApplicationRequest;
-use App\Models\LoanApplication;
-use App\Models\User;
-use App\Services\LoanApplicationService;
-use Exception;
+use App\Http\Requests\StoreLoanApplicationRequest;    // Assumed to exist
+use App\Http\Requests\UpdateLoanApplicationRequest;    // Assumed to exist
+use App\Models\LoanApplication;                        //
+use App\Models\User;                                   //
+use App\Services\LoanApplicationService;               //
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Illuminate\Validation\ValidationException as IlluminateValidationException; // For specific catch
+use Throwable;
 
 class LoanApplicationController extends Controller
 {
@@ -22,133 +22,215 @@ class LoanApplicationController extends Controller
     {
         $this->loanApplicationService = $loanApplicationService;
         $this->middleware('auth');
-        $this->authorizeResource(LoanApplication::class, 'loan_application', [
-            'except' => ['index', 'submit'], // submit is custom; index uses viewAny
+
+        // Authorize resource methods. 'index', 'create', 'edit' are handled by Livewire.
+        // 'submitApplication' is a custom method with its own authorization.
+        $this->authorizeResource(LoanApplication::class, 'loanApplication', [
+            'only' => ['show', 'store', 'update', 'destroy'],
         ]);
     }
 
-    public function index(): View|RedirectResponse
-    {
-        $this->authorize('viewAny', LoanApplication::class);
-        /** @var User $user */
-        $user = Auth::user();
-        Log::info('LoanApplicationController@index called for User ID: ' . $user->id . '. Typically handled by Livewire.');
-        return redirect()->route('resource-management.my-applications.loan.index');
-    }
-
-    public function create(): View
-    {
-        $this->authorize('create', LoanApplication::class);
-        Log::info('LoanApplicationController@create: Displaying create form (typically handled by Livewire).', ['user_id' => Auth::id()]);
-        return view('resource-management.loan-applications.create'); // Embeds <livewire:loan-request-form />
-    }
-
+    /**
+     * Store a newly created loan application and submit it for approval.
+     * Validation and authorization (create ability) handled by StoreLoanApplicationRequest.
+     *
+     * @param  \App\Http\Requests\StoreLoanApplicationRequest  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function store(StoreLoanApplicationRequest $request): RedirectResponse
     {
         /** @var User $user */
         $user = $request->user();
-        Log::info('LoanApplicationController@store: Attempting to store new loan application.', ['user_id' => $user->id]);
+        $validatedData = $request->validated();
+
+        Log::info("LoanApplicationController@store: User ID {$user->id} attempting to create and submit new loan application.");
+
         try {
-            $validatedData = $request->validated();
-            $loanApplication = $this->loanApplicationService->createAndSubmitApplication($validatedData, $user);
-            Log::info('Loan application stored and submitted successfully.', ['user_id' => $user->id, 'application_id' => $loanApplication->id]);
+            $loanApplication = $this->loanApplicationService->createAndSubmitApplication(
+                $validatedData,
+                $user
+            ); //
+
+            Log::info("Loan application ID: {$loanApplication->id} created and submitted successfully by User ID: {$user->id}.");
+
             return redirect()
-                ->route('resource-management.loan-applications.show', ['loan_application' => $loanApplication->id])
+                ->route('resource-management.my-applications.loan-applications.show', $loanApplication) //
                 ->with('success', __('Permohonan pinjaman berjaya dihantar untuk kelulusan.'));
-        } catch (ValidationException $e) {
-            Log::error('Validation error storing loan application: ' . $e->getMessage(), ['user_id' => $user->id, 'errors' => $e->errors()]);
-            return redirect()->back()->withInput()->withErrors($e->errors())->with('error', __('Sila semak semula borang permohonan. Terdapat maklumat yang tidak sah.'));
-        } catch (Exception $e) {
-            Log::error('Error storing loan application: ' . $e->getMessage(), ['user_id' => $user->id, 'exception_trace' => $e->getTraceAsString()]);
-            return redirect()->back()->withInput()->with('error', __('Satu ralat berlaku semasa menghantar permohonan pinjaman: ') . $e->getMessage());
+        } catch (IlluminateValidationException $e) {
+            Log::warning("LoanApplicationController@store: Validation error for User ID {$user->id}.", ['errors' => $e->errors()]);
+            return redirect()->back()->withInput()->withErrors($e->errors())
+                ->with('error', __('Sila semak semula borang permohonan. Terdapat maklumat yang tidak sah.'));
+        } catch (Throwable $e) {
+            Log::error("Error creating and submitting loan application for User ID: {$user->id}.", [
+                'error' => $e->getMessage(),
+                'exception_trace_snippet' => substr($e->getTraceAsString(), 0, 500),
+            ]);
+            $userMessage = ($e instanceof \RuntimeException || $e instanceof \InvalidArgumentException)
+                ? $e->getMessage()
+                : __('Satu ralat berlaku semasa menghantar permohonan pinjaman.');
+            return redirect()->back()->withInput()->with('error', $userMessage);
         }
     }
 
-    public function show(LoanApplication $loan_application): View
+    /**
+     * Display the specified loan application.
+     * Authorization to 'view' handled by authorizeResource.
+     *
+     * @param  \App\Models\LoanApplication  $loanApplication
+     * @return \Illuminate\View\View
+     */
+    public function show(LoanApplication $loanApplication): View
     {
-        // authorizeResource handles 'view'
-        Log::info('LoanApplicationController@show: Displaying loan application.', ['application_id' => $loan_application->id, 'user_id' => Auth::id()]);
-        $loan_application->loadMissing([
-            'user.department', 'user.position', 'user.grade',
-            'responsibleOfficer.department', 'responsibleOfficer.position', 'responsibleOfficer.grade',
-            'supportingOfficer.department', 'supportingOfficer.position', 'supportingOfficer.grade',
-            'approvals.officer',
-            'applicationItems',
-            'loanTransactions.issuingOfficer', 'loanTransactions.receivingOfficer',
-            'loanTransactions.returningOfficer', 'loanTransactions.returnAcceptingOfficer',
-            'loanTransactions.loanTransactionItems.equipment',
-            'creator', 'updater'
+        // $this->authorize('view', $loanApplication); // Covered by authorizeResource
+
+        Log::info("LoanApplicationController@show: User ID ".Auth::id()." viewing LoanApplication ID {$loanApplication->id}.");
+
+        $loanApplication->loadMissing([
+            'user.department:id,name', // Applicant's department
+            'user.position:id,name',   // Applicant's position
+            'user.grade:id,name',      // Applicant's grade
+            'responsibleOfficer:id,name', //
+            'supportingOfficer:id,name',  //
+            'approvals.officer:id,name',  //
+            'applicationItems.equipmentTypeLabel', // Accessor - Note: equipmentTypeLabel is an accessor, not a direct relation to load equipment model
+            'loanTransactions.issuingOfficer:id,name',
+            'loanTransactions.receivingOfficer:id,name',
+            'loanTransactions.returningOfficer:id,name',
+            'loanTransactions.returnAcceptingOfficer:id,name',
+            'loanTransactions.loanTransactionItems.equipment:id,tag_id,asset_type,brand,model', //
         ]);
-        return view('resource-management.loan-applications.show', ['loanApplication' => $loan_application]);
+
+        return view('loan-applications.show', compact('loanApplication')); // View path
     }
 
-    public function edit(LoanApplication $loan_application): View|RedirectResponse
+    /**
+     * Update the specified loan application in storage.
+     * Validation and authorization (update ability) handled by UpdateLoanApplicationRequest.
+     * Typically for updating a draft.
+     *
+     * @param  \App\Http\Requests\UpdateLoanApplicationRequest  $request
+     * @param  \App\Models\LoanApplication  $loanApplication
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function update(UpdateLoanApplicationRequest $request, LoanApplication $loanApplication): RedirectResponse
     {
-        // authorizeResource handles 'update'
-        if ($loan_application->isDraft()) {
-            Log::info('LoanApplicationController@edit: Displaying edit form.', ['application_id' => $loan_application->id, 'user_id' => Auth::id()]);
-            return view('resource-management.loan-applications.edit', ['loanApplication' => $loan_application]);
-        }
-        Log::warning('Attempt to edit non-draft loan application.', ['application_id' => $loan_application->id, 'user_id' => Auth::id(), 'status' => $loan_application->status]);
-        return redirect()->route('resource-management.loan-applications.show', ['loan_application' => $loan_application->id])->with('error', __('Hanya permohonan draf yang boleh disunting.'));
-    }
-
-    public function update(UpdateLoanApplicationRequest $request, LoanApplication $loan_application): RedirectResponse
-    {
-        // authorizeResource or UpdateLoanApplicationRequest handles 'update'
         /** @var User $user */
         $user = $request->user();
-        if (!$loan_application->isDraft() && !$user->can('manageDirectly', $loan_application)) { // Assuming manageDirectly for admin edits
-            Log::warning('Attempt to update non-draft loan application by non-authorized user.', ['application_id' => $loan_application->id, 'user_id' => $user->id]);
-            return redirect()->route('resource-management.loan-applications.show', ['loan_application' => $loan_application->id])->with('error', __('Hanya permohonan draf yang boleh dikemaskini atau anda tiada kebenaran.'));
+        $validatedData = $request->validated();
+
+        // Policy should enforce that only drafts can be updated by the owner.
+        // Adding an explicit check here for robustness if policy is more permissive.
+        if (!$loanApplication->isDraft() || (int)$loanApplication->user_id !== (int)$user->id) { //
+            Log::warning("User ID {$user->id} attempt to update non-draft or unauthorized LoanApplication ID {$loanApplication->id}.", [
+                'application_status' => $loanApplication->status,
+                'owner_id' => $loanApplication->user_id,
+            ]);
+            return redirect()
+                ->route('resource-management.my-applications.loan-applications.show', $loanApplication) //
+                ->with('error', __('Hanya draf permohonan anda yang boleh dikemaskini.'));
         }
-        Log::info('LoanApplicationController@update: Attempting to update loan application.', ['user_id' => $user->id, 'application_id' => $loan_application->id]);
+
+        Log::info("LoanApplicationController@update: User ID {$user->id} attempting to update LoanApplication ID {$loanApplication->id}.");
+
         try {
-            $validatedData = $request->validated();
-            $updatedApplication = $this->loanApplicationService->updateApplication($loan_application, $validatedData, $user);
-            Log::info('Loan application updated successfully.', ['user_id' => $user->id, 'application_id' => $updatedApplication->id]);
-            return redirect()->route('resource-management.loan-applications.show', ['loan_application' => $updatedApplication->id])->with('success', __('Permohonan pinjaman berjaya dikemaskini.'));
-        } catch (ValidationException $e) {
-            Log::error('Validation error updating loan application: ' . $e->getMessage(), ['user_id' => $user->id, 'application_id' => $loan_application->id, 'errors' => $e->errors()]);
-            return redirect()->back()->withInput()->withErrors($e->errors())->with('error', __('Sila semak semula borang permohonan.'));
-        } catch (Exception $e) {
-            Log::error('Error updating loan application: ' . $e->getMessage(), ['user_id' => $user->id, 'application_id' => $loan_application->id]);
-            return redirect()->back()->withInput()->with('error', __('Satu ralat berlaku semasa mengemaskini permohonan pinjaman: ') . $e->getMessage());
+            $updatedApplication = $this->loanApplicationService->updateApplication(
+                $loanApplication,
+                $validatedData,
+                $user
+            ); //
+            Log::info("LoanApplication ID {$updatedApplication->id} updated successfully by User ID {$user->id}.");
+
+            return redirect()
+                ->route('resource-management.my-applications.loan-applications.show', $updatedApplication) //
+                ->with('success', __('Permohonan pinjaman berjaya dikemaskini.'));
+        } catch (Throwable $e) {
+            Log::error("Error updating LoanApplication ID {$loanApplication->id} by User ID {$user->id}.", [
+                'error' => $e->getMessage(),
+                'exception_trace_snippet' => substr($e->getTraceAsString(), 0, 500),
+            ]);
+            $userMessage = ($e instanceof \RuntimeException || $e instanceof \InvalidArgumentException)
+                ? $e->getMessage()
+                : __('Satu ralat berlaku semasa mengemaskini permohonan pinjaman.');
+            return redirect()->back()->withInput()->with('error', $userMessage);
         }
     }
 
-    public function submit(LoanApplication $loanApplication): RedirectResponse // Route model binding uses 'loanApplication'
+    /**
+     * Submit a previously saved draft or rejected loan application for approval.
+     *
+     * @param  \App\Models\LoanApplication  $loanApplication
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function submitApplication(LoanApplication $loanApplication): RedirectResponse
     {
-        $this->authorize('submit', $loanApplication);
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        Log::debug("LoanApplicationController@submit: Attempting to submit loan application ID {$loanApplication->id} by User ID {$user->id}");
-        try {
-            $submittedApplication = $this->loanApplicationService->submitApplicationForApproval($loanApplication, $user);
-            Log::info('Loan application submitted for approval successfully.', ['application_id' => $submittedApplication->id, 'user_id' => $user->id]);
-            return redirect()->route('resource-management.loan-applications.show', ['loan_application' => $submittedApplication->id])->with('success', __('Permohonan pinjaman berjaya dihantar untuk kelulusan.'));
-        } catch (Exception $e) {
-            Log::error('Error submitting loan application for approval.', ['application_id' => $loanApplication->id, 'user_id' => $user->id, 'error' => $e->getMessage()]);
-            return redirect()->back()->with('error', __('Gagal menghantar permohonan pinjaman untuk kelulusan: ') . $e->getMessage());
-        }
-    }
-
-    public function destroy(LoanApplication $loan_application): RedirectResponse
-    {
-        // authorizeResource handles 'delete'
         /** @var User $user */
         $user = Auth::user();
-        if (!$loan_application->isDraft() && !$user->can('forceDelete', $loan_application)) { // Assuming forceDelete for admin
-            Log::warning('Attempt to delete non-draft/non-deletable loan application.', ['application_id' => $loan_application->id, 'user_id' => Auth::id()]);
-            return redirect()->route('resource-management.loan-applications.show', ['loan_application' => $loan_application->id])->with('error', __('Hanya permohonan draf yang boleh dibuang atau anda tiada kebenaran.'));
-        }
-        Log::info('LoanApplicationController@destroy: Attempting to delete loan application.', ['user_id' => $user->id, 'application_id' => $loan_application->id]);
+
+        // Authorize using the 'submit' ability from LoanApplicationPolicy
+        $this->authorize('submit', $loanApplication);
+
+        Log::info("LoanApplicationController@submitApplication: User ID {$user->id} attempting to submit LoanApplication ID {$loanApplication->id}.");
+
         try {
-            $this->loanApplicationService->deleteApplication($loan_application, $user);
-            Log::info('Loan application deleted successfully.', ['application_id' => $loan_application->id, 'user_id' => $user->id]);
-            return redirect()->route('resource-management.my-applications.loan.index')->with('success', __('Permohonan pinjaman berjaya dibuang.'));
-        } catch (Exception $e) {
-            Log::error('Error deleting loan application: ' . $e->getMessage(), ['application_id' => $loan_application->id, 'user_id' => $user->id]);
+            $submittedApplication = $this->loanApplicationService->submitApplicationForApproval(
+                $loanApplication,
+                $user
+            ); //
+            Log::info("LoanApplication ID {$submittedApplication->id} submitted successfully by User ID {$user->id}. Status: {$submittedApplication->status}");
+
+            return redirect()
+                ->route('resource-management.my-applications.loan-applications.show', $submittedApplication) //
+                ->with('success', __('Permohonan pinjaman berjaya dihantar untuk kelulusan.'));
+        } catch (Throwable $e) {
+            Log::error("Error submitting LoanApplication ID {$loanApplication->id} by User ID {$user->id}.", [
+                'error' => $e->getMessage(),
+                'exception_trace_snippet' => substr($e->getTraceAsString(), 0, 500),
+            ]);
+            $userMessage = ($e instanceof \RuntimeException || $e instanceof \InvalidArgumentException)
+                ? $e->getMessage()
+                : __('Gagal menghantar permohonan pinjaman disebabkan ralat sistem.');
+            return redirect()->route('resource-management.my-applications.loan-applications.show', $loanApplication)->with('error', $userMessage);
+        }
+    }
+
+    /**
+     * Remove the specified loan application (soft delete).
+     * Authorization to 'delete' handled by authorizeResource.
+     *
+     * @param  \App\Models\LoanApplication  $loanApplication
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function destroy(LoanApplication $loanApplication): RedirectResponse
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        // $this->authorize('delete', $loanApplication); // Covered by authorizeResource
+
+        // Policy should enforce that only drafts can be deleted by the owner.
+        // Add explicit check here for robustness.
+        if (!$loanApplication->isDraft() || (int)$loanApplication->user_id !== (int)$user->id) { //
+            Log::warning("User ID {$user->id} attempt to delete non-draft or unauthorized LoanApplication ID {$loanApplication->id}.", [
+                'application_status' => $loanApplication->status,
+                'owner_id' => $loanApplication->user_id,
+            ]);
+            return redirect()
+                ->route('resource-management.my-applications.loan-applications.show', $loanApplication) //
+                ->with('error', __('Hanya draf permohonan anda yang boleh dibuang.'));
+        }
+
+        Log::info("LoanApplicationController@destroy: User ID {$user->id} attempting to soft delete LoanApplication ID {$loanApplication->id}.");
+
+        try {
+            $this->loanApplicationService->deleteApplication($loanApplication, $user); //
+            Log::info("LoanApplication ID {$loanApplication->id} soft deleted successfully by User ID {$user->id}.");
+
+            return redirect()->route('resource-management.my-applications.loan.index') // Redirect to Livewire index
+                ->with('success', __('Permohonan pinjaman berjaya dibuang.'));
+        } catch (Throwable $e) {
+            Log::error("Error soft deleting LoanApplication ID {$loanApplication->id} by User ID {$user->id}.", [
+                'error' => $e->getMessage(),
+                'exception_trace_snippet' => substr($e->getTraceAsString(), 0, 500),
+            ]);
             return redirect()->back()->with('error', __('Gagal membuang permohonan pinjaman: ') . $e->getMessage());
         }
     }
