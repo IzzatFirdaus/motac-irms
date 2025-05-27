@@ -1,79 +1,47 @@
 <div>
-
+    {{-- $configData is globally available from commonMaster.blade.php --}}
     @php
-        $configData = Helper::appClasses();
-        use App\Models\Employee;
-        // It's good practice to ensure App facade is explicitly imported if not already via an alias
-        // use Illuminate\Support\Facades\App; // Already imported lower in the file by you, which is fine.
+        // Props $containerNav and $navbarDetachedClass are passed from the parent layout (app.blade.php)
+        // and made available via the Navbar Livewire component's public properties.
+        // $navbarFull is another layout variable that might control brand visibility.
+        $navbarFull = $navbarFull ?? $configData['navbarFull'] ?? false;
+        // $navbarHideToggle is a theme-specific variable for controlling menu toggle visibility
+        $navbarHideToggle = $navbarHideToggle ?? $configData['navbarHideToggle'] ?? false;
     @endphp
 
     @push('custom-css')
         <style>
-            .animation-fade {
-                animation: fade 2s infinite;
-            }
-
-            .animation-rotate {
-                animation: rotation 2s infinite;
-            }
-
-            @keyframes fade {
-                0% {
-                    opacity: 1;
-                }
-
-                50% {
-                    opacity: 0;
-                }
-
-                100% {
-                    opacity: 1;
-                }
-            }
-
-            @keyframes rotation {
-                from {
-                    transform: rotate(0deg);
-                }
-
-                to {
-                    transform: rotate(360deg);
-                }
-            }
+            .animation-fade { animation: fade 2s infinite; }
+            .animation-rotate { animation: rotation 2s infinite linear; } /* Added linear for smoother rotation */
+            @keyframes fade { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+            @keyframes rotation { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         </style>
     @endpush
 
-    @php
-        $containerNav = $containerNav ?? 'container-fluid';
-        $navbarDetached = $navbarDetached ?? 'navbar-detached';
-        // $navbarDetached = ($navbarDetached ?? '');
-        // $navbarHideToggle = ($navbarDetached ?? true);
-        use Illuminate\Support\Facades\App; // This was already in your file
-    @endphp
-
-    @if (isset($navbarDetached) && $navbarDetached == 'navbar-detached')
-        <nav class="layout-navbar {{ $containerNav }} navbar navbar-expand-xl {{ $navbarDetached }} align-items-center bg-navbar-theme"
-            id="layout-navbar">
-    @endif
-    @if (isset($navbarDetached) && $navbarDetached == '')
+    {{-- Open Nav based on $navbarDetachedClass (prop from component, originating from app.blade.php) --}}
+    @if ($navbarDetachedClass === 'navbar-detached')
+        <nav class="layout-navbar {{ $this->containerNav }} navbar navbar-expand-xl {{ $this->navbarDetachedClass }} align-items-center bg-navbar-theme" id="layout-navbar">
+    @else
         <nav class="layout-navbar navbar navbar-expand-xl align-items-center bg-navbar-theme" id="layout-navbar">
-            <div class="{{ $containerNav }}">
+            <div class="{{ $this->containerNav }}"> {{-- container-fluid or container-xxl --}}
     @endif
 
-    @if (isset($navbarFull))
+    {{-- App Brand (conditionally displayed based on $navbarFull, often for horizontal layouts) --}}
+    @if ($navbarFull)
         <div class="navbar-brand app-brand demo d-none d-xl-flex py-0 me-4">
             <a href="{{ url('/') }}" class="app-brand-link gap-2">
                 <span class="app-brand-logo demo">
-                    @include('_partials.macros', ['height' => 20])
+                    {{-- Ensure _partials.macros provides MOTAC logo --}}
+                    @include('_partials.macros', ['height' => 20, 'width' => 20]) {{-- Added width for better control --}}
                 </span>
-                <span class="app-brand-text demo menu-text fw-bold">{{ config('variables.templateName') }}</span>
+                <span class="app-brand-text demo menu-text fw-bold">{{ $configData['templateName'] ?? config('app.name') }}</span>
             </a>
         </div>
     @endif
 
-    @if (!isset($navbarHideToggle))
-        <div
-            class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0{{ isset($menuHorizontal) ? ' d-xl-none ' : '' }} {{ isset($contentNavbar) ? ' d-xl-none ' : '' }} d-xl-none">
+    {{-- Menu Toggler --}}
+    @if (!$navbarHideToggle)
+        <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none"> {{-- Simplified conditional classes --}}
             <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
                 <i class="ti ti-menu-2 ti-sm"></i>
             </a>
@@ -81,21 +49,20 @@
     @endif
 
     <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+        {{-- Style Switcher & Offline Indicator --}}
         <div class="navbar-nav d-flex flex-row align-items-center">
-            <a wire:ignore class="nav-link style-switcher-toggle hide-arrow" href="javascript:void(0);">
-                <i class='ti ti-sm'></i>
+            <a wire:ignore class="nav-link style-switcher-toggle hide-arrow" href="javascript:void(0);" title="{{ __('Toggle style') }}">
+                <i class='ti ti-sm'></i> {{-- Icon (ti-sun/ti-moon) is set by main.js --}}
             </a>
-            <div wire:offline>
-                <a class="nav-link dropdown-toggle hide-arrow">
-                    <i class="animation-fade ti ti-wifi-off fs-3 mx-2"></i>
-                </a>
+            <div wire:offline class="text-danger" title="{{ __('You are offline') }}">
+                <i class="animation-fade ti ti-wifi-off fs-4 mx-2"></i>
             </div>
         </div>
 
         <ul class="navbar-nav flex-row align-items-center ms-auto">
-
+            {{-- Import Progress Bar --}}
             @if ($activeProgressBar)
-                <li wire:poll.1s="updateProgressBar" class="nav-item mx-3" style="width: 250px;">
+                <li wire:poll.1s="updateProgressBar" class="nav-item mx-3" style="width: 250px;" title="{{ __('Import in progress...') }}">
                     <div class="progress" style="height: 20px;">
                         <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" role="progressbar"
                             style="width: {{ $percentage }}%;" aria-valuenow="{{ $percentage }}" aria-valuemin="0"
@@ -103,146 +70,137 @@
                     </div>
                 </li>
             @else
+                {{-- Display session flashed messages for import status if progress bar is not active --}}
                 @if (session()->has('success'))
-                    <div class="nav-item mx-3 text-success">
-                        {{ session('success') }}
-                    </div>
+                    <li class="nav-item mx-3 text-success" role="alert">
+                        <i class="ti ti-circle-check me-1"></i>{{ session('success') }}
+                    </li>
                 @endif
                 @if (session()->has('error'))
-                    <div class="nav-item mx-3 text-danger">
-                        {{ session('error') }}
-                    </div>
+                    <li class="nav-item mx-3 text-danger" role="alert">
+                        <i class="ti ti-alert-circle me-1"></i>{{ session('error') }}
+                    </li>
                 @endif
             @endif
+
+            {{-- Language Switcher - System Design 3.1 LanguageController.php --}}
             <li class="nav-item dropdown-language dropdown me-2 me-xl-1">
-                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
-                    {{-- Dynamically set main flag based on current locale --}}
+                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown" aria-label="{{ __('Select Language') }}">
+                    {{-- Flag is dynamically set by main.js based on HTML lang, or server-rendered --}}
                     @if (App::getLocale() == 'ar')
                         <i class="fi fi-sy fis rounded-circle me-1 fs-3"></i>
                     @elseif (App::getLocale() == 'my')
                         <i class="fi fi-my fis rounded-circle me-1 fs-3"></i>
-                    @else
-                        {{-- Default to English/US flag --}}
+                    @else {{-- Default to English --}}
                         <i class="fi fi-us fis rounded-circle me-1 fs-3"></i>
                     @endif
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end">
                     <li>
-                        <a class="dropdown-item {{ App::getLocale() == 'en' ? 'selected' : '' }}"
-                            href="{{ url('lang/en') }}" data-language="en" data-text-direction="ltr">
+                        <a class="dropdown-item {{ App::getLocale() == 'en' ? 'active' : '' }}"
+                            href="{{ route('language.swap', 'en') }}" data-language="en" data-text-direction="ltr">
                             <i class="fi fi-us fis rounded-circle me-1 fs-3"></i>
                             <span class="align-middle">English</span>
                         </a>
                     </li>
                     <li>
-                        <a class="dropdown-item {{ App::getLocale() == 'ar' ? 'selected' : '' }}"
-                            href="{{ url('lang/ar') }}" data-language="ar" data-text-direction="rtl">
-                            <i class="fi fi-sy fis rounded-circle me-1 fs-3"></i>
-                            <span class="align-middle">العربية</span>
-                        </a>
-                    </li>
-                    {{-- Added Bahasa Melayu (my) option --}}
-                    <li>
-                        <a class="dropdown-item {{ App::getLocale() == 'my' ? 'selected' : '' }}"
-                            href="{{ url('lang/my') }}" data-language="my" data-text-direction="ltr">
+                        <a class="dropdown-item {{ App::getLocale() == 'my' ? 'active' : '' }}"
+                            href="{{ route('language.swap', 'my') }}" data-language="my" data-text-direction="ltr">
                             <i class="fi fi-my fis rounded-circle me-1 fs-3"></i>
                             <span class="align-middle">Bahasa Melayu</span>
                         </a>
                     </li>
-                </ul>
-            </li>
-            <li class="nav-item dropdown-notifications navbar-dropdown dropdown me-3 me-xl-2">
-                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown"
-                    data-bs-auto-close="outside" aria-expanded="false">
-                    <i class="ti ti-bell ti-md"></i>
-                    @if (count($unreadNotifications))
-                        <span
-                            class="badge bg-danger rounded-pill badge-notifications">{{ count($unreadNotifications) }}</span>
-                    @endif
-                </a>
-                <ul wire:ignore.self class="dropdown-menu dropdown-menu-end py-0">
-                    <li class="dropdown-menu-header border-bottom">
-                        <div class="dropdown-header d-flex align-items-center py-3">
-                            <h5 class="text-body mb-0 me-auto">{{ __('Notifications') }}</h5>
-                            @if (count($unreadNotifications))
-                                <a wire:click.prevent='markAllNotificationsAsRead()' href=""
-                                    class="dropdown-notifications-all text-body mx-2"><i
-                                        class="ti ti-mail-opened fs-4"></i></a>
-                            @endif
-                            <div wire:loading.class='animation-rotate'>
-                                <a wire:click.prevent='$refresh' href=""
-                                    class="dropdown-notifications-all text-body"><i class="ti ti-refresh fs-4"></i></a>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="dropdown-notifications-list scrollable-container ps">
-                        <ul class="list-group list-group-flush">
-                            @forelse ($unreadNotifications as $notification)
-                                <li
-                                    class="list-group-item list-group-item-action dropdown-notifications-item marked-as-read">
-                                    <div class="d-flex">
-                                        <div class="flex-shrink-0 me-3">
-                                            <div class="avatar">
-                                                @php
-                                                    $employee = Employee::find($notification->data['employee_id']);
-                                                    $imageSrc = Storage::disk('public')->exists(
-                                                        $employee->profile_photo_path,
-                                                    )
-                                                        ? Storage::disk('public')->url($employee->profile_photo_path)
-                                                        : Storage::disk('public')->url(
-                                                            'profile-photos/.default-photo.jpg',
-                                                        );
-                                                @endphp
-                                                <img src="{{ $imageSrc }}" class="h-auto rounded-circle">
-                                                {{-- <span class="avatar-initial rounded-circle bg-label-success"><i class="ti ti-chart-pie"></i></span> --}}
-                                            </div>
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <h6 class="mb-1">{{ $notification->data['user'] }}</h6>
-                                            <p class="mb-0">{{ __($notification->data['message']) }}</p>
-                                            <small
-                                                class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
-                                        </div>
-                                        <div class="flex-shrink-0 dropdown-notifications-actions">
-                                            <a wire:click="markNotificationAsRead('{{ $notification->id }}')"
-                                                class="dropdown-notifications-read"><button
-                                                    class="btn btn-xs rounded-pill btn-outline-primary waves-effect">Mark
-                                                    as read</button></a>
-                                        </div>
-                                    </div>
-                                </li>
-                            @empty
-                                <li class="border-top">
-                                    <p class="d-flex justify-content-center text-muted m-3 p-2 h-px-40 align-items-center"
-                                        style="text-align: center">
-                                        {{ __('Time to relax!') }}
-                                        <br>
-                                        {{ __('No new updates to worry about') }}
-                                    </p>
-                                </li>
-                            @endforelse
-                        </ul>
-                        <div class="ps__rail-x" style="left: 0px; bottom: 0px;">
-                            <div class="ps__thumb-x" tabindex="0" style="left: 0px; width: 0px;"></div>
-                        </div>
-                        <div class="ps__rail-y" style="top: 0px; right: 0px;">
-                            <div class="ps__thumb-y" tabindex="0" style="top: 0px; height: 0px;"></div>
-                        </div>
-                    </li>
-                    <li class="dropdown-menu-footer border-top">
-                        <a href="#"
-                            class="dropdown-item d-flex justify-content-center text-primary p-2 h-px-40 mb-1 align-items-center"
-                            style="opacity: 0.5;pointer-events: none;">
-                            {{ __('View all notifications') }}
+                    <li>
+                        <a class="dropdown-item {{ App::getLocale() == 'ar' ? 'active' : '' }}"
+                            href="{{ route('language.swap', 'ar') }}" data-language="ar" data-text-direction="rtl">
+                            <i class="fi fi-sy fis rounded-circle me-1 fs-3"></i>
+                            <span class="align-middle">العربية</span>
                         </a>
                     </li>
                 </ul>
             </li>
+
+            {{-- Notifications Dropdown - System Design 4.4, 9.5 --}}
+            <li class="nav-item dropdown-notifications navbar-dropdown dropdown me-3 me-xl-2">
+                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown"
+                    data-bs-auto-close="outside" aria-expanded="false" aria-label="{{ __('View notifications') }}">
+                    <i class="ti ti-bell ti-md"></i>
+                    @if ($unreadNotifications->count())
+                        <span class="badge bg-danger rounded-pill badge-notifications">{{ $unreadNotifications->count() }}</span>
+                    @endif
+                </a>
+                <ul wire:ignore.self class="dropdown-menu dropdown-menu-end py-0" style="min-width: 350px; max-width: 400px;">
+                    <li class="dropdown-menu-header border-bottom">
+                        <div class="dropdown-header d-flex align-items-center py-3">
+                            <h5 class="text-body mb-0 me-auto">{{ __('Notifications') }}</h5>
+                            @if ($unreadNotifications->count())
+                                <button wire:click='markAllNotificationsAsRead' type="button"
+                                    class="btn btn-sm btn-text-secondary p-0 me-2" title="{{ __('Mark all as read') }}">
+                                    <i class="ti ti-mail-opened fs-4"></i>
+                                </button>
+                            @endif
+                            <div wire:loading.class='animation-rotate' wire:target="refreshNotificationsHandler,markAllNotificationsAsRead,markNotificationAsRead">
+                                <button wire:click.prevent='$dispatch("refreshNotifications")' type="button"
+                                    class="btn btn-sm btn-text-secondary p-0" title="{{ __('Refresh Notifications') }}">
+                                    <i class="ti ti-refresh fs-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="dropdown-notifications-list scrollable-container">
+                        <ul class="list-group list-group-flush">
+                            @forelse ($unreadNotifications as $notification)
+                                <li class="list-group-item list-group-item-action dropdown-notifications-item">
+                                    <a href="{{ $notification->data['url'] ?? '#' }}" class="text-decoration-none text-reset d-block" @if(isset($notification->data['url']) && $notification->data['url'] !== '#') wire:click.prevent="markNotificationAsRead('{{ $notification->id }}')" @endif>
+                                        <div class="d-flex">
+                                            <div class="flex-shrink-0 me-3">
+                                                <div class="avatar">
+                                                    {{-- Assuming notification data includes actor_photo_url or a default --}}
+                                                    <img src="{{ $notification->data['actor_photo_url'] ?? asset('assets/img/avatars/1.png') }}"
+                                                        alt="{{ $notification->data['actor_name'] ?? __('User') }} Avatar" class="h-auto rounded-circle">
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1 small">{{ $notification->data['title'] ?? __('Notification') }}</h6>
+                                                <p class="mb-0 small text-wrap">{{ Str::limit($notification->data['message'] ?? __('No message content.'), 100) }}</p>
+                                                <small class="text-muted">{{ \Carbon\Carbon::parse($notification->created_at)->diffForHumans() }}</small>
+                                            </div>
+                                            <div class="flex-shrink-0 dropdown-notifications-actions">
+                                                <button wire:click.stop="markNotificationAsRead('{{ $notification->id }}')" type="button"
+                                                    class="btn btn-xs rounded-pill btn-icon btn-outline-primary waves-effect"
+                                                    title="{{ __('Mark as read') }}">
+                                                    <i class="ti ti-mail-opened ti-xs"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                            @empty
+                                <li class="border-top">
+                                    <p class="d-flex justify-content-center text-muted m-3 p-2 h-px-40 align-items-center text-center">
+                                        {{ __('No new notifications.') }}
+                                    </p>
+                                </li>
+                            @endforelse
+                        </ul>
+                    </li>
+                    @if ($unreadNotifications->isNotEmpty() || (Auth::user() && Auth::user()->notifications()->count() > 0))
+                    <li class="dropdown-menu-footer border-top">
+                        <a href="{{ route('notifications.index') }}"
+                            class="dropdown-item d-flex justify-content-center text-primary p-2 h-px-40 mb-1 align-items-center">
+                            {{ __('View all notifications') }}
+                        </a>
+                    </li>
+                    @endif
+                </ul>
+            </li>
+
+            {{-- User Dropdown - System Design 4.1 (User model) --}}
             <li class="nav-item navbar-dropdown dropdown-user dropdown">
-                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown" aria-label="{{ __('User menu') }}">
                     <div class="avatar avatar-online">
-                        <img src="{{ Auth::user() ? Auth::user()->profile_photo_url : asset('assets/img/avatars/1.png') }}"
-                            alt class="w-px-40 h-auto rounded-circle">
+                        <img src="{{ Auth::user()?->profile_photo_url ?? asset('assets/img/avatars/1.png') }}"
+                            alt="{{ Auth::user()?->name ?? __('User') }} {{ __('Avatar') }}" class="w-px-40 h-auto rounded-circle">
                     </div>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end">
@@ -252,61 +210,51 @@
                             <div class="d-flex">
                                 <div class="flex-shrink-0 me-3">
                                     <div class="avatar avatar-online">
-                                        <img src="{{ Auth::user() ? Auth::user()->profile_photo_url : asset('assets/img/avatars/1.png') }}"
-                                            alt class="w-px-40 h-auto rounded-circle">
+                                        <img src="{{ Auth::user()?->profile_photo_url ?? asset('assets/img/avatars/1.png') }}"
+                                            alt="{{ Auth::user()?->name ?? __('User') }} {{ __('Avatar') }}" class="w-px-40 h-auto rounded-circle">
                                     </div>
                                 </div>
                                 <div class="flex-grow-1">
                                     <span class="fw-semibold d-block">
-                                        @if (Auth::check())
-                                            {{ Auth::user()->name }}
-                                        @else
-                                            !!No Name!!
-                                        @endif
+                                        {{ Auth::user()?->name ?? __('Guest') }}
                                     </span>
-                                    <small class="text-muted">{{ Auth::user()->getRoleNames()->first() }}</small>
+                                    <small class="text-muted">{{ Auth::user()?->getRoleNames()->first() ?? __('User Role') }}</small>
                                 </div>
                             </div>
                         </a>
                     </li>
-                    {{-- <li>
-                  <div class="dropdown-divider"></div>
-                </li> --}}
-                    {{-- <li>
-                  <a class="dropdown-item" href="{{ Route::has('profile.show') ? route('profile.show') : 'javascript:void(0);' }}">
-                    <i class="ti ti-user-check me-2 ti-sm"></i>
-                    <span class="align-middle">My Profile</span>
-                  </a>
-                </li> --}}
-                    {{-- <li>
-                  <a class="dropdown-item" href="javascript:void(0);">
-                    <span class="d-flex align-items-center align-middle">
-                      <i class="flex-shrink-0 ti ti-credit-card me-2 ti-sm"></i>
-                      <span class="flex-grow-1 align-middle">Billing</span>
-                      <span class="flex-shrink-0 badge badge-center rounded-pill bg-label-danger w-px-20 h-px-20">2</span>
-                    </span>
-                  </a>
-                </li> --}}
+                    <li><div class="dropdown-divider"></div></li>
                     <li>
-                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{{ Route::has('profile.show') ? route('profile.show') : 'javascript:void(0);' }}">
+                            <i class="ti ti-user-check me-2 ti-sm"></i>
+                            <span class="align-middle">{{ __('My Profile') }}</span>
+                        </a>
                     </li>
+                    @if (Auth::user()?->hasRole('Admin')) {{-- System Design 8.1 RBAC --}}
+                        <li>
+                            <a class="dropdown-item" href="{{ route('settings.users.index') }}"> {{-- System Design 9.1 --}}
+                                <i class="ti ti-settings me-2 ti-sm"></i>
+                                <span class="align-middle">{{ __('Settings') }}</span>
+                            </a>
+                        </li>
+                    @endif
+                    <li><div class="dropdown-divider"></div></li>
                     @if (Auth::check())
                         <li>
                             <a class="dropdown-item" href="{{ route('logout') }}"
                                 onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                <i class='ti ti-logout me-2'></i>
+                                <i class='ti ti-logout me-2 ti-sm'></i>
                                 <span class="align-middle">{{ __('Sign out') }}</span>
                             </a>
                         </li>
-                        <form method="POST" id="logout-form" action="{{ route('logout') }}">
+                        <form method="POST" id="logout-form" action="{{ route('logout') }}" style="display: none;">
                             @csrf
                         </form>
                     @else
                         <li>
-                            <a class="dropdown-item"
-                                href="{{ Route::has('login') ? route('login') : url('auth/login-basic') }}">
-                                <i class='ti ti-login me-2'></i>
-                                <span class="align-middle">Login</span>
+                            <a class="dropdown-item" href="{{ Route::has('login') ? route('login') : url('login') }}">
+                                <i class='ti ti-login me-2 ti-sm'></i>
+                                <span class="align-middle">{{ __('Login') }}</span>
                             </a>
                         </li>
                     @endif
@@ -314,8 +262,10 @@
             </li>
         </ul>
     </div>
-    @if (!isset($navbarDetached))
-</div>
-@endif
+
+    {{-- Close Div For Navbar if Not Detached --}}
+    @if (!($navbarDetachedClass === 'navbar-detached'))
+        </div>
+    @endif
 </nav>
 </div>

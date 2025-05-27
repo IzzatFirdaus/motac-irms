@@ -2,176 +2,202 @@
   "menu": [
     {
       "url": "/dashboard",
-      "name": "Dashboard",
-      "icon": "menu-icon tf-icons ti ti-dashboard",
+      "name": "menu.dashboard",
+      "icon": "menu-icon tf-icons ti ti-smart-home",
       "slug": "dashboard",
-      "role": ["Admin", "BPM Staff", "Employee", "Approver", "IT Admin"]
+      "role": ["Admin", "BPM Staff", "IT Admin", "Employee", "Approver"]
     },
     {
-      "name": "Settings",
-      "icon": "menu-icon tf-icons ti ti-adjustments-alt",
-      "slug": "settings",
-      "role": ["Admin"],
-      "submenu": [
-        {
-          "url": "/settings/users",
-          "name": "Users",
-          "slug": "settings.users.index"
-        },
-        {
-          "url": "/settings/roles",
-          "name": "Roles",
-          "slug": "settings.roles.index"
-        },
-        {
-          "url": "/settings/permissions",
-          "name": "Permissions",
-          "slug": "settings.permissions.index"
-        },
-        {
-          "url": "/settings/grades",
-          "name": "Grades",
-          "slug": "settings.grades.index"
-        },
-        {
-          "url": "/settings/departments",
-          "name": "Departments",
-          "slug": "settings.departments.index"
-        },
-        {
-          "url": "/settings/positions",
-          "name": "Positions",
-          "slug": "settings.positions.index"
-        },
-        {
-          "url": "log-viewer",
-          "name": "Logs",
-          "slug": "settings-logs",
-          "target": "_blank"
-        }
-      ]
+      "menuHeader": "menu.section.resource_management",
+      "role": ["Admin", "BPM Staff", "IT Admin", "Employee", "Approver"]
     },
     {
-      "menuHeader": "Resource Management",
-      "role": ["Admin", "BPM Staff", "Employee", "Approver", "IT Admin"]
-    },
-    {
-      "name": "My Applications",
-      "icon": "menu-icon tf-icons ti ti-folder",
+      "name": "menu.my_applications.title",
+      "icon": "menu-icon tf-icons ti ti-folder-search",
       "slug": "resource-management.my-applications",
       "role": ["Employee", "Admin"],
       "submenu": [
         {
           "url": "/resource-management/my-applications/email",
-          "name": "Email Applications",
-          "slug": "resource-management.my-applications.email.index"
+          "name": "menu.my_applications.email",
+          "slug": "resource-management.my-applications.email.index",
+          "routeName": "resource-management.my-applications.email.index"
         },
         {
           "url": "/resource-management/my-applications/loan",
-          "name": "Loan Applications",
-          "slug": "resource-management.my-applications.loan.index"
+          "name": "menu.my_applications.loan",
+          "slug": "resource-management.my-applications.loan.index",
+          "routeName": "resource-management.my-applications.loan.index"
         }
       ]
     },
     {
-      "name": "Apply for Resources",
-      "icon": "menu-icon tf-icons ti ti-file-invoice",
+      "name": "menu.apply_for_resources.title",
+      "icon": "menu-icon tf-icons ti ti-file-plus",
       "slug": "resource-management.application-forms",
       "role": ["Employee", "Admin"],
       "submenu": [
         {
           "url": "/resource-management/application-forms/email/create",
-          "name": "Email Account",
-          "slug": "resource-management.application-forms.email.create"
+          "name": "menu.apply_for_resources.email",
+          "slug": "resource-management.application-forms.email.create",
+          "routeName": "resource-management.application-forms.email.create"
         },
         {
           "url": "/resource-management/application-forms/loan/create",
-          "name": "Equipment Loan",
-          "slug": "resource-management.application-forms.loan.create"
+          "name": "menu.apply_for_resources.loan",
+          "slug": "resource-management.application-forms.loan.create",
+          "routeName": "resource-management.application-forms.loan.create"
         }
       ]
     },
     {
       "url": "/approval-dashboard",
-      "name": "Approvals",
-      "icon": "menu-icon tf-icons ti ti-checks",
+      "name": "menu.approvals_dashboard",
+      "icon": "menu-icon tf-icons ti ti-user-check",
       "slug": "approval-dashboard",
-      "role": ["Approver", "Admin"]
+      "routeName": "approval-dashboard",
+      "role": ["Admin", "Approver", "BPM Staff", "IT Admin"]
     },
     {
-      "name": "Administration",
-      "icon": "menu-icon tf-icons ti ti-building-warehouse",
+      "name": "menu.administration.title",
+      "icon": "menu-icon tf-icons ti ti-settings-cog",
       "slug": "resource-management.admin",
       "role": ["Admin", "BPM Staff", "IT Admin"],
       "submenu": [
         {
-          "name": "BPM Operations",
+          "name": "menu.administration.bpm_operations.title",
           "icon": "menu-icon tf-icons ti ti-tool",
           "slug": "resource-management.admin.bpm",
           "role": ["Admin", "BPM Staff"],
           "submenu": [
             {
               "url": "/resource-management/admin/bpm/outstanding-loans",
-              "name": "Outstanding Loans",
-              "slug": "resource-management.admin.bpm.outstanding-loans"
+              "name": "menu.administration.bpm_operations.outstanding_loans",
+              "slug": "resource-management.admin.bpm.outstanding-loans",
+              "routeName": "resource-management.admin.bpm.outstanding-loans"
             },
             {
               "url": "/resource-management/admin/bpm/issued-loans",
-              "name": "Issued Loans",
-              "slug": "resource-management.admin.bpm.issued-loans"
+              "name": "menu.administration.bpm_operations.issued_loans",
+              "slug": "resource-management.admin.bpm.issued-loans",
+              "routeName": "resource-management.admin.bpm.issued-loans"
             }
           ]
         },
         {
           "url": "/resource-management/admin/equipment-admin",
-          "name": "Equipment Management",
+          "name": "menu.administration.equipment_management",
           "icon": "menu-icon tf-icons ti ti-device-laptop",
           "slug": "resource-management.admin.equipment-admin.index",
+          "routeName": "resource-management.admin.equipment-admin.index",
           "role": ["Admin", "BPM Staff"]
         },
         {
-          "url": "/resource-management/admin/email-applications",
-          "name": "Email Applications (Admin)",
+          "url": "/resource-management/admin/email-applications-admin", 
+          "name": "menu.administration.email_applications",
           "icon": "menu-icon tf-icons ti ti-mail-cog",
-          "slug": "resource-management.admin.email-applications.index",
+          "slug": "resource-management.admin.email-applications-admin.index",
+          "routeName": "resource-management.admin.email-applications-admin.index",
           "role": ["Admin", "IT Admin"]
         }
       ]
     },
     {
-      "name": "Reports",
+      "menuHeader": "menu.section.system",
+      "role": ["Admin"]
+    },
+    {
+      "name": "menu.settings.title",
+      "icon": "menu-icon tf-icons ti ti-settings",
+      "slug": "settings",
+      "role": ["Admin"],
+      "submenu": [
+        {
+          "url": "/settings/users",
+          "name": "menu.settings.users",
+          "slug": "settings.users.index",
+          "routeName": "settings.users.index"
+        },
+        {
+          "url": "/settings/roles",
+          "name": "menu.settings.roles",
+          "slug": "settings.roles.index",
+          "routeName": "settings.roles.index"
+        },
+        {
+          "url": "/settings/permissions",
+          "name": "menu.settings.permissions",
+          "slug": "settings.permissions.index",
+          "routeName": "settings.permissions.index"
+        },
+        {
+          "url": "/settings/grades",
+          "name": "menu.settings.grades",
+          "slug": "settings.grades.index",
+          "routeName": "settings.grades.index"
+        },
+        {
+          "url": "/settings/departments",
+          "name": "menu.settings.departments",
+          "slug": "settings.departments.index",
+          "routeName": "settings.departments.index"
+        },
+        {
+          "url": "/settings/positions",
+          "name": "menu.settings.positions",
+          "slug": "settings.positions.index",
+          "routeName": "settings.positions.index"
+        },
+        {
+          "url": "/log-viewer",
+          "name": "menu.settings.logs",
+          "slug": "log-viewer",
+          "routeName": "log-viewer",
+          "target": "_blank"
+        }
+      ]
+    },
+    {
+      "name": "menu.reports.title",
       "icon": "menu-icon tf-icons ti ti-file-analytics",
       "slug": "reports",
       "role": ["Admin", "BPM Staff"],
       "submenu": [
         {
           "url": "/reports/equipment",
-          "name": "Equipment Report",
-          "slug": "reports.equipment"
+          "name": "menu.reports.equipment",
+          "slug": "reports.equipment",
+          "routeName": "reports.equipment"
         },
         {
           "url": "/reports/email-accounts",
-          "name": "Email Accounts Report",
-          "slug": "reports.email-accounts"
+          "name": "menu.reports.email_accounts",
+          "slug": "reports.email-accounts",
+          "routeName": "reports.email-accounts"
+
         },
         {
           "url": "/reports/loan-applications",
-          "name": "Loan Applications Report",
-          "slug": "reports.loan-applications"
+          "name": "menu.reports.loan_applications",
+          "slug": "reports.loan-applications",
+          "routeName": "reports.loan-applications"
         },
         {
           "url": "/reports/user-activity",
-          "name": "User Activity Report",
-          "slug": "reports.user-activity"
+          "name": "menu.reports.user_activity",
+          "slug": "reports.user-activity",
+          "routeName": "reports.user-activity",
+          "role": ["Admin"]
         }
       ]
     },
     {
       "url": "#logout-url",
-      "name": "Logout",
+      "name": "menu.logout",
       "icon": "menu-icon tf-icons ti ti-logout",
       "slug": "logout",
-      "role": ["Admin", "BPM Staff", "Employee", "Approver", "IT Admin"]
+      "role": ["Admin", "BPM Staff", "IT Admin", "Employee", "Approver"]
     }
   ]
 }

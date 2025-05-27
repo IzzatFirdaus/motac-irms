@@ -1,101 +1,81 @@
-@isset($pageConfigs)
-  {!! Helper::updatePageConfig($pageConfigs) !!}
-@endisset
+@extends('layouts.commonMaster') {{-- Ensures it uses the root HTML structure and $configData --}}
 
 @php
-  $configData = Helper::appClasses();
-@endphp
+    // Config values are primarily inherited from $configData (set in commonMaster.blade.php).
+    // These allow specific pages that extend this layout (though less common for Livewire full-page components)
+    // or this layout itself to provide overrides if $pageConfigs is not used for such specific overrides.
 
-@extends('layouts/commonMaster')
+    // Determine if shared UI elements should be displayed. Defaults come from $configData,
+    // which is sourced from Helpers::appClasses() via commonMaster.blade.php
+    //.
+    $isMenu = $isMenu ?? $configData['isMenu'] ?? true;
+    $isNavbar = $isNavbar ?? $configData['isNavbar'] ?? true;
+    $isFooter = $isFooter ?? $configData['isFooter'] ?? true;
+    $contentNavbar = $contentNavbar ?? $configData['contentNavbar'] ?? true; // Usually true if navbar is part of content area
 
-@php
-  /* Display elements */
-  $contentNavbar = ($contentNavbar ?? true);
-  $containerNav = ($containerNav ?? 'container-xxl');
-  $isNavbar = ($isNavbar ?? true);
-  $isMenu = ($isMenu ?? true);
-  $isFlex = ($isFlex ?? false);
-  $isFooter = ($isFooter ?? true);
-  $customizerHidden = ($customizerHidden ?? '');
-  $pricingModal = ($pricingModal ?? false);
+    // Container settings
+    $containerNav = $containerNav ?? $configData['containerNav'] ?? 'container-xxl'; // For navbar's container
+    $container = $container ?? $configData['container'] ?? 'container-xxl'; // For main content area
 
-  /* HTML Classes */
-  $navbarDetached = 'navbar-detached';
-  $menuFixed = (isset($configData['menuFixed']) ? $configData['menuFixed'] : '');
-  $navbarFixed = (isset($configData['navbarFixed']) ? $configData['navbarFixed'] : '');
-  $footerFixed = (isset($configData['footerFixed']) ? $configData['footerFixed'] : '');
-  $menuCollapsed = (isset($configData['menuCollapsed']) ? $configData['menuCollapsed'] : '');
+    // Layout class for navbar detachment (if theme supports)
+    $navbarDetachedClass = ($configData['navbarDetached'] ?? false) ? 'navbar-detached' : '';
 
-  /* Content classes */
-  $container = ($container ?? 'container-xxl');
+    // Flex layout option
+    $isFlex = $isFlex ?? $configData['isFlex'] ?? false; // For pages needing specific flex behaviors
+
 @endphp
 
 @section('layoutContent')
-  <div class="layout-wrapper layout-content-navbar {{ $isMenu ? '' : 'layout-without-menu' }}">
-    <div class="layout-container">
+    {{-- This allows page-specific configurations (passed from a controller/Livewire component)
+         to potentially modify global $configData values if Helper::updatePageConfig is designed to do so.
+         This is more common with traditional Blade views than full-page Livewire components. --}}
+    @isset($pageConfigs)
+        {!! App\Helpers\Helpers::updatePageConfig($pageConfigs) !!}
+    @endisset
 
-      @if ($isMenu)
-        {{-- @include('layouts/sections/menu/verticalMenu') --}}
-        @livewire('sections.menu.verticalMenu')
-      @endif
+    <div class="layout-wrapper layout-content-navbar {{ $isMenu ? '' : 'layout-without-menu' }}">
+        <div class="layout-container">
 
-      <!-- Layout page -->
-      <div class="layout-page">
-
-        {{-- Below commented code read by artisan command while installing jetstream. !! Do not remove if you want to use jetstream. --}}
-        <x-banner />
-
-        <!-- BEGIN: Navbar-->
-        @if ($isNavbar)
-          {{-- @include('layouts/sections/navbar/navbar') --}}
-          @livewire('sections.navbar.navbar')
-        @endif
-        <!-- END: Navbar-->
-
-        <!-- Content wrapper -->
-        <div class="content-wrapper">
-
-          <!-- Content -->
-          @if ($isFlex)
-          <div class="{{$container}} d-flex align-items-stretch flex-grow-1 p-0">
-            @else
-            <div class="{{$container}} flex-grow-1 container-p-y">
-              @endif
-
-              {{-- @yield('content') --}}
-              {{ $slot }}
-
-              <!-- pricingModal -->
-              @if ($pricingModal)
-                @include('_partials/_modals/modal-pricing')
-              @endif
-              <!--/ pricingModal -->
-
-            </div>
-            <!-- / Content -->
-
-            <!-- Footer -->
-            @if ($isFooter)
-              {{-- @include('layouts/sections/footer/footer') --}}
-              @livewire('sections.footer.footer')
+            @if ($isMenu)
+                {{-- Vertical Menu Livewire Component --}}
+                @livewire('sections.menu.vertical-menu')
             @endif
-            <!-- / Footer -->
 
-            <div class="content-backdrop fade"></div>
-          </div>
+            <div class="layout-page">
 
-          <!--/ Content wrapper -->
-        </div>
-        <!-- / Layout page -->
-      </div>
+                {{-- Include general alerts partial - System Design 6.3 --}}
+                @include('_partials._alerts.alert-general')
 
-      @if ($isMenu)
-        <!-- Overlay -->
-        <div class="layout-overlay layout-menu-toggle"></div>
-      @endif
+                @if ($isNavbar)
+                    {{-- Navbar Livewire Component --}}
+                    {{-- The $navbarDetachedClass should be applied within the navbar component or its container logic if needed --}}
+                    @livewire('sections.navbar.navbar', ['containerNav' => $containerNav, 'navbarDetachedClass' => $navbarDetachedClass])
+                @endif
 
-      <!-- Drag Target Area To SlideIn Menu On Small Screens -->
-      <div class="drag-target"></div>
+                <div class="content-wrapper">
+                    @if ($isFlex)
+                        <div class="{{ $container }} d-flex align-items-stretch flex-grow-1 p-0">
+                            {{ $slot }} {{-- Main Livewire page content --}}
+                        </div>
+                    @else
+                        <div class="{{ $container }} flex-grow-1 container-p-y">
+                            {{ $slot }} {{-- Main Livewire page content --}}
+                        </div>
+                    @endif
+                    @if ($isFooter)
+                        {{-- Footer Livewire Component --}}
+                        @livewire('sections.footer.footer')
+                    @endif
+
+                    <div class="content-backdrop fade"></div>
+                </div>
+                </div>
+            </div>
+
+        @if ($isMenu)
+            <div class="layout-overlay layout-menu-toggle"></div>
+        @endif
+
+        <div class="drag-target"></div>
     </div>
-    <!-- / Layout wrapper -->
 @endsection
