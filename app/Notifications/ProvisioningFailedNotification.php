@@ -5,127 +5,246 @@ declare(strict_types=1);
 namespace App\Notifications;
 
 use App\Models\EmailApplication;
-use App\Models\User;
+use App\Models\User; // Ensured User model is imported
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\HtmlString; // For rendering HTML in email if necessary (like preformatted error)
-use Illuminate\Support\Str;
+use Illuminate\Support\HtmlString; // Correct import for HtmlString
 
-final class ProvisioningFailedNotification extends Notification implements ShouldQueue
+/**
+ * Class ProvisioningFailedNotification
+ *
+ * Notification sent to IT Admins/BPM staff when automated provisioning for an Email Application fails.
+ * This notification alerts staff to a technical issue requiring manual intervention.
+ */
+class ProvisioningFailedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
+    /**
+     * The Email Application model instance related to the provisioning failure.
+     */
     protected EmailApplication $application;
-    protected string $errorMessage;
-    protected ?User $adminUser; // Admin who might have triggered or is being informed
 
+    /**
+     * The error message from the provisioning attempt.
+     */
+    protected string $errorMessage;
+
+    /**
+     * The admin user who triggered the process (optional).
+     */
+    protected ?User $adminUser;
+
+    /**
+     * Create a new notification instance.
+     *
+     * @param  \App\Models\EmailApplication  $application  The application related to the failure.
+     * @param  string  $errorMessage  The error message from the provisioning attempt.
+     * @param  \App\Models\User|null  $adminUser  The admin user who triggered the process (optional).
+     */
     public function __construct(
         EmailApplication $application,
         string $errorMessage,
-        ?User $adminUser = null // User instance (e.g., the admin performing the action or a generic system user)
+        ?User $adminUser = null
     ) {
-        $this->application = $application->loadMissing('user'); // Ensure applicant is loaded
+        $this->application = $application;
+        // It's good practice to ensure relationships are loaded if they will be accessed.
+        if ($this->application instanceof EmailApplication) {
+            $this->application->loadMissing('user');
+        }
         $this->errorMessage = $errorMessage;
-        $this->adminUser = $adminUser; // This might be the notifiable if sent to specific admin
+        $this->adminUser = $adminUser;
 
+        Log::info(
+            "ProvisioningFailedNotification created for EmailApplication ID: ".
+            ($this->application->id ?? 'N/A').
+            ". Error: {$this->errorMessage}".
+            ($this->adminUser ? ". Triggered by Admin ID: {$this->adminUser->id}" : '')
+        );
+
+        // The warning for null user is good as is.
         if ($this->application->user === null) {
-            Log::warning("ProvisioningFailedNotification: Applicant (user) relationship is null for EmailApplication ID: " . ($this->application->id ?? 'N/A'));
+            Log::warning(
+                'ProvisioningFailedNotification: Applicant user relationship is null for application ID '.
+                  ($this->application->id ?? 'N/A').
+                  '.'
+            );
         }
     }
 
-    public function via(User $notifiable): array // $notifiable is the IT Admin/BPM staff
+    /**
+     * Get the notification's delivery channels.
+     *
+     * @return array<int, string>
+     */
+    public function via(User $notifiable): array
     {
         return ['mail', 'database'];
     }
 
-    public function toMail(User $notifiable): MailMessage // $notifiable is IT Admin/BPM Staff
+    /**
+     * Get the mail representation of the notification.
+     */
+    public function toMail(User $notifiable): MailMessage
     {
-        $adminRecipientName = $notifiable->name ?? __('Pentadbir ICT');
-        $applicantName = $this->application->user?->name ?? __('Tidak Diketahui');
+        /** @phpstan-ignore-next-line nullsafe.neverNull, nullCoalesce.expr */
+        $applicantName = $this->application->user?->name ?? __('Tidak Dikenali');
         $applicationId = $this->application->id ?? 'N/A';
+        $triggeredByAdminInfo = $this->adminUser ? __(' Proses dicetuskan oleh: :adminName (ID: :adminId).', ['adminName' => $this->adminUser->name, 'adminId' => $this->adminUser->id]) : '';
 
         $viewUrl = '#';
-        $adminRouteName = 'admin.resource-management.email-applications.show'; // Specific admin route
-        $genericRouteName = 'resource-management.email-applications.show'; // More generic one
+        $adminRouteName = 'admin.email-applications.show'; // Prefer admin-specific route
+        $genericRouteName = 'email-applications.show';
 
-        if ($this->application->id) {
+        if ($this->application->id !== null) {
             if (Route::has($adminRouteName)) {
                 try {
-                    $viewUrl = route($adminRouteName, $this->application->id);
+                    $viewUrl = route($adminRouteName, ['email_application' => $this->application->id]);
                 } catch (\Exception $e) {
-                    Log::error("Error generating admin route for ProvisioningFailedNotification mail: {$e->getMessage()}", ['app_id' => $applicationId]);
-                    $viewUrl = '#'; // Reset to try generic
+                    Log::error("Error generating admin route for ProvisioningFailedNotification mail: {$e->getMessage()}", ['application_id' => $this->application->id, 'route_name' => $adminRouteName]);
+                    // Try generic route if admin route fails or is not available
+                    if (Route::has($genericRouteName)) {
+                        try {
+                             $viewUrl = route($genericRouteName, ['email_application' => $this->application->id]);
+                        } catch (\Exception $e_generic) {
+                             Log::error("Error generating generic route for ProvisioningFailedNotification mail: {$e_generic->getMessage()}", ['application_id' => $this->application->id, 'route_name' => $genericRouteName]);
+                        }
+                    }
                 }
-            }
-            if ($viewUrl === '#' && Route::has($genericRouteName)) { // Fallback to generic show if admin not found
+            } elseif (Route::has($genericRouteName)) {
                  try {
-                    $viewUrl = route($genericRouteName, $this->application->id);
-                } catch (\Exception $e) {
-                    Log::error("Error generating generic route for ProvisioningFailedNotification mail: {$e->getMessage()}", ['app_id' => $applicationId]);
-                    $viewUrl = '#';
+                    $viewUrl = route($genericRouteName, ['email_application' => $this->application->id]);
+                } catch (\Exception $e_generic) {
+                     Log::error("Error generating generic route for ProvisioningFailedNotification mail: {$e_generic->getMessage()}", ['application_id' => $this->application->id, 'route_name' => $genericRouteName]);
                 }
             }
         }
 
-        $mailMessage = (new MailMessage())
-            ->subject(__("Amaran: Penyediaan E-mel/ID Gagal - Permohonan #:id", ['id' => $applicationId]))
-            ->greeting(__('Salam Sejahtera, :name,', ['name' => $adminRecipientName]))
+        if ($viewUrl === '#') {
+            Log::warning(
+                'Could not generate a valid URL for ProvisioningFailedNotification mail.',
+                ['application_id' => $this->application->id ?? 'N/A']
+            );
+        }
+
+
+        $mailMessage = (new MailMessage)
+            ->subject(__('Amaran: Gagal Memproses Akaun E-mel/ID Pengguna - Permohonan #:applicationId', ['applicationId' => $applicationId]))
+            ->greeting(__('Salam Pentadbir ICT,'))
             ->error() // Mark as important
-            ->line(__('Proses penyediaan E-mel/ID Pengguna untuk permohonan berikut telah **GAGAL**:'))
-            ->line(__('ID Permohonan: **#:id**', ['id' => $applicationId]))
-            ->line(__('Pemohon: **:name**', ['name' => $applicantName]))
+            ->line(__('Proses penyediaan akaun e-mel/ID pengguna untuk permohonan berikut telah **GAGAL**:'))
+            ->line(__('- Jenis Permohonan: :type', ['type' => __('Akaun E-mel/ID Pengguna')]))
+            ->line(__('- ID Permohonan: #:id', ['id' => $applicationId]))
+            ->line(__('- Pemohon: :name', ['name' => $applicantName]));
+
+        if ($this->application->proposed_email) {
+            $mailMessage->line(__('- Cadangan E-mel/ID: :email', ['email' => $this->application->proposed_email]));
+        }
+
+        $mailMessage->line('')
+            ->line(__('Ralat yang berlaku:'))
+            // Using HtmlString to allow preformatted error message display if it contains HTML or newlines.
+            ->line(new HtmlString("<pre style='background-color: #f8f8f8; padding: 10px; border: 1px solid #ddd; border-radius: 4px; white-space: pre-wrap; word-wrap: break-word;'>".htmlspecialchars($this->errorMessage)."</pre>"))
             ->line('');
 
-        if ($this->adminUser) {
-             $mailMessage->line(__("Proses dicetuskan oleh: :adminName (ID: :adminId)", ['adminName' => $this->adminUser->name, 'adminId' => $this->adminUser->id]));
-        }
-
-        $mailMessage->line(__('Ralat yang dilaporkan:'))
-                    // Using HtmlString to allow pre-formatted error or simple text
-                    ->line(new HtmlString("<pre style='background-color:#f8f9fa; padding:10px; border:1px solid #dee2e6; white-space:pre-wrap; word-wrap:break-word;'>".e($this->errorMessage)."</pre>"))
-                    ->line('');
-
-        $mailMessage->line(__('Tindakan manual mungkin diperlukan. Sila semak log sistem dan permohonan berkaitan untuk maklumat lanjut.'));
+        $mailMessage->line(__('Tindakan manual mungkin diperlukan untuk menyelesaikan isu ini.' . $triggeredByAdminInfo))
+            ->line(__('Sila semak log sistem untuk maklumat lanjut dan ambil tindakan pembetulan yang sewajarnya.'));
 
         if ($viewUrl !== '#') {
-            $mailMessage->action(__('Lihat Permohonan'), $viewUrl);
+            $mailMessage->action(__('Lihat Permohonan E-mel'), $viewUrl);
         }
 
-        return $mailMessage->salutation(__('Harap maklum dan tindakan segera.'));
+        return $mailMessage->salutation(__('Sekian, harap maklum.'));
     }
 
-    public function toArray(User $notifiable): array // $notifiable is IT Admin/BPM Staff
+    /**
+     * Get the array representation of the notification for the database channel.
+     *
+     * @param  \App\Models\User  $notifiable  The user who needs to be notified (IT Admin/BPM Staff).
+     * @return array<string, mixed> An array of data to be stored.
+     */
+    public function toArray(User $notifiable): array
     {
         $applicationId = $this->application->id ?? null;
+        /** @phpstan-ignore-next-line */
+        $applicantId = $this->application->user?->id ?? null;
+        /** @phpstan-ignore-next-line */
         $applicantName = $this->application->user?->name ?? __('Tidak Diketahui');
-        $triggeredByAdminName = $this->adminUser?->name ?? __('Sistem Automasi');
+        /** @phpstan-ignore-next-line */
+        $adminUserId = $this->adminUser?->id ?? null;
+        /** @phpstan-ignore-next-line */
+        $adminUserName = $this->adminUser?->name ?? __('Sistem Automasi');
 
-        $viewUrl = '#';
-        $adminRouteName = 'admin.resource-management.email-applications.show';
-        if ($applicationId && Route::has($adminRouteName)) {
-            try {
-                $viewUrl = route($adminRouteName, $applicationId);
-            } catch (\Exception $e) {
-                 Log::error("Error generating admin URL for ProvisioningFailedNotification toArray: " . $e->getMessage(), ['application_id' => $applicationId]);
-                 $viewUrl = '#';
+        $applicationUrl = '#';
+        $adminRouteName = 'admin.email-applications.show';
+        $genericRouteName = 'email-applications.show';
+
+        if ($applicationId !== null) {
+             if (Route::has($adminRouteName)) {
+                try {
+                    $applicationUrl = route($adminRouteName, ['email_application' => $applicationId]);
+                } catch (\Exception $e) {
+                    Log::error("Error generating admin URL for ProvisioningFailedNotification toArray: {$e->getMessage()}", ['application_id' => $applicationId, 'route_name' => $adminRouteName]);
+                     if (Route::has($genericRouteName)) {
+                        try {
+                             $applicationUrl = route($genericRouteName, ['email_application' => $applicationId]);
+                        } catch (\Exception $e_generic) {
+                             Log::error("Error generating generic URL for ProvisioningFailedNotification toArray: {$e_generic->getMessage()}", ['application_id' => $applicationId, 'route_name' => $genericRouteName]);
+                        }
+                    }
+                }
+            } elseif (Route::has($genericRouteName)) {
+                 try {
+                    $applicationUrl = route($genericRouteName, ['email_application' => $applicationId]);
+                } catch (\Exception $e_generic) {
+                     Log::error("Error generating generic URL for ProvisioningFailedNotification toArray: {$e_generic->getMessage()}", ['application_id' => $applicationId, 'route_name' => $genericRouteName]);
+                }
             }
         }
 
+        if ($applicationUrl === '#') {
+            Log::warning(
+                'Could not generate a valid URL for in-app ProvisioningFailedNotification.',
+                ['application_id' => $applicationId]
+            );
+        }
+
+        // Assume EmailApplication::STATUS_PROVISION_FAILED exists in your EmailApplication model
+        // e.g., public const STATUS_PROVISION_FAILED = 'provision_failed';
+        $statusKey = defined(EmailApplication::class.'::STATUS_PROVISION_FAILED')
+            ? EmailApplication::STATUS_PROVISION_FAILED
+            : 'provisioning_failed';
+
+
         return [
-            'application_id' => $applicationId,
+            'application_type_display' => __('Permohonan E-mel/ID Pengguna'),
             'application_type_morph' => $this->application->getMorphClass(),
+            'email_application_id' => $applicationId, // Retain for specific reference if needed
+            'application_id' => $applicationId, // Generic reference
+            'applicant_id' => $applicantId,
             'applicant_name' => $applicantName,
-            'error_message' => Str::limit($this->errorMessage, 250), // Store a summary of the error
-            'subject' => __("Penyediaan E-mel/ID Gagal (#:id)", ['id' => $applicationId ?? 'N/A']),
-            'message' => __("Penyediaan E-mel/ID untuk :applicantName (Permohonan #:id) GAGAL. Punca: :reason", ['applicantName' => $applicantName, 'id' => $applicationId ?? 'N/A', 'reason' => Str::limit($this->errorMessage, 100)]),
-            'url' => ($viewUrl !== '#') ? $viewUrl : null,
-            'triggered_by_admin_name' => $triggeredByAdminName,
-            'requires_manual_intervention' => true,
-            'icon' => 'ti ti-alert-triangle-filled',
+            'error_message' => $this->errorMessage,
+            'status_key' => $statusKey,
+            'subject' => __('Gagal Memproses Akaun E-mel/ID Pengguna (#:id)', ['id' => $applicationId ?? 'N/A']),
+            'message' => __(
+                'Penyediaan akaun e-mel/ID pengguna untuk :applicant_name (Permohonan #:application_id) telah GAGAL. Ralat: :error',
+                [
+                    'applicant_name' => $applicantName,
+                    'application_id' => $applicationId ?? 'N/A',
+                    'error' => substr($this->errorMessage, 0, 100).(strlen($this->errorMessage) > 100 ? '...' : '') // Show a snippet of the error
+                ]
+            ),
+            'url' => ($applicationUrl !== '#' && filter_var($applicationUrl, FILTER_VALIDATE_URL))
+                ? $applicationUrl
+                : null,
+            'triggered_by_admin_id' => $adminUserId,
+            'triggered_by_admin_name' => $adminUserName,
+            'icon' => 'ti ti-alert-octagon', // Tabler icon for failure/critical alert
+            'action_required' => true,
         ];
     }
 }
