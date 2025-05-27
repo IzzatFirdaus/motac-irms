@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {{--
     resources/views/components/back-button.blade.php
 
@@ -50,3 +51,13 @@
     - Fully responsive and accessible for assistive tech.
     - See prinsip-reka-bentuk-mygovea.md: Prinsip 1, 5, 6, 7, 15, 17.
 --}}
+=======
+@props(['route', 'text' => 'Kembali', 'icon' => 'ti-arrow-left']) {{-- Using Tabler Icon class --}}
+
+<a href="{{ $route }}" {{ $attributes->merge(['class' => 'btn btn-secondary inline-flex items-center text-sm']) }}>
+    <i class="ti {{ $icon }} {{ $text ? 'mr-1.5 -ml-0.5' : '' }} h-4 w-4"></i>
+    @if($text)
+        <span>{{ $text }}</span>
+    @endif
+</a>
+>>>>>>> 7940bed (feat: Standardize authorization policies, update service provider and models, and refine configuration for consistent role management and grade-based approvals; Refactor: Streamline notification system with generic classes and consolidations)
