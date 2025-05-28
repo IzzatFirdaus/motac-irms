@@ -136,7 +136,7 @@ var t,r,u,i,o=0,f=[],c=[],e=preact__WEBPACK_IMPORTED_MODULE_0__.options.__b,a=pr
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Calendar: function() { return /* binding */ Calendar; },
-/* harmony export */   JsonRequestError: function() { return /* reexport safe */ _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.ag; },
+/* harmony export */   JsonRequestError: function() { return /* reexport safe */ _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.ae; },
 /* harmony export */   createPlugin: function() { return /* binding */ createPlugin; },
 /* harmony export */   formatDate: function() { return /* binding */ formatDate; },
 /* harmony export */   formatRange: function() { return /* binding */ formatRange; },
@@ -607,6 +607,25 @@ function reduceViewType(viewType, action) {
             viewType = action.viewType;
     }
     return viewType;
+}
+
+function reduceCurrentDate(currentDate, action) {
+    switch (action.type) {
+        case 'CHANGE_DATE':
+            return action.dateMarker;
+        default:
+            return currentDate;
+    }
+}
+// should be initialized once and stay constant
+// this will change too
+function getInitialDate(options, dateEnv, nowManager) {
+    let initialDateInput = options.initialDate;
+    // compute the initial ambig-timezone date
+    if (initialDateInput != null) {
+        return dateEnv.createMarker(initialDateInput);
+    }
+    return nowManager.getDateMarker();
 }
 
 function reduceDynamicOptionOverrides(dynamicOptionOverrides, action) {
@@ -1118,6 +1137,7 @@ let recurring = {
                 endTime: refined.endTime || null,
                 startRecur: refined.startRecur ? dateEnv.createMarker(refined.startRecur) : null,
                 endRecur: refined.endRecur ? dateEnv.createMarker(refined.endRecur) : null,
+                dateEnv,
             };
             let duration;
             if (refined.duration) {
@@ -1137,7 +1157,7 @@ let recurring = {
     expand(typeData, framingRange, dateEnv) {
         let clippedFramingRange = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.o)(framingRange, { start: typeData.startRecur, end: typeData.endRecur });
         if (clippedFramingRange) {
-            return expandRanges(typeData.daysOfWeek, typeData.startTime, clippedFramingRange, dateEnv);
+            return expandRanges(typeData.daysOfWeek, typeData.startTime, typeData.dateEnv, dateEnv, clippedFramingRange);
         }
         return [];
     },
@@ -1147,7 +1167,7 @@ const simpleRecurringEventsPlugin = createPlugin({
     recurringTypes: [recurring],
     eventRefiners: SIMPLE_RECURRING_REFINERS,
 });
-function expandRanges(daysOfWeek, startTime, framingRange, dateEnv) {
+function expandRanges(daysOfWeek, startTime, eventDateEnv, calendarDateEnv, framingRange) {
     let dowHash = daysOfWeek ? (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.f)(daysOfWeek) : null;
     let dayMarker = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.q)(framingRange.start);
     let endMarker = framingRange.end;
@@ -1157,12 +1177,12 @@ function expandRanges(daysOfWeek, startTime, framingRange, dateEnv) {
         // if everyday, or this particular day-of-week
         if (!dowHash || dowHash[dayMarker.getUTCDay()]) {
             if (startTime) {
-                instanceStart = dateEnv.add(dayMarker, startTime);
+                instanceStart = calendarDateEnv.add(dayMarker, startTime);
             }
             else {
                 instanceStart = dayMarker;
             }
-            instanceStarts.push(instanceStart);
+            instanceStarts.push(calendarDateEnv.createMarker(eventDateEnv.toDate(instanceStart)));
         }
         dayMarker = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.t)(dayMarker, 1);
     }
@@ -1327,6 +1347,49 @@ function buildTitleFormat(dateProfile) {
     return { year: 'numeric', month: 'long', day: 'numeric' };
 }
 
+/*
+TODO: test switching timezones when NO timezone plugin
+*/
+class CalendarNowManager {
+    constructor() {
+        this.resetListeners = new Set();
+    }
+    handleInput(dateEnv, // will change if timezone setup changed
+    nowInput) {
+        const oldDateEnv = this.dateEnv;
+        if (dateEnv !== oldDateEnv) {
+            if (typeof nowInput === 'function') {
+                this.nowFn = nowInput;
+            }
+            else if (!oldDateEnv) { // first time?
+                this.nowAnchorDate = dateEnv.toDate(nowInput
+                    ? dateEnv.createMarker(nowInput)
+                    : dateEnv.createNowMarker());
+                this.nowAnchorQueried = Date.now();
+            }
+            this.dateEnv = dateEnv;
+            // not first time? fire reset handlers
+            if (oldDateEnv) {
+                for (const resetListener of this.resetListeners.values()) {
+                    resetListener();
+                }
+            }
+        }
+    }
+    getDateMarker() {
+        return this.nowAnchorDate
+            ? this.dateEnv.timestampToMarker(this.nowAnchorDate.valueOf() +
+                (Date.now() - this.nowAnchorQueried))
+            : this.dateEnv.createMarker(this.nowFn());
+    }
+    addResetListener(handler) {
+        this.resetListeners.add(handler);
+    }
+    removeResetListener(handler) {
+        this.resetListeners.delete(handler);
+    }
+}
+
 // in future refactor, do the redux-style function(state=initial) for initial-state
 // also, whatever is happening in constructor, have it happen in action queue too
 class CalendarDataManager {
@@ -1346,6 +1409,7 @@ class CalendarDataManager {
         this.buildEventUiBases = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.z)(buildEventUiBases);
         this.parseContextBusinessHours = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.A)(parseContextBusinessHours);
         this.buildTitle = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.z)(buildTitle);
+        this.nowManager = new CalendarNowManager();
         this.emitter = new _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.F();
         this.actionRunner = new TaskRunner(this._handleAction.bind(this), this.updateData.bind(this));
         this.currentCalendarOptionsInput = {};
@@ -1361,6 +1425,7 @@ class CalendarDataManager {
         };
         this.props = props;
         this.actionRunner.pause();
+        this.nowManager = new CalendarNowManager();
         let dynamicOptionOverrides = {};
         let optionsData = this.computeOptionsData(props.optionOverrides, dynamicOptionOverrides, props.calendarApi);
         let currentViewType = optionsData.calendarOptions.initialView || optionsData.pluginHooks.initialView;
@@ -1370,12 +1435,8 @@ class CalendarDataManager {
         props.calendarApi.currentDataManager = this;
         this.emitter.setThisContext(props.calendarApi);
         this.emitter.setOptions(currentViewData.options);
-        let currentDate = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.G)(optionsData.calendarOptions, optionsData.dateEnv);
-        let dateProfile = currentViewData.dateProfileGenerator.build(currentDate);
-        if (!(0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.H)(dateProfile.activeRange, currentDate)) {
-            currentDate = dateProfile.currentRange.start;
-        }
         let calendarContext = {
+            nowManager: this.nowManager,
             dateEnv: optionsData.dateEnv,
             options: optionsData.calendarOptions,
             pluginHooks: optionsData.pluginHooks,
@@ -1384,6 +1445,11 @@ class CalendarDataManager {
             emitter: this.emitter,
             getCurrentData: this.getCurrentData,
         };
+        let currentDate = getInitialDate(optionsData.calendarOptions, optionsData.dateEnv, this.nowManager);
+        let dateProfile = currentViewData.dateProfileGenerator.build(currentDate);
+        if (!(0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.G)(dateProfile.activeRange, currentDate)) {
+            currentDate = dateProfile.currentRange.start;
+        }
         // needs to be after setThisContext
         for (let callback of optionsData.pluginHooks.contextInit) {
             callback(calendarContext);
@@ -1398,8 +1464,8 @@ class CalendarDataManager {
             businessHours: this.parseContextBusinessHours(calendarContext),
             eventSources,
             eventUiBases: {},
-            eventStore: (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.I)(),
-            renderableEventStore: (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.I)(),
+            eventStore: (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.H)(),
+            renderableEventStore: (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.H)(),
             dateSelection: null,
             eventSelection: '',
             eventDrag: null,
@@ -1444,6 +1510,7 @@ class CalendarDataManager {
         emitter.setThisContext(props.calendarApi);
         emitter.setOptions(currentViewData.options);
         let calendarContext = {
+            nowManager: this.nowManager,
             dateEnv: optionsData.dateEnv,
             options: optionsData.calendarOptions,
             pluginHooks: optionsData.pluginHooks,
@@ -1456,15 +1523,15 @@ class CalendarDataManager {
         if (this.data && this.data.dateProfileGenerator !== currentViewData.dateProfileGenerator) { // hack
             dateProfile = currentViewData.dateProfileGenerator.build(currentDate);
         }
-        currentDate = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.J)(currentDate, action);
+        currentDate = reduceCurrentDate(currentDate, action);
         dateProfile = reduceDateProfile(dateProfile, action, currentDate, currentViewData.dateProfileGenerator);
         if (action.type === 'PREV' || // TODO: move this logic into DateProfileGenerator
             action.type === 'NEXT' || // "
-            !(0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.H)(dateProfile.currentRange, currentDate)) {
+            !(0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.G)(dateProfile.currentRange, currentDate)) {
             currentDate = dateProfile.currentRange.start;
         }
         let eventSources = reduceEventSources(state.eventSources, action, dateProfile, calendarContext);
-        let eventStore = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.K)(state.eventStore, action, eventSources, dateProfile, calendarContext);
+        let eventStore = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.I)(state.eventStore, action, eventSources, dateProfile, calendarContext);
         let isEventsLoading = computeEventSourcesLoading(eventSources); // BAD. also called in this func in computeIsLoading
         let renderableEventStore = (isEventsLoading && !currentViewData.options.progressiveEventRendering) ?
             (state.renderableEventStore || eventStore) : // try from previous state
@@ -1511,7 +1578,7 @@ class CalendarDataManager {
         let oldData = this.data;
         let optionsData = this.computeOptionsData(props.optionOverrides, state.dynamicOptionOverrides, props.calendarApi);
         let currentViewData = this.computeCurrentViewData(state.currentViewType, optionsData, props.optionOverrides, state.dynamicOptionOverrides);
-        let data = this.data = Object.assign(Object.assign(Object.assign({ viewTitle: this.buildTitle(state.dateProfile, currentViewData.options, optionsData.dateEnv), calendarApi: props.calendarApi, dispatch: this.dispatch, emitter: this.emitter, getCurrentData: this.getCurrentData }, optionsData), currentViewData), state);
+        let data = this.data = Object.assign(Object.assign(Object.assign({ nowManager: this.nowManager, viewTitle: this.buildTitle(state.dateProfile, currentViewData.options, optionsData.dateEnv), calendarApi: props.calendarApi, dispatch: this.dispatch, emitter: this.emitter, getCurrentData: this.getCurrentData }, optionsData), currentViewData), state);
         let changeHandlers = optionsData.pluginHooks.optionChangeHandlers;
         let oldCalendarOptions = oldData && oldData.calendarOptions;
         let newCalendarOptions = optionsData.calendarOptions;
@@ -1519,8 +1586,8 @@ class CalendarDataManager {
             if (oldCalendarOptions.timeZone !== newCalendarOptions.timeZone) {
                 // hack
                 state.eventSources = data.eventSources = reduceEventSourcesNewTimeZone(data.eventSources, state.dateProfile, data);
-                state.eventStore = data.eventStore = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.L)(data.eventStore, oldData.dateEnv, data.dateEnv);
-                state.renderableEventStore = data.renderableEventStore = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.L)(data.renderableEventStore, oldData.dateEnv, data.dateEnv);
+                state.eventStore = data.eventStore = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.J)(data.eventStore, oldData.dateEnv, data.dateEnv);
+                state.renderableEventStore = data.renderableEventStore = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.J)(data.renderableEventStore, oldData.dateEnv, data.dateEnv);
             }
             for (let optionName in changeHandlers) {
                 if (this.optionsForHandling.indexOf(optionName) !== -1 ||
@@ -1560,7 +1627,7 @@ class CalendarDataManager {
     }
     // always called from behind a memoizer
     processRawCalendarOptions(optionOverrides, dynamicOptionOverrides) {
-        let { locales, locale } = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.M)([
+        let { locales, locale } = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.K)([
             _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.e,
             optionOverrides,
             dynamicOptionOverrides,
@@ -1569,9 +1636,9 @@ class CalendarDataManager {
         let availableRawLocales = availableLocaleData.map;
         let localeDefaults = this.buildLocale(locale || availableLocaleData.defaultCode, availableRawLocales).options;
         let pluginHooks = this.buildPluginHooks(optionOverrides.plugins || [], globalPlugins);
-        let refiners = this.currentCalendarOptionsRefiners = Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({}, _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.N), _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.O), _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.P), pluginHooks.listenerRefiners), pluginHooks.optionRefiners);
+        let refiners = this.currentCalendarOptionsRefiners = Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({}, _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.L), _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.M), _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.N), pluginHooks.listenerRefiners), pluginHooks.optionRefiners);
         let extra = {};
-        let raw = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.M)([
+        let raw = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.K)([
             _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.e,
             localeDefaults,
             optionOverrides,
@@ -1582,9 +1649,9 @@ class CalendarDataManager {
         let currentRefined = this.currentCalendarOptionsRefined;
         let anyChanges = false;
         for (let optionName in raw) {
-            if (this.optionsForRefining.indexOf(optionName) === -1 && (raw[optionName] === currentRaw[optionName] || (_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.Q[optionName] &&
+            if (this.optionsForRefining.indexOf(optionName) === -1 && (raw[optionName] === currentRaw[optionName] || (_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.O[optionName] &&
                 (optionName in currentRaw) &&
-                _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.Q[optionName](currentRaw[optionName], raw[optionName])))) {
+                _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.O[optionName](currentRaw[optionName], raw[optionName])))) {
                 refined[optionName] = currentRefined[optionName];
             }
             else if (refiners[optionName]) {
@@ -1619,8 +1686,10 @@ class CalendarDataManager {
         }
         let { refinedOptions, extra } = this.processRawViewOptions(viewSpec, optionsData.pluginHooks, optionsData.localeDefaults, optionOverrides, dynamicOptionOverrides);
         warnUnknownOptions(extra);
+        this.nowManager.handleInput(optionsData.dateEnv, refinedOptions.now);
         let dateProfileGenerator = this.buildDateProfileGenerator({
             dateProfileGeneratorClass: viewSpec.optionDefaults.dateProfileGeneratorClass,
+            nowManager: this.nowManager,
             duration: viewSpec.duration,
             durationUnit: viewSpec.durationUnit,
             usesMinMaxTime: viewSpec.optionDefaults.usesMinMaxTime,
@@ -1634,7 +1703,6 @@ class CalendarDataManager {
             dateIncrement: refinedOptions.dateIncrement,
             hiddenDays: refinedOptions.hiddenDays,
             weekends: refinedOptions.weekends,
-            nowInput: refinedOptions.now,
             validRangeInput: refinedOptions.validRange,
             visibleRangeInput: refinedOptions.visibleRange,
             fixedWeekCount: refinedOptions.fixedWeekCount,
@@ -1643,7 +1711,7 @@ class CalendarDataManager {
         return { viewSpec, options: refinedOptions, dateProfileGenerator, viewApi };
     }
     processRawViewOptions(viewSpec, pluginHooks, localeDefaults, optionOverrides, dynamicOptionOverrides) {
-        let raw = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.M)([
+        let raw = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.K)([
             _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.e,
             viewSpec.optionDefaults,
             localeDefaults,
@@ -1651,7 +1719,7 @@ class CalendarDataManager {
             viewSpec.optionOverrides,
             dynamicOptionOverrides,
         ]);
-        let refiners = Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({}, _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.N), _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.O), _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.P), _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.R), pluginHooks.listenerRefiners), pluginHooks.optionRefiners);
+        let refiners = Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({}, _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.L), _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.M), _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.N), _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.P), pluginHooks.listenerRefiners), pluginHooks.optionRefiners);
         let refined = {};
         let currentRaw = this.currentViewOptionsInput;
         let currentRefined = this.currentViewOptionsRefined;
@@ -1659,14 +1727,14 @@ class CalendarDataManager {
         let extra = {};
         for (let optionName in raw) {
             if (raw[optionName] === currentRaw[optionName] ||
-                (_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.Q[optionName] &&
-                    _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.Q[optionName](raw[optionName], currentRaw[optionName]))) {
+                (_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.O[optionName] &&
+                    _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.O[optionName](raw[optionName], currentRaw[optionName]))) {
                 refined[optionName] = currentRefined[optionName];
             }
             else {
                 if (raw[optionName] === this.currentCalendarOptionsInput[optionName] ||
-                    (_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.Q[optionName] &&
-                        _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.Q[optionName](raw[optionName], this.currentCalendarOptionsInput[optionName]))) {
+                    (_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.O[optionName] &&
+                        _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.O[optionName](raw[optionName], this.currentCalendarOptionsInput[optionName]))) {
                     if (optionName in this.currentCalendarOptionsRefined) { // might be an "extra" prop
                         refined[optionName] = this.currentCalendarOptionsRefined[optionName];
                     }
@@ -1693,7 +1761,7 @@ class CalendarDataManager {
 }
 function buildDateEnv$1(timeZone, explicitLocale, weekNumberCalculation, firstDay, weekText, pluginHooks, availableLocaleData, defaultSeparator) {
     let locale = buildLocale(explicitLocale || availableLocaleData.defaultCode, availableLocaleData.map);
-    return new _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.S({
+    return new _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.Q({
         calendarSystem: 'gregory',
         timeZone,
         namedTimeZoneImpl: pluginHooks.namedTimeZonedImpl,
@@ -1710,7 +1778,7 @@ function buildTheme(options, pluginHooks) {
     return new ThemeClass(options);
 }
 function buildDateProfileGenerator(props) {
-    let DateProfileGeneratorClass = props.dateProfileGeneratorClass || _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.U;
+    let DateProfileGeneratorClass = props.dateProfileGeneratorClass || _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.R;
     return new DateProfileGeneratorClass(props);
 }
 function buildViewApi(type, getCurrentData, dateEnv) {
@@ -1732,7 +1800,7 @@ function buildEventUiBases(eventDefs, eventUiSingleBase, eventUiBySource) {
 function buildViewUiProps(calendarContext) {
     let { options } = calendarContext;
     return {
-        eventUiSingleBase: (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.W)({
+        eventUiSingleBase: (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.S)({
             display: options.eventDisplay,
             editable: options.editable,
             startEditable: options.eventStartEditable,
@@ -1746,7 +1814,7 @@ function buildViewUiProps(calendarContext) {
             color: options.eventColor,
             // classNames: options.eventClassNames // render hook will handle this
         }, calendarContext),
-        selectionConfig: (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.W)({
+        selectionConfig: (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.S)({
             constraint: options.selectConstraint,
             overlap: typeof options.selectOverlap === 'boolean' ? options.selectOverlap : undefined,
             allow: options.selectAllow,
@@ -1762,7 +1830,7 @@ function computeIsLoading(state, context) {
     return false;
 }
 function parseContextBusinessHours(calendarContext) {
-    return (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.X)(calendarContext.options.businessHours, calendarContext);
+    return (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.U)(calendarContext.options.businessHours, calendarContext);
 }
 function warnUnknownOptions(options, viewName) {
     for (let optionName in options) {
@@ -1796,7 +1864,7 @@ class ToolbarSection extends _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.B 
                 if (isPressed) {
                     buttonClasses.push(theme.getClass('buttonActive'));
                 }
-                children.push((0,preact__WEBPACK_IMPORTED_MODULE_1__.createElement)("button", { type: "button", title: typeof buttonHint === 'function' ? buttonHint(props.navUnit) : buttonHint, disabled: isDisabled, "aria-pressed": isPressed, className: buttonClasses.join(' '), onClick: buttonClick }, buttonText || (buttonIcon ? (0,preact__WEBPACK_IMPORTED_MODULE_1__.createElement)("span", { className: buttonIcon }) : '')));
+                children.push((0,preact__WEBPACK_IMPORTED_MODULE_1__.createElement)("button", { type: "button", title: typeof buttonHint === 'function' ? buttonHint(props.navUnit) : buttonHint, disabled: isDisabled, "aria-pressed": isPressed, className: buttonClasses.join(' '), onClick: buttonClick }, buttonText || (buttonIcon ? (0,preact__WEBPACK_IMPORTED_MODULE_1__.createElement)("span", { className: buttonIcon, role: "img" }) : '')));
             }
         }
         if (children.length > 1) {
@@ -1853,7 +1921,7 @@ class ViewHarness extends _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.B {
         };
         this.handleEl = (el) => {
             this.el = el;
-            (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.Y)(this.props.elRef, el);
+            (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.W)(this.props.elRef, el);
             this.updateAvailableWidth();
         };
         this.handleResize = () => {
@@ -1906,22 +1974,22 @@ class ViewHarness extends _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.B {
 /*
 Detects when the user clicks on an event within a DateComponent
 */
-class EventClicking extends _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.Z {
+class EventClicking extends _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.X {
     constructor(settings) {
         super(settings);
         this.handleSegClick = (ev, segEl) => {
             let { component } = this;
             let { context } = component;
-            let seg = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__._)(segEl);
+            let seg = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.Y)(segEl);
             if (seg && // might be the <div> surrounding the more link
                 component.isValidSegDownEl(ev.target)) {
                 // our way to simulate a link click for elements that can't be <a> tags
                 // grab before trigger fired in case trigger trashes DOM thru rerendering
-                let hasUrlContainer = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.$)(ev.target, '.fc-event-forced-url');
+                let hasUrlContainer = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.Z)(ev.target, '.fc-event-forced-url');
                 let url = hasUrlContainer ? hasUrlContainer.querySelector('a[href]').href : '';
                 context.emitter.trigger('eventClick', {
                     el: segEl,
-                    event: new _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a0(component.context, seg.eventRange.def, seg.eventRange.instance),
+                    event: new _internal_common_js__WEBPACK_IMPORTED_MODULE_0__._(component.context, seg.eventRange.def, seg.eventRange.instance),
                     jsEvent: ev,
                     view: context.viewApi,
                 });
@@ -1930,7 +1998,7 @@ class EventClicking extends _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.Z {
                 }
             }
         };
-        this.destroy = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a1)(settings.el, 'click', '.fc-event', // on both fg and bg events
+        this.destroy = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.$)(settings.el, 'click', '.fc-event', // on both fg and bg events
         this.handleSegClick);
     }
 }
@@ -1939,7 +2007,7 @@ class EventClicking extends _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.Z {
 Triggers events and adds/removes core classNames when the user's pointer
 enters/leaves event-elements of a component.
 */
-class EventHovering extends _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.Z {
+class EventHovering extends _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.X {
     constructor(settings) {
         super(settings);
         // for simulating an eventMouseLeave when the event el is destroyed while mouse is over it
@@ -1949,7 +2017,7 @@ class EventHovering extends _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.Z {
             }
         };
         this.handleSegEnter = (ev, segEl) => {
-            if ((0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__._)(segEl)) { // TODO: better way to make sure not hovering over more+ link or its wrapper
+            if ((0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.Y)(segEl)) { // TODO: better way to make sure not hovering over more+ link or its wrapper
                 this.currentSegEl = segEl;
                 this.triggerEvent('eventMouseEnter', ev, segEl);
             }
@@ -1960,7 +2028,7 @@ class EventHovering extends _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.Z {
                 this.triggerEvent('eventMouseLeave', ev, segEl);
             }
         };
-        this.removeHoverListeners = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a2)(settings.el, '.fc-event', // on both fg and bg events
+        this.removeHoverListeners = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a0)(settings.el, '.fc-event', // on both fg and bg events
         this.handleSegEnter, this.handleSegLeave);
     }
     destroy() {
@@ -1969,11 +2037,11 @@ class EventHovering extends _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.Z {
     triggerEvent(publicEvName, ev, segEl) {
         let { component } = this;
         let { context } = component;
-        let seg = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__._)(segEl);
+        let seg = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.Y)(segEl);
         if (!ev || component.isValidSegDownEl(ev.target)) {
             context.emitter.trigger(publicEvName, {
                 el: segEl,
-                event: new _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a0(context, seg.eventRange.def, seg.eventRange.instance),
+                event: new _internal_common_js__WEBPACK_IMPORTED_MODULE_0__._(context, seg.eventRange.def, seg.eventRange.instance),
                 jsEvent: ev,
                 view: context.viewApi,
             });
@@ -1981,10 +2049,10 @@ class EventHovering extends _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.Z {
     }
 }
 
-class CalendarContent extends _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a3 {
+class CalendarContent extends _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a1 {
     constructor() {
         super(...arguments);
-        this.buildViewContext = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.z)(_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a4);
+        this.buildViewContext = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.z)(_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a2);
         this.buildViewPropTransformers = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.z)(buildViewPropTransformers);
         this.buildToolbarProps = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.z)(buildToolbarProps);
         this.headerRef = (0,preact__WEBPACK_IMPORTED_MODULE_1__.createRef)();
@@ -1992,12 +2060,12 @@ class CalendarContent extends _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a
         this.interactionsStore = {};
         // eslint-disable-next-line
         this.state = {
-            viewLabelId: (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a5)(),
+            viewLabelId: (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a3)(),
         };
         // Component Registration
         // -----------------------------------------------------------------------------------------------------------------
         this.registerInteractiveComponent = (component, settingsInput) => {
-            let settings = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a6)(component, settingsInput);
+            let settings = (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a4)(component, settingsInput);
             let DEFAULT_INTERACTIONS = [
                 EventClicking,
                 EventHovering,
@@ -2005,7 +2073,7 @@ class CalendarContent extends _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a
             let interactionClasses = DEFAULT_INTERACTIONS.concat(this.props.pluginHooks.componentInteractions);
             let interactions = interactionClasses.map((TheInteractionClass) => new TheInteractionClass(settings));
             this.interactionsStore[component.uid] = interactions;
-            _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a7[component.uid] = settings;
+            _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a5[component.uid] = settings;
         };
         this.unregisterInteractiveComponent = (component) => {
             let listeners = this.interactionsStore[component.uid];
@@ -2015,7 +2083,7 @@ class CalendarContent extends _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a
                 }
                 delete this.interactionsStore[component.uid];
             }
-            delete _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a7[component.uid];
+            delete _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a5[component.uid];
         };
         // Resizing
         // -----------------------------------------------------------------------------------------------------------------
@@ -2038,8 +2106,6 @@ class CalendarContent extends _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a
     render() {
         let { props } = this;
         let { toolbarConfig, options } = props;
-        let toolbarProps = this.buildToolbarProps(props.viewSpec, props.dateProfile, props.dateProfileGenerator, props.currentDate, (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a8)(props.options.now, props.dateEnv), // TODO: use NowTimer????
-        props.viewTitle);
         let viewVGrow = false;
         let viewHeight = '';
         let viewAspectRatio;
@@ -2055,16 +2121,20 @@ class CalendarContent extends _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a
         else {
             viewAspectRatio = Math.max(options.aspectRatio, 0.5); // prevent from getting too tall
         }
-        let viewContext = this.buildViewContext(props.viewSpec, props.viewApi, props.options, props.dateProfileGenerator, props.dateEnv, props.theme, props.pluginHooks, props.dispatch, props.getCurrentData, props.emitter, props.calendarApi, this.registerInteractiveComponent, this.unregisterInteractiveComponent);
+        let viewContext = this.buildViewContext(props.viewSpec, props.viewApi, props.options, props.dateProfileGenerator, props.dateEnv, props.nowManager, props.theme, props.pluginHooks, props.dispatch, props.getCurrentData, props.emitter, props.calendarApi, this.registerInteractiveComponent, this.unregisterInteractiveComponent);
         let viewLabelId = (toolbarConfig.header && toolbarConfig.header.hasTitle)
             ? this.state.viewLabelId
-            : '';
+            : undefined;
         return ((0,preact__WEBPACK_IMPORTED_MODULE_1__.createElement)(_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.V.Provider, { value: viewContext },
-            toolbarConfig.header && ((0,preact__WEBPACK_IMPORTED_MODULE_1__.createElement)(Toolbar, Object.assign({ ref: this.headerRef, extraClassName: "fc-header-toolbar", model: toolbarConfig.header, titleId: viewLabelId }, toolbarProps))),
-            (0,preact__WEBPACK_IMPORTED_MODULE_1__.createElement)(ViewHarness, { liquid: viewVGrow, height: viewHeight, aspectRatio: viewAspectRatio, labeledById: viewLabelId },
-                this.renderView(props),
-                this.buildAppendContent()),
-            toolbarConfig.footer && ((0,preact__WEBPACK_IMPORTED_MODULE_1__.createElement)(Toolbar, Object.assign({ ref: this.footerRef, extraClassName: "fc-footer-toolbar", model: toolbarConfig.footer, titleId: "" }, toolbarProps)))));
+            (0,preact__WEBPACK_IMPORTED_MODULE_1__.createElement)(_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a6, { unit: "day" }, (nowDate) => {
+                let toolbarProps = this.buildToolbarProps(props.viewSpec, props.dateProfile, props.dateProfileGenerator, props.currentDate, nowDate, props.viewTitle);
+                return ((0,preact__WEBPACK_IMPORTED_MODULE_1__.createElement)(preact__WEBPACK_IMPORTED_MODULE_1__.Fragment, null,
+                    toolbarConfig.header && ((0,preact__WEBPACK_IMPORTED_MODULE_1__.createElement)(Toolbar, Object.assign({ ref: this.headerRef, extraClassName: "fc-header-toolbar", model: toolbarConfig.header, titleId: viewLabelId }, toolbarProps))),
+                    (0,preact__WEBPACK_IMPORTED_MODULE_1__.createElement)(ViewHarness, { liquid: viewVGrow, height: viewHeight, aspectRatio: viewAspectRatio, labeledById: viewLabelId },
+                        this.renderView(props),
+                        this.buildAppendContent()),
+                    toolbarConfig.footer && ((0,preact__WEBPACK_IMPORTED_MODULE_1__.createElement)(Toolbar, Object.assign({ ref: this.footerRef, extraClassName: "fc-footer-toolbar", model: toolbarConfig.footer, titleId: "" }, toolbarProps)))));
+            })));
     }
     componentDidMount() {
         let { props } = this;
@@ -2130,7 +2200,7 @@ function buildToolbarProps(viewSpec, dateProfile, dateProfileGenerator, currentD
         title,
         activeButton: viewSpec.type,
         navUnit: viewSpec.singleUnit,
-        isTodayEnabled: todayInfo.isValid && !(0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.H)(dateProfile.currentRange, now),
+        isTodayEnabled: todayInfo.isValid && !(0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.G)(dateProfile.currentRange, now),
         isPrevEnabled: prevInfo.isValid,
         isNextEnabled: nextInfo.isValid,
     };
@@ -2141,7 +2211,7 @@ function buildViewPropTransformers(theClasses) {
     return theClasses.map((TheClass) => new TheClass());
 }
 
-class Calendar extends _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a9 {
+class Calendar extends _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a7 {
     constructor(el, optionOverrides = {}) {
         super();
         this.isRendering = false;
@@ -2164,11 +2234,11 @@ class Calendar extends _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a9 {
             if (this.isRendering) {
                 this.isRendered = true;
                 let { currentData } = this;
-                (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.aa)(() => {
-                    (0,preact__WEBPACK_IMPORTED_MODULE_1__.render)((0,preact__WEBPACK_IMPORTED_MODULE_1__.createElement)(_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.ab, { options: currentData.calendarOptions, theme: currentData.theme, emitter: currentData.emitter }, (classNames, height, isHeightAuto, forPrint) => {
+                (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a8)(() => {
+                    (0,preact__WEBPACK_IMPORTED_MODULE_1__.render)((0,preact__WEBPACK_IMPORTED_MODULE_1__.createElement)(_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a9, { options: currentData.calendarOptions, theme: currentData.theme, emitter: currentData.emitter }, (classNames, height, isHeightAuto, forPrint) => {
                         this.setClassNames(classNames);
                         this.setHeight(height);
-                        return ((0,preact__WEBPACK_IMPORTED_MODULE_1__.createElement)(_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.ac.Provider, { value: this.customContentRenderId },
+                        return ((0,preact__WEBPACK_IMPORTED_MODULE_1__.createElement)(_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.aa.Provider, { value: this.customContentRenderId },
                             (0,preact__WEBPACK_IMPORTED_MODULE_1__.createElement)(CalendarContent, Object.assign({ isHeightAuto: isHeightAuto, forPrint: forPrint }, currentData))));
                     }), this.el);
                 });
@@ -2180,7 +2250,7 @@ class Calendar extends _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a9 {
                 this.setHeight('');
             }
         };
-        (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.ad)(el);
+        (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.ab)(el);
         this.el = el;
         this.renderRunner = new _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.D(this.handleRenderRequest);
         new CalendarDataManager({
@@ -2210,7 +2280,7 @@ class Calendar extends _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a9 {
         }
     }
     updateSize() {
-        (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.aa)(() => {
+        (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a8)(() => {
             super.updateSize();
         });
     }
@@ -2241,7 +2311,7 @@ class Calendar extends _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.a9 {
         }
     }
     setHeight(height) {
-        (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.ae)(this.el, 'height', height);
+        (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.ac)(this.el, 'height', height);
     }
 }
 
@@ -2274,7 +2344,7 @@ function formatRange(startInput, endInput, options) {
 // TODO: more DRY and optimized
 function buildDateEnv(settings) {
     let locale = buildLocale(settings.locale || 'en', organizeRawLocales([]).map); // TODO: don't hardcode 'en' everywhere
-    return new _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.S(Object.assign(Object.assign({ timeZone: _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.e.timeZone, calendarSystem: 'gregory' }, settings), { locale }));
+    return new _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.Q(Object.assign(Object.assign({ timeZone: _internal_common_js__WEBPACK_IMPORTED_MODULE_0__.e.timeZone, calendarSystem: 'gregory' }, settings), { locale }));
 }
 
 // HELPERS
@@ -2283,10 +2353,10 @@ if nextDayThreshold is specified, slicing is done in an all-day fashion.
 you can get nextDayThreshold from context.nextDayThreshold
 */
 function sliceEvents(props, allDay) {
-    return (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.af)(props.eventStore, props.eventUiBases, props.dateProfile.activeRange, allDay ? props.nextDayThreshold : null).fg;
+    return (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.ad)(props.eventStore, props.eventUiBases, props.dateProfile.activeRange, allDay ? props.nextDayThreshold : null).fg;
 }
 
-const version = '6.1.8';
+const version = '6.1.17';
 
 
 
@@ -2301,200 +2371,197 @@ const version = '6.1.8';
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   $: function() { return /* binding */ elementClosest; },
+/* harmony export */   $: function() { return /* binding */ listenBySelector; },
 /* harmony export */   A: function() { return /* binding */ memoizeObjArg; },
 /* harmony export */   B: function() { return /* binding */ BaseComponent; },
 /* harmony export */   C: function() { return /* binding */ ContentContainer; },
 /* harmony export */   D: function() { return /* binding */ DelayedRunner; },
 /* harmony export */   E: function() { return /* binding */ isPropsEqual; },
 /* harmony export */   F: function() { return /* binding */ Emitter; },
-/* harmony export */   G: function() { return /* binding */ getInitialDate; },
-/* harmony export */   H: function() { return /* binding */ rangeContainsMarker; },
-/* harmony export */   I: function() { return /* binding */ createEmptyEventStore; },
-/* harmony export */   J: function() { return /* binding */ reduceCurrentDate; },
-/* harmony export */   K: function() { return /* binding */ reduceEventStore; },
-/* harmony export */   L: function() { return /* binding */ rezoneEventStoreDates; },
-/* harmony export */   M: function() { return /* binding */ mergeRawOptions; },
-/* harmony export */   N: function() { return /* binding */ BASE_OPTION_REFINERS; },
-/* harmony export */   O: function() { return /* binding */ CALENDAR_LISTENER_REFINERS; },
-/* harmony export */   P: function() { return /* binding */ CALENDAR_OPTION_REFINERS; },
-/* harmony export */   Q: function() { return /* binding */ COMPLEX_OPTION_COMPARATORS; },
-/* harmony export */   R: function() { return /* binding */ VIEW_OPTION_REFINERS; },
-/* harmony export */   S: function() { return /* binding */ DateEnv; },
+/* harmony export */   G: function() { return /* binding */ rangeContainsMarker; },
+/* harmony export */   H: function() { return /* binding */ createEmptyEventStore; },
+/* harmony export */   I: function() { return /* binding */ reduceEventStore; },
+/* harmony export */   J: function() { return /* binding */ rezoneEventStoreDates; },
+/* harmony export */   K: function() { return /* binding */ mergeRawOptions; },
+/* harmony export */   L: function() { return /* binding */ BASE_OPTION_REFINERS; },
+/* harmony export */   M: function() { return /* binding */ CALENDAR_LISTENER_REFINERS; },
+/* harmony export */   N: function() { return /* binding */ CALENDAR_OPTION_REFINERS; },
+/* harmony export */   O: function() { return /* binding */ COMPLEX_OPTION_COMPARATORS; },
+/* harmony export */   P: function() { return /* binding */ VIEW_OPTION_REFINERS; },
+/* harmony export */   Q: function() { return /* binding */ DateEnv; },
+/* harmony export */   R: function() { return /* binding */ DateProfileGenerator; },
+/* harmony export */   S: function() { return /* binding */ createEventUi; },
 /* harmony export */   T: function() { return /* binding */ Theme; },
-/* harmony export */   U: function() { return /* binding */ DateProfileGenerator; },
+/* harmony export */   U: function() { return /* binding */ parseBusinessHours; },
 /* harmony export */   V: function() { return /* binding */ ViewContextType; },
-/* harmony export */   W: function() { return /* binding */ createEventUi; },
-/* harmony export */   X: function() { return /* binding */ parseBusinessHours; },
-/* harmony export */   Y: function() { return /* binding */ setRef; },
-/* harmony export */   Z: function() { return /* binding */ Interaction; },
-/* harmony export */   _: function() { return /* binding */ getElSeg; },
+/* harmony export */   W: function() { return /* binding */ setRef; },
+/* harmony export */   X: function() { return /* binding */ Interaction; },
+/* harmony export */   Y: function() { return /* binding */ getElSeg; },
+/* harmony export */   Z: function() { return /* binding */ elementClosest; },
+/* harmony export */   _: function() { return /* binding */ EventImpl; },
 /* harmony export */   a: function() { return /* binding */ mapHash; },
-/* harmony export */   a$: function() { return /* binding */ getSlotClassNames; },
-/* harmony export */   a0: function() { return /* binding */ EventImpl; },
-/* harmony export */   a1: function() { return /* binding */ listenBySelector; },
-/* harmony export */   a2: function() { return /* binding */ listenToHoverBySelector; },
-/* harmony export */   a3: function() { return /* binding */ PureComponent; },
-/* harmony export */   a4: function() { return /* binding */ buildViewContext; },
-/* harmony export */   a5: function() { return /* binding */ getUniqueDomId; },
-/* harmony export */   a6: function() { return /* binding */ parseInteractionSettings; },
-/* harmony export */   a7: function() { return /* binding */ interactionSettingsStore; },
-/* harmony export */   a8: function() { return /* binding */ getNow; },
-/* harmony export */   a9: function() { return /* binding */ CalendarImpl; },
-/* harmony export */   aA: function() { return /* binding */ diffDates; },
-/* harmony export */   aB: function() { return /* binding */ removeExact; },
-/* harmony export */   aC: function() { return /* binding */ memoizeArraylike; },
-/* harmony export */   aD: function() { return /* binding */ memoizeHashlike; },
-/* harmony export */   aE: function() { return /* binding */ intersectRects; },
-/* harmony export */   aF: function() { return /* binding */ pointInsideRect; },
-/* harmony export */   aG: function() { return /* binding */ constrainPoint; },
-/* harmony export */   aH: function() { return /* binding */ getRectCenter; },
-/* harmony export */   aI: function() { return /* binding */ diffPoints; },
-/* harmony export */   aJ: function() { return /* binding */ translateRect; },
-/* harmony export */   aK: function() { return /* binding */ compareObjs; },
-/* harmony export */   aL: function() { return /* binding */ collectFromHash; },
-/* harmony export */   aM: function() { return /* binding */ findElements; },
-/* harmony export */   aN: function() { return /* binding */ findDirectChildren; },
-/* harmony export */   aO: function() { return /* binding */ removeElement; },
-/* harmony export */   aP: function() { return /* binding */ applyStyle; },
-/* harmony export */   aQ: function() { return /* binding */ elementMatches; },
-/* harmony export */   aR: function() { return /* binding */ getEventTargetViaRoot; },
-/* harmony export */   aS: function() { return /* binding */ parseClassNames; },
-/* harmony export */   aT: function() { return /* binding */ getCanVGrowWithinCell; },
-/* harmony export */   aU: function() { return /* binding */ mergeEventStores; },
-/* harmony export */   aV: function() { return /* binding */ getRelevantEvents; },
-/* harmony export */   aW: function() { return /* binding */ eventTupleToStore; },
-/* harmony export */   aX: function() { return /* binding */ combineEventUis; },
-/* harmony export */   aY: function() { return /* binding */ Splitter; },
-/* harmony export */   aZ: function() { return /* binding */ getDayClassNames; },
-/* harmony export */   a_: function() { return /* binding */ getDateMeta; },
-/* harmony export */   aa: function() { return /* binding */ flushSync; },
-/* harmony export */   ab: function() { return /* binding */ CalendarRoot; },
-/* harmony export */   ac: function() { return /* binding */ RenderId; },
-/* harmony export */   ad: function() { return /* binding */ ensureElHasStyles; },
-/* harmony export */   ae: function() { return /* binding */ applyStyleProp; },
-/* harmony export */   af: function() { return /* binding */ sliceEventStore; },
-/* harmony export */   ag: function() { return /* binding */ JsonRequestError; },
-/* harmony export */   ah: function() { return /* binding */ createContext; },
-/* harmony export */   ai: function() { return /* binding */ refineProps; },
-/* harmony export */   aj: function() { return /* binding */ createEventInstance; },
-/* harmony export */   ak: function() { return /* binding */ parseEventDef; },
-/* harmony export */   al: function() { return /* binding */ refineEventDef; },
-/* harmony export */   am: function() { return /* binding */ padStart; },
-/* harmony export */   an: function() { return /* binding */ isInt; },
-/* harmony export */   ao: function() { return /* binding */ parseFieldSpecs; },
-/* harmony export */   ap: function() { return /* binding */ compareByFieldSpecs; },
-/* harmony export */   aq: function() { return /* binding */ flexibleCompare; },
-/* harmony export */   ar: function() { return /* binding */ preventSelection; },
-/* harmony export */   as: function() { return /* binding */ allowSelection; },
-/* harmony export */   at: function() { return /* binding */ preventContextMenu; },
-/* harmony export */   au: function() { return /* binding */ allowContextMenu; },
-/* harmony export */   av: function() { return /* binding */ compareNumbers; },
-/* harmony export */   aw: function() { return /* binding */ enableCursor; },
-/* harmony export */   ax: function() { return /* binding */ disableCursor; },
-/* harmony export */   ay: function() { return /* binding */ computeVisibleDayRange; },
-/* harmony export */   az: function() { return /* binding */ isMultiDayRange; },
+/* harmony export */   a$: function() { return /* binding */ preventDefault; },
+/* harmony export */   a0: function() { return /* binding */ listenToHoverBySelector; },
+/* harmony export */   a1: function() { return /* binding */ PureComponent; },
+/* harmony export */   a2: function() { return /* binding */ buildViewContext; },
+/* harmony export */   a3: function() { return /* binding */ getUniqueDomId; },
+/* harmony export */   a4: function() { return /* binding */ parseInteractionSettings; },
+/* harmony export */   a5: function() { return /* binding */ interactionSettingsStore; },
+/* harmony export */   a6: function() { return /* binding */ NowTimer; },
+/* harmony export */   a7: function() { return /* binding */ CalendarImpl; },
+/* harmony export */   a8: function() { return /* binding */ flushSync; },
+/* harmony export */   a9: function() { return /* binding */ CalendarRoot; },
+/* harmony export */   aA: function() { return /* binding */ memoizeArraylike; },
+/* harmony export */   aB: function() { return /* binding */ memoizeHashlike; },
+/* harmony export */   aC: function() { return /* binding */ intersectRects; },
+/* harmony export */   aD: function() { return /* binding */ pointInsideRect; },
+/* harmony export */   aE: function() { return /* binding */ constrainPoint; },
+/* harmony export */   aF: function() { return /* binding */ getRectCenter; },
+/* harmony export */   aG: function() { return /* binding */ diffPoints; },
+/* harmony export */   aH: function() { return /* binding */ translateRect; },
+/* harmony export */   aI: function() { return /* binding */ compareObjs; },
+/* harmony export */   aJ: function() { return /* binding */ collectFromHash; },
+/* harmony export */   aK: function() { return /* binding */ findElements; },
+/* harmony export */   aL: function() { return /* binding */ findDirectChildren; },
+/* harmony export */   aM: function() { return /* binding */ removeElement; },
+/* harmony export */   aN: function() { return /* binding */ applyStyle; },
+/* harmony export */   aO: function() { return /* binding */ elementMatches; },
+/* harmony export */   aP: function() { return /* binding */ getEventTargetViaRoot; },
+/* harmony export */   aQ: function() { return /* binding */ parseClassNames; },
+/* harmony export */   aR: function() { return /* binding */ getCanVGrowWithinCell; },
+/* harmony export */   aS: function() { return /* binding */ mergeEventStores; },
+/* harmony export */   aT: function() { return /* binding */ getRelevantEvents; },
+/* harmony export */   aU: function() { return /* binding */ eventTupleToStore; },
+/* harmony export */   aV: function() { return /* binding */ combineEventUis; },
+/* harmony export */   aW: function() { return /* binding */ Splitter; },
+/* harmony export */   aX: function() { return /* binding */ getDayClassNames; },
+/* harmony export */   aY: function() { return /* binding */ getDateMeta; },
+/* harmony export */   aZ: function() { return /* binding */ getSlotClassNames; },
+/* harmony export */   a_: function() { return /* binding */ buildNavLinkAttrs; },
+/* harmony export */   aa: function() { return /* binding */ RenderId; },
+/* harmony export */   ab: function() { return /* binding */ ensureElHasStyles; },
+/* harmony export */   ac: function() { return /* binding */ applyStyleProp; },
+/* harmony export */   ad: function() { return /* binding */ sliceEventStore; },
+/* harmony export */   ae: function() { return /* binding */ JsonRequestError; },
+/* harmony export */   af: function() { return /* binding */ createContext; },
+/* harmony export */   ag: function() { return /* binding */ refineProps; },
+/* harmony export */   ah: function() { return /* binding */ createEventInstance; },
+/* harmony export */   ai: function() { return /* binding */ parseEventDef; },
+/* harmony export */   aj: function() { return /* binding */ refineEventDef; },
+/* harmony export */   ak: function() { return /* binding */ padStart; },
+/* harmony export */   al: function() { return /* binding */ isInt; },
+/* harmony export */   am: function() { return /* binding */ parseFieldSpecs; },
+/* harmony export */   an: function() { return /* binding */ compareByFieldSpecs; },
+/* harmony export */   ao: function() { return /* binding */ flexibleCompare; },
+/* harmony export */   ap: function() { return /* binding */ preventSelection; },
+/* harmony export */   aq: function() { return /* binding */ allowSelection; },
+/* harmony export */   ar: function() { return /* binding */ preventContextMenu; },
+/* harmony export */   as: function() { return /* binding */ allowContextMenu; },
+/* harmony export */   at: function() { return /* binding */ compareNumbers; },
+/* harmony export */   au: function() { return /* binding */ enableCursor; },
+/* harmony export */   av: function() { return /* binding */ disableCursor; },
+/* harmony export */   aw: function() { return /* binding */ computeVisibleDayRange; },
+/* harmony export */   ax: function() { return /* binding */ isMultiDayRange; },
+/* harmony export */   ay: function() { return /* binding */ diffDates; },
+/* harmony export */   az: function() { return /* binding */ removeExact; },
 /* harmony export */   b: function() { return /* binding */ buildViewClassNames; },
-/* harmony export */   b$: function() { return /* binding */ SimpleScrollGrid; },
-/* harmony export */   b0: function() { return /* binding */ buildNavLinkAttrs; },
-/* harmony export */   b1: function() { return /* binding */ preventDefault; },
-/* harmony export */   b2: function() { return /* binding */ whenTransitionDone; },
-/* harmony export */   b3: function() { return /* binding */ computeInnerRect; },
-/* harmony export */   b4: function() { return /* binding */ computeEdges; },
-/* harmony export */   b5: function() { return /* binding */ getClippingParents; },
-/* harmony export */   b6: function() { return /* binding */ computeRect; },
-/* harmony export */   b7: function() { return /* binding */ rangesEqual; },
-/* harmony export */   b8: function() { return /* binding */ rangesIntersect; },
-/* harmony export */   b9: function() { return /* binding */ rangeContainsRange; },
-/* harmony export */   bA: function() { return /* binding */ SegHierarchy; },
-/* harmony export */   bB: function() { return /* binding */ buildEntryKey; },
-/* harmony export */   bC: function() { return /* binding */ getEntrySpanEnd; },
-/* harmony export */   bD: function() { return /* binding */ binarySearch; },
-/* harmony export */   bE: function() { return /* binding */ groupIntersectingEntries; },
-/* harmony export */   bF: function() { return /* binding */ intersectSpans; },
-/* harmony export */   bG: function() { return /* binding */ interactionSettingsToStore; },
-/* harmony export */   bH: function() { return /* binding */ ElementDragging; },
-/* harmony export */   bI: function() { return /* binding */ config; },
-/* harmony export */   bJ: function() { return /* binding */ parseDragMeta; },
-/* harmony export */   bK: function() { return /* binding */ DayHeader; },
-/* harmony export */   bL: function() { return /* binding */ computeFallbackHeaderFormat; },
-/* harmony export */   bM: function() { return /* binding */ TableDateCell; },
-/* harmony export */   bN: function() { return /* binding */ TableDowCell; },
-/* harmony export */   bO: function() { return /* binding */ DaySeriesModel; },
-/* harmony export */   bP: function() { return /* binding */ hasBgRendering; },
-/* harmony export */   bQ: function() { return /* binding */ buildSegTimeText; },
-/* harmony export */   bR: function() { return /* binding */ sortEventSegs; },
-/* harmony export */   bS: function() { return /* binding */ getSegMeta; },
-/* harmony export */   bT: function() { return /* binding */ buildEventRangeKey; },
-/* harmony export */   bU: function() { return /* binding */ getSegAnchorAttrs; },
-/* harmony export */   bV: function() { return /* binding */ DayTableModel; },
-/* harmony export */   bW: function() { return /* binding */ Slicer; },
-/* harmony export */   bX: function() { return /* binding */ applyMutationToEventStore; },
-/* harmony export */   bY: function() { return /* binding */ isPropsValid; },
-/* harmony export */   bZ: function() { return /* binding */ isInteractionValid; },
-/* harmony export */   b_: function() { return /* binding */ isDateSelectionValid; },
-/* harmony export */   ba: function() { return /* binding */ PositionCache; },
-/* harmony export */   bb: function() { return /* binding */ ScrollController; },
-/* harmony export */   bc: function() { return /* binding */ ElementScrollController; },
-/* harmony export */   bd: function() { return /* binding */ WindowScrollController; },
-/* harmony export */   be: function() { return /* binding */ DateComponent; },
-/* harmony export */   bf: function() { return /* binding */ isDateSpansEqual; },
-/* harmony export */   bg: function() { return /* binding */ addMs; },
-/* harmony export */   bh: function() { return /* binding */ addWeeks; },
-/* harmony export */   bi: function() { return /* binding */ diffWeeks; },
-/* harmony export */   bj: function() { return /* binding */ diffWholeWeeks; },
-/* harmony export */   bk: function() { return /* binding */ diffDayAndTime; },
-/* harmony export */   bl: function() { return /* binding */ diffDays; },
-/* harmony export */   bm: function() { return /* binding */ isValidDate; },
-/* harmony export */   bn: function() { return /* binding */ asCleanDays; },
-/* harmony export */   bo: function() { return /* binding */ multiplyDuration; },
-/* harmony export */   bp: function() { return /* binding */ addDurations; },
-/* harmony export */   bq: function() { return /* binding */ asRoughMinutes; },
-/* harmony export */   br: function() { return /* binding */ asRoughSeconds; },
-/* harmony export */   bs: function() { return /* binding */ asRoughMs; },
-/* harmony export */   bt: function() { return /* binding */ wholeDivideDurations; },
-/* harmony export */   bu: function() { return /* binding */ formatIsoTimeString; },
-/* harmony export */   bv: function() { return /* binding */ formatDayString; },
-/* harmony export */   bw: function() { return /* binding */ buildIsoString; },
-/* harmony export */   bx: function() { return /* binding */ formatIsoMonthStr; },
-/* harmony export */   by: function() { return /* binding */ NamedTimeZoneImpl; },
-/* harmony export */   bz: function() { return /* binding */ parse; },
+/* harmony export */   b$: function() { return /* binding */ renderMicroColGroup; },
+/* harmony export */   b0: function() { return /* binding */ whenTransitionDone; },
+/* harmony export */   b1: function() { return /* binding */ computeInnerRect; },
+/* harmony export */   b2: function() { return /* binding */ computeEdges; },
+/* harmony export */   b3: function() { return /* binding */ getClippingParents; },
+/* harmony export */   b4: function() { return /* binding */ computeRect; },
+/* harmony export */   b5: function() { return /* binding */ rangesEqual; },
+/* harmony export */   b6: function() { return /* binding */ rangesIntersect; },
+/* harmony export */   b7: function() { return /* binding */ rangeContainsRange; },
+/* harmony export */   b8: function() { return /* binding */ PositionCache; },
+/* harmony export */   b9: function() { return /* binding */ ScrollController; },
+/* harmony export */   bA: function() { return /* binding */ getEntrySpanEnd; },
+/* harmony export */   bB: function() { return /* binding */ binarySearch; },
+/* harmony export */   bC: function() { return /* binding */ groupIntersectingEntries; },
+/* harmony export */   bD: function() { return /* binding */ intersectSpans; },
+/* harmony export */   bE: function() { return /* binding */ interactionSettingsToStore; },
+/* harmony export */   bF: function() { return /* binding */ ElementDragging; },
+/* harmony export */   bG: function() { return /* binding */ config; },
+/* harmony export */   bH: function() { return /* binding */ parseDragMeta; },
+/* harmony export */   bI: function() { return /* binding */ DayHeader; },
+/* harmony export */   bJ: function() { return /* binding */ computeFallbackHeaderFormat; },
+/* harmony export */   bK: function() { return /* binding */ TableDateCell; },
+/* harmony export */   bL: function() { return /* binding */ TableDowCell; },
+/* harmony export */   bM: function() { return /* binding */ DaySeriesModel; },
+/* harmony export */   bN: function() { return /* binding */ hasBgRendering; },
+/* harmony export */   bO: function() { return /* binding */ buildSegTimeText; },
+/* harmony export */   bP: function() { return /* binding */ sortEventSegs; },
+/* harmony export */   bQ: function() { return /* binding */ getSegMeta; },
+/* harmony export */   bR: function() { return /* binding */ buildEventRangeKey; },
+/* harmony export */   bS: function() { return /* binding */ getSegAnchorAttrs; },
+/* harmony export */   bT: function() { return /* binding */ DayTableModel; },
+/* harmony export */   bU: function() { return /* binding */ Slicer; },
+/* harmony export */   bV: function() { return /* binding */ applyMutationToEventStore; },
+/* harmony export */   bW: function() { return /* binding */ isPropsValid; },
+/* harmony export */   bX: function() { return /* binding */ isInteractionValid; },
+/* harmony export */   bY: function() { return /* binding */ isDateSelectionValid; },
+/* harmony export */   bZ: function() { return /* binding */ SimpleScrollGrid; },
+/* harmony export */   b_: function() { return /* binding */ hasShrinkWidth; },
+/* harmony export */   ba: function() { return /* binding */ ElementScrollController; },
+/* harmony export */   bb: function() { return /* binding */ WindowScrollController; },
+/* harmony export */   bc: function() { return /* binding */ DateComponent; },
+/* harmony export */   bd: function() { return /* binding */ isDateSpansEqual; },
+/* harmony export */   be: function() { return /* binding */ addMs; },
+/* harmony export */   bf: function() { return /* binding */ addWeeks; },
+/* harmony export */   bg: function() { return /* binding */ diffWeeks; },
+/* harmony export */   bh: function() { return /* binding */ diffWholeWeeks; },
+/* harmony export */   bi: function() { return /* binding */ diffDayAndTime; },
+/* harmony export */   bj: function() { return /* binding */ diffDays; },
+/* harmony export */   bk: function() { return /* binding */ isValidDate; },
+/* harmony export */   bl: function() { return /* binding */ asCleanDays; },
+/* harmony export */   bm: function() { return /* binding */ multiplyDuration; },
+/* harmony export */   bn: function() { return /* binding */ addDurations; },
+/* harmony export */   bo: function() { return /* binding */ asRoughMinutes; },
+/* harmony export */   bp: function() { return /* binding */ asRoughSeconds; },
+/* harmony export */   bq: function() { return /* binding */ asRoughMs; },
+/* harmony export */   br: function() { return /* binding */ wholeDivideDurations; },
+/* harmony export */   bs: function() { return /* binding */ formatIsoTimeString; },
+/* harmony export */   bt: function() { return /* binding */ formatDayString; },
+/* harmony export */   bu: function() { return /* binding */ buildIsoString; },
+/* harmony export */   bv: function() { return /* binding */ formatIsoMonthStr; },
+/* harmony export */   bw: function() { return /* binding */ NamedTimeZoneImpl; },
+/* harmony export */   bx: function() { return /* binding */ parse; },
+/* harmony export */   by: function() { return /* binding */ SegHierarchy; },
+/* harmony export */   bz: function() { return /* binding */ buildEntryKey; },
 /* harmony export */   c: function() { return /* binding */ greatestDurationDenominator; },
-/* harmony export */   c0: function() { return /* binding */ hasShrinkWidth; },
-/* harmony export */   c1: function() { return /* binding */ renderMicroColGroup; },
-/* harmony export */   c2: function() { return /* binding */ getScrollGridClassNames; },
-/* harmony export */   c3: function() { return /* binding */ getSectionClassNames; },
-/* harmony export */   c4: function() { return /* binding */ getSectionHasLiquidHeight; },
-/* harmony export */   c5: function() { return /* binding */ getAllowYScrolling; },
-/* harmony export */   c6: function() { return /* binding */ renderChunkContent; },
-/* harmony export */   c7: function() { return /* binding */ computeShrinkWidth; },
-/* harmony export */   c8: function() { return /* binding */ sanitizeShrinkWidth; },
-/* harmony export */   c9: function() { return /* binding */ isColPropsEqual; },
-/* harmony export */   ca: function() { return /* binding */ renderScrollShim; },
-/* harmony export */   cb: function() { return /* binding */ getStickyFooterScrollbar; },
-/* harmony export */   cc: function() { return /* binding */ getStickyHeaderDates; },
-/* harmony export */   cd: function() { return /* binding */ Scroller; },
-/* harmony export */   ce: function() { return /* binding */ getScrollbarWidths; },
-/* harmony export */   cf: function() { return /* binding */ RefMap; },
-/* harmony export */   cg: function() { return /* binding */ getIsRtlScrollbarOnLeft; },
-/* harmony export */   ch: function() { return /* binding */ NowTimer; },
-/* harmony export */   ci: function() { return /* binding */ ScrollResponder; },
-/* harmony export */   cj: function() { return /* binding */ StandardEvent; },
-/* harmony export */   ck: function() { return /* binding */ NowIndicatorContainer; },
-/* harmony export */   cl: function() { return /* binding */ DayCellContainer; },
-/* harmony export */   cm: function() { return /* binding */ hasCustomDayCellContent; },
-/* harmony export */   cn: function() { return /* binding */ EventContainer; },
-/* harmony export */   co: function() { return /* binding */ renderFill; },
-/* harmony export */   cp: function() { return /* binding */ BgEvent; },
-/* harmony export */   cq: function() { return /* binding */ WeekNumberContainer; },
-/* harmony export */   cr: function() { return /* binding */ MoreLinkContainer; },
-/* harmony export */   cs: function() { return /* binding */ computeEarliestSegStart; },
-/* harmony export */   ct: function() { return /* binding */ ViewContainer; },
-/* harmony export */   cu: function() { return /* binding */ triggerDateSelect; },
-/* harmony export */   cv: function() { return /* binding */ getDefaultEventEnd; },
-/* harmony export */   cw: function() { return /* binding */ injectStyles; },
-/* harmony export */   cx: function() { return /* binding */ buildElAttrs; },
-/* harmony export */   cy: function() { return /* binding */ CustomRenderingStore; },
+/* harmony export */   c0: function() { return /* binding */ getScrollGridClassNames; },
+/* harmony export */   c1: function() { return /* binding */ getSectionClassNames; },
+/* harmony export */   c2: function() { return /* binding */ getSectionHasLiquidHeight; },
+/* harmony export */   c3: function() { return /* binding */ getAllowYScrolling; },
+/* harmony export */   c4: function() { return /* binding */ renderChunkContent; },
+/* harmony export */   c5: function() { return /* binding */ computeShrinkWidth; },
+/* harmony export */   c6: function() { return /* binding */ sanitizeShrinkWidth; },
+/* harmony export */   c7: function() { return /* binding */ isColPropsEqual; },
+/* harmony export */   c8: function() { return /* binding */ renderScrollShim; },
+/* harmony export */   c9: function() { return /* binding */ getStickyFooterScrollbar; },
+/* harmony export */   ca: function() { return /* binding */ getStickyHeaderDates; },
+/* harmony export */   cb: function() { return /* binding */ Scroller; },
+/* harmony export */   cc: function() { return /* binding */ getScrollbarWidths; },
+/* harmony export */   cd: function() { return /* binding */ RefMap; },
+/* harmony export */   ce: function() { return /* binding */ getIsRtlScrollbarOnLeft; },
+/* harmony export */   cf: function() { return /* binding */ ScrollResponder; },
+/* harmony export */   cg: function() { return /* binding */ StandardEvent; },
+/* harmony export */   ch: function() { return /* binding */ NowIndicatorContainer; },
+/* harmony export */   ci: function() { return /* binding */ DayCellContainer; },
+/* harmony export */   cj: function() { return /* binding */ hasCustomDayCellContent; },
+/* harmony export */   ck: function() { return /* binding */ EventContainer; },
+/* harmony export */   cl: function() { return /* binding */ renderFill; },
+/* harmony export */   cm: function() { return /* binding */ BgEvent; },
+/* harmony export */   cn: function() { return /* binding */ WeekNumberContainer; },
+/* harmony export */   co: function() { return /* binding */ MoreLinkContainer; },
+/* harmony export */   cp: function() { return /* binding */ computeEarliestSegStart; },
+/* harmony export */   cq: function() { return /* binding */ ViewContainer; },
+/* harmony export */   cr: function() { return /* binding */ triggerDateSelect; },
+/* harmony export */   cs: function() { return /* binding */ getDefaultEventEnd; },
+/* harmony export */   ct: function() { return /* binding */ injectStyles; },
+/* harmony export */   cu: function() { return /* binding */ buildElAttrs; },
+/* harmony export */   cv: function() { return /* binding */ CustomRenderingStore; },
 /* harmony export */   d: function() { return /* binding */ createDuration; },
 /* harmony export */   e: function() { return /* binding */ BASE_OPTION_DEFAULTS; },
 /* harmony export */   f: function() { return /* binding */ arrayToHash; },
@@ -2534,7 +2601,9 @@ function injectStyles(styleText) {
     });
 }
 function ensureElHasStyles(el) {
-    if (el.isConnected) {
+    if (el.isConnected && // sometimes true if SSR system simulates DOM
+        el.getRootNode // sometimes undefined if SSR system simulates DOM
+    ) {
         registerStylesRoot(el.getRootNode());
     }
 }
@@ -2605,6 +2674,79 @@ if (typeof document !== 'undefined') {
 
 var css_248z = ":root{--fc-small-font-size:.85em;--fc-page-bg-color:#fff;--fc-neutral-bg-color:hsla(0,0%,82%,.3);--fc-neutral-text-color:grey;--fc-border-color:#ddd;--fc-button-text-color:#fff;--fc-button-bg-color:#2c3e50;--fc-button-border-color:#2c3e50;--fc-button-hover-bg-color:#1e2b37;--fc-button-hover-border-color:#1a252f;--fc-button-active-bg-color:#1a252f;--fc-button-active-border-color:#151e27;--fc-event-bg-color:#3788d8;--fc-event-border-color:#3788d8;--fc-event-text-color:#fff;--fc-event-selected-overlay-color:rgba(0,0,0,.25);--fc-more-link-bg-color:#d0d0d0;--fc-more-link-text-color:inherit;--fc-event-resizer-thickness:8px;--fc-event-resizer-dot-total-width:8px;--fc-event-resizer-dot-border-width:1px;--fc-non-business-color:hsla(0,0%,84%,.3);--fc-bg-event-color:#8fdf82;--fc-bg-event-opacity:0.3;--fc-highlight-color:rgba(188,232,241,.3);--fc-today-bg-color:rgba(255,220,40,.15);--fc-now-indicator-color:red}.fc-not-allowed,.fc-not-allowed .fc-event{cursor:not-allowed}.fc{display:flex;flex-direction:column;font-size:1em}.fc,.fc *,.fc :after,.fc :before{box-sizing:border-box}.fc table{border-collapse:collapse;border-spacing:0;font-size:1em}.fc th{text-align:center}.fc td,.fc th{padding:0;vertical-align:top}.fc a[data-navlink]{cursor:pointer}.fc a[data-navlink]:hover{text-decoration:underline}.fc-direction-ltr{direction:ltr;text-align:left}.fc-direction-rtl{direction:rtl;text-align:right}.fc-theme-standard td,.fc-theme-standard th{border:1px solid var(--fc-border-color)}.fc-liquid-hack td,.fc-liquid-hack th{position:relative}@font-face{font-family:fcicons;font-style:normal;font-weight:400;src:url(\"data:application/x-font-ttf;charset=utf-8;base64,AAEAAAALAIAAAwAwT1MvMg8SBfAAAAC8AAAAYGNtYXAXVtKNAAABHAAAAFRnYXNwAAAAEAAAAXAAAAAIZ2x5ZgYydxIAAAF4AAAFNGhlYWQUJ7cIAAAGrAAAADZoaGVhB20DzAAABuQAAAAkaG10eCIABhQAAAcIAAAALGxvY2ED4AU6AAAHNAAAABhtYXhwAA8AjAAAB0wAAAAgbmFtZXsr690AAAdsAAABhnBvc3QAAwAAAAAI9AAAACAAAwPAAZAABQAAApkCzAAAAI8CmQLMAAAB6wAzAQkAAAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAAAAAAAABAAADpBgPA/8AAQAPAAEAAAAABAAAAAAAAAAAAAAAgAAAAAAADAAAAAwAAABwAAQADAAAAHAADAAEAAAAcAAQAOAAAAAoACAACAAIAAQAg6Qb//f//AAAAAAAg6QD//f//AAH/4xcEAAMAAQAAAAAAAAAAAAAAAQAB//8ADwABAAAAAAAAAAAAAgAANzkBAAAAAAEAAAAAAAAAAAACAAA3OQEAAAAAAQAAAAAAAAAAAAIAADc5AQAAAAABAWIAjQKeAskAEwAAJSc3NjQnJiIHAQYUFwEWMjc2NCcCnuLiDQ0MJAz/AA0NAQAMJAwNDcni4gwjDQwM/wANIwz/AA0NDCMNAAAAAQFiAI0CngLJABMAACUBNjQnASYiBwYUHwEHBhQXFjI3AZ4BAA0N/wAMJAwNDeLiDQ0MJAyNAQAMIw0BAAwMDSMM4uINIwwNDQAAAAIA4gC3Ax4CngATACcAACUnNzY0JyYiDwEGFB8BFjI3NjQnISc3NjQnJiIPAQYUHwEWMjc2NCcB87e3DQ0MIw3VDQ3VDSMMDQ0BK7e3DQ0MJAzVDQ3VDCQMDQ3zuLcMJAwNDdUNIwzWDAwNIwy4twwkDA0N1Q0jDNYMDA0jDAAAAgDiALcDHgKeABMAJwAAJTc2NC8BJiIHBhQfAQcGFBcWMjchNzY0LwEmIgcGFB8BBwYUFxYyNwJJ1Q0N1Q0jDA0Nt7cNDQwjDf7V1Q0N1QwkDA0Nt7cNDQwkDLfWDCMN1Q0NDCQMt7gMIw0MDNYMIw3VDQ0MJAy3uAwjDQwMAAADAFUAAAOrA1UAMwBoAHcAABMiBgcOAQcOAQcOARURFBYXHgEXHgEXHgEzITI2Nz4BNz4BNz4BNRE0JicuAScuAScuASMFITIWFx4BFx4BFx4BFREUBgcOAQcOAQcOASMhIiYnLgEnLgEnLgE1ETQ2Nz4BNz4BNz4BMxMhMjY1NCYjISIGFRQWM9UNGAwLFQkJDgUFBQUFBQ4JCRULDBgNAlYNGAwLFQkJDgUFBQUFBQ4JCRULDBgN/aoCVgQIBAQHAwMFAQIBAQIBBQMDBwQECAT9qgQIBAQHAwMFAQIBAQIBBQMDBwQECASAAVYRGRkR/qoRGRkRA1UFBAUOCQkVDAsZDf2rDRkLDBUJCA4FBQUFBQUOCQgVDAsZDQJVDRkLDBUJCQ4FBAVVAgECBQMCBwQECAX9qwQJAwQHAwMFAQICAgIBBQMDBwQDCQQCVQUIBAQHAgMFAgEC/oAZEhEZGRESGQAAAAADAFUAAAOrA1UAMwBoAIkAABMiBgcOAQcOAQcOARURFBYXHgEXHgEXHgEzITI2Nz4BNz4BNz4BNRE0JicuAScuAScuASMFITIWFx4BFx4BFx4BFREUBgcOAQcOAQcOASMhIiYnLgEnLgEnLgE1ETQ2Nz4BNz4BNz4BMxMzFRQWMzI2PQEzMjY1NCYrATU0JiMiBh0BIyIGFRQWM9UNGAwLFQkJDgUFBQUFBQ4JCRULDBgNAlYNGAwLFQkJDgUFBQUFBQ4JCRULDBgN/aoCVgQIBAQHAwMFAQIBAQIBBQMDBwQECAT9qgQIBAQHAwMFAQIBAQIBBQMDBwQECASAgBkSEhmAERkZEYAZEhIZgBEZGREDVQUEBQ4JCRUMCxkN/asNGQsMFQkIDgUFBQUFBQ4JCBUMCxkNAlUNGQsMFQkJDgUEBVUCAQIFAwIHBAQIBf2rBAkDBAcDAwUBAgICAgEFAwMHBAMJBAJVBQgEBAcCAwUCAQL+gIASGRkSgBkSERmAEhkZEoAZERIZAAABAOIAjQMeAskAIAAAExcHBhQXFjI/ARcWMjc2NC8BNzY0JyYiDwEnJiIHBhQX4uLiDQ0MJAzi4gwkDA0N4uINDQwkDOLiDCQMDQ0CjeLiDSMMDQ3h4Q0NDCMN4uIMIw0MDOLiDAwNIwwAAAABAAAAAQAAa5n0y18PPPUACwQAAAAAANivOVsAAAAA2K85WwAAAAADqwNVAAAACAACAAAAAAAAAAEAAAPA/8AAAAQAAAAAAAOrAAEAAAAAAAAAAAAAAAAAAAALBAAAAAAAAAAAAAAAAgAAAAQAAWIEAAFiBAAA4gQAAOIEAABVBAAAVQQAAOIAAAAAAAoAFAAeAEQAagCqAOoBngJkApoAAQAAAAsAigADAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAA4ArgABAAAAAAABAAcAAAABAAAAAAACAAcAYAABAAAAAAADAAcANgABAAAAAAAEAAcAdQABAAAAAAAFAAsAFQABAAAAAAAGAAcASwABAAAAAAAKABoAigADAAEECQABAA4ABwADAAEECQACAA4AZwADAAEECQADAA4APQADAAEECQAEAA4AfAADAAEECQAFABYAIAADAAEECQAGAA4AUgADAAEECQAKADQApGZjaWNvbnMAZgBjAGkAYwBvAG4Ac1ZlcnNpb24gMS4wAFYAZQByAHMAaQBvAG4AIAAxAC4AMGZjaWNvbnMAZgBjAGkAYwBvAG4Ac2ZjaWNvbnMAZgBjAGkAYwBvAG4Ac1JlZ3VsYXIAUgBlAGcAdQBsAGEAcmZjaWNvbnMAZgBjAGkAYwBvAG4Ac0ZvbnQgZ2VuZXJhdGVkIGJ5IEljb01vb24uAEYAbwBuAHQAIABnAGUAbgBlAHIAYQB0AGUAZAAgAGIAeQAgAEkAYwBvAE0AbwBvAG4ALgAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\") format(\"truetype\")}.fc-icon{speak:none;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;display:inline-block;font-family:fcicons!important;font-style:normal;font-variant:normal;font-weight:400;height:1em;line-height:1;text-align:center;text-transform:none;-webkit-user-select:none;-moz-user-select:none;user-select:none;width:1em}.fc-icon-chevron-left:before{content:\"\\e900\"}.fc-icon-chevron-right:before{content:\"\\e901\"}.fc-icon-chevrons-left:before{content:\"\\e902\"}.fc-icon-chevrons-right:before{content:\"\\e903\"}.fc-icon-minus-square:before{content:\"\\e904\"}.fc-icon-plus-square:before{content:\"\\e905\"}.fc-icon-x:before{content:\"\\e906\"}.fc .fc-button{border-radius:0;font-family:inherit;font-size:inherit;line-height:inherit;margin:0;overflow:visible;text-transform:none}.fc .fc-button:focus{outline:1px dotted;outline:5px auto -webkit-focus-ring-color}.fc .fc-button{-webkit-appearance:button}.fc .fc-button:not(:disabled){cursor:pointer}.fc .fc-button{background-color:transparent;border:1px solid transparent;border-radius:.25em;display:inline-block;font-size:1em;font-weight:400;line-height:1.5;padding:.4em .65em;text-align:center;-webkit-user-select:none;-moz-user-select:none;user-select:none;vertical-align:middle}.fc .fc-button:hover{text-decoration:none}.fc .fc-button:focus{box-shadow:0 0 0 .2rem rgba(44,62,80,.25);outline:0}.fc .fc-button:disabled{opacity:.65}.fc .fc-button-primary{background-color:var(--fc-button-bg-color);border-color:var(--fc-button-border-color);color:var(--fc-button-text-color)}.fc .fc-button-primary:hover{background-color:var(--fc-button-hover-bg-color);border-color:var(--fc-button-hover-border-color);color:var(--fc-button-text-color)}.fc .fc-button-primary:disabled{background-color:var(--fc-button-bg-color);border-color:var(--fc-button-border-color);color:var(--fc-button-text-color)}.fc .fc-button-primary:focus{box-shadow:0 0 0 .2rem rgba(76,91,106,.5)}.fc .fc-button-primary:not(:disabled).fc-button-active,.fc .fc-button-primary:not(:disabled):active{background-color:var(--fc-button-active-bg-color);border-color:var(--fc-button-active-border-color);color:var(--fc-button-text-color)}.fc .fc-button-primary:not(:disabled).fc-button-active:focus,.fc .fc-button-primary:not(:disabled):active:focus{box-shadow:0 0 0 .2rem rgba(76,91,106,.5)}.fc .fc-button .fc-icon{font-size:1.5em;vertical-align:middle}.fc .fc-button-group{display:inline-flex;position:relative;vertical-align:middle}.fc .fc-button-group>.fc-button{flex:1 1 auto;position:relative}.fc .fc-button-group>.fc-button.fc-button-active,.fc .fc-button-group>.fc-button:active,.fc .fc-button-group>.fc-button:focus,.fc .fc-button-group>.fc-button:hover{z-index:1}.fc-direction-ltr .fc-button-group>.fc-button:not(:first-child){border-bottom-left-radius:0;border-top-left-radius:0;margin-left:-1px}.fc-direction-ltr .fc-button-group>.fc-button:not(:last-child){border-bottom-right-radius:0;border-top-right-radius:0}.fc-direction-rtl .fc-button-group>.fc-button:not(:first-child){border-bottom-right-radius:0;border-top-right-radius:0;margin-right:-1px}.fc-direction-rtl .fc-button-group>.fc-button:not(:last-child){border-bottom-left-radius:0;border-top-left-radius:0}.fc .fc-toolbar{align-items:center;display:flex;justify-content:space-between}.fc .fc-toolbar.fc-header-toolbar{margin-bottom:1.5em}.fc .fc-toolbar.fc-footer-toolbar{margin-top:1.5em}.fc .fc-toolbar-title{font-size:1.75em;margin:0}.fc-direction-ltr .fc-toolbar>*>:not(:first-child){margin-left:.75em}.fc-direction-rtl .fc-toolbar>*>:not(:first-child){margin-right:.75em}.fc-direction-rtl .fc-toolbar-ltr{flex-direction:row-reverse}.fc .fc-scroller{-webkit-overflow-scrolling:touch;position:relative}.fc .fc-scroller-liquid{height:100%}.fc .fc-scroller-liquid-absolute{bottom:0;left:0;position:absolute;right:0;top:0}.fc .fc-scroller-harness{direction:ltr;overflow:hidden;position:relative}.fc .fc-scroller-harness-liquid{height:100%}.fc-direction-rtl .fc-scroller-harness>.fc-scroller{direction:rtl}.fc-theme-standard .fc-scrollgrid{border:1px solid var(--fc-border-color)}.fc .fc-scrollgrid,.fc .fc-scrollgrid table{table-layout:fixed;width:100%}.fc .fc-scrollgrid table{border-left-style:hidden;border-right-style:hidden;border-top-style:hidden}.fc .fc-scrollgrid{border-bottom-width:0;border-collapse:separate;border-right-width:0}.fc .fc-scrollgrid-liquid{height:100%}.fc .fc-scrollgrid-section,.fc .fc-scrollgrid-section table,.fc .fc-scrollgrid-section>td{height:1px}.fc .fc-scrollgrid-section-liquid>td{height:100%}.fc .fc-scrollgrid-section>*{border-left-width:0;border-top-width:0}.fc .fc-scrollgrid-section-footer>*,.fc .fc-scrollgrid-section-header>*{border-bottom-width:0}.fc .fc-scrollgrid-section-body table,.fc .fc-scrollgrid-section-footer table{border-bottom-style:hidden}.fc .fc-scrollgrid-section-sticky>*{background:var(--fc-page-bg-color);position:sticky;z-index:3}.fc .fc-scrollgrid-section-header.fc-scrollgrid-section-sticky>*{top:0}.fc .fc-scrollgrid-section-footer.fc-scrollgrid-section-sticky>*{bottom:0}.fc .fc-scrollgrid-sticky-shim{height:1px;margin-bottom:-1px}.fc-sticky{position:sticky}.fc .fc-view-harness{flex-grow:1;position:relative}.fc .fc-view-harness-active>.fc-view{bottom:0;left:0;position:absolute;right:0;top:0}.fc .fc-col-header-cell-cushion{display:inline-block;padding:2px 4px}.fc .fc-bg-event,.fc .fc-highlight,.fc .fc-non-business{bottom:0;left:0;position:absolute;right:0;top:0}.fc .fc-non-business{background:var(--fc-non-business-color)}.fc .fc-bg-event{background:var(--fc-bg-event-color);opacity:var(--fc-bg-event-opacity)}.fc .fc-bg-event .fc-event-title{font-size:var(--fc-small-font-size);font-style:italic;margin:.5em}.fc .fc-highlight{background:var(--fc-highlight-color)}.fc .fc-cell-shaded,.fc .fc-day-disabled{background:var(--fc-neutral-bg-color)}a.fc-event,a.fc-event:hover{text-decoration:none}.fc-event.fc-event-draggable,.fc-event[href]{cursor:pointer}.fc-event .fc-event-main{position:relative;z-index:2}.fc-event-dragging:not(.fc-event-selected){opacity:.75}.fc-event-dragging.fc-event-selected{box-shadow:0 2px 7px rgba(0,0,0,.3)}.fc-event .fc-event-resizer{display:none;position:absolute;z-index:4}.fc-event-selected .fc-event-resizer,.fc-event:hover .fc-event-resizer{display:block}.fc-event-selected .fc-event-resizer{background:var(--fc-page-bg-color);border-color:inherit;border-radius:calc(var(--fc-event-resizer-dot-total-width)/2);border-style:solid;border-width:var(--fc-event-resizer-dot-border-width);height:var(--fc-event-resizer-dot-total-width);width:var(--fc-event-resizer-dot-total-width)}.fc-event-selected .fc-event-resizer:before{bottom:-20px;content:\"\";left:-20px;position:absolute;right:-20px;top:-20px}.fc-event-selected,.fc-event:focus{box-shadow:0 2px 5px rgba(0,0,0,.2)}.fc-event-selected:before,.fc-event:focus:before{bottom:0;content:\"\";left:0;position:absolute;right:0;top:0;z-index:3}.fc-event-selected:after,.fc-event:focus:after{background:var(--fc-event-selected-overlay-color);bottom:-1px;content:\"\";left:-1px;position:absolute;right:-1px;top:-1px;z-index:1}.fc-h-event{background-color:var(--fc-event-bg-color);border:1px solid var(--fc-event-border-color);display:block}.fc-h-event .fc-event-main{color:var(--fc-event-text-color)}.fc-h-event .fc-event-main-frame{display:flex}.fc-h-event .fc-event-time{max-width:100%;overflow:hidden}.fc-h-event .fc-event-title-container{flex-grow:1;flex-shrink:1;min-width:0}.fc-h-event .fc-event-title{display:inline-block;left:0;max-width:100%;overflow:hidden;right:0;vertical-align:top}.fc-h-event.fc-event-selected:before{bottom:-10px;top:-10px}.fc-direction-ltr .fc-daygrid-block-event:not(.fc-event-start),.fc-direction-rtl .fc-daygrid-block-event:not(.fc-event-end){border-bottom-left-radius:0;border-left-width:0;border-top-left-radius:0}.fc-direction-ltr .fc-daygrid-block-event:not(.fc-event-end),.fc-direction-rtl .fc-daygrid-block-event:not(.fc-event-start){border-bottom-right-radius:0;border-right-width:0;border-top-right-radius:0}.fc-h-event:not(.fc-event-selected) .fc-event-resizer{bottom:0;top:0;width:var(--fc-event-resizer-thickness)}.fc-direction-ltr .fc-h-event:not(.fc-event-selected) .fc-event-resizer-start,.fc-direction-rtl .fc-h-event:not(.fc-event-selected) .fc-event-resizer-end{cursor:w-resize;left:calc(var(--fc-event-resizer-thickness)*-.5)}.fc-direction-ltr .fc-h-event:not(.fc-event-selected) .fc-event-resizer-end,.fc-direction-rtl .fc-h-event:not(.fc-event-selected) .fc-event-resizer-start{cursor:e-resize;right:calc(var(--fc-event-resizer-thickness)*-.5)}.fc-h-event.fc-event-selected .fc-event-resizer{margin-top:calc(var(--fc-event-resizer-dot-total-width)*-.5);top:50%}.fc-direction-ltr .fc-h-event.fc-event-selected .fc-event-resizer-start,.fc-direction-rtl .fc-h-event.fc-event-selected .fc-event-resizer-end{left:calc(var(--fc-event-resizer-dot-total-width)*-.5)}.fc-direction-ltr .fc-h-event.fc-event-selected .fc-event-resizer-end,.fc-direction-rtl .fc-h-event.fc-event-selected .fc-event-resizer-start{right:calc(var(--fc-event-resizer-dot-total-width)*-.5)}.fc .fc-popover{box-shadow:0 2px 6px rgba(0,0,0,.15);position:absolute;z-index:9999}.fc .fc-popover-header{align-items:center;display:flex;flex-direction:row;justify-content:space-between;padding:3px 4px}.fc .fc-popover-title{margin:0 2px}.fc .fc-popover-close{cursor:pointer;font-size:1.1em;opacity:.65}.fc-theme-standard .fc-popover{background:var(--fc-page-bg-color);border:1px solid var(--fc-border-color)}.fc-theme-standard .fc-popover-header{background:var(--fc-neutral-bg-color)}";
 injectStyles(css_248z);
+
+class DelayedRunner {
+    constructor(drainedOption) {
+        this.drainedOption = drainedOption;
+        this.isRunning = false;
+        this.isDirty = false;
+        this.pauseDepths = {};
+        this.timeoutId = 0;
+    }
+    request(delay) {
+        this.isDirty = true;
+        if (!this.isPaused()) {
+            this.clearTimeout();
+            if (delay == null) {
+                this.tryDrain();
+            }
+            else {
+                this.timeoutId = setTimeout(// NOT OPTIMAL! TODO: look at debounce
+                this.tryDrain.bind(this), delay);
+            }
+        }
+    }
+    pause(scope = '') {
+        let { pauseDepths } = this;
+        pauseDepths[scope] = (pauseDepths[scope] || 0) + 1;
+        this.clearTimeout();
+    }
+    resume(scope = '', force) {
+        let { pauseDepths } = this;
+        if (scope in pauseDepths) {
+            if (force) {
+                delete pauseDepths[scope];
+            }
+            else {
+                pauseDepths[scope] -= 1;
+                let depth = pauseDepths[scope];
+                if (depth <= 0) {
+                    delete pauseDepths[scope];
+                }
+            }
+            this.tryDrain();
+        }
+    }
+    isPaused() {
+        return Object.keys(this.pauseDepths).length;
+    }
+    tryDrain() {
+        if (!this.isRunning && !this.isPaused()) {
+            this.isRunning = true;
+            while (this.isDirty) {
+                this.isDirty = false;
+                this.drained(); // might set isDirty to true again
+            }
+            this.isRunning = false;
+        }
+    }
+    clear() {
+        this.clearTimeout();
+        this.isDirty = false;
+        this.pauseDepths = {};
+    }
+    clearTimeout() {
+        if (this.timeoutId) {
+            clearTimeout(this.timeoutId);
+            this.timeoutId = 0;
+        }
+    }
+    drained() {
+        if (this.drainedOption) {
+            this.drainedOption();
+        }
+    }
+}
 
 function removeElement(el) {
     if (el.parentNode) {
@@ -2793,10 +2935,12 @@ function enableCursor() {
 ----------------------------------------------------------------------------------------------------------------------*/
 function preventSelection(el) {
     el.style.userSelect = 'none';
+    el.style.webkitUserSelect = 'none';
     el.addEventListener('selectstart', preventDefault);
 }
 function allowSelection(el) {
     el.style.userSelect = '';
+    el.style.webkitUserSelect = '';
     el.removeEventListener('selectstart', preventDefault);
 }
 /* Context Menu
@@ -3063,168 +3207,6 @@ function greatestDurationDenominator(dur) {
         return { unit: 'year', value: dur.years };
     }
     return { unit: 'millisecond', value: 0 };
-}
-
-const { hasOwnProperty } = Object.prototype;
-// Merges an array of objects into a single object.
-// The second argument allows for an array of property names who's object values will be merged together.
-function mergeProps(propObjs, complexPropsMap) {
-    let dest = {};
-    if (complexPropsMap) {
-        for (let name in complexPropsMap) {
-            if (complexPropsMap[name] === isMaybeObjectsEqual) { // implies that it's object-mergeable
-                let complexObjs = [];
-                // collect the trailing object values, stopping when a non-object is discovered
-                for (let i = propObjs.length - 1; i >= 0; i -= 1) {
-                    let val = propObjs[i][name];
-                    if (typeof val === 'object' && val) { // non-null object
-                        complexObjs.unshift(val);
-                    }
-                    else if (val !== undefined) {
-                        dest[name] = val; // if there were no objects, this value will be used
-                        break;
-                    }
-                }
-                // if the trailing values were objects, use the merged value
-                if (complexObjs.length) {
-                    dest[name] = mergeProps(complexObjs);
-                }
-            }
-        }
-    }
-    // copy values into the destination, going from last to first
-    for (let i = propObjs.length - 1; i >= 0; i -= 1) {
-        let props = propObjs[i];
-        for (let name in props) {
-            if (!(name in dest)) { // if already assigned by previous props or complex props, don't reassign
-                dest[name] = props[name];
-            }
-        }
-    }
-    return dest;
-}
-function filterHash(hash, func) {
-    let filtered = {};
-    for (let key in hash) {
-        if (func(hash[key], key)) {
-            filtered[key] = hash[key];
-        }
-    }
-    return filtered;
-}
-function mapHash(hash, func) {
-    let newHash = {};
-    for (let key in hash) {
-        newHash[key] = func(hash[key], key);
-    }
-    return newHash;
-}
-function arrayToHash(a) {
-    let hash = {};
-    for (let item of a) {
-        hash[item] = true;
-    }
-    return hash;
-}
-// TODO: reassess browser support
-// https://caniuse.com/?search=object.values
-function hashValuesToArray(obj) {
-    let a = [];
-    for (let key in obj) {
-        a.push(obj[key]);
-    }
-    return a;
-}
-function isPropsEqual(obj0, obj1) {
-    if (obj0 === obj1) {
-        return true;
-    }
-    for (let key in obj0) {
-        if (hasOwnProperty.call(obj0, key)) {
-            if (!(key in obj1)) {
-                return false;
-            }
-        }
-    }
-    for (let key in obj1) {
-        if (hasOwnProperty.call(obj1, key)) {
-            if (obj0[key] !== obj1[key]) {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-const HANDLER_RE = /^on[A-Z]/;
-function isNonHandlerPropsEqual(obj0, obj1) {
-    const keys = getUnequalProps(obj0, obj1);
-    for (let key of keys) {
-        if (!HANDLER_RE.test(key)) {
-            return false;
-        }
-    }
-    return true;
-}
-function getUnequalProps(obj0, obj1) {
-    let keys = [];
-    for (let key in obj0) {
-        if (hasOwnProperty.call(obj0, key)) {
-            if (!(key in obj1)) {
-                keys.push(key);
-            }
-        }
-    }
-    for (let key in obj1) {
-        if (hasOwnProperty.call(obj1, key)) {
-            if (obj0[key] !== obj1[key]) {
-                keys.push(key);
-            }
-        }
-    }
-    return keys;
-}
-function compareObjs(oldProps, newProps, equalityFuncs = {}) {
-    if (oldProps === newProps) {
-        return true;
-    }
-    for (let key in newProps) {
-        if (key in oldProps && isObjValsEqual(oldProps[key], newProps[key], equalityFuncs[key])) ;
-        else {
-            return false;
-        }
-    }
-    // check for props that were omitted in the new
-    for (let key in oldProps) {
-        if (!(key in newProps)) {
-            return false;
-        }
-    }
-    return true;
-}
-/*
-assumed "true" equality for handler names like "onReceiveSomething"
-*/
-function isObjValsEqual(val0, val1, comparator) {
-    if (val0 === val1 || comparator === true) {
-        return true;
-    }
-    if (comparator) {
-        return comparator(val0, val1);
-    }
-    return false;
-}
-function collectFromHash(hash, startIndex = 0, endIndex, step = 1) {
-    let res = [];
-    if (endIndex == null) {
-        endIndex = Object.keys(hash).length;
-    }
-    for (let i = startIndex; i < endIndex; i += step) {
-        let val = hash[i];
-        if (val !== undefined) { // will disregard undefined for sparse arrays
-            res.push(val);
-        }
-    }
-    return res;
 }
 
 // TODO: new util arrayify?
@@ -3571,10 +3553,10 @@ function memoizeHashlike(workerFunc, resEquality, teardownFunc) {
 
 const EXTENDED_SETTINGS_AND_SEVERITIES = {
     week: 3,
-    separator: 0,
-    omitZeroMinute: 0,
-    meridiem: 0,
-    omitCommas: 0,
+    separator: 9,
+    omitZeroMinute: 9,
+    meridiem: 9,
+    omitCommas: 9,
 };
 const STANDARD_DATE_PROP_SEVERITIES = {
     timeZoneName: 7,
@@ -3596,22 +3578,25 @@ class NativeFormatter {
     constructor(formatSettings) {
         let standardDateProps = {};
         let extendedSettings = {};
-        let severity = 0;
+        let smallestUnitNum = 9; // the smallest unit in the formatter (9 is a sentinel, beyond max)
         for (let name in formatSettings) {
             if (name in EXTENDED_SETTINGS_AND_SEVERITIES) {
                 extendedSettings[name] = formatSettings[name];
-                severity = Math.max(EXTENDED_SETTINGS_AND_SEVERITIES[name], severity);
+                const severity = EXTENDED_SETTINGS_AND_SEVERITIES[name];
+                if (severity < 9) {
+                    smallestUnitNum = Math.min(EXTENDED_SETTINGS_AND_SEVERITIES[name], smallestUnitNum);
+                }
             }
             else {
                 standardDateProps[name] = formatSettings[name];
                 if (name in STANDARD_DATE_PROP_SEVERITIES) { // TODO: what about hour12? no severity
-                    severity = Math.max(STANDARD_DATE_PROP_SEVERITIES[name], severity);
+                    smallestUnitNum = Math.min(STANDARD_DATE_PROP_SEVERITIES[name], smallestUnitNum);
                 }
             }
         }
         this.standardDateProps = standardDateProps;
         this.extendedSettings = extendedSettings;
-        this.severity = severity;
+        this.smallestUnitNum = smallestUnitNum;
         this.buildFormattingFunc = memoize(buildFormattingFunc);
     }
     format(date, context) {
@@ -3646,8 +3631,8 @@ class NativeFormatter {
         }
         return full0 + separator + full1;
     }
-    getLargestUnit() {
-        switch (this.severity) {
+    getSmallestUnit() {
+        switch (this.smallestUnitNum) {
             case 7:
             case 6:
             case 5:
@@ -4084,7 +4069,7 @@ const BASE_OPTION_REFINERS = {
     // (can't be part of plugin system b/c must be provided at runtime)
     handleCustomRendering: identity,
     customRenderingMetaMap: identity,
-    customRenderingReplacesEl: Boolean,
+    customRenderingReplaces: Boolean,
 };
 // do NOT give a type here. need `typeof BASE_OPTION_DEFAULTS` to give real results.
 // raw values.
@@ -4238,1245 +4223,535 @@ function identity(raw) {
     return raw;
 }
 
-function createEventInstance(defId, range, forcedStartTzo, forcedEndTzo) {
-    return {
-        instanceId: guid(),
-        defId,
-        range,
-        forcedStartTzo: forcedStartTzo == null ? null : forcedStartTzo,
-        forcedEndTzo: forcedEndTzo == null ? null : forcedEndTzo,
-    };
-}
-
-function parseRecurring(refined, defaultAllDay, dateEnv, recurringTypes) {
-    for (let i = 0; i < recurringTypes.length; i += 1) {
-        let parsed = recurringTypes[i].parse(refined, dateEnv);
-        if (parsed) {
-            let { allDay } = refined;
-            if (allDay == null) {
-                allDay = defaultAllDay;
-                if (allDay == null) {
-                    allDay = parsed.allDayGuess;
-                    if (allDay == null) {
-                        allDay = false;
+const { hasOwnProperty } = Object.prototype;
+// Merges an array of objects into a single object.
+// The second argument allows for an array of property names who's object values will be merged together.
+function mergeProps(propObjs, complexPropsMap) {
+    let dest = {};
+    if (complexPropsMap) {
+        for (let name in complexPropsMap) {
+            if (complexPropsMap[name] === isMaybeObjectsEqual) { // implies that it's object-mergeable
+                let complexObjs = [];
+                // collect the trailing object values, stopping when a non-object is discovered
+                for (let i = propObjs.length - 1; i >= 0; i -= 1) {
+                    let val = propObjs[i][name];
+                    if (typeof val === 'object' && val) { // non-null object
+                        complexObjs.unshift(val);
+                    }
+                    else if (val !== undefined) {
+                        dest[name] = val; // if there were no objects, this value will be used
+                        break;
                     }
                 }
-            }
-            return {
-                allDay,
-                duration: parsed.duration,
-                typeData: parsed.typeData,
-                typeId: i,
-            };
-        }
-    }
-    return null;
-}
-function expandRecurring(eventStore, framingRange, context) {
-    let { dateEnv, pluginHooks, options } = context;
-    let { defs, instances } = eventStore;
-    // remove existing recurring instances
-    // TODO: bad. always expand events as a second step
-    instances = filterHash(instances, (instance) => !defs[instance.defId].recurringDef);
-    for (let defId in defs) {
-        let def = defs[defId];
-        if (def.recurringDef) {
-            let { duration } = def.recurringDef;
-            if (!duration) {
-                duration = def.allDay ?
-                    options.defaultAllDayEventDuration :
-                    options.defaultTimedEventDuration;
-            }
-            let starts = expandRecurringRanges(def, duration, framingRange, dateEnv, pluginHooks.recurringTypes);
-            for (let start of starts) {
-                let instance = createEventInstance(defId, {
-                    start,
-                    end: dateEnv.add(start, duration),
-                });
-                instances[instance.instanceId] = instance;
+                // if the trailing values were objects, use the merged value
+                if (complexObjs.length) {
+                    dest[name] = mergeProps(complexObjs);
+                }
             }
         }
     }
-    return { defs, instances };
-}
-/*
-Event MUST have a recurringDef
-*/
-function expandRecurringRanges(eventDef, duration, framingRange, dateEnv, recurringTypes) {
-    let typeDef = recurringTypes[eventDef.recurringDef.typeId];
-    let markers = typeDef.expand(eventDef.recurringDef.typeData, {
-        start: dateEnv.subtract(framingRange.start, duration),
-        end: framingRange.end,
-    }, dateEnv);
-    // the recurrence plugins don't guarantee that all-day events are start-of-day, so we have to
-    if (eventDef.allDay) {
-        markers = markers.map(startOfDay);
-    }
-    return markers;
-}
-
-function parseEvents(rawEvents, eventSource, context, allowOpenRange, defIdMap, instanceIdMap) {
-    let eventStore = createEmptyEventStore();
-    let eventRefiners = buildEventRefiners(context);
-    for (let rawEvent of rawEvents) {
-        let tuple = parseEvent(rawEvent, eventSource, context, allowOpenRange, eventRefiners, defIdMap, instanceIdMap);
-        if (tuple) {
-            eventTupleToStore(tuple, eventStore);
+    // copy values into the destination, going from last to first
+    for (let i = propObjs.length - 1; i >= 0; i -= 1) {
+        let props = propObjs[i];
+        for (let name in props) {
+            if (!(name in dest)) { // if already assigned by previous props or complex props, don't reassign
+                dest[name] = props[name];
+            }
         }
     }
-    return eventStore;
+    return dest;
 }
-function eventTupleToStore(tuple, eventStore = createEmptyEventStore()) {
-    eventStore.defs[tuple.def.defId] = tuple.def;
-    if (tuple.instance) {
-        eventStore.instances[tuple.instance.instanceId] = tuple.instance;
-    }
-    return eventStore;
-}
-// retrieves events that have the same groupId as the instance specified by `instanceId`
-// or they are the same as the instance.
-// why might instanceId not be in the store? an event from another calendar?
-function getRelevantEvents(eventStore, instanceId) {
-    let instance = eventStore.instances[instanceId];
-    if (instance) {
-        let def = eventStore.defs[instance.defId];
-        // get events/instances with same group
-        let newStore = filterEventStoreDefs(eventStore, (lookDef) => isEventDefsGrouped(def, lookDef));
-        // add the original
-        // TODO: wish we could use eventTupleToStore or something like it
-        newStore.defs[def.defId] = def;
-        newStore.instances[instance.instanceId] = instance;
-        return newStore;
-    }
-    return createEmptyEventStore();
-}
-function isEventDefsGrouped(def0, def1) {
-    return Boolean(def0.groupId && def0.groupId === def1.groupId);
-}
-function createEmptyEventStore() {
-    return { defs: {}, instances: {} };
-}
-function mergeEventStores(store0, store1) {
-    return {
-        defs: Object.assign(Object.assign({}, store0.defs), store1.defs),
-        instances: Object.assign(Object.assign({}, store0.instances), store1.instances),
-    };
-}
-function filterEventStoreDefs(eventStore, filterFunc) {
-    let defs = filterHash(eventStore.defs, filterFunc);
-    let instances = filterHash(eventStore.instances, (instance) => (defs[instance.defId] // still exists?
-    ));
-    return { defs, instances };
-}
-function excludeSubEventStore(master, sub) {
-    let { defs, instances } = master;
-    let filteredDefs = {};
-    let filteredInstances = {};
-    for (let defId in defs) {
-        if (!sub.defs[defId]) { // not explicitly excluded
-            filteredDefs[defId] = defs[defId];
+function filterHash(hash, func) {
+    let filtered = {};
+    for (let key in hash) {
+        if (func(hash[key], key)) {
+            filtered[key] = hash[key];
         }
     }
-    for (let instanceId in instances) {
-        if (!sub.instances[instanceId] && // not explicitly excluded
-            filteredDefs[instances[instanceId].defId] // def wasn't filtered away
-        ) {
-            filteredInstances[instanceId] = instances[instanceId];
-        }
-    }
-    return {
-        defs: filteredDefs,
-        instances: filteredInstances,
-    };
+    return filtered;
 }
-
-function normalizeConstraint(input, context) {
-    if (Array.isArray(input)) {
-        return parseEvents(input, null, context, true); // allowOpenRange=true
+function mapHash(hash, func) {
+    let newHash = {};
+    for (let key in hash) {
+        newHash[key] = func(hash[key], key);
     }
-    if (typeof input === 'object' && input) { // non-null object
-        return parseEvents([input], null, context, true); // allowOpenRange=true
-    }
-    if (input != null) {
-        return String(input);
-    }
-    return null;
+    return newHash;
 }
-
-function parseClassNames(raw) {
-    if (Array.isArray(raw)) {
-        return raw;
+function arrayToHash(a) {
+    let hash = {};
+    for (let item of a) {
+        hash[item] = true;
     }
-    if (typeof raw === 'string') {
-        return raw.split(/\s+/);
-    }
-    return [];
+    return hash;
 }
-
-// TODO: better called "EventSettings" or "EventConfig"
-// TODO: move this file into structs
-// TODO: separate constraint/overlap/allow, because selection uses only that, not other props
-const EVENT_UI_REFINERS = {
-    display: String,
-    editable: Boolean,
-    startEditable: Boolean,
-    durationEditable: Boolean,
-    constraint: identity,
-    overlap: identity,
-    allow: identity,
-    className: parseClassNames,
-    classNames: parseClassNames,
-    color: String,
-    backgroundColor: String,
-    borderColor: String,
-    textColor: String,
-};
-const EMPTY_EVENT_UI = {
-    display: null,
-    startEditable: null,
-    durationEditable: null,
-    constraints: [],
-    overlap: null,
-    allows: [],
-    backgroundColor: '',
-    borderColor: '',
-    textColor: '',
-    classNames: [],
-};
-function createEventUi(refined, context) {
-    let constraint = normalizeConstraint(refined.constraint, context);
-    return {
-        display: refined.display || null,
-        startEditable: refined.startEditable != null ? refined.startEditable : refined.editable,
-        durationEditable: refined.durationEditable != null ? refined.durationEditable : refined.editable,
-        constraints: constraint != null ? [constraint] : [],
-        overlap: refined.overlap != null ? refined.overlap : null,
-        allows: refined.allow != null ? [refined.allow] : [],
-        backgroundColor: refined.backgroundColor || refined.color || '',
-        borderColor: refined.borderColor || refined.color || '',
-        textColor: refined.textColor || '',
-        classNames: (refined.className || []).concat(refined.classNames || []), // join singular and plural
-    };
+// TODO: reassess browser support
+// https://caniuse.com/?search=object.values
+function hashValuesToArray(obj) {
+    let a = [];
+    for (let key in obj) {
+        a.push(obj[key]);
+    }
+    return a;
 }
-// TODO: prevent against problems with <2 args!
-function combineEventUis(uis) {
-    return uis.reduce(combineTwoEventUis, EMPTY_EVENT_UI);
-}
-function combineTwoEventUis(item0, item1) {
-    return {
-        display: item1.display != null ? item1.display : item0.display,
-        startEditable: item1.startEditable != null ? item1.startEditable : item0.startEditable,
-        durationEditable: item1.durationEditable != null ? item1.durationEditable : item0.durationEditable,
-        constraints: item0.constraints.concat(item1.constraints),
-        overlap: typeof item1.overlap === 'boolean' ? item1.overlap : item0.overlap,
-        allows: item0.allows.concat(item1.allows),
-        backgroundColor: item1.backgroundColor || item0.backgroundColor,
-        borderColor: item1.borderColor || item0.borderColor,
-        textColor: item1.textColor || item0.textColor,
-        classNames: item0.classNames.concat(item1.classNames),
-    };
-}
-
-const EVENT_NON_DATE_REFINERS = {
-    id: String,
-    groupId: String,
-    title: String,
-    url: String,
-    interactive: Boolean,
-};
-const EVENT_DATE_REFINERS = {
-    start: identity,
-    end: identity,
-    date: identity,
-    allDay: Boolean,
-};
-const EVENT_REFINERS = Object.assign(Object.assign(Object.assign({}, EVENT_NON_DATE_REFINERS), EVENT_DATE_REFINERS), { extendedProps: identity });
-function parseEvent(raw, eventSource, context, allowOpenRange, refiners = buildEventRefiners(context), defIdMap, instanceIdMap) {
-    let { refined, extra } = refineEventDef(raw, context, refiners);
-    let defaultAllDay = computeIsDefaultAllDay(eventSource, context);
-    let recurringRes = parseRecurring(refined, defaultAllDay, context.dateEnv, context.pluginHooks.recurringTypes);
-    if (recurringRes) {
-        let def = parseEventDef(refined, extra, eventSource ? eventSource.sourceId : '', recurringRes.allDay, Boolean(recurringRes.duration), context, defIdMap);
-        def.recurringDef = {
-            typeId: recurringRes.typeId,
-            typeData: recurringRes.typeData,
-            duration: recurringRes.duration,
-        };
-        return { def, instance: null };
-    }
-    let singleRes = parseSingle(refined, defaultAllDay, context, allowOpenRange);
-    if (singleRes) {
-        let def = parseEventDef(refined, extra, eventSource ? eventSource.sourceId : '', singleRes.allDay, singleRes.hasEnd, context, defIdMap);
-        let instance = createEventInstance(def.defId, singleRes.range, singleRes.forcedStartTzo, singleRes.forcedEndTzo);
-        if (instanceIdMap && def.publicId && instanceIdMap[def.publicId]) {
-            instance.instanceId = instanceIdMap[def.publicId];
-        }
-        return { def, instance };
-    }
-    return null;
-}
-function refineEventDef(raw, context, refiners = buildEventRefiners(context)) {
-    return refineProps(raw, refiners);
-}
-function buildEventRefiners(context) {
-    return Object.assign(Object.assign(Object.assign({}, EVENT_UI_REFINERS), EVENT_REFINERS), context.pluginHooks.eventRefiners);
-}
-/*
-Will NOT populate extendedProps with the leftover properties.
-Will NOT populate date-related props.
-*/
-function parseEventDef(refined, extra, sourceId, allDay, hasEnd, context, defIdMap) {
-    let def = {
-        title: refined.title || '',
-        groupId: refined.groupId || '',
-        publicId: refined.id || '',
-        url: refined.url || '',
-        recurringDef: null,
-        defId: ((defIdMap && refined.id) ? defIdMap[refined.id] : '') || guid(),
-        sourceId,
-        allDay,
-        hasEnd,
-        interactive: refined.interactive,
-        ui: createEventUi(refined, context),
-        extendedProps: Object.assign(Object.assign({}, (refined.extendedProps || {})), extra),
-    };
-    for (let memberAdder of context.pluginHooks.eventDefMemberAdders) {
-        Object.assign(def, memberAdder(refined));
-    }
-    // help out EventImpl from having user modify props
-    Object.freeze(def.ui.classNames);
-    Object.freeze(def.extendedProps);
-    return def;
-}
-function parseSingle(refined, defaultAllDay, context, allowOpenRange) {
-    let { allDay } = refined;
-    let startMeta;
-    let startMarker = null;
-    let hasEnd = false;
-    let endMeta;
-    let endMarker = null;
-    let startInput = refined.start != null ? refined.start : refined.date;
-    startMeta = context.dateEnv.createMarkerMeta(startInput);
-    if (startMeta) {
-        startMarker = startMeta.marker;
-    }
-    else if (!allowOpenRange) {
-        return null;
-    }
-    if (refined.end != null) {
-        endMeta = context.dateEnv.createMarkerMeta(refined.end);
-    }
-    if (allDay == null) {
-        if (defaultAllDay != null) {
-            allDay = defaultAllDay;
-        }
-        else {
-            // fall back to the date props LAST
-            allDay = (!startMeta || startMeta.isTimeUnspecified) &&
-                (!endMeta || endMeta.isTimeUnspecified);
-        }
-    }
-    if (allDay && startMarker) {
-        startMarker = startOfDay(startMarker);
-    }
-    if (endMeta) {
-        endMarker = endMeta.marker;
-        if (allDay) {
-            endMarker = startOfDay(endMarker);
-        }
-        if (startMarker && endMarker <= startMarker) {
-            endMarker = null;
-        }
-    }
-    if (endMarker) {
-        hasEnd = true;
-    }
-    else if (!allowOpenRange) {
-        hasEnd = context.options.forceEventDuration || false;
-        endMarker = context.dateEnv.add(startMarker, allDay ?
-            context.options.defaultAllDayEventDuration :
-            context.options.defaultTimedEventDuration);
-    }
-    return {
-        allDay,
-        hasEnd,
-        range: { start: startMarker, end: endMarker },
-        forcedStartTzo: startMeta ? startMeta.forcedTzo : null,
-        forcedEndTzo: endMeta ? endMeta.forcedTzo : null,
-    };
-}
-function computeIsDefaultAllDay(eventSource, context) {
-    let res = null;
-    if (eventSource) {
-        res = eventSource.defaultAllDay;
-    }
-    if (res == null) {
-        res = context.options.defaultAllDay;
-    }
-    return res;
-}
-
-const DEF_DEFAULTS = {
-    startTime: '09:00',
-    endTime: '17:00',
-    daysOfWeek: [1, 2, 3, 4, 5],
-    display: 'inverse-background',
-    classNames: 'fc-non-business',
-    groupId: '_businessHours', // so multiple defs get grouped
-};
-/*
-TODO: pass around as EventDefHash!!!
-*/
-function parseBusinessHours(input, context) {
-    return parseEvents(refineInputs(input), null, context);
-}
-function refineInputs(input) {
-    let rawDefs;
-    if (input === true) {
-        rawDefs = [{}]; // will get DEF_DEFAULTS verbatim
-    }
-    else if (Array.isArray(input)) {
-        // if specifying an array, every sub-definition NEEDS a day-of-week
-        rawDefs = input.filter((rawDef) => rawDef.daysOfWeek);
-    }
-    else if (typeof input === 'object' && input) { // non-null object
-        rawDefs = [input];
-    }
-    else { // is probably false
-        rawDefs = [];
-    }
-    rawDefs = rawDefs.map((rawDef) => (Object.assign(Object.assign({}, DEF_DEFAULTS), rawDef)));
-    return rawDefs;
-}
-
-/* Date stuff that doesn't belong in datelib core
-----------------------------------------------------------------------------------------------------------------------*/
-// given a timed range, computes an all-day range that has the same exact duration,
-// but whose start time is aligned with the start of the day.
-function computeAlignedDayRange(timedRange) {
-    let dayCnt = Math.floor(diffDays(timedRange.start, timedRange.end)) || 1;
-    let start = startOfDay(timedRange.start);
-    let end = addDays(start, dayCnt);
-    return { start, end };
-}
-// given a timed range, computes an all-day range based on how for the end date bleeds into the next day
-// TODO: give nextDayThreshold a default arg
-function computeVisibleDayRange(timedRange, nextDayThreshold = createDuration(0)) {
-    let startDay = null;
-    let endDay = null;
-    if (timedRange.end) {
-        endDay = startOfDay(timedRange.end);
-        let endTimeMS = timedRange.end.valueOf() - endDay.valueOf(); // # of milliseconds into `endDay`
-        // If the end time is actually inclusively part of the next day and is equal to or
-        // beyond the next day threshold, adjust the end to be the exclusive end of `endDay`.
-        // Otherwise, leaving it as inclusive will cause it to exclude `endDay`.
-        if (endTimeMS && endTimeMS >= asRoughMs(nextDayThreshold)) {
-            endDay = addDays(endDay, 1);
-        }
-    }
-    if (timedRange.start) {
-        startDay = startOfDay(timedRange.start); // the beginning of the day the range starts
-        // If end is within `startDay` but not past nextDayThreshold, assign the default duration of one day.
-        if (endDay && endDay <= startDay) {
-            endDay = addDays(startDay, 1);
-        }
-    }
-    return { start: startDay, end: endDay };
-}
-// spans from one day into another?
-function isMultiDayRange(range) {
-    let visibleRange = computeVisibleDayRange(range);
-    return diffDays(visibleRange.start, visibleRange.end) > 1;
-}
-function diffDates(date0, date1, dateEnv, largeUnit) {
-    if (largeUnit === 'year') {
-        return createDuration(dateEnv.diffWholeYears(date0, date1), 'year');
-    }
-    if (largeUnit === 'month') {
-        return createDuration(dateEnv.diffWholeMonths(date0, date1), 'month');
-    }
-    return diffDayAndTime(date0, date1); // returns a duration
-}
-
-function pointInsideRect(point, rect) {
-    return point.left >= rect.left &&
-        point.left < rect.right &&
-        point.top >= rect.top &&
-        point.top < rect.bottom;
-}
-// Returns a new rectangle that is the intersection of the two rectangles. If they don't intersect, returns false
-function intersectRects(rect1, rect2) {
-    let res = {
-        left: Math.max(rect1.left, rect2.left),
-        right: Math.min(rect1.right, rect2.right),
-        top: Math.max(rect1.top, rect2.top),
-        bottom: Math.min(rect1.bottom, rect2.bottom),
-    };
-    if (res.left < res.right && res.top < res.bottom) {
-        return res;
-    }
-    return false;
-}
-function translateRect(rect, deltaX, deltaY) {
-    return {
-        left: rect.left + deltaX,
-        right: rect.right + deltaX,
-        top: rect.top + deltaY,
-        bottom: rect.bottom + deltaY,
-    };
-}
-// Returns a new point that will have been moved to reside within the given rectangle
-function constrainPoint(point, rect) {
-    return {
-        left: Math.min(Math.max(point.left, rect.left), rect.right),
-        top: Math.min(Math.max(point.top, rect.top), rect.bottom),
-    };
-}
-// Returns a point that is the center of the given rectangle
-function getRectCenter(rect) {
-    return {
-        left: (rect.left + rect.right) / 2,
-        top: (rect.top + rect.bottom) / 2,
-    };
-}
-// Subtracts point2's coordinates from point1's coordinates, returning a delta
-function diffPoints(point1, point2) {
-    return {
-        left: point1.left - point2.left,
-        top: point1.top - point2.top,
-    };
-}
-
-let canVGrowWithinCell;
-function getCanVGrowWithinCell() {
-    if (canVGrowWithinCell == null) {
-        canVGrowWithinCell = computeCanVGrowWithinCell();
-    }
-    return canVGrowWithinCell;
-}
-function computeCanVGrowWithinCell() {
-    // for SSR, because this function is call immediately at top-level
-    // TODO: just make this logic execute top-level, immediately, instead of doing lazily
-    if (typeof document === 'undefined') {
+function isPropsEqual(obj0, obj1) {
+    if (obj0 === obj1) {
         return true;
     }
-    let el = document.createElement('div');
-    el.style.position = 'absolute';
-    el.style.top = '0px';
-    el.style.left = '0px';
-    el.innerHTML = '<table><tr><td><div></div></td></tr></table>';
-    el.querySelector('table').style.height = '100px';
-    el.querySelector('div').style.height = '100%';
-    document.body.appendChild(el);
-    let div = el.querySelector('div');
-    let possible = div.offsetHeight > 0;
-    document.body.removeChild(el);
-    return possible;
-}
-
-const EMPTY_EVENT_STORE = createEmptyEventStore(); // for purecomponents. TODO: keep elsewhere
-class Splitter {
-    constructor() {
-        this.getKeysForEventDefs = memoize(this._getKeysForEventDefs);
-        this.splitDateSelection = memoize(this._splitDateSpan);
-        this.splitEventStore = memoize(this._splitEventStore);
-        this.splitIndividualUi = memoize(this._splitIndividualUi);
-        this.splitEventDrag = memoize(this._splitInteraction);
-        this.splitEventResize = memoize(this._splitInteraction);
-        this.eventUiBuilders = {}; // TODO: typescript protection
-    }
-    splitProps(props) {
-        let keyInfos = this.getKeyInfo(props);
-        let defKeys = this.getKeysForEventDefs(props.eventStore);
-        let dateSelections = this.splitDateSelection(props.dateSelection);
-        let individualUi = this.splitIndividualUi(props.eventUiBases, defKeys); // the individual *bases*
-        let eventStores = this.splitEventStore(props.eventStore, defKeys);
-        let eventDrags = this.splitEventDrag(props.eventDrag);
-        let eventResizes = this.splitEventResize(props.eventResize);
-        let splitProps = {};
-        this.eventUiBuilders = mapHash(keyInfos, (info, key) => this.eventUiBuilders[key] || memoize(buildEventUiForKey));
-        for (let key in keyInfos) {
-            let keyInfo = keyInfos[key];
-            let eventStore = eventStores[key] || EMPTY_EVENT_STORE;
-            let buildEventUi = this.eventUiBuilders[key];
-            splitProps[key] = {
-                businessHours: keyInfo.businessHours || props.businessHours,
-                dateSelection: dateSelections[key] || null,
-                eventStore,
-                eventUiBases: buildEventUi(props.eventUiBases[''], keyInfo.ui, individualUi[key]),
-                eventSelection: eventStore.instances[props.eventSelection] ? props.eventSelection : '',
-                eventDrag: eventDrags[key] || null,
-                eventResize: eventResizes[key] || null,
-            };
-        }
-        return splitProps;
-    }
-    _splitDateSpan(dateSpan) {
-        let dateSpans = {};
-        if (dateSpan) {
-            let keys = this.getKeysForDateSpan(dateSpan);
-            for (let key of keys) {
-                dateSpans[key] = dateSpan;
+    for (let key in obj0) {
+        if (hasOwnProperty.call(obj0, key)) {
+            if (!(key in obj1)) {
+                return false;
             }
         }
-        return dateSpans;
     }
-    _getKeysForEventDefs(eventStore) {
-        return mapHash(eventStore.defs, (eventDef) => this.getKeysForEventDef(eventDef));
-    }
-    _splitEventStore(eventStore, defKeys) {
-        let { defs, instances } = eventStore;
-        let splitStores = {};
-        for (let defId in defs) {
-            for (let key of defKeys[defId]) {
-                if (!splitStores[key]) {
-                    splitStores[key] = createEmptyEventStore();
-                }
-                splitStores[key].defs[defId] = defs[defId];
+    for (let key in obj1) {
+        if (hasOwnProperty.call(obj1, key)) {
+            if (obj0[key] !== obj1[key]) {
+                return false;
             }
         }
-        for (let instanceId in instances) {
-            let instance = instances[instanceId];
-            for (let key of defKeys[instance.defId]) {
-                if (splitStores[key]) { // must have already been created
-                    splitStores[key].instances[instanceId] = instance;
-                }
-            }
-        }
-        return splitStores;
     }
-    _splitIndividualUi(eventUiBases, defKeys) {
-        let splitHashes = {};
-        for (let defId in eventUiBases) {
-            if (defId) { // not the '' key
-                for (let key of defKeys[defId]) {
-                    if (!splitHashes[key]) {
-                        splitHashes[key] = {};
-                    }
-                    splitHashes[key][defId] = eventUiBases[defId];
-                }
-            }
-        }
-        return splitHashes;
-    }
-    _splitInteraction(interaction) {
-        let splitStates = {};
-        if (interaction) {
-            let affectedStores = this._splitEventStore(interaction.affectedEvents, this._getKeysForEventDefs(interaction.affectedEvents));
-            // can't rely on defKeys because event data is mutated
-            let mutatedKeysByDefId = this._getKeysForEventDefs(interaction.mutatedEvents);
-            let mutatedStores = this._splitEventStore(interaction.mutatedEvents, mutatedKeysByDefId);
-            let populate = (key) => {
-                if (!splitStates[key]) {
-                    splitStates[key] = {
-                        affectedEvents: affectedStores[key] || EMPTY_EVENT_STORE,
-                        mutatedEvents: mutatedStores[key] || EMPTY_EVENT_STORE,
-                        isEvent: interaction.isEvent,
-                    };
-                }
-            };
-            for (let key in affectedStores) {
-                populate(key);
-            }
-            for (let key in mutatedStores) {
-                populate(key);
-            }
-        }
-        return splitStates;
-    }
+    return true;
 }
-function buildEventUiForKey(allUi, eventUiForKey, individualUi) {
-    let baseParts = [];
-    if (allUi) {
-        baseParts.push(allUi);
-    }
-    if (eventUiForKey) {
-        baseParts.push(eventUiForKey);
-    }
-    let stuff = {
-        '': combineEventUis(baseParts),
-    };
-    if (individualUi) {
-        Object.assign(stuff, individualUi);
-    }
-    return stuff;
-}
-
-function parseRange(input, dateEnv) {
-    let start = null;
-    let end = null;
-    if (input.start) {
-        start = dateEnv.createMarker(input.start);
-    }
-    if (input.end) {
-        end = dateEnv.createMarker(input.end);
-    }
-    if (!start && !end) {
-        return null;
-    }
-    if (start && end && end < start) {
-        return null;
-    }
-    return { start, end };
-}
-// SIDE-EFFECT: will mutate ranges.
-// Will return a new array result.
-function invertRanges(ranges, constraintRange) {
-    let invertedRanges = [];
-    let { start } = constraintRange; // the end of the previous range. the start of the new range
-    let i;
-    let dateRange;
-    // ranges need to be in order. required for our date-walking algorithm
-    ranges.sort(compareRanges);
-    for (i = 0; i < ranges.length; i += 1) {
-        dateRange = ranges[i];
-        // add the span of time before the event (if there is any)
-        if (dateRange.start > start) { // compare millisecond time (skip any ambig logic)
-            invertedRanges.push({ start, end: dateRange.start });
-        }
-        if (dateRange.end > start) {
-            start = dateRange.end;
-        }
-    }
-    // add the span of time after the last event (if there is any)
-    if (start < constraintRange.end) { // compare millisecond time (skip any ambig logic)
-        invertedRanges.push({ start, end: constraintRange.end });
-    }
-    return invertedRanges;
-}
-function compareRanges(range0, range1) {
-    return range0.start.valueOf() - range1.start.valueOf(); // earlier ranges go first
-}
-function intersectRanges(range0, range1) {
-    let { start, end } = range0;
-    let newRange = null;
-    if (range1.start !== null) {
-        if (start === null) {
-            start = range1.start;
-        }
-        else {
-            start = new Date(Math.max(start.valueOf(), range1.start.valueOf()));
-        }
-    }
-    if (range1.end != null) {
-        if (end === null) {
-            end = range1.end;
-        }
-        else {
-            end = new Date(Math.min(end.valueOf(), range1.end.valueOf()));
-        }
-    }
-    if (start === null || end === null || start < end) {
-        newRange = { start, end };
-    }
-    return newRange;
-}
-function rangesEqual(range0, range1) {
-    return (range0.start === null ? null : range0.start.valueOf()) === (range1.start === null ? null : range1.start.valueOf()) &&
-        (range0.end === null ? null : range0.end.valueOf()) === (range1.end === null ? null : range1.end.valueOf());
-}
-function rangesIntersect(range0, range1) {
-    return (range0.end === null || range1.start === null || range0.end > range1.start) &&
-        (range0.start === null || range1.end === null || range0.start < range1.end);
-}
-function rangeContainsRange(outerRange, innerRange) {
-    return (outerRange.start === null || (innerRange.start !== null && innerRange.start >= outerRange.start)) &&
-        (outerRange.end === null || (innerRange.end !== null && innerRange.end <= outerRange.end));
-}
-function rangeContainsMarker(range, date) {
-    return (range.start === null || date >= range.start) &&
-        (range.end === null || date < range.end);
-}
-// If the given date is not within the given range, move it inside.
-// (If it's past the end, make it one millisecond before the end).
-function constrainMarkerToRange(date, range) {
-    if (range.start != null && date < range.start) {
-        return range.start;
-    }
-    if (range.end != null && date >= range.end) {
-        return new Date(range.end.valueOf() - 1);
-    }
-    return date;
-}
-
-function getDateMeta(date, todayRange, nowDate, dateProfile) {
-    return {
-        dow: date.getUTCDay(),
-        isDisabled: Boolean(dateProfile && !rangeContainsMarker(dateProfile.activeRange, date)),
-        isOther: Boolean(dateProfile && !rangeContainsMarker(dateProfile.currentRange, date)),
-        isToday: Boolean(todayRange && rangeContainsMarker(todayRange, date)),
-        isPast: Boolean(nowDate ? (date < nowDate) : todayRange ? (date < todayRange.start) : false),
-        isFuture: Boolean(nowDate ? (date > nowDate) : todayRange ? (date >= todayRange.end) : false),
-    };
-}
-function getDayClassNames(meta, theme) {
-    let classNames = [
-        'fc-day',
-        `fc-day-${DAY_IDS[meta.dow]}`,
-    ];
-    if (meta.isDisabled) {
-        classNames.push('fc-day-disabled');
-    }
-    else {
-        if (meta.isToday) {
-            classNames.push('fc-day-today');
-            classNames.push(theme.getClass('today'));
-        }
-        if (meta.isPast) {
-            classNames.push('fc-day-past');
-        }
-        if (meta.isFuture) {
-            classNames.push('fc-day-future');
-        }
-        if (meta.isOther) {
-            classNames.push('fc-day-other');
-        }
-    }
-    return classNames;
-}
-function getSlotClassNames(meta, theme) {
-    let classNames = [
-        'fc-slot',
-        `fc-slot-${DAY_IDS[meta.dow]}`,
-    ];
-    if (meta.isDisabled) {
-        classNames.push('fc-slot-disabled');
-    }
-    else {
-        if (meta.isToday) {
-            classNames.push('fc-slot-today');
-            classNames.push(theme.getClass('today'));
-        }
-        if (meta.isPast) {
-            classNames.push('fc-slot-past');
-        }
-        if (meta.isFuture) {
-            classNames.push('fc-slot-future');
-        }
-    }
-    return classNames;
-}
-
-const DAY_FORMAT = createFormatter({ year: 'numeric', month: 'long', day: 'numeric' });
-const WEEK_FORMAT = createFormatter({ week: 'long' });
-function buildNavLinkAttrs(context, dateMarker, viewType = 'day', isTabbable = true) {
-    const { dateEnv, options, calendarApi } = context;
-    let dateStr = dateEnv.format(dateMarker, viewType === 'week' ? WEEK_FORMAT : DAY_FORMAT);
-    if (options.navLinks) {
-        let zonedDate = dateEnv.toDate(dateMarker);
-        const handleInteraction = (ev) => {
-            let customAction = viewType === 'day' ? options.navLinkDayClick :
-                viewType === 'week' ? options.navLinkWeekClick : null;
-            if (typeof customAction === 'function') {
-                customAction.call(calendarApi, dateEnv.toDate(dateMarker), ev);
-            }
-            else {
-                if (typeof customAction === 'string') {
-                    viewType = customAction;
-                }
-                calendarApi.zoomTo(dateMarker, viewType);
-            }
-        };
-        return Object.assign({ title: formatWithOrdinals(options.navLinkHint, [dateStr, zonedDate], dateStr), 'data-navlink': '' }, (isTabbable
-            ? createAriaClickAttrs(handleInteraction)
-            : { onClick: handleInteraction }));
-    }
-    return { 'aria-label': dateStr };
-}
-
-let _isRtlScrollbarOnLeft = null;
-function getIsRtlScrollbarOnLeft() {
-    if (_isRtlScrollbarOnLeft === null) {
-        _isRtlScrollbarOnLeft = computeIsRtlScrollbarOnLeft();
-    }
-    return _isRtlScrollbarOnLeft;
-}
-function computeIsRtlScrollbarOnLeft() {
-    let outerEl = document.createElement('div');
-    applyStyle(outerEl, {
-        position: 'absolute',
-        top: -1000,
-        left: 0,
-        border: 0,
-        padding: 0,
-        overflow: 'scroll',
-        direction: 'rtl',
-    });
-    outerEl.innerHTML = '<div></div>';
-    document.body.appendChild(outerEl);
-    let innerEl = outerEl.firstChild;
-    let res = innerEl.getBoundingClientRect().left > outerEl.getBoundingClientRect().left;
-    removeElement(outerEl);
-    return res;
-}
-
-let _scrollbarWidths;
-function getScrollbarWidths() {
-    if (!_scrollbarWidths) {
-        _scrollbarWidths = computeScrollbarWidths();
-    }
-    return _scrollbarWidths;
-}
-function computeScrollbarWidths() {
-    let el = document.createElement('div');
-    el.style.overflow = 'scroll';
-    el.style.position = 'absolute';
-    el.style.top = '-9999px';
-    el.style.left = '-9999px';
-    document.body.appendChild(el);
-    let res = computeScrollbarWidthsForEl(el);
-    document.body.removeChild(el);
-    return res;
-}
-// WARNING: will include border
-function computeScrollbarWidthsForEl(el) {
-    return {
-        x: el.offsetHeight - el.clientHeight,
-        y: el.offsetWidth - el.clientWidth,
-    };
-}
-
-function computeEdges(el, getPadding = false) {
-    let computedStyle = window.getComputedStyle(el);
-    let borderLeft = parseInt(computedStyle.borderLeftWidth, 10) || 0;
-    let borderRight = parseInt(computedStyle.borderRightWidth, 10) || 0;
-    let borderTop = parseInt(computedStyle.borderTopWidth, 10) || 0;
-    let borderBottom = parseInt(computedStyle.borderBottomWidth, 10) || 0;
-    let badScrollbarWidths = computeScrollbarWidthsForEl(el); // includes border!
-    let scrollbarLeftRight = badScrollbarWidths.y - borderLeft - borderRight;
-    let scrollbarBottom = badScrollbarWidths.x - borderTop - borderBottom;
-    let res = {
-        borderLeft,
-        borderRight,
-        borderTop,
-        borderBottom,
-        scrollbarBottom,
-        scrollbarLeft: 0,
-        scrollbarRight: 0,
-    };
-    if (getIsRtlScrollbarOnLeft() && computedStyle.direction === 'rtl') { // is the scrollbar on the left side?
-        res.scrollbarLeft = scrollbarLeftRight;
-    }
-    else {
-        res.scrollbarRight = scrollbarLeftRight;
-    }
-    if (getPadding) {
-        res.paddingLeft = parseInt(computedStyle.paddingLeft, 10) || 0;
-        res.paddingRight = parseInt(computedStyle.paddingRight, 10) || 0;
-        res.paddingTop = parseInt(computedStyle.paddingTop, 10) || 0;
-        res.paddingBottom = parseInt(computedStyle.paddingBottom, 10) || 0;
-    }
-    return res;
-}
-function computeInnerRect(el, goWithinPadding = false, doFromWindowViewport) {
-    let outerRect = doFromWindowViewport ? el.getBoundingClientRect() : computeRect(el);
-    let edges = computeEdges(el, goWithinPadding);
-    let res = {
-        left: outerRect.left + edges.borderLeft + edges.scrollbarLeft,
-        right: outerRect.right - edges.borderRight - edges.scrollbarRight,
-        top: outerRect.top + edges.borderTop,
-        bottom: outerRect.bottom - edges.borderBottom - edges.scrollbarBottom,
-    };
-    if (goWithinPadding) {
-        res.left += edges.paddingLeft;
-        res.right -= edges.paddingRight;
-        res.top += edges.paddingTop;
-        res.bottom -= edges.paddingBottom;
-    }
-    return res;
-}
-function computeRect(el) {
-    let rect = el.getBoundingClientRect();
-    return {
-        left: rect.left + window.pageXOffset,
-        top: rect.top + window.pageYOffset,
-        right: rect.right + window.pageXOffset,
-        bottom: rect.bottom + window.pageYOffset,
-    };
-}
-function computeClippedClientRect(el) {
-    let clippingParents = getClippingParents(el);
-    let rect = el.getBoundingClientRect();
-    for (let clippingParent of clippingParents) {
-        let intersection = intersectRects(rect, clippingParent.getBoundingClientRect());
-        if (intersection) {
-            rect = intersection;
-        }
-        else {
-            return null;
-        }
-    }
-    return rect;
-}
-// does not return window
-function getClippingParents(el) {
-    let parents = [];
-    while (el instanceof HTMLElement) { // will stop when gets to document or null
-        let computedStyle = window.getComputedStyle(el);
-        if (computedStyle.position === 'fixed') {
-            break;
-        }
-        if ((/(auto|scroll)/).test(computedStyle.overflow + computedStyle.overflowY + computedStyle.overflowX)) {
-            parents.push(el);
-        }
-        el = el.parentNode;
-    }
-    return parents;
-}
-
-/*
-given a function that resolves a result asynchronously.
-the function can either call passed-in success and failure callbacks,
-or it can return a promise.
-if you need to pass additional params to func, bind them first.
-*/
-function unpromisify(func, normalizedSuccessCallback, normalizedFailureCallback) {
-    // guard against success/failure callbacks being called more than once
-    // and guard against a promise AND callback being used together.
-    let isResolved = false;
-    let wrappedSuccess = function (res) {
-        if (!isResolved) {
-            isResolved = true;
-            normalizedSuccessCallback(res);
-        }
-    };
-    let wrappedFailure = function (error) {
-        if (!isResolved) {
-            isResolved = true;
-            normalizedFailureCallback(error);
-        }
-    };
-    let res = func(wrappedSuccess, wrappedFailure);
-    if (res && typeof res.then === 'function') {
-        res.then(wrappedSuccess, wrappedFailure);
-    }
-}
-
-class Emitter {
-    constructor() {
-        this.handlers = {};
-        this.thisContext = null;
-    }
-    setThisContext(thisContext) {
-        this.thisContext = thisContext;
-    }
-    setOptions(options) {
-        this.options = options;
-    }
-    on(type, handler) {
-        addToHash(this.handlers, type, handler);
-    }
-    off(type, handler) {
-        removeFromHash(this.handlers, type, handler);
-    }
-    trigger(type, ...args) {
-        let attachedHandlers = this.handlers[type] || [];
-        let optionHandler = this.options && this.options[type];
-        let handlers = [].concat(optionHandler || [], attachedHandlers);
-        for (let handler of handlers) {
-            handler.apply(this.thisContext, args);
-        }
-    }
-    hasHandlers(type) {
-        return Boolean((this.handlers[type] && this.handlers[type].length) ||
-            (this.options && this.options[type]));
-    }
-}
-function addToHash(hash, type, handler) {
-    (hash[type] || (hash[type] = []))
-        .push(handler);
-}
-function removeFromHash(hash, type, handler) {
-    if (handler) {
-        if (hash[type]) {
-            hash[type] = hash[type].filter((func) => func !== handler);
-        }
-    }
-    else {
-        delete hash[type]; // remove all handler funcs for this type
-    }
-}
-
-/*
-Records offset information for a set of elements, relative to an origin element.
-Can record the left/right OR the top/bottom OR both.
-Provides methods for querying the cache by position.
-*/
-class PositionCache {
-    constructor(originEl, els, isHorizontal, isVertical) {
-        this.els = els;
-        let originClientRect = this.originClientRect = originEl.getBoundingClientRect(); // relative to viewport top-left
-        if (isHorizontal) {
-            this.buildElHorizontals(originClientRect.left);
-        }
-        if (isVertical) {
-            this.buildElVerticals(originClientRect.top);
-        }
-    }
-    // Populates the left/right internal coordinate arrays
-    buildElHorizontals(originClientLeft) {
-        let lefts = [];
-        let rights = [];
-        for (let el of this.els) {
-            let rect = el.getBoundingClientRect();
-            lefts.push(rect.left - originClientLeft);
-            rights.push(rect.right - originClientLeft);
-        }
-        this.lefts = lefts;
-        this.rights = rights;
-    }
-    // Populates the top/bottom internal coordinate arrays
-    buildElVerticals(originClientTop) {
-        let tops = [];
-        let bottoms = [];
-        for (let el of this.els) {
-            let rect = el.getBoundingClientRect();
-            tops.push(rect.top - originClientTop);
-            bottoms.push(rect.bottom - originClientTop);
-        }
-        this.tops = tops;
-        this.bottoms = bottoms;
-    }
-    // Given a left offset (from document left), returns the index of the el that it horizontally intersects.
-    // If no intersection is made, returns undefined.
-    leftToIndex(leftPosition) {
-        let { lefts, rights } = this;
-        let len = lefts.length;
-        let i;
-        for (i = 0; i < len; i += 1) {
-            if (leftPosition >= lefts[i] && leftPosition < rights[i]) {
-                return i;
-            }
-        }
-        return undefined; // TODO: better
-    }
-    // Given a top offset (from document top), returns the index of the el that it vertically intersects.
-    // If no intersection is made, returns undefined.
-    topToIndex(topPosition) {
-        let { tops, bottoms } = this;
-        let len = tops.length;
-        let i;
-        for (i = 0; i < len; i += 1) {
-            if (topPosition >= tops[i] && topPosition < bottoms[i]) {
-                return i;
-            }
-        }
-        return undefined; // TODO: better
-    }
-    // Gets the width of the element at the given index
-    getWidth(leftIndex) {
-        return this.rights[leftIndex] - this.lefts[leftIndex];
-    }
-    // Gets the height of the element at the given index
-    getHeight(topIndex) {
-        return this.bottoms[topIndex] - this.tops[topIndex];
-    }
-    similarTo(otherCache) {
-        return similarNumArrays(this.tops || [], otherCache.tops || []) &&
-            similarNumArrays(this.bottoms || [], otherCache.bottoms || []) &&
-            similarNumArrays(this.lefts || [], otherCache.lefts || []) &&
-            similarNumArrays(this.rights || [], otherCache.rights || []);
-    }
-}
-function similarNumArrays(a, b) {
-    const len = a.length;
-    if (len !== b.length) {
-        return false;
-    }
-    for (let i = 0; i < len; i++) {
-        if (Math.round(a[i]) !== Math.round(b[i])) {
+const HANDLER_RE = /^on[A-Z]/;
+function isNonHandlerPropsEqual(obj0, obj1) {
+    const keys = getUnequalProps(obj0, obj1);
+    for (let key of keys) {
+        if (!HANDLER_RE.test(key)) {
             return false;
         }
     }
     return true;
 }
-
-/* eslint max-classes-per-file: "off" */
+function getUnequalProps(obj0, obj1) {
+    let keys = [];
+    for (let key in obj0) {
+        if (hasOwnProperty.call(obj0, key)) {
+            if (!(key in obj1)) {
+                keys.push(key);
+            }
+        }
+    }
+    for (let key in obj1) {
+        if (hasOwnProperty.call(obj1, key)) {
+            if (obj0[key] !== obj1[key]) {
+                keys.push(key);
+            }
+        }
+    }
+    return keys;
+}
+function compareObjs(oldProps, newProps, equalityFuncs = {}) {
+    if (oldProps === newProps) {
+        return true;
+    }
+    for (let key in newProps) {
+        if (key in oldProps && isObjValsEqual(oldProps[key], newProps[key], equalityFuncs[key])) ;
+        else {
+            return false;
+        }
+    }
+    // check for props that were omitted in the new
+    for (let key in oldProps) {
+        if (!(key in newProps)) {
+            return false;
+        }
+    }
+    return true;
+}
 /*
-An object for getting/setting scroll-related information for an element.
-Internally, this is done very differently for window versus DOM element,
-so this object serves as a common interface.
+assumed "true" equality for handler names like "onReceiveSomething"
 */
-class ScrollController {
-    getMaxScrollTop() {
-        return this.getScrollHeight() - this.getClientHeight();
+function isObjValsEqual(val0, val1, comparator) {
+    if (val0 === val1 || comparator === true) {
+        return true;
     }
-    getMaxScrollLeft() {
-        return this.getScrollWidth() - this.getClientWidth();
+    if (comparator) {
+        return comparator(val0, val1);
     }
-    canScrollVertically() {
-        return this.getMaxScrollTop() > 0;
+    return false;
+}
+function collectFromHash(hash, startIndex = 0, endIndex, step = 1) {
+    let res = [];
+    if (endIndex == null) {
+        endIndex = Object.keys(hash).length;
     }
-    canScrollHorizontally() {
-        return this.getMaxScrollLeft() > 0;
+    for (let i = startIndex; i < endIndex; i += step) {
+        let val = hash[i];
+        if (val !== undefined) { // will disregard undefined for sparse arrays
+            res.push(val);
+        }
     }
-    canScrollUp() {
-        return this.getScrollTop() > 0;
+    return res;
+}
+
+let calendarSystemClassMap = {};
+function registerCalendarSystem(name, theClass) {
+    calendarSystemClassMap[name] = theClass;
+}
+function createCalendarSystem(name) {
+    return new calendarSystemClassMap[name]();
+}
+class GregorianCalendarSystem {
+    getMarkerYear(d) {
+        return d.getUTCFullYear();
     }
-    canScrollDown() {
-        return this.getScrollTop() < this.getMaxScrollTop();
+    getMarkerMonth(d) {
+        return d.getUTCMonth();
     }
-    canScrollLeft() {
-        return this.getScrollLeft() > 0;
+    getMarkerDay(d) {
+        return d.getUTCDate();
     }
-    canScrollRight() {
-        return this.getScrollLeft() < this.getMaxScrollLeft();
+    arrayToMarker(arr) {
+        return arrayToUtcDate(arr);
+    }
+    markerToArray(marker) {
+        return dateToUtcArray(marker);
     }
 }
-class ElementScrollController extends ScrollController {
-    constructor(el) {
-        super();
-        this.el = el;
+registerCalendarSystem('gregory', GregorianCalendarSystem);
+
+const ISO_RE = /^\s*(\d{4})(-?(\d{2})(-?(\d{2})([T ](\d{2}):?(\d{2})(:?(\d{2})(\.(\d+))?)?(Z|(([-+])(\d{2})(:?(\d{2}))?))?)?)?)?$/;
+function parse(str) {
+    let m = ISO_RE.exec(str);
+    if (m) {
+        let marker = new Date(Date.UTC(Number(m[1]), m[3] ? Number(m[3]) - 1 : 0, Number(m[5] || 1), Number(m[7] || 0), Number(m[8] || 0), Number(m[10] || 0), m[12] ? Number(`0.${m[12]}`) * 1000 : 0));
+        if (isValidDate(marker)) {
+            let timeZoneOffset = null;
+            if (m[13]) {
+                timeZoneOffset = (m[15] === '-' ? -1 : 1) * (Number(m[16] || 0) * 60 +
+                    Number(m[18] || 0));
+            }
+            return {
+                marker,
+                isTimeUnspecified: !m[6],
+                timeZoneOffset,
+            };
+        }
     }
-    getScrollTop() {
-        return this.el.scrollTop;
-    }
-    getScrollLeft() {
-        return this.el.scrollLeft;
-    }
-    setScrollTop(top) {
-        this.el.scrollTop = top;
-    }
-    setScrollLeft(left) {
-        this.el.scrollLeft = left;
-    }
-    getScrollWidth() {
-        return this.el.scrollWidth;
-    }
-    getScrollHeight() {
-        return this.el.scrollHeight;
-    }
-    getClientHeight() {
-        return this.el.clientHeight;
-    }
-    getClientWidth() {
-        return this.el.clientWidth;
-    }
+    return null;
 }
-class WindowScrollController extends ScrollController {
-    getScrollTop() {
-        return window.pageYOffset;
+
+class DateEnv {
+    constructor(settings) {
+        let timeZone = this.timeZone = settings.timeZone;
+        let isNamedTimeZone = timeZone !== 'local' && timeZone !== 'UTC';
+        if (settings.namedTimeZoneImpl && isNamedTimeZone) {
+            this.namedTimeZoneImpl = new settings.namedTimeZoneImpl(timeZone);
+        }
+        this.canComputeOffset = Boolean(!isNamedTimeZone || this.namedTimeZoneImpl);
+        this.calendarSystem = createCalendarSystem(settings.calendarSystem);
+        this.locale = settings.locale;
+        this.weekDow = settings.locale.week.dow;
+        this.weekDoy = settings.locale.week.doy;
+        if (settings.weekNumberCalculation === 'ISO') {
+            this.weekDow = 1;
+            this.weekDoy = 4;
+        }
+        if (typeof settings.firstDay === 'number') {
+            this.weekDow = settings.firstDay;
+        }
+        if (typeof settings.weekNumberCalculation === 'function') {
+            this.weekNumberFunc = settings.weekNumberCalculation;
+        }
+        this.weekText = settings.weekText != null ? settings.weekText : settings.locale.options.weekText;
+        this.weekTextLong = (settings.weekTextLong != null ? settings.weekTextLong : settings.locale.options.weekTextLong) || this.weekText;
+        this.cmdFormatter = settings.cmdFormatter;
+        this.defaultSeparator = settings.defaultSeparator;
     }
-    getScrollLeft() {
-        return window.pageXOffset;
+    // Creating / Parsing
+    createMarker(input) {
+        let meta = this.createMarkerMeta(input);
+        if (meta === null) {
+            return null;
+        }
+        return meta.marker;
     }
-    setScrollTop(n) {
-        window.scroll(window.pageXOffset, n);
+    createNowMarker() {
+        if (this.canComputeOffset) {
+            return this.timestampToMarker(new Date().valueOf());
+        }
+        // if we can't compute the current date val for a timezone,
+        // better to give the current local date vals than UTC
+        return arrayToUtcDate(dateToLocalArray(new Date()));
     }
-    setScrollLeft(n) {
-        window.scroll(n, window.pageYOffset);
+    createMarkerMeta(input) {
+        if (typeof input === 'string') {
+            return this.parse(input);
+        }
+        let marker = null;
+        if (typeof input === 'number') {
+            marker = this.timestampToMarker(input);
+        }
+        else if (input instanceof Date) {
+            input = input.valueOf();
+            if (!isNaN(input)) {
+                marker = this.timestampToMarker(input);
+            }
+        }
+        else if (Array.isArray(input)) {
+            marker = arrayToUtcDate(input);
+        }
+        if (marker === null || !isValidDate(marker)) {
+            return null;
+        }
+        return { marker, isTimeUnspecified: false, forcedTzo: null };
     }
-    getScrollWidth() {
-        return document.documentElement.scrollWidth;
+    parse(s) {
+        let parts = parse(s);
+        if (parts === null) {
+            return null;
+        }
+        let { marker } = parts;
+        let forcedTzo = null;
+        if (parts.timeZoneOffset !== null) {
+            if (this.canComputeOffset) {
+                marker = this.timestampToMarker(marker.valueOf() - parts.timeZoneOffset * 60 * 1000);
+            }
+            else {
+                forcedTzo = parts.timeZoneOffset;
+            }
+        }
+        return { marker, isTimeUnspecified: parts.isTimeUnspecified, forcedTzo };
     }
-    getScrollHeight() {
-        return document.documentElement.scrollHeight;
+    // Accessors
+    getYear(marker) {
+        return this.calendarSystem.getMarkerYear(marker);
     }
-    getClientHeight() {
-        return document.documentElement.clientHeight;
+    getMonth(marker) {
+        return this.calendarSystem.getMarkerMonth(marker);
     }
-    getClientWidth() {
-        return document.documentElement.clientWidth;
+    getDay(marker) {
+        return this.calendarSystem.getMarkerDay(marker);
+    }
+    // Adding / Subtracting
+    add(marker, dur) {
+        let a = this.calendarSystem.markerToArray(marker);
+        a[0] += dur.years;
+        a[1] += dur.months;
+        a[2] += dur.days;
+        a[6] += dur.milliseconds;
+        return this.calendarSystem.arrayToMarker(a);
+    }
+    subtract(marker, dur) {
+        let a = this.calendarSystem.markerToArray(marker);
+        a[0] -= dur.years;
+        a[1] -= dur.months;
+        a[2] -= dur.days;
+        a[6] -= dur.milliseconds;
+        return this.calendarSystem.arrayToMarker(a);
+    }
+    addYears(marker, n) {
+        let a = this.calendarSystem.markerToArray(marker);
+        a[0] += n;
+        return this.calendarSystem.arrayToMarker(a);
+    }
+    addMonths(marker, n) {
+        let a = this.calendarSystem.markerToArray(marker);
+        a[1] += n;
+        return this.calendarSystem.arrayToMarker(a);
+    }
+    // Diffing Whole Units
+    diffWholeYears(m0, m1) {
+        let { calendarSystem } = this;
+        if (timeAsMs(m0) === timeAsMs(m1) &&
+            calendarSystem.getMarkerDay(m0) === calendarSystem.getMarkerDay(m1) &&
+            calendarSystem.getMarkerMonth(m0) === calendarSystem.getMarkerMonth(m1)) {
+            return calendarSystem.getMarkerYear(m1) - calendarSystem.getMarkerYear(m0);
+        }
+        return null;
+    }
+    diffWholeMonths(m0, m1) {
+        let { calendarSystem } = this;
+        if (timeAsMs(m0) === timeAsMs(m1) &&
+            calendarSystem.getMarkerDay(m0) === calendarSystem.getMarkerDay(m1)) {
+            return (calendarSystem.getMarkerMonth(m1) - calendarSystem.getMarkerMonth(m0)) +
+                (calendarSystem.getMarkerYear(m1) - calendarSystem.getMarkerYear(m0)) * 12;
+        }
+        return null;
+    }
+    // Range / Duration
+    greatestWholeUnit(m0, m1) {
+        let n = this.diffWholeYears(m0, m1);
+        if (n !== null) {
+            return { unit: 'year', value: n };
+        }
+        n = this.diffWholeMonths(m0, m1);
+        if (n !== null) {
+            return { unit: 'month', value: n };
+        }
+        n = diffWholeWeeks(m0, m1);
+        if (n !== null) {
+            return { unit: 'week', value: n };
+        }
+        n = diffWholeDays(m0, m1);
+        if (n !== null) {
+            return { unit: 'day', value: n };
+        }
+        n = diffHours(m0, m1);
+        if (isInt(n)) {
+            return { unit: 'hour', value: n };
+        }
+        n = diffMinutes(m0, m1);
+        if (isInt(n)) {
+            return { unit: 'minute', value: n };
+        }
+        n = diffSeconds(m0, m1);
+        if (isInt(n)) {
+            return { unit: 'second', value: n };
+        }
+        return { unit: 'millisecond', value: m1.valueOf() - m0.valueOf() };
+    }
+    countDurationsBetween(m0, m1, d) {
+        // TODO: can use greatestWholeUnit
+        let diff;
+        if (d.years) {
+            diff = this.diffWholeYears(m0, m1);
+            if (diff !== null) {
+                return diff / asRoughYears(d);
+            }
+        }
+        if (d.months) {
+            diff = this.diffWholeMonths(m0, m1);
+            if (diff !== null) {
+                return diff / asRoughMonths(d);
+            }
+        }
+        if (d.days) {
+            diff = diffWholeDays(m0, m1);
+            if (diff !== null) {
+                return diff / asRoughDays(d);
+            }
+        }
+        return (m1.valueOf() - m0.valueOf()) / asRoughMs(d);
+    }
+    // Start-Of
+    // these DON'T return zoned-dates. only UTC start-of dates
+    startOf(m, unit) {
+        if (unit === 'year') {
+            return this.startOfYear(m);
+        }
+        if (unit === 'month') {
+            return this.startOfMonth(m);
+        }
+        if (unit === 'week') {
+            return this.startOfWeek(m);
+        }
+        if (unit === 'day') {
+            return startOfDay(m);
+        }
+        if (unit === 'hour') {
+            return startOfHour(m);
+        }
+        if (unit === 'minute') {
+            return startOfMinute(m);
+        }
+        if (unit === 'second') {
+            return startOfSecond(m);
+        }
+        return null;
+    }
+    startOfYear(m) {
+        return this.calendarSystem.arrayToMarker([
+            this.calendarSystem.getMarkerYear(m),
+        ]);
+    }
+    startOfMonth(m) {
+        return this.calendarSystem.arrayToMarker([
+            this.calendarSystem.getMarkerYear(m),
+            this.calendarSystem.getMarkerMonth(m),
+        ]);
+    }
+    startOfWeek(m) {
+        return this.calendarSystem.arrayToMarker([
+            this.calendarSystem.getMarkerYear(m),
+            this.calendarSystem.getMarkerMonth(m),
+            m.getUTCDate() - ((m.getUTCDay() - this.weekDow + 7) % 7),
+        ]);
+    }
+    // Week Number
+    computeWeekNumber(marker) {
+        if (this.weekNumberFunc) {
+            return this.weekNumberFunc(this.toDate(marker));
+        }
+        return weekOfYear(marker, this.weekDow, this.weekDoy);
+    }
+    // TODO: choke on timeZoneName: long
+    format(marker, formatter, dateOptions = {}) {
+        return formatter.format({
+            marker,
+            timeZoneOffset: dateOptions.forcedTzo != null ?
+                dateOptions.forcedTzo :
+                this.offsetForMarker(marker),
+        }, this);
+    }
+    formatRange(start, end, formatter, dateOptions = {}) {
+        if (dateOptions.isEndExclusive) {
+            end = addMs(end, -1);
+        }
+        return formatter.formatRange({
+            marker: start,
+            timeZoneOffset: dateOptions.forcedStartTzo != null ?
+                dateOptions.forcedStartTzo :
+                this.offsetForMarker(start),
+        }, {
+            marker: end,
+            timeZoneOffset: dateOptions.forcedEndTzo != null ?
+                dateOptions.forcedEndTzo :
+                this.offsetForMarker(end),
+        }, this, dateOptions.defaultSeparator);
+    }
+    /*
+    DUMB: the omitTime arg is dumb. if we omit the time, we want to omit the timezone offset. and if we do that,
+    might as well use buildIsoString or some other util directly
+    */
+    formatIso(marker, extraOptions = {}) {
+        let timeZoneOffset = null;
+        if (!extraOptions.omitTimeZoneOffset) {
+            if (extraOptions.forcedTzo != null) {
+                timeZoneOffset = extraOptions.forcedTzo;
+            }
+            else {
+                timeZoneOffset = this.offsetForMarker(marker);
+            }
+        }
+        return buildIsoString(marker, timeZoneOffset, extraOptions.omitTime);
+    }
+    // TimeZone
+    timestampToMarker(ms) {
+        if (this.timeZone === 'local') {
+            return arrayToUtcDate(dateToLocalArray(new Date(ms)));
+        }
+        if (this.timeZone === 'UTC' || !this.namedTimeZoneImpl) {
+            return new Date(ms);
+        }
+        return arrayToUtcDate(this.namedTimeZoneImpl.timestampToArray(ms));
+    }
+    offsetForMarker(m) {
+        if (this.timeZone === 'local') {
+            return -arrayToLocalDate(dateToUtcArray(m)).getTimezoneOffset(); // convert "inverse" offset to "normal" offset
+        }
+        if (this.timeZone === 'UTC') {
+            return 0;
+        }
+        if (this.namedTimeZoneImpl) {
+            return this.namedTimeZoneImpl.offsetForArray(dateToUtcArray(m));
+        }
+        return null;
+    }
+    // Conversion
+    toDate(m, forcedTzo) {
+        if (this.timeZone === 'local') {
+            return arrayToLocalDate(dateToUtcArray(m));
+        }
+        if (this.timeZone === 'UTC') {
+            return new Date(m.valueOf()); // make sure it's a copy
+        }
+        if (!this.namedTimeZoneImpl) {
+            return new Date(m.valueOf() - (forcedTzo || 0));
+        }
+        return new Date(m.valueOf() -
+            this.namedTimeZoneImpl.offsetForArray(dateToUtcArray(m)) * 1000 * 60);
     }
 }
 
@@ -5629,9 +4904,10 @@ class ScrollResponder {
 }
 
 const ViewContextType = createContext({}); // for Components
-function buildViewContext(viewSpec, viewApi, viewOptions, dateProfileGenerator, dateEnv, theme, pluginHooks, dispatch, getCurrentData, emitter, calendarApi, registerInteractiveComponent, unregisterInteractiveComponent) {
+function buildViewContext(viewSpec, viewApi, viewOptions, dateProfileGenerator, dateEnv, nowManager, theme, pluginHooks, dispatch, getCurrentData, emitter, calendarApi, registerInteractiveComponent, unregisterInteractiveComponent) {
     return {
         dateEnv,
+        nowManager,
         options: viewOptions,
         pluginHooks,
         emitter,
@@ -5703,70 +4979,370 @@ function setRef(ref, current) {
     }
 }
 
-/*
-an INTERACTABLE date component
-
-PURPOSES:
-- hook up to fg, fill, and mirror renderers
-- interface for dragging and hits
-*/
-class DateComponent extends BaseComponent {
+class ContentInjector extends BaseComponent {
     constructor() {
         super(...arguments);
-        this.uid = guid();
+        this.id = guid();
+        this.queuedDomNodes = [];
+        this.currentDomNodes = [];
+        this.handleEl = (el) => {
+            const { options } = this.context;
+            const { generatorName } = this.props;
+            if (!options.customRenderingReplaces || !hasCustomRenderingHandler(generatorName, options)) {
+                this.updateElRef(el);
+            }
+        };
+        this.updateElRef = (el) => {
+            if (this.props.elRef) {
+                setRef(this.props.elRef, el);
+            }
+        };
     }
-    // Hit System
-    // -----------------------------------------------------------------------------------------------------------------
-    prepareHits() {
+    render() {
+        const { props, context } = this;
+        const { options } = context;
+        const { customGenerator, defaultGenerator, renderProps } = props;
+        const attrs = buildElAttrs(props, [], this.handleEl);
+        let useDefault = false;
+        let innerContent;
+        let queuedDomNodes = [];
+        let currentGeneratorMeta;
+        if (customGenerator != null) {
+            const customGeneratorRes = typeof customGenerator === 'function' ?
+                customGenerator(renderProps, preact__WEBPACK_IMPORTED_MODULE_0__.createElement) :
+                customGenerator;
+            if (customGeneratorRes === true) {
+                useDefault = true;
+            }
+            else {
+                const isObject = customGeneratorRes && typeof customGeneratorRes === 'object'; // non-null
+                if (isObject && ('html' in customGeneratorRes)) {
+                    attrs.dangerouslySetInnerHTML = { __html: customGeneratorRes.html };
+                }
+                else if (isObject && ('domNodes' in customGeneratorRes)) {
+                    queuedDomNodes = Array.prototype.slice.call(customGeneratorRes.domNodes);
+                }
+                else if (isObject
+                    ? (0,preact__WEBPACK_IMPORTED_MODULE_0__.isValidElement)(customGeneratorRes) // vdom node
+                    : typeof customGeneratorRes !== 'function' // primitive value (like string or number)
+                ) {
+                    // use in vdom
+                    innerContent = customGeneratorRes;
+                }
+                else {
+                    // an exotic object for handleCustomRendering
+                    currentGeneratorMeta = customGeneratorRes;
+                }
+            }
+        }
+        else {
+            useDefault = !hasCustomRenderingHandler(props.generatorName, options);
+        }
+        if (useDefault && defaultGenerator) {
+            innerContent = defaultGenerator(renderProps);
+        }
+        this.queuedDomNodes = queuedDomNodes;
+        this.currentGeneratorMeta = currentGeneratorMeta;
+        return (0,preact__WEBPACK_IMPORTED_MODULE_0__.createElement)(props.elTag, attrs, innerContent);
     }
-    queryHit(positionLeft, positionTop, elWidth, elHeight) {
-        return null; // this should be abstract
+    componentDidMount() {
+        this.applyQueueudDomNodes();
+        this.triggerCustomRendering(true);
     }
-    // Pointer Interaction Utils
-    // -----------------------------------------------------------------------------------------------------------------
-    isValidSegDownEl(el) {
-        return !this.props.eventDrag && // HACK
-            !this.props.eventResize && // HACK
-            !elementClosest(el, '.fc-event-mirror');
+    componentDidUpdate() {
+        this.applyQueueudDomNodes();
+        this.triggerCustomRendering(true);
     }
-    isValidDateDownEl(el) {
-        return !elementClosest(el, '.fc-event:not(.fc-bg-event)') &&
-            !elementClosest(el, '.fc-more-link') && // a "more.." link
-            !elementClosest(el, 'a[data-navlink]') && // a clickable nav link
-            !elementClosest(el, '.fc-popover'); // hack
+    componentWillUnmount() {
+        this.triggerCustomRendering(false); // TODO: different API for removal?
     }
+    triggerCustomRendering(isActive) {
+        var _a;
+        const { props, context } = this;
+        const { handleCustomRendering, customRenderingMetaMap } = context.options;
+        if (handleCustomRendering) {
+            const generatorMeta = (_a = this.currentGeneratorMeta) !== null && _a !== void 0 ? _a : customRenderingMetaMap === null || customRenderingMetaMap === void 0 ? void 0 : customRenderingMetaMap[props.generatorName];
+            if (generatorMeta) {
+                handleCustomRendering(Object.assign(Object.assign({ id: this.id, isActive, containerEl: this.base, reportNewContainerEl: this.updateElRef, // front-end framework tells us about new container els
+                    generatorMeta }, props), { elClasses: (props.elClasses || []).filter(isTruthy) }));
+            }
+        }
+    }
+    applyQueueudDomNodes() {
+        const { queuedDomNodes, currentDomNodes } = this;
+        const el = this.base;
+        if (!isArraysEqual(queuedDomNodes, currentDomNodes)) {
+            currentDomNodes.forEach(removeElement);
+            for (let newNode of queuedDomNodes) {
+                el.appendChild(newNode);
+            }
+            this.currentDomNodes = queuedDomNodes;
+        }
+    }
+}
+ContentInjector.addPropsEquality({
+    elClasses: isArraysEqual,
+    elStyle: isPropsEqual,
+    elAttrs: isNonHandlerPropsEqual,
+    renderProps: isPropsEqual,
+});
+// Util
+/*
+Does UI-framework provide custom way of rendering that does not use Preact VDOM
+AND does the calendar's options define custom rendering?
+AKA. Should we NOT render the default content?
+*/
+function hasCustomRenderingHandler(generatorName, options) {
+    var _a;
+    return Boolean(options.handleCustomRendering &&
+        generatorName &&
+        ((_a = options.customRenderingMetaMap) === null || _a === void 0 ? void 0 : _a[generatorName]));
+}
+function buildElAttrs(props, extraClassNames, elRef) {
+    const attrs = Object.assign(Object.assign({}, props.elAttrs), { ref: elRef });
+    if (props.elClasses || extraClassNames) {
+        attrs.className = (props.elClasses || [])
+            .concat(extraClassNames || [])
+            .concat(attrs.className || [])
+            .filter(Boolean)
+            .join(' ');
+    }
+    if (props.elStyle) {
+        attrs.style = props.elStyle;
+    }
+    return attrs;
+}
+function isTruthy(val) {
+    return Boolean(val);
 }
 
-function reduceCurrentDate(currentDate, action) {
-    switch (action.type) {
-        case 'CHANGE_DATE':
-            return action.dateMarker;
-        default:
-            return currentDate;
+const RenderId = createContext(0);
+
+class ContentContainer extends preact__WEBPACK_IMPORTED_MODULE_0__.Component {
+    constructor() {
+        super(...arguments);
+        this.InnerContent = InnerContentInjector.bind(undefined, this);
+        this.handleEl = (el) => {
+            this.el = el;
+            if (this.props.elRef) {
+                setRef(this.props.elRef, el);
+                if (el && this.didMountMisfire) {
+                    this.componentDidMount();
+                }
+            }
+        };
+    }
+    render() {
+        const { props } = this;
+        const generatedClassNames = generateClassNames(props.classNameGenerator, props.renderProps);
+        if (props.children) {
+            const elAttrs = buildElAttrs(props, generatedClassNames, this.handleEl);
+            const children = props.children(this.InnerContent, props.renderProps, elAttrs);
+            if (props.elTag) {
+                return (0,preact__WEBPACK_IMPORTED_MODULE_0__.createElement)(props.elTag, elAttrs, children);
+            }
+            else {
+                return children;
+            }
+        }
+        else {
+            return (0,preact__WEBPACK_IMPORTED_MODULE_0__.createElement)((ContentInjector), Object.assign(Object.assign({}, props), { elRef: this.handleEl, elTag: props.elTag || 'div', elClasses: (props.elClasses || []).concat(generatedClassNames), renderId: this.context }));
+        }
+    }
+    componentDidMount() {
+        var _a, _b;
+        if (this.el) {
+            (_b = (_a = this.props).didMount) === null || _b === void 0 ? void 0 : _b.call(_a, Object.assign(Object.assign({}, this.props.renderProps), { el: this.el }));
+        }
+        else {
+            this.didMountMisfire = true;
+        }
+    }
+    componentWillUnmount() {
+        var _a, _b;
+        (_b = (_a = this.props).willUnmount) === null || _b === void 0 ? void 0 : _b.call(_a, Object.assign(Object.assign({}, this.props.renderProps), { el: this.el }));
     }
 }
-function getInitialDate(options, dateEnv) {
-    let initialDateInput = options.initialDate;
-    // compute the initial ambig-timezone date
-    if (initialDateInput != null) {
-        return dateEnv.createMarker(initialDateInput);
-    }
-    return getNow(options.now, dateEnv); // getNow already returns unzoned
+ContentContainer.contextType = RenderId;
+function InnerContentInjector(containerComponent, props) {
+    const parentProps = containerComponent.props;
+    return (0,preact__WEBPACK_IMPORTED_MODULE_0__.createElement)((ContentInjector), Object.assign({ renderProps: parentProps.renderProps, generatorName: parentProps.generatorName, customGenerator: parentProps.customGenerator, defaultGenerator: parentProps.defaultGenerator, renderId: containerComponent.context }, props));
 }
-function getNow(nowInput, dateEnv) {
-    if (typeof nowInput === 'function') {
-        nowInput = nowInput();
+// Utils
+function generateClassNames(classNameGenerator, renderProps) {
+    const classNames = typeof classNameGenerator === 'function' ?
+        classNameGenerator(renderProps) :
+        classNameGenerator || [];
+    return typeof classNames === 'string' ? [classNames] : classNames;
+}
+
+class ViewContainer extends BaseComponent {
+    render() {
+        let { props, context } = this;
+        let { options } = context;
+        let renderProps = { view: context.viewApi };
+        return ((0,preact__WEBPACK_IMPORTED_MODULE_0__.createElement)(ContentContainer, Object.assign({}, props, { elTag: props.elTag || 'div', elClasses: [
+                ...buildViewClassNames(props.viewSpec),
+                ...(props.elClasses || []),
+            ], renderProps: renderProps, classNameGenerator: options.viewClassNames, generatorName: undefined, didMount: options.viewDidMount, willUnmount: options.viewWillUnmount }), () => props.children));
     }
-    if (nowInput == null) {
-        return dateEnv.createNowMarker();
+}
+function buildViewClassNames(viewSpec) {
+    return [
+        `fc-${viewSpec.type}-view`,
+        'fc-view',
+    ];
+}
+
+function parseRange(input, dateEnv) {
+    let start = null;
+    let end = null;
+    if (input.start) {
+        start = dateEnv.createMarker(input.start);
     }
-    return dateEnv.createMarker(nowInput);
+    if (input.end) {
+        end = dateEnv.createMarker(input.end);
+    }
+    if (!start && !end) {
+        return null;
+    }
+    if (start && end && end < start) {
+        return null;
+    }
+    return { start, end };
+}
+// SIDE-EFFECT: will mutate ranges.
+// Will return a new array result.
+function invertRanges(ranges, constraintRange) {
+    let invertedRanges = [];
+    let { start } = constraintRange; // the end of the previous range. the start of the new range
+    let i;
+    let dateRange;
+    // ranges need to be in order. required for our date-walking algorithm
+    ranges.sort(compareRanges);
+    for (i = 0; i < ranges.length; i += 1) {
+        dateRange = ranges[i];
+        // add the span of time before the event (if there is any)
+        if (dateRange.start > start) { // compare millisecond time (skip any ambig logic)
+            invertedRanges.push({ start, end: dateRange.start });
+        }
+        if (dateRange.end > start) {
+            start = dateRange.end;
+        }
+    }
+    // add the span of time after the last event (if there is any)
+    if (start < constraintRange.end) { // compare millisecond time (skip any ambig logic)
+        invertedRanges.push({ start, end: constraintRange.end });
+    }
+    return invertedRanges;
+}
+function compareRanges(range0, range1) {
+    return range0.start.valueOf() - range1.start.valueOf(); // earlier ranges go first
+}
+function intersectRanges(range0, range1) {
+    let { start, end } = range0;
+    let newRange = null;
+    if (range1.start !== null) {
+        if (start === null) {
+            start = range1.start;
+        }
+        else {
+            start = new Date(Math.max(start.valueOf(), range1.start.valueOf()));
+        }
+    }
+    if (range1.end != null) {
+        if (end === null) {
+            end = range1.end;
+        }
+        else {
+            end = new Date(Math.min(end.valueOf(), range1.end.valueOf()));
+        }
+    }
+    if (start === null || end === null || start < end) {
+        newRange = { start, end };
+    }
+    return newRange;
+}
+function rangesEqual(range0, range1) {
+    return (range0.start === null ? null : range0.start.valueOf()) === (range1.start === null ? null : range1.start.valueOf()) &&
+        (range0.end === null ? null : range0.end.valueOf()) === (range1.end === null ? null : range1.end.valueOf());
+}
+function rangesIntersect(range0, range1) {
+    return (range0.end === null || range1.start === null || range0.end > range1.start) &&
+        (range0.start === null || range1.end === null || range0.start < range1.end);
+}
+function rangeContainsRange(outerRange, innerRange) {
+    return (outerRange.start === null || (innerRange.start !== null && innerRange.start >= outerRange.start)) &&
+        (outerRange.end === null || (innerRange.end !== null && innerRange.end <= outerRange.end));
+}
+function rangeContainsMarker(range, date) {
+    return (range.start === null || date >= range.start) &&
+        (range.end === null || date < range.end);
+}
+// If the given date is not within the given range, move it inside.
+// (If it's past the end, make it one millisecond before the end).
+function constrainMarkerToRange(date, range) {
+    if (range.start != null && date < range.start) {
+        return range.start;
+    }
+    if (range.end != null && date >= range.end) {
+        return new Date(range.end.valueOf() - 1);
+    }
+    return date;
+}
+
+/* Date stuff that doesn't belong in datelib core
+----------------------------------------------------------------------------------------------------------------------*/
+// given a timed range, computes an all-day range that has the same exact duration,
+// but whose start time is aligned with the start of the day.
+function computeAlignedDayRange(timedRange) {
+    let dayCnt = Math.floor(diffDays(timedRange.start, timedRange.end)) || 1;
+    let start = startOfDay(timedRange.start);
+    let end = addDays(start, dayCnt);
+    return { start, end };
+}
+// given a timed range, computes an all-day range based on how for the end date bleeds into the next day
+// TODO: give nextDayThreshold a default arg
+function computeVisibleDayRange(timedRange, nextDayThreshold = createDuration(0)) {
+    let startDay = null;
+    let endDay = null;
+    if (timedRange.end) {
+        endDay = startOfDay(timedRange.end);
+        let endTimeMS = timedRange.end.valueOf() - endDay.valueOf(); // # of milliseconds into `endDay`
+        // If the end time is actually inclusively part of the next day and is equal to or
+        // beyond the next day threshold, adjust the end to be the exclusive end of `endDay`.
+        // Otherwise, leaving it as inclusive will cause it to exclude `endDay`.
+        if (endTimeMS && endTimeMS >= asRoughMs(nextDayThreshold)) {
+            endDay = addDays(endDay, 1);
+        }
+    }
+    if (timedRange.start) {
+        startDay = startOfDay(timedRange.start); // the beginning of the day the range starts
+        // If end is within `startDay` but not past nextDayThreshold, assign the default duration of one day.
+        if (endDay && endDay <= startDay) {
+            endDay = addDays(startDay, 1);
+        }
+    }
+    return { start: startDay, end: endDay };
+}
+// spans from one day into another?
+function isMultiDayRange(range) {
+    let visibleRange = computeVisibleDayRange(range);
+    return diffDays(visibleRange.start, visibleRange.end) > 1;
+}
+function diffDates(date0, date1, dateEnv, largeUnit) {
+    if (largeUnit === 'year') {
+        return createDuration(dateEnv.diffWholeYears(date0, date1), 'year');
+    }
+    if (largeUnit === 'month') {
+        return createDuration(dateEnv.diffWholeMonths(date0, date1), 'month');
+    }
+    return diffDayAndTime(date0, date1); // returns a duration
 }
 
 class DateProfileGenerator {
     constructor(props) {
         this.props = props;
-        this.nowDate = getNow(props.nowInput, props.dateEnv);
         this.initHiddenDays();
     }
     /* Date Range Computation
@@ -5851,7 +5427,7 @@ class DateProfileGenerator {
     buildValidRange() {
         let input = this.props.validRangeInput;
         let simpleInput = typeof input === 'function'
-            ? input.call(this.props.calendarApi, this.nowDate)
+            ? input.call(this.props.calendarApi, this.props.dateEnv.toDate(this.props.nowManager.getDateMarker()))
             : input;
         return this.refineRange(simpleInput) ||
             { start: null, end: null }; // completely open-ended
@@ -6072,6 +5648,656 @@ class DateProfileGenerator {
         }
         return date;
     }
+}
+
+function createEventInstance(defId, range, forcedStartTzo, forcedEndTzo) {
+    return {
+        instanceId: guid(),
+        defId,
+        range,
+        forcedStartTzo: forcedStartTzo == null ? null : forcedStartTzo,
+        forcedEndTzo: forcedEndTzo == null ? null : forcedEndTzo,
+    };
+}
+
+function parseRecurring(refined, defaultAllDay, dateEnv, recurringTypes) {
+    for (let i = 0; i < recurringTypes.length; i += 1) {
+        let parsed = recurringTypes[i].parse(refined, dateEnv);
+        if (parsed) {
+            let { allDay } = refined;
+            if (allDay == null) {
+                allDay = defaultAllDay;
+                if (allDay == null) {
+                    allDay = parsed.allDayGuess;
+                    if (allDay == null) {
+                        allDay = false;
+                    }
+                }
+            }
+            return {
+                allDay,
+                duration: parsed.duration,
+                typeData: parsed.typeData,
+                typeId: i,
+            };
+        }
+    }
+    return null;
+}
+function expandRecurring(eventStore, framingRange, context) {
+    let { dateEnv, pluginHooks, options } = context;
+    let { defs, instances } = eventStore;
+    // remove existing recurring instances
+    // TODO: bad. always expand events as a second step
+    instances = filterHash(instances, (instance) => !defs[instance.defId].recurringDef);
+    for (let defId in defs) {
+        let def = defs[defId];
+        if (def.recurringDef) {
+            let { duration } = def.recurringDef;
+            if (!duration) {
+                duration = def.allDay ?
+                    options.defaultAllDayEventDuration :
+                    options.defaultTimedEventDuration;
+            }
+            let starts = expandRecurringRanges(def, duration, framingRange, dateEnv, pluginHooks.recurringTypes);
+            for (let start of starts) {
+                let instance = createEventInstance(defId, {
+                    start,
+                    end: dateEnv.add(start, duration),
+                });
+                instances[instance.instanceId] = instance;
+            }
+        }
+    }
+    return { defs, instances };
+}
+/*
+Event MUST have a recurringDef
+*/
+function expandRecurringRanges(eventDef, duration, framingRange, dateEnv, recurringTypes) {
+    let typeDef = recurringTypes[eventDef.recurringDef.typeId];
+    let markers = typeDef.expand(eventDef.recurringDef.typeData, {
+        start: dateEnv.subtract(framingRange.start, duration),
+        end: framingRange.end,
+    }, dateEnv);
+    // the recurrence plugins don't guarantee that all-day events are start-of-day, so we have to
+    if (eventDef.allDay) {
+        markers = markers.map(startOfDay);
+    }
+    return markers;
+}
+
+const EVENT_NON_DATE_REFINERS = {
+    id: String,
+    groupId: String,
+    title: String,
+    url: String,
+    interactive: Boolean,
+};
+const EVENT_DATE_REFINERS = {
+    start: identity,
+    end: identity,
+    date: identity,
+    allDay: Boolean,
+};
+const EVENT_REFINERS = Object.assign(Object.assign(Object.assign({}, EVENT_NON_DATE_REFINERS), EVENT_DATE_REFINERS), { extendedProps: identity });
+function parseEvent(raw, eventSource, context, allowOpenRange, refiners = buildEventRefiners(context), defIdMap, instanceIdMap) {
+    let { refined, extra } = refineEventDef(raw, context, refiners);
+    let defaultAllDay = computeIsDefaultAllDay(eventSource, context);
+    let recurringRes = parseRecurring(refined, defaultAllDay, context.dateEnv, context.pluginHooks.recurringTypes);
+    if (recurringRes) {
+        let def = parseEventDef(refined, extra, eventSource ? eventSource.sourceId : '', recurringRes.allDay, Boolean(recurringRes.duration), context, defIdMap);
+        def.recurringDef = {
+            typeId: recurringRes.typeId,
+            typeData: recurringRes.typeData,
+            duration: recurringRes.duration,
+        };
+        return { def, instance: null };
+    }
+    let singleRes = parseSingle(refined, defaultAllDay, context, allowOpenRange);
+    if (singleRes) {
+        let def = parseEventDef(refined, extra, eventSource ? eventSource.sourceId : '', singleRes.allDay, singleRes.hasEnd, context, defIdMap);
+        let instance = createEventInstance(def.defId, singleRes.range, singleRes.forcedStartTzo, singleRes.forcedEndTzo);
+        if (instanceIdMap && def.publicId && instanceIdMap[def.publicId]) {
+            instance.instanceId = instanceIdMap[def.publicId];
+        }
+        return { def, instance };
+    }
+    return null;
+}
+function refineEventDef(raw, context, refiners = buildEventRefiners(context)) {
+    return refineProps(raw, refiners);
+}
+function buildEventRefiners(context) {
+    return Object.assign(Object.assign(Object.assign({}, EVENT_UI_REFINERS), EVENT_REFINERS), context.pluginHooks.eventRefiners);
+}
+/*
+Will NOT populate extendedProps with the leftover properties.
+Will NOT populate date-related props.
+*/
+function parseEventDef(refined, extra, sourceId, allDay, hasEnd, context, defIdMap) {
+    let def = {
+        title: refined.title || '',
+        groupId: refined.groupId || '',
+        publicId: refined.id || '',
+        url: refined.url || '',
+        recurringDef: null,
+        defId: ((defIdMap && refined.id) ? defIdMap[refined.id] : '') || guid(),
+        sourceId,
+        allDay,
+        hasEnd,
+        interactive: refined.interactive,
+        ui: createEventUi(refined, context),
+        extendedProps: Object.assign(Object.assign({}, (refined.extendedProps || {})), extra),
+    };
+    for (let memberAdder of context.pluginHooks.eventDefMemberAdders) {
+        Object.assign(def, memberAdder(refined));
+    }
+    // help out EventImpl from having user modify props
+    Object.freeze(def.ui.classNames);
+    Object.freeze(def.extendedProps);
+    return def;
+}
+function parseSingle(refined, defaultAllDay, context, allowOpenRange) {
+    let { allDay } = refined;
+    let startMeta;
+    let startMarker = null;
+    let hasEnd = false;
+    let endMeta;
+    let endMarker = null;
+    let startInput = refined.start != null ? refined.start : refined.date;
+    startMeta = context.dateEnv.createMarkerMeta(startInput);
+    if (startMeta) {
+        startMarker = startMeta.marker;
+    }
+    else if (!allowOpenRange) {
+        return null;
+    }
+    if (refined.end != null) {
+        endMeta = context.dateEnv.createMarkerMeta(refined.end);
+    }
+    if (allDay == null) {
+        if (defaultAllDay != null) {
+            allDay = defaultAllDay;
+        }
+        else {
+            // fall back to the date props LAST
+            allDay = (!startMeta || startMeta.isTimeUnspecified) &&
+                (!endMeta || endMeta.isTimeUnspecified);
+        }
+    }
+    if (allDay && startMarker) {
+        startMarker = startOfDay(startMarker);
+    }
+    if (endMeta) {
+        endMarker = endMeta.marker;
+        if (allDay) {
+            endMarker = startOfDay(endMarker);
+        }
+        if (startMarker && endMarker <= startMarker) {
+            endMarker = null;
+        }
+    }
+    if (endMarker) {
+        hasEnd = true;
+    }
+    else if (!allowOpenRange) {
+        hasEnd = context.options.forceEventDuration || false;
+        endMarker = context.dateEnv.add(startMarker, allDay ?
+            context.options.defaultAllDayEventDuration :
+            context.options.defaultTimedEventDuration);
+    }
+    return {
+        allDay,
+        hasEnd,
+        range: { start: startMarker, end: endMarker },
+        forcedStartTzo: startMeta ? startMeta.forcedTzo : null,
+        forcedEndTzo: endMeta ? endMeta.forcedTzo : null,
+    };
+}
+function computeIsDefaultAllDay(eventSource, context) {
+    let res = null;
+    if (eventSource) {
+        res = eventSource.defaultAllDay;
+    }
+    if (res == null) {
+        res = context.options.defaultAllDay;
+    }
+    return res;
+}
+
+function parseEvents(rawEvents, eventSource, context, allowOpenRange, defIdMap, instanceIdMap) {
+    let eventStore = createEmptyEventStore();
+    let eventRefiners = buildEventRefiners(context);
+    for (let rawEvent of rawEvents) {
+        let tuple = parseEvent(rawEvent, eventSource, context, allowOpenRange, eventRefiners, defIdMap, instanceIdMap);
+        if (tuple) {
+            eventTupleToStore(tuple, eventStore);
+        }
+    }
+    return eventStore;
+}
+function eventTupleToStore(tuple, eventStore = createEmptyEventStore()) {
+    eventStore.defs[tuple.def.defId] = tuple.def;
+    if (tuple.instance) {
+        eventStore.instances[tuple.instance.instanceId] = tuple.instance;
+    }
+    return eventStore;
+}
+// retrieves events that have the same groupId as the instance specified by `instanceId`
+// or they are the same as the instance.
+// why might instanceId not be in the store? an event from another calendar?
+function getRelevantEvents(eventStore, instanceId) {
+    let instance = eventStore.instances[instanceId];
+    if (instance) {
+        let def = eventStore.defs[instance.defId];
+        // get events/instances with same group
+        let newStore = filterEventStoreDefs(eventStore, (lookDef) => isEventDefsGrouped(def, lookDef));
+        // add the original
+        // TODO: wish we could use eventTupleToStore or something like it
+        newStore.defs[def.defId] = def;
+        newStore.instances[instance.instanceId] = instance;
+        return newStore;
+    }
+    return createEmptyEventStore();
+}
+function isEventDefsGrouped(def0, def1) {
+    return Boolean(def0.groupId && def0.groupId === def1.groupId);
+}
+function createEmptyEventStore() {
+    return { defs: {}, instances: {} };
+}
+function mergeEventStores(store0, store1) {
+    return {
+        defs: Object.assign(Object.assign({}, store0.defs), store1.defs),
+        instances: Object.assign(Object.assign({}, store0.instances), store1.instances),
+    };
+}
+function filterEventStoreDefs(eventStore, filterFunc) {
+    let defs = filterHash(eventStore.defs, filterFunc);
+    let instances = filterHash(eventStore.instances, (instance) => (defs[instance.defId] // still exists?
+    ));
+    return { defs, instances };
+}
+function excludeSubEventStore(master, sub) {
+    let { defs, instances } = master;
+    let filteredDefs = {};
+    let filteredInstances = {};
+    for (let defId in defs) {
+        if (!sub.defs[defId]) { // not explicitly excluded
+            filteredDefs[defId] = defs[defId];
+        }
+    }
+    for (let instanceId in instances) {
+        if (!sub.instances[instanceId] && // not explicitly excluded
+            filteredDefs[instances[instanceId].defId] // def wasn't filtered away
+        ) {
+            filteredInstances[instanceId] = instances[instanceId];
+        }
+    }
+    return {
+        defs: filteredDefs,
+        instances: filteredInstances,
+    };
+}
+
+function normalizeConstraint(input, context) {
+    if (Array.isArray(input)) {
+        return parseEvents(input, null, context, true); // allowOpenRange=true
+    }
+    if (typeof input === 'object' && input) { // non-null object
+        return parseEvents([input], null, context, true); // allowOpenRange=true
+    }
+    if (input != null) {
+        return String(input);
+    }
+    return null;
+}
+
+function parseClassNames(raw) {
+    if (Array.isArray(raw)) {
+        return raw;
+    }
+    if (typeof raw === 'string') {
+        return raw.split(/\s+/);
+    }
+    return [];
+}
+
+// TODO: better called "EventSettings" or "EventConfig"
+// TODO: move this file into structs
+// TODO: separate constraint/overlap/allow, because selection uses only that, not other props
+const EVENT_UI_REFINERS = {
+    display: String,
+    editable: Boolean,
+    startEditable: Boolean,
+    durationEditable: Boolean,
+    constraint: identity,
+    overlap: identity,
+    allow: identity,
+    className: parseClassNames,
+    classNames: parseClassNames,
+    color: String,
+    backgroundColor: String,
+    borderColor: String,
+    textColor: String,
+};
+const EMPTY_EVENT_UI = {
+    display: null,
+    startEditable: null,
+    durationEditable: null,
+    constraints: [],
+    overlap: null,
+    allows: [],
+    backgroundColor: '',
+    borderColor: '',
+    textColor: '',
+    classNames: [],
+};
+function createEventUi(refined, context) {
+    let constraint = normalizeConstraint(refined.constraint, context);
+    return {
+        display: refined.display || null,
+        startEditable: refined.startEditable != null ? refined.startEditable : refined.editable,
+        durationEditable: refined.durationEditable != null ? refined.durationEditable : refined.editable,
+        constraints: constraint != null ? [constraint] : [],
+        overlap: refined.overlap != null ? refined.overlap : null,
+        allows: refined.allow != null ? [refined.allow] : [],
+        backgroundColor: refined.backgroundColor || refined.color || '',
+        borderColor: refined.borderColor || refined.color || '',
+        textColor: refined.textColor || '',
+        classNames: (refined.className || []).concat(refined.classNames || []), // join singular and plural
+    };
+}
+// TODO: prevent against problems with <2 args!
+function combineEventUis(uis) {
+    return uis.reduce(combineTwoEventUis, EMPTY_EVENT_UI);
+}
+function combineTwoEventUis(item0, item1) {
+    return {
+        display: item1.display != null ? item1.display : item0.display,
+        startEditable: item1.startEditable != null ? item1.startEditable : item0.startEditable,
+        durationEditable: item1.durationEditable != null ? item1.durationEditable : item0.durationEditable,
+        constraints: item0.constraints.concat(item1.constraints),
+        overlap: typeof item1.overlap === 'boolean' ? item1.overlap : item0.overlap,
+        allows: item0.allows.concat(item1.allows),
+        backgroundColor: item1.backgroundColor || item0.backgroundColor,
+        borderColor: item1.borderColor || item0.borderColor,
+        textColor: item1.textColor || item0.textColor,
+        classNames: item0.classNames.concat(item1.classNames),
+    };
+}
+
+const EVENT_SOURCE_REFINERS = {
+    id: String,
+    defaultAllDay: Boolean,
+    url: String,
+    format: String,
+    events: identity,
+    eventDataTransform: identity,
+    // for any network-related sources
+    success: identity,
+    failure: identity,
+};
+function parseEventSource(raw, context, refiners = buildEventSourceRefiners(context)) {
+    let rawObj;
+    if (typeof raw === 'string') {
+        rawObj = { url: raw };
+    }
+    else if (typeof raw === 'function' || Array.isArray(raw)) {
+        rawObj = { events: raw };
+    }
+    else if (typeof raw === 'object' && raw) { // not null
+        rawObj = raw;
+    }
+    if (rawObj) {
+        let { refined, extra } = refineProps(rawObj, refiners);
+        let metaRes = buildEventSourceMeta(refined, context);
+        if (metaRes) {
+            return {
+                _raw: raw,
+                isFetching: false,
+                latestFetchId: '',
+                fetchRange: null,
+                defaultAllDay: refined.defaultAllDay,
+                eventDataTransform: refined.eventDataTransform,
+                success: refined.success,
+                failure: refined.failure,
+                publicId: refined.id || '',
+                sourceId: guid(),
+                sourceDefId: metaRes.sourceDefId,
+                meta: metaRes.meta,
+                ui: createEventUi(refined, context),
+                extendedProps: extra,
+            };
+        }
+    }
+    return null;
+}
+function buildEventSourceRefiners(context) {
+    return Object.assign(Object.assign(Object.assign({}, EVENT_UI_REFINERS), EVENT_SOURCE_REFINERS), context.pluginHooks.eventSourceRefiners);
+}
+function buildEventSourceMeta(raw, context) {
+    let defs = context.pluginHooks.eventSourceDefs;
+    for (let i = defs.length - 1; i >= 0; i -= 1) { // later-added plugins take precedence
+        let def = defs[i];
+        let meta = def.parseMeta(raw);
+        if (meta) {
+            return { sourceDefId: i, meta };
+        }
+    }
+    return null;
+}
+
+function reduceEventStore(eventStore, action, eventSources, dateProfile, context) {
+    switch (action.type) {
+        case 'RECEIVE_EVENTS': // raw
+            return receiveRawEvents(eventStore, eventSources[action.sourceId], action.fetchId, action.fetchRange, action.rawEvents, context);
+        case 'RESET_RAW_EVENTS':
+            return resetRawEvents(eventStore, eventSources[action.sourceId], action.rawEvents, dateProfile.activeRange, context);
+        case 'ADD_EVENTS': // already parsed, but not expanded
+            return addEvent(eventStore, action.eventStore, // new ones
+            dateProfile ? dateProfile.activeRange : null, context);
+        case 'RESET_EVENTS':
+            return action.eventStore;
+        case 'MERGE_EVENTS': // already parsed and expanded
+            return mergeEventStores(eventStore, action.eventStore);
+        case 'PREV': // TODO: how do we track all actions that affect dateProfile :(
+        case 'NEXT':
+        case 'CHANGE_DATE':
+        case 'CHANGE_VIEW_TYPE':
+            if (dateProfile) {
+                return expandRecurring(eventStore, dateProfile.activeRange, context);
+            }
+            return eventStore;
+        case 'REMOVE_EVENTS':
+            return excludeSubEventStore(eventStore, action.eventStore);
+        case 'REMOVE_EVENT_SOURCE':
+            return excludeEventsBySourceId(eventStore, action.sourceId);
+        case 'REMOVE_ALL_EVENT_SOURCES':
+            return filterEventStoreDefs(eventStore, (eventDef) => (!eventDef.sourceId // only keep events with no source id
+            ));
+        case 'REMOVE_ALL_EVENTS':
+            return createEmptyEventStore();
+        default:
+            return eventStore;
+    }
+}
+function receiveRawEvents(eventStore, eventSource, fetchId, fetchRange, rawEvents, context) {
+    if (eventSource && // not already removed
+        fetchId === eventSource.latestFetchId // TODO: wish this logic was always in event-sources
+    ) {
+        let subset = parseEvents(transformRawEvents(rawEvents, eventSource, context), eventSource, context);
+        if (fetchRange) {
+            subset = expandRecurring(subset, fetchRange, context);
+        }
+        return mergeEventStores(excludeEventsBySourceId(eventStore, eventSource.sourceId), subset);
+    }
+    return eventStore;
+}
+function resetRawEvents(existingEventStore, eventSource, rawEvents, activeRange, context) {
+    const { defIdMap, instanceIdMap } = buildPublicIdMaps(existingEventStore);
+    let newEventStore = parseEvents(transformRawEvents(rawEvents, eventSource, context), eventSource, context, false, defIdMap, instanceIdMap);
+    return expandRecurring(newEventStore, activeRange, context);
+}
+function transformRawEvents(rawEvents, eventSource, context) {
+    let calEachTransform = context.options.eventDataTransform;
+    let sourceEachTransform = eventSource ? eventSource.eventDataTransform : null;
+    if (sourceEachTransform) {
+        rawEvents = transformEachRawEvent(rawEvents, sourceEachTransform);
+    }
+    if (calEachTransform) {
+        rawEvents = transformEachRawEvent(rawEvents, calEachTransform);
+    }
+    return rawEvents;
+}
+function transformEachRawEvent(rawEvents, func) {
+    let refinedEvents;
+    if (!func) {
+        refinedEvents = rawEvents;
+    }
+    else {
+        refinedEvents = [];
+        for (let rawEvent of rawEvents) {
+            let refinedEvent = func(rawEvent);
+            if (refinedEvent) {
+                refinedEvents.push(refinedEvent);
+            }
+            else if (refinedEvent == null) {
+                refinedEvents.push(rawEvent);
+            } // if a different falsy value, do nothing
+        }
+    }
+    return refinedEvents;
+}
+function addEvent(eventStore, subset, expandRange, context) {
+    if (expandRange) {
+        subset = expandRecurring(subset, expandRange, context);
+    }
+    return mergeEventStores(eventStore, subset);
+}
+function rezoneEventStoreDates(eventStore, oldDateEnv, newDateEnv) {
+    let { defs } = eventStore;
+    let instances = mapHash(eventStore.instances, (instance) => {
+        let def = defs[instance.defId];
+        if (def.allDay) {
+            return instance; // isn't dependent on timezone
+        }
+        return Object.assign(Object.assign({}, instance), { range: {
+                start: newDateEnv.createMarker(oldDateEnv.toDate(instance.range.start, instance.forcedStartTzo)),
+                end: newDateEnv.createMarker(oldDateEnv.toDate(instance.range.end, instance.forcedEndTzo)),
+            }, forcedStartTzo: newDateEnv.canComputeOffset ? null : instance.forcedStartTzo, forcedEndTzo: newDateEnv.canComputeOffset ? null : instance.forcedEndTzo });
+    });
+    return { defs, instances };
+}
+function excludeEventsBySourceId(eventStore, sourceId) {
+    return filterEventStoreDefs(eventStore, (eventDef) => eventDef.sourceId !== sourceId);
+}
+// QUESTION: why not just return instances? do a general object-property-exclusion util
+function excludeInstances(eventStore, removals) {
+    return {
+        defs: eventStore.defs,
+        instances: filterHash(eventStore.instances, (instance) => !removals[instance.instanceId]),
+    };
+}
+function buildPublicIdMaps(eventStore) {
+    const { defs, instances } = eventStore;
+    const defIdMap = {};
+    const instanceIdMap = {};
+    for (let defId in defs) {
+        const def = defs[defId];
+        const { publicId } = def;
+        if (publicId) {
+            defIdMap[publicId] = defId;
+        }
+    }
+    for (let instanceId in instances) {
+        const instance = instances[instanceId];
+        const def = defs[instance.defId];
+        const { publicId } = def;
+        if (publicId) {
+            instanceIdMap[publicId] = instanceId;
+        }
+    }
+    return { defIdMap, instanceIdMap };
+}
+
+class Emitter {
+    constructor() {
+        this.handlers = {};
+        this.thisContext = null;
+    }
+    setThisContext(thisContext) {
+        this.thisContext = thisContext;
+    }
+    setOptions(options) {
+        this.options = options;
+    }
+    on(type, handler) {
+        addToHash(this.handlers, type, handler);
+    }
+    off(type, handler) {
+        removeFromHash(this.handlers, type, handler);
+    }
+    trigger(type, ...args) {
+        let attachedHandlers = this.handlers[type] || [];
+        let optionHandler = this.options && this.options[type];
+        let handlers = [].concat(optionHandler || [], attachedHandlers);
+        for (let handler of handlers) {
+            handler.apply(this.thisContext, args);
+        }
+    }
+    hasHandlers(type) {
+        return Boolean((this.handlers[type] && this.handlers[type].length) ||
+            (this.options && this.options[type]));
+    }
+}
+function addToHash(hash, type, handler) {
+    (hash[type] || (hash[type] = []))
+        .push(handler);
+}
+function removeFromHash(hash, type, handler) {
+    if (handler) {
+        if (hash[type]) {
+            hash[type] = hash[type].filter((func) => func !== handler);
+        }
+    }
+    else {
+        delete hash[type]; // remove all handler funcs for this type
+    }
+}
+
+const DEF_DEFAULTS = {
+    startTime: '09:00',
+    endTime: '17:00',
+    daysOfWeek: [1, 2, 3, 4, 5],
+    display: 'inverse-background',
+    classNames: 'fc-non-business',
+    groupId: '_businessHours', // so multiple defs get grouped
+};
+/*
+TODO: pass around as EventDefHash!!!
+*/
+function parseBusinessHours(input, context) {
+    return parseEvents(refineInputs(input), null, context);
+}
+function refineInputs(input) {
+    let rawDefs;
+    if (input === true) {
+        rawDefs = [{}]; // will get DEF_DEFAULTS verbatim
+    }
+    else if (Array.isArray(input)) {
+        // if specifying an array, every sub-definition NEEDS a day-of-week
+        rawDefs = input.filter((rawDef) => rawDef.daysOfWeek);
+    }
+    else if (typeof input === 'object' && input) { // non-null object
+        rawDefs = [input];
+    }
+    else { // is probably false
+        rawDefs = [];
+    }
+    rawDefs = rawDefs.map((rawDef) => (Object.assign(Object.assign({}, DEF_DEFAULTS), rawDef)));
+    return rawDefs;
 }
 
 function triggerDateSelect(selection, pev, context) {
@@ -6767,7 +6993,7 @@ startOverride, endOverride) {
 function getSegMeta(seg, todayRange, nowDate) {
     let segRange = seg.eventRange.range;
     return {
-        isPast: segRange.end < (nowDate || todayRange.start),
+        isPast: segRange.end <= (nowDate || todayRange.start),
         isFuture: segRange.start >= (nowDate || todayRange.end),
         isToday: todayRange && rangeContainsMarker(todayRange, segRange.start),
     };
@@ -6933,373 +7159,1237 @@ function fabricateEventRange(dateSpan, eventUiBases, context) {
     };
 }
 
-let calendarSystemClassMap = {};
-function registerCalendarSystem(name, theClass) {
-    calendarSystemClassMap[name] = theClass;
+/*
+given a function that resolves a result asynchronously.
+the function can either call passed-in success and failure callbacks,
+or it can return a promise.
+if you need to pass additional params to func, bind them first.
+*/
+function unpromisify(func, normalizedSuccessCallback, normalizedFailureCallback) {
+    // guard against success/failure callbacks being called more than once
+    // and guard against a promise AND callback being used together.
+    let isResolved = false;
+    let wrappedSuccess = function (res) {
+        if (!isResolved) {
+            isResolved = true;
+            normalizedSuccessCallback(res);
+        }
+    };
+    let wrappedFailure = function (error) {
+        if (!isResolved) {
+            isResolved = true;
+            normalizedFailureCallback(error);
+        }
+    };
+    let res = func(wrappedSuccess, wrappedFailure);
+    if (res && typeof res.then === 'function') {
+        res.then(wrappedSuccess, wrappedFailure);
+    }
 }
-function createCalendarSystem(name) {
-    return new calendarSystemClassMap[name]();
-}
-class GregorianCalendarSystem {
-    getMarkerYear(d) {
-        return d.getUTCFullYear();
-    }
-    getMarkerMonth(d) {
-        return d.getUTCMonth();
-    }
-    getMarkerDay(d) {
-        return d.getUTCDate();
-    }
-    arrayToMarker(arr) {
-        return arrayToUtcDate(arr);
-    }
-    markerToArray(marker) {
-        return dateToUtcArray(marker);
-    }
-}
-registerCalendarSystem('gregory', GregorianCalendarSystem);
 
-const ISO_RE = /^\s*(\d{4})(-?(\d{2})(-?(\d{2})([T ](\d{2}):?(\d{2})(:?(\d{2})(\.(\d+))?)?(Z|(([-+])(\d{2})(:?(\d{2}))?))?)?)?)?$/;
-function parse(str) {
-    let m = ISO_RE.exec(str);
-    if (m) {
-        let marker = new Date(Date.UTC(Number(m[1]), m[3] ? Number(m[3]) - 1 : 0, Number(m[5] || 1), Number(m[7] || 0), Number(m[8] || 0), Number(m[10] || 0), m[12] ? Number(`0.${m[12]}`) * 1000 : 0));
-        if (isValidDate(marker)) {
-            let timeZoneOffset = null;
-            if (m[13]) {
-                timeZoneOffset = (m[15] === '-' ? -1 : 1) * (Number(m[16] || 0) * 60 +
-                    Number(m[18] || 0));
+class JsonRequestError extends Error {
+    constructor(message, response) {
+        super(message);
+        this.response = response;
+    }
+}
+function requestJson(method, url, params) {
+    method = method.toUpperCase();
+    const fetchOptions = {
+        method,
+    };
+    if (method === 'GET') {
+        url += (url.indexOf('?') === -1 ? '?' : '&') +
+            new URLSearchParams(params);
+    }
+    else {
+        fetchOptions.body = new URLSearchParams(params);
+        fetchOptions.headers = {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        };
+    }
+    return fetch(url, fetchOptions).then((fetchRes) => {
+        if (fetchRes.ok) {
+            return fetchRes.json().then((parsedResponse) => {
+                return [parsedResponse, fetchRes];
+            }, () => {
+                throw new JsonRequestError('Failure parsing JSON', fetchRes);
+            });
+        }
+        else {
+            throw new JsonRequestError('Request failed', fetchRes);
+        }
+    });
+}
+
+let canVGrowWithinCell;
+function getCanVGrowWithinCell() {
+    if (canVGrowWithinCell == null) {
+        canVGrowWithinCell = computeCanVGrowWithinCell();
+    }
+    return canVGrowWithinCell;
+}
+function computeCanVGrowWithinCell() {
+    // for SSR, because this function is call immediately at top-level
+    // TODO: just make this logic execute top-level, immediately, instead of doing lazily
+    if (typeof document === 'undefined') {
+        return true;
+    }
+    let el = document.createElement('div');
+    el.style.position = 'absolute';
+    el.style.top = '0px';
+    el.style.left = '0px';
+    el.innerHTML = '<table><tr><td><div></div></td></tr></table>';
+    el.querySelector('table').style.height = '100px';
+    el.querySelector('div').style.height = '100%';
+    document.body.appendChild(el);
+    let div = el.querySelector('div');
+    let possible = div.offsetHeight > 0;
+    document.body.removeChild(el);
+    return possible;
+}
+
+class CalendarRoot extends BaseComponent {
+    constructor() {
+        super(...arguments);
+        this.state = {
+            forPrint: false,
+        };
+        this.handleBeforePrint = () => {
+            flushSync(() => {
+                this.setState({ forPrint: true });
+            });
+        };
+        this.handleAfterPrint = () => {
+            flushSync(() => {
+                this.setState({ forPrint: false });
+            });
+        };
+    }
+    render() {
+        let { props } = this;
+        let { options } = props;
+        let { forPrint } = this.state;
+        let isHeightAuto = forPrint || options.height === 'auto' || options.contentHeight === 'auto';
+        let height = (!isHeightAuto && options.height != null) ? options.height : '';
+        let classNames = [
+            'fc',
+            forPrint ? 'fc-media-print' : 'fc-media-screen',
+            `fc-direction-${options.direction}`,
+            props.theme.getClass('root'),
+        ];
+        if (!getCanVGrowWithinCell()) {
+            classNames.push('fc-liquid-hack');
+        }
+        return props.children(classNames, height, isHeightAuto, forPrint);
+    }
+    componentDidMount() {
+        let { emitter } = this.props;
+        emitter.on('_beforeprint', this.handleBeforePrint);
+        emitter.on('_afterprint', this.handleAfterPrint);
+    }
+    componentWillUnmount() {
+        let { emitter } = this.props;
+        emitter.off('_beforeprint', this.handleBeforePrint);
+        emitter.off('_afterprint', this.handleAfterPrint);
+    }
+}
+
+class Interaction {
+    constructor(settings) {
+        this.component = settings.component;
+        this.isHitComboAllowed = settings.isHitComboAllowed || null;
+    }
+    destroy() {
+    }
+}
+function parseInteractionSettings(component, input) {
+    return {
+        component,
+        el: input.el,
+        useEventCenter: input.useEventCenter != null ? input.useEventCenter : true,
+        isHitComboAllowed: input.isHitComboAllowed || null,
+    };
+}
+function interactionSettingsToStore(settings) {
+    return {
+        [settings.component.uid]: settings,
+    };
+}
+// global state
+const interactionSettingsStore = {};
+
+class NowTimer extends preact__WEBPACK_IMPORTED_MODULE_0__.Component {
+    constructor(props, context) {
+        super(props, context);
+        this.handleRefresh = () => {
+            let timing = this.computeTiming();
+            if (timing.state.nowDate.valueOf() !== this.state.nowDate.valueOf()) {
+                this.setState(timing.state);
             }
-            return {
-                marker,
-                isTimeUnspecified: !m[6],
-                timeZoneOffset,
+            this.clearTimeout();
+            this.setTimeout(timing.waitMs);
+        };
+        this.handleVisibilityChange = () => {
+            if (!document.hidden) {
+                this.handleRefresh();
+            }
+        };
+        this.state = this.computeTiming().state;
+    }
+    render() {
+        let { props, state } = this;
+        return props.children(state.nowDate, state.todayRange);
+    }
+    componentDidMount() {
+        this.setTimeout();
+        this.context.nowManager.addResetListener(this.handleRefresh);
+        // fired tab becomes visible after being hidden
+        document.addEventListener('visibilitychange', this.handleVisibilityChange);
+    }
+    componentDidUpdate(prevProps) {
+        if (prevProps.unit !== this.props.unit) {
+            this.clearTimeout();
+            this.setTimeout();
+        }
+    }
+    componentWillUnmount() {
+        this.clearTimeout();
+        this.context.nowManager.removeResetListener(this.handleRefresh);
+        document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+    }
+    computeTiming() {
+        let { props, context } = this;
+        let unroundedNow = context.nowManager.getDateMarker();
+        let currentUnitStart = context.dateEnv.startOf(unroundedNow, props.unit);
+        let nextUnitStart = context.dateEnv.add(currentUnitStart, createDuration(1, props.unit));
+        let waitMs = nextUnitStart.valueOf() - unroundedNow.valueOf();
+        // there is a max setTimeout ms value (https://stackoverflow.com/a/3468650/96342)
+        // ensure no longer than a day
+        waitMs = Math.min(1000 * 60 * 60 * 24, waitMs);
+        return {
+            state: { nowDate: currentUnitStart, todayRange: buildDayRange(currentUnitStart) },
+            waitMs,
+        };
+    }
+    setTimeout(waitMs = this.computeTiming().waitMs) {
+        // NOTE: timeout could take longer than expected if tab sleeps,
+        // which is why we listen to 'visibilitychange'
+        this.timeoutId = setTimeout(() => {
+            // NOTE: timeout could also return *earlier* than expected, and we need to wait 2 ms more
+            // This is why use use same waitMs from computeTiming, so we don't skip an interval while
+            // .setState() is executing
+            const timing = this.computeTiming();
+            this.setState(timing.state, () => {
+                this.setTimeout(timing.waitMs);
+            });
+        }, waitMs);
+    }
+    clearTimeout() {
+        if (this.timeoutId) {
+            clearTimeout(this.timeoutId);
+        }
+    }
+}
+NowTimer.contextType = ViewContextType;
+function buildDayRange(date) {
+    let start = startOfDay(date);
+    let end = addDays(start, 1);
+    return { start, end };
+}
+
+class CalendarImpl {
+    getCurrentData() {
+        return this.currentDataManager.getCurrentData();
+    }
+    dispatch(action) {
+        this.currentDataManager.dispatch(action);
+    }
+    get view() { return this.getCurrentData().viewApi; }
+    batchRendering(callback) {
+        callback();
+    }
+    updateSize() {
+        this.trigger('_resize', true);
+    }
+    // Options
+    // -----------------------------------------------------------------------------------------------------------------
+    setOption(name, val) {
+        this.dispatch({
+            type: 'SET_OPTION',
+            optionName: name,
+            rawOptionValue: val,
+        });
+    }
+    getOption(name) {
+        return this.currentDataManager.currentCalendarOptionsInput[name];
+    }
+    getAvailableLocaleCodes() {
+        return Object.keys(this.getCurrentData().availableRawLocales);
+    }
+    // Trigger
+    // -----------------------------------------------------------------------------------------------------------------
+    on(handlerName, handler) {
+        let { currentDataManager } = this;
+        if (currentDataManager.currentCalendarOptionsRefiners[handlerName]) {
+            currentDataManager.emitter.on(handlerName, handler);
+        }
+        else {
+            console.warn(`Unknown listener name '${handlerName}'`);
+        }
+    }
+    off(handlerName, handler) {
+        this.currentDataManager.emitter.off(handlerName, handler);
+    }
+    // not meant for public use
+    trigger(handlerName, ...args) {
+        this.currentDataManager.emitter.trigger(handlerName, ...args);
+    }
+    // View
+    // -----------------------------------------------------------------------------------------------------------------
+    changeView(viewType, dateOrRange) {
+        this.batchRendering(() => {
+            this.unselect();
+            if (dateOrRange) {
+                if (dateOrRange.start && dateOrRange.end) { // a range
+                    this.dispatch({
+                        type: 'CHANGE_VIEW_TYPE',
+                        viewType,
+                    });
+                    this.dispatch({
+                        type: 'SET_OPTION',
+                        optionName: 'visibleRange',
+                        rawOptionValue: dateOrRange,
+                    });
+                }
+                else {
+                    let { dateEnv } = this.getCurrentData();
+                    this.dispatch({
+                        type: 'CHANGE_VIEW_TYPE',
+                        viewType,
+                        dateMarker: dateEnv.createMarker(dateOrRange),
+                    });
+                }
+            }
+            else {
+                this.dispatch({
+                    type: 'CHANGE_VIEW_TYPE',
+                    viewType,
+                });
+            }
+        });
+    }
+    // Forces navigation to a view for the given date.
+    // `viewType` can be a specific view name or a generic one like "week" or "day".
+    // needs to change
+    zoomTo(dateMarker, viewType) {
+        let state = this.getCurrentData();
+        let spec;
+        viewType = viewType || 'day'; // day is default zoom
+        spec = state.viewSpecs[viewType] || this.getUnitViewSpec(viewType);
+        this.unselect();
+        if (spec) {
+            this.dispatch({
+                type: 'CHANGE_VIEW_TYPE',
+                viewType: spec.type,
+                dateMarker,
+            });
+        }
+        else {
+            this.dispatch({
+                type: 'CHANGE_DATE',
+                dateMarker,
+            });
+        }
+    }
+    // Given a duration singular unit, like "week" or "day", finds a matching view spec.
+    // Preference is given to views that have corresponding buttons.
+    getUnitViewSpec(unit) {
+        let { viewSpecs, toolbarConfig } = this.getCurrentData();
+        let viewTypes = [].concat(toolbarConfig.header ? toolbarConfig.header.viewsWithButtons : [], toolbarConfig.footer ? toolbarConfig.footer.viewsWithButtons : []);
+        let i;
+        let spec;
+        for (let viewType in viewSpecs) {
+            viewTypes.push(viewType);
+        }
+        for (i = 0; i < viewTypes.length; i += 1) {
+            spec = viewSpecs[viewTypes[i]];
+            if (spec) {
+                if (spec.singleUnit === unit) {
+                    return spec;
+                }
+            }
+        }
+        return null;
+    }
+    // Current Date
+    // -----------------------------------------------------------------------------------------------------------------
+    prev() {
+        this.unselect();
+        this.dispatch({ type: 'PREV' });
+    }
+    next() {
+        this.unselect();
+        this.dispatch({ type: 'NEXT' });
+    }
+    prevYear() {
+        let state = this.getCurrentData();
+        this.unselect();
+        this.dispatch({
+            type: 'CHANGE_DATE',
+            dateMarker: state.dateEnv.addYears(state.currentDate, -1),
+        });
+    }
+    nextYear() {
+        let state = this.getCurrentData();
+        this.unselect();
+        this.dispatch({
+            type: 'CHANGE_DATE',
+            dateMarker: state.dateEnv.addYears(state.currentDate, 1),
+        });
+    }
+    today() {
+        let state = this.getCurrentData();
+        this.unselect();
+        this.dispatch({
+            type: 'CHANGE_DATE',
+            dateMarker: state.nowManager.getDateMarker(),
+        });
+    }
+    gotoDate(zonedDateInput) {
+        let state = this.getCurrentData();
+        this.unselect();
+        this.dispatch({
+            type: 'CHANGE_DATE',
+            dateMarker: state.dateEnv.createMarker(zonedDateInput),
+        });
+    }
+    incrementDate(deltaInput) {
+        let state = this.getCurrentData();
+        let delta = createDuration(deltaInput);
+        if (delta) { // else, warn about invalid input?
+            this.unselect();
+            this.dispatch({
+                type: 'CHANGE_DATE',
+                dateMarker: state.dateEnv.add(state.currentDate, delta),
+            });
+        }
+    }
+    getDate() {
+        let state = this.getCurrentData();
+        return state.dateEnv.toDate(state.currentDate);
+    }
+    // Date Formatting Utils
+    // -----------------------------------------------------------------------------------------------------------------
+    formatDate(d, formatter) {
+        let { dateEnv } = this.getCurrentData();
+        return dateEnv.format(dateEnv.createMarker(d), createFormatter(formatter));
+    }
+    // `settings` is for formatter AND isEndExclusive
+    formatRange(d0, d1, settings) {
+        let { dateEnv } = this.getCurrentData();
+        return dateEnv.formatRange(dateEnv.createMarker(d0), dateEnv.createMarker(d1), createFormatter(settings), settings);
+    }
+    formatIso(d, omitTime) {
+        let { dateEnv } = this.getCurrentData();
+        return dateEnv.formatIso(dateEnv.createMarker(d), { omitTime });
+    }
+    // Date Selection / Event Selection / DayClick
+    // -----------------------------------------------------------------------------------------------------------------
+    select(dateOrObj, endDate) {
+        let selectionInput;
+        if (endDate == null) {
+            if (dateOrObj.start != null) {
+                selectionInput = dateOrObj;
+            }
+            else {
+                selectionInput = {
+                    start: dateOrObj,
+                    end: null,
+                };
+            }
+        }
+        else {
+            selectionInput = {
+                start: dateOrObj,
+                end: endDate,
             };
         }
+        let state = this.getCurrentData();
+        let selection = parseDateSpan(selectionInput, state.dateEnv, createDuration({ days: 1 }));
+        if (selection) { // throw parse error otherwise?
+            this.dispatch({ type: 'SELECT_DATES', selection });
+            triggerDateSelect(selection, null, state);
+        }
     }
-    return null;
+    unselect(pev) {
+        let state = this.getCurrentData();
+        if (state.dateSelection) {
+            this.dispatch({ type: 'UNSELECT_DATES' });
+            triggerDateUnselect(pev, state);
+        }
+    }
+    // Public Events API
+    // -----------------------------------------------------------------------------------------------------------------
+    addEvent(eventInput, sourceInput) {
+        if (eventInput instanceof EventImpl) {
+            let def = eventInput._def;
+            let instance = eventInput._instance;
+            let currentData = this.getCurrentData();
+            // not already present? don't want to add an old snapshot
+            if (!currentData.eventStore.defs[def.defId]) {
+                this.dispatch({
+                    type: 'ADD_EVENTS',
+                    eventStore: eventTupleToStore({ def, instance }), // TODO: better util for two args?
+                });
+                this.triggerEventAdd(eventInput);
+            }
+            return eventInput;
+        }
+        let state = this.getCurrentData();
+        let eventSource;
+        if (sourceInput instanceof EventSourceImpl) {
+            eventSource = sourceInput.internalEventSource;
+        }
+        else if (typeof sourceInput === 'boolean') {
+            if (sourceInput) { // true. part of the first event source
+                [eventSource] = hashValuesToArray(state.eventSources);
+            }
+        }
+        else if (sourceInput != null) { // an ID. accepts a number too
+            let sourceApi = this.getEventSourceById(sourceInput); // TODO: use an internal function
+            if (!sourceApi) {
+                console.warn(`Could not find an event source with ID "${sourceInput}"`); // TODO: test
+                return null;
+            }
+            eventSource = sourceApi.internalEventSource;
+        }
+        let tuple = parseEvent(eventInput, eventSource, state, false);
+        if (tuple) {
+            let newEventApi = new EventImpl(state, tuple.def, tuple.def.recurringDef ? null : tuple.instance);
+            this.dispatch({
+                type: 'ADD_EVENTS',
+                eventStore: eventTupleToStore(tuple),
+            });
+            this.triggerEventAdd(newEventApi);
+            return newEventApi;
+        }
+        return null;
+    }
+    triggerEventAdd(eventApi) {
+        let { emitter } = this.getCurrentData();
+        emitter.trigger('eventAdd', {
+            event: eventApi,
+            relatedEvents: [],
+            revert: () => {
+                this.dispatch({
+                    type: 'REMOVE_EVENTS',
+                    eventStore: eventApiToStore(eventApi),
+                });
+            },
+        });
+    }
+    // TODO: optimize
+    getEventById(id) {
+        let state = this.getCurrentData();
+        let { defs, instances } = state.eventStore;
+        id = String(id);
+        for (let defId in defs) {
+            let def = defs[defId];
+            if (def.publicId === id) {
+                if (def.recurringDef) {
+                    return new EventImpl(state, def, null);
+                }
+                for (let instanceId in instances) {
+                    let instance = instances[instanceId];
+                    if (instance.defId === def.defId) {
+                        return new EventImpl(state, def, instance);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+    getEvents() {
+        let currentData = this.getCurrentData();
+        return buildEventApis(currentData.eventStore, currentData);
+    }
+    removeAllEvents() {
+        this.dispatch({ type: 'REMOVE_ALL_EVENTS' });
+    }
+    // Public Event Sources API
+    // -----------------------------------------------------------------------------------------------------------------
+    getEventSources() {
+        let state = this.getCurrentData();
+        let sourceHash = state.eventSources;
+        let sourceApis = [];
+        for (let internalId in sourceHash) {
+            sourceApis.push(new EventSourceImpl(state, sourceHash[internalId]));
+        }
+        return sourceApis;
+    }
+    getEventSourceById(id) {
+        let state = this.getCurrentData();
+        let sourceHash = state.eventSources;
+        id = String(id);
+        for (let sourceId in sourceHash) {
+            if (sourceHash[sourceId].publicId === id) {
+                return new EventSourceImpl(state, sourceHash[sourceId]);
+            }
+        }
+        return null;
+    }
+    addEventSource(sourceInput) {
+        let state = this.getCurrentData();
+        if (sourceInput instanceof EventSourceImpl) {
+            // not already present? don't want to add an old snapshot
+            if (!state.eventSources[sourceInput.internalEventSource.sourceId]) {
+                this.dispatch({
+                    type: 'ADD_EVENT_SOURCES',
+                    sources: [sourceInput.internalEventSource],
+                });
+            }
+            return sourceInput;
+        }
+        let eventSource = parseEventSource(sourceInput, state);
+        if (eventSource) { // TODO: error otherwise?
+            this.dispatch({ type: 'ADD_EVENT_SOURCES', sources: [eventSource] });
+            return new EventSourceImpl(state, eventSource);
+        }
+        return null;
+    }
+    removeAllEventSources() {
+        this.dispatch({ type: 'REMOVE_ALL_EVENT_SOURCES' });
+    }
+    refetchEvents() {
+        this.dispatch({ type: 'FETCH_EVENT_SOURCES', isRefetch: true });
+    }
+    // Scroll
+    // -----------------------------------------------------------------------------------------------------------------
+    scrollToTime(timeInput) {
+        let time = createDuration(timeInput);
+        if (time) {
+            this.trigger('_scrollRequest', { time });
+        }
+    }
 }
 
-class DateEnv {
-    constructor(settings) {
-        let timeZone = this.timeZone = settings.timeZone;
-        let isNamedTimeZone = timeZone !== 'local' && timeZone !== 'UTC';
-        if (settings.namedTimeZoneImpl && isNamedTimeZone) {
-            this.namedTimeZoneImpl = new settings.namedTimeZoneImpl(timeZone);
-        }
-        this.canComputeOffset = Boolean(!isNamedTimeZone || this.namedTimeZoneImpl);
-        this.calendarSystem = createCalendarSystem(settings.calendarSystem);
-        this.locale = settings.locale;
-        this.weekDow = settings.locale.week.dow;
-        this.weekDoy = settings.locale.week.doy;
-        if (settings.weekNumberCalculation === 'ISO') {
-            this.weekDow = 1;
-            this.weekDoy = 4;
-        }
-        if (typeof settings.firstDay === 'number') {
-            this.weekDow = settings.firstDay;
-        }
-        if (typeof settings.weekNumberCalculation === 'function') {
-            this.weekNumberFunc = settings.weekNumberCalculation;
-        }
-        this.weekText = settings.weekText != null ? settings.weekText : settings.locale.options.weekText;
-        this.weekTextLong = (settings.weekTextLong != null ? settings.weekTextLong : settings.locale.options.weekTextLong) || this.weekText;
-        this.cmdFormatter = settings.cmdFormatter;
-        this.defaultSeparator = settings.defaultSeparator;
+function pointInsideRect(point, rect) {
+    return point.left >= rect.left &&
+        point.left < rect.right &&
+        point.top >= rect.top &&
+        point.top < rect.bottom;
+}
+// Returns a new rectangle that is the intersection of the two rectangles. If they don't intersect, returns false
+function intersectRects(rect1, rect2) {
+    let res = {
+        left: Math.max(rect1.left, rect2.left),
+        right: Math.min(rect1.right, rect2.right),
+        top: Math.max(rect1.top, rect2.top),
+        bottom: Math.min(rect1.bottom, rect2.bottom),
+    };
+    if (res.left < res.right && res.top < res.bottom) {
+        return res;
     }
-    // Creating / Parsing
-    createMarker(input) {
-        let meta = this.createMarkerMeta(input);
-        if (meta === null) {
-            return null;
-        }
-        return meta.marker;
+    return false;
+}
+function translateRect(rect, deltaX, deltaY) {
+    return {
+        left: rect.left + deltaX,
+        right: rect.right + deltaX,
+        top: rect.top + deltaY,
+        bottom: rect.bottom + deltaY,
+    };
+}
+// Returns a new point that will have been moved to reside within the given rectangle
+function constrainPoint(point, rect) {
+    return {
+        left: Math.min(Math.max(point.left, rect.left), rect.right),
+        top: Math.min(Math.max(point.top, rect.top), rect.bottom),
+    };
+}
+// Returns a point that is the center of the given rectangle
+function getRectCenter(rect) {
+    return {
+        left: (rect.left + rect.right) / 2,
+        top: (rect.top + rect.bottom) / 2,
+    };
+}
+// Subtracts point2's coordinates from point1's coordinates, returning a delta
+function diffPoints(point1, point2) {
+    return {
+        left: point1.left - point2.left,
+        top: point1.top - point2.top,
+    };
+}
+
+const EMPTY_EVENT_STORE = createEmptyEventStore(); // for purecomponents. TODO: keep elsewhere
+class Splitter {
+    constructor() {
+        this.getKeysForEventDefs = memoize(this._getKeysForEventDefs);
+        this.splitDateSelection = memoize(this._splitDateSpan);
+        this.splitEventStore = memoize(this._splitEventStore);
+        this.splitIndividualUi = memoize(this._splitIndividualUi);
+        this.splitEventDrag = memoize(this._splitInteraction);
+        this.splitEventResize = memoize(this._splitInteraction);
+        this.eventUiBuilders = {}; // TODO: typescript protection
     }
-    createNowMarker() {
-        if (this.canComputeOffset) {
-            return this.timestampToMarker(new Date().valueOf());
+    splitProps(props) {
+        let keyInfos = this.getKeyInfo(props);
+        let defKeys = this.getKeysForEventDefs(props.eventStore);
+        let dateSelections = this.splitDateSelection(props.dateSelection);
+        let individualUi = this.splitIndividualUi(props.eventUiBases, defKeys); // the individual *bases*
+        let eventStores = this.splitEventStore(props.eventStore, defKeys);
+        let eventDrags = this.splitEventDrag(props.eventDrag);
+        let eventResizes = this.splitEventResize(props.eventResize);
+        let splitProps = {};
+        this.eventUiBuilders = mapHash(keyInfos, (info, key) => this.eventUiBuilders[key] || memoize(buildEventUiForKey));
+        for (let key in keyInfos) {
+            let keyInfo = keyInfos[key];
+            let eventStore = eventStores[key] || EMPTY_EVENT_STORE;
+            let buildEventUi = this.eventUiBuilders[key];
+            splitProps[key] = {
+                businessHours: keyInfo.businessHours || props.businessHours,
+                dateSelection: dateSelections[key] || null,
+                eventStore,
+                eventUiBases: buildEventUi(props.eventUiBases[''], keyInfo.ui, individualUi[key]),
+                eventSelection: eventStore.instances[props.eventSelection] ? props.eventSelection : '',
+                eventDrag: eventDrags[key] || null,
+                eventResize: eventResizes[key] || null,
+            };
         }
-        // if we can't compute the current date val for a timezone,
-        // better to give the current local date vals than UTC
-        return arrayToUtcDate(dateToLocalArray(new Date()));
+        return splitProps;
     }
-    createMarkerMeta(input) {
-        if (typeof input === 'string') {
-            return this.parse(input);
-        }
-        let marker = null;
-        if (typeof input === 'number') {
-            marker = this.timestampToMarker(input);
-        }
-        else if (input instanceof Date) {
-            input = input.valueOf();
-            if (!isNaN(input)) {
-                marker = this.timestampToMarker(input);
+    _splitDateSpan(dateSpan) {
+        let dateSpans = {};
+        if (dateSpan) {
+            let keys = this.getKeysForDateSpan(dateSpan);
+            for (let key of keys) {
+                dateSpans[key] = dateSpan;
             }
         }
-        else if (Array.isArray(input)) {
-            marker = arrayToUtcDate(input);
-        }
-        if (marker === null || !isValidDate(marker)) {
-            return null;
-        }
-        return { marker, isTimeUnspecified: false, forcedTzo: null };
+        return dateSpans;
     }
-    parse(s) {
-        let parts = parse(s);
-        if (parts === null) {
-            return null;
-        }
-        let { marker } = parts;
-        let forcedTzo = null;
-        if (parts.timeZoneOffset !== null) {
-            if (this.canComputeOffset) {
-                marker = this.timestampToMarker(marker.valueOf() - parts.timeZoneOffset * 60 * 1000);
-            }
-            else {
-                forcedTzo = parts.timeZoneOffset;
+    _getKeysForEventDefs(eventStore) {
+        return mapHash(eventStore.defs, (eventDef) => this.getKeysForEventDef(eventDef));
+    }
+    _splitEventStore(eventStore, defKeys) {
+        let { defs, instances } = eventStore;
+        let splitStores = {};
+        for (let defId in defs) {
+            for (let key of defKeys[defId]) {
+                if (!splitStores[key]) {
+                    splitStores[key] = createEmptyEventStore();
+                }
+                splitStores[key].defs[defId] = defs[defId];
             }
         }
-        return { marker, isTimeUnspecified: parts.isTimeUnspecified, forcedTzo };
-    }
-    // Accessors
-    getYear(marker) {
-        return this.calendarSystem.getMarkerYear(marker);
-    }
-    getMonth(marker) {
-        return this.calendarSystem.getMarkerMonth(marker);
-    }
-    getDay(marker) {
-        return this.calendarSystem.getMarkerDay(marker);
-    }
-    // Adding / Subtracting
-    add(marker, dur) {
-        let a = this.calendarSystem.markerToArray(marker);
-        a[0] += dur.years;
-        a[1] += dur.months;
-        a[2] += dur.days;
-        a[6] += dur.milliseconds;
-        return this.calendarSystem.arrayToMarker(a);
-    }
-    subtract(marker, dur) {
-        let a = this.calendarSystem.markerToArray(marker);
-        a[0] -= dur.years;
-        a[1] -= dur.months;
-        a[2] -= dur.days;
-        a[6] -= dur.milliseconds;
-        return this.calendarSystem.arrayToMarker(a);
-    }
-    addYears(marker, n) {
-        let a = this.calendarSystem.markerToArray(marker);
-        a[0] += n;
-        return this.calendarSystem.arrayToMarker(a);
-    }
-    addMonths(marker, n) {
-        let a = this.calendarSystem.markerToArray(marker);
-        a[1] += n;
-        return this.calendarSystem.arrayToMarker(a);
-    }
-    // Diffing Whole Units
-    diffWholeYears(m0, m1) {
-        let { calendarSystem } = this;
-        if (timeAsMs(m0) === timeAsMs(m1) &&
-            calendarSystem.getMarkerDay(m0) === calendarSystem.getMarkerDay(m1) &&
-            calendarSystem.getMarkerMonth(m0) === calendarSystem.getMarkerMonth(m1)) {
-            return calendarSystem.getMarkerYear(m1) - calendarSystem.getMarkerYear(m0);
-        }
-        return null;
-    }
-    diffWholeMonths(m0, m1) {
-        let { calendarSystem } = this;
-        if (timeAsMs(m0) === timeAsMs(m1) &&
-            calendarSystem.getMarkerDay(m0) === calendarSystem.getMarkerDay(m1)) {
-            return (calendarSystem.getMarkerMonth(m1) - calendarSystem.getMarkerMonth(m0)) +
-                (calendarSystem.getMarkerYear(m1) - calendarSystem.getMarkerYear(m0)) * 12;
-        }
-        return null;
-    }
-    // Range / Duration
-    greatestWholeUnit(m0, m1) {
-        let n = this.diffWholeYears(m0, m1);
-        if (n !== null) {
-            return { unit: 'year', value: n };
-        }
-        n = this.diffWholeMonths(m0, m1);
-        if (n !== null) {
-            return { unit: 'month', value: n };
-        }
-        n = diffWholeWeeks(m0, m1);
-        if (n !== null) {
-            return { unit: 'week', value: n };
-        }
-        n = diffWholeDays(m0, m1);
-        if (n !== null) {
-            return { unit: 'day', value: n };
-        }
-        n = diffHours(m0, m1);
-        if (isInt(n)) {
-            return { unit: 'hour', value: n };
-        }
-        n = diffMinutes(m0, m1);
-        if (isInt(n)) {
-            return { unit: 'minute', value: n };
-        }
-        n = diffSeconds(m0, m1);
-        if (isInt(n)) {
-            return { unit: 'second', value: n };
-        }
-        return { unit: 'millisecond', value: m1.valueOf() - m0.valueOf() };
-    }
-    countDurationsBetween(m0, m1, d) {
-        // TODO: can use greatestWholeUnit
-        let diff;
-        if (d.years) {
-            diff = this.diffWholeYears(m0, m1);
-            if (diff !== null) {
-                return diff / asRoughYears(d);
+        for (let instanceId in instances) {
+            let instance = instances[instanceId];
+            for (let key of defKeys[instance.defId]) {
+                if (splitStores[key]) { // must have already been created
+                    splitStores[key].instances[instanceId] = instance;
+                }
             }
         }
-        if (d.months) {
-            diff = this.diffWholeMonths(m0, m1);
-            if (diff !== null) {
-                return diff / asRoughMonths(d);
+        return splitStores;
+    }
+    _splitIndividualUi(eventUiBases, defKeys) {
+        let splitHashes = {};
+        for (let defId in eventUiBases) {
+            if (defId) { // not the '' key
+                for (let key of defKeys[defId]) {
+                    if (!splitHashes[key]) {
+                        splitHashes[key] = {};
+                    }
+                    splitHashes[key][defId] = eventUiBases[defId];
+                }
             }
         }
-        if (d.days) {
-            diff = diffWholeDays(m0, m1);
-            if (diff !== null) {
-                return diff / asRoughDays(d);
+        return splitHashes;
+    }
+    _splitInteraction(interaction) {
+        let splitStates = {};
+        if (interaction) {
+            let affectedStores = this._splitEventStore(interaction.affectedEvents, this._getKeysForEventDefs(interaction.affectedEvents));
+            // can't rely on defKeys because event data is mutated
+            let mutatedKeysByDefId = this._getKeysForEventDefs(interaction.mutatedEvents);
+            let mutatedStores = this._splitEventStore(interaction.mutatedEvents, mutatedKeysByDefId);
+            let populate = (key) => {
+                if (!splitStates[key]) {
+                    splitStates[key] = {
+                        affectedEvents: affectedStores[key] || EMPTY_EVENT_STORE,
+                        mutatedEvents: mutatedStores[key] || EMPTY_EVENT_STORE,
+                        isEvent: interaction.isEvent,
+                    };
+                }
+            };
+            for (let key in affectedStores) {
+                populate(key);
+            }
+            for (let key in mutatedStores) {
+                populate(key);
             }
         }
-        return (m1.valueOf() - m0.valueOf()) / asRoughMs(d);
+        return splitStates;
     }
-    // Start-Of
-    // these DON'T return zoned-dates. only UTC start-of dates
-    startOf(m, unit) {
-        if (unit === 'year') {
-            return this.startOfYear(m);
-        }
-        if (unit === 'month') {
-            return this.startOfMonth(m);
-        }
-        if (unit === 'week') {
-            return this.startOfWeek(m);
-        }
-        if (unit === 'day') {
-            return startOfDay(m);
-        }
-        if (unit === 'hour') {
-            return startOfHour(m);
-        }
-        if (unit === 'minute') {
-            return startOfMinute(m);
-        }
-        if (unit === 'second') {
-            return startOfSecond(m);
-        }
-        return null;
+}
+function buildEventUiForKey(allUi, eventUiForKey, individualUi) {
+    let baseParts = [];
+    if (allUi) {
+        baseParts.push(allUi);
     }
-    startOfYear(m) {
-        return this.calendarSystem.arrayToMarker([
-            this.calendarSystem.getMarkerYear(m),
-        ]);
+    if (eventUiForKey) {
+        baseParts.push(eventUiForKey);
     }
-    startOfMonth(m) {
-        return this.calendarSystem.arrayToMarker([
-            this.calendarSystem.getMarkerYear(m),
-            this.calendarSystem.getMarkerMonth(m),
-        ]);
+    let stuff = {
+        '': combineEventUis(baseParts),
+    };
+    if (individualUi) {
+        Object.assign(stuff, individualUi);
     }
-    startOfWeek(m) {
-        return this.calendarSystem.arrayToMarker([
-            this.calendarSystem.getMarkerYear(m),
-            this.calendarSystem.getMarkerMonth(m),
-            m.getUTCDate() - ((m.getUTCDay() - this.weekDow + 7) % 7),
-        ]);
+    return stuff;
+}
+
+function getDateMeta(date, todayRange, nowDate, dateProfile) {
+    return {
+        dow: date.getUTCDay(),
+        isDisabled: Boolean(dateProfile && (!dateProfile.activeRange || !rangeContainsMarker(dateProfile.activeRange, date))),
+        isOther: Boolean(dateProfile && !rangeContainsMarker(dateProfile.currentRange, date)),
+        isToday: Boolean(todayRange && rangeContainsMarker(todayRange, date)),
+        isPast: Boolean(nowDate ? (date < nowDate) : todayRange ? (date < todayRange.start) : false),
+        isFuture: Boolean(nowDate ? (date > nowDate) : todayRange ? (date >= todayRange.end) : false),
+    };
+}
+function getDayClassNames(meta, theme) {
+    let classNames = [
+        'fc-day',
+        `fc-day-${DAY_IDS[meta.dow]}`,
+    ];
+    if (meta.isDisabled) {
+        classNames.push('fc-day-disabled');
     }
-    // Week Number
-    computeWeekNumber(marker) {
-        if (this.weekNumberFunc) {
-            return this.weekNumberFunc(this.toDate(marker));
+    else {
+        if (meta.isToday) {
+            classNames.push('fc-day-today');
+            classNames.push(theme.getClass('today'));
         }
-        return weekOfYear(marker, this.weekDow, this.weekDoy);
-    }
-    // TODO: choke on timeZoneName: long
-    format(marker, formatter, dateOptions = {}) {
-        return formatter.format({
-            marker,
-            timeZoneOffset: dateOptions.forcedTzo != null ?
-                dateOptions.forcedTzo :
-                this.offsetForMarker(marker),
-        }, this);
-    }
-    formatRange(start, end, formatter, dateOptions = {}) {
-        if (dateOptions.isEndExclusive) {
-            end = addMs(end, -1);
+        if (meta.isPast) {
+            classNames.push('fc-day-past');
         }
-        return formatter.formatRange({
-            marker: start,
-            timeZoneOffset: dateOptions.forcedStartTzo != null ?
-                dateOptions.forcedStartTzo :
-                this.offsetForMarker(start),
-        }, {
-            marker: end,
-            timeZoneOffset: dateOptions.forcedEndTzo != null ?
-                dateOptions.forcedEndTzo :
-                this.offsetForMarker(end),
-        }, this, dateOptions.defaultSeparator);
+        if (meta.isFuture) {
+            classNames.push('fc-day-future');
+        }
+        if (meta.isOther) {
+            classNames.push('fc-day-other');
+        }
     }
-    /*
-    DUMB: the omitTime arg is dumb. if we omit the time, we want to omit the timezone offset. and if we do that,
-    might as well use buildIsoString or some other util directly
-    */
-    formatIso(marker, extraOptions = {}) {
-        let timeZoneOffset = null;
-        if (!extraOptions.omitTimeZoneOffset) {
-            if (extraOptions.forcedTzo != null) {
-                timeZoneOffset = extraOptions.forcedTzo;
+    return classNames;
+}
+function getSlotClassNames(meta, theme) {
+    let classNames = [
+        'fc-slot',
+        `fc-slot-${DAY_IDS[meta.dow]}`,
+    ];
+    if (meta.isDisabled) {
+        classNames.push('fc-slot-disabled');
+    }
+    else {
+        if (meta.isToday) {
+            classNames.push('fc-slot-today');
+            classNames.push(theme.getClass('today'));
+        }
+        if (meta.isPast) {
+            classNames.push('fc-slot-past');
+        }
+        if (meta.isFuture) {
+            classNames.push('fc-slot-future');
+        }
+    }
+    return classNames;
+}
+
+const DAY_FORMAT = createFormatter({ year: 'numeric', month: 'long', day: 'numeric' });
+const WEEK_FORMAT = createFormatter({ week: 'long' });
+function buildNavLinkAttrs(context, dateMarker, viewType = 'day', isTabbable = true) {
+    const { dateEnv, options, calendarApi } = context;
+    let dateStr = dateEnv.format(dateMarker, viewType === 'week' ? WEEK_FORMAT : DAY_FORMAT);
+    if (options.navLinks) {
+        let zonedDate = dateEnv.toDate(dateMarker);
+        const handleInteraction = (ev) => {
+            let customAction = viewType === 'day' ? options.navLinkDayClick :
+                viewType === 'week' ? options.navLinkWeekClick : null;
+            if (typeof customAction === 'function') {
+                customAction.call(calendarApi, dateEnv.toDate(dateMarker), ev);
             }
             else {
-                timeZoneOffset = this.offsetForMarker(marker);
+                if (typeof customAction === 'string') {
+                    viewType = customAction;
+                }
+                calendarApi.zoomTo(dateMarker, viewType);
+            }
+        };
+        return Object.assign({ title: formatWithOrdinals(options.navLinkHint, [dateStr, zonedDate], dateStr), 'data-navlink': '' }, (isTabbable
+            ? createAriaClickAttrs(handleInteraction)
+            : { onClick: handleInteraction }));
+    }
+    return { 'aria-label': dateStr };
+}
+
+let _isRtlScrollbarOnLeft = null;
+function getIsRtlScrollbarOnLeft() {
+    if (_isRtlScrollbarOnLeft === null) {
+        _isRtlScrollbarOnLeft = computeIsRtlScrollbarOnLeft();
+    }
+    return _isRtlScrollbarOnLeft;
+}
+function computeIsRtlScrollbarOnLeft() {
+    let outerEl = document.createElement('div');
+    applyStyle(outerEl, {
+        position: 'absolute',
+        top: -1000,
+        left: 0,
+        border: 0,
+        padding: 0,
+        overflow: 'scroll',
+        direction: 'rtl',
+    });
+    outerEl.innerHTML = '<div></div>';
+    document.body.appendChild(outerEl);
+    let innerEl = outerEl.firstChild;
+    let res = innerEl.getBoundingClientRect().left > outerEl.getBoundingClientRect().left;
+    removeElement(outerEl);
+    return res;
+}
+
+let _scrollbarWidths;
+function getScrollbarWidths() {
+    if (!_scrollbarWidths) {
+        _scrollbarWidths = computeScrollbarWidths();
+    }
+    return _scrollbarWidths;
+}
+function computeScrollbarWidths() {
+    let el = document.createElement('div');
+    el.style.overflow = 'scroll';
+    el.style.position = 'absolute';
+    el.style.top = '-9999px';
+    el.style.left = '-9999px';
+    document.body.appendChild(el);
+    let res = computeScrollbarWidthsForEl(el);
+    document.body.removeChild(el);
+    return res;
+}
+// WARNING: will include border
+function computeScrollbarWidthsForEl(el) {
+    return {
+        x: el.offsetHeight - el.clientHeight,
+        y: el.offsetWidth - el.clientWidth,
+    };
+}
+
+function computeEdges(el, getPadding = false) {
+    let computedStyle = window.getComputedStyle(el);
+    let borderLeft = parseInt(computedStyle.borderLeftWidth, 10) || 0;
+    let borderRight = parseInt(computedStyle.borderRightWidth, 10) || 0;
+    let borderTop = parseInt(computedStyle.borderTopWidth, 10) || 0;
+    let borderBottom = parseInt(computedStyle.borderBottomWidth, 10) || 0;
+    let badScrollbarWidths = computeScrollbarWidthsForEl(el); // includes border!
+    let scrollbarLeftRight = badScrollbarWidths.y - borderLeft - borderRight;
+    let scrollbarBottom = badScrollbarWidths.x - borderTop - borderBottom;
+    let res = {
+        borderLeft,
+        borderRight,
+        borderTop,
+        borderBottom,
+        scrollbarBottom,
+        scrollbarLeft: 0,
+        scrollbarRight: 0,
+    };
+    if (getIsRtlScrollbarOnLeft() && computedStyle.direction === 'rtl') { // is the scrollbar on the left side?
+        res.scrollbarLeft = scrollbarLeftRight;
+    }
+    else {
+        res.scrollbarRight = scrollbarLeftRight;
+    }
+    if (getPadding) {
+        res.paddingLeft = parseInt(computedStyle.paddingLeft, 10) || 0;
+        res.paddingRight = parseInt(computedStyle.paddingRight, 10) || 0;
+        res.paddingTop = parseInt(computedStyle.paddingTop, 10) || 0;
+        res.paddingBottom = parseInt(computedStyle.paddingBottom, 10) || 0;
+    }
+    return res;
+}
+function computeInnerRect(el, goWithinPadding = false, doFromWindowViewport) {
+    let outerRect = doFromWindowViewport ? el.getBoundingClientRect() : computeRect(el);
+    let edges = computeEdges(el, goWithinPadding);
+    let res = {
+        left: outerRect.left + edges.borderLeft + edges.scrollbarLeft,
+        right: outerRect.right - edges.borderRight - edges.scrollbarRight,
+        top: outerRect.top + edges.borderTop,
+        bottom: outerRect.bottom - edges.borderBottom - edges.scrollbarBottom,
+    };
+    if (goWithinPadding) {
+        res.left += edges.paddingLeft;
+        res.right -= edges.paddingRight;
+        res.top += edges.paddingTop;
+        res.bottom -= edges.paddingBottom;
+    }
+    return res;
+}
+function computeRect(el) {
+    let rect = el.getBoundingClientRect();
+    return {
+        left: rect.left + window.scrollX,
+        top: rect.top + window.scrollY,
+        right: rect.right + window.scrollX,
+        bottom: rect.bottom + window.scrollY,
+    };
+}
+function computeClippedClientRect(el) {
+    let clippingParents = getClippingParents(el);
+    let rect = el.getBoundingClientRect();
+    for (let clippingParent of clippingParents) {
+        let intersection = intersectRects(rect, clippingParent.getBoundingClientRect());
+        if (intersection) {
+            rect = intersection;
+        }
+        else {
+            return null;
+        }
+    }
+    return rect;
+}
+// does not return window
+function getClippingParents(el) {
+    let parents = [];
+    while (el instanceof HTMLElement) { // will stop when gets to document or null
+        let computedStyle = window.getComputedStyle(el);
+        if (computedStyle.position === 'fixed') {
+            break;
+        }
+        if ((/(auto|scroll)/).test(computedStyle.overflow + computedStyle.overflowY + computedStyle.overflowX)) {
+            parents.push(el);
+        }
+        el = el.parentNode;
+    }
+    return parents;
+}
+
+/*
+Records offset information for a set of elements, relative to an origin element.
+Can record the left/right OR the top/bottom OR both.
+Provides methods for querying the cache by position.
+*/
+class PositionCache {
+    constructor(originEl, els, isHorizontal, isVertical) {
+        this.els = els;
+        let originClientRect = this.originClientRect = originEl.getBoundingClientRect(); // relative to viewport top-left
+        if (isHorizontal) {
+            this.buildElHorizontals(originClientRect.left);
+        }
+        if (isVertical) {
+            this.buildElVerticals(originClientRect.top);
+        }
+    }
+    // Populates the left/right internal coordinate arrays
+    buildElHorizontals(originClientLeft) {
+        let lefts = [];
+        let rights = [];
+        for (let el of this.els) {
+            let rect = el.getBoundingClientRect();
+            lefts.push(rect.left - originClientLeft);
+            rights.push(rect.right - originClientLeft);
+        }
+        this.lefts = lefts;
+        this.rights = rights;
+    }
+    // Populates the top/bottom internal coordinate arrays
+    buildElVerticals(originClientTop) {
+        let tops = [];
+        let bottoms = [];
+        for (let el of this.els) {
+            let rect = el.getBoundingClientRect();
+            tops.push(rect.top - originClientTop);
+            bottoms.push(rect.bottom - originClientTop);
+        }
+        this.tops = tops;
+        this.bottoms = bottoms;
+    }
+    // Given a left offset (from document left), returns the index of the el that it horizontally intersects.
+    // If no intersection is made, returns undefined.
+    leftToIndex(leftPosition) {
+        let { lefts, rights } = this;
+        let len = lefts.length;
+        let i;
+        for (i = 0; i < len; i += 1) {
+            if (leftPosition >= lefts[i] && leftPosition < rights[i]) {
+                return i;
             }
         }
-        return buildIsoString(marker, timeZoneOffset, extraOptions.omitTime);
+        return undefined; // TODO: better
     }
-    // TimeZone
-    timestampToMarker(ms) {
-        if (this.timeZone === 'local') {
-            return arrayToUtcDate(dateToLocalArray(new Date(ms)));
+    // Given a top offset (from document top), returns the index of the el that it vertically intersects.
+    // If no intersection is made, returns undefined.
+    topToIndex(topPosition) {
+        let { tops, bottoms } = this;
+        let len = tops.length;
+        let i;
+        for (i = 0; i < len; i += 1) {
+            if (topPosition >= tops[i] && topPosition < bottoms[i]) {
+                return i;
+            }
         }
-        if (this.timeZone === 'UTC' || !this.namedTimeZoneImpl) {
-            return new Date(ms);
-        }
-        return arrayToUtcDate(this.namedTimeZoneImpl.timestampToArray(ms));
+        return undefined; // TODO: better
     }
-    offsetForMarker(m) {
-        if (this.timeZone === 'local') {
-            return -arrayToLocalDate(dateToUtcArray(m)).getTimezoneOffset(); // convert "inverse" offset to "normal" offset
-        }
-        if (this.timeZone === 'UTC') {
-            return 0;
-        }
-        if (this.namedTimeZoneImpl) {
-            return this.namedTimeZoneImpl.offsetForArray(dateToUtcArray(m));
-        }
-        return null;
+    // Gets the width of the element at the given index
+    getWidth(leftIndex) {
+        return this.rights[leftIndex] - this.lefts[leftIndex];
     }
-    // Conversion
-    toDate(m, forcedTzo) {
-        if (this.timeZone === 'local') {
-            return arrayToLocalDate(dateToUtcArray(m));
+    // Gets the height of the element at the given index
+    getHeight(topIndex) {
+        return this.bottoms[topIndex] - this.tops[topIndex];
+    }
+    similarTo(otherCache) {
+        return similarNumArrays(this.tops || [], otherCache.tops || []) &&
+            similarNumArrays(this.bottoms || [], otherCache.bottoms || []) &&
+            similarNumArrays(this.lefts || [], otherCache.lefts || []) &&
+            similarNumArrays(this.rights || [], otherCache.rights || []);
+    }
+}
+function similarNumArrays(a, b) {
+    const len = a.length;
+    if (len !== b.length) {
+        return false;
+    }
+    for (let i = 0; i < len; i++) {
+        if (Math.round(a[i]) !== Math.round(b[i])) {
+            return false;
         }
-        if (this.timeZone === 'UTC') {
-            return new Date(m.valueOf()); // make sure it's a copy
-        }
-        if (!this.namedTimeZoneImpl) {
-            return new Date(m.valueOf() - (forcedTzo || 0));
-        }
-        return new Date(m.valueOf() -
-            this.namedTimeZoneImpl.offsetForArray(dateToUtcArray(m)) * 1000 * 60);
+    }
+    return true;
+}
+
+/* eslint max-classes-per-file: "off" */
+/*
+An object for getting/setting scroll-related information for an element.
+Internally, this is done very differently for window versus DOM element,
+so this object serves as a common interface.
+*/
+class ScrollController {
+    getMaxScrollTop() {
+        return this.getScrollHeight() - this.getClientHeight();
+    }
+    getMaxScrollLeft() {
+        return this.getScrollWidth() - this.getClientWidth();
+    }
+    canScrollVertically() {
+        return this.getMaxScrollTop() > 0;
+    }
+    canScrollHorizontally() {
+        return this.getMaxScrollLeft() > 0;
+    }
+    canScrollUp() {
+        return this.getScrollTop() > 0;
+    }
+    canScrollDown() {
+        return this.getScrollTop() < this.getMaxScrollTop();
+    }
+    canScrollLeft() {
+        return this.getScrollLeft() > 0;
+    }
+    canScrollRight() {
+        return this.getScrollLeft() < this.getMaxScrollLeft();
+    }
+}
+class ElementScrollController extends ScrollController {
+    constructor(el) {
+        super();
+        this.el = el;
+    }
+    getScrollTop() {
+        return this.el.scrollTop;
+    }
+    getScrollLeft() {
+        return this.el.scrollLeft;
+    }
+    setScrollTop(top) {
+        this.el.scrollTop = top;
+    }
+    setScrollLeft(left) {
+        this.el.scrollLeft = left;
+    }
+    getScrollWidth() {
+        return this.el.scrollWidth;
+    }
+    getScrollHeight() {
+        return this.el.scrollHeight;
+    }
+    getClientHeight() {
+        return this.el.clientHeight;
+    }
+    getClientWidth() {
+        return this.el.clientWidth;
+    }
+}
+class WindowScrollController extends ScrollController {
+    getScrollTop() {
+        return window.scrollY;
+    }
+    getScrollLeft() {
+        return window.scrollX;
+    }
+    setScrollTop(n) {
+        window.scroll(window.scrollX, n);
+    }
+    setScrollLeft(n) {
+        window.scroll(n, window.scrollY);
+    }
+    getScrollWidth() {
+        return document.documentElement.scrollWidth;
+    }
+    getScrollHeight() {
+        return document.documentElement.scrollHeight;
+    }
+    getClientHeight() {
+        return document.documentElement.clientHeight;
+    }
+    getClientWidth() {
+        return document.documentElement.clientWidth;
+    }
+}
+
+/*
+an INTERACTABLE date component
+
+PURPOSES:
+- hook up to fg, fill, and mirror renderers
+- interface for dragging and hits
+*/
+class DateComponent extends BaseComponent {
+    constructor() {
+        super(...arguments);
+        this.uid = guid();
+    }
+    // Hit System
+    // -----------------------------------------------------------------------------------------------------------------
+    prepareHits() {
+    }
+    queryHit(positionLeft, positionTop, elWidth, elHeight) {
+        return null; // this should be abstract
+    }
+    // Pointer Interaction Utils
+    // -----------------------------------------------------------------------------------------------------------------
+    isValidSegDownEl(el) {
+        return !this.props.eventDrag && // HACK
+            !this.props.eventResize && // HACK
+            !elementClosest(el, '.fc-event-mirror');
+    }
+    isValidDateDownEl(el) {
+        return !elementClosest(el, '.fc-event:not(.fc-bg-event)') &&
+            !elementClosest(el, '.fc-more-link') && // a "more.." link
+            !elementClosest(el, 'a[data-navlink]') && // a clickable nav link
+            !elementClosest(el, '.fc-popover'); // hack
     }
 }
 
@@ -7310,7 +8400,11 @@ class NamedTimeZoneImpl {
 }
 
 class SegHierarchy {
-    constructor() {
+    constructor(getEntryThickness = (entry) => {
+        // if no thickness known, assume 1 (if 0, so small it always fits)
+        return entry.thickness || 1;
+    }) {
+        this.getEntryThickness = getEntryThickness;
         // settings
         this.strictOrder = false;
         this.allowReslicing = false;
@@ -7331,51 +8425,45 @@ class SegHierarchy {
         let insertion = this.findInsertion(entry);
         if (this.isInsertionValid(insertion, entry)) {
             this.insertEntryAt(entry, insertion);
-            return 1;
         }
-        return this.handleInvalidInsertion(insertion, entry, hiddenEntries);
+        else {
+            this.handleInvalidInsertion(insertion, entry, hiddenEntries);
+        }
     }
     isInsertionValid(insertion, entry) {
-        return (this.maxCoord === -1 || insertion.levelCoord + entry.thickness <= this.maxCoord) &&
+        return (this.maxCoord === -1 || insertion.levelCoord + this.getEntryThickness(entry) <= this.maxCoord) &&
             (this.maxStackCnt === -1 || insertion.stackCnt < this.maxStackCnt);
     }
-    // returns number of new entries inserted
     handleInvalidInsertion(insertion, entry, hiddenEntries) {
         if (this.allowReslicing && insertion.touchingEntry) {
-            return this.splitEntry(entry, insertion.touchingEntry, hiddenEntries);
+            const hiddenEntry = Object.assign(Object.assign({}, entry), { span: intersectSpans(entry.span, insertion.touchingEntry.span) });
+            hiddenEntries.push(hiddenEntry);
+            this.splitEntry(entry, insertion.touchingEntry, hiddenEntries);
         }
-        hiddenEntries.push(entry);
-        return 0;
+        else {
+            hiddenEntries.push(entry);
+        }
     }
+    /*
+    Does NOT add what hit the `barrier` into hiddenEntries. Should already be done.
+    */
     splitEntry(entry, barrier, hiddenEntries) {
-        let partCnt = 0;
-        let splitHiddenEntries = [];
         let entrySpan = entry.span;
         let barrierSpan = barrier.span;
         if (entrySpan.start < barrierSpan.start) {
-            partCnt += this.insertEntry({
+            this.insertEntry({
                 index: entry.index,
                 thickness: entry.thickness,
                 span: { start: entrySpan.start, end: barrierSpan.start },
-            }, splitHiddenEntries);
+            }, hiddenEntries);
         }
         if (entrySpan.end > barrierSpan.end) {
-            partCnt += this.insertEntry({
+            this.insertEntry({
                 index: entry.index,
                 thickness: entry.thickness,
                 span: { start: barrierSpan.end, end: entrySpan.end },
-            }, splitHiddenEntries);
+            }, hiddenEntries);
         }
-        if (partCnt) {
-            hiddenEntries.push({
-                index: entry.index,
-                thickness: entry.thickness,
-                span: intersectSpans(barrierSpan, entrySpan), // guaranteed to intersect
-            }, ...splitHiddenEntries);
-            return partCnt;
-        }
-        hiddenEntries.push(entry);
-        return 0;
     }
     insertEntryAt(entry, insertion) {
         let { entriesByLevel, levelCoords } = this;
@@ -7390,6 +8478,9 @@ class SegHierarchy {
         }
         this.stackCnts[buildEntryKey(entry)] = insertion.stackCnt;
     }
+    /*
+    does not care about limits
+    */
     findInsertion(newEntry) {
         let { levelCoords, entriesByLevel, strictOrder, stackCnts } = this;
         let levelCnt = levelCoords.length;
@@ -7399,10 +8490,10 @@ class SegHierarchy {
         let touchingEntry = null;
         let stackCnt = 0;
         for (let trackingLevel = 0; trackingLevel < levelCnt; trackingLevel += 1) {
-            let trackingCoord = levelCoords[trackingLevel];
+            const trackingCoord = levelCoords[trackingLevel];
             // if the current level is past the placed entry, we have found a good empty space and can stop.
             // if strictOrder, keep finding more lateral intersections.
-            if (!strictOrder && trackingCoord >= candidateCoord + newEntry.thickness) {
+            if (!strictOrder && trackingCoord >= candidateCoord + this.getEntryThickness(newEntry)) {
                 break;
             }
             let trackingEntries = entriesByLevel[trackingLevel];
@@ -7413,7 +8504,7 @@ class SegHierarchy {
             (trackingEntry = trackingEntries[lateralIndex]) && // but not past the whole entry list
                 trackingEntry.span.start < newEntry.span.end // and not entirely past newEntry
             ) {
-                let trackingEntryBottom = trackingCoord + trackingEntry.thickness;
+                let trackingEntryBottom = trackingCoord + this.getEntryThickness(trackingEntry);
                 // intersects into the top of the candidate?
                 if (trackingEntryBottom > candidateCoord) {
                     candidateCoord = trackingEntryBottom;
@@ -7461,7 +8552,7 @@ class SegHierarchy {
             let entries = entriesByLevel[level];
             let levelCoord = levelCoords[level];
             for (let entry of entries) {
-                rects.push(Object.assign(Object.assign({}, entry), { levelCoord }));
+                rects.push(Object.assign(Object.assign({}, entry), { thickness: this.getEntryThickness(entry), levelCoord }));
             }
         }
         return rects;
@@ -7542,30 +8633,6 @@ function binarySearch(a, searchVal, getItemVal) {
     return [startIndex, 0];
 }
 
-class Interaction {
-    constructor(settings) {
-        this.component = settings.component;
-        this.isHitComboAllowed = settings.isHitComboAllowed || null;
-    }
-    destroy() {
-    }
-}
-function parseInteractionSettings(component, input) {
-    return {
-        component,
-        el: input.el,
-        useEventCenter: input.useEventCenter != null ? input.useEventCenter : true,
-        isHitComboAllowed: input.isHitComboAllowed || null,
-    };
-}
-function interactionSettingsToStore(settings) {
-    return {
-        [settings.component.uid]: settings,
-    };
-}
-// global state
-const interactionSettingsStore = {};
-
 /*
 An abstraction for a dragging interaction originating on an event.
 Does higher-level things than PointerDragger, such as possibly:
@@ -7621,48 +8688,6 @@ function parseDragMeta(raw) {
     };
 }
 
-class CalendarRoot extends BaseComponent {
-    constructor() {
-        super(...arguments);
-        this.state = {
-            forPrint: false,
-        };
-        this.handleBeforePrint = () => {
-            this.setState({ forPrint: true });
-        };
-        this.handleAfterPrint = () => {
-            this.setState({ forPrint: false });
-        };
-    }
-    render() {
-        let { props } = this;
-        let { options } = props;
-        let { forPrint } = this.state;
-        let isHeightAuto = forPrint || options.height === 'auto' || options.contentHeight === 'auto';
-        let height = (!isHeightAuto && options.height != null) ? options.height : '';
-        let classNames = [
-            'fc',
-            forPrint ? 'fc-media-print' : 'fc-media-screen',
-            `fc-direction-${options.direction}`,
-            props.theme.getClass('root'),
-        ];
-        if (!getCanVGrowWithinCell()) {
-            classNames.push('fc-liquid-hack');
-        }
-        return props.children(classNames, height, isHeightAuto, forPrint);
-    }
-    componentDidMount() {
-        let { emitter } = this.props;
-        emitter.on('_beforeprint', this.handleBeforePrint);
-        emitter.on('_afterprint', this.handleAfterPrint);
-    }
-    componentWillUnmount() {
-        let { emitter } = this.props;
-        emitter.off('_beforeprint', this.handleBeforePrint);
-        emitter.off('_afterprint', this.handleAfterPrint);
-    }
-}
-
 // Computes a default column header formatting string if `colFormat` is not explicitly defined
 function computeFallbackHeaderFormat(datesRepDistinctDays, dayCnt) {
     // if more than one week row, or if there are a lot of columns with not much space,
@@ -7681,183 +8706,6 @@ function renderInner$1(renderProps) {
     return renderProps.text;
 }
 
-class ContentInjector extends BaseComponent {
-    constructor() {
-        super(...arguments);
-        this.id = guid();
-        this.queuedDomNodes = [];
-        this.currentDomNodes = [];
-        this.handleEl = (el) => {
-            if (this.props.elRef) {
-                setRef(this.props.elRef, el);
-            }
-        };
-    }
-    render() {
-        const { props, context } = this;
-        const { options } = context;
-        const { customGenerator, defaultGenerator, renderProps } = props;
-        const attrs = buildElAttrs(props);
-        let useDefault = false;
-        let innerContent;
-        let queuedDomNodes = [];
-        let currentGeneratorMeta;
-        if (customGenerator != null) {
-            const customGeneratorRes = typeof customGenerator === 'function' ?
-                customGenerator(renderProps, preact__WEBPACK_IMPORTED_MODULE_0__.createElement) :
-                customGenerator;
-            if (customGeneratorRes === true) {
-                useDefault = true;
-            }
-            else {
-                const isObject = customGeneratorRes && typeof customGeneratorRes === 'object'; // non-null
-                if (isObject && ('html' in customGeneratorRes)) {
-                    attrs.dangerouslySetInnerHTML = { __html: customGeneratorRes.html };
-                }
-                else if (isObject && ('domNodes' in customGeneratorRes)) {
-                    queuedDomNodes = Array.prototype.slice.call(customGeneratorRes.domNodes);
-                }
-                else if (!isObject && typeof customGeneratorRes !== 'function') {
-                    // primitive value (like string or number)
-                    innerContent = customGeneratorRes;
-                }
-                else {
-                    // an exotic object for handleCustomRendering
-                    currentGeneratorMeta = customGeneratorRes;
-                }
-            }
-        }
-        else {
-            useDefault = !hasCustomRenderingHandler(props.generatorName, options);
-        }
-        if (useDefault && defaultGenerator) {
-            innerContent = defaultGenerator(renderProps);
-        }
-        this.queuedDomNodes = queuedDomNodes;
-        this.currentGeneratorMeta = currentGeneratorMeta;
-        return (0,preact__WEBPACK_IMPORTED_MODULE_0__.createElement)(props.elTag, attrs, innerContent);
-    }
-    componentDidMount() {
-        this.applyQueueudDomNodes();
-        this.triggerCustomRendering(true);
-    }
-    componentDidUpdate() {
-        this.applyQueueudDomNodes();
-        this.triggerCustomRendering(true);
-    }
-    componentWillUnmount() {
-        this.triggerCustomRendering(false); // TODO: different API for removal?
-    }
-    triggerCustomRendering(isActive) {
-        var _a;
-        const { props, context } = this;
-        const { handleCustomRendering, customRenderingMetaMap } = context.options;
-        if (handleCustomRendering) {
-            const generatorMeta = (_a = this.currentGeneratorMeta) !== null && _a !== void 0 ? _a : customRenderingMetaMap === null || customRenderingMetaMap === void 0 ? void 0 : customRenderingMetaMap[props.generatorName];
-            if (generatorMeta) {
-                handleCustomRendering(Object.assign(Object.assign({ id: this.id, isActive, containerEl: this.base, reportNewContainerEl: this.handleEl, // for customRenderingReplacesEl
-                    generatorMeta }, props), { elClasses: (props.elClasses || []).filter(isTruthy) }));
-            }
-        }
-    }
-    applyQueueudDomNodes() {
-        const { queuedDomNodes, currentDomNodes } = this;
-        const el = this.base;
-        if (!isArraysEqual(queuedDomNodes, currentDomNodes)) {
-            currentDomNodes.forEach(removeElement);
-            for (let newNode of queuedDomNodes) {
-                el.appendChild(newNode);
-            }
-            this.currentDomNodes = queuedDomNodes;
-        }
-    }
-}
-ContentInjector.addPropsEquality({
-    elClasses: isArraysEqual,
-    elStyle: isPropsEqual,
-    elAttrs: isNonHandlerPropsEqual,
-    renderProps: isPropsEqual,
-});
-// Util
-/*
-Does UI-framework provide custom way of rendering?
-*/
-function hasCustomRenderingHandler(generatorName, options) {
-    var _a;
-    return Boolean(options.handleCustomRendering &&
-        generatorName &&
-        ((_a = options.customRenderingMetaMap) === null || _a === void 0 ? void 0 : _a[generatorName]));
-}
-function buildElAttrs(props, extraClassNames) {
-    const attrs = Object.assign(Object.assign({}, props.elAttrs), { ref: props.elRef });
-    if (props.elClasses || extraClassNames) {
-        attrs.className = (props.elClasses || [])
-            .concat(extraClassNames || [])
-            .concat(attrs.className || [])
-            .filter(Boolean)
-            .join(' ');
-    }
-    if (props.elStyle) {
-        attrs.style = props.elStyle;
-    }
-    return attrs;
-}
-function isTruthy(val) {
-    return Boolean(val);
-}
-
-const RenderId = createContext(0);
-
-class ContentContainer extends preact__WEBPACK_IMPORTED_MODULE_0__.Component {
-    constructor() {
-        super(...arguments);
-        this.InnerContent = InnerContentInjector.bind(undefined, this);
-        this.handleRootEl = (el) => {
-            this.rootEl = el;
-            if (this.props.elRef) {
-                setRef(this.props.elRef, el);
-            }
-        };
-    }
-    render() {
-        const { props } = this;
-        const generatedClassNames = generateClassNames(props.classNameGenerator, props.renderProps);
-        if (props.children) {
-            const elAttrs = buildElAttrs(props, generatedClassNames);
-            const children = props.children(this.InnerContent, props.renderProps, elAttrs);
-            if (props.elTag) {
-                return (0,preact__WEBPACK_IMPORTED_MODULE_0__.createElement)(props.elTag, elAttrs, children);
-            }
-            else {
-                return children;
-            }
-        }
-        else {
-            return (0,preact__WEBPACK_IMPORTED_MODULE_0__.createElement)((ContentInjector), Object.assign(Object.assign({}, props), { elRef: this.handleRootEl, elTag: props.elTag || 'div', elClasses: (props.elClasses || []).concat(generatedClassNames), renderId: this.context }));
-        }
-    }
-    componentDidMount() {
-        var _a, _b;
-        (_b = (_a = this.props).didMount) === null || _b === void 0 ? void 0 : _b.call(_a, Object.assign(Object.assign({}, this.props.renderProps), { el: this.rootEl || this.base }));
-    }
-    componentWillUnmount() {
-        var _a, _b;
-        (_b = (_a = this.props).willUnmount) === null || _b === void 0 ? void 0 : _b.call(_a, Object.assign(Object.assign({}, this.props.renderProps), { el: this.rootEl || this.base }));
-    }
-}
-ContentContainer.contextType = RenderId;
-function InnerContentInjector(containerComponent, props) {
-    const parentProps = containerComponent.props;
-    return (0,preact__WEBPACK_IMPORTED_MODULE_0__.createElement)((ContentInjector), Object.assign({ renderProps: parentProps.renderProps, generatorName: parentProps.generatorName, customGenerator: parentProps.customGenerator, defaultGenerator: parentProps.defaultGenerator, renderId: containerComponent.context }, props));
-}
-// Utils
-function generateClassNames(classNameGenerator, renderProps) {
-    const classNames = typeof classNameGenerator === 'function' ?
-        classNameGenerator(renderProps) :
-        classNameGenerator || [];
-    return typeof classNames === 'string' ? [classNames] : classNames;
-}
-
 // BAD name for this class now. used in the Header
 class TableDateCell extends BaseComponent {
     render() {
@@ -7871,7 +8719,13 @@ class TableDateCell extends BaseComponent {
         let navLinkAttrs = (!dayMeta.isDisabled && props.colCnt > 1)
             ? buildNavLinkAttrs(this.context, date)
             : {};
-        let renderProps = Object.assign(Object.assign(Object.assign({ date: dateEnv.toDate(date), view: viewApi }, props.extraRenderProps), { text }), dayMeta);
+        let publicDate = dateEnv.toDate(date);
+        // workaround for Luxon (and maybe moment) returning prior-days when start-of-day
+        // in DST gap: https://github.com/fullcalendar/fullcalendar/issues/7633
+        if (dateEnv.namedTimeZoneImpl) {
+            publicDate = addMs(publicDate, 3600000); // add an hour
+        }
+        let renderProps = Object.assign(Object.assign(Object.assign({ date: publicDate, view: viewApi }, props.extraRenderProps), { text }), dayMeta);
         return ((0,preact__WEBPACK_IMPORTED_MODULE_0__.createElement)(ContentContainer, { elTag: "th", elClasses: classNames, elAttrs: Object.assign({ role: 'columnheader', colSpan: props.colSpan, 'data-date': !dayMeta.isDisabled ? formatDayString(date) : undefined }, props.extraDataAttrs), renderProps: renderProps, generatorName: "dayHeaderContent", customGenerator: options.dayHeaderContent, defaultGenerator: renderInner$1, classNameGenerator: options.dayHeaderClassNames, didMount: options.dayHeaderDidMount, willUnmount: options.dayHeaderWillUnmount }, (InnerContainer) => ((0,preact__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", { className: "fc-scrollgrid-sync-inner" }, !dayMeta.isDisabled && ((0,preact__WEBPACK_IMPORTED_MODULE_0__.createElement)(InnerContainer, { elTag: "a", elAttrs: navLinkAttrs, elClasses: [
                 'fc-col-header-cell-cushion',
                 props.isSticky && 'fc-sticky',
@@ -7908,65 +8762,6 @@ class TableDowCell extends BaseComponent {
                     'aria-label': dateEnv.format(date, WEEKDAY_FORMAT),
                 } })))));
     }
-}
-
-class NowTimer extends preact__WEBPACK_IMPORTED_MODULE_0__.Component {
-    constructor(props, context) {
-        super(props, context);
-        this.initialNowDate = getNow(context.options.now, context.dateEnv);
-        this.initialNowQueriedMs = new Date().valueOf();
-        this.state = this.computeTiming().currentState;
-    }
-    render() {
-        let { props, state } = this;
-        return props.children(state.nowDate, state.todayRange);
-    }
-    componentDidMount() {
-        this.setTimeout();
-    }
-    componentDidUpdate(prevProps) {
-        if (prevProps.unit !== this.props.unit) {
-            this.clearTimeout();
-            this.setTimeout();
-        }
-    }
-    componentWillUnmount() {
-        this.clearTimeout();
-    }
-    computeTiming() {
-        let { props, context } = this;
-        let unroundedNow = addMs(this.initialNowDate, new Date().valueOf() - this.initialNowQueriedMs);
-        let currentUnitStart = context.dateEnv.startOf(unroundedNow, props.unit);
-        let nextUnitStart = context.dateEnv.add(currentUnitStart, createDuration(1, props.unit));
-        let waitMs = nextUnitStart.valueOf() - unroundedNow.valueOf();
-        // there is a max setTimeout ms value (https://stackoverflow.com/a/3468650/96342)
-        // ensure no longer than a day
-        waitMs = Math.min(1000 * 60 * 60 * 24, waitMs);
-        return {
-            currentState: { nowDate: currentUnitStart, todayRange: buildDayRange(currentUnitStart) },
-            nextState: { nowDate: nextUnitStart, todayRange: buildDayRange(nextUnitStart) },
-            waitMs,
-        };
-    }
-    setTimeout() {
-        let { nextState, waitMs } = this.computeTiming();
-        this.timeoutId = setTimeout(() => {
-            this.setState(nextState, () => {
-                this.setTimeout();
-            });
-        }, waitMs);
-    }
-    clearTimeout() {
-        if (this.timeoutId) {
-            clearTimeout(this.timeoutId);
-        }
-    }
-}
-NowTimer.contextType = ViewContextType;
-function buildDayRange(date) {
-    let start = startOfDay(date);
-    let end = addDays(start, 1);
-    return { start, end };
 }
 
 class DayHeader extends BaseComponent {
@@ -8238,139 +9033,6 @@ function computeActiveRange(dateProfile, isComponentAllDay) {
     };
 }
 
-function reduceEventStore(eventStore, action, eventSources, dateProfile, context) {
-    switch (action.type) {
-        case 'RECEIVE_EVENTS': // raw
-            return receiveRawEvents(eventStore, eventSources[action.sourceId], action.fetchId, action.fetchRange, action.rawEvents, context);
-        case 'RESET_RAW_EVENTS':
-            return resetRawEvents(eventStore, eventSources[action.sourceId], action.rawEvents, dateProfile.activeRange, context);
-        case 'ADD_EVENTS': // already parsed, but not expanded
-            return addEvent(eventStore, action.eventStore, // new ones
-            dateProfile ? dateProfile.activeRange : null, context);
-        case 'RESET_EVENTS':
-            return action.eventStore;
-        case 'MERGE_EVENTS': // already parsed and expanded
-            return mergeEventStores(eventStore, action.eventStore);
-        case 'PREV': // TODO: how do we track all actions that affect dateProfile :(
-        case 'NEXT':
-        case 'CHANGE_DATE':
-        case 'CHANGE_VIEW_TYPE':
-            if (dateProfile) {
-                return expandRecurring(eventStore, dateProfile.activeRange, context);
-            }
-            return eventStore;
-        case 'REMOVE_EVENTS':
-            return excludeSubEventStore(eventStore, action.eventStore);
-        case 'REMOVE_EVENT_SOURCE':
-            return excludeEventsBySourceId(eventStore, action.sourceId);
-        case 'REMOVE_ALL_EVENT_SOURCES':
-            return filterEventStoreDefs(eventStore, (eventDef) => (!eventDef.sourceId // only keep events with no source id
-            ));
-        case 'REMOVE_ALL_EVENTS':
-            return createEmptyEventStore();
-        default:
-            return eventStore;
-    }
-}
-function receiveRawEvents(eventStore, eventSource, fetchId, fetchRange, rawEvents, context) {
-    if (eventSource && // not already removed
-        fetchId === eventSource.latestFetchId // TODO: wish this logic was always in event-sources
-    ) {
-        let subset = parseEvents(transformRawEvents(rawEvents, eventSource, context), eventSource, context);
-        if (fetchRange) {
-            subset = expandRecurring(subset, fetchRange, context);
-        }
-        return mergeEventStores(excludeEventsBySourceId(eventStore, eventSource.sourceId), subset);
-    }
-    return eventStore;
-}
-function resetRawEvents(existingEventStore, eventSource, rawEvents, activeRange, context) {
-    const { defIdMap, instanceIdMap } = buildPublicIdMaps(existingEventStore);
-    let newEventStore = parseEvents(transformRawEvents(rawEvents, eventSource, context), eventSource, context, false, defIdMap, instanceIdMap);
-    return expandRecurring(newEventStore, activeRange, context);
-}
-function transformRawEvents(rawEvents, eventSource, context) {
-    let calEachTransform = context.options.eventDataTransform;
-    let sourceEachTransform = eventSource ? eventSource.eventDataTransform : null;
-    if (sourceEachTransform) {
-        rawEvents = transformEachRawEvent(rawEvents, sourceEachTransform);
-    }
-    if (calEachTransform) {
-        rawEvents = transformEachRawEvent(rawEvents, calEachTransform);
-    }
-    return rawEvents;
-}
-function transformEachRawEvent(rawEvents, func) {
-    let refinedEvents;
-    if (!func) {
-        refinedEvents = rawEvents;
-    }
-    else {
-        refinedEvents = [];
-        for (let rawEvent of rawEvents) {
-            let refinedEvent = func(rawEvent);
-            if (refinedEvent) {
-                refinedEvents.push(refinedEvent);
-            }
-            else if (refinedEvent == null) {
-                refinedEvents.push(rawEvent);
-            } // if a different falsy value, do nothing
-        }
-    }
-    return refinedEvents;
-}
-function addEvent(eventStore, subset, expandRange, context) {
-    if (expandRange) {
-        subset = expandRecurring(subset, expandRange, context);
-    }
-    return mergeEventStores(eventStore, subset);
-}
-function rezoneEventStoreDates(eventStore, oldDateEnv, newDateEnv) {
-    let { defs } = eventStore;
-    let instances = mapHash(eventStore.instances, (instance) => {
-        let def = defs[instance.defId];
-        if (def.allDay) {
-            return instance; // isn't dependent on timezone
-        }
-        return Object.assign(Object.assign({}, instance), { range: {
-                start: newDateEnv.createMarker(oldDateEnv.toDate(instance.range.start, instance.forcedStartTzo)),
-                end: newDateEnv.createMarker(oldDateEnv.toDate(instance.range.end, instance.forcedEndTzo)),
-            }, forcedStartTzo: newDateEnv.canComputeOffset ? null : instance.forcedStartTzo, forcedEndTzo: newDateEnv.canComputeOffset ? null : instance.forcedEndTzo });
-    });
-    return { defs, instances };
-}
-function excludeEventsBySourceId(eventStore, sourceId) {
-    return filterEventStoreDefs(eventStore, (eventDef) => eventDef.sourceId !== sourceId);
-}
-// QUESTION: why not just return instances? do a general object-property-exclusion util
-function excludeInstances(eventStore, removals) {
-    return {
-        defs: eventStore.defs,
-        instances: filterHash(eventStore.instances, (instance) => !removals[instance.instanceId]),
-    };
-}
-function buildPublicIdMaps(eventStore) {
-    const { defs, instances } = eventStore;
-    const defIdMap = {};
-    const instanceIdMap = {};
-    for (let defId in defs) {
-        const def = defs[defId];
-        const { publicId } = def;
-        if (publicId) {
-            defIdMap[publicId] = defId;
-        }
-    }
-    for (let instanceId in instances) {
-        const instance = instances[instanceId];
-        const def = defs[instance.defId];
-        const { publicId } = def;
-        if (publicId) {
-            instanceIdMap[publicId] = instanceId;
-        }
-    }
-    return { defIdMap, instanceIdMap };
-}
-
 // high-level segmenting-aware tester functions
 // ------------------------------------------------------------------------------------------------------------------------
 function isInteractionValid(interaction, dateProfile, context) {
@@ -8553,114 +9215,6 @@ function anyRangesContainRange(outerRanges, innerRange) {
         }
     }
     return false;
-}
-
-class JsonRequestError extends Error {
-    constructor(message, response) {
-        super(message);
-        this.response = response;
-    }
-}
-function requestJson(method, url, params) {
-    method = method.toUpperCase();
-    const fetchOptions = {
-        method,
-    };
-    if (method === 'GET') {
-        url += (url.indexOf('?') === -1 ? '?' : '&') +
-            new URLSearchParams(params);
-    }
-    else {
-        fetchOptions.body = new URLSearchParams(params);
-        fetchOptions.headers = {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        };
-    }
-    return fetch(url, fetchOptions).then((fetchRes) => {
-        if (fetchRes.ok) {
-            return fetchRes.json().then((parsedResponse) => {
-                return [parsedResponse, fetchRes];
-            }, () => {
-                throw new JsonRequestError('Failure parsing JSON', fetchRes);
-            });
-        }
-        else {
-            throw new JsonRequestError('Request failed', fetchRes);
-        }
-    });
-}
-
-class DelayedRunner {
-    constructor(drainedOption) {
-        this.drainedOption = drainedOption;
-        this.isRunning = false;
-        this.isDirty = false;
-        this.pauseDepths = {};
-        this.timeoutId = 0;
-    }
-    request(delay) {
-        this.isDirty = true;
-        if (!this.isPaused()) {
-            this.clearTimeout();
-            if (delay == null) {
-                this.tryDrain();
-            }
-            else {
-                this.timeoutId = setTimeout(// NOT OPTIMAL! TODO: look at debounce
-                this.tryDrain.bind(this), delay);
-            }
-        }
-    }
-    pause(scope = '') {
-        let { pauseDepths } = this;
-        pauseDepths[scope] = (pauseDepths[scope] || 0) + 1;
-        this.clearTimeout();
-    }
-    resume(scope = '', force) {
-        let { pauseDepths } = this;
-        if (scope in pauseDepths) {
-            if (force) {
-                delete pauseDepths[scope];
-            }
-            else {
-                pauseDepths[scope] -= 1;
-                let depth = pauseDepths[scope];
-                if (depth <= 0) {
-                    delete pauseDepths[scope];
-                }
-            }
-            this.tryDrain();
-        }
-    }
-    isPaused() {
-        return Object.keys(this.pauseDepths).length;
-    }
-    tryDrain() {
-        if (!this.isRunning && !this.isPaused()) {
-            this.isRunning = true;
-            while (this.isDirty) {
-                this.isDirty = false;
-                this.drained(); // might set isDirty to true again
-            }
-            this.isRunning = false;
-        }
-    }
-    clear() {
-        this.clearTimeout();
-        this.isDirty = false;
-        this.pauseDepths = {};
-    }
-    clearTimeout() {
-        if (this.timeoutId) {
-            clearTimeout(this.timeoutId);
-            this.timeoutId = 0;
-        }
-    }
-    drained() {
-        if (this.drainedOption) {
-            this.drainedOption();
-        }
-    }
 }
 
 const VISIBLE_HIDDEN_RE = /^(visible|hidden)$/;
@@ -9479,461 +10033,6 @@ function pickLatestEnd(seg0, seg1) {
     return seg0.eventRange.range.end > seg1.eventRange.range.end ? seg0 : seg1;
 }
 
-class ViewContainer extends BaseComponent {
-    render() {
-        let { props, context } = this;
-        let { options } = context;
-        let renderProps = { view: context.viewApi };
-        return ((0,preact__WEBPACK_IMPORTED_MODULE_0__.createElement)(ContentContainer, Object.assign({}, props, { elTag: props.elTag || 'div', elClasses: [
-                ...buildViewClassNames(props.viewSpec),
-                ...(props.elClasses || []),
-            ], renderProps: renderProps, classNameGenerator: options.viewClassNames, generatorName: undefined, didMount: options.viewDidMount, willUnmount: options.viewWillUnmount }), () => props.children));
-    }
-}
-function buildViewClassNames(viewSpec) {
-    return [
-        `fc-${viewSpec.type}-view`,
-        'fc-view',
-    ];
-}
-
-const EVENT_SOURCE_REFINERS = {
-    id: String,
-    defaultAllDay: Boolean,
-    url: String,
-    format: String,
-    events: identity,
-    eventDataTransform: identity,
-    // for any network-related sources
-    success: identity,
-    failure: identity,
-};
-function parseEventSource(raw, context, refiners = buildEventSourceRefiners(context)) {
-    let rawObj;
-    if (typeof raw === 'string') {
-        rawObj = { url: raw };
-    }
-    else if (typeof raw === 'function' || Array.isArray(raw)) {
-        rawObj = { events: raw };
-    }
-    else if (typeof raw === 'object' && raw) { // not null
-        rawObj = raw;
-    }
-    if (rawObj) {
-        let { refined, extra } = refineProps(rawObj, refiners);
-        let metaRes = buildEventSourceMeta(refined, context);
-        if (metaRes) {
-            return {
-                _raw: raw,
-                isFetching: false,
-                latestFetchId: '',
-                fetchRange: null,
-                defaultAllDay: refined.defaultAllDay,
-                eventDataTransform: refined.eventDataTransform,
-                success: refined.success,
-                failure: refined.failure,
-                publicId: refined.id || '',
-                sourceId: guid(),
-                sourceDefId: metaRes.sourceDefId,
-                meta: metaRes.meta,
-                ui: createEventUi(refined, context),
-                extendedProps: extra,
-            };
-        }
-    }
-    return null;
-}
-function buildEventSourceRefiners(context) {
-    return Object.assign(Object.assign(Object.assign({}, EVENT_UI_REFINERS), EVENT_SOURCE_REFINERS), context.pluginHooks.eventSourceRefiners);
-}
-function buildEventSourceMeta(raw, context) {
-    let defs = context.pluginHooks.eventSourceDefs;
-    for (let i = defs.length - 1; i >= 0; i -= 1) { // later-added plugins take precedence
-        let def = defs[i];
-        let meta = def.parseMeta(raw);
-        if (meta) {
-            return { sourceDefId: i, meta };
-        }
-    }
-    return null;
-}
-
-class CalendarImpl {
-    getCurrentData() {
-        return this.currentDataManager.getCurrentData();
-    }
-    dispatch(action) {
-        this.currentDataManager.dispatch(action);
-    }
-    get view() { return this.getCurrentData().viewApi; }
-    batchRendering(callback) {
-        callback();
-    }
-    updateSize() {
-        this.trigger('_resize', true);
-    }
-    // Options
-    // -----------------------------------------------------------------------------------------------------------------
-    setOption(name, val) {
-        this.dispatch({
-            type: 'SET_OPTION',
-            optionName: name,
-            rawOptionValue: val,
-        });
-    }
-    getOption(name) {
-        return this.currentDataManager.currentCalendarOptionsInput[name];
-    }
-    getAvailableLocaleCodes() {
-        return Object.keys(this.getCurrentData().availableRawLocales);
-    }
-    // Trigger
-    // -----------------------------------------------------------------------------------------------------------------
-    on(handlerName, handler) {
-        let { currentDataManager } = this;
-        if (currentDataManager.currentCalendarOptionsRefiners[handlerName]) {
-            currentDataManager.emitter.on(handlerName, handler);
-        }
-        else {
-            console.warn(`Unknown listener name '${handlerName}'`);
-        }
-    }
-    off(handlerName, handler) {
-        this.currentDataManager.emitter.off(handlerName, handler);
-    }
-    // not meant for public use
-    trigger(handlerName, ...args) {
-        this.currentDataManager.emitter.trigger(handlerName, ...args);
-    }
-    // View
-    // -----------------------------------------------------------------------------------------------------------------
-    changeView(viewType, dateOrRange) {
-        this.batchRendering(() => {
-            this.unselect();
-            if (dateOrRange) {
-                if (dateOrRange.start && dateOrRange.end) { // a range
-                    this.dispatch({
-                        type: 'CHANGE_VIEW_TYPE',
-                        viewType,
-                    });
-                    this.dispatch({
-                        type: 'SET_OPTION',
-                        optionName: 'visibleRange',
-                        rawOptionValue: dateOrRange,
-                    });
-                }
-                else {
-                    let { dateEnv } = this.getCurrentData();
-                    this.dispatch({
-                        type: 'CHANGE_VIEW_TYPE',
-                        viewType,
-                        dateMarker: dateEnv.createMarker(dateOrRange),
-                    });
-                }
-            }
-            else {
-                this.dispatch({
-                    type: 'CHANGE_VIEW_TYPE',
-                    viewType,
-                });
-            }
-        });
-    }
-    // Forces navigation to a view for the given date.
-    // `viewType` can be a specific view name or a generic one like "week" or "day".
-    // needs to change
-    zoomTo(dateMarker, viewType) {
-        let state = this.getCurrentData();
-        let spec;
-        viewType = viewType || 'day'; // day is default zoom
-        spec = state.viewSpecs[viewType] || this.getUnitViewSpec(viewType);
-        this.unselect();
-        if (spec) {
-            this.dispatch({
-                type: 'CHANGE_VIEW_TYPE',
-                viewType: spec.type,
-                dateMarker,
-            });
-        }
-        else {
-            this.dispatch({
-                type: 'CHANGE_DATE',
-                dateMarker,
-            });
-        }
-    }
-    // Given a duration singular unit, like "week" or "day", finds a matching view spec.
-    // Preference is given to views that have corresponding buttons.
-    getUnitViewSpec(unit) {
-        let { viewSpecs, toolbarConfig } = this.getCurrentData();
-        let viewTypes = [].concat(toolbarConfig.header ? toolbarConfig.header.viewsWithButtons : [], toolbarConfig.footer ? toolbarConfig.footer.viewsWithButtons : []);
-        let i;
-        let spec;
-        for (let viewType in viewSpecs) {
-            viewTypes.push(viewType);
-        }
-        for (i = 0; i < viewTypes.length; i += 1) {
-            spec = viewSpecs[viewTypes[i]];
-            if (spec) {
-                if (spec.singleUnit === unit) {
-                    return spec;
-                }
-            }
-        }
-        return null;
-    }
-    // Current Date
-    // -----------------------------------------------------------------------------------------------------------------
-    prev() {
-        this.unselect();
-        this.dispatch({ type: 'PREV' });
-    }
-    next() {
-        this.unselect();
-        this.dispatch({ type: 'NEXT' });
-    }
-    prevYear() {
-        let state = this.getCurrentData();
-        this.unselect();
-        this.dispatch({
-            type: 'CHANGE_DATE',
-            dateMarker: state.dateEnv.addYears(state.currentDate, -1),
-        });
-    }
-    nextYear() {
-        let state = this.getCurrentData();
-        this.unselect();
-        this.dispatch({
-            type: 'CHANGE_DATE',
-            dateMarker: state.dateEnv.addYears(state.currentDate, 1),
-        });
-    }
-    today() {
-        let state = this.getCurrentData();
-        this.unselect();
-        this.dispatch({
-            type: 'CHANGE_DATE',
-            dateMarker: getNow(state.calendarOptions.now, state.dateEnv),
-        });
-    }
-    gotoDate(zonedDateInput) {
-        let state = this.getCurrentData();
-        this.unselect();
-        this.dispatch({
-            type: 'CHANGE_DATE',
-            dateMarker: state.dateEnv.createMarker(zonedDateInput),
-        });
-    }
-    incrementDate(deltaInput) {
-        let state = this.getCurrentData();
-        let delta = createDuration(deltaInput);
-        if (delta) { // else, warn about invalid input?
-            this.unselect();
-            this.dispatch({
-                type: 'CHANGE_DATE',
-                dateMarker: state.dateEnv.add(state.currentDate, delta),
-            });
-        }
-    }
-    getDate() {
-        let state = this.getCurrentData();
-        return state.dateEnv.toDate(state.currentDate);
-    }
-    // Date Formatting Utils
-    // -----------------------------------------------------------------------------------------------------------------
-    formatDate(d, formatter) {
-        let { dateEnv } = this.getCurrentData();
-        return dateEnv.format(dateEnv.createMarker(d), createFormatter(formatter));
-    }
-    // `settings` is for formatter AND isEndExclusive
-    formatRange(d0, d1, settings) {
-        let { dateEnv } = this.getCurrentData();
-        return dateEnv.formatRange(dateEnv.createMarker(d0), dateEnv.createMarker(d1), createFormatter(settings), settings);
-    }
-    formatIso(d, omitTime) {
-        let { dateEnv } = this.getCurrentData();
-        return dateEnv.formatIso(dateEnv.createMarker(d), { omitTime });
-    }
-    // Date Selection / Event Selection / DayClick
-    // -----------------------------------------------------------------------------------------------------------------
-    select(dateOrObj, endDate) {
-        let selectionInput;
-        if (endDate == null) {
-            if (dateOrObj.start != null) {
-                selectionInput = dateOrObj;
-            }
-            else {
-                selectionInput = {
-                    start: dateOrObj,
-                    end: null,
-                };
-            }
-        }
-        else {
-            selectionInput = {
-                start: dateOrObj,
-                end: endDate,
-            };
-        }
-        let state = this.getCurrentData();
-        let selection = parseDateSpan(selectionInput, state.dateEnv, createDuration({ days: 1 }));
-        if (selection) { // throw parse error otherwise?
-            this.dispatch({ type: 'SELECT_DATES', selection });
-            triggerDateSelect(selection, null, state);
-        }
-    }
-    unselect(pev) {
-        let state = this.getCurrentData();
-        if (state.dateSelection) {
-            this.dispatch({ type: 'UNSELECT_DATES' });
-            triggerDateUnselect(pev, state);
-        }
-    }
-    // Public Events API
-    // -----------------------------------------------------------------------------------------------------------------
-    addEvent(eventInput, sourceInput) {
-        if (eventInput instanceof EventImpl) {
-            let def = eventInput._def;
-            let instance = eventInput._instance;
-            let currentData = this.getCurrentData();
-            // not already present? don't want to add an old snapshot
-            if (!currentData.eventStore.defs[def.defId]) {
-                this.dispatch({
-                    type: 'ADD_EVENTS',
-                    eventStore: eventTupleToStore({ def, instance }), // TODO: better util for two args?
-                });
-                this.triggerEventAdd(eventInput);
-            }
-            return eventInput;
-        }
-        let state = this.getCurrentData();
-        let eventSource;
-        if (sourceInput instanceof EventSourceImpl) {
-            eventSource = sourceInput.internalEventSource;
-        }
-        else if (typeof sourceInput === 'boolean') {
-            if (sourceInput) { // true. part of the first event source
-                [eventSource] = hashValuesToArray(state.eventSources);
-            }
-        }
-        else if (sourceInput != null) { // an ID. accepts a number too
-            let sourceApi = this.getEventSourceById(sourceInput); // TODO: use an internal function
-            if (!sourceApi) {
-                console.warn(`Could not find an event source with ID "${sourceInput}"`); // TODO: test
-                return null;
-            }
-            eventSource = sourceApi.internalEventSource;
-        }
-        let tuple = parseEvent(eventInput, eventSource, state, false);
-        if (tuple) {
-            let newEventApi = new EventImpl(state, tuple.def, tuple.def.recurringDef ? null : tuple.instance);
-            this.dispatch({
-                type: 'ADD_EVENTS',
-                eventStore: eventTupleToStore(tuple),
-            });
-            this.triggerEventAdd(newEventApi);
-            return newEventApi;
-        }
-        return null;
-    }
-    triggerEventAdd(eventApi) {
-        let { emitter } = this.getCurrentData();
-        emitter.trigger('eventAdd', {
-            event: eventApi,
-            relatedEvents: [],
-            revert: () => {
-                this.dispatch({
-                    type: 'REMOVE_EVENTS',
-                    eventStore: eventApiToStore(eventApi),
-                });
-            },
-        });
-    }
-    // TODO: optimize
-    getEventById(id) {
-        let state = this.getCurrentData();
-        let { defs, instances } = state.eventStore;
-        id = String(id);
-        for (let defId in defs) {
-            let def = defs[defId];
-            if (def.publicId === id) {
-                if (def.recurringDef) {
-                    return new EventImpl(state, def, null);
-                }
-                for (let instanceId in instances) {
-                    let instance = instances[instanceId];
-                    if (instance.defId === def.defId) {
-                        return new EventImpl(state, def, instance);
-                    }
-                }
-            }
-        }
-        return null;
-    }
-    getEvents() {
-        let currentData = this.getCurrentData();
-        return buildEventApis(currentData.eventStore, currentData);
-    }
-    removeAllEvents() {
-        this.dispatch({ type: 'REMOVE_ALL_EVENTS' });
-    }
-    // Public Event Sources API
-    // -----------------------------------------------------------------------------------------------------------------
-    getEventSources() {
-        let state = this.getCurrentData();
-        let sourceHash = state.eventSources;
-        let sourceApis = [];
-        for (let internalId in sourceHash) {
-            sourceApis.push(new EventSourceImpl(state, sourceHash[internalId]));
-        }
-        return sourceApis;
-    }
-    getEventSourceById(id) {
-        let state = this.getCurrentData();
-        let sourceHash = state.eventSources;
-        id = String(id);
-        for (let sourceId in sourceHash) {
-            if (sourceHash[sourceId].publicId === id) {
-                return new EventSourceImpl(state, sourceHash[sourceId]);
-            }
-        }
-        return null;
-    }
-    addEventSource(sourceInput) {
-        let state = this.getCurrentData();
-        if (sourceInput instanceof EventSourceImpl) {
-            // not already present? don't want to add an old snapshot
-            if (!state.eventSources[sourceInput.internalEventSource.sourceId]) {
-                this.dispatch({
-                    type: 'ADD_EVENT_SOURCES',
-                    sources: [sourceInput.internalEventSource],
-                });
-            }
-            return sourceInput;
-        }
-        let eventSource = parseEventSource(sourceInput, state);
-        if (eventSource) { // TODO: error otherwise?
-            this.dispatch({ type: 'ADD_EVENT_SOURCES', sources: [eventSource] });
-            return new EventSourceImpl(state, eventSource);
-        }
-        return null;
-    }
-    removeAllEventSources() {
-        this.dispatch({ type: 'REMOVE_ALL_EVENT_SOURCES' });
-    }
-    refetchEvents() {
-        this.dispatch({ type: 'FETCH_EVENT_SOURCES', isRefetch: true });
-    }
-    // Scroll
-    // -----------------------------------------------------------------------------------------------------------------
-    scrollToTime(timeInput) {
-        let time = createDuration(timeInput);
-        if (time) {
-            this.trigger('_scrollRequest', { time });
-        }
-    }
-}
-
 class Store {
     constructor() {
         this.handlers = [];
@@ -10056,8 +10155,86 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-var css_248z = ":root{--fc-daygrid-event-dot-width:8px}.fc-daygrid-day-events:after,.fc-daygrid-day-events:before,.fc-daygrid-day-frame:after,.fc-daygrid-day-frame:before,.fc-daygrid-event-harness:after,.fc-daygrid-event-harness:before{clear:both;content:\"\";display:table}.fc .fc-daygrid-body{position:relative;z-index:1}.fc .fc-daygrid-day.fc-day-today{background-color:var(--fc-today-bg-color)}.fc .fc-daygrid-day-frame{min-height:100%;position:relative}.fc .fc-daygrid-day-top{display:flex;flex-direction:row-reverse}.fc .fc-day-other .fc-daygrid-day-top{opacity:.3}.fc .fc-daygrid-day-number{padding:4px;position:relative;z-index:4}.fc .fc-daygrid-month-start{font-size:1.1em;font-weight:700}.fc .fc-daygrid-day-events{margin-top:1px}.fc .fc-daygrid-body-balanced .fc-daygrid-day-events{left:0;position:absolute;right:0}.fc .fc-daygrid-body-unbalanced .fc-daygrid-day-events{min-height:2em;position:relative}.fc .fc-daygrid-body-natural .fc-daygrid-day-events{margin-bottom:1em}.fc .fc-daygrid-event-harness{position:relative}.fc .fc-daygrid-event-harness-abs{left:0;position:absolute;right:0;top:0}.fc .fc-daygrid-bg-harness{bottom:0;position:absolute;top:0}.fc .fc-daygrid-day-bg .fc-non-business{z-index:1}.fc .fc-daygrid-day-bg .fc-bg-event{z-index:2}.fc .fc-daygrid-day-bg .fc-highlight{z-index:3}.fc .fc-daygrid-event{margin-top:1px;z-index:6}.fc .fc-daygrid-event.fc-event-mirror{z-index:7}.fc .fc-daygrid-day-bottom{font-size:.85em;margin:0 2px}.fc .fc-daygrid-day-bottom:after,.fc .fc-daygrid-day-bottom:before{clear:both;content:\"\";display:table}.fc .fc-daygrid-more-link{border-radius:3px;cursor:pointer;line-height:1;margin-top:1px;max-width:100%;overflow:hidden;padding:2px;position:relative;white-space:nowrap;z-index:4}.fc .fc-daygrid-more-link:hover{background-color:rgba(0,0,0,.1)}.fc .fc-daygrid-week-number{background-color:var(--fc-neutral-bg-color);color:var(--fc-neutral-text-color);min-width:1.5em;padding:2px;position:absolute;text-align:center;top:0;z-index:5}.fc .fc-more-popover .fc-popover-body{min-width:220px;padding:10px}.fc-direction-ltr .fc-daygrid-event.fc-event-start,.fc-direction-rtl .fc-daygrid-event.fc-event-end{margin-left:2px}.fc-direction-ltr .fc-daygrid-event.fc-event-end,.fc-direction-rtl .fc-daygrid-event.fc-event-start{margin-right:2px}.fc-direction-ltr .fc-daygrid-more-link{float:left}.fc-direction-ltr .fc-daygrid-week-number{border-radius:0 0 3px 0;left:0}.fc-direction-rtl .fc-daygrid-more-link{float:right}.fc-direction-rtl .fc-daygrid-week-number{border-radius:0 0 0 3px;right:0}.fc-liquid-hack .fc-daygrid-day-frame{position:static}.fc-daygrid-event{border-radius:3px;font-size:var(--fc-small-font-size);position:relative;white-space:nowrap}.fc-daygrid-block-event .fc-event-time{font-weight:700}.fc-daygrid-block-event .fc-event-time,.fc-daygrid-block-event .fc-event-title{padding:1px}.fc-daygrid-dot-event{align-items:center;display:flex;padding:2px 0}.fc-daygrid-dot-event .fc-event-title{flex-grow:1;flex-shrink:1;font-weight:700;min-width:0;overflow:hidden}.fc-daygrid-dot-event.fc-event-mirror,.fc-daygrid-dot-event:hover{background:rgba(0,0,0,.1)}.fc-daygrid-dot-event.fc-event-selected:before{bottom:-10px;top:-10px}.fc-daygrid-event-dot{border:calc(var(--fc-daygrid-event-dot-width)/2) solid var(--fc-event-border-color);border-radius:calc(var(--fc-daygrid-event-dot-width)/2);box-sizing:content-box;height:0;margin:0 4px;width:0}.fc-direction-ltr .fc-daygrid-event .fc-event-time{margin-right:3px}.fc-direction-rtl .fc-daygrid-event .fc-event-time{margin-left:3px}";
-(0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cw)(css_248z);
+/* An abstract class for the daygrid views, as well as month view. Renders one or more rows of day cells.
+----------------------------------------------------------------------------------------------------------------------*/
+// It is a manager for a Table subcomponent, which does most of the heavy lifting.
+// It is responsible for managing width/height.
+class TableView extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bc {
+    constructor() {
+        super(...arguments);
+        this.headerElRef = (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createRef)();
+    }
+    renderSimpleLayout(headerRowContent, bodyContent) {
+        let { props, context } = this;
+        let sections = [];
+        let stickyHeaderDates = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ca)(context.options);
+        if (headerRowContent) {
+            sections.push({
+                type: 'header',
+                key: 'header',
+                isSticky: stickyHeaderDates,
+                chunk: {
+                    elRef: this.headerElRef,
+                    tableClassName: 'fc-col-header',
+                    rowContent: headerRowContent,
+                },
+            });
+        }
+        sections.push({
+            type: 'body',
+            key: 'body',
+            liquid: true,
+            chunk: { content: bodyContent },
+        });
+        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cq, { elClasses: ['fc-daygrid'], viewSpec: context.viewSpec },
+            (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bZ, { liquid: !props.isHeightAuto && !props.forPrint, collapsibleWidth: props.forPrint, cols: [] /* TODO: make optional? */, sections: sections })));
+    }
+    renderHScrollLayout(headerRowContent, bodyContent, colCnt, dayMinWidth) {
+        let ScrollGrid = this.context.pluginHooks.scrollGridImpl;
+        if (!ScrollGrid) {
+            throw new Error('No ScrollGrid implementation');
+        }
+        let { props, context } = this;
+        let stickyHeaderDates = !props.forPrint && (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ca)(context.options);
+        let stickyFooterScrollbar = !props.forPrint && (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.c9)(context.options);
+        let sections = [];
+        if (headerRowContent) {
+            sections.push({
+                type: 'header',
+                key: 'header',
+                isSticky: stickyHeaderDates,
+                chunks: [{
+                        key: 'main',
+                        elRef: this.headerElRef,
+                        tableClassName: 'fc-col-header',
+                        rowContent: headerRowContent,
+                    }],
+            });
+        }
+        sections.push({
+            type: 'body',
+            key: 'body',
+            liquid: true,
+            chunks: [{
+                    key: 'main',
+                    content: bodyContent,
+                }],
+        });
+        if (stickyFooterScrollbar) {
+            sections.push({
+                type: 'footer',
+                key: 'footer',
+                isSticky: true,
+                chunks: [{
+                        key: 'main',
+                        content: _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.c8,
+                    }],
+            });
+        }
+        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cq, { elClasses: ['fc-daygrid'], viewSpec: context.viewSpec },
+            (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(ScrollGrid, { liquid: !props.isHeightAuto && !props.forPrint, forPrint: props.forPrint, collapsibleWidth: props.forPrint, colGroups: [{ cols: [{ span: colCnt, minWidth: dayMinWidth }] }], sections: sections })));
+    }
+}
 
 function splitSegsByRow(segs, rowCnt) {
     let byRow = [];
@@ -10120,7 +10297,7 @@ function hasListItemDisplay(seg) {
 class TableBlockEvent extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.B {
     render() {
         let { props } = this;
-        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cj, Object.assign({}, props, { elClasses: ['fc-daygrid-event', 'fc-daygrid-block-event', 'fc-h-event'], defaultTimeFormat: DEFAULT_TABLE_EVENT_TIME_FORMAT, defaultDisplayEventEnd: props.defaultDisplayEventEnd, disableResizing: !props.seg.eventRange.def.allDay })));
+        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cg, Object.assign({}, props, { elClasses: ['fc-daygrid-event', 'fc-daygrid-block-event', 'fc-h-event'], defaultTimeFormat: DEFAULT_TABLE_EVENT_TIME_FORMAT, defaultDisplayEventEnd: props.defaultDisplayEventEnd, disableResizing: !props.seg.eventRange.def.allDay })));
     }
 }
 
@@ -10130,8 +10307,8 @@ class TableListItemEvent extends _fullcalendar_core_internal_js__WEBPACK_IMPORTE
         let { options } = context;
         let { seg } = props;
         let timeFormat = options.eventTimeFormat || DEFAULT_TABLE_EVENT_TIME_FORMAT;
-        let timeText = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bQ)(seg, timeFormat, context, true, props.defaultDisplayEventEnd);
-        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cn, Object.assign({}, props, { elTag: "a", elClasses: ['fc-daygrid-event', 'fc-daygrid-dot-event'], elAttrs: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bU)(props.seg, context), defaultGenerator: renderInnerContent, timeText: timeText, isResizing: false, isDateSelecting: false })));
+        let timeText = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bO)(seg, timeFormat, context, true, props.defaultDisplayEventEnd);
+        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ck, Object.assign({}, props, { elTag: "a", elClasses: ['fc-daygrid-event', 'fc-daygrid-dot-event'], elAttrs: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bS)(props.seg, context), defaultGenerator: renderInnerContent, timeText: timeText, isResizing: false, isDateSelecting: false })));
     }
 }
 function renderInnerContent(renderProps) {
@@ -10149,7 +10326,7 @@ class TableCellMoreLink extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED
     render() {
         let { props } = this;
         let { allSegs, invisibleSegs } = this.compileSegs(props.singlePlacements);
-        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cr, { elClasses: ['fc-daygrid-more-link'], dateProfile: props.dateProfile, todayRange: props.todayRange, allDayDate: props.allDayDate, moreCnt: props.moreCnt, allSegs: allSegs, hiddenSegs: invisibleSegs, alignmentElRef: props.alignmentElRef, alignGridTop: props.alignGridTop, extraDateSpan: props.extraDateSpan, popoverContent: () => {
+        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.co, { elClasses: ['fc-daygrid-more-link'], dateProfile: props.dateProfile, todayRange: props.todayRange, allDayDate: props.allDayDate, moreCnt: props.moreCnt, allSegs: allSegs, hiddenSegs: invisibleSegs, alignmentElRef: props.alignmentElRef, alignGridTop: props.alignGridTop, extraDateSpan: props.extraDateSpan, popoverContent: () => {
                 let isForcedInvisible = (props.eventDrag ? props.eventDrag.affectedInstances : null) ||
                     (props.eventResize ? props.eventResize.affectedInstances : null) ||
                     {};
@@ -10157,7 +10334,7 @@ class TableCellMoreLink extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED
                     let instanceId = seg.eventRange.instance.instanceId;
                     return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", { className: "fc-daygrid-event-harness", key: instanceId, style: {
                             visibility: isForcedInvisible[instanceId] ? 'hidden' : '',
-                        } }, hasListItemDisplay(seg) ? ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(TableListItemEvent, Object.assign({ seg: seg, isDragging: false, isSelected: instanceId === props.eventSelection, defaultDisplayEventEnd: false }, (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bS)(seg, props.todayRange)))) : ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(TableBlockEvent, Object.assign({ seg: seg, isDragging: false, isResizing: false, isDateSelecting: false, isSelected: instanceId === props.eventSelection, defaultDisplayEventEnd: false }, (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bS)(seg, props.todayRange))))));
+                        } }, hasListItemDisplay(seg) ? ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(TableListItemEvent, Object.assign({ seg: seg, isDragging: false, isSelected: instanceId === props.eventSelection, defaultDisplayEventEnd: false }, (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bQ)(seg, props.todayRange)))) : ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(TableBlockEvent, Object.assign({ seg: seg, isDragging: false, isResizing: false, isDateSelecting: false, isSelected: instanceId === props.eventSelection, defaultDisplayEventEnd: false }, (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bQ)(seg, props.todayRange))))));
                 })));
             } }));
     }
@@ -10175,16 +10352,16 @@ function compileSegs(singlePlacements) {
 }
 
 const DEFAULT_WEEK_NUM_FORMAT = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.x)({ week: 'narrow' });
-class TableCell extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.be {
+class TableCell extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bc {
     constructor() {
         super(...arguments);
         this.rootElRef = (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createRef)();
         this.state = {
-            dayNumberId: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a5)(),
+            dayNumberId: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a3)(),
         };
         this.handleRootEl = (el) => {
-            (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.Y)(this.rootElRef, el);
-            (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.Y)(this.props.elRef, el);
+            (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.W)(this.rootElRef, el);
+            (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.W)(this.props.elRef, el);
         };
     }
     render() {
@@ -10194,17 +10371,17 @@ class TableCell extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_
         // TODO: memoize this?
         const isMonthStart = props.showDayNumber &&
             shouldDisplayMonthStart(date, dateProfile.currentRange, dateEnv);
-        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cl, { elTag: "td", elRef: this.handleRootEl, elClasses: [
+        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ci, { elTag: "td", elRef: this.handleRootEl, elClasses: [
                 'fc-daygrid-day',
                 ...(props.extraClassNames || []),
             ], elAttrs: Object.assign(Object.assign(Object.assign({}, props.extraDataAttrs), (props.showDayNumber ? { 'aria-labelledby': state.dayNumberId } : {})), { role: 'gridcell' }), defaultGenerator: renderTopInner, date: date, dateProfile: dateProfile, todayRange: props.todayRange, showDayNumber: props.showDayNumber, isMonthStart: isMonthStart, extraRenderProps: props.extraRenderProps }, (InnerContent, renderProps) => ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", { ref: props.innerElRef, className: "fc-daygrid-day-frame fc-scrollgrid-sync-inner", style: { minHeight: props.minHeight } },
-            props.showWeekNumber && ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cq, { elTag: "a", elClasses: ['fc-daygrid-week-number'], elAttrs: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.b0)(context, date, 'week'), date: date, defaultFormat: DEFAULT_WEEK_NUM_FORMAT })),
+            props.showWeekNumber && ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cn, { elTag: "a", elClasses: ['fc-daygrid-week-number'], elAttrs: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a_)(context, date, 'week'), date: date, defaultFormat: DEFAULT_WEEK_NUM_FORMAT })),
             !renderProps.isDisabled &&
-                (props.showDayNumber || (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cm)(options) || props.forceDayTop) ? ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", { className: "fc-daygrid-day-top" },
+                (props.showDayNumber || (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cj)(options) || props.forceDayTop) ? ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", { className: "fc-daygrid-day-top" },
                 (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(InnerContent, { elTag: "a", elClasses: [
                         'fc-daygrid-day-number',
                         isMonthStart && 'fc-daygrid-month-start',
-                    ], elAttrs: Object.assign(Object.assign({}, (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.b0)(context, date)), { id: state.dayNumberId }) }))) : props.showDayNumber ? (
+                    ], elAttrs: Object.assign(Object.assign({}, (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a_)(context, date)), { id: state.dayNumberId }) }))) : props.showDayNumber ? (
             // for creating correct amount of space (see issue #7162)
             (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", { className: "fc-daygrid-day-top", style: { visibility: 'hidden' } },
                 (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)("a", { className: "fc-daygrid-day-number" }, "\u00A0"))) : undefined,
@@ -10220,7 +10397,7 @@ function renderTopInner(props) {
 }
 function shouldDisplayMonthStart(date, currentRange, dateEnv) {
     const { start: currentStart, end: currentEnd } = currentRange;
-    const currentEndIncl = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bg)(currentEnd, -1);
+    const currentEndIncl = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.be)(currentEnd, -1);
     const currentFirstYear = dateEnv.getYear(currentStart);
     const currentFirstMonth = dateEnv.getMonth(currentStart);
     const currentLastYear = dateEnv.getYear(currentEndIncl);
@@ -10234,9 +10411,22 @@ function shouldDisplayMonthStart(date, currentRange, dateEnv) {
             (dateEnv.getDay(date) === 1 && date.valueOf() < currentEnd.valueOf()));
 }
 
+function generateSegKey(seg) {
+    return seg.eventRange.instance.instanceId + ':' + seg.firstCol;
+}
+function generateSegUid(seg) {
+    return generateSegKey(seg) + ':' + seg.lastCol;
+}
 function computeFgSegPlacement(segs, // assumed already sorted
-dayMaxEvents, dayMaxEventRows, strictOrder, eventInstanceHeights, maxContentHeight, cells) {
-    let hierarchy = new DayGridSegHierarchy();
+dayMaxEvents, dayMaxEventRows, strictOrder, segHeights, maxContentHeight, cells) {
+    let hierarchy = new DayGridSegHierarchy((segEntry) => {
+        // TODO: more DRY with generateSegUid
+        let segUid = segs[segEntry.index].eventRange.instance.instanceId +
+            ':' + segEntry.span.start +
+            ':' + (segEntry.span.end - 1);
+        // if no thickness known, assume 1 (if 0, so small it always fits)
+        return segHeights[segUid] || 1;
+    });
     hierarchy.allowReslicing = true;
     hierarchy.strictOrder = strictOrder;
     if (dayMaxEvents === true || dayMaxEventRows === true) {
@@ -10255,12 +10445,11 @@ dayMaxEvents, dayMaxEventRows, strictOrder, eventInstanceHeights, maxContentHeig
     let unknownHeightSegs = [];
     for (let i = 0; i < segs.length; i += 1) {
         let seg = segs[i];
-        let { instanceId } = seg.eventRange.instance;
-        let eventHeight = eventInstanceHeights[instanceId];
+        let segUid = generateSegUid(seg);
+        let eventHeight = segHeights[segUid];
         if (eventHeight != null) {
             segInputs.push({
                 index: i,
-                thickness: eventHeight,
                 span: {
                     start: seg.firstCol,
                     end: seg.lastCol + 1,
@@ -10417,7 +10606,7 @@ function resliceSeg(seg, spanStart, spanEnd, cells) {
             range: slicedRange,
         }, isStart: seg.isStart && slicedRange.start.valueOf() === origRange.start.valueOf(), isEnd: seg.isEnd && slicedRange.end.valueOf() === origRange.end.valueOf() });
 }
-class DayGridSegHierarchy extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bA {
+class DayGridSegHierarchy extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.by {
     constructor() {
         super(...arguments);
         // config
@@ -10428,7 +10617,7 @@ class DayGridSegHierarchy extends _fullcalendar_core_internal_js__WEBPACK_IMPORT
     addSegs(segInputs) {
         const hiddenSegs = super.addSegs(segInputs);
         const { entriesByLevel } = this;
-        const excludeHidden = (entry) => !this.forceHidden[(0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bB)(entry)];
+        const excludeHidden = (entry) => !this.forceHidden[(0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bz)(entry)];
         // remove the forced-hidden segs
         for (let level = 0; level < entriesByLevel.length; level += 1) {
             entriesByLevel[level] = entriesByLevel[level].filter(excludeHidden);
@@ -10438,16 +10627,20 @@ class DayGridSegHierarchy extends _fullcalendar_core_internal_js__WEBPACK_IMPORT
     handleInvalidInsertion(insertion, entry, hiddenEntries) {
         const { entriesByLevel, forceHidden } = this;
         const { touchingEntry, touchingLevel, touchingLateral } = insertion;
+        // the entry that the new insertion is touching must be hidden
         if (this.hiddenConsumes && touchingEntry) {
-            const touchingEntryId = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bB)(touchingEntry);
-            // if not already hidden
+            const touchingEntryId = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bz)(touchingEntry);
             if (!forceHidden[touchingEntryId]) {
                 if (this.allowReslicing) {
-                    const placeholderEntry = Object.assign(Object.assign({}, touchingEntry), { span: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bF)(touchingEntry.span, entry.span) });
-                    const placeholderEntryId = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bB)(placeholderEntry);
-                    forceHidden[placeholderEntryId] = true;
-                    entriesByLevel[touchingLevel][touchingLateral] = placeholderEntry; // replace touchingEntry with our placeholder
-                    this.splitEntry(touchingEntry, entry, hiddenEntries); // split up the touchingEntry, reinsert it
+                    // split up the touchingEntry, reinsert it
+                    const hiddenEntry = Object.assign(Object.assign({}, touchingEntry), { span: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bD)(touchingEntry.span, entry.span) });
+                    // reinsert the area that turned into a "more" link (so no other entries try to
+                    // occupy the space) but mark it forced-hidden
+                    const hiddenEntryId = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bz)(hiddenEntry);
+                    forceHidden[hiddenEntryId] = true;
+                    entriesByLevel[touchingLevel][touchingLateral] = hiddenEntry;
+                    hiddenEntries.push(hiddenEntry);
+                    this.splitEntry(touchingEntry, entry, hiddenEntries);
                 }
                 else {
                     forceHidden[touchingEntryId] = true;
@@ -10455,22 +10648,23 @@ class DayGridSegHierarchy extends _fullcalendar_core_internal_js__WEBPACK_IMPORT
                 }
             }
         }
-        return super.handleInvalidInsertion(insertion, entry, hiddenEntries);
+        // will try to reslice...
+        super.handleInvalidInsertion(insertion, entry, hiddenEntries);
     }
 }
 
-class TableRow extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.be {
+class TableRow extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bc {
     constructor() {
         super(...arguments);
-        this.cellElRefs = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cf(); // the <td>
-        this.frameElRefs = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cf(); // the fc-daygrid-day-frame
-        this.fgElRefs = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cf(); // the fc-daygrid-day-events
-        this.segHarnessRefs = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cf(); // indexed by "instanceId:firstCol"
+        this.cellElRefs = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cd(); // the <td>
+        this.frameElRefs = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cd(); // the fc-daygrid-day-frame
+        this.fgElRefs = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cd(); // the fc-daygrid-day-events
+        this.segHarnessRefs = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cd(); // indexed by "instanceId:firstCol"
         this.rootElRef = (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createRef)();
         this.state = {
             framePositions: null,
             maxContentHeight: null,
-            eventInstanceHeights: {},
+            segHeights: {},
         };
         this.handleResize = (isForced) => {
             if (isForced) {
@@ -10486,7 +10680,7 @@ class TableRow extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0
         let bgEventSegsByCol = splitSegsByFirstCol(props.bgEventSegs, colCnt);
         let highlightSegsByCol = splitSegsByFirstCol(this.getHighlightSegs(), colCnt);
         let mirrorSegsByCol = splitSegsByFirstCol(this.getMirrorSegs(), colCnt);
-        let { singleColPlacements, multiColPlacements, moreCnts, moreMarginTops } = computeFgSegPlacement((0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bR)(props.fgEventSegs, options.eventOrder), props.dayMaxEvents, props.dayMaxEventRows, options.eventOrderStrict, state.eventInstanceHeights, state.maxContentHeight, props.cells);
+        let { singleColPlacements, multiColPlacements, moreCnts, moreMarginTops } = computeFgSegPlacement((0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bP)(props.fgEventSegs, options.eventOrder), props.dayMaxEvents, props.dayMaxEventRows, options.eventOrderStrict, state.segHeights, state.maxContentHeight, props.cells);
         let isForcedInvisible = // TODO: messy way to compute this
          (props.eventDrag && props.eventDrag.affectedInstances) ||
             (props.eventResize && props.eventResize.affectedInstances) ||
@@ -10545,7 +10739,6 @@ class TableRow extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0
             for (let placement of segPlacements) {
                 let { seg } = placement;
                 let { instanceId } = seg.eventRange.instance;
-                let key = instanceId + ':' + col;
                 let isVisible = placement.isVisible && !isForcedInvisible[instanceId];
                 let isAbsolute = placement.isAbsolute;
                 let left = '';
@@ -10564,13 +10757,13 @@ class TableRow extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0
                 known bug: events that are force to be list-item but span multiple days still take up space in later columns
                 todo: in print view, for multi-day events, don't display title within non-start/end segs
                 */
-                nodes.push((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", { className: 'fc-daygrid-event-harness' + (isAbsolute ? ' fc-daygrid-event-harness-abs' : ''), key: key, ref: isMirror ? null : this.segHarnessRefs.createRef(key), style: {
+                nodes.push((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", { className: 'fc-daygrid-event-harness' + (isAbsolute ? ' fc-daygrid-event-harness-abs' : ''), key: generateSegKey(seg), ref: isMirror ? null : this.segHarnessRefs.createRef(generateSegUid(seg)), style: {
                         visibility: isVisible ? '' : 'hidden',
                         marginTop: isAbsolute ? '' : placement.marginTop,
                         top: isAbsolute ? placement.absoluteTop : '',
                         left,
                         right,
-                    } }, hasListItemDisplay(seg) ? ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(TableListItemEvent, Object.assign({ seg: seg, isDragging: isDragging, isSelected: instanceId === eventSelection, defaultDisplayEventEnd: defaultDisplayEventEnd }, (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bS)(seg, todayRange)))) : ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(TableBlockEvent, Object.assign({ seg: seg, isDragging: isDragging, isResizing: isResizing, isDateSelecting: isDateSelecting, isSelected: instanceId === eventSelection, defaultDisplayEventEnd: defaultDisplayEventEnd }, (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bS)(seg, todayRange))))));
+                    } }, hasListItemDisplay(seg) ? ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(TableListItemEvent, Object.assign({ seg: seg, isDragging: isDragging, isSelected: instanceId === eventSelection, defaultDisplayEventEnd: defaultDisplayEventEnd }, (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bQ)(seg, todayRange)))) : ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(TableBlockEvent, Object.assign({ seg: seg, isDragging: isDragging, isResizing: isResizing, isDateSelecting: isDateSelecting, isSelected: instanceId === eventSelection, defaultDisplayEventEnd: defaultDisplayEventEnd }, (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bQ)(seg, todayRange))))));
             }
         }
         return nodes;
@@ -10589,9 +10782,9 @@ class TableRow extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0
                     left: 0,
                     right: framePositions.rights[seg.firstCol] - framePositions.rights[seg.lastCol],
                 };
-                nodes.push((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", { key: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bT)(seg.eventRange), className: "fc-daygrid-bg-harness", style: leftRightCss }, fillType === 'bg-event' ?
-                    (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cp, Object.assign({ seg: seg }, (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bS)(seg, todayRange))) :
-                    (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.co)(fillType)));
+                nodes.push((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", { key: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bR)(seg.eventRange), className: "fc-daygrid-bg-harness", style: leftRightCss }, fillType === 'bg-event' ?
+                    (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cm, Object.assign({ seg: seg }, (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bQ)(seg, todayRange))) :
+                    (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cl)(fillType)));
             }
         }
         return (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.Fragment, {}, ...nodes);
@@ -10605,38 +10798,37 @@ class TableRow extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0
                 let frameEls = props.cells.map((cell) => frameElRefs.currentMap[cell.key]);
                 if (frameEls.length) {
                     let originEl = this.rootElRef.current;
-                    let newPositionCache = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ba(originEl, frameEls, true, // isHorizontal
+                    let newPositionCache = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.b8(originEl, frameEls, true, // isHorizontal
                     false);
                     if (!state.framePositions || !state.framePositions.similarTo(newPositionCache)) {
                         this.setState({
-                            framePositions: new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ba(originEl, frameEls, true, // isHorizontal
+                            framePositions: new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.b8(originEl, frameEls, true, // isHorizontal
                             false),
                         });
                     }
                 }
             }
-            const oldInstanceHeights = this.state.eventInstanceHeights;
-            const newInstanceHeights = this.queryEventInstanceHeights();
+            const oldSegHeights = this.state.segHeights;
+            const newSegHeights = this.querySegHeights();
             const limitByContentHeight = props.dayMaxEvents === true || props.dayMaxEventRows === true;
             this.safeSetState({
                 // HACK to prevent oscillations of events being shown/hidden from max-event-rows
                 // Essentially, once you compute an element's height, never null-out.
                 // TODO: always display all events, as visibility:hidden?
-                eventInstanceHeights: Object.assign(Object.assign({}, oldInstanceHeights), newInstanceHeights),
+                segHeights: Object.assign(Object.assign({}, oldSegHeights), newSegHeights),
                 maxContentHeight: limitByContentHeight ? this.computeMaxContentHeight() : null,
             });
         }
     }
-    queryEventInstanceHeights() {
+    querySegHeights() {
         let segElMap = this.segHarnessRefs.currentMap;
-        let eventInstanceHeights = {};
+        let segHeights = {};
         // get the max height amongst instance segs
-        for (let key in segElMap) {
-            let height = Math.round(segElMap[key].getBoundingClientRect().height);
-            let instanceId = key.split(':')[0]; // deconstruct how renderFgSegs makes the key
-            eventInstanceHeights[instanceId] = Math.max(eventInstanceHeights[instanceId] || 0, height);
+        for (let segUid in segElMap) {
+            let height = Math.round(segElMap[segUid].getBoundingClientRect().height);
+            segHeights[segUid] = Math.max(segHeights[segUid] || 0, height);
         }
-        return eventInstanceHeights;
+        return segHeights;
     }
     computeMaxContentHeight() {
         let firstKey = this.props.cells[0].key;
@@ -10650,7 +10842,7 @@ class TableRow extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0
     }
 }
 TableRow.addStateEquality({
-    eventInstanceHeights: _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.E,
+    segHeights: _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.E,
 });
 function buildMirrorPlacements(mirrorSegs, colPlacements) {
     if (!mirrorSegs.length) {
@@ -10675,7 +10867,7 @@ function buildAbsoluteTopHash(colPlacements) {
     return topsByInstanceId;
 }
 
-class TableRows extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.be {
+class TableRows extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bc {
     constructor() {
         super(...arguments);
         this.splitBusinessHourSegs = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.z)(splitSegsByRow);
@@ -10684,7 +10876,7 @@ class TableRows extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_
         this.splitDateSelectionSegs = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.z)(splitSegsByRow);
         this.splitEventDrag = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.z)(splitInteractionByRow);
         this.splitEventResize = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.z)(splitInteractionByRow);
-        this.rowRefs = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cf();
+        this.rowRefs = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cd();
     }
     render() {
         let { props, context } = this;
@@ -10700,21 +10892,31 @@ class TableRows extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_
         let cellMinHeight = (rowCnt >= 7 && props.clientWidth) ?
             props.clientWidth / context.options.aspectRatio / 6 :
             null;
-        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ch, { unit: "day" }, (nowDate, todayRange) => ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.Fragment, null, props.cells.map((cells, row) => ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(TableRow, { ref: this.rowRefs.createRef(row), key: cells.length
+        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a6, { unit: "day" }, (nowDate, todayRange) => ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.Fragment, null, props.cells.map((cells, row) => ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(TableRow, { ref: this.rowRefs.createRef(row), key: cells.length
                 ? cells[0].date.toISOString() /* best? or put key on cell? or use diff formatter? */
                 : row // in case there are no cells (like when resource view is loading)
             , showDayNumbers: rowCnt > 1, showWeekNumbers: props.showWeekNumbers, todayRange: todayRange, dateProfile: props.dateProfile, cells: cells, renderIntro: props.renderRowIntro, businessHourSegs: businessHourSegsByRow[row], eventSelection: props.eventSelection, bgEventSegs: bgEventSegsByRow[row].filter(isSegAllDay) /* hack */, fgEventSegs: fgEventSegsByRow[row], dateSelectionSegs: dateSelectionSegsByRow[row], eventDrag: eventDragByRow[row], eventResize: eventResizeByRow[row], dayMaxEvents: props.dayMaxEvents, dayMaxEventRows: props.dayMaxEventRows, clientWidth: props.clientWidth, clientHeight: props.clientHeight, cellMinHeight: cellMinHeight, forPrint: props.forPrint })))))));
     }
     componentDidMount() {
-        // HACK: need a daygrid wrapper parent to do positioning
-        // NOTE: a daygrid resource view w/o resources can have zero cells
-        const firstCellEl = this.rowRefs.currentMap[0].getCellEls()[0];
-        this.rootEl = firstCellEl ? firstCellEl.closest('.fc-daygrid-body') : null;
-        if (this.rootEl) {
-            this.context.registerInteractiveComponent(this, {
-                el: this.rootEl,
-                isHitComboAllowed: this.props.isHitComboAllowed,
-            });
+        this.registerInteractiveComponent();
+    }
+    componentDidUpdate() {
+        // for if started with zero cells
+        this.registerInteractiveComponent();
+    }
+    registerInteractiveComponent() {
+        if (!this.rootEl) {
+            // HACK: need a daygrid wrapper parent to do positioning
+            // NOTE: a daygrid resource view w/o resources can have zero cells
+            const firstCellEl = this.rowRefs.currentMap[0].getCellEls()[0];
+            const rootEl = firstCellEl ? firstCellEl.closest('.fc-daygrid-body') : null;
+            if (rootEl) {
+                this.rootEl = rootEl;
+                this.context.registerInteractiveComponent(this, {
+                    el: rootEl,
+                    isHitComboAllowed: this.props.isHitComboAllowed,
+                });
+            }
         }
     }
     componentWillUnmount() {
@@ -10726,9 +10928,9 @@ class TableRows extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_
     // Hit System
     // ----------------------------------------------------------------------------------------------------
     prepareHits() {
-        this.rowPositions = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ba(this.rootEl, this.rowRefs.collect().map((rowObj) => rowObj.getCellEls()[0]), // first cell el in each row. TODO: not optimal
+        this.rowPositions = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.b8(this.rootEl, this.rowRefs.collect().map((rowObj) => rowObj.getCellEls()[0]), // first cell el in each row. TODO: not optimal
         false, true);
-        this.colPositions = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ba(this.rootEl, this.rowRefs.currentMap[0].getCellEls(), // cell els in first row
+        this.colPositions = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.b8(this.rootEl, this.rowRefs.currentMap[0].getCellEls(), // cell els in first row
         true, // horizontal
         false);
     }
@@ -10766,7 +10968,7 @@ function isSegAllDay(seg) {
     return seg.eventRange.def.allDay;
 }
 
-class Table extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.be {
+class Table extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bc {
     constructor() {
         super(...arguments);
         this.elRef = (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createRef)();
@@ -10837,17 +11039,17 @@ class Table extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.
 function getScrollSubjectEl(containerEl, dateProfile) {
     let el;
     if (dateProfile.currentRangeUnit.match(/year|month/)) {
-        el = containerEl.querySelector(`[data-date="${(0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bx)(dateProfile.currentDate)}-01"]`);
+        el = containerEl.querySelector(`[data-date="${(0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bv)(dateProfile.currentDate)}-01"]`);
         // even if view is month-based, first-of-month might be hidden...
     }
     if (!el) {
-        el = containerEl.querySelector(`[data-date="${(0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bv)(dateProfile.currentDate)}"]`);
+        el = containerEl.querySelector(`[data-date="${(0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bt)(dateProfile.currentDate)}"]`);
         // could still be hidden if an interior-view hidden day
     }
     return el;
 }
 
-class DayTableSlicer extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bW {
+class DayTableSlicer extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bU {
     constructor() {
         super(...arguments);
         this.forceDayIfListItem = true;
@@ -10857,7 +11059,7 @@ class DayTableSlicer extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MO
     }
 }
 
-class DayTable extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.be {
+class DayTable extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bc {
     constructor() {
         super(...arguments);
         this.slicer = new DayTableSlicer();
@@ -10869,7 +11071,31 @@ class DayTable extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0
     }
 }
 
-class TableDateProfileGenerator extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.U {
+class DayTableView extends TableView {
+    constructor() {
+        super(...arguments);
+        this.buildDayTableModel = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.z)(buildDayTableModel);
+        this.headerRef = (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createRef)();
+        this.tableRef = (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createRef)();
+        // can't override any lifecycle methods from parent
+    }
+    render() {
+        let { options, dateProfileGenerator } = this.context;
+        let { props } = this;
+        let dayTableModel = this.buildDayTableModel(props.dateProfile, dateProfileGenerator);
+        let headerContent = options.dayHeaders && ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bI, { ref: this.headerRef, dateProfile: props.dateProfile, dates: dayTableModel.headerDates, datesRepDistinctDays: dayTableModel.rowCnt === 1 }));
+        let bodyContent = (contentArg) => ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(DayTable, { ref: this.tableRef, dateProfile: props.dateProfile, dayTableModel: dayTableModel, businessHours: props.businessHours, dateSelection: props.dateSelection, eventStore: props.eventStore, eventUiBases: props.eventUiBases, eventSelection: props.eventSelection, eventDrag: props.eventDrag, eventResize: props.eventResize, nextDayThreshold: options.nextDayThreshold, colGroupNode: contentArg.tableColGroupNode, tableMinWidth: contentArg.tableMinWidth, dayMaxEvents: options.dayMaxEvents, dayMaxEventRows: options.dayMaxEventRows, showWeekNumbers: options.weekNumbers, expandRows: !props.isHeightAuto, headerAlignElRef: this.headerElRef, clientWidth: contentArg.clientWidth, clientHeight: contentArg.clientHeight, forPrint: props.forPrint }));
+        return options.dayMinWidth
+            ? this.renderHScrollLayout(headerContent, bodyContent, dayTableModel.colCnt, options.dayMinWidth)
+            : this.renderSimpleLayout(headerContent, bodyContent);
+    }
+}
+function buildDayTableModel(dateProfile, dateProfileGenerator) {
+    let daySeries = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bM(dateProfile.renderRange, dateProfileGenerator);
+    return new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bT(daySeries, /year|month|week/.test(dateProfile.currentRangeUnit));
+}
+
+class TableDateProfileGenerator extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.R {
     // Computes the date range that will be rendered
     buildRenderRange(currentRange, currentRangeUnit, isRangeAllDay) {
         let renderRange = super.buildRenderRange(currentRange, currentRangeUnit, isRangeAllDay);
@@ -10892,7 +11118,7 @@ function buildDayTableRenderRange(props) {
         // make end-of-week if not already
         endOfWeek = dateEnv.startOfWeek(end);
         if (endOfWeek.valueOf() !== end.valueOf()) {
-            end = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bh)(endOfWeek, 1);
+            end = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bf)(endOfWeek, 1);
         }
     }
     // ensure 6 weeks
@@ -10901,116 +11127,14 @@ function buildDayTableRenderRange(props) {
         // compute dateprofiles of all months, then use start of first and end of last.
         let lastMonthRenderStart = dateEnv.startOfWeek(dateEnv.startOfMonth((0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.t)(currentRange.end, -1)));
         let rowCnt = Math.ceil(// could be partial weeks due to hiddenDays
-        (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bi)(lastMonthRenderStart, end));
-        end = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bh)(end, 6 - rowCnt);
+        (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bg)(lastMonthRenderStart, end));
+        end = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bf)(end, 6 - rowCnt);
     }
     return { start, end };
 }
 
-/* An abstract class for the daygrid views, as well as month view. Renders one or more rows of day cells.
-----------------------------------------------------------------------------------------------------------------------*/
-// It is a manager for a Table subcomponent, which does most of the heavy lifting.
-// It is responsible for managing width/height.
-class TableView extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.be {
-    constructor() {
-        super(...arguments);
-        this.headerElRef = (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createRef)();
-    }
-    renderSimpleLayout(headerRowContent, bodyContent) {
-        let { props, context } = this;
-        let sections = [];
-        let stickyHeaderDates = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cc)(context.options);
-        if (headerRowContent) {
-            sections.push({
-                type: 'header',
-                key: 'header',
-                isSticky: stickyHeaderDates,
-                chunk: {
-                    elRef: this.headerElRef,
-                    tableClassName: 'fc-col-header',
-                    rowContent: headerRowContent,
-                },
-            });
-        }
-        sections.push({
-            type: 'body',
-            key: 'body',
-            liquid: true,
-            chunk: { content: bodyContent },
-        });
-        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ct, { elClasses: ['fc-daygrid'], viewSpec: context.viewSpec },
-            (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.b$, { liquid: !props.isHeightAuto && !props.forPrint, collapsibleWidth: props.forPrint, cols: [] /* TODO: make optional? */, sections: sections })));
-    }
-    renderHScrollLayout(headerRowContent, bodyContent, colCnt, dayMinWidth) {
-        let ScrollGrid = this.context.pluginHooks.scrollGridImpl;
-        if (!ScrollGrid) {
-            throw new Error('No ScrollGrid implementation');
-        }
-        let { props, context } = this;
-        let stickyHeaderDates = !props.forPrint && (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cc)(context.options);
-        let stickyFooterScrollbar = !props.forPrint && (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cb)(context.options);
-        let sections = [];
-        if (headerRowContent) {
-            sections.push({
-                type: 'header',
-                key: 'header',
-                isSticky: stickyHeaderDates,
-                chunks: [{
-                        key: 'main',
-                        elRef: this.headerElRef,
-                        tableClassName: 'fc-col-header',
-                        rowContent: headerRowContent,
-                    }],
-            });
-        }
-        sections.push({
-            type: 'body',
-            key: 'body',
-            liquid: true,
-            chunks: [{
-                    key: 'main',
-                    content: bodyContent,
-                }],
-        });
-        if (stickyFooterScrollbar) {
-            sections.push({
-                type: 'footer',
-                key: 'footer',
-                isSticky: true,
-                chunks: [{
-                        key: 'main',
-                        content: _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ca,
-                    }],
-            });
-        }
-        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ct, { elClasses: ['fc-daygrid'], viewSpec: context.viewSpec },
-            (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(ScrollGrid, { liquid: !props.isHeightAuto && !props.forPrint, forPrint: props.forPrint, collapsibleWidth: props.forPrint, colGroups: [{ cols: [{ span: colCnt, minWidth: dayMinWidth }] }], sections: sections })));
-    }
-}
-
-class DayTableView extends TableView {
-    constructor() {
-        super(...arguments);
-        this.buildDayTableModel = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.z)(buildDayTableModel);
-        this.headerRef = (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createRef)();
-        this.tableRef = (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createRef)();
-        // can't override any lifecycle methods from parent
-    }
-    render() {
-        let { options, dateProfileGenerator } = this.context;
-        let { props } = this;
-        let dayTableModel = this.buildDayTableModel(props.dateProfile, dateProfileGenerator);
-        let headerContent = options.dayHeaders && ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bK, { ref: this.headerRef, dateProfile: props.dateProfile, dates: dayTableModel.headerDates, datesRepDistinctDays: dayTableModel.rowCnt === 1 }));
-        let bodyContent = (contentArg) => ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(DayTable, { ref: this.tableRef, dateProfile: props.dateProfile, dayTableModel: dayTableModel, businessHours: props.businessHours, dateSelection: props.dateSelection, eventStore: props.eventStore, eventUiBases: props.eventUiBases, eventSelection: props.eventSelection, eventDrag: props.eventDrag, eventResize: props.eventResize, nextDayThreshold: options.nextDayThreshold, colGroupNode: contentArg.tableColGroupNode, tableMinWidth: contentArg.tableMinWidth, dayMaxEvents: options.dayMaxEvents, dayMaxEventRows: options.dayMaxEventRows, showWeekNumbers: options.weekNumbers, expandRows: !props.isHeightAuto, headerAlignElRef: this.headerElRef, clientWidth: contentArg.clientWidth, clientHeight: contentArg.clientHeight, forPrint: props.forPrint }));
-        return options.dayMinWidth
-            ? this.renderHScrollLayout(headerContent, bodyContent, dayTableModel.colCnt, options.dayMinWidth)
-            : this.renderSimpleLayout(headerContent, bodyContent);
-    }
-}
-function buildDayTableModel(dateProfile, dateProfileGenerator) {
-    let daySeries = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bO(dateProfile.renderRange, dateProfileGenerator);
-    return new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bV(daySeries, /year|month|week/.test(dateProfile.currentRangeUnit));
-}
+var css_248z = ":root{--fc-daygrid-event-dot-width:8px}.fc-daygrid-day-events:after,.fc-daygrid-day-events:before,.fc-daygrid-day-frame:after,.fc-daygrid-day-frame:before,.fc-daygrid-event-harness:after,.fc-daygrid-event-harness:before{clear:both;content:\"\";display:table}.fc .fc-daygrid-body{position:relative;z-index:1}.fc .fc-daygrid-day.fc-day-today{background-color:var(--fc-today-bg-color)}.fc .fc-daygrid-day-frame{min-height:100%;position:relative}.fc .fc-daygrid-day-top{display:flex;flex-direction:row-reverse}.fc .fc-day-other .fc-daygrid-day-top{opacity:.3}.fc .fc-daygrid-day-number{padding:4px;position:relative;z-index:4}.fc .fc-daygrid-month-start{font-size:1.1em;font-weight:700}.fc .fc-daygrid-day-events{margin-top:1px}.fc .fc-daygrid-body-balanced .fc-daygrid-day-events{left:0;position:absolute;right:0}.fc .fc-daygrid-body-unbalanced .fc-daygrid-day-events{min-height:2em;position:relative}.fc .fc-daygrid-body-natural .fc-daygrid-day-events{margin-bottom:1em}.fc .fc-daygrid-event-harness{position:relative}.fc .fc-daygrid-event-harness-abs{left:0;position:absolute;right:0;top:0}.fc .fc-daygrid-bg-harness{bottom:0;position:absolute;top:0}.fc .fc-daygrid-day-bg .fc-non-business{z-index:1}.fc .fc-daygrid-day-bg .fc-bg-event{z-index:2}.fc .fc-daygrid-day-bg .fc-highlight{z-index:3}.fc .fc-daygrid-event{margin-top:1px;z-index:6}.fc .fc-daygrid-event.fc-event-mirror{z-index:7}.fc .fc-daygrid-day-bottom{font-size:.85em;margin:0 2px}.fc .fc-daygrid-day-bottom:after,.fc .fc-daygrid-day-bottom:before{clear:both;content:\"\";display:table}.fc .fc-daygrid-more-link{border-radius:3px;cursor:pointer;line-height:1;margin-top:1px;max-width:100%;overflow:hidden;padding:2px;position:relative;white-space:nowrap;z-index:4}.fc .fc-daygrid-more-link:hover{background-color:rgba(0,0,0,.1)}.fc .fc-daygrid-week-number{background-color:var(--fc-neutral-bg-color);color:var(--fc-neutral-text-color);min-width:1.5em;padding:2px;position:absolute;text-align:center;top:0;z-index:5}.fc .fc-more-popover .fc-popover-body{min-width:220px;padding:10px}.fc-direction-ltr .fc-daygrid-event.fc-event-start,.fc-direction-rtl .fc-daygrid-event.fc-event-end{margin-left:2px}.fc-direction-ltr .fc-daygrid-event.fc-event-end,.fc-direction-rtl .fc-daygrid-event.fc-event-start{margin-right:2px}.fc-direction-ltr .fc-daygrid-more-link{float:left}.fc-direction-ltr .fc-daygrid-week-number{border-radius:0 0 3px 0;left:0}.fc-direction-rtl .fc-daygrid-more-link{float:right}.fc-direction-rtl .fc-daygrid-week-number{border-radius:0 0 0 3px;right:0}.fc-liquid-hack .fc-daygrid-day-frame{position:static}.fc-daygrid-event{border-radius:3px;font-size:var(--fc-small-font-size);position:relative;white-space:nowrap}.fc-daygrid-block-event .fc-event-time{font-weight:700}.fc-daygrid-block-event .fc-event-time,.fc-daygrid-block-event .fc-event-title{padding:1px}.fc-daygrid-dot-event{align-items:center;display:flex;padding:2px 0}.fc-daygrid-dot-event .fc-event-title{flex-grow:1;flex-shrink:1;font-weight:700;min-width:0;overflow:hidden}.fc-daygrid-dot-event.fc-event-mirror,.fc-daygrid-dot-event:hover{background:rgba(0,0,0,.1)}.fc-daygrid-dot-event.fc-event-selected:before{bottom:-10px;top:-10px}.fc-daygrid-event-dot{border:calc(var(--fc-daygrid-event-dot-width)/2) solid var(--fc-event-border-color);border-radius:calc(var(--fc-daygrid-event-dot-width)/2);box-sizing:content-box;height:0;margin:0 4px;width:0}.fc-direction-ltr .fc-daygrid-event .fc-event-time{margin-right:3px}.fc-direction-rtl .fc-daygrid-event .fc-event-time{margin-left:3px}";
+(0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ct)(css_248z);
 
 
 
@@ -11034,7 +11158,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bI.touchMouseIgnoreWait = 500;
+_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bG.touchMouseIgnoreWait = 500;
 let ignoreMouseDepth = 0;
 let listenerCnt = 0;
 let isWindowTouchMoveCancelled = false;
@@ -11134,8 +11258,8 @@ class PointerDragging {
         };
         this.handleScroll = (ev) => {
             if (!this.shouldIgnoreMove) {
-                let pageX = (window.pageXOffset - this.prevScrollX) + this.prevPageX;
-                let pageY = (window.pageYOffset - this.prevScrollY) + this.prevPageY;
+                let pageX = (window.scrollX - this.prevScrollX) + this.prevPageX;
+                let pageY = (window.scrollY - this.prevScrollY) + this.prevPageY;
                 this.emitter.trigger('pointermove', {
                     origEvent: ev,
                     isTouch: this.isTouchDragging,
@@ -11162,7 +11286,7 @@ class PointerDragging {
         let subjectEl = this.querySubjectEl(ev);
         let downEl = ev.target;
         if (subjectEl &&
-            (!this.handleSelector || (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.$)(downEl, this.handleSelector))) {
+            (!this.handleSelector || (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.Z)(downEl, this.handleSelector))) {
             this.subjectEl = subjectEl;
             this.isDragging = true; // do this first so cancelTouchScroll will work
             this.wasTouchScroll = false;
@@ -11179,7 +11303,7 @@ class PointerDragging {
     }
     querySubjectEl(ev) {
         if (this.selector) {
-            return (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.$)(ev.target, this.selector);
+            return (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.Z)(ev.target, this.selector);
         }
         return this.containerEl;
     }
@@ -11204,8 +11328,8 @@ class PointerDragging {
         if (this.shouldWatchScroll) {
             this.prevPageX = ev.pageX;
             this.prevPageY = ev.pageY;
-            this.prevScrollX = window.pageXOffset;
-            this.prevScrollY = window.pageYOffset;
+            this.prevScrollX = window.scrollX;
+            this.prevScrollY = window.scrollY;
         }
     }
     destroyScrollWatch() {
@@ -11283,7 +11407,7 @@ function startIgnoringMouse() {
     ignoreMouseDepth += 1;
     setTimeout(() => {
         ignoreMouseDepth -= 1;
-    }, _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bI.touchMouseIgnoreWait);
+    }, _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bG.touchMouseIgnoreWait);
 }
 // We want to attach touchmove as early as possible for Safari
 // ----------------------------------------------------------------------------------------------------
@@ -11324,15 +11448,15 @@ class ElementMirror {
     start(sourceEl, pageX, pageY) {
         this.sourceEl = sourceEl;
         this.sourceElRect = this.sourceEl.getBoundingClientRect();
-        this.origScreenX = pageX - window.pageXOffset;
-        this.origScreenY = pageY - window.pageYOffset;
+        this.origScreenX = pageX - window.scrollX;
+        this.origScreenY = pageY - window.scrollY;
         this.deltaX = 0;
         this.deltaY = 0;
         this.updateElPosition();
     }
     handleMove(pageX, pageY) {
-        this.deltaX = (pageX - window.pageXOffset) - this.origScreenX;
-        this.deltaY = (pageY - window.pageYOffset) - this.origScreenY;
+        this.deltaX = (pageX - window.scrollX) - this.origScreenX;
+        this.deltaY = (pageY - window.scrollY) - this.origScreenY;
         this.updateElPosition();
     }
     // can be called before start
@@ -11377,25 +11501,25 @@ class ElementMirror {
         mirrorEl.style.transition =
             'top ' + revertDuration + 'ms,' +
                 'left ' + revertDuration + 'ms';
-        (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aP)(mirrorEl, {
+        (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aN)(mirrorEl, {
             left: finalSourceElRect.left,
             top: finalSourceElRect.top,
         });
-        (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.b2)(mirrorEl, () => {
+        (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.b0)(mirrorEl, () => {
             mirrorEl.style.transition = '';
             callback();
         });
     }
     cleanup() {
         if (this.mirrorEl) {
-            (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aO)(this.mirrorEl);
+            (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aM)(this.mirrorEl);
             this.mirrorEl = null;
         }
         this.sourceEl = null;
     }
     updateElPosition() {
         if (this.sourceEl && this.isVisible) {
-            (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aP)(this.getMirrorEl(), {
+            (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aN)(this.getMirrorEl(), {
                 left: this.sourceElRect.left + this.deltaX,
                 top: this.sourceElRect.top + this.deltaY,
             });
@@ -11409,8 +11533,10 @@ class ElementMirror {
             // we don't want long taps or any mouse interaction causing selection/menus.
             // would use preventSelection(), but that prevents selectstart, causing problems.
             mirrorEl.style.userSelect = 'none';
+            mirrorEl.style.webkitUserSelect = 'none';
+            mirrorEl.style.pointerEvents = 'none';
             mirrorEl.classList.add('fc-event-dragging');
-            (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aP)(mirrorEl, {
+            (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aN)(mirrorEl, {
                 position: 'fixed',
                 zIndex: this.zIndex,
                 visibility: '',
@@ -11435,7 +11561,7 @@ The cache can be in one of two modes:
 - doesListening:false - ignores when the container is scrolled by someone else
 - doesListening:true - watch for scrolling and update the cache
 */
-class ScrollGeomCache extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bb {
+class ScrollGeomCache extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.b9 {
     constructor(scrollController, doesListening) {
         super();
         this.handleScroll = () => {
@@ -11503,19 +11629,19 @@ class ScrollGeomCache extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_M
 
 class ElementScrollGeomCache extends ScrollGeomCache {
     constructor(el, doesListening) {
-        super(new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bc(el), doesListening);
+        super(new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ba(el), doesListening);
     }
     getEventTarget() {
         return this.scrollController.el;
     }
     computeClientRect() {
-        return (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.b3)(this.scrollController.el);
+        return (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.b1)(this.scrollController.el);
     }
 }
 
 class WindowScrollGeomCache extends ScrollGeomCache {
     constructor(doesListening) {
-        super(new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bd(), doesListening);
+        super(new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bb(), doesListening);
     }
     getEventTarget() {
         return window;
@@ -11564,7 +11690,7 @@ class AutoScroller {
         this.everMovedRight = false;
         this.animate = () => {
             if (this.isAnimating) { // wasn't cancelled between animation calls
-                let edge = this.computeBestEdge(this.pointerScreenX + window.pageXOffset, this.pointerScreenY + window.pageYOffset);
+                let edge = this.computeBestEdge(this.pointerScreenX + window.scrollX, this.pointerScreenY + window.scrollY);
                 if (edge) {
                     let now = getTime();
                     this.handleSide(edge, (now - this.msSinceRequest) / 1000);
@@ -11590,8 +11716,8 @@ class AutoScroller {
     }
     handleMove(pageX, pageY) {
         if (this.isEnabled) {
-            let pointerScreenX = pageX - window.pageXOffset;
-            let pointerScreenY = pageY - window.pageYOffset;
+            let pointerScreenX = pageX - window.scrollX;
+            let pointerScreenY = pageY - window.scrollY;
             let yDelta = this.pointerScreenY === null ? 0 : pointerScreenY - this.pointerScreenY;
             let xDelta = this.pointerScreenX === null ? 0 : pointerScreenX - this.pointerScreenX;
             if (yDelta < 0) {
@@ -11671,6 +11797,10 @@ class AutoScroller {
                     (!bestSide || bestSide.distance > bottomDist)) {
                     bestSide = { scrollCache, name: 'bottom', distance: bottomDist };
                 }
+                /*
+                TODO: fix broken RTL scrolling. canScrollLeft always returning false
+                https://github.com/fullcalendar/fullcalendar/issues/4837
+                */
                 if (leftDist <= edgeThreshold && this.everMovedLeft && scrollCache.canScrollLeft() &&
                     (!bestSide || bestSide.distance > leftDist)) {
                     bestSide = { scrollCache, name: 'left', distance: leftDist };
@@ -11698,6 +11828,10 @@ class AutoScroller {
                 els.push(query);
             }
             else {
+                /*
+                TODO: in the future, always have auto-scroll happen on element where current Hit came from
+                Ticket: https://github.com/fullcalendar/fullcalendar/issues/4593
+                */
                 els.push(...Array.prototype.slice.call(scrollStartEl.getRootNode().querySelectorAll(query)));
             }
         }
@@ -11711,7 +11845,7 @@ Monitors dragging on an element. Has a number of high-level features:
 - minimum wait time ("delay") before dragging
 - a mirror element that follows the pointer
 */
-class FeaturefulElementDragging extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bH {
+class FeaturefulElementDragging extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bF {
     constructor(containerEl, selector) {
         super(containerEl);
         this.containerEl = containerEl;
@@ -11731,8 +11865,8 @@ class FeaturefulElementDragging extends _fullcalendar_core_internal_js__WEBPACK_
                 this.isInteracting = true;
                 this.isDelayEnded = false;
                 this.isDistanceSurpassed = false;
+                (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ap)(document.body);
                 (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ar)(document.body);
-                (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.at)(document.body);
                 // prevent links from being visited if there's an eventual drag.
                 // also prevents selection in older browsers (maybe?).
                 // not necessary for touch, besides, browser would complain about passiveness.
@@ -11777,8 +11911,8 @@ class FeaturefulElementDragging extends _fullcalendar_core_internal_js__WEBPACK_
         this.onPointerUp = (ev) => {
             if (this.isInteracting) {
                 this.isInteracting = false;
+                (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aq)(document.body);
                 (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.as)(document.body);
-                (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.au)(document.body);
                 this.emitter.trigger('pointerup', ev); // can potentially set mirrorNeedsRevert
                 if (this.isDragging) {
                     this.autoScroller.stop();
@@ -11872,9 +12006,10 @@ and an determine if a given point is inside the combined clipping rectangle.
 */
 class OffsetTracker {
     constructor(el) {
-        this.origRect = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.b6)(el);
+        this.el = el;
+        this.origRect = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.b4)(el);
         // will work fine for divs that have overflow:hidden
-        this.scrollCaches = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.b5)(el).map((scrollEl) => new ElementScrollGeomCache(scrollEl, true));
+        this.scrollCaches = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.b3)(el).map((scrollEl) => new ElementScrollGeomCache(scrollEl, true));
     }
     destroy() {
         for (let scrollCache of this.scrollCaches) {
@@ -11899,7 +12034,7 @@ class OffsetTracker {
         let point = { left: pageX, top: pageY };
         for (let scrollCache of this.scrollCaches) {
             if (!isIgnoredClipping(scrollCache.getEventTarget()) &&
-                !(0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aF)(point, scrollCache.clientRect)) {
+                !(0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aD)(point, scrollCache.clientRect)) {
                 return false;
             }
         }
@@ -11931,6 +12066,7 @@ class HitDragging {
         // options that can be set by caller
         this.useSubjectCenter = false;
         this.requireInitial = true; // if doesn't start out on a hit, won't emit any events
+        this.disablePointCheck = false;
         this.initialHit = null;
         this.movingHit = null;
         this.finalHit = null; // won't ever be populated if shouldIgnoreMove
@@ -11987,18 +12123,18 @@ class HitDragging {
         let subjectEl = ev.subjectEl;
         let subjectRect;
         if (subjectEl instanceof HTMLElement) { // i.e. not a Document/ShadowRoot
-            subjectRect = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.b6)(subjectEl);
-            adjustedPoint = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aG)(adjustedPoint, subjectRect);
+            subjectRect = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.b4)(subjectEl);
+            adjustedPoint = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aE)(adjustedPoint, subjectRect);
         }
         let initialHit = this.initialHit = this.queryHitForOffset(adjustedPoint.left, adjustedPoint.top);
         if (initialHit) {
             if (this.useSubjectCenter && subjectRect) {
-                let slicedSubjectRect = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aE)(subjectRect, initialHit.rect);
+                let slicedSubjectRect = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aC)(subjectRect, initialHit.rect);
                 if (slicedSubjectRect) {
-                    adjustedPoint = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aH)(slicedSubjectRect);
+                    adjustedPoint = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aF)(slicedSubjectRect);
                 }
             }
-            this.coordAdjust = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aI)(adjustedPoint, origPoint);
+            this.coordAdjust = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aG)(adjustedPoint, origPoint);
         }
         else {
             this.coordAdjust = { left: 0, top: 0 };
@@ -12046,7 +12182,14 @@ class HitDragging {
                     let hit = component.queryHit(positionLeft, positionTop, width, height);
                     if (hit && (
                     // make sure the hit is within activeRange, meaning it's not a dead cell
-                    (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.b9)(hit.dateProfile.activeRange, hit.dateSpan.range)) &&
+                    (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.b7)(hit.dateProfile.activeRange, hit.dateSpan.range)) &&
+                        // Ensure the component we are querying for the hit is accessibly my the pointer
+                        // Prevents obscured calendars (ex: under a modal dialog) from accepting hit
+                        // https://github.com/fullcalendar/fullcalendar/issues/5026
+                        (this.disablePointCheck ||
+                            offsetTracker.el.contains(offsetTracker.el.getRootNode().elementFromPoint(
+                            // add-back origins to get coordinate relative to top-left of window viewport
+                            positionLeft + originLeft - window.scrollX, positionTop + originTop - window.scrollY))) &&
                         (!bestHit || hit.layer > bestHit.layer)) {
                         hit.componentId = id;
                         hit.context = component.context;
@@ -12070,7 +12213,7 @@ function isHitsEqual(hit0, hit1) {
     if (Boolean(hit0) !== Boolean(hit1)) {
         return false;
     }
-    return (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bf)(hit0.dateSpan, hit1.dateSpan);
+    return (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bd)(hit0.dateSpan, hit1.dateSpan);
 }
 
 function buildDatePointApiWithContext(dateSpan, context) {
@@ -12093,7 +12236,7 @@ function buildDatePointApi(span, dateEnv) {
 Monitors when the user clicks on a specific date/time of a component.
 A pointerdown+pointerup on the same "hit" constitutes a click.
 */
-class DateClicking extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.Z {
+class DateClicking extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.X {
     constructor(settings) {
         super(settings);
         this.handlePointerDown = (pev) => {
@@ -12118,7 +12261,7 @@ class DateClicking extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODU
         // we DO want to watch pointer moves because otherwise finalHit won't get populated
         this.dragging = new FeaturefulElementDragging(settings.el);
         this.dragging.autoScroller.isEnabled = false;
-        let hitDragging = this.hitDragging = new HitDragging(this.dragging, (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bG)(settings));
+        let hitDragging = this.hitDragging = new HitDragging(this.dragging, (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bE)(settings));
         hitDragging.emitter.on('pointerdown', this.handlePointerDown);
         hitDragging.emitter.on('dragend', this.handleDragEnd);
     }
@@ -12131,7 +12274,7 @@ class DateClicking extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODU
 Tracks when the user selects a portion of time of a component,
 constituted by a drag over date cells, with a possible delay at the beginning of the drag.
 */
-class DateSelecting extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.Z {
+class DateSelecting extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.X {
     constructor(settings) {
         super(settings);
         this.dragSelection = null;
@@ -12160,7 +12303,7 @@ class DateSelecting extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MOD
                 if (!disallowed) {
                     dragSelection = joinHitsIntoSelection(initialHit, hit, context.pluginHooks.dateSelectionTransformers);
                 }
-                if (!dragSelection || !(0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.b_)(dragSelection, hit.dateProfile, context)) {
+                if (!dragSelection || !(0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bY)(dragSelection, hit.dateProfile, context)) {
                     isInvalid = true;
                     dragSelection = null;
                 }
@@ -12172,10 +12315,10 @@ class DateSelecting extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MOD
                 context.dispatch({ type: 'UNSELECT_DATES' });
             }
             if (!isInvalid) {
-                (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aw)();
+                (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.au)();
             }
             else {
-                (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ax)();
+                (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.av)();
             }
             if (!isFinal) {
                 this.dragSelection = dragSelection; // only clear if moved away from all hits while dragging
@@ -12184,7 +12327,7 @@ class DateSelecting extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MOD
         this.handlePointerUp = (pev) => {
             if (this.dragSelection) {
                 // selection is already rendered, so just need to report selection
-                (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cu)(this.dragSelection, pev, this.component.context);
+                (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cr)(this.dragSelection, pev, this.component.context);
                 this.dragSelection = null;
             }
         };
@@ -12194,7 +12337,7 @@ class DateSelecting extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MOD
         dragging.touchScrollAllowed = false;
         dragging.minDistance = options.selectMinDistance || 0;
         dragging.autoScroller.isEnabled = options.dragScroll;
-        let hitDragging = this.hitDragging = new HitDragging(this.dragging, (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bG)(settings));
+        let hitDragging = this.hitDragging = new HitDragging(this.dragging, (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bE)(settings));
         hitDragging.emitter.on('pointerdown', this.handlePointerDown);
         hitDragging.emitter.on('dragstart', this.handleDragStart);
         hitDragging.emitter.on('hitupdate', this.handleHitUpdate);
@@ -12221,7 +12364,7 @@ function joinHitsIntoSelection(hit0, hit1, dateSelectionTransformers) {
         dateSpan1.range.start,
         dateSpan1.range.end,
     ];
-    ms.sort(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.av);
+    ms.sort(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.at);
     let props = {};
     for (let transformer of dateSelectionTransformers) {
         let res = transformer(hit0, hit1);
@@ -12237,7 +12380,7 @@ function joinHitsIntoSelection(hit0, hit1, dateSelectionTransformers) {
     return props;
 }
 
-class EventDragging extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.Z {
+class EventDragging extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.X {
     constructor(settings) {
         super(settings);
         // internal state
@@ -12256,10 +12399,10 @@ class EventDragging extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MOD
             let { options } = component.context;
             let initialContext = component.context;
             this.subjectEl = ev.subjectEl;
-            let subjectSeg = this.subjectSeg = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__._)(ev.subjectEl);
+            let subjectSeg = this.subjectSeg = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.Y)(ev.subjectEl);
             let eventRange = this.eventRange = subjectSeg.eventRange;
             let eventInstanceId = eventRange.instance.instanceId;
-            this.relevantEvents = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aV)(initialContext.getCurrentData().eventStore, eventInstanceId);
+            this.relevantEvents = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aT)(initialContext.getCurrentData().eventStore, eventInstanceId);
             dragging.minDistance = ev.isTouch ? 0 : options.eventDragMinDistance;
             dragging.delay =
                 // only do a touch delay if touch and this event hasn't been selected yet
@@ -12270,11 +12413,11 @@ class EventDragging extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MOD
                 mirror.parentNode = options.fixedMirrorParent;
             }
             else {
-                mirror.parentNode = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.$)(origTarget, '.fc');
+                mirror.parentNode = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.Z)(origTarget, '.fc');
             }
             mirror.revertDuration = options.dragRevertDuration;
             let isValid = component.isValidSegDownEl(origTarget) &&
-                !(0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.$)(origTarget, '.fc-event-resizer'); // NOT on a resizer
+                !(0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.Z)(origTarget, '.fc-event-resizer'); // NOT on a resizer
             dragging.setIgnoreMove(!isValid);
             // disable dragging for elements that are resizable (ie, selectable)
             // but are not draggable
@@ -12299,7 +12442,7 @@ class EventDragging extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MOD
                 initialContext.calendarApi.unselect(ev); // unselect *date* selection
                 initialContext.emitter.trigger('eventDragStart', {
                     el: this.subjectEl,
-                    event: new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a0(initialContext, eventRange.def, eventRange.instance),
+                    event: new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__._(initialContext, eventRange.def, eventRange.instance),
                     jsEvent: ev.origEvent,
                     view: initialContext.viewApi,
                 });
@@ -12319,7 +12462,7 @@ class EventDragging extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MOD
             let isInvalid = false;
             let interaction = {
                 affectedEvents: relevantEvents,
-                mutatedEvents: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.I)(),
+                mutatedEvents: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.H)(),
                 isEvent: true,
             };
             if (hit) {
@@ -12327,15 +12470,15 @@ class EventDragging extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MOD
                 let receivingOptions = receivingContext.options;
                 if (initialContext === receivingContext ||
                     (receivingOptions.editable && receivingOptions.droppable)) {
-                    mutation = computeEventMutation(initialHit, hit, receivingContext.getCurrentData().pluginHooks.eventDragMutationMassagers);
+                    mutation = computeEventMutation(initialHit, hit, this.eventRange.instance.range.start, receivingContext.getCurrentData().pluginHooks.eventDragMutationMassagers);
                     if (mutation) {
-                        mutatedRelevantEvents = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bX)(relevantEvents, receivingContext.getCurrentData().eventUiBases, mutation, receivingContext);
+                        mutatedRelevantEvents = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bV)(relevantEvents, receivingContext.getCurrentData().eventUiBases, mutation, receivingContext);
                         interaction.mutatedEvents = mutatedRelevantEvents;
-                        if (!(0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bZ)(interaction, hit.dateProfile, receivingContext)) {
+                        if (!(0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bX)(interaction, hit.dateProfile, receivingContext)) {
                             isInvalid = true;
                             mutation = null;
                             mutatedRelevantEvents = null;
-                            interaction.mutatedEvents = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.I)();
+                            interaction.mutatedEvents = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.H)();
                         }
                     }
                 }
@@ -12345,10 +12488,10 @@ class EventDragging extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MOD
             }
             this.displayDrag(receivingContext, interaction);
             if (!isInvalid) {
-                (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aw)();
+                (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.au)();
             }
             else {
-                (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ax)();
+                (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.av)();
             }
             if (!isFinal) {
                 if (initialContext === receivingContext && // TODO: write test for this
@@ -12377,7 +12520,7 @@ class EventDragging extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MOD
                 let { receivingContext, validMutation } = this;
                 let eventDef = this.eventRange.def;
                 let eventInstance = this.eventRange.instance;
-                let eventApi = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a0(initialContext, eventDef, eventInstance);
+                let eventApi = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__._(initialContext, eventDef, eventInstance);
                 let relevantEvents = this.relevantEvents;
                 let mutatedRelevantEvents = this.mutatedRelevantEvents;
                 let { finalHit } = this.hitDragging;
@@ -12391,7 +12534,7 @@ class EventDragging extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MOD
                 if (validMutation) {
                     // dropped within same calendar
                     if (receivingContext === initialContext) {
-                        let updatedEventApi = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a0(initialContext, mutatedRelevantEvents.defs[eventDef.defId], eventInstance ? mutatedRelevantEvents.instances[eventInstance.instanceId] : null);
+                        let updatedEventApi = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__._(initialContext, mutatedRelevantEvents.defs[eventDef.defId], eventInstance ? mutatedRelevantEvents.instances[eventInstance.instanceId] : null);
                         initialContext.dispatch({
                             type: 'MERGE_EVENTS',
                             eventStore: mutatedRelevantEvents,
@@ -12434,7 +12577,7 @@ class EventDragging extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MOD
                         initialContext.emitter.trigger('eventRemove', eventRemoveArg);
                         let addedEventDef = mutatedRelevantEvents.defs[eventDef.defId];
                         let addedEventInstance = mutatedRelevantEvents.instances[eventInstance.instanceId];
-                        let addedEventApi = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a0(receivingContext, addedEventDef, addedEventInstance);
+                        let addedEventApi = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__._(receivingContext, addedEventDef, addedEventInstance);
                         receivingContext.dispatch({
                             type: 'MERGE_EVENTS',
                             eventStore: mutatedRelevantEvents,
@@ -12472,7 +12615,7 @@ class EventDragging extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MOD
         dragging.pointer.selector = EventDragging.SELECTOR;
         dragging.touchScrollAllowed = false;
         dragging.autoScroller.isEnabled = options.dragScroll;
-        let hitDragging = this.hitDragging = new HitDragging(this.dragging, _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a7);
+        let hitDragging = this.hitDragging = new HitDragging(this.dragging, _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a5);
         hitDragging.useSubjectCenter = settings.useEventCenter;
         hitDragging.emitter.on('pointerdown', this.handlePointerDown);
         hitDragging.emitter.on('dragstart', this.handleDragStart);
@@ -12496,7 +12639,7 @@ class EventDragging extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MOD
                     type: 'SET_EVENT_DRAG',
                     state: {
                         affectedEvents: state.affectedEvents,
-                        mutatedEvents: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.I)(),
+                        mutatedEvents: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.H)(),
                         isEvent: true,
                     },
                 });
@@ -12534,7 +12677,7 @@ class EventDragging extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MOD
 // TODO: test this in IE11
 // QUESTION: why do we need it on the resizable???
 EventDragging.SELECTOR = '.fc-event-draggable, .fc-event-resizable';
-function computeEventMutation(hit0, hit1, massagers) {
+function computeEventMutation(hit0, hit1, eventInstanceStart, massagers) {
     let dateSpan0 = hit0.dateSpan;
     let dateSpan1 = hit1.dateSpan;
     let date0 = dateSpan0.range.start;
@@ -12546,10 +12689,15 @@ function computeEventMutation(hit0, hit1, massagers) {
         if (dateSpan1.allDay) {
             // means date1 is already start-of-day,
             // but date0 needs to be converted
-            date0 = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.q)(date0);
+            date0 = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.q)(eventInstanceStart);
+        }
+        else {
+            // Moving from allDate->timed
+            // Doesn't matter where on the event the drag began, mutate the event's start-date to date1
+            date0 = eventInstanceStart;
         }
     }
-    let delta = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aA)(date0, date1, hit0.context.dateEnv, hit0.componentId === hit1.componentId ?
+    let delta = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ay)(date0, date1, hit0.context.dateEnv, hit0.componentId === hit1.componentId ?
         hit0.largeUnit :
         null);
     if (delta.milliseconds) { // has hours/minutes/seconds
@@ -12573,7 +12721,7 @@ function getComponentTouchDelay(component) {
     return delay;
 }
 
-class EventResizing extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.Z {
+class EventResizing extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.X {
     constructor(settings) {
         super(settings);
         // internal state
@@ -12586,7 +12734,7 @@ class EventResizing extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MOD
         this.handlePointerDown = (ev) => {
             let { component } = this;
             let segEl = this.querySegEl(ev);
-            let seg = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__._)(segEl);
+            let seg = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.Y)(segEl);
             let eventRange = this.eventRange = seg.eventRange;
             this.dragging.minDistance = component.context.options.eventDragMinDistance;
             // if touch, need to be working with a selected event
@@ -12596,14 +12744,14 @@ class EventResizing extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MOD
         this.handleDragStart = (ev) => {
             let { context } = this.component;
             let eventRange = this.eventRange;
-            this.relevantEvents = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aV)(context.getCurrentData().eventStore, this.eventRange.instance.instanceId);
+            this.relevantEvents = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aT)(context.getCurrentData().eventStore, this.eventRange.instance.instanceId);
             let segEl = this.querySegEl(ev);
             this.draggingSegEl = segEl;
-            this.draggingSeg = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__._)(segEl);
+            this.draggingSeg = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.Y)(segEl);
             context.calendarApi.unselect();
             context.emitter.trigger('eventResizeStart', {
                 el: segEl,
-                event: new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a0(context, eventRange.def, eventRange.instance),
+                event: new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__._(context, eventRange.def, eventRange.instance),
                 jsEvent: ev.origEvent,
                 view: context.viewApi,
             });
@@ -12618,7 +12766,7 @@ class EventResizing extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MOD
             let isInvalid = false;
             let interaction = {
                 affectedEvents: relevantEvents,
-                mutatedEvents: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.I)(),
+                mutatedEvents: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.H)(),
                 isEvent: true,
             };
             if (hit) {
@@ -12630,9 +12778,9 @@ class EventResizing extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MOD
                 }
             }
             if (mutation) {
-                mutatedRelevantEvents = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bX)(relevantEvents, context.getCurrentData().eventUiBases, mutation, context);
+                mutatedRelevantEvents = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bV)(relevantEvents, context.getCurrentData().eventUiBases, mutation, context);
                 interaction.mutatedEvents = mutatedRelevantEvents;
-                if (!(0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bZ)(interaction, hit.dateProfile, context)) {
+                if (!(0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bX)(interaction, hit.dateProfile, context)) {
                     isInvalid = true;
                     mutation = null;
                     mutatedRelevantEvents = null;
@@ -12649,10 +12797,10 @@ class EventResizing extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MOD
                 context.dispatch({ type: 'UNSET_EVENT_RESIZE' });
             }
             if (!isInvalid) {
-                (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aw)();
+                (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.au)();
             }
             else {
-                (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ax)();
+                (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.av)();
             }
             if (!isFinal) {
                 if (mutation && isHitsEqual(initialHit, hit)) {
@@ -12666,7 +12814,7 @@ class EventResizing extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MOD
             let { context } = this.component;
             let eventDef = this.eventRange.def;
             let eventInstance = this.eventRange.instance;
-            let eventApi = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a0(context, eventDef, eventInstance);
+            let eventApi = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__._(context, eventDef, eventInstance);
             let relevantEvents = this.relevantEvents;
             let mutatedRelevantEvents = this.mutatedRelevantEvents;
             context.emitter.trigger('eventResizeStop', {
@@ -12676,7 +12824,7 @@ class EventResizing extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MOD
                 view: context.viewApi,
             });
             if (this.validMutation) {
-                let updatedEventApi = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a0(context, mutatedRelevantEvents.defs[eventDef.defId], eventInstance ? mutatedRelevantEvents.instances[eventInstance.instanceId] : null);
+                let updatedEventApi = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__._(context, mutatedRelevantEvents.defs[eventDef.defId], eventInstance ? mutatedRelevantEvents.instances[eventInstance.instanceId] : null);
                 context.dispatch({
                     type: 'MERGE_EVENTS',
                     eventStore: mutatedRelevantEvents,
@@ -12709,7 +12857,7 @@ class EventResizing extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MOD
         dragging.pointer.selector = '.fc-event-resizer';
         dragging.touchScrollAllowed = false;
         dragging.autoScroller.isEnabled = component.context.options.dragScroll;
-        let hitDragging = this.hitDragging = new HitDragging(this.dragging, (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bG)(settings));
+        let hitDragging = this.hitDragging = new HitDragging(this.dragging, (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bE)(settings));
         hitDragging.emitter.on('pointerdown', this.handlePointerDown);
         hitDragging.emitter.on('dragstart', this.handleDragStart);
         hitDragging.emitter.on('hitupdate', this.handleHitUpdate);
@@ -12719,14 +12867,14 @@ class EventResizing extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MOD
         this.dragging.destroy();
     }
     querySegEl(ev) {
-        return (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.$)(ev.subjectEl, '.fc-event');
+        return (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.Z)(ev.subjectEl, '.fc-event');
     }
 }
 function computeMutation(hit0, hit1, isFromStart, instanceRange) {
     let dateEnv = hit0.context.dateEnv;
     let date0 = hit0.dateSpan.range.start;
     let date1 = hit1.dateSpan.range.start;
-    let delta = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aA)(date0, date1, dateEnv, hit0.largeUnit);
+    let delta = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ay)(date0, date1, dateEnv, hit0.largeUnit);
     if (isFromStart) {
         if (dateEnv.add(instanceRange.start, delta) < instanceRange.end) {
             return { startDelta: delta };
@@ -12751,9 +12899,9 @@ class UnselectAuto {
         };
         this.onDocumentPointerDown = (pev) => {
             let unselectCancel = this.context.options.unselectCancel;
-            let downEl = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aR)(pev.origEvent);
-            this.matchesCancel = !!(0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.$)(downEl, unselectCancel);
-            this.matchesEvent = !!(0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.$)(downEl, EventDragging.SELECTOR); // interaction started on an event?
+            let downEl = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aP)(pev.origEvent);
+            this.matchesCancel = !!(0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.Z)(downEl, unselectCancel);
+            this.matchesEvent = !!(0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.Z)(downEl, EventDragging.SELECTOR); // interaction started on an event?
         };
         this.onDocumentPointerUp = (pev) => {
             let { context } = this;
@@ -12829,18 +12977,18 @@ class ExternalElementDragging {
             let droppableEvent = null;
             let isInvalid = false;
             let interaction = {
-                affectedEvents: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.I)(),
-                mutatedEvents: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.I)(),
+                affectedEvents: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.H)(),
+                mutatedEvents: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.H)(),
                 isEvent: this.dragMeta.create,
             };
             if (hit) {
                 receivingContext = hit.context;
                 if (this.canDropElOnCalendar(ev.subjectEl, receivingContext)) {
                     droppableEvent = computeEventForDateSpan(hit.dateSpan, this.dragMeta, receivingContext);
-                    interaction.mutatedEvents = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aW)(droppableEvent);
-                    isInvalid = !(0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bZ)(interaction, hit.dateProfile, receivingContext);
+                    interaction.mutatedEvents = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aU)(droppableEvent);
+                    isInvalid = !(0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bX)(interaction, hit.dateProfile, receivingContext);
                     if (isInvalid) {
-                        interaction.mutatedEvents = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.I)();
+                        interaction.mutatedEvents = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.H)();
                         droppableEvent = null;
                     }
                 }
@@ -12850,10 +12998,10 @@ class ExternalElementDragging {
             // TODO: wish we could somehow wait for dispatch to guarantee render
             dragging.setMirrorIsVisible(isFinal || !droppableEvent || !document.querySelector('.fc-event-mirror'));
             if (!isInvalid) {
-                (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aw)();
+                (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.au)();
             }
             else {
-                (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ax)();
+                (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.av)();
             }
             if (!isFinal) {
                 dragging.setMirrorNeedsRevert(!droppableEvent);
@@ -12870,7 +13018,7 @@ class ExternalElementDragging {
                 let dragMeta = this.dragMeta;
                 receivingContext.emitter.trigger('drop', Object.assign(Object.assign({}, buildDatePointApiWithContext(finalHit.dateSpan, receivingContext)), { draggedEl: pev.subjectEl, jsEvent: pev.origEvent, view: finalView }));
                 if (dragMeta.create) {
-                    let addingEvents = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aW)(droppableEvent);
+                    let addingEvents = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aU)(droppableEvent);
                     receivingContext.dispatch({
                         type: 'MERGE_EVENTS',
                         eventStore: addingEvents,
@@ -12883,7 +13031,7 @@ class ExternalElementDragging {
                     }
                     // signal that an external event landed
                     receivingContext.emitter.trigger('eventReceive', {
-                        event: new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a0(receivingContext, droppableEvent.def, droppableEvent.instance),
+                        event: new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__._(receivingContext, droppableEvent.def, droppableEvent.instance),
                         relatedEvents: [],
                         revert() {
                             receivingContext.dispatch({
@@ -12899,7 +13047,7 @@ class ExternalElementDragging {
             this.receivingContext = null;
             this.droppableEvent = null;
         };
-        let hitDragging = this.hitDragging = new HitDragging(dragging, _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a7);
+        let hitDragging = this.hitDragging = new HitDragging(dragging, _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a5);
         hitDragging.requireInitial = false; // will start outside of a component
         hitDragging.emitter.on('dragstart', this.handleDragStart);
         hitDragging.emitter.on('hitupdate', this.handleHitUpdate);
@@ -12908,10 +13056,10 @@ class ExternalElementDragging {
     }
     buildDragMeta(subjectEl) {
         if (typeof this.suppliedDragMeta === 'object') {
-            return (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bJ)(this.suppliedDragMeta);
+            return (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bH)(this.suppliedDragMeta);
         }
         if (typeof this.suppliedDragMeta === 'function') {
-            return (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bJ)(this.suppliedDragMeta(subjectEl));
+            return (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bH)(this.suppliedDragMeta(subjectEl));
         }
         return getDragMetaFromEl(subjectEl);
     }
@@ -12935,7 +13083,7 @@ class ExternalElementDragging {
             return dropAccept.call(receivingContext.calendarApi, el);
         }
         if (typeof dropAccept === 'string' && dropAccept) {
-            return Boolean((0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aQ)(el, dropAccept));
+            return Boolean((0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aO)(el, dropAccept));
         }
         return true;
     }
@@ -12947,8 +13095,8 @@ function computeEventForDateSpan(dateSpan, dragMeta, context) {
     for (let transform of context.pluginHooks.externalDefTransforms) {
         Object.assign(defProps, transform(dateSpan, dragMeta));
     }
-    let { refined, extra } = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.al)(defProps, context);
-    let def = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ak)(refined, extra, dragMeta.sourceId, dateSpan.allDay, context.options.forceEventDuration || Boolean(dragMeta.duration), // hasEnd
+    let { refined, extra } = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aj)(defProps, context);
+    let def = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ai)(refined, extra, dragMeta.sourceId, dateSpan.allDay, context.options.forceEventDuration || Boolean(dragMeta.duration), // hasEnd
     context);
     let start = dateSpan.range.start;
     // only rely on time info if drop zone is all-day,
@@ -12958,8 +13106,8 @@ function computeEventForDateSpan(dateSpan, dragMeta, context) {
     }
     let end = dragMeta.duration ?
         context.dateEnv.add(start, dragMeta.duration) :
-        (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cv)(dateSpan.allDay, start, context);
-    let instance = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aj)(def.defId, { start, end });
+        (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cs)(dateSpan.allDay, start, context);
+    let instance = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ah)(def.defId, { start, end });
     return { def, instance };
 }
 // Utils for extracting data from element
@@ -12969,11 +13117,11 @@ function getDragMetaFromEl(el) {
     let obj = str ?
         JSON.parse(str) :
         { create: false }; // if no embedded data, assume no event creation
-    return (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bJ)(obj);
+    return (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bH)(obj);
 }
-_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bI.dataAttrPrefix = '';
+_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bG.dataAttrPrefix = '';
 function getEmbeddedElData(el, name) {
-    let prefix = _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bI.dataAttrPrefix;
+    let prefix = _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bG.dataAttrPrefix;
     let prefixedName = (prefix ? prefix + '-' : '') + name;
     return el.getAttribute('data-' + prefixedName) || '';
 }
@@ -13028,7 +13176,7 @@ The third-party system is responsible for drawing the visuals effects of the dra
 This class simply monitors for pointer movements and fires events.
 It also has the ability to hide the moving element (the "mirror") during the drag.
 */
-class InferredElementDragging extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bH {
+class InferredElementDragging extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bF {
     constructor(containerEl) {
         super(containerEl);
         this.shouldIgnoreMove = false;
@@ -13113,7 +13261,10 @@ class ThirdPartyDraggable {
         if (typeof settings.mirrorSelector === 'string') {
             dragging.mirrorSelector = settings.mirrorSelector;
         }
-        new ExternalElementDragging(dragging, settings.eventData); // eslint-disable-line no-new
+        let externalDragging = new ExternalElementDragging(dragging, settings.eventData);
+        // The hit-detection system requires that the dnd-mirror-element be pointer-events:none,
+        // but this can't be guaranteed for third-party draggables, so disable
+        externalDragging.hitDragging.disablePointCheck = true;
     }
     destroy() {
         this.dragging.destroy();
@@ -13218,34 +13369,31 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-var css_248z = ":root{--fc-list-event-dot-width:10px;--fc-list-event-hover-bg-color:#f5f5f5}.fc-theme-standard .fc-list{border:1px solid var(--fc-border-color)}.fc .fc-list-empty{align-items:center;background-color:var(--fc-neutral-bg-color);display:flex;height:100%;justify-content:center}.fc .fc-list-empty-cushion{margin:5em 0}.fc .fc-list-table{border-style:hidden;width:100%}.fc .fc-list-table tr>*{border-left:0;border-right:0}.fc .fc-list-sticky .fc-list-day>*{background:var(--fc-page-bg-color);position:sticky;top:0}.fc .fc-list-table thead{left:-10000px;position:absolute}.fc .fc-list-table tbody>tr:first-child th{border-top:0}.fc .fc-list-table th{padding:0}.fc .fc-list-day-cushion,.fc .fc-list-table td{padding:8px 14px}.fc .fc-list-day-cushion:after{clear:both;content:\"\";display:table}.fc-theme-standard .fc-list-day-cushion{background-color:var(--fc-neutral-bg-color)}.fc-direction-ltr .fc-list-day-text,.fc-direction-rtl .fc-list-day-side-text{float:left}.fc-direction-ltr .fc-list-day-side-text,.fc-direction-rtl .fc-list-day-text{float:right}.fc-direction-ltr .fc-list-table .fc-list-event-graphic{padding-right:0}.fc-direction-rtl .fc-list-table .fc-list-event-graphic{padding-left:0}.fc .fc-list-event.fc-event-forced-url{cursor:pointer}.fc .fc-list-event:hover td{background-color:var(--fc-list-event-hover-bg-color)}.fc .fc-list-event-graphic,.fc .fc-list-event-time{white-space:nowrap;width:1px}.fc .fc-list-event-dot{border:calc(var(--fc-list-event-dot-width)/2) solid var(--fc-event-border-color);border-radius:calc(var(--fc-list-event-dot-width)/2);box-sizing:content-box;display:inline-block;height:0;width:0}.fc .fc-list-event-title a{color:inherit;text-decoration:none}.fc .fc-list-event.fc-event-forced-url:hover a{text-decoration:underline}";
-(0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cw)(css_248z);
-
 class ListViewHeaderRow extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.B {
     constructor() {
         super(...arguments);
         this.state = {
-            textId: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a5)(),
+            textId: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a3)(),
         };
     }
     render() {
         let { theme, dateEnv, options, viewApi } = this.context;
         let { cellId, dayDate, todayRange } = this.props;
         let { textId } = this.state;
-        let dayMeta = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a_)(dayDate, todayRange);
+        let dayMeta = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aY)(dayDate, todayRange);
         // will ever be falsy?
         let text = options.listDayFormat ? dateEnv.format(dayDate, options.listDayFormat) : '';
         // will ever be falsy? also, BAD NAME "alt"
         let sideText = options.listDaySideFormat ? dateEnv.format(dayDate, options.listDaySideFormat) : '';
         let renderProps = Object.assign({ date: dateEnv.toDate(dayDate), view: viewApi, textId,
             text,
-            sideText, navLinkAttrs: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.b0)(this.context, dayDate), sideNavLinkAttrs: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.b0)(this.context, dayDate, 'day', false) }, dayMeta);
+            sideText, navLinkAttrs: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a_)(this.context, dayDate), sideNavLinkAttrs: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a_)(this.context, dayDate, 'day', false) }, dayMeta);
         // TODO: make a reusable HOC for dayHeader (used in daygrid/timegrid too)
         return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.C, { elTag: "tr", elClasses: [
                 'fc-list-day',
-                ...(0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aZ)(dayMeta, theme),
+                ...(0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aX)(dayMeta, theme),
             ], elAttrs: {
-                'data-date': (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bv)(dayDate),
+                'data-date': (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bt)(dayDate),
             }, renderProps: renderProps, generatorName: "dayHeaderContent", customGenerator: options.dayHeaderContent, defaultGenerator: renderInnerContent, classNameGenerator: options.dayHeaderClassNames, didMount: options.dayHeaderDidMount, willUnmount: options.dayHeaderWillUnmount }, (InnerContent) => ( // TODO: force-hide top border based on :first-child
         (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)("th", { scope: "colgroup", colSpan: 3, id: cellId, "aria-labelledby": textId },
             (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(InnerContent, { elTag: "div", elClasses: [
@@ -13271,7 +13419,7 @@ class ListViewEventRow extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_
         let { options } = context;
         let { seg, timeHeaderId, eventHeaderId, dateHeaderId } = props;
         let timeFormat = options.eventTimeFormat || DEFAULT_TIME_FORMAT;
-        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cn, Object.assign({}, props, { elTag: "tr", elClasses: [
+        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ck, Object.assign({}, props, { elTag: "tr", elClasses: [
                 'fc-list-event',
                 seg.eventRange.def.url && 'fc-event-forced-url',
             ], defaultGenerator: () => renderEventInnerContent(seg, context) /* weird */, seg: seg, timeText: "", disableDragging: true, disableResizing: true }), (InnerContent, eventContentArg) => ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.Fragment, null,
@@ -13284,7 +13432,7 @@ class ListViewEventRow extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_
     }
 }
 function renderEventInnerContent(seg, context) {
-    let interactiveAttrs = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bU)(seg, context);
+    let interactiveAttrs = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bS)(seg, context);
     return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)("a", Object.assign({}, interactiveAttrs), seg.eventRange.def.title));
 }
 function buildTimeContent(seg, timeFormat, context, timeHeaderId, dateHeaderId) {
@@ -13297,19 +13445,19 @@ function buildTimeContent(seg, timeFormat, context, timeHeaderId, dateHeaderId) 
         if (eventDef.allDay) {
             doAllDay = true;
         }
-        else if ((0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.az)(seg.eventRange.range)) { // TODO: use (!isStart || !isEnd) instead?
+        else if ((0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ax)(seg.eventRange.range)) { // TODO: use (!isStart || !isEnd) instead?
             if (seg.isStart) {
-                timeText = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bQ)(seg, timeFormat, context, null, null, eventInstance.range.start, seg.end);
+                timeText = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bO)(seg, timeFormat, context, null, null, eventInstance.range.start, seg.end);
             }
             else if (seg.isEnd) {
-                timeText = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bQ)(seg, timeFormat, context, null, null, seg.start, eventInstance.range.end);
+                timeText = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bO)(seg, timeFormat, context, null, null, seg.start, eventInstance.range.end);
             }
             else {
                 doAllDay = true;
             }
         }
         else {
-            timeText = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bQ)(seg, timeFormat, context);
+            timeText = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bO)(seg, timeFormat, context);
         }
         if (doAllDay) {
             let renderProps = {
@@ -13331,15 +13479,15 @@ function renderAllDayInner(renderProps) {
 /*
 Responsible for the scroller, and forwarding event-related actions into the "grid".
 */
-class ListView extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.be {
+class ListView extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bc {
     constructor() {
         super(...arguments);
         this.computeDateVars = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.z)(computeDateVars);
         this.eventStoreToSegs = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.z)(this._eventStoreToSegs);
         this.state = {
-            timeHeaderId: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a5)(),
-            eventHeaderId: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a5)(),
-            dateHeaderIdRoot: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a5)(),
+            timeHeaderId: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a3)(),
+            eventHeaderId: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a3)(),
+            dateHeaderIdRoot: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a3)(),
         };
         this.setRootEl = (rootEl) => {
             if (rootEl) {
@@ -13356,14 +13504,14 @@ class ListView extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0
         let { props, context } = this;
         let { dayDates, dayRanges } = this.computeDateVars(props.dateProfile);
         let eventSegs = this.eventStoreToSegs(props.eventStore, props.eventUiBases, dayRanges);
-        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ct, { elRef: this.setRootEl, elClasses: [
+        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cq, { elRef: this.setRootEl, elClasses: [
                 'fc-list',
                 context.theme.getClass('table'),
                 context.options.stickyHeaderDates !== false ?
                     'fc-list-sticky' :
                     '',
             ], viewSpec: context.viewSpec },
-            (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cd, { liquid: !props.isHeightAuto, overflowX: props.isHeightAuto ? 'visible' : 'hidden', overflowY: props.isHeightAuto ? 'visible' : 'auto' }, eventSegs.length > 0 ?
+            (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cb, { liquid: !props.isHeightAuto, overflowX: props.isHeightAuto ? 'visible' : 'hidden', overflowY: props.isHeightAuto ? 'visible' : 'auto' }, eventSegs.length > 0 ?
                 this.renderSegList(eventSegs, dayDates) :
                 this.renderEmptyMessage())));
     }
@@ -13379,18 +13527,18 @@ class ListView extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0
         let { theme, options } = this.context;
         let { timeHeaderId, eventHeaderId, dateHeaderIdRoot } = this.state;
         let segsByDay = groupSegsByDay(allSegs); // sparse array
-        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ch, { unit: "day" }, (nowDate, todayRange) => {
+        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a6, { unit: "day" }, (nowDate, todayRange) => {
             let innerNodes = [];
             for (let dayIndex = 0; dayIndex < segsByDay.length; dayIndex += 1) {
                 let daySegs = segsByDay[dayIndex];
                 if (daySegs) { // sparse array, so might be undefined
-                    let dayStr = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bv)(dayDates[dayIndex]);
+                    let dayStr = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bt)(dayDates[dayIndex]);
                     let dateHeaderId = dateHeaderIdRoot + '-' + dayStr;
                     // append a day header
                     innerNodes.push((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(ListViewHeaderRow, { key: dayStr, cellId: dateHeaderId, dayDate: dayDates[dayIndex], todayRange: todayRange }));
-                    daySegs = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bR)(daySegs, options.eventOrder);
+                    daySegs = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bP)(daySegs, options.eventOrder);
                     for (let seg of daySegs) {
-                        innerNodes.push((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(ListViewEventRow, Object.assign({ key: dayStr + ':' + seg.eventRange.instance.instanceId /* are multiple segs for an instanceId */, seg: seg, isDragging: false, isResizing: false, isDateSelecting: false, isSelected: false, timeHeaderId: timeHeaderId, eventHeaderId: eventHeaderId, dateHeaderId: dateHeaderId }, (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bS)(seg, todayRange, nowDate))));
+                        innerNodes.push((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(ListViewEventRow, Object.assign({ key: dayStr + ':' + seg.eventRange.instance.instanceId /* are multiple segs for an instanceId */, seg: seg, isDragging: false, isResizing: false, isDateSelecting: false, isSelected: false, timeHeaderId: timeHeaderId, eventHeaderId: eventHeaderId, dateHeaderId: dateHeaderId }, (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bQ)(seg, todayRange, nowDate))));
                     }
                 }
             }
@@ -13404,7 +13552,7 @@ class ListView extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0
         }));
     }
     _eventStoreToSegs(eventStore, eventUiBases, dayRanges) {
-        return this.eventRangesToSegs((0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.af)(eventStore, eventUiBases, this.props.dateProfile.activeRange, this.context.options.nextDayThreshold).fg, dayRanges);
+        return this.eventRangesToSegs((0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ad)(eventStore, eventUiBases, this.props.dateProfile.activeRange, this.context.options.nextDayThreshold).fg, dayRanges);
     }
     eventRangesToSegs(eventRanges, dayRanges) {
         let segs = [];
@@ -13480,6 +13628,9 @@ function groupSegsByDay(segs) {
     }
     return segsByDay;
 }
+
+var css_248z = ":root{--fc-list-event-dot-width:10px;--fc-list-event-hover-bg-color:#f5f5f5}.fc-theme-standard .fc-list{border:1px solid var(--fc-border-color)}.fc .fc-list-empty{align-items:center;background-color:var(--fc-neutral-bg-color);display:flex;height:100%;justify-content:center}.fc .fc-list-empty-cushion{margin:5em 0}.fc .fc-list-table{border-style:hidden;width:100%}.fc .fc-list-table tr>*{border-left:0;border-right:0}.fc .fc-list-sticky .fc-list-day>*{background:var(--fc-page-bg-color);position:sticky;top:0}.fc .fc-list-table thead{left:-10000px;position:absolute}.fc .fc-list-table tbody>tr:first-child th{border-top:0}.fc .fc-list-table th{padding:0}.fc .fc-list-day-cushion,.fc .fc-list-table td{padding:8px 14px}.fc .fc-list-day-cushion:after{clear:both;content:\"\";display:table}.fc-theme-standard .fc-list-day-cushion{background-color:var(--fc-neutral-bg-color)}.fc-direction-ltr .fc-list-day-text,.fc-direction-rtl .fc-list-day-side-text{float:left}.fc-direction-ltr .fc-list-day-side-text,.fc-direction-rtl .fc-list-day-text{float:right}.fc-direction-ltr .fc-list-table .fc-list-event-graphic{padding-right:0}.fc-direction-rtl .fc-list-table .fc-list-event-graphic{padding-left:0}.fc .fc-list-event.fc-event-forced-url{cursor:pointer}.fc .fc-list-event:hover td{background-color:var(--fc-list-event-hover-bg-color)}.fc .fc-list-event-graphic,.fc .fc-list-event-time{white-space:nowrap;width:1px}.fc .fc-list-event-dot{border:calc(var(--fc-list-event-dot-width)/2) solid var(--fc-event-border-color);border-radius:calc(var(--fc-list-event-dot-width)/2);box-sizing:content-box;display:inline-block;height:0;width:0}.fc .fc-list-event-title a{color:inherit;text-decoration:none}.fc .fc-list-event.fc-event-forced-url:hover a{text-decoration:underline}";
+(0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ct)(css_248z);
 
 
 
@@ -13561,10 +13712,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-var css_248z = ".fc-v-event{background-color:var(--fc-event-bg-color);border:1px solid var(--fc-event-border-color);display:block}.fc-v-event .fc-event-main{color:var(--fc-event-text-color);height:100%}.fc-v-event .fc-event-main-frame{display:flex;flex-direction:column;height:100%}.fc-v-event .fc-event-time{flex-grow:0;flex-shrink:0;max-height:100%;overflow:hidden}.fc-v-event .fc-event-title-container{flex-grow:1;flex-shrink:1;min-height:0}.fc-v-event .fc-event-title{bottom:0;max-height:100%;overflow:hidden;top:0}.fc-v-event:not(.fc-event-start){border-top-left-radius:0;border-top-right-radius:0;border-top-width:0}.fc-v-event:not(.fc-event-end){border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom-width:0}.fc-v-event.fc-event-selected:before{left:-10px;right:-10px}.fc-v-event .fc-event-resizer-start{cursor:n-resize}.fc-v-event .fc-event-resizer-end{cursor:s-resize}.fc-v-event:not(.fc-event-selected) .fc-event-resizer{height:var(--fc-event-resizer-thickness);left:0;right:0}.fc-v-event:not(.fc-event-selected) .fc-event-resizer-start{top:calc(var(--fc-event-resizer-thickness)/-2)}.fc-v-event:not(.fc-event-selected) .fc-event-resizer-end{bottom:calc(var(--fc-event-resizer-thickness)/-2)}.fc-v-event.fc-event-selected .fc-event-resizer{left:50%;margin-left:calc(var(--fc-event-resizer-dot-total-width)/-2)}.fc-v-event.fc-event-selected .fc-event-resizer-start{top:calc(var(--fc-event-resizer-dot-total-width)/-2)}.fc-v-event.fc-event-selected .fc-event-resizer-end{bottom:calc(var(--fc-event-resizer-dot-total-width)/-2)}.fc .fc-timegrid .fc-daygrid-body{z-index:2}.fc .fc-timegrid-divider{padding:0 0 2px}.fc .fc-timegrid-body{min-height:100%;position:relative;z-index:1}.fc .fc-timegrid-axis-chunk{position:relative}.fc .fc-timegrid-axis-chunk>table,.fc .fc-timegrid-slots{position:relative;z-index:1}.fc .fc-timegrid-slot{border-bottom:0;height:1.5em}.fc .fc-timegrid-slot:empty:before{content:\"\\00a0\"}.fc .fc-timegrid-slot-minor{border-top-style:dotted}.fc .fc-timegrid-slot-label-cushion{display:inline-block;white-space:nowrap}.fc .fc-timegrid-slot-label{vertical-align:middle}.fc .fc-timegrid-axis-cushion,.fc .fc-timegrid-slot-label-cushion{padding:0 4px}.fc .fc-timegrid-axis-frame-liquid{height:100%}.fc .fc-timegrid-axis-frame{align-items:center;display:flex;justify-content:flex-end;overflow:hidden}.fc .fc-timegrid-axis-cushion{flex-shrink:0;max-width:60px}.fc-direction-ltr .fc-timegrid-slot-label-frame{text-align:right}.fc-direction-rtl .fc-timegrid-slot-label-frame{text-align:left}.fc-liquid-hack .fc-timegrid-axis-frame-liquid{bottom:0;height:auto;left:0;position:absolute;right:0;top:0}.fc .fc-timegrid-col.fc-day-today{background-color:var(--fc-today-bg-color)}.fc .fc-timegrid-col-frame{min-height:100%;position:relative}.fc-media-screen.fc-liquid-hack .fc-timegrid-col-frame{bottom:0;height:auto;left:0;position:absolute;right:0;top:0}.fc-media-screen .fc-timegrid-cols{bottom:0;left:0;position:absolute;right:0;top:0}.fc-media-screen .fc-timegrid-cols>table{height:100%}.fc-media-screen .fc-timegrid-col-bg,.fc-media-screen .fc-timegrid-col-events,.fc-media-screen .fc-timegrid-now-indicator-container{left:0;position:absolute;right:0;top:0}.fc .fc-timegrid-col-bg{z-index:2}.fc .fc-timegrid-col-bg .fc-non-business{z-index:1}.fc .fc-timegrid-col-bg .fc-bg-event{z-index:2}.fc .fc-timegrid-col-bg .fc-highlight{z-index:3}.fc .fc-timegrid-bg-harness{left:0;position:absolute;right:0}.fc .fc-timegrid-col-events{z-index:3}.fc .fc-timegrid-now-indicator-container{bottom:0;overflow:hidden}.fc-direction-ltr .fc-timegrid-col-events{margin:0 2.5% 0 2px}.fc-direction-rtl .fc-timegrid-col-events{margin:0 2px 0 2.5%}.fc-timegrid-event-harness{position:absolute}.fc-timegrid-event-harness>.fc-timegrid-event{bottom:0;left:0;position:absolute;right:0;top:0}.fc-timegrid-event-harness-inset .fc-timegrid-event,.fc-timegrid-event.fc-event-mirror,.fc-timegrid-more-link{box-shadow:0 0 0 1px var(--fc-page-bg-color)}.fc-timegrid-event,.fc-timegrid-more-link{border-radius:3px;font-size:var(--fc-small-font-size)}.fc-timegrid-event{margin-bottom:1px}.fc-timegrid-event .fc-event-main{padding:1px 1px 0}.fc-timegrid-event .fc-event-time{font-size:var(--fc-small-font-size);margin-bottom:1px;white-space:nowrap}.fc-timegrid-event-short .fc-event-main-frame{flex-direction:row;overflow:hidden}.fc-timegrid-event-short .fc-event-time:after{content:\"\\00a0-\\00a0\"}.fc-timegrid-event-short .fc-event-title{font-size:var(--fc-small-font-size)}.fc-timegrid-more-link{background:var(--fc-more-link-bg-color);color:var(--fc-more-link-text-color);cursor:pointer;margin-bottom:1px;position:absolute;z-index:9999}.fc-timegrid-more-link-inner{padding:3px 2px;top:0}.fc-direction-ltr .fc-timegrid-more-link{right:0}.fc-direction-rtl .fc-timegrid-more-link{left:0}.fc .fc-timegrid-now-indicator-line{border-color:var(--fc-now-indicator-color);border-style:solid;border-width:1px 0 0;left:0;position:absolute;right:0;z-index:4}.fc .fc-timegrid-now-indicator-arrow{border-color:var(--fc-now-indicator-color);border-style:solid;margin-top:-5px;position:absolute;z-index:4}.fc-direction-ltr .fc-timegrid-now-indicator-arrow{border-bottom-color:transparent;border-top-color:transparent;border-width:5px 0 5px 6px;left:0}.fc-direction-rtl .fc-timegrid-now-indicator-arrow{border-bottom-color:transparent;border-top-color:transparent;border-width:5px 6px 5px 0;right:0}";
-(0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cw)(css_248z);
-
-class AllDaySplitter extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aY {
+class AllDaySplitter extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.aW {
     getKeyInfo() {
         return {
             allDay: {},
@@ -13581,7 +13729,7 @@ class AllDaySplitter extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MO
         if (!eventDef.allDay) {
             return ['timed'];
         }
-        if ((0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bP)(eventDef)) {
+        if ((0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bN)(eventDef)) {
             return ['timed', 'allDay'];
         }
         return ['allDay'];
@@ -13638,7 +13786,7 @@ class TimeBodyAxis extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODU
 
 const DEFAULT_WEEK_NUM_FORMAT = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.x)({ week: 'short' });
 const AUTO_ALL_DAY_MAX_EVENT_ROWS = 5;
-class TimeColsView extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.be {
+class TimeColsView extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bc {
     constructor() {
         super(...arguments);
         this.allDaySplitter = new AllDaySplitter(); // for use by subclasses
@@ -13660,13 +13808,13 @@ class TimeColsView extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODU
             let { options } = this.context;
             let { dateProfile } = this.props;
             let range = dateProfile.renderRange;
-            let dayCnt = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bl)(range.start, range.end);
+            let dayCnt = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bj)(range.start, range.end);
             // only do in day views (to avoid doing in week views that dont need it)
             let navLinkAttrs = (dayCnt === 1)
-                ? (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.b0)(this.context, range.start, 'week')
+                ? (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a_)(this.context, range.start, 'week')
                 : {};
             if (options.weekNumbers && rowKey === 'day') {
-                return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cq, { elTag: "th", elClasses: [
+                return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cn, { elTag: "th", elClasses: [
                         'fc-timegrid-axis',
                         'fc-scrollgrid-shrink',
                     ], elAttrs: {
@@ -13722,7 +13870,7 @@ class TimeColsView extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODU
     renderSimpleLayout(headerRowContent, allDayContent, timeContent) {
         let { context, props } = this;
         let sections = [];
-        let stickyHeaderDates = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cc)(context.options);
+        let stickyHeaderDates = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ca)(context.options);
         if (headerRowContent) {
             sections.push({
                 type: 'header',
@@ -13759,8 +13907,8 @@ class TimeColsView extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODU
                 content: timeContent,
             },
         });
-        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ct, { elRef: this.rootElRef, elClasses: ['fc-timegrid'], viewSpec: context.viewSpec },
-            (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.b$, { liquid: !props.isHeightAuto && !props.forPrint, collapsibleWidth: props.forPrint, cols: [{ width: 'shrink' }], sections: sections })));
+        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cq, { elRef: this.rootElRef, elClasses: ['fc-timegrid'], viewSpec: context.viewSpec },
+            (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bZ, { liquid: !props.isHeightAuto && !props.forPrint, collapsibleWidth: props.forPrint, cols: [{ width: 'shrink' }], sections: sections })));
     }
     renderHScrollLayout(headerRowContent, allDayContent, timeContent, colCnt, dayMinWidth, slatMetas, slatCoords) {
         let ScrollGrid = this.context.pluginHooks.scrollGridImpl;
@@ -13768,8 +13916,8 @@ class TimeColsView extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODU
             throw new Error('No ScrollGrid implementation');
         }
         let { context, props } = this;
-        let stickyHeaderDates = !props.forPrint && (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cc)(context.options);
-        let stickyFooterScrollbar = !props.forPrint && (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cb)(context.options);
+        let stickyHeaderDates = !props.forPrint && (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ca)(context.options);
+        let stickyFooterScrollbar = !props.forPrint && (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.c9)(context.options);
         let sections = [];
         if (headerRowContent) {
             sections.push({
@@ -13832,12 +13980,12 @@ class TimeColsView extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODU
                             (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)("tbody", null,
                                 (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(TimeBodyAxis, { slatMetas: slatMetas }))),
                         (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", { className: "fc-timegrid-now-indicator-container" },
-                            (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ch, { unit: isNowIndicator ? 'minute' : 'day' /* hacky */ }, (nowDate) => {
+                            (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a6, { unit: isNowIndicator ? 'minute' : 'day' /* hacky */ }, (nowDate) => {
                                 let nowIndicatorTop = isNowIndicator &&
                                     slatCoords &&
                                     slatCoords.safeComputeTop(nowDate); // might return void
                                 if (typeof nowIndicatorTop === 'number') {
-                                    return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ck, { elClasses: ['fc-timegrid-now-indicator-arrow'], elStyle: { top: nowIndicatorTop }, isAxis: true, date: nowDate }));
+                                    return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ch, { elClasses: ['fc-timegrid-now-indicator-arrow'], elStyle: { top: nowIndicatorTop }, isAxis: true, date: nowDate }));
                                 }
                                 return null;
                             })))),
@@ -13857,16 +14005,16 @@ class TimeColsView extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODU
                 chunks: [
                     {
                         key: 'axis',
-                        content: _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ca,
+                        content: _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.c8,
                     },
                     {
                         key: 'cols',
-                        content: _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ca,
+                        content: _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.c8,
                     },
                 ],
             });
         }
-        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ct, { elRef: this.rootElRef, elClasses: ['fc-timegrid'], viewSpec: context.viewSpec },
+        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cq, { elRef: this.rootElRef, elClasses: ['fc-timegrid'], viewSpec: context.viewSpec },
             (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(ScrollGrid, { liquid: !props.isHeightAuto && !props.forPrint, forPrint: props.forPrint, collapsibleWidth: false, colGroups: [
                     { width: 'shrink', cols: [{ width: 'shrink' }] },
                     { cols: [{ span: colCnt, minWidth: dayMinWidth }] },
@@ -13895,11 +14043,11 @@ class TimeColsSlatsCoords {
     }
     safeComputeTop(date) {
         let { dateProfile } = this;
-        if ((0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.H)(dateProfile.currentRange, date)) {
+        if ((0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.G)(dateProfile.currentRange, date)) {
             let startOfDayDate = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.q)(date);
             let timeMs = date.valueOf() - startOfDayDate.valueOf();
-            if (timeMs >= (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bs)(dateProfile.slotMinTime) &&
-                timeMs < (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bs)(dateProfile.slotMaxTime)) {
+            if (timeMs >= (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bq)(dateProfile.slotMinTime) &&
+                timeMs < (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bq)(dateProfile.slotMaxTime)) {
                 return this.computeTimeTop((0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.d)(timeMs));
             }
         }
@@ -13920,7 +14068,7 @@ class TimeColsSlatsCoords {
         let { positions, dateProfile } = this;
         let len = positions.els.length;
         // floating-point value of # of slots covered
-        let slatCoverage = (duration.milliseconds - (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bs)(dateProfile.slotMinTime)) / (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bs)(this.slotDuration);
+        let slatCoverage = (duration.milliseconds - (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bq)(dateProfile.slotMinTime)) / (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bq)(this.slotDuration);
         let slatIndex;
         let slatRemainder;
         // compute a floating-point number for how many slats should be progressed through.
@@ -13971,7 +14119,7 @@ class TimeColsSlats extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MOD
     constructor() {
         super(...arguments);
         this.rootElRef = (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createRef)();
-        this.slatElRefs = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cf();
+        this.slatElRefs = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cd();
     }
     render() {
         let { props, context } = this;
@@ -14002,7 +14150,7 @@ class TimeColsSlats extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MOD
         ) {
             let rootEl = this.rootElRef.current;
             if (rootEl.offsetHeight) { // not hidden by css
-                props.onCoords(new TimeColsSlatsCoords(new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ba(this.rootElRef.current, collectSlatEls(this.slatElRefs.currentMap, props.slatMetas), false, true), this.props.dateProfile, context.options.slotDuration));
+                props.onCoords(new TimeColsSlatsCoords(new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.b8(this.rootElRef.current, collectSlatEls(this.slatElRefs.currentMap, props.slatMetas), false, true), this.props.dateProfile, context.options.slotDuration));
             }
         }
     }
@@ -14049,7 +14197,7 @@ function splitInteractionByCol(ui, colCnt) {
 class TimeColMoreLink extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.B {
     render() {
         let { props } = this;
-        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cr, { elClasses: ['fc-timegrid-more-link'], elStyle: {
+        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.co, { elClasses: ['fc-timegrid-more-link'], elStyle: {
                 top: props.top,
                 bottom: props.bottom,
             }, allDayDate: null, moreCnt: props.hiddenSegs.length, allSegs: props.hiddenSegs, hiddenSegs: props.hiddenSegs, extraDateSpan: props.extraDateSpan, dateProfile: props.dateProfile, todayRange: props.todayRange, popoverContent: () => renderPlainFgSegs(props.hiddenSegs, props), defaultGenerator: renderMoreLinkInner, forceTimed: true }, (InnerContent) => ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(InnerContent, { elTag: "div", elClasses: ['fc-timegrid-more-link-inner', 'fc-sticky'] }))));
@@ -14061,7 +14209,7 @@ function renderMoreLinkInner(props) {
 
 // segInputs assumed sorted
 function buildPositioning(segInputs, strictOrder, maxStackCnt) {
-    let hierarchy = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bA();
+    let hierarchy = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.by();
     if (strictOrder != null) {
         hierarchy.strictOrder = strictOrder;
     }
@@ -14069,7 +14217,7 @@ function buildPositioning(segInputs, strictOrder, maxStackCnt) {
         hierarchy.maxStackCnt = maxStackCnt;
     }
     let hiddenEntries = hierarchy.addSegs(segInputs);
-    let hiddenGroups = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bE)(hiddenEntries);
+    let hiddenGroups = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bC)(hiddenEntries);
     let web = buildWeb(hierarchy);
     web = stretchWeb(web, 1); // all levelCoords/thickness will have 0.0-1.0
     let segRects = webToRects(web);
@@ -14125,7 +14273,7 @@ function findNextLevelSegs(hierarchy, subjectLevel, subjectLateral) {
     for (; level < levelCnt; level += 1) {
         let entries = entriesByLevel[level];
         let entry;
-        let searchIndex = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bD)(entries, subjectEntry.span.start, _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bC);
+        let searchIndex = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bB)(entries, subjectEntry.span.start, _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bA);
         let lateralStart = searchIndex[0] + searchIndex[1]; // if exact match (which doesn't collide), go to next one
         let lateralEnd = lateralStart;
         while ( // loop through entries that horizontally intersect
@@ -14140,7 +14288,7 @@ function findNextLevelSegs(hierarchy, subjectLevel, subjectLateral) {
     return null;
 }
 function stretchWeb(topLevelNodes, totalThickness) {
-    const stretchNode = cacheable((node, startCoord, prevThickness) => (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bB)(node), (node, startCoord, prevThickness) => {
+    const stretchNode = cacheable((node, startCoord, prevThickness) => (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bz)(node), (node, startCoord, prevThickness) => {
         let { nextLevelNodes, thickness } = node;
         let allThickness = thickness + prevThickness;
         let thicknessFraction = thickness / allThickness;
@@ -14170,7 +14318,7 @@ function stretchWeb(topLevelNodes, totalThickness) {
 // not sorted in any particular order
 function webToRects(topLevelNodes) {
     let rects = [];
-    const processNode = cacheable((node, levelCoord, stackDepth) => (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bB)(node), (node, levelCoord, stackDepth) => {
+    const processNode = cacheable((node, levelCoord, stackDepth) => (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bz)(node), (node, levelCoord, stackDepth) => {
         let rect = Object.assign(Object.assign({}, node), { levelCoord,
             stackDepth, stackForward: 0 });
         rects.push(rect);
@@ -14251,7 +14399,7 @@ const DEFAULT_TIME_FORMAT = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_
 });
 class TimeColEvent extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.B {
     render() {
-        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cj, Object.assign({}, this.props, { elClasses: [
+        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cg, Object.assign({}, this.props, { elClasses: [
                 'fc-timegrid-event',
                 'fc-v-event',
                 this.props.isShort && 'fc-timegrid-event-short',
@@ -14262,7 +14410,7 @@ class TimeColEvent extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODU
 class TimeCol extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.B {
     constructor() {
         super(...arguments);
-        this.sortEventSegs = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.z)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bR);
+        this.sortEventSegs = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.z)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bP);
     }
     // TODO: memoize event-placement?
     render() {
@@ -14279,7 +14427,7 @@ class TimeCol extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0_
             (props.eventResize && props.eventResize.affectedInstances) ||
             {};
         let sortedFgSegs = this.sortEventSegs(props.fgEventSegs, options.eventOrder);
-        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cl, { elTag: "td", elRef: props.elRef, elClasses: [
+        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ci, { elTag: "td", elRef: props.elRef, elClasses: [
                 'fc-timegrid-col',
                 ...(props.extraClassNames || []),
             ], elAttrs: Object.assign({ role: 'gridcell' }, props.extraDataAttrs), date: props.date, dateProfile: props.dateProfile, todayRange: props.todayRange, extraRenderProps: props.extraRenderProps }, (InnerContent) => ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", { className: "fc-timegrid-col-frame" },
@@ -14290,7 +14438,7 @@ class TimeCol extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0_
             (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", { className: "fc-timegrid-col-events" }, this.renderFgSegs(sortedFgSegs, interactionAffectedInstances, false, false, false)),
             (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", { className: "fc-timegrid-col-events" }, this.renderFgSegs(mirrorSegs, {}, Boolean(props.eventDrag), Boolean(props.eventResize), Boolean(isSelectMirror), 'mirror')),
             (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", { className: "fc-timegrid-now-indicator-container" }, this.renderNowIndicator(props.nowIndicatorSegs)),
-            (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cm)(options) && ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(InnerContent, { elTag: "div", elClasses: ['fc-timegrid-col-misc'] }))))));
+            (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cj)(options) && ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(InnerContent, { elTag: "div", elClasses: ['fc-timegrid-col-misc'] }))))));
     }
     renderFgSegs(sortedFgSegs, segIsInvisible, isDragging, isResizing, isDateSelecting, forcedKey) {
         let { props } = this;
@@ -14318,7 +14466,7 @@ class TimeCol extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0_
                 let isShort = Boolean(rect) && (rect.span.end - rect.span.start) < eventShortHeight; // look at other places for this problem
                 return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", { className: 'fc-timegrid-event-harness' +
                         (isInset ? ' fc-timegrid-event-harness-inset' : ''), key: forcedKey || instanceId, style: Object.assign(Object.assign({ visibility: isVisible ? '' : 'hidden' }, vStyle), hStyle) },
-                    (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(TimeColEvent, Object.assign({ seg: seg, isDragging: isDragging, isResizing: isResizing, isDateSelecting: isDateSelecting, isSelected: instanceId === eventSelection, isShort: isShort }, (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bS)(seg, todayRange, nowDate)))));
+                    (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(TimeColEvent, Object.assign({ seg: seg, isDragging: isDragging, isResizing: isResizing, isDateSelecting: isDateSelecting, isSelected: instanceId === eventSelection, isShort: isShort }, (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bQ)(seg, todayRange, nowDate)))));
             })));
     }
     // will already have eventMinHeight applied because segInputs already had it
@@ -14327,7 +14475,7 @@ class TimeCol extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0_
         return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.Fragment, null, hiddenGroups.map((hiddenGroup) => {
             let positionCss = computeSegVStyle(hiddenGroup.span);
             let hiddenSegs = compileSegsFromEntries(hiddenGroup.entries, segs);
-            return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(TimeColMoreLink, { key: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bw)((0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cs)(hiddenSegs)), hiddenSegs: hiddenSegs, top: positionCss.top, bottom: positionCss.bottom, extraDateSpan: extraDateSpan, dateProfile: dateProfile, todayRange: todayRange, nowDate: nowDate, eventSelection: eventSelection, eventDrag: eventDrag, eventResize: eventResize }));
+            return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(TimeColMoreLink, { key: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bu)((0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cp)(hiddenSegs)), hiddenSegs: hiddenSegs, top: positionCss.top, bottom: positionCss.bottom, extraDateSpan: extraDateSpan, dateProfile: dateProfile, todayRange: todayRange, nowDate: nowDate, eventSelection: eventSelection, eventDrag: eventDrag, eventResize: eventResize }));
         })));
     }
     renderFillSegs(segs, fillType) {
@@ -14335,9 +14483,9 @@ class TimeCol extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0_
         let segVCoords = computeSegVCoords(segs, props.date, props.slatCoords, context.options.eventMinHeight); // don't assume all populated
         let children = segVCoords.map((vcoords, i) => {
             let seg = segs[i];
-            return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", { key: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bT)(seg.eventRange), className: "fc-timegrid-bg-harness", style: computeSegVStyle(vcoords) }, fillType === 'bg-event' ?
-                (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cp, Object.assign({ seg: seg }, (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bS)(seg, props.todayRange, props.nowDate))) :
-                (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.co)(fillType)));
+            return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", { key: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bR)(seg.eventRange), className: "fc-timegrid-bg-harness", style: computeSegVStyle(vcoords) }, fillType === 'bg-event' ?
+                (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cm, Object.assign({ seg: seg }, (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bQ)(seg, props.todayRange, props.nowDate))) :
+                (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cl)(fillType)));
         });
         return (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.Fragment, null, children);
     }
@@ -14346,7 +14494,7 @@ class TimeCol extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0_
         if (!slatCoords) {
             return null;
         }
-        return segs.map((seg, i) => ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ck
+        return segs.map((seg, i) => ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ch
         // key doesn't matter. will only ever be one
         , { 
             // key doesn't matter. will only ever be one
@@ -14392,7 +14540,7 @@ function renderPlainFgSegs(sortedFgSegs, { todayRange, nowDate, eventSelection, 
     return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.Fragment, null, sortedFgSegs.map((seg) => {
         let instanceId = seg.eventRange.instance.instanceId;
         return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", { key: instanceId, style: { visibility: hiddenInstances[instanceId] ? 'hidden' : '' } },
-            (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(TimeColEvent, Object.assign({ seg: seg, isDragging: false, isResizing: false, isDateSelecting: false, isSelected: instanceId === eventSelection, isShort: false }, (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bS)(seg, todayRange, nowDate)))));
+            (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(TimeColEvent, Object.assign({ seg: seg, isDragging: false, isResizing: false, isDateSelecting: false, isSelected: instanceId === eventSelection, isShort: false }, (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bQ)(seg, todayRange, nowDate)))));
     })));
 }
 function computeSegVStyle(segVCoords) {
@@ -14419,7 +14567,7 @@ class TimeColsContent extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_M
         this.splitEventDrag = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.z)(splitInteractionByCol);
         this.splitEventResize = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.z)(splitInteractionByCol);
         this.rootElRef = (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createRef)();
-        this.cellElRefs = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cf();
+        this.cellElRefs = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.cd();
     }
     render() {
         let { props, context } = this;
@@ -14444,7 +14592,7 @@ class TimeColsContent extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_M
                     (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)("tr", { role: "row" },
                         props.axis && ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)("td", { "aria-hidden": true, className: "fc-timegrid-col fc-timegrid-axis" },
                             (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", { className: "fc-timegrid-col-frame" },
-                                (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", { className: "fc-timegrid-now-indicator-container" }, typeof nowIndicatorTop === 'number' && ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ck, { elClasses: ['fc-timegrid-now-indicator-arrow'], elStyle: { top: nowIndicatorTop }, isAxis: true, date: props.nowDate })))))),
+                                (0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", { className: "fc-timegrid-now-indicator-container" }, typeof nowIndicatorTop === 'number' && ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ch, { elClasses: ['fc-timegrid-now-indicator-arrow'], elStyle: { top: nowIndicatorTop }, isAxis: true, date: props.nowDate })))))),
                         props.cells.map((cell, i) => ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(TimeCol, { key: cell.key, elRef: this.cellElRefs.createRef(cell.key), dateProfile: props.dateProfile, date: cell.date, nowDate: props.nowDate, todayRange: props.todayRange, extraRenderProps: cell.extraRenderProps, extraDataAttrs: cell.extraDataAttrs, extraClassNames: cell.extraClassNames, extraDateSpan: cell.extraDateSpan, fgEventSegs: fgEventSegsByRow[i], bgEventSegs: bgEventSegsByRow[i], businessHourSegs: businessHourSegsByRow[i], nowIndicatorSegs: nowIndicatorSegsByRow[i], dateSelectionSegs: dateSelectionSegsByRow[i], eventDrag: eventDragByRow[i], eventResize: eventResizeByRow[i], slatCoords: props.slatCoords, eventSelection: props.eventSelection, forPrint: props.forPrint }))))))));
     }
     componentDidMount() {
@@ -14458,7 +14606,7 @@ class TimeColsContent extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_M
         if (props.onColCoords &&
             props.clientWidth !== null // means sizing has stabilized
         ) {
-            props.onColCoords(new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ba(this.rootElRef.current, collectCellEls(this.cellElRefs.currentMap, props.cells), true, // horizontal
+            props.onColCoords(new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.b8(this.rootElRef.current, collectCellEls(this.cellElRefs.currentMap, props.cells), true, // horizontal
             false));
         }
     }
@@ -14469,7 +14617,7 @@ function collectCellEls(elMap, cells) {
 
 /* A component that renders one or more columns of vertical time slots
 ----------------------------------------------------------------------------------------------------------------------*/
-class TimeCols extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.be {
+class TimeCols extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bc {
     constructor() {
         super(...arguments);
         this.processSlotOptions = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.z)(processSlotOptions);
@@ -14549,7 +14697,7 @@ class TimeCols extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0
             let localSnapIndex = Math.floor(partial * snapsPerSlot); // the snap # relative to start of slat
             let snapIndex = slatIndex * snapsPerSlot + localSnapIndex;
             let dayDate = this.props.cells[colIndex].date;
-            let time = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bp)(dateProfile.slotMinTime, (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bo)(snapDuration, snapIndex));
+            let time = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bn)(dateProfile.slotMinTime, (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bm)(snapDuration, snapIndex));
             let start = dateEnv.add(dayDate, time);
             let end = dateEnv.add(start, snapDuration);
             return {
@@ -14570,7 +14718,7 @@ class TimeCols extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0
 }
 function processSlotOptions(slotDuration, snapDurationOverride) {
     let snapDuration = snapDurationOverride || slotDuration;
-    let snapsPerSlot = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bt)(slotDuration, snapDuration);
+    let snapsPerSlot = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.br)(slotDuration, snapDuration);
     if (snapsPerSlot === null) {
         snapDuration = slotDuration;
         snapsPerSlot = 1;
@@ -14579,7 +14727,7 @@ function processSlotOptions(slotDuration, snapDurationOverride) {
     return { snapDuration, snapsPerSlot };
 }
 
-class DayTimeColsSlicer extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bW {
+class DayTimeColsSlicer extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bU {
     sliceRange(range, dayRanges) {
         let segs = [];
         for (let col = 0; col < dayRanges.length; col += 1) {
@@ -14598,7 +14746,7 @@ class DayTimeColsSlicer extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED
     }
 }
 
-class DayTimeCols extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.be {
+class DayTimeCols extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bc {
     constructor() {
         super(...arguments);
         this.buildDayRanges = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.z)(buildDayRanges);
@@ -14612,7 +14760,7 @@ class DayTimeCols extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODUL
         let dayRanges = this.buildDayRanges(dayTableModel, dateProfile, context.dateEnv);
         // give it the first row of cells
         // TODO: would move this further down hierarchy, but sliceNowDate needs it
-        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ch, { unit: nowIndicator ? 'minute' : 'day' }, (nowDate, todayRange) => ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(TimeCols, Object.assign({ ref: this.timeColsRef }, this.slicer.sliceProps(props, dateProfile, null, context, dayRanges), { forPrint: props.forPrint, axis: props.axis, dateProfile: dateProfile, slatMetas: props.slatMetas, slotDuration: props.slotDuration, cells: dayTableModel.cells[0], tableColGroupNode: props.tableColGroupNode, tableMinWidth: props.tableMinWidth, clientWidth: props.clientWidth, clientHeight: props.clientHeight, expandRows: props.expandRows, nowDate: nowDate, nowIndicatorSegs: nowIndicator && this.slicer.sliceNowDate(nowDate, dateProfile, nextDayThreshold, context, dayRanges), todayRange: todayRange, onScrollTopRequest: props.onScrollTopRequest, onSlatCoords: props.onSlatCoords })))));
+        return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a6, { unit: nowIndicator ? 'minute' : 'day' }, (nowDate, todayRange) => ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(TimeCols, Object.assign({ ref: this.timeColsRef }, this.slicer.sliceProps(props, dateProfile, null, context, dayRanges), { forPrint: props.forPrint, axis: props.axis, dateProfile: dateProfile, slatMetas: props.slatMetas, slotDuration: props.slotDuration, cells: dayTableModel.cells[0], tableColGroupNode: props.tableColGroupNode, tableMinWidth: props.tableMinWidth, clientWidth: props.clientWidth, clientHeight: props.clientHeight, expandRows: props.expandRows, nowDate: nowDate, nowIndicatorSegs: nowIndicator && this.slicer.sliceNowDate(nowDate, dateProfile, nextDayThreshold, context, dayRanges), todayRange: todayRange, onScrollTopRequest: props.onScrollTopRequest, onSlatCoords: props.onSlatCoords })))));
     }
 }
 function buildDayRanges(dayTableModel, dateProfile, dateEnv) {
@@ -14641,18 +14789,18 @@ function buildSlatMetas(slotMinTime, slotMaxTime, explicitLabelInterval, slotDur
     let slatIterator = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.d)(0);
     let labelInterval = explicitLabelInterval || computeLabelInterval(slotDuration);
     let metas = [];
-    while ((0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bs)(slatTime) < (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bs)(slotMaxTime)) {
+    while ((0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bq)(slatTime) < (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bq)(slotMaxTime)) {
         let date = dateEnv.add(dayStart, slatTime);
-        let isLabeled = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bt)(slatIterator, labelInterval) !== null;
+        let isLabeled = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.br)(slatIterator, labelInterval) !== null;
         metas.push({
             date,
             time: slatTime,
             key: date.toISOString(),
-            isoTimeStr: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bu)(date),
+            isoTimeStr: (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bs)(date),
             isLabeled,
         });
-        slatTime = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bp)(slatTime, slotDuration);
-        slatIterator = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bp)(slatIterator, slotDuration);
+        slatTime = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bn)(slatTime, slotDuration);
+        slatIterator = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bn)(slatIterator, slotDuration);
     }
     return metas;
 }
@@ -14664,7 +14812,7 @@ function computeLabelInterval(slotDuration) {
     // find the smallest stock label interval that results in more than one slots-per-label
     for (i = STOCK_SUB_DURATIONS.length - 1; i >= 0; i -= 1) {
         labelInterval = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.d)(STOCK_SUB_DURATIONS[i]);
-        slotsPerLabel = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bt)(labelInterval, slotDuration);
+        slotsPerLabel = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.br)(labelInterval, slotDuration);
         if (slotsPerLabel !== null && slotsPerLabel > 1) {
             return labelInterval;
         }
@@ -14688,7 +14836,7 @@ class DayTimeColsView extends TimeColsView {
         let { dayMinWidth } = options;
         let hasAttachedAxis = !dayMinWidth;
         let hasDetachedAxis = dayMinWidth;
-        let headerContent = options.dayHeaders && ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bK, { dates: dayTableModel.headerDates, dateProfile: dateProfile, datesRepDistinctDays: true, renderIntro: hasAttachedAxis ? this.renderHeadAxis : null }));
+        let headerContent = options.dayHeaders && ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bI, { dates: dayTableModel.headerDates, dateProfile: dateProfile, datesRepDistinctDays: true, renderIntro: hasAttachedAxis ? this.renderHeadAxis : null }));
         let allDayContent = (options.allDaySlot !== false) && ((contentArg) => ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_daygrid_internal_js__WEBPACK_IMPORTED_MODULE_2__.DayTable, Object.assign({}, splitProps.allDay, { dateProfile: dateProfile, dayTableModel: dayTableModel, nextDayThreshold: options.nextDayThreshold, tableMinWidth: contentArg.tableMinWidth, colGroupNode: contentArg.tableColGroupNode, renderRowIntro: hasAttachedAxis ? this.renderTableRowAxis : null, showWeekNumbers: false, expandRows: false, headerAlignElRef: this.headerElRef, clientWidth: contentArg.clientWidth, clientHeight: contentArg.clientHeight, forPrint: props.forPrint }, this.getAllDayMaxEventProps()))));
         let timeGridContent = (contentArg) => ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(DayTimeCols, Object.assign({}, splitProps.timed, { dayTableModel: dayTableModel, dateProfile: dateProfile, axis: hasAttachedAxis, slotDuration: options.slotDuration, slatMetas: slatMetas, forPrint: props.forPrint, tableColGroupNode: contentArg.tableColGroupNode, tableMinWidth: contentArg.tableMinWidth, clientWidth: contentArg.clientWidth, clientHeight: contentArg.clientHeight, onSlatCoords: this.handleSlatCoords, expandRows: contentArg.expandRows, onScrollTopRequest: this.handleScrollTopRequest })));
         return hasDetachedAxis
@@ -14697,9 +14845,12 @@ class DayTimeColsView extends TimeColsView {
     }
 }
 function buildTimeColsModel(dateProfile, dateProfileGenerator) {
-    let daySeries = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bO(dateProfile.renderRange, dateProfileGenerator);
-    return new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bV(daySeries, false);
+    let daySeries = new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bM(dateProfile.renderRange, dateProfileGenerator);
+    return new _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.bT(daySeries, false);
 }
+
+var css_248z = ".fc-v-event{background-color:var(--fc-event-bg-color);border:1px solid var(--fc-event-border-color);display:block}.fc-v-event .fc-event-main{color:var(--fc-event-text-color);height:100%}.fc-v-event .fc-event-main-frame{display:flex;flex-direction:column;height:100%}.fc-v-event .fc-event-time{flex-grow:0;flex-shrink:0;max-height:100%;overflow:hidden}.fc-v-event .fc-event-title-container{flex-grow:1;flex-shrink:1;min-height:0}.fc-v-event .fc-event-title{bottom:0;max-height:100%;overflow:hidden;top:0}.fc-v-event:not(.fc-event-start){border-top-left-radius:0;border-top-right-radius:0;border-top-width:0}.fc-v-event:not(.fc-event-end){border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom-width:0}.fc-v-event.fc-event-selected:before{left:-10px;right:-10px}.fc-v-event .fc-event-resizer-start{cursor:n-resize}.fc-v-event .fc-event-resizer-end{cursor:s-resize}.fc-v-event:not(.fc-event-selected) .fc-event-resizer{height:var(--fc-event-resizer-thickness);left:0;right:0}.fc-v-event:not(.fc-event-selected) .fc-event-resizer-start{top:calc(var(--fc-event-resizer-thickness)/-2)}.fc-v-event:not(.fc-event-selected) .fc-event-resizer-end{bottom:calc(var(--fc-event-resizer-thickness)/-2)}.fc-v-event.fc-event-selected .fc-event-resizer{left:50%;margin-left:calc(var(--fc-event-resizer-dot-total-width)/-2)}.fc-v-event.fc-event-selected .fc-event-resizer-start{top:calc(var(--fc-event-resizer-dot-total-width)/-2)}.fc-v-event.fc-event-selected .fc-event-resizer-end{bottom:calc(var(--fc-event-resizer-dot-total-width)/-2)}.fc .fc-timegrid .fc-daygrid-body{z-index:2}.fc .fc-timegrid-divider{padding:0 0 2px}.fc .fc-timegrid-body{min-height:100%;position:relative;z-index:1}.fc .fc-timegrid-axis-chunk{position:relative}.fc .fc-timegrid-axis-chunk>table,.fc .fc-timegrid-slots{position:relative;z-index:1}.fc .fc-timegrid-slot{border-bottom:0;height:1.5em}.fc .fc-timegrid-slot:empty:before{content:\"\\00a0\"}.fc .fc-timegrid-slot-minor{border-top-style:dotted}.fc .fc-timegrid-slot-label-cushion{display:inline-block;white-space:nowrap}.fc .fc-timegrid-slot-label{vertical-align:middle}.fc .fc-timegrid-axis-cushion,.fc .fc-timegrid-slot-label-cushion{padding:0 4px}.fc .fc-timegrid-axis-frame-liquid{height:100%}.fc .fc-timegrid-axis-frame{align-items:center;display:flex;justify-content:flex-end;overflow:hidden}.fc .fc-timegrid-axis-cushion{flex-shrink:0;max-width:60px}.fc-direction-ltr .fc-timegrid-slot-label-frame{text-align:right}.fc-direction-rtl .fc-timegrid-slot-label-frame{text-align:left}.fc-liquid-hack .fc-timegrid-axis-frame-liquid{bottom:0;height:auto;left:0;position:absolute;right:0;top:0}.fc .fc-timegrid-col.fc-day-today{background-color:var(--fc-today-bg-color)}.fc .fc-timegrid-col-frame{min-height:100%;position:relative}.fc-media-screen.fc-liquid-hack .fc-timegrid-col-frame{bottom:0;height:auto;left:0;position:absolute;right:0;top:0}.fc-media-screen .fc-timegrid-cols{bottom:0;left:0;position:absolute;right:0;top:0}.fc-media-screen .fc-timegrid-cols>table{height:100%}.fc-media-screen .fc-timegrid-col-bg,.fc-media-screen .fc-timegrid-col-events,.fc-media-screen .fc-timegrid-now-indicator-container{left:0;position:absolute;right:0;top:0}.fc .fc-timegrid-col-bg{z-index:2}.fc .fc-timegrid-col-bg .fc-non-business{z-index:1}.fc .fc-timegrid-col-bg .fc-bg-event{z-index:2}.fc .fc-timegrid-col-bg .fc-highlight{z-index:3}.fc .fc-timegrid-bg-harness{left:0;position:absolute;right:0}.fc .fc-timegrid-col-events{z-index:3}.fc .fc-timegrid-now-indicator-container{bottom:0;overflow:hidden}.fc-direction-ltr .fc-timegrid-col-events{margin:0 2.5% 0 2px}.fc-direction-rtl .fc-timegrid-col-events{margin:0 2px 0 2.5%}.fc-timegrid-event-harness{position:absolute}.fc-timegrid-event-harness>.fc-timegrid-event{bottom:0;left:0;position:absolute;right:0;top:0}.fc-timegrid-event-harness-inset .fc-timegrid-event,.fc-timegrid-event.fc-event-mirror,.fc-timegrid-more-link{box-shadow:0 0 0 1px var(--fc-page-bg-color)}.fc-timegrid-event,.fc-timegrid-more-link{border-radius:3px;font-size:var(--fc-small-font-size)}.fc-timegrid-event{margin-bottom:1px}.fc-timegrid-event .fc-event-main{padding:1px 1px 0}.fc-timegrid-event .fc-event-time{font-size:var(--fc-small-font-size);margin-bottom:1px;white-space:nowrap}.fc-timegrid-event-short .fc-event-main-frame{flex-direction:row;overflow:hidden}.fc-timegrid-event-short .fc-event-time:after{content:\"\\00a0-\\00a0\"}.fc-timegrid-event-short .fc-event-title{font-size:var(--fc-small-font-size)}.fc-timegrid-more-link{background:var(--fc-more-link-bg-color);color:var(--fc-more-link-text-color);cursor:pointer;margin-bottom:1px;position:absolute;z-index:9999}.fc-timegrid-more-link-inner{padding:3px 2px;top:0}.fc-direction-ltr .fc-timegrid-more-link{right:0}.fc-direction-rtl .fc-timegrid-more-link{left:0}.fc .fc-timegrid-now-indicator-arrow,.fc .fc-timegrid-now-indicator-line{pointer-events:none}.fc .fc-timegrid-now-indicator-line{border-color:var(--fc-now-indicator-color);border-style:solid;border-width:1px 0 0;left:0;position:absolute;right:0;z-index:4}.fc .fc-timegrid-now-indicator-arrow{border-color:var(--fc-now-indicator-color);border-style:solid;margin-top:-5px;position:absolute;z-index:4}.fc-direction-ltr .fc-timegrid-now-indicator-arrow{border-bottom-color:transparent;border-top-color:transparent;border-width:5px 0 5px 6px;left:0}.fc-direction-rtl .fc-timegrid-now-indicator-arrow{border-bottom-color:transparent;border-top-color:transparent;border-width:5px 6px 5px 0;right:0}";
+(0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.ct)(css_248z);
 
 
 

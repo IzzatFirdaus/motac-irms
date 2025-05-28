@@ -2,30 +2,66 @@
 
 namespace Database\Seeders;
 
-use App\Models\Center;
-use Faker\Factory;
+use App\Models\Center; // Assuming App\Models\Center exists
+use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class CenterSeeder extends Seeder
 {
     public function run(): void
     {
-        $faker = Factory::create();
+        Log::info('Starting CenterSeeder (Revision 3)...');
 
-        for ($i = 0; $i < 5; $i++) {
-            Center::create([
-                'name' => $faker->firstName,
-                'start_work_hour' => $faker->time(),
-                'end_work_hour' => $faker->time(),
-                'weekends' => $faker->words(),
-                'is_active' => rand(0, 1),
-                'created_by' => $faker->name,
-                'updated_by' => $faker->name,
-                'deleted_by' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
-                'deleted_at' => null,
-            ]);
+        if (!Schema::hasTable('centers')) {
+            Log::warning('Centers table does not exist. Skipping CenterSeeder. If this table is required, please ensure its migration has been run.');
+            return;
         }
+        // Truncate if needed, ensure FK safety
+        // DB::statement('SET FOREIGN_KEY_CHECKS = 0;');
+        // Center::truncate();
+        // DB::statement('SET FOREIGN_KEY_CHECKS = 1;');
+        // Log::info('Truncated centers table (if uncommented).');
+
+
+        $auditUserId = null;
+        $adminUserForAudit = User::orderBy('id')->first();
+        $auditUserId = $adminUserForAudit?->id;
+
+        if (!$auditUserId) {
+            // Attempt to create a fallback user only if User model and factory exist
+            if (class_exists(User::class) && method_exists(User::class, 'factory')) {
+                $auditUser = User::factory()->create(['name' => 'Audit User (CenterSeeder)']);
+                $auditUserId = $auditUser->id;
+                Log::info("Created a fallback audit user with ID {$auditUserId} for CenterSeeder.");
+            } else {
+                Log::warning('No users found for CenterSeeder audit trails, and User factory is unavailable. Centers will be created without explicit audit user IDs or will rely on factory defaults for these.');
+            }
+        } else {
+            Log::info("Using User ID {$auditUserId} for audit columns in CenterSeeder if factory overrides are applied.");
+        }
+
+        $numberOfCenters = 5; // Define how many example centers to create
+        Log::info("Attempting to create {$numberOfCenters} centers using factory (Revision 3)...");
+
+        // The CenterFactory should handle setting created_by/updated_by.
+        // If you need to override it specifically from the seeder for all created instances:
+        $factoryData = [];
+        if ($auditUserId) {
+            $factoryData['created_by'] = $auditUserId;
+            $factoryData['updated_by'] = $auditUserId;
+        }
+        // Ensure your CenterFactory populates all necessary fields for a Center.
+        // Example: name, code, location_id (if centers are tied to locations table), etc.
+
+        if (class_exists(Center::class) && method_exists(Center::class, 'factory')) {
+            Center::factory()->count($numberOfCenters)->create($factoryData);
+            Log::info("CenterSeeder finished. Created/processed {$numberOfCenters} centers.");
+        } else {
+            Log::error('App\Models\Center model or its factory not found. Cannot seed centers.');
+        }
+
+        Log::info('CenterSeeder complete (Revision 3).');
     }
 }

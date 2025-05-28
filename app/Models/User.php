@@ -12,33 +12,33 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
-use Laravel\Jetstream\HasProfilePhoto;
+use Laravel\Jetstream\HasProfilePhoto; // Trait for profile photo URL
 use Laravel\Sanctum\HasApiTokens;
-use Spatie\Permission\Traits\HasRoles;
+use Spatie\Permission\Traits\HasRoles; // For Spatie roles and permissions
 
 /**
  * User Model for MOTAC System.
- * (PHPDoc from your provided file, confirmed alignment)
+ * System Design Reference: Section 4.1 Users & Organizational Data
  * @property int $id
- * @property string|null $title
+ * @property string|null $title (e.g., "Encik", "Puan", "Dr.")
  * @property string $name
- * @property string|null $identification_number NRIC
+ * @property string|null $identification_number (NRIC)
  * @property string|null $passport_number
- * @property string|null $profile_photo_path Used by HasProfilePhoto trait
+ * @property string|null $profile_photo_path (Used by HasProfilePhoto trait)
  * @property int|null $position_id
  * @property int|null $grade_id
  * @property int|null $department_id
- * @property string|null $level Aras/Floor
+ * @property string|null $level (Aras/Floor from MyMail form)
  * @property string|null $mobile_number
- * @property string $email Unique personal email, used for login
- * @property string|null $motac_email Official MOTAC email
- * @property string|null $user_id_assigned Assigned User ID (e.g., for network access)
- * @property string|null $service_status Enum from SERVICE_STATUS_LABELS keys
- * @property string|null $appointment_type Enum from APPOINTMENT_TYPE_LABELS keys
+ * @property string $email (Unique personal email, used for login)
+ * @property string|null $motac_email (Official MOTAC email)
+ * @property string|null $user_id_assigned (Assigned User ID, e.g., network ID)
+ * @property string|null $service_status (Enum: 'tetap', 'lantikan_kontrak_mystep', etc.)
+ * @property string|null $appointment_type (Enum: 'baharu', 'kenaikan_pangkat_pertukaran', etc.)
  * @property string|null $previous_department_name
  * @property string|null $previous_department_email
  * @property string $password
- * @property string $status Enum from STATUS_OPTIONS (active, inactive)
+ * @property string $status (Enum: 'active', 'inactive')
  * @property \Illuminate\Support\Carbon|null $email_verified_at
  * @property string|null $two_factor_secret
  * @property string|null $two_factor_recovery_codes
@@ -47,12 +47,12 @@ use Spatie\Permission\Traits\HasRoles;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property int|null $created_by Foreign key to users table
- * @property int|null $updated_by Foreign key to users table
- * @property int|null $deleted_by Foreign key to users table
+ * @property int|null $created_by (FK to users.id, handled by BlameableObserver)
+ * @property int|null $updated_by (FK to users.id, handled by BlameableObserver)
+ * @property int|null $deleted_by (FK to users.id, handled by BlameableObserver)
  *
- * @property-read string $profile_photo_url Accessor from HasProfilePhoto
- * @property-read string|null $nric Accessor for identification_number
+ * @property-read string $profile_photo_url (Accessor from HasProfilePhoto)
+ * @property-read string|null $nric (Accessor for identification_number)
  * @property-read Department|null $department
  * @property-read Grade|null $grade
  * @property-read Position|null $position
@@ -60,14 +60,14 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, LoanApplication> $loanApplicationsAsApplicant
  * @property-read \Illuminate\Database\Eloquent\Collection<int, LoanApplication> $loanApplicationsAsResponsibleOfficer
  * @property-read \Illuminate\Database\Eloquent\Collection<int, LoanApplication> $loanApplicationsAsSupportingOfficer
- * @property-read \Illuminate\Database\Eloquent\Collection<int, Approval> $approvalsMade As Approving Officer
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Approval> $approvalsMade (Approvals made by this user)
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Permission> $permissions
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
- * @property-read User|null $creatorInfo Alias for creator
- * @property-read User|null $updaterInfo Alias for updater
- * @property-read User|null $deleterInfo Alias for deleter
+ * @property-read User|null $creator
+ * @property-read User|null $updater
+ * @property-read User|null $deleter
  */
 class User extends Authenticatable
 {
@@ -75,70 +75,76 @@ class User extends Authenticatable
 
     public const STATUS_ACTIVE = 'active';
     public const STATUS_INACTIVE = 'inactive';
-
     public static array $STATUS_OPTIONS = [
         self::STATUS_ACTIVE => 'Aktif',
         self::STATUS_INACTIVE => 'Tidak Aktif',
     ];
 
+    // Constants from System Design 4.1 User Model and MyMail supplementary document
     public const SERVICE_STATUS_TETAP = 'tetap';
     public const SERVICE_STATUS_KONTRAK_MYSTEP = 'lantikan_kontrak_mystep';
     public const SERVICE_STATUS_PELAJAR_INDUSTRI = 'pelajar_latihan_industri';
     public const SERVICE_STATUS_OTHER_AGENCY = 'other_agency_existing_mailbox';
-    public const SERVICE_STATUS_TYPE_4 = 'service_type_4';
-    public const SERVICE_STATUS_TYPE_7 = 'service_type_7';
-
+    public const SERVICE_STATUS_TYPE_4 = 'service_type_4'; // Placeholder for "Perkhidmatan Jenis 4" - Requires actual label
+    public const SERVICE_STATUS_TYPE_7 = 'service_type_7'; // Placeholder for "Perkhidmatan Jenis 7" - Requires actual label
     public static array $SERVICE_STATUS_LABELS = [
         self::SERVICE_STATUS_TETAP => 'Tetap',
         self::SERVICE_STATUS_KONTRAK_MYSTEP => 'Lantikan Kontrak / MySTEP',
         self::SERVICE_STATUS_PELAJAR_INDUSTRI => 'Pelajar Latihan Industri (Ibu Pejabat Sahaja)',
-        self::SERVICE_STATUS_OTHER_AGENCY => 'E-mel Sandaran (Agensi Lain)',
-        self::SERVICE_STATUS_TYPE_4 => 'Jenis Perkhidmatan 4 (Perlu Label Sebenar)', // Placeholder
-        self::SERVICE_STATUS_TYPE_7 => 'Jenis Perkhidmatan 7 (Perlu Label Sebenar)', // Placeholder
+        self::SERVICE_STATUS_OTHER_AGENCY => 'E-mel Sandaran (Staf Agensi Lain di MOTAC)',
+        self::SERVICE_STATUS_TYPE_4 => 'Perkhidmatan Jenis 4', // Update with actual label
+        self::SERVICE_STATUS_TYPE_7 => 'Perkhidmatan Jenis 7', // Update with actual label
     ];
 
     public const APPOINTMENT_TYPE_BAHARU = 'baharu';
     public const APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN = 'kenaikan_pangkat_pertukaran';
     public const APPOINTMENT_TYPE_LAIN_LAIN = 'lain_lain';
-
     public static array $APPOINTMENT_TYPE_LABELS = [
         self::APPOINTMENT_TYPE_BAHARU => 'Baharu',
         self::APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN => 'Kenaikan Pangkat/Pertukaran',
         self::APPOINTMENT_TYPE_LAIN_LAIN => 'Lain-lain',
     ];
 
-    // Title options based on typical usage in forms
+    // Titles for forms, based on MyMail and general Malaysian context
     public const TITLE_ENCIK = 'Encik';
     public const TITLE_PUAN = 'Puan';
     public const TITLE_CIK = 'Cik';
-    public const TITLE_DR = 'Dr.';
-    public const TITLE_PROF = 'Prof.';
-    public const TITLE_DATO = 'Dato\'';
-    // ... add other relevant titles
-
+    public const TITLE_DR = 'Dr.'; // Doktor
+    public const TITLE_IR = 'Ir.'; // Jurutera Profesional
+    public const TITLE_AR = 'Ar.'; // Arkitek Profesional
+    public const TITLE_SR = 'Sr.'; // Juruukur Profesional
+    public const TITLE_PROF = 'Prof.'; // Profesor
+    public const TITLE_PROF_MADYA = 'Prof. Madya'; // Profesor Madya
+    public const TITLE_DATUK = 'Datuk'; // Note: consider variations like Dato', Datin, Tan Sri, Puan Sri
+    public const TITLE_DATO = 'Dato\''; // If different from Datuk
+    // Add more as needed by MOTAC context
     public static array $TITLE_OPTIONS = [
         self::TITLE_ENCIK => 'Encik',
         self::TITLE_PUAN => 'Puan',
         self::TITLE_CIK => 'Cik',
         self::TITLE_DR => 'Dr.',
+        self::TITLE_IR => 'Ir.',
+        self::TITLE_AR => 'Ar.',
+        self::TITLE_SR => 'Sr.',
         self::TITLE_PROF => 'Prof.',
+        self::TITLE_PROF_MADYA => 'Prof. Madya',
+        self::TITLE_DATUK => 'Datuk',
         self::TITLE_DATO => 'Dato\'',
     ];
-
 
     protected $table = 'users';
 
     protected $fillable = [
         'name', 'email', 'password',
         'title', 'identification_number', 'passport_number', 'profile_photo_path',
-        'position_id', 'grade_id', 'department_id', 'level',
+        'position_id', 'grade_id', 'department_id', 'level', // 'level' is for "Aras"
         'mobile_number', 'motac_email', 'user_id_assigned',
         'service_status', 'appointment_type',
         'previous_department_name', 'previous_department_email',
         'status',
         'email_verified_at',
         'two_factor_secret', 'two_factor_recovery_codes', 'two_factor_confirmed_at',
-        // 'created_by', 'updated_by' are typically handled by BlameableObserver
+        // created_by, updated_by, deleted_by are handled by BlameableObserver
     ];
 
     protected $hidden = [
@@ -149,21 +155,21 @@ class User extends Authenticatable
     ];
 
     protected $appends = [
-        'profile_photo_url',
-        'nric', // As defined in accessor
+        'profile_photo_url', // From HasProfilePhoto trait
+        'nric', // Custom accessor for identification_number
     ];
 
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password' => 'hashed',
+        'password' => 'hashed', // Automatically hashes passwords
         'two_factor_confirmed_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
-        // If using PHP 8.1 native enums, they would be cast here.
-        // 'status' => UserStatusEnum::class,
-        // 'service_status' => ServiceStatusEnum::class,
-        // 'appointment_type' => AppointmentTypeEnum::class,
+        // Consider using native PHP enums for status fields if on PHP 8.1+
+        // 'status' => \App\Enums\UserStatusEnum::class,
+        // 'service_status' => \App\Enums\ServiceStatusEnum::class,
+        // 'appointment_type' => \App\Enums\AppointmentTypeEnum::class,
     ];
 
     protected static function newFactory(): UserFactory
@@ -172,73 +178,39 @@ class User extends Authenticatable
     }
 
     // Relationships
-    public function department(): BelongsTo
-    {
-        return $this->belongsTo(Department::class, 'department_id');
-    }
+    public function department(): BelongsTo { return $this->belongsTo(Department::class, 'department_id'); }
+    public function grade(): BelongsTo { return $this->belongsTo(Grade::class, 'grade_id'); }
+    public function position(): BelongsTo { return $this->belongsTo(Position::class, 'position_id'); }
+    public function emailApplications(): HasMany { return $this->hasMany(EmailApplication::class, 'user_id'); }
+    public function loanApplicationsAsApplicant(): HasMany { return $this->hasMany(LoanApplication::class, 'user_id'); }
+    public function loanApplicationsAsResponsibleOfficer(): HasMany { return $this->hasMany(LoanApplication::class, 'responsible_officer_id'); }
+    public function loanApplicationsAsSupportingOfficer(): HasMany { return $this->hasMany(LoanApplication::class, 'supporting_officer_id'); }
+    public function approvalsMade(): HasMany { return $this->hasMany(Approval::class, 'officer_id'); }
 
-    public function grade(): BelongsTo
-    {
-        return $this->belongsTo(Grade::class, 'grade_id');
-    }
+    // Blameable relationships (user who created/updated/deleted this user record)
+    public function creator(): BelongsTo { return $this->belongsTo(User::class, 'created_by'); }
+    public function updater(): BelongsTo { return $this->belongsTo(User::class, 'updated_by'); }
+    public function deleter(): BelongsTo { return $this->belongsTo(User::class, 'deleted_by'); }
 
-    public function position(): BelongsTo
-    {
-        return $this->belongsTo(Position::class, 'position_id');
-    }
-
-    public function emailApplications(): HasMany
-    {
-        return $this->hasMany(EmailApplication::class, 'user_id');
-    }
-
-    public function loanApplicationsAsApplicant(): HasMany
-    {
-        return $this->hasMany(LoanApplication::class, 'user_id');
-    }
-
-    public function loanApplicationsAsResponsibleOfficer(): HasMany
-    {
-        return $this->hasMany(LoanApplication::class, 'responsible_officer_id');
-    }
-
-    public function loanApplicationsAsSupportingOfficer(): HasMany
-    {
-        return $this->hasMany(LoanApplication::class, 'supporting_officer_id');
-    }
-
-    public function approvalsMade(): HasMany // Approvals made by this user
-    {
-        return $this->hasMany(Approval::class, 'officer_id');
-    }
-
-    // Blameable relationships
-    public function creator(): BelongsTo // Renamed from creatorInfo for convention
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function updater(): BelongsTo // Renamed from updaterInfo for convention
-    {
-        return $this->belongsTo(User::class, 'updated_by');
-    }
-
-    public function deleter(): BelongsTo // Renamed from deleterInfo for convention
-    {
-        return $this->belongsTo(User::class, 'deleted_by');
-    }
-
-
-    // Role checks
+    // Role checks - ensure role names match exactly how they are defined in Spatie seeder/config
+    // System Design Section 8.1 (Standardized role names)
     public function isAdmin(): bool { return $this->hasRole('Admin'); }
-    public function isBpmStaff(): bool { return $this->hasRole('BPMStaff'); }
+    public function isBpmStaff(): bool { return $this->hasRole('BPM Staff'); } // Note: "BPM Staff" with space
     public function isItAdmin(): bool { return $this->hasRole('IT Admin'); }
-    public function isSupportingOfficerRole(): bool { return $this->hasRole('SupportingOfficer'); } // Clarified name
-    public function isHodRole(): bool { return $this->hasRole('HOD'); } // Clarified name
+    // Example roles for approval workflows if defined
+    // public function isSupportingOfficerRole(): bool { return $this->hasRole('Supporting Officer'); }
+    // public function isHodRole(): bool { return $this->hasRole('Head of Department'); }
 
+
+    /**
+     * Route notifications for the mail channel.
+     * Prioritizes official MOTAC email if available.
+     * @param  \Illuminate\Notifications\Notification|null  $notification
+     * @return array|string
+     */
     public function routeNotificationForMail($notification = null): array|string
     {
-        return $this->motac_email ?? $this->email;
+        return $this->motac_email ?: $this->email;
     }
 
     // Accessors
@@ -247,24 +219,23 @@ class User extends Authenticatable
         return $this->identification_number;
     }
 
-    // Static methods for options (used in factories, forms)
+    // Static methods for dropdown options
     public static function getStatusOptions(): array { return self::$STATUS_OPTIONS; }
     public static function getServiceStatusOptions(): array { return self::$SERVICE_STATUS_LABELS; }
     public static function getAppointmentTypeOptions(): array { return self::$APPOINTMENT_TYPE_LABELS; }
     public static function getTitleOptions(): array { return self::$TITLE_OPTIONS; }
 
     /**
-     * Get level options (Aras).
+     * Get Aras/Level options for forms.
      * Based on MyMail supplementary document (values 1-18).
      */
     public static function getLevelOptions(): array
     {
         $levels = [];
-        for ($i = 1; $i <= 18; $i++) {
+        for ($i = 1; $i <= 18; $i++) { // As per supplementary doc: Aras (Level/Floor)
             $levels[(string)$i] = (string)$i;
         }
-        // Add 'Lain-lain' or other specific values if needed.
-        // $levels['other'] = 'Lain-lain';
+        // $levels['other'] = __('Lain-lain'); // Add if needed
         return $levels;
     }
 }

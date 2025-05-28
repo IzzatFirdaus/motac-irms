@@ -1,19 +1,28 @@
-<!-- Footer-->
-  <footer class="content-footer footer bg-footer-theme">
-    <div class="{{ (!empty($containerNav) ? $containerNav : 'container-fluid') }}">
-      <div class="footer-container d-flex align-items-center justify-content-between py-2 flex-md-row flex-column">
-        <div>
-          © <script>
-            document.write(new Date().getFullYear())
+{{-- resources/views/livewire/sections/footer/footer.blade.php --}}
+{{-- This is the Blade view for the Footer Livewire component. --}}
+{{-- Design Language: Clean & Uncluttered, Professional, Bahasa Melayu. --}}
 
-          </script>
-          , made with ❤️ by <a href="http://namaa.sy/" target="_blank" class="fw-semibold">IT Department</a>
+<div>
+  <footer class="content-footer footer bg-footer-theme">
+    {{-- $containerClass is passed from the Footer.php Livewire component, defaulting to container-fluid --}}
+    <div class="{{ $containerClass ?? 'container-fluid' }}">
+      <div class="footer-container d-flex align-items-center justify-content-center py-2 flex-md-row flex-column">
+        <div class="text-center">
+          © <script>document.write(new Date().getFullYear())</script>
+          {{-- Using the translatable key from my.json --}}
+          {{ __('Copyright MOTAC') }}
+          {{-- Example specific text:
+          {{ __('Hak Cipta Terpelihara © :year Bahagian Pengurusan Maklumat, Kementerian Pelancongan, Seni dan Budaya Malaysia.', ['year' => date('Y')]) }}
+          --}}
         </div>
-        <div>
-          <a href="https://data.namaa.sy/" target="_blank" class="footer-link me-4">Data system</a>
-          <a href="http://namaa.sy/" target="_blank" class="footer-link d-none d-sm-inline-block">Namaa</a>
+        {{-- Example for internal links if needed, otherwise keep it clean --}}
+        {{--
+        <div class="d-none d-lg-inline-block ms-md-auto">
+          <a href="{{ url('/panduan-pengguna') }}" class="footer-link me-4" target="_blank">{{ __('Panduan Pengguna') }}</a>
+          <a href="{{ url('/hubungi-pentadbir') }}" class="footer-link">{{ __('Hubungi Pentadbir Sistem') }}</a>
         </div>
+        --}}
       </div>
     </div>
   </footer>
-<!--/ Footer-->
+</div>

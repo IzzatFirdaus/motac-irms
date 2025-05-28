@@ -1,100 +1,82 @@
+{{-- resources/views/layouts/contentNavbarLayout.blade.php --}}
+{{-- This is the main layout for authenticated pages using traditional Blade views. --}}
+{{-- System Design: Implies a standard layout for content pages. --}}
+{{-- Design Language: Standard Application Layout, container-fluid. --}}
+
 @isset($pageConfigs)
-  {!! Helper::updatePageConfig($pageConfigs) !!}
+  {!! \App\Helpers\Helpers::updatePageConfig($pageConfigs) !!}
 @endisset
 
 @php
-  $configData = Helper::appClasses();
+  // $configData is globally available from commonMaster.blade.php (via Helpers::appClasses())
+  $configData = \App\Helpers\Helpers::appClasses();
+
+  /* Display elements - defaults from $configData, can be overridden by $pageConfigs */
+  $contentNavbar = $contentNavbar ?? $configData['contentNavbar'] ?? true;
+  $containerNav = $containerNav ?? $configData['containerNav'] ?? 'container-fluid'; // Default to fluid
+  $isNavbar = $isNavbar ?? $configData['isNavbar'] ?? true;
+  $isMenu = $isMenu ?? $configData['isMenu'] ?? true;
+  $isFlex = $isFlex ?? $configData['isFlex'] ?? false;
+  $isFooter = $isFooter ?? $configData['isFooter'] ?? true;
+  $customizerHidden = $customizerHidden ?? $configData['customizerHidden'] ?? true; // Hide customizer by default
+
+  /* HTML Classes from $configData */
+  $navbarDetached = $configData['navbarDetached'] ? 'navbar-detached' : ''; // Ensure it's a class string or empty
+  $menuFixed = $configData['menuFixed'] ?? true; // Already a boolean/string in Helpers.php
+  $navbarFixed = $configData['navbarFixed'] ?? true;
+  $footerFixed = $configData['footerFixed'] ?? false;
+  $menuCollapsed = $configData['menuCollapsed'] ?? false;
+
+  /* Content classes - defaults to 'container-fluid' from Helpers.php */
+  $container = $container ?? $configData['container'] ?? 'container-fluid';
 @endphp
 
-@extends('layouts/commonMaster' )
-
-@php
-  /* Display elements */
-  $contentNavbar = ($contentNavbar ?? true);
-  $containerNav = ($containerNav ?? 'container-xxl');
-  $isNavbar = ($isNavbar ?? true);
-  $isMenu = ($isMenu ?? true);
-  $isFlex = ($isFlex ?? false);
-  $isFooter = ($isFooter ?? true);
-  $customizerHidden = ($customizerHidden ?? '');
-  $pricingModal = ($pricingModal ?? false);
-
-  /* HTML Classes */
-  $navbarDetached = 'navbar-detached';
-  $menuFixed = (isset($configData['menuFixed']) ? $configData['menuFixed'] : '');
-  $navbarFixed = (isset($configData['navbarFixed']) ? $configData['navbarFixed'] : '');
-  $footerFixed = (isset($configData['footerFixed']) ? $configData['footerFixed'] : '');
-  $menuCollapsed = (isset($configData['menuCollapsed']) ? $configData['menuCollapsed'] : '');
-
-  /* Content classes */
-  $container = ($container ?? 'container-xxl');
-@endphp
+@extends('layouts.commonMaster')
 
 @section('layoutContent')
   <div class="layout-wrapper layout-content-navbar {{ $isMenu ? '' : 'layout-without-menu' }}">
     <div class="layout-container">
 
       @if ($isMenu)
-        {{-- @include('layouts/sections/menu/verticalMenu') --}}
-        @livewire('sections.menu.verticalMenu')
+        {{-- Includes the Livewire component for the vertical menu --}}
+        @livewire('sections.menu.vertical-menu')
       @endif
 
-      <!-- Layout page -->
       <div class="layout-page">
 
-        {{-- Below commented code read by artisan command while installing jetstream. !! Do not remove if you want to use jetstream. --}}
+        {{-- Jetstream Banner (if used) or custom MOTAC banner --}}
+        {{-- System Design: The Big Picture mentions <x-banner /> --}}
         <x-banner />
 
-        <!-- BEGIN: Navbar-->
         @if ($isNavbar)
-          {{-- @include('layouts/sections/navbar/navbar') --}}
-          @livewire('sections.navbar.navbar')
+          {{-- Includes the Livewire component for the navbar --}}
+          {{-- Pass detached status. Navbar component should handle $containerNav internally if needed for its own container. --}}
+          @livewire('sections.navbar.navbar', ['navbarDetached' => $navbarDetached])
         @endif
-        <!-- END: Navbar-->
-
-        <!-- Content wrapper -->
         <div class="content-wrapper">
 
-          <!-- Content -->
           @if ($isFlex)
-            <div class="{{$container}} d-flex align-items-stretch flex-grow-1 p-0">
-              @else
-              <div class="{{$container}} flex-grow-1 container-p-y">
-                @endif
+            <div class="{{ $container }} d-flex align-items-stretch flex-grow-1 p-0">
+          @else
+            <div class="{{ $container }} flex-grow-1 container-p-y"> {{-- Standard padding for content area --}}
+          @endif
 
-                @yield('content')
-                {{-- {{ $slot }} --}}
+            @yield('content') {{-- Main Blade content for traditional views --}}
 
-                <!-- pricingModal -->
-                @if ($pricingModal)
-                  @include('_partials/_modals/modal-pricing')
-                @endif
-                <!--/ pricingModal -->
-
-              </div>
-              <!-- / Content -->
-
-              <!-- Footer -->
-              @if ($isFooter)
-                {{-- @include('layouts/sections/footer/footer') --}}
-                @livewire('sections.footer.footer')
-              @endif
-              <!-- / Footer -->
-
-              <div class="content-backdrop fade"></div>
-            </div>
-          <!--/ Content wrapper -->
+          </div>
+          @if ($isFooter)
+            {{-- Includes the Livewire component for the footer --}}
+            @livewire('sections.footer.footer')
+          @endif
+          <div class="content-backdrop fade"></div>
         </div>
-        <!-- / Layout page -->
+        </div>
       </div>
 
-      @if ($isMenu)
-        <!-- Overlay -->
-        <div class="layout-overlay layout-menu-toggle"></div>
-      @endif
+    @if ($isMenu)
+      <div class="layout-overlay layout-menu-toggle"></div>
+    @endif
 
-      <!-- Drag Target Area To SlideIn Menu On Small Screens -->
-      <div class="drag-target"></div>
-    </div>
-    <!-- / Layout wrapper -->
-@endsection
+    <div class="drag-target"></div>
+  </div>
+  @endsection

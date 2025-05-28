@@ -1,34 +1,37 @@
-@extends('layouts.commonMaster') {{-- Ensures it uses the root HTML structure and $configData --}}
+{{-- resources/views/livewire/layouts/app.blade.php --}}
+{{-- This is the main application layout for full-page Livewire components --}}
+
+@extends('layouts.commonMaster') {{-- Extends the root HTML structure from commonMaster.blade.php --}}
 
 @php
-    // Config values are primarily inherited from $configData (set in commonMaster.blade.php).
-    // These allow specific pages that extend this layout (though less common for Livewire full-page components)
-    // or this layout itself to provide overrides if $pageConfigs is not used for such specific overrides.
+    // $configData is globally available as commonMaster.blade.php calls \App\Helpers\Helpers::appClasses().
+    // This block sets local layout variables, using $configData values as defaults.
+    // These can be overridden by specific Livewire components if they pass these variables to the layout.
 
-    // Determine if shared UI elements should be displayed. Defaults come from $configData,
-    // which is sourced from Helpers::appClasses() via commonMaster.blade.php
-    //.
+    // Determine if shared UI elements should be displayed.
+    // Design Language: Standard Application Layout (Top Navbar, Left Sidebar, Main Content)
     $isMenu = $isMenu ?? $configData['isMenu'] ?? true;
     $isNavbar = $isNavbar ?? $configData['isNavbar'] ?? true;
     $isFooter = $isFooter ?? $configData['isFooter'] ?? true;
-    $contentNavbar = $contentNavbar ?? $configData['contentNavbar'] ?? true; // Usually true if navbar is part of content area
+    // $contentNavbar = $contentNavbar ?? $configData['contentNavbar'] ?? true; // Usually true for vertical layout
 
-    // Container settings
-    $containerNav = $containerNav ?? $configData['containerNav'] ?? 'container-xxl'; // For navbar's container
-    $container = $container ?? $configData['container'] ?? 'container-xxl'; // For main content area
+    // Container settings - defaults to 'container-fluid' as per Helpers.php for MOTAC internal system
+    // Design Language: Focused & Functional Digital Workspace (container-fluid)
+    $containerNav = $containerNav ?? $configData['containerNav'] ?? 'container-fluid';
+    $container = $container ?? $configData['container'] ?? 'container-fluid';
 
-    // Layout class for navbar detachment (if theme supports)
+    // CSS class for navbar detachment based on theme configuration
     $navbarDetachedClass = ($configData['navbarDetached'] ?? false) ? 'navbar-detached' : '';
 
-    // Flex layout option
-    $isFlex = $isFlex ?? $configData['isFlex'] ?? false; // For pages needing specific flex behaviors
+    // Option for flex layout on specific pages (less common for general app layout)
+    $isFlex = $isFlex ?? $configData['isFlex'] ?? false;
 
 @endphp
 
 @section('layoutContent')
-    {{-- This allows page-specific configurations (passed from a controller/Livewire component)
-         to potentially modify global $configData values if Helper::updatePageConfig is designed to do so.
-         This is more common with traditional Blade views than full-page Livewire components. --}}
+    {{-- This allows page-specific configurations passed from a controller or Livewire component
+         to potentially modify global $configData values if App\Helpers\Helpers::updatePageConfig is used.
+         More typical for traditional Blade views. --}}
     @isset($pageConfigs)
         {!! App\Helpers\Helpers::updatePageConfig($pageConfigs) !!}
     @endisset
@@ -38,44 +41,61 @@
 
             @if ($isMenu)
                 {{-- Vertical Menu Livewire Component --}}
+                {{-- System Design: Sections 3, 6.2 --}}
                 @livewire('sections.menu.vertical-menu')
             @endif
 
+            {{-- Layout Page --}}
             <div class="layout-page">
 
-                {{-- Include general alerts partial - System Design 6.3 --}}
+                {{-- General alerts partial, placed for high visibility --}}
+                {{-- System Design Reference: Section 6.3 (alert-general.blade.php) --}}
                 @include('_partials._alerts.alert-general')
 
                 @if ($isNavbar)
                     {{-- Navbar Livewire Component --}}
-                    {{-- The $navbarDetachedClass should be applied within the navbar component or its container logic if needed --}}
-                    @livewire('sections.navbar.navbar', ['containerNav' => $containerNav, 'navbarDetachedClass' => $navbarDetachedClass])
+                    {{-- System Design: Sections 3, 6.2 --}}
+                    @livewire('sections.navbar.navbar', [
+                        'containerNav' => $containerNav,
+                        'navbarDetachedClass' => $navbarDetachedClass
+                    ])
                 @endif
 
+                {{-- Content Wrapper --}}
                 <div class="content-wrapper">
+                    {{-- Main Content Area --}}
                     @if ($isFlex)
                         <div class="{{ $container }} d-flex align-items-stretch flex-grow-1 p-0">
-                            {{ $slot }} {{-- Main Livewire page content --}}
+                            {{ $slot }} {{-- Main Livewire page content is injected here --}}
                         </div>
                     @else
+                        {{-- Standard content area with padding --}}
+                        {{-- Design Language: Ample space for forms, tables, dashboards --}}
                         <div class="{{ $container }} flex-grow-1 container-p-y">
-                            {{ $slot }} {{-- Main Livewire page content --}}
+                            {{ $slot }} {{-- Main Livewire page content is injected here --}}
                         </div>
                     @endif
+                    {{-- /Main Content Area --}}
+
                     @if ($isFooter)
                         {{-- Footer Livewire Component --}}
+                        {{-- System Design: Sections 3, 6.2 --}}
                         @livewire('sections.footer.footer')
                     @endif
 
                     <div class="content-backdrop fade"></div>
                 </div>
-                </div>
+                {{-- /Content Wrapper --}}
             </div>
+            {{-- /Layout Page --}}
+        </div>
 
+        {{-- Overlay for menu functionality on small screens --}}
         @if ($isMenu)
             <div class="layout-overlay layout-menu-toggle"></div>
         @endif
 
+        {{-- Drag Target Area for menu slide-in on small screens --}}
         <div class="drag-target"></div>
     </div>
 @endsection

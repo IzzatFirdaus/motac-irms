@@ -1,55 +1,34 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Livewire\Sections\Menu;
 
-use App\Models\User; // As per System Design 4.1
+use App\Models\User; // Ensure this model exists and is correctly namespaced
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log; // For logging potential issues
 use Livewire\Component;
-use Illuminate\View\View;
+use Illuminate\Support\Facades\Log; // Optional: for debugging roles
 
 class VerticalMenu extends Component
 {
-    public ?string $role = null; // The primary role of the authenticated user
-    // public bool $isMobile = false; // Kept from original if specific mobile rendering logic is needed here
+    public ?string $role = null; // Type hint for clarity
 
-    /**
-     * Mount the component.
-     * Fetches the authenticated user's primary role.
-     * $menuData is assumed to be globally shared by MenuServiceProvider.
-     * $configData is assumed to be globally shared by AppServiceProvider.
-     */
-    public function mount(/*bool $isMobile = false*/): void // $isMobile can be passed if needed
+    public function mount()
     {
-        // $this->isMobile = $isMobile;
-
         if (Auth::check()) {
-            /** @var User $user */
-            $user = Auth::user();
-            // Fetches the first role. Ensure this is the desired logic for menu filtering.
-            // System Design 8.1 specifies role-based access.
-            $this->role = $user->getRoleNames()->first();
-            if (!$this->role) {
-                Log::info('VerticalMenuComponent: User ID ' . $user->id . ' has no roles assigned for menu filtering.');
-                // Optionally assign a default role like 'Employee' or 'Guest' if applicable
-                // $this->role = 'Employee'; // Example default
+            /** @var \App\Models\User|null $user */
+            $user = Auth::user(); // More direct way to get the authenticated user model
+            if ($user && method_exists($user, 'getRoleNames')) {
+                $this->role = $user->getRoleNames()->first(); // Assumes Spatie permissions or similar
+                // Log::debug('VerticalMenu: User role set to ' . $this->role); // Optional debugging
+            } else {
+                // Log::warning('VerticalMenu: User authenticated but role could not be determined or getRoleNames method missing.'); // Optional
+                $this->role = null; // Default if user has no roles or method is missing
             }
-        } else {
-            // Handle guest users - they might see a very limited menu or specific guest items
-            // The verticalMenu.json should define what roles (including a potential 'Guest' role) see which items.
-            $this->role = 'Guest'; // Example role for unauthenticated users
-            Log::debug('VerticalMenuComponent: No authenticated user. Role set to Guest.');
         }
     }
 
-    /**
-     * Render the component's view.
-     * The view will use the public $role property and globally shared $menuData / $configData.
-     */
-    public function render(): View
+    public function render()
     {
+        // The view will receive $this->role
         return view('livewire.sections.menu.vertical-menu');
     }
 }

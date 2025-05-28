@@ -541,7 +541,6 @@
   "Example: nur.faridah@motac.gov.my (Supporter Email)": "مثال: nur.faridah@motac.gov.my",
   "Example: Rashid Bin Sardi (Admin/EO/CC Name)": "مثال: راشد بن ساردي",
   "Example: rashid@motac.gov.my (Admin/EO/CC Email)": "مثال: rashid@motac.gov.my",
-  "Full Name & Title:*": "الاسم الكامل واللقب:*",
   "My Dashboard": "لوحة التحكم الخاصة بي",
   "National Number:*": "الرقم الوطني:*",
   "No.": "الرقم",
@@ -552,5 +551,10 @@
   "Proposed ID/Email Purpose/Remarks:*": "المعرف/البريد الإلكتروني المقترح الغرض/الملاحظات:*",
   "SUPPORTING OFFICER INFORMATION": "معلومات الموظف الداعم",
   "Sign in to your account": "تسجيل الدخول إلى حسابك",
-  "statistics": "الإحصائيات"
+  "statistics": "الإحصائيات",
+  "Sistem Pengurusan Sumber MOTAC": "Sistem Pengurusan Sumber MOTAC",
+  "Sistem Pengurusan Sumber Bersepadu Dalaman untuk Kementerian Pelancongan, Seni dan Budaya Malaysia.": "Sistem Pengurusan Sumber Bersepadu Dalaman untuk Kementerian Pelancongan, Seni dan Budaya Malaysia.",
+  "motac, bpm, pengurusan sumber, pinjaman ict, permohonan emel": "motac, bpm, pengurusan sumber, pinjaman ict, permohonan emel",
+  "MOTAC ICT LOAN": "MOTAC ICT LOAN",
+  "Start your development with a Dashboard for Bootstrap 5": "Start your development with a Dashboard for Bootstrap 5"
 }

@@ -4,75 +4,93 @@ declare(strict_types=1);
 
 namespace App\Notifications;
 
-use App\Models\User; // Added for type hinting $notifiable
+use App\Models\User; // For type hinting $notifiable
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification as BaseNotification;
+use Illuminate\Support\Facades\Lang;
 
 final class DefaultUserNotification extends BaseNotification implements ShouldQueue
 {
     use Queueable;
 
-    private string $subject;
-    private string $greeting;
-    private string $line;
+    private string $subjectKey;
+    private string $greetingKey;
+    private array $lines; // Array of lines (can be translatable keys or plain strings)
     private ?string $actionUrl;
-    private string $actionText;
-    private array $additionalData; // For any other specific data to store
+    private string $actionTextKey;
+    private array $mailData; // Data to pass to the Markdown/Blade view
 
+    /**
+     * Create a new notification instance.
+     *
+     * @param string $subjectKey Translatable key for the email subject.
+     * @param string $greetingKey Translatable key for the email greeting.
+     * @param array $lines Array of translatable strings or plain strings for the email body.
+     * @param string|null $actionUrl URL for the action button.
+     * @param string $actionTextKey Translatable key for the action button text.
+     * @param array $additionalData Extra data for 'database' channel or to pass to MailMessage.
+     */
     public function __construct(
-        string $subject = 'Notifikasi Baru',
-        string $greeting = 'Salam Sejahtera!',
-        string $line = 'Anda mempunyai notifikasi baru.',
+        string $subjectKey = 'Notifikasi Baru', // Default translatable key
+        string $greetingKey = 'Salam Sejahtera', // Default translatable key
+        array $lines = ['Anda mempunyai notifikasi baharu.'], // Default line (can be a key)
         ?string $actionUrl = null,
-        string $actionText = 'Lihat Butiran',
-        array $additionalData = [] // Allow passing extra data
+        string $actionTextKey = 'Lihat Butiran', // Default translatable key
+        array $additionalData = []
     ) {
-        $this->subject = $subject;
-        $this->greeting = $greeting;
-        $this->line = $line;
+        $this->subjectKey = $subjectKey;
+        $this->greetingKey = $greetingKey;
+        $this->lines = $lines;
         $this->actionUrl = $actionUrl;
-        $this->actionText = $actionText;
-        $this->additionalData = $additionalData;
+        $this->actionTextKey = $actionTextKey;
+        $this->mailData = $additionalData; // Store additional data for mail view
     }
 
-    public function via(User $notifiable): array // Type hinted $notifiable
+    public function via(User $notifiable): array
     {
         $channels = ['database'];
-        // Example condition for sending email, adapt as needed:
-        // if ($notifiable->email_notifications_enabled && $notifiable->email) {
-        //     $channels[] = 'mail';
-        // }
+        // Example: Only send email if user has an email and notifications enabled
+        if ($notifiable->email && ($this->mailData['send_email'] ?? true)) { // Assuming a flag or user preference
+            $channels[] = 'mail';
+        }
         return $channels;
     }
 
-    public function toMail(User $notifiable): MailMessage // Type hinted $notifiable
+    public function toMail(User $notifiable): MailMessage
     {
-        $mailMessage = (new MailMessage())
-            ->subject($this->subject)
-            ->greeting($this->greeting.' '.($notifiable->name ?? '')) // Personalize greeting
-            ->line($this->line);
+        // Prepare data for the email view
+        $dataForView = array_merge([
+            'greeting' => __($this->greetingKey),
+            'notifiableName' => $notifiable->name,
+            'lines' => array_map(fn($line) => __($line), $this->lines), // Translate each line
+            'actionUrl' => ($this->actionUrl && filter_var($this->actionUrl, FILTER_VALIDATE_URL)) ? $this->actionUrl : null,
+            'actionText' => __($this->actionTextKey),
+            'subject' => __($this->subjectKey) // For use within the template if needed
+        ], $this->mailData); // Merge any other custom data
 
-        if ($this->actionUrl && filter_var($this->actionUrl, FILTER_VALIDATE_URL)) {
-            $mailMessage->action($this->actionText, $this->actionUrl);
-        }
-
-        $mailMessage->line(__('Terima kasih kerana menggunakan aplikasi kami!'));
-
-        return $mailMessage;
+        // System Design: Section 9.5 for email notifications.
+        return (new MailMessage())
+            ->subject(__($this->subjectKey)) // Subject is translated
+            ->markdown('emails.notifications.motac_default_notification', $dataForView); // Use the Blade template
     }
 
-    public function toArray(User $notifiable): array // Type hinted $notifiable
+    public function toArray(User $notifiable): array
     {
+        // Data for database notifications (System Design 4.4, 9.5)
+        $translatedLines = array_map(fn($line) => __($line), $this->lines);
+
         return array_merge([
-            'subject' => $this->subject,
-            'greeting' => $this->greeting, // May not be directly used if message is specific
-            'message' => $this->line, // Main message content
+            'subject' => __($this->subjectKey),
+            'greeting' => __($this->greetingKey),
+            'message' => implode("\n", $translatedLines), // Combine lines for simple display
             'action_url' => ($this->actionUrl && filter_var($this->actionUrl, FILTER_VALIDATE_URL)) ? $this->actionUrl : null,
-            'action_text' => $this->actionText,
-            'icon' => $this->additionalData['icon'] ?? 'ti ti-bell', // Default icon
-            'notification_type' => $this->additionalData['type'] ?? 'user_specific',
-        ], $this->additionalData); // Merge any other custom data
+            'action_text' => __($this->actionTextKey),
+            'icon' => $this->mailData['icon'] ?? 'ti ti-bell', // Default icon from template
+            'notification_type' => $this->mailData['type'] ?? 'user_specific', // e.g., 'loan_application'
+            'user_id' => $notifiable->id,
+            'user_name' => $notifiable->name, // For context in admin notification views
+        ], $this->mailData);
     }
 }

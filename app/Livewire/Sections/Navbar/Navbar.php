@@ -1,131 +1,93 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Livewire\Sections\Navbar;
 
-use App\Models\Import; // System Design 3.1, for import progress bar
-use App\Models\User;   // System Design 4.1
-use Illuminate\Database\Eloquent\Collection as EloquentCollection; // For type hinting
+use App\Models\Import; // For progress bar feature
+use App\Models\User;   // For type hinting Auth::user()
+use Illuminate\Support\Collection; // For unreadNotifications type
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
+// use Illuminate\Support\Facades\DB; // Not used after removing failed_jobs truncate
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Illuminate\View\View;
-use Illuminate\Queue\Failed\FailedJobProviderInterface; // For checking failed jobs, though usage will be reconsidered
 
 class Navbar extends Component
 {
-    public EloquentCollection $unreadNotifications;
-    public bool $activeProgressBar = false;
+    public Collection $unreadNotifications;
+    public bool $activeProgressBar = false; // Related to import progress feature
     public int $percentage = 0;
 
-    // Props passed from app.blade.php for dynamic styling
-    public string $containerNav = 'container-xxl'; // Default value
-    public string $navbarDetachedClass = ''; // Default value (e.g., 'navbar-detached' or empty)
-
-    protected const LOG_AREA = 'NavbarComponent: ';
-
-    public function mount(string $containerNav = 'container-xxl', string $navbarDetachedClass = ''): void
+    public function mount(): void
     {
-        $this->containerNav = $containerNav;
-        $this->navbarDetachedClass = $navbarDetachedClass;
-        $this->loadUnreadNotifications();
+        $this->unreadNotifications = collect(); // Initialize
+        $this->refreshNotifications();
+        // $this->updateProgressBar(); // Call if progress bar should be checked on mount
     }
 
-    protected function loadUnreadNotifications(): void
+    public function render(): View
     {
-        if (Auth::check()) {
-            /** @var User $user */
-            $user = Auth::user();
-            // Assumes User model uses Laravel's default Notifiable trait and notifications table,
-            // or that the 'notifications'/'unreadNotifications' relationships are correctly
-            // overridden if using the custom App\Models\Notification table.
-            // System Design 4.4 mentions a custom Notification model.
-            $this->unreadNotifications = $user->unreadNotifications;
-        } else {
-            $this->unreadNotifications = new EloquentCollection(); // Initialize as empty Eloquent collection
-        }
+        // No need to fetch notifications here again if mount and refreshNotifications handle it.
+        // However, fetching here ensures it's always up-to-date on re-renders triggered by other actions.
+        // For performance with Livewire, it's often better to refresh explicitly via events.
+        // $this->refreshNotifications(); // Can be called here if needed on every render
+        return view('livewire.sections.navbar.navbar');
     }
 
     #[On('refreshNotifications')]
-    public function refreshNotificationsHandler(): void
+    public function refreshNotifications(): void
     {
-        $this->loadUnreadNotifications();
-    }
-
-    /**
-     * Update the import progress bar status.
-     * This is triggered by a Livewire event or polled.
-     * System Design implies an Import model for tracking (Section 3.1, 9.5).
-     */
-    #[On('activeProgressBar')] // Listen for this event to trigger an update
-    public function updateProgressBar(): void
-    {
-        /** @var Import|null $latestImport */
-        $latestImport = Import::latest()->first();
-
-        if ($latestImport) {
-            if ($latestImport->status === 'processing') {
-                $this->activeProgressBar = true;
-                if ($latestImport->total > 0) {
-                    $this->percentage = (int) round(($latestImport->current / $latestImport->total) * 100);
-                } else {
-                    $this->percentage = 0; // Avoid division by zero
-                }
-                // Check for related failed jobs ONLY if the import is handled by a queue that uses the failed_jobs table.
-                // This part is highly dependent on how imports are implemented.
-                // If imports are synchronous or use a different failure tracking, this check might be irrelevant or harmful.
-                // For now, let's assume direct status from Import model is primary.
-            } elseif ($latestImport->status === 'completed') {
-                $this->activeProgressBar = false;
-                $this->percentage = 100;
-                // Using session flash for temporary messages. Consider a more robust event-driven UI update.
-                session()->flash('success', __('Import Selesai!'));
-            } elseif (in_array($latestImport->status, ['failed', 'cancelled'])) {
-                $this->activeProgressBar = false;
-                $this->percentage = 0;
-                session()->flash('error', __('Proses Import Gagal atau Dibatalkan.'));
-            } else {
-                // Status is pending or some other state not requiring active progress bar
-                $this->activeProgressBar = false;
-                $this->percentage = 0;
-            }
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        if ($user) {
+            // Limit the number of notifications fetched for performance
+            $this->unreadNotifications = $user->unreadNotifications()->take(10)->get();
         } else {
-            // No import records found
-            $this->activeProgressBar = false;
-            $this->percentage = 0;
+            $this->unreadNotifications = collect();
         }
     }
 
+    // The import progress bar logic. Review if this is a core MOTAC navbar feature.
+    // If kept, ensure 'activeProgressBar' event is dispatched from the import process.
+    // #[On('activeProgressBar')]
+    // public function updateProgressBar(): void
+    // {
+    //     $import_data = Import::latest()->first();
+    //     if ($import_data && $import_data->status == 'processing') {
+    //         $this->activeProgressBar = true;
+    //         if ($import_data->total > 0) {
+    //             $this->percentage = (int) round($import_data->current / ($import_data->total / 100));
+    //         } else {
+    //             $this->percentage = 0; // Avoid division by zero
+    //         }
+    //     } else {
+    //         if ($this->activeProgressBar && $import_data && $import_data->status == 'completed') {
+    //             // session()->flash('toastr', ['type' => 'success', 'message' => __('Imported Successfully!')]);
+    //         }
+    //         $this->percentage = 100; // Or 0 if no import is active
+    //         $this->activeProgressBar = false; // Reset
+    //     }
+    // }
 
     public function markNotificationAsRead(string $notificationId): void
     {
-        if (Auth::check()) {
-            /** @var User $user */
-            $user = Auth::user();
-            $notification = $user->notifications()->where('id', $notificationId)->first();
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        if ($user) {
+            $notification = $user->unreadNotifications()->where('id', $notificationId)->first();
             if ($notification) {
                 $notification->markAsRead();
-                $this->loadUnreadNotifications(); // Refresh the count/list
+                $this->dispatch('refreshNotifications')->self(); // Refresh after marking as read
             }
         }
     }
 
     public function markAllNotificationsAsRead(): void
     {
-        if (Auth::check()) {
-            /** @var User $user */
-            $user = Auth::user();
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        if ($user) {
             $user->unreadNotifications->markAsRead();
-            $this->loadUnreadNotifications(); // Refresh the count/list
+            $this->dispatch('refreshNotifications')->self(); // Refresh after marking all as read
         }
-    }
-
-    public function render(): View
-    {
-        // CRITICAL: Removed DB::table('failed_jobs')->truncate();
-        // Failed jobs should be managed via dedicated admin tools or scheduled tasks.
-        return view('livewire.sections.navbar.navbar');
     }
 }

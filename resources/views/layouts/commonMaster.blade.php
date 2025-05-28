@@ -1,99 +1,67 @@
+{{-- resources/views/layouts/commonMaster.blade.php --}}
 <!DOCTYPE html>
 
 @php
-    // $configData is initialized here using the App\Helpers\Helpers class.
-    // This $configData instance is then available to this master layout and any views that extend it (like app.blade.php).
-    // This aligns with System Design 3.3 for AppServiceProvider sharing UI config from Helpers.
-    // and "The Big Picture" flow.
-    try {
-        $configData = \App\Helpers\Helpers::appClasses();
-    } catch (\Exception $e) {
-        // Fallback in case Helpers class or appClasses method has an issue.
-        // This prevents a fatal error and allows the page to render with basic defaults.
-        Log::critical('CRITICAL ERROR fetching appClasses in commonMaster.blade.php: ' . $e->getMessage());
-        $configData = [
-            'templateName' => env('APP_NAME', 'MOTAC RMS'),
-            'templateDescription' => 'MOTAC Resource Management System',
-            'templateKeyword' => 'motac, resource management',
-            'locale' => 'en',
-            'textDirection' => 'ltr',
-            'style' => 'light', // light, dark
-            'theme' => 'theme-default',
-            'layout' => 'vertical',
-            'navbarFixed' => false,
-            'menuFixed' => false,
-            'menuCollapsed' => false,
-            'footerFixed' => false,
-            'customizerHidden' => true, // Sensible default if config fails
-            'assetsPath' => asset('/assets') . '/',
-            'baseUrl' => url('/'),
-            'primaryColor' => '#7367f0', // A default primary color
-            // Add other essential keys that layouts/sections might expect
-            'contentNavbar' => true,
-            'containerNav' => 'container-xxl',
-            'isNavbar' => true,
-            'isMenu' => true,
-            'isFlex' => false,
-            'isFooter' => true,
-            'navbarDetached' => false,
-            'container' => 'container-xxl',
-            'rtlSupport' => '', // Default to no RTL asset path modification
-            'displayCustomizer' => false,
-        ];
-    }
+    // Get $configData from the Helper.
+    // System Design: Section 3.3, 4.1, App\Helpers\Helpers::appClasses()
+    $configData = \App\Helpers\Helpers::appClasses();
+    $currentLocale = app()->getLocale(); // e.g., 'ms', 'en'
 
-    $currentLocale = $configData['locale'] ?? str_replace('_', '-', app()->getLocale());
-    $textDirection = $configData['textDirection'] ?? 'ltr';
-    $themeMode = $configData['style'] ?? 'light'; // Expected by data-bs-theme
-    $themeName = $configData['theme'] ?? 'theme-default';
-    $layoutName = $configData['layout'] ?? 'vertical';
-    $assetsPath = $configData['assetsPath'] ?? asset('/assets') . '/';
-    $baseUrl = $configData['baseUrl'] ?? url('/');
+    // Determine text direction based on current locale from $configData (which gets it from session or config)
+    // Design Language: Bahasa Melayu as Primary Language (Keutamaan Bahasa Melayu) -> 'ltr'
+    $textDirection = $configData['textDirection'] ?? (($currentLocale === 'ar') ? 'rtl' : 'ltr');
+
+    // Determine data-bs-theme attribute for Bootstrap 5.3+ dark mode handling
+    // Design Language: User-selectable dark mode
+    $activeTheme = $configData['style'] ?? 'light'; // 'light' or 'dark'
+    $bsTheme = ($activeTheme === 'dark') ? 'dark' : 'light'; // This is correctly derived in Helpers.php too
 @endphp
 
 <html lang="{{ $currentLocale }}"
-    class="{{ $themeMode }}-style {{ $configData['navbarFixed'] ? 'layout-navbar-fixed' : '' }} {{ $configData['menuFixed'] ? 'layout-menu-fixed' : '' }} {{ $configData['menuCollapsed'] ? 'layout-menu-collapsed' : '' }} {{ $configData['footerFixed'] ? 'layout-footer-fixed' : '' }} {{ $configData['customizerHidden'] ? 'customizer-hide' : '' }}"
+    class="{{ $activeTheme }}-style {{ $configData['navbarFixed'] ?? '' }} {{ $configData['menuFixed'] ?? '' }} {{ $configData['menuCollapsed'] ?? '' }} {{ $configData['footerFixed'] ?? '' }} {{ $configData['customizerHidden'] ?? '' }}"
     dir="{{ $textDirection }}"
-    data-bs-theme="{{ $themeMode }}"
-    data-theme="{{ $themeName }}"
-    data-assets-path="{{ $assetsPath }}"
-    data-base-url="{{ $baseUrl }}"
+    data-theme="{{ $configData['theme'] ?? 'theme-motac' }}" {{-- MOTAC-specific clean theme --}}
+    data-bs-theme="{{ $bsTheme }}" {{-- Bootstrap 5.3+ dark mode attribute --}}
+    data-assets-path="{{ asset('assets/') . '/' }}" {{-- Standard asset path --}}
+    data-base-url="{{ url('/') }}"
     data-framework="laravel"
-    data-template="{{ $layoutName }}-menu-{{ $themeName }}-{{ $themeMode }}">
+    data-template="{{ $configData['layout'] ?? 'vertical' }}-menu-{{ $configData['theme'] ?? 'theme-motac' }}-{{ $activeTheme }}">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-    {{-- The title is yielded here; Livewire components like Dashboard.php will set it using #[Title] attribute --}}
-    <title>@yield('title', $configData['templateName'] ?? config('app.name', 'MOTAC RMS'))</title>
-
-    <meta name="description" content="{{ $configData['templateDescription'] ?? 'Sistem Pengurusan Sumber Bersepadu MOTAC' }}" />
-    <meta name="keywords" content="{{ $configData['templateKeyword'] ?? 'motac, pengurusan sumber, pinjaman ict, permohonan emel' }}">
+    {{-- Design Language: Professionalism & Trustworthiness, Prominent MOTAC Branding --}}
+    <title>@yield('title') | {{ $configData['templateName'] ?? __('Sistem Pengurusan Sumber MOTAC') }}</title>
+    <meta name="description"
+        content="{{ $configData['templateDescription'] ?? __('Sistem Dalaman Bahagian Pengurusan Maklumat, Kementerian Pelancongan, Seni dan Budaya Malaysia.') }}" />
+    <meta name="keywords"
+        content="{{ $configData['templateKeyword'] ?? 'motac, bpm, sistem dalaman, pengurusan sumber, pinjaman ict, permohonan emel' }}">
+    {{-- CSRF Token --}}
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <link rel="icon" type="image/x-icon" href="{{ $assetsPath }}img/favicon/favicon.ico" />
+    {{-- Favicon - Design Language: Prominent MOTAC Branding --}}
+    <link rel="icon" type="image/x-icon" href="{{ asset('assets/img/favicon/favicon-motac.ico') }}" />
 
-    {{-- styles.blade.php will use the globally available $configData (or the one passed by AppServiceProvider) --}}
-    @include('layouts.sections.styles')
+    {{-- Include Styles - This will pull in styles.blade.php --}}
+    {{-- System Design: "The Big Picture" (Stylesheet Inclusion) --}}
+    @include('layouts/sections/styles')
 
-    {{-- scriptsIncludes.blade.php also relies on $configData --}}
-    @include('layouts.sections.scriptsIncludes')
-
-    @yield('vendor-style')
-    @yield('page-style')
-    @stack('custom-css')
+    {{-- Include Scripts for customizer, helper, analytics, config --}}
+    {{-- System Design: "The BigPicture" (Initial JavaScript Configurations) --}}
+    @include('layouts/sections/scriptsIncludes')
 </head>
 
 <body>
-    {{-- Layout content from extending Blade files (e.g., app.blade.php) will be injected here --}}
+    {{-- Layout Content --}}
     @yield('layoutContent')
+    {{--/ Layout Content --}}
 
-    @include('layouts.sections.scripts')
+    {{-- Include Scripts --}}
+    {{-- System Design: "The Big Picture" (Global JavaScript Execution) --}}
+    @include('layouts/sections/scripts')
 
-    @yield('vendor-script')
-    @yield('page-script')
-    @stack('custom-scripts')
 </body>
+
 </html>

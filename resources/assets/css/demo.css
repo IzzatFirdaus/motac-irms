@@ -12,14 +12,14 @@
 }
 
 .app-brand-logo.demo {
-  -ms-flex-align: center;
-  align-items: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  display: -ms-flexbox;
+  display: flexbox;
   display: flex;
+  justify-content: center;
+  align-items: center;
   width: 34px;
   height: 24px;
+  -ms-flex-align: center;
+  -ms-flex-pack: center;
 }
 
 .app-brand-logo.demo svg {
@@ -35,9 +35,11 @@
 .layout-navbar-fixed .layout-wrapper:not(.layout-without-menu) .layout-page {
   padding-top: 64px !important;
 }
-.layout-navbar-fixed .layout-wrapper:not(.layout-horizontal):not(.layout-without-menu) .layout-page {
+
+.layout-navbar-fixed .layout-wrapper:not(.layout-horizontal, .layout-without-menu) .layout-page {
   padding-top: 78px !important;
 }
+
 /* Navbar page z-index issue solution */
 .content-wrapper .navbar {
   z-index: auto;
@@ -60,6 +62,7 @@
   margin-top: 1rem !important;
   margin-bottom: 0 !important;
 }
+
 .demo-vertical-spacing.demo-only-element > :first-child {
   margin-top: 0 !important;
 }
@@ -68,6 +71,7 @@
   margin-top: 1.875rem !important;
   margin-bottom: 0 !important;
 }
+
 .demo-vertical-spacing-lg.demo-only-element > :first-child {
   margin-top: 0 !important;
 }
@@ -76,6 +80,7 @@
   margin-top: 5rem !important;
   margin-bottom: 0 !important;
 }
+
 .demo-vertical-spacing-xl.demo-only-element > :first-child {
   margin-top: 0 !important;
 }
@@ -96,21 +101,23 @@
 
 .layout-demo-wrapper {
   display: -webkit-box;
-  display: -ms-flexbox;
+  display: flexbox;
   display: flex;
+  flex-direction: column;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 1rem;
   -webkit-box-align: center;
   -ms-flex-align: center;
-  align-items: center;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
-  -ms-flex-direction: column;
-  flex-direction: column;
-  margin-top: 1rem;
 }
+
 .layout-demo-placeholder img {
   width: 900px;
 }
+
 .layout-demo-info {
-  text-align: center;
   margin-top: 1rem;
+  text-align: center;
 }

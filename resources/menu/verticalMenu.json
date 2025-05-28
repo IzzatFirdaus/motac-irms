@@ -5,6 +5,7 @@
       "name": "menu.dashboard",
       "icon": "menu-icon tf-icons ti ti-smart-home",
       "slug": "dashboard",
+      "routeName": "dashboard",
       "role": ["Admin", "BPM Staff", "IT Admin", "Employee", "Approver"]
     },
     {
@@ -15,7 +16,7 @@
       "name": "menu.my_applications.title",
       "icon": "menu-icon tf-icons ti ti-folder-search",
       "slug": "resource-management.my-applications",
-      "role": ["Employee", "Admin"],
+      "role": ["Employee", "Admin", "BPM Staff", "IT Admin", "Approver"],
       "submenu": [
         {
           "url": "/resource-management/my-applications/email",
@@ -94,98 +95,92 @@
           "role": ["Admin", "BPM Staff"]
         },
         {
-          "url": "/resource-management/admin/email-applications-admin", 
+          "url": "/resource-management/admin/email-applications-admin",
           "name": "menu.administration.email_applications",
           "icon": "menu-icon tf-icons ti ti-mail-cog",
           "slug": "resource-management.admin.email-applications-admin.index",
           "routeName": "resource-management.admin.email-applications-admin.index",
           "role": ["Admin", "IT Admin"]
+        },
+        {
+          "url": "/resource-management/admin/users-admin",
+          "name": "menu.administration.users_list",
+          "icon": "menu-icon tf-icons ti ti-users-group",
+          "slug": "resource-management.admin.users-admin.index",
+          "routeName": "resource-management.admin.users-admin.index",
+          "role": ["Admin"]
         }
       ]
     },
     {
-      "menuHeader": "menu.section.system",
+      "menuHeader": "menu.section.system_config",
       "role": ["Admin"]
     },
     {
       "name": "menu.settings.title",
-      "icon": "menu-icon tf-icons ti ti-settings",
+      "icon": "menu-icon tf-icons ti ti-adjustments-horizontal",
       "slug": "settings",
       "role": ["Admin"],
       "submenu": [
         {
           "url": "/settings/users",
-          "name": "menu.settings.users",
+          "name": "menu.settings.user_management",
           "slug": "settings.users.index",
           "routeName": "settings.users.index"
         },
         {
           "url": "/settings/roles",
-          "name": "menu.settings.roles",
+          "name": "menu.settings.roles_permissions",
           "slug": "settings.roles.index",
           "routeName": "settings.roles.index"
         },
         {
-          "url": "/settings/permissions",
-          "name": "menu.settings.permissions",
-          "slug": "settings.permissions.index",
-          "routeName": "settings.permissions.index"
-        },
-        {
           "url": "/settings/grades",
-          "name": "menu.settings.grades",
+          "name": "menu.settings.grades_management",
           "slug": "settings.grades.index",
           "routeName": "settings.grades.index"
         },
         {
           "url": "/settings/departments",
-          "name": "menu.settings.departments",
+          "name": "menu.settings.departments_management",
           "slug": "settings.departments.index",
           "routeName": "settings.departments.index"
         },
         {
           "url": "/settings/positions",
-          "name": "menu.settings.positions",
+          "name": "menu.settings.positions_management",
           "slug": "settings.positions.index",
           "routeName": "settings.positions.index"
-        },
-        {
-          "url": "/log-viewer",
-          "name": "menu.settings.logs",
-          "slug": "log-viewer",
-          "routeName": "log-viewer",
-          "target": "_blank"
         }
       ]
     },
     {
       "name": "menu.reports.title",
-      "icon": "menu-icon tf-icons ti ti-file-analytics",
+      "icon": "menu-icon tf-icons ti ti-chart-bar",
       "slug": "reports",
       "role": ["Admin", "BPM Staff"],
       "submenu": [
         {
           "url": "/reports/equipment",
-          "name": "menu.reports.equipment",
+          "name": "menu.reports.equipment_report",
           "slug": "reports.equipment",
           "routeName": "reports.equipment"
         },
         {
           "url": "/reports/email-accounts",
-          "name": "menu.reports.email_accounts",
+          "name": "menu.reports.email_accounts_report",
           "slug": "reports.email-accounts",
           "routeName": "reports.email-accounts"
-
         },
         {
           "url": "/reports/loan-applications",
-          "name": "menu.reports.loan_applications",
+          "name": "menu.reports.loan_applications_report",
           "slug": "reports.loan-applications",
           "routeName": "reports.loan-applications"
         },
         {
           "url": "/reports/user-activity",
-          "name": "menu.reports.user_activity",
+          "name": "menu.reports.user_activity_report",
           "slug": "reports.user-activity",
           "routeName": "reports.user-activity",
           "role": ["Admin"]
@@ -193,11 +188,13 @@
       ]
     },
     {
-      "url": "#logout-url",
-      "name": "menu.logout",
-      "icon": "menu-icon tf-icons ti ti-logout",
-      "slug": "logout",
-      "role": ["Admin", "BPM Staff", "IT Admin", "Employee", "Approver"]
+      "url": "/log-viewer",
+      "name": "menu.system_logs",
+      "icon": "menu-icon tf-icons ti ti-file-text",
+      "slug": "log-viewer.index",
+      "routeName": "log-viewer.index",
+      "target": "_blank",
+      "role": ["Admin"]
     }
   ]
 }

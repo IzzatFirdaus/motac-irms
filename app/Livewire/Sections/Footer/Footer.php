@@ -8,6 +8,12 @@ class Footer extends Component
 {
     public function render()
     {
-        return view('livewire.sections.footer.footer');
+        // Pass the containerNav variable to the view, consistent with app.blade.php
+        $configData = \App\Helpers\Helpers::appClasses();
+        $containerNav = ($configData['contentLayout'] === 'compact') ? 'container-xxl' : 'container-fluid';
+
+        return view('livewire.sections.footer.footer', [
+            'containerNav' => $containerNav
+        ]);
     }
 }

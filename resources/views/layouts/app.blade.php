@@ -1,113 +1,81 @@
+{{-- app.blade.php --}}
+@isset($pageConfigs)
+  {!! Helper::updatePageConfig($pageConfigs) !!}
+@endisset
+
 @php
-    // Config data initialization.
-    // The system design document mentions that AppServiceProvider may share global data
-    // like UI configuration from Helpers::appClasses() using View::share(). If $configData is already
-    // globally shared and available here, this direct initialization might be redundant.
-    // However, this ensures $configData is defined for this layout with sensible defaults if not globally provided.
-    $configData = class_exists(App\Helpers\Helpers::class) && method_exists(App\Helpers\Helpers::class, 'appClasses')
-            ? App\Helpers\Helpers::appClasses()
-            : ['templateName' => 'MOTAC RMS', 'textDirection' => 'ltr', 'style' => 'light']; // Added 'style' to defaults for $themeMode
-
-    // Theme mode for Bootstrap 5.3+
-    $themeMode = $configData['style'] ?? (Cookie::get('theme_mode', 'light')); //
-
-    // Text direction
-    $currentLocale = str_replace('_', '-', app()->getLocale());
-    $textDirection = $configData['textDirection'] ?? ($currentLocale === 'ar' ? 'rtl' : 'ltr'); //
-
-    // Layout settings
-    $isMenu = $isMenu ?? ($configData['isMenu'] ?? true); //
-    $isNavbar = $isNavbar ?? ($configData['isNavbar'] ?? true); //
-    $isFooter = $isFooter ?? ($configData['isFooter'] ?? true); //
-    $containerClass = $container ?? ($configData['container'] ?? 'container-fluid'); //
-
-    // Navbar specific properties
-    $pageComponentNavbarFull = $navbarFull ?? ($configData['navbarFull'] ?? false); //
-    $pageComponentContainerNav = $containerNav ?? ($configData['containerNav'] ?? 'container-fluid'); //
+  $configData = Helper::appClasses();
 @endphp
-<!DOCTYPE html>
-<html lang="{{ $currentLocale }}" data-bs-theme="{{ $themeMode }}" dir="{{ $textDirection }}">
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+@extends('layouts/commonMaster') {{-- Ensures it extends the revised commonMaster --}}
 
-    <title>@yield('title', $configData['templateName'] ?? config('app.name', 'MOTAC RMS'))</title> {{-- --}}
+@php
+  /* Display elements */
+  $contentNavbar = ($contentNavbar ?? true);
+  // Changed default to container-fluid for internal system (task-oriented)
+  $containerNav = ($containerNav ?? 'container-fluid');
+  $isNavbar = ($isNavbar ?? true);
+  $isMenu = ($isMenu ?? true);
+  $isFlex = ($isFlex ?? false);
+  $isFooter = ($isFooter ?? true);
+  $customizerHidden = ($customizerHidden ?? ''); // Template customizer - keep if used
+  //$pricingModal = ($pricingModal ?? false); // Likely HRMS specific, remove if not used by MOTAC
 
-    {{-- Favicon --}}
-    <link rel="icon" type="image/x-icon" href="{{ asset('assets/img/favicon/favicon.ico') }}" /> {{-- --}}
+  /* HTML Classes */
+  $navbarDetached = ($configData['navbarDetached'] ?? 'navbar-detached'); // Keep from config
+  $menuFixed = (isset($configData['menuFixed']) ? $configData['menuFixed'] : '');
+  $navbarFixed = (isset($configData['navbarFixed']) ? $configData['navbarFixed'] : '');
+  $footerFixed = (isset($configData['footerFixed']) ? $configData['footerFixed'] : '');
+  $menuCollapsed = (isset($configData['menuCollapsed']) ? $configData['menuCollapsed'] : '');
 
-    {{-- Core CSS (Bootstrap & Theme) --}}
-    @include('layouts.sections.styles') {{-- This should include your compiled Bootstrap CSS --}}
+  /* Content classes */
+  // Changed default to container-fluid
+  $container = ($container ?? 'container-fluid');
+@endphp
 
-    {{-- Page-specific Styles --}}
-    @yield('page-style')
-    @stack('styles_before')
-    @livewireStyles
-    @stack('styles_after')
-</head>
+@section('layoutContent')
+  <div class="layout-wrapper layout-content-navbar {{ $isMenu ? '' : 'layout-without-menu' }}">
+    <div class="layout-container">
 
-<body class="d-flex flex-column min-vh-100">
+      @if ($isMenu)
+        @livewire('sections.menu.vertical-menu')
+      @endif
 
-    <div class="layout-wrapper d-flex flex-grow-1">
-        @if ($isMenu) {{-- --}}
-            {{-- Sidebar Menu (Livewire Component) --}}
-            @livewire('sections.menu.vertical-menu', ['isMobile' => false]) {{-- --}}
+      <div class="layout-page">
 
-            {{-- Mobile Offcanvas Menu --}}
-            <div class="offcanvas {{ $textDirection === 'rtl' ? 'offcanvas-end' : 'offcanvas-start' }}" tabindex="-1" id="mobileMenuOffcanvas" aria-labelledby="mobileMenuOffcanvasLabel"> {{-- --}}
-                <div class="offcanvas-header">
-                    <h5 class="offcanvas-title" id="mobileMenuOffcanvasLabel">{{ $configData['templateName'] ?? config('app.name', 'MOTAC RMS') }}</h5> {{-- --}}
-                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-                </div>
-                <div class="offcanvas-body p-0">
-                    @livewire('sections.menu.vertical-menu', ['isMobile' => true]) {{-- --}}
-                </div>
-            </div>
+        {{-- Removed Jetstream Banner comment, assuming setup is done or not used --}}
+        {{-- <x-banner /> --}}
+
+        @if ($isNavbar)
+          @livewire('sections.navbar.navbar', ['navbarDetached' => $navbarDetached])
         @endif
+        <div class="content-wrapper">
 
-        {{-- Layout Content --}}
-        <div class="layout-page d-flex flex-column flex-grow-1">
-            @if ($isNavbar) {{-- --}}
-                {{-- Navbar (Livewire Component) --}}
-                @livewire('sections.navbar.navbar', [
-                    'containerNav' => $pageComponentContainerNav,
-                    'navbarFull' => $pageComponentNavbarFull
-                ]) {{-- --}}
+          @if ($isFlex)
+            <div class="{{ $container }} d-flex align-items-stretch flex-grow-1 p-0">
+          @else
+            <div class="{{ $container }} flex-grow-1 container-p-y"> {{-- Standard padding for content area --}}
+          @endif
+
+            {{ $slot }} {{-- Main Livewire/Blade content slot --}}
+
+            {{-- Remove pricingModal if not used by MOTAC system --}}
+            {{--@if ($pricingModal)
+            //  @include('_partials/_modals/modal-pricing')
+            //@endif--}}
+            </div>
+            @if ($isFooter)
+              @livewire('sections.footer.footer')
             @endif
-
-            {{-- Content Area --}}
-            <main class="content-wrapper flex-grow-1 py-3 py-md-4">
-                <div class="{{ $containerClass }}"> {{-- --}}
-                    {{-- Flash Messages / Banners --}}
-                    {{-- The following <x-jet-banner /> was causing an "Unable to locate component" error. --}}
-                    {{-- It's a Jetstream component. If Jetstream is not fully installed or this banner is not needed (MOTAC design has _alerts.alert-general), it should be commented out. --}}
-                    {{-- <x-jet-banner /> --}} {{-- --}}
-
-                    @include('_partials._alerts.alert-general') {{-- Your custom alerts partial, as per MOTAC design --}}
-
-                    {{ $slot ?? '' }}  {{-- For Livewire full-page components --}}
-                    @yield('content')   {{-- For traditional Blade views --}}
-                </div>
-            </main>
-            {{-- / Content Area --}}
-
-            @if ($isFooter) {{-- --}}
-                {{-- Footer (Livewire Component or Partial) --}}
-                @livewire('sections.footer.footer') {{-- --}}
-            @endif
+            <div class="content-backdrop fade"></div>
+          </div>
+          </div>
         </div>
-        {{-- / Layout Content --}}
+
+      @if ($isMenu)
+        <div class="layout-overlay layout-menu-toggle"></div>
+      @endif
+
+      <div class="drag-target"></div>
     </div>
-
-    {{-- Core JS (Bootstrap Bundle, Theme) --}}
-    @include('layouts.sections.scripts') {{-- This should include Bootstrap JS --}}
-
-    {{-- Page-specific Scripts --}}
-    @yield('page-script')
-    @stack('scripts_before')
-    @livewireScripts
-    @stack('scripts_after')
-</body>
-</html>
+    @endsection

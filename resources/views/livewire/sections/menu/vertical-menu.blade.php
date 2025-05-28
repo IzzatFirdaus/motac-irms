@@ -1,137 +1,124 @@
+{{-- resources/views/livewire/sections/menu/vertical-menu.blade.php --}}
+{{-- Renders the main vertical navigation menu. --}}
+{{-- System Design: Phase 3 (Vertical Menu), Design Language: Intuitive Navigation --}}
 <div>
-    {{--
-        $configData is globally available from AppServiceProvider via Helpers::appClasses().
-        $menuData is globally available from MenuServiceProvider (loaded from verticalMenu.json).
-        $role is a public property from the VerticalMenu Livewire component.
-    --}}
-    @php
-        // Ensure $configData and $menuData are available; provide safe fallbacks if not (though providers should ensure they are).
-        $configData = $configData ?? App\Helpers\Helpers::appClasses(); // Fallback just in case
-        $menuData = $menuData ?? json_decode('{"menu": []}'); // Fallback for menu data
+  @php
+    // $configData is globally available from commonMaster or App\Helpers\Helpers::appClasses()
+    $configData = \App\Helpers\Helpers::appClasses();
 
-        // Determine if navbarFull is set to hide the brand in the menu
-        $navbarFull = $configData['navbarFull'] ?? false; // As per commonMaster and app layouts
+    // $menuData is assumed to be injected by a Service Provider (e.g., MenuServiceProvider)
+    // It typically loads data from a JSON file like resources/menu/verticalMenu.json
+    // The structure of $menuData->menu should contain items with 'name', 'slug', 'url', 'icon', 'role', 'submenu', etc.
+  @endphp
 
-        // Standardized role names from System Design
-        $adminRoleName = 'Admin'; // Consistent admin role name
-    @endphp
+  <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
 
-    <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
-        @if(!$navbarFull)
-            <div class="app-brand demo">
-                <a href="{{ url('/') }}" class="app-brand-link">
-                    <span class="app-brand-logo demo">
-                        {{-- System Design 6.1: Unified MOTAC Branding --}}
-                        @include('_partials.macros', ['height' => 20, 'width' => 20]) {{-- Assuming this partial renders MOTAC logo --}}
-                    </span>
-                    <span class="app-brand-text demo menu-text fw-bold ms-2">{{ $configData['templateName'] ?? config('app.name', 'MOTAC RMS') }}</span>
-                </a>
+    {{-- App Brand (Logo & Name) --}}
+    {{-- Design Language: Prominent MOTAC Branding --}}
+    @if(!isset($navbarFull)) {{-- Typically, brand is here for vertical menu --}}
+      <div class="app-brand demo">
+        <a href="{{url('/')}}" class="app-brand-link">
+          <span class="app-brand-logo demo">
+            {{-- Ensure asset path is correct for MOTAC logo --}}
+            <img src="{{ asset('assets/img/logo/motac-logo.svg') }}" alt="{{ __('Logo Sistem MOTAC') }}" height="32"> {{-- Adjusted height for clarity --}}
+          </span>
+          <span class="app-brand-text demo menu-text fw-bold ms-2">{{ __(config('variables.templateName', 'Sistem MOTAC')) }}</span>
+        </a>
 
-                {{-- Responsive Menu Toggle Button (usually hidden on larger screens by CSS/JS) --}}
-                <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
-                    <i class="ti menu-toggle-icon d-none d-xl-block ti-sm align-middle"></i>
-                    <i class="ti ti-x d-block d-xl-none ti-sm align-middle"></i>
-                </a>
-            </div>
-        @endif
+        {{-- Menu Toggle Button (for collapsing menu on larger screens) --}}
+        <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto {{ $configData['layout'] === 'horizontal' ? 'd-none' : '' }}">
+            {{-- Icons for toggle state --}}
+            <i class="ti menu-toggle-icon d-none d-xl-block ti-sm align-middle"></i> {{-- Chevron left/right based on LTR/RTL --}}
+            <i class="ti ti-x d-block d-xl-none ti-sm align-middle"></i> {{-- Close icon for mobile --}}
+        </a>
+      </div>
+    @endif
 
-        <div class="menu-inner-shadow"></div>
+    <div class="menu-inner-shadow"></div>
 
-        <ul class="menu-inner py-1">
-            @if(isset($menuData) && property_exists($menuData, 'menu') && is_array($menuData->menu))
-                @foreach ($menuData->menu as $menu)
-                    @php
-                        // Role-based visibility check
-                        // $role is from the Livewire component (e.g., 'Admin', 'BPM Staff', 'Employee', 'Guest')
-                        $isVisible = false;
-                        if (isset($menu->role)) {
-                            if ($role === $adminRoleName) { // Admin sees all items that have a role defined
-                                $isVisible = true;
-                            } elseif (is_array($menu->role) && in_array($role, $menu->role)) {
-                                $isVisible = true;
-                            } elseif (is_string($menu->role) && $role === $menu->role) {
-                                $isVisible = true;
-                            }
-                        } else {
-                             $isVisible = true; // No role defined means visible to all (including guests if $role is 'Guest')
-                        }
-                    @endphp
+    <ul class="menu-inner py-1">
+      @if(isset($menuData) && isset($menuData->menu) && count($menuData->menu) > 0)
+        @foreach ($menuData->menu as $menu)
+          {{-- Role-based menu item visibility --}}
+          {{-- System Design: RBAC for menu items --}}
+          @php
+            $canViewMenu = false;
+            if ($role === 'Admin') { // Super Admin sees all
+                $canViewMenu = true;
+            } elseif (isset($menu->role)) {
+                if (is_array($menu->role) && in_array($role, $menu->role)) {
+                    $canViewMenu = true;
+                } elseif (is_string($menu->role) && $role === $menu->role) {
+                    $canViewMenu = true;
+                }
+            } elseif (isset($menu->permissions)) { // Prefer permission-based checks if available
+                // Assumes user has a method like canany() or similar for checking multiple permissions
+                // $canViewMenu = Auth::user() && Auth::user()->canany(is_array($menu->permissions) ? $menu->permissions : [$menu->permissions]);
+            }
+             else { // If no specific role/permission is defined, assume visible to all authenticated users
+                $canViewMenu = true;
+            }
+          @endphp
 
-                    @if ($isVisible)
-                        {{-- Menu Headers --}}
-                        @if (isset($menu->menuHeader))
-                            <li class="menu-header small text-uppercase mt-2">
-                                <span class="menu-header-text">{{ isset($menu->name) ? __($menu->name) : (isset($menu->menuHeader) ? __($menu->menuHeader) : '') }}</span>
-                            </li>
-                        @else
-                            {{-- Menu Items --}}
-                            @php
-                                $activeClass = '';
-                                $currentRouteName = Route::currentRouteName();
-                                $menuSlug = $menu->slug ?? null;
-
-                                if ($menuSlug) {
-                                    if (is_string($menuSlug) && $currentRouteName === $menuSlug) {
-                                        $activeClass = 'active';
-                                    } elseif (is_array($menuSlug)) { // If slug can be an array of route names for highlighting
-                                        foreach($menuSlug as $slug_item) {
-                                            if ($currentRouteName === $slug_item || str_starts_with((string)$currentRouteName, (string)$slug_item . '.')) {
-                                                $activeClass = ($configData['layout'] ?? 'vertical') === 'vertical' ? 'active open' : 'active';
-                                                break;
-                                            }
-                                        }
-                                    } elseif (is_string($menuSlug) && isset($menu->submenu) && str_starts_with((string)$currentRouteName, $menuSlug . '.')) {
-                                        // For parent menu highlighting if submenu routes are prefixed by parent slug
-                                        $activeClass = ($configData['layout'] ?? 'vertical') === 'vertical' ? 'active open' : 'active';
-                                    }
-                                }
-                            @endphp
-
-                            {{-- Special handling for logout link --}}
-                            @if (($menu->slug ?? '') === 'logout')
-                                <li class="menu-item">
-                                    <a href="{{ route('logout') }}"
-                                       onclick="event.preventDefault(); document.getElementById('logout-form-menu').submit();"
-                                       class="menu-link">
-                                        @isset($menu->icon)<i class="{{ $menu->icon }} me-2"></i>@endisset
-                                        <div>{{ isset($menu->name) ? __($menu->name) : '' }}</div>
-                                    </a>
-                                    {{-- Keep the form outside the <a> tag if it causes issues, or ensure it's not nested in a way that breaks HTML --}}
-                                </li>
-                            @else
-                                <li class="menu-item {{ $activeClass }}">
-                                    <a href="{{ isset($menu->url) ? (Str::startsWith($menu->url, ['http://', 'https://']) ? $menu->url : url($menu->url)) : (isset($menu->routeName) && Route::has($menu->routeName) ? route($menu->routeName, ($menu->routeParams ?? [])) : 'javascript:void(0);') }}"
-                                       class="{{ isset($menu->submenu) ? 'menu-link menu-toggle' : 'menu-link' }}"
-                                       @if (isset($menu->target) && !empty($menu->target)) target="{{ $menu->target }}" @endif>
-                                        @isset($menu->icon)<i class="{{ $menu->icon }} me-2"></i>@endisset
-                                        <div>{{ isset($menu->name) ? __($menu->name) : '' }}</div>
-                                        @isset($menu->badge)
-                                            <div class="badge bg-label-{{ $menu->badge[0] }} rounded-pill ms-auto">{{ $menu->badge[1] }}</div>
-                                        @endisset
-                                    </a>
-
-                                    {{-- Render submenu if it exists --}}
-                                    @isset($menu->submenu)
-                                        @include('layouts.sections.menu.submenu', [
-                                            'menu' => $menu->submenu,
-                                            'configData' => $configData, // Pass for submenu rendering consistency
-                                            'role' => $role           // Pass role for submenu item filtering
-                                        ])
-                                    @endisset
-                                </li>
-                            @endif
-                        @endif
-                    @endif
-                @endforeach
+          @if ($canViewMenu)
+            {{-- Menu Headers --}}
+            @if (isset($menu->menuHeader))
+              <li class="menu-header small text-uppercase">
+                <span class="menu-header-text">{{ __($menu->menuHeader) }}</span>
+              </li>
             @else
-                <li class="menu-item">
-                    <div class="menu-link text-warning">{{ __('Menu data not available or malformed.') }}</div>
-                </li>
+              {{-- Active Menu Logic --}}
+              @php
+                $activeClass = null;
+                $currentRouteName = Route::currentRouteName();
+
+                if (isset($menu->slug) && $currentRouteName === $menu->slug) {
+                  $activeClass = 'active';
+                } elseif (isset($menu->submenu) && isset($menu->slug)) {
+                  // Check if current route starts with any of the defined slugs for parent menu
+                  $slugsToCheck = is_array($menu->slug) ? $menu->slug : [$menu->slug];
+                  foreach ($slugsToCheck as $slug) {
+                    if (str_starts_with((string)$currentRouteName, (string)$slug)) {
+                      $activeClass = 'active open';
+                      break;
+                    }
+                  }
+                }
+              @endphp
+
+              {{-- Main Menu Item --}}
+              <li class="menu-item {{ $activeClass }}">
+                <a href="{{ isset($menu->url) ? url($menu->url) : 'javascript:void(0);' }}"
+                   class="{{ isset($menu->submenu) ? 'menu-link menu-toggle' : 'menu-link' }}"
+                   @if (isset($menu->target) && !empty($menu->target)) target="{{ $menu->target }}" @endif>
+                  @isset($menu->icon)
+                    <i class="{{ $menu->icon }}"></i>
+                  @endisset
+                  {{-- Design Language: Bahasa Melayu as Primary Language --}}
+                  <div class="menu-item-label">{{ isset($menu->name) ? __($menu->name) : '' }}</div>
+                  @isset($menu->badge)
+                    <div class="badge bg-label-{{ $menu->badge[0] }} rounded-pill ms-auto">{{ $menu->badge[1] }}</div>
+                  @endisset
+                </a>
+
+                {{-- Submenu --}}
+                @isset($menu->submenu)
+                  {{-- Assumes submenu.blade.php handles recursion and role checks for sub-items --}}
+                  @include('layouts.sections.menu.submenu', ['menu' => $menu->submenu, 'role' => $role])
+                @endisset
+              </li>
             @endif
-        </ul>
-        {{-- Hidden form for logout, can be placed outside the main <ul> if that's cleaner --}}
-        <form method="POST" id="logout-form-menu" action="{{ route('logout') }}" style="display: none;">
-            @csrf
-        </form>
-    </aside>
+          @endif
+        @endforeach
+      @else
+        {{-- Fallback if menu data is not available --}}
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-alert-circle"></i>
+                <div class="menu-item-label">{{ __('Menu tidak dimuatkan') }}</div>
+            </a>
+        </li>
+      @endif
+    </ul>
+  </aside>
 </div>
