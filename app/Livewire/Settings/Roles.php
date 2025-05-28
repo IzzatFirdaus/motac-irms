@@ -7,7 +7,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
+// use Spatie\Permission\Models\Role; // We will use the fully qualified name directly
 
 #[Layout('layouts.app')]
 class Roles extends Component
@@ -16,10 +16,10 @@ class Roles extends Component
 
     public bool $showModal = false;
     public bool $isEditMode = false;
-    public ?Role $editingRole = null;
-    public ?int $roleId = null; // Keep track of ID for editing
+    public ?\Spatie\Permission\Models\Role $editingRole = null; // Type hint with FQCN
+    public ?int $roleId = null;
     public string $name = '';
-    public array $selectedPermissions = []; // For assigning permissions to role
+    public array $selectedPermissions = [];
 
     public bool $showDeleteConfirmationModal = false;
     public ?int $roleIdToDelete = null;
@@ -32,20 +32,20 @@ class Roles extends Component
 
     public function mount(): void
     {
-        // $this->authorize('viewAny', Role::class);
-        $this->editingRole = new Role();
-        $this->allPermissions = Permission::orderBy('name')->pluck('name', 'id')->all();
+        // $this->authorize('viewAny', \Spatie\Permission\Models\Role::class);
+        $this->editingRole = new \Spatie\Permission\Models\Role(); // Use FQCN
+        $this->allPermissions = Permission::orderBy('name')->pluck('name', 'id')->all(); // Permission model seems fine
     }
 
     public function create(): void
     {
-        // $this->authorize('create', Role::class);
+        // $this->authorize('create', \Spatie\Permission\Models\Role::class);
         $this->resetInputFields();
         $this->isEditMode = false;
         $this->showModal = true;
     }
 
-    public function edit(Role $role): void
+    public function edit(\Spatie\Permission\Models\Role $role): void // Type hint with FQCN
     {
         // $this->authorize('update', $role);
         $this->resetInputFields();
@@ -69,8 +69,9 @@ class Roles extends Component
             $this->editingRole->permissions()->sync($this->selectedPermissions);
             session()->flash('message', __('Peranan berjaya dikemaskini.'));
         } else {
-            // $this->authorize('create', Role::class);
-            $role = Role::create($data);
+            // $this->authorize('create', \Spatie\Permission\Models\Role::class);
+            // Use FQCN for Role::create
+            $role = \Spatie\Permission\Models\Role::create($data);
             $role->permissions()->sync($this->selectedPermissions);
             session()->flash('message', __('Peranan berjaya dicipta.'));
         }
@@ -86,7 +87,7 @@ class Roles extends Component
 
     public function confirmRoleDeletion(int $id): void
     {
-        // $role = Role::find($id);
+        // $role = \Spatie\Permission\Models\Role::find($id); // Use FQCN
         // if ($role) {
         //     $this->authorize('delete', $role);
         // }
@@ -97,7 +98,8 @@ class Roles extends Component
     public function deleteRole(): void
     {
         if ($this->roleIdToDelete) {
-            $role = Role::findOrFail($this->roleIdToDelete);
+            // Use FQCN for Role::findOrFail
+            $role = \Spatie\Permission\Models\Role::findOrFail($this->roleIdToDelete);
             // $this->authorize('delete', $role);
             if ($role->users()->count() > 0) {
                 session()->flash('error', __('Peranan tidak boleh dipadam kerana ia telah ditugaskan kepada pengguna.'));
@@ -114,7 +116,9 @@ class Roles extends Component
 
     public function render()
     {
-        $roles = Role::withCount('permissions', 'users')->orderBy('name')->paginate(10);
+        // *** Critical Change: Use the fully qualified class name (FQCN) ***
+        $roles = \Spatie\Permission\Models\Role::withCount('permissions', 'users')->orderBy('name')->paginate(10);
+
         return view('livewire.settings.roles', [
           'roles' => $roles,
         ]);
@@ -129,10 +133,12 @@ class Roles extends Component
             'string',
             'min:3',
             'max:255',
+            // Ensure ValidationRule is correctly imported if this line causes issues,
+            // or use the FQCN for Rule: \Illuminate\Validation\Rule::unique...
             ValidationRule::unique('roles', 'name')->ignore($roleIdToIgnore),
           ],
           'selectedPermissions' => 'nullable|array',
-          'selectedPermissions.*' => 'exists:permissions,id', // Validate permissions by ID
+          'selectedPermissions.*' => 'exists:permissions,id',
         ];
     }
 
@@ -141,7 +147,7 @@ class Roles extends Component
         $this->name = '';
         $this->roleId = null;
         $this->selectedPermissions = [];
-        $this->editingRole = new Role();
+        $this->editingRole = new \Spatie\Permission\Models\Role(); // Use FQCN
         $this->isEditMode = false;
         $this->resetErrorBag();
         $this->resetValidation();
