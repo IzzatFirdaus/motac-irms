@@ -2,14 +2,14 @@
 
 namespace App\Livewire\Settings;
 
-use App\Models\User;
 use App\Models\Department;
-use App\Models\Position;
 use App\Models\Grade;
+use App\Models\Position;
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
-use Livewire\Component;
 use Livewire\Attributes\Layout;
+use Livewire\Component;
 use Spatie\Permission\Models\Role; // For role assignment
 
 #[Layout('layouts.app')]
@@ -70,34 +70,9 @@ class CreateUser extends Component
         if (empty($this->appointment_type) && !empty($this->appointmentTypeOptions)) {
             $this->appointment_type = array_key_first($this->appointmentTypeOptions);
         }
-         if (empty($this->title) && !empty($this->titleOptions)) {
+        if (empty($this->title) && !empty($this->titleOptions)) {
             $this->title = array_key_first($this->titleOptions);
         }
-    }
-
-    protected function rules(): array
-    {
-        return [
-            'title' => ['required', 'string', \Illuminate\Validation\Rule::in(array_keys($this->titleOptions))],
-            'name' => 'required|string|max:255',
-            'identification_number' => 'required|string|max:20|unique:users,identification_number',
-            'passport_number' => 'nullable|string|max:20|unique:users,passport_number',
-            'department_id' => 'required|exists:departments,id',
-            'position_id' => 'required|exists:positions,id',
-            'grade_id' => 'required|exists:grades,id',
-            'level' => ['nullable', 'string', \Illuminate\Validation\Rule::in(array_keys($this->levelOptions))],
-            'mobile_number' => 'required|string|max:20',
-            'personal_email' => 'required|email|max:255|unique:users,personal_email',
-            'motac_email' => 'nullable|email|max:255|unique:users,motac_email',
-            'service_status' => ['required', 'string', \Illuminate\Validation\Rule::in(array_keys($this->serviceStatusOptions))],
-            'appointment_type' => ['required', 'string', \Illuminate\Validation\Rule::in(array_keys($this->appointmentTypeOptions))],
-            'previous_department_name' => 'nullable|string|max:255',
-            'previous_department_email' => 'nullable|email|max:255',
-            'password' => ['required', 'string', Password::min(8)->mixedCase()->numbers()->symbols(), 'confirmed'],
-            'status' => ['required', 'string', \Illuminate\Validation\Rule::in(['active', 'inactive'])],
-            'selectedRoles' => 'nullable|array',
-            'selectedRoles.*' => 'exists:roles,id', // Validate that roles exist by ID
-        ];
     }
 
     public function saveUser(): void
@@ -138,6 +113,37 @@ class CreateUser extends Component
         // return redirect()->route('settings.users.index');
     }
 
+    public function render()
+    {
+        // Data for dropdowns is already loaded in mount/properties
+        return view('livewire.settings.create-user');
+    }
+
+    protected function rules(): array
+    {
+        return [
+            'title' => ['required', 'string', \Illuminate\Validation\Rule::in(array_keys($this->titleOptions))],
+            'name' => 'required|string|max:255',
+            'identification_number' => 'required|string|max:20|unique:users,identification_number',
+            'passport_number' => 'nullable|string|max:20|unique:users,passport_number',
+            'department_id' => 'required|exists:departments,id',
+            'position_id' => 'required|exists:positions,id',
+            'grade_id' => 'required|exists:grades,id',
+            'level' => ['nullable', 'string', \Illuminate\Validation\Rule::in(array_keys($this->levelOptions))],
+            'mobile_number' => 'required|string|max:20',
+            'personal_email' => 'required|email|max:255|unique:users,personal_email',
+            'motac_email' => 'nullable|email|max:255|unique:users,motac_email',
+            'service_status' => ['required', 'string', \Illuminate\Validation\Rule::in(array_keys($this->serviceStatusOptions))],
+            'appointment_type' => ['required', 'string', \Illuminate\Validation\Rule::in(array_keys($this->appointmentTypeOptions))],
+            'previous_department_name' => 'nullable|string|max:255',
+            'previous_department_email' => 'nullable|email|max:255',
+            'password' => ['required', 'string', Password::min(8)->mixedCase()->numbers()->symbols(), 'confirmed'],
+            'status' => ['required', 'string', \Illuminate\Validation\Rule::in(['active', 'inactive'])],
+            'selectedRoles' => 'nullable|array',
+            'selectedRoles.*' => 'exists:roles,id', // Validate that roles exist by ID
+        ];
+    }
+
     private function resetForm(): void
     {
         $this->resetExcept('departmentOptions', 'positionOptions', 'gradeOptions', 'serviceStatusOptions', 'appointmentTypeOptions', 'levelOptions', 'titleOptions', 'allRoles');
@@ -151,11 +157,5 @@ class CreateUser extends Component
         if (!empty($this->titleOptions)) {
             $this->title = array_key_first($this->titleOptions);
         }
-    }
-
-    public function render()
-    {
-        // Data for dropdowns is already loaded in mount/properties
-        return view('livewire.settings.create-user');
     }
 }

@@ -12,7 +12,8 @@ trait MessageProvider
     {
         $settings = Setting::first();
 
-        $response = Http::get('https://bms.syriatel.sy/API/SendSMS.aspx?'.
+        $response = Http::get(
+            'https://bms.syriatel.sy/API/SendSMS.aspx?'.
           'user_name='.$settings->sms_api_username.
           '&password='.$settings->sms_api_password.
           '&msg='.$messageBody.
@@ -31,7 +32,8 @@ trait MessageProvider
     {
         $settings = Setting::first();
 
-        $response = Http::get('https://bms.syriatel.sy/API/CheckUserStatus.aspx?'.
+        $response = Http::get(
+            'https://bms.syriatel.sy/API/CheckUserStatus.aspx?'.
           'user_name='.$settings->sms_api_username.
           '&password='.$settings->sms_api_password.
           '&target_user_name='.$settings->sms_api_username
