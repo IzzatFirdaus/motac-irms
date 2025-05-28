@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Livewire; // Ensure this matches your actual namespace
 
-use App\Models\User;
-use App\Models\LoanApplication;
 use App\Models\EmailApplication;
+use App\Models\LoanApplication;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
-use Livewire\Component;
-use Livewire\Attributes\Title; // For setting page title (Livewire 3.x)
+use Livewire\Attributes\Title;
+use Livewire\Component; // For setting page title (Livewire 3.x)
 
 class Dashboard extends Component
 {

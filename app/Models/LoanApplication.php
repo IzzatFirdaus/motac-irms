@@ -66,7 +66,8 @@ use Illuminate\Support\Str;
  */
 class LoanApplication extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
 
     // Status constants as defined in System Design (Section 4.3)
     public const STATUS_DRAFT = 'draft';
@@ -128,33 +129,6 @@ class LoanApplication extends Model
         'status' => self::STATUS_DRAFT,
     ];
 
-    protected static function newFactory(): LoanApplicationFactory
-    {
-        return LoanApplicationFactory::new();
-    }
-
-    // Relationships
-    public function user(): BelongsTo { return $this->belongsTo(User::class, 'user_id'); }
-    public function responsibleOfficer(): BelongsTo { return $this->belongsTo(User::class, 'responsible_officer_id'); }
-    public function supportingOfficer(): BelongsTo { return $this->belongsTo(User::class, 'supporting_officer_id'); }
-    public function currentApprovalOfficer(): BelongsTo { return $this->belongsTo(User::class, 'current_approval_officer_id');}
-    public function applicationItems(): HasMany { return $this->hasMany(LoanApplicationItem::class, 'loan_application_id'); }
-    public function items(): HasMany { return $this->applicationItems(); } // Alias
-    public function loanTransactions(): HasMany { return $this->hasMany(LoanTransaction::class, 'loan_application_id'); }
-    public function approvals(): MorphMany { return $this->morphMany(Approval::class, 'approvable'); }
-    public function approvedByOfficer(): BelongsTo { return $this->belongsTo(User::class, 'approved_by'); }
-    public function rejectedByOfficer(): BelongsTo { return $this->belongsTo(User::class, 'rejected_by'); }
-    public function cancelledByOfficer(): BelongsTo { return $this->belongsTo(User::class, 'cancelled_by'); }
-    public function creator(): BelongsTo { return $this->belongsTo(User::class, 'created_by'); }
-    public function updater(): BelongsTo { return $this->belongsTo(User::class, 'updated_by'); }
-    public function deleter(): BelongsTo { return $this->belongsTo(User::class, 'deleted_by'); }
-
-    // Accessors
-    public function getStatusTranslatedAttribute(): string
-    {
-        return __(self::$STATUSES_LABELS[$this->status] ?? Str::title(str_replace('_', ' ', (string) $this->status)));
-    }
-
     // Placeholder accessors for derived data based on transactions (implement if needed)
     // public function getIssuedAtAttribute(): ?Carbon { /* Logic based on first 'issue' transaction */ return null; }
     // public function getIssuedByAttribute(): ?int { /* Logic based on first 'issue' transaction */ return null; }
@@ -162,14 +136,101 @@ class LoanApplication extends Model
     // public function getReturnedByAttribute(): ?int { /* Logic based on last 'return' transaction */ return null; }
 
     // Static helper methods
-    public static function getStatusOptions(): array { return self::$STATUSES_LABELS; }
-    public static function getStatusKeys(): array { return array_keys(self::$STATUSES_LABELS); }
+    public static function getStatusOptions(): array
+    {
+        return self::$STATUSES_LABELS;
+    }
+    public static function getStatusKeys(): array
+    {
+        return array_keys(self::$STATUSES_LABELS);
+    }
+
+    protected static function newFactory(): LoanApplicationFactory
+    {
+        return LoanApplicationFactory::new();
+    }
+
+    // Relationships
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+    public function responsibleOfficer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'responsible_officer_id');
+    }
+    public function supportingOfficer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'supporting_officer_id');
+    }
+    public function currentApprovalOfficer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'current_approval_officer_id');
+    }
+    public function applicationItems(): HasMany
+    {
+        return $this->hasMany(LoanApplicationItem::class, 'loan_application_id');
+    }
+    public function items(): HasMany
+    {
+        return $this->applicationItems();
+    } // Alias
+    public function loanTransactions(): HasMany
+    {
+        return $this->hasMany(LoanTransaction::class, 'loan_application_id');
+    }
+    public function approvals(): MorphMany
+    {
+        return $this->morphMany(Approval::class, 'approvable');
+    }
+    public function approvedByOfficer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+    public function rejectedByOfficer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'rejected_by');
+    }
+    public function cancelledByOfficer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'cancelled_by');
+    }
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+    public function deleter(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deleted_by');
+    }
+
+    // Accessors
+    public function getStatusTranslatedAttribute(): string
+    {
+        return __(self::$STATUSES_LABELS[$this->status] ?? Str::title(str_replace('_', ' ', (string) $this->status)));
+    }
 
     // Business Logic Methods
-    public function isDraft(): bool { return $this->status === self::STATUS_DRAFT; }
-    public function isApproved(): bool { return $this->status === self::STATUS_APPROVED; } // Approved and ready for issuance
-    public function isPartiallyIssued(): bool { return $this->status === self::STATUS_PARTIALLY_ISSUED; }
-    public function isFullyIssued(): bool { return $this->status === self::STATUS_ISSUED; }
+    public function isDraft(): bool
+    {
+        return $this->status === self::STATUS_DRAFT;
+    }
+    public function isApproved(): bool
+    {
+        return $this->status === self::STATUS_APPROVED;
+    } // Approved and ready for issuance
+    public function isPartiallyIssued(): bool
+    {
+        return $this->status === self::STATUS_PARTIALLY_ISSUED;
+    }
+    public function isFullyIssued(): bool
+    {
+        return $this->status === self::STATUS_ISSUED;
+    }
     public function isPendingApproval(): bool
     {
         return in_array($this->status, [
@@ -195,22 +256,40 @@ class LoanApplication extends Model
 
         switch ($newStatus) {
             case self::STATUS_PENDING_SUPPORT:
-                if (!$this->submitted_at) { $this->submitted_at = now(); }
+                if (!$this->submitted_at) {
+                    $this->submitted_at = now();
+                }
                 // Applicant confirmation timestamp should be set when user submits from draft
-                if (!$this->applicant_confirmation_timestamp) { $this->applicant_confirmation_timestamp = $this->submitted_at ?? now(); }
+                if (!$this->applicant_confirmation_timestamp) {
+                    $this->applicant_confirmation_timestamp = $this->submitted_at ?? now();
+                }
                 break;
             case self::STATUS_APPROVED:
-                if (!$this->approved_at) { $this->approved_at = now(); }
-                if ($actingUserIdToSet) { $this->approved_by = $actingUserIdToSet; }
+                if (!$this->approved_at) {
+                    $this->approved_at = now();
+                }
+                if ($actingUserIdToSet) {
+                    $this->approved_by = $actingUserIdToSet;
+                }
                 break;
             case self::STATUS_REJECTED:
-                if (!$this->rejected_at) { $this->rejected_at = now(); }
-                if ($actingUserIdToSet) { $this->rejected_by = $actingUserIdToSet; }
-                if ($reason) { $this->rejection_reason = $reason; }
+                if (!$this->rejected_at) {
+                    $this->rejected_at = now();
+                }
+                if ($actingUserIdToSet) {
+                    $this->rejected_by = $actingUserIdToSet;
+                }
+                if ($reason) {
+                    $this->rejection_reason = $reason;
+                }
                 break;
             case self::STATUS_CANCELLED:
-                if (!$this->cancelled_at) { $this->cancelled_at = now(); }
-                if ($actingUserIdToSet) { $this->cancelled_by = $actingUserIdToSet; }
+                if (!$this->cancelled_at) {
+                    $this->cancelled_at = now();
+                }
+                if ($actingUserIdToSet) {
+                    $this->cancelled_by = $actingUserIdToSet;
+                }
                 break;
         }
         $saved = $this->save();
@@ -221,8 +300,8 @@ class LoanApplication extends Model
             // Dispatch an event for notifications
             // event(new \App\Events\LoanApplicationStatusChanged($this, $oldStatus, $actingUserIdToSet));
         } else {
-             Log::error("LoanApplication ID {$this->id}: Failed to save status transition from '{$oldStatus}' to '{$newStatus}'.", [
-                'acting_user_id' => $actingUserIdToSet,
+            Log::error("LoanApplication ID {$this->id}: Failed to save status transition from '{$oldStatus}' to '{$newStatus}'.", [
+               'acting_user_id' => $actingUserIdToSet,
             ]);
         }
         return $saved;
@@ -241,7 +320,7 @@ class LoanApplication extends Model
             $totalApprovedQty += $appItem->quantity_approved ?? $appItem->quantity_requested; // Fallback to requested if not explicitly approved quantity
         }
 
-        foreach($this->loanTransactions as $transaction) {
+        foreach ($this->loanTransactions as $transaction) {
             if ($transaction->type === LoanTransaction::TYPE_ISSUE &&
                 in_array($transaction->status, [LoanTransaction::STATUS_ISSUED, LoanTransaction::STATUS_COMPLETED])) {
                 $totalIssuedQty += $transaction->loanTransactionItems()->sum('quantity_transacted');

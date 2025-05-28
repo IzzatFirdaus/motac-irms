@@ -32,16 +32,6 @@ class ApplicationNeedsAction extends Notification implements ShouldQueue
         return ['mail', 'database'];
     }
 
-    private function getItemTypeDisplayName(): string
-    {
-        if ($this->approvableItem instanceof EmailApplication) {
-            return __('Permohonan E-mel/ID Pengguna');
-        } elseif ($this->approvableItem instanceof LoanApplication) {
-            return __('Permohonan Pinjaman Peralatan ICT');
-        }
-        return __('Permohonan Umum'); // Fallback
-    }
-
     public function toMail(User $notifiable): MailMessage
     {
         $itemTypeDisplayName = $this->getItemTypeDisplayName();
@@ -77,10 +67,14 @@ class ApplicationNeedsAction extends Notification implements ShouldQueue
         $purposeOrNotes = null;
         if ($this->approvableItem instanceof LoanApplication) {
             $purposeOrNotes = $this->approvableItem->purpose;
-            if ($purposeOrNotes) $mailMessage->line(__('- Tujuan: :purpose', ['purpose' => $purposeOrNotes]));
+            if ($purposeOrNotes) {
+                $mailMessage->line(__('- Tujuan: :purpose', ['purpose' => $purposeOrNotes]));
+            }
         } elseif ($this->approvableItem instanceof EmailApplication) {
             $purposeOrNotes = $this->approvableItem->application_reason_notes;
-             if ($purposeOrNotes) $mailMessage->line(__('- Tujuan/Catatan: :notes', ['notes' => $purposeOrNotes]));
+            if ($purposeOrNotes) {
+                $mailMessage->line(__('- Tujuan/Catatan: :notes', ['notes' => $purposeOrNotes]));
+            }
         }
 
 
@@ -129,5 +123,15 @@ class ApplicationNeedsAction extends Notification implements ShouldQueue
             'url' => ($viewUrl !== '#' && filter_var($viewUrl, FILTER_VALIDATE_URL)) ? $viewUrl : null,
             'icon' => 'ti ti-bell-ringing',
         ];
+    }
+
+    private function getItemTypeDisplayName(): string
+    {
+        if ($this->approvableItem instanceof EmailApplication) {
+            return __('Permohonan E-mel/ID Pengguna');
+        } elseif ($this->approvableItem instanceof LoanApplication) {
+            return __('Permohonan Pinjaman Peralatan ICT');
+        }
+        return __('Permohonan Umum'); // Fallback
     }
 }

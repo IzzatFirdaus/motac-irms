@@ -17,7 +17,9 @@ final class ProcessReturnRequest extends FormRequest
     {
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
-        if (!$user) return false;
+        if (!$user) {
+            return false;
+        }
 
         /** @var LoanTransaction|null $issueTransaction */
         $issueTransaction = $this->route('loanTransaction'); // This is the original issue transaction

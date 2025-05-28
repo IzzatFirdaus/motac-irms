@@ -8,8 +8,8 @@ use App\Jobs\SyncAppWithGithub; // As per system design
 use App\Validator\CustomSignatureValidator; // As per system design
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Config; // Using Config facade explicitly
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log; // Using Config facade explicitly
 
 class WebhookController extends Controller
 {

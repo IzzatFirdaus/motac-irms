@@ -5,16 +5,17 @@ namespace App\Livewire\ResourceManagement\Admin\BPM;
 use App\Models\LoanApplication;
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Illuminate\View\View;
-use Illuminate\Support\Facades\Auth;
 
 #[Layout('layouts.app')] // Ensure layouts.app is Bootstrap-compatible
 class OutstandingLoans extends Component
 {
-    use AuthorizesRequests, WithPagination;
+    use AuthorizesRequests;
+    use WithPagination;
 
     public string $searchTerm = '';
     protected string $paginationTheme = 'bootstrap'; // Converted to Bootstrap
@@ -42,8 +43,8 @@ class OutstandingLoans extends Component
                 LoanApplication::STATUS_PENDING_BPM_REVIEW, // If BPM has a specific review stage before issuance
                 // LoanApplication::STATUS_PARTIALLY_ISSUED, // If BPM can continue issuing for partially issued ones (currently commented out, depends on workflow)
             ]);
-            // Optionally, filter by applications where current_approval_stage is specifically for BPM
-            // ->where('current_approval_stage', Approval::STAGE_LOAN_BPM_REVIEW) // Example, if you have such a field
+        // Optionally, filter by applications where current_approval_stage is specifically for BPM
+        // ->where('current_approval_stage', Approval::STAGE_LOAN_BPM_REVIEW) // Example, if you have such a field
 
         if (!empty($this->searchTerm)) {
             $searchTerm = '%' . $this->searchTerm . '%';

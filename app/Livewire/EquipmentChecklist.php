@@ -20,6 +20,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+
 // Removed duplicate Illuminate\Http\RedirectResponse if it was already there from your original
 
 #[Layout('layouts.app')]
@@ -96,7 +97,7 @@ class EquipmentChecklist extends Component
                             return Equipment::where('asset_type', $appItem->equipment_type)
                                        ->where('status', Equipment::STATUS_AVAILABLE)
                                        ->get()
-                                       ->mapWithKeys(function($eq) {
+                                       ->mapWithKeys(function ($eq) {
                                            return [$eq->id => "{$eq->brand} {$eq->model} (Tag: {$eq->tag_id}) - Jenis: {$eq->asset_type_label}"];
                                        });
                         })->flatten()->toArray();
@@ -162,8 +163,8 @@ class EquipmentChecklist extends Component
             }
 
             if (!$this->loanApplication) {
-                 $this->loanApplication = $this->loanApplicationService->findLoanApplication($this->loanApplicationId);
-                 if (!$this->loanApplication) {
+                $this->loanApplication = $this->loanApplicationService->findLoanApplication($this->loanApplicationId);
+                if (!$this->loanApplication) {
                     throw new ModelNotFoundException("Permohonan Pinjaman dengan ID {$this->loanApplicationId} tidak ditemui.");
                 }
             }
@@ -206,9 +207,9 @@ class EquipmentChecklist extends Component
                 session()->flash('success', 'Peralatan berjaya dikeluarkan.');
 
             } elseif ($this->transactionType === LoanTransaction::TYPE_RETURN) {
-                 $this->authorize('createReturn', [LoanTransaction::class, $this->loanApplication]);
+                $this->authorize('createReturn', [LoanTransaction::class, $this->loanApplication]);
                 if ($equipmentToTransact->status !== Equipment::STATUS_ON_LOAN) {
-                     throw new Exception("Peralatan '{$equipmentToTransact->tag_id}' tidak dalam status dipinjam. Status semasa: {$equipmentToTransact->status_label}");
+                    throw new Exception("Peralatan '{$equipmentToTransact->tag_id}' tidak dalam status dipinjam. Status semasa: {$equipmentToTransact->status_label}");
                 }
 
                 $itemData = [[
@@ -226,7 +227,7 @@ class EquipmentChecklist extends Component
                     'status' => LoanTransaction::STATUS_RETURNED_GOOD,
                     'related_transaction_id' => $this->loanTransaction?->id,
                 ];
-                 $transaction = $this->loanTransactionService->createTransaction(
+                $transaction = $this->loanTransactionService->createTransaction(
                     $this->loanApplication,
                     LoanTransaction::TYPE_RETURN,
                     $currentUser,
@@ -255,8 +256,7 @@ class EquipmentChecklist extends Component
             DB::rollBack();
             session()->flash('error', __('Anda tidak dibenarkan untuk tindakan ini: ') . $e->getMessage());
             $this->dispatch('toastr', type: 'error', message: __('Anda tidak dibenarkan untuk tindakan ini.'));
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             session()->flash('error', __('Ralat sistem semasa memproses transaksi: ') . $e->getMessage());
             Log::error('Error processing transaction: '.$e->getMessage(), ['exception' => $e]);
@@ -314,7 +314,7 @@ class EquipmentChecklist extends Component
         $officerOptions = User::role(['Admin', 'BPM Staff', 'IT Admin'])->orderBy('name')->pluck('name', 'id')->toArray();
         $returningOfficerOptions = $this->loanApplication?->user ? [$this->loanApplication->user->id => $this->loanApplication->user->name] : [];
         $conditionStatusOptions = Equipment::getConditionStatusesList();
-        $onLoanEquipmentOptions = $this->onLoanEquipment()->mapWithKeys(function($eq){ // Call as method
+        $onLoanEquipmentOptions = $this->onLoanEquipment()->mapWithKeys(function ($eq) { // Call as method
             return [$eq->id => "{$eq->brand} {$eq->model} (Tag: {$eq->tag_id})"];
         })->toArray();
 

@@ -12,8 +12,8 @@ use App\Models\User;
 use App\Notifications\ApplicationApproved;
 use App\Notifications\ApplicationNeedsAction;
 use App\Notifications\ApplicationRejected;
-use App\Notifications\ApplicationSubmitted;
 use App\Notifications\ApplicationStatusUpdatedNotification;
+use App\Notifications\ApplicationSubmitted;
 use App\Notifications\DefaultUserNotification;
 use App\Notifications\EmailApplicationReadyForProcessingNotification;
 use App\Notifications\EmailProvisionedNotification;
@@ -95,7 +95,11 @@ final class NotificationService
         try {
             $greeting = __('Salam Sejahtera, :name,', ['name' => $userToNotify->name ?? __('Pengguna')]);
             $notification = new DefaultUserNotification(
-                $taskTitle, $greeting, $taskMessage, $actionUrl, $actionText
+                $taskTitle,
+                $greeting,
+                $taskMessage,
+                $actionUrl,
+                $actionText
             );
             $userToNotify->notify($notification);
             Log::info(self::LOG_AREA." DefaultUserNotification sent to User ID {$userId}.");

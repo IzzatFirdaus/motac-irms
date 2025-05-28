@@ -9,7 +9,6 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification as BaseNotification;
-use Illuminate\Support\Facades\Lang;
 
 final class DefaultUserNotification extends BaseNotification implements ShouldQueue
 {
@@ -64,7 +63,7 @@ final class DefaultUserNotification extends BaseNotification implements ShouldQu
         $dataForView = array_merge([
             'greeting' => __($this->greetingKey),
             'notifiableName' => $notifiable->name,
-            'lines' => array_map(fn($line) => __($line), $this->lines), // Translate each line
+            'lines' => array_map(fn ($line) => __($line), $this->lines), // Translate each line
             'actionUrl' => ($this->actionUrl && filter_var($this->actionUrl, FILTER_VALIDATE_URL)) ? $this->actionUrl : null,
             'actionText' => __($this->actionTextKey),
             'subject' => __($this->subjectKey) // For use within the template if needed
@@ -79,7 +78,7 @@ final class DefaultUserNotification extends BaseNotification implements ShouldQu
     public function toArray(User $notifiable): array
     {
         // Data for database notifications (System Design 4.4, 9.5)
-        $translatedLines = array_map(fn($line) => __($line), $this->lines);
+        $translatedLines = array_map(fn ($line) => __($line), $this->lines);
 
         return array_merge([
             'subject' => __($this->subjectKey),

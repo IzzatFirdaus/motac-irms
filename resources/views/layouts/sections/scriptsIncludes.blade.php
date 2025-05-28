@@ -7,6 +7,11 @@
     $hasCustomizer = $configData['hasCustomizer'] ?? false; // Defaulted to false in Helpers.php for MOTAC
     $displayCustomizer = $configData['displayCustomizer'] ?? false; // Defaulted to false
     $rtlSupportPath = $configData['rtlSupport'] ?? ''; // '/rtl' or ''
+
+    // Define the default customizer controls array explicitly
+    $defaultCustomizerControls = ['rtl', 'style', 'themes', 'layoutType', 'showDropdownOnHover', 'layoutNavbarFixed', 'layoutFooterFixed', 'menuFixed', 'menuCollapsed'];
+    // Use the default if 'customizerControls' is not set in $configData
+    $customizerControls = $configData['customizerControls'] ?? $defaultCustomizerControls;
 @endphp
 
 {{-- Core theme helper script --}}
@@ -59,7 +64,7 @@
             };
             return resolvedPaths[path] || path; // Fallback to original path if not found
           },
-          controls: @json($configData['customizerControls'] ?? ['rtl', 'style', 'layoutNavbarFixed', 'themes']) // Configure available controls
+          controls: @json($customizerControls) // Now using the pre-defined $customizerControls variable
         });
       } else {
         console.warn('TemplateCustomizer class not found, customizer will not be initialized.');

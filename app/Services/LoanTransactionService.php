@@ -9,21 +9,19 @@ use App\Models\LoanApplication;
 use App\Models\LoanTransaction;
 use App\Models\LoanTransactionItem;
 use App\Models\User;
+use App\Notifications\EquipmentIssuedNotification;
+use App\Notifications\EquipmentReturnedNotification;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection as SupportCollection;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use InvalidArgumentException;
+// Assuming these specific notifications will be created/are available
 use RuntimeException;
 use Throwable;
-// Assuming these specific notifications will be created/are available
-use App\Notifications\EquipmentIssuedNotification;
-use App\Notifications\EquipmentReturnedNotification;
-
 
 final class LoanTransactionService
 {
@@ -140,12 +138,12 @@ final class LoanTransactionService
                     } elseif (in_array($itemStatusOnReturn, [LoanTransactionItem::STATUS_ITEM_RETURNED_MINOR_DAMAGE, LoanTransactionItem::STATUS_ITEM_RETURNED_MAJOR_DAMAGE, LoanTransactionItem::STATUS_ITEM_UNSERVICEABLE_ON_RETURN])) {
                         $newEquipmentOpStatus = Equipment::STATUS_UNDER_MAINTENANCE;
                         if ($itemStatusOnReturn === LoanTransactionItem::STATUS_ITEM_UNSERVICEABLE_ON_RETURN || $conditionOnReturn === Equipment::CONDITION_UNSERVICEABLE) {
-                             $newEquipmentOpStatus = Equipment::STATUS_DISPOSED;
+                            $newEquipmentOpStatus = Equipment::STATUS_DISPOSED;
                         }
                     }
                     $this->equipmentService->changeOperationalStatus($equipment, $newEquipmentOpStatus, $actingOfficer, __("Dikembalikan melalui Transaksi #:txId. Status Item: :itemStatus", ['txId' => $txIdLog, 'itemStatus' => LoanTransactionItem::getStatusOptions()[$itemStatusOnReturn] ?? $itemStatusOnReturn]));
                     if ($conditionOnReturn !== $equipment->condition_status) {
-                       $this->equipmentService->changeConditionStatus($equipment, $conditionOnReturn, $actingOfficer, __("Keadaan semasa pemulangan Transaksi #:txId.", ['txId' => $txIdLog]));
+                        $this->equipmentService->changeConditionStatus($equipment, $conditionOnReturn, $actingOfficer, __("Keadaan semasa pemulangan Transaksi #:txId.", ['txId' => $txIdLog]));
                     }
                 }
                 /** @var LoanTransactionItem $transactionItem */
@@ -158,8 +156,9 @@ final class LoanTransactionService
             }
 
             if ($transaction->status === LoanTransaction::STATUS_PENDING) {
-                if ($type === LoanTransaction::TYPE_ISSUE) $transaction->status = LoanTransaction::STATUS_ISSUED;
-                elseif ($type === LoanTransaction::TYPE_RETURN) {
+                if ($type === LoanTransaction::TYPE_ISSUE) {
+                    $transaction->status = LoanTransaction::STATUS_ISSUED;
+                } elseif ($type === LoanTransaction::TYPE_RETURN) {
                     $transaction->status = $extraDetails['status'] ?? $this->determineOverallReturnTransactionStatus($itemData); // Updated to use helper
                 }
                 $transaction->save();
@@ -173,13 +172,13 @@ final class LoanTransactionService
 
             // Send notifications
             if ($type === LoanTransaction::TYPE_ISSUE && class_exists(EquipmentIssuedNotification::class) && $loanApplication->user) {
-                 $this->notificationService->notifyApplicantStatusUpdate($loanApplication, 'N/A', $loanApplication->status); // Example generic status update, or specific
-                 // Or a more specific notification:
-                 // $this->notificationService->notifyGeneric($loanApplication->user, new EquipmentIssuedNotification($transaction));
+                $this->notificationService->notifyApplicantStatusUpdate($loanApplication, 'N/A', $loanApplication->status); // Example generic status update, or specific
+                // Or a more specific notification:
+                // $this->notificationService->notifyGeneric($loanApplication->user, new EquipmentIssuedNotification($transaction));
             } elseif ($type === LoanTransaction::TYPE_RETURN && class_exists(EquipmentReturnedNotification::class) && $loanApplication->user) {
-                 $this->notificationService->notifyApplicantStatusUpdate($loanApplication, 'N/A', $loanApplication->status);
-                 // Or a more specific notification:
-                 // $this->notificationService->notifyGeneric($loanApplication->user, new EquipmentReturnedNotification($transaction));
+                $this->notificationService->notifyApplicantStatusUpdate($loanApplication, 'N/A', $loanApplication->status);
+                // Or a more specific notification:
+                // $this->notificationService->notifyGeneric($loanApplication->user, new EquipmentReturnedNotification($transaction));
             }
 
 
@@ -230,7 +229,7 @@ final class LoanTransactionService
             }
             // Ensure you are using the correct status constant from Equipment model
             if ($equipment->status !== Equipment::STATUS_AVAILABLE) {
-                 throw new InvalidArgumentException("Peralatan {$equipment->tag_id} tidak tersedia untuk dikeluarkan. Status semasa: {$equipment->statusLabel}"); // statusLabel is an accessor
+                throw new InvalidArgumentException("Peralatan {$equipment->tag_id} tidak tersedia untuk dikeluarkan. Status semasa: {$equipment->statusLabel}"); // statusLabel is an accessor
             }
 
             $relatedLoanApplicationItem = $loanApplication->applicationItems()
@@ -303,7 +302,7 @@ final class LoanTransactionService
             // Corrected Check: An item being returned should be in an 'issued' state.
             // 'Overdue' is a loan application status, not an item transaction status.
             if ($issuedItem->status !== LoanTransactionItem::STATUS_ITEM_ISSUED) { // Corrected line
-                 throw new InvalidArgumentException("Item ID {$issuedTxItemId} ({$issuedItem->equipment->tag_id}) tidak berstatus '".LoanTransactionItem::$STATUSES_LABELS[LoanTransactionItem::STATUS_ITEM_ISSUED]."'. Status semasa: {$issuedItem->statusTranslated}"); // statusTranslated is an accessor
+                throw new InvalidArgumentException("Item ID {$issuedTxItemId} ({$issuedItem->equipment->tag_id}) tidak berstatus '".LoanTransactionItem::$STATUSES_LABELS[LoanTransactionItem::STATUS_ITEM_ISSUED]."'. Status semasa: {$issuedItem->statusTranslated}"); // statusTranslated is an accessor
             }
 
             if (!$firstRelatedIssueTransactionId && $issuedItem->loanTransaction->type === LoanTransaction::TYPE_ISSUE) {
@@ -351,6 +350,143 @@ final class LoanTransactionService
         );
     }
 
+    public function findTransaction(int $id, array $with = []): ?LoanTransaction
+    {
+        Log::debug(self::LOG_AREA . "Finding loan transaction ID {$id}.", ['with' => $with]);
+        try {
+            $query = LoanTransaction::query();
+            // Assuming LoanTransaction model has a static method to get default relations array
+            $defaultWith = LoanTransaction::getDefinedDefaultRelationsStatic();
+            $query->with(array_unique(array_merge($defaultWith, $with)));
+
+            /** @var LoanTransaction|null $transaction */
+            $transaction = $query->find($id);
+            if (!$transaction) {
+                Log::notice(self::LOG_AREA . "Loan transaction ID {$id} not found.");
+            }
+            return $transaction;
+        } catch (Throwable $e) {
+            Log::error(self::LOG_AREA . "Error finding loan transaction ID {$id}: " . $e->getMessage());
+            throw new RuntimeException(__('Gagal mendapatkan butiran transaksi pinjaman.'), 0, $e);
+        }
+    }
+
+    public function getTransactions(array $filters = [], array $with = [], ?int $perPage = 15, string $sortBy = 'transaction_date', string $sortDirection = 'desc'): LengthAwarePaginator|SupportCollection
+    {
+        Log::debug(self::LOG_AREA . 'Getting transactions.', ['filters' => $filters, 'with' => $with, 'perPage' => $perPage]);
+        $query = LoanTransaction::query();
+        $defaultWith = LoanTransaction::getDefinedDefaultRelationsStatic();
+        $query->with(array_unique(array_merge($defaultWith, $with)));
+
+        if (!empty($filters['type'])) {
+            $query->where('type', $filters['type']);
+        }
+        if (!empty($filters['loan_application_id'])) {
+            $query->where('loan_application_id', (int) $filters['loan_application_id']);
+        }
+        if (!empty($filters['officer_id'])) {
+            $officerId = (int) $filters['officer_id'];
+            $query->where(fn ($q) => $q->where('issuing_officer_id', $officerId)->orWhere('return_accepting_officer_id', $officerId)->orWhere('receiving_officer_id', $officerId)->orWhere('returning_officer_id', $officerId));
+        }
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+        if (!empty($filters['date_from'])) {
+            $query->whereDate('transaction_date', '>=', Carbon::parse($filters['date_from'])->startOfDay());
+        }
+        if (!empty($filters['date_to'])) {
+            $query->whereDate('transaction_date', '<=', Carbon::parse($filters['date_to'])->endOfDay());
+        }
+
+        $sortDirectionSafe = strtolower($sortDirection) === 'asc' ? 'asc' : 'desc';
+        $allowedSorts = ['transaction_date', 'created_at', 'type', 'status', 'updated_at'];
+        $safeSortBy = in_array($sortBy, $allowedSorts) && Schema::hasColumn((new LoanTransaction())->getTable(), $sortBy) ? $sortBy : 'transaction_date';
+
+        $query->orderBy($safeSortBy, $sortDirectionSafe);
+
+        return ($perPage !== null && $perPage > 0) ? $query->paginate($perPage) : $query->get();
+    }
+
+    public function updateTransaction(LoanTransaction $transaction, array $validatedData, User $actingOfficer): LoanTransaction
+    {
+        $txIdLog = $transaction->id;
+        Log::info(self::LOG_AREA . "Attempting to update loan transaction ID {$txIdLog}.", ['data_keys' => array_keys($validatedData)]);
+        DB::beginTransaction();
+        try {
+            if (isset($validatedData['return_notes'])) {
+                $transaction->return_notes = $validatedData['return_notes'];
+            }
+            if (isset($validatedData['issue_notes'])) {
+                $transaction->issue_notes = $validatedData['issue_notes'];
+            }
+            if (isset($validatedData['status'])) {
+                if (!in_array($validatedData['status'], LoanTransaction::getStatusesList(), true)) {
+                    throw new InvalidArgumentException("Status transaksi tidak sah: {$validatedData['status']}");
+                }
+                $transaction->status = $validatedData['status'];
+            }
+
+            $transaction->save();
+
+            if ($transaction->loanApplication) {
+                $transaction->loanApplication->updateOverallStatusAfterTransaction();
+            }
+            DB::commit();
+            Log::info(self::LOG_AREA . "Loan transaction ID {$txIdLog} updated successfully by User ID {$actingOfficer->id}.");
+            return $transaction->fresh($transaction->getRelations());
+        } catch (Throwable $e) {
+            DB::rollBack();
+            Log::error(self::LOG_AREA . "Error updating loan transaction ID {$txIdLog}: " . $e->getMessage(), ['data' => $validatedData]);
+            throw new RuntimeException(__('Gagal mengemaskini transaksi pinjaman: ') . $e->getMessage(), (int) $e->getCode(), $e);
+        }
+    }
+
+    public function deleteTransaction(LoanTransaction $transaction, User $actingOfficer): bool
+    {
+        $txIdLog = $transaction->id;
+        Log::info(self::LOG_AREA . "Attempting to delete loan transaction ID {$txIdLog} by User ID: {$actingOfficer->id}.");
+
+        DB::beginTransaction();
+        try {
+            $transactionType = $transaction->type;
+            $loanApplication = $transaction->loanApplication()->first();
+
+            /** @var SupportCollection<int, LoanTransactionItem> $itemsToRevert */
+            $itemsToRevert = $transaction->loanTransactionItems()->with('equipment')->get();
+
+            foreach ($itemsToRevert as $txItem) {
+                if (!$txItem->equipment) {
+                    continue;
+                }
+                /** @var Equipment $equipment */
+                $equipment = $txItem->equipment;
+                $revertNote = __("Transaksi ID :txId (:type) dibatalkan oleh :officer.", ['txId' => $txIdLog, 'type' => $transactionType, 'officer' => $actingOfficer->name]);
+
+                if ($transactionType === LoanTransaction::TYPE_ISSUE) {
+                    $this->equipmentService->changeOperationalStatus($equipment, Equipment::STATUS_AVAILABLE, $actingOfficer, $revertNote);
+                } elseif ($transactionType === LoanTransaction::TYPE_RETURN) {
+                    $this->equipmentService->changeOperationalStatus($equipment, Equipment::STATUS_ON_LOAN, $actingOfficer, $revertNote);
+                }
+                $txItem->delete();
+            }
+
+            $deleted = $transaction->delete();
+
+            if ($deleted && $loanApplication) {
+                $loanApplication->updateOverallStatusAfterTransaction();
+                Log::debug(self::LOG_AREA . "Called updateOverallStatusAfterTransaction for LA ID: {$loanApplication->id} after deleting Tx ID {$txIdLog}");
+            }
+
+            DB::commit();
+            Log::info(self::LOG_AREA . "Loan transaction ID {$txIdLog} and its items processed for deletion.");
+            return (bool) $deleted;
+        } catch (Throwable $e) {
+            DB::rollBack();
+            Log::error(self::LOG_AREA . "Error deleting loan transaction ID {$txIdLog}: " . $e->getMessage());
+            throw new RuntimeException(__('Gagal memadam transaksi pinjaman: ') . $e->getMessage(), (int) $e->getCode(), $e);
+        }
+    }
+
     private function determineItemStatusOnReturn(string $conditionOnReturn): string
     {
         // Ensure Equipment model constants are accessible, e.g., use App\Models\Equipment::CONSTANT_NAME
@@ -392,12 +528,12 @@ final class LoanTransactionService
                 $hasLost = true;
                 $allGood = false;
             }
-            if ($status === LoanTransactionItem::STATUS_ITEM_RETURNED_PENDING_INSPECTION){
+            if ($status === LoanTransactionItem::STATUS_ITEM_RETURNED_PENDING_INSPECTION) {
                 return LoanTransaction::STATUS_RETURNED_PENDING_INSPECTION; // If any item is pending inspection, whole transaction is
             }
-            if ($status !== LoanTransactionItem::STATUS_ITEM_RETURNED_GOOD && $status !== LoanTransactionItem::STATUS_ITEM_REPORTED_LOST){ // Consider only good or lost for allGood logic
+            if ($status !== LoanTransactionItem::STATUS_ITEM_RETURNED_GOOD && $status !== LoanTransactionItem::STATUS_ITEM_REPORTED_LOST) { // Consider only good or lost for allGood logic
                 // If not good and not lost, means it's damaged or unserviceable
-                if ($status !== LoanTransactionItem::STATUS_ITEM_RETURNED_MINOR_DAMAGE && $status !== LoanTransactionItem::STATUS_ITEM_RETURNED_MAJOR_DAMAGE && $status !== LoanTransactionItem::STATUS_ITEM_UNSERVICEABLE_ON_RETURN){
+                if ($status !== LoanTransactionItem::STATUS_ITEM_RETURNED_MINOR_DAMAGE && $status !== LoanTransactionItem::STATUS_ITEM_RETURNED_MAJOR_DAMAGE && $status !== LoanTransactionItem::STATUS_ITEM_UNSERVICEABLE_ON_RETURN) {
                     $allGood = false; // Any other status apart from good or lost also makes it not "all good"
                 }
             }
@@ -421,131 +557,12 @@ final class LoanTransactionService
             return LoanTransaction::STATUS_RETURNED_DAMAGED; // From LoanTransaction.php constants
         }
         if ($allGood) {
-             return LoanTransaction::STATUS_RETURNED_GOOD; // From LoanTransaction.php constants
+            return LoanTransaction::STATUS_RETURNED_GOOD; // From LoanTransaction.php constants
         }
         // Fallback or if items are mixed in a way not covered above, might need more logic or a general complete.
         // For now, if any item is pending inspection, that becomes the transaction status.
         // If no items pending, and some not good, it would have hit damaged/lost.
         // If all items processed and none are good, it would be damaged or lost.
         return LoanTransaction::STATUS_COMPLETED; // Or another appropriate default.
-    }
-
-    public function findTransaction(int $id, array $with = []): ?LoanTransaction
-    {
-        Log::debug(self::LOG_AREA . "Finding loan transaction ID {$id}.", ['with' => $with]);
-        try {
-            $query = LoanTransaction::query();
-            // Assuming LoanTransaction model has a static method to get default relations array
-            $defaultWith = LoanTransaction::getDefinedDefaultRelationsStatic();
-            $query->with(array_unique(array_merge($defaultWith, $with)));
-
-            /** @var LoanTransaction|null $transaction */
-            $transaction = $query->find($id);
-            if (!$transaction) Log::notice(self::LOG_AREA . "Loan transaction ID {$id} not found.");
-            return $transaction;
-        } catch (Throwable $e) {
-            Log::error(self::LOG_AREA . "Error finding loan transaction ID {$id}: " . $e->getMessage());
-            throw new RuntimeException(__('Gagal mendapatkan butiran transaksi pinjaman.'), 0, $e);
-        }
-    }
-
-    public function getTransactions(array $filters = [], array $with = [], ?int $perPage = 15, string $sortBy = 'transaction_date', string $sortDirection = 'desc'): LengthAwarePaginator|SupportCollection
-    {
-        Log::debug(self::LOG_AREA . 'Getting transactions.', ['filters' => $filters, 'with' => $with, 'perPage' => $perPage]);
-        $query = LoanTransaction::query();
-        $defaultWith = LoanTransaction::getDefinedDefaultRelationsStatic();
-        $query->with(array_unique(array_merge($defaultWith, $with)));
-
-        if (!empty($filters['type'])) $query->where('type', $filters['type']);
-        if (!empty($filters['loan_application_id'])) $query->where('loan_application_id', (int) $filters['loan_application_id']);
-        if (!empty($filters['officer_id'])) {
-            $officerId = (int) $filters['officer_id'];
-            $query->where(fn($q) => $q->where('issuing_officer_id', $officerId)->orWhere('return_accepting_officer_id', $officerId)->orWhere('receiving_officer_id', $officerId)->orWhere('returning_officer_id', $officerId));
-        }
-        if (!empty($filters['status'])) $query->where('status', $filters['status']);
-        if (!empty($filters['date_from'])) $query->whereDate('transaction_date', '>=', Carbon::parse($filters['date_from'])->startOfDay());
-        if (!empty($filters['date_to'])) $query->whereDate('transaction_date', '<=', Carbon::parse($filters['date_to'])->endOfDay());
-
-        $sortDirectionSafe = strtolower($sortDirection) === 'asc' ? 'asc' : 'desc';
-        $allowedSorts = ['transaction_date', 'created_at', 'type', 'status', 'updated_at'];
-        $safeSortBy = in_array($sortBy, $allowedSorts) && Schema::hasColumn((new LoanTransaction)->getTable(), $sortBy) ? $sortBy : 'transaction_date';
-
-        $query->orderBy($safeSortBy, $sortDirectionSafe);
-
-        return ($perPage !== null && $perPage > 0) ? $query->paginate($perPage) : $query->get();
-    }
-
-    public function updateTransaction(LoanTransaction $transaction, array $validatedData, User $actingOfficer): LoanTransaction
-    {
-        $txIdLog = $transaction->id;
-        Log::info(self::LOG_AREA . "Attempting to update loan transaction ID {$txIdLog}.", ['data_keys' => array_keys($validatedData)]);
-        DB::beginTransaction();
-        try {
-            if (isset($validatedData['return_notes'])) $transaction->return_notes = $validatedData['return_notes'];
-            if (isset($validatedData['issue_notes'])) $transaction->issue_notes = $validatedData['issue_notes'];
-            if (isset($validatedData['status'])) {
-                if (!in_array($validatedData['status'], LoanTransaction::getStatusesList(), true)) {
-                    throw new InvalidArgumentException("Status transaksi tidak sah: {$validatedData['status']}");
-                }
-                $transaction->status = $validatedData['status'];
-            }
-
-            $transaction->save();
-
-            if ($transaction->loanApplication) {
-                $transaction->loanApplication->updateOverallStatusAfterTransaction();
-            }
-            DB::commit();
-            Log::info(self::LOG_AREA . "Loan transaction ID {$txIdLog} updated successfully by User ID {$actingOfficer->id}.");
-            return $transaction->fresh($transaction->getRelations());
-        } catch (Throwable $e) {
-            DB::rollBack();
-            Log::error(self::LOG_AREA . "Error updating loan transaction ID {$txIdLog}: " . $e->getMessage(), ['data' => $validatedData]);
-            throw new RuntimeException(__('Gagal mengemaskini transaksi pinjaman: ') . $e->getMessage(), (int) $e->getCode(), $e);
-        }
-    }
-
-    public function deleteTransaction(LoanTransaction $transaction, User $actingOfficer): bool
-    {
-        $txIdLog = $transaction->id;
-        Log::info(self::LOG_AREA . "Attempting to delete loan transaction ID {$txIdLog} by User ID: {$actingOfficer->id}.");
-
-        DB::beginTransaction();
-        try {
-            $transactionType = $transaction->type;
-            $loanApplication = $transaction->loanApplication()->first();
-
-            /** @var SupportCollection<int, LoanTransactionItem> $itemsToRevert */
-            $itemsToRevert = $transaction->loanTransactionItems()->with('equipment')->get();
-
-            foreach ($itemsToRevert as $txItem) {
-                if (!$txItem->equipment) continue;
-                /** @var Equipment $equipment */
-                $equipment = $txItem->equipment;
-                $revertNote = __("Transaksi ID :txId (:type) dibatalkan oleh :officer.", ['txId' => $txIdLog, 'type' => $transactionType, 'officer' => $actingOfficer->name]);
-
-                if ($transactionType === LoanTransaction::TYPE_ISSUE) {
-                    $this->equipmentService->changeOperationalStatus($equipment, Equipment::STATUS_AVAILABLE, $actingOfficer, $revertNote);
-                } elseif ($transactionType === LoanTransaction::TYPE_RETURN) {
-                    $this->equipmentService->changeOperationalStatus($equipment, Equipment::STATUS_ON_LOAN, $actingOfficer, $revertNote);
-                }
-                $txItem->delete();
-            }
-
-            $deleted = $transaction->delete();
-
-            if ($deleted && $loanApplication) {
-                $loanApplication->updateOverallStatusAfterTransaction();
-                Log::debug(self::LOG_AREA . "Called updateOverallStatusAfterTransaction for LA ID: {$loanApplication->id} after deleting Tx ID {$txIdLog}");
-            }
-
-            DB::commit();
-            Log::info(self::LOG_AREA . "Loan transaction ID {$txIdLog} and its items processed for deletion.");
-            return (bool) $deleted;
-        } catch (Throwable $e) {
-            DB::rollBack();
-            Log::error(self::LOG_AREA . "Error deleting loan transaction ID {$txIdLog}: " . $e->getMessage());
-            throw new RuntimeException(__('Gagal memadam transaksi pinjaman: ') . $e->getMessage(), (int) $e->getCode(), $e);
-        }
     }
 }

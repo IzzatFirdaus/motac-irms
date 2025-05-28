@@ -104,8 +104,8 @@ final class EquipmentIssuedNotification extends Notification implements ShouldQu
         $itemsDetails = $this->issueTransaction->loanTransactionItems->map(function (LoanTransactionItem $item) {
             $equipment = $item->equipment;
             if ($equipment instanceof Equipment) {
-                 $assetTypeDisplay = $equipment->assetTypeDisplay ?? __('Peralatan');
-                 $brandAndModel = trim(($equipment->brand ?? '') . ' ' . ($equipment->model ?? ''));
+                $assetTypeDisplay = $equipment->assetTypeDisplay ?? __('Peralatan');
+                $brandAndModel = trim(($equipment->brand ?? '') . ' ' . ($equipment->model ?? ''));
                 return "{$assetTypeDisplay}" . ($brandAndModel ? " ({$brandAndModel})" : "") . ", Tag: ".($equipment->tag_id ?? '-').", Siri: ".($equipment->serial_number ?? '-')." - Kuantiti: {$item->quantity_transacted}";
             }
             return __("Item ID: :id - Butiran peralatan tidak lengkap.", ['id' => $item->id]);
@@ -118,7 +118,7 @@ final class EquipmentIssuedNotification extends Notification implements ShouldQu
                 $applicationUrl = route($routeName, $applicationId);
             } catch (\Exception $e) {
                 Log::error('Error generating URL for EquipmentIssuedNotification array: ' . $e->getMessage(), ['loan_application_id' => $applicationId]);
-                 $applicationUrl = '#'; // Fallback
+                $applicationUrl = '#'; // Fallback
             }
         }
 

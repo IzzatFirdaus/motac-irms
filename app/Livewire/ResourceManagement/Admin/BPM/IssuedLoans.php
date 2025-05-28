@@ -2,13 +2,13 @@
 
 namespace App\Livewire\ResourceManagement\Admin\BPM;
 
-use App\Models\LoanApplication;
-use App\Models\LoanTransaction; // For constants if used directly in query
-use App\Models\Equipment;       // For constants like ASSET_TYPES_LABELS
-use Illuminate\Support\Str;
+use App\Models\Equipment;
+use App\Models\LoanApplication; // For constants if used directly in query
+use App\Models\LoanTransaction;       // For constants like ASSET_TYPES_LABELS
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Helpers\Helpers; // Assuming your helper for badge classes
+
+// Assuming your helper for badge classes
 
 class IssuedLoans extends Component
 {

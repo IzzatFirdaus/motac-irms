@@ -49,22 +49,6 @@ class EquipmentReturnReminderNotification extends Notification implements Should
         return ['mail', 'database'];
     }
 
-    private function formatDate($date): string
-    {
-        if ($date instanceof Carbon) {
-            return $date->format(config('app.date_format_my', 'd/m/Y'));
-        }
-        if (is_string($date)) {
-            try {
-                return Carbon::parse($date)->format(config('app.date_format_my', 'd/m/Y'));
-            } catch (\Exception $e) {
-                // Log::error("Error parsing date string for formatting: {$date} - {$e->getMessage()}");
-                return __('Tidak dinyatakan');
-            }
-        }
-        return __('Tidak dinyatakan');
-    }
-
     public function toMail(User $notifiable): MailMessage
     {
         $loanApplication = $this->getLoanApplication();
@@ -102,7 +86,7 @@ class EquipmentReturnReminderNotification extends Notification implements Should
             ->line(__("Tarikh pemulangan yang dijangka adalah pada **:date**.", ['date' => $expectedReturnDate]));
 
         if ($level === 'error') {
-             $mailMessage->line(__("Sila pulangkan peralatan tersebut dengan kadar **SEGERA** di **:loc**.", ['loc' => $returnLocation]));
+            $mailMessage->line(__("Sila pulangkan peralatan tersebut dengan kadar **SEGERA** di **:loc**.", ['loc' => $returnLocation]));
         } else {
             $mailMessage->line(__("Sila pastikan peralatan dipulangkan di **:loc** pada atau sebelum tarikh tersebut.", ['loc' => $returnLocation]));
         }
@@ -170,13 +154,13 @@ class EquipmentReturnReminderNotification extends Notification implements Should
             $icon = 'ti ti-alarm-snooze';
         }
         if ($applicationId) {
-             $subject .= __(" (#:id)", ['id' => $applicationId]);
+            $subject .= __(" (#:id)", ['id' => $applicationId]);
         }
 
 
         $applicationUrl = '#';
         $routeName = 'resource-management.my-applications.loan.show';
-         if ($applicationId && Route::has($routeName)) {
+        if ($applicationId && Route::has($routeName)) {
             try {
                 $applicationUrl = route($routeName, ['loan_application' => $applicationId]);
             } catch (\Exception $e) {
@@ -203,5 +187,21 @@ class EquipmentReturnReminderNotification extends Notification implements Should
             'return_location' => $returnLocation,
             'icon' => $icon,
         ];
+    }
+
+    private function formatDate($date): string
+    {
+        if ($date instanceof Carbon) {
+            return $date->format(config('app.date_format_my', 'd/m/Y'));
+        }
+        if (is_string($date)) {
+            try {
+                return Carbon::parse($date)->format(config('app.date_format_my', 'd/m/Y'));
+            } catch (\Exception $e) {
+                // Log::error("Error parsing date string for formatting: {$date} - {$e->getMessage()}");
+                return __('Tidak dinyatakan');
+            }
+        }
+        return __('Tidak dinyatakan');
     }
 }

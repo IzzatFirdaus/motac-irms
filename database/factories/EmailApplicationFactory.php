@@ -161,7 +161,7 @@ class EmailApplicationFactory extends EloquentFactory
             $finalUserId = null;
 
             if (!$isUserIdOnly) {
-                 // Use proposed_email if available, else generate one
+                // Use proposed_email if available, else generate one
                 $finalEmail = $attributes['proposed_email'] ?? ($baseEmail . '@' . config('mail.motac_domain', 'motac.gov.my'));
             }
 

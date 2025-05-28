@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
-use App\Models\Department;
 use App\Models\EmailApplication;
-use App\Models\User; // Using MOTAC User model
-use App\Models\Grade; // For supporting officer grade options if dynamic from DB
+use App\Models\Grade; // Using MOTAC User model
+use App\Models\User; // For supporting officer grade options if dynamic from DB
 use App\Services\EmailApplicationService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -101,9 +100,9 @@ final class EmailApplicationForm extends Component
         $isFinalApplicantSubmission = false;
 
         if (!$this->isEdit || ($this->application && $this->application->status === EmailApplication::STATUS_DRAFT)) {
-             if ($this->cert_info_is_true && $this->cert_data_usage_agreed && $this->cert_email_responsibility_agreed) {
-                 $isFinalApplicantSubmission = true;
-             }
+            if ($this->cert_info_is_true && $this->cert_data_usage_agreed && $this->cert_email_responsibility_agreed) {
+                $isFinalApplicantSubmission = true;
+            }
         }
 
         $rules = [
@@ -172,22 +171,6 @@ final class EmailApplicationForm extends Component
         return $rules;
     }
 
-    protected function messages(): array
-    {
-        return [
-            'applicant_identification_number.regex' => __('Format No. Kad Pengenalan tidak sah (cth: 800101010001).'),
-            'proposed_email.regex' => __('Cadangan e-mel mesti menggunakan domain rasmi :domain.', ['domain' => config('motac.email_provisioning.default_domain', 'motac.gov.my')]),
-            'group_email.regex' => __('Group e-mel mesti menggunakan domain rasmi :domain.', ['domain' => config('motac.email_provisioning.default_domain', 'motac.gov.my')]),
-            'cert_info_is_true.accepted' => __('Anda mesti mengesahkan semua maklumat adalah BENAR.'),
-            'cert_data_usage_agreed.accepted' => __('Anda mesti BERSETUJU maklumat diguna pakai oleh BPM.'),
-            'cert_email_responsibility_agreed.accepted' => __('Anda mesti BERSETUJU untuk bertanggungjawab ke atas e-mel.'),
-            'purpose.required' => __('Sila nyatakan Tujuan/Catatan/Cadangan ID E-mel.'),
-            'purpose.min' => __('Tujuan/Catatan mesti sekurang-kurangnya :min aksara.'),
-            '*.required' => __('Medan ini diperlukan.'),
-            '*.email' => __('Sila masukkan format e-mel yang sah.'),
-        ];
-    }
-
     public function boot(EmailApplicationService $emailApplicationService): void
     {
         $this->emailApplicationService = $emailApplicationService;
@@ -240,53 +223,6 @@ final class EmailApplicationForm extends Component
         $this->is_group_email_request = !empty($this->group_email);
     }
 
-    private function prefillApplicantDetails(User $user): void
-    {
-        $this->applicant_title = $user->title;
-        $this->applicant_name = $user->name;
-        $this->isPassportInputMode = empty($user->identification_number) && !empty($user->passport_number);
-        $this->applicant_identification_number = $user->identification_number;
-        $this->applicant_passport_number = $user->passport_number;
-        $this->applicant_jawatan_gred = ($user->position?->name ?? '') . ($user->grade?->name ? ' (Gred ' . $user->grade->name . ')' : '');
-        $this->applicant_bahagian_unit = $user->department?->name;
-        $this->applicant_level_aras = (string) $user->level;
-        $this->applicant_mobile_number = $user->mobile_number;
-        $this->applicant_personal_email = $user->personal_email ?? $user->email;
-    }
-
-    private function fillFormFromModel(): void
-    {
-        if (!$this->application) return;
-        if ($this->application->user) {
-            $this->prefillApplicantDetails($this->application->user);
-        }
-
-        $this->service_status = $this->application->service_status ?? $this->applicant_name->service_status ?? '';
-        $this->appointment_type = $this->application->appointment_type ?? $this->applicant_name->appointment_type ?? '';
-        $this->previous_department_name = $this->application->previous_department_name;
-        $this->previous_department_email = $this->application->previous_department_email;
-        $this->service_start_date = $this->application->service_start_date ? $this->application->service_start_date->format('Y-m-d') : null;
-        $this->service_end_date = $this->application->service_end_date ? $this->application->service_end_date->format('Y-m-d') : null;
-        $this->purpose = $this->application->purpose;
-        $this->proposed_email = $this->application->proposed_email;
-        $this->is_group_email_request = !empty($this->application->group_email);
-        $this->group_email = $this->application->group_email;
-        $this->group_admin_name = $this->application->group_admin_name;
-        $this->group_admin_email = $this->application->group_admin_email;
-        $this->supporting_officer_id = $this->application->supporting_officer_id;
-        $this->manual_supporting_officer_name = $this->application->supporting_officer_name;
-        $this->manual_supporting_officer_grade_key = $this->application->supporting_officer_grade;
-        $this->manual_supporting_officer_email = $this->application->supporting_officer_email;
-        $this->cert_info_is_true = (bool)$this->application->cert_info_is_true;
-        $this->cert_data_usage_agreed = (bool)$this->application->cert_data_usage_agreed;
-        $this->cert_email_responsibility_agreed = (bool)$this->application->cert_email_responsibility_agreed;
-        $this->current_status_key = $this->application->status;
-        $this->editable_status_for_admin_key = $this->application->status;
-        $this->rejection_reason = $this->application->rejection_reason;
-        $this->final_assigned_email = $this->application->final_assigned_email;
-        $this->final_assigned_user_id = $this->application->final_assigned_user_id;
-    }
-
     public function updatedServiceStatus(string $value): void
     {
         $this->showServiceDates = in_array($value, [User::SERVICE_STATUS_KONTRAK_MYSTEP, User::SERVICE_STATUS_PELAJAR_INDUSTRI]);
@@ -307,20 +243,6 @@ final class EmailApplicationForm extends Component
             $this->applicant_passport_number = null;
         }
         $this->resetValidation($this->isPassportInputMode ? 'applicant_identification_number' : 'applicant_passport_number');
-    }
-
-    private function determineSubmissionStatus(bool $isFinalButtonClicked): string
-    {
-        /** @var User $currentUser */
-        $currentUser = Auth::user();
-
-        if ($this->isEdit && ($currentUser->isAdmin() || $currentUser->isItAdmin())) {
-            return $this->editable_status_for_admin_key;
-        }
-        if ($isFinalButtonClicked) {
-            return EmailApplication::STATUS_PENDING_SUPPORT;
-        }
-        return EmailApplication::STATUS_DRAFT;
     }
 
     public function submitApplication(bool $isFinalSubmission): ?RedirectResponse
@@ -369,8 +291,8 @@ final class EmailApplicationForm extends Component
                 $this->authorize('create', EmailApplication::class);
                 $applicationData['user_id'] = $currentUser->id;
                 $prefilledFields = ['applicant_title', 'applicant_name', 'applicant_identification_number', 'applicant_passport_number', 'applicant_jawatan_gred', 'applicant_bahagian_unit', 'applicant_level_aras', 'applicant_mobile_number', 'applicant_personal_email'];
-                foreach($prefilledFields as $field) {
-                    if(isset($validatedData[$field])) {
+                foreach ($prefilledFields as $field) {
+                    if (isset($validatedData[$field])) {
                         $applicationData[$field] = $validatedData[$field];
                     }
                 }
@@ -381,7 +303,7 @@ final class EmailApplicationForm extends Component
             }
 
             if ($isFinalSubmission && $this->application->status === EmailApplication::STATUS_PENDING_SUPPORT && !$currentUser->isAdmin() && !$currentUser->isItAdmin()) {
-                 $this->emailApplicationService->processApplicationSubmission($this->application, $currentUser);
+                $this->emailApplicationService->processApplicationSubmission($this->application, $currentUser);
             }
 
             DB::commit();
@@ -430,6 +352,91 @@ final class EmailApplicationForm extends Component
         return $this->submitApplication(true);
     }
 
+    public function render(): View
+    {
+        return view('livewire.email-application-form')
+            ->title($this->isEdit ? __('Kemaskini Permohonan Emel/ID') : __('Borang Permohonan Emel/ID Pengguna'));
+    }
+
+    protected function messages(): array
+    {
+        return [
+            'applicant_identification_number.regex' => __('Format No. Kad Pengenalan tidak sah (cth: 800101010001).'),
+            'proposed_email.regex' => __('Cadangan e-mel mesti menggunakan domain rasmi :domain.', ['domain' => config('motac.email_provisioning.default_domain', 'motac.gov.my')]),
+            'group_email.regex' => __('Group e-mel mesti menggunakan domain rasmi :domain.', ['domain' => config('motac.email_provisioning.default_domain', 'motac.gov.my')]),
+            'cert_info_is_true.accepted' => __('Anda mesti mengesahkan semua maklumat adalah BENAR.'),
+            'cert_data_usage_agreed.accepted' => __('Anda mesti BERSETUJU maklumat diguna pakai oleh BPM.'),
+            'cert_email_responsibility_agreed.accepted' => __('Anda mesti BERSETUJU untuk bertanggungjawab ke atas e-mel.'),
+            'purpose.required' => __('Sila nyatakan Tujuan/Catatan/Cadangan ID E-mel.'),
+            'purpose.min' => __('Tujuan/Catatan mesti sekurang-kurangnya :min aksara.'),
+            '*.required' => __('Medan ini diperlukan.'),
+            '*.email' => __('Sila masukkan format e-mel yang sah.'),
+        ];
+    }
+
+    private function prefillApplicantDetails(User $user): void
+    {
+        $this->applicant_title = $user->title;
+        $this->applicant_name = $user->name;
+        $this->isPassportInputMode = empty($user->identification_number) && !empty($user->passport_number);
+        $this->applicant_identification_number = $user->identification_number;
+        $this->applicant_passport_number = $user->passport_number;
+        $this->applicant_jawatan_gred = ($user->position?->name ?? '') . ($user->grade?->name ? ' (Gred ' . $user->grade->name . ')' : '');
+        $this->applicant_bahagian_unit = $user->department?->name;
+        $this->applicant_level_aras = (string) $user->level;
+        $this->applicant_mobile_number = $user->mobile_number;
+        $this->applicant_personal_email = $user->personal_email ?? $user->email;
+    }
+
+    private function fillFormFromModel(): void
+    {
+        if (!$this->application) {
+            return;
+        }
+        if ($this->application->user) {
+            $this->prefillApplicantDetails($this->application->user);
+        }
+
+        $this->service_status = $this->application->service_status ?? $this->applicant_name->service_status ?? '';
+        $this->appointment_type = $this->application->appointment_type ?? $this->applicant_name->appointment_type ?? '';
+        $this->previous_department_name = $this->application->previous_department_name;
+        $this->previous_department_email = $this->application->previous_department_email;
+        $this->service_start_date = $this->application->service_start_date ? $this->application->service_start_date->format('Y-m-d') : null;
+        $this->service_end_date = $this->application->service_end_date ? $this->application->service_end_date->format('Y-m-d') : null;
+        $this->purpose = $this->application->purpose;
+        $this->proposed_email = $this->application->proposed_email;
+        $this->is_group_email_request = !empty($this->application->group_email);
+        $this->group_email = $this->application->group_email;
+        $this->group_admin_name = $this->application->group_admin_name;
+        $this->group_admin_email = $this->application->group_admin_email;
+        $this->supporting_officer_id = $this->application->supporting_officer_id;
+        $this->manual_supporting_officer_name = $this->application->supporting_officer_name;
+        $this->manual_supporting_officer_grade_key = $this->application->supporting_officer_grade;
+        $this->manual_supporting_officer_email = $this->application->supporting_officer_email;
+        $this->cert_info_is_true = (bool)$this->application->cert_info_is_true;
+        $this->cert_data_usage_agreed = (bool)$this->application->cert_data_usage_agreed;
+        $this->cert_email_responsibility_agreed = (bool)$this->application->cert_email_responsibility_agreed;
+        $this->current_status_key = $this->application->status;
+        $this->editable_status_for_admin_key = $this->application->status;
+        $this->rejection_reason = $this->application->rejection_reason;
+        $this->final_assigned_email = $this->application->final_assigned_email;
+        $this->final_assigned_user_id = $this->application->final_assigned_user_id;
+    }
+
+    private function determineSubmissionStatus(bool $isFinalButtonClicked): string
+    {
+        /** @var User $currentUser */
+        $currentUser = Auth::user();
+
+        if ($this->isEdit && ($currentUser->isAdmin() || $currentUser->isItAdmin())) {
+            return $this->editable_status_for_admin_key;
+        }
+        if ($isFinalButtonClicked) {
+            return EmailApplication::STATUS_PENDING_SUPPORT;
+        }
+        return EmailApplication::STATUS_DRAFT;
+    }
+
     private function validateCertificationsIfFinal(bool $isFinalSubmission): void
     {
         if ($isFinalSubmission) {
@@ -437,11 +444,5 @@ final class EmailApplicationForm extends Component
             $this->validateOnly('cert_data_usage_agreed', ['cert_data_usage_agreed' => 'accepted']);
             $this->validateOnly('cert_email_responsibility_agreed', ['cert_email_responsibility_agreed' => 'accepted']);
         }
-    }
-
-    public function render(): View
-    {
-        return view('livewire.email-application-form')
-            ->title($this->isEdit ? __('Kemaskini Permohonan Emel/ID') : __('Borang Permohonan Emel/ID Pengguna'));
     }
 } // Make sure this closing brace is present

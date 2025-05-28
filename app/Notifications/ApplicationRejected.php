@@ -75,7 +75,7 @@ final class ApplicationRejected extends Notification implements ShouldQueue
             $mailMessage->line(__('Sebab penolakan oleh :rejecterName:', ['rejecterName' => $rejecterName]));
             $mailMessage->line($this->rejectionReason);
         } else {
-            $mailMessage->line(__('Permohonan anda ditolak oleh :rejecterName. Tiada sebab khusus dinyatakan.',['rejecterName' => $rejecterName]));
+            $mailMessage->line(__('Permohonan anda ditolak oleh :rejecterName. Tiada sebab khusus dinyatakan.', ['rejecterName' => $rejecterName]));
         }
         $mailMessage->line(''); // spacing
 
@@ -96,10 +96,10 @@ final class ApplicationRejected extends Notification implements ShouldQueue
                 try {
                     $viewApplicationUrl = route($routeName, $routeParameters);
                 } catch (\Exception $e) {
-                     Log::error('Error generating URL for ApplicationRejected mail: '.$e->getMessage(), [
-                        'application_id' => $this->application->id ?? null,
-                        'application_type' => $this->application::class,
-                        'route_name' => $routeName,
+                    Log::error('Error generating URL for ApplicationRejected mail: '.$e->getMessage(), [
+                       'application_id' => $this->application->id ?? null,
+                       'application_type' => $this->application::class,
+                       'route_name' => $routeName,
                     ]);
                     $viewApplicationUrl = '#'; // Fallback
                 }
@@ -144,7 +144,7 @@ final class ApplicationRejected extends Notification implements ShouldQueue
         $routeParameters = [];
         $routeName = null;
 
-         if ($applicationId !== null) {
+        if ($applicationId !== null) {
             if ($isLoanApp) {
                 $routeName = 'resource-management.my-applications.loan.show';
                 $routeParameters = ['loan_application' => $applicationId];
@@ -165,7 +165,7 @@ final class ApplicationRejected extends Notification implements ShouldQueue
                         'application_type' => $applicationMorphClass,
                         'route_name' => $routeName,
                     ]);
-                     $applicationUrl = '#'; // Fallback
+                    $applicationUrl = '#'; // Fallback
                 }
             }
         }

@@ -6,6 +6,7 @@ use App\Models\Approval;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Model;
+
 // use Illuminate\Support\Arr; // Not explicitly used after review
 
 /**

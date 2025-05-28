@@ -3,9 +3,10 @@
 namespace App\Livewire\ResourceManagement\Admin\Equipment;
 
 use App\Models\Equipment;
-use Livewire\Component;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Auth; // Assuming created_by/updated_by are handled by observer
+use Livewire\Component;
+
+// Assuming created_by/updated_by are handled by observer
 
 class EquipmentForm extends Component
 {
@@ -47,6 +48,40 @@ class EquipmentForm extends Component
         }
     }
 
+    public function updated($propertyName): void
+    {
+        $this->validateOnly($propertyName);
+    }
+
+    public function saveEquipment(): void
+    {
+        $validatedData = $this->validate();
+
+        // Map model_name back to model for database saving
+        $dbData = $validatedData;
+        $dbData['model'] = $validatedData['model_name'];
+        unset($dbData['model_name']);
+
+        if ($this->isEditing && $this->equipmentInstance->exists) {
+            $this->equipmentInstance->update($dbData);
+            session()->flash('success', 'Peralatan berjaya dikemaskini.');
+        } else {
+            Equipment::create($dbData); // Assumes BlameableObserver handles created_by
+            session()->flash('success', 'Peralatan baru berjaya ditambah.');
+            $this->resetForm();
+        }
+
+        $this->dispatch('equipmentSaved'); // For refreshing lists or other components
+        // Consider redirecting based on your application flow. The web.php routes might use a controller to show this component.
+        // If this component is full-page, redirect here. Otherwise, the parent page might handle redirection or modal closing.
+        $this->redirectRoute('resource-management.admin.equipment-admin.index'); //
+    }
+
+    public function render()
+    {
+        return view('livewire.resource-management.admin.equipment.equipment-form');
+    }
+
     protected function populateFields(): void
     {
         if ($this->equipmentInstance) {
@@ -81,35 +116,6 @@ class EquipmentForm extends Component
         ];
     }
 
-    public function updated($propertyName): void
-    {
-        $this->validateOnly($propertyName);
-    }
-
-    public function saveEquipment(): void
-    {
-        $validatedData = $this->validate();
-
-        // Map model_name back to model for database saving
-        $dbData = $validatedData;
-        $dbData['model'] = $validatedData['model_name'];
-        unset($dbData['model_name']);
-
-        if ($this->isEditing && $this->equipmentInstance->exists) {
-            $this->equipmentInstance->update($dbData);
-            session()->flash('success', 'Peralatan berjaya dikemaskini.');
-        } else {
-            Equipment::create($dbData); // Assumes BlameableObserver handles created_by
-            session()->flash('success', 'Peralatan baru berjaya ditambah.');
-            $this->resetForm();
-        }
-
-        $this->dispatch('equipmentSaved'); // For refreshing lists or other components
-        // Consider redirecting based on your application flow. The web.php routes might use a controller to show this component.
-        // If this component is full-page, redirect here. Otherwise, the parent page might handle redirection or modal closing.
-         $this->redirectRoute('resource-management.admin.equipment-admin.index'); //
-    }
-
     private function resetForm()
     {
         $this->resetValidation();
@@ -118,10 +124,5 @@ class EquipmentForm extends Component
         $this->equipmentInstance = new Equipment();
         $this->status = $this->equipmentInstance->getAttributes()['status'] ?? Equipment::STATUS_AVAILABLE; //
         $this->condition_status = $this->equipmentInstance->getAttributes()['condition_status'] ?? Equipment::CONDITION_NEW; //
-    }
-
-    public function render()
-    {
-        return view('livewire.resource-management.admin.equipment.equipment-form');
     }
 }

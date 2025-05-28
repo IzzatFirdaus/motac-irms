@@ -109,17 +109,17 @@ class ProvisioningFailedNotification extends Notification implements ShouldQueue
                     // Try generic route if admin route fails or is not available
                     if (Route::has($genericRouteName)) {
                         try {
-                             $viewUrl = route($genericRouteName, ['email_application' => $this->application->id]);
+                            $viewUrl = route($genericRouteName, ['email_application' => $this->application->id]);
                         } catch (\Exception $e_generic) {
-                             Log::error("Error generating generic route for ProvisioningFailedNotification mail: {$e_generic->getMessage()}", ['application_id' => $this->application->id, 'route_name' => $genericRouteName]);
+                            Log::error("Error generating generic route for ProvisioningFailedNotification mail: {$e_generic->getMessage()}", ['application_id' => $this->application->id, 'route_name' => $genericRouteName]);
                         }
                     }
                 }
             } elseif (Route::has($genericRouteName)) {
-                 try {
+                try {
                     $viewUrl = route($genericRouteName, ['email_application' => $this->application->id]);
                 } catch (\Exception $e_generic) {
-                     Log::error("Error generating generic route for ProvisioningFailedNotification mail: {$e_generic->getMessage()}", ['application_id' => $this->application->id, 'route_name' => $genericRouteName]);
+                    Log::error("Error generating generic route for ProvisioningFailedNotification mail: {$e_generic->getMessage()}", ['application_id' => $this->application->id, 'route_name' => $genericRouteName]);
                 }
             }
         }
@@ -132,7 +132,7 @@ class ProvisioningFailedNotification extends Notification implements ShouldQueue
         }
 
 
-        $mailMessage = (new MailMessage)
+        $mailMessage = (new MailMessage())
             ->subject(__('Amaran: Gagal Memproses Akaun E-mel/ID Pengguna - Permohonan #:applicationId', ['applicationId' => $applicationId]))
             ->greeting(__('Salam Pentadbir ICT,'))
             ->error() // Mark as important
@@ -184,24 +184,24 @@ class ProvisioningFailedNotification extends Notification implements ShouldQueue
         $genericRouteName = 'email-applications.show';
 
         if ($applicationId !== null) {
-             if (Route::has($adminRouteName)) {
+            if (Route::has($adminRouteName)) {
                 try {
                     $applicationUrl = route($adminRouteName, ['email_application' => $applicationId]);
                 } catch (\Exception $e) {
                     Log::error("Error generating admin URL for ProvisioningFailedNotification toArray: {$e->getMessage()}", ['application_id' => $applicationId, 'route_name' => $adminRouteName]);
-                     if (Route::has($genericRouteName)) {
+                    if (Route::has($genericRouteName)) {
                         try {
-                             $applicationUrl = route($genericRouteName, ['email_application' => $applicationId]);
+                            $applicationUrl = route($genericRouteName, ['email_application' => $applicationId]);
                         } catch (\Exception $e_generic) {
-                             Log::error("Error generating generic URL for ProvisioningFailedNotification toArray: {$e_generic->getMessage()}", ['application_id' => $applicationId, 'route_name' => $genericRouteName]);
+                            Log::error("Error generating generic URL for ProvisioningFailedNotification toArray: {$e_generic->getMessage()}", ['application_id' => $applicationId, 'route_name' => $genericRouteName]);
                         }
                     }
                 }
             } elseif (Route::has($genericRouteName)) {
-                 try {
+                try {
                     $applicationUrl = route($genericRouteName, ['email_application' => $applicationId]);
                 } catch (\Exception $e_generic) {
-                     Log::error("Error generating generic URL for ProvisioningFailedNotification toArray: {$e_generic->getMessage()}", ['application_id' => $applicationId, 'route_name' => $genericRouteName]);
+                    Log::error("Error generating generic URL for ProvisioningFailedNotification toArray: {$e_generic->getMessage()}", ['application_id' => $applicationId, 'route_name' => $genericRouteName]);
                 }
             }
         }

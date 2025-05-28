@@ -2,8 +2,8 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
-use Illuminate\Contracts\View\View; // Added for return type hint consistency
+use Illuminate\Contracts\View\View;
+use Livewire\Component; // Added for return type hint consistency
 
 // This is a simple Livewire component to render the contact us view.
 // It currently doesn't contain form handling logic.

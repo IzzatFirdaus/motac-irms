@@ -6,19 +6,16 @@ namespace App\Services;
 
 use App\Models\Approval;
 use App\Models\EmailApplication;
-use App\Models\User;
-use App\Models\Grade; // For fetching grade name details
+use App\Models\Grade;
+use App\Models\User; // For fetching grade name details
 // Specific Notification Classes - System Design 5.1, 9.2
 // Notifications are now dispatched via NotificationService
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Config; // For accessing motac config
+use Illuminate\Support\Facades\Log; // For accessing motac config
 use InvalidArgumentException;
 use RuntimeException;
-use Throwable;
 
 final class EmailApplicationService
 {
@@ -98,45 +95,6 @@ final class EmailApplicationService
             Log::info(self::LOG_AREA . "Email application UPDATED successfully.", ['application_id' => $application->id]);
             return $application->fresh($this->defaultEmailApplicationRelations);
         });
-    }
-
-    /**
-     * Helper to set certification fields based on input, preserving existing state if not overridden.
-     * @param array &$applicationData Reference to the data array to be modified for create/update.
-     * @param array $inputData The raw input data from the form.
-     * @param EmailApplication|null $existingApplication Optional existing application for context during updates.
-     */
-    private function setCertificationFields(array &$applicationData, array $inputData, ?EmailApplication $existingApplication = null): void
-    {
-        // Determine the new state of individual certification flags
-        $newCertInfoIsTrue = isset($inputData['cert_info_is_true']) ? (bool)$inputData['cert_info_is_true'] : ($existingApplication?->cert_info_is_true ?? false);
-        $newCertDataUsageAgreed = isset($inputData['cert_data_usage_agreed']) ? (bool)$inputData['cert_data_usage_agreed'] : ($existingApplication?->cert_data_usage_agreed ?? false);
-        $newCertEmailResponsibilityAgreed = isset($inputData['cert_email_responsibility_agreed']) ? (bool)$inputData['cert_email_responsibility_agreed'] : ($existingApplication?->cert_email_responsibility_agreed ?? false);
-
-        // If a master 'certification_accepted' flag is passed and is true, it forces all individual flags to true.
-        if (isset($inputData['certification_accepted']) && $inputData['certification_accepted'] === true) {
-            $newCertInfoIsTrue = true;
-            $newCertDataUsageAgreed = true;
-            $newCertEmailResponsibilityAgreed = true;
-        }
-        // If 'certification_accepted' is explicitly false, it doesn't necessarily mean unchecking all; individual flags dictate.
-
-        $applicationData['cert_info_is_true'] = $newCertInfoIsTrue;
-        $applicationData['cert_data_usage_agreed'] = $newCertDataUsageAgreed;
-        $applicationData['cert_email_responsibility_agreed'] = $newCertEmailResponsibilityAgreed;
-
-        // Update certification_timestamp
-        if ($newCertInfoIsTrue && $newCertDataUsageAgreed && $newCertEmailResponsibilityAgreed) {
-            // If all are true, set/keep timestamp. If previously uncertified and now certified, set new timestamp.
-            $applicationData['certification_timestamp'] = $existingApplication?->certification_timestamp ?? now();
-            if (isset($inputData['certification_accepted']) && $inputData['certification_accepted'] === true && !$existingApplication?->areAllCertificationsComplete()) {
-                 $applicationData['certification_timestamp'] = now(); // Fresh timestamp if master accept flag made it complete
-            }
-        } else {
-            // If any certification is false, clear the timestamp.
-            $applicationData['certification_timestamp'] = null;
-        }
-        unset($applicationData['certification_accepted']); // Remove temporary key
     }
 
 
@@ -235,7 +193,7 @@ final class EmailApplicationService
             $targetUserId = $provisioningDetails['final_assigned_user_id'] ?? $application->final_assigned_user_id; // Can be optional
 
             if (empty($targetEmail)) {
-                 throw new InvalidArgumentException(__('Alamat e-mel yang akan disediakan adalah mandatori.'));
+                throw new InvalidArgumentException(__('Alamat e-mel yang akan disediakan adalah mandatori.'));
             }
 
             // Update application with these target values before calling provisioning service
@@ -270,6 +228,45 @@ final class EmailApplicationService
             }
             return $application->fresh($this->defaultEmailApplicationRelations);
         });
+    }
+
+    /**
+     * Helper to set certification fields based on input, preserving existing state if not overridden.
+     * @param array &$applicationData Reference to the data array to be modified for create/update.
+     * @param array $inputData The raw input data from the form.
+     * @param EmailApplication|null $existingApplication Optional existing application for context during updates.
+     */
+    private function setCertificationFields(array &$applicationData, array $inputData, ?EmailApplication $existingApplication = null): void
+    {
+        // Determine the new state of individual certification flags
+        $newCertInfoIsTrue = isset($inputData['cert_info_is_true']) ? (bool)$inputData['cert_info_is_true'] : ($existingApplication?->cert_info_is_true ?? false);
+        $newCertDataUsageAgreed = isset($inputData['cert_data_usage_agreed']) ? (bool)$inputData['cert_data_usage_agreed'] : ($existingApplication?->cert_data_usage_agreed ?? false);
+        $newCertEmailResponsibilityAgreed = isset($inputData['cert_email_responsibility_agreed']) ? (bool)$inputData['cert_email_responsibility_agreed'] : ($existingApplication?->cert_email_responsibility_agreed ?? false);
+
+        // If a master 'certification_accepted' flag is passed and is true, it forces all individual flags to true.
+        if (isset($inputData['certification_accepted']) && $inputData['certification_accepted'] === true) {
+            $newCertInfoIsTrue = true;
+            $newCertDataUsageAgreed = true;
+            $newCertEmailResponsibilityAgreed = true;
+        }
+        // If 'certification_accepted' is explicitly false, it doesn't necessarily mean unchecking all; individual flags dictate.
+
+        $applicationData['cert_info_is_true'] = $newCertInfoIsTrue;
+        $applicationData['cert_data_usage_agreed'] = $newCertDataUsageAgreed;
+        $applicationData['cert_email_responsibility_agreed'] = $newCertEmailResponsibilityAgreed;
+
+        // Update certification_timestamp
+        if ($newCertInfoIsTrue && $newCertDataUsageAgreed && $newCertEmailResponsibilityAgreed) {
+            // If all are true, set/keep timestamp. If previously uncertified and now certified, set new timestamp.
+            $applicationData['certification_timestamp'] = $existingApplication?->certification_timestamp ?? now();
+            if (isset($inputData['certification_accepted']) && $inputData['certification_accepted'] === true && !$existingApplication?->areAllCertificationsComplete()) {
+                $applicationData['certification_timestamp'] = now(); // Fresh timestamp if master accept flag made it complete
+            }
+        } else {
+            // If any certification is false, clear the timestamp.
+            $applicationData['certification_timestamp'] = null;
+        }
+        unset($applicationData['certification_accepted']); // Remove temporary key
     }
 
     // Other methods like deleteApplication, findApplicationById would follow similar logging and transaction patterns.

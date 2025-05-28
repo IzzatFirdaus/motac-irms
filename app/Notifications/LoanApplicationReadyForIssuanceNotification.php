@@ -42,7 +42,7 @@ class LoanApplicationReadyForIssuanceNotification extends Notification implement
         $startDate = $loanApp->loan_start_date instanceof Carbon ? $loanApp->loan_start_date->format('d/m/Y') : ($loanApp->loan_start_date ?? 'N/A'); //
         $endDate = $loanApp->loan_end_date instanceof Carbon ? $loanApp->loan_end_date->format('d/m/Y') : ($loanApp->loan_end_date ?? 'N/A'); //
 
-        $mailMessage = (new MailMessage)
+        $mailMessage = (new MailMessage())
             ->subject(__('Tindakan Diperlukan: Permohonan Pinjaman Sedia Untuk Pengeluaran (#:id)', ['id' => $loanApplicationId]))
             ->greeting(__('Salam Sejahtera, Staf BPM,')) // Greeting to BPM staff
             ->line(__('Permohonan Pinjaman Peralatan ICT berikut oleh :applicantName (#:id) telah diluluskan dan sedia untuk proses pengeluaran peralatan.', ['applicantName' => $applicantName, 'id' => $loanApplicationId]))

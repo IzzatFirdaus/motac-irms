@@ -95,18 +95,6 @@ class LoanTransactionFactory extends EloquentFactory
         ];
     }
 
-    private function getApplicationFromAttributes(array $attributes): LoanApplication
-    {
-        $application = null;
-        if (isset($attributes['loan_application_id'])) {
-            $appId = $attributes['loan_application_id'];
-            if (is_scalar($appId) && !empty($appId)) {
-                $application = LoanApplication::find($appId);
-            }
-        }
-        return $application ?? (LoanApplication::inRandomOrder()->first() ?? LoanApplication::factory()->create());
-    }
-
     public function issue(): static
     {
         return $this->state(function (array $attributes) {
@@ -127,7 +115,9 @@ class LoanTransactionFactory extends EloquentFactory
                 'loan_application_id' => $application->id,
             ];
         })->afterCreating(function (LoanTransaction $transaction) {
-            if ($transaction->loanTransactionItems()->count() > 0) return;
+            if ($transaction->loanTransactionItems()->count() > 0) {
+                return;
+            }
 
             $loanApplication = $transaction->loanApplication()->first(); // Ensure it's the correct instance
             // $auditUserId = $transaction->created_by ?? (User::first()?->id ?? User::factory()->create()->id); // Blameable
@@ -137,7 +127,7 @@ class LoanTransactionFactory extends EloquentFactory
                     /** @var \App\Models\LoanApplicationItem $appItem */
                     // Issue quantity based on approved, less already issued for this appItem
                     $alreadyIssuedForAppItem = LoanTransactionItem::where('loan_application_item_id', $appItem->id)
-                                                ->whereHas('loanTransaction', fn($q) => $q->where('type', LoanTransaction::TYPE_ISSUE))
+                                                ->whereHas('loanTransaction', fn ($q) => $q->where('type', LoanTransaction::TYPE_ISSUE))
                                                 ->sum('quantity_transacted');
                     $quantityToIssue = ($appItem->quantity_approved ?? 0) - $alreadyIssuedForAppItem;
 
@@ -147,7 +137,9 @@ class LoanTransactionFactory extends EloquentFactory
                             ->take($quantityToIssue)->get();
 
                         foreach ($availableEquipment as $eq) {
-                            if ($quantityToIssue <= 0) break;
+                            if ($quantityToIssue <= 0) {
+                                break;
+                            }
                             LoanTransactionItem::factory()
                                 ->for($transaction)
                                 ->for($eq, 'equipment')
@@ -174,7 +166,7 @@ class LoanTransactionFactory extends EloquentFactory
             $transactionDate = Carbon::parse($attributes['transaction_date'] ?? $this->faker->dateTimeBetween(Carbon::parse($issueDate)->addDay(), Carbon::parse($application->loan_end_date ?? 'now')->addDays(5)));
             $returnNotes = $this->faker->optional(0.4)->sentence;
 
-             // Find a related issue transaction
+            // Find a related issue transaction
             $relatedIssueTx = LoanTransaction::where('loan_application_id', $application->id)
                                 ->where('type', LoanTransaction::TYPE_ISSUE)
                                 ->latest('transaction_date')
@@ -193,7 +185,9 @@ class LoanTransactionFactory extends EloquentFactory
                 'related_transaction_id' => $relatedIssueTx?->id,
             ];
         })->afterCreating(function (LoanTransaction $transaction) {
-            if ($transaction->loanTransactionItems()->count() > 0) return;
+            if ($transaction->loanTransactionItems()->count() > 0) {
+                return;
+            }
 
             // $auditUserId = $transaction->created_by ?? (User::first()?->id ?? User::factory()->create()->id); // Blameable
             $relatedIssueTransactionId = $transaction->related_transaction_id ??
@@ -232,5 +226,17 @@ class LoanTransactionFactory extends EloquentFactory
             'deleted_at' => now(),
             // 'deleted_by' handled by BlameableObserver
         ]);
+    }
+
+    private function getApplicationFromAttributes(array $attributes): LoanApplication
+    {
+        $application = null;
+        if (isset($attributes['loan_application_id'])) {
+            $appId = $attributes['loan_application_id'];
+            if (is_scalar($appId) && !empty($appId)) {
+                $application = LoanApplication::find($appId);
+            }
+        }
+        return $application ?? (LoanApplication::inRandomOrder()->first() ?? LoanApplication::factory()->create());
     }
 }

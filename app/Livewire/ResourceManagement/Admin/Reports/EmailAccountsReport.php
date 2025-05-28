@@ -5,16 +5,15 @@ namespace App\Livewire\ResourceManagement\Admin\Reports;
 use App\Models\EmailApplication; // Example model
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\Attributes\Layout;
 
 #[Layout('layouts.app')]
 class EmailAccountsReport extends Component
 {
-    use AuthorizesRequests, WithPagination;
-
-    protected string $paginationTheme = 'bootstrap';
+    use AuthorizesRequests;
+    use WithPagination;
 
     // Filter properties
     public ?string $filterStatus = null;
@@ -26,6 +25,8 @@ class EmailAccountsReport extends Component
     // Sorting properties
     public string $sortBy = 'created_at';
     public string $sortDirection = 'desc';
+
+    protected string $paginationTheme = 'bootstrap';
 
     public function mount()
     {
@@ -43,7 +44,7 @@ class EmailAccountsReport extends Component
                 $q->where('proposed_email', 'like', '%' . $this->searchTerm . '%')
                   ->orWhere('final_assigned_email', 'like', '%' . $this->searchTerm . '%')
                   ->orWhereHas('user', function ($userQuery) {
-                        $userQuery->where('name', 'like', '%' . $this->searchTerm . '%');
+                      $userQuery->where('name', 'like', '%' . $this->searchTerm . '%');
                   });
             });
         }
@@ -53,7 +54,7 @@ class EmailAccountsReport extends Component
         }
 
         if ($this->filterServiceStatus) {
-            $query->whereHas('user', function($q) {
+            $query->whereHas('user', function ($q) {
                 $q->where('service_status', $this->filterServiceStatus);
             });
         }

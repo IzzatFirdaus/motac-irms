@@ -59,18 +59,6 @@ final class ApplicationSubmitted extends Notification implements ShouldQueue
     }
 
     /**
-     * Format a date string using the application's configured format.
-     */
-    private function formatDate(?Carbon $date): string
-    {
-        if ($date instanceof Carbon) {
-            // Use translatedFormat for month names if needed, or simple format for d/m/Y
-            return $date->translatedFormat(config('app.date_format_my_short', 'd M Y'));
-        }
-        return __('Tidak Dinyatakan');
-    }
-
-    /**
      * Get the mail representation of the notification.
      * Design Language: Email Design Specifics (Official Branding & Tone, Clear Subject, Structured Content)
      *
@@ -152,8 +140,8 @@ final class ApplicationSubmitted extends Notification implements ShouldQueue
                     $viewUrl = url('/'); // Fallback to dashboard or home
                 }
             } else {
-                 Log::warning("Route '{$routeName}' not found for ApplicationSubmitted mail notification.", ['application_id' => $this->application->id]);
-                 $viewUrl = url('/'); // Fallback
+                Log::warning("Route '{$routeName}' not found for ApplicationSubmitted mail notification.", ['application_id' => $this->application->id]);
+                $viewUrl = url('/'); // Fallback
             }
         }
 
@@ -220,5 +208,17 @@ final class ApplicationSubmitted extends Notification implements ShouldQueue
             'url' => ($viewUrl !== '#' && filter_var($viewUrl, FILTER_VALIDATE_URL)) ? $viewUrl : null,
             'notification_type' => 'application_event', // For categorizing notifications
         ];
+    }
+
+    /**
+     * Format a date string using the application's configured format.
+     */
+    private function formatDate(?Carbon $date): string
+    {
+        if ($date instanceof Carbon) {
+            // Use translatedFormat for month names if needed, or simple format for d/m/Y
+            return $date->translatedFormat(config('app.date_format_my_short', 'd M Y'));
+        }
+        return __('Tidak Dinyatakan');
     }
 }

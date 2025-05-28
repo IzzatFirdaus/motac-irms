@@ -30,7 +30,8 @@ use Illuminate\Database\Eloquent\SoftDeletes; // Assuming you want soft deletes 
  */
 class Department extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
 
     public const BRANCH_TYPE_STATE = 'state';
     public const BRANCH_TYPE_HQ = 'headquarters';
@@ -55,6 +56,11 @@ class Department extends Model
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
     ];
+
+    public static function getBranchTypeOptions(): array
+    {
+        return self::$BRANCH_TYPE_LABELS;
+    }
 
     // Relationships
     public function users(): HasMany
@@ -88,10 +94,5 @@ class Department extends Model
     public function deleterInfo(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by');
-    }
-
-    public static function getBranchTypeOptions(): array
-    {
-        return self::$BRANCH_TYPE_LABELS;
     }
 }

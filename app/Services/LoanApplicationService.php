@@ -9,7 +9,7 @@ use App\Models\LoanApplication;
 use App\Models\LoanApplicationItem;
 use App\Models\LoanTransaction;
 use App\Models\User;
-use App\Notifications\ApplicationSubmitted; // System Design 5.2
+// System Design 5.2
 use Illuminate\Auth\Access\AuthorizationException as IlluminateAuthorizationException; // Laravel's standard auth exception
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -17,10 +17,11 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth; // For default acting user ID
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Notification as NotificationFacade; // For sending notifications
+// For sending notifications
 use InvalidArgumentException; // Standard PHP exception
 use RuntimeException;         // Standard PHP exception
-use Throwable;                // Catch all throwables
+
+// Catch all throwables
 
 final class LoanApplicationService
 {
@@ -67,7 +68,7 @@ final class LoanApplicationService
             if (!$isPrivilegedUser && (int) $filters['user_id'] !== $requestingUser->id) {
                 // Non-privileged user trying to access other user's applications - restrict to their own
                 $query->where('user_id', $requestingUser->id);
-                 Log::warning(self::LOG_AREA."Unauthorized attempt to filter by user_id.", ['requesting_user_id' => $requestingUser->id, 'target_user_id' => $filters['user_id']]);
+                Log::warning(self::LOG_AREA."Unauthorized attempt to filter by user_id.", ['requesting_user_id' => $requestingUser->id, 'target_user_id' => $filters['user_id']]);
             } else {
                 $query->where('user_id', (int) $filters['user_id']);
             }
@@ -92,14 +93,18 @@ final class LoanApplicationService
             $query->where(function ($q) use ($term) {
                 $q->where('id', 'like', $term) // Search by ID
                   ->orWhere('purpose', 'like', $term)
-                  ->orWhereHas('user', fn($uq) => $uq->where('name', 'like', $term));
+                  ->orWhereHas('user', fn ($uq) => $uq->where('name', 'like', $term));
             });
         }
 
         $orderBy = $filters['order_by'] ?? 'updated_at';
         $orderDirection = $filters['order_direction'] ?? 'desc';
-        if (!in_array($orderBy, ['created_at', 'updated_at', 'loan_start_date', 'status'])) $orderBy = 'updated_at';
-        if (!in_array($orderDirection, ['asc', 'desc'])) $orderDirection = 'desc';
+        if (!in_array($orderBy, ['created_at', 'updated_at', 'loan_start_date', 'status'])) {
+            $orderBy = 'updated_at';
+        }
+        if (!in_array($orderDirection, ['asc', 'desc'])) {
+            $orderDirection = 'desc';
+        }
 
         $perPage = isset($filters['per_page']) && is_numeric($filters['per_page']) ? (int) $filters['per_page'] : 15;
         return $query->orderBy($orderBy, $orderDirection)->paginate($perPage);
@@ -123,7 +128,7 @@ final class LoanApplicationService
             throw new InvalidArgumentException(__('Pegawai Penyokong mesti dipilih untuk menghantar permohonan.'));
         }
         if (empty($validatedData['applicant_confirmation']) || $validatedData['applicant_confirmation'] !== true) { // Stricter check
-             throw new InvalidArgumentException(__('Perakuan pemohon mesti diterima sebelum penghantaran.'));
+            throw new InvalidArgumentException(__('Perakuan pemohon mesti diterima sebelum penghantaran.'));
         }
 
         /** @var User $supportingOfficer */
@@ -135,12 +140,12 @@ final class LoanApplicationService
         // Validate Supporting Officer's Grade - System Design 3.3, 7.2
         $minSupportGradeLevel = (int) config('motac.approval.min_loan_support_grade_level', 41);
         if (!$supportingOfficer->grade || (int) $supportingOfficer->grade->level < $minSupportGradeLevel) {
-             Log::warning(self::LOG_AREA."Supporting Officer Grade Check Failed.", ['officer_id' => $supportingOfficer->id, 'officer_grade_level' => $supportingOfficer->grade?->level, 'required_level' => $minSupportGradeLevel, 'application_user_id' => $applicantId]);
-             throw new InvalidArgumentException(__("Pegawai Penyokong yang dipilih (:name) tidak memenuhi syarat minima gred (Gred :minGrade atau setara). Gred semasa: :currentGrade", [
-                 'name' => $supportingOfficer->name,
-                 'minGrade' => $minSupportGradeLevel, // Consider fetching grade name for $minSupportGradeLevel for better message
-                 'currentGrade' => $supportingOfficer->grade?->name ?? __('Tidak Dinyatakan')
-                ]));
+            Log::warning(self::LOG_AREA."Supporting Officer Grade Check Failed.", ['officer_id' => $supportingOfficer->id, 'officer_grade_level' => $supportingOfficer->grade?->level, 'required_level' => $minSupportGradeLevel, 'application_user_id' => $applicantId]);
+            throw new InvalidArgumentException(__("Pegawai Penyokong yang dipilih (:name) tidak memenuhi syarat minima gred (Gred :minGrade atau setara). Gred semasa: :currentGrade", [
+                'name' => $supportingOfficer->name,
+                'minGrade' => $minSupportGradeLevel, // Consider fetching grade name for $minSupportGradeLevel for better message
+                'currentGrade' => $supportingOfficer->grade?->name ?? __('Tidak Dinyatakan')
+               ]));
         }
 
         return DB::transaction(function () use ($validatedData, $applicant, $supportingOfficer, $applicantId) {
@@ -189,7 +194,7 @@ final class LoanApplicationService
             throw new RuntimeException(__('Pegawai Penyokong mesti ditetapkan sebelum permohonan boleh dihantar. Sila kemaskini draf.'));
         }
         if (empty($application->applicant_confirmation_timestamp)) {
-             throw new RuntimeException(__('Perakuan pemohon mesti diterima sebelum penghantaran. Sila kemaskini draf dan sahkan perakuan.'));
+            throw new RuntimeException(__('Perakuan pemohon mesti diterima sebelum penghantaran. Sila kemaskini draf dan sahkan perakuan.'));
         }
 
         /** @var User $supportingOfficer */
@@ -218,7 +223,7 @@ final class LoanApplicationService
                 $this->approvalService->initiateApprovalWorkflow($application, $submitter, Approval::STAGE_LOAN_SUPPORT_REVIEW, $supportingOfficer);
             } else {
                 // Re-notify if task already exists but application is resubmitted
-                 Log::info(self::LOG_AREA . "Existing pending approval task found for resubmission.", ['approval_id' => $existingPendingSupportApproval->id]);
+                Log::info(self::LOG_AREA . "Existing pending approval task found for resubmission.", ['approval_id' => $existingPendingSupportApproval->id]);
                 $this->notificationService->notifyApproverApplicationNeedsAction($existingPendingSupportApproval, $application, $supportingOfficer);
             }
 
@@ -383,7 +388,7 @@ final class LoanApplicationService
             /** @var \App\Models\LoanTransactionItem $originalIssuedItem */
             //$originalIssuedItem = AppLoanTransactionItemModel::findOrFail($item['loan_transaction_item_id']);
             if ($originalIssuedItem->loan_transaction_id !== $issueTransaction->id || (int)$originalIssuedItem->equipment_id !== (int)$item['equipment_id']) {
-                 throw new InvalidArgumentException(__("Item rujukan pengeluaran (ID: :itemRefId) tidak sepadan atau tidak sah untuk item peralatan (ID: :eqId).", ['itemRefId' => $item['loan_transaction_item_id'], 'eqId' => $item['equipment_id']]));
+                throw new InvalidArgumentException(__("Item rujukan pengeluaran (ID: :itemRefId) tidak sepadan atau tidak sah untuk item peralatan (ID: :eqId).", ['itemRefId' => $item['loan_transaction_item_id'], 'eqId' => $item['equipment_id']]));
             }
 
             $serviceItemData[] = [
@@ -431,12 +436,12 @@ final class LoanApplicationService
             ->with($this->defaultLoanApplicationRelations); // Eager load details
 
         if (!empty($filters['search_term'])) {
-             $term = '%' . $filters['search_term'] . '%';
-             $query->where(function ($q) use ($term) {
+            $term = '%' . $filters['search_term'] . '%';
+            $query->where(function ($q) use ($term) {
                 $q->where('id', 'like', $term)
                   ->orWhere('purpose', 'like', $term)
-                  ->orWhereHas('user', fn($uq) => $uq->where('name', 'like', $term))
-                  ->orWhereHas('responsibleOfficer', fn($roq) => $roq->where('name', 'like', $term));
+                  ->orWhereHas('user', fn ($uq) => $uq->where('name', 'like', $term))
+                  ->orWhereHas('responsibleOfficer', fn ($roq) => $roq->where('name', 'like', $term));
             });
         }
         // Add other filters as needed (e.g., by department, by due date range for overdue)

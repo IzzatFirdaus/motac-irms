@@ -50,8 +50,8 @@ class StoreEmailApplicationRequest extends FormRequest
                 Rule::requiredIf(fn () => $this->input('appointment_type') === User::APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN),
                 'nullable', 'email:rfc,dns', 'max:255'
             ],
-            'service_start_date' => ['nullable', 'date_format:Y-m-d', Rule::requiredIf(fn() => in_array($this->input('service_status'), [User::SERVICE_STATUS_KONTRAK_MYSTEP, User::SERVICE_STATUS_PELAJAR_INDUSTRI]))],
-            'service_end_date' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:service_start_date', Rule::requiredIf(fn() => in_array($this->input('service_status'), [User::SERVICE_STATUS_KONTRAK_MYSTEP, User::SERVICE_STATUS_PELAJAR_INDUSTRI]))],
+            'service_start_date' => ['nullable', 'date_format:Y-m-d', Rule::requiredIf(fn () => in_array($this->input('service_status'), [User::SERVICE_STATUS_KONTRAK_MYSTEP, User::SERVICE_STATUS_PELAJAR_INDUSTRI]))],
+            'service_end_date' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:service_start_date', Rule::requiredIf(fn () => in_array($this->input('service_status'), [User::SERVICE_STATUS_KONTRAK_MYSTEP, User::SERVICE_STATUS_PELAJAR_INDUSTRI]))],
 
             'application_reason_notes' => ['required', 'string', 'min:10', 'max:2000'],
             'proposed_email' => [
@@ -76,8 +76,8 @@ class StoreEmailApplicationRequest extends FormRequest
                  ]),
             ],
             'group_email' => ['nullable', 'email:rfc,dns', 'max:255', Rule::unique('email_applications', 'group_email')->ignore($this->email_application?->id)->whereNull('deleted_at')],
-            'contact_person_name' => ['nullable', 'string', 'max:255', Rule::requiredIf(fn() => !empty($this->input('group_email')))],
-            'contact_person_email' => ['nullable', 'email:rfc,dns', 'max:255', Rule::requiredIf(fn() => !empty($this->input('group_email')))],
+            'contact_person_name' => ['nullable', 'string', 'max:255', Rule::requiredIf(fn () => !empty($this->input('group_email')))],
+            'contact_person_email' => ['nullable', 'email:rfc,dns', 'max:255', Rule::requiredIf(fn () => !empty($this->input('group_email')))],
 
             'supporting_officer_id' => ['nullable', 'integer', 'exists:users,id'],
             'supporting_officer_name' => [Rule::requiredIf(empty($this->supporting_officer_id)), 'nullable', 'string', 'max:255'],

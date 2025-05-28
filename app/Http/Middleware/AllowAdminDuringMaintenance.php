@@ -2,12 +2,12 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\HttpException; // For 503 status
-use App\Models\User; // For type hinting
+use Symfony\Component\HttpFoundation\Response; // For 503 status
+use Symfony\Component\HttpKernel\Exception\HttpException; // For type hinting
 
 class AllowAdminDuringMaintenance
 {

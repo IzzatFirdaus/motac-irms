@@ -2,32 +2,30 @@
 
 namespace App\Providers;
 
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
-use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Event;
-
-// Models to be observed by BlameableObserver
-use App\Models\User;
+use App\Models\Approval;
 use App\Models\Department;
-use App\Models\Position;
-use App\Models\Grade;
 use App\Models\EmailApplication;
 use App\Models\Equipment;
+// Models to be observed by BlameableObserver
 use App\Models\EquipmentCategory;
-use App\Models\SubCategory as EquipmentSubCategory; // Using alias for clarity
-use App\Models\Location as EquipmentLocation;   // Using alias for clarity
+use App\Models\Grade;
+use App\Models\Import;
 use App\Models\LoanApplication;
 use App\Models\LoanApplicationItem;
 use App\Models\LoanTransaction;
 use App\Models\LoanTransactionItem;
-use App\Models\Approval;
-use App\Models\Setting;     // If settings are database-driven and auditable
-use App\Models\Import;      // If import processes are auditable
-use App\Models\Notification as CustomNotification; // Aliased to avoid conflict with Illuminate\Notifications\Notification
-
-// Observer
+use App\Models\Location as EquipmentLocation; // Using alias for clarity
+use App\Models\Notification as CustomNotification;   // Using alias for clarity
+use App\Models\Position;
+use App\Models\Setting;
+use App\Models\SubCategory as EquipmentSubCategory;
+use App\Models\User;
 use App\Observers\BlameableObserver;
+use Illuminate\Auth\Events\Registered;     // If settings are database-driven and auditable
+use Illuminate\Auth\Listeners\SendEmailVerificationNotification;      // If import processes are auditable
+use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider; // Aliased to avoid conflict with Illuminate\Notifications\Notification
+// Observer
+use Illuminate\Support\Facades\Event;
 
 class EventServiceProvider extends ServiceProvider
 {

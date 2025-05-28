@@ -71,7 +71,7 @@ final class EquipmentIncidentNotification extends Notification implements Should
             $detailsHeader = __('Butiran peralatan yang rosak:');
         }
 
-        $mailMessage = (new MailMessage)
+        $mailMessage = (new MailMessage())
             ->subject($subject)
             ->greeting($greetingLine)
             ->line($introLine)

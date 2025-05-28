@@ -39,7 +39,8 @@ use Illuminate\Support\Str;
  */
 class LoanApplicationItem extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
 
     protected $table = 'loan_application_items';
 
@@ -144,7 +145,7 @@ class LoanApplicationItem extends Model
                 $issuedQty += $item->quantity_transacted;
             } elseif ($item->loanTransaction?->type === LoanTransaction::TYPE_RETURN && in_array($item->status, LoanTransactionItem::$RETURN_APPLICABLE_STATUSES)) {
                 // Only count actual returns, not "reported_lost" as "returned quantity" unless business logic dictates
-                if(!in_array($item->status, [LoanTransactionItem::STATUS_ITEM_REPORTED_LOST])) {
+                if (!in_array($item->status, [LoanTransactionItem::STATUS_ITEM_REPORTED_LOST])) {
                     $returnedQty += $item->quantity_transacted;
                 }
             }

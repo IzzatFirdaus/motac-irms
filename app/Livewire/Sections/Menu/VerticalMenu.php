@@ -4,8 +4,8 @@ namespace App\Livewire\Sections\Menu;
 
 use App\Models\User; // Ensure this model exists and is correctly namespaced
 use Illuminate\Support\Facades\Auth;
-use Livewire\Component;
-use Illuminate\Support\Facades\Log; // Optional: for debugging roles
+use Illuminate\Support\Facades\Log;
+use Livewire\Component; // Optional: for debugging roles
 
 class VerticalMenu extends Component
 {

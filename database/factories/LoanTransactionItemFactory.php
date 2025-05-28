@@ -34,7 +34,7 @@ class LoanTransactionItemFactory extends EloquentFactory
             $loanApplicationItemId = $appItem?->id;
 
             if (!$loanApplicationItemId) { // Fallback to any item from the application
-                 $loanApplicationItemId = $loanTransaction->loanApplication->applicationItems()->inRandomOrder()->first()?->id;
+                $loanApplicationItemId = $loanTransaction->loanApplication->applicationItems()->inRandomOrder()->first()?->id;
             }
         }
 
@@ -62,7 +62,7 @@ class LoanTransactionItemFactory extends EloquentFactory
             } elseif ($chosenStatusKey === LoanTransactionItem::VAL_STATUS_UNSERVICEABLE) {
                 $conditionOnReturnKey = Equipment::CONDITION_UNSERVICEABLE;
             } else { // For reported_lost or other general returned statuses
-                 $conditionOnReturnKey = Arr::random(array_keys($itemConditionStatuses ?: [Equipment::CONDITION_FAIR])); // Fallback condition
+                $conditionOnReturnKey = Arr::random(array_keys($itemConditionStatuses ?: [Equipment::CONDITION_FAIR])); // Fallback condition
             }
         }
 
@@ -94,12 +94,12 @@ class LoanTransactionItemFactory extends EloquentFactory
     public function returnedGood(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => LoanTransactionItem::VAL_STATUS_RETURNED_GOOD, 
+            'status' => LoanTransactionItem::VAL_STATUS_RETURNED_GOOD,
             'condition_on_return' => Equipment::CONDITION_GOOD, // Matches Equipment condition
             'accessories_checklist_return' => $attributes['accessories_checklist_issue'] ?? json_encode($this->faker->randomElements(['Power Adapter', 'Mouse', 'Bag'], $this->faker->numberBetween(1, 3))),
         ]);
     }
-     public function returnedDamaged(): static
+    public function returnedDamaged(): static
     {
         $damageConditions = [Equipment::CONDITION_MINOR_DAMAGE, Equipment::CONDITION_MAJOR_DAMAGE, Equipment::CONDITION_UNSERVICEABLE];
         return $this->state(fn (array $attributes) => [

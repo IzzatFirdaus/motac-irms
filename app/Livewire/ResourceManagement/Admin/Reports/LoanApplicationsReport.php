@@ -2,20 +2,18 @@
 
 namespace App\Livewire\ResourceManagement\Admin\Reports;
 
-use App\Models\LoanApplication; // Example model
-use App\Models\Department;
-use App\Models\User;
+use App\Models\Department; // Example model
+use App\Models\LoanApplication;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\Attributes\Layout;
 
 #[Layout('layouts.app')]
 class LoanApplicationsReport extends Component
 {
-    use AuthorizesRequests, WithPagination;
-
-    protected string $paginationTheme = 'bootstrap';
+    use AuthorizesRequests;
+    use WithPagination;
 
     // Filter properties
     public ?string $filterStatus = null;
@@ -27,6 +25,8 @@ class LoanApplicationsReport extends Component
     // Sorting properties
     public string $sortBy = 'created_at';
     public string $sortDirection = 'desc';
+
+    protected string $paginationTheme = 'bootstrap';
 
     public function mount()
     {
@@ -42,7 +42,7 @@ class LoanApplicationsReport extends Component
                 $q->where('id', 'like', '%' . $this->searchTerm . '%')
                   ->orWhere('purpose', 'like', '%' . $this->searchTerm . '%')
                   ->orWhereHas('user', function ($userQuery) {
-                        $userQuery->where('name', 'like', '%' . $this->searchTerm . '%');
+                      $userQuery->where('name', 'like', '%' . $this->searchTerm . '%');
                   });
             });
         }

@@ -2,20 +2,19 @@
 
 namespace App\Livewire\ResourceManagement\Admin\Reports;
 
-use App\Models\User; // Example model
-use App\Models\Department;
-use Spatie\Permission\Models\Role;
+use App\Models\Department; // Example model
+use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\Attributes\Layout;
+use Spatie\Permission\Models\Role;
 
 #[Layout('layouts.app')]
 class UserActivityReport extends Component
 {
-    use AuthorizesRequests, WithPagination;
-
-    protected string $paginationTheme = 'bootstrap';
+    use AuthorizesRequests;
+    use WithPagination;
 
     // Filter properties
     public string $searchTerm = ''; // Search by user name/email
@@ -25,6 +24,8 @@ class UserActivityReport extends Component
     // Sorting properties
     public string $sortBy = 'name';
     public string $sortDirection = 'asc';
+
+    protected string $paginationTheme = 'bootstrap';
 
     public function mount()
     {
@@ -49,7 +50,7 @@ class UserActivityReport extends Component
             $query->where('department_id', $this->filterDepartmentId);
         }
         if ($this->filterRoleName) {
-            $query->whereHas('roles', function($q){
+            $query->whereHas('roles', function ($q) {
                 $q->where('name', $this->filterRoleName);
             });
         }

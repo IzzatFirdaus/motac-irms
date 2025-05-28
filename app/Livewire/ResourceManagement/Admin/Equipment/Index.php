@@ -2,22 +2,23 @@
 
 namespace App\Livewire\ResourceManagement\Admin\Equipment;
 
-use App\Models\Equipment;
-use App\Models\Department; // For department filter/selection
+use App\Models\Department;
+use App\Models\Equipment; // For department filter/selection
 // use App\Models\User; // For created_by/updated_by names, not directly instantiated
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Attributes\Layout;
-use Livewire\Component;
-use Livewire\WithPagination;
 use Illuminate\Support\Facades\Log;
-// use App\Helpers\Helpers; // For status colors (used in Blade)
+use Illuminate\Validation\Rule as ValidationRule;
 use Illuminate\View\View;
-use Illuminate\Validation\Rule as ValidationRule; // Aliased
+use Livewire\Attributes\Layout;
+// use App\Helpers\Helpers; // For status colors (used in Blade)
+use Livewire\Component;
+use Livewire\WithPagination; // Aliased
 
 #[Layout('layouts.app')]
 class Index extends Component
 {
-    use AuthorizesRequests, WithPagination;
+    use AuthorizesRequests;
+    use WithPagination;
 
     public string $searchTerm = '';
     public string $filterAssetType = '';
@@ -110,25 +111,6 @@ class Index extends Component
         return defined(Equipment::class . '::$CONDITION_STATUSES_LABELS') ? Equipment::$CONDITION_STATUSES_LABELS : [];
     }
 
-    // Validation rules defined as a method
-    protected function formRules(bool $isEditMode = false, ?int $equipmentId = null): array
-    {
-        return [
-            'asset_type' => ['required', 'string', 'max:255', ValidationRule::in(array_keys($this->assetTypeOptionsProperty))],
-            'brand' => 'nullable|string|max:255',
-            'model_name' => 'nullable|string|max:255',
-            'serial_number' => ['required', 'string', 'max:255', $isEditMode ? ValidationRule::unique('equipment', 'serial_number')->ignore($equipmentId) : ValidationRule::unique('equipment', 'serial_number')],
-            'tag_id' => ['required', 'string', 'max:255', $isEditMode ? ValidationRule::unique('equipment', 'tag_id')->ignore($equipmentId) : ValidationRule::unique('equipment', 'tag_id')],
-            'purchase_date' => 'nullable|date_format:Y-m-d',
-            'warranty_expiry_date' => 'nullable|date_format:Y-m-d|after_or_equal:purchase_date',
-            'status' => ['required', 'string', ValidationRule::in(array_keys($this->statusOptionsProperty))],
-            'current_location' => 'nullable|string|max:255',
-            'notes' => 'nullable|string|max:1000',
-            'condition_status' => ['required', 'string', ValidationRule::in(array_keys($this->conditionStatusOptionsProperty))],
-            'department_id' => 'nullable|exists:departments,id',
-        ];
-    }
-
 
     public function openCreateModal(): void
     {
@@ -176,7 +158,7 @@ class Index extends Component
     public function updateEquipment(): void
     {
         if (!$this->editingEquipment || !$this->editingEquipment->exists) {
-             $this->dispatch('toastr', type: 'error', message: __('Ralat: Tiada peralatan dipilih untuk dikemaskini.'));
+            $this->dispatch('toastr', type: 'error', message: __('Ralat: Tiada peralatan dipilih untuk dikemaskini.'));
             return;
         }
         $this->authorize('update', $this->editingEquipment);
@@ -199,13 +181,15 @@ class Index extends Component
 
     public function deleteEquipment(): void
     {
-        if (!$this->deletingEquipment) return;
+        if (!$this->deletingEquipment) {
+            return;
+        }
         $this->authorize('delete', $this->deletingEquipment);
 
         try {
             // Check for related loan application items or transaction items before deleting
             if ($this->deletingEquipment->loanApplicationItems()->exists() || $this->deletingEquipment->loanTransactionItems()->exists()) {
-                 $this->dispatch('toastr', type: 'error', message: __('Peralatan ini tidak boleh dipadam kerana mempunyai rekod pinjaman berkaitan.'));
+                $this->dispatch('toastr', type: 'error', message: __('Peralatan ini tidak boleh dipadam kerana mempunyai rekod pinjaman berkaitan.'));
             } else {
                 $this->deletingEquipment->delete();
                 $this->dispatch('toastr', type: 'success', message: __('Peralatan ICT berjaya dipadam.'));
@@ -234,6 +218,58 @@ class Index extends Component
         $this->resetErrorBag(); // Clear validation errors
     }
 
+    // Reset pagination when filters change
+    public function updatingSearchTerm(): void
+    {
+        $this->resetPage();
+    }
+    public function updatedFilterAssetType(): void
+    {
+        $this->resetPage();
+    }
+    public function updatedFilterStatus(): void
+    {
+        $this->resetPage();
+    }
+    public function updatedFilterCondition(): void
+    {
+        $this->resetPage();
+    }
+    public function updatedFilterDepartmentId(): void
+    {
+        $this->resetPage();
+    }
+
+    public function render(): View
+    {
+        return view('livewire.resource-management.admin.equipment.index', [
+            'equipmentList' => $this->equipmentListProperty,
+            'departmentOptions' => $this->departmentOptionsProperty,
+            'assetTypeOptions' => $this->assetTypeOptionsProperty,
+            'statusOptions' => $this->statusOptionsProperty,
+            'conditionStatusOptions' => $this->conditionStatusOptionsProperty,
+        ])->title(__('Pengurusan Peralatan ICT'));
+    }
+
+    // Validation rules defined as a method
+    protected function formRules(bool $isEditMode = false, ?int $equipmentId = null): array
+    {
+        return [
+            'asset_type' => ['required', 'string', 'max:255', ValidationRule::in(array_keys($this->assetTypeOptionsProperty))],
+            'brand' => 'nullable|string|max:255',
+            'model_name' => 'nullable|string|max:255',
+            'serial_number' => ['required', 'string', 'max:255', $isEditMode ? ValidationRule::unique('equipment', 'serial_number')->ignore($equipmentId) : ValidationRule::unique('equipment', 'serial_number')],
+            'tag_id' => ['required', 'string', 'max:255', $isEditMode ? ValidationRule::unique('equipment', 'tag_id')->ignore($equipmentId) : ValidationRule::unique('equipment', 'tag_id')],
+            'purchase_date' => 'nullable|date_format:Y-m-d',
+            'warranty_expiry_date' => 'nullable|date_format:Y-m-d|after_or_equal:purchase_date',
+            'status' => ['required', 'string', ValidationRule::in(array_keys($this->statusOptionsProperty))],
+            'current_location' => 'nullable|string|max:255',
+            'notes' => 'nullable|string|max:1000',
+            'condition_status' => ['required', 'string', ValidationRule::in(array_keys($this->conditionStatusOptionsProperty))],
+            'department_id' => 'nullable|exists:departments,id',
+        ];
+    }
+
     private function resetForm(): void
     {
         $this->asset_type = '';
@@ -249,30 +285,16 @@ class Index extends Component
 
         if (defined(Equipment::class . '::STATUS_AVAILABLE')) {
             $this->status = Equipment::STATUS_AVAILABLE;
-        } else { $this->status = ''; }
+        } else {
+            $this->status = '';
+        }
         if (defined(Equipment::class . '::CONDITION_GOOD')) {
             $this->condition_status = Equipment::CONDITION_GOOD;
-        } else { $this->condition_status = ''; }
+        } else {
+            $this->condition_status = '';
+        }
 
         $this->editingEquipment = new Equipment(); // Fresh model for potential creation
         $this->deletingEquipment = null;
-    }
-
-    // Reset pagination when filters change
-    public function updatingSearchTerm(): void { $this->resetPage(); }
-    public function updatedFilterAssetType(): void { $this->resetPage(); }
-    public function updatedFilterStatus(): void { $this->resetPage(); }
-    public function updatedFilterCondition(): void { $this->resetPage(); }
-    public function updatedFilterDepartmentId(): void { $this->resetPage(); }
-
-    public function render(): View
-    {
-        return view('livewire.resource-management.admin.equipment.index', [
-            'equipmentList' => $this->equipmentListProperty,
-            'departmentOptions' => $this->departmentOptionsProperty,
-            'assetTypeOptions' => $this->assetTypeOptionsProperty,
-            'statusOptions' => $this->statusOptionsProperty,
-            'conditionStatusOptions' => $this->conditionStatusOptionsProperty,
-        ])->title(__('Pengurusan Peralatan ICT'));
     }
 }

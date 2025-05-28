@@ -9,7 +9,9 @@ use Illuminate\Routing\Controller as BaseController;
 
 class Controller extends BaseController
 {
-    use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
+    use AuthorizesRequests;
+    use DispatchesJobs;
+    use ValidatesRequests;
 
     // You could add shared helper methods or properties here if needed by many controllers,
     // but often, custom traits or services are a better approach for shared functionality

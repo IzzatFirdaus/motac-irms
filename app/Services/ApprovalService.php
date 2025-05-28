@@ -177,18 +177,21 @@ final class ApprovalService
         Log::info(self::LOG_AREA . "Handling rejected item: {$itemClass} ID {$itemIdLog}, stage '{$currentStageDisplay}'. Reason: " . ($rejectionReason ?? 'N/A'));
 
         $rejectedStatusForItem = null;
-        if ($approvableItem instanceof EmailApplication) $rejectedStatusForItem = EmailApplication::STATUS_REJECTED;
-        elseif ($approvableItem instanceof LoanApplication) $rejectedStatusForItem = LoanApplication::STATUS_REJECTED;
+        if ($approvableItem instanceof EmailApplication) {
+            $rejectedStatusForItem = EmailApplication::STATUS_REJECTED;
+        } elseif ($approvableItem instanceof LoanApplication) {
+            $rejectedStatusForItem = LoanApplication::STATUS_REJECTED;
+        }
 
         if ($rejectedStatusForItem && method_exists($approvableItem, 'transitionToStatus')) {
             if (property_exists($approvableItem, 'rejection_reason') && $approvableItem->isFillable('rejection_reason')) {
-                 $approvableItem->rejection_reason = $rejectionReason;
+                $approvableItem->rejection_reason = $rejectionReason;
             }
             $approvableItem->transitionToStatus($rejectedStatusForItem, __("Ditolak pada peringkat ':stage'. Alasan: :reason", ['stage' => $currentStageDisplay, 'reason' => ($rejectionReason ?: __('Tiada alasan diberikan'))]), $rejectedBy->id);
             Log::info(self::LOG_AREA . "{$itemClass} ID {$itemIdLog} status updated to '{$rejectedStatusForItem}'.");
         } else {
-             Log::warning(self::LOG_AREA . "Could not set rejected status for {$itemClass} ID {$itemIdLog}. Model issues or status missing.");
-             // Fallback attempt
+            Log::warning(self::LOG_AREA . "Could not set rejected status for {$itemClass} ID {$itemIdLog}. Model issues or status missing.");
+            // Fallback attempt
             if (property_exists($approvableItem, 'status') && $rejectedStatusForItem) {
                 $approvableItem->status = $rejectedStatusForItem;
                 if (property_exists($approvableItem, 'rejection_reason') && $approvableItem->isFillable('rejection_reason')) {
@@ -230,7 +233,9 @@ final class ApprovalService
                     ->role('HOD')
                     ->where('status', $activeUserStatus)
                     ->first();
-                if (!$officer) Log::warning(self::LOG_AREA."No HOD found for department ID: {$applicant->department_id} for {$logIdentifier}.");
+                if (!$officer) {
+                    Log::warning(self::LOG_AREA."No HOD found for department ID: {$applicant->department_id} for {$logIdentifier}.");
+                }
             } elseif ($stageKey === Approval::STAGE_LOAN_BPM_REVIEW) {
                 // Assign to any user with 'BPM Staff' role.
                 $officer = User::role('BPMStaff')->where('status', $activeUserStatus)->inRandomOrder()->first();

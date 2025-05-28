@@ -6,44 +6,21 @@ use App\Models\LoanApplication;
 use App\Models\LoanTransactionItem;
 use App\Models\User; // Make sure User model is imported
 use App\Services\LoanTransactionService;
-use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
+use Livewire\Component;
 
 class ProcessReturn extends Component
 {
     public LoanApplication $loanApplication;
     public array $selectedTransactionItemIds = [];
     public array $accessories_on_return = []; // This is currently passed as $itemSpecificDetails
-                                            // Ensure its structure matches what processExistingReturn expects
-                                            // or adjust the service method / data preparation here.
+    // Ensure its structure matches what processExistingReturn expects
+    // or adjust the service method / data preparation here.
     public string $return_notes = '';
     public array $allAccessoriesList = [];
     public $issuedTransactionItems = [];
-
-    // For more detailed return, you would have properties like:
-    // public array $itemConditions = []; // ['tx_item_id_1' => 'good', ...]
-    // public array $itemReturnNotes = []; // ['tx_item_id_1' => 'note for item 1', ...]
-    // public array $itemReturnAccessories = []; // ['tx_item_id_1' => ['cable', 'bag'], ...]
-
-    protected function rules(): array
-    {
-        return [
-            'selectedTransactionItemIds' => ['required', 'array', 'min:1'],
-            'selectedTransactionItemIds.*' => [
-                'required',
-                'integer',
-                Rule::exists('loan_transaction_items', 'id')
-                    ->where('status', LoanTransactionItem::STATUS_ITEM_ISSUED) // Ensure item is still issued
-            ],
-            // The following rules depend on how you structure detailed item return data.
-            // This is a simplified version:
-            'accessories_on_return' => ['nullable', 'array'],
-            'accessories_on_return.*' => ['string'], // If accessories_on_return is just a flat list
-            'return_notes' => ['nullable', 'string'],
-        ];
-    }
 
     public function mount(int $loanApplicationId): void
     {
@@ -90,7 +67,7 @@ class ProcessReturn extends Component
         // You need to build the $itemSpecificDetails structure correctly here based on your form inputs.
         // For demonstration, I'm passing an empty array, assuming you'll build this.
         $itemSpecificDetailsForService = [];
-        foreach($this->selectedTransactionItemIds as $txItemId) {
+        foreach ($this->selectedTransactionItemIds as $txItemId) {
             // Example: Fetch details for this item from your Livewire properties
             // $itemSpecificDetailsForService[$txItemId] = [
             //     'condition_on_return' => $this->itemConditions[$txItemId] ?? \App\Models\Equipment::CONDITION_GOOD,
@@ -129,5 +106,28 @@ class ProcessReturn extends Component
     public function render()
     {
         return view('livewire.resource-management.admin.bpm.process-return');
+    }
+
+    // For more detailed return, you would have properties like:
+    // public array $itemConditions = []; // ['tx_item_id_1' => 'good', ...]
+    // public array $itemReturnNotes = []; // ['tx_item_id_1' => 'note for item 1', ...]
+    // public array $itemReturnAccessories = []; // ['tx_item_id_1' => ['cable', 'bag'], ...]
+
+    protected function rules(): array
+    {
+        return [
+            'selectedTransactionItemIds' => ['required', 'array', 'min:1'],
+            'selectedTransactionItemIds.*' => [
+                'required',
+                'integer',
+                Rule::exists('loan_transaction_items', 'id')
+                    ->where('status', LoanTransactionItem::STATUS_ITEM_ISSUED) // Ensure item is still issued
+            ],
+            // The following rules depend on how you structure detailed item return data.
+            // This is a simplified version:
+            'accessories_on_return' => ['nullable', 'array'],
+            'accessories_on_return.*' => ['string'], // If accessories_on_return is just a flat list
+            'return_notes' => ['nullable', 'string'],
+        ];
     }
 }

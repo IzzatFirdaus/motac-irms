@@ -2,19 +2,18 @@
 
 namespace App\Livewire\ResourceManagement\Admin\Reports;
 
-use App\Models\Equipment; // Example model
-use App\Models\Department;
+use App\Models\Department; // Example model
+use App\Models\Equipment;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\Attributes\Layout;
 
 #[Layout('layouts.app')]
 class EquipmentReport extends Component
 {
-    use AuthorizesRequests, WithPagination;
-
-    protected string $paginationTheme = 'bootstrap';
+    use AuthorizesRequests;
+    use WithPagination;
 
     // Filter properties
     public ?string $filterAssetType = null;
@@ -26,6 +25,8 @@ class EquipmentReport extends Component
     // Sorting properties
     public string $sortBy = 'tag_id';
     public string $sortDirection = 'asc';
+
+    protected string $paginationTheme = 'bootstrap';
 
     public function mount()
     {

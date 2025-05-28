@@ -2,14 +2,14 @@
 
 namespace App\Livewire\ResourceManagement\Admin\BPM;
 
-use App\Models\LoanApplication;
 use App\Models\Equipment;
+use App\Models\LoanApplication;
 use App\Models\User; // Make sure User model is imported
 use App\Services\LoanTransactionService;
-use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
+use Livewire\Component;
 
 class ProcessIssuance extends Component
 {
@@ -19,17 +19,6 @@ class ProcessIssuance extends Component
     public string $issue_notes = '';
     public array $allAccessoriesList = [];
     public $availableEquipment = [];
-
-    protected function rules(): array
-    {
-        return [
-            'selectedEquipmentIds' => ['required', 'array', 'min:1'],
-            'selectedEquipmentIds.*' => ['required', 'integer', Rule::exists('equipment', 'id')->where('status', Equipment::STATUS_AVAILABLE)],
-            'accessories' => ['nullable', 'array'],
-            'accessories.*' => ['string'],
-            'issue_notes' => ['nullable', 'string'],
-        ];
-    }
 
     public function mount(int $loanApplicationId): void
     {
@@ -98,5 +87,16 @@ class ProcessIssuance extends Component
     public function render()
     {
         return view('livewire.resource-management.admin.bpm.process-issuance');
+    }
+
+    protected function rules(): array
+    {
+        return [
+            'selectedEquipmentIds' => ['required', 'array', 'min:1'],
+            'selectedEquipmentIds.*' => ['required', 'integer', Rule::exists('equipment', 'id')->where('status', Equipment::STATUS_AVAILABLE)],
+            'accessories' => ['nullable', 'array'],
+            'accessories.*' => ['string'],
+            'issue_notes' => ['nullable', 'string'],
+        ];
     }
 }

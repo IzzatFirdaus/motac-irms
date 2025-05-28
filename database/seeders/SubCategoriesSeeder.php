@@ -23,7 +23,7 @@ class SubCategoriesSeeder extends Seeder
         $adminUserForAudit = User::orderBy('id')->first();
         $auditUserId = $adminUserForAudit?->id;
 
-         if (!$auditUserId) {
+        if (!$auditUserId) {
             $adminUserForAudit = User::factory()->create(['name' => 'Audit User (SubCatSeeder)']);
             $auditUserId = $adminUserForAudit->id;
             Log::info("Created a fallback audit user with ID {$auditUserId} for SubCategoriesSeeder.");

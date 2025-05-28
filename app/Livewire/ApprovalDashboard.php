@@ -6,13 +6,13 @@ use App\Models\Approval;
 use App\Models\EmailApplication;
 use App\Models\LoanApplication;
 use App\Services\ApprovalService; // For processing decisions
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\View\View;
 use Illuminate\Validation\Rule; // Make sure Rule is imported
-use Illuminate\Auth\Access\AuthorizationException; // Make sure this is imported
+use Illuminate\View\View; // Make sure this is imported
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On; // For listening to events
@@ -23,19 +23,20 @@ use Throwable; // Import Throwable
 #[Layout('layouts.app')] // Bootstrap main layout
 class ApprovalDashboard extends Component
 {
-    use AuthorizesRequests, WithPagination;
+    use AuthorizesRequests;
+    use WithPagination;
 
     public string $filterType = 'all'; // 'all', EmailApplication::class, LoanApplication::class
     public string $searchTerm = '';
     public string $filterStatus = Approval::STATUS_PENDING; // Default to pending
-
-    protected string $paginationTheme = 'bootstrap'; // <-- CONVERTED TO BOOTSTRAP
 
     // Modal properties for taking action
     public bool $showApprovalActionModal = false;
     public ?Approval $selectedApproval = null;
     public string $decision = ''; // 'approved' or 'rejected'
     public string $comments = '';
+
+    protected string $paginationTheme = 'bootstrap'; // <-- CONVERTED TO BOOTSTRAP
 
     protected ApprovalService $approvalService;
 
@@ -76,7 +77,7 @@ class ApprovalDashboard extends Component
         if (!empty($this->searchTerm)) {
             $query->where(function ($q) {
                 $q->whereHasMorph('approvable', [LoanApplication::class, EmailApplication::class], function ($qAppro, $type) {
-                    $qAppro->whereHas('user', function($qUser) {
+                    $qAppro->whereHas('user', function ($qUser) {
                         $qUser->where('name', 'like', '%' . $this->searchTerm . '%')
                               ->orWhere('email', 'like', '%' . $this->searchTerm . '%');
                     });
@@ -93,9 +94,18 @@ class ApprovalDashboard extends Component
         return $query->paginate(10);
     }
 
-    public function updatedFilterType(): void { $this->resetPage(); }
-    public function updatedSearchTerm(): void { $this->resetPage(); }
-    public function updatedFilterStatus(): void { $this->resetPage(); }
+    public function updatedFilterType(): void
+    {
+        $this->resetPage();
+    }
+    public function updatedSearchTerm(): void
+    {
+        $this->resetPage();
+    }
+    public function updatedFilterStatus(): void
+    {
+        $this->resetPage();
+    }
 
 
     public function openApprovalActionModal(int $approvalId): void
@@ -119,7 +129,9 @@ class ApprovalDashboard extends Component
             'comments' => [Rule::requiredIf($this->decision === Approval::STATUS_REJECTED), 'nullable', 'string', 'min:5', 'max:1000'],
         ]);
 
-        if (!$this->selectedApproval) return;
+        if (!$this->selectedApproval) {
+            return;
+        }
 
         /** @var User $user */
         $user = Auth::user();

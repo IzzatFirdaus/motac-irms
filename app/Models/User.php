@@ -71,14 +71,16 @@ use Spatie\Permission\Traits\HasRoles; // For Spatie roles and permissions
  */
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, HasProfilePhoto, HasRoles, Notifiable, SoftDeletes, TwoFactorAuthenticatable;
+    use HasApiTokens;
+    use HasFactory;
+    use HasProfilePhoto;
+    use HasRoles;
+    use Notifiable;
+    use SoftDeletes;
+    use TwoFactorAuthenticatable;
 
     public const STATUS_ACTIVE = 'active';
     public const STATUS_INACTIVE = 'inactive';
-    public static array $STATUS_OPTIONS = [
-        self::STATUS_ACTIVE => 'Aktif',
-        self::STATUS_INACTIVE => 'Tidak Aktif',
-    ];
 
     // Constants from System Design 4.1 User Model and MyMail supplementary document
     public const SERVICE_STATUS_TETAP = 'tetap';
@@ -87,23 +89,10 @@ class User extends Authenticatable
     public const SERVICE_STATUS_OTHER_AGENCY = 'other_agency_existing_mailbox';
     public const SERVICE_STATUS_TYPE_4 = 'service_type_4'; // Placeholder for "Perkhidmatan Jenis 4" - Requires actual label
     public const SERVICE_STATUS_TYPE_7 = 'service_type_7'; // Placeholder for "Perkhidmatan Jenis 7" - Requires actual label
-    public static array $SERVICE_STATUS_LABELS = [
-        self::SERVICE_STATUS_TETAP => 'Tetap',
-        self::SERVICE_STATUS_KONTRAK_MYSTEP => 'Lantikan Kontrak / MySTEP',
-        self::SERVICE_STATUS_PELAJAR_INDUSTRI => 'Pelajar Latihan Industri (Ibu Pejabat Sahaja)',
-        self::SERVICE_STATUS_OTHER_AGENCY => 'E-mel Sandaran (Staf Agensi Lain di MOTAC)',
-        self::SERVICE_STATUS_TYPE_4 => 'Perkhidmatan Jenis 4', // Update with actual label
-        self::SERVICE_STATUS_TYPE_7 => 'Perkhidmatan Jenis 7', // Update with actual label
-    ];
 
     public const APPOINTMENT_TYPE_BAHARU = 'baharu';
     public const APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN = 'kenaikan_pangkat_pertukaran';
     public const APPOINTMENT_TYPE_LAIN_LAIN = 'lain_lain';
-    public static array $APPOINTMENT_TYPE_LABELS = [
-        self::APPOINTMENT_TYPE_BAHARU => 'Baharu',
-        self::APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN => 'Kenaikan Pangkat/Pertukaran',
-        self::APPOINTMENT_TYPE_LAIN_LAIN => 'Lain-lain',
-    ];
 
     // Titles for forms, based on MyMail and general Malaysian context
     public const TITLE_ENCIK = 'Encik';
@@ -117,6 +106,23 @@ class User extends Authenticatable
     public const TITLE_PROF_MADYA = 'Prof. Madya'; // Profesor Madya
     public const TITLE_DATUK = 'Datuk'; // Note: consider variations like Dato', Datin, Tan Sri, Puan Sri
     public const TITLE_DATO = 'Dato\''; // If different from Datuk
+    public static array $STATUS_OPTIONS = [
+        self::STATUS_ACTIVE => 'Aktif',
+        self::STATUS_INACTIVE => 'Tidak Aktif',
+    ];
+    public static array $SERVICE_STATUS_LABELS = [
+        self::SERVICE_STATUS_TETAP => 'Tetap',
+        self::SERVICE_STATUS_KONTRAK_MYSTEP => 'Lantikan Kontrak / MySTEP',
+        self::SERVICE_STATUS_PELAJAR_INDUSTRI => 'Pelajar Latihan Industri (Ibu Pejabat Sahaja)',
+        self::SERVICE_STATUS_OTHER_AGENCY => 'E-mel Sandaran (Staf Agensi Lain di MOTAC)',
+        self::SERVICE_STATUS_TYPE_4 => 'Perkhidmatan Jenis 4', // Update with actual label
+        self::SERVICE_STATUS_TYPE_7 => 'Perkhidmatan Jenis 7', // Update with actual label
+    ];
+    public static array $APPOINTMENT_TYPE_LABELS = [
+        self::APPOINTMENT_TYPE_BAHARU => 'Baharu',
+        self::APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN => 'Kenaikan Pangkat/Pertukaran',
+        self::APPOINTMENT_TYPE_LAIN_LAIN => 'Lain-lain',
+    ];
     // Add more as needed by MOTAC context
     public static array $TITLE_OPTIONS = [
         self::TITLE_ENCIK => 'Encik',
@@ -172,31 +178,105 @@ class User extends Authenticatable
         // 'appointment_type' => \App\Enums\AppointmentTypeEnum::class,
     ];
 
+    // Static methods for dropdown options
+    public static function getStatusOptions(): array
+    {
+        return self::$STATUS_OPTIONS;
+    }
+    public static function getServiceStatusOptions(): array
+    {
+        return self::$SERVICE_STATUS_LABELS;
+    }
+    public static function getAppointmentTypeOptions(): array
+    {
+        return self::$APPOINTMENT_TYPE_LABELS;
+    }
+    public static function getTitleOptions(): array
+    {
+        return self::$TITLE_OPTIONS;
+    }
+
+    /**
+     * Get Aras/Level options for forms.
+     * Based on MyMail supplementary document (values 1-18).
+     */
+    public static function getLevelOptions(): array
+    {
+        $levels = [];
+        for ($i = 1; $i <= 18; $i++) { // As per supplementary doc: Aras (Level/Floor)
+            $levels[(string)$i] = (string)$i;
+        }
+        // $levels['other'] = __('Lain-lain'); // Add if needed
+        return $levels;
+    }
+
     protected static function newFactory(): UserFactory
     {
         return UserFactory::new();
     }
 
     // Relationships
-    public function department(): BelongsTo { return $this->belongsTo(Department::class, 'department_id'); }
-    public function grade(): BelongsTo { return $this->belongsTo(Grade::class, 'grade_id'); }
-    public function position(): BelongsTo { return $this->belongsTo(Position::class, 'position_id'); }
-    public function emailApplications(): HasMany { return $this->hasMany(EmailApplication::class, 'user_id'); }
-    public function loanApplicationsAsApplicant(): HasMany { return $this->hasMany(LoanApplication::class, 'user_id'); }
-    public function loanApplicationsAsResponsibleOfficer(): HasMany { return $this->hasMany(LoanApplication::class, 'responsible_officer_id'); }
-    public function loanApplicationsAsSupportingOfficer(): HasMany { return $this->hasMany(LoanApplication::class, 'supporting_officer_id'); }
-    public function approvalsMade(): HasMany { return $this->hasMany(Approval::class, 'officer_id'); }
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class, 'department_id');
+    }
+    public function grade(): BelongsTo
+    {
+        return $this->belongsTo(Grade::class, 'grade_id');
+    }
+    public function position(): BelongsTo
+    {
+        return $this->belongsTo(Position::class, 'position_id');
+    }
+    public function emailApplications(): HasMany
+    {
+        return $this->hasMany(EmailApplication::class, 'user_id');
+    }
+    public function loanApplicationsAsApplicant(): HasMany
+    {
+        return $this->hasMany(LoanApplication::class, 'user_id');
+    }
+    public function loanApplicationsAsResponsibleOfficer(): HasMany
+    {
+        return $this->hasMany(LoanApplication::class, 'responsible_officer_id');
+    }
+    public function loanApplicationsAsSupportingOfficer(): HasMany
+    {
+        return $this->hasMany(LoanApplication::class, 'supporting_officer_id');
+    }
+    public function approvalsMade(): HasMany
+    {
+        return $this->hasMany(Approval::class, 'officer_id');
+    }
 
     // Blameable relationships (user who created/updated/deleted this user record)
-    public function creator(): BelongsTo { return $this->belongsTo(User::class, 'created_by'); }
-    public function updater(): BelongsTo { return $this->belongsTo(User::class, 'updated_by'); }
-    public function deleter(): BelongsTo { return $this->belongsTo(User::class, 'deleted_by'); }
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+    public function deleter(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deleted_by');
+    }
 
     // Role checks - ensure role names match exactly how they are defined in Spatie seeder/config
     // System Design Section 8.1 (Standardized role names)
-    public function isAdmin(): bool { return $this->hasRole('Admin'); }
-    public function isBpmStaff(): bool { return $this->hasRole('BPM Staff'); } // Note: "BPM Staff" with space
-    public function isItAdmin(): bool { return $this->hasRole('IT Admin'); }
+    public function isAdmin(): bool
+    {
+        return $this->hasRole('Admin');
+    }
+    public function isBpmStaff(): bool
+    {
+        return $this->hasRole('BPM Staff');
+    } // Note: "BPM Staff" with space
+    public function isItAdmin(): bool
+    {
+        return $this->hasRole('IT Admin');
+    }
     // Example roles for approval workflows if defined
     // public function isSupportingOfficerRole(): bool { return $this->hasRole('Supporting Officer'); }
     // public function isHodRole(): bool { return $this->hasRole('Head of Department'); }
@@ -217,25 +297,5 @@ class User extends Authenticatable
     public function getNricAttribute(): ?string
     {
         return $this->identification_number;
-    }
-
-    // Static methods for dropdown options
-    public static function getStatusOptions(): array { return self::$STATUS_OPTIONS; }
-    public static function getServiceStatusOptions(): array { return self::$SERVICE_STATUS_LABELS; }
-    public static function getAppointmentTypeOptions(): array { return self::$APPOINTMENT_TYPE_LABELS; }
-    public static function getTitleOptions(): array { return self::$TITLE_OPTIONS; }
-
-    /**
-     * Get Aras/Level options for forms.
-     * Based on MyMail supplementary document (values 1-18).
-     */
-    public static function getLevelOptions(): array
-    {
-        $levels = [];
-        for ($i = 1; $i <= 18; $i++) { // As per supplementary doc: Aras (Level/Floor)
-            $levels[(string)$i] = (string)$i;
-        }
-        // $levels['other'] = __('Lain-lain'); // Add if needed
-        return $levels;
     }
 }

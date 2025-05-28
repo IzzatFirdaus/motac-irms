@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests\Api;
 
+use App\Models\EmailApplication;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
-use App\Models\EmailApplication; // For status constant
+use Illuminate\Validation\Rule; // For status constant
 
 class ProvisionEmailRequest extends FormRequest
 {

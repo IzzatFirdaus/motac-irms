@@ -2,10 +2,10 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\App; // Import the App facade
+use Illuminate\Support\ServiceProvider; // Import the App facade
 
 class QueryLogServiceProvider extends ServiceProvider
 {
@@ -38,10 +38,12 @@ class QueryLogServiceProvider extends ServiceProvider
                 }
 
                 Log::warning(
-                    'Long running queries detected.', [
+                    'Long running queries detected.',
+                    [
                         'queries' => $connection->getQueryLog(),
                         'url' => $url,
-                    ]);
+                    ]
+                );
             });
         }
     }

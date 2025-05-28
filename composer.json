@@ -24,10 +24,12 @@
     "barryvdh/laravel-debugbar": "^3.9",
     "barryvdh/laravel-ide-helper": "*",
     "fakerphp/faker": "^1.9.1",
+    "friendsofphp/php-cs-fixer": "*",
     "laravel/pint": "^1.0",
     "laravel/sail": "^1.21",
     "mockery/mockery": "^1.4.4",
     "nunomaduro/collision": "^7.0",
+    "nunomaduro/larastan": "*",
     "phpunit/phpunit": "^10.0",
     "pixinvent/vuexy-laravel-bootstrap-jetstream": "^1.2",
     "spatie/laravel-ignition": "^2.0"

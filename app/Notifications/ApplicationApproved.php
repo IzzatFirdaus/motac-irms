@@ -38,22 +38,6 @@ final class ApplicationApproved extends Notification implements ShouldQueue
         return ['mail', 'database'];
     }
 
-    private function formatDate($date, $format = null): string
-    {
-        $format = $format ?? config('app.date_format_my', 'd/m/Y');
-        if ($date instanceof Carbon) {
-            return $date->format($format);
-        }
-        if (is_string($date)) {
-            try {
-                return Carbon::parse($date)->format($format);
-            } catch (\Exception $e) {
-                return __('Tidak dinyatakan');
-            }
-        }
-        return __('Tidak dinyatakan');
-    }
-
 
     public function toMail(User $notifiable): MailMessage
     {
@@ -66,7 +50,7 @@ final class ApplicationApproved extends Notification implements ShouldQueue
           : __('Permohonan Akaun E-mel/ID Pengguna');
 
         $mailMessage = (new MailMessage())
-            ->subject(__(':appType Diluluskan (#:id)',['appType' => $applicationTypeDisplay, 'id' => $applicationId]))
+            ->subject(__(':appType Diluluskan (#:id)', ['appType' => $applicationTypeDisplay, 'id' => $applicationId]))
             ->greeting(__("Salam Sejahtera, :name,", ['name' => $applicantName]))
             ->line(__(':appType anda dengan ID #:id telah **diluluskan**.', ['appType' => $applicationTypeDisplay, 'id' => $applicationId]));
 
@@ -87,9 +71,9 @@ final class ApplicationApproved extends Notification implements ShouldQueue
             /** @var EmailApplication $emailApp */
             $emailApp = $this->application;
             if ($emailApp->application_reason_notes) {
-                 $mailMessage->line(__('Tujuan/Catatan: :reason', ['reason' => $emailApp->application_reason_notes]));
+                $mailMessage->line(__('Tujuan/Catatan: :reason', ['reason' => $emailApp->application_reason_notes]));
             }
-             $mailMessage->line(__('Pihak BPM akan memproses permohonan anda dan akan memaklumkan setelah akaun/ID pengguna anda sedia untuk digunakan.'));
+            $mailMessage->line(__('Pihak BPM akan memproses permohonan anda dan akan memaklumkan setelah akaun/ID pengguna anda sedia untuk digunakan.'));
         }
 
         $mailMessage
@@ -180,7 +164,7 @@ final class ApplicationApproved extends Notification implements ShouldQueue
         $routeParameters = [];
         $routeName = null;
 
-         if ($applicationId !== null) {
+        if ($applicationId !== null) {
             if ($isLoanApp) {
                 $routeName = 'resource-management.my-applications.loan.show';
                 $routeParameters = ['loan_application' => $applicationId];
@@ -201,11 +185,11 @@ final class ApplicationApproved extends Notification implements ShouldQueue
                     ]);
                     $applicationUrl = '#'; // Fallback
                 }
-            } else if ($routeName) {
-                 Log::warning('Route not found for in-app ApplicationApproved notification.', [
-                    'application_id' => $applicationId,
-                    'application_type' => $applicationMorphClass,
-                    'route_name' => $routeName,
+            } elseif ($routeName) {
+                Log::warning('Route not found for in-app ApplicationApproved notification.', [
+                   'application_id' => $applicationId,
+                   'application_type' => $applicationMorphClass,
+                   'route_name' => $routeName,
                 ]);
             }
         }
@@ -213,5 +197,21 @@ final class ApplicationApproved extends Notification implements ShouldQueue
 
 
         return $data;
+    }
+
+    private function formatDate($date, $format = null): string
+    {
+        $format = $format ?? config('app.date_format_my', 'd/m/Y');
+        if ($date instanceof Carbon) {
+            return $date->format($format);
+        }
+        if (is_string($date)) {
+            try {
+                return Carbon::parse($date)->format($format);
+            } catch (\Exception $e) {
+                return __('Tidak dinyatakan');
+            }
+        }
+        return __('Tidak dinyatakan');
     }
 }

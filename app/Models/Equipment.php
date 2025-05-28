@@ -62,7 +62,8 @@ use Illuminate\Support\Str;
  */
 class Equipment extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
 
     // Asset types based on system design doc (4.3) and model
     public const ASSET_TYPE_LAPTOP = 'laptop';
@@ -71,6 +72,36 @@ class Equipment extends Model
     public const ASSET_TYPE_DESKTOP_PC = 'desktop_pc';
     public const ASSET_TYPE_MONITOR = 'monitor';
     public const ASSET_TYPE_OTHER = 'other_ict';
+
+    // Operational statuses based on system design doc (4.3) and model
+    public const STATUS_AVAILABLE = 'available';
+    public const STATUS_ON_LOAN = 'on_loan';
+    public const STATUS_UNDER_MAINTENANCE = 'under_maintenance';
+    public const STATUS_DISPOSED = 'disposed';
+    public const STATUS_LOST = 'lost';
+    public const STATUS_DAMAGED_NEEDS_REPAIR = 'damaged_needs_repair';
+
+    // Physical condition statuses
+    public const CONDITION_NEW = 'new';
+    public const CONDITION_GOOD = 'good';
+    public const CONDITION_FAIR = 'fair';
+    public const CONDITION_MINOR_DAMAGE = 'minor_damage';
+    public const CONDITION_MAJOR_DAMAGE = 'major_damage';
+    public const CONDITION_UNSERVICEABLE = 'unserviceable';
+    public const CONDITION_LOST = 'lost'; // Added to resolve diagnostic
+
+    // Acquisition Types
+    public const ACQUISITION_TYPE_PURCHASE = 'purchase';
+    public const ACQUISITION_TYPE_LEASE = 'lease';
+    public const ACQUISITION_TYPE_DONATION = 'donation';
+    public const ACQUISITION_TYPE_TRANSFER = 'transfer';
+    public const ACQUISITION_TYPE_OTHER = 'other_acquisition';
+
+    // Classifications
+    public const CLASSIFICATION_ASSET = 'asset';
+    public const CLASSIFICATION_INVENTORY = 'inventory';
+    public const CLASSIFICATION_CONSUMABLE = 'consumable';
+    public const CLASSIFICATION_OTHER = 'other_classification';
 
     public static array $ASSET_TYPES_LABELS = [
         self::ASSET_TYPE_LAPTOP => 'Komputer Riba',
@@ -81,14 +112,6 @@ class Equipment extends Model
         self::ASSET_TYPE_OTHER => 'Lain-lain Peralatan ICT',
     ];
 
-    // Operational statuses based on system design doc (4.3) and model
-    public const STATUS_AVAILABLE = 'available';
-    public const STATUS_ON_LOAN = 'on_loan';
-    public const STATUS_UNDER_MAINTENANCE = 'under_maintenance';
-    public const STATUS_DISPOSED = 'disposed';
-    public const STATUS_LOST = 'lost';
-    public const STATUS_DAMAGED_NEEDS_REPAIR = 'damaged_needs_repair';
-
     public static array $STATUSES_LABELS = [
         self::STATUS_AVAILABLE => 'Tersedia',
         self::STATUS_ON_LOAN => 'Sedang Dipinjam',
@@ -97,15 +120,6 @@ class Equipment extends Model
         self::STATUS_LOST => 'Hilang',
         self::STATUS_DAMAGED_NEEDS_REPAIR => 'Rosak (Perlu Pembaikan)',
     ];
-
-    // Physical condition statuses
-    public const CONDITION_NEW = 'new';
-    public const CONDITION_GOOD = 'good';
-    public const CONDITION_FAIR = 'fair';
-    public const CONDITION_MINOR_DAMAGE = 'minor_damage';
-    public const CONDITION_MAJOR_DAMAGE = 'major_damage';
-    public const CONDITION_UNSERVICEABLE = 'unserviceable';
-    public const CONDITION_LOST = 'lost'; // Added to resolve diagnostic
 
     public static array $CONDITION_STATUSES_LABELS = [
         self::CONDITION_NEW => 'Baru',
@@ -117,32 +131,19 @@ class Equipment extends Model
         self::CONDITION_LOST => 'Hilang (Keadaan)', // Label for condition 'lost'
     ];
 
-    // Acquisition Types
-    public const ACQUISITION_TYPE_PURCHASE = 'purchase';
-    public const ACQUISITION_TYPE_LEASE = 'lease';
-    public const ACQUISITION_TYPE_DONATION = 'donation';
-    public const ACQUISITION_TYPE_TRANSFER = 'transfer';
-    public const ACQUISITION_TYPE_OTHER = 'other_acquisition';
-
-     public static array $ACQUISITION_TYPES_LABELS = [
-        self::ACQUISITION_TYPE_PURCHASE => 'Belian',
-        self::ACQUISITION_TYPE_LEASE => 'Sewaan',
-        self::ACQUISITION_TYPE_DONATION => 'Sumbangan',
-        self::ACQUISITION_TYPE_TRANSFER => 'Pindahan',
-        self::ACQUISITION_TYPE_OTHER => 'Lain-lain (Perolehan)',
+    public static array $ACQUISITION_TYPES_LABELS = [
+       self::ACQUISITION_TYPE_PURCHASE => 'Belian',
+       self::ACQUISITION_TYPE_LEASE => 'Sewaan',
+       self::ACQUISITION_TYPE_DONATION => 'Sumbangan',
+       self::ACQUISITION_TYPE_TRANSFER => 'Pindahan',
+       self::ACQUISITION_TYPE_OTHER => 'Lain-lain (Perolehan)',
     ];
 
-    // Classifications
-    public const CLASSIFICATION_ASSET = 'asset';
-    public const CLASSIFICATION_INVENTORY = 'inventory';
-    public const CLASSIFICATION_CONSUMABLE = 'consumable';
-    public const CLASSIFICATION_OTHER = 'other_classification';
-
-     public static array $CLASSIFICATIONS_LABELS = [
-        self::CLASSIFICATION_ASSET => 'Aset',
-        self::CLASSIFICATION_INVENTORY => 'Inventori',
-        self::CLASSIFICATION_CONSUMABLE => 'Barang Luak',
-        self::CLASSIFICATION_OTHER => 'Lain-lain (Klasifikasi)',
+    public static array $CLASSIFICATIONS_LABELS = [
+       self::CLASSIFICATION_ASSET => 'Aset',
+       self::CLASSIFICATION_INVENTORY => 'Inventori',
+       self::CLASSIFICATION_CONSUMABLE => 'Barang Luak',
+       self::CLASSIFICATION_OTHER => 'Lain-lain (Klasifikasi)',
     ];
 
     protected $table = 'equipment';
@@ -168,6 +169,48 @@ class Equipment extends Model
         'status' => self::STATUS_AVAILABLE,
         'condition_status' => self::CONDITION_GOOD,
     ];
+
+    // Static methods for dropdown options/validation
+    public static function getAssetTypesList(): array
+    {
+        return array_keys(self::$ASSET_TYPES_LABELS);
+    }
+    public static function getAssetTypeOptions(): array
+    {
+        return self::$ASSET_TYPES_LABELS;
+    }
+    public static function getOperationalStatusesList(): array
+    {
+        return array_keys(self::$STATUSES_LABELS);
+    }
+    public static function getStatusOptions(): array
+    {
+        return self::$STATUSES_LABELS;
+    }
+    public static function getConditionStatusesList(): array
+    {
+        return array_keys(self::$CONDITION_STATUSES_LABELS);
+    }
+    public static function getConditionStatusOptions(): array
+    {
+        return self::$CONDITION_STATUSES_LABELS;
+    }
+    public static function getAcquisitionTypesList(): array
+    {
+        return array_keys(self::$ACQUISITION_TYPES_LABELS);
+    }
+    public static function getAcquisitionTypeOptions(): array
+    {
+        return self::$ACQUISITION_TYPES_LABELS;
+    }
+    public static function getClassificationsList(): array
+    {
+        return array_keys(self::$CLASSIFICATIONS_LABELS);
+    }
+    public static function getClassificationOptions(): array
+    {
+        return self::$CLASSIFICATIONS_LABELS;
+    }
 
     protected static function newFactory(): EquipmentFactory
     {
@@ -221,7 +264,10 @@ class Equipment extends Model
         return self::$ASSET_TYPES_LABELS[$this->asset_type] ?? Str::title(str_replace('_', ' ', (string) $this->asset_type));
     }
     // Alias for consistency if used elsewhere
-    public function getAssetTypeDisplayAttribute(): string { return $this->getAssetTypeLabelAttribute(); }
+    public function getAssetTypeDisplayAttribute(): string
+    {
+        return $this->getAssetTypeLabelAttribute();
+    }
 
     public function getStatusLabelAttribute(): string
     {
@@ -239,18 +285,6 @@ class Equipment extends Model
     {
         return $this->classification ? (self::$CLASSIFICATIONS_LABELS[$this->classification] ?? Str::title(str_replace('_', ' ', (string) $this->classification))) : null;
     }
-
-    // Static methods for dropdown options/validation
-    public static function getAssetTypesList(): array { return array_keys(self::$ASSET_TYPES_LABELS); }
-    public static function getAssetTypeOptions(): array { return self::$ASSET_TYPES_LABELS; }
-    public static function getOperationalStatusesList(): array { return array_keys(self::$STATUSES_LABELS); }
-    public static function getStatusOptions(): array { return self::$STATUSES_LABELS; }
-    public static function getConditionStatusesList(): array { return array_keys(self::$CONDITION_STATUSES_LABELS); }
-    public static function getConditionStatusOptions(): array { return self::$CONDITION_STATUSES_LABELS; }
-    public static function getAcquisitionTypesList(): array { return array_keys(self::$ACQUISITION_TYPES_LABELS); }
-    public static function getAcquisitionTypeOptions(): array { return self::$ACQUISITION_TYPES_LABELS; }
-    public static function getClassificationsList(): array { return array_keys(self::$CLASSIFICATIONS_LABELS); }
-    public static function getClassificationOptions(): array { return self::$CLASSIFICATIONS_LABELS; }
 
     // Scopes
     public function scopeAvailable(Builder $query): Builder
@@ -281,7 +315,7 @@ class Equipment extends Model
         }
 
         $saved = $this->save();
-        if($saved) {
+        if ($saved) {
             Log::info("Equipment ID {$this->id} operational status updated.", ['old_status' => $oldStatus, 'new_status' => $newStatus, 'user_id' => $actingUserId]);
         } else {
             Log::error("Equipment ID {$this->id}: Failed to save operational status update.", ['old_status' => $oldStatus, 'new_status' => $newStatus, 'user_id' => $actingUserId]);
@@ -300,13 +334,13 @@ class Equipment extends Model
         $actingUserName = $actingUserId ? (User::find($actingUserId)?->name ?? 'System/Tidak Diketahui') : 'Sistem';
 
         if ($reason) {
-             $this->notes = ($this->notes ? $this->notes . "\n" : '') . "Status Keadaan Fizikal ditukar dari '{$oldCondition}' kepada '{$newCondition}' oleh {$actingUserName} pada " . now()->translatedFormat('d/m/Y H:i A') . ". Sebab: {$reason}";
+            $this->notes = ($this->notes ? $this->notes . "\n" : '') . "Status Keadaan Fizikal ditukar dari '{$oldCondition}' kepada '{$newCondition}' oleh {$actingUserName} pada " . now()->translatedFormat('d/m/Y H:i A') . ". Sebab: {$reason}";
         }
         if ($actingUserId && $this->updated_by !== $actingUserId) {
             $this->updated_by = $actingUserId;
         }
         $saved = $this->save();
-        if($saved) {
+        if ($saved) {
             Log::info("Equipment ID {$this->id} condition status updated.", ['old_condition' => $oldCondition, 'new_condition' => $newCondition, 'user_id' => $actingUserId]);
         } else {
             Log::error("Equipment ID {$this->id}: Failed to save physical condition status update.", ['old_condition' => $oldCondition, 'new_condition' => $newCondition, 'user_id' => $actingUserId]);

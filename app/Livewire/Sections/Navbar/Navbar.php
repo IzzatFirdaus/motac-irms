@@ -7,9 +7,9 @@ use App\Models\User;   // For type hinting Auth::user()
 use Illuminate\Support\Collection; // For unreadNotifications type
 use Illuminate\Support\Facades\Auth;
 // use Illuminate\Support\Facades\DB; // Not used after removing failed_jobs truncate
+use Illuminate\View\View;
 use Livewire\Attributes\On;
 use Livewire\Component;
-use Illuminate\View\View;
 
 class Navbar extends Component
 {

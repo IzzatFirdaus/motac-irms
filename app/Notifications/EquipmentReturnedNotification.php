@@ -2,18 +2,18 @@
 
 namespace App\Notifications;
 
+use App\Models\Equipment;
 use App\Models\LoanApplication;
-use App\Models\LoanTransaction;
-use App\Models\LoanTransactionItem; // Added for type hinting
-use App\Models\Equipment; // Added for instanceof
+use App\Models\LoanTransaction; // Added for type hinting
+use App\Models\LoanTransactionItem; // Added for instanceof
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Route; // Added for consistency
-use Illuminate\Support\Carbon; // Added for date formatting
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log; // Added for consistency
+use Illuminate\Support\Facades\Route; // Added for date formatting
 
 class EquipmentReturnedNotification extends Notification implements ShouldQueue
 {
@@ -53,7 +53,7 @@ class EquipmentReturnedNotification extends Notification implements ShouldQueue
             ->line(__('Butiran peralatan yang dipulangkan:'));
 
         if ($this->returnTransaction->loanTransactionItems->isNotEmpty()) {
-            foreach($this->returnTransaction->loanTransactionItems as $item) {
+            foreach ($this->returnTransaction->loanTransactionItems as $item) {
                 /** @var LoanTransactionItem $item */
                 $equipment = $item->equipment;
                 if ($equipment instanceof Equipment) {
@@ -69,11 +69,11 @@ class EquipmentReturnedNotification extends Notification implements ShouldQueue
                         ($item->item_notes ? " ".__('Catatan Item').": {$item->item_notes}" : '')
                     );
                 } else {
-                     $mailMessage->line(__("- Butiran peralatan tidak lengkap untuk item transaksi ID: :id", ['id' => $item->id]));
+                    $mailMessage->line(__("- Butiran peralatan tidak lengkap untuk item transaksi ID: :id", ['id' => $item->id]));
                 }
             }
         } else {
-             $mailMessage->line(__("Tiada butiran item spesifik untuk transaksi pemulangan ini."));
+            $mailMessage->line(__("Tiada butiran item spesifik untuk transaksi pemulangan ini."));
         }
 
 

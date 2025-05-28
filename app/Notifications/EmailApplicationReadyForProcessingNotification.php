@@ -60,7 +60,7 @@ final class EmailApplicationReadyForProcessingNotification extends Notification 
                     'route_name' => $adminRouteName,
                     'exception' => $e,
                 ]);
-                 $adminApplicationUrl = '#'; // Fallback
+                $adminApplicationUrl = '#'; // Fallback
             }
         }
 
@@ -82,7 +82,7 @@ final class EmailApplicationReadyForProcessingNotification extends Notification 
         $adminRouteName = 'admin.resource-management.email-applications.show';
         if ($applicationId !== null && Route::has($adminRouteName)) {
             try {
-                 $generatedUrl = route($adminRouteName, $applicationId);
+                $generatedUrl = route($adminRouteName, $applicationId);
                 if (filter_var($generatedUrl, FILTER_VALIDATE_URL)) {
                     $adminApplicationUrl = $generatedUrl;
                 }

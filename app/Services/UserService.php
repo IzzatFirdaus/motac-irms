@@ -160,7 +160,7 @@ final class UserService
         if (! method_exists(User::class, 'role') && ! method_exists(User::query(), 'role')) {
             Log::error(self::LOG_AREA." User model or query builder does not have a 'role' scope/method. Cannot get users by role '{$roleName}'.");
 
-            return new EloquentCollection;
+            return new EloquentCollection();
         }
 
         // This assumes 'role' is a scope, like from Spatie/laravel-permission.

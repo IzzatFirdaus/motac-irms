@@ -10,8 +10,8 @@ use App\Services\LoanApplicationService;               //
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\View\View;
-use Illuminate\Validation\ValidationException as IlluminateValidationException; // For specific catch
+use Illuminate\Validation\ValidationException as IlluminateValidationException;
+use Illuminate\View\View; // For specific catch
 use Throwable;
 
 class LoanApplicationController extends Controller

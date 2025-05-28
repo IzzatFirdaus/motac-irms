@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Shared;
 
-use Livewire\Component;
 use Livewire\Attributes\Url;
+use Livewire\Component;
 
 class TableFilters extends Component
 {

@@ -50,8 +50,8 @@ class EquipmentSeeder extends Seeder
             $this->call(UserSeeder::class); // Ensure UserSeeder creates at least one user, or a specific AdminUserSeeder
             $adminUserForAudit = User::orderBy('id')->first(); // Try again
             if (!$adminUserForAudit) {
-                 $adminUserForAudit = User::factory()->create(['name' => 'Audit User (EquipmentSeeder)']);
-                 Log::info('Created a default audit user for EquipmentSeeder as no users were found.');
+                $adminUserForAudit = User::factory()->create(['name' => 'Audit User (EquipmentSeeder)']);
+                Log::info('Created a default audit user for EquipmentSeeder as no users were found.');
             }
             $auditUserId = $adminUserForAudit->id;
         }

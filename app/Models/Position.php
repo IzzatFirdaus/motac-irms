@@ -34,7 +34,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Position extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
 
     protected $table = 'positions';
 
@@ -47,8 +48,8 @@ class Position extends Model
         'is_active' => 'boolean',
     ];
 
-     protected $attributes = [
-        'is_active' => true,
+    protected $attributes = [
+       'is_active' => true,
     ];
 
     // BlameableObserver handles created_by, updated_by, deleted_by. Boot method removed.

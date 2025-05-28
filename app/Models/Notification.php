@@ -123,7 +123,7 @@ final class Notification extends Model // Consider extending Illuminate\Notifica
                 // Ensure deleted_by is only set if it's not already set (e.g., during a force delete or previous attempt)
                 // and an authenticated user is present.
                 if (Auth::check() && property_exists($model, 'deleted_by') && is_null($model->deleted_by)) {
-                     /** @var User $user */
+                    /** @var User $user */
                     $user = Auth::user();
                     $model->deleted_by = $user->id;
                     // IMPORTANT: The SoftDeletes trait handles saving `deleted_at`.
@@ -143,7 +143,7 @@ final class Notification extends Model // Consider extending Illuminate\Notifica
                 if (property_exists($model, 'deleted_by')) {
                     $model->deleted_by = null;
                 }
-                 // Optionally update 'updated_by' on restore as well
+                // Optionally update 'updated_by' on restore as well
                 if (Auth::check() && !$model->isDirty('updated_by')) {
                     /** @var User $user */
                     $user = Auth::user();

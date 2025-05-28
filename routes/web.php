@@ -2,59 +2,54 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\ApprovalController;
 // General Controllers for MOTAC System & Livewire Components
 // System Design Reference: 3.1 (Key active PHP controllers, Livewire Components)
-use App\Http\Controllers\ApprovalController;
-use App\Http\Controllers\EmailAccountController;       // Admin side for email apps
-use App\Http\Controllers\EmailApplicationController;  // User side for email apps
-use App\Http\Controllers\EquipmentController;         // Public viewing of equipment
-use App\Http\Controllers\language\LanguageController;
-use App\Http\Controllers\LoanApplicationController;    // User side for loan apps
-use App\Http\Controllers\LoanTransactionController;   // Admin side for loan transactions
-use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\EmailAccountController;
+use App\Http\Controllers\EmailApplicationController;       // Admin side for email apps
+use App\Http\Controllers\EquipmentController;  // User side for email apps
+use App\Http\Controllers\language\LanguageController;         // Public viewing of equipment
+use App\Http\Controllers\LoanApplicationController;
+use App\Http\Controllers\LoanTransactionController;    // User side for loan apps
+use App\Http\Controllers\NotificationController;   // Admin side for loan transactions
 use App\Http\Controllers\WebhookController;
+use App\Livewire\ApprovalDashboard;
 // Misc controllers for error pages etc.
 // use App\Http\Controllers\MiscErrorController;
 
 // Livewire Components
-use App\Livewire\ApprovalDashboard; // System Design 6.2
-use App\Livewire\ContactUs;         // Public page
-use App\Livewire\Dashboard;         // System Design 9.6
-
+use App\Livewire\ContactUs; // System Design 6.2
+use App\Livewire\Dashboard;         // Public page
+use App\Livewire\EmailApplicationForm as EmailApplicationFormLW;         // System Design 9.6
 // Corrected namespaces for Livewire form components
-use App\Livewire\EmailApplicationForm as EmailApplicationFormLW;
 use App\Livewire\LoanRequestForm as LoanRequestFormLW;
-
-// Admin & Settings Livewire Components (from System Design 9.1, 9.3, 9.7)
 use App\Livewire\ResourceManagement\Admin\BPM\IssuedLoans;
+// Admin & Settings Livewire Components (from System Design 9.1, 9.3, 9.7)
 use App\Livewire\ResourceManagement\Admin\BPM\OutstandingLoans;
 use App\Livewire\ResourceManagement\Admin\Equipment\Index as AdminEquipmentIndexLW;
 use App\Livewire\ResourceManagement\Admin\Grades\Index as AdminGradesIndexLW;
 use App\Livewire\ResourceManagement\Admin\Users\Index as AdminUsersIndexLW;
 use App\Livewire\ResourceManagement\MyApplications\Email\Index as EmailApplicationsIndexLW;
 use App\Livewire\ResourceManagement\MyApplications\Loan\Index as LoanApplicationsIndexLW;
-
-use App\Livewire\Settings\Users as SettingsUsersLW;
 use App\Livewire\Settings\CreateUser as CreateSettingsUserLW;
-use App\Livewire\Settings\EditUser as EditSettingsUserLW;
-use App\Livewire\Settings\ShowUser as ShowSettingsUserLW;
-use App\Livewire\Settings\Roles as SettingsRolesLW;
-use App\Livewire\Settings\Permissions as SettingsPermissionsLW;
 use App\Livewire\Settings\Departments\Index as AdminDepartmentsIndexLW;
+use App\Livewire\Settings\EditUser as EditSettingsUserLW;
+use App\Livewire\Settings\Permissions as SettingsPermissionsLW;
 use App\Livewire\Settings\Positions\Index as AdminPositionsIndexLW;
-
+use App\Livewire\Settings\Roles as SettingsRolesLW;
+use App\Livewire\Settings\ShowUser as ShowSettingsUserLW;
+use App\Livewire\Settings\Users as SettingsUsersLW;
+use App\Models\Approval;
 // Models for Route Model Binding
+use App\Models\Department;
+use App\Models\EmailApplication;
 use App\Models\Equipment;
+use App\Models\Grade;
 use App\Models\LoanApplication;
 use App\Models\LoanTransaction;
-use App\Models\EmailApplication;
-use App\Models\Approval;
-use App\Models\User;
-use App\Models\Grade;
-use App\Models\Department;
 use App\Models\Position;
+use App\Models\User;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -132,8 +127,8 @@ Route::middleware([
                 Route::get('/outstanding-loans', OutstandingLoans::class)->name('outstanding-loans');
                 Route::get('/issued-loans', IssuedLoans::class)->name('issued-loans');
                 // Issue and Return forms/pages embedding Livewire components
-                Route::get('/loan-transactions/issue/{loanApplication}/form', fn(LoanApplication $loanApplication) => view('resource-management.admin.bpm.issue-page', compact('loanApplication')))->name('loan-transactions.issue.form')->middleware('can:processIssuance,loanApplication');
-                Route::get('/loan-transactions/return/{loanTransaction}/form', fn(LoanTransaction $loanTransaction) => view('resource-management.admin.bpm.return-page', compact('loanTransaction')))->name('loan-transactions.return.form')->middleware('can:processReturn,loanTransaction.loanApplication');
+                Route::get('/loan-transactions/issue/{loanApplication}/form', fn (LoanApplication $loanApplication) => view('resource-management.admin.bpm.issue-page', compact('loanApplication')))->name('loan-transactions.issue.form')->middleware('can:processIssuance,loanApplication');
+                Route::get('/loan-transactions/return/{loanTransaction}/form', fn (LoanTransaction $loanTransaction) => view('resource-management.admin.bpm.return-page', compact('loanTransaction')))->name('loan-transactions.return.form')->middleware('can:processReturn,loanTransaction.loanApplication');
                 Route::get('/loan-transactions/{loanTransaction}', [LoanTransactionController::class, 'show'])->name('loan-transactions.show')->middleware('can:view,loanTransaction'); // System Design 9.3
             });
 
@@ -141,19 +136,19 @@ Route::middleware([
             Route::prefix('equipment-admin')->name('equipment-admin.')->middleware(['role:Admin|BPM Staff'])->group(function () {
                 Route::get('/', AdminEquipmentIndexLW::class)->name('index')->middleware('can:viewAny,'.Equipment::class);
                 // Pages embedding Livewire form component for create/edit
-                Route::get('/create', fn() => view('resource-management.admin.equipment.create-edit-page', ['equipmentId' => null]))->name('create')->middleware('can:create,'.Equipment::class);
-                Route::get('/{equipment}/edit', fn(Equipment $equipment) => view('resource-management.admin.equipment.create-edit-page', ['equipmentId' => $equipment->id]))->name('edit')->middleware('can:update,equipment');
+                Route::get('/create', fn () => view('resource-management.admin.equipment.create-edit-page', ['equipmentId' => null]))->name('create')->middleware('can:create,'.Equipment::class);
+                Route::get('/{equipment}/edit', fn (Equipment $equipment) => view('resource-management.admin.equipment.create-edit-page', ['equipmentId' => $equipment->id]))->name('edit')->middleware('can:update,equipment');
             });
 
             // Email Applications Admin (Processing by IT Admin) - System Design 9.2
-            Route::prefix('email-applications-admin')->name('email-applications-admin.')->middleware(['role:Admin|IT Admin'])->group(function() {
-                 Route::get('/', [EmailAccountController::class, 'indexForAdmin'])->name('index')->middleware('can:viewAny,'.EmailApplication::class);
-                 Route::get('/{email_application}', [EmailAccountController::class, 'showForAdmin'])->name('show')->middleware('can:view,email_application');
-                 Route::post('/{email_application}/process', [EmailAccountController::class, 'processApplication'])->name('process')->middleware('can:processByIT,email_application');
+            Route::prefix('email-applications-admin')->name('email-applications-admin.')->middleware(['role:Admin|IT Admin'])->group(function () {
+                Route::get('/', [EmailAccountController::class, 'indexForAdmin'])->name('index')->middleware('can:viewAny,'.EmailApplication::class);
+                Route::get('/{email_application}', [EmailAccountController::class, 'showForAdmin'])->name('show')->middleware('can:view,email_application');
+                Route::post('/{email_application}/process', [EmailAccountController::class, 'processApplication'])->name('process')->middleware('can:processByIT,email_application');
             });
 
             // Users Admin (Listing by Admin) - System Design 9.1
-            Route::prefix('users-admin')->name('users-admin.')->middleware(['role:Admin'])->group(function() {
+            Route::prefix('users-admin')->name('users-admin.')->middleware(['role:Admin'])->group(function () {
                 Route::get('/', AdminUsersIndexLW::class)->name('index')->middleware('can:viewAny,'.User::class);
             });
         });
@@ -181,15 +176,15 @@ Route::middleware([
     // Reports Section - System Design 9.5
     Route::prefix('reports')->name('reports.')->middleware(['role:Admin|BPM Staff'])->group(function () {
         // Views embedding Livewire report components
-        Route::get('/equipment', fn() => view('reports.equipment_report_page'))->name('equipment')->middleware('permission:view_equipment_reports');
-        Route::get('/loan-applications', fn() => view('reports.loan_applications_report_page'))->name('loan-applications')->middleware('permission:view_loan_reports');
-        Route::get('/user-activity', fn() => view('reports.user_activity_report_page'))->name('user-activity')->middleware('permission:view_user_activity_reports');
-        Route::get('/email-accounts', fn() => view('reports.email_accounts_report_page'))->name('email-accounts')->middleware('permission:view_email_reports');
+        Route::get('/equipment', fn () => view('reports.equipment_report_page'))->name('equipment')->middleware('permission:view_equipment_reports');
+        Route::get('/loan-applications', fn () => view('reports.loan_applications_report_page'))->name('loan-applications')->middleware('permission:view_loan_reports');
+        Route::get('/user-activity', fn () => view('reports.user_activity_report_page'))->name('user-activity')->middleware('permission:view_user_activity_reports');
+        Route::get('/email-accounts', fn () => view('reports.email_accounts_report_page'))->name('email-accounts')->middleware('permission:view_email_reports');
     });
 });
 
 // Fallback route for 404 errors
-Route::fallback(function() {
+Route::fallback(function () {
     // Ensure the message is translatable as per design principles
     abort(404, __('Laman Tidak Ditemui. Sila semak URL atau kembali ke papan pemuka.'));
 });

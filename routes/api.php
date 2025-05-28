@@ -33,7 +33,7 @@ Route::prefix('v1')
         // The 'provision' method in EmailProvisioningController would handle the logic.
         Route::post('/email-accounts/provision', [EmailProvisioningController::class, 'provisionEmailAccount']) // Method name updated for clarity
             ->name('email-accounts.provision'); // [cite: 2]
-            // Add specific permissions/policy checks within the controller method if needed.
+        // Add specific permissions/policy checks within the controller method if needed.
 
         // Example: API endpoint to check equipment availability (if needed for external integration)
         // Route::get('/equipment/{equipment_tag_id}/availability', [App\Http\Controllers\Api\EquipmentApiController::class, 'checkAvailability'])

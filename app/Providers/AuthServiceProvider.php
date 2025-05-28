@@ -2,42 +2,42 @@
 
 namespace App\Providers;
 
-use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Gate;
-use App\Models\User; // For Gate::before type hinting
-
-// Models for Policies - System Design Section 4 & 8.1
+use App\Models\Approval;
 use App\Models\Department;
-use App\Models\Position;
-use App\Models\Grade;
-use App\Models\EmailApplication;
+use App\Models\EmailApplication; // For Gate::before type hinting
+// Models for Policies - System Design Section 4 & 8.1
 use App\Models\Equipment;
+use App\Models\Grade;
+use App\Models\LoanApplication;
+use App\Models\LoanTransaction;
+use App\Models\Position;
 // use App\Models\EquipmentCategory;
 // use App\Models\SubCategory;
 // use App\Models\Location;
-use App\Models\LoanApplication;
+use App\Models\User;
 // use App\Models\LoanApplicationItem;
-use App\Models\LoanTransaction;
+use App\Policies\ApprovalPolicy;
 // use App\Models\LoanTransactionItem;
-use App\Models\Approval;
+use App\Policies\DepartmentPolicy;
 // use App\Models\Setting;
 // use App\Models\Import;
 
 // Policies - System Design Section 3.1, 8.1, 9
-use App\Policies\UserPolicy;
-use App\Policies\DepartmentPolicy;
-use App\Policies\PositionPolicy;
-use App\Policies\GradePolicy;
 use App\Policies\EmailApplicationPolicy;
 use App\Policies\EquipmentPolicy;
+use App\Policies\GradePolicy;
+use App\Policies\LoanApplicationPolicy;
+use App\Policies\LoanTransactionPolicy;
+use App\Policies\PositionPolicy;
 // use App\Policies\EquipmentCategoryPolicy;
 // use App\Policies\SubCategoryPolicy;
 // use App\Policies\LocationPolicy;
-use App\Policies\LoanApplicationPolicy;
+use App\Policies\UserPolicy;
 // use App\Policies\LoanApplicationItemPolicy;
-use App\Policies\LoanTransactionPolicy;
+use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 // use App\Policies\LoanTransactionItemPolicy;
-use App\Policies\ApprovalPolicy;
+use Illuminate\Support\Facades\Gate;
+
 // use App\Policies\SettingPolicy;
 // use App\Policies\ImportPolicy;
 

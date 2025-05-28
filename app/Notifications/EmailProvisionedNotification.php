@@ -48,7 +48,7 @@ class EmailProvisionedNotification extends Notification implements ShouldQueue
         $assignedUserId = $this->emailApplication->final_assigned_user_id;
 
         if ($assignedEmail || $assignedUserId) {
-             $mailMessage->line(__('Permohonan anda untuk Akaun E-mel / ID Pengguna MOTAC (#:id) telah berjaya diproses dan akaun anda kini aktif.', ['id' => $applicationId]));
+            $mailMessage->line(__('Permohonan anda untuk Akaun E-mel / ID Pengguna MOTAC (#:id) telah berjaya diproses dan akaun anda kini aktif.', ['id' => $applicationId]));
             if ($assignedEmail) {
                 $mailMessage->line(__('Alamat e-mel MOTAC rasmi anda ialah: **:email**', ['email' => $assignedEmail]));
             }
@@ -100,8 +100,8 @@ class EmailProvisionedNotification extends Notification implements ShouldQueue
         if ($assignedUserId) {
             $messageText .= ' ' . __('ID Pengguna: :userId.', ['userId' => $assignedUserId]);
         }
-         if (!$assignedEmail && !$assignedUserId) {
-             $messageText = __('Proses penyediaan akaun/ID pengguna ICT anda (#:appId) telah selesai.', ['appId' => $applicationId ?? 'N/A']);
+        if (!$assignedEmail && !$assignedUserId) {
+            $messageText = __('Proses penyediaan akaun/ID pengguna ICT anda (#:appId) telah selesai.', ['appId' => $applicationId ?? 'N/A']);
         }
 
 

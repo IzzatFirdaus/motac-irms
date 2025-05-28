@@ -41,7 +41,8 @@ use Illuminate\Support\Str;
  */
 class LoanTransactionItem extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
 
     // VAL_ prefix was used in factory, using direct constant names here for consistency with other models.
     public const STATUS_ITEM_ISSUED = 'issued';
@@ -100,41 +101,23 @@ class LoanTransactionItem extends Model
         // This can be handled by the service/controller creating the item.
     ];
 
+    // Static helper methods
+    public static function getStatusOptions(): array
+    {
+        return self::$STATUSES_LABELS;
+    }
+    public static function getStatusesList(): array
+    {
+        return self::$STATUSES_LABELS;
+    } // For factory
+    public static function getConditionStatusesList(): array // Actually refers to Equipment conditions
+    {
+        return Equipment::$CONDITION_STATUSES_LABELS; // Used by factory, values should be keys of Equipment statuses
+    }
+
     protected static function newFactory(): LoanTransactionItemFactory
     {
         return LoanTransactionItemFactory::new();
-    }
-
-    // Relationships
-    public function loanTransaction(): BelongsTo { return $this->belongsTo(LoanTransaction::class, 'loan_transaction_id'); }
-    public function equipment(): BelongsTo { return $this->belongsTo(Equipment::class, 'equipment_id'); }
-    public function loanApplicationItem(): BelongsTo { return $this->belongsTo(LoanApplicationItem::class, 'loan_application_item_id'); }
-
-    // Blameable
-    public function creator(): BelongsTo { return $this->belongsTo(User::class, 'created_by'); }
-    public function updater(): BelongsTo { return $this->belongsTo(User::class, 'updated_by'); }
-    public function deleter(): BelongsTo { return $this->belongsTo(User::class, 'deleted_by'); }
-
-    // Accessors
-    public function getStatusTranslatedAttribute(): string
-    {
-        return self::$STATUSES_LABELS[$this->status] ?? Str::title(str_replace('_', ' ', (string) $this->status));
-    }
-
-    public function getConditionOnReturnTranslatedAttribute(): ?string
-    {
-        // Uses Equipment's condition labels as condition_on_return stores keys from Equipment model
-        return $this->condition_on_return
-            ? (Equipment::$CONDITION_STATUSES_LABELS[$this->condition_on_return] ?? Str::title(str_replace('_', ' ', (string) $this->condition_on_return)))
-            : null;
-    }
-
-    // Static helper methods
-    public static function getStatusOptions(): array { return self::$STATUSES_LABELS; }
-    public static function getStatusesList(): array { return self::$STATUSES_LABELS; } // For factory
-    public static function getConditionStatusesList(): array // Actually refers to Equipment conditions
-    {
-         return Equipment::$CONDITION_STATUSES_LABELS; // Used by factory, values should be keys of Equipment statuses
     }
 
     /**
@@ -156,12 +139,54 @@ class LoanTransactionItem extends Model
         });
 
         static::deleted(function (self $item) {
-             // Also update quantities on delete
+            // Also update quantities on delete
             if ($item->loanApplicationItem) {
                 $item->loanApplicationItem->recalculateQuantities();
                 $item->loanApplicationItem->save();
             }
             $item->loanTransaction?->updateParentLoanApplicationStatus();
         });
+    }
+
+    // Relationships
+    public function loanTransaction(): BelongsTo
+    {
+        return $this->belongsTo(LoanTransaction::class, 'loan_transaction_id');
+    }
+    public function equipment(): BelongsTo
+    {
+        return $this->belongsTo(Equipment::class, 'equipment_id');
+    }
+    public function loanApplicationItem(): BelongsTo
+    {
+        return $this->belongsTo(LoanApplicationItem::class, 'loan_application_item_id');
+    }
+
+    // Blameable
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+    public function deleter(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deleted_by');
+    }
+
+    // Accessors
+    public function getStatusTranslatedAttribute(): string
+    {
+        return self::$STATUSES_LABELS[$this->status] ?? Str::title(str_replace('_', ' ', (string) $this->status));
+    }
+
+    public function getConditionOnReturnTranslatedAttribute(): ?string
+    {
+        // Uses Equipment's condition labels as condition_on_return stores keys from Equipment model
+        return $this->condition_on_return
+            ? (Equipment::$CONDITION_STATUSES_LABELS[$this->condition_on_return] ?? Str::title(str_replace('_', ' ', (string) $this->condition_on_return)))
+            : null;
     }
 }

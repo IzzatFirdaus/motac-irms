@@ -1,11 +1,4 @@
 <?php
-// TEMPORARY DEBUGGING - REMOVE AFTER CHECKING
-var_dump('APP_URL from config: ' . env('APP_URL', 'http://localhost'));
-var_dump('ASSET_URL from config: ' . env('ASSET_URL'));
-// You can also try to see the fully resolved config if the app boots far enough
-// var_dump(config('app.url'), config('app.asset_url'));
-// die('Checking config values from config/app.php'); 
-
 
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\ServiceProvider;
@@ -18,7 +11,7 @@ return [
     |--------------------------------------------------------------------------
     | Design Language: Prominent MOTAC Branding
     */
-  'name' => env('APP_NAME', 'Sistem Pengurusan Sumber MOTAC'), // MOTAC specific name [cite: 9]
+  'name' => env('APP_NAME', 'Sistem Pengurusan Sumber MOTAC'), // MOTAC specific name
 
   /*
     |--------------------------------------------------------------------------
@@ -48,7 +41,7 @@ return [
     |--------------------------------------------------------------------------
     | System Design Reference: 3.3 AppServiceProvider sets 'Asia/Kuala_Lumpur'.
     */
-  'timezone' => env('APP_TIMEZONE', 'Asia/Kuala_Lumpur'), // MOTAC specific timezone [cite: 9]
+  'timezone' => env('APP_TIMEZONE', 'Asia/Kuala_Lumpur'), // MOTAC specific timezone
 
   /*
     |--------------------------------------------------------------------------
@@ -56,14 +49,14 @@ return [
     |--------------------------------------------------------------------------
     | Design Language: Bahasa Melayu as Primary Language
     */
-  'locale' => env('APP_LOCALE', 'my'), // MOTAC default: Bahasa Melayu [cite: 9]
+  'locale' => env('APP_LOCALE', 'my'), // MOTAC default: Bahasa Melayu
 
   /*
     |--------------------------------------------------------------------------
     | Application Fallback Locale
     |--------------------------------------------------------------------------
     */
-  'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'), // English as fallback [cite: 9]
+  'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'), // English as fallback
 
   /*
     |--------------------------------------------------------------------------
@@ -115,25 +108,30 @@ return [
     /*
      * Package Service Providers Below
      */
-    // Illuminate\Auth\AuthServiceProvider::class, // Example of a Laravel Framework Provider (KEEP ENABLED INITIALLY)
-    // Illuminate\Broadcasting\BroadcastServiceProvider::class, // KEEP ENABLED INITIALLY
-    // ... other Illuminate providers ... // KEEP ENABLED INITIALLY
+    // Illuminate\Auth\AuthServiceProvider::class,
+    // Illuminate\Broadcasting\BroadcastServiceProvider::class,
+    // ... other Illuminate providers ...
 
-    // Spatie\Permission\PermissionServiceProvider::class, // ==> TEMPORARILY COMMENT OUT
+    // Spatie\Permission\PermissionServiceProvider::class,
+
+    // Add Livewire Service Provider here
+    Livewire\LivewireServiceProvider::class, // UNCOMMENTED/ADDED THIS LINE
 
     /*
      * Application Service Providers...
      */
-    // App\Providers\AppServiceProvider::class,          // ==> TEMPORARILY COMMENT OUT
-    // App\Providers\AuthServiceProvider::class,         // ==> TEMPORARILY COMMENT OUT
-    // App\Providers\BroadcastServiceProvider::class,    // This is your app's one, if different from Illuminate's
-    // App\Providers\EventServiceProvider::class,        // ==> TEMPORARILY COMMENT OUT
-    // App\Providers\FortifyServiceProvider::class,      // ==> TEMPORARILY COMMENT OUT (if listed and not part of defaultProviders)
-    // App\Providers\JetstreamServiceProvider::class,  // ==> TEMPORARILY COMMENT OUT (if listed and not part of defaultProviders)
-    // App\Providers\MenuServiceProvider::class,         // ==> TEMPORARILY COMMENT OUT
-    // App\Providers\RouteServiceProvider::class,        // ==> TEMPORARILY COMMENT OUT
-    // App\Providers\QueryLogServiceProvider::class,     // ==> TEMPORARILY COMMENT OUT (even the modified one)
-    // App\Providers\TelescopeServiceProvider::class,    // Already commented in your file
+    App\Providers\AppServiceProvider::class,
+    App\Providers\AuthServiceProvider::class,
+    // App\Providers\BroadcastServiceProvider::class,
+    App\Providers\EventServiceProvider::class,
+    App\Providers\RouteServiceProvider::class,
+    // App\Providers\QueryLogServiceProvider::class,
+    // App\Providers\TelescopeServiceProvider::class,
+    // Add any other custom application service providers that were commented out
+    // based on your project's needs. For example:
+    // App\Providers\FortifyServiceProvider::class,
+    // App\Providers\JetstreamServiceProvider::class,
+    // App\Providers\MenuServiceProvider::class,
 
   ])->toArray(),
 

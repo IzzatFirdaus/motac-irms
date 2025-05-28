@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth; // For transitionToStatus default acting user
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -59,7 +58,8 @@ use Illuminate\Support\Str;
  */
 class EmailApplication extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
 
     // Status constants as defined in system design document (Section 4.2)
     public const STATUS_DRAFT = 'draft';
@@ -124,18 +124,45 @@ class EmailApplication extends Model
         'cert_email_responsibility_agreed' => false,
     ];
 
+    public static function getStatusOptions(): array
+    {
+        return self::$STATUSES_LABELS;
+    }
+    public static function getStatusKeys(): array
+    {
+        return array_keys(self::$STATUSES_LABELS);
+    }
+
     protected static function newFactory(): EmailApplicationFactory
     {
         return EmailApplicationFactory::new();
     }
 
     // Relationships
-    public function user(): BelongsTo { return $this->belongsTo(User::class, 'user_id'); }
-    public function supportingOfficerUser(): BelongsTo { return $this->belongsTo(User::class, 'supporting_officer_id'); }
-    public function approvals(): MorphMany { return $this->morphMany(Approval::class, 'approvable'); }
-    public function creator(): BelongsTo { return $this->belongsTo(User::class, 'created_by'); }
-    public function updater(): BelongsTo { return $this->belongsTo(User::class, 'updated_by'); }
-    public function deleter(): BelongsTo { return $this->belongsTo(User::class, 'deleted_by'); }
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+    public function supportingOfficerUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'supporting_officer_id');
+    }
+    public function approvals(): MorphMany
+    {
+        return $this->morphMany(Approval::class, 'approvable');
+    }
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+    public function deleter(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deleted_by');
+    }
 
     // Accessors
     public function getStatusTranslatedAttribute(): string
@@ -149,12 +176,17 @@ class EmailApplication extends Model
     }
 
     // Business Logic Methods
-    public function isDraft(): bool { return $this->status === self::STATUS_DRAFT; }
+    public function isDraft(): bool
+    {
+        return $this->status === self::STATUS_DRAFT;
+    }
 
     public function canBeSubmitted(?User $user = null): bool
     {
         $user = $user ?? Auth::user(); // Use authenticated user if not provided
-        if (!$user) { return false; }
+        if (!$user) {
+            return false;
+        }
         return $this->isDraft() && (int)$this->user_id === (int)$user->id;
     }
 
@@ -165,9 +197,6 @@ class EmailApplication extends Model
                $this->cert_email_responsibility_agreed &&
                $this->certification_timestamp !== null;
     }
-
-    public static function getStatusOptions(): array { return self::$STATUSES_LABELS; }
-    public static function getStatusKeys(): array { return array_keys(self::$STATUSES_LABELS); }
 
     public function transitionToStatus(string $newStatus, ?string $reason = null, ?int $actingUserId = null): bool
     {

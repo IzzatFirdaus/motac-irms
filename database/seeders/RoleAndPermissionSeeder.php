@@ -148,7 +148,7 @@ class RoleAndPermissionSeeder extends Seeder
                     'view_all_email_applications',// View email applications relevant to their department for approval
                 ]);
             })->pluck('name')->toArray();
-             $approverPermsForHod = Role::findByName('Approver', 'web')?->permissions->pluck('name')->toArray() ?? [];
+            $approverPermsForHod = Role::findByName('Approver', 'web')?->permissions->pluck('name')->toArray() ?? [];
             $hodRole->syncPermissions(array_unique(array_merge($hodPermissions, $approverPermsForHod)));
         }
 
@@ -190,7 +190,7 @@ class RoleAndPermissionSeeder extends Seeder
                     // Avoid giving 'Admin' user the 'User' role if they are the only one and being created.
                     // This logic might need adjustment based on AdminUserSeeder.
                     if (strtolower($userInstance->email) !== 'admin@example.com') { // Example admin email
-                         $userInstance->assignRole($defaultUserRoleForAssignment);
+                        $userInstance->assignRole($defaultUserRoleForAssignment);
                     }
                 }
                 Log::info("Assigned '{$defaultUserRoleForAssignment->name}' role to {$usersWithoutRoles->count()} users who had no roles (excluding potential default admin).");

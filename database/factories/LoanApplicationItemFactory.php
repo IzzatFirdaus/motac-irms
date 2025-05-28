@@ -31,11 +31,17 @@ class LoanApplicationItemFactory extends EloquentFactory
         // $derivedStatus = 'pending_approval'; // Default or derive based on quantities below.
         // Example derivation:
         $derivedStatus = 'unknown';
-        if ($approvedQuantity === null) $derivedStatus = 'pending_approval';
-        elseif ($approvedQuantity > 0 && $issuedQuantity == 0) $derivedStatus = 'awaiting_issuance';
-        elseif ($issuedQuantity > 0 && $issuedQuantity < $approvedQuantity) $derivedStatus = 'partially_issued';
-        elseif ($issuedQuantity > 0 && $issuedQuantity == $approvedQuantity && $returnedQuantity < $issuedQuantity) $derivedStatus = 'fully_issued';
-        elseif ($returnedQuantity > 0 && $returnedQuantity == $issuedQuantity) $derivedStatus = 'fully_returned';
+        if ($approvedQuantity === null) {
+            $derivedStatus = 'pending_approval';
+        } elseif ($approvedQuantity > 0 && $issuedQuantity == 0) {
+            $derivedStatus = 'awaiting_issuance';
+        } elseif ($issuedQuantity > 0 && $issuedQuantity < $approvedQuantity) {
+            $derivedStatus = 'partially_issued';
+        } elseif ($issuedQuantity > 0 && $issuedQuantity == $approvedQuantity && $returnedQuantity < $issuedQuantity) {
+            $derivedStatus = 'fully_issued';
+        } elseif ($returnedQuantity > 0 && $returnedQuantity == $issuedQuantity) {
+            $derivedStatus = 'fully_returned';
+        }
 
 
         return [
@@ -87,7 +93,7 @@ class LoanApplicationItemFactory extends EloquentFactory
     public function fullyProcessed(): static
     {
         return $this->state(function (array $attributes) {
-            $requested = $attributes['quantity_requested'] ?? $this->faker->numberBetween(1,2);
+            $requested = $attributes['quantity_requested'] ?? $this->faker->numberBetween(1, 2);
             return [
                 'quantity_requested' => $requested,
                 'quantity_approved' => $requested,

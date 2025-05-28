@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 /**
@@ -53,15 +52,11 @@ use Illuminate\Support\Str;
  */
 class LoanTransaction extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
 
     public const TYPE_ISSUE = 'issue';
     public const TYPE_RETURN = 'return';
-
-    public static array $TYPES_LABELS = [
-        self::TYPE_ISSUE => 'Pengeluaran',
-        self::TYPE_RETURN => 'Pemulangan',
-    ];
 
     // Statuses for a transaction itself
     public const STATUS_PENDING = 'pending';
@@ -74,6 +69,11 @@ class LoanTransaction extends Model
     public const STATUS_RETURNED_WITH_DAMAGE_AND_LOSS = 'returned_with_damage_and_loss'; // Added
     public const STATUS_COMPLETED = 'completed';
     public const STATUS_CANCELLED = 'cancelled';
+
+    public static array $TYPES_LABELS = [
+        self::TYPE_ISSUE => 'Pengeluaran',
+        self::TYPE_RETURN => 'Pemulangan',
+    ];
 
     public static array $STATUSES_LABELS = [
         self::STATUS_PENDING => 'Menunggu Tindakan',
@@ -107,6 +107,30 @@ class LoanTransaction extends Model
         'accessories_checklist_on_return' => 'array',
     ];
 
+    // Static helpers
+    public static function getTypesOptions(): array
+    {
+        return self::$TYPES_LABELS;
+    }
+    public static function getStatusOptions(): array
+    {
+        return self::$STATUSES_LABELS;
+    }
+    public static function getStatusesList(): array
+    {
+        return array_keys(self::$STATUSES_LABELS);
+    } // Corrected to return keys for list
+
+    /**
+     * Placeholder for static method to define default eager loaded relations.
+     * Implement this to return an array of relation names.
+     * e.g., return ['loanApplication.user', 'issuingOfficer', ...];
+     */
+    public static function getDefinedDefaultRelationsStatic(): array
+    {
+        return ['loanApplication.user', 'loanTransactionItems.equipment', 'issuingOfficer', 'receivingOfficer', 'returningOfficer', 'returnAcceptingOfficer'];
+    }
+
     // Default attributes can be set if a common initial status is desired
     // protected $attributes = [
     // 'status' => self::STATUS_PENDING,
@@ -118,20 +142,53 @@ class LoanTransaction extends Model
     }
 
     // Relationships
-    public function loanApplication(): BelongsTo { return $this->belongsTo(LoanApplication::class, 'loan_application_id'); }
-    public function loanTransactionItems(): HasMany { return $this->hasMany(LoanTransactionItem::class, 'loan_transaction_id'); }
-    public function items(): HasMany { return $this->loanTransactionItems(); }
+    public function loanApplication(): BelongsTo
+    {
+        return $this->belongsTo(LoanApplication::class, 'loan_application_id');
+    }
+    public function loanTransactionItems(): HasMany
+    {
+        return $this->hasMany(LoanTransactionItem::class, 'loan_transaction_id');
+    }
+    public function items(): HasMany
+    {
+        return $this->loanTransactionItems();
+    }
 
-    public function issuingOfficer(): BelongsTo { return $this->belongsTo(User::class, 'issuing_officer_id'); }
-    public function receivingOfficer(): BelongsTo { return $this->belongsTo(User::class, 'receiving_officer_id'); }
-    public function returningOfficer(): BelongsTo { return $this->belongsTo(User::class, 'returning_officer_id'); }
-    public function returnAcceptingOfficer(): BelongsTo { return $this->belongsTo(User::class, 'return_accepting_officer_id'); }
+    public function issuingOfficer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'issuing_officer_id');
+    }
+    public function receivingOfficer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'receiving_officer_id');
+    }
+    public function returningOfficer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'returning_officer_id');
+    }
+    public function returnAcceptingOfficer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'return_accepting_officer_id');
+    }
 
-    public function relatedIssueTransaction(): BelongsTo { return $this->belongsTo(LoanTransaction::class, 'related_transaction_id'); }
+    public function relatedIssueTransaction(): BelongsTo
+    {
+        return $this->belongsTo(LoanTransaction::class, 'related_transaction_id');
+    }
 
-    public function creator(): BelongsTo { return $this->belongsTo(User::class, 'created_by'); }
-    public function updater(): BelongsTo { return $this->belongsTo(User::class, 'updated_by'); }
-    public function deleter(): BelongsTo { return $this->belongsTo(User::class, 'deleted_by'); }
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+    public function deleter(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deleted_by');
+    }
 
     // Accessors
     public function getTypeTranslatedAttribute(): string
@@ -142,21 +199,6 @@ class LoanTransaction extends Model
     public function getStatusTranslatedAttribute(): string
     {
         return self::$STATUSES_LABELS[$this->status] ?? Str::title(str_replace('_', ' ', (string) $this->status));
-    }
-
-    // Static helpers
-    public static function getTypesOptions(): array { return self::$TYPES_LABELS; }
-    public static function getStatusOptions(): array { return self::$STATUSES_LABELS; }
-    public static function getStatusesList(): array { return array_keys(self::$STATUSES_LABELS); } // Corrected to return keys for list
-
-    /**
-     * Placeholder for static method to define default eager loaded relations.
-     * Implement this to return an array of relation names.
-     * e.g., return ['loanApplication.user', 'issuingOfficer', ...];
-     */
-    public static function getDefinedDefaultRelationsStatic(): array
-    {
-        return ['loanApplication.user', 'loanTransactionItems.equipment', 'issuingOfficer', 'receivingOfficer', 'returningOfficer', 'returnAcceptingOfficer'];
     }
 
 

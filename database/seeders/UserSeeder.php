@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use App\Models\Department; // For assigning users to existing departments
-use App\Models\Grade;      // For assigning users to existing grades
-use App\Models\Position;   // For assigning users to existing positions
+use App\Models\Department;
+use App\Models\Grade; // For assigning users to existing departments
+use App\Models\Position;      // For assigning users to existing grades
+use App\Models\User;   // For assigning users to existing positions
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Role; // To check role existence

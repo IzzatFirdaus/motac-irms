@@ -6,10 +6,9 @@ namespace App\Services;
 
 use App\Models\EmailApplication;
 use App\Models\User;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Config; // Added from suggestion
-use RuntimeException;
+use Illuminate\Support\Facades\Log; // Added from suggestion
 use Throwable;
 
 final class EmailProvisioningService
@@ -94,9 +93,9 @@ final class EmailProvisioningService
                 $errorMessage .= ' - ' . $response->json('message');
             }
             if ($response->json('errors')) {
-                 $errorMessage .= ' Details: ' . json_encode($response->json('errors'));
+                $errorMessage .= ' Details: ' . json_encode($response->json('errors'));
             }
-             if ($response->json('error_code')) {
+            if ($response->json('error_code')) {
                 $errorCode = $response->json('error_code');
             }
 

@@ -5,16 +5,17 @@ namespace App\Livewire\ResourceManagement\MyApplications\Loan;
 use App\Models\LoanApplication;
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
 
 #[Layout('layouts.app')]
 class Index extends Component
 {
-    use AuthorizesRequests, WithPagination;
+    use AuthorizesRequests;
+    use WithPagination;
 
     public string $searchTerm = '';
     public string $filterStatus = ''; // Empty string means 'all'

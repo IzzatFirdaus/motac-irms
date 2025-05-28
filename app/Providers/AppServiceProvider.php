@@ -2,24 +2,23 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\View;
-use Illuminate\Support\Facades\Lang;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Carbon;
-use Illuminate\Database\Eloquent\Model;
-use App\Helpers\Helpers; // Assuming this is your helper class
-use Illuminate\Support\Facades\App; // Import the App facade
-
-// MOTAC Core Services
+use App\Helpers\Helpers;
 use App\Services\ApprovalService;
 use App\Services\EmailApplicationService;
 use App\Services\EmailProvisioningService;
 use App\Services\EquipmentService;
 use App\Services\LoanApplicationService;
-use App\Services\LoanTransactionService;
-use App\Services\NotificationService;
+use App\Services\LoanTransactionService; // Assuming this is your helper class
+use App\Services\NotificationService; // Import the App facade
+// MOTAC Core Services
 use App\Services\UserService;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Lang;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
