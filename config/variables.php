@@ -12,15 +12,15 @@ return [
     'templateKeyword'     => 'motac, bpm, sistem dalaman, pengurusan sumber, pinjaman ict, permohonan emel, kementerian pelancongan seni dan budaya',
 
     // URLs
-    'productPage'    => env('APP_URL', url('/dashboard')), // Main landing page after login
+    'productPage' => rtrim(env('APP_URL', 'http://localhost'), '/') . '/dashboard', // Main landing page after login
     'documentation'  => '#', // Link to user manual or SOP if available
-    'repositoryUrl'  => 'https://github.com/your-repo/motac-system', // Placeholder for your Git repo
+    'repositoryUrl'  => 'https://github.com/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS',
 
     // Social media or contact links (MOTAC specific, if any to be shown in footer or elsewhere)
     // These are examples, update with actual MOTAC links if needed, or remove if not used.
     'facebookUrl'    => 'https://www.facebook.com/MyMOTAC/',
     'twitterUrl'     => 'https://twitter.com/MyMOTAC',
-    'instagramUrl'   => 'https://www.instagram.com/mymotac/',
+    'instagramUrl'   => 'https://www.instagram.com/MyMOTAC',
     'githubUrl'      => '#', // If MOTAC has a public GitHub for certain projects
 
 

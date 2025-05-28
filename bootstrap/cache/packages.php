@@ -17,15 +17,18 @@
       0 => 'Barryvdh\\LaravelIdeHelper\\IdeHelperServiceProvider',
     ),
   ),
-  'jenssegers/agent' => 
+  'imanghafoori/laravel-microscope' => 
   array (
     'providers' => 
     array (
-      0 => 'Jenssegers\\Agent\\AgentServiceProvider',
+      0 => 'Imanghafoori\\LaravelMicroscope\\LaravelMicroscopeServiceProvider',
     ),
-    'aliases' => 
+  ),
+  'imanghafoori/smart-realtime-facades' => 
+  array (
+    'providers' => 
     array (
-      'Agent' => 'Jenssegers\\Agent\\Facades\\Agent',
+      0 => 'Imanghafoori\\RealtimeFacades\\SmartRealTimeFacadesProvider',
     ),
   ),
   'laravel/fortify' => 
@@ -99,6 +102,13 @@
       0 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
     ),
   ),
+  'nunomaduro/phpinsights' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'NunoMaduro\\PhpInsights\\Application\\Adapters\\Laravel\\InsightsServiceProvider',
+    ),
+  ),
   'nunomaduro/termwind' => 
   array (
     'providers' => 
@@ -126,6 +136,13 @@
     'providers' => 
     array (
       0 => 'Pixinvent\\Jetstrap\\JetstrapServiceProvider',
+    ),
+  ),
+  'spatie/laravel-activitylog' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Spatie\\Activitylog\\ActivitylogServiceProvider',
     ),
   ),
   'spatie/laravel-ignition' => 

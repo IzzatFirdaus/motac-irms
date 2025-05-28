@@ -8,8 +8,8 @@
                 <p class="form-display-field">{{ $user->name ?? 'N/A' }}</p>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ $user->passport_number ? __('No. Pasport:') : __('No. Pengenalan (NRIC):') }}</label>
-                <p class="form-display-field">{{ $user->identification_number ?? $user->passport_number ?? 'N/A' }}</p>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('No. Pengenalan (NRIC):') }}</label>
+                <p class="form-display-field">{{ $user->identification_number ?? 'N/A' }}</p>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Jawatan & Gred:') }}</label>
@@ -35,7 +35,7 @@
     @endif
 </x-card>
 
-{{-- Add this style to your global CSS or within a <style> tag in your main layout for .form-display-field --}}
+{{-- Styles (ensure these are in your global CSS or a relevant <style> block if not already present) --}}
 {{--
 <style>
     .form-display-field {

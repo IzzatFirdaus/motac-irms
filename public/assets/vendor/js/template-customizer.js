@@ -1178,20 +1178,33 @@ var TemplateCustomizer = /*#__PURE__*/function () {
   }, {
     key: "_insertStylesheet",
     value: function _insertStylesheet(className, href) {
-      var curLink = document.querySelector(".".concat(className));
-      if (typeof document.documentMode === 'number' && document.documentMode < 11) {
-        if (!curLink) return;
-        if (href === curLink.getAttribute('href')) return;
-        var link = document.createElement('link');
-        link.setAttribute('rel', 'stylesheet');
-        link.setAttribute('type', 'text/css');
-        link.className = className;
-        link.setAttribute('href', href);
-        curLink.parentNode.insertBefore(link, curLink.nextSibling);
-      } else {
-        document.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"".concat(href, "\" class=\"").concat(className, "\">"));
+      // Try to find an existing link with the same class
+      var existingLink = document.querySelector("link.".concat(className));
+
+      if (existingLink) {
+        if (existingLink.getAttribute('href') === href) {
+          return; // Already correct, do nothing
+        }
+        // If href is different, remove the old link.
+        if (existingLink.parentNode) {
+          existingLink.parentNode.removeChild(existingLink);
+        }
       }
-      curLink.parentNode.removeChild(curLink);
+
+      // Create the new link element
+      var newLink = document.createElement('link');
+      newLink.setAttribute('rel', 'stylesheet');
+      newLink.setAttribute('type', 'text/css');
+      newLink.className = className;
+      newLink.setAttribute('href', href);
+
+      // Append the new link to the <head>
+      var head = document.getElementsByTagName('head')[0];
+      if (head) {
+        head.appendChild(newLink);
+      } else {
+        console.error('TemplateCustomizer: <head> element not found. Cannot insert stylesheet: ' + href);
+      }
     }
   }, {
     key: "_loadStylesheets",
