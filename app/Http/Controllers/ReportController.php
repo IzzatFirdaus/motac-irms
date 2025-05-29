@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\EmailApplication;
 use App\Models\Equipment;
-use App\Models\EquipmentCategory; //
+use App\Models\EquipmentCategory;
 use App\Models\LoanApplication;
 use App\Models\LoanTransaction;
-use App\Models\Location;        //
+use App\Models\Location;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,13 +19,13 @@ class ReportController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        // Consider adding role/permission middleware for report access if not handled at route level
-        // e.g., $this->middleware(['role:Admin|BPMStaff']);
+        // Middleware for roles/permissions should be handled at the route level in web.php
+        // as per current web.php structure.
     }
 
     /**
-     * Display a report on user activities (e.g., application counts).
-     * Note: Current web.php routes do not directly call this method.
+     * Display a report on user activities.
+     * Corresponds to route: reports.activity-log
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\View\View
@@ -39,11 +39,11 @@ class ReportController extends Controller
             'ip_address' => $request->ip(),
         ]);
 
-        $query = User::withCount([ //
-            'emailApplications',    //
-            'loanApplicationsAsApplicant as loan_applications_count', //
-            'approvalsMade as approvals_count',          //
-        ])->with(['department:id,name', 'grade:id,name', 'position:id,name']); //
+        $query = User::withCount([
+            'emailApplications',
+            'loanApplicationsAsApplicant as loan_applications_count', // Ensure 'loanApplicationsAsApplicant' relation exists
+            'approvalsMade as approvals_count',                     // Ensure 'approvalsMade' relation exists
+        ])->with(['department:id,name', 'grade:id,name', 'position:id,name']);
 
         if ($request->filled('search')) {
             $searchTerm = $request->input('search');
@@ -53,43 +53,43 @@ class ReportController extends Controller
                   ->orWhere('identification_number', 'like', '%'.$searchTerm.'%');
             });
         }
-        // Add other filters as needed (e.g., by department, status)
+        // Add other filters (department, grade, etc.) as needed
 
-        $users = $query->latest('created_at')->paginate(config('pagination.default_size', 20));
+        $users = $query->latest('created_at')->paginate(config('pagination.reports_per_page', 20));
 
         Log::info("ReportController@activityLog: Fetched {$users->total()} users for report.", ['admin_user_id' => $adminUserId]);
 
-        // Assumes 'reports.activity-log' view exists
         return view('reports.activity-log', compact('users', 'request'));
     }
 
     /**
      * Display an equipment inventory report.
-     * Note: Current web.php routes do not directly call this method.
+     * Method name changed to match web.php action.
+     * Corresponds to route: reports.equipment-inventory
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\View\View
      */
-    public function equipment(Request $request): View
+    public function equipmentInventory(Request $request): View // Renamed from equipment
     {
         $adminUserId = Auth::id();
-        Log::info("ReportController@equipment: Generating Equipment Inventory Report.", [
+        Log::info("ReportController@equipmentInventory: Generating Equipment Inventory Report.", [
             'admin_user_id' => $adminUserId,
             'filters' => $request->all(),
             'ip_address' => $request->ip(),
         ]);
 
-        $query = Equipment::with([ //
-            'equipmentCategory:id,name', //
-            'definedLocation:id,name',   //
-            'department:id,name',        //
+        $query = Equipment::with([
+            'equipmentCategory:id,name',
+            'definedLocation:id,name', // Ensure 'definedLocation' is the correct relation name
+            'department:id,name',
         ]);
 
         if ($request->filled('status') && $request->status !== 'all') {
             $query->where('status', $request->input('status'));
         }
         if ($request->filled('location_id') && $request->location_id !== 'all') {
-            $query->where('location_id', $request->input('location_id'));
+            $query->where('location_id', $request->input('location_id')); // Assuming 'location_id' is the FK on Equipment table
         }
         if ($request->filled('equipment_category_id') && $request->equipment_category_id !== 'all') {
             $query->where('equipment_category_id', $request->input('equipment_category_id'));
@@ -108,23 +108,21 @@ class ReportController extends Controller
             });
         }
 
-        $equipment = $query->orderBy('tag_id')->paginate(config('pagination.default_size', 20));
+        $equipment = $query->orderBy('tag_id')->paginate(config('pagination.reports_per_page', 20));
 
-        // Data for filter dropdowns
-        $locations = Location::where('is_active', true)->orderBy('name')->pluck('name', 'id'); //
-        $categories = EquipmentCategory::where('is_active', true)->orderBy('name')->pluck('name', 'id'); //
-        $statuses = Equipment::getStatusOptions(); //
-        $assetTypes = Equipment::getAssetTypeOptions(); //
+        $locations = Location::where('is_active', true)->orderBy('name')->pluck('name', 'id');
+        $categories = EquipmentCategory::where('is_active', true)->orderBy('name')->pluck('name', 'id');
+        $statuses = Equipment::getStatusOptions();
+        $assetTypes = Equipment::getAssetTypeOptions();
 
-        Log::info("ReportController@equipment: Fetched {$equipment->total()} equipment items.", ['admin_user_id' => $adminUserId]);
+        Log::info("ReportController@equipmentInventory: Fetched {$equipment->total()} equipment items.", ['admin_user_id' => $adminUserId]);
 
-        // Assumes 'reports.equipment-inventory' view exists
         return view('reports.equipment-inventory', compact('equipment', 'locations', 'categories', 'statuses', 'assetTypes', 'request'));
     }
 
     /**
      * Display a loan history report.
-     * Note: Current web.php routes do not directly call this method.
+     * Corresponds to route: reports.loan-history
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\View\View
@@ -138,16 +136,15 @@ class ReportController extends Controller
             'ip_address' => $request->ip(),
         ]);
 
-        $query = LoanTransaction::with([ //
-            'loanApplication.user:id,name',                 //
-            'loanApplication.responsibleOfficer:id,name',   //
-            'loanTransactionItems.equipment:id,tag_id,asset_type,brand,model', //
-            'issuingOfficer:id,name',                       //
-            'receivingOfficer:id,name',                     //
-            'returningOfficer:id,name',                     //
-            'returnAcceptingOfficer:id,name',               //
+        $query = LoanTransaction::with([
+            'loanApplication.user:id,name',
+            'loanApplication.responsibleOfficer:id,name',
+            'loanTransactionItems.equipment:id,tag_id,asset_type,brand,model',
+            'issuingOfficer:id,name',
+            'receivingOfficer:id,name',
+            'returningOfficer:id,name',
+            'returnAcceptingOfficer:id,name',
         ]);
-        // ->whereIn('type', [LoanTransaction::TYPE_ISSUE, LoanTransaction::TYPE_RETURN]); // Filter by relevant types if needed
 
         if ($request->filled('user_id')) {
             $userIdFilter = $request->input('user_id');
@@ -171,24 +168,22 @@ class ReportController extends Controller
             $query->whereDate('transaction_date', '<=', $request->input('date_to'));
         }
 
-        $loanHistory = $query->latest('transaction_date')->paginate(config('pagination.default_size', 20));
+        $loanHistory = $query->latest('transaction_date')->paginate(config('pagination.reports_per_page', 20));
 
-        // Data for filter dropdowns
-        $users = User::orderBy('name')->pluck('name', 'id'); //
+        $users = User::orderBy('name')->pluck('name', 'id');
         $equipmentList = Equipment::orderBy('tag_id')->select('id', 'tag_id', 'brand', 'model')->get()->mapWithKeys(function ($item) {
-            return [$item->id => "{$item->tag_id} - {$item->brand} {$item->model}"];
-        }); //
-        $transactionTypes = LoanTransaction::getTypesOptions(); //
+            return [$item->id => "{$item->tag_id} ({$item->brand} {$item->model})"]; // Added () for clarity
+        });
+        $transactionTypes = LoanTransaction::getTypesOptions();
 
         Log::info("ReportController@loanHistory: Fetched {$loanHistory->total()} loan transactions.", ['admin_user_id' => $adminUserId]);
 
-        // Assumes 'reports.loan-history' view exists
         return view('reports.loan-history', compact('loanHistory', 'users', 'equipmentList', 'transactionTypes', 'request'));
     }
 
     /**
      * Display a report on email account applications.
-     * Note: Current web.php routes do not directly call this method.
+     * Corresponds to route: reports.email-accounts
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\View\View
@@ -202,7 +197,7 @@ class ReportController extends Controller
             'ip_address' => $request->ip(),
         ]);
 
-        $query = EmailApplication::with(['user:id,name,department_id', 'user.department:id,name']); //
+        $query = EmailApplication::with(['user:id,name,department_id', 'user.department:id,name']);
 
         if ($request->filled('status') && $request->status !== 'all') {
             $query->where('status', $request->input('status'));
@@ -219,10 +214,8 @@ class ReportController extends Controller
         if ($request->filled('search')) {
             $searchTerm = $request->input('search');
             $query->where(function ($q) use ($searchTerm) {
-                // The original query used 'subject' which doesn't exist on EmailApplication model.
-                // Adjusting to search relevant fields like proposed_email or notes.
                 $q->where('proposed_email', 'like', '%'.$searchTerm.'%')
-                  ->orWhere('application_reason_notes', 'like', '%'.$searchTerm.'%') //
+                  ->orWhere('application_reason_notes', 'like', '%'.$searchTerm.'%')
                   ->orWhereHas('user', function ($userQuery) use ($searchTerm) {
                       $userQuery->where('name', 'like', '%'.$searchTerm.'%')
                                 ->orWhere('email', 'like', '%'.$searchTerm.'%');
@@ -230,21 +223,19 @@ class ReportController extends Controller
             });
         }
 
-        $emailApplications = $query->latest('updated_at')->paginate(config('pagination.default_size', 20));
+        $emailApplications = $query->latest('updated_at')->paginate(config('pagination.reports_per_page', 20));
 
-        // Data for filter dropdowns
-        $usersFilter = User::orderBy('name')->pluck('name', 'id'); //
-        $statuses = EmailApplication::getStatusOptions(); //
+        $usersFilter = User::orderBy('name')->pluck('name', 'id');
+        $statuses = EmailApplication::getStatusOptions();
 
         Log::info("ReportController@emailAccounts: Fetched {$emailApplications->total()} email applications.", ['admin_user_id' => $adminUserId]);
 
-        // Assumes 'reports.email-accounts' view exists
         return view('reports.email-accounts', compact('emailApplications', 'usersFilter', 'statuses', 'request'));
     }
 
     /**
      * Display a report on loan applications.
-     * Note: Current web.php routes do not directly call this method.
+     * Corresponds to route: reports.loan-applications
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\View\View
@@ -258,11 +249,11 @@ class ReportController extends Controller
             'ip_address' => $request->ip(),
         ]);
 
-        $query = LoanApplication::with([ //
-            'user:id,name,department_id', 'user.department:id,name', //
-            'responsibleOfficer:id,name', //
-            'supportingOfficer:id,name',  //
-            'approvals.officer:id,name',  //
+        $query = LoanApplication::with([
+            'user:id,name,department_id', 'user.department:id,name',
+            'responsibleOfficer:id,name',
+            'supportingOfficer:id,name',
+            'approvals.officer:id,name', // For showing who approved/rejected at various stages
         ]);
 
         if ($request->filled('status') && $request->status !== 'all') {
@@ -272,7 +263,7 @@ class ReportController extends Controller
             $query->where('user_id', $request->input('user_id'));
         }
         if ($request->filled('date_from')) {
-            $query->whereDate('created_at', '>=', $request->input('date_from'));
+            $query->whereDate('created_at', '>=', $request->input('date_from')); // Assuming filter by creation date
         }
         if ($request->filled('date_to')) {
             $query->whereDate('created_at', '<=', $request->input('date_to'));
@@ -280,23 +271,35 @@ class ReportController extends Controller
         if ($request->filled('search')) {
             $searchTerm = $request->input('search');
             $query->where(function ($q) use ($searchTerm) {
-                $q->where('purpose', 'like', '%'.$searchTerm.'%') //
-                  ->orWhere('location', 'like', '%'.$searchTerm.'%') //
+                $q->where('purpose', 'like', '%'.$searchTerm.'%')
+                  ->orWhere('location', 'like', '%'.$searchTerm.'%') // Usage location
                   ->orWhereHas('user', function ($userQuery) use ($searchTerm) {
                       $userQuery->where('name', 'like', '%'.$searchTerm.'%');
                   });
             });
         }
 
-        $loanApplications = $query->latest('updated_at')->paginate(config('pagination.default_size', 20));
+        $loanApplications = $query->latest('updated_at')->paginate(config('pagination.reports_per_page', 20));
 
-        // Data for filter dropdowns
-        $usersFilter = User::orderBy('name')->pluck('name', 'id'); //
-        $statuses = LoanApplication::getStatusOptions(); //
+        $usersFilter = User::orderBy('name')->pluck('name', 'id');
+        $statuses = LoanApplication::getStatusOptions();
 
         Log::info("ReportController@loanApplications: Fetched {$loanApplications->total()} loan applications.", ['admin_user_id' => $adminUserId]);
 
-        // Assumes 'reports.loan-applications' view exists
         return view('reports.loan-applications', compact('loanApplications', 'usersFilter', 'statuses', 'request'));
+    }
+
+    /**
+     * Display the main reports index page (if one exists).
+     * Corresponds to route: reports.index
+     *
+     * @param Request $request
+     * @return View
+     */
+    public function index(Request $request): View
+    {
+        // This method might show a dashboard of available reports or links to them.
+        // Ensure the view 'reports.index' exists.
+        return view('reports.index');
     }
 }

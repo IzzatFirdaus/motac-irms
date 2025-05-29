@@ -1,11 +1,44 @@
 {{-- resources/views/layouts/sections/menu/verticalMenu.blade.php --}}
 {{-- MOTAC ICT LOAN SYSTEM | Vertical Sidebar Navigation --}}
-{{-- Expected: $configData (from Helpers::appClasses()), $menuData (from config or service provider) --}}
+{{-- Expected: $configData (from Helpers::appClasses()), $menuData (from config or service provider), $currentUserRole (from controller/component or derived) --}}
 
 @php
-  $currentUserRole = Auth::check() ? Auth::user()->getRoleNames()->first() : null;
+  // Ensure $currentUserRole is available; if not passed, try to get it.
+  // It's better if the Livewire component (VerticalMenu.php) consistently provides this.
+  $currentUserRole = $currentUserRole ?? (Auth::check() ? Auth::user()->getRoleNames()->first() : null);
   $currentRouteName = Route::currentRouteName();
   $layoutType = $configData['layout'] ?? 'vertical';
+  $activeOpenClass = $layoutType === 'vertical' ? 'active open' : 'active'; // Class for active parent
+
+  // Helper function to recursively check if a menu item or any of its children are active
+  // This helps in deciding if a parent menu item should be 'open'
+  if (!function_exists('isMenuItemActive')) {
+      function isMenuItemActive($item, $currentRouteName, &$isAnyChildActive = false) {
+          $isActive = false;
+          if (isset($item->routeName) && $item->routeName === $currentRouteName) {
+              $isActive = true;
+              $isAnyChildActive = true; // Mark that an active child path is found
+          } elseif (isset($item->routeNamePrefix) && str_starts_with($currentRouteName, $item->routeNamePrefix)) {
+              $isActive = true;
+              // $isAnyChildActive = true; // Optionally mark parent active if prefix matches a child's active state
+          } elseif (isset($item->slug) && !isset($item->routeName) && !isset($item->routeNamePrefix)) {
+             // Fallback to slug for items that might not have direct routes but group children
+             // This condition might need to be more specific if slugs are broadly used for active state
+          }
+
+          if (!empty($item->submenu)) {
+              $hasActiveGrandChild = false;
+              foreach ($item->submenu as $subItem) {
+                  if (isMenuItemActive($subItem, $currentRouteName, $hasActiveGrandChild)) {
+                      $isActive = true; // Parent is active if any child is active
+                      $isAnyChildActive = true; // Propagate upwards
+                      break;
+                  }
+              }
+          }
+          return $isActive;
+      }
+  }
 @endphp
 
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme" aria-label="Navigasi Sistem">
@@ -34,16 +67,15 @@
         @php
           // Determine access rights
           $canViewMenu = false;
-
           if ($currentUserRole === 'Admin') {
               $canViewMenu = true;
           } elseif (isset($menu->role)) {
               $menuRoles = is_array($menu->role) ? $menu->role : [$menu->role];
               $canViewMenu = in_array($currentUserRole, $menuRoles);
-          } elseif (isset($menu->permissions)) {
-              // Optional: implement canAny() logic if needed
+          } elseif (isset($menu->permissions) && Auth::check()) {
+              // Optional: implement canAny() logic if needed, e.g., Auth::user()->canAny((array)$menu->permissions);
           } else {
-              $canViewMenu = true;
+              $canViewMenu = true; // Default for items without specific role/permission
           }
         @endphp
 
@@ -54,27 +86,32 @@
             </li>
           @else
             @php
-              // Determine active state
-              $activeClass = '';
-              $activeOpenClass = $layoutType === 'vertical' ? 'active open' : 'active';
+              $menuItemIsActive = false; // Is the menu item itself (or its direct route) active?
+              $anyChildIsActive = false;  // Is any child/grandchild of this menu item active?
 
-              if (isset($menu->routeNamePrefix) && str_starts_with($currentRouteName, $menu->routeNamePrefix)) {
-                  $activeClass = $activeOpenClass;
-              } elseif (isset($menu->slug) && $currentRouteName === $menu->slug) {
-                  $activeClass = 'active';
-              } elseif (isset($menu->routeName) && $currentRouteName === $menu->routeName && empty($menu->submenu)) {
-                  $activeClass = 'active';
-              } elseif (isset($menu->submenu) && isset($menu->slug)) {
-                  $slugsToCheck = is_array($menu->slug) ? $menu->slug : [$menu->slug];
-                  foreach ($slugsToCheck as $slugItem) {
-                      if (str_starts_with($currentRouteName, $slugItem)) {
-                          $activeClass = $activeOpenClass;
-                          break;
-                      }
+              // Check if this menu item itself or any of its children are active
+              isMenuItemActive($menu, $currentRouteName, $anyChildIsActive);
+
+              // The item's direct route is active
+              if (isset($menu->routeName) && $menu->routeName === $currentRouteName) {
+                  $menuItemIsActive = true;
+              }
+              // Active based on routeNamePrefix if not already active by specific route or child
+              // This ensures the prefix logic applies primarily if no specific child makes it active.
+              if (!$menuItemIsActive && !$anyChildIsActive && isset($menu->routeNamePrefix) && str_starts_with($currentRouteName, $menu->routeNamePrefix)) {
+                  $menuItemIsActive = true;
+              }
+
+              $activeClass = '';
+              if ($menuItemIsActive || $anyChildIsActive) {
+                  if (isset($menu->submenu) && !empty($menu->submenu)) {
+                      $activeClass = $activeOpenClass; // 'active open' for parents with active state
+                  } else {
+                      $activeClass = 'active'; // 'active' for items without submenu or when only itself is active
                   }
               }
 
-              $hasSubmenu = isset($menu->submenu);
+              $hasSubmenu = isset($menu->submenu) && !empty($menu->submenu);
               $menuLinkClass = $hasSubmenu ? 'menu-link menu-toggle' : 'menu-link';
               $menuHref = $menu->url ?? (isset($menu->routeName) && Route::has($menu->routeName) ? route($menu->routeName) : 'javascript:void(0);');
             @endphp
@@ -95,10 +132,11 @@
               </a>
 
               @if ($hasSubmenu)
+                {{-- Pass $menu->submenu as $currentMenuLevelItems to avoid variable name collision --}}
                 @include('layouts.sections.menu.submenu', [
                     'menu' => $menu->submenu,
                     'configData' => $configData,
-                    'role' => $currentUserRole
+                    'currentUserRole' => $currentUserRole // Pass the role for consistent checking in submenu
                 ])
               @endif
             </li>

@@ -3,31 +3,29 @@
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
-
 <p align="center">
-  <a href="https://github.com/amralsaleeh/HRMS">
-    <img src="public/assets/img/logo/logo_128.png" alt="Logo">
+  <a href="[https://github.com/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS]">
+    <h1 align="center">MOTAC ICT LOAN</h1>
   </a>
 
-  <h2 align="center">HRMS</h2>
+  <h2 align="center">MOTAC Integrated Resource Management System</h2>
 
   <p align="center">
-    Human Resource Management System
+    A system for managing Email/User ID Provisioning and ICT Equipment Loans at the Ministry of Tourism, Arts and Culture, Malaysia.
+    <br />
+    Built upon the amralsaleeh/HRMS template structure.
     <br />
     <br />
-    <a href="https://github.com/amralsaleeh/HRMS/issues">Report Bug</a>
+    <a href="[MOTAC_GIT_REPOSITORY_URL]/issues">Report Bug</a>
     ·
-    <a href="https://github.com/amralsaleeh/HRMS/issues">Request Feature</a>
+    <a href="[MOTAC_GIT_REPOSITORY_URL]/issues">Request Feature</a>
   </p>
 </p>
 <br />
 
-**HRMS** is an open-source web application tailored to streamline employee management and HR processes within organizations.
+The **MOTAC Integrated Resource Management System** is a web application designed to streamline and consolidate two key operational areas for the Ministry of Tourism, Arts and Culture (MOTAC), Malaysia: Email/User ID Provisioning and ICT Equipment Loan Management. It provides a unified, Laravel-based platform to optimize workflows, enforce business rules, and ensure a consistent user experience.
 
-It optimizes organizational efficiency through clear hierarchy establishment, centralized employee records, streamlined attendance and leave management, precise salary processing, timely alerts, comprehensive HR reports, and efficient asset/device tracking.
-
-This concise solution promotes effective workforce management and informed decision-making.
+This system aims to enhance efficiency through automated processes, centralized data management, role-based access, real-time notifications, and comprehensive reporting capabilities tailored to MOTAC's specific needs.
 
 ### Built With
 * [Laravel](https://laravel.com)
@@ -35,53 +33,17 @@ This concise solution promotes effective workforce management and informed decis
 
 ## Features
 
-- **Organizational Structure:** Establish a clear hierarchy with centers, departments, and positions.
-
-- **Employee Information Management:** Maintain centralized and detailed records of employee information.
-
-- **Process Automation:** Reduces administrative burdens on the department by handling routine tasks.
-
-- **Attendance and Leave Tracking:** Track attendance, manage leave requests, and monitor employee availability.
-
-- **Salary and Deduction Management:** Streamline salary and deduction processes, ensuring accuracy and compliance.
-
-- **Alerts and Messaging System:** Implement notifications for important dates and announcements.
-
-- **Comprehensive HR Reports:** Generate detailed reports for insights into employee performance and attendance.
-
-- **Asset and Device Management:** Efficiently manage and track organizational assets and assigned devices for each employee.
-
-- **Support localization:** Enable multilingual support and adapt the system to various regional and cultural settings, ensuring usability and compliance with local practices. Supports both left-to-right (LTR) and right-to-left (RTL) text directions.
-
-## Screenshots 
-
-![Login](https://github.com/amralsaleeh/HRMS/assets/9991208/ea5a3024-3ecd-43c4-8350-1cbb79396bb1)
-<h3 align="center">Login</h3>
-<br/>
-
-![Dashboard](https://github.com/amralsaleeh/HRMS/assets/9991208/a23907bf-0229-479b-aa53-71d1fd6ae6fa)
-<h3 align="center">Dashboard</h3>
-<br/>
-
-![Employee Info](https://github.com/amralsaleeh/HRMS/assets/9991208/e52d38de-f68d-4aa5-a126-16af75ce1faa)
-<h3 align="center">Employee Info</h3>
-<br/>
-
-![SMS](https://github.com/amralsaleeh/HRMS/assets/9991208/b1a66e9d-7b2c-4897-9313-630a5a88acab)
-<h3 align="center">SMS</h3>
-<br/>
-
-![Fingerprints](https://github.com/amralsaleeh/HRMS/assets/9991208/5a25f002-065d-445d-ae17-ed1e5035bf48)
-<h3 align="center">Fingerprints</h3>
-<br/>
-
-![Discounts](https://github.com/amralsaleeh/HRMS/assets/9991208/edb3fb25-4ec3-4bd7-b232-348ee66466b7)
-<h3 align="center">Discounts</h3>
-<br/>
-
-![User](https://github.com/amralsaleeh/HRMS/assets/9991208/8d522284-a835-4be3-91fb-2076f77e4fb6)
-<h3 align="center">User</h3>
-<br/>
+- **Email/User ID Provisioning Management:** Automates the application, certification, approval, and provisioning process for official MOTAC email accounts and user IDs, mirroring existing MyMail application workflows.
+- **ICT Equipment Loan Management:** Facilitates the request, approval, issuance, tracking, and return of ICT equipment (laptops, projectors, etc.) for official use.
+- **Unified Data Management:** Consolidates user data, applications, approvals, equipment inventory, and notifications in a single MySQL database.
+- **Streamlined Workflows & Process Automation:** Automates and standardizes application and approval processes, reducing administrative burdens.
+- **Role-Based Access Control (RBAC) & Security:** Ensures users, approvers, BPM staff, and IT Admins have appropriate access levels with robust security measures, including grade-based approval logic. Standardized role names (e.g., 'Admin', 'BPM Staff', 'IT Admin') are utilized.
+- **User and Organizational Data Management:** Maintains centralized records of system users, including their department, position, and grade, crucial for workflows and approvals.
+- **Dynamic Forms:** Utilizes Livewire for complex, dynamic application forms, such as replicating the conditional field logic of the MyMail application form.
+- **Real-Time Reporting & Notifications:** Enables insights into resource utilization and application statuses. Users are notified of critical events via email and in-app (database) notifications.
+- **ICT Equipment Inventory Management:** Manages a detailed inventory of ICT equipment, including categories, sub-categories, locations, and status.
+- **Audit Trails:** Automatically records user actions for key data (created_by, updated_by) for accountability and tracking.
+- **Support for Localization:** Adapts the system for use in Bahasa Melayu as the primary language, including UI text and date formats. The system architecture supports language switching.
 
 ## Getting Started
 
@@ -92,80 +54,72 @@ This concise solution promotes effective workforce management and informed decis
 
 ### Installation
 
-1. Download the source code using the following command:
-
-   ```bash
-   git clone https://github.com/amralsaleeh/HRMS.git
-
-2. Navigate to the project folder:
-   
+1.  Download the source code using the following command:
     ```bash
-    cd HRMS
-
-3. Install dependencies using Composer:
-   
+    git clone [https://github.com/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS]
+    ```
+2.  Navigate to the project folder:
+    ```bash
+    cd MOTAC_Integrated_Resource_Management_System # Or your chosen project folder name
+    ```
+3.  Install dependencies using Composer:
     ```bash
     composer install
-4. Set up the database and necessary configurations:
-
-    - Copy the `.env.example` to `.env` file in the root of your project.
-      
-    - Open the `.env` file in the root of your project.
-
-    - Set the database connection details, including `DB_CONNECTION`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`.
-      
-    - Set the `APP_TIMEZONE` to 'Asia/Istanbul' or whatever timezone you like.
-
-5. Run the key generate command:
-   
+    ```
+4.  Set up the database and necessary configurations:
+    * Copy the `.env.example` to `.env` file in the root of your project.
+    * Open the `.env` file in the root of your project.
+    * Set the database connection details: `DB_CONNECTION=mysql`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`.
+    * Set the `APP_URL` to your application's URL.
+    * Set the `APP_TIMEZONE` to 'Asia/Kuala_Lumpur'.
+    * Configure `MAIL_MAILER` and other mail settings as per `config/mail.php` for notifications.
+5.  Run the key generate command:
     ```bash
     php artisan key:generate
-
-6. Run the storage link command:
-   
+    ```
+6.  Run the storage link command:
     ```bash
     php artisan storage:link
-7. Run the migration command with the seed flag to add some fake data:
-   
+    ```
+7.  Run the migration command. It is recommended to use specific seeders developed for the MOTAC system to populate necessary data like departments, grades, roles, equipment categories, etc.
     ```bash
-    php artisan migrate --seed
-8. Run the development server:
-   
+    php artisan migrate # Add --seed if MOTAC-specific seeders are available
+    ```
+8.  Run the development server:
     ```bash
     php artisan serve
-9. Open your browser and go to http://localhost:8000 to see the application.
+    ```
+9.  Open your browser and go to `http://localhost:8000` (or your configured `APP_URL`) to see the application.
 
-    
-### Usage
-10. Login:
-    
+### Default Admin Usage (Example)
+The system uses role-based access. Initial administrative users should be created through seeding or a designated registration process defined by MOTAC. For development, if based on the original HRMS template, example credentials might be:
     ```bash
     email: admin@demo.com
     password: admin
+    ```
+    *(Note: These credentials are for illustrative purposes if derived from the base template. Actual admin credentials for the MOTAC system will be established during setup and should be kept secure.)*
 
 ## Contribution
-We welcome contributions from developers and users. If you have ideas for improving the system or discover issues, feel free to create an Issue or submit a Pull Request.
+We welcome contributions from authorized developers and users within MOTAC. If you have ideas for improving the system or discover issues, please use the project's issue tracker.
+For reporting security vulnerabilities, please refer to the `SECURITY.md` file.
 
 ## Contact
 
-Amr Alsaleh - [@amralsaleeh](https://linkedin.com/in/amralsaleeh) - amralsaleeh@outlook.com
-
-Project Link: [https://github.com/amralsaleeh/HRMS](https://github.com/amralsaleeh/HRMS)
+Information Management Division (BPM)
+Ministry of Tourism, Arts and Culture (MOTAC), Malaysia
+Project Link: `[MOTAC_GIT_REPOSITORY_URL]`
+*(Official contact email for project queries to be provided by MOTAC/BPM)*
 
 ## License
-This project uses the MIT License. Please see [LICENSE](LICENSE.md) File for more information.
+This project may use the MIT License if adopted from the base template. Please see the `LICENSE.md` file for specific license information applicable to the MOTAC Integrated Resource Management System. MOTAC reserves the right to define the licensing terms.
 
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/amralsaleeh/HRMS.svg?style=flat-square
-[contributors-url]: https://github.com/amralsaleeh/HRMS/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/amralsaleeh/HRMS.svg?style=flat-square
-[forks-url]: https://github.com/amralsaleeh/HRMS/network/members
-[stars-shield]: https://img.shields.io/github/stars/amralsaleeh/HRMS.svg?style=flat-square
-[stars-url]: https://github.com/amralsaleeh/HRMS/stargazers
-[issues-shield]: https://img.shields.io/github/issues/amralsaleeh/HRMS.svg?style=flat-square
-[issues-url]: https://github.com/amralsaleeh/HRMS/issues
-[license-shield]: https://img.shields.io/github/license/amralsaleeh/HRMS.svg?style=flat-square
-[license-url]: https://github.com/amralsaleeh/HRMS/blob/master/LICENSE.md
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat-square&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/amralsaleeh
+[contributors-shield]: https://img.shields.io/github/contributors/[MOTAC_GITHUB_USER]/[MOTAC_GITHUB_REPO].svg?style=flat-square
+[contributors-url]: https://github.com/[MOTAC_GITHUB_USER]/[MOTAC_GITHUB_REPO]/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/[MOTAC_GITHUB_USER]/[MOTAC_GITHUB_REPO].svg?style=flat-square
+[forks-url]: https://github.com/[MOTAC_GITHUB_USER]/[MOTAC_GITHUB_REPO]/network/members
+[stars-shield]: https://img.shields.io/github/stars/[MOTAC_GITHUB_USER]/[MOTAC_GITHUB_REPO].svg?style=flat-square
+[stars-url]: https://github.com/[MOTAC_GITHUB_USER]/[MOTAC_GITHUB_REPO]/stargazers
+[issues-shield]: https://img.shields.io/github/issues/[MOTAC_GITHUB_USER]/[MOTAC_GITHUB_REPO].svg?style=flat-square
+[issues-url]: https://github.com/[MOTAC_GITHUB_USER]/[MOTAC_GITHUB_REPO]/issues
+[license-shield]: https://img.shields.io/github/license/[MOTAC_GITHUB_USER]/[MOTAC_GITHUB_REPO].svg?style=flat-square
+[license-url]: https://github.com/[MOTAC_GITHUB_USER]/[MOTAC_GITHUB_REPO]/blob/master/LICENSE.md

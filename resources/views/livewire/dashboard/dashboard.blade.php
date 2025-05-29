@@ -41,7 +41,7 @@
                                     @can('create', App\Models\LoanApplication::class)
                                         <li>
                                             {{-- MODIFIED ROUTE BELOW --}}
-                                            <a class="dropdown-item" href="{{ route('resource-management.application-forms.loan.create') }}">
+                                            <a class="dropdown-item" href="{{ route('loan-applications.create') }}">
                                                 <i class="ti ti-device-laptop ti-xs me-2"></i>{{ __('Mohon Pinjaman ICT') }}
                                             </a>
                                         </li>
@@ -49,7 +49,7 @@
                                     @can('create', App\Models\EmailApplication::class)
                                         <li>
                                             {{-- MODIFIED ROUTE BELOW --}}
-                                            <a class="dropdown-item" href="{{ route('resource-management.application-forms.email.create') }}">
+                                            <a class="dropdown-item" href="{{ route('email-applications.create') }}">
                                                 <i class="ti ti-mail-forward ti-xs me-2"></i>{{ __('Mohon E-mel/ID') }}
                                             </a>
                                         </li>

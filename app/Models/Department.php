@@ -27,6 +27,32 @@ use Illuminate\Database\Eloquent\SoftDeletes; // Assuming you want soft deletes 
  * @property-read \App\Models\User|null $creatorInfo
  * @property-read \App\Models\User|null $updaterInfo
  * @property-read \App\Models\User|null $deleterInfo
+ * @property string|null $description
+ * @property int $is_active
+ * @property int|null $head_of_department_id
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Position> $positions
+ * @property-read int|null $positions_count
+ * @property-read int|null $users_count
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Department newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Department newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Department onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Department query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Department whereBranchType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Department whereCode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Department whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Department whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Department whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Department whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Department whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Department whereHeadOfDepartmentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Department whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Department whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Department whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Department whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Department whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Department withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Department withoutTrashed()
+ * @mixin \Eloquent
  */
 class Department extends Model
 {

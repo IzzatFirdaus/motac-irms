@@ -1,4 +1,4 @@
-{{-- Remove <!DOCTYPE html>, <html>, <head>, <script for Tailwind>, <style> block --}}
+{{-- resources/views/equipment/index.blade.php --}}
 @extends('layouts.app') {{-- Assuming layouts.app has Bootstrap 5 linked --}}
 
 @section('title', 'Senarai Peralatan ICT') {{-- Added title section --}}
@@ -8,14 +8,8 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fs-3 fw-bold mb-0">Senarai Peralatan ICT</h2>
-        {{-- @can('create', App\Models\Equipment::class) --}}
-        <a href="{{ route('equipment.create') }}" class="btn btn-primary">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle-fill me-2" viewBox="0 0 16 16">
-                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z"/>
-            </svg>
-            Tambah Peralatan Baru
-        </a>
-        {{-- @endcan --}}
+        {{-- "Tambah Peralatan Baru" button removed as general users typically don't create equipment directly here --}}
+        {{-- If there's a user-facing request process, that would be a different feature/route --}}
     </div>
 
     @if (session()->has('success'))
@@ -70,10 +64,8 @@
                                     <td>{{ $item->current_location ?? 'N/A' }}</td>
                                     <td>
                                         <a href="{{ route('equipment.show', $item) }}" class="btn btn-sm btn-outline-primary me-1">Lihat</a>
-                                        {{-- @can('update', $item) --}}
-                                        <a href="{{ route('equipment.edit', $item) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
-                                        {{-- @endcan --}}
-                                        {{-- Delete button would need a form --}}
+                                        {{-- Edit button removed as general users typically don't edit equipment directly from this general listing --}}
+                                        {{-- The 'show' page has a conditional edit button pointing to the admin route --}}
                                     </td>
                                 </tr>
                             @endforeach

@@ -14,6 +14,7 @@ use Illuminate\Support\Str;
 
 /**
  * Loan Transaction Model.
+ *
  * @property int $id
  * @property int $loan_application_id
  * @property string $type Enum: 'issue', 'return'
@@ -49,6 +50,40 @@ use Illuminate\Support\Str;
  * @property-read LoanTransaction|null $relatedIssueTransaction
  * @property-read string $typeTranslated Accessor: type_translated
  * @property-read string $statusTranslated Accessor: status_translated
+ * @property string|null $due_date Applicable for issue transactions
+ * @property-read string $status_translated
+ * @property-read string $type_translated
+ * @property-read int|null $items_count
+ * @property-read int|null $loan_transaction_items_count
+ * @method static \Database\Factories\LoanTransactionFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereAccessoriesChecklistOnIssue($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereAccessoriesChecklistOnReturn($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereDueDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereIssueTimestamp($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereIssuingOfficerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereLoanApplicationId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereReceivingOfficerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereReturnAcceptingOfficerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereReturnNotes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereReturnTimestamp($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereReturningOfficerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereTransactionDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction withoutTrashed()
+ * @mixin \Eloquent
  */
 class LoanTransaction extends Model
 {

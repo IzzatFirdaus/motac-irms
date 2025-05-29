@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Schema;
 // Explicit User import
 
 /**
+ * 
+ *
  * @property int $id
  * @property string $site_name
  * @property string|null $site_logo_path
@@ -37,7 +39,6 @@ use Illuminate\Support\Facades\Schema;
  * @property-read \App\Models\User|null $creator
  * @property-read \App\Models\User|null $deleter
  * @property-read \App\Models\User|null $updater
- *
  * @method static \Database\Factories\SettingFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting newQuery()
@@ -61,7 +62,6 @@ use Illuminate\Support\Facades\Schema;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting withoutTrashed()
- *
  * @mixin \Eloquent
  */
 class Setting extends Model

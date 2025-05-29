@@ -2,12 +2,14 @@
 
 namespace App\Livewire\ResourceManagement\Admin\Reports;
 
-use App\Models\EmailApplication; // Example model
-use App\Models\User;
+use App\Models\EmailApplication;
+use App\Models\User; // For service status options
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 #[Layout('layouts.app')]
 class EmailAccountsReport extends Component
@@ -16,8 +18,8 @@ class EmailAccountsReport extends Component
     use WithPagination;
 
     // Filter properties
-    public ?string $filterStatus = null;
-    public ?string $filterServiceStatus = null;
+    public ?string $filterStatus = ''; // Use empty string for "All"
+    public ?string $filterServiceStatus = ''; // Use empty string for "All"
     public ?string $filterDateFrom = null;
     public ?string $filterDateTo = null;
     public string $searchTerm = '';
@@ -27,65 +29,82 @@ class EmailAccountsReport extends Component
     public string $sortDirection = 'desc';
 
     protected string $paginationTheme = 'bootstrap';
+    public int $perPage = 15;
 
     public function mount()
     {
-        // $this->authorize('viewEmailAccountsReport'); // Placeholder for authorization
+        // Example authorization, ensure policy exists
+        // $this->authorize('viewAny', EmailApplication::class); // Or a specific report permission
+        Log::info("Livewire\EmailAccountsReport: Generating Email Accounts Report page.", [
+            'admin_user_id' => Auth::id(),
+            'ip_address' => request()->ip(),
+        ]);
     }
 
     public function getReportDataProperty()
     {
-        // Replace with actual reporting logic, possibly from a ReportService
-        $query = EmailApplication::with(['user.department', 'supportingOfficer'])
-            ->select('email_applications.*'); // Ensure select for join if any
+        // Revision 3 - EmailApplication fields: user_id, proposed_email, final_assigned_email, status, created_at
+        // User fields: name, service_status
+        $query = EmailApplication::with(['user:id,name,service_status,department_id', 'user.department:id,name', 'supportingOfficer:id,name'])
+            ->select('email_applications.*');
 
         if (!empty($this->searchTerm)) {
-            $query->where(function ($q) {
-                $q->where('proposed_email', 'like', '%' . $this->searchTerm . '%')
-                  ->orWhere('final_assigned_email', 'like', '%' . $this->searchTerm . '%')
-                  ->orWhereHas('user', function ($userQuery) {
-                      $userQuery->where('name', 'like', '%' . $this->searchTerm . '%');
+            $search = '%' . strtolower($this->searchTerm) . '%';
+            $query->where(function ($q) use ($search) {
+                $q->whereRaw('LOWER(proposed_email) LIKE ?', [$search])
+                  ->orWhereRaw('LOWER(final_assigned_email) LIKE ?', [$search])
+                  ->orWhereHas('user', function ($userQuery) use ($search) {
+                      $userQuery->whereRaw('LOWER(name) LIKE ?', [$search]);
                   });
             });
         }
 
-        if ($this->filterStatus) {
+        if (!empty($this->filterStatus)) {
             $query->where('status', $this->filterStatus);
         }
 
-        if ($this->filterServiceStatus) {
+        if (!empty($this->filterServiceStatus)) {
             $query->whereHas('user', function ($q) {
                 $q->where('service_status', $this->filterServiceStatus);
             });
         }
 
-        if ($this->filterDateFrom) {
-            $query->whereDate('created_at', '>=', $this->filterDateFrom);
+        if (!empty($this->filterDateFrom)) {
+            $query->whereDate('email_applications.created_at', '>=', $this->filterDateFrom);
         }
-        if ($this->filterDateTo) {
-            $query->whereDate('created_at', '<=', $this->filterDateTo);
+        if (!empty($this->filterDateTo)) {
+            $query->whereDate('email_applications.created_at', '<=', $this->filterDateTo);
         }
 
         $query->orderBy($this->sortBy, $this->sortDirection);
 
-        return $query->paginate(15);
+        $reportData = $query->paginate($this->perPage);
+        Log::info("Livewire\EmailAccountsReport: Fetched {$reportData->total()} email applications.", ['admin_user_id' => Auth::id()]);
+        return $reportData;
     }
 
     public function getStatusOptionsProperty(): array
     {
-        // Assuming EmailApplication model has a method or constant for status options
-        return defined(EmailApplication::class . '::STATUS_OPTIONS') ? EmailApplication::$STATUS_OPTIONS : [];
+        // Ensure EmailApplication model has this static property/method as per "Revision 3" (4.2)
+        return EmailApplication::$STATUS_OPTIONS ?? (defined(EmailApplication::class . '::STATUS_DRAFT') ? EmailApplication::getStatusOptions() : []);
     }
 
     public function getServiceStatusOptionsProperty(): array
     {
+        // Ensure User model has this static method as per "Revision 3" (4.1)
         return User::getServiceStatusOptions();
     }
 
-
-    public function applyFilters(): void
+    public function applyFilters(): void // This can be triggered by a button if not using wire:model.live
     {
         $this->resetPage(); // Reset pagination when filters change
+    }
+
+    public function updating($property): void
+    {
+        if (in_array($property, ['filterStatus', 'filterServiceStatus', 'filterDateFrom', 'filterDateTo', 'searchTerm'])) {
+            $this->resetPage();
+        }
     }
 
     public function setSortBy(string $column): void
@@ -96,6 +115,14 @@ class EmailAccountsReport extends Component
             $this->sortBy = $column;
             $this->sortDirection = 'asc';
         }
+        $this->resetPage();
+    }
+
+    public function resetFilters(): void
+    {
+        $this->reset(['filterStatus', 'filterServiceStatus', 'filterDateFrom', 'filterDateTo', 'searchTerm', 'sortBy', 'sortDirection']);
+        $this->sortBy = 'created_at'; // Default sort
+        $this->sortDirection = 'desc'; // Default direction
         $this->resetPage();
     }
 

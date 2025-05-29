@@ -3,16 +3,14 @@
 namespace App\Livewire\ResourceManagement\Admin\Equipment;
 
 use App\Models\Department;
-use App\Models\Equipment; // For department filter/selection
-// use App\Models\User; // For created_by/updated_by names, not directly instantiated
+use App\Models\Equipment;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule as ValidationRule;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
-// use App\Helpers\Helpers; // For status colors (used in Blade)
 use Livewire\Component;
-use Livewire\WithPagination; // Aliased
+use Livewire\WithPagination;
 
 #[Layout('layouts.app')]
 class Index extends Component
@@ -29,14 +27,16 @@ class Index extends Component
     public bool $showCreateModal = false;
     public bool $showEditModal = false;
     public bool $showDeleteModal = false;
+    public bool $showViewModal = false;
 
     public ?Equipment $editingEquipment = null;
     public ?Equipment $deletingEquipment = null;
+    public ?Equipment $viewingEquipment = null;
 
-    // Form fields for create/edit
+    // Form fields for create/edit modals
     public string $asset_type = '';
     public ?string $brand = null;
-    public ?string $model_name = null; // Using model_name to avoid conflict with Eloquent's $model
+    public ?string $model_name = null;
     public string $serial_number = '';
     public string $tag_id = '';
     public ?string $purchase_date = null;
@@ -47,13 +47,12 @@ class Index extends Component
     public string $condition_status = '';
     public ?int $department_id = null;
 
-    protected string $paginationTheme = 'bootstrap'; // Updated to Bootstrap
+    protected string $paginationTheme = 'bootstrap';
 
     public function mount(): void
     {
         $this->authorize('viewAny', Equipment::class);
-        $this->editingEquipment = new Equipment(); // For create form binding
-        // Set default values for new equipment
+        $this->editingEquipment = new Equipment();
         if (defined(Equipment::class . '::STATUS_AVAILABLE')) {
             $this->status = Equipment::STATUS_AVAILABLE;
         }
@@ -65,7 +64,13 @@ class Index extends Component
     // Computed property for equipment list
     public function getEquipmentListProperty()
     {
-        $query = Equipment::with(['department:id,name', 'creator:id,name', 'updater:id,name'])
+        $query = Equipment::with([
+                'department:id,name',
+                'creator:id,name',
+                'updater:id,name',
+                // Corrected relationship path:
+                'activeLoanTransactionItem.loanTransaction.loanApplication.user:id,name'
+            ])
             ->orderBy('created_at', 'desc');
 
         if (!empty($this->searchTerm)) {
@@ -73,7 +78,7 @@ class Index extends Component
                 $q->where('tag_id', 'like', '%' . $this->searchTerm . '%')
                   ->orWhere('serial_number', 'like', '%' . $this->searchTerm . '%')
                   ->orWhere('brand', 'like', '%' . $this->searchTerm . '%')
-                  ->orWhere('model', 'like', '%' . $this->searchTerm . '%'); // search 'model' column
+                  ->orWhere('model', 'like', '%' . $this->searchTerm . '%');
             });
         }
         if (!empty($this->filterAssetType)) {
@@ -116,16 +121,17 @@ class Index extends Component
     {
         $this->authorize('create', Equipment::class);
         $this->resetForm();
-        // Defaults are set in resetForm or mount
+        $this->showEditModal = false;
         $this->showCreateModal = true;
+        $this->dispatch('open-modal', modalId: 'equipmentFormModal');
     }
 
     public function createEquipment(): void
     {
         $this->authorize('create', Equipment::class);
-        $validated = $this->validate($this->formRules());
+        $validated = $this->validate($this->formRules(false));
         $validatedData = $validated;
-        $validatedData['model'] = $this->model_name; // Map model_name back to model
+        $validatedData['model'] = $this->model_name;
         unset($validatedData['model_name']);
 
         Equipment::create($validatedData);
@@ -141,7 +147,7 @@ class Index extends Component
 
         $this->asset_type = $equipment->asset_type;
         $this->brand = $equipment->brand;
-        $this->model_name = $equipment->model; // Populate model_name from equipment's model field
+        $this->model_name = $equipment->model;
         $this->serial_number = $equipment->serial_number;
         $this->tag_id = $equipment->tag_id;
         $this->purchase_date = $equipment->purchase_date ? ($equipment->purchase_date instanceof \Carbon\Carbon ? $equipment->purchase_date->format('Y-m-d') : $equipment->purchase_date) : null;
@@ -152,7 +158,9 @@ class Index extends Component
         $this->condition_status = $equipment->condition_status;
         $this->department_id = $equipment->department_id;
 
+        $this->showCreateModal = false;
         $this->showEditModal = true;
+        $this->dispatch('open-modal', modalId: 'equipmentFormModal');
     }
 
     public function updateEquipment(): void
@@ -164,7 +172,7 @@ class Index extends Component
         $this->authorize('update', $this->editingEquipment);
         $validated = $this->validate($this->formRules(true, $this->editingEquipment->id));
         $validatedData = $validated;
-        $validatedData['model'] = $this->model_name; // Map model_name back to model
+        $validatedData['model'] = $this->model_name;
         unset($validatedData['model_name']);
 
         $this->editingEquipment->update($validatedData);
@@ -177,17 +185,18 @@ class Index extends Component
         $this->authorize('delete', $equipment);
         $this->deletingEquipment = $equipment;
         $this->showDeleteModal = true;
+        $this->dispatch('open-modal', modalId: 'deleteConfirmationModal');
     }
 
     public function deleteEquipment(): void
     {
         if (!$this->deletingEquipment) {
+            $this->dispatch('toastr', type: 'error', message: __('Tiada peralatan dipilih untuk dipadam.'));
             return;
         }
         $this->authorize('delete', $this->deletingEquipment);
 
         try {
-            // Check for related loan application items or transaction items before deleting
             if ($this->deletingEquipment->loanApplicationItems()->exists() || $this->deletingEquipment->loanTransactionItems()->exists()) {
                 $this->dispatch('toastr', type: 'error', message: __('Peralatan ini tidak boleh dipadam kerana mempunyai rekod pinjaman berkaitan.'));
             } else {
@@ -209,64 +218,71 @@ class Index extends Component
         $this->closeModal();
     }
 
+    public function openViewModal(Equipment $equipment): void
+    {
+        $this->authorize('view', $equipment);
+        $this->viewingEquipment = $equipment->loadMissing(['department:id,name', 'creator:id,name', 'updater:id,name']);
+        $this->showViewModal = true;
+        $this->dispatch('open-modal', modalId: 'viewEquipmentModal');
+    }
+
     public function closeModal(): void
     {
+        if ($this->showCreateModal || $this->showEditModal) {
+             $this->dispatch('close-modal', modalId: 'equipmentFormModal');
+        }
+        if ($this->showDeleteModal) {
+             $this->dispatch('close-modal', modalId: 'deleteConfirmationModal');
+        }
+        if ($this->showViewModal) {
+             $this->dispatch('close-modal', modalId: 'viewEquipmentModal');
+        }
+
         $this->showCreateModal = false;
         $this->showEditModal = false;
         $this->showDeleteModal = false;
+        $this->showViewModal = false;
         $this->resetForm();
-        $this->resetErrorBag(); // Clear validation errors
+        $this->viewingEquipment = null;
+        $this->resetErrorBag();
     }
 
-    // Reset pagination when filters change
-    public function updatingSearchTerm(): void
-    {
-        $this->resetPage();
-    }
-    public function updatedFilterAssetType(): void
-    {
-        $this->resetPage();
-    }
-    public function updatedFilterStatus(): void
-    {
-        $this->resetPage();
-    }
-    public function updatedFilterCondition(): void
-    {
-        $this->resetPage();
-    }
-    public function updatedFilterDepartmentId(): void
-    {
-        $this->resetPage();
-    }
+    public function updatingSearchTerm(): void { $this->resetPage(); }
+    public function updatedFilterAssetType(): void { $this->resetPage(); }
+    public function updatedFilterStatus(): void { $this->resetPage(); }
+    public function updatedFilterCondition(): void { $this->resetPage(); }
+    public function updatedFilterDepartmentId(): void { $this->resetPage(); }
 
     public function render(): View
     {
         return view('livewire.resource-management.admin.equipment.index', [
-            'equipmentList' => $this->equipmentListProperty,
-            'departmentOptions' => $this->departmentOptionsProperty,
-            'assetTypeOptions' => $this->assetTypeOptionsProperty,
-            'statusOptions' => $this->statusOptionsProperty,
-            'conditionStatusOptions' => $this->conditionStatusOptionsProperty,
+            'equipmentList' => $this->equipmentList,
+            'departmentOptions' => $this->departmentOptions,
+            'assetTypeOptions' => $this->assetTypeOptions,
+            'statusOptions' => $this->statusOptions,
+            'conditionStatusOptions' => $this->conditionStatusOptions,
         ])->title(__('Pengurusan Peralatan ICT'));
     }
 
-    // Validation rules defined as a method
-    protected function formRules(bool $isEditMode = false, ?int $equipmentId = null): array
+    protected function formRules(bool $isEditMode = false, ?int $equipmentIdToIgnore = null): array
     {
+        $assetTypeKeys = !empty($this->assetTypeOptions) ? array_keys($this->assetTypeOptions) : (defined(Equipment::class . '::$ASSET_TYPES_LABELS') ? array_keys(Equipment::$ASSET_TYPES_LABELS) : []);
+        $statusKeys = !empty($this->statusOptions) ? array_keys($this->statusOptions) : (defined(Equipment::class . '::$STATUSES_LABELS') ? array_keys(Equipment::$STATUSES_LABELS) : []);
+        $conditionStatusKeys = !empty($this->conditionStatusOptions) ? array_keys($this->conditionStatusOptions) : (defined(Equipment::class . '::$CONDITION_STATUSES_LABELS') ? array_keys(Equipment::$CONDITION_STATUSES_LABELS) : []);
+
         return [
-            'asset_type' => ['required', 'string', 'max:255', ValidationRule::in(array_keys($this->assetTypeOptionsProperty))],
+            'asset_type' => ['required', 'string', 'max:255', ValidationRule::in($assetTypeKeys)],
             'brand' => 'nullable|string|max:255',
             'model_name' => 'nullable|string|max:255',
-            'serial_number' => ['required', 'string', 'max:255', $isEditMode ? ValidationRule::unique('equipment', 'serial_number')->ignore($equipmentId) : ValidationRule::unique('equipment', 'serial_number')],
-            'tag_id' => ['required', 'string', 'max:255', $isEditMode ? ValidationRule::unique('equipment', 'tag_id')->ignore($equipmentId) : ValidationRule::unique('equipment', 'tag_id')],
+            'serial_number' => ['required', 'string', 'max:255', $isEditMode ? ValidationRule::unique('equipment', 'serial_number')->ignore($equipmentIdToIgnore) : ValidationRule::unique('equipment', 'serial_number')],
+            'tag_id' => ['required', 'string', 'max:255', $isEditMode ? ValidationRule::unique('equipment', 'tag_id')->ignore($equipmentIdToIgnore) : ValidationRule::unique('equipment', 'tag_id')],
             'purchase_date' => 'nullable|date_format:Y-m-d',
             'warranty_expiry_date' => 'nullable|date_format:Y-m-d|after_or_equal:purchase_date',
-            'status' => ['required', 'string', ValidationRule::in(array_keys($this->statusOptionsProperty))],
+            'status' => ['required', 'string', ValidationRule::in($statusKeys)],
             'current_location' => 'nullable|string|max:255',
             'notes' => 'nullable|string|max:1000',
-            'condition_status' => ['required', 'string', ValidationRule::in(array_keys($this->conditionStatusOptionsProperty))],
-            'department_id' => 'nullable|exists:departments,id',
+            'condition_status' => ['required', 'string', ValidationRule::in($conditionStatusKeys)],
+            'department_id' => 'nullable|integer|exists:departments,id',
         ];
     }
 
@@ -294,7 +310,7 @@ class Index extends Component
             $this->condition_status = '';
         }
 
-        $this->editingEquipment = new Equipment(); // Fresh model for potential creation
+        $this->editingEquipment = new Equipment();
         $this->deletingEquipment = null;
     }
 }

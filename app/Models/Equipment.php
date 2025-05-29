@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
+use Database\Factories\EquipmentFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,31 +14,34 @@ use Illuminate\Support\Str;
 
 /**
  * Equipment Model.
+ * System Design Reference: MOTAC Integrated Resource Management System (Revision 3) - Section 4.3
  *
  * @property int $id
- * @property string $asset_type Key for ASSET_TYPES_LABELS
+ * @property string $asset_type (Enum from ASSET_TYPE_CONSTANTS)
  * @property string|null $brand
  * @property string|null $model
- * @property string|null $tag_id MOTAC Tag ID
- * @property string|null $serial_number
- * @property \Illuminate\Support\Carbon|null $purchase_date
- * @property \Illuminate\Support\Carbon|null $warranty_expiry_date
- * @property string $status Operational status key (e.g., STATUS_AVAILABLE)
- * @property string $condition_status Physical condition key (e.g., CONDITION_STATUS_GOOD)
- * @property string|null $current_location
- * @property string|null $notes
- * @property array|null $specifications JSON column for detailed specs
- * @property int|null $department_id (FK to departments.id as per design doc for equipment)
- * @property int|null $equipment_category_id (FK to equipment_categories.id)
- * @property int|null $sub_category_id (FK to sub_categories.id)
- * @property int|null $location_id (FK to locations.id)
+ * @property string|null $serial_number (Unique)
+ * @property string|null $tag_id (Unique MOTAC Tag ID)
  * @property string|null $item_code (Unique item code)
  * @property string|null $description (Detailed description)
+ * @property \Illuminate\Support\Carbon|null $purchase_date
  * @property float|null $purchase_price
- * @property string|null $acquisition_type (Enum: 'purchase', 'lease', etc.)
- * @property string|null $classification (Enum: 'asset', 'inventory', etc.)
+ * @property \Illuminate\Support\Carbon|null $warranty_expiry_date
+ * @property string $status (Enum from STATUS_CONSTANTS, default: 'available')
+ * @property string $condition_status (Enum from CONDITION_STATUS_CONSTANTS, default: 'good')
+ * @property string|null $current_location
+ * @property string|null $acquisition_type (Enum from ACQUISITION_TYPE_CONSTANTS)
+ * @property string|null $classification (Enum from CLASSIFICATION_CONSTANTS)
  * @property string|null $funded_by
  * @property string|null $supplier_name
+ * @property string|null $notes
+ * @property array|null $specifications (JSON for detailed specs - kept if previously used)
+ *
+ * @property int|null $department_id (FK to departments.id)
+ * @property int|null $equipment_category_id (FK to equipment_categories.id)
+ * @property int|null $sub_category_id (FK to sub_categories.id)
+ * @property int|null $location_id (FK to locations.id for structured location)
+ *
  * @property int|null $created_by
  * @property int|null $updated_by
  * @property int|null $deleted_by
@@ -43,269 +49,284 @@ use Illuminate\Support\Str;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  *
- * @property-read string $assetTypeLabel Accessor
- * @property-read string $statusLabel Accessor
- * @property-read string $conditionStatusLabel Accessor
+ * @property-read \App\Models\LoanTransactionItem|null $activeLoanTransactionItem
+ * @property-read \App\Models\User|null $creator
+ * @property-read \App\Models\Location|null $definedLocation
+ * @property-read \App\Models\User|null $deleter
  * @property-read \App\Models\Department|null $department
  * @property-read \App\Models\EquipmentCategory|null $equipmentCategory
- * @property-read \App\Models\SubCategory|null $subCategory
- * @property-read \App\Models\Location|null $physicalLocation
- * @property-read \App\Models\User|null $creator
- * @property-read \App\Models\User|null $updater
- * @property-read \App\Models\User|null $deleter
+ * @property-read string $asset_type_label
+ * @property-read string $condition_status_label
+ * @property-read string $status_label
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanTransactionItem> $loanTransactionItems
+ * @property-read int|null $loan_transaction_items_count
+ * @property-read \App\Models\SubCategory|null $subCategory
+ * @property-read \App\Models\User|null $updater
+ *
+ * @method static \Database\Factories\EquipmentFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereAcquisitionType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereAssetType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereBrand($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereClassification($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereConditionStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereCurrentLocation($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereDepartmentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereEquipmentCategoryId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereFundedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereItemCode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereLocationId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereModel($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereNotes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment wherePurchaseDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment wherePurchasePrice($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereSerialNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereSubCategoryId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereSupplierName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereTagId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereWarrantyExpiryDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment withoutTrashed()
+ * @mixin \Eloquent
  */
 class Equipment extends Model
 {
-    use HasFactory;
-    use SoftDeletes;
+  use HasFactory;
+  use SoftDeletes;
 
-    // Asset Types (Referenced by LoanApplicationItem, approval-dashboard, issued-loans etc.)
-    // Based on system design doc section 4.3 for equipment.asset_type enum
-    public const ASSET_TYPE_LAPTOP = 'laptop';
-    public const ASSET_TYPE_PROJECTOR = 'projector';
-    public const ASSET_TYPE_PRINTER = 'printer';
-    public const ASSET_TYPE_DESKTOP_PC = 'desktop_pc';
-    public const ASSET_TYPE_MONITOR = 'monitor';
-    public const ASSET_TYPE_OTHER_ICT = 'other_ict';
-    // Add any other specific types if they exist as distinct enum values in your DB
-    // For example, from my previous generic template:
-    public const ASSET_TYPE_SCANNER = 'scanner';
-    public const ASSET_TYPE_TABLET = 'tablet';
-    public const ASSET_TYPE_WEBCAM = 'webcam';
-    public const ASSET_TYPE_UPS = 'ups';
-    public const ASSET_TYPE_NETWORK_SWITCH = 'network_switch';
-    public const ASSET_TYPE_EXTERNAL_HARD_DRIVE = 'external_hard_drive';
+  // Constants from "Revision 3" (Section 4.3)
+  public const ASSET_TYPE_LAPTOP = 'laptop';
+  public const ASSET_TYPE_PROJECTOR = 'projector';
+  public const ASSET_TYPE_PRINTER = 'printer';
+  public const ASSET_TYPE_DESKTOP_PC = 'desktop_pc';
+  public const ASSET_TYPE_MONITOR = 'monitor';
+  public const ASSET_TYPE_OTHER_ICT = 'other_ict';
 
-    // Operational Statuses (Referenced by Helpers.php and Blade views)
-    // Based on system design doc section 4.3 for equipment.status enum
-    public const STATUS_AVAILABLE = 'available';
-    public const STATUS_ON_LOAN = 'on_loan';
-    public const STATUS_UNDER_MAINTENANCE = 'under_maintenance';
-    public const STATUS_DISPOSED = 'disposed';
-    public const STATUS_LOST = 'lost';
-    public const STATUS_DAMAGED_NEEDS_REPAIR = 'damaged_needs_repair';
+  public const STATUS_AVAILABLE = 'available';
+  public const STATUS_ON_LOAN = 'on_loan';
+  public const STATUS_UNDER_MAINTENANCE = 'under_maintenance';
+  public const STATUS_DISPOSED = 'disposed';
+  public const STATUS_LOST = 'lost';
+  public const STATUS_DAMAGED_NEEDS_REPAIR = 'damaged_needs_repair';
 
-    // Condition Statuses (Referenced by LoanTransactionItem and system design doc section 4.3 for equipment.condition_status enum)
-    public const CONDITION_STATUS_NEW = 'new';
-    public const CONDITION_STATUS_GOOD = 'good';
-    public const CONDITION_STATUS_FAIR = 'fair';
-    public const CONDITION_STATUS_MINOR_DAMAGE = 'minor_damage'; // From design doc
-    public const CONDITION_STATUS_MAJOR_DAMAGE = 'major_damage'; // From design doc
-    public const CONDITION_STATUS_UNSERVICEABLE = 'unserviceable';
+  public const CONDITION_NEW = 'new';
+  public const CONDITION_GOOD = 'good';
+  public const CONDITION_FAIR = 'fair';
+  public const CONDITION_MINOR_DAMAGE = 'minor_damage';
+  public const CONDITION_MAJOR_DAMAGE = 'major_damage';
+  public const CONDITION_UNSERVICEABLE = 'unserviceable';
+  public const CONDITION_LOST = 'lost'; // Physical condition
 
-    // Acquisition Types (from system design doc section 4.3 for equipment.acquisition_type enum)
-    public const ACQUISITION_TYPE_PURCHASE = 'purchase';
-    public const ACQUISITION_TYPE_LEASE = 'lease';
-    public const ACQUISITION_TYPE_DONATION = 'donation';
-    public const ACQUISITION_TYPE_TRANSFER = 'transfer';
-    public const ACQUISITION_TYPE_OTHER = 'other_acquisition';
+  public const ACQUISITION_TYPE_PURCHASE = 'purchase';
+  public const ACQUISITION_TYPE_LEASE = 'lease';
+  public const ACQUISITION_TYPE_DONATION = 'donation';
+  public const ACQUISITION_TYPE_TRANSFER = 'transfer';
+  public const ACQUISITION_TYPE_OTHER = 'other_acquisition';
 
-    // Classification Types (from system design doc section 4.3 for equipment.classification enum)
-    public const CLASSIFICATION_ASSET = 'asset';
-    public const CLASSIFICATION_INVENTORY = 'inventory';
-    public const CLASSIFICATION_CONSUMABLE = 'consumable';
-    public const CLASSIFICATION_OTHER = 'other_classification';
+  public const CLASSIFICATION_ASSET = 'asset';
+  public const CLASSIFICATION_INVENTORY = 'inventory';
+  public const CLASSIFICATION_CONSUMABLE = 'consumable';
+  public const CLASSIFICATION_OTHER = 'other_classification';
 
+  // Labels for dropdowns/display
+  public static array $ASSET_TYPES_LABELS = [
+    self::ASSET_TYPE_LAPTOP => 'Komputer Riba',
+    self::ASSET_TYPE_PROJECTOR => 'Proyektor',
+    self::ASSET_TYPE_PRINTER => 'Pencetak',
+    self::ASSET_TYPE_DESKTOP_PC => 'Komputer Meja',
+    self::ASSET_TYPE_MONITOR => 'Monitor',
+    self::ASSET_TYPE_OTHER_ICT => 'Lain-lain Peralatan ICT',
+  ];
 
-    public static array $ASSET_TYPES_LABELS = [
-        self::ASSET_TYPE_LAPTOP => 'Komputer Riba',
-        self::ASSET_TYPE_PROJECTOR => 'Proyektor',
-        self::ASSET_TYPE_PRINTER => 'Pencetak',
-        self::ASSET_TYPE_DESKTOP_PC => 'Komputer Meja',
-        self::ASSET_TYPE_MONITOR => 'Monitor',
-        self::ASSET_TYPE_SCANNER => 'Pengimbas',
-        self::ASSET_TYPE_TABLET => 'Tablet',
-        self::ASSET_TYPE_WEBCAM => 'Webcam',
-        self::ASSET_TYPE_UPS => 'UPS',
-        self::ASSET_TYPE_NETWORK_SWITCH => 'Network Switch',
-        self::ASSET_TYPE_EXTERNAL_HARD_DRIVE => 'External Hard Drive',
-        self::ASSET_TYPE_OTHER_ICT => 'Lain-lain Peralatan ICT',
-    ];
+  public static array $STATUSES_LABELS = [
+    self::STATUS_AVAILABLE => 'Tersedia',
+    self::STATUS_ON_LOAN => 'Sedang Dipinjam',
+    self::STATUS_UNDER_MAINTENANCE => 'Dalam Penyenggaraan',
+    self::STATUS_DISPOSED => 'Telah Dilupus',
+    self::STATUS_LOST => 'Hilang (Operasi)',
+    self::STATUS_DAMAGED_NEEDS_REPAIR => 'Rosak (Perlu Pembaikan)',
+  ];
 
-    public static array $OPERATIONAL_STATUSES_LABELS = [
-        self::STATUS_AVAILABLE => 'Tersedia',
-        self::STATUS_ON_LOAN => 'Sedang Dipinjam',
-        self::STATUS_UNDER_MAINTENANCE => 'Dalam Penyenggaraan',
-        self::STATUS_DISPOSED => 'Telah Dilupus',
-        self::STATUS_LOST => 'Hilang',
-        self::STATUS_DAMAGED_NEEDS_REPAIR => 'Rosak (Perlu Pembaikan)',
-    ];
-    // Note: design doc also has 'lost' for condition_status, which overlaps with operational status.
-    // Using distinct condition statuses here. If 'lost' is a condition, add:
-    // public const CONDITION_STATUS_LOST = 'lost';
+  public static array $CONDITION_STATUSES_LABELS = [
+    self::CONDITION_NEW => 'Baru',
+    self::CONDITION_GOOD => 'Baik',
+    self::CONDITION_FAIR => 'Sederhana Baik',
+    self::CONDITION_MINOR_DAMAGE => 'Rosak Ringan',
+    self::CONDITION_MAJOR_DAMAGE => 'Rosak Teruk',
+    self::CONDITION_UNSERVICEABLE => 'Tidak Boleh Digunakan / Lupus',
+    self::CONDITION_LOST => 'Hilang (Keadaan Fizikal)',
+  ];
 
+  public static array $ACQUISITION_TYPES_LABELS = [ // Added
+    self::ACQUISITION_TYPE_PURCHASE => 'Pembelian',
+    self::ACQUISITION_TYPE_LEASE => 'Sewaan',
+    self::ACQUISITION_TYPE_DONATION => 'Sumbangan',
+    self::ACQUISITION_TYPE_TRANSFER => 'Pindahan',
+    self::ACQUISITION_TYPE_OTHER => 'Perolehan Lain',
+  ];
 
-    public static array $CONDITION_STATUSES_LABELS = [
-        self::CONDITION_STATUS_NEW => 'Baru',
-        self::CONDITION_STATUS_GOOD => 'Baik',
-        self::CONDITION_STATUS_FAIR => 'Sederhana Baik', // Working, with cosmetic issues or minor wear
-        self::CONDITION_STATUS_MINOR_DAMAGE => 'Rosak Ringan',
-        self::CONDITION_STATUS_MAJOR_DAMAGE => 'Rosak Teruk',
-        self::CONDITION_STATUS_UNSERVICEABLE => 'Tidak Boleh Digunakan / Lupus',
-        // self::CONDITION_STATUS_LOST => 'Hilang (Keadaan)', // If 'lost' is a condition
-    ];
-
-    public static array $ACQUISITION_TYPES_LABELS = [
-        self::ACQUISITION_TYPE_PURCHASE => 'Pembelian',
-        self::ACQUISITION_TYPE_LEASE => 'Sewaan',
-        self::ACQUISITION_TYPE_DONATION => 'Sumbangan',
-        self::ACQUISITION_TYPE_TRANSFER => 'Pindahan',
-        self::ACQUISITION_TYPE_OTHER => 'Lain-lain Perolehan',
-    ];
-
-    public static array $CLASSIFICATION_LABELS = [
-        self::CLASSIFICATION_ASSET => 'Aset',
-        self::CLASSIFICATION_INVENTORY => 'Inventori',
-        self::CLASSIFICATION_CONSUMABLE => 'Barang Guna Habis',
-        self::CLASSIFICATION_OTHER => 'Lain-lain Klasifikasi',
-    ];
-
-    protected $table = 'equipment';
-
-    protected $fillable = [
-        'asset_type', 'brand', 'model', 'tag_id', 'serial_number',
-        'purchase_date', 'warranty_expiry_date',
-        'status', 'condition_status', 'current_location', 'notes', 'specifications',
-        'department_id', 'equipment_category_id', 'sub_category_id', 'location_id',
-        'item_code', 'description', 'purchase_price', 'acquisition_type', 'classification',
-        'funded_by', 'supplier_name',
-        // created_by, updated_by are handled by BlameableObserver if you have one
-    ];
-
-    protected $casts = [
-        'purchase_date' => 'date',
-        'warranty_expiry_date' => 'date',
-        'specifications' => 'array',
-        'purchase_price' => 'decimal:2',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-        'deleted_at' => 'datetime',
-    ];
+  public static array $CLASSIFICATION_LABELS = [
+    self::CLASSIFICATION_ASSET => 'Aset',
+    self::CLASSIFICATION_INVENTORY => 'Inventori',
+    self::CLASSIFICATION_CONSUMABLE => 'Barang Guna Habis',
+    self::CLASSIFICATION_OTHER => 'Klasifikasi Lain',
+  ];
 
 
-    // Static methods for dropdown options
-    public static function getAssetTypeOptions(): array
-    {
-        return self::$ASSET_TYPES_LABELS;
-    }
+  protected $table = 'equipment';
 
-    public static function getOperationalStatusOptions(): array
-    {
-        return self::$OPERATIONAL_STATUSES_LABELS;
-    }
+  protected $fillable = [
+    'asset_type',
+    'brand',
+    'model',
+    'serial_number',
+    'tag_id',
+    'purchase_date',
+    'warranty_expiry_date',
+    'status',
+    'current_location',
+    'notes',
+    'condition_status',
+    'department_id',
+    'equipment_category_id',
+    'sub_category_id',
+    'location_id',
+    'item_code',
+    'description',
+    'purchase_price',
+    'acquisition_type',
+    'classification',
+    'funded_by',
+    'supplier_name',
+    'specifications',
+    // created_by, updated_by are handled by BlameableObserver from System Design
+  ];
 
-    public static function getConditionStatusOptions(): array
-    {
-        return self::$CONDITION_STATUSES_LABELS;
-    }
+  protected $casts = [
+    'purchase_date' => 'date:Y-m-d',
+    'warranty_expiry_date' => 'date:Y-m-d',
+    'specifications' => 'array',
+    'purchase_price' => 'decimal:2',
+    'created_at' => 'datetime',
+    'updated_at' => 'datetime',
+    'deleted_at' => 'datetime',
+  ];
 
-    public static function getAcquisitionTypeOptions(): array
-    {
-        return self::$ACQUISITION_TYPES_LABELS;
-    }
+  protected $attributes = [
+    'status' => self::STATUS_AVAILABLE, // Default as per Design Doc
+    'condition_status' => self::CONDITION_GOOD, // Default as per Design Doc
+  ];
 
-    public static function getClassificationOptions(): array
-    {
-        return self::$CLASSIFICATION_LABELS;
-    }
+  // Static methods to get options for dropdowns
+  public static function getAssetTypeOptions(): array
+  {
+    return self::$ASSET_TYPES_LABELS;
+  }
+  public static function getStatusOptions(): array
+  {
+    return self::$STATUSES_LABELS;
+  }
+  public static function getConditionStatusOptions(): array
+  {
+    return self::$CONDITION_STATUSES_LABELS;
+  }
+  public static function getAcquisitionTypeOptions(): array
+  {
+    return self::$ACQUISITION_TYPES_LABELS;
+  } // Added
+  public static function getClassificationOptions(): array
+  {
+    return self::$CLASSIFICATION_LABELS;
+  }
 
 
-    // Relationships
-    public function department(): BelongsTo
-    {
-        return $this->belongsTo(Department::class, 'department_id');
-    }
+  protected static function newFactory(): EquipmentFactory
+  {
+    return EquipmentFactory::new();
+  }
 
-    public function equipmentCategory(): BelongsTo
-    {
-        return $this->belongsTo(EquipmentCategory::class, 'equipment_category_id');
-    }
+  // Relationships
+  public function department(): BelongsTo
+  {
+    return $this->belongsTo(Department::class, 'department_id');
+  }
+  public function equipmentCategory(): BelongsTo
+  {
+    return $this->belongsTo(EquipmentCategory::class, 'equipment_category_id');
+  }
+  public function subCategory(): BelongsTo
+  {
+    return $this->belongsTo(SubCategory::class, 'sub_category_id');
+  }
+  public function definedLocation(): BelongsTo
+  {
+    return $this->belongsTo(Location::class, 'location_id');
+  }
 
-    public function subCategory(): BelongsTo
-    {
-        return $this->belongsTo(SubCategory::class, 'sub_category_id');
-    }
+  public function loanTransactionItems(): HasMany
+  {
+    return $this->hasMany(LoanTransactionItem::class, 'equipment_id');
+  }
 
-    public function physicalLocation(): BelongsTo // Changed name to avoid conflict if Location model is used elsewhere
-    {
-        return $this->belongsTo(Location::class, 'location_id');
-    }
+  public function activeLoanTransactionItem()
+  { // : HasOne but returns model or null
+    // Assuming LoanTransactionItem has a status to indicate it's currently 'issued' or 'active'
+    // Adjust 'status_item_issued' if your LoanTransactionItem constant is different.
+    // The design doc for loan_transaction_items lists 'issued' as a status
+    return $this->hasOne(LoanTransactionItem::class, 'equipment_id')
+      ->where('status', LoanTransactionItem::STATUS_ITEM_ISSUED)
+      ->latestOfMany('created_at'); // In case of re-issues, get the latest one.
+  }
 
-    public function loanTransactionItems(): HasMany
-    {
-        return $this->hasMany(LoanTransactionItem::class, 'equipment_id');
-    }
+  // Blameable relationships
+  public function creator(): BelongsTo
+  {
+    return $this->belongsTo(User::class, 'created_by');
+  }
+  public function updater(): BelongsTo
+  {
+    return $this->belongsTo(User::class, 'updated_by');
+  }
+  public function deleter(): BelongsTo
+  {
+    return $this->belongsTo(User::class, 'deleted_by');
+  }
 
-    public function creator(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
+  // Accessors for translated labels
+  public function getAssetTypeLabelAttribute(): string
+  {
+    return __(self::$ASSET_TYPES_LABELS[$this->asset_type] ?? Str::title(str_replace('_', ' ', (string) $this->asset_type)));
+  }
 
-    public function updater(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'updated_by');
-    }
+  public function getStatusLabelAttribute(): string
+  {
+    return __(self::$STATUSES_LABELS[$this->status] ?? Str::title(str_replace('_', ' ', (string) $this->status)));
+  }
 
-    public function deleter(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'deleted_by');
-    }
+  public function getConditionStatusLabelAttribute(): string
+  {
+    return __(self::$CONDITION_STATUSES_LABELS[$this->condition_status] ?? Str::title(str_replace('_', ' ', (string) $this->condition_status)));
+  }
 
-    // Accessors
-    public function getAssetTypeLabelAttribute(): string
-    {
-        return self::$ASSET_TYPES_LABELS[$this->asset_type] ?? Str::title(str_replace('_', ' ', (string) $this->asset_type));
-    }
+  public function getAcquisitionTypeLabelAttribute(): string // Added
+  {
+    return __(self::$ACQUISITION_TYPES_LABELS[$this->acquisition_type] ?? Str::title(str_replace('_', ' ', (string) $this->acquisition_type)));
+  }
 
-    public function getStatusLabelAttribute(): string
-    {
-        return self::$OPERATIONAL_STATUSES_LABELS[$this->status] ?? Str::title(str_replace('_', ' ', (string) $this->status));
-    }
-
-    public function getConditionStatusLabelAttribute(): string
-    {
-        return self::$CONDITION_STATUSES_LABELS[$this->condition_status] ?? Str::title(str_replace('_', ' ', (string) $this->condition_status));
-    }
-
-    public function updateStatusFromLoans(): void
-    {
-        $this->loadMissing('loanTransactionItems.loanTransaction');
-
-        $isIssuedAndNotFullyReturned = $this->loanTransactionItems()
-            ->whereHas('loanTransaction', function ($query) {
-                $query->where('type', LoanTransaction::TYPE_ISSUE)
-                      ->whereIn('status', [LoanTransaction::STATUS_ISSUED, LoanTransaction::STATUS_COMPLETED]);
-            })
-            ->where(function ($query) {
-                // Item is issued but not yet returned in good/damaged/lost condition via a corresponding return transaction
-                $query->where('status', LoanTransactionItem::STATUS_ITEM_ISSUED)
-                      ->orWhere(function ($subQuery) {
-                          // Consider items that were part of a return transaction but are still pending inspection
-                          $subQuery->where('status', LoanTransactionItem::STATUS_ITEM_RETURNED_PENDING_INSPECTION)
-                                   ->whereHas('loanTransaction', fn ($q) => $q->where('type', LoanTransaction::TYPE_RETURN));
-                      });
-            })
-            ->exists();
-
-        $newStatus = $this->status;
-
-        if (in_array($this->status, [self::STATUS_UNDER_MAINTENANCE, self::STATUS_DISPOSED, self::STATUS_LOST])) {
-            // Do not override these critical manual statuses based on loan activity
-        } elseif ($isIssuedAndNotFullyReturned) {
-            $newStatus = self::STATUS_ON_LOAN;
-        } else {
-            // Not on loan and not in a fixed non-available state
-            if (in_array($this->condition_status, [self::STATUS_DAMAGED_NEEDS_REPAIR, self::CONDITION_STATUS_MAJOR_DAMAGE, self::CONDITION_STATUS_UNSERVICEABLE])) {
-                $newStatus = self::STATUS_DAMAGED_NEEDS_REPAIR;
-            } else {
-                $newStatus = self::STATUS_AVAILABLE;
-            }
-        }
-
-        if ($this->status !== $newStatus) {
-            $this->status = $newStatus;
-            $this->saveQuietly(); // Use saveQuietly if you don't want to trigger observers again for this update
-        }
-    }
+  public function getClassificationLabelAttribute(): string // Added
+  {
+    return __(self::$CLASSIFICATION_LABELS[$this->classification] ?? Str::title(str_replace('_', ' ', (string) $this->classification)));
+  }
 }

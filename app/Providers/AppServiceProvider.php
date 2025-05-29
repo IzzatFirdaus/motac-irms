@@ -15,6 +15,7 @@ use App\Services\UserService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Blade; // Correctly imported
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\View;
@@ -36,12 +37,21 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        Model::shouldBeStrict(! $this->app->environment('production'));
+        Model::shouldBeStrict(!$this->app->environment('production'));
+
+        // Register Blade component aliases
+        // This tells Laravel that when <x-app-layout> is used,
+        // it should render the resources/views/layouts/app.blade.php view.
+        Blade::component('layouts.app', 'app-layout');
+
+        // Register the 'alert' component alias to use the 'alert-manager.blade.php' view
+        // This means <x-alert /> will render resources/views/components/alert-manager.blade.php
+        Blade::component('components.alert-manager', 'alert'); // <<< THIS LINE IS ADDED/ENSURED
 
         Lang::handleMissingKeysUsing(function (string $key, array $replacements, string $locale) {
             $logMessage = "Missing translation key detected: [{$key}] for locale [{$locale}].";
             Log::warning($logMessage, ['replacements' => $replacements]);
-            return $key;
+            return $key; // Return the key itself to avoid breaking the UI
         });
 
         try {
@@ -49,7 +59,7 @@ class AppServiceProvider extends ServiceProvider
             Carbon::setLocale($currentAppLocale);
         } catch (\Exception $e) {
             Log::error("AppServiceProvider: Failed to set Carbon locale to '" . app()->getLocale() . "'. Error: " . $e->getMessage());
-            Carbon::setLocale(config('app.fallback_locale', 'en'));
+            Carbon::setLocale(config('app.fallback_locale', 'en')); // Fallback to default
         }
 
         // ✅ ONLY register view composers in HTTP context
@@ -59,38 +69,39 @@ class AppServiceProvider extends ServiceProvider
 
                 try {
                     $configData = class_exists(Helpers::class) && method_exists(Helpers::class, 'appClasses')
-                      ? Helpers::appClasses()
-                      : throw new \Exception('Helpers::appClasses() not found or class not loaded.');
+                        ? Helpers::appClasses()
+                        : throw new \Exception('Helpers::appClasses() not found or class not loaded.');
                 } catch (\Exception $e) {
                     Log::critical('AppServiceProvider View Composer error: ' . $e->getMessage());
+                    // Provide a sensible default configData array if Helpers fails
                     $configData = [
-                      'templateName' => config('variables.templateName', __('Sistem MOTAC')),
-                      'textDirection' => 'ltr',
-                      'style' => 'light',
-                      'theme' => 'theme-motac',
-                      'layout' => 'vertical',
-                      'assetsPath' => asset('/assets') . '/',
-                      'baseUrl' => url('/'),
-                      'locale' => config('app.locale', 'ms'),
-                      'bsTheme' => 'light',
-                      'isMenu' => true,
-                      'isNavbar' => true,
-                      'isFooter' => true,
-                      'contentNavbar' => true,
-                      'menuFixed' => true,
-                      'menuCollapsed' => false,
-                      'navbarFixed' => true,
-                      'navbarDetached' => true,
-                      'footerFixed' => false,
-                      'customizerHidden' => true,
-                      'displayCustomizer' => false,
-                      'rtlSupport' => '',
-                      'primaryColor' => '#0050A0',
-                      'isFlex' => false,
-                      'container' => 'container-fluid',
-                      'containerNav' => 'container-fluid',
-                      'showMenu' => true,
-                      'contentLayout' => 'wide',
+                        'templateName' => config('variables.templateName', __('Sistem MOTAC')),
+                        'textDirection' => 'ltr', // default
+                        'style' => 'light', // default
+                        'theme' => 'theme-motac', // default (example)
+                        'layout' => 'vertical', // default
+                        'assetsPath' => asset('/assets') . '/',
+                        'baseUrl' => url('/'),
+                        'locale' => config('app.locale', 'ms'),
+                        'bsTheme' => 'light', // Assuming Bootstrap 5+
+                        'isMenu' => true,
+                        'isNavbar' => true,
+                        'isFooter' => true,
+                        'contentNavbar' => true, // Default based on your app.blade.php
+                        'menuFixed' => true,
+                        'menuCollapsed' => false,
+                        'navbarFixed' => true, // default
+                        'navbarDetached' => true, // Default to detached as per your app.blade.php logic
+                        'footerFixed' => false,
+                        'customizerHidden' => true, // As per your app.blade.php
+                        'displayCustomizer' => false, // Usually false by default
+                        'rtlSupport' => '', // Or determine based on locale
+                        'primaryColor' => '#0050A0', // Example color
+                        'isFlex' => false, // As per your app.blade.php
+                        'container' => 'container-fluid', // As per your app.blade.php
+                        'containerNav' => 'container-fluid', // As per your app.blade.php
+                        'showMenu' => true, // default
+                        'contentLayout' => 'wide', // default
                     ];
                 }
 
@@ -98,12 +109,13 @@ class AppServiceProvider extends ServiceProvider
                 $appClasses = $configData;
 
                 $view->with('configData', $configData);
-                $view->with('appClasses', $appClasses);
+                $view->with('appClasses', $appClasses); // Share $appClasses as well
             });
 
             View::share('appName', config('variables.templateName', __('Sistem Pengurusan Sumber MOTAC')));
         } else {
-            Log::info('View composer skipped: running in console mode.');
+            // Optional: Log that view composers are skipped in console
+            Log::info('View composer registration skipped: application is running in console.');
         }
     }
 }

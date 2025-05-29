@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Auth;
 // Explicit User, EquipmentCategory, Equipment imports
 
 /**
+ * 
+ *
  * @property int $id
  * @property int $equipment_category_id
  * @property string $name
@@ -33,7 +35,6 @@ use Illuminate\Support\Facades\Auth;
  * @property-read int|null $equipment_count
  * @property-read \App\Models\EquipmentCategory $equipmentCategory
  * @property-read \App\Models\User|null $updater
- *
  * @method static Builder<static>|SubCategory active()
  * @method static Builder<static>|SubCategory byCategory(int $categoryId)
  * @method static Builder<static>|SubCategory byName(string $name)
@@ -55,7 +56,6 @@ use Illuminate\Support\Facades\Auth;
  * @method static Builder<static>|SubCategory whereUpdatedBy($value)
  * @method static Builder<static>|SubCategory withTrashed()
  * @method static Builder<static>|SubCategory withoutTrashed()
- *
  * @mixin \Eloquent
  */
 class SubCategory extends Model

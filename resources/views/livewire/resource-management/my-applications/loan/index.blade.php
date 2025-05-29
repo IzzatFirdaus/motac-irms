@@ -1,35 +1,35 @@
-{{-- resources/views/livewire/resource-management/my-applications/email/index.blade.php --}}
+{{-- resources/views/livewire/resource-management/my-applications/loan/index.blade.php --}}
 <div>
-    @section('title', __('Status Permohonan Emel/ID Saya'))
+    @section('title', __('Status Permohonan Pinjaman Saya'))
 
     {{-- Page Header --}}
     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4">
-        <h1 class="h2 fw-semibold text-dark mb-2 mb-sm-0">{{ __('Senarai Permohonan Emel/ID Saya') }}</h1>
-        <a href="{{ route('resource-management.application-forms.email.create') }}"
+        <h1 class="h2 fw-semibold text-dark mb-2 mb-sm-0">{{ __('Senarai Permohonan Pinjaman Saya') }}</h1>
+        <a href="{{ route('loan-applications.create') }}"
             class="btn btn-primary d-inline-flex align-items-center text-uppercase small fw-semibold mt-2 mt-sm-0 px-3 py-2">
-            <i class="ti ti-file-plus {{ app()->getLocale() === 'ar' ? 'ms-2' : 'me-2' }}"></i>
-            {{ __('Mohon Emel/ID Baru') }}
+            <i class="ti ti-briefcase {{ app()->getLocale() === 'ar' ? 'ms-2' : 'me-2' }}"></i>
+            {{ __('Mohon Pinjaman Baru') }}
         </a>
     </div>
 
     {{-- Alerts --}}
-    {{-- Ensure this include points to your Bootstrap-styled alert component --}}
-    @include('layouts.sections.components.alert-general-bootstrap')
+    @include('_partials._alerts.alert-general')
 
     {{-- Filters and Search --}}
     <div class="card shadow-sm mb-4">
         <div class="card-body p-3">
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label for="searchTerm" class="form-label">{{ __('Carian (ID, Emel Dicadang, Tujuan)') }}</label>
-                    <input wire:model.live.debounce.300ms="searchTerm" type="text" id="searchTerm"
+                    <label for="loanSearchTerm" class="form-label">{{ __('Carian (ID, Tujuan, Lokasi)') }}</label>
+                    <input wire:model.live.debounce.300ms="searchTerm" type="text" id="loanSearchTerm"
                         placeholder="{{ __('Masukkan kata kunci...') }}" class="form-control form-control-sm">
                 </div>
                 <div class="col-md-6">
-                    <label for="filterStatus" class="form-label">{{ __('Tapis mengikut Status') }}</label>
-                    <select wire:model.live="filterStatus" id="filterStatus" class="form-select form-select-sm">
-                        @foreach ($this->statusOptions as $key => $label)
-                            <option value="{{ $key }}">{{ $label }}</option>
+                    <label for="loanFilterStatus" class="form-label">{{ __('Tapis mengikut Status') }}</label>
+                    <select wire:model.live="filterStatus" id="loanFilterStatus" class="form-select form-select-sm">
+                        {{-- Uses $statusOptions passed from the component's render method --}}
+                        @foreach ($statusOptions as $key => $label)
+                            <option value="{{ $key }}">{{ __($label) }}</option> {{-- Ensure labels are translatable or already translated --}}
                         @endforeach
                     </select>
                 </div>
@@ -37,7 +37,7 @@
         </div>
     </div>
 
-    {{-- Email Applications Table --}}
+    {{-- Loan Applications Table --}}
     <div class="card shadow-sm">
         <div class="table-responsive">
             <table class="table table-hover table-striped mb-0">
@@ -46,11 +46,11 @@
                         <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">
                             {{ __('ID Permohonan') }}</th>
                         <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">
-                            {{ __('Emel/ID Dicadang') }}</th>
+                            {{ __('Tujuan') }}</th>
                         <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">
-                            {{ __('Tujuan/Catatan') }}</th>
+                            {{ __('Tarikh Mula Pinjam') }}</th>
                         <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">
-                            {{ __('Tarikh Mohon') }}</th>
+                            {{ __('Tarikh Hantar Balik') }}</th>
                         <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">
                             {{ __('Status') }}</th>
                         <th scope="col" class="text-end small text-uppercase text-muted fw-medium px-3 py-2">
@@ -66,41 +66,43 @@
                             </div>
                         </td>
                     </tr>
-                    @forelse ($this->applications as $application)
-                        <tr wire:key="email-app-{{ $application->id }}">
+                    {{-- Uses $applications passed from the component's render method --}}
+                    @forelse ($applications as $application)
+                        <tr wire:key="loan-app-{{ $application->id }}">
                             <td class="px-3 py-2 align-middle small text-dark fw-medium">#{{ $application->id }}</td>
-                            <td class="px-3 py-2 align-middle small text-muted">
-                                {{ $application->proposed_email ?: ($application->group_email ?: __('N/A')) }}</td>
                             <td class="px-3 py-2 align-middle small text-muted"
                                 style="max-width: 300px; white-space: normal;">
-                                {{ Str::limit($application->purpose ?? $application->application_reason_notes, 70) }}
+                                {{ Str::limit($application->purpose, 70) }}
                             </td>
                             <td class="px-3 py-2 align-middle small text-muted">
-                                {{ $application->created_at->translatedFormat('d M Y, h:i A') }}</td>
+                                {{ $application->loan_start_date ? Carbon\Carbon::parse($application->loan_start_date)->translatedFormat(config('app.date_format_my', 'd/m/Y')) : 'N/A' }}
+                            </td>
+                            <td class="px-3 py-2 align-middle small text-muted">
+                                {{ $application->loan_end_date ? Carbon\Carbon::parse($application->loan_end_date)->translatedFormat(config('app.date_format_my', 'd/m/Y')) : 'N/A' }}
+                            </td>
                             <td class="px-3 py-2 align-middle small">
-                                <span
-                                    class="badge rounded-pill {{ Helpers::getBootstrapStatusColorClass($application->status) }}">
-                                    {{ $application->status_translated }}
+                                {{-- Assuming Helpers class and status_translated accessor/method exist --}}
+                                <span class="badge rounded-pill {{ App\Helpers\Helpers::getStatusColorClass($application->status ?? 'default') }}">
+                                    {{ __($application->status_translated ?? Str::studly($application->status)) }}
                                 </span>
                             </td>
                             <td class="px-3 py-2 align-middle text-end">
-                                <a href="{{ route('resource-management.my-applications.email-applications.show', $application->id) }}"
+                                <a href="{{ route('loan-applications.show', $application->id) }}"
                                     class="btn btn-sm btn-outline-primary border-0 p-1"
                                     title="{{ __('Lihat Detail') }}">
                                     <i class="ti ti-eye fs-6"></i>
                                 </a>
-                                @if ($application->status === \App\Models\EmailApplication::STATUS_DRAFT)
+                                @if ($application->status === \App\Models\LoanApplication::STATUS_DRAFT)
                                     @can('update', $application)
-                                        {{-- Assuming edit route is a Livewire component or a standard controller action --}}
-                                        <a href="{{ route('resource-management.application-forms.email.edit', $application->id) }}"
-                                            {{-- Example edit route --}} class="btn btn-sm btn-outline-secondary border-0 p-1 ms-1"
+                                        <a href="{{ route('loan-applications.edit', $application->id) }}"
+                                            class="btn btn-sm btn-outline-secondary border-0 p-1 ms-1"
                                             title="{{ __('Kemaskini Draf') }}">
                                             <i class="ti ti-pencil fs-6"></i>
                                         </a>
                                     @endcan
                                     @can('delete', $application)
                                         <button
-                                            wire:click="$dispatch('open-delete-modal', { id: {{ $application->id }}, modelClass: 'App\\Models\\EmailApplication', itemDescription: 'Permohonan Emel/ID #{{ $application->id }}' })"
+                                            wire:click="$dispatch('open-delete-modal', { id: {{ $application->id }}, modelClass: 'App\\Models\\LoanApplication', itemDescription: '{{ __('Permohonan Pinjaman #') . $application->id }}' })"
                                             type="button" class="btn btn-sm btn-outline-danger border-0 p-1 ms-1"
                                             title="{{ __('Padam Draf') }}">
                                             <i class="ti ti-trash fs-6"></i>
@@ -113,8 +115,8 @@
                         <tr>
                             <td colspan="6" class="px-3 py-5 text-center">
                                 <div class="d-flex flex-column align-items-center text-muted small">
-                                    <i class="ti ti-mail-off fs-1 mb-2 text-secondary"></i>
-                                    {{ __('Tiada rekod permohonan emel/ID ditemui.') }}
+                                    <i class="ti ti-briefcase-off fs-1 mb-2 text-secondary"></i>
+                                    {{ __('Tiada rekod permohonan pinjaman ditemui.') }}
                                 </div>
                             </td>
                         </tr>
@@ -125,22 +127,12 @@
     </div>
 
     {{-- Pagination --}}
-    @if ($this->applications->hasPages())
+    @if ($applications->hasPages())
         <div class="mt-4 d-flex justify-content-center">
-            {{ $this->applications->links() }} {{-- Ensure Bootstrap pagination views are used --}}
+            {{ $applications->links() }}
         </div>
     @endif
 
-    {{-- Placeholder for a global delete confirmation modal. Ensure it's Bootstrap-styled. --}}
-    {{--
-    <livewire:components.confirmation-modal
-        event-to-open="open-delete-modal"
-        event-on-confirm="delete-item" {{-- Define this method in your Livewire PHP --}}
-    modal-title="{{ __('Sahkan Pemadaman') }}"
-    modal-description="{{ __('Adakah anda pasti ingin memadam item ini? Tindakan ini tidak boleh diundur.') }}"
-    confirm-button-text="{{ __('Ya, Padam') }}"
-    confirm-button-class="btn-danger"
-    wire-key="global-delete-confirmation-modal"
-    />
-    --}}
+    {{-- Modal placeholder for delete confirmation if you use one --}}
+    {{-- <livewire:components.confirmation-modal event-to-open="open-delete-modal" ... /> --}}
 </div>

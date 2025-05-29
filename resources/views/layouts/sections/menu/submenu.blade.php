@@ -1,62 +1,102 @@
+{{-- This file is expected to be included by a parent menu Blade view --}}
+{{-- Expected variables: $menu (array of submenu items), $configData, $currentUserRole --}}
+
+@php
+  $currentRouteName = Route::currentRouteName();
+  $layoutType = $configData['layout'] ?? 'vertical';
+  $activeOpenClass = $layoutType === 'vertical' ? 'active open' : 'active';
+
+  // Helper function (if not already defined globally or in a shared include)
+  // to recursively check if a menu item or any of its children are active
+  if (!function_exists('isSubMenuItemActive')) { // Use a different name to avoid collision if included multiple times with different contexts
+      function isSubMenuItemActive($item, $currentRouteName, &$isAnyChildActive = false) {
+          $isActive = false;
+          if (isset($item->routeName) && $item->routeName === $currentRouteName) {
+              $isActive = true;
+              $isAnyChildActive = true;
+          } elseif (isset($item->routeNamePrefix) && str_starts_with($currentRouteName, $item->routeNamePrefix)) {
+              $isActive = true;
+              // $isAnyChildActive = true; // Optional: if prefix match implies parent is open
+          }
+
+          if (!empty($item->submenu)) {
+              $hasActiveGrandChild = false;
+              foreach ($item->submenu as $subItem) {
+                  if (isSubMenuItemActive($subItem, $currentRouteName, $hasActiveGrandChild)) {
+                      $isActive = true;
+                      $isAnyChildActive = true;
+                      break;
+                  }
+              }
+          }
+          return $isActive;
+      }
+  }
+@endphp
+
 <ul class="menu-sub">
   @if (isset($menu) && is_array($menu))
-    @foreach ($menu as $submenu)
+    @foreach ($menu as $submenuItem) {{-- Renamed $submenu to $submenuItem to avoid confusion with outer scope $menu --}}
       @php
         $canViewSubmenu = false;
-        $currentUserRole = $role ?? (Auth::check() ? Auth::user()->getRoleNames()->first() : null);
-
+        // $currentUserRole is expected to be passed from the parent include
         if ($currentUserRole === 'Admin') {
             $canViewSubmenu = true;
-        } elseif (isset($submenu->role)) {
-            $roles = is_array($submenu->role) ? $submenu->role : [$submenu->role];
+        } elseif (isset($submenuItem->role)) {
+            $roles = is_array($submenuItem->role) ? $submenuItem->role : [$submenuItem->role];
             $canViewSubmenu = in_array($currentUserRole, $roles);
-        } elseif (isset($submenu->permissions) && Auth::check()) {
-            // Uncomment if using permission system
-            // $canViewSubmenu = Auth::user()->canAny((array) $submenu->permissions);
+        } elseif (isset($submenuItem->permissions) && Auth::check()) {
+            // Uncomment if using permission system, e.g., Auth::user()->canAny((array)$submenuItem->permissions);
         } else {
-            $canViewSubmenu = true;
+            $canViewSubmenu = true; // Default for items without specific role/permission
+        }
+
+        $menuItemIsActive = false;
+        $anyChildIsActive = false;
+
+        isSubMenuItemActive($submenuItem, $currentRouteName, $anyChildIsActive);
+
+        if (isset($submenuItem->routeName) && $submenuItem->routeName === $currentRouteName) {
+            $menuItemIsActive = true;
+        }
+        if (!$menuItemIsActive && !$anyChildIsActive && isset($submenuItem->routeNamePrefix) && str_starts_with($currentRouteName, $submenuItem->routeNamePrefix)) {
+            $menuItemIsActive = true;
         }
 
         $activeClass = '';
-        $currentRouteName = Route::currentRouteName();
-        $layoutType = $configData['layout'] ?? 'vertical';
-        $activeOpenClass = $layoutType === 'vertical' ? 'active open' : 'active';
-
-        if (isset($submenu->routeName) && $currentRouteName === $submenu->routeName) {
-            $activeClass = 'active';
-        } elseif (isset($submenu->submenu)) {
-            if (isset($submenu->routeNamePrefix) && str_starts_with($currentRouteName, $submenu->routeNamePrefix)) {
+        if ($menuItemIsActive || $anyChildIsActive) {
+            if (isset($submenuItem->submenu) && !empty($submenuItem->submenu)) {
                 $activeClass = $activeOpenClass;
-            } elseif (isset($submenu->slug)) {
-                foreach ((array)$submenu->slug as $slug) {
-                    if (str_starts_with($currentRouteName, $slug)) {
-                        $activeClass = $activeOpenClass;
-                        break;
-                    }
-                }
+            } else {
+                $activeClass = 'active';
             }
         }
+
+        $hasFurtherSubmenu = isset($submenuItem->submenu) && !empty($submenuItem->submenu);
+        $submenuLinkClass = $hasFurtherSubmenu ? 'menu-link menu-toggle' : 'menu-link';
+        $submenuHref = $submenuItem->url ?? (isset($submenuItem->routeName) && Route::has($submenuItem->routeName) ? route($submenuItem->routeName) : 'javascript:void(0);');
       @endphp
 
       @if ($canViewSubmenu)
         <li class="menu-item {{ $activeClass }}">
-          <a href="{{ isset($submenu->routeName) && Route::has($submenu->routeName) ? route($submenu->routeName) : (isset($submenu->url) ? url($submenu->url) : 'javascript:void(0);') }}"
-             class="{{ isset($submenu->submenu) ? 'menu-link menu-toggle' : 'menu-link' }}"
-             @if (!empty($submenu->target)) target="{{ $submenu->target }}" @endif>
-            @isset($submenu->icon)
-              <i class="menu-icon tf-icons {{ $submenu->icon }}"></i>
+          <a href="{{ $submenuHref }}"
+             class="{{ $submenuLinkClass }}"
+             @if (!empty($submenuItem->target)) target="{{ $submenuItem->target }}" @endif>
+            @isset($submenuItem->icon) {{-- Submenu items might not always have icons, but supported if they do --}}
+              <i class="menu-icon tf-icons {{ $submenuItem->icon }}"></i>
             @endisset
-            <div>{{ __($submenu->name ?? '') }}</div>
-            @isset($submenu->badge)
-              <div class="badge bg-label-{{ $submenu->badge[0] }} rounded-pill ms-auto">{{ __($submenu->badge[1]) }}</div>
+            <div>{{ __($submenuItem->name ?? '') }}</div>
+            @isset($submenuItem->badge)
+              <div class="badge bg-label-{{ $submenuItem->badge[0] }} rounded-pill ms-auto">{{ __($submenuItem->badge[1]) }}</div>
             @endisset
           </a>
 
-          @if (isset($submenu->submenu))
+          {{-- Recursive call for the next level of submenu --}}
+          @if ($hasFurtherSubmenu)
             @include('layouts.sections.menu.submenu', [
-              'menu' => $submenu->submenu,
+              'menu' => $submenuItem->submenu,
               'configData' => $configData,
-              'role' => $currentUserRole
+              'currentUserRole' => $currentUserRole // Continue passing the role
             ])
           @endif
         </li>

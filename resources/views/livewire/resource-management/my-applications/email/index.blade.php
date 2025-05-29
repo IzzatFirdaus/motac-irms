@@ -5,7 +5,8 @@
     {{-- Page Header --}}
     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4">
         <h1 class="h2 fw-semibold text-dark mb-2 mb-sm-0">{{ __('Senarai Permohonan Emel/ID Saya') }}</h1>
-        <a href="{{ route('resource-management.application-forms.email.create') }}"
+        {{-- CORRECTED ROUTE for creating new email application --}}
+        <a href="{{ route('email-applications.create') }}"
             class="btn btn-primary d-inline-flex align-items-center text-uppercase small fw-semibold mt-2 mt-sm-0 px-3 py-2">
             <i class="ti ti-file-plus {{ app()->getLocale() === 'ar' ? 'ms-2' : 'me-2' }}"></i>
             {{ __('Mohon Emel/ID Baru') }}
@@ -13,8 +14,7 @@
     </div>
 
     {{-- Alerts --}}
-    {{-- Assuming alert-general.blade.php is at resources/views/_partials/_alerts/alert-general.blade.php --}}
-    @include('_partials._alerts.alert-general') {{--  UPDATED PATH --}}
+    @include('_partials._alerts.alert-general')
 
 
     {{-- Filters and Search --}}
@@ -22,15 +22,16 @@
         <div class="card-body p-3">
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label for="searchTerm" class="form-label">{{ __('Carian (ID, Emel Dicadang, Tujuan)') }}</label>
-                    <input wire:model.live.debounce.300ms="searchTerm" type="text" id="searchTerm"
+                    <label for="emailSearchTerm" class="form-label">{{ __('Carian (ID, Emel Dicadang, Tujuan)') }}</label>
+                    <input wire:model.live.debounce.300ms="searchTerm" type="text" id="emailSearchTerm"
                         placeholder="{{ __('Masukkan kata kunci...') }}" class="form-control form-control-sm">
                 </div>
                 <div class="col-md-6">
-                    <label for="filterStatus" class="form-label">{{ __('Tapis mengikut Status') }}</label>
-                    <select wire:model.live="filterStatus" id="filterStatus" class="form-select form-select-sm">
-                        @foreach ($statusOptions as $key => $label) {{-- Changed from $this->statusOptions --}}
-                            <option value="{{ $key }}">{{ __($label) }}</option>
+                    <label for="emailFilterStatus" class="form-label">{{ __('Tapis mengikut Status') }}</label>
+                    <select wire:model.live="filterStatus" id="emailFilterStatus" class="form-select form-select-sm">
+                        {{-- Uses $statusOptions passed from the component's render method --}}
+                        @foreach ($statusOptions as $key => $label)
+                            <option value="{{ $key }}">{{ __($label) }}</option> {{-- Ensure labels are translatable --}}
                         @endforeach
                     </select>
                 </div>
@@ -67,21 +68,21 @@
                             </div>
                         </td>
                     </tr>
-                    @forelse ($applications as $application) {{-- Changed from $this->applications --}}
+                    {{-- Uses $applications passed from the component's render method --}}
+                    @forelse ($applications as $application)
                         <tr wire:key="email-app-{{ $application->id }}">
                             <td class="px-3 py-2 align-middle small text-dark fw-medium">#{{ $application->id }}</td>
                             <td class="px-3 py-2 align-middle small text-muted">
                                 {{ $application->proposed_email ?: ($application->group_email ?: __('N/A')) }}</td>
                             <td class="px-3 py-2 align-middle small text-muted"
                                 style="max-width: 300px; white-space: normal;">
-                                {{ Str::limit($application->application_reason_notes ?? $application->purpose, 70) }}
+                                {{ Str::limit($application->application_reason_notes ?? __('N/A'), 70) }}
                             </td>
                             <td class="px-3 py-2 align-middle small text-muted">
-                                {{ $application->created_at->translatedFormat('d M Y, h:i A') }}</td>
+                                {{ $application->created_at->translatedFormat(config('app.datetime_format_my', 'd/m/Y H:i A')) }}</td>
                             <td class="px-3 py-2 align-middle small">
-                                <span
-                                    class="badge rounded-pill {{ App\Helpers\Helpers::getStatusColorClass($application->status) }}">
-                                    {{ __($application->status_translated) }}
+                                <span class="badge rounded-pill {{ App\Helpers\Helpers::getStatusColorClass($application->status ?? 'default') }}">
+                                    {{ __($application->status_translated ?? Str::studly($application->status)) }}
                                 </span>
                             </td>
                             <td class="px-3 py-2 align-middle text-end">
@@ -125,9 +126,9 @@
     </div>
 
     {{-- Pagination --}}
-    @if ($applications->hasPages()) {{-- Changed from $this->applications --}}
+    @if ($applications->hasPages())
         <div class="mt-4 d-flex justify-content-center">
-            {{ $applications->links() }} {{-- Changed from $this->applications --}}
+            {{ $applications->links() }}
         </div>
     @endif
 

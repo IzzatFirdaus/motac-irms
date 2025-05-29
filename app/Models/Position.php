@@ -22,11 +22,34 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- *
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
  * @property-read \App\Models\User|null $creator
  * @property-read \App\Models\User|null $updater
  * @property-read \App\Models\User|null $deleter
+ * @property int|null $vacancies_count
+ * @property int|null $department_id
+ * @property int|null $grade_id
+ * @property-read int|null $users_count
+ * @method static \Database\Factories\PositionFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position whereDepartmentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position whereGradeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position whereVacanciesCount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position withoutTrashed()
+ * @mixin \Eloquent
  */
 class Position extends Model
 {

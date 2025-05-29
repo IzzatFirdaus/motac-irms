@@ -2,7 +2,7 @@
 @props([
     'resource',
     'statusAttribute' => 'status', // The attribute on the $resource model that holds the status value
-    'statusTextPrefix' => '',    // Optional prefix for the displayed status text
+    'statusTextPrefix' => '', // Optional prefix for the displayed status text
 ])
 
 @php
@@ -10,8 +10,8 @@
 
     // Attempt to use a translated status label if available from the model
     // Checks for accessors like getStatusLabelAttribute() or a public property like statusLabel
-    $statusLabelAccessor = 'get'.Str::studly($statusAttribute).'LabelAttribute';
-    $statusDisplayAccessor = Str::camel($statusAttribute).'Label'; // E.g., statusLabel, conditionStatusLabel
+    $statusLabelAccessor = 'get' . Str::studly($statusAttribute) . 'LabelAttribute';
+    $statusDisplayAccessor = Str::camel($statusAttribute) . 'Label'; // E.g., statusLabel, conditionStatusLabel
 
     if (method_exists($resource, $statusLabelAccessor)) {
         $formattedStatus = $resource->{$statusLabelAccessor}();
@@ -68,7 +68,6 @@
         'unserviceable_on_return' => 'danger',
         'returned_major_damage' => 'danger',
 
-
         // Draft/Secondary Statuses
         'draft' => 'secondary',
         'partially_returned' => 'secondary', // Could also be info or warning
@@ -82,8 +81,10 @@
 
     $badgeClass = "badge rounded-pill bg-label-{$bootstrapColorSuffix}";
 
+    $statusClass = \App\Helpers\Helpers::getStatusColorClass($statusValue);
+    $statusText = ucfirst(str_replace('_', ' ', $statusValue));
 @endphp
 
-<span {{ $attributes->merge(['class' => $badgeClass]) }}>
-    {{ $statusTextPrefix }}{{ $formattedStatus }}
+<span {{ $attributes->merge(['class' => 'badge rounded-pill ' . $statusClass]) }}>
+    {{ $statusText }}
 </span>

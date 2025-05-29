@@ -1,7 +1,9 @@
 <?php
 
-return [
+// As per System Design Rev. 3, mail configurations are managed here and in the .env file. [cite: 65]
+// Mailtrap is recommended for development environments, configured via .env variables. [cite: 50]
 
+return [
     /*
     |--------------------------------------------------------------------------
     | Default Mailer
@@ -10,7 +12,7 @@ return [
     | This option controls the default mailer that is used to send any email
     | messages sent by your application. Alternative mailers may be setup
     | and used as needed; however, this mailer will be used by default.
-    |
+    | System Design Rev. 3 refers to MAIL_MAILER in .env. [cite: 65]
     */
 
     'default' => env('MAIL_MAILER', 'smtp'),
@@ -36,21 +38,27 @@ return [
     'mailers' => [
         'smtp' => [
             'transport' => 'smtp',
+            // MAIL_HOST, MAIL_PORT, MAIL_ENCRYPTION, MAIL_USERNAME, MAIL_PASSWORD
+            // are configured via .env as per System Design Rev. 3. [cite: 65]
+            // For development, these would point to Mailtrap. [cite: 50]
             'host' => env('MAIL_HOST', 'smtp.mailgun.org'),
             'port' => env('MAIL_PORT', 587),
             'encryption' => env('MAIL_ENCRYPTION', 'tls'),
             'username' => env('MAIL_USERNAME'),
             'password' => env('MAIL_PASSWORD'),
             'timeout' => null,
-            'local_domain' => env('MAIL_EHLO_DOMAIN'),
+            'local_domain' => env('MAIL_EHLO_DOMAIN'), // Formerly 'ehlo_domain' in older Laravel versions
         ],
 
         'ses' => [
             'transport' => 'ses',
+            // SES configuration typically involves AWS key, secret, and region set in .env
+            // and potentially in config/services.php
         ],
 
         'mailgun' => [
             'transport' => 'mailgun',
+            // Mailgun domain and secret are usually set in .env and config/services.php
             // 'client' => [
             //     'timeout' => 5,
             // ],
@@ -58,6 +66,7 @@ return [
 
         'postmark' => [
             'transport' => 'postmark',
+            // Postmark token is usually set in .env and config/services.php
             // 'client' => [
             //     'timeout' => 5,
             // ],
@@ -70,18 +79,18 @@ return [
 
         'log' => [
             'transport' => 'log',
-            'channel' => env('MAIL_LOG_CHANNEL'),
+            'channel' => env('MAIL_LOG_CHANNEL'), // Logs emails to a log channel instead of sending
         ],
 
         'array' => [
-            'transport' => 'array',
+            'transport' => 'array', // Used for testing, stores emails in an array
         ],
 
         'failover' => [
             'transport' => 'failover',
             'mailers' => [
-                'smtp',
-                'log',
+                'smtp', // Primary mailer
+                'log',  // Fallback mailer
             ],
         ],
     ],
@@ -94,6 +103,8 @@ return [
     | You may wish for all e-mails sent by your application to be sent from
     | the same address. Here, you may specify a name and address that is
     | used globally for all e-mails that are sent by your application.
+    | MAIL_FROM_ADDRESS and MAIL_FROM_NAME are configured via .env
+    | as per System Design Rev. 3. [cite: 65]
     |
     */
 
@@ -110,14 +121,14 @@ return [
     | If you are using Markdown based email rendering, you may configure your
     | theme and component paths here, allowing you to customize the design
     | of the emails. Or, you may simply stick with the Laravel defaults!
-    |
+    | System Design Rev. 3 indicates use of Markdown emails (e.g., ProvisioningFailedNotification). [cite: 216]
     */
 
     'markdown' => [
-        'theme' => 'default',
+        'theme' => 'default', // You can customize this theme
 
         'paths' => [
-            resource_path('views/vendor/mail'),
+            resource_path('views/vendor/mail'), // For customized mail components
         ],
     ],
 

@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreEmailApplicationRequest;    // Assumed to exist
-use App\Http\Requests\UpdateEmailApplicationRequest;    // Assumed to exist
-use App\Models\EmailApplication;                       //
-use App\Models\User;                                   //
-use App\Services\EmailApplicationService;              //
+use App\Http\Requests\StoreEmailApplicationRequest;
+use App\Http\Requests\UpdateEmailApplicationRequest;
+use App\Models\EmailApplication;
+use App\Models\User;
+use App\Services\EmailApplicationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
-use Throwable; // Catching generic Throwable for broad error handling
+use Throwable;
 
 class EmailApplicationController extends Controller
 {
@@ -22,17 +22,16 @@ class EmailApplicationController extends Controller
         $this->emailApplicationService = $emailApplicationService;
         $this->middleware('auth');
 
-        // Automatically authorize resource methods based on EmailApplicationPolicy.
-        // 'index' and 'create' are handled by Livewire.
-        // 'submitApplication' will have its authorization checked manually using the 'submit' ability.
-        $this->authorizeResource(EmailApplication::class, 'emailApplication', [
-            'only' => ['show', 'store', 'edit', 'update', 'destroy'],
+        // Authorize resource methods. 'index' and 'create', 'edit' are primarily handled by Livewire components
+        // that might call these controller methods for backend logic or have their own routes.
+        // The routes in web.php for 'store', 'show', 'update', 'destroy', 'submitApplication' point here.
+        $this->authorizeResource(EmailApplication::class, 'email_application', [ // Use snake_case for parameter name
+            'except' => ['index', 'create', 'edit'], // Assuming Livewire handles these views/forms
         ]);
     }
 
     /**
      * Store a newly created email application draft.
-     * Validation and authorization (create ability) handled by StoreEmailApplicationRequest.
      *
      * @param  \App\Http\Requests\StoreEmailApplicationRequest  $request
      * @return \Illuminate\Http\RedirectResponse
@@ -49,11 +48,12 @@ class EmailApplicationController extends Controller
             $application = $this->emailApplicationService->createApplication(
                 $validatedData,
                 $user
-            ); //
+            );
             Log::info("Email application draft ID: {$application->id} created successfully by User ID: {$user->id}.");
 
+            // Corrected route name
             return redirect()
-                ->route('resource-management.my-applications.email-applications.show', $application) // Route from web.php
+                ->route('email-applications.show', $application)
                 ->with('success', __('Draf permohonan e-mel berjaya dicipta. Anda boleh menyunting atau menghantarnya untuk kelulusan.'));
         } catch (Throwable $e) {
             Log::error("Error storing email application draft for User ID: {$user->id}.", [
@@ -67,55 +67,30 @@ class EmailApplicationController extends Controller
 
     /**
      * Display the specified email application.
-     * Authorization to 'view' is handled by authorizeResource.
      *
      * @param  \App\Models\EmailApplication  $emailApplication
      * @return \Illuminate\View\View
      */
     public function show(EmailApplication $emailApplication): View
     {
-        // $this->authorize('view', $emailApplication); // Covered by authorizeResource
+        // Authorization handled by authorizeResource for 'email_application' parameter
+        // $this->authorize('view', $emailApplication);
 
         Log::info("EmailApplicationController@show: User ID ".Auth::id()." viewing EmailApplication ID {$emailApplication->id}.");
 
         $emailApplication->loadMissing([
-            'user.department', 'user.grade', 'user.position', //
-            'supportingOfficerUser.grade', //
-            'approvals.officer:id,name',     //
-            'creator:id,name',               //
-            'updater:id,name',               //
+            'user.department', 'user.grade', 'user.position',
+            'supportingOfficerUser.grade', // Ensure this relation exists and is named correctly
+            'approvals.officer:id,name',
+            'creator:id,name', // If using blameable behavior
+            'updater:id,name', // If using blameable behavior
         ]);
 
-        return view('email-applications.show', compact('emailApplication')); // View path
-    }
-
-    /**
-     * Show the form for editing the specified email application.
-     * Authorization to 'update' (implicitly for edit form) is handled by authorizeResource.
-     *
-     * @param  \App\Models\EmailApplication  $emailApplication
-     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
-     */
-    public function edit(EmailApplication $emailApplication): View|RedirectResponse
-    {
-        // $this->authorize('update', $emailApplication); // Covered by authorizeResource
-
-        if (!$emailApplication->isDraft()) { //
-            Log::warning("User ID ".Auth::id()." attempt to edit non-draft EmailApplication ID {$emailApplication->id}.", [
-                'application_status' => $emailApplication->status,
-            ]);
-            return redirect()
-                ->route('resource-management.my-applications.email-applications.show', $emailApplication) //
-                ->with('error', __('Hanya draf permohonan yang boleh disunting.'));
-        }
-
-        Log::info("EmailApplicationController@edit: User ID ".Auth::id()." viewing edit form for EmailApplication ID {$emailApplication->id}.");
-        return view('email-applications.edit', compact('emailApplication')); // View path
+        return view('email-applications.show', compact('emailApplication'));
     }
 
     /**
      * Update the specified email application in storage.
-     * Validation and authorization (update ability) handled by UpdateEmailApplicationRequest.
      *
      * @param  \App\Http\Requests\UpdateEmailApplicationRequest  $request
      * @param  \App\Models\EmailApplication  $emailApplication
@@ -123,17 +98,20 @@ class EmailApplicationController extends Controller
      */
     public function update(UpdateEmailApplicationRequest $request, EmailApplication $emailApplication): RedirectResponse
     {
+        // Authorization handled by authorizeResource for 'email_application' parameter
+        // $this->authorize('update', $emailApplication);
+
         /** @var User $user */
         $user = $request->user();
         $validatedData = $request->validated();
 
-        // Business rule: only drafts can be updated. Policy/FormRequest should ideally also enforce this.
-        if (!$emailApplication->isDraft()) { //
+        if (!$emailApplication->isDraft()) {
             Log::warning("User ID {$user->id} attempt to update non-draft EmailApplication ID {$emailApplication->id}.", [
                 'application_status' => $emailApplication->status,
             ]);
+            // Corrected route name
             return redirect()
-                ->route('resource-management.my-applications.email-applications.show', $emailApplication) //
+                ->route('email-applications.show', $emailApplication)
                 ->with('error', __('Hanya draf permohonan yang boleh dikemaskini.'));
         }
 
@@ -144,11 +122,12 @@ class EmailApplicationController extends Controller
                 $emailApplication,
                 $validatedData,
                 $user
-            ); //
+            );
             Log::info("EmailApplication ID {$updatedApplication->id} updated successfully by User ID {$user->id}.");
 
+            // Corrected route name
             return redirect()
-                ->route('resource-management.my-applications.email-applications.show', $updatedApplication) //
+                ->route('email-applications.show', $updatedApplication)
                 ->with('success', __('Permohonan e-mel berjaya dikemaskini.'));
         } catch (Throwable $e) {
             Log::error("Error updating EmailApplication ID {$emailApplication->id} by User ID {$user->id}.", [
@@ -162,7 +141,6 @@ class EmailApplicationController extends Controller
 
     /**
      * Submit a draft application for approval.
-     * Method name matches the route definition in web.php.
      *
      * @param  \App\Models\EmailApplication  $emailApplication
      * @return \Illuminate\Http\RedirectResponse
@@ -172,7 +150,7 @@ class EmailApplicationController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
-        // Use 'submit' ability from EmailApplicationPolicy
+        // Manually authorize the 'submit' ability from EmailApplicationPolicy
         $this->authorize('submit', $emailApplication);
 
         Log::info("EmailApplicationController@submitApplication: User ID {$user->id} attempting to submit EmailApplication ID {$emailApplication->id}.");
@@ -181,11 +159,12 @@ class EmailApplicationController extends Controller
             $submittedApplication = $this->emailApplicationService->submitApplication(
                 $emailApplication,
                 $user
-            ); //
+            );
             Log::info("EmailApplication ID {$submittedApplication->id} submitted successfully by User ID {$user->id}. Status: {$submittedApplication->status}");
 
+            // Corrected route name
             return redirect()
-                ->route('resource-management.my-applications.email-applications.show', $submittedApplication) //
+                ->route('email-applications.show', $submittedApplication)
                 ->with('success', __('Permohonan e-mel berjaya dihantar untuk kelulusan.'));
         } catch (Throwable $e) {
             Log::error("Error submitting EmailApplication ID {$emailApplication->id} by User ID {$user->id}.", [
@@ -195,29 +174,32 @@ class EmailApplicationController extends Controller
             $errorMessage = ($e instanceof \RuntimeException || $e instanceof \InvalidArgumentException)
                 ? $e->getMessage()
                 : __('Gagal menghantar permohonan e-mel disebabkan ralat sistem.');
-            return redirect()->back()->with('error', $errorMessage);
+            // Corrected route name for redirect back
+            return redirect()->route('email-applications.show', $emailApplication)->with('error', $errorMessage);
         }
     }
 
     /**
      * Remove the specified email application (soft delete).
-     * Authorization to 'delete' is handled by authorizeResource.
      *
      * @param  \App\Models\EmailApplication  $emailApplication
      * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(EmailApplication $emailApplication): RedirectResponse
     {
+        // Authorization handled by authorizeResource for 'email_application' parameter
+        // $this->authorize('delete', $emailApplication);
+
         /** @var User $user */
         $user = Auth::user();
-        // $this->authorize('delete', $emailApplication); // Covered by authorizeResource
 
-        if (!$emailApplication->isDraft()) { //
+        if (!$emailApplication->isDraft()) {
             Log::warning("User ID {$user->id} attempt to delete non-draft EmailApplication ID {$emailApplication->id}.", [
                 'application_status' => $emailApplication->status,
             ]);
+            // Corrected route name
             return redirect()
-                ->route('resource-management.my-applications.email-applications.show', $emailApplication) //
+                ->route('email-applications.show', $emailApplication)
                 ->with('error', __('Hanya draf permohonan yang boleh dibuang.'));
         }
 
@@ -227,11 +209,12 @@ class EmailApplicationController extends Controller
             $deleted = $this->emailApplicationService->deleteApplication(
                 $emailApplication,
                 $user
-            ); //
+            );
 
             if ($deleted) {
                 Log::info("EmailApplication ID {$emailApplication->id} soft deleted successfully by User ID {$user->id}.");
-                return redirect()->route('resource-management.my-applications.email.index') // Redirect to Livewire index page
+                // Corrected route name - this should point to the Livewire index page for email applications
+                return redirect()->route('email-applications.index')
                     ->with('success', __('Permohonan e-mel berjaya dibuang.'));
             }
             Log::warning("Soft delete operation returned false for EmailApplication ID {$emailApplication->id} by User ID {$user->id}.");

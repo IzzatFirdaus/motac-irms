@@ -13,7 +13,9 @@ use Illuminate\Support\Str;
 
 /**
  * Loan Transaction Item Model.
+ * 
  * (PHPDoc from your provided file, confirmed and aligned with model)
+ *
  * @property int $id
  * @property int $loan_transaction_id
  * @property int $equipment_id Specific physical equipment item
@@ -38,6 +40,32 @@ use Illuminate\Support\Str;
  * @property-read \App\Models\User|null $deleter
  * @property-read string $statusTranslated Accessor: status_translated
  * @property-read string|null $conditionOnReturnTranslated Accessor: condition_on_return_translated
+ * @property-read string|null $condition_on_return_translated
+ * @property-read string $status_translated
+ * @method static \Database\Factories\LoanTransactionItemFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereAccessoriesChecklistIssue($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereAccessoriesChecklistReturn($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereConditionOnReturn($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereEquipmentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereItemNotes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereLoanApplicationItemId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereLoanTransactionId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereQuantityTransacted($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem withoutTrashed()
+ * @mixin \Eloquent
  */
 class LoanTransactionItem extends Model
 {

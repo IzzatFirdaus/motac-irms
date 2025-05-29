@@ -3,44 +3,61 @@
     @foreach ($submenuItems as $item)
       @php
         $canView = false;
+        // Role check: User's role is passed as $currentRole from the parent include
         if ($currentRole === 'Admin') {
             $canView = true;
         } elseif (isset($item->role)) {
             $roles = is_array($item->role) ? $item->role : [$item->role];
             $canView = in_array($currentRole, $roles);
         } elseif (isset($item->permissions) && Auth::check()) {
-            // $canView = Auth::user()->canAny((array) $item->permissions);
+            // Permission check (example, actual implementation might vary)
+            // $permissions = is_array($item->permissions) ? $item->permissions : [$item->permissions];
+            // $canView = Auth::user()->canAny($permissions);
         } else {
+            // If no specific role/permission is defined for the item, assume it's viewable
+            // (or apply a default deny policy if that's your system's behavior)
             $canView = true;
         }
 
         $subActiveClass = '';
-        $currentRouteName = Route::currentRouteName();
+        $currentRouteNameFromLaravel = Route::currentRouteName(); // Renamed to avoid conflict if $currentRouteName is passed in
         $isNestedSubmenuActive = false;
 
+        // Check if any child submenu item (any level deep) is active
         if (!empty($item->submenu)) {
-          foreach ($item->submenu as $sub) {
-              if (isset($sub->routeName) && $currentRouteName === $sub->routeName) {
-                  $isNestedSubmenuActive = true; break;
-              }
-              if (!empty($sub->submenu)) {
-                  foreach ($sub->submenu as $deep) {
-                      if (isset($deep->routeName) && $currentRouteName === $deep->routeName) {
-                          $isNestedSubmenuActive = true; break 2;
+          $checkNestedActive = function ($nestedItems, $currentRoute) use (&$checkNestedActive, &$isNestedSubmenuActive) {
+              foreach ($nestedItems as $nestedItem) {
+                  if (isset($nestedItem->routeName) && $currentRoute === $nestedItem->routeName) {
+                      $isNestedSubmenuActive = true;
+                      return true;
+                  }
+                  if (isset($nestedItem->routeNamePrefix) && str_starts_with($currentRoute, $nestedItem->routeNamePrefix)) {
+                      $isNestedSubmenuActive = true;
+                      return true;
+                  }
+                  if (!empty($nestedItem->submenu)) {
+                      if ($checkNestedActive($nestedItem->submenu, $currentRoute)) {
+                          $isNestedSubmenuActive = true; // Ensure parent is marked active
+                          return true;
                       }
                   }
               }
-          }
+              return false;
+          };
+          $checkNestedActive($item->submenu, $currentRouteNameFromLaravel);
         }
 
-        if (isset($item->routeName) && $currentRouteName === $item->routeName) {
+        // Determine active class for the current submenu item
+        if (isset($item->routeName) && $currentRouteNameFromLaravel === $item->routeName) {
             $subActiveClass = 'active' . (!empty($item->submenu) ? ' open' : '');
-        } elseif ($isNestedSubmenuActive) {
+        } elseif ($isNestedSubmenuActive) { // A child submenu item is active
             $subActiveClass = 'active open';
-        } elseif (isset($item->routeNamePrefix) && str_starts_with($currentRouteName, $item->routeNamePrefix)) {
+        } elseif (isset($item->routeNamePrefix) && str_starts_with($currentRouteNameFromLaravel, $item->routeNamePrefix)) {
             $subActiveClass = 'active' . (!empty($item->submenu) ? ' open' : '');
-        } elseif (isset($item->slug) && str_starts_with($currentRouteName, $item->slug)) {
-            $subActiveClass = 'active' . (!empty($item->submenu) ? ' open' : '');
+        } elseif (isset($item->slug) && str_starts_with($currentRouteNameFromLaravel, $item->slug) && !isset($item->routeName) && !isset($item->routeNamePrefix)) {
+            // Fallback to slug for active state if routeName/routeNamePrefix not set
+            if ($isNestedSubmenuActive) $subActiveClass = 'active open';
+            else $subActiveClass = 'active' . (!empty($item->submenu) ? ' open' : '');
         }
       @endphp
 
@@ -58,11 +75,12 @@
             @endisset
           </a>
 
+          {{-- Recursive call for deeper submenus --}}
           @if (!empty($item->submenu))
             @include('livewire.sections.menu.recursive-submenu', [
               'submenuItems' => $item->submenu,
-              'currentRole' => $currentRole,
-              'configData' => $configData
+              'currentRole' => $currentRole, // Pass the role down
+              'configData' => $configData    // Pass configData down
             ])
           @endif
         </li>

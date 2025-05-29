@@ -14,6 +14,7 @@ use Illuminate\Support\Str;
 
 /**
  * Loan Application Item Model.
+ * 
  * Represents a type of equipment and quantity requested in a loan application.
  *
  * @property int $id
@@ -36,6 +37,31 @@ use Illuminate\Support\Str;
  * @property-read \App\Models\User|null $updater
  * @property-read \App\Models\User|null $deleter
  * @property-read string $equipmentTypeLabel Accessor for equipment_type label
+ * @property string $status Status of this specific requested item
+ * @property-read string $equipment_type_label
+ * @property-read int|null $loan_transaction_items_count
+ * @method static \Database\Factories\LoanApplicationItemFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereEquipmentType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereLoanApplicationId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereNotes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereQuantityApproved($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereQuantityIssued($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereQuantityRequested($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem withoutTrashed()
+ * @mixin \Eloquent
  */
 class LoanApplicationItem extends Model
 {

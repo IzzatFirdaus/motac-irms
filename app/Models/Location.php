@@ -40,11 +40,25 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read int|null $equipment_count
  * // Removed: @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Device> $devices
  * // Removed: @property-read int|null $devices_count
- *
  * @method static Builder<static>|Location active()
  * @method static Builder<static>|Location byCity(string $city)
  * @method static Builder<static>|Location byCountry(string $country)
  * @method static LocationFactory factory($count = null, $state = [])
+ * @method static Builder<static>|Location newModelQuery()
+ * @method static Builder<static>|Location newQuery()
+ * @method static Builder<static>|Location onlyTrashed()
+ * @method static Builder<static>|Location query()
+ * @method static Builder<static>|Location whereCreatedAt($value)
+ * @method static Builder<static>|Location whereCreatedBy($value)
+ * @method static Builder<static>|Location whereDeletedAt($value)
+ * @method static Builder<static>|Location whereDeletedBy($value)
+ * @method static Builder<static>|Location whereDescription($value)
+ * @method static Builder<static>|Location whereId($value)
+ * @method static Builder<static>|Location whereName($value)
+ * @method static Builder<static>|Location whereUpdatedAt($value)
+ * @method static Builder<static>|Location whereUpdatedBy($value)
+ * @method static Builder<static>|Location withTrashed()
+ * @method static Builder<static>|Location withoutTrashed()
  * @mixin \Eloquent
  */
 class Location extends Model

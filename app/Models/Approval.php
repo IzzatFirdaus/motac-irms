@@ -14,7 +14,9 @@ use Illuminate\Support\Str;
 
 /**
  * Approval Model.
+ *
  * (PHPDoc from your provided file, confirmed alignment)
+ *
  * @property int $id
  * @property string $approvable_type Model class name (e.g., EmailApplication::class)
  * @property int $approvable_id ID of the model being approved
@@ -36,6 +38,30 @@ use Illuminate\Support\Str;
  * @property-read \App\Models\User|null $deleter
  * @property-read string $statusTranslated Accessor: status_translated
  * @property-read string|null $stageTranslated Accessor: stage_translated
+ * @property-read string|null $stage_translated
+ * @property-read string $status_translated
+ * @method static \Database\Factories\ApprovalFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereApprovableId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereApprovableType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereApprovalTimestamp($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereComments($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereOfficerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereStage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval withoutTrashed()
+ * @mixin \Eloquent
  */
 class Approval extends Model
 {
@@ -60,40 +86,40 @@ class Approval extends Model
 
 
     public static array $STATUSES_LABELS = [
-      self::STATUS_PENDING => 'Menunggu Keputusan',
-      self::STATUS_APPROVED => 'Diluluskan',
-      self::STATUS_REJECTED => 'Ditolak',
+        self::STATUS_PENDING => 'Menunggu Keputusan',
+        self::STATUS_APPROVED => 'Diluluskan',
+        self::STATUS_REJECTED => 'Ditolak',
     ];
 
 
     public static array $STAGES_LABELS = [
-      self::STAGE_EMAIL_SUPPORT_REVIEW => 'Sokongan Permohonan E-mel (Pegawai Penyokong)',
-      self::STAGE_EMAIL_ADMIN_REVIEW => 'Semakan Pentadbir E-mel (BPM/IT)',
-      self::STAGE_LOAN_SUPPORT_REVIEW => 'Sokongan Permohonan Pinjaman (Pegawai Penyokong)',
-      self::STAGE_LOAN_HOD_REVIEW => 'Kelulusan Ketua Jabatan (Pinjaman)',
-      self::STAGE_LOAN_BPM_REVIEW => 'Semakan & Kelulusan Akhir BPM (Pinjaman)',
-      self::STAGE_GENERAL_REVIEW => 'Peringkat Semakan Umum',
-      self::STAGE_SUPPORT_REVIEW => 'Peringkat Sokongan Umum', // Label for the new generic stage
+        self::STAGE_EMAIL_SUPPORT_REVIEW => 'Sokongan Permohonan E-mel (Pegawai Penyokong)',
+        self::STAGE_EMAIL_ADMIN_REVIEW => 'Semakan Pentadbir E-mel (BPM/IT)',
+        self::STAGE_LOAN_SUPPORT_REVIEW => 'Sokongan Permohonan Pinjaman (Pegawai Penyokong)',
+        self::STAGE_LOAN_HOD_REVIEW => 'Kelulusan Ketua Jabatan (Pinjaman)',
+        self::STAGE_LOAN_BPM_REVIEW => 'Semakan & Kelulusan Akhir BPM (Pinjaman)',
+        self::STAGE_GENERAL_REVIEW => 'Peringkat Semakan Umum',
+        self::STAGE_SUPPORT_REVIEW => 'Peringkat Sokongan Umum', // Label for the new generic stage
     ];
 
     protected $table = 'approvals';
 
     protected $fillable = [
-      'approvable_type',
-      'approvable_id',
-      'officer_id',
-      'stage',
-      'status',
-      'comments',
-      'approval_timestamp',
+        'approvable_type',
+        'approvable_id',
+        'officer_id',
+        'stage',
+        'status',
+        'comments',
+        'approval_timestamp',
     ];
 
     protected $casts = [
-      'approval_timestamp' => 'datetime',
+        'approval_timestamp' => 'datetime',
     ];
 
     protected $attributes = [
-      'status' => self::STATUS_PENDING,
+        'status' => self::STATUS_PENDING,
     ];
 
     // Static helpers
@@ -101,10 +127,26 @@ class Approval extends Model
     {
         return self::$STATUSES_LABELS;
     }
-    public static function getStages(): array
+
+    /**
+     * Get all possible status values as a simple array.
+     *
+     * @return array<string>
+     */
+    public static function getStatuses(): array  // <<< METHOD ADDED HERE
+    {
+        return [
+            self::STATUS_PENDING,
+            self::STATUS_APPROVED,
+            self::STATUS_REJECTED,
+        ];
+    }
+
+    public static function getStages(): array // This returns labels, consider renaming to getStageOptions if consistent
     {
         return self::$STAGES_LABELS;
     }
+
     public static function getStageKeys(): array
     {
         return array_keys(self::$STAGES_LABELS);
@@ -164,12 +206,12 @@ class Approval extends Model
     {
         if (!$this->relationLoaded('approvable')) {
             $this->load([
-              'approvable' => function ($morphTo) {
-                  $morphTo->morphWith([
-                    EmailApplication::class => ['user:id,name', 'user.department:id,name'],
-                    LoanApplication::class => ['user:id,name', 'user.department:id,name', 'applicationItems'],
-                  ]);
-              },
+                'approvable' => function ($morphTo) {
+                    $morphTo->morphWith([
+                        EmailApplication::class => ['user:id,name', 'user.department:id,name'],
+                        LoanApplication::class => ['user:id,name', 'user.department:id,name', 'applicationItems'],
+                    ]);
+                },
             ]);
         }
         if (!$this->relationLoaded('officer')) {
