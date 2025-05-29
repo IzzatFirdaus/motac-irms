@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {{--
     resources/views/components/sort-icon.blade.php
 
@@ -34,3 +35,16 @@
         <i class="bi bi-filter {{ $inactiveColor }} {{ $iconSize }} ms-1" title="{{ __('Belum disusun') }}"></i>
     @endif
 </span>
+=======
+@props(['field', 'sortField', 'sortDirection'])
+
+@if ($sortField === $field)
+    @if ($sortDirection === 'asc')
+        <i class="bi bi-sort-alpha-down ms-1"></i>
+    @else
+        <i class="bi bi-sort-alpha-up-alt ms-1"></i>
+    @endif
+@else
+    <i class="bi bi-filter text-muted ms-1"></i>
+@endif
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)

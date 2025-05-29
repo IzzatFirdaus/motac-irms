@@ -2,13 +2,13 @@
 
 namespace App\Livewire\Settings;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule as ValidationRule;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Spatie\Permission\Models\Permission;
-
-// use Spatie\Permission\Models\Role; // We will use the fully qualified name directly
+use Spatie\Permission\Models\Role;
 
 #[Layout('layouts.app')]
 class Roles extends Component
@@ -17,13 +17,14 @@ class Roles extends Component
 
     public bool $showModal = false;
     public bool $isEditMode = false;
-    public ?\Spatie\Permission\Models\Role $editingRole = null; // Type hint with FQCN
+    public ?Role $editingRole = null;
     public ?int $roleId = null;
     public string $name = '';
     public array $selectedPermissions = [];
 
     public bool $showDeleteConfirmationModal = false;
     public ?int $roleIdToDelete = null;
+    public string $roleNameToDelete = '';
 
     public $allPermissions = [];
 
@@ -31,48 +32,62 @@ class Roles extends Component
 
     protected $listeners = ['closeRoleModalEvent' => 'closeModal'];
 
+    protected array $coreRoles = ['Admin', 'BPM Staff', 'IT Admin']; // System Design standardized roles
+
     public function mount(): void
     {
-        // $this->authorize('viewAny', \Spatie\Permission\Models\Role::class);
-        $this->editingRole = new \Spatie\Permission\Models\Role(); // Use FQCN
-        $this->allPermissions = Permission::orderBy('name')->pluck('name', 'id')->all(); // Permission model seems fine
+        if (!Auth::user()->can('manage_roles')) {
+            abort(403, 'This action is unauthorized.');
+        }
+        $this->editingRole = new Role();
+        $this->allPermissions = Permission::orderBy('name')->pluck('name', 'id')->all();
     }
 
     public function create(): void
     {
-        // $this->authorize('create', \Spatie\Permission\Models\Role::class);
+        if (!Auth::user()->can('manage_roles')) {
+            abort(403, 'This action is unauthorized.');
+        }
         $this->resetInputFields();
         $this->isEditMode = false;
         $this->showModal = true;
     }
 
-    public function edit(\Spatie\Permission\Models\Role $role): void // Type hint with FQCN
+    public function edit(Role $role): void
     {
-        // $this->authorize('update', $role);
+        if (!Auth::user()->can('manage_roles')) {
+            abort(403, 'This action is unauthorized.');
+        }
         $this->resetInputFields();
         $this->editingRole = $role;
         $this->name = $role->name;
         $this->roleId = $role->id;
-        $this->selectedPermissions = $role->permissions->pluck('id')->toArray();
+        $this->selectedPermissions = $role->permissions->pluck('id')->map(fn ($id) => (string) $id)->toArray();
         $this->isEditMode = true;
         $this->showModal = true;
     }
 
     public function saveRole(): void
     {
+        if (!Auth::user()->can('manage_roles')) {
+            abort(403, 'This action is unauthorized.');
+        }
         $this->validate();
 
         $data = ['name' => $this->name, 'guard_name' => 'web'];
 
         if ($this->isEditMode && $this->editingRole && $this->editingRole->exists) {
-            // $this->authorize('update', $this->editingRole);
+            if (in_array($this->editingRole->getOriginal('name'), $this->coreRoles) && $this->name !== $this->editingRole->getOriginal('name')) {
+                session()->flash('error', __('Core role "%roleName" cannot be renamed.', ['roleName' => $this->editingRole->getOriginal('name')]));
+                $this->closeModal();
+                return;
+            }
+
             $this->editingRole->update($data);
             $this->editingRole->permissions()->sync($this->selectedPermissions);
             session()->flash('message', __('Peranan berjaya dikemaskini.'));
         } else {
-            // $this->authorize('create', \Spatie\Permission\Models\Role::class);
-            // Use FQCN for Role::create
-            $role = \Spatie\Permission\Models\Role::create($data);
+            $role = Role::create($data);
             $role->permissions()->sync($this->selectedPermissions);
             session()->flash('message', __('Peranan berjaya dicipta.'));
         }
@@ -88,24 +103,61 @@ class Roles extends Component
 
     public function confirmRoleDeletion(int $id): void
     {
-        // $role = \Spatie\Permission\Models\Role::find($id); // Use FQCN
-        // if ($role) {
-        //     $this->authorize('delete', $role);
-        // }
-        $this->roleIdToDelete = $id;
-        $this->showDeleteConfirmationModal = true;
+        if (!Auth::user()->can('manage_roles')) {
+            abort(403, 'This action is unauthorized.');
+        }
+        $role = Role::find($id);
+        if ($role) {
+            if (in_array($role->name, $this->coreRoles)) {
+                session()->flash('error', __('Core role "%roleName" cannot be deleted.', ['roleName' => $role->name]));
+                return;
+            }
+
+            $superAdminRoleName = config('permission.default_super_admin_role_name', 'Super Admin');
+            if ($role->name === $superAdminRoleName && config('permission.protect_super_admin_role', true)) {
+                 session()->flash('error', __('The default Super Admin role cannot be deleted.'));
+                 return;
+            }
+
+            $this->roleIdToDelete = $id;
+            $this->roleNameToDelete = $role->name;
+            $this->showDeleteConfirmationModal = true;
+        } else {
+            session()->flash('error', __('Peranan tidak ditemui.'));
+        }
     }
 
     public function deleteRole(): void
     {
+        if (!Auth::user()->can('manage_roles')) {
+            abort(403, 'This action is unauthorized.');
+        }
+
         if ($this->roleIdToDelete) {
-            // Use FQCN for Role::findOrFail
-            $role = \Spatie\Permission\Models\Role::findOrFail($this->roleIdToDelete);
-            // $this->authorize('delete', $role);
+            $role = Role::findOrFail($this->roleIdToDelete);
+
+            if (in_array($role->name, $this->coreRoles)) {
+                session()->flash('error', __('Core role "%roleName" cannot be deleted.', ['roleName' => $role->name]));
+                $this->showDeleteConfirmationModal = false;
+                $this->roleIdToDelete = null;
+                $this->roleNameToDelete = '';
+                return;
+            }
+
+            $superAdminRoleName = config('permission.default_super_admin_role_name', 'Super Admin');
+            if ($role->name === $superAdminRoleName && config('permission.protect_super_admin_role', true)) {
+                 session()->flash('error', __('The default Super Admin role cannot be deleted.'));
+                 $this->showDeleteConfirmationModal = false;
+                 $this->roleIdToDelete = null;
+                 $this->roleNameToDelete = '';
+                 return;
+            }
+
             if ($role->users()->count() > 0) {
                 session()->flash('error', __('Peranan tidak boleh dipadam kerana ia telah ditugaskan kepada pengguna.'));
                 $this->showDeleteConfirmationModal = false;
                 $this->roleIdToDelete = null;
+                $this->roleNameToDelete = '';
                 return;
             }
             $role->delete();
@@ -113,15 +165,25 @@ class Roles extends Component
         }
         $this->showDeleteConfirmationModal = false;
         $this->roleIdToDelete = null;
+        $this->roleNameToDelete = '';
     }
 
     public function render()
     {
-        // *** Critical Change: Use the fully qualified class name (FQCN) ***
-        $roles = \Spatie\Permission\Models\Role::withCount('permissions', 'users')->orderBy('name')->paginate(10);
+        // Fetch paginated roles without eager loading counts initially
+        $roles = Role::orderBy('name')->paginate(10);
 
-        return view('livewire.settings.roles', [
+        // Manually load counts for permissions and users for each role in the current page
+        // This approach avoids potential boot-time model resolution issues with withCount()
+        // but introduces N+1 queries for the counts on each page load.
+        $roles->each(function ($role) {
+            $role->permissions_count = $role->permissions()->count();
+            $role->users_count = $role->users()->count();
+        });
+
+        return view('livewire.settings.roles.index', [
           'roles' => $roles,
+          'allPermissionsForView' => $this->allPermissions,
         ]);
     }
 
@@ -134,8 +196,6 @@ class Roles extends Component
             'string',
             'min:3',
             'max:255',
-            // Ensure ValidationRule is correctly imported if this line causes issues,
-            // or use the FQCN for Rule: \Illuminate\Validation\Rule::unique...
             ValidationRule::unique('roles', 'name')->ignore($roleIdToIgnore),
           ],
           'selectedPermissions' => 'nullable|array',
@@ -148,7 +208,7 @@ class Roles extends Component
         $this->name = '';
         $this->roleId = null;
         $this->selectedPermissions = [];
-        $this->editingRole = new \Spatie\Permission\Models\Role(); // Use FQCN
+        $this->editingRole = new Role();
         $this->isEditMode = false;
         $this->resetErrorBag();
         $this->resetValidation();

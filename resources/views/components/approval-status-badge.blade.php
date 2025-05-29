@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {{--
     resources/views/components/approval-status-badge.blade.php
 
@@ -57,3 +58,16 @@
     - All status badges in the application must use this component for consistency.
     - Principles applied: Citizen-centric (clear feedback), Minimalist UI, Accessibility, Error Prevention, UI/UX Component.
 --}}
+=======
+{{-- resources/views/components/approval-status-badge.blade.php --}}
+@props(['status'])
+
+@php
+    $statusClass = \App\Helpers\Helpers::getStatusColorClass($status);
+    $statusText = ucfirst(str_replace('_', ' ', $status));
+@endphp
+
+<span {{ $attributes->merge(['class' => 'badge rounded-pill ' . $statusClass]) }}>
+    {{ $statusText }}
+</span>
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
