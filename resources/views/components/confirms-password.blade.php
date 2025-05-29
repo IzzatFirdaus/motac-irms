@@ -1,7 +1,7 @@
 @props(['title' => __('Confirm Password'), 'content' => __('For your security, please confirm your password to continue.'), 'button' => __('Confirm')])
 
 @php
-$confirmableId = md5($attributes->wire('then'));
+$confirmableId = md5($attributes->wire('then')->value()); // Ensure value() is called on the attribute
 @endphp
 
 <span {{ $attributes->wire('then') }} x-data x-ref="span"
@@ -11,6 +11,7 @@ $confirmableId = md5($attributes->wire('then'));
 </span>
 
 @once
+  {{-- Assuming x-dialog-modal, x-input, x-input-error, x-secondary-button, x-button are Bootstrap 5 styled --}}
   <x-dialog-modal wire:model.live="confirmingPassword">
     <x-slot name="title">
       {{ $title }}
@@ -21,11 +22,11 @@ $confirmableId = md5($attributes->wire('then'));
 
       <div class="mt-3" x-data="{}"
         x-on:confirming-password.window="setTimeout(() => $refs.confirmable_password.focus(), 250)">
-        <x-input type="password" class="{{ $errors->has('confirmable_password') ? 'is-invalid' : '' }}"
+        <x-input type="password" class="form-control {{ $errors->has('confirmable_password') ? 'is-invalid' : '' }}"
           placeholder="{{ __('Password') }}" x-ref="confirmable_password" wire:model="confirmablePassword"
           wire:keydown.enter="confirmPassword" />
 
-        <x-input-error for="confirmable_password" />
+        <x-input-error for="confirmable_password" class="mt-2" /> {{-- Added Bootstrap margin class --}}
       </div>
     </x-slot>
 

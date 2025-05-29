@@ -1,6 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.app') {{-- Main application layout --}}
 
-@section('title', 'Senarai Peralatan ICT')
+@section('title', __('Senarai Peralatan ICT'))
 
 @section('content')
 <div class="container-fluid">
@@ -8,11 +8,12 @@
         <h1 class="h3 mb-0 text-gray-800 dark:text-gray-100">{{ __('Senarai Peralatan ICT') }}</h1>
         <div>
             @can('create', App\Models\Equipment::class)
-                {{-- Link to the route that loads the Livewire EquipmentForm for creation --}}
+                {{-- This route should load the page that includes the EquipmentForm Livewire component for creation --}}
                 <a href="{{ route('resource-management.admin.equipment-admin.create') }}" class="btn btn-primary btn-sm">
                     <i class="ti ti-plus me-1"></i> {{ __('Tambah Peralatan Baru') }}
                 </a>
             @endcan
+            {{-- Add other actions like Import/Export if needed --}}
         </div>
     </div>
 
@@ -23,74 +24,73 @@
         <x-alert type="danger" :message="session('error')" class="mb-4"/>
     @endif
 
-    {{-- Livewire component for equipment listing and filtering is recommended here --}}
-    {{-- For now, assuming a standard Blade list is still in use for this specific path 'equipment.index' --}}
-    {{-- If AdminEquipmentIndexLW is the primary index, this Blade view might be vestigial or for a different role. --}}
+    {{-- OPTION 1: If this page IS the main equipment admin index, load the Livewire component here: --}}
+    {{-- @livewire('resource-management.admin.equipment.admin-equipment-index-lw') --}}
 
-    <x-card> {{-- Using the card component --}}
-        @if ($equipment->isEmpty())
-            <x-alert type="info" message="Tiada peralatan ICT ditemui dalam inventori." />
+    {{-- OPTION 2: If this is a traditional Blade view with data from controller (as the code suggests): --}}
+    <x-card>
+        @if (!isset($equipment) || $equipment->isEmpty())
+            <div class="p-4">
+                 <x-alert type="info" message="{{__('Tiada peralatan ICT ditemui dalam inventori.')}}" />
+            </div>
         @else
             <div class="table-responsive">
-                <table class="table table-hover table-striped table-sm"> {{-- Added table-sm for compactness --}}
+                <table class="table table-hover table-striped table-sm">
                     <thead class="table-light">
                         <tr>
-                            <th class="small">ID</th>
-                            <th class="small">Jenis Aset</th>
-                            <th class="small">Jenama & Model</th>
-                            <th class="small">Tag ID</th>
-                            <th class="small">No. Siri</th>
-                            <th class="small">Status Operasi</th>
-                            <th class="small">Status Keadaan</th>
-                            <th class="small">Lokasi</th>
-                            <th class="text-end small">Tindakan</th>
+                            <th class="small text-uppercase">#</th>
+                            <th class="small text-uppercase">{{__('Jenis Aset')}}</th>
+                            <th class="small text-uppercase">{{__('Jenama & Model')}}</th>
+                            <th class="small text-uppercase">{{__('Tag ID')}}</th>
+                            <th class="small text-uppercase">{{__('No. Siri')}}</th>
+                            <th class="small text-uppercase">{{__('Status Operasi')}}</th>
+                            <th class="small text-uppercase">{{__('Status Keadaan')}}</th>
+                            <th class="small text-uppercase">{{__('Lokasi Semasa')}}</th>
+                            <th class="text-end small text-uppercase">{{__('Tindakan')}}</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($equipment as $item)
                             <tr>
-                                <td class="small">{{ $item->id }}</td>
-                                <td class="small">{{ $item->asset_type_label }}</td>
-                                <td class="small">
-                                    <div class="fw-medium">{{ $item->brand ?? 'N/A' }}</div>
-                                    <div class="text-muted" style="font-size: 0.8em;">{{ $item->model ?? 'N/A' }}</div>
+                                <td class="small align-middle">{{ $loop->iteration + ($equipment->currentPage() - 1) * $equipment->perPage() }}</td>
+                                <td class="small align-middle">{{ $item->asset_type_label ?? __('N/A') }}</td>
+                                <td class="small align-middle">
+                                    <div class="fw-medium">{{ $item->brand ?? __('N/A') }}</div>
+                                    <div class="text-muted" style="font-size: 0.8em;">{{ $item->model ?? __('N/A') }}</div>
                                 </td>
-                                <td class="small">{{ $item->tag_id ?? 'N/A' }}</td>
-                                <td class="small">{{ $item->serial_number ?? 'N/A' }}</td>
-                                <td class="small">
+                                <td class="small align-middle">{{ $item->tag_id ?? __('N/A') }}</td>
+                                <td class="small align-middle">{{ $item->serial_number ?? __('N/A') }}</td>
+                                <td class="small align-middle">
                                     <span class="badge {{ App\Helpers\Helpers::getStatusColorClass($item->status, 'bootstrap_badge') }} px-2 py-1">
-                                        {{ $item->status_label }}
+                                        {{ $item->status_label ?? __(Str::title(str_replace('_',' ',$item->status))) }}
                                     </span>
                                 </td>
-                                <td class="small">
+                                <td class="small align-middle">
                                     <span class="badge {{ App\Helpers\Helpers::getStatusColorClass($item->condition_status, 'bootstrap_badge_condition') }} px-2 py-1">
-                                        {{ $item->condition_status_label }}
+                                        {{ $item->condition_status_label ?? __(Str::title(str_replace('_',' ',$item->condition_status))) }}
                                     </span>
                                 </td>
-                                <td class="small">{{ $item->current_location ?? 'N/A' }}</td>
-                                <td class="text-end">
-                                    @can('view', $item)
-                                        <a href="{{ route('equipment.show', $item) }}" class="btn btn-sm btn-outline-info border-0 p-1" title="Lihat">
+                                <td class="small align-middle">{{ $item->current_location ?? __('N/A') }}</td>
+                                <td class="text-end align-middle">
+                                    {{-- @can('view', $item) --}} {{-- Assuming general show route for equipment --}}
+                                        {{-- <a href="{{ route('equipment.show', $item->id) }}" class="btn btn-sm btn-icon btn-outline-info border-0 me-1" title="{{__('Lihat')}}">
                                             <i class="ti ti-eye"></i>
-                                        </a>
-                                    @endcan
+                                        </a> --}}
+                                    {{-- @endcan --}}
                                     @can('update', $item)
-                                        {{-- Link to the route that loads the Livewire EquipmentForm for editing --}}
-                                        <a href="{{ route('resource-management.admin.equipment-admin.edit', $item) }}" class="btn btn-sm btn-outline-primary border-0 p-1 ms-1" title="Edit">
+                                        {{-- This route should load the page that includes the EquipmentForm Livewire component for editing --}}
+                                        <a href="{{ route('resource-management.admin.equipment-admin.edit', $item->id) }}" class="btn btn-sm btn-icon btn-outline-primary border-0 me-1" title="{{__('Edit')}}">
                                             <i class="ti ti-pencil"></i>
                                         </a>
                                     @endcan
                                     @can('delete', $item)
-                                        {{-- Implement delete as a Livewire action or a modal confirmation for safety --}}
-                                        {{-- Example basic form:
-                                        <form action="{{ route('equipment.destroy', $item) }}" method="POST" class="d-inline" onsubmit="return confirm('Anda pasti ingin memadam peralatan ini?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger border-0 p-1 ms-1" title="Padam">
-                                                <i class="ti ti-trash"></i>
-                                            </button>
-                                        </form>
-                                        --}}
+                                        {{-- For deletion, it's best to use a Livewire action with confirmation --}}
+                                        {{-- Example: <button wire:click="confirmDelete({{ $item->id }})" class="btn btn-sm btn-icon btn-outline-danger border-0" title="{{__('Padam')}}"><i class="ti ti-trash"></i></button> --}}
+                                        <button onclick="confirm('Anda pasti ingin memadam peralatan ini: {{ $item->tag_id }}?') || event.stopImmediatePropagation()"
+                                                wire:click="deleteEquipment({{ $item->id }})" {{-- Assuming a deleteEquipment method in a parent Livewire component if this view is part of one --}}
+                                                class="btn btn-sm btn-icon btn-outline-danger border-0" title="{{__('Padam')}}">
+                                            <i class="ti ti-trash"></i>
+                                        </button>
                                     @endcan
                                 </td>
                             </tr>
@@ -100,11 +100,12 @@
             </div>
 
             @if ($equipment->hasPages())
-                <div class="card-footer bg-light border-top d-flex justify-content-center py-2">
+                <div class="card-footer bg-light border-top d-flex justify-content-center py-3">
                     {{ $equipment->links() }}
                 </div>
             @endif
         @endif
     </x-card>
+    {{-- End of OPTION 2 --}}
 </div>
 @endsection

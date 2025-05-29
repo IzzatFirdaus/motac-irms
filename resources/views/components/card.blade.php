@@ -1,12 +1,27 @@
-@props(['title' => null, 'titleClass' => 'text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 pb-3', 'bodyClass' => ''])
+@props([
+    'title' => null,
+    'headerClass' => '', // Custom classes for card-header
+    'titleTag' => 'h5',  // HTML tag for the title, e.g., h5, h3
+    'titleClass' => '', // Custom classes for card-title
+    'bodyClass' => '',   // Custom classes for card-body
+    'footer' => null     // Slot for card-footer content
+])
 
-<div {{ $attributes->merge(['class' => 'card border border-gray-300 dark:border-gray-700 rounded-lg p-6 mb-6 bg-white dark:bg-gray-800 shadow-md']) }}>
-    @if ($title)
-        <h3 class="{{ $titleClass }}">
-            {{ $title }}
-        </h3>
+<div {{ $attributes->merge(['class' => 'card shadow-sm mb-3']) }}> {{-- Standard Bootstrap card with shadow and margin --}}
+    @if ($title || $attributes->has('header'))
+        <div class="card-header {{ $headerClass }}">
+            @if ($title)
+                <{{ $titleTag }} class="card-title {{ $titleClass }}">{{ $title }}</{{ $titleTag }}>
+            @endif
+            {{ $attributes->get('header') ?? '' }} {{-- Allows passing additional header content --}}
+        </div>
     @endif
     <div class="card-body {{ $bodyClass }}">
         {{ $slot }}
     </div>
+    @if ($footer)
+        <div class="card-footer">
+            {{ $footer }}
+        </div>
+    @endif
 </div>

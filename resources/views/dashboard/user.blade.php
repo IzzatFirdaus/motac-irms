@@ -81,7 +81,8 @@
         <div class="col-12">
             <div class="card shadow-sm">
                 <div class="card-header py-3">
-                    <h5 class="card-title mb-0">{{ __('Ringkasan Aktiviti Terkini Anda') }}</h5>
+                    {{-- Changed to h6 for better hierarchy if the page title is h1/h3 --}}
+                    <h6 class="card-title mb-0 fw-bold">{{ __('Ringkasan Aktiviti Terkini Anda') }}</h6>
                 </div>
                 <div class="card-body">
                     {{--
@@ -101,7 +102,7 @@
 
 @push('page-style')
     <style>
-        .card-body .btn {
+        .card-body .btn.btn-sm { /* Targeting only btn-sm for this style for better specificity */
             min-width: 180px; /* Ensure buttons have a decent width */
         }
     </style>

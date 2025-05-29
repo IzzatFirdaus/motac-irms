@@ -50,6 +50,8 @@
 
                 {{-- General alerts partial, placed for high visibility --}}
                 {{-- System Design Reference: Section 6.3 (alert-general.blade.php) --}}
+                {{-- It's often better to place alerts within the $slot or handled by Livewire components directly
+                     to be closer to the action that triggered them. However, a global spot is also common. --}}
                 @include('_partials._alerts.alert-general')
 
                 @if ($isNavbar)

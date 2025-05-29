@@ -1,26 +1,31 @@
+{{--
+    NOTE: This is a Laravel Jetstream component styled with Tailwind CSS.
+    For the MOTAC system, this requires a UI refactor to Bootstrap 5 and
+    replacement of Jetstream x-components with MOTAC's Bootstrap components.
+    Adjustments below primarily make static text translatable.
+--}}
 <x-action-section>
   <x-slot name="title">
-    {{ __('Browser Sessions') }}
+    {{ __('Sesi Pelayar Imbas') }}
   </x-slot>
 
   <x-slot name="description">
-    {{ __('Manage and log out your active sessions on other browsers and devices.') }}
+    {{ __('Urus dan log keluar sesi aktif anda pada pelayar imbas dan peranti lain.') }}
   </x-slot>
 
   <x-slot name="content">
     <x-action-message on="loggedOut">
-      {{ __('Done.') }}
+      {{ __('Selesai.') }}
     </x-action-message>
 
     <p class="card-text">
-      {{ __('If necessary, you may log out of all of your other browser sessions across all of your devices. Some of your recent sessions are listed below; however, this list may not be exhaustive. If you feel your account has been compromised, you should also update your password.') }}
+      {{ __('Jika perlu, anda boleh log keluar daripada semua sesi pelayar imbas anda yang lain merentas semua peranti anda. Beberapa sesi terkini anda disenaraikan di bawah; walau bagaimanapun, senarai ini mungkin tidak lengkap. Jika anda merasakan akaun anda telah terjejas, anda juga patut mengemas kini kata laluan anda.') }}
     </p>
 
     @if (count($this->sessions) > 0)
       <div class="mt-3">
-        <!-- Other Browser Sessions -->
         @foreach ($this->sessions as $session)
-          <div class="d-flex mb-50">
+          <div class="d-flex align-items-center mb-3"> {{-- Bootstrap align-items-center and mb-3 --}}
             <div>
               @if ($session->agent->isDesktop())
                 <svg fill="none" width="32" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -40,10 +45,10 @@
               @endif
             </div>
 
-            <div class="ms-2">
+            <div class="ms-2"> {{-- Bootstrap ms-2 --}}
               <div>
-                {{ $session->agent->platform() ? $session->agent->platform() : 'Unknown' }} -
-                {{ $session->agent->browser() ? $session->agent->browser() : 'Unknown' }}
+                {{ $session->agent->platform() ? $session->agent->platform() : __('Tidak Diketahui') }} -
+                {{ $session->agent->browser() ? $session->agent->browser() : __('Tidak Diketahui') }}
               </div>
 
               <div>
@@ -51,9 +56,9 @@
                   {{ $session->ip_address }},
 
                   @if ($session->is_current_device)
-                    <span class="text-success fw-medium">{{ __('This device') }}</span>
+                    <span class="text-success fw-medium">{{ __('Peranti ini') }}</span>
                   @else
-                    {{ __('Last active') }} {{ $session->last_active }}
+                    {{ __('Aktif terakhir') }} {{ $session->last_active }}
                   @endif
                 </div>
               </div>
@@ -64,23 +69,23 @@
     @endif
 
     <div class="d-flex mt-3">
+      {{-- Assuming x-button is your MOTAC system's Bootstrap button component --}}
       <x-button wire:click="confirmLogout" wire:loading.attr="disabled">
-        {{ __('Log Out Other Browser Sessions') }}
+        {{ __('Log Keluar Sesi Pelayar Imbas Lain') }}
       </x-button>
     </div>
 
-    <!-- Log out Other Devices Confirmation Modal -->
     <x-dialog-modal wire:model.live="confirmingLogout">
       <x-slot name="title">
-        {{ __('Log Out Other Browser Sessions') }}
+        {{ __('Log Keluar Sesi Pelayar Imbas Lain') }}
       </x-slot>
 
       <x-slot name="content">
-        {{ __('Please enter your password to confirm you would like to log out of your other browser sessions across all of your devices.') }}
+        {{ __('Sila masukkan kata laluan anda untuk mengesahkan bahawa anda ingin log keluar daripada sesi pelayar imbas anda yang lain merentas semua peranti anda.') }}
 
         <div class="mt-3" x-data="{}"
           x-on:confirming-logout-other-browser-sessions.window="setTimeout(() => $refs.password.focus(), 250)">
-          <x-input type="password" placeholder="{{ __('Password') }}" x-ref="password"
+          <x-input type="password" placeholder="{{ __('Kata Laluan') }}" x-ref="password"
             class="{{ $errors->has('password') ? 'is-invalid' : '' }}" wire:model="password"
             wire:keydown.enter="logoutOtherBrowserSessions" />
 
@@ -90,15 +95,15 @@
 
       <x-slot name="footer">
         <x-secondary-button wire:click="$toggle('confirmingLogout')" wire:loading.attr="disabled">
-          {{ __('Cancel') }}
+          {{ __('Batal') }}
         </x-secondary-button>
 
+        {{-- This should use x-danger-button if available and styled for Bootstrap --}}
         <button class="btn btn-danger ms-1 text-uppercase" wire:click="logoutOtherBrowserSessions"
           wire:loading.attr="disabled">
-          {{ __('Log out Other Browser Sessions') }}
+          {{ __('Log Keluar Sesi Pelayar Imbas Lain') }}
         </button>
       </x-slot>
     </x-dialog-modal>
   </x-slot>
-
 </x-action-section>

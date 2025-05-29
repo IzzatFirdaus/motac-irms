@@ -10,6 +10,7 @@
     },
     {
       "menuHeader": "menu.section.resource_management",
+      "name": "menu.section.resource_management",
       "role": ["Admin", "BPM Staff", "IT Admin", "Employee", "Approver"]
     },
     {
@@ -22,13 +23,15 @@
           "url": "/email-applications",
           "name": "menu.my_applications.email",
           "slug": "email-applications.index",
-          "routeName": "email-applications.index"
+          "routeName": "email-applications.index",
+          "role": ["Employee"]
         },
         {
           "url": "/loan-applications",
           "name": "menu.my_applications.loan",
           "slug": "loan-applications.index",
-          "routeName": "loan-applications.index"
+          "routeName": "loan-applications.index",
+          "role": ["Employee"]
         }
       ]
     },

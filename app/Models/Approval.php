@@ -47,14 +47,17 @@ class Approval extends Model
     public const STATUS_REJECTED = 'rejected';
 
     // Stage Constants (Refined for clarity and distinction)
-    public const STAGE_EMAIL_SUPPORT_REVIEW = 'email_support_review'; // Simplified from previous for broader use
-    public const STAGE_EMAIL_ADMIN_REVIEW = 'email_admin_review'; // New, for admin/BPM to review before provisioning
+    public const STAGE_EMAIL_SUPPORT_REVIEW = 'email_support_review';
+    public const STAGE_EMAIL_ADMIN_REVIEW = 'email_admin_review';
 
     public const STAGE_LOAN_SUPPORT_REVIEW = 'loan_support_review';
     public const STAGE_LOAN_HOD_REVIEW = 'loan_hod_review';
-    public const STAGE_LOAN_BPM_REVIEW = 'loan_bpm_review'; // BPM checks/approves before issuance
-    // Consider a generic stage if applicable across multiple types
+    public const STAGE_LOAN_BPM_REVIEW = 'loan_bpm_review';
     public const STAGE_GENERAL_REVIEW = 'general_review';
+
+    // Added generic stage for Blade usage
+    public const STAGE_SUPPORT_REVIEW = 'support_review';
+
 
     public static array $STATUSES_LABELS = [
       self::STATUS_PENDING => 'Menunggu Keputusan',
@@ -70,6 +73,7 @@ class Approval extends Model
       self::STAGE_LOAN_HOD_REVIEW => 'Kelulusan Ketua Jabatan (Pinjaman)',
       self::STAGE_LOAN_BPM_REVIEW => 'Semakan & Kelulusan Akhir BPM (Pinjaman)',
       self::STAGE_GENERAL_REVIEW => 'Peringkat Semakan Umum',
+      self::STAGE_SUPPORT_REVIEW => 'Peringkat Sokongan Umum', // Label for the new generic stage
     ];
 
     protected $table = 'approvals';
@@ -82,13 +86,10 @@ class Approval extends Model
       'status',
       'comments',
       'approval_timestamp',
-      // created_by, updated_by handled by BlameableObserver
     ];
 
     protected $casts = [
       'approval_timestamp' => 'datetime',
-      // 'status' => ApprovalStatusEnum::class, // If using PHP 8.1 Enums
-      // 'stage' => ApprovalStageEnum::class, // If using PHP 8.1 Enums
     ];
 
     protected $attributes = [
@@ -103,15 +104,12 @@ class Approval extends Model
     public static function getStages(): array
     {
         return self::$STAGES_LABELS;
-    } // Renamed from getStageOptions for clarity
+    }
     public static function getStageKeys(): array
     {
         return array_keys(self::$STAGES_LABELS);
     }
 
-    /**
-     * Get display name for a given stage key.
-     */
     public static function getStageDisplayName(?string $stageKey): string
     {
         if ($stageKey === null) {
@@ -162,34 +160,24 @@ class Approval extends Model
         return $this->stage ? (self::$STAGES_LABELS[$this->stage] ?? Str::title(str_replace('_', ' ', (string) $this->stage))) : null;
     }
 
-    /**
-     * Load default relationships typically needed for viewing an approval task.
-     * @return $this
-     */
     public function loadDefaultRelationships(): self
     {
-        // Check if relation is already loaded before attempting to load to avoid N+1 issues if called multiple times.
         if (!$this->relationLoaded('approvable')) {
             $this->load([
               'approvable' => function ($morphTo) {
                   $morphTo->morphWith([
-                    EmailApplication::class => ['user:id,name', 'user.department:id,name'], // Load applicant and their department
-                    LoanApplication::class => ['user:id,name', 'user.department:id,name', 'applicationItems'], // Load applicant, dept, and loan items
-                    // Add other approvable types and their relevant nested relations here if needed
+                    EmailApplication::class => ['user:id,name', 'user.department:id,name'],
+                    LoanApplication::class => ['user:id,name', 'user.department:id,name', 'applicationItems'],
                   ]);
               },
             ]);
         }
         if (!$this->relationLoaded('officer')) {
-            $this->load('officer:id,name'); // The officer assigned to this approval task
+            $this->load('officer:id,name');
         }
-        // Optionally load creator/updater if these are Blameable relations and useful in the view
         if (method_exists($this, 'creator') && !$this->relationLoaded('creator')) {
             $this->load('creator:id,name');
         }
-        // if (method_exists($this, 'updater') && !$this->relationLoaded('updater')) {
-        //    $this->load('updater:id,name');
-        // }
         return $this;
     }
 }

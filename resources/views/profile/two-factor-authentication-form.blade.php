@@ -1,36 +1,42 @@
+{{--
+    NOTE: This is a Laravel Jetstream component styled with Tailwind CSS.
+    For the MOTAC system, this requires a UI refactor to Bootstrap 5 and
+    replacement of Jetstream x-components with MOTAC's Bootstrap components.
+    Adjustments below primarily make static text translatable.
+--}}
 <x-action-section>
   <x-slot name="title">
-    {{ __('Two Factor Authentication') }}
+    {{ __('Pengesahan Dua Faktor') }}
   </x-slot>
 
   <x-slot name="description">
-    {{ __('Add additional security to your account using two factor authentication.') }}
+    {{ __('Tambah keselamatan tambahan pada akaun anda menggunakan pengesahan dua faktor.') }}
   </x-slot>
 
   <x-slot name="content">
-    <h6>
+    <h6 class="fw-semibold"> {{-- Bootstrap font weight --}}
       @if ($this->enabled)
         @if ($showingConfirmation)
-          {{ __('You are enabling two factor authentication.') }}
+          {{ __('Anda sedang mengaktifkan pengesahan dua faktor.') }}
         @else
-          {{ __('You have enabled two factor authentication.') }}
+          {{ __('Anda telah mengaktifkan pengesahan dua faktor.') }}
         @endif
       @else
-        {{ __('You have not enabled two factor authentication.') }}
+        {{ __('Anda belum mengaktifkan pengesahan dua faktor.') }}
       @endif
     </h6>
 
     <p class="card-text">
-      {{ __('When two factor authentication is enabled, you will be prompted for a secure, random token during authentication. You may retrieve this token from your phone\'s Google Authenticator application.') }}
+      {{ __('Apabila pengesahan dua faktor diaktifkan, anda akan diminta untuk token rawak yang selamat semasa pengesahan. Anda boleh mendapatkan token ini dari aplikasi Google Authenticator telefon anda.') }}
     </p>
 
     @if ($this->enabled)
       @if ($showingQrCode)
         <p class="card-text mt-2">
           @if ($showingConfirmation)
-            {{ __('Scan the following QR code using your phone\'s authenticator application and confirm it with the generated OTP code.') }}
+            {{ __('Imbas kod QR berikut menggunakan aplikasi pengesah telefon anda dan sahkan dengan kod OTP yang dijana.') }}
           @else
-            {{ __('Two factor authentication is now enabled. Scan the following QR code using your phone\'s authenticator application.') }}
+            {{ __('Pengesahan dua faktor kini diaktifkan. Imbas kod QR berikut menggunakan aplikasi pengesah telefon anda.') }}
           @endif
         </p>
 
@@ -40,65 +46,67 @@
 
         <div class="mt-4">
             <p class="fw-medium">
-              {{ __('Setup Key') }}: {{ decrypt($this->user->two_factor_secret) }}
+              {{ __('Kunci Persediaan') }}: {{ decrypt($this->user->two_factor_secret) }}
             </p>
         </div>
 
         @if ($showingConfirmation)
           <div class="mt-2">
-            <x-label for="code" value="{{ __('Code') }}" />
-            <x-input id="code" class="d-block mt-3 w-100" type="text" inputmode="numeric" name="code" autofocus autocomplete="one-time-code"
+            <x-label for="code" value="{{ __('Kod') }}" />
+            <x-input id="code" class="d-block mt-1 w-100" type="text" inputmode="numeric" name="code" autofocus autocomplete="one-time-code" {{-- Bootstrap utilities --}}
                 wire:model="code"
                 wire:keydown.enter="confirmTwoFactorAuthentication" />
-            <x-input-error for="code" class="mt-3" />
+            <x-input-error for="code" class="mt-1" /> {{-- Bootstrap margin top --}}
           </div>
         @endif
       @endif
 
       @if ($showingRecoveryCodes)
         <p class="card-text mt-2">
-          {{ __('Store these recovery codes in a secure password manager. They can be used to recover access to your account if your two factor authentication device is lost.') }}
+          {{ __('Simpan kod pemulihan ini dalam pengurus kata laluan yang selamat. Ia boleh digunakan untuk memulihkan akses ke akaun anda jika peranti pengesahan dua faktor anda hilang.') }}
         </p>
 
-        <div class="bg-light rounded p-2">
+        <div class="bg-light rounded p-3 mt-2"> {{-- Bootstrap bg-light, rounded, p-3 --}}
           @foreach (json_decode(decrypt($this->user->two_factor_recovery_codes), true) as $code)
-            <div>{{ $code }}</div>
+            <div class="font-monospace">{{ $code }}</div> {{-- Bootstrap font-monospace --}}
           @endforeach
         </div>
       @endif
     @endif
 
-    <div class="mt-2">
+    <div class="mt-3"> {{-- Bootstrap margin top --}}
       @if (!$this->enabled)
         <x-confirms-password wire:then="enableTwoFactorAuthentication">
+          {{-- Assuming x-button is your MOTAC system's Bootstrap button --}}
           <x-button type="button" wire:loading.attr="disabled">
-            {{ __('Enable') }}
+            {{ __('Aktifkan') }}
           </x-button>
         </x-confirms-password>
       @else
         @if ($showingRecoveryCodes)
           <x-confirms-password wire:then="regenerateRecoveryCodes">
-            <x-secondary-button class="me-1">
-              {{ __('Regenerate Recovery Codes') }}
+            <x-secondary-button class="me-1"> {{-- Bootstrap margin end --}}
+              {{ __('Jana Semula Kod Pemulihan') }}
             </x-secondary-button>
           </x-confirms-password>
         @elseif ($showingConfirmation)
           <x-confirms-password wire:then="confirmTwoFactorAuthentication">
             <x-button type="button" wire:loading.attr="disabled">
-              {{ __('Confirm') }}
+              {{ __('Sahkan') }}
             </x-button>
           </x-confirms-password>
         @else
           <x-confirms-password wire:then="showRecoveryCodes">
             <x-secondary-button class="me-1">
-              {{ __('Show Recovery Codes') }}
+              {{ __('Tunjukkan Kod Pemulihan') }}
             </x-secondary-button>
           </x-confirms-password>
         @endif
 
         <x-confirms-password wire:then="disableTwoFactorAuthentication">
-          <x-danger-button wire:loading.attr="disabled">
-            {{ __('Disable') }}
+          {{-- Assuming x-danger-button is your MOTAC system's Bootstrap danger button --}}
+          <x-danger-button wire:loading.attr="disabled" class="ms-1"> {{-- Bootstrap margin start --}}
+            {{ __('Nyahaktifkan') }}
           </x-danger-button>
         </x-confirms-password>
       @endif

@@ -41,7 +41,7 @@
 @endphp
 
 @if ($alertMessage)
-  <div class="alert alert-{{ \App\Helpers\Helpers::getBootstrapAlertClass($alertLevel) }} alert-dismissible d-flex align-items-center fade show" role="alert">
+  <div class="alert alert-{{ \App\Helpers\Helpers::getAlertClass($alertLevel) }} alert-dismissible d-flex align-items-center fade show" role="alert">
     <span class="alert-icon alert-icon-lg me-2">
       <i class="ti {{ $alertIcon }} ti-sm"></i>
     </span>

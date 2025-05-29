@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Sections\Navbar;
 
-use App\Models\Import; // For progress bar feature [cite: 1]
-use App\Models\User;   // For type hinting Auth::user() [cite: 1]
-use Illuminate\Support\Collection; // For unreadNotifications type [cite: 1]
+use App\Models\Import;
+use App\Models\User;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use Livewire\Attributes\On;
@@ -13,77 +13,102 @@ use Livewire\Component;
 class Navbar extends Component
 {
     public Collection $unreadNotifications;
-    public bool $activeProgressBar = false; // Related to import progress feature [cite: 1]
+    public bool $activeProgressBar = false;
     public int $percentage = 0;
+
+    public string $defaultProfilePhotoUrl = '/assets/img/avatars/1.png';
+    public string $profileShowRoute = '/profile/show';
+    public string $adminSettingsRoute = '/admin/settings';
+    public bool $canViewAdminSettings = false;
+
+    public string $containerNav = 'container-fluid';
+    public string $navbarDetachedClass = '';
+    public bool $navbarFull = true;
+    public bool $navbarHideToggle = false;
+    public ?string $activeTheme = null;
+
+    public array $availableLocales = [];
+    protected string $localeConfigKey = 'locales'; // Optional config path for locales
 
     public function mount(): void
     {
-        $this->unreadNotifications = collect(); // Initialize [cite: 1]
-        $this->refreshNotifications(); // [cite: 1]
-        $this->updateProgressBar(); // Call to check progress bar state on mount [cite: 1]
+        $this->unreadNotifications = collect();
+        $this->refreshNotifications();
+        $this->updateProgressBar();
+
+        $this->canViewAdminSettings = Auth::check() && Auth::user()->hasRole('Admin');
+
+        // Load locales from config or default
+        $this->availableLocales = config($this->localeConfigKey, [
+            'en' => ['name' => 'English', 'flag_icon' => 'fi-gb', 'display' => true],
+            'my' => ['name' => 'Bahasa Melayu', 'flag_icon' => 'fi-my', 'display' => true],
+            'ar' => ['name' => 'العربية', 'flag_icon' => 'fi-sa', 'display' => true],
+        ]);
     }
 
     public function render(): View
     {
-        return view('livewire.sections.navbar.navbar'); // [cite: 1]
+        return view('livewire.sections.navbar.navbar');
     }
 
-    #[On('refreshNotifications')] // [cite: 1]
+    #[On('refreshNotifications')]
     public function refreshNotifications(): void
     {
-        /** @var \App\Models\User|null $user */
-        $user = Auth::user(); // [cite: 1]
-        if ($user) {
-            // Limit the number of notifications fetched for performance
-            $this->unreadNotifications = $user->unreadNotifications()->take(10)->get(); // [cite: 1]
-        } else {
-            $this->unreadNotifications = collect(); // [cite: 1]
-        }
+        $user = Auth::user();
+        $this->unreadNotifications = $user
+            ? $user->unreadNotifications()->take(10)->get()
+            : collect();
     }
 
-    // Import progress bar logic.
-    // Ensure 'activeProgressBar' event is dispatched from your import process if this is used.
-    #[On('activeProgressBar')] // Listens for the event to update [cite: 1]
+    #[On('activeProgressBar')]
     public function updateProgressBar(): void
     {
-        $import_data = Import::latest()->first(); // [cite: 1]
-        if ($import_data && $import_data->status == 'processing') { // [cite: 1]
-            $this->activeProgressBar = true; // [cite: 1]
-            if ($import_data->total > 0) { // [cite: 1]
-                $this->percentage = (int) round($import_data->current / ($import_data->total / 100)); // [cite: 1]
-            } else {
-                $this->percentage = 0; // Avoid division by zero [cite: 1]
-            }
+        $import = Import::latest()->first();
+
+        if ($import && $import->status === 'processing') {
+            $this->activeProgressBar = true;
+            $this->percentage = $import->total > 0
+                ? (int) round($import->current / ($import->total / 100))
+                : 0;
         } else {
-            if ($this->activeProgressBar && $import_data && $import_data->status == 'completed') { // [cite: 1]
-                // Example: Dispatch a toastr notification. Ensure you have a system to handle this.
-                // $this->dispatch('toastr', ['type' => 'success', 'message' => __('Imported Successfully!')]);
+            if ($this->activeProgressBar && $import && $import->status === 'completed') {
+                // Example:
+                // $this->dispatch('toastr', ['type' => 'success', 'message' => __('Import completed')]);
             }
-            $this->percentage = ($import_data && $import_data->status == 'completed') ? 100 : 0; // Show 100% if completed, else 0 [cite: 1]
-            $this->activeProgressBar = false; // Reset [cite: 1]
+            $this->percentage = $import && $import->status === 'completed' ? 100 : 0;
+            $this->activeProgressBar = false;
         }
     }
 
     public function markNotificationAsRead(string $notificationId): void
     {
-        /** @var \App\Models\User|null $user */
-        $user = Auth::user(); // [cite: 1]
+        $user = Auth::user();
         if ($user) {
-            $notification = $user->unreadNotifications()->where('id', $notificationId)->first(); // [cite: 1]
+            $notification = $user->unreadNotifications()->where('id', $notificationId)->first();
             if ($notification) {
-                $notification->markAsRead(); // [cite: 1]
-                $this->dispatch('refreshNotifications')->self(); // Refresh after marking as read [cite: 1]
+                $notification->markAsRead();
+                $this->dispatch('refreshNotifications')->self();
             }
         }
     }
 
     public function markAllNotificationsAsRead(): void
     {
-        /** @var \App\Models\User|null $user */
-        $user = Auth::user(); // [cite: 1]
+        $user = Auth::user();
         if ($user) {
-            $user->unreadNotifications->markAsRead(); // [cite: 1]
-            $this->dispatch('refreshNotifications')->self(); // Refresh after marking all as read [cite: 1]
+            $user->unreadNotifications->markAsRead();
+            $this->dispatch('refreshNotifications')->self();
         }
+    }
+
+    public function handleNotificationClick(string $notificationId, string $link = '#'): void
+    {
+        $this->markNotificationAsRead($notificationId);
+        redirect()->to($link);
+    }
+
+    public function getLocaleFlagIcon(string $locale): string
+    {
+        return $this->availableLocales[$locale]['flag_icon'] ?? 'fi-gl';
     }
 }

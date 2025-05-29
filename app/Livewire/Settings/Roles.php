@@ -7,6 +7,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Spatie\Permission\Models\Permission;
+
 // use Spatie\Permission\Models\Role; // We will use the fully qualified name directly
 
 #[Layout('layouts.app')]

@@ -5,26 +5,22 @@
   <footer class="content-footer footer bg-footer-theme">
     @php
         // $configData is globally available via commonMaster.blade.php
-        // $containerNav should default to 'container-fluid' for internal MOTAC system
-        $containerClass = $containerNav ?? $configData['containerNav'] ?? 'container-fluid';
+        // This ensures container class consistency with the main layout.
+        $containerClass = $configData['containerNav'] ?? $containerNav ?? 'container-fluid';
     @endphp
     <div class="{{ $containerClass }}">
       <div class="footer-container d-flex align-items-center justify-content-center py-2 flex-md-row flex-column">
         <div class="text-center">
           {{-- Design Language: Formal & Respectful Tone, Prominent MOTAC Branding (textual) --}}
-          © <script>document.write(new Date().getFullYear())</script>
-          {{ __('Copyright Bahagian Pengurusan Maklumat, MOTAC.') }}
-          {{-- Using the key from my.json for copyright --}}
-          {{-- This can be replaced by a more specific copyright string directly if preferred:
-               e.g., __('Hak Cipta Terpelihara © :year Bahagian Pengurusan Maklumat, Kementerian Pelancongan, Seni dan Budaya Malaysia.', ['year' => date('Y')])
-          --}}
+          {{ __('Hak Cipta Terpelihara') }} © <script>document.write(new Date().getFullYear())</script>
+          <a href="{{ config('variables.creatorUrl', 'https://motac.gov.my') }}" target="_blank" class="footer-link fw-medium">{{ __(config('variables.creatorName', 'Bahagian Pengurusan Maklumat, MOTAC')) }}.</a>
+          {{-- This provides flexibility via config/variables.php or defaults to MOTAC. --}}
         </div>
-        {{-- Optional: Add other links here if necessary for internal systems, e.g., support contact or policy links --}}
+        {{-- Optional: Add other links here if necessary for internal systems --}}
         {{--
-        <div class="ms-md-auto">
-          <a href="{{ url('/hubungi-kami') }}" class="footer-link me-4">{{ __('Hubungi Kami') }}</a>
-          <a href="{{ url('/dasar-privasi') }}" class="footer-link">{{ __('Dasar Privasi') }}</a>
-        </div>
+        <div class="ms-md-auto"> {{-- Only show if there are links --}}
+            {{-- Example: <a href="{{ url('/bantuan') }}" class="footer-link me-4">{{ __('Bantuan Sistem') }}</a> --}}
+        {{-- </div>
         --}}
       </div>
     </div>

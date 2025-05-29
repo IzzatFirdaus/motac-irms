@@ -1,15 +1,19 @@
 {{-- resources/views/livewire/resource-management/approval/dashboard.blade.php --}}
 <div>
     @php
-        $configData = \App\Helpers\Helpers::appClasses();
+        // $configData is globally available if layouts.commonMaster calls this helper.
+        // If not, ensure it's properly initialized or remove if not used directly in this file.
+        // $configData = \App\Helpers\Helpers::appClasses();
     @endphp
 
-    @section('title', __('Papan Pemuka Kelulusan'))
+    {{-- Title is typically set using #[Title('...')] in the Livewire component class for v3 --}}
+    {{-- @section('title', __('Papan Pemuka Kelulusan')) --}}
 
-    @include('layouts._partials._alerts.alert-general')
+    @include('_partials._alerts.alert-general') {{-- Corrected path from previous review --}}
 
     <div class="d-flex justify-content-between align-items-center mb-4 pt-3">
         <h4 class="fw-bold mb-0">{{ __('Senarai Tugasan Kelulusan') }}</h4>
+        {{-- Optional: Add a count of pending tasks or other summary info here --}}
     </div>
 
     <div class="card mb-4">
@@ -19,6 +23,7 @@
                     <label for="filterTypeApproval" class="form-label">{{ __('Tapis Mengikut Jenis') }}</label>
                     <select wire:model.live="filterType" id="filterTypeApproval" class="form-select form-select-sm">
                         <option value="">{{ __('Semua Jenis') }}</option>
+                        {{-- Ensure these class paths are correct and accessible --}}
                         <option value="{{ addslashes(App\Models\EmailApplication::class) }}">{{ __('Permohonan E-mel/ID') }}</option>
                         <option value="{{ addslashes(App\Models\LoanApplication::class) }}">{{ __('Permohonan Pinjaman ICT') }}</option>
                     </select>
@@ -53,50 +58,50 @@
 
     <div wire:loading.remove>
         @if ($this->pendingApprovalTasks->isEmpty())
-            <div class="alert alert-info d-flex align-items-center" role="alert">
-                <span class="alert-icon me-2"><i class="ti ti-info-circle ti-md"></i></span>
-                <div>{{ __('Tiada tugasan kelulusan yang sepadan dengan tapisan semasa.') }}</div>
-            </div>
+            <x-alert type="info" class="d-flex align-items-center">
+                 <span class="alert-icon me-2"><i class="ti ti-info-circle ti-md"></i></span>
+                {{ __('Tiada tugasan kelulusan yang sepadan dengan tapisan semasa.') }}
+            </x-alert>
         @else
             <div class="card">
                 <div class="table-responsive text-nowrap">
                     <table class="table table-hover">
                         <thead class="table-light">
                             <tr>
-                                <th>{{ __('ID Tugasan') }}</th>
-                                <th>{{ __('Jenis & ID Permohonan') }}</th>
-                                <th>{{ __('Pemohon') }}</th>
-                                <th>{{ __('Peringkat Kelulusan') }}</th>
-                                <th>{{ __('Status Tugasan') }}</th>
-                                <th>{{ __('Tarikh Diterima') }}</th>
-                                <th class="text-center">{{ __('Tindakan') }}</th>
+                                <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('ID Tugasan') }}</th>
+                                <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Jenis & ID Permohonan') }}</th>
+                                <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Pemohon') }}</th>
+                                <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Peringkat Kelulusan') }}</th>
+                                <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Status Tugasan') }}</th>
+                                <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Tarikh Diterima') }}</th>
+                                <th class="text-center small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Tindakan') }}</th>
                             </tr>
                         </thead>
                         <tbody class="table-border-bottom-0">
                             @foreach ($this->pendingApprovalTasks as $approvalTask)
                                 @php $approvable = $approvalTask->approvable; @endphp
                                 <tr wire:key="approval-task-{{ $approvalTask->id }}">
-                                    <td><strong>#{{ $approvalTask->id }}</strong></td>
-                                    <td>
+                                    <td class="px-3 py-2 small"><strong>#{{ $approvalTask->id }}</strong></td>
+                                    <td class="px-3 py-2 small">
                                         @if ($approvable instanceof \App\Models\EmailApplication) <i class="ti ti-mail text-info me-1"></i>{{ __('E-mel/ID') }}
                                         @elseif ($approvable instanceof \App\Models\LoanApplication) <i class="ti ti-device-laptop text-primary me-1"></i>{{ __('Pinjaman ICT') }}
                                         @else <i class="ti ti-file-invoice text-secondary me-1"></i>{{ __('Tidak Diketahui') }}
                                         @endif
                                         @if ($approvable) - #{{ $approvable->id }} @endif
                                     </td>
-                                    <td>{{ optional(optional($approvable)->user)->name ?? (optional($approvable)->applicant_name ?? __('N/A')) }}</td>
-                                    <td>{{ __(App\Models\Approval::getStageDisplayName($approvalTask->stage)) }}</td>
-                                    <td><span class="badge {{ \App\Helpers\Helpers::getBootstrapStatusColorClass('approval_'.$approvalTask->status) }}">{{ __(Str::title(str_replace('_', ' ', $approvalTask->status))) }}</span></td>
-                                    <td>{{ $approvalTask->created_at->translatedFormat(config('app.date_format_my_short', 'd M Y')) }}</td>
-                                    <td class="text-center">
+                                    <td class="px-3 py-2 small">{{ optional(optional($approvable)->user)->name ?? (optional($approvable)->applicant_name ?? __('N/A')) }}</td>
+                                    <td class="px-3 py-2 small">{{ __(App\Models\Approval::getStageDisplayName($approvalTask->stage)) }}</td>
+                                    <td class="px-3 py-2 small"><span class="badge {{ \App\Helpers\Helpers::getBootstrapStatusColorClass('approval_'.$approvalTask->status) }}">{{ __(Str::title(str_replace('_', ' ', $approvalTask->status))) }}</span></td>
+                                    <td class="px-3 py-2 small">{{ $approvalTask->created_at->translatedFormat(config('app.date_format_my_short', 'd M Y')) }}</td>
+                                    <td class="text-center px-3 py-2">
                                         @if ($approvalTask->status === \App\Models\Approval::STATUS_PENDING)
-                                            @can('update', $approvalTask)
+                                            @can('update', $approvalTask) {{-- Policy check on the Approval model instance --}}
                                                 <button type="button" wire:click="openApprovalModal({{ $approvalTask->id }})"
                                                         class="btn btn-sm btn-primary">
                                                     <i class="ti ti-edit ti-xs me-1"></i>{{ __('Semak & Bertindak') }}
                                                 </button>
                                             @else
-                                                <span class="text-muted small"><em>{{ __('Tiada tindakan') }}</em></span>
+                                                <span class="text-muted small"><em>{{ __('Tiada kebenaran bertindak') }}</em></span>
                                             @endcan
                                         @else
                                              <a href="{{ $this->getViewApplicationRoute($approvalTask) }}" class="btn btn-sm btn-outline-secondary">
@@ -110,7 +115,7 @@
                     </table>
                 </div>
                 @if ($this->pendingApprovalTasks->hasPages())
-                    <div class="card-footer d-flex justify-content-center">
+                    <div class="card-footer bg-light border-top d-flex justify-content-center py-2">
                         {{ $this->pendingApprovalTasks->links() }}
                     </div>
                 @endif
@@ -118,6 +123,7 @@
         @endif
     </div>
 
+    {{-- Approval Action Modal --}}
     @if ($showApprovalModal && $this->currentApprovalDetails)
         <div class="modal fade @if($showApprovalModal) show @endif" id="approvalActionBootstrapModal" tabindex="-1"
              style="display: @if($showApprovalModal) block; background-color: rgba(0,0,0,0.5); @else none; @endif"
@@ -128,31 +134,34 @@
                         <div class="modal-header">
                             <h5 class="modal-title" id="approvalActionModalLabel">
                                 {{ __('Semak Tugasan Kelulusan') }} #{{ $this->currentApprovalDetails->id }}
-                                <small class="d-block text-muted">{{ __(App\Models\Approval::getStageDisplayName($this->currentApprovalDetails->stage)) }}</small>
+                                <small class="d-block text-muted fw-normal">{{ __(App\Models\Approval::getStageDisplayName($this->currentApprovalDetails->stage)) }}</small>
                             </h5>
                             <button type="button" class="btn-close" wire:click="closeApprovalModal" aria-label="{{__('Tutup')}}"></button>
                         </div>
                         <div class="modal-body">
                             @php $item = $this->currentApprovable; @endphp
                             @if ($item)
-                                <div class="mb-3 p-3 border rounded bg-light-subtle">
+                                <div class="mb-3 p-3 border rounded bg-light-subtle"> {{-- Using Bootstrap's bg-light-subtle --}}
                                     <h6 class="mb-2 fw-semibold">{{ __('Butiran Permohonan') }}</h6>
                                     <dl class="row mb-0">
                                         <dt class="col-sm-4">{{ __('Jenis Permohonan') }}</dt>
                                         <dd class="col-sm-8">
-                                            @if ($item instanceof \App\Models\EmailApplication) {{ __('Permohonan E-mel/ID') }}
-                                            @elseif ($item instanceof \App\Models\LoanApplication) {{ __('Permohonan Pinjaman ICT') }}
+                                            @if ($item instanceof \App\Models\EmailApplication) <i class="ti ti-mail text-info me-1"></i>{{ __('Permohonan E-mel/ID') }}
+                                            @elseif ($item instanceof \App\Models\LoanApplication) <i class="ti ti-device-laptop text-primary me-1"></i>{{ __('Permohonan Pinjaman ICT') }}
                                             @endif
                                             (#{{ $item->id }})
                                         </dd>
                                         <dt class="col-sm-4">{{ __('Pemohon') }}</dt>
                                         <dd class="col-sm-8">{{ optional($item->user)->name ?? (optional($item)->applicant_name ?? __('N/A')) }}</dd>
+
                                         @if ($item instanceof \App\Models\EmailApplication)
                                             <dt class="col-sm-4">{{ __('E-mel Dicadang') }}</dt>
                                             <dd class="col-sm-8">{{ $item->proposed_email ?? __('N/A') }}</dd>
+                                            <dt class="col-sm-4">{{ __('Tujuan/Catatan') }}</dt>
+                                            <dd class="col-sm-8">{{ $item->application_reason_notes ?? __('N/A') }}</dd>
                                         @elseif ($item instanceof \App\Models\LoanApplication)
                                             <dt class="col-sm-4">{{ __('Tujuan Pinjaman') }}</dt>
-                                            <dd class="col-sm-8">{{ Str::limit($item->purpose, 150) ?? __('N/A') }}</dd>
+                                            <dd class="col-sm-8" style="white-space: pre-wrap;">{{ $item->purpose ?? __('N/A') }}</dd>
                                             <dt class="col-sm-4">{{ __('Lokasi Penggunaan') }}</dt>
                                             <dd class="col-sm-8">{{ $item->location ?? __('N/A') }}</dd>
                                             <dt class="col-sm-4">{{ __('Tempoh Pinjaman') }}</dt>
@@ -165,7 +174,9 @@
                                                 <dd class="col-sm-12">
                                                     <ul class="list-unstyled ps-3">
                                                         @foreach ($item->applicationItems as $loanItem)
-                                                            <li>- {{ $loanItem->equipment_type }} ({{ __('Kuantiti') }}: {{ $loanItem->quantity_requested }})</li>
+                                                            <li>- {{ $loanItem->equipment_type ? (\App\Models\Equipment::ASSET_TYPES_LABELS[$loanItem->equipment_type] ?? Str::title(str_replace('_', ' ', $loanItem->equipment_type))) : 'N/A' }}
+                                                                ({{ __('Kuantiti') }}: {{ $loanItem->quantity_requested }})
+                                                            </li>
                                                         @endforeach
                                                     </ul>
                                                 </dd>
@@ -184,7 +195,7 @@
                             <hr>
                             <div class="mb-3">
                                 <label for="approvalDecisionModal" class="form-label fw-semibold">{{ __('Keputusan Anda') }} <span class="text-danger">*</span></label>
-                                <select wire:model.lazy="approvalDecision" id="approvalDecisionModal" class="form-select @error('approvalDecision') is-invalid @enderror">
+                                <select wire:model.live="approvalDecision" id="approvalDecisionModal" class="form-select @error('approvalDecision') is-invalid @enderror"> {{-- Used .live for approvalDecision for reactive required on comments --}}
                                     <option value="">-- {{ __('Pilih Keputusan') }} --</option>
                                     <option value="{{ \App\Models\Approval::STATUS_APPROVED }}">{{ __('Luluskan') }}</option>
                                     <option value="{{ \App\Models\Approval::STATUS_REJECTED }}">{{ __('Tolak') }}</option>
@@ -192,8 +203,11 @@
                                 @error('approvalDecision') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div class="mb-0">
-                                <label for="approvalCommentsModal" class="form-label fw-semibold">{{ __('Ulasan') }} @if ($approvalDecision === \App\Models\Approval::STATUS_REJECTED) <span class="text-danger">*</span>@endif</label>
-                                <textarea wire:model.lazy="approvalComments" id="approvalCommentsModal" rows="3" class="form-control @error('approvalComments') is-invalid @enderror" placeholder="{{ __('Sila berikan ulasan anda...') }}"></textarea>
+                                <label for="approvalCommentsModal" class="form-label fw-semibold">
+                                    {{ __('Ulasan') }}
+                                    @if ($approvalDecision === \App\Models\Approval::STATUS_REJECTED) <span class="text-danger">* {{ __('(Wajib jika ditolak)') }}</span>@endif
+                                </label>
+                                <textarea wire:model.defer="approvalComments" id="approvalCommentsModal" rows="3" class="form-control @error('approvalComments') is-invalid @enderror" placeholder="{{ __('Sila berikan ulasan anda...') }}"></textarea>
                                 @error('approvalComments') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div wire:loading wire:target="recordDecision" class="text-muted small mt-2">
@@ -211,19 +225,29 @@
                 </div>
             </div>
         </div>
+        {{-- Ensure Bootstrap JS is loaded for modal functionality if not handled by Livewire globally --}}
         <script>
-            document.addEventListener('livewire:initialized', () => { // Changed from livewire:load
+            document.addEventListener('livewire:initialized', () => {
                 const approvalModalElement = document.getElementById('approvalActionBootstrapModal');
-                let approvalModalInstance = null;
+                let approvalModalInstance = null; // Initialize as null
+
                 if (approvalModalElement) {
-                     approvalModalInstance = new bootstrap.Modal(approvalModalElement);
+                    // Ensure Bootstrap Modal is initialized only once or get existing instance
+                     approvalModalInstance = bootstrap.Modal.getInstance(approvalModalElement);
+                     if (!approvalModalInstance) {
+                        approvalModalInstance = new bootstrap.Modal(approvalModalElement, { backdrop: 'static', keyboard: false });
+                     }
                 }
 
                 @this.on('showApprovalModalJs', () => {
-                    if(approvalModalInstance) approvalModalInstance.show();
+                    if(approvalModalInstance) {
+                        approvalModalInstance.show();
+                    }
                 });
                 @this.on('hideApprovalModalJs', () => {
-                    if(approvalModalInstance) approvalModalInstance.hide();
+                    if(approvalModalInstance) {
+                        approvalModalInstance.hide();
+                    }
                 });
             });
         </script>

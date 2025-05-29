@@ -13,7 +13,6 @@ use App\Models\LoanTransactionItem;
 use App\Models\User;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 
 final class Helpers
@@ -116,11 +115,19 @@ final class Helpers
     }
   }
 
-  public static function getBootstrapStatusColorClass(string $status): string
+  /**
+   * Get Bootstrap status color class.
+   *
+   * @param string $status The status string.
+   * @param string|null $context An optional context (e.g., 'bootstrap_badge', 'bootstrap_badge_condition') - currently not used in logic but fixes signature mismatch.
+   * @return string The Bootstrap class string.
+   */
+  public static function getStatusColorClass(string $status, ?string $context = null): string // Added ?string $context = null
   {
+    // The $context parameter is now defined but not used in the logic.
+    // If you need different classes based on $context, you'll need to modify the match expression or add more logic here.
     $normalizedStatus = strtolower(str_replace([' ', '-'], '_', $status));
 
-    // This match statement is console-safe
     return match ($normalizedStatus) {
       User::STATUS_ACTIVE, 'active' => 'text-bg-success',
       User::STATUS_INACTIVE, 'inactive' => 'text-bg-secondary',
@@ -173,7 +180,7 @@ final class Helpers
     };
   }
 
-  public static function getBootstrapAlertClass(string $statusType): string
+  public static function getAlertClass(string $statusType): string
   {
     // This is console-safe
     return match (strtolower($statusType)) {
@@ -183,5 +190,9 @@ final class Helpers
       'error', 'danger', 'failed' => 'danger',
       default => 'secondary',
     };
+  }
+  public static function formatDate($date)
+  {
+    return $date?->translatedFormat(config('app.date_format_my_short', 'd M Y')) ?? '-';
   }
 }

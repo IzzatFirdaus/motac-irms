@@ -1,11 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
 use Database\Factories\PositionFactory;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,20 +10,19 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * Position Model.
+ * Position Model (Jawatan).
  *
  * @property int $id
- * @property string $name
- * @property int|null $grade_id FK to grades table
- * @property string|null $description (Added for completeness)
- * @property bool $is_active (Added for completeness)
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
+ * @property string $name (e.g., "Pegawai Teknologi Maklumat", "Pembantu Tadbir")
+ * @property string|null $code (Optional position code)
+ * @property string|null $description
+ * @property int|null $created_by (FK to users.id, typically handled by BlameableObserver)
+ * @property int|null $updated_by (FK to users.id, typically handled by BlameableObserver)
+ * @property int|null $deleted_by (FK to users.id, typically handled by BlameableObserver)
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \App\Models\Grade|null $grade
+ *
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
  * @property-read \App\Models\User|null $creator
  * @property-read \App\Models\User|null $updater
@@ -39,57 +35,84 @@ class Position extends Model
 
     protected $table = 'positions';
 
+    /**
+     * The attributes that are mass assignable.
+     * 'created_by', 'updated_by', 'deleted_by' are often handled by observers (e.g., BlameableObserver)
+     * and might not need to be in fillable if set automatically.
+     */
     protected $fillable = [
-        'name', 'grade_id', 'description', 'is_active',
-        // created_by, updated_by handled by BlameableObserver
+      'name',
+      'code',
+      'description',
+      // 'created_by', // Uncomment if you need to set these manually at times
+      // 'updated_by',
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
     protected $casts = [
-        'is_active' => 'boolean',
+      'created_at' => 'datetime',
+      'updated_at' => 'datetime',
+      'deleted_at' => 'datetime',
     ];
 
-    protected $attributes = [
-       'is_active' => true,
-    ];
-
-    // BlameableObserver handles created_by, updated_by, deleted_by. Boot method removed.
+    /**
+     * Get options for dropdowns, typically value => label.
+     * Example: Position::getOptions()->pluck('name', 'id');
+     */
+    public static function getPositionOptions(): array
+    {
+        // You might want to order these, e.g., by name
+        return static::query()->pluck('name', 'id')->all();
+    }
 
     protected static function newFactory(): PositionFactory
     {
+
         return PositionFactory::new();
     }
 
     // Relationships
-    public function grade(): BelongsTo
-    {
-        return $this->belongsTo(Grade::class, 'grade_id');
-    }
 
-    public function users(): HasMany // Users holding this position
+    /**
+     * Get the users who hold this position.
+     */
+    public function users(): HasMany
     {
         return $this->hasMany(User::class, 'position_id');
     }
 
+    /**
+     * Get the user who created this record.
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    /**
+     * Get the user who last updated this record.
+     */
     public function updater(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
 
+    /**
+     * Get the user who soft deleted this record.
+     */
     public function deleter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by');
     }
 
-    // Scopes
-    public function scopeActive(Builder $query): Builder
-    {
-        return $query->where('is_active', true);
-    }
-
-    // Removed old Employee and Timeline relationships
+    // Add other relationships or model logic as needed.
+    // For example, if positions are categorized or have specific permissions:
+    // public function category(): BelongsTo
+    // {
+    //    return $this->belongsTo(PositionCategory::class, 'position_category_id');
+    // }
 }

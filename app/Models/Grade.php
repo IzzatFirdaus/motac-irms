@@ -9,25 +9,24 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * Grade Model.
+ * Grade Model (Gred Perkhidmatan).
  *
  * @property int $id
- * @property string $name Example: "41", "N19", "JUSA C"
- * @property int|null $level Numeric representation for comparison (e.g., 41, 19, 54)
- * @property int|null $min_approval_grade_id FK to grades table itself (for approval hierarchy)
- * @property bool $is_approver_grade Can this grade generally act as an approver
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
+ * @property string $name (e.g., "F41", "N19", "JUSA C")
+ * @property string|null $description
+ * @property int|null $grade_level (Numeric level for sorting/comparison, if applicable)
+ * @property string|null $service_scheme (e.g., "Skim Perkhidmatan Teknologi Maklumat")
+ * @property int|null $created_by (FK to users.id, typically handled by BlameableObserver)
+ * @property int|null $updated_by (FK to users.id, typically handled by BlameableObserver)
+ * @property int|null $deleted_by (FK to users.id, typically handled by BlameableObserver)
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ *
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Position> $positions
- * @property-read \App\Models\Grade|null $minApprovalGrade
- * @property-read \App\Models\User|null $creatorInfo
- * @property-read \App\Models\User|null $updaterInfo
- * @property-read \App\Models\User|null $deleterInfo
+ * @property-read \App\Models\User|null $creator
+ * @property-read \App\Models\User|null $updater
+ * @property-read \App\Models\User|null $deleter
  */
 class Grade extends Model
 {
@@ -36,54 +35,74 @@ class Grade extends Model
 
     protected $table = 'grades';
 
+    /**
+     * The attributes that are mass assignable.
+     * 'created_by', 'updated_by', 'deleted_by' are often handled by observers.
+     */
     protected $fillable = [
         'name',
-        'level',
-        'min_approval_grade_id',
-        'is_approver_grade',
-        // created_by, updated_by handled by BlameableObserver
+        'description',
+        'grade_level',
+        'service_scheme',
+        // 'created_by',
+        // 'updated_by',
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
     protected $casts = [
-        'level' => 'integer',
-        'is_approver_grade' => 'boolean',
+        'grade_level' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
     ];
 
-    protected $attributes = [
-        'is_approver_grade' => false,
-    ];
+    /**
+     * Get options for dropdowns.
+     */
+    public static function getGradeOptions(): array
+    {
+        // Example: you might want to order these by level or name
+        // return static::query()->orderBy('grade_level')->pluck('name', 'id')->all();
+        return static::query()->pluck('name', 'id')->all();
+    }
 
     // Relationships
+
+    /**
+     * Get the users who have this grade.
+     */
     public function users(): HasMany
     {
-        return $this->hasMany(User::class);
+        return $this->hasMany(User::class, 'grade_id');
     }
 
-    public function positions(): HasMany
-    {
-        return $this->hasMany(Position::class);
-    }
-
-    public function minApprovalGrade(): BelongsTo // The grade that is the minimum required to approve actions related to this grade
-    {
-        return $this->belongsTo(Grade::class, 'min_approval_grade_id');
-    }
-
-    public function creatorInfo(): BelongsTo
+    /**
+     * Get the user who created this record.
+     */
+    public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function updaterInfo(): BelongsTo
+    /**
+     * Get the user who last updated this record.
+     */
+    public function updater(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
 
-    public function deleterInfo(): BelongsTo
+    /**
+     * Get the user who soft deleted this record.
+     */
+    public function deleter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by');
     }
+
+    // Add other relationships or model logic as needed.
 }

@@ -7,11 +7,10 @@
     {{-- $containerClass is passed from the Footer.php Livewire component, defaulting to container-fluid --}}
     <div class="{{ $containerClass ?? 'container-fluid' }}">
       <div class="footer-container d-flex align-items-center justify-content-center py-2 flex-md-row flex-column">
-        <div class="text-center">
-          © <script>document.write(new Date().getFullYear())</script>
-          {{-- Using the translatable key from my.json --}}
-          {{ __('Copyright MOTAC') }}
-          {{-- Example specific text:
+        <div class="text-center small"> {{-- Added 'small' for text size --}}
+          {{ __('Hak Cipta Terpelihara') }} &copy; <script>document.write(new Date().getFullYear())</script>
+          <a href="{{ url('/') }}" class="footer-link fw-semibold">{{ config('app.name', 'MOTAC') }}</a>.
+          {{-- A more specific copyright:
           {{ __('Hak Cipta Terpelihara © :year Bahagian Pengurusan Maklumat, Kementerian Pelancongan, Seni dan Budaya Malaysia.', ['year' => date('Y')]) }}
           --}}
         </div>

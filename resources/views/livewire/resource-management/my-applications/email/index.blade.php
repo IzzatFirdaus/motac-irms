@@ -13,8 +13,9 @@
     </div>
 
     {{-- Alerts --}}
-    {{-- Ensure this include points to your Bootstrap-styled alert component --}}
-    @include('layouts.sections.components.alert-general-bootstrap')
+    {{-- Assuming alert-general.blade.php is at resources/views/_partials/_alerts/alert-general.blade.php --}}
+    @include('_partials._alerts.alert-general') {{--  UPDATED PATH --}}
+
 
     {{-- Filters and Search --}}
     <div class="card shadow-sm mb-4">
@@ -28,8 +29,8 @@
                 <div class="col-md-6">
                     <label for="filterStatus" class="form-label">{{ __('Tapis mengikut Status') }}</label>
                     <select wire:model.live="filterStatus" id="filterStatus" class="form-select form-select-sm">
-                        @foreach ($this->statusOptions as $key => $label)
-                            <option value="{{ $key }}">{{ $label }}</option>
+                        @foreach ($statusOptions as $key => $label) {{-- Changed from $this->statusOptions --}}
+                            <option value="{{ $key }}">{{ __($label) }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -66,41 +67,40 @@
                             </div>
                         </td>
                     </tr>
-                    @forelse ($this->applications as $application)
+                    @forelse ($applications as $application) {{-- Changed from $this->applications --}}
                         <tr wire:key="email-app-{{ $application->id }}">
                             <td class="px-3 py-2 align-middle small text-dark fw-medium">#{{ $application->id }}</td>
                             <td class="px-3 py-2 align-middle small text-muted">
                                 {{ $application->proposed_email ?: ($application->group_email ?: __('N/A')) }}</td>
                             <td class="px-3 py-2 align-middle small text-muted"
                                 style="max-width: 300px; white-space: normal;">
-                                {{ Str::limit($application->purpose ?? $application->application_reason_notes, 70) }}
+                                {{ Str::limit($application->application_reason_notes ?? $application->purpose, 70) }}
                             </td>
                             <td class="px-3 py-2 align-middle small text-muted">
                                 {{ $application->created_at->translatedFormat('d M Y, h:i A') }}</td>
                             <td class="px-3 py-2 align-middle small">
                                 <span
-                                    class="badge rounded-pill {{ Helpers::getBootstrapStatusColorClass($application->status) }}">
-                                    {{ $application->status_translated }}
+                                    class="badge rounded-pill {{ App\Helpers\Helpers::getStatusColorClass($application->status) }}">
+                                    {{ __($application->status_translated) }}
                                 </span>
                             </td>
                             <td class="px-3 py-2 align-middle text-end">
-                                <a href="{{ route('resource-management.my-applications.email-applications.show', $application->id) }}"
+                                <a href="{{ route('email-applications.show', $application->id) }}"
                                     class="btn btn-sm btn-outline-primary border-0 p-1"
                                     title="{{ __('Lihat Detail') }}">
                                     <i class="ti ti-eye fs-6"></i>
                                 </a>
                                 @if ($application->status === \App\Models\EmailApplication::STATUS_DRAFT)
                                     @can('update', $application)
-                                        {{-- Assuming edit route is a Livewire component or a standard controller action --}}
-                                        <a href="{{ route('resource-management.application-forms.email.edit', $application->id) }}"
-                                            {{-- Example edit route --}} class="btn btn-sm btn-outline-secondary border-0 p-1 ms-1"
+                                        <a href="{{ route('email-applications.edit', $application->id) }}"
+                                            class="btn btn-sm btn-outline-secondary border-0 p-1 ms-1"
                                             title="{{ __('Kemaskini Draf') }}">
                                             <i class="ti ti-pencil fs-6"></i>
                                         </a>
                                     @endcan
                                     @can('delete', $application)
                                         <button
-                                            wire:click="$dispatch('open-delete-modal', { id: {{ $application->id }}, modelClass: 'App\\Models\\EmailApplication', itemDescription: 'Permohonan Emel/ID #{{ $application->id }}' })"
+                                            wire:click="$dispatch('open-delete-modal', { id: {{ $application->id }}, modelClass: 'App\\Models\\EmailApplication', itemDescription: '{{ __("Permohonan Emel/ID #") . $application->id }}' })"
                                             type="button" class="btn btn-sm btn-outline-danger border-0 p-1 ms-1"
                                             title="{{ __('Padam Draf') }}">
                                             <i class="ti ti-trash fs-6"></i>
@@ -125,22 +125,11 @@
     </div>
 
     {{-- Pagination --}}
-    @if ($this->applications->hasPages())
+    @if ($applications->hasPages()) {{-- Changed from $this->applications --}}
         <div class="mt-4 d-flex justify-content-center">
-            {{ $this->applications->links() }} {{-- Ensure Bootstrap pagination views are used --}}
+            {{ $applications->links() }} {{-- Changed from $this->applications --}}
         </div>
     @endif
 
-    {{-- Placeholder for a global delete confirmation modal. Ensure it's Bootstrap-styled. --}}
-    {{--
-    <livewire:components.confirmation-modal
-        event-to-open="open-delete-modal"
-        event-on-confirm="delete-item" {{-- Define this method in your Livewire PHP --}}
-    modal-title="{{ __('Sahkan Pemadaman') }}"
-    modal-description="{{ __('Adakah anda pasti ingin memadam item ini? Tindakan ini tidak boleh diundur.') }}"
-    confirm-button-text="{{ __('Ya, Padam') }}"
-    confirm-button-class="btn-danger"
-    wire-key="global-delete-confirmation-modal"
-    />
-    --}}
+    {{-- Modal placeholder --}}
 </div>

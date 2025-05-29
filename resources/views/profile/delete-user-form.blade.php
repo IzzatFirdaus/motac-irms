@@ -1,36 +1,41 @@
+{{--
+    NOTE: This is a Laravel Jetstream component styled with Tailwind CSS.
+    For the MOTAC system, this requires a UI refactor to Bootstrap 5 and
+    replacement of Jetstream x-components with MOTAC's Bootstrap components.
+    Adjustments below primarily make static text translatable.
+--}}
 <x-action-section>
   <x-slot name="title">
-    {{ __('Delete Account') }}
+    {{ __('Hapus Akaun') }}
   </x-slot>
 
   <x-slot name="description">
-    {{ __('Permanently delete your account.') }}
+    {{ __('Hapuskan akaun anda secara kekal.') }}
   </x-slot>
 
   <x-slot name="content">
     <div>
-      {{ __('Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.') }}
+      {{ __('Setelah akaun anda dihapuskan, semua sumber dan data akan dihapuskan secara kekal. Sebelum menghapuskan akaun anda, sila muat turun sebarang data atau maklumat yang ingin anda simpan.') }}
     </div>
 
     <div class="mt-3">
       <x-danger-button wire:click="confirmUserDeletion" wire:loading.attr="disabled">
-        {{ __('Delete Account') }}
+        {{ __('Hapus Akaun') }}
       </x-danger-button>
     </div>
 
-    <!-- Delete User Confirmation Modal -->
     <x-dialog-modal wire:model.live="confirmingUserDeletion">
       <x-slot name="title">
-        {{ __('Delete Account') }}
+        {{ __('Hapus Akaun') }}
       </x-slot>
 
       <x-slot name="content">
-        {{ __('Are you sure you want to delete your account? Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.') }}
+        {{ __('Adakah anda pasti ingin menghapuskan akaun anda? Setelah akaun anda dihapuskan, semua sumber dan data akan dihapuskan secara kekal. Sila masukkan kata laluan anda untuk mengesahkan bahawa anda ingin menghapuskan akaun anda secara kekal.') }}
 
         <div class="mt-2" x-data="{}"
           x-on:confirming-delete-user.window="setTimeout(() => $refs.password.focus(), 250)">
           <x-input type="password" class="{{ $errors->has('password') ? 'is-invalid' : '' }}"
-            placeholder="{{ __('Password') }}" x-ref="password" wire:model="password"
+            placeholder="{{ __('Kata Laluan') }}" x-ref="password" wire:model="password"
             wire:keydown.enter="deleteUser" />
 
           <x-input-error for="password" />
@@ -39,14 +44,13 @@
 
       <x-slot name="footer">
         <x-secondary-button wire:click="$toggle('confirmingUserDeletion')" wire:loading.attr="disabled">
-          {{ __('Cancel') }}
+          {{ __('Batal') }}
         </x-secondary-button>
 
         <x-danger-button class="ms-1" wire:click="deleteUser" wire:loading.attr="disabled">
-          {{ __('Delete Account') }}
+          {{ __('Hapus Akaun') }}
         </x-danger-button>
       </x-slot>
     </x-dialog-modal>
   </x-slot>
-
 </x-action-section>

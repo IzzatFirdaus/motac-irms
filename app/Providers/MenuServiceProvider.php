@@ -2,9 +2,10 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\Facades\Log; // For logging errors
-use Illuminate\Support\Facades\View; // For View::share
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use stdClass;
 
 class MenuServiceProvider extends ServiceProvider
 {
@@ -13,39 +14,45 @@ class MenuServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // No specific services to register for this provider.
+        // No service bindings needed for this provider.
     }
 
     /**
      * Bootstrap services.
-     * Loads menu data from a JSON file and shares it with all views.
-     * System Design Reference: 3.3 MenuServiceProvider loads and shares navigation menu data.
-     * The menu data is used by resources/views/livewire/sections/menu/vertical-menu.blade.php.
+     * Loads vertical menu structure from JSON and shares with all views.
      */
     public function boot(): void
     {
-        $menuJsonPath = base_path('resources/menu/verticalMenu.json'); // Path to the menu configuration file
-        $verticalMenuData = null;
+        $menuPath = base_path('resources/menu/verticalMenu.json');
+        $menuData = new stdClass(); // Default object with no menu
 
-        if (file_exists($menuJsonPath)) {
-            $verticalMenuJson = file_get_contents($menuJsonPath);
-            if ($verticalMenuJson === false) {
-                Log::error('MenuServiceProvider: Could not read verticalMenu.json file.');
-            } else {
-                $decodedData = json_decode($verticalMenuJson);
-                if (json_last_error() === JSON_ERROR_NONE) {
-                    $verticalMenuData = $decodedData;
+        if (file_exists($menuPath)) {
+            try {
+                $jsonContent = file_get_contents($menuPath);
+
+                if ($jsonContent === false) {
+                    Log::error('[MenuServiceProvider] Failed to read verticalMenu.json.');
                 } else {
-                    Log::error('MenuServiceProvider: Error decoding verticalMenu.json. JSON Error: ' . json_last_error_msg());
+                    $decoded = json_decode($jsonContent);
+
+                    if (json_last_error() === JSON_ERROR_NONE) {
+                        $menuData = $decoded;
+                    } else {
+                        Log::error('[MenuServiceProvider] JSON decoding failed: ' . json_last_error_msg());
+                    }
                 }
+            } catch (\Throwable $e) {
+                Log::critical('[MenuServiceProvider] Exception occurred: ' . $e->getMessage());
             }
         } else {
-            Log::warning('MenuServiceProvider: verticalMenu.json file not found at ' . $menuJsonPath);
+            Log::warning('[MenuServiceProvider] Menu file not found: ' . $menuPath);
         }
 
-        // Share menuData with all views.
-        // If $verticalMenuData is null (e.g., file not found or invalid JSON),
-        // the views should handle this gracefully (e.g., display "Menu not available").
-        View::share('menuData', $verticalMenuData);
+        // Ensure it always has a "menu" property to prevent Blade exceptions
+        if (!property_exists($menuData, 'menu')) {
+            $menuData->menu = [];
+        }
+
+        View::share('menuData', $menuData);
     }
 }

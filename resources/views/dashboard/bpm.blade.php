@@ -65,7 +65,7 @@
                 <div class="card-body">
                     <p>{{ __('Laptop Tersedia:') }} <strong>XX</strong> {{ __('unit') }}</p>
                     <p>{{ __('Projektor Tersedia:') }} <strong>YY</strong> {{ __('unit') }}</p>
-                    <a href="{{-- route('resource-management.admin.equipment-admin.index') --}}" class="btn btn-sm btn-info">{{ __('Lihat Inventori Terperinci') }}</a>
+                    <a href="{{-- route('resource-management.admin.equipment-admin.index') --}}"{{-- class="btn btn-sm btn-info">{{ __('Lihat Inventori Terperinci') }}</a>
                 </div>
             </div>
         </div>
