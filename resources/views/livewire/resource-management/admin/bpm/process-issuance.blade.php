@@ -179,130 +179,124 @@
 =======
 {{-- resources/views/livewire/resource-management/admin/bpm/process-issuance.blade.php --}}
 <div>
-    <h2 class="text-2xl font-bold mb-6 text-gray-800">Rekod Pengeluaran Peralatan untuk Permohonan Pinjaman #{{ $loanApplication->id }}</h2>
+    <h3 class="mb-4">{{ __('Rekod Pengeluaran Peralatan untuk Permohonan Pinjaman') }} #{{ $loanApplication->id }}</h3>
 
     @if (session()->has('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
+        <x-alert type="success" :message="session('success')" class="mb-4"/>
     @endif
     @if (session()->has('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
+        <x-alert type="danger" :message="session('error')" class="mb-4"/>
     @endif
-     @if ($errors->any())
-         <div class="alert alert-danger mb-4">
-             <p class="font-semibold">Sila perbetulkan ralat berikut:</p>
-             <ul class="list-disc list-inside">
-                 @foreach ($errors->all() as $error)
-                     <li>{{ $error }}</li>
-                 @endforeach
-             </ul>
-         </div>
-     @endif
+    @if ($errors->any())
+        <x-alert type="danger" class="mb-4">
+            <p class="fw-semibold">{{ __('Sila perbetulkan ralat berikut:') }}</p>
+            <ul class="mt-1 list-disc ps-4"> {{-- Using ps-4 for Bootstrap-like list padding --}}
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </x-alert>
+    @endif
 
+    {{-- Loan Application Details Card --}}
+    <x-card card-title="{{ __('Butiran Permohonan Pinjaman') }}" class="mb-4">
+        <p class="mb-1"><span class="fw-semibold">{{ __('Pemohon') }}:</span> {{ $loanApplication->user->name ?? __('N/A') }}</p>
+        <p class="mb-1"><span class="fw-semibold">{{ __('Tujuan Permohonan') }}:</span> {{ $loanApplication->purpose ?? __('N/A') }}</p>
+        <p class="mb-1"><span class="fw-semibold">{{ __('Lokasi Penggunaan') }}:</span> {{ $loanApplication->location ?? __('N/A') }}</p>
+        <p class="mb-1"><span class="fw-semibold">{{ __('Tarikh Pinjaman') }}:</span> {{ $loanApplication->loan_start_date ? $loanApplication->loan_start_date->translatedFormat(config('app.date_format_my', 'd/m/Y')) : __('N/A') }}</p>
+        <p class="mb-0"><span class="fw-semibold">{{ __('Tarikh Dijangka Pulang') }}:</span> {{ $loanApplication->loan_end_date ? $loanApplication->loan_end_date->translatedFormat(config('app.date_format_my', 'd/m/Y')) : __('N/A') }}</p>
 
-    {{-- Loan Application Details Card (similar to issue.blade.php) --}}
-    <div class="card mb-6">
-        <h3 class="card-title">Butiran Permohonan Pinjaman</h3>
-        <p class="mb-2"><span class="font-semibold">Pemohon:</span> {{ $loanApplication->user->name ?? 'N/A' }}</p>
-        <p class="mb-2"><span class="font-semibold">Tujuan Permohonan:</span> {{ $loanApplication->purpose ?? 'N/A' }}</p>
-         <p class="mb-2"><span class="font-semibold">Lokasi Penggunaan:</span> {{ $loanApplication->location ?? 'N/A' }}</p>
-         <p class="mb-2"><span class="font-semibold">Tarikh Pinjaman:</span> {{ $loanApplication->loan_start_date?->format('Y-m-d') ?? 'N/A' }}</p>
-         <p class="mb-2"><span class="font-semibold">Tarikh Dijangka Pulang:</span> {{ $loanApplication->loan_end_date?->format('Y-m-d') ?? 'N/A' }}</p>
-
-        @if ($loanApplication->items->isNotEmpty())
-            <h4 class="text-lg font-semibold mt-4 mb-2 text-gray-700">Item Peralatan Dimohon:</h4>
-            <div class="overflow-x-auto shadow-sm rounded-md border border-gray-200">
-                <table class="min-w-full divide-y divide-gray-200 table">
-                    <thead class="bg-gray-50">
+        @if ($loanApplication->applicationItems->isNotEmpty()) {{-- Changed from items to applicationItems for clarity if that's your relation name --}}
+            <h6 class="mt-3 mb-2 fw-semibold">{{ __('Item Peralatan Dimohon:') }}</h6>
+            <div class="table-responsive border rounded">
+                <table class="table table-sm table-striped mb-0">
+                    <thead class="table-light">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Bil.</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Jenis Peralatan</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Kuantiti Dimohon</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Kuantiti Diluluskan</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Catatan</th>
+                            <th class="small px-3 py-2">#</th>
+                            <th class="small px-3 py-2">{{ __('Jenis Peralatan') }}</th>
+                            <th class="small px-3 py-2">{{ __('Kuantiti Dimohon') }}</th>
+                            <th class="small px-3 py-2">{{ __('Kuantiti Diluluskan') }}</th>
+                            <th class="small px-3 py-2">{{ __('Catatan') }}</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach ($loanApplication->items as $item)
+                    <tbody>
+                        @foreach ($loanApplication->applicationItems as $item)
                         <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b">{{ $loop->iteration }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b">{{ $item->equipment_type ?? 'N/A' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b">{{ $item->quantity_requested ?? 'N/A' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b">{{ $item->quantity_approved ?? 'N/A' }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-900 border-b">{{ $item->notes ?? '-' }}</td>
+                            <td class="small px-3 py-2">{{ $loop->iteration }}</td>
+                            <td class="small px-3 py-2">{{ $item->equipment_type ? (\App\Models\Equipment::$ASSET_TYPES_LABELS[$item->equipment_type] ?? Str::title(str_replace('_', ' ', $item->equipment_type))) : __('N/A') }}</td>
+                            <td class="small px-3 py-2">{{ $item->quantity_requested ?? __('N/A') }}</td>
+                            <td class="small px-3 py-2">{{ $item->quantity_approved ?? __('N/A') }}</td>
+                            <td class="small px-3 py-2">{{ $item->notes ?? '-' }}</td>
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
         @endif
-    </div>
+    </x-card>
 
     <form wire:submit.prevent="submitIssue">
-        <div class="card">
-            <h3 class="card-title">Rekod Pengeluaran Peralatan</h3>
-
-            <div class="form-group">
-                <label for="selectedEquipmentIds" class="block text-gray-700 text-sm font-bold mb-2">Pilih Peralatan untuk Dikeluarkan*:</label>
-                <select wire:model.defer="selectedEquipmentIds" id="selectedEquipmentIds" class="form-control @error('selectedEquipmentIds') border-red-500 @enderror" multiple required>
+        <x-card card-title="{{ __('Rekod Pengeluaran Peralatan Sebenar') }}">
+            {{-- Select Equipment to Issue --}}
+            <div class="mb-3">
+                <label for="selectedEquipmentIds" class="form-label fw-semibold">{{ __('Pilih Peralatan untuk Dikeluarkan') }}*:</label>
+                {{-- Consider using a more user-friendly multiple select component if you have one (e.g., TomSelect, Select2 via wrapper) --}}
+                <select wire:model.defer="selectedEquipmentIds" id="selectedEquipmentIds" class="form-select @error('selectedEquipmentIds') is-invalid @enderror @error('selectedEquipmentIds.*') is-invalid @enderror" multiple required size="5">
                     @forelse ($availableEquipment as $equipment)
                         <option value="{{ $equipment->id }}">
-                            {{ $equipment->brand }} {{ $equipment->model }} (Tag: {{ $equipment->tag_id ?? 'N/A' }}) - {{ $equipment->asset_type_label }}  {{-- --}}
+                            {{ $equipment->asset_type_label }}: {{ $equipment->brand }} {{ $equipment->model }} (Tag: {{ $equipment->tag_id ?? __('N/A') }})
                         </option>
                     @empty
-                        <option value="" disabled>Tiada peralatan tersedia yang sepadan.</option>
+                        <option value="" disabled>{{ __('Tiada peralatan tersedia yang sepadan dengan jenis yang diluluskan.') }}</option>
                     @endforelse
                 </select>
-                @error('selectedEquipmentIds') <span class="text-danger">{{ $message }}</span> @enderror
-                @error('selectedEquipmentIds.*') <span class="text-danger">{{ $message }}</span> @enderror
+                @error('selectedEquipmentIds') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                @error('selectedEquipmentIds.*') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
 
-            <div class="form-group">
-                <label class="block text-gray-700 text-sm font-bold mb-2">Senarai Semak Aksesori Dikeluarkan:</label>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {{-- Accessories Checklist --}}
+            <div class="mb-3">
+                <label class="form-label fw-semibold">{{ __('Senarai Semak Aksesori Dikeluarkan') }}:</label>
+                <div class="row">
                     @foreach ($allAccessoriesList as $accessory)
-                        <div class="flex items-center">
-                            <input type="checkbox" wire:model.defer="accessories" value="{{ $accessory }}" id="accessory-{{ Str::slug($accessory) }}" class="form-check-input h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                            <label class="ml-2 block text-sm text-gray-700" for="accessory-{{ Str::slug($accessory) }}">{{ $accessory }}</label>
+                        <div class="col-md-6 col-lg-4">
+                            <div class="form-check">
+                                <input type="checkbox" wire:model.defer="accessories" value="{{ $accessory }}" id="accessory-{{ Str::slug($accessory) }}" class="form-check-input">
+                                <label class="form-check-label" for="accessory-{{ Str::slug($accessory) }}">{{ $accessory }}</label>
+                            </div>
                         </div>
                     @endforeach
                 </div>
-                @error('accessories') <span class="text-danger">{{ $message }}</span> @enderror
+                @error('accessories') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
             </div>
 
-            <div class="form-group">
-                <label for="issue_notes" class="block text-gray-700 text-sm font-bold mb-2">Catatan Pengeluaran:</label>
-                <textarea wire:model.defer="issue_notes" id="issue_notes" class="form-control @error('issue_notes') border-red-500 @enderror" rows="3"></textarea>
-                @error('issue_notes') <span class="text-danger">{{ $message }}</span> @enderror
+            {{-- Issue Notes --}}
+            <div class="mb-3">
+                <label for="issue_notes" class="form-label fw-semibold">{{ __('Catatan Pengeluaran') }}:</label>
+                <textarea wire:model.defer="issue_notes" id="issue_notes" class="form-control @error('issue_notes') is-invalid @enderror" rows="3" placeholder="cth: Beg bercalar sedikit"></textarea>
+                @error('issue_notes') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
 
-            <div class="form-group">
-                <label class="block text-gray-700 text-sm font-bold mb-1">Diproses Oleh:</label>
-                <p class="text-gray-800">{{ Auth::user()->name ?? 'N/A' }}</p>
+            {{-- Processed By --}}
+            <div class="mb-3">
+                <label class="form-label fw-semibold">{{ __('Diproses Oleh') }}:</label>
+                <p class="form-control-static">{{ Auth::user()->name ?? __('N/A') }}</p>
             </div>
-        </div>
+        </x-card>
 
-        <div class="flex justify-center mt-6">
-            <button type="submit" class="btn btn-primary" wire:loading.attr="disabled">
-                <svg wire:loading wire:target="submitIssue" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span wire:loading.remove wire:target="submitIssue">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                </span>
-                Rekod Pengeluaran Peralatan
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="submitIssue">
+                <span wire:loading wire:target="submitIssue" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                <span wire:loading.remove wire:target="submitIssue"><i class="ti ti-check me-1"></i></span>
+                {{ __('Rekod Pengeluaran Peralatan') }}
             </button>
         </div>
     </form>
 
-     <div class="mt-6 text-center">
-         <a href="{{ route('resource-management.my-applications.loan-applications.show', $loanApplication) }}" class="btn btn-secondary"> {{-- --}}
-             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-             </svg>
-             Kembali ke Butiran Permohonan
+     <div class="mt-4 text-center">
+         <a href="{{ route('resource-management.my-applications.loan-applications.show', $loanApplication->id) }}" class="btn btn-secondary">
+            <i class="ti ti-arrow-left me-1"></i>
+            {{ __('Kembali ke Butiran Permohonan') }}
          </a>
      </div>
 >>>>>>> 7940bed (feat: Standardize authorization policies, update service provider and models, and refine configuration for consistent role management and grade-based approvals; Refactor: Streamline notification system with generic classes and consolidations)
