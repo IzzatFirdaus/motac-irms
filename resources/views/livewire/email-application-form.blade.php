@@ -1,4 +1,4 @@
-{{-- resources/views/livewire/resource-management/email-account/application-form.blade.php (Bootstrap Version) --}}
+{{-- resources/views/livewire/email-application-form.blade.php (Bootstrap Version) --}}
 <div>
     {{-- @section('title', $isEdit ? __('Kemaskini Permohonan Emel/ID') : __('Borang Permohonan Emel/ID Pengguna MOTAC')) --}}
     {{-- Title typically set via #[Title] attribute in the Livewire component --}}
@@ -276,7 +276,8 @@
                         <label for="editable_status_for_admin_key_form" class="form-label">{{ __('Status Permohonan Semasa') }}</label>
                         <select wire:model.live="editable_status_for_admin_key" id="editable_status_for_admin_key_form" class="form-select form-select-sm @error('editable_status_for_admin_key') is-invalid @enderror">
                             {{-- Populate from EmailApplication model status constants/labels --}}
-                            @foreach (\App\Models\EmailApplication::$STATUSES_LABELS as $key => $label)
+                            {{-- CORRECTED LINE: Using $STATUS_OPTIONS --}}
+                            @foreach (\App\Models\EmailApplication::$STATUS_OPTIONS as $key => $label)
                                 <option value="{{ $key }}">{{ $label }}</option>
                             @endforeach
                         </select>

@@ -97,12 +97,12 @@
             <div class="card-body p-4">
                 <div class="form-check mb-3">
                     <input id="applicant_is_responsible_officer" wire:model.live="applicant_is_responsible_officer" type="checkbox" class="form-check-input">
-                    <label for="applicant_is_responsible_officer" class="form-check-label fw-medium">{{ __('Sila tandakan jika Pemohon adalah Pegawai Bertanggungjawab.') }} [cite: 3]</label>
+                    <label for="applicant_is_responsible_officer" class="form-check-label fw-medium">{{ __('Sila tandakan jika Pemohon adalah Pegawai Bertanggungjawab.') }}</label>
                 </div>
 
                 @if(!$applicant_is_responsible_officer)
                     <p class="text-muted mb-3 fst-italic">
-                        {{ __('Bahagian ini hanya perlu diisi jika Pegawai Bertanggungjawab bukan Pemohon.') }} [cite: 4]
+                        {{ __('Bahagian ini hanya perlu diisi jika Pegawai Bertanggungjawab bukan Pemohon.') }}
                     </p>
                     <div class="row g-3">
                         <div class="col-md-4">
@@ -194,12 +194,12 @@
                     <input id="applicant_confirmation" wire:model.defer="applicant_confirmation" type="checkbox" value="1"
                            class="form-check-input @error('applicant_confirmation') is-invalid @enderror">
                     <label for="applicant_confirmation" class="form-check-label fw-medium">
-                        {{ __('Saya dengan ini mengesahkan dan memperakukan bahawa semua peralatan yang dipinjam adalah untuk kegunaan rasmi dan berada di bawah tanggungjawab dan penyeliaan saya sepanjang tempoh tersebut.') }} [cite: 6]
+                        {{ __('Saya dengan ini mengesahkan dan memperakukan bahawa semua peralatan yang dipinjam adalah untuk kegunaan rasmi dan berada di bawah tanggungjawab dan penyeliaan saya sepanjang tempoh tersebut.') }}
                     </label>
                     @error('applicant_confirmation') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror {{-- d-block for checkbox errors --}}
                 </div>
                 <p class="form-text">
-                    {{__('Peringatan: Sila semak dan periksa kesempurnaan peralatan semasa mengambil dan sebelum memulangkan peralatan yang dipinjam. Kehilangan dan kekurangan pada peralatan semasa pemulangan adalah dibawah tanggungjawab pemohon.')}} [cite: 20, 21]
+                    {{__('Peringatan: Sila semak dan periksa kesempurnaan peralatan semasa mengambil dan sebelum memulangkan peralatan yang dipinjam. Kehilangan dan kekurangan pada peralatan semasa pemulangan adalah dibawah tanggungjawab pemohon.')}}
                 </p>
             </div>
         </div>

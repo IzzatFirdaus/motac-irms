@@ -2,9 +2,14 @@
 <div>
     @php
         $configData = \App\Helpers\Helpers::appClasses();
-        $currentLocale = App::getLocale();
+        $currentLocale = App::getLocale(); // Current locale e.g., 'ms', 'en'
         // $activeTheme is derived from $configData['style'] which should reflect the current theme (light/dark)
         $activeTheme = $configData['style'] ?? 'light';
+
+        // Get the flag code for the currently active locale.
+        // This assumes $availableLocales is a public property from your Livewire component,
+        // processed in its mount() method to include 'flag_code'.
+        $currentFlagCode = $availableLocales[$currentLocale]['flag_code'] ?? 'us'; // Default to 'us' if not found
     @endphp
 
     @push('custom-css')
@@ -82,17 +87,19 @@
                 {{-- Language Switcher --}}
                 <li class="nav-item dropdown-language dropdown me-2 me-xl-1" role="none">
                     <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown" role="menuitem" aria-haspopup="true" aria-expanded="false" aria-label="{{ __('Tukar Bahasa') }}">
-                        {{-- Dynamically set flag based on current locale --}}
-                        <i class="fi fi-{{ $currentLocale === 'my' ? 'my' : ($currentLocale === 'ar' ? (config('app.available_locales.ar.flag_icon_class', 'sy')) : (config('app.available_locales.en.flag_icon_class', 'us'))) }} fis rounded-circle me-1 fs-3"></i>
+                        {{-- EDITED LINE: Dynamically set flag based on processed $currentFlagCode --}}
+                        <i class="fi fi-{{ $currentFlagCode }} fis rounded-circle me-1 fs-3"></i>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" role="menu">
+                        {{-- $availableLocales comes from the Livewire component's public property --}}
                         @foreach ($availableLocales as $localeKey => $localeData)
                             @if($localeData['display'] ?? false)
                                 <li>
                                     <a class="dropdown-item {{ $currentLocale === $localeKey ? 'active' : '' }}"
                                        href="{{ route('language.swap', ['locale' => $localeKey]) }}"
                                        aria-label="{{ $localeData['name'] }}">
-                                        <i class="fi {{ $localeData['flag_icon_class'] ?? ('fi-'.($localeKey === 'en' ? 'us' : $localeKey)) }} fis rounded-circle me-2 fs-4"></i>
+                                        {{-- EDITED LINE: Use flag_code from $localeData, fallback to 'us' --}}
+                                        <i class="fi fi-{{ $localeData['flag_code'] ?: 'us' }} fis rounded-circle me-2 fs-4"></i>
                                         {{ __($localeData['name']) }}
                                     </a>
                                 </li>
@@ -102,6 +109,10 @@
                 </li>
 
                 {{-- Notifications Dropdown --}}
+                {{-- IMPORTANT: The "View not found" error indicates the path below is incorrect for your project. --}}
+                {{-- Please VERIFY and CORRECT the path to your notifications partial. --}}
+                {{-- Example: If your file is at resources/views/partials/navbar_notifications.blade.php, --}}
+                {{-- then use @include('partials.navbar_notifications') --}}
                 <li class="nav-item dropdown-notifications navbar-dropdown dropdown me-3 me-xl-2" role="none">
                     <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" aria-label="{{ __('Notifikasi') }}">
                         <i class="ti ti-bell ti-md"></i>
@@ -171,6 +182,7 @@
                 </li>
 
                 {{-- User Menu Dropdown --}}
+                {{-- IMPORTANT: Also verify this @include path if you encounter similar "View not found" errors for it. --}}
                 <li class="nav-item navbar-dropdown dropdown-user dropdown">
                     <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown" aria-label="{{ __('Profil Pengguna') }}">
                         <div class="avatar avatar-online">

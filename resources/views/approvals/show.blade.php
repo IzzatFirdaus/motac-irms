@@ -24,7 +24,8 @@
                                 <i class="bi bi-clipboard-check-fill me-2 text-primary"></i> {{ __('Tugasan Kelulusan') }}
                                 #{{ $approval->id }}
                             </h2>
-                            <a href="{{ url()->previous(route('approval.dashboard')) }}" {{-- Ensure route('approval.dashboard') is correct --}}
+                            {{-- MODIFIED THE LINE BELOW --}}
+                            <a href="{{ url()->previous(route('approvals.dashboard')) }}"
                                 class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center mt-2 mt-sm-0">
                                 <i class="bi bi-arrow-left me-1"></i> {{ __('Kembali') }}
                             </a>
@@ -198,7 +199,8 @@
                                 <section class="mt-4 pt-4 border-top">
                                     <h3 class="h6 fw-semibold text-dark mb-3"><i
                                             class="bi bi-pencil-fill me-2"></i>{{ __('Rekod Keputusan Anda') }}</h3>
-                                    <form action="{{ route('approvals.decision.store', $approval->id) }}" method="POST">
+                                    {{-- POTENTIAL SECOND CORRECTION FOR THE ROUTE BELOW --}}
+                                    <form action="{{ route('approvals.recordDecision', $approval->id) }}" method="POST">
                                         @csrf
                                         <div class="mb-3">
                                             <label for="decision" class="form-label fw-medium">{{ __('Keputusan') }} <span

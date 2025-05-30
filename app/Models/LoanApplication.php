@@ -17,15 +17,14 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Loan Application Model.
- * 
- * System Design Reference: MOTAC Integrated Resource Management System (Revision 3) - Section 4.3
+ * * System Design Reference: MOTAC Integrated Resource Management System (Revision 3) - Section 4.3
  *
  * @property int $id
- * @property int $user_id
+ * @property int $user_id Applicant User ID
  * @property int|null $responsible_officer_id
  * @property int|null $supporting_officer_id
  * @property string $purpose
- * @property string $location
+ * @property string $location Usage location
  * @property string|null $return_location
  * @property \Illuminate\Support\Carbon $loan_start_date
  * @property \Illuminate\Support\Carbon $loan_end_date
@@ -33,14 +32,14 @@ use Illuminate\Support\Facades\Log;
  * @property string|null $rejection_reason
  * @property \Illuminate\Support\Carbon|null $applicant_confirmation_timestamp
  * @property \Illuminate\Support\Carbon|null $submitted_at
- * @property int|null $approved_by
+ * @property int|null $approved_by User ID of approver
  * @property \Illuminate\Support\Carbon|null $approved_at
- * @property int|null $rejected_by
+ * @property int|null $rejected_by User ID of rejector
  * @property \Illuminate\Support\Carbon|null $rejected_at
- * @property int|null $cancelled_by
+ * @property int|null $cancelled_by User ID of canceller
  * @property \Illuminate\Support\Carbon|null $cancelled_at
  * @property string|null $admin_notes
- * @property int|null $current_approval_officer_id  // Changed from string to int based on FK convention
+ * @property int|null $current_approval_officer_id User ID of current approver
  * @property string|null $current_approval_stage
  * @property int|null $created_by
  * @property int|null $updated_by
@@ -48,10 +47,6 @@ use Illuminate\Support\Facades\Log;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property int|null $issued_by
- * @property string|null $issued_at
- * @property int|null $returned_by
- * @property string|null $returned_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanApplicationItem> $applicationItems
  * @property-read int|null $application_items_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Approval> $approvals
@@ -62,6 +57,7 @@ use Illuminate\Support\Facades\Log;
  * @property-read \App\Models\User|null $currentApprovalOfficer
  * @property-read \App\Models\User|null $deleter
  * @property-read string $status_translated
+ * @property-read bool $is_draft Checks if status is draft
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanApplicationItem> $items
  * @property-read int|null $items_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanTransaction> $loanTransactions
@@ -89,8 +85,6 @@ use Illuminate\Support\Facades\Log;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereDeletedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereIssuedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereIssuedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereLoanEndDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereLoanStartDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereLocation($value)
@@ -99,10 +93,10 @@ use Illuminate\Support\Facades\Log;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereRejectedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereRejectionReason($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereResponsibleOfficerId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereReturnedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereReturnedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereReturnLocation($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereSubmittedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereSupportingOfficerId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereUserId($value)
@@ -115,7 +109,7 @@ class LoanApplication extends Model
     use HasFactory;
     use SoftDeletes;
 
-    // Status constants as defined in "Revision 3" (Section 4.3)
+    // Status constants as defined in "Revision 3" (Section 4.3, loan_applications table)
     public const STATUS_DRAFT = 'draft';
     public const STATUS_PENDING_SUPPORT = 'pending_support';
     public const STATUS_PENDING_HOD_REVIEW = 'pending_hod_review';
@@ -128,10 +122,10 @@ class LoanApplication extends Model
     public const STATUS_OVERDUE = 'overdue';
     public const STATUS_CANCELLED = 'cancelled';
 
-    public static array $STATUS_OPTIONS = [ // For dropdowns
+    public static array $STATUS_OPTIONS = [ // For dropdowns and display
         self::STATUS_DRAFT => 'Draf',
         self::STATUS_PENDING_SUPPORT => 'Menunggu Sokongan Pegawai (Gred 41+)',
-        self::STATUS_PENDING_HOD_REVIEW => 'Menunggu Kelulusan Ketua Jabatan/Unit', // Assuming this is a valid stage
+        self::STATUS_PENDING_HOD_REVIEW => 'Menunggu Kelulusan Ketua Jabatan/Unit',
         self::STATUS_PENDING_BPM_REVIEW => 'Menunggu Semakan & Kelulusan BPM',
         self::STATUS_APPROVED => 'Diluluskan (Sedia Untuk Pengeluaran)',
         self::STATUS_REJECTED => 'Ditolak',
@@ -145,22 +139,22 @@ class LoanApplication extends Model
     protected $table = 'loan_applications';
 
     protected $fillable = [
-        'user_id', 'responsible_officer_id', 'supporting_officer_id',
-        'purpose', 'location', 'return_location',
-        'loan_start_date', 'loan_end_date',
-        'status', 'rejection_reason',
-        'applicant_confirmation_timestamp', 'submitted_at',
-        'approved_by', 'approved_at',
-        'rejected_by', 'rejected_at',
-        'cancelled_by', 'cancelled_at',
-        'admin_notes',
-        'current_approval_officer_id', 'current_approval_stage',
+        'user_id', 'responsible_officer_id', 'supporting_officer_id', //
+        'purpose', 'location', 'return_location', //
+        'loan_start_date', 'loan_end_date', //
+        'status', 'rejection_reason', //
+        'applicant_confirmation_timestamp', 'submitted_at', //
+        'approved_by', 'approved_at', //
+        'rejected_by', 'rejected_at', //
+        'cancelled_by', 'cancelled_at', //
+        'admin_notes', //
+        'current_approval_officer_id', 'current_approval_stage', //
         // created_by, updated_by are handled by BlameableObserver
     ];
 
     protected $casts = [
-        'loan_start_date' => 'datetime', // Ensure format matches form input or set via mutator
-        'loan_end_date' => 'datetime',   // Ensure format matches form input or set via mutator
+        'loan_start_date' => 'datetime',
+        'loan_end_date' => 'datetime',
         'applicant_confirmation_timestamp' => 'datetime',
         'submitted_at' => 'datetime',
         'approved_at' => 'datetime',
@@ -172,12 +166,18 @@ class LoanApplication extends Model
     ];
 
     protected $attributes = [
-        'status' => self::STATUS_DRAFT,
+        'status' => self::STATUS_DRAFT, // Default status for new applications
     ];
 
     public static function getStatusOptions(): array
     {
         return self::$STATUS_OPTIONS;
+    }
+
+    // Helper to get all status keys
+    public static function getStatusKeys(): array
+    {
+        return array_keys(self::$STATUS_OPTIONS);
     }
 
     protected static function newFactory(): LoanApplicationFactory
@@ -189,16 +189,18 @@ class LoanApplication extends Model
     public function user(): BelongsTo { return $this->belongsTo(User::class, 'user_id'); } // Applicant
     public function responsibleOfficer(): BelongsTo { return $this->belongsTo(User::class, 'responsible_officer_id'); }
     public function supportingOfficer(): BelongsTo { return $this->belongsTo(User::class, 'supporting_officer_id'); }
-    public function approvedBy(): BelongsTo { return $this->belongsTo(User::class, 'approved_by'); } // Renamed for clarity
-    public function rejectedBy(): BelongsTo { return $this->belongsTo(User::class, 'rejected_by'); } // Renamed for clarity
-    public function cancelledBy(): BelongsTo { return $this->belongsTo(User::class, 'cancelled_by'); } // Renamed for clarity
+    public function approvedBy(): BelongsTo { return $this->belongsTo(User::class, 'approved_by'); }
+    public function rejectedBy(): BelongsTo { return $this->belongsTo(User::class, 'rejected_by'); }
+    public function cancelledBy(): BelongsTo { return $this->belongsTo(User::class, 'cancelled_by'); }
     public function currentApprovalOfficer(): BelongsTo { return $this->belongsTo(User::class, 'current_approval_officer_id');}
 
     public function applicationItems(): HasMany { return $this->hasMany(LoanApplicationItem::class, 'loan_application_id'); }
-    public function items(): HasMany { return $this->applicationItems(); } // Alias
-    public function loanTransactions(): HasMany { return $this->hasMany(LoanTransaction::class, 'loan_application_id'); }
-    public function approvals(): MorphMany { return $this->morphMany(Approval::class, 'approvable'); }
+    public function items(): HasMany { return $this->applicationItems(); } // Alias for applicationItems
 
+    public function loanTransactions(): HasMany { return $this->hasMany(LoanTransaction::class, 'loan_application_id'); }
+    public function approvals(): MorphMany { return $this->morphMany(Approval::class, 'approvable'); } // Polymorphic relation for approvals
+
+    // Blameable relationships
     public function creator(): BelongsTo { return $this->belongsTo(User::class, 'created_by'); }
     public function updater(): BelongsTo { return $this->belongsTo(User::class, 'updated_by'); }
     public function deleter(): BelongsTo { return $this->belongsTo(User::class, 'deleted_by'); }
@@ -209,18 +211,50 @@ class LoanApplication extends Model
         return __(self::$STATUS_OPTIONS[$this->status] ?? Str::title(str_replace('_', ' ', (string) $this->status)));
     }
 
-    // Business Logic (example from previous version, adjust as per full service logic)
+    public function getIsDraftAttribute(): bool
+    {
+        return $this->status === self::STATUS_DRAFT;
+    }
+
+    /**
+     * Basic status transition.
+     * NOTE: Complex business logic for status transitions, notifications, and approval workflow
+     * initiation should ideally be handled within a dedicated service class (e.g., LoanApplicationService, ApprovalService)
+     * to keep the model focused on data representation and relationships.
+     */
     public function transitionToStatus(string $newStatus, ?string $reason = null, ?int $actingUserId = null): bool
     {
-        // ... (Implementation from previous LoanApplication model or a service)
-        // Ensure this logic is robust and handles side effects like setting *_at and *_by fields.
-        Log::info("Transitioning LoanApplication ID {$this->id} from {$this->status} to {$newStatus}");
+        Log::info("Transitioning LoanApplication ID {$this->id} from {$this->status} to {$newStatus}. Acting User ID: {$actingUserId}. Reason: {$reason}");
+
         $this->status = $newStatus;
-        // Add logic for reason, timestamps, and responsible user IDs
+
+        // Basic timestamping for submission
+        if ($newStatus === self::STATUS_PENDING_SUPPORT && !$this->submitted_at) {
+            $this->submitted_at = now();
+        }
+
+        // Example of setting acting user if applicable (e.g., for cancellation)
+        if ($newStatus === self::STATUS_CANCELLED && $actingUserId && !$this->cancelled_by) {
+            $this->cancelled_by = $actingUserId;
+            $this->cancelled_at = now();
+            if($reason) $this->admin_notes = ($this->admin_notes ? $this->admin_notes . "\n" : '') . "Cancelled: " . $reason;
+        }
+
+        // Add more specific logic for other status transitions if needed here,
+        // or preferably, handle in the service layer.
+
         return $this->save();
     }
+
+    /**
+     * Placeholder for updating overall status after a transaction.
+     * Logic should be in LoanApplicationService.
+     */
     public function updateOverallStatusAfterTransaction(): void
     {
-        // Implementation from previous LoanApplication model or better, from LoanApplicationService
+        Log::debug("Placeholder: updateOverallStatusAfterTransaction called for LoanApplication ID {$this->id}. Actual logic should be in a service.");
+        // Example: $this->load('loanTransactions', 'applicationItems');
+        // // Logic to determine if status should be 'issued', 'partially_issued', 'returned' based on items and transactions.
+        // // This is complex and belongs in the LoanApplicationService.
     }
 }

@@ -11,7 +11,7 @@ return [
     |--------------------------------------------------------------------------
     | Design Language: Prominent MOTAC Branding
     */
-  'name' => env('APP_NAME', 'Sistem Pengurusan Sumber MOTAC'), // MOTAC specific name
+  'name' => env('APP_NAME', 'Sistem Pengurusan Sumber MOTAC'), // MOTAC specific name [cite: 27]
 
   /*
     |--------------------------------------------------------------------------
@@ -41,7 +41,7 @@ return [
     |--------------------------------------------------------------------------
     | System Design Reference: 3.3 AppServiceProvider sets 'Asia/Kuala_Lumpur'.
     */
-  'timezone' => env('APP_TIMEZONE', 'Asia/Kuala_Lumpur'), // MOTAC specific timezone
+  'timezone' => env('APP_TIMEZONE', 'Asia/Kuala_Lumpur'), // MOTAC specific timezone [cite: 28]
 
   /*
     |--------------------------------------------------------------------------
@@ -49,26 +49,26 @@ return [
     |--------------------------------------------------------------------------
     | Design Language: Bahasa Melayu as Primary Language
     */
-  'locale' => env('APP_LOCALE', 'my'), // MOTAC default: Bahasa Melayu
+  'locale' => env('APP_LOCALE', 'ms'), // CORRECTED: Changed 'my' to 'ms' for Bahasa Melayu [cite: 29]
 
   /*
     |--------------------------------------------------------------------------
     | Application Fallback Locale
     |--------------------------------------------------------------------------
     */
-  'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'), // English as fallback
+  'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'), // English as fallback [cite: 30]
 
   /*
     |--------------------------------------------------------------------------
     | Available Locales
     |--------------------------------------------------------------------------
     | Used by LanguageController and LocaleMiddleware.
-    | 'my' for Bahasa Melayu, 'en' for English. 'ar' for Arabic (optional).
+    | 'ms' for Bahasa Melayu, 'en' for English. 'ar' for Arabic (optional).
     | Added 'display' flag for UI control.
     | System Design Reference: LanguageController.php, LocaleMiddleware.php
     */
   'available_locales' => [
-    'my' => ['name' => 'Bahasa Melayu', 'script' => 'Latn', 'native' => 'Bahasa Melayu', 'regional' => 'ms_MY', 'direction' => 'ltr', 'display' => true],
+    'ms' => ['name' => 'Bahasa Melayu', 'script' => 'Latn', 'native' => 'Bahasa Melayu', 'regional' => 'ms_MY', 'direction' => 'ltr', 'display' => true], // CORRECTED: Changed key 'my' to 'ms' [cite: 31, 32]
     'en' => ['name' => 'English',       'script' => 'Latn', 'native' => 'English',       'regional' => 'en_US', 'direction' => 'ltr', 'display' => true],
     // 'ar' => ['name' => 'العربية',       'script' => 'Arab', 'native' => 'العربية',       'regional' => 'ar_AE', 'direction' => 'rtl', 'display' => true], // Example for Arabic
   ],
@@ -78,7 +78,7 @@ return [
     | Faker Locale
     |--------------------------------------------------------------------------
     */
-  'faker_locale' => env('APP_FAKER_LOCALE', 'ms_MY'), // For Malaysian context data
+  'faker_locale' => env('APP_FAKER_LOCALE', 'ms_MY'), // For Malaysian context data [cite: 33]
 
   /*
     |--------------------------------------------------------------------------
@@ -131,7 +131,7 @@ return [
     // based on your project's needs. For example:
     // App\Providers\FortifyServiceProvider::class,
     // App\Providers\JetstreamServiceProvider::class,
-    // App\Providers\MenuServiceProvider::class,
+    App\Providers\MenuServiceProvider::class,
 
   ])->toArray(),
 

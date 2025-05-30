@@ -16,40 +16,56 @@ class Navbar extends Component
   public bool $activeProgressBar = false;
   public int $percentage = 0;
 
-  // These properties are defined but not directly used for route() generation in this component.
-  // The Blade view handles its own route() calls.
-  public string $defaultProfilePhotoUrl = '/assets/img/avatars/1.png'; // Default, can be overridden by Auth::user()->profile_photo_url
-  public string $profileShowRoute = '/profile/show'; // Placeholder, Blade uses Route::has('profile.show')
-  public string $adminSettingsRoute = '/admin/settings'; // Placeholder, Blade uses its own logic
+  public string $defaultProfilePhotoUrl = '/assets/img/avatars/1.png';
+  public string $profileShowRoute = '/profile/show';
+  public string $adminSettingsRoute = '/admin/settings';
   public bool $canViewAdminSettings = false;
 
-  // Properties for navbar appearance, typically passed from a layout or config
   public string $containerNav = 'container-fluid';
-  public string $navbarDetachedClass = ''; // Example: 'navbar-detached'
-  public bool $navbarFull = true; // Example: true if it's the main full navbar
+  public string $navbarDetachedClass = '';
+  public bool $navbarFull = true;
   public bool $navbarHideToggle = false;
-  public ?string $activeTheme = null; // Will be set by App\Helpers\Helpers in Blade
+  public ?string $activeTheme = null;
 
   public array $availableLocales = [];
-  // The key used to fetch locales from config. Can be 'app.available_locales' if structured that way.
   protected string $localeConfigKey = 'app.available_locales';
 
   public function mount(): void
   {
-    $this->unreadNotifications = collect(); // Initialize as an empty collection
+    $this->unreadNotifications = collect();
     $this->refreshNotifications();
     $this->updateProgressBar();
 
     $this->canViewAdminSettings = Auth::check() && Auth::user()->hasRole('Admin');
 
-    // Load locales from config or provide a sensible default structure.
-    // Ensure the config key 'app.available_locales' exists and is structured as expected by the Blade view.
-    // Example structure: ['en' => ['name' => 'English', 'flag_icon' => 'us', 'display' => true], ...]
-    $this->availableLocales = config($this->localeConfigKey, [
-      'en' => ['name' => 'English', 'flag_icon_class' => 'fi-us', 'display' => true], // Assuming 'flag_icon_class' for CSS
-      'my' => ['name' => 'Bahasa Melayu', 'flag_icon_class' => 'fi-my', 'display' => true],
-      'ar' => ['name' => 'العربية', 'flag_icon_class' => 'fi-sy', 'display' => config('app.available_locales.ar.display', false)], // Use actual config for display
-    ]);
+    // CORRECTED: Process available locales to include a 'flag_code'
+    $configuredLocales = config($this->localeConfigKey, []);
+    $processedLocales = [];
+
+    foreach ($configuredLocales as $localeKey => $properties) {
+        $countryCode = 'default'; // Default flag code if one cannot be determined
+        if (!empty($properties['regional'])) {
+            $parts = explode('_', $properties['regional']);
+            if (count($parts) === 2) {
+                $countryCode = strtolower($parts[1]); // Extracts 'my' from 'ms_MY', 'us' from 'en_US'
+            }
+        }
+        // You might want a more specific fallback if countryCode remains 'default' or empty
+        // For instance, use the first two letters of the localeKey if it's a valid country code,
+        // or a generic globe icon. For now, 'us' is used as a fallback in getLocaleFlagIcon.
+
+        $processedLocales[$localeKey] = $properties; // Keep original properties
+        $processedLocales[$localeKey]['flag_code'] = $countryCode ?: 'us'; // Add the derived country code, fallback to 'us'
+    }
+    $this->availableLocales = $processedLocales;
+
+    // Initialize activeTheme if not already set (e.g., by a parent component or direct property binding)
+    if (is_null($this->activeTheme) && class_exists(\App\Helpers\Helpers::class)) {
+        $configData = \App\Helpers\Helpers::appClasses();
+        $this->activeTheme = $configData['style'] ?? 'light';
+    } else if (is_null($this->activeTheme)) {
+        $this->activeTheme = 'light'; // Absolute fallback
+    }
   }
 
   public function render(): View
@@ -62,7 +78,7 @@ class Navbar extends Component
   {
     $user = Auth::user();
     $this->unreadNotifications = $user
-      ? $user->unreadNotifications()->latest()->take(10)->get() // Added latest() for order
+      ? $user->unreadNotifications()->latest()->take(10)->get()
       : collect();
   }
 
@@ -73,16 +89,15 @@ class Navbar extends Component
 
     if ($import && $import->status === 'processing') {
       $this->activeProgressBar = true;
-      $this->percentage = $import->total_rows > 0 // Assuming 'total_rows' and 'processed_rows'
+      $this->percentage = $import->total_rows > 0
         ? (int) round($import->processed_rows / ($import->total_rows / 100))
         : 0;
     } else {
       if ($this->activeProgressBar && $import && $import->status === 'completed') {
-        // Example: Dispatch a toastr notification for completion
         // $this->dispatch('toastr', ['type' => 'success', 'message' => __('Import completed successfully!')]);
       }
-      $this->percentage = $import && ($import->status === 'completed' || $import->status === 'failed') ? 100 : 0; // Show 100% also on fail to remove bar
-      $this->activeProgressBar = false; // Hide progress bar if not processing
+      $this->percentage = $import && ($import->status === 'completed' || $import->status === 'failed') ? 100 : 0;
+      $this->activeProgressBar = false;
     }
   }
 
@@ -93,9 +108,7 @@ class Navbar extends Component
       $notification = $user->unreadNotifications()->where('id', $notificationId)->first();
       if ($notification) {
         $notification->markAsRead();
-        // Refresh notifications by re-calling the method or dispatching the event to self
         $this->refreshNotifications();
-        // Or if other components need to know: $this->dispatch('notificationsUpdated');
       }
     }
   }
@@ -109,28 +122,18 @@ class Navbar extends Component
     }
   }
 
-  /**
-   * Handles click on a notification, marks it as read, and redirects.
-   * The $link should ideally come from the notification data.
-   */
   public function handleNotificationClick(string $notificationId, ?string $link = null): void
   {
     $this->markNotificationAsRead($notificationId);
-
-    // If a link is provided (from notification data), redirect to it.
-    // Otherwise, do nothing or redirect to a default notifications page.
     if ($link && $link !== '#') {
       redirect()->to($link);
     }
-    // Optionally, if no link, you could redirect to notifications.index:
-    // else {
-    //     redirect()->route('notifications.index');
-    // }
   }
 
-  // Helper to get flag icon, not directly used in Blade but good for consistency if needed
+  // CORRECTED: Helper to get just the country code for the flag icon
   public function getLocaleFlagIcon(string $locale): string
   {
-    return $this->availableLocales[$locale]['flag_icon_class'] ?? 'fi-us'; // Default flag
+    // $this->availableLocales should be populated by mount() with 'flag_code'
+    return $this->availableLocales[$locale]['flag_code'] ?? 'us'; // Default to 'us' (US flag code)
   }
 }

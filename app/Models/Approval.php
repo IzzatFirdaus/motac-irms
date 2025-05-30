@@ -208,8 +208,8 @@ class Approval extends Model
             $this->load([
                 'approvable' => function ($morphTo) {
                     $morphTo->morphWith([
-                        EmailApplication::class => ['user:id,name', 'user.department:id,name'],
-                        LoanApplication::class => ['user:id,name', 'user.department:id,name', 'applicationItems'],
+                        EmailApplication::class => ['user:id,name,department_id', 'user.department:id,name'], // MODIFIED HERE
+                        LoanApplication::class => ['user:id,name,department_id', 'user.department:id,name', 'applicationItems'], // MODIFIED HERE
                     ]);
                 },
             ]);

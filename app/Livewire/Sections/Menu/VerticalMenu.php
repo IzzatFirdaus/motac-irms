@@ -1,74 +1,59 @@
 <?php
 
-namespace App\Livewire\Sections\Menu; // Assuming this is the correct namespace based on your file structure
+namespace App\Livewire\Sections\Menu;
 
-use App\Models\User; // Ensures the User model is referenced
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Livewire\Component;
 
 class VerticalMenu extends Component
 {
-  public ?string $role = null;
-  public mixed $menuData = []; // This will hold the structured menu data, typically an object or array
+    /**
+     * Role of the current authenticated user.
+     *
+     * @var string|null
+     */
+    public ?string $role = null;
 
-  /**
-   * The mount method is called when the component is first initialized.
-   * It's a good place to set up initial state.
-   */
-  public function mount(): void
-  {
-    $this->initializeUserRole();
-    $this->loadMenuData();
-  }
+    /**
+     * Lifecycle hook: Called once when the component is initialized.
+     * Determines and sets the user role.
+     *
+     * @return void
+     */
+    public function mount(): void
+    {
+        $this->initializeUserRole();
 
-  /**
-   * Determine and set the current authenticated user's role.
-   * This relies on the User model having a getRoleNames() method (e.g., from Spatie/laravel-permission).
-   */
-  protected function initializeUserRole(): void
-  {
-    /** @var \App\Models\User|null $user */
-    $user = Auth::user();
-
-    if ($user && method_exists($user, 'getRoleNames')) {
-      // Assuming getRoleNames() returns a collection and we take the first role.
-      // Adjust if your role logic is different.
-      $this->role = $user->getRoleNames()->first();
-    } else {
-      $this->role = null; // No user or role method doesn't exist
+        // Optional for debugging or system audit trails
+        Log::debug('[VerticalMenu] Component mounted. Role: ' . ($this->role ?? 'None'));
     }
-  }
 
-  /**
-   * Load menu data from the Laravel configuration.
-   * This assumes that your menu structure (e.g., from verticalMenu.json)
-   * is loaded into the 'menu' key in your config files, perhaps by a service provider.
-   */
-  protected function loadMenuData(): void
-  {
-    // Fetches the menu configuration. If 'menu' config is not found, defaults to an empty array.
-    // The structure of config('menu') should match what verticalMenu.blade.php expects
-    // (e.g., an object with a ->menu property that is an array of menu items).
-    $this->menuData = config('menu'); // Corrected `verticalMenu.json` should populate this.
+    /**
+     * Sets the role property based on the authenticated user's first assigned role.
+     * Defaults to null if no user or role data is found.
+     *
+     * @return void
+     */
+    protected function initializeUserRole(): void
+    {
+        $user = Auth::user();
 
-    if (is_null($this->menuData)) {
-      $this->menuData = []; // Ensure it's an array or empty object if config is null
+        if ($user && method_exists($user, 'getRoleNames')) {
+            $this->role = $user->getRoleNames()->first();
+        } else {
+            $this->role = null;
+        }
     }
-  }
 
-  /**
-   * Render the component's view.
-   * This will pass the $role and $menuData to the specified Blade view.
-   */
-  public function render(): View
-  {
-    // Ensure the view path matches where your vertical menu Blade file is located.
-    // Based on your other files, it might be 'layouts.sections.menu.verticalMenu'
-    // or 'livewire.sections.menu.vertical-menu'. Adjust as needed.
-    return view('livewire.sections.menu.vertical-menu', [
-      'menuData' => $this->menuData,
-      'currentUserRole' => $this->role // Pass the role to the view, making it available for logic there
-    ]);
-  }
+    /**
+     * Renders the vertical menu view, which uses globally shared $menuData.
+     *
+     * @return \Illuminate\View\View
+     */
+    public function render(): View
+    {
+        return view('livewire.sections.menu.vertical-menu');
+    }
 }

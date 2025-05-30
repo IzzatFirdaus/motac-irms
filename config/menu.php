@@ -8,7 +8,10 @@ return [
     | Vertical Menu Data
     |--------------------------------------------------------------------------
     |
-    | Structure:
+    | This structure is directly used by App\Livewire\Sections\Menu\VerticalMenu.php
+    | by accessing config('menu.menu').
+    |
+    | Structure for each item:
     | - name: The display name of the menu item (translatable string key).
     | - icon: Tabler Icon class (e.g., 'ti ti-smart-home').
     | - routeName: The Laravel named route for the menu item.
@@ -17,167 +20,214 @@ return [
     | - submenu: An array of submenu items, following the same structure.
     | - menuHeader: If set, this item will be a header text.
     | - role: An array or string of roles that can see this menu item.
-    |         Checked against the user's role from VerticalMenu.php.
-    |         If not set, visible to all authenticated users with a role, or based on permissions.
-    |         The 'Admin' role typically sees all items due to Blade logic.
-    | - permissions: An array or string of permissions required (if using Spatie permissions and Blade logic is adapted).
+    | - slug: A string identifier, often used for active state checking.
+    | - target: HTML target attribute for links (e.g., '_blank').
     |
     */
     'menu' => [
-        // Dashboard
         [
-            'name' => 'Dashboard',
-            'icon' => 'ti ti-smart-home',
-            'routeName' => 'dashboard', // General dashboard route
-        ],
-
-        // My Applications (for general users)
-        [
-            'menuHeader' => 'Aplikasi Saya',
-            // No specific role here, visibility determined by items. Assumes a basic authenticated user role.
+            'url' => '/dashboard',
+            'name' => 'menu.dashboard',
+            'icon' => 'menu-icon tf-icons ti ti-smart-home',
+            'slug' => 'dashboard',
+            'routeName' => 'dashboard',
+            'role' => ['Admin', 'BPM Staff', 'IT Admin', 'Employee', 'Approver'],
         ],
         [
-            'name' => 'Permohonan Emel & ID Pengguna',
-            'icon' => 'ti ti-mail',
-            'routeName' => 'my-applications.email.index', // User's list of email applications
-            'routeNamePrefix' => 'my-applications.email',
-            // 'role' => ['User'], // Example if 'User' is a defined role for non-admins
+            'menuHeader' => 'menu.section.resource_management',
+            'name' => 'menu.section.resource_management', // name property added for consistency if menuHeader is also an item
+            'role' => ['Admin', 'BPM Staff', 'IT Admin', 'Employee', 'Approver'],
         ],
         [
-            'name' => 'Permohonan Pinjaman Peralatan ICT',
-            'icon' => 'ti ti-device-laptop',
-            'routeName' => 'my-applications.loan.index', // User's list of loan applications
-            'routeNamePrefix' => 'my-applications.loan',
-            // 'role' => ['User'],
-        ],
-
-        // Approvals
-        [
-            'menuHeader' => 'Tindakan Kelulusan',
-            'role' => ['Admin', 'Approver'], // 'Approver' role or users with approval tasks
-        ],
-        [
-            'name' => 'Senarai Kelulusan',
-            'icon' => 'ti ti-checks',
-            'routeName' => 'approvals.index', // Approval dashboard/list
-            'role' => ['Admin', 'Approver'],
-        ],
-
-        // ICT Equipment (Public View)
-        [
-            'menuHeader' => 'Maklumat Peralatan ICT',
+            'name' => 'menu.my_applications.title',
+            'icon' => 'menu-icon tf-icons ti ti-folder-search',
+            'slug' => 'my-applications',
+            'role' => ['Employee', 'Admin', 'BPM Staff', 'IT Admin', 'Approver'],
+            'submenu' => [
+                [
+                    'url' => '/email-applications',
+                    'name' => 'menu.my_applications.email',
+                    'slug' => 'email-applications.index',
+                    'routeName' => 'email-applications.index',
+                    'role' => ['Employee'],
+                ],
+                [
+                    'url' => '/loan-applications',
+                    'name' => 'menu.my_applications.loan',
+                    'slug' => 'loan-applications.index',
+                    'routeName' => 'loan-applications.index',
+                    'role' => ['Employee'],
+                ],
+            ],
         ],
         [
-            'name' => 'Senarai Peralatan ICT',
-            'icon' => 'ti ti-list-details',
-            'routeName' => 'equipment.index', // Public listing of equipment
+            'name' => 'menu.apply_for_resources.title',
+            'icon' => 'menu-icon tf-icons ti ti-file-plus',
+            'slug' => 'application-forms',
+            'role' => ['Employee', 'Admin'],
+            'submenu' => [
+                [
+                    'url' => '/email-applications/create',
+                    'name' => 'menu.apply_for_resources.email',
+                    'slug' => 'email-applications.create',
+                    'routeName' => 'email-applications.create',
+                ],
+                [
+                    'url' => '/loan-applications/create',
+                    'name' => 'menu.apply_for_resources.loan',
+                    'slug' => 'loan-applications.create',
+                    'routeName' => 'loan-applications.create',
+                ],
+            ],
         ],
-
-        // Resource Management (Primarily for Admin, BPM Staff, IT Admin)
         [
-            'menuHeader' => 'Pengurusan Sumber',
+            'url' => '/approvals/dashboard',
+            'name' => 'menu.approvals_dashboard',
+            'icon' => 'menu-icon tf-icons ti ti-user-check',
+            'slug' => 'approvals.dashboard',
+            'routeName' => 'approvals.dashboard',
+            'role' => ['Admin', 'Approver', 'BPM Staff', 'IT Admin'],
+        ],
+        [
+            'name' => 'menu.administration.title',
+            'icon' => 'menu-icon tf-icons ti ti-settings-cog',
+            'slug' => 'resource-management',
+            'routeNamePrefix' => 'resource-management',
             'role' => ['Admin', 'BPM Staff', 'IT Admin'],
+            'submenu' => [
+                [
+                    'name' => 'menu.administration.bpm_operations.title',
+                    'icon' => 'menu-icon tf-icons ti ti-tool', // Icon can be added to submenu parents too
+                    'slug' => 'resource-management.bpm',
+                    'routeNamePrefix' => 'resource-management.bpm',
+                    'role' => ['Admin', 'BPM Staff'],
+                    'submenu' => [
+                        [
+                            'url' => '/resource-management/bpm/outstanding-loans',
+                            'name' => 'menu.administration.bpm_operations.outstanding_loans',
+                            'slug' => 'resource-management.bpm.outstanding-loans',
+                            'routeName' => 'resource-management.bpm.outstanding-loans',
+                        ],
+                        [
+                            'url' => '/resource-management/bpm/issued-loans',
+                            'name' => 'menu.administration.bpm_operations.issued_loans',
+                            'slug' => 'resource-management.bpm.issued-loans',
+                            'routeName' => 'resource-management.bpm.issued-loans',
+                        ],
+                    ],
+                ],
+                [
+                    'url' => '/resource-management/equipment-admin',
+                    'name' => 'menu.administration.equipment_management',
+                    'icon' => 'menu-icon tf-icons ti ti-device-laptop',
+                    'slug' => 'resource-management.equipment-admin.index',
+                    'routeName' => 'resource-management.equipment-admin.index',
+                    'role' => ['Admin', 'BPM Staff'],
+                ],
+                [
+                    'url' => '/resource-management/email-applications-admin',
+                    'name' => 'menu.administration.email_applications',
+                    'icon' => 'menu-icon tf-icons ti ti-mail-cog',
+                    'slug' => 'resource-management.email-applications-admin.index',
+                    'routeName' => 'resource-management.email-applications-admin.index',
+                    'role' => ['Admin', 'IT Admin'],
+                ],
+                [
+                    'url' => '/resource-management/users-admin',
+                    'name' => 'menu.administration.users_list',
+                    'icon' => 'menu-icon tf-icons ti ti-users-group',
+                    'slug' => 'resource-management.users-admin.index',
+                    'routeName' => 'resource-management.users-admin.index',
+                    'role' => ['Admin'],
+                ],
+            ],
         ],
         [
-            'name' => 'Permohonan Emel (Proses)',
-            'icon' => 'ti ti-mail-cog',
-            'routeName' => 'admin.email-applications.index', // IT Admin processing email applications
-            'role' => ['Admin', 'IT Admin'],
+            'menuHeader' => 'menu.section.system_config',
+            'name' => 'menu.section.system_config', // name property added
+            'role' => ['Admin'],
         ],
         [
-            'name' => 'Permohonan Pinjaman (Proses)',
-            'icon' => 'ti ti-settings-cog',
+            'name' => 'menu.settings.title',
+            'icon' => 'menu-icon tf-icons ti ti-adjustments-horizontal',
+            'slug' => 'settings',
+            'routeNamePrefix' => 'settings',
+            'role' => ['Admin'],
+            'submenu' => [
+                [
+                    'url' => '/settings/users',
+                    'name' => 'menu.settings.user_management',
+                    'slug' => 'settings.users.index',
+                    'routeName' => 'settings.users.index',
+                ],
+                [
+                    'url' => '/settings/roles',
+                    'name' => 'menu.settings.roles_permissions',
+                    'slug' => 'settings.roles.index',
+                    'routeName' => 'settings.roles.index',
+                ],
+                [
+                    'url' => '/settings/grades',
+                    'name' => 'menu.settings.grades_management',
+                    'slug' => 'settings.grades.index',
+                    'routeName' => 'settings.grades.index',
+                ],
+                [
+                    'url' => '/settings/departments',
+                    'name' => 'menu.settings.departments_management',
+                    'slug' => 'settings.departments.index',
+                    'routeName' => 'settings.departments.index',
+                ],
+                [
+                    'url' => '/settings/positions',
+                    'name' => 'menu.settings.positions_management',
+                    'slug' => 'settings.positions.index',
+                    'routeName' => 'settings.positions.index',
+                ],
+            ],
+        ],
+        [
+            'name' => 'menu.reports.title',
+            'icon' => 'menu-icon tf-icons ti ti-chart-bar',
+            'slug' => 'reports',
+            'routeNamePrefix' => 'reports',
             'role' => ['Admin', 'BPM Staff'],
-            'routeNamePrefix' => 'admin.loan-applications.management', // Prefix for the group
             'submenu' => [
                 [
-                    'name' => 'Semua Permohonan Pinjaman',
-                    'routeName' => 'admin.loan-applications.management.index', // Admin/BPM view of all loan apps
+                    'url' => '/reports/equipment-inventory',
+                    'name' => 'menu.reports.equipment_report',
+                    'slug' => 'reports.equipment-inventory',
+                    'routeName' => 'reports.equipment-inventory',
                 ],
                 [
-                    'name' => 'Proses Pengeluaran',
-                    'routeName' => 'admin.loan-applications.management.issue', // Page for issuing
+                    'url' => '/reports/email-accounts',
+                    'name' => 'menu.reports.email_accounts_report',
+                    'slug' => 'reports.email-accounts',
+                    'routeName' => 'reports.email-accounts',
                 ],
                 [
-                    'name' => 'Proses Pemulangan',
-                    'routeName' => 'admin.loan-applications.management.return', // Page for returning
+                    'url' => '/reports/loan-applications',
+                    'name' => 'menu.reports.loan_applications_report',
+                    'slug' => 'reports.loan-applications',
+                    'routeName' => 'reports.loan-applications',
+                ],
+                [
+                    'url' => '/reports/activity-log',
+                    'name' => 'menu.reports.user_activity_report',
+                    'slug' => 'reports.activity-log',
+                    'routeName' => 'reports.activity-log',
+                    'role' => ['Admin'],
                 ],
             ],
         ],
         [
-            'name' => 'Inventori Peralatan ICT',
-            'icon' => 'ti ti-building-warehouse',
-            'routeName' => 'admin.equipment-inventory.index', // CRUD for equipment
-            'role' => ['Admin', 'BPM Staff'],
-        ],
-
-        // System Administration (Admin Role)
-        [
-            'menuHeader' => 'Pentadbiran Sistem',
+            'url' => '/log-viewer',
+            'name' => 'menu.system_logs',
+            'icon' => 'menu-icon tf-icons ti ti-file-text',
+            'slug' => 'log-viewer.index',
+            'routeName' => 'log-viewer.index',
+            'target' => '_blank',
             'role' => ['Admin'],
         ],
-        [
-            'name' => 'Pengurusan Pengguna',
-            'icon' => 'ti ti-users',
-            'routeName' => 'admin.users.index', // User CRUD
-            'role' => ['Admin'],
-        ],
-        [
-            'name' => 'Struktur Organisasi',
-            'icon' => 'ti ti-hierarchy-2',
-            'role' => ['Admin'],
-            'routeNamePrefix' => 'settings.organization',
-            'submenu' => [
-                [
-                    'name' => 'Jabatan',
-                    'routeName' => 'settings.departments.index', // Department CRUD
-                ],
-                [
-                    'name' => 'Jawatan',
-                    'routeName' => 'settings.positions.index', // Position CRUD
-                ],
-                [
-                    'name' => 'Gred',
-                    'routeName' => 'settings.grades.index', // Grade CRUD
-        ],
-            ],
-        ],
-        [
-            'name' => 'Peranan & Kebenaran',
-            'icon' => 'ti ti-user-shield',
-            'routeName' => 'settings.roles.index', // Roles & Permissions UI
-            'role' => ['Admin'],
-        ],
-        [
-            'name' => 'Laporan Sistem',
-            'icon' => 'ti ti-report-analytics',
-            'role' => ['Admin'],
-            'routeNamePrefix' => 'admin.reports',
-            'submenu' => [
-                [
-                    'name' => 'Laporan Akaun Emel',
-                    'routeName' => 'admin.reports.email-accounts',
-                ],
-                [
-                    'name' => 'Laporan Peralatan ICT',
-                    'routeName' => 'admin.reports.equipment',
-                ],
-                [
-                    'name' => 'Laporan Pinjaman ICT',
-                    'routeName' => 'admin.reports.loan-applications',
-                ],
-                [
-                    'name' => 'Laporan Aktiviti Pengguna',
-                    'routeName' => 'admin.reports.user-activity',
-                ],
-            ],
-        ],
-        // Example of a Settings link if not covered above
-        // [
-        // 'name' => 'Konfigurasi Sistem',
-        // 'icon' => 'ti ti-settings',
-        // 'routeName' => 'admin.settings.index',
-        // 'role' => ['Admin'],
-        // ],
     ],
 ];

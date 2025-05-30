@@ -7,7 +7,7 @@ namespace App\Services;
 use App\Models\Approval;
 use App\Models\EmailApplication;
 use App\Models\Grade;
-use App\Models\User; // For fetching grade name details
+use App\Models\User; // For fetching grade name details & type hinting
 // Specific Notification Classes - System Design 5.1, 9.2
 // Notifications are now dispatched via NotificationService
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log; // For accessing motac config
 use InvalidArgumentException;
 use RuntimeException;
+use Throwable; // For catching exceptions in deleteApplication
 
 final class EmailApplicationService
 {
@@ -27,12 +28,16 @@ final class EmailApplicationService
 
     // Default relations to eager load for EmailApplication consistency
     private array $defaultEmailApplicationRelations = [
-        'user:id,name,email,department_id,grade_id,service_status,appointment_type', // Added fields based on application context
+        // Ensure fields here match what's selected in EmailApplicationController's show method for User
+        'user:id,name,title,full_name,email,department_id,grade_id,position_id,service_status,appointment_type',
         'user.department:id,name',
         'user.grade:id,name,level',
-        'supportingOfficerUser:id,name,email,grade_id', // For system-selected supporting officer
-        'supportingOfficerUser.grade:id,name,level',
-        'approvals.officer:id,name', // For displaying approval history
+        'user.position:id,name', // Added user.position based on typical needs
+        'supportingOfficer:id,name,title,full_name,email,grade_id', // CORRECTED: supportingOfficerUser to supportingOfficer
+        'supportingOfficer.grade:id,name,level', // CORRECTED: supportingOfficerUser to supportingOfficer
+        'approvals.officer:id,name,title,full_name', // For displaying approval history
+        'creator:id,name,title,full_name', // For blameable
+        'updater:id,name,title,full_name', // For blameable
     ];
 
     public function __construct(
@@ -82,10 +87,8 @@ final class EmailApplicationService
     public function updateApplication(EmailApplication $application, array $data, User $updater): EmailApplication
     {
         Log::info(self::LOG_AREA . "Attempting to update email application.", ['application_id' => $application->id, 'user_id' => $updater->id, 'data_keys' => array_keys($data)]);
-        // Authorization check (e.g., $updater->can('update', $application)) should be handled in the controller or Livewire component.
 
         return DB::transaction(function () use ($application, $data) {
-            // Prepare data, ensuring existing cert flags are used if not explicitly in $data to avoid accidental clearing
             $updateData = $data;
             $this->setCertificationFields($updateData, $data, $application);
 
@@ -107,24 +110,25 @@ final class EmailApplicationService
      */
     public function submitApplication(EmailApplication $application, User $submitter): EmailApplication
     {
-        if (!((int) $application->user_id === (int) $submitter->id && $application->canBeSubmitted($submitter))) {
-            // Using __() for translatable messages
+        // Ensure the applicant is the one submitting and the application is in a submittable state.
+        // The canBeSubmitted method should encapsulate status checks (e.g., isDraft).
+        // System Design (Rev. 3, Sources 391-396 for certification, 397-400 for supporting officer)
+        if (!($application->user_id == $submitter->id && $application->isDraft())) { // Simplified based on typical logic
             throw new RuntimeException(__('Permohonan ini tidak boleh dihantar oleh anda atau statusnya tidak membenarkan penghantaran.'));
         }
-        if (!$application->areAllCertificationsComplete()) {
-            throw new RuntimeException(__('Semua tiga perakuan mesti ditandakan sebelum permohonan boleh dihantar.'));
+        if (!$application->cert_info_is_true || !$application->cert_data_usage_agreed || !$application->cert_email_responsibility_agreed) {
+            throw new RuntimeException(__('Semua tiga perakuan mesti ditandakan sebelum permohonan boleh dihantar. Pastikan perakuan disimpan sebelum menghantar.'));
         }
 
         $supportingOfficer = null;
-        // Min grade for supporting officer from config - System Design 3.3, 7.2
-        $minSupportGradeLevel = (int) Config::get('motac.approval.min_email_supporting_officer_grade_level', 9);
+        $minSupportGradeLevel = (int) Config::get('motac.approval.min_email_supporting_officer_grade_level', 9); // Source 61, 183
 
-        if ($application->supporting_officer_id) { // If supporting officer selected from system users
+        if ($application->supporting_officer_id) {
             $supportingOfficer = User::with('grade:id,name,level')->find($application->supporting_officer_id);
             if (!$supportingOfficer) {
                 throw new ModelNotFoundException(__('Pegawai Penyokong (dari sistem) yang dipilih tidak ditemui.'));
             }
-            if (!$supportingOfficer->grade || (int) $supportingOfficer->grade->level < $minSupportGradeLevel) {
+            if (!$supportingOfficer->grade || (int) $supportingOfficer->grade->level < $minSupportGradeLevel) { // Source 114, 398
                 $minGradeName = Grade::where('level', $minSupportGradeLevel)->value('name') ?? "Gred $minSupportGradeLevel";
                 throw new InvalidArgumentException(
                     __("Pegawai Penyokong (:name) tidak memenuhi syarat gred minima (:minGrade). Gred semasa: :currentGrade", [
@@ -135,26 +139,37 @@ final class EmailApplicationService
                 );
             }
         } elseif (empty($application->supporting_officer_name) || empty($application->supporting_officer_email) || empty($application->supporting_officer_grade)) {
-            // If supporting officer details are entered manually
             throw new RuntimeException(__('Maklumat Pegawai Penyokong (Nama, E-mel, dan Gred) mesti diisi dengan lengkap jika tidak dipilih dari senarai pengguna sistem.'));
         }
-        // Additional validation for manually entered grade text could be added here if needed.
 
         Log::info(self::LOG_AREA . "Submitting email application for approval.", ['application_id' => $application->id, 'submitter_id' => $submitter->id]);
 
         return DB::transaction(function () use ($application, $submitter, $supportingOfficer) {
-            // Transition to PENDING_SUPPORT status
-            $application->transitionToStatus(EmailApplication::STATUS_PENDING_SUPPORT, __('Permohonan dihantar untuk semakan dan sokongan.'), $submitter->id);
+            $application->status = EmailApplication::STATUS_PENDING_SUPPORT;
+            $application->certification_timestamp = now(); // Ensure timestamp is set on submission
+            $application->save(); // Persist status change
 
-            if ($supportingOfficer instanceof User) { // If system user is selected as supporting officer
-                $this->approvalService->initiateApprovalWorkflow($application, $submitter, Approval::STAGE_EMAIL_SUPPORT_REVIEW, $supportingOfficer);
-            } else { // Manual supporting officer details provided
-                Log::info(self::LOG_AREA."Manual supporting officer details provided. An admin may need to create an approval task or the system should notify the external email.", ['application_id' => $application->id]);
-                // TODO: Implement notification to manually entered supporting officer's email if required.
-                // Or, create a pending approval task assigned to a generic "BPM Admin" role to handle these.
+            // Use ApprovalService to create the approval task
+            // System Design (Rev. 3, Sources 401, 116)
+            if ($supportingOfficer) { // System user selected
+                $this->approvalService->initiateApprovalWorkflow(
+                    $application,
+                    $submitter, // The user initiating this stage transition
+                    Approval::STAGE_EMAIL_SUPPORT_REVIEW,
+                    $supportingOfficer // The officer assigned to this stage
+                );
+            } else { // Manual supporting officer details
+                // If manual, a notification should go to the manually entered email,
+                // or an admin needs to create the task.
+                // For now, logging this. Notification to external email can be added.
+                Log::info(self::LOG_AREA . "Manual supporting officer details. Notify external or BPM admin.", [
+                    'application_id' => $application->id,
+                    'manual_officer_email' => $application->supporting_officer_email
+                ]);
+                // Consider: $this->notificationService->notifyExternalSupportingOfficer($application);
             }
 
-            // Notify applicant of submission - System Design 5.1
+            // Notify applicant of submission - System Design 5.1, 215
             $this->notificationService->notifyApplicantApplicationSubmitted($application);
 
             Log::info(self::LOG_AREA . "Email application SUBMITTED successfully.", ['application_id' => $application->id, 'new_status' => $application->status]);
@@ -172,13 +187,12 @@ final class EmailApplicationService
      */
     public function processProvisioning(EmailApplication $application, array $provisioningDetails, User $actingAdmin): EmailApplication
     {
-        // Authorization check (e.g., $actingAdmin->can('processByIT', $application)) should be in the controller.
-        if (!in_array($application->status, [EmailApplication::STATUS_APPROVED, EmailApplication::STATUS_PENDING_ADMIN])) {
+        if (!in_array($application->status, [EmailApplication::STATUS_APPROVED, EmailApplication::STATUS_PENDING_ADMIN])) { // Source 402
             throw new RuntimeException(
                 __("Permohonan mesti berstatus ':statusApproved' atau ':statusPendingAdmin' untuk tindakan penyediaan. Status semasa: :currentStatus", [
-                    'statusApproved' => __(EmailApplication::$STATUSES_LABELS[EmailApplication::STATUS_APPROVED]),
-                    'statusPendingAdmin' => __(EmailApplication::$STATUSES_LABELS[EmailApplication::STATUS_PENDING_ADMIN]),
-                    'currentStatus' => $application->statusTranslated
+                    'statusApproved' => __(EmailApplication::$STATUS_OPTIONS[EmailApplication::STATUS_APPROVED]), // Use STATUS_OPTIONS for labels
+                    'statusPendingAdmin' => __(EmailApplication::$STATUS_OPTIONS[EmailApplication::STATUS_PENDING_ADMIN]),
+                    'currentStatus' => $application->status_translated // Use accessor
                 ])
             );
         }
@@ -186,44 +200,42 @@ final class EmailApplicationService
         Log::info(self::LOG_AREA . "Starting provisioning process for EmailApplication.", ['application_id' => $application->id, 'admin_id' => $actingAdmin->id]);
 
         return DB::transaction(function () use ($application, $provisioningDetails, $actingAdmin) {
-            $application->transitionToStatus(EmailApplication::STATUS_PROCESSING, __('Proses penyediaan akaun dimulakan oleh Pentadbir IT.'), $actingAdmin->id);
+            // System Design (Rev. 3, Source 78, 403)
+            $application->status = EmailApplication::STATUS_PROCESSING;
+            $application->save(); // Persist status change
 
-            // Use details from form if provided, otherwise from application's proposed/final fields.
             $targetEmail = $provisioningDetails['final_assigned_email'] ?? $application->final_assigned_email ?? $application->proposed_email;
-            $targetUserId = $provisioningDetails['final_assigned_user_id'] ?? $application->final_assigned_user_id; // Can be optional
+            $targetUserId = $provisioningDetails['final_assigned_user_id'] ?? $application->final_assigned_user_id;
 
             if (empty($targetEmail)) {
                 throw new InvalidArgumentException(__('Alamat e-mel yang akan disediakan adalah mandatori.'));
             }
 
-            // Update application with these target values before calling provisioning service
             $application->final_assigned_email = $targetEmail;
             $application->final_assigned_user_id = $targetUserId;
-            $application->saveQuietly(); // Save without triggering observers again for this minor update if any
+            $application->saveQuietly();
 
-            // Call the EmailProvisioningService to handle the actual provisioning logic
+            // System Design (Rev. 3, Source 324, 404)
             $provisionResult = $this->emailProvisioningService->provisionEmailAccount($application, $targetEmail, $targetUserId);
 
             if ($provisionResult['success']) {
-                $application->transitionToStatus(EmailApplication::STATUS_COMPLETED, $provisionResult['message'] ?? __('Akaun e-mel/ID pengguna telah berjaya disediakan.'), $actingAdmin->id);
-                // Update application with confirmed details if provisioning service returns them explicitly
+                $application->status = EmailApplication::STATUS_COMPLETED; // Source 78
                 $application->final_assigned_email = $provisionResult['assigned_email'] ?? $application->final_assigned_email;
                 $application->final_assigned_user_id = $provisionResult['assigned_user_id'] ?? $application->final_assigned_user_id;
                 $application->save();
 
                 Log::info(self::LOG_AREA."Provisioning COMPLETED successfully.", ['application_id' => $application->id, 'assigned_email' => $application->final_assigned_email]);
-                // Notify the applicant - System Design 5.1
-                if ($application->user) { // Check if user relationship is loaded/exists
+                // System Design (Rev. 3, Source 216, 406)
+                if ($application->user) {
                     $this->notificationService->notifyApplicantEmailProvisioned($application);
                 }
             } else {
                 $failureReason = $provisionResult['message'] ?? __('Proses penyediaan akaun e-mel/ID pengguna gagal tanpa mesej spesifik.');
-                $application->transitionToStatus(EmailApplication::STATUS_PROVISION_FAILED, $failureReason, $actingAdmin->id);
-                // Store failure reason, perhaps append to admin_notes or rejection_reason
-                $application->admin_notes = ($application->admin_notes ? $application->admin_notes . "\n" : '') . __('Kegagalan Penyediaan IT: ') . $failureReason;
+                $application->status = EmailApplication::STATUS_PROVISION_FAILED; // Source 78
+                $application->rejection_reason = ($application->rejection_reason ? $application->rejection_reason . "\n" : '') . __('Kegagalan Penyediaan IT: ') . $failureReason;
                 $application->save();
                 Log::error(self::LOG_AREA."Provisioning FAILED.", ['application_id' => $application->id, 'reason' => $failureReason]);
-                // Notify acting admin and potentially other IT Admins of the failure
+                // System Design (Rev. 3, Source 216, 407)
                 $this->notificationService->notifyAdminProvisioningFailed($application, $failureReason, $actingAdmin);
             }
             return $application->fresh($this->defaultEmailApplicationRelations);
@@ -232,42 +244,72 @@ final class EmailApplicationService
 
     /**
      * Helper to set certification fields based on input, preserving existing state if not overridden.
+     * System Design (Rev. 3, Source 108-111, 392-395)
      * @param array &$applicationData Reference to the data array to be modified for create/update.
      * @param array $inputData The raw input data from the form.
      * @param EmailApplication|null $existingApplication Optional existing application for context during updates.
      */
     private function setCertificationFields(array &$applicationData, array $inputData, ?EmailApplication $existingApplication = null): void
     {
-        // Determine the new state of individual certification flags
-        $newCertInfoIsTrue = isset($inputData['cert_info_is_true']) ? (bool)$inputData['cert_info_is_true'] : ($existingApplication?->cert_info_is_true ?? false);
-        $newCertDataUsageAgreed = isset($inputData['cert_data_usage_agreed']) ? (bool)$inputData['cert_data_usage_agreed'] : ($existingApplication?->cert_data_usage_agreed ?? false);
-        $newCertEmailResponsibilityAgreed = isset($inputData['cert_email_responsibility_agreed']) ? (bool)$inputData['cert_email_responsibility_agreed'] : ($existingApplication?->cert_email_responsibility_agreed ?? false);
+        $applicationData['cert_info_is_true'] = isset($inputData['cert_info_is_true'])
+            ? (bool)$inputData['cert_info_is_true']
+            : ($existingApplication?->cert_info_is_true ?? false);
+        $applicationData['cert_data_usage_agreed'] = isset($inputData['cert_data_usage_agreed'])
+            ? (bool)$inputData['cert_data_usage_agreed']
+            : ($existingApplication?->cert_data_usage_agreed ?? false);
+        $applicationData['cert_email_responsibility_agreed'] = isset($inputData['cert_email_responsibility_agreed'])
+            ? (bool)$inputData['cert_email_responsibility_agreed']
+            : ($existingApplication?->cert_email_responsibility_agreed ?? false);
 
-        // If a master 'certification_accepted' flag is passed and is true, it forces all individual flags to true.
-        if (isset($inputData['certification_accepted']) && $inputData['certification_accepted'] === true) {
-            $newCertInfoIsTrue = true;
-            $newCertDataUsageAgreed = true;
-            $newCertEmailResponsibilityAgreed = true;
-        }
-        // If 'certification_accepted' is explicitly false, it doesn't necessarily mean unchecking all; individual flags dictate.
-
-        $applicationData['cert_info_is_true'] = $newCertInfoIsTrue;
-        $applicationData['cert_data_usage_agreed'] = $newCertDataUsageAgreed;
-        $applicationData['cert_email_responsibility_agreed'] = $newCertEmailResponsibilityAgreed;
-
-        // Update certification_timestamp
-        if ($newCertInfoIsTrue && $newCertDataUsageAgreed && $newCertEmailResponsibilityAgreed) {
-            // If all are true, set/keep timestamp. If previously uncertified and now certified, set new timestamp.
-            $applicationData['certification_timestamp'] = $existingApplication?->certification_timestamp ?? now();
-            if (isset($inputData['certification_accepted']) && $inputData['certification_accepted'] === true && !$existingApplication?->areAllCertificationsComplete()) {
-                $applicationData['certification_timestamp'] = now(); // Fresh timestamp if master accept flag made it complete
+        // If all individual certs are true, set the timestamp
+        if ($applicationData['cert_info_is_true'] && $applicationData['cert_data_usage_agreed'] && $applicationData['cert_email_responsibility_agreed']) {
+            // If it wasn't certified before, or if we are forcing a new timestamp via a master accept flag (not present here)
+            if (!($existingApplication && $existingApplication->cert_info_is_true && $existingApplication->cert_data_usage_agreed && $existingApplication->cert_email_responsibility_agreed)) {
+                 $applicationData['certification_timestamp'] = now();
+            } elseif ($existingApplication) {
+                // Preserve existing timestamp if already fully certified and no changes to certs
+                 $applicationData['certification_timestamp'] = $existingApplication->certification_timestamp;
+            } else {
+                 $applicationData['certification_timestamp'] = now(); // For new applications fully certified from start
             }
         } else {
-            // If any certification is false, clear the timestamp.
             $applicationData['certification_timestamp'] = null;
         }
-        unset($applicationData['certification_accepted']); // Remove temporary key
     }
 
-    // Other methods like deleteApplication, findApplicationById would follow similar logging and transaction patterns.
+    /**
+     * Delete an email application (soft delete).
+     * System Design Reference: Controller calls this, expects soft delete.
+     * @param EmailApplication $application The application to delete.
+     * @param User $deleter The user performing the deletion (for logging/audit).
+     * @return bool True if deletion was successful, false otherwise.
+     * @throws RuntimeException If deletion fails unexpectedly.
+     */
+    public function deleteApplication(EmailApplication $application, User $deleter): bool
+    {
+        Log::info(self::LOG_AREA . "Attempting to soft delete email application.", [
+            'application_id' => $application->id,
+            'deleter_id' => $deleter->id
+        ]);
+
+        // Controller should ensure only draft can be deleted.
+        // This service method performs the actual deletion.
+        try {
+            $result = $application->delete(); // Eloquent soft delete
+            if ($result) {
+                Log::info(self::LOG_AREA . "Email application soft DELETED successfully.", ['application_id' => $application->id]);
+            } else {
+                Log::warning(self::LOG_AREA . "Email application soft delete operation returned false.", ['application_id' => $application->id]);
+            }
+            return (bool)$result;
+        } catch (Throwable $e) {
+            Log::error(self::LOG_AREA . "Error during email application soft delete.", [
+                'application_id' => $application->id,
+                'error' => $e->getMessage(),
+                'trace_snippet' => substr($e->getTraceAsString(), 0, 300)
+            ]);
+            // Optionally rethrow or wrap in a custom exception
+            throw new RuntimeException(__('Gagal memadamkan permohonan e-mel: ') . $e->getMessage(), 0, $e);
+        }
+    }
 }
