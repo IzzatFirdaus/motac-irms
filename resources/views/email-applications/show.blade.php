@@ -17,13 +17,12 @@
                 <h1 class="fs-3 fw-bold mb-1">
                     {{ $itemTypeDisplay }}
                 </h1>
-                <p class="text-muted mb-0">ID Permohonan: #{{ $emailApplication->id }}</p>
+                <p class="text-muted mb-0">{{ __('ID Permohonan') }}: #{{ $emailApplication->id }}</p>
             </div>
-            {{-- Assuming x-resource-status-panel is a component that displays status with appropriate styling --}}
-            <x-resource-status-panel :status="$emailApplication->status" class="fs-5 p-2 mt-2 mt-sm-0" />
+            <x-resource-status-panel :resource="$emailApplication" statusAttribute="status" class="fs-5 p-2 mt-2 mt-sm-0" :showIcon="true" />
         </div>
 
-        @include('partials.session-messages') {{-- Extracted session messages to a partial for reusability --}}
+        {{-- Assuming session messages are handled globally by _partials._alerts.alert-general.blade.php --}}
 
         @if (($emailApplication->status === \App\Models\EmailApplication::STATUS_REJECTED || $emailApplication->status === \App\Models\EmailApplication::STATUS_PROVISION_FAILED) && $emailApplication->rejection_reason)
             <div class="alert alert-danger bg-danger-subtle border-danger-subtle text-danger-emphasis p-3 rounded mb-4" role="alert">
@@ -38,18 +37,15 @@
                 <section aria-labelledby="applicant-information-heading">
                     <h2 id="applicant-information-heading" class="fs-5 fw-semibold mb-3 border-bottom pb-2">{{ __('MAKLUMAT PEMOHON') }}</h2>
                     @if($emailApplication->user)
-                        {{-- Assuming x-user-info-card is a component that displays user details --}}
                         <x-user-info-card :user="$emailApplication->user" title=""/>
                     @else
-                        {{-- Fallback if user relationship isn't loaded or doesn't exist --}}
                         <dl class="row g-2 small">
                             <dt class="col-sm-4 fw-medium text-muted">{{__('Nama Penuh')}}:</dt>
                             <dd class="col-sm-8">{{ e($emailApplication->applicant_name ?? 'N/A') }}</dd>
-                            {{-- Add other fallback fields from $emailApplication if necessary --}}
                         </dl>
                     @endif
                     <p class="small mt-2"><span class="fw-medium text-muted">{{__('Taraf Perkhidmatan')}}:</span>
-                        <span>{{ e(\App\Models\User::getServiceStatusDisplayName($emailApplication->service_status)) }}</span> {{-- Assumes a helper method on User or EmailApplication model --}}
+                        <span>{{ e(\App\Models\User::getServiceStatusDisplayName($emailApplication->service_status)) }}</span>
                     </p>
                 </section>
 
@@ -57,16 +53,17 @@
                     <h2 id="application-details-heading" class="fs-5 fw-semibold mb-3 mt-4 border-bottom pb-2">{{ __('BUTIRAN PERMOHONAN') }}</h2>
                     <dl class="row g-2 small">
                         <dt class="col-sm-12 fw-medium text-muted">{{__('Tujuan Permohonan / Catatan Tambahan')}}:</dt>
-                        <dd class="col-sm-12" style="white-space: pre-wrap;">{{ e($emailApplication->purpose ?? ($emailApplication->application_reason_notes ?? 'Tiada')) }}</dd>
+                        <dd class="col-sm-12" style="white-space: pre-wrap;">{{ e($emailApplication->application_reason_notes ?? ($emailApplication->purpose ?? 'Tiada')) }}</dd>
 
                         <dt class="col-sm-4 fw-medium text-muted">{{__('Cadangan E-mel Rasmi')}}:</dt>
                         <dd class="col-sm-8">{{ e($emailApplication->proposed_email ?? 'Tidak Memohon E-mel Rasmi') }}</dd>
 
-                        @if ($emailApplication->is_group_email_request || $emailApplication->group_email) {{-- Check if it was a group email request or if group email exists --}}
+                        {{-- CORRECTED: Check if group_email field has a value --}}
+                        @if (!empty($emailApplication->group_email))
                             <div class="col-12 mt-3">
                                 <div class="p-3 bg-light-subtle border rounded">
                                     <h3 class="fs-6 fw-semibold mb-2">{{ __('Maklumat Group E-mel') }}</h3>
-                                    <dl class="row g-1 nested-dl small"> {{-- Nested definition list --}}
+                                    <dl class="row g-1 nested-dl small">
                                         <dt class="col-sm-5 fw-medium text-muted">{{__('Alamat Group E-mel Dicadang')}}:</dt>
                                         <dd class="col-sm-7">{{ e($emailApplication->group_email ?? 'N/A') }}</dd>
                                         <dt class="col-sm-5 fw-medium text-muted">{{__('Nama Admin/EO/CC Group')}}:</dt>
@@ -84,13 +81,13 @@
                     <h2 id="applicant-certification-heading" class="fs-5 fw-semibold mb-3 mt-4 border-bottom pb-2">{{ __('PERAKUAN PEMOHON') }}</h2>
                      <dl class="row g-2 small">
                         <dt class="col-sm-5 fw-medium text-muted">{{__('Semua maklumat yang diisi adalah BENAR')}}:</dt>
-                        <dd class="col-sm-7"><x-boolean-badge :value="$emailApplication->cert_info_is_true" /></dd>
+                        <dd class="col-sm-7"><x-boolean-badge :value="(bool)$emailApplication->cert_info_is_true" /></dd>
 
                         <dt class="col-sm-5 fw-medium text-muted">{{__('BERSETUJU maklumat diguna pakai untuk pemprosesan')}}:</dt>
-                         <dd class="col-sm-7"><x-boolean-badge :value="$emailApplication->cert_data_usage_agreed" /></dd>
+                         <dd class="col-sm-7"><x-boolean-badge :value="(bool)$emailApplication->cert_data_usage_agreed" /></dd>
 
                         <dt class="col-sm-5 fw-medium text-muted">{{__('BERSETUJU bertanggungjawab atas penggunaan e-mel')}}:</dt>
-                        <dd class="col-sm-7"><x-boolean-badge :value="$emailApplication->cert_email_responsibility_agreed" /></dd>
+                        <dd class="col-sm-7"><x-boolean-badge :value="(bool)$emailApplication->cert_email_responsibility_agreed" /></dd>
 
                         <dt class="col-sm-5 fw-medium text-muted">{{__('Tarikh Perakuan')}}:</dt>
                         <dd class="col-sm-7">{{ optional($emailApplication->certification_timestamp)->translatedFormat('d M Y, H:i A') ?? __('Belum Diperakui') }}</dd>
@@ -107,13 +104,13 @@
                         <dt class="col-sm-4 fw-medium text-muted">{{__('E-mel')}}:</dt>
                         <dd class="col-sm-8">{{ e(optional($emailApplication->supportingOfficer)->email ?? $emailApplication->supporting_officer_email ?? 'N/A') }}</dd>
 
-                        <dt class="col-sm-4 fw-medium text-muted">{{__('Gred')}}:</dt> {{-- System Design reference for grades [cite: 284] --}}
+                        <dt class="col-sm-4 fw-medium text-muted">{{__('Gred')}}:</dt>
                         <dd class="col-sm-8">{{ e(optional(optional($emailApplication->supportingOfficer)->grade)->name ?? $emailApplication->supporting_officer_grade ?? 'N/A') }}</dd>
                     </dl>
                 </section>
                 @endif
 
-                @if ($emailApplication->isCompletedOrProvisionFailed()) {{-- Assuming method exists on model --}}
+                @if ($emailApplication->isCompletedOrProvisionFailed()) {{-- Ensure this method exists on EmailApplication model --}}
                 <section aria-labelledby="provisioning-details-heading">
                     <h2 id="provisioning-details-heading" class="fs-5 fw-semibold mb-3 mt-4 border-bottom pb-2">{{ __('MAKLUMAT PENYEDIAAN AKAUN') }}</h2>
                      <dl class="row g-2 small">
@@ -166,27 +163,30 @@
                     </div>
                     <div class="d-flex flex-wrap gap-2">
                         @can('update', $emailApplication)
-                             @if ($emailApplication->isDraft()) {{-- Assuming isDraft() method on model --}}
+                             @if ($emailApplication->isDraft())
                                 <a href="{{ route('email-applications.edit', $emailApplication) }}" class="btn btn-primary btn-sm d-inline-flex align-items-center">
                                    <i class="bi bi-pencil-square me-1"></i> {{ __('Edit Draf') }}
                                 </a>
                             @endif
                         @endcan
 
-                        @can('submit', $emailApplication) {{-- Policy for submitting --}}
-                            <form action="{{ route('email-applications.submit', $emailApplication) }}" method="POST" onsubmit="return confirm('{{ __('Adakah anda pasti untuk menghantar permohonan ini?') }}');" class="d-inline">
-                                @csrf
-                                <button type="submit" class="btn btn-success btn-sm d-inline-flex align-items-center">
-                                    <i class="bi bi-send-check-fill me-1"></i> {{ __('Hantar Permohonan') }}
-                                </button>
-                            </form>
+                        @can('submit', $emailApplication)
+                            @if ($emailApplication->isDraft() || $emailApplication->status === \App\Models\EmailApplication::STATUS_REJECTED)
+                                <form action="{{ route('email-applications.submit', $emailApplication) }}" method="POST" onsubmit="return confirm('{{ __('Adakah anda pasti untuk menghantar permohonan ini?') }}');" class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="btn btn-success btn-sm d-inline-flex align-items-center">
+                                        <i class="bi bi-send-check-fill me-1"></i> {{ __('Hantar Permohonan') }}
+                                    </button>
+                                </form>
+                            @endif
                         @endcan
 
-                        {{-- Example: Button for IT Admin to process (if applicable and policy allows) --}}
                         @can('processByIT', $emailApplication)
-                             <button type="button" class="btn btn-info btn-sm d-inline-flex align-items-center" onclick="alert('Trigger IT Process Modal/Action');"> {{-- Replace onclick with actual modal trigger --}}
-                                <i class="bi bi-gear-fill me-1"></i> {{ __('Proses Penyediaan Akaun') }}
-                            </button>
+                             @if ($emailApplication->status === \App\Models\EmailApplication::STATUS_APPROVED || $emailApplication->status === \App\Models\EmailApplication::STATUS_PENDING_ADMIN)
+                                 <button type="button" class="btn btn-info btn-sm d-inline-flex align-items-center" onclick="alert('Trigger IT Process Modal/Action for {{ $emailApplication->id }}');">
+                                    <i class="bi bi-gear-fill me-1"></i> {{ __('Proses Penyediaan Akaun') }}
+                                </button>
+                            @endif
                         @endcan
 
                         @can('delete', $emailApplication)
@@ -205,19 +205,11 @@
             </div>
         </div>
     </div>
-
-    {{-- The Alpine.js Modals were commented out in the original. Keeping them commented. --}}
-    {{-- If you plan to use them, ensure Alpine.js is set up and the modal actions/routes are correctly wired. --}}
-    {{--
-    <div x-data="{ showApprovalModal: false, ... }" x-cloak>
-        ... Alpine Modal HTML ...
-    </div>
-    --}}
 </div>
 @endsection
 
 @push('styles')
 <style>
-    .nested-dl dt { font-weight: normal; } /* Example style for nested dl */
+    .nested-dl dt { font-weight: normal; }
 </style>
 @endpush

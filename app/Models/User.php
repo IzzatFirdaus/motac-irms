@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str; // Added for Str::title
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
@@ -83,17 +84,11 @@ class User extends Authenticatable
     public const STATUS_ACTIVE = 'active';
     public const STATUS_INACTIVE = 'inactive';
 
-    // Service Status Constants - Ensure these are the KEYS stored in DB
-    // CRITICAL: The migration for 'users' table, 'service_status' ENUM column
-    // MUST include all these numeric string values.
     public const SERVICE_STATUS_TETAP = '1';
     public const SERVICE_STATUS_KONTRAK_MYSTEP = '2';
     public const SERVICE_STATUS_PELAJAR_INDUSTRI = '3';
-    public const SERVICE_STATUS_OTHER_AGENCY = '4'; // For "E-mel Sandaran (Agensi Lain di MOTAC)"
-    // Add other service_type_4, service_type_7 as distinct numeric strings if they become concrete requirements
-    // e.g., public const SERVICE_STATUS_TYPE_4_LEGACY = '5'; // Example
+    public const SERVICE_STATUS_OTHER_AGENCY = '4';
 
-    // Appointment Type Constants - Ensure these are the KEYS stored in DB
     public const APPOINTMENT_TYPE_BAHARU = '1';
     public const APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN = '2';
     public const APPOINTMENT_TYPE_LAIN_LAIN = '3';
@@ -122,7 +117,6 @@ class User extends Authenticatable
         self::SERVICE_STATUS_KONTRAK_MYSTEP => 'Lantikan Kontrak / MyStep',
         self::SERVICE_STATUS_PELAJAR_INDUSTRI => 'Pelajar Latihan Industri (Ibu Pejabat Sahaja)',
         self::SERVICE_STATUS_OTHER_AGENCY => 'E-mel Sandaran (Agensi Lain di MOTAC)',
-        // Add labels for other service statuses if defined
     ];
 
     public static array $APPOINTMENT_TYPE_LABELS = [
@@ -142,7 +136,6 @@ class User extends Authenticatable
         'service_status', 'appointment_type',
         'previous_department_name', 'previous_department_email',
         'status', 'email_verified_at',
-        // created_by, updated_by handled by BlameableObserver
     ];
 
     protected $hidden = [
@@ -175,6 +168,17 @@ class User extends Authenticatable
             $levels[(string)$i] = (string)$i;
         }
         return $levels;
+    }
+
+    /**
+     * Get the display name for a given service status key.
+     *
+     * @param string|null $statusKey
+     * @return string
+     */
+    public static function getServiceStatusDisplayName(?string $statusKey): string
+    {
+        return __(self::$SERVICE_STATUS_LABELS[$statusKey] ?? Str::title(str_replace('_', ' ', (string) $statusKey)));
     }
 
     protected static function newFactory(): UserFactory { return UserFactory::new(); }

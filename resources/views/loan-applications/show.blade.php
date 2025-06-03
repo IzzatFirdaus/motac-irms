@@ -13,14 +13,21 @@
                     <h1 class="h2 fw-bold text-dark mb-1">
                         {{ __('Butiran Permohonan Pinjaman ICT') }}
                     </h1>
-                    <p class="text-muted mb-0">ID Permohonan: #{{ $loanApplication->id }}</p>
+                    <p class="text-muted mb-0">{{ __('ID Permohonan') }}: #{{ $loanApplication->id }}</p>
                 </div>
                 <div class="mt-2 mt-md-0">
-                    <x-resource-status-panel :status="$loanApplication->status" :options="\App\Models\LoanApplication::getStatusOptions()" class="fs-5 px-3 py-2 shadow-sm" />
+                    {{-- Ensure x-resource-status-panel expects :resource and optionally statusAttribute --}}
+                    <x-resource-status-panel
+                        :resource="$loanApplication"
+                        statusAttribute="status" {{-- This model has getStatusLabelAttribute --}}
+                        class="fs-5 px-3 py-2 shadow-sm"
+                        :showIcon="true"
+                    />
                 </div>
             </div>
 
-            @include('partials.alert-messages')
+            {{-- Removed: @include('partials.alert-messages') --}}
+            {{-- Assuming session messages are handled globally by _partials._alerts.alert-general.blade.php --}}
 
             @if ($loanApplication->status === \App\Models\LoanApplication::STATUS_REJECTED && $loanApplication->rejection_reason)
                 <div class="alert alert-danger bg-danger-subtle border-danger-subtle p-3 mb-4 shadow-sm rounded-3">
@@ -35,6 +42,7 @@
                     <section aria-labelledby="applicant-information">
                         <h2 id="applicant-information" class="h5 fw-semibold text-dark mb-3 border-bottom pb-2">{{ __('BAHAGIAN 1 | MAKLUMAT PEMOHON') }}</h2>
                         @if($loanApplication->user)
+                            {{-- Ensure resources/views/components/user-info-card.blade.php exists --}}
                             <x-user-info-card :user="$loanApplication->user" :application="$loanApplication" title=""/>
                         @else
                             <p class="text-muted small">{{ __('Maklumat pemohon tidak tersedia.') }}</p>
@@ -61,7 +69,7 @@
                             <dd class="col-md-8 col-lg-9 text-dark">{{ optional($loanApplication->loan_end_date)->translatedFormat('d M Y, h:i A') ?? __('N/A') }}</dd>
 
                             <dt class="col-md-4 col-lg-3 fw-medium text-muted">{{ __('Tarikh Permohonan Dihantar:') }}</dt>
-                            <dd class="col-md-8 col-lg-9 text-dark">{{ optional($loanApplication->submitted_at)->translatedFormat('d M Y, h:i A') ?? (optional($loanApplication->created_at)->translatedFormat('d M Y, h:i A'). ($loanApplication->status === \App\Models\LoanApplication::STATUS_DRAFT ? ' (Draf)' : ' (Belum Dihantar)')) }}</dd>
+                            <dd class="col-md-8 col-lg-9 text-dark">{{ optional($loanApplication->submitted_at)->translatedFormat('d M Y, h:i A') ?? (optional($loanApplication->created_at)->translatedFormat('d M Y, h:i A'). ($loanApplication->isDraft() ? ' (Draf)' : ' (Belum Dihantar)')) }}</dd>
                         </dl>
                     </section>
 
@@ -153,9 +161,11 @@
                                     <tbody>
                                         @foreach ($loanApplication->approvals->sortBy('created_at') as $approval)
                                             <tr>
+                                                {{-- Ensure \App\Models\Approval::getStageDisplayName() method exists --}}
                                                 <td class="small text-dark ps-3">{{ e(\App\Models\Approval::getStageDisplayName($approval->stage)) ?? __('N/A') }}</td>
                                                 <td class="small text-dark">{{ e(optional($approval->officer)->name ?? 'N/A') }}</td>
                                                 <td class="small">
+                                                    {{-- Ensure resources/views/components/approval-status-badge.blade.php exists --}}
                                                     <x-approval-status-badge :status="$approval->status" />
                                                 </td>
                                                 <td class="small text-muted" style="white-space: pre-wrap;">{{ e($approval->comments ?? '-') }}</td>
@@ -180,16 +190,21 @@
                                     <div class="card-body p-3">
                                         <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
                                             <h3 class="h6 card-title mb-0 text-dark fw-medium">
-                                                {{ __('Transaksi') }} #{{ $transaction->id }} - <span class="fw-normal">{{ e(__(\App\Models\LoanTransaction::getTypeLabel($transaction->type))) }}</span>
+                                                {{ __('Transaksi') }} #{{ $transaction->id }} - <span class="fw-normal">{{-- Ensure \App\Models\LoanTransaction::getTypeLabel() method exists --}}{{ e(__(\App\Models\LoanTransaction::getTypeLabel($transaction->type))) }}</span>
                                             </h3>
-                                            <x-resource-status-panel :status="$transaction->status" :options="\App\Models\LoanTransaction::getStatusOptions()" class="fs-6 px-2 py-1" />
+                                            <x-resource-status-panel
+                                                :resource="$transaction"
+                                                statusAttribute="status"
+                                                class="fs-6 px-2 py-1"
+                                                :showIcon="true"
+                                            />
                                         </div>
                                         <p class="small text-muted mb-2">{{__('Tarikh Transaksi')}}: {{ optional($transaction->transaction_date)->translatedFormat('d M Y, h:i A') }}</p>
                                         <div class="small text-muted mb-2">
-                                            @if($transaction->isIssue())
+                                            @if($transaction->isIssue()) {{-- Ensure isIssue() method on LoanTransaction model --}}
                                                 <p class="mb-1"><strong class="fw-medium">{{ __('Pegawai Pengeluar (BPM):') }}</strong> {{ e(optional($transaction->issuingOfficer)->name ?? 'N/A') }}</p>
                                                 <p class="mb-0"><strong class="fw-medium">{{ __('Pegawai Penerima (Pemohon/Wakil):') }}</strong> {{ e(optional($transaction->receivingOfficer)->name ?? 'N/A') }}</p>
-                                            @elseif($transaction->isReturn())
+                                            @elseif($transaction->isReturn()) {{-- Ensure isReturn() method on LoanTransaction model --}}
                                                 <p class="mb-1"><strong class="fw-medium">{{ __('Pegawai Pemulang (Pemohon/Wakil):') }}</strong> {{ e(optional($transaction->returningOfficer)->name ?? 'N/A') }}</p>
                                                 <p class="mb-0"><strong class="fw-medium">{{ __('Pegawai Terima Pulangan (BPM):') }}</strong> {{ e(optional($transaction->returnAcceptingOfficer)->name ?? 'N/A') }}</p>
                                             @endif
@@ -204,6 +219,7 @@
                                                         {{ e(optional($txItem->equipment)->brand_model_serial ?? (optional($txItem->equipment)->tag_id ?? __('Peralatan ID: ') . $txItem->equipment_id)) }}
                                                         (Qty: {{ $txItem->quantity_transacted }})
                                                         @if($transaction->isReturn() && $txItem->condition_on_return)
+                                                            {{-- Ensure \App\Models\Equipment::getConditionStatusOptions() method exists --}}
                                                             <span class="ms-2 text-muted">({{ __('Keadaan Semasa Pulang') }}: {{ e(\App\Models\Equipment::getConditionStatusOptions()[$txItem->condition_on_return] ?? Str::title(str_replace('_', ' ',$txItem->condition_on_return))) }})</span>
                                                         @endif
                                                     </li>
@@ -240,8 +256,8 @@
                             <i class="bi bi-arrow-left-circle me-1"></i> {{ __('Kembali ke Senarai') }}
                         </a>
 
-                        @can('update', $loanApplication) {{-- Policy: LoanApplicationPolicy@update --}}
-                            @if ($loanApplication->isDraft() || $loanApplication->isRejected()) {{-- Assuming these methods exist on model --}}
+                        @can('update', $loanApplication)
+                            @if ($loanApplication->isDraft() || $loanApplication->isRejected())
                                 <a href="{{ route('loan-applications.edit', $loanApplication) }}"
                                    class="btn btn-info d-inline-flex align-items-center">
                                     <i class="bi bi-pencil-square me-1"></i> {{ $loanApplication->isRejected() ? __('Edit & Hantar Semula') : __('Kemaskini Draf') }}
@@ -249,7 +265,7 @@
                             @endif
                         @endcan
 
-                        @can('submit', $loanApplication) {{-- Policy: LoanApplicationPolicy@submit --}}
+                        @can('submit', $loanApplication)
                              @if ($loanApplication->isDraft() || $loanApplication->isRejected())
                                 <form action="{{ route('loan-applications.submit', $loanApplication) }}" method="POST" class="d-inline" onsubmit="return confirm('{{__('Adakah anda pasti untuk menghantar permohonan ini untuk kelulusan?')}}');">
                                      @csrf
@@ -260,8 +276,8 @@
                             @endif
                         @endcan
 
-                        @can('processIssuance', $loanApplication) {{-- Policy: LoanApplicationPolicy@processIssuance --}}
-                            @if ($loanApplication->canBeIssued()) {{-- Assuming this method checks if status allows issuance --}}
+                        @can('processIssuance', $loanApplication)
+                            @if ($loanApplication->canBeIssued())
                                  <a href="{{ route('resource-management.bpm.loan-transactions.issue.form', $loanApplication) }}"
                                    class="btn btn-warning d-inline-flex align-items-center">
                                     <i class="bi bi-box-arrow-up-right me-1"></i> {{ __('Proses Pengeluaran Peralatan') }}
@@ -270,10 +286,10 @@
                         @endcan
 
                         @php
-                            $relevantIssueTransaction = $loanApplication->getRelevantIssueTransactionForReturn(); // Moved to a model method
+                            $relevantIssueTransaction = $loanApplication->getRelevantIssueTransactionForReturn();
                         @endphp
-                        @if ($relevantIssueTransaction && $loanApplication->canBeReturned()) {{-- Assuming canBeReturned on model --}}
-                            @can('processReturn', $loanApplication) {{-- Policy: LoanApplicationPolicy@processReturn --}}
+                        @if ($relevantIssueTransaction && $loanApplication->canBeReturned())
+                            @can('processReturn', $loanApplication)
                                  <a href="{{ route('resource-management.bpm.loan-transactions.return.form', $relevantIssueTransaction) }}"
                                    class="btn btn-purple d-inline-flex align-items-center">
                                     <i class="bi bi-box-arrow-in-left me-1"></i> {{ __('Proses Pemulangan Peralatan') }}
@@ -281,7 +297,7 @@
                             @endcan
                         @endif
 
-                        @can('delete', $loanApplication) {{-- Policy: LoanApplicationPolicy@delete --}}
+                        @can('delete', $loanApplication)
                             @if ($loanApplication->isDraft())
                                 <form action="{{ route('loan-applications.destroy', $loanApplication) }}" method="POST" class="d-inline" onsubmit="return confirm('{{__('Adakah anda pasti untuk memadam draf permohonan ini?')}}');">
                                     @csrf
