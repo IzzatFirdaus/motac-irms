@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Pagination\Paginator; // <--- ADD THIS LINE
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -45,6 +46,10 @@ class AppServiceProvider extends ServiceProvider
     {
         // Enforce strict Eloquent mode in non-production environments
         Model::shouldBeStrict(!$this->app->environment('production'));
+
+        // Configure Laravel Paginator to use Bootstrap 5 <--- ADD THESE LINES
+        Paginator::useBootstrapFive();
+
 
         // Register Blade component aliases for convenience
         // Blade::component('layouts.app', 'app-layout'); // Example: <x-app-layout /> maps to resources/views/layouts/app.blade.php

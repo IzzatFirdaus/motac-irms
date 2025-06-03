@@ -71,9 +71,9 @@
                             <td class="px-3 py-2 small">
                                 {{-- Ensure .bg-success-lt & .bg-danger-lt are MOTAC themed --}}
                                 @if($grade->is_approver_grade)
-                                    <span class="badge rounded-pill bg-success-lt">{{ __('Ya') }}</span>
+                                    <span class="badge rounded-pill bg-success-lt text-dark">{{ __('Ya') }}</span>
                                 @else
-                                    <span class="badge rounded-pill bg-danger-lt">{{ __('Tidak') }}</span>
+                                    <span class="badge rounded-pill bg-danger-lt text-dark">{{ __('Tidak') }}</span>
                                 @endif
                             </td>
                             <td class="px-3 py-2 small text-muted">{{ $grade->minApprovalGrade?->name ?? '-' }}</td>

@@ -12,12 +12,13 @@
                     <h1 class="h2 fw-bold text-dark mb-0">
                         {{ __('Butiran Transaksi Pinjaman Peralatan ICT') }} #{{ $loanTransaction->id }}
                     </h1>
-                    <a href="{{ route('loan-transactions.index') }}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center">
+                    <a href="{{ route('resource-management.bpm.loan-transactions.index') }}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center">
                         <i class="bi bi-list-ul me-1"></i> {{__('Senarai Semua Transaksi')}}
                     </a>
                 </div>
 
-                @include('partials.alert-messages')
+                {{-- Corrected include path for general alert messages --}}
+                @include('_partials._alerts.alert-general')
 
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-light py-3">
@@ -88,7 +89,8 @@
                                 <dd class="col-sm-8">{{ optional($loanTransaction->issue_timestamp)->translatedFormat('d M Y, H:i A') ?? __('N/A') }}</dd>
 
                                 <dt class="col-sm-4 text-muted">{{ __('Aksesori Dikeluarkan:') }}</dt>
-                                <dd class="col-sm-8">{{ implode(', ', json_decode($loanTransaction->accessories_checklist_on_issue ?? '[]', true)) ?: '-' }}</dd>
+                                {{-- Removed json_decode as it's already an array due to model casting --}}
+                                <dd class="col-sm-8">{{ implode(', ', $loanTransaction->accessories_checklist_on_issue ?: ['-']) }}</dd>
 
                                 <dt class="col-sm-4 text-muted">{{ __('Catatan Pengeluaran:') }}</dt>
                                 <dd class="col-sm-8" style="white-space: pre-wrap;">{{ e($loanTransaction->issue_notes ?: '-') }}</dd>
@@ -114,7 +116,8 @@
                                 <dd class="col-sm-8">{{ optional($loanTransaction->return_timestamp)->translatedFormat('d M Y, H:i A') ?? __('N/A') }}</dd>
 
                                 <dt class="col-sm-4 text-muted">{{ __('Aksesori Dipulangkan:') }}</dt>
-                                <dd class="col-sm-8">{{ implode(', ', json_decode($loanTransaction->accessories_checklist_on_return ?? '[]', true)) ?: '-' }}</dd>
+                                {{-- Removed json_decode as it's already an array due to model casting --}}
+                                <dd class="col-sm-8">{{ implode(', ', $loanTransaction->accessories_checklist_on_return ?: ['-']) }}</dd>
 
                                 <dt class="col-sm-4 text-muted">{{ __('Catatan Pemulangan:') }}</dt>
                                 <dd class="col-sm-8" style="white-space: pre-wrap;">{{ e($loanTransaction->return_notes ?: '-') }}</dd>

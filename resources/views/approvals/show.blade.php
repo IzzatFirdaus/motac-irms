@@ -24,7 +24,7 @@
                                 <i class="bi bi-clipboard-check-fill me-2 text-primary"></i> {{ __('Tugasan Kelulusan') }}
                                 #{{ $approval->id }}
                             </h2>
-                            <a href="{{ url()->previous(route('approvals.dashboard')) }}" {{-- System Design reference for approver dashboard fallback [cite: 435] --}}
+                            <a href="{{ url()->previous(route('approvals.dashboard')) }}"
                                 class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center mt-2 mt-sm-0">
                                 <i class="bi bi-arrow-left me-1"></i> {{ __('Kembali') }}
                             </a>
@@ -34,14 +34,22 @@
                                 class="fw-medium">{{ \App\Models\Approval::getStageDisplayName($approval->stage) }}</span>
                             <span class="mx-2 text-muted">|</span>
                             {{ __('Status Semasa Tugasan') }}:
+                            {{-- Ensure x-approval-status-badge component exists --}}
                             <x-approval-status-badge :status="$approval->status" />
                         </p>
                     </div>
 
                     <div class="card-body p-3 p-sm-4">
-                        @include('partials.alert-messages') {{-- Assuming a partial for session messages --}}
+                        {{-- REMOVED: @include('partials.alert-messages') --}}
+                        {{-- Assuming session messages and validation errors (if any from POST to this page)
+                             are handled globally by _partials._alerts.alert-general.blade.php
+                             included in your main layout (e.g., layouts.app.blade.php) --}}
 
                         @if ($errors->any())
+                            {{-- This specific error block can remain if you want errors displayed right here
+                                 in addition to any global alerts, or if alert-general is not global.
+                                 However, _partials._alerts.alert-general.blade.php also handles $errors->any()
+                                 so this might be duplicative if _partials._alerts.alert-general is in layouts.app.blade.php --}}
                             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                                 <h5 class="alert-heading fw-bold"><i
                                         class="bi bi-x-octagon-fill me-2"></i>{{ __('Sila perbetulkan ralat berikut:') }}
@@ -85,8 +93,8 @@
                                     <dt class="col-sm-4 col-lg-3 fw-medium text-muted">
                                         {{ __('Status Keseluruhan Permohonan') }}:</dt>
                                     <dd class="col-sm-8 col-lg-9">
-                                        {{-- Assuming the status attribute exists on the approvable item and badge component handles it --}}
-                                        <x-resource-status-panel :status="$approvableItem->status" class="badge" />
+                                        {{-- Ensure x-resource-status-panel component exists and is correctly called --}}
+                                        <x-resource-status-panel :resource="$approvableItem" statusAttribute="status" class="badge" :showIcon="true" />
                                     </dd>
 
                                     @if (property_exists($approvableItem, 'purpose') && !empty($approvableItem->purpose))
@@ -179,7 +187,6 @@
                                                 <option value="{{ \App\Models\Approval::STATUS_REJECTED }}" {{ old('decision') == \App\Models\Approval::STATUS_REJECTED ? 'selected' : '' }}>
                                                     {{ __('Tolak') }}</option>
                                             </select>
-                                            {{-- Linter PHP1412 false positive: $message is available in @error block --}}
                                             @error('decision')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -187,7 +194,6 @@
                                         <div class="mb-3">
                                             <label for="comments" class="form-label fw-medium">{{ __('Catatan Tambahan (Jika Ada)') }} <span id="comments_required_star" class="text-danger fst-italic" style="display:none;">* {{ __('Wajib diisi jika ditolak') }}</span></label>
                                             <textarea name="comments" id="comments" rows="4" class="form-control @error('comments') is-invalid @enderror" placeholder="{{ __('Sila berikan justifikasi jika menolak permohonan.') }}">{{ old('comments') }}</textarea>
-                                            {{-- Linter PHP1412 false positive: $message is available in @error block --}}
                                             @error('comments')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror

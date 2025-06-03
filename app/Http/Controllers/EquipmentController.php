@@ -74,14 +74,22 @@ class EquipmentController extends Controller
             perPage: (int) $request->input('per_page', config('pagination.default_size', 15))
         );
 
+        // Prepare data for dropdowns/filters in the view
+        $assetTypes = Equipment::getAssetTypeOptions();
+        $operationalStatuses = Equipment::getStatusOptions();
+        $conditionStatuses = Equipment::getConditionStatusOptions();
+        $classifications = Equipment::getClassificationOptions();
+        $locations = Location::where('is_active', true)->orderBy('name')->get(['id', 'name']);
+
+
         $viewData = [
             'equipmentList' => $equipmentPaginator,
             'requestFilters' => $request->only(['asset_type', 'status', 'condition_status', 'classification', 'location_id', 'search']),
-            'assetTypes' => method_exists(Equipment::class, 'getAssetTypeOptions') ? Equipment::getAssetTypeOptions() : [],
-            'operationalStatuses' => method_exists(Equipment::class, 'getStatusOptions') ? Equipment::getStatusOptions() : [],
-            'conditionStatuses' => method_exists(Equipment::class, 'getConditionStatusOptions') ? Equipment::getConditionStatusOptions() : [],
-            'classifications' => method_exists(Equipment::class, 'getClassificationOptions') ? Equipment::getClassificationOptions() : [],
-            'locations' => Location::where('is_active', true)->orderBy('name')->get(['id', 'name']),
+            'assetTypes' => $assetTypes, // Corrected to use the variable
+            'operationalStatuses' => $operationalStatuses, // Corrected to use the variable
+            'conditionStatuses' => $conditionStatuses, // Corrected to use the variable
+            'classifications' => $classifications, // Corrected to use the variable
+            'locations' => $locations, // Corrected to use the variable
         ];
 
         return view('equipment.index', $viewData);
@@ -102,12 +110,14 @@ class EquipmentController extends Controller
         );
 
         $equipment->loadMissing([
-            'creatorInfo:id,name',     // Assumes 'creatorInfo' relation exists on Equipment model, linking to User
-            'updaterInfo:id,name',     // Assumes 'updaterInfo' relation exists on Equipment model, linking to User
-            'definedLocation:id,name', // Assumes 'definedLocation' is the correct relation name to Location model
-            'department:id,name',      // Assumes 'department' relation exists
-            'equipmentCategory:id,name',// Assumes 'equipmentCategory' relation exists
-            'subCategory:id,name'      // Assumes 'subCategory' relation exists
+            'creator:id,name',     // Changed from 'creatorInfo' to 'creator'
+            'updater:id,name',     // Changed from 'updaterInfo' to 'updater'
+            'definedLocation:id,name',
+            'department:id,name',
+            'equipmentCategory:id,name',
+            'subCategory:id,name',
+            // Eager load loanTransactionItems and their nested relationships to prevent N+1 issues
+            'loanTransactionItems.loanTransaction.loanApplication.user', // Eager loads transaction, then application, then user.
         ]);
 
         return view('equipment.show', compact('equipment'));

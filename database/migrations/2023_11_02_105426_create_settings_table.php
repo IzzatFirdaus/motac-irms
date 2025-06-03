@@ -10,33 +10,31 @@ return new class extends Migration
   {
     Schema::create('settings', function (Blueprint $table) {
       $table->id();
-      // Example settings - add more as needed by your application
+
+      // Original fields
       $table->string('site_name')->default('MOTAC Resource Management');
       $table->string('site_logo_path')->nullable();
       $table->string('default_notification_email_from')->nullable();
       $table->string('default_notification_email_name')->nullable();
-
       $table->string('sms_api_sender')->nullable();
       $table->string('sms_api_username')->nullable();
-      $table->string('sms_api_password')->nullable(); // Consider encrypting if storing real credentials
+      $table->string('sms_api_password')->nullable();
       $table->text('terms_and_conditions_loan')->nullable();
       $table->text('terms_and_conditions_email')->nullable();
 
-      $table
-        ->foreignId('created_by')
-        ->nullable()
-        ->constrained('users')
-        ->onDelete('set null');
-      $table
-        ->foreignId('updated_by')
-        ->nullable()
-        ->constrained('users')
-        ->onDelete('set null');
-      $table
-        ->foreignId('deleted_by')
-        ->nullable()
-        ->constrained('users')
-        ->onDelete('set null');
+      // Added fields based on seeder error and common application settings
+      $table->string('application_name')->default('MOTAC Integrated Resource Management System')->comment('Official name of the application');
+      $table->string('default_system_email')->nullable()->comment('Default email for system-originated non-notification emails');
+      $table->unsignedInteger('default_loan_period_days')->default(7)->comment('Default loan period in days');
+      $table->unsignedInteger('max_loan_items_per_application')->default(5)->comment('Max items per single loan application');
+      $table->string('contact_us_email')->nullable()->comment('Email for contact us inquiries');
+      $table->boolean('system_maintenance_mode')->default(false);
+      $table->text('system_maintenance_message')->nullable();
+
+      // Blameable fields
+      $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
+      $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
+      $table->foreignId('deleted_by')->nullable()->constrained('users')->onDelete('set null');
 
       $table->timestamps();
       $table->softDeletes();

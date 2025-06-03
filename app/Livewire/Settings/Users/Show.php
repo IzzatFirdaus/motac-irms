@@ -7,23 +7,31 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests; // Import AuthorizesRequests trait
 
 #[Layout('layouts.app')]
-#[Title(method: 'getPageTitle')] // Using method for dynamic title
+#[Title('Maklumat Pengguna')] // - Fixed: Use a static string for broader Livewire 3 compatibility
 class Show extends Component
 {
+  use AuthorizesRequests; // - Use AuthorizesRequests trait for $this->authorize()
+
   public User $user;
 
-  public function getPageTitle(): string
-  {
-    return __('Maklumat Pengguna') . ' - ' . $this->user->name;
-  }
+  // Removed getPageTitle method as it's no longer used for the #[Title] attribute directly
+  // public function getPageTitle(): string
+  // {
+  //   return __('Maklumat Pengguna') . ' - ' . $this->user->name;
+  // }
 
   public function mount(User $user): void
   {
-    abort_unless(Auth::user()->can('view', $user), 403, __('Tindakan tidak dibenarkan.'));
-    // Eager load relationships for display
-    $this->user = $user->load(['department', 'position', 'grade', 'roles.permissions']);
+    // Use $this->authorize() for consistency and better error handling
+    // System Design Reference: Policies define authorization logic for actions on specific models
+    $this->authorize('view', $user);
+
+    // Eager load relationships for display as per SDD
+    // Ensure 'creator', 'updater', 'deleter' relationships are defined in User model (via Blameable trait)
+    $this->user = $user->load(['department', 'position', 'grade', 'roles.permissions', 'creator', 'updater', 'deleter']);
   }
 
   public function render()

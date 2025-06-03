@@ -3,8 +3,6 @@
 namespace App\Livewire\Settings\Users;
 
 use App\Models\User;
-// Consider using a UserService for business logic if it grows complex
-// use App\Services\UserService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -29,25 +27,27 @@ class Index extends Component
 
   protected string $paginationTheme = 'bootstrap';
 
-  // Optional: Inject UserService
-  // protected UserService $userService;
-
-  // public function boot(UserService $userService)
-  // {
-  //     $this->userService = $userService;
-  // }
-
   public function mount(): void
   {
     $this->authorize('viewAny', User::class);
-    $this->rolesForFilter = Role::orderBy('name')->pluck('name', 'name')->all(); // Using role name as key and value for filter
+    $this->rolesForFilter = Role::orderBy('name')->pluck('name', 'name')->all();
     $this->statusOptions = User::getStatusOptions();
   }
 
-  public function getUsersListProperty() // Renamed from getUsersProperty for clarity with Livewire conventions
+  public function getUsersListProperty()
   {
-    // Consider moving complex query logic to UserService or a UserRepository
-    $query = User::with(['department:id,name', 'roles:id,name'])
+    $query = User::select(
+        'id',
+        'name',
+        'email',
+        'motac_email',
+        'identification_number',
+        'status',
+        'title',
+        'department_id',
+        'profile_photo_path' // Add 'profile_photo_path' here
+    ) //
+      ->with(['department:id,name', 'roles:id,name'])
       ->orderBy('name', 'asc');
 
     if (!empty($this->search)) {
@@ -95,10 +95,8 @@ class Index extends Component
 
   public function confirmUserDeletion(int $userId, string $userName): void
   {
-    // Authorization check is done again in deleteUser, which is good practice
-    $user = User::findOrFail($userId); // Ensure user exists before dispatching
+    $user = User::findOrFail($userId);
     $this->authorize('delete', $user);
-
 
     if (Auth::id() === $user->id) {
       $this->dispatch('toastr', type: 'error', message: __('Anda tidak boleh memadam akaun anda sendiri.'));
@@ -108,8 +106,8 @@ class Index extends Component
     $this->dispatch('open-delete-modal', [
       'id' => $userId,
       'itemDescription' => __('pengguna') . ' ' . $userName,
-      'deleteMethod' => 'deleteUser', // Ensure your modal component calls this method
-      'modelClass' => User::class // Can be used by a generic modal to show what's being deleted
+      'deleteMethod' => 'deleteUser',
+      'modelClass' => User::class
     ]);
   }
 
@@ -123,23 +121,16 @@ class Index extends Component
       return;
     }
 
-    // Consider moving deletion logic to a UserService
-    // E.g., $this->userService->deleteUser($user);
     $userName = $user->name;
-    $user->delete(); // Performs soft delete if User model uses SoftDeletes trait
+    $user->delete();
 
     session()->flash('message', __('Pengguna :name berjaya dipadam.', ['name' => $userName]));
-    // If your modal needs an explicit close, dispatch an event
-    // $this->dispatch('close-delete-modal');
-    // Refresh the list
-    // $this->resetPage(); // Or trigger a refresh of the usersList property if needed
   }
 
   public function render()
   {
-    // View path assumes your Blade file is at resources/views/livewire/settings/users/index.blade.php
     return view('livewire.settings.users.index', [
-      'usersList' => $this->usersList, // Uses the computed property
+      'usersList' => $this->usersList,
       'rolesForFilter' => $this->rolesForFilter,
       'statusOptions' => $this->statusOptions,
     ]);

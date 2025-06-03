@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use App\Traits\Blameable;
 
 /**
  * Equipment Model.
@@ -52,9 +53,9 @@ use Illuminate\Support\Str;
  * @property \Illuminate\Support\Carbon|null $deleted_at
  *
  * @property-read \App\Models\LoanTransactionItem|null $activeLoanTransactionItem
- * @property-read \App\Models\User|null $creator
+ * @property-read \App\Models\User|null $creator // Provided by Blameable trait
  * @property-read \App\Models\Location|null $definedLocation
- * @property-read \App\Models\User|null $deleter
+ * @property-read \App\Models\User|null $deleter // Provided by Blameable trait
  * @property-read \App\Models\Department|null $department
  * @property-read \App\Models\EquipmentCategory|null $equipmentCategory
  * @property-read string $asset_type_label
@@ -65,7 +66,7 @@ use Illuminate\Support\Str;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanTransactionItem> $loanTransactionItems
  * @property-read int|null $loan_transaction_items_count
  * @property-read \App\Models\SubCategory|null $subCategory
- * @property-read \App\Models\User|null $updater
+ * @property-read \App\Models\User|null $updater // Provided by Blameable trait
  *
  * @method static \Database\Factories\EquipmentFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment newModelQuery()
@@ -108,8 +109,9 @@ class Equipment extends Model
 {
   use HasFactory;
   use SoftDeletes;
+  use Blameable;
 
-  // Constants from "Revision 3" (Section 4.3) [cite: 1]
+  // Constants from "Revision 3" (Section 4.3)
   public const ASSET_TYPE_LAPTOP = 'laptop';
   public const ASSET_TYPE_PROJECTOR = 'projector';
   public const ASSET_TYPE_PRINTER = 'printer';
@@ -123,6 +125,8 @@ class Equipment extends Model
   public const STATUS_DISPOSED = 'disposed';
   public const STATUS_LOST = 'lost';
   public const STATUS_DAMAGED_NEEDS_REPAIR = 'damaged_needs_repair';
+  public const STATUS_RETURNED_PENDING_INSPECTION = 'returned_pending_inspection'; // ADDED: Missing constant
+
 
   public const CONDITION_NEW = 'new';
   public const CONDITION_GOOD = 'good';
@@ -145,7 +149,7 @@ class Equipment extends Model
 
   public static array $ASSET_TYPES_LABELS = [
     self::ASSET_TYPE_LAPTOP => 'Komputer Riba',
-    self::ASSET_TYPE_PROJECTOR => 'Projektor', // Corrected from Proyektor
+    self::ASSET_TYPE_PROJECTOR => 'Projektor',
     self::ASSET_TYPE_PRINTER => 'Pencetak',
     self::ASSET_TYPE_DESKTOP_PC => 'Komputer Meja',
     self::ASSET_TYPE_MONITOR => 'Monitor',
@@ -159,6 +163,7 @@ class Equipment extends Model
     self::STATUS_DISPOSED => 'Telah Dilupus',
     self::STATUS_LOST => 'Hilang (Operasi)',
     self::STATUS_DAMAGED_NEEDS_REPAIR => 'Rosak (Perlu Pembaikan)',
+    self::STATUS_RETURNED_PENDING_INSPECTION => 'Dipulangkan (Menunggu Semakan)', // ADDED: Label for new status
   ];
 
   public static array $CONDITION_STATUSES_LABELS = [
@@ -179,7 +184,7 @@ class Equipment extends Model
     self::ACQUISITION_TYPE_OTHER => 'Perolehan Lain',
   ];
 
-  public static array $CLASSIFICATION_LABELS = [ // Corrected name to $CLASSIFICATION_LABELS from $CLASSIFICATIONS_LABELS
+  public static array $CLASSIFICATION_LABELS = [
     self::CLASSIFICATION_ASSET => 'Aset',
     self::CLASSIFICATION_INVENTORY => 'Inventori',
     self::CLASSIFICATION_CONSUMABLE => 'Barang Guna Habis',
@@ -198,7 +203,7 @@ class Equipment extends Model
     'purchase_date',
     'warranty_expiry_date',
     'status',
-    'current_location', // As per Design Doc Section 4.3 [cite: 1]
+    'current_location',
     'notes',
     'condition_status',
     'department_id',
@@ -212,13 +217,13 @@ class Equipment extends Model
     'classification',
     'funded_by',
     'supplier_name',
-    'specifications',
+    // 'specifications',
   ];
 
   protected $casts = [
     'purchase_date' => 'date:Y-m-d',
     'warranty_expiry_date' => 'date:Y-m-d',
-    'specifications' => 'array',
+    // 'specifications' => 'array',
     'purchase_price' => 'decimal:2',
     'created_at' => 'datetime',
     'updated_at' => 'datetime',
@@ -234,14 +239,14 @@ class Equipment extends Model
   public static function getStatusOptions(): array { return self::$STATUSES_LABELS; }
   public static function getConditionStatusOptions(): array { return self::$CONDITION_STATUSES_LABELS; }
   public static function getAcquisitionTypeOptions(): array { return self::$ACQUISITION_TYPES_LABELS; }
-  public static function getClassificationOptions(): array { return self::$CLASSIFICATION_LABELS; } // Corrected name
+  public static function getClassificationOptions(): array { return self::$CLASSIFICATION_LABELS; }
 
   // For validation purposes (getting keys)
   public static function getAssetTypesList(): array { return array_keys(self::$ASSET_TYPES_LABELS); }
   public static function getOperationalStatusesList(): array { return array_keys(self::$STATUSES_LABELS); }
   public static function getConditionStatusesList(): array { return array_keys(self::$CONDITION_STATUSES_LABELS); }
   public static function getAcquisitionTypesList(): array { return array_keys(self::$ACQUISITION_TYPES_LABELS); }
-  public static function getClassificationsList(): array { return array_keys(self::$CLASSIFICATION_LABELS); } // Corrected name
+  public static function getClassificationsList(): array { return array_keys(self::$CLASSIFICATION_LABELS); }
 
 
   protected static function newFactory(): EquipmentFactory
@@ -256,16 +261,16 @@ class Equipment extends Model
   public function definedLocation(): BelongsTo { return $this->belongsTo(Location::class, 'location_id'); }
   public function loanTransactionItems(): HasMany { return $this->hasMany(LoanTransactionItem::class, 'equipment_id'); }
 
-  public function activeLoanTransactionItem(): \Illuminate\Database\Eloquent\Relations\HasOne // Type hint added
+  /**
+   * Get the single active loan transaction item (if any) for this equipment.
+   * An active loan transaction item is one that has been 'issued' and not yet returned.
+   */
+  public function activeLoanTransactionItem(): \Illuminate\Database\Eloquent\Relations\HasOne
   {
     return $this->hasOne(LoanTransactionItem::class, 'equipment_id')
       ->where('status', LoanTransactionItem::STATUS_ITEM_ISSUED)
       ->latestOfMany('created_at');
   }
-
-  public function creator(): BelongsTo { return $this->belongsTo(User::class, 'created_by'); }
-  public function updater(): BelongsTo { return $this->belongsTo(User::class, 'updated_by'); }
-  public function deleter(): BelongsTo { return $this->belongsTo(User::class, 'deleted_by'); }
 
   // Accessors for translated labels
   public function getAssetTypeLabelAttribute(): string
@@ -303,9 +308,6 @@ class Equipment extends Model
       if ($reason) {
           $this->notes = ($this->notes ? $this->notes . "\n" : '') . "Status Operasi ditukar dari '{$oldStatus}' kepada '{$newStatus}' oleh {$actingUserName} pada " . now()->translatedFormat('d/m/Y H:i A') . ". Sebab: {$reason}";
       }
-      // BlameableObserver will handle updated_by based on Auth::id().
-      // If actingUserId is provided and is different, it means a specific user (not necessarily Auth::id()) took the action.
-      // The BlameableObserver should ideally be flexible enough, or this explicit set is a good override.
       if ($actingUserId) {
           $this->updated_by = $actingUserId;
       }

@@ -5,13 +5,10 @@
     {{-- Page Header --}}
     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4 pb-2 border-bottom">
         <h1 class="h2 fw-bold text-dark mb-2 mb-sm-0 d-flex align-items-center">
-            {{-- Iconography: Design Language 2.4 --}}
             <i class="bi bi-diagram-3-fill me-2"></i>
             {{ __('Pengurusan Jabatan') }}
         </h1>
-        {{-- Add button for creating new department. Assuming a Livewire modal or a separate page. --}}
-        {{-- For consistency, if using Livewire modals, a button to trigger it would go here.
-             Example from other index pages:
+        {{-- UNCOMMENTED and assuming 'create' policy exists for Department model --}}
         @can('create', App\Models\Department::class)
             <button wire:click="$dispatch('open-modal', { modalId: 'departmentFormModal', action: 'create' })"
                 class="btn btn-primary d-inline-flex align-items-center text-uppercase small fw-semibold mt-2 mt-sm-0 px-3 py-2 motac-btn-primary">
@@ -19,7 +16,6 @@
                 {{ __('Tambah Jabatan Baru') }}
             </button>
         @endcan
-        --}}
     </div>
 
     @include('_partials._alerts.alert-general') {{-- Ensure this uses MOTAC themed alerts --}}
@@ -35,7 +31,6 @@
                 class="form-label visually-hidden">{{ __('Cari jabatan (nama, kod)...') }}</label>
             <input wire:model.live.debounce.300ms="search" type="text" id="departmentSearch"
                 class="form-control form-control-sm" placeholder="{{ __('Cari jabatan (nama, kod)...') }}">
-            {{-- Ensure form-control is MOTAC themed --}}
         </div>
     </div>
 
@@ -46,15 +41,15 @@
             <h5 class="mb-0 fw-medium text-dark d-flex align-items-center">
                 <i class="bi bi-list-ul me-2 text-primary"></i>{{ __('Senarai Jabatan') }}
             </h5>
-            {{-- Optional: Add total count if available from Livewire component
+            @if ($departments->total() > 0) {{-- Check if $departments is not null and has total() method --}}
             <span class="text-muted small">
-                {{ __('Memaparkan :count rekod', ['count' => $departments->total()]) }}
+                {{ __('Memaparkan :from-:to daripada :total rekod', ['from' => $departments->firstItem(), 'to' => $departments->lastItem(), 'total' => $departments->total()]) }}
             </span>
-            --}}
+            @endif
         </div>
         <div class="table-responsive">
-            <table class="table table-hover table-striped mb-0 align-middle"> {{-- Ensure table is MOTAC themed --}}
-                <thead class="table-light"> {{-- Ensure table-light header is MOTAC themed --}}
+            <table class="table table-hover table-striped mb-0 align-middle">
+                <thead class="table-light">
                     <tr>
                         <th class="small text-uppercase text-muted fw-medium px-3 py-2" wire:click="sortBy('name')"
                             style="cursor: pointer;">
@@ -62,7 +57,7 @@
                             @if ($sortField === 'name')
                                 <i class="bi bi-arrow-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
                             @else
-                                <i class="bi bi-arrow-down-up text-muted opacity-50"></i> {{-- Hint for sortable --}}
+                                <i class="bi bi-arrow-down-up text-muted opacity-50"></i>
                             @endif
                         </th>
                         <th class="small text-uppercase text-muted fw-medium px-3 py-2" wire:click="sortBy('code')"
@@ -98,11 +93,11 @@
                 </thead>
                 <tbody>
                     <tr wire:loading.class.delay="opacity-50" class="transition-opacity">
-                        <td colspan="5" class="p-0 border-0"> {{-- Colspan should match number of columns --}}
+                        <td colspan="5" class="p-0 border-0">
                             <div wire:loading.flex class="progress bg-transparent rounded-0"
                                 style="height: 2px; width: 100%;">
                                 <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
-                                    {{-- Ensure bg-primary uses MOTAC primary color --}} role="progressbar" style="width: 100%"
+                                    role="progressbar" style="width: 100%"
                                     aria-label="{{ __('Memuatkan Data Jabatan...') }}"></div>
                             </div>
                         </td>
@@ -115,44 +110,44 @@
                                 {{ $department->branch_type_label ?? __(Str::title(str_replace('_', ' ', $department->branch_type))) }}
                             </td>
                             <td class="px-3 py-2 small">
-                                {{-- Ensure Helpers::getStatusColorClass or direct badge classes are MOTAC themed --}}
                                 @if ($department->is_active)
                                     <span class="badge text-bg-success">{{ __('Aktif') }}</span>
-                                    {{-- Bootstrap 5.3+ text-bg-* class --}}
                                 @else
                                     <span class="badge text-bg-secondary">{{ __('Tidak Aktif') }}</span>
-                                    {{-- Use secondary or danger for inactive --}}
                                 @endif
                             </td>
                             <td class="px-3 py-2 text-end">
-                                {{-- Add action buttons (e.g., Edit, View) here --}}
-                                {{-- Example based on other index pages:
-                            @can('update', $department)
-                            <button wire:click="$dispatch('open-modal', { modalId: 'departmentFormModal', action: 'edit', departmentId: {{ $department->id }} })"
-                                class="btn btn-sm btn-icon btn-outline-primary border-0 me-1 motac-btn-icon" title="{{ __('Kemaskini') }}">
-                                <i class="bi bi-pencil-fill fs-6"></i>
-                            </button>
-                            @endcan
-                            @can('delete', $department)
-                            <button wire:click="$dispatch('open-delete-modal', { id: {{ $department->id }}, modelClass: 'App\\Models\\Department', itemDescription: '{{ $department->name }}', deleteMethod: 'deleteDepartment' })"
-                                class="btn btn-sm btn-icon btn-outline-danger border-0 motac-btn-icon" title="{{ __('Padam') }}">
-                                <i class="bi bi-trash3-fill fs-6"></i>
-                            </button>
-                            @endcan
-                             --}}
+                                {{-- UNCOMMENTED and REVISED Action buttons --}}
+                                <div class="d-inline-flex align-items-center gap-1">
+                                    @can('update', $department)
+                                    <button wire:click="$dispatch('open-modal', { modalId: 'departmentFormModal', action: 'edit', departmentId: {{ $department->id }} })"
+                                        class="btn btn-secondary p-2" {{-- Solid, larger button --}}
+                                        title="{{ __('Kemaskini') }}">
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </button>
+                                    @endcan
+                                    @can('delete', $department)
+                                    <button wire:click="$dispatch('open-delete-modal', { id: {{ $department->id }}, modelClass: 'App\\Models\\Department', itemDescription: '{{ e(addslashes($department->name)) }}', deleteMethod: 'deleteDepartment' })"
+                                        class="btn btn-danger p-2" {{-- Solid, larger button --}}
+                                        title="{{ __('Padam') }}">
+                                        <i class="bi bi-trash3-fill"></i>
+                                    </button>
+                                    @endcan
+                                </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-3 py-5 text-center"> {{-- Colspan should match --}}
+                            <td colspan="5" class="px-3 py-5 text-center">
                                 <div class="d-flex flex-column align-items-center text-muted small">
                                     <i class="bi bi-diagram-2 fs-1 mb-2 text-secondary"></i>
                                     <p>{{ __('Tiada jabatan ditemui.') }}</p>
                                     @if (empty($search))
-                                        {{-- Add button to trigger modal or link to create page --}}
-                                        {{-- <button wire:click="$dispatch('open-modal', { modalId: 'departmentFormModal', action: 'create' })" class="btn btn-sm btn-primary mt-2">
-                                        <i class="bi bi-plus-lg me-1"></i> {{ __('Tambah Jabatan Baru') }}
-                                    </button> --}}
+                                        @can('create', App\Models\Department::class)
+                                        <button wire:click="$dispatch('open-modal', { modalId: 'departmentFormModal', action: 'create' })" class="btn btn-sm btn-link mt-1">
+                                            <i class="bi bi-plus-circle-dotted me-1"></i> {{ __('Tambah Jabatan Baru Sekarang') }}
+                                        </button>
+                                        @endcan
                                     @endif
                                 </div>
                             </td>
@@ -163,9 +158,11 @@
         </div>
         @if ($departments->hasPages())
             <div class="card-footer bg-light border-top py-3 motac-card-footer d-flex justify-content-center">
-                {{ $departments->links() }} {{-- Ensure pagination is Bootstrap 5 styled and MOTAC themed --}}
+                {{ $departments->links() }}
             </div>
         @endif
     </div>
-    {{-- Include modals for create/edit/delete if handled within this Livewire component --}}
+    {{-- Include modals for create/edit/delete if handled within this Livewire component (e.g., outside this main div or via slots) --}}
+    {{-- For example: <livewire:settings.departments.department-form-modal /> --}}
+    {{-- <livewire:settings.departments.delete-department-modal /> --}}
 </div>

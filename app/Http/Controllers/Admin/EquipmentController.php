@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller; // Base controller
@@ -7,13 +9,12 @@ use App\Models\Equipment;
 use App\Models\Location;
 use App\Models\Department;
 use App\Models\EquipmentCategory;
-// use App\Models\SubCategory; // Uncomment if SubCategory model is used
+use App\Models\SubCategory; // Make sure SubCategory model is used if needed in views
 use App\Services\EquipmentService;
 use App\Http\Requests\Admin\StoreEquipmentRequest;
 use App\Http\Requests\Admin\UpdateEquipmentRequest;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
-// use Illuminate\Http\Request; // Using FormRequests for store/update
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -28,41 +29,59 @@ class EquipmentController extends Controller
     {
         $this->equipmentService = $equipmentService;
         $this->middleware('auth');
-        $this->middleware(['role:Admin|BPM Staff']); // System Design: Role for equipment management
+        // Apply role middleware for Admin and BPM Staff as per system design
+        $this->middleware(['role:Admin|BPM Staff']);
 
-        // Assumes EquipmentPolicy is registered and defines abilities for equipment resource
+        // Authorize resource actions using EquipmentPolicy
         $this->authorizeResource(Equipment::class, 'equipment');
     }
 
     /**
      * Show the form for creating new equipment.
+     *
+     * @return \Illuminate\View\View
      */
     public function create(): View
     {
         Log::info('Admin\EquipmentController@create: Displaying create equipment form.', ['admin_user_id' => Auth::id()]);
-        // Ensure these static methods exist on the Equipment model or are sourced appropriately
-        $viewData = [
-            'assetTypes' => method_exists(Equipment::class, 'getAssetTypeOptions') ? Equipment::getAssetTypeOptions() : [],
-            'initialStatuses' => method_exists(Equipment::class, 'getInitialStatusOptions') ? Equipment::getInitialStatusOptions() : [],
-            'conditionStatuses' => method_exists(Equipment::class, 'getConditionStatusOptions') ? Equipment::getConditionStatusOptions() : [],
-            'acquisitionTypes' => method_exists(Equipment::class, 'getAcquisitionTypeOptions') ? Equipment::getAcquisitionTypeOptions() : [],
-            'classifications' => method_exists(Equipment::class, 'getClassificationOptions') ? Equipment::getClassificationOptions() : [],
-            'locations' => Location::where('is_active', true)->orderBy('name')->pluck('name', 'id'),
-            'departments' => Department::where('is_active', true)->orderBy('name')->pluck('name', 'id'),
-            'equipmentCategories' => EquipmentCategory::where('is_active', true)->orderBy('name')->pluck('name', 'id'),
-            // 'subCategories' => SubCategory::where('is_active', true)->orderBy('name')->pluck('name', 'id'), // Or load dynamically based on category
-        ];
-        return view('admin.equipment.create', $viewData);
+
+        $assetTypes = Equipment::getAssetTypeOptions();
+        $initialStatuses = Equipment::getStatusOptions(); // Assuming getStatusOptions provides initial statuses as well, or you might need a dedicated method like getInitialStatusOptions()
+        $conditionStatuses = Equipment::getConditionStatusOptions();
+        $acquisitionTypes = Equipment::getAcquisitionTypeOptions();
+        $classifications = Equipment::getClassificationOptions();
+
+        $locations = Location::where('is_active', true)->orderBy('name')->pluck('name', 'id');
+        $departments = Department::where('is_active', true)->orderBy('name')->pluck('name', 'id');
+        $equipmentCategories = EquipmentCategory::where('is_active', true)->orderBy('name')->pluck('name', 'id');
+        // SubCategories will often be dynamically loaded based on the selected EquipmentCategory.
+        // For 'create' if not dynamic, you might pass all of them.
+        $subCategories = SubCategory::where('is_active', true)->orderBy('name')->pluck('name', 'id');
+
+
+        return view('admin.equipment.create', compact(
+            'assetTypes',
+            'initialStatuses',
+            'conditionStatuses',
+            'acquisitionTypes',
+            'classifications',
+            'locations',
+            'departments',
+            'equipmentCategories',
+            'subCategories'
+        ));
     }
 
     /**
      * Store a newly created equipment in storage.
+     *
+     * @param \App\Http\Requests\Admin\StoreEquipmentRequest $request
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(StoreEquipmentRequest $request): RedirectResponse
     {
         Log::info('Admin\EquipmentController@store: Attempting to create equipment.', ['admin_user_id' => Auth::id(), 'data_keys' => array_keys($request->except(['_token']))]);
         try {
-            // Assuming EquipmentService->createEquipment handles the creation logic
             $this->equipmentService->createEquipment($request->validated());
             Log::info('Admin Equipment created successfully.', ['admin_user_id' => Auth::id()]);
             return redirect()->route('resource-management.equipment-admin.index')
@@ -75,21 +94,21 @@ class EquipmentController extends Controller
 
     /**
      * Display the specified equipment.
+     *
+     * @param \App\Models\Equipment $equipment
+     * @return \Illuminate\View\View
      */
     public function show(Equipment $equipment): View
     {
         Log::info("Admin\EquipmentController@show: Displaying equipment ID {$equipment->id}.", ['admin_user_id' => Auth::id()]);
-        // Verify these relationship names with your Equipment model:
-        // 'grade' is unusual for an equipment item directly.
-        // 'location' vs 'definedLocation' - ensure consistency.
+        // Eager load necessary relationships for the show view
         $equipment->loadMissing([
-            // 'grade', // Does Equipment have a direct 'grade' relationship?
             'department:id,name',
             'equipmentCategory:id,name',
-            'subCategory:id,name',    // Ensure this relation exists
-            'definedLocation:id,name',// Use 'definedLocation' if that's the relation name (from user-facing controller) or 'location' if it's direct.
-            'creator:id,name',        // Blameable: user who created
-            'updater:id,name',        // Blameable: user who last updated
+            'subCategory:id,name',
+            'definedLocation:id,name', // Assuming 'definedLocation' is the correct relationship to Location model
+            'creator:id,name',         // Creator relation for audit trail
+            'updater:id,name',         // Updater relation for audit trail
             'loanTransactionItems.loanTransaction.loanApplication.user:id,name' // For detailed loan history
         ]);
         return view('admin.equipment.show', compact('equipment'));
@@ -97,33 +116,53 @@ class EquipmentController extends Controller
 
     /**
      * Show the form for editing the specified equipment.
+     *
+     * @param \App\Models\Equipment $equipment
+     * @return \Illuminate\View\View
      */
     public function edit(Equipment $equipment): View
     {
         Log::info("Admin\EquipmentController@edit: Displaying edit form for equipment ID {$equipment->id}.", ['admin_user_id' => Auth::id()]);
-        $viewData = [
-            'equipment' => $equipment,
-            'assetTypes' => method_exists(Equipment::class, 'getAssetTypeOptions') ? Equipment::getAssetTypeOptions() : [],
-            'allStatuses' => method_exists(Equipment::class, 'getStatusOptions') ? Equipment::getStatusOptions() : [], // All statuses for editing
-            'conditionStatuses' => method_exists(Equipment::class, 'getConditionStatusOptions') ? Equipment::getConditionStatusOptions() : [],
-            'acquisitionTypes' => method_exists(Equipment::class, 'getAcquisitionTypeOptions') ? Equipment::getAcquisitionTypeOptions() : [],
-            'classifications' => method_exists(Equipment::class, 'getClassificationOptions') ? Equipment::getClassificationOptions() : [],
-            'locations' => Location::where('is_active', true)->orderBy('name')->pluck('name', 'id'),
-            'departments' => Department::where('is_active', true)->orderBy('name')->pluck('name', 'id'),
-            'equipmentCategories' => EquipmentCategory::where('is_active', true)->orderBy('name')->pluck('name', 'id'),
-            // 'subCategories' => $equipment->equipmentCategory ? $equipment->equipmentCategory->subCategories()->orderBy('name')->pluck('name', 'id') : collect(),
-        ];
-        return view('admin.equipment.edit', $viewData);
+
+        // Fetch all necessary data for dropdowns
+        $assetTypes = Equipment::getAssetTypeOptions();
+        $statusOptions = Equipment::getStatusOptions(); // Full list of operational statuses
+        $conditionStatusOptions = Equipment::getConditionStatusOptions(); // Full list of physical condition statuses
+        $acquisitionTypes = Equipment::getAcquisitionTypeOptions();
+        $classifications = Equipment::getClassificationOptions();
+
+        $locations = Location::where('is_active', true)->orderBy('name')->pluck('name', 'id');
+        $departments = Department::where('is_active', true)->orderBy('name')->pluck('name', 'id');
+        $equipmentCategories = EquipmentCategory::where('is_active', true)->orderBy('name')->pluck('name', 'id');
+        // SubCategories might need to be filtered by the currently selected equipment's category,
+        // or loaded dynamically via JavaScript/Livewire. For a standard dropdown, provide all.
+        $subCategories = SubCategory::where('is_active', true)->orderBy('name')->pluck('name', 'id');
+
+        return view('admin.equipment.edit', compact(
+            'equipment',
+            'assetTypes',
+            'statusOptions',
+            'conditionStatusOptions',
+            'acquisitionTypes',
+            'classifications',
+            'locations',
+            'departments',
+            'equipmentCategories',
+            'subCategories'
+        ));
     }
 
     /**
      * Update the specified equipment in storage.
+     *
+     * @param \App\Http\Requests\Admin\UpdateEquipmentRequest $request
+     * @param \App\Models\Equipment $equipment
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(UpdateEquipmentRequest $request, Equipment $equipment): RedirectResponse
     {
-        Log::info("Admin\EquipmentController@update: Attempting to update grade ID: {$equipment->id}.", ['admin_user_id' => Auth::id(), 'data_keys' => array_keys($request->except(['_token', '_method']))]);
+        Log::info("Admin\EquipmentController@update: Attempting to update equipment ID: {$equipment->id}.", ['admin_user_id' => Auth::id(), 'data_keys' => array_keys($request->except(['_token', '_method']))]);
         try {
-            // Assuming EquipmentService->updateEquipment handles the update logic
             $this->equipmentService->updateEquipment($equipment, $request->validated());
             Log::info("Admin Equipment ID: {$equipment->id} updated successfully.", ['admin_user_id' => Auth::id()]);
             return redirect()->route('resource-management.equipment-admin.index')
@@ -136,17 +175,19 @@ class EquipmentController extends Controller
 
     /**
      * Remove the specified equipment from storage.
+     *
+     * @param \App\Models\Equipment $equipment
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(Equipment $equipment): RedirectResponse
     {
         Log::info("Admin\EquipmentController@destroy: Attempting to delete equipment ID: {$equipment->id}.", ['admin_user_id' => Auth::id()]);
         try {
-            // Policy should check if deletable. Additional business logic can be in service.
+            // Prevent deletion if the equipment is currently on loan
             if (defined(Equipment::class.'::STATUS_ON_LOAN') && $equipment->status === Equipment::STATUS_ON_LOAN) {
                  return redirect()->route('resource-management.equipment-admin.index')
                                  ->with('error', __('Peralatan tidak boleh dipadam kerana sedang dalam pinjaman.'));
             }
-            // Assuming EquipmentService->deleteEquipment handles the deletion logic
             $this->equipmentService->deleteEquipment($equipment);
             Log::info("Admin Equipment ID: {$equipment->id} deleted successfully.", ['admin_user_id' => Auth::id()]);
             return redirect()->route('resource-management.equipment-admin.index')

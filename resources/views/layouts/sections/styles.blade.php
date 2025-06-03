@@ -8,9 +8,7 @@
     $styleSuffix = $currentStyle !== 'light' ? '-' . $currentStyle : '';
 @endphp
 
-{{-- Local Font Loading (Example, ensure these are your chosen fonts) --}}
-{{-- Consider using Google Fonts if local hosting is complex, but be mindful of external requests --}}
-
+{{-- Google Fonts --}}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link
@@ -24,6 +22,11 @@
 <link rel="stylesheet" href="{{ asset('assets/vendor/fonts/fontawesome.css') }}" />
 <link rel="stylesheet" href="{{ asset('assets/vendor/fonts/tabler-icons.css') }}" />
 <link rel="stylesheet" href="{{ asset('assets/vendor/fonts/flag-icons.css') }}" />
+{{-- ADDED: Bootstrap Icons CSS --}}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+{{-- OR if you have it locally (ensure path is correct): --}}
+{{-- <link rel="stylesheet" href="{{ asset('assets/vendor/fonts/bootstrap-icons.css') }}" /> --}}
+
 
 {{-- Core CSS --}}
 <link rel="stylesheet" href="{{ asset('assets/vendor/css' . $rtlSupport . '/core' . $styleSuffix . '.css') }}"
@@ -51,13 +54,5 @@
 @stack('custom-css')
 @livewireStyles
 
-{{-- styles.blade.php --}}
-{{-- Design Document: Use clean, legible sans-serif. Ensure Bahasa Melayu support.
-    Consider self-hosting fonts like "Inter" or "Open Sans".
-    The following is an example. Update font files in public/assets/fonts/
---}}
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link
-    href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
-    rel="stylesheet">
+{{-- The duplicate Google Fonts link at the end of your original file has been removed for cleanliness.
+     It's already included at the top. --}}

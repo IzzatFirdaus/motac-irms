@@ -7,14 +7,14 @@
     <div class="container py-4">
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
             <h1 class="h2 fw-bold text-dark mb-0">{{ __('Sejarah Kelulusan') }}</h1>
-            <a href="{{ route('approvals.dashboard') }}" {{-- System Design reference for approver dashboard [cite: 151, 165, 166, 229, 435] --}}
+            <a href="{{ route('approvals.dashboard') }}"
                 class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center">
                 <i class="bi bi-speedometer2 me-1"></i>
                 {{ __('Papan Pemuka Kelulusan') }}
             </a>
         </div>
 
-        @include('partials.alert-messages') {{-- Assuming a partial for session messages --}}
+        {{-- Assuming global alert handling --}}
 
         <div class="card shadow-sm">
             <div class="card-header bg-light py-3">
@@ -78,12 +78,13 @@
                                         {{ optional($approval->approval_timestamp)->translatedFormat('d M Y, H:i A') ?? 'N/A' }}
                                     </td>
                                     <td class="px-3 py-2 text-end">
-                                        <div class="d-inline-flex align-items-center gap-1">
+                                        <div class="d-inline-flex align-items-center gap-1"> {{-- Reduced gap to 1 if buttons become too wide --}}
                                             @can('view', $approval)
+                                                {{-- Made button larger and solid secondary --}}
                                                 <a href="{{ route('approvals.show', $approval) }}"
-                                                    class="btn btn-sm btn-outline-secondary border-0 p-1"
+                                                    class="btn btn-secondary p-2" {{-- Removed btn-sm, changed to p-2 --}}
                                                     title="{{ __('Lihat Butiran Kelulusan') }}">
-                                                    <i class="bi bi-receipt-cutoff"></i>
+                                                    <i class="bi bi-search"></i>
                                                 </a>
                                             @endcan
                                             @if ($approvableItem)
@@ -91,18 +92,17 @@
                                                     $applicationDetailRouteName = null;
                                                     $applicationDetailRouteParams = null;
                                                     if ($approvableItem instanceof \App\Models\EmailApplication) {
-                                                        // Ensure this route name matches your web.php for viewing a user's own email application details [cite: 150]
                                                         $applicationDetailRouteName = 'email-applications.show';
                                                         $applicationDetailRouteParams = $approvableItem->id;
                                                     } elseif ($approvableItem instanceof \App\Models\LoanApplication) {
-                                                        // Ensure this route name matches your web.php for viewing a user's own loan application details [cite: 150]
                                                         $applicationDetailRouteName = 'loan-applications.show';
                                                         $applicationDetailRouteParams = $approvableItem->id;
                                                     }
                                                 @endphp
                                                 @if ($applicationDetailRouteName && Route::has($applicationDetailRouteName))
+                                                    {{-- Made button larger and solid primary --}}
                                                     <a href="{{ route($applicationDetailRouteName, $applicationDetailRouteParams) }}"
-                                                        class="btn btn-sm btn-outline-primary border-0 p-1"
+                                                        class="btn btn-primary p-2" {{-- Removed btn-sm, changed to p-2 --}}
                                                         title="{{ __('Lihat Permohonan Asal') }}">
                                                         <i class="bi bi-file-earmark-text-fill"></i>
                                                     </a>

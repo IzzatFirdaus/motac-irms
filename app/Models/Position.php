@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
-use Database\Factories\PositionFactory; // Ensure this factory exists if you use it
+use Database\Factories\PositionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Builder; // Added for scopeSearch method
-use Illuminate\Support\Str; // For Str::title if needed for accessors
+use Illuminate\Database\Eloquent\Builder;
+use App\Traits\Blameable; // Import the Blameable trait
 
 /**
  * Position Model (Jawatan).
@@ -58,18 +58,23 @@ use Illuminate\Support\Str; // For Str::title if needed for accessors
 class Position extends Model
 {
   use HasFactory;
-  use SoftDeletes; // Ensure you use SoftDeletes if your table has a deleted_at column
+  use SoftDeletes;
+  use Blameable; // Use the Blameable trait
 
-  protected $table = 'positions';
+  protected $table = 'positions'; // Explicitly define table name for clarity
 
   /**
    * The attributes that are mass assignable.
+   * System Design Reference: `fillable` array for mass assignment.
    */
   protected $fillable = [
     'name',
     'description',
     'grade_id',
     'is_active',
+    // 'created_by', // Handled by Blameable trait
+    // 'updated_by', // Handled by Blameable trait
+    // 'deleted_by', // Handled by Blameable trait
   ];
 
   /**
@@ -91,7 +96,7 @@ class Position extends Model
   ];
 
   /**
-   * Get options for dropdowns.
+   * Get options for dropdowns (e.g., for forms where all active positions are needed).
    */
   public static function getPositionOptions(): array
   {
@@ -118,23 +123,33 @@ class Position extends Model
 
   /**
    * Get the users who hold this position.
+   * System Design Reference: Crucial check: Ensure Position model has a users() relationship defined.
    */
   public function users(): HasMany
   {
     return $this->hasMany(User::class, 'position_id');
   }
 
-  // Blameable relationships (Ensure these foreign keys exist in your 'positions' table if used)
+  // Blameable relationships (These rely on the blameable fields existing in your 'positions' table)
+  /**
+   * Get the user who created this record.
+   */
   public function creator(): BelongsTo
   {
     return $this->belongsTo(User::class, 'created_by');
   }
 
+  /**
+   * Get the user who last updated this record.
+   */
   public function updater(): BelongsTo
   {
     return $this->belongsTo(User::class, 'updated_by');
   }
 
+  /**
+   * Get the user who soft deleted this record.
+   */
   public function deleter(): BelongsTo
   {
     return $this->belongsTo(User::class, 'deleted_by');
@@ -143,6 +158,7 @@ class Position extends Model
   /**
    * Scope a query to only include positions matching a given search term.
    * This allows using ->search($term) in queries.
+   * System Design Reference: Position model has a scopeSearch($query, $term) method.
    *
    * @param  \Illuminate\Database\Eloquent\Builder  $query
    * @param  string|null  $term The search term.
@@ -154,14 +170,12 @@ class Position extends Model
           return $query;
       }
 
-      // Ensure the table name is prefixed if joining or to avoid ambiguity
-      return $query->where(function (Builder $subQuery) use ($term) {
-          $searchTerm = '%' . $term . '%';
+      $searchTerm = '%' . $term . '%';
+      return $query->where(function (Builder $subQuery) use ($searchTerm) {
           $subQuery->where($this->getTable().'.name', 'like', $searchTerm)
-                   ->orWhere($this->getTable().'.description', 'like', $searchTerm)
-                   ->orWhereHas('grade', function (Builder $gradeQuery) use ($searchTerm) {
-                       $gradeQuery->where('name', 'like', $searchTerm);
-                   });
+                   ->orWhere($this->getTable().'.description', 'like', $searchTerm);
+      })->orWhereHas('grade', function (Builder $gradeQuery) use ($searchTerm) {
+          $gradeQuery->where('name', 'like', $searchTerm);
       });
   }
 }

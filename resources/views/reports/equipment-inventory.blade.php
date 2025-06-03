@@ -32,7 +32,8 @@
             </div>
         @endif
 
-        @if ($equipment->isEmpty())
+        {{-- CORRECTED LINE: Using $equipmentList instead of $equipment --}}
+        @if ($equipmentList->isEmpty())
             <div class="alert alert-info text-center" role="alert">
                  <i class="bi bi-info-circle-fill me-2"></i>{{ __('Tiada peralatan ICT ditemui untuk laporan ini.') }}
             </div>
@@ -54,13 +55,13 @@
                                     <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Status Operasi') }}</th>
                                     <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Status Kondisi') }}</th>
                                     <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Jabatan') }}</th>
-                                    {{-- <th scope="col" class="text-uppercase small">{{ __('Jawatan') }}</th> --}}
                                     <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Pengguna Semasa') }}</th>
                                     <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Tarikh Pinjam') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($equipment as $item)
+                                {{-- CORRECTED LINE: Iterating over $equipmentList --}}
+                                @foreach ($equipmentList as $item)
                                     <tr>
                                         <td class="px-3 py-2 small text-dark fw-medium">{{ optional($item)->tag_id ?? 'N/A' }}</td>
                                         <td class="px-3 py-2 small">{{ $item->asset_type_translated ?? (optional($item)->asset_type ? __(Str::title(str_replace('_',' ',optional($item)->asset_type))) : 'N/A') }}</td>
@@ -78,7 +79,6 @@
                                             </span>
                                         </td>
                                         <td class="px-3 py-2 small">{{ optional(optional($item)->department)->name ?? 'N/A' }}</td>
-                                        {{-- <td class="px-3 py-2 small">{{ optional(optional($item)->position)->name ?? 'N/A' }}</td> --}}
                                         <td class="px-3 py-2 small">
                                             @if (optional($item)->activeLoanTransaction && optional(optional($item)->activeLoanTransaction->loanApplication)->user)
                                                 {{ optional(optional($item)->activeLoanTransaction->loanApplication->user)->name ?? 'N/A' }}
@@ -99,9 +99,10 @@
                         </table>
                     </div>
                 </div>
-                 @if ($equipment instanceof \Illuminate\Pagination\LengthAwarePaginator && $equipment->hasPages())
+                {{-- CORRECTED LINE: Using $equipmentList for pagination --}}
+                 @if ($equipmentList instanceof \Illuminate\Pagination\LengthAwarePaginator && $equipmentList->hasPages())
                     <div class="card-footer bg-light border-top d-flex justify-content-center py-2">
-                        {{ $equipment->links() }}
+                        {{ $equipmentList->links() }}
                     </div>
                 @endif
             </div>

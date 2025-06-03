@@ -6,17 +6,16 @@ use App\Models\Department;
 use App\Models\Grade;
 use App\Models\Position;
 use App\Models\User;
-// Consider using a UserService for business logic if it grows complex
-// use App\Services\UserService;
 use Illuminate\Validation\Rule as ValidationRule;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
+use Livewire\Attributes\Title; // Keep Title attribute
 use Livewire\Component;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
 
 #[Layout('layouts.app')]
-#[Title(method: 'getPageTitle')] // Using method for dynamic title
+// #[Title(method: 'getPageTitle')] // Old line causing the error
+#[Title('Kemaskini Pengguna')] // - Fixed: Use a static string or concatenate directly
 class Edit extends Component
 {
     public User $user;
@@ -58,14 +57,19 @@ class Edit extends Component
     //     $this->userService = $userService;
     // }
 
-    public function getPageTitle(): string
-    {
-        return __('Kemaskini Pengguna') . ' - ' . $this->user->name;
-    }
+    // Removed getPageTitle method as it's no longer used for the #[Title] attribute directly
+    // If you need dynamic title, you'll set it in the render method or a similar lifecycle hook
+    // public function getPageTitle(): string
+    // {
+    //     return __('Kemaskini Pengguna') . ' - ' . $this->user->name;
+    // }
 
     public function mount(User $user): void
     {
-        abort_unless(Auth::user()->can('update', $user), 403, __('Tindakan tidak dibenarkan.'));
+        // Use authorization gate directly as abort_unless is usually for controllers or outside mount
+        if (!Auth::user()->can('update', $user)) {
+            abort(403, __('Tindakan tidak dibenarkan.'));
+        }
         $this->user = $user;
 
         // Consider moving option loading to a dedicated method or service
@@ -73,6 +77,15 @@ class Edit extends Component
         $this->populateFormFields(); // Populate after options are loaded for defaults
 
         $this->selectedRoles = $this->user->roles->pluck('id')->map(fn($id) => (string) $id)->toArray();
+
+        // Dynamically set page title here if using older Livewire 3 versions
+        // and you want a dynamic title based on $this->user->name.
+        // This is often done in the layout or by passing data to the view.
+        // For Livewire component, the #[Title] attribute is for the <title> tag.
+        // If you need the dynamic user name in the <title> tag, you might need to adjust your layout.
+        // Or, if your layout accepts a 'title' variable, you can pass it:
+        // $this->dispatch('setPageTitle', __('Kemaskini Pengguna') . ' - ' . $this->user->name);
+        // (This would require a listener in your layout file or a parent component)
     }
 
     protected function loadDropdownOptions(): void
@@ -89,8 +102,6 @@ class Edit extends Component
 
     private function populateFormFields(): void
     {
-        // Assuming User::getXOptions() returns an associative array (value => label)
-        // and array_key_first is suitable for picking a default value if the current user property is null.
         $this->title = $this->user->title ?? (!empty($this->titleOptions) ? array_key_first($this->titleOptions) : '');
         $this->name = $this->user->name;
         $this->identification_number = $this->user->identification_number ?? '';
@@ -111,12 +122,14 @@ class Edit extends Component
 
     public function saveUser(): void
     {
-        abort_unless(Auth::user()->can('update', $this->user), 403, __('Tindakan tidak dibenarkan.'));
+        // Use authorization gate directly as abort_unless is usually for controllers or outside mount
+        if (!Auth::user()->can('update', $this->user)) {
+            abort(403, __('Tindakan tidak dibenarkan.'));
+        }
 
         $validatedData = $this->validate();
 
         // Consider moving user update logic to a UserService
-        // E.g., $this->userService->updateUser($this->user, $validatedData);
         $this->user->update([
           'title' => $validatedData['title'],
           'name' => $validatedData['name'],
@@ -140,14 +153,10 @@ class Edit extends Component
         if (isset($validatedData['selectedRoles'])) {
             $this->user->roles()->sync($validatedData['selectedRoles']);
         } else {
-            // If selectedRoles is not set or empty, and you want to remove all roles:
-            $this->user->roles()->sync([]);
+            $this->user->roles()->sync([]); // If selectedRoles is not set or empty, remove all roles
         }
 
         session()->flash('message', __('Maklumat pengguna :name berjaya dikemaskini.', ['name' => $this->user->name]));
-        // Optionally, you might want to refresh the user data if needed, or redirect
-        // $this->user->refresh();
-        // $this->populateFormFields(); // To reflect any changes if staying on page
     }
 
     public function render()
@@ -158,8 +167,6 @@ class Edit extends Component
 
     protected function rules(): array
     {
-        // Note: Password fields are intentionally omitted from edit form
-        // Add them separately if you want to allow password changes here.
         return [
           'title' => ['required', 'string', ValidationRule::in(array_keys(User::getTitleOptions()))],
           'name' => 'required|string|max:255',

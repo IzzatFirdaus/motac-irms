@@ -46,15 +46,17 @@ class LoanTransactionItem extends Model
     use SoftDeletes;
 
     public const STATUS_ITEM_ISSUED = 'issued';
+    public const STATUS_ITEM_RETURNED = 'returned'; // ADDED: Missing constant - This is a general 'returned' state
     public const STATUS_ITEM_RETURNED_PENDING_INSPECTION = 'returned_pending_inspection';
     public const STATUS_ITEM_RETURNED_GOOD = 'returned_good';
     public const STATUS_ITEM_RETURNED_MINOR_DAMAGE = 'returned_minor_damage';
     public const STATUS_ITEM_RETURNED_MAJOR_DAMAGE = 'returned_major_damage';
     public const STATUS_ITEM_REPORTED_LOST = 'reported_lost';
-    public const STATUS_ITEM_UNSERVICEABLE_ON_RETURN = 'unserviceable_on_return'; // Aligned with Design Doc Sec 4.3 enum
+    public const STATUS_ITEM_UNSERVICEABLE_ON_RETURN = 'unserviceable_on_return';
 
     public static array $STATUSES_LABELS = [
         self::STATUS_ITEM_ISSUED => 'Telah Dikeluarkan',
+        self::STATUS_ITEM_RETURNED => 'Telah Dipulangkan', // ADDED: Label for general 'returned'
         self::STATUS_ITEM_RETURNED_PENDING_INSPECTION => 'Pemulangan (Menunggu Semakan)',
         self::STATUS_ITEM_RETURNED_GOOD => 'Dipulangkan (Keadaan Baik)',
         self::STATUS_ITEM_RETURNED_MINOR_DAMAGE => 'Dipulangkan (Rosak Ringan)',
@@ -109,9 +111,7 @@ class LoanTransactionItem extends Model
 
     protected static function booted(): void
     {
-        // parent::booted(); // Call if Laravel's base Model ever implements a booted method.
         if (empty(self::$CONDITION_ON_RETURN_LIST)) {
-            // Ensure Equipment::getConditionStatusOptions() returns an array of ['value' => 'Label']
             self::$CONDITION_ON_RETURN_LIST = Equipment::getConditionStatusOptions();
         }
     }
@@ -120,6 +120,35 @@ class LoanTransactionItem extends Model
     public function loanTransaction(): BelongsTo { return $this->belongsTo(LoanTransaction::class, 'loan_transaction_id'); }
     public function equipment(): BelongsTo { return $this->belongsTo(Equipment::class, 'equipment_id'); }
     public function loanApplicationItem(): BelongsTo { return $this->belongsTo(LoanApplicationItem::class, 'loan_application_item_id'); }
+
+    // This relationship is important for tracking if an issued item has been part of a *return* transaction item.
+    // Assuming a LoanTransactionItem of type 'return' is created for each item returned.
+    public function returnTransactionItem(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        // This links the current LoanTransactionItem (which is an 'issue' item)
+        // to a LoanTransactionItem that represents its return.
+        // This requires a `related_loan_transaction_item_id` in your LoanTransactionItem table
+        // or a similar mechanism to link the issued item to its return record.
+        // As per the controller, we create a *new* LoanTransactionItem for the return.
+        // So, this relationship might be tricky without a direct link.
+        // A common way is to check `LoanTransaction` of type 'return' for the `equipment_id` and `loan_application_item_id`.
+        // For now, I'll comment this out as it's not directly supported by the current schema of `LoanTransactionItem` relations shown.
+        // The controller's `whereDoesntHave('returnTransactionItem')` implies some mechanism exists or is intended.
+        // A simpler way for `whereDoesntHave` check would be:
+        // ->whereNotIn('equipment_id', function ($query) use ($loanTransaction) {
+        //     $query->select('equipment_id')
+        //           ->from('loan_transaction_items')
+        //           ->where('loan_transaction_id', '!=', $loanTransaction->id) // Exclude current issue transaction
+        //           ->whereIn('status', self::$RETURN_APPLICABLE_STATUSES); // Items marked as returned
+        // });
+        // For `whereDoesntHave('returnTransactionItem')` to work, you'd need a relationship
+        // that finds a subsequent LTI that 'returned' this specific item.
+        // One way is if `loan_transaction_items` had a `related_loan_transaction_item_id`
+        // or if `LoanTransaction` of type 'return' directly referenced the original `LoanTransactionItem`s.
+        return $this->hasOne(LoanTransactionItem::class, 'equipment_id', 'equipment_id')
+                    ->where('status', self::STATUS_ITEM_RETURNED); // Assuming a simple return status
+    }
+
 
     public function creator(): BelongsTo { return $this->belongsTo(User::class, 'created_by'); }
     public function updater(): BelongsTo { return $this->belongsTo(User::class, 'updated_by'); }
