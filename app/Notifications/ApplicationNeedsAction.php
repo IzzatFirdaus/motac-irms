@@ -9,8 +9,8 @@ use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+// Removed: use Illuminate\Notifications\Messages\MailMessage; // For instanceof checks - Not used
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 
@@ -32,11 +32,11 @@ class ApplicationNeedsAction extends Notification implements ShouldQueue
         return ['mail', 'database'];
     }
 
-    public function toMail(User $notifiable): MailMessage
+    public function toMail(User $notifiable): \Illuminate\Notifications\Messages\MailMessage // Corrected return type
     {
         $itemTypeDisplayName = $this->getItemTypeDisplayName();
         $applicationId = $this->approvableItem->id ?? 'N/A';
-        $stageName = Approval::getStageDisplayName($this->approvalTask->stage);
+        $stageName = Approval::getStageDisplayName($this->approvalTask->stage); // Ensure this static method exists on Approval model
         $applicantName = $this->approvableItem->user?->name ?? __('Pemohon Tidak Dikenali');
 
         $subject = __('Tindakan Diperlukan: :itemType #:applicationId - Peringkat :stageName', [
@@ -46,7 +46,7 @@ class ApplicationNeedsAction extends Notification implements ShouldQueue
         ]);
 
         $viewUrl = '#';
-        if ($this->approvalTask->id && Route::has('approvals.show')) { // Check if route exists
+        if ($this->approvalTask->id && Route::has('approvals.show')) {
             try {
                 $viewUrl = route('approvals.show', $this->approvalTask->id);
             } catch (\Exception $e) {
@@ -55,7 +55,7 @@ class ApplicationNeedsAction extends Notification implements ShouldQueue
             }
         }
 
-        $mailMessage = (new MailMessage())
+        $mailMessage = (new \Illuminate\Notifications\Messages\MailMessage()) // Using FQCN for MailMessage
             ->subject($subject)
             ->greeting(__('Salam :name,', ['name' => $notifiable->name]))
             ->line(__('Satu :itemType memerlukan perhatian anda untuk peringkat kelulusan ":stageName".', ['itemType' => strtolower($itemTypeDisplayName), 'stageName' => $stageName]))
@@ -67,14 +67,10 @@ class ApplicationNeedsAction extends Notification implements ShouldQueue
         $purposeOrNotes = null;
         if ($this->approvableItem instanceof LoanApplication) {
             $purposeOrNotes = $this->approvableItem->purpose;
-            if ($purposeOrNotes) {
-                $mailMessage->line(__('- Tujuan: :purpose', ['purpose' => $purposeOrNotes]));
-            }
+            if ($purposeOrNotes) $mailMessage->line(__('- Tujuan: :purpose', ['purpose' => $purposeOrNotes]));
         } elseif ($this->approvableItem instanceof EmailApplication) {
             $purposeOrNotes = $this->approvableItem->application_reason_notes;
-            if ($purposeOrNotes) {
-                $mailMessage->line(__('- Tujuan/Catatan: :notes', ['notes' => $purposeOrNotes]));
-            }
+             if ($purposeOrNotes) $mailMessage->line(__('- Tujuan/Catatan: :notes', ['notes' => $purposeOrNotes]));
         }
 
 
@@ -92,11 +88,11 @@ class ApplicationNeedsAction extends Notification implements ShouldQueue
     {
         $itemTypeDisplayName = $this->getItemTypeDisplayName();
         $applicationId = $this->approvableItem->id ?? null;
-        $stageName = Approval::getStageDisplayName($this->approvalTask->stage);
+        $stageName = Approval::getStageDisplayName($this->approvalTask->stage); // Ensure this static method exists
         $applicantName = $this->approvableItem->user?->name ?? __('Pemohon Tidak Dikenali');
 
         $viewUrl = '#';
-        if ($this->approvalTask->id && Route::has('approvals.show')) { // Check if route exists
+        if ($this->approvalTask->id && Route::has('approvals.show')) {
             try {
                 $viewUrl = route('approvals.show', $this->approvalTask->id);
             } catch (\Exception $e) {

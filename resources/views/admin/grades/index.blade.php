@@ -8,7 +8,8 @@
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
             <h1 class="h2 fw-bold text-dark mb-0">{{ __('Senarai Gred Jawatan') }}</h1>
             @can('create', App\Models\Grade::class)
-                <a href="{{ route('admin.grades.create') }}" class="btn btn-primary d-inline-flex align-items-center">
+                {{-- Corrected route name --}}
+                <a href="{{ route('settings.grades.create') }}" class="btn btn-primary d-inline-flex align-items-center">
                     <i class="bi bi-plus-lg me-1"></i> {{ __('Tambah Gred Baru') }}
                 </a>
             @endcan
@@ -62,7 +63,8 @@
                             @foreach ($grades as $grade)
                                 <tr>
                                     <td class="px-3 py-2 small text-dark fw-medium">
-                                        <a href="{{ route('admin.grades.show', $grade) }}"
+                                        {{-- Corrected route name --}}
+                                        <a href="{{ route('settings.grades.show', $grade) }}"
                                             class="text-decoration-none text-primary-emphasis">
                                             {{ $grade->name ?? 'N/A' }}
                                         </a>
@@ -85,21 +87,24 @@
                                     <td class="px-3 py-2 text-end">
                                         <div class="d-inline-flex align-items-center gap-1">
                                             @can('view', $grade)
-                                                <a href="{{ route('admin.grades.show', $grade) }}"
+                                                {{-- Corrected route name --}}
+                                                <a href="{{ route('settings.grades.show', $grade) }}"
                                                     class="btn btn-sm btn-outline-secondary border-0 p-1"
                                                     title="{{ __('Lihat') }}">
                                                     <i class="bi bi-eye-fill"></i>
                                                 </a>
                                             @endcan
                                             @can('update', $grade)
-                                                <a href="{{ route('admin.grades.edit', $grade) }}"
+                                                {{-- Corrected route name --}}
+                                                <a href="{{ route('settings.grades.edit', $grade) }}"
                                                     class="btn btn-sm btn-outline-primary border-0 p-1"
                                                     title="{{ __('Kemaskini') }}">
                                                     <i class="bi bi-pencil-fill"></i>
                                                 </a>
                                             @endcan
                                             @can('delete', $grade)
-                                                <form method="POST" action="{{ route('admin.grades.destroy', $grade) }}"
+                                                {{-- Corrected route name --}}
+                                                <form method="POST" action="{{ route('settings.grades.destroy', $grade) }}"
                                                     onsubmit="return confirm('{{ __('Adakah anda pasti ingin memadam gred :name?', ['name' => $grade->name]) }}');"
                                                     class="d-inline">
                                                     @csrf

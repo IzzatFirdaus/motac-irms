@@ -3,91 +3,137 @@
 namespace App\Livewire\HumanResource\Structure;
 
 use App\Models\Position;
-use Livewire\Attributes\Rule;
+use App\Models\Grade; // For Grade selection
 use Livewire\Component;
+use Illuminate\Validation\Rule as ValidationRule; // Alias for Laravel's Rule
 
 class Positions extends Component
 {
-    // Variables - Start //
     public $positions = [];
+    public ?Position $positionInstance = null; // Explicitly type hinting
 
-    #[Rule('required')]
-    public $name;
+    // Form fields based on System Design
+    // #[Rule('required|string|max:255')] // Livewire 3 attribute validation
+    public string $name = '';
 
-    #[Rule('required|numeric')]
-    public $vacanciesCount;
+    // #[Rule('nullable|string|max:1000')]
+    public ?string $description = null;
 
-    public $position;
+    // #[Rule('required|exists:grades,id')]
+    public ?int $grade_id = null;
 
-    public $isEdit = false;
+    // #[Rule('boolean')]
+    public bool $is_active = true;
 
-    public $confirmedId;
+    // public $vacanciesCount; // Removed as it's not in MOTAC System Design for positions table
 
-    // Variables - End //
+    public bool $isEditMode = false;
+    public ?int $confirmedId = null;
+
+    // Options for dropdowns
+    public array $gradeOptions = [];
+
+    public function mount(): void
+    {
+        $this->gradeOptions = Grade::orderBy('name')->pluck('name', 'id')->all();
+        $this->loadPositions();
+    }
+
+    protected function rules(): array
+    {
+        $nameRule = ValidationRule::unique('positions', 'name');
+        if ($this->isEditMode && $this->positionInstance) {
+            $nameRule->ignore($this->positionInstance->id);
+        }
+
+        return [
+            'name' => ['required', 'string', 'max:255', $nameRule],
+            'description' => ['nullable', 'string', 'max:1000'],
+            'grade_id' => ['required', 'integer', 'exists:grades,id'],
+            'is_active' => ['boolean'],
+        ];
+    }
+
+    public function loadPositions(): void
+    {
+        $this->positions = Position::with('grade')->orderBy('name')->get();
+    }
+
     public function render()
     {
-        $this->positions = Position::all();
-
         return view('livewire.human-resource.structure.positions');
     }
 
     public function submitPosition()
     {
-        $this->isEdit ? $this->editPosition() : $this->addPosition();
-    }
+        $this->validate(); // Uses rules() method
 
-    public function addPosition()
-    {
-        $this->validate();
-
-        Position::create([
+        $data = [
             'name' => $this->name,
-            'vacancies_count' => $this->vacanciesCount,
-        ]);
+            'description' => $this->description,
+            'grade_id' => $this->grade_id,
+            'is_active' => $this->is_active,
+            // 'vacancies_count' => $this->vacanciesCount, // Removed
+        ];
+
+        if ($this->isEditMode && $this->positionInstance) {
+            $this->positionInstance->update($data);
+            session()->flash('toastr', ['type' => 'success', 'message' => __('Jawatan berjaya dikemaskini.')]);
+        } else {
+            Position::create($data);
+            session()->flash('toastr', ['type' => 'success', 'message' => __('Jawatan baru berjaya ditambah.')]);
+        }
 
         $this->dispatch('closeModal', elementId: '#positionModal');
-        $this->dispatch('toastr', type: 'success' /* , title: 'Done!' */, message: __('Going Well!'));
+        $this->resetForm();
+        $this->loadPositions();
     }
 
-    public function editPosition()
+    public function showNewPositionModal(): void
     {
-        $this->validate();
-
-        $this->position->update([
-            'name' => $this->name,
-            'vacancies_count' => $this->vacanciesCount,
-        ]);
-
-        $this->dispatch('closeModal', elementId: '#positionModal');
-        $this->dispatch('toastr', type: 'success' /* , title: 'Done!' */, message: __('Going Well!'));
-
-        $this->reset();
+        $this->resetForm();
+        $this->isEditMode = false;
+        $this->positionInstance = null;
+        $this->dispatch('openModal', elementId: '#positionModal');
     }
 
-    public function confirmDeletePosition($id)
+    public function showEditPositionModal(Position $position): void
+    {
+        $this->resetForm();
+        $this->isEditMode = true;
+        $this->positionInstance = $position;
+
+        $this->name = $position->name;
+        $this->description = $position->description;
+        $this->grade_id = $position->grade_id;
+        $this->is_active = $position->is_active;
+        // $this->vacanciesCount = $position->vacancies_count; // Removed
+        $this->dispatch('openModal', elementId: '#positionModal');
+    }
+
+    public function confirmDeletePosition($id): void
     {
         $this->confirmedId = $id;
     }
 
-    public function deletePosition(Position $position)
+    public function deletePosition(Position $position): void
     {
         $position->delete();
-        $this->dispatch('toastr', type: 'success' /* , title: 'Done!' */, message: __('Going Well!'));
+        session()->flash('toastr', ['type' => 'success', 'message' => __('Jawatan berjaya dipadam.')]);
+        $this->loadPositions();
+        $this->confirmedId = null;
     }
 
-    public function showNewPositionModal()
+    public function resetForm(): void
     {
-        $this->reset();
-    }
-
-    public function showEditPositionModal(Position $position)
-    {
-        $this->reset();
-        $this->isEdit = true;
-
-        $this->position = $position;
-
-        $this->name = $position->name;
-        $this->vacanciesCount = $position->vacancies_count;
+        $this->resetErrorBag();
+        $this->resetValidation();
+        $this->name = '';
+        $this->description = null;
+        $this->grade_id = null;
+        $this->is_active = true;
+        // $this->vacanciesCount = 0; // Removed
+        $this->positionInstance = null;
+        $this->isEditMode = false;
     }
 }

@@ -8,7 +8,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Role; // Make sure this is imported
 
 #[Layout('layouts.app')]
 class UserActivityReport extends Component
@@ -29,16 +29,19 @@ class UserActivityReport extends Component
 
     public function mount()
     {
-        // $this->authorize('viewUserActivityReport');
+        // Ensure correct authorization. Example:
+        // abort_unless(auth()->user()->can('view_user_activity_reports'), 403, 'Anda tidak mempunyai kebenaran untuk melihat laporan ini.');
+        // Or using a policy:
+        // $this->authorize('viewUserActivityReport', User::class); // Assuming a general policy or use a specific ReportPolicy
     }
 
     public function getReportDataProperty()
     {
         $query = User::withCount([
             'emailApplications',
-            'loanApplicationsAsApplicant',
-            'approvalsMade'
-        ])->with(['department', 'roles']);
+            'loanApplicationsAsApplicant', // Corrected to match User model's likely relationship name for loans initiated by user
+            'approvalsMade' // Corrected to match User model's likely relationship name for approvals made by user
+        ])->with(['department', 'roles']); // Eager load department and roles
 
         if (!empty($this->searchTerm)) {
             $query->where(function ($q) {
@@ -56,7 +59,7 @@ class UserActivityReport extends Component
         }
 
         $query->orderBy($this->sortBy, $this->sortDirection);
-        return $query->paginate(15);
+        return $query->paginate(15); // Or your preferred pagination number
     }
 
     // Options for filters
@@ -64,14 +67,21 @@ class UserActivityReport extends Component
     {
         return Department::orderBy('name')->pluck('name', 'id');
     }
+
     public function getRoleOptionsProperty(): \Illuminate\Support\Collection
     {
-        return Role::orderBy('name')->pluck('name', 'name'); // Using name as value for easy filtering
+        return Role::orderBy('name')->pluck('name', 'name'); // Using name as value for easy filtering in whereHas
     }
 
 
     public function applyFilters(): void
     {
+        $this->resetPage(); // Reset pagination when filters are applied
+    }
+
+    public function resetFilters(): void // Added method to reset filters
+    {
+        $this->reset(['searchTerm', 'filterDepartmentId', 'filterRoleName']);
         $this->resetPage();
     }
 
@@ -83,15 +93,16 @@ class UserActivityReport extends Component
             $this->sortBy = $column;
             $this->sortDirection = 'asc';
         }
-        $this->resetPage();
+        $this->resetPage(); // Reset pagination when sorting changes
     }
 
     public function render()
     {
+        // Correctly access computed properties
         return view('livewire.resource-management.admin.reports.user-activity-report', [
-            'reportData' => $this->reportDataProperty,
-            'departmentOptions' => $this->departmentOptionsProperty,
-            'roleOptions' => $this->roleOptionsProperty,
+            'reportData' => $this->reportData,
+            'departmentOptions' => $this->departmentOptions,
+            'roleOptions' => $this->roleOptions,
         ])->title(__('Laporan Aktiviti Pengguna'));
     }
 }

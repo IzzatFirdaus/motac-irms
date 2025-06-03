@@ -1,38 +1,69 @@
 {{-- resources/views/components/resource-status-panel.blade.php --}}
 @props([
     'resource',
-    'statusAttribute' => 'status', // The attribute on the $resource model that holds the status value
-    'statusTextPrefix' => '', // Optional prefix for the displayed status text
+    'statusAttribute' => 'status',
+    'statusTextPrefix' => '',
+    'icon' => null, // Optional: pass 'true' to auto-select based on status, or a specific BI class
+    'showIcon' => false // Simpler prop to control icon visibility
 ])
 
 @php
     $statusValue = strtolower($resource->{$statusAttribute} ?? 'unknown');
-    $statusTextPrefix = $statusTextPrefix ?? ''; // Ensure prefix is initialized
+    $statusTextPrefix = $statusTextPrefix ?? '';
 
-    // Attempt to use a translated status label if available from the model
-    // Checks for accessors like getStatusLabelAttribute() or a public property like statusLabel
-    // e.g., for 'status' attribute, it checks for getStatusLabelAttribute() or statusLabel property
-    // e.g., for 'condition_status' attribute, it checks for getConditionStatusLabelAttribute() or conditionStatusLabel property
-    $statusLabelAccessorMethodName = 'get' . Illuminate\Support\Str::studly($statusAttribute) . 'LabelAttribute'; // e.g. getStatusLabelAttribute
-    $statusLabelPropertyName = Illuminate\Support\Str::camel($statusAttribute) . 'Label'; // e.g. statusLabel
+    $statusLabelAccessorMethodName = 'get' . Illuminate\Support\Str::studly($statusAttribute) . 'LabelAttribute';
+    $statusLabelPropertyName = Illuminate\Support\Str::camel($statusAttribute) . 'Label';
 
     if (method_exists($resource, $statusLabelAccessorMethodName)) {
-        // If an accessor like getStatusLabelAttribute() exists, call it
         $formattedStatus = $resource->{$statusLabelAccessorMethodName}();
     } elseif (property_exists($resource, $statusLabelPropertyName) && !is_null($resource->{$statusLabelPropertyName})) {
-        // If a public property like ->statusLabel exists, use it
         $formattedStatus = $resource->{$statusLabelPropertyName};
     } else {
-        // Fallback: Convert 'pending_approval' to 'Pending Approval' and translate
-        // This also handles the case where no specific accessor or property is found.
         $formattedStatus = __(Illuminate\Support\Str::title(str_replace('_', ' ', $statusValue)));
     }
 
-    // Rely on the Helper to get the appropriate CSS class for the status badge
-    // This helper is expected to return a class string like 'bg-label-success', 'text-bg-danger', etc.
-    $statusClass = \App\Helpers\Helpers::getStatusColorClass($statusValue);
+    $statusClass = \App\Helpers\Helpers::getStatusColorClass($statusValue); // Expected to return MOTAC-themed badge classes
+
+    $statusIconClass = '';
+    if ($showIcon === true) { // Auto-select icon based on status value
+        switch ($statusValue) {
+            case 'approved':
+            case 'completed':
+            case 'active':
+            case 'available':
+                $statusIconClass = 'bi-check-circle-fill';
+                break;
+            case 'pending':
+            case 'pending_support':
+            case 'pending_approval':
+            case 'processing':
+                $statusIconClass = 'bi-clock-history';
+                break;
+            case 'rejected':
+            case 'cancelled':
+            case 'inactive':
+                $statusIconClass = 'bi-x-circle-fill';
+                break;
+            case 'on_loan':
+                $statusIconClass = 'bi-arrow-up-right-circle-fill';
+                break;
+            case 'damaged_needs_repair':
+            case 'under_maintenance':
+                $statusIconClass = 'bi-tools';
+                break;
+            default:
+                $statusIconClass = 'bi-info-circle-fill';
+                break;
+        }
+    } elseif (is_string($showIcon) && Str::startsWith($showIcon, 'bi-')) { // Allow passing a specific Bootstrap Icon class
+        $statusIconClass = $showIcon;
+    }
+
 @endphp
 
-<span {{ $attributes->merge(['class' => 'badge rounded-pill ' . $statusClass]) }}>
+<span {{ $attributes->merge(['class' => 'badge rounded-pill ' . $statusClass . ' d-inline-flex align-items-center']) }}>
+    @if($statusIconClass)
+        <i class="bi {{ $statusIconClass }} me-1"></i>
+    @endif
     {{ $statusTextPrefix . $formattedStatus }}
 </span>

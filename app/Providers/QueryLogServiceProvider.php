@@ -5,9 +5,10 @@ namespace App\Providers;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\ServiceProvider; // Import the App facade
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Database\Events\QueryExecuted; // Import the QueryExecuted event
 
-class QueryLogServiceProvider extends ServiceProvider
+class QueryLogServiceProvider extends ServiceProvider // Corrected class name
 {
     /**
      * Register services.
@@ -19,28 +20,35 @@ class QueryLogServiceProvider extends ServiceProvider
 
     /**
      * Bootstrap services.
+     * Enables query logging in the local environment and logs queries exceeding a certain duration.
      */
     public function boot(): void
     {
-        if (app()->environment('local')) {
-            DB::enableQueryLog();
+        if (App::environment('local')) {
+            // Optionally enable logging of all queries in local environment for debugging
+            // DB::enableQueryLog();
 
-            DB::whenQueryingForLongerThan(1000, function ($connection) {
-                // Only attempt to get the URL if not running in console
-                $url = 'N/A in console';
+            $longQueryThreshold = config('database.long_query_threshold', 1000); // Default to 1000ms (1s)
+
+            DB::whenQueryingForLongerThan($longQueryThreshold, function ($connection, QueryExecuted $event) {
+                $url = 'N/A (Console or no request context)';
                 if (!App::runningInConsole()) {
-                    // Ensure request() is not null and fullUrl() can be safely called
-                    if (request() && method_exists(request(), 'fullUrl')) {
-                        $url = request()->fullUrl();
+                    /** @var \Illuminate\Http\Request|null $currentRequest */
+                    $currentRequest = request(); // Global helper
+                    if ($currentRequest && method_exists($currentRequest, 'fullUrl')) {
+                        $url = $currentRequest->fullUrl();
                     } else {
-                        $url = 'Request object not available';
+                        $url = 'Request object or fullUrl() method not available.';
                     }
                 }
 
                 Log::warning(
-                    'Long running queries detected.',
+                    'Long running query detected.',
                     [
-                        'queries' => $connection->getQueryLog(),
+                        'connection_name' => $connection->getName(),
+                        'query' => $event->sql,          // SQL from the event
+                        'bindings' => $event->bindings,   // Bindings from the event
+                        'time_ms' => $event->time,        // Execution time in milliseconds from the event
                         'url' => $url,
                     ]
                 );

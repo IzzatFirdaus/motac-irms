@@ -12,7 +12,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Route; // Added for consistency
+use Illuminate\Support\Facades\Route;
 
 final class ApplicationRejected extends Notification implements ShouldQueue
 {
@@ -28,7 +28,7 @@ final class ApplicationRejected extends Notification implements ShouldQueue
         ?string $rejectionReason
     ) {
         $this->application = $application;
-        $this->application->loadMissing('user'); // Eager load user relationship
+        $this->application->loadMissing('user'); // Added eager loading
         $this->rejecter = $rejecter;
         $this->rejectionReason = $rejectionReason;
         Log::info('ApplicationRejected notification created for '.$application::class." ID: ".($application->id ?? 'N/A')." by User ID: {$rejecter->id}.");
@@ -49,7 +49,7 @@ final class ApplicationRejected extends Notification implements ShouldQueue
         return $this->rejectionReason;
     }
 
-    public function via(User $notifiable): array // Type hinted $notifiable
+    public function via(User $notifiable): array // Standardized to User
     {
         return ['mail', 'database'];
     }
@@ -62,22 +62,23 @@ final class ApplicationRejected extends Notification implements ShouldQueue
             ? __('Permohonan Pinjaman Peralatan ICT')
             : __('Permohonan Akaun E-mel/ID Pengguna');
 
+        // Corrected: Prioritize loaded applicant user from the application model
         $applicantName = $this->application->user?->name ?? $notifiable->name ?? __('Pemohon');
         $rejecterName = $this->rejecter->name ?? __('Pegawai Pelulus');
 
         $mailMessage = (new MailMessage())
             ->subject(__(':appType Ditolak (#:appId)', ['appType' => $applicationTypeDisplay, 'appId' => $applicationId]))
             ->greeting(__('Salam Sejahtera, :name,', ['name' => $applicantName]))
-            ->error() // Mark as important/error
+            ->error()
             ->line(__('Dukacita dimaklumkan bahawa :appType anda (ID: #:appId) telah **ditolak**.', ['appType' => $applicationTypeDisplay, 'appId' => $applicationId]));
 
         if ($this->rejectionReason !== null && trim($this->rejectionReason) !== '') {
             $mailMessage->line(__('Sebab penolakan oleh :rejecterName:', ['rejecterName' => $rejecterName]));
             $mailMessage->line($this->rejectionReason);
         } else {
-            $mailMessage->line(__('Permohonan anda ditolak oleh :rejecterName. Tiada sebab khusus dinyatakan.', ['rejecterName' => $rejecterName]));
+            $mailMessage->line(__('Permohonan anda ditolak oleh :rejecterName. Tiada sebab khusus dinyatakan.',['rejecterName' => $rejecterName]));
         }
-        $mailMessage->line(''); // spacing
+        $mailMessage->line('');
 
         $viewApplicationUrl = '#';
         $routeParameters = [];
@@ -85,9 +86,11 @@ final class ApplicationRejected extends Notification implements ShouldQueue
 
         if ($this->application->id) {
             if ($isLoanApp) {
+                // Standardized route name
                 $routeName = 'resource-management.my-applications.loan.show';
                 $routeParameters = ['loan_application' => $this->application->id];
             } else {
+                // Standardized route name
                 $routeName = 'resource-management.my-applications.email.show';
                 $routeParameters = ['email_application' => $this->application->id];
             }
@@ -96,12 +99,12 @@ final class ApplicationRejected extends Notification implements ShouldQueue
                 try {
                     $viewApplicationUrl = route($routeName, $routeParameters);
                 } catch (\Exception $e) {
-                    Log::error('Error generating URL for ApplicationRejected mail: '.$e->getMessage(), [
-                       'application_id' => $this->application->id ?? null,
-                       'application_type' => $this->application::class,
-                       'route_name' => $routeName,
+                     Log::error('Error generating URL for ApplicationRejected mail: '.$e->getMessage(), [
+                        'application_id' => $this->application->id ?? null,
+                        'application_type' => $this->application::class,
+                        'route_name' => $routeName,
                     ]);
-                    $viewApplicationUrl = '#'; // Fallback
+                    $viewApplicationUrl = '#';
                 }
             }
         }
@@ -130,8 +133,8 @@ final class ApplicationRejected extends Notification implements ShouldQueue
             'application_id' => $applicationId,
             'application_type_morph' => $applicationMorphClass,
             'application_type_display' => $applicationTypeDisplay,
-            'applicant_user_id' => $this->application->user_id ?? $notifiable->id,
-            'status_key' => 'rejected', // Generic rejected status
+            'applicant_user_id' => $this->application->user_id ?? $notifiable->id, // Use loaded user_id
+            'status_key' => 'rejected',
             'subject' => __(':appType Ditolak (#:id)', ['appType' => $applicationTypeDisplay, 'id' => $applicationId ?? 'N/A']),
             'message' => __(':appType anda (ID: #:appId) telah ditolak oleh :rejecterName.', ['appType' => $applicationTypeDisplay, 'appId' => $applicationId ?? 'N/A', 'rejecterName' => $rejectedBy]),
             'rejection_reason' => $this->rejectionReason,
@@ -144,7 +147,7 @@ final class ApplicationRejected extends Notification implements ShouldQueue
         $routeParameters = [];
         $routeName = null;
 
-        if ($applicationId !== null) {
+         if ($applicationId !== null) {
             if ($isLoanApp) {
                 $routeName = 'resource-management.my-applications.loan.show';
                 $routeParameters = ['loan_application' => $applicationId];
@@ -165,7 +168,7 @@ final class ApplicationRejected extends Notification implements ShouldQueue
                         'application_type' => $applicationMorphClass,
                         'route_name' => $routeName,
                     ]);
-                    $applicationUrl = '#'; // Fallback
+                    $applicationUrl = '#';
                 }
             }
         }

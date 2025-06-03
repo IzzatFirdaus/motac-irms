@@ -1,24 +1,20 @@
+{{-- resources/views/livewire/resource-management/admin/bpm/issued-loans.blade.php --}}
 <div>
     @section('title', __('Senarai Pinjaman Telah Dikeluarkan'))
 
     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4">
-        {{-- Title can also be set via #[Title('')] in Livewire component class --}}
         <h1 class="h2 fw-semibold text-dark mb-2 mb-sm-0">
             {{ __('Senarai Peralatan ICT Telah Dikeluarkan') }}</h1>
         {{-- Add any action buttons here if needed, e.g., Export --}}
     </div>
 
-    {{-- Livewire session messages or a global alert component --}}
     @if (session()->has('message'))
-        <x-alert type="success" :message="session('message')" class="mb-4"/> {{-- Assuming x-alert is a Blade component --}}
+        <x-alert type="success" :message="session('message')" class="mb-4"/>
     @elseif (session()->has('error'))
         <x-alert type="danger" :message="session('error')" class="mb-4"/>
     @endif
 
-    {{-- Placeholder for potential Livewire-driven global table filters if not already part of this component --}}
-    {{-- @livewire('shared.table-filters', ['model' => \App\Models\LoanApplication::class]) --}}
-
-    <x-card> {{-- Assuming x-card is a Blade component for consistent card styling --}}
+    <x-card>
         <div class="table-responsive">
             <table class="table table-hover table-striped mb-0">
                 <thead class="table-light">
@@ -33,7 +29,6 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {{-- Loading indicator for the entire table body during wire:loading --}}
                     <tr wire:loading.class.delay="opacity-50" class="transition-opacity">
                         <td colspan="7" class="p-0">
                             <div wire:loading.flex class="progress" style="height: 2px; width: 100%;" role="progressbar" aria-valuetext="Loading...">
@@ -54,16 +49,15 @@
                                         @foreach ($loanApplication->applicationItems as $item)
                                             @if ($item->quantity_issued > 0)
                                                 <li>
-                                                    <i class="ti ti-chevron-right text-secondary me-1" style="font-size: 0.7rem;"></i>
-                                                    {{-- Accessing asset type label safely from Equipment model --}}
+                                                    <i class="bi bi-chevron-right text-secondary me-1" style="font-size: 0.7rem;"></i>
                                                     {{ $item->equipment_type ? (\App\Models\Equipment::$ASSET_TYPES_LABELS[$item->equipment_type] ?? Str::title(str_replace('_', ' ', $item->equipment_type))) : __('Jenis Tidak Dinyatakan') }}
                                                     ({{ __('Qty:') }} {{ $item->quantity_issued }})
                                                     @if ($item->loanTransactionItems->isNotEmpty())
                                                         <ul class="list-unstyled ps-3 text-body-secondary" style="font-size: 0.75rem;">
-                                                            {{-- Filter for transaction items related to an "issue" transaction --}}
                                                             @foreach ($item->loanTransactionItems->filter(fn($transactionItem) => $transactionItem->loanTransaction?->type === \App\Models\LoanTransaction::TYPE_ISSUE) as $transactionItem)
                                                                 @if ($transactionItem->equipment)
-                                                                    <li><i class="ti ti-arrow-right text-info me-1" style="font-size: 0.6rem;"></i>
+                                                                    <li>
+                                                                        <i class="bi bi-arrow-right-short text-info me-1" style="font-size: 0.8rem;"></i>
                                                                         {{ $transactionItem->equipment->tag_id ?? 'N/A Tag' }} -
                                                                         {{ $transactionItem->equipment->brand ?? 'N/A Brand' }}
                                                                         {{ $transactionItem->equipment->model ?? 'N/A Model' }}
@@ -82,10 +76,9 @@
                             </td>
                             <td class="px-3 py-2 align-middle small text-muted">
                                 @php
-                                    // Getting the transaction_date from the latest "issue" type transaction
                                     $latestIssueTransactionDate = $loanApplication->loanTransactions
                                         ->where('type', \App\Models\LoanTransaction::TYPE_ISSUE)
-                                        ->sortByDesc('transaction_date') // or 'id' if transaction_date can be same
+                                        ->sortByDesc('transaction_date')
                                         ->first()?->transaction_date;
                                 @endphp
                                 {{ $latestIssueTransactionDate ? $latestIssueTransactionDate->translatedFormat(config('app.datetime_format_my', 'd M Y, h:i A')) : __('N/A') }}
@@ -104,41 +97,38 @@
                                 @endif
                             </td>
                             <td class="px-3 py-2 align-middle small">
-                                {{-- Using accessor for translated status if available, otherwise format from status field --}}
                                 <span class="badge rounded-pill {{ \App\Helpers\Helpers::getStatusColorClass($loanApplication->status, 'bootstrap_badge') }}">
                                     {{ $loanApplication->status_translated ?? __(Str::title(str_replace('_', ' ', $loanApplication->status))) }}
                                 </span>
                             </td>
                             <td class="px-3 py-2 align-middle text-end">
                                 @php
-                                    // Find the latest loan transaction of type 'issue' for this loan application
                                     $latestIssueTransaction = $loanApplication->loanTransactions
                                         ->where('type', \App\Models\LoanTransaction::TYPE_ISSUE)
-                                        ->sortByDesc('id') // Get the most recent one
+                                        ->sortByDesc('id')
                                         ->first();
                                 @endphp
                                 @if ($latestIssueTransaction)
-                                    <a href="{{ route('resource-management.admin.loan-transactions.show', $latestIssueTransaction->id) }}"
+                                    <a href="{{ route('resource-management.bpm.loan-transactions.show', $latestIssueTransaction->id) }}"
                                         class="btn btn-sm btn-outline-info border-0 p-1"
                                         title="{{ __('Lihat Detail Transaksi Keluar') }}">
-                                        <i class="ti ti-file-invoice fs-6 lh-1"></i>
+                                        <i class="bi bi-file-earmark-text fs-6 lh-1"></i>
                                     </a>
                                     @if (!in_array($loanApplication->status, [\App\Models\LoanApplication::STATUS_RETURNED, \App\Models\LoanApplication::STATUS_CANCELLED]))
-                                        {{-- Ensure the policy name matches one defined in AuthServiceProvider and LoanApplicationPolicy --}}
                                         @can('processReturn', $loanApplication)
-                                            <a href="{{ route('resource-management.admin.loan-transactions.return.form', ['loanApplicationId' => $loanApplication->id]) }}"
+                                            {{-- ***** EDITED LINE ***** --}}
+                                            <a href="{{ route('resource-management.bpm.loan-transactions.return.form', ['loanTransaction' => $latestIssueTransaction->id]) }}"
                                                 class="btn btn-sm btn-outline-success border-0 p-1 ms-1"
                                                 title="{{ __('Proses Pemulangan') }}">
-                                                <i class="ti ti-arrow-back-up fs-6 lh-1"></i>
+                                                <i class="bi bi-arrow-return-left fs-6 lh-1"></i>
                                             </a>
                                         @endcan
                                     @endif
                                 @else
-                                     {{-- Fallback to loan application detail if no specific issue transaction found (should ideally not happen for issued loans) --}}
-                                    <a href="{{ route('resource-management.my-applications.loan-applications.show', $loanApplication->id) }}"
+                                    <a href="{{ route('loan-applications.show', $loanApplication->id) }}"
                                         class="btn btn-sm btn-outline-primary border-0 p-1"
                                         title="{{ __('Lihat Detail Permohonan') }}">
-                                        <i class="ti ti-eye fs-6 lh-1"></i>
+                                        <i class="bi bi-eye fs-6 lh-1"></i>
                                     </a>
                                 @endif
                             </td>
@@ -147,7 +137,7 @@
                         <tr>
                             <td colspan="7" class="px-3 py-5 text-center">
                                 <div class="d-flex flex-column align-items-center text-muted small">
-                                    <i class="ti ti-folder-off fs-1 mb-2 text-secondary"></i>
+                                    <i class="bi bi-folder-x fs-1 mb-2 text-secondary"></i>
                                     {{ __('Tiada rekod pinjaman yang telah dikeluarkan ditemui.') }}
                                 </div>
                             </td>

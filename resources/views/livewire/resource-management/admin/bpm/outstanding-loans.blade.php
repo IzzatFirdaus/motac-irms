@@ -1,40 +1,45 @@
+{{-- resources/views/livewire/bpm/outstanding-loans.blade.php --}}
 <div>
     {{-- The title is set in your Livewire component's render method using ->title() --}}
     {{-- The layout is set by #[Layout('layouts.app')] in your Livewire component --}}
 
-    <div class="container py-4">
+    <div class="container py-4"> {{-- Consider container-fluid for full width as per general MOTAC internal tool design --}}
         <h2 class="h2 fw-bold text-dark mb-4">{{ __('Senarai Pinjaman Menunggu Pengeluaran') }}</h2>
 
-        {{-- Include a general alert partial if you have one, or handle session messages directly --}}
         @if (session()->has('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{-- Iconography: Design Language 2.4 (Bootstrap Icons are good) --}}
+                <i class="bi bi-check-circle-fill me-2"></i>
                 {{ session('success') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
         @if (session()->has('error'))
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{-- Iconography: Design Language 2.4 --}}
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
                 {{ session('error') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
 
-        {{-- Search Input (as per your Livewire component's $searchTerm property) --}}
-        <div class="card shadow-sm mb-4">
-            <div class="card-body">
+        {{-- Search Input --}}
+        {{-- Apply .motac-card if it provides specific MOTAC theme styling over default .card shadow-sm --}}
+        <div class="card shadow-sm mb-4 motac-card">
+            <div class="card-body motac-card-body">
                 <div class="row">
                     <div class="col-md-12">
                         <label for="searchOutstandingLoansBPM"
                             class="form-label visually-hidden">{{ __('Carian Permohonan') }}</label>
                         <input wire:model.live.debounce.300ms="searchTerm" id="searchOutstandingLoansBPM" type="text"
-                            placeholder="{{ __('Cari ID Permohonan, Tujuan, Nama Pemohon...') }}" class="form-control">
+                            placeholder="{{ __('Cari ID Permohonan, Tujuan, Nama Pemohon...') }}" class="form-control"> {{-- Ensure form-control is MOTAC themed --}}
                     </div>
                 </div>
             </div>
         </div>
 
         <div wire:loading.delay.long class="text-center py-5">
-            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"> {{-- Ensure text-primary uses MOTAC primary color --}}
                 <span class="visually-hidden">{{ __('Memuatkan...') }}</span>
             </div>
             <p class="mt-2">{{ __('Memuatkan senarai permohonan...') }}</p>
@@ -42,16 +47,17 @@
 
         <div wire:loading.remove>
             @if ($applications->isEmpty())
-                <div class="alert alert-info" role="alert">
+                <div class="alert alert-info" role="alert"> {{-- Ensure alert-info is MOTAC themed --}}
                     <i class="bi bi-info-circle-fill me-2"></i>
                     {{ __('Tiada permohonan pinjaman menunggu pengeluaran pada masa ini atau sepadan dengan carian anda.') }}
                 </div>
             @else
-                <div class="card shadow-sm">
-                    <div class="card-body p-0"> {{-- Removed card-body padding to make table flush --}}
+                {{-- Apply .motac-card if preferred over .card.shadow-sm --}}
+                <div class="card shadow-sm motac-card">
+                    <div class="card-body p-0 motac-card-body">
                         <div class="table-responsive">
-                            <table class="table table-striped table-hover mb-0"> {{-- Removed mb-0 if card-body has p-0 --}}
-                                <thead class="table-light">
+                            <table class="table table-striped table-hover mb-0">
+                                <thead class="table-light"> {{-- Ensure table-light uses MOTAC theme surface/bg color --}}
                                     <tr>
                                         <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">
                                             {{ __('Permohonan #') }}</th>
@@ -74,37 +80,31 @@
                                     @foreach ($applications as $application)
                                         <tr wire:key="bpm-outstanding-loan-{{ $application->id }}">
                                             <td class="align-middle px-3 py-2">
-                                                {{-- Assuming 'loan-applications.show' is a defined route for viewing details --}}
-                                                <a
-                                                    href="{{ route('loan-applications.show', $application->id) }}">{{ $application->id }}</a>
+                                                <a href="{{ route('loan-applications.show', $application->id) }}">{{ $application->id }}</a>
                                             </td>
                                             <td class="align-middle px-3 py-2">
                                                 @if ($application->user)
-                                                    {{-- Assuming 'settings.users.show' or a similar admin route for user details --}}
-                                                    <a
-                                                        href="{{ route('settings.users.show', $application->user->id) }}">
-                                                        {{ $application->user->name ?? 'N/A' }}
+                                                    <a href="{{ route('settings.users.show', $application->user->id) }}">
+                                                        {{ $application->user->name ?? __('N/A') }}
                                                     </a>
                                                 @else
-                                                    N/A
+                                                    {{__('N/A')}}
                                                 @endif
                                             </td>
                                             <td class="align-middle px-3 py-2"
                                                 style="white-space: normal; min-width: 250px;">
                                                 {{ Str::limit($application->purpose, 70) }}</td>
                                             <td class="align-middle px-3 py-2">
-                                                {{ $application->loan_end_date?->translatedFormat(config('app.date_format_my_short', 'd M Y')) ?? 'N/A' }}
+                                                {{ $application->loan_end_date?->translatedFormat(config('app.date_format_my_short', 'd M Y')) ?? __('N/A') }}
                                             </td>
                                             <td class="align-middle small px-3 py-2">
-                                                {{-- Accessing applicationItems as per your Livewire component's eager loading --}}
                                                 @if ($application->applicationItems->where('quantity_approved', '>', 0)->isNotEmpty())
                                                     <ul class="list-unstyled mb-0 ps-0">
                                                         @foreach ($application->applicationItems->where('quantity_approved', '>', 0) as $item)
                                                             <li>
-                                                                {{-- CORRECTED LINE BELOW --}}
-                                                                {{ $item->equipment_type ? \App\Models\Equipment::$ASSET_TYPES_LABELS[$item->equipment_type] ?? Str::title(str_replace('_', ' ', $item->equipment_type)) : 'N/A' }}
+                                                                {{ $item->equipment_type ? \App\Models\Equipment::$ASSET_TYPES_LABELS[$item->equipment_type] ?? Str::title(str_replace('_', ' ', $item->equipment_type)) : __('N/A') }}
                                                                 ({{ __('Diluluskan') }}:
-                                                                {{ $item->quantity_approved ?? 'N/A' }})
+                                                                {{ $item->quantity_approved ?? __('N/A') }})
                                                             </li>
                                                         @endforeach
                                                     </ul>
@@ -113,12 +113,10 @@
                                                 @endif
                                             </td>
                                             <td class="text-end align-middle px-3 py-2">
-                                                {{-- Corrected route name based on typical structure from your web.php --}}
                                                 @can('processIssuance', $application)
-                                                    {{-- Assuming you have a policy --}}
                                                     <a href="{{ route('resource-management.bpm.loan-transactions.issue.form', $application->id) }}"
-                                                        class="btn btn-sm btn-primary d-inline-flex align-items-center">
-                                                        <i class="bi bi-box-arrow-up-right me-1"></i>
+                                                        class="btn btn-sm btn-primary d-inline-flex align-items-center"> {{-- btn-primary should be MOTAC themed --}}
+                                                        <i class="bi bi-box-arrow-up-right me-1"></i> {{-- Already Bootstrap Icon --}}
                                                         {{ __('Keluarkan Peralatan') }}
                                                     </a>
                                                 @else
@@ -135,7 +133,7 @@
 
                 @if ($applications->hasPages())
                     <div class="mt-4 d-flex justify-content-center">
-                        {{ $applications->links() }}
+                        {{ $applications->links() }} {{-- Ensure pagination view is Bootstrap 5 styled --}}
                     </div>
                 @endif
             @endif

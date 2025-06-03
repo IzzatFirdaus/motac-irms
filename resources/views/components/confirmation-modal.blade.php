@@ -1,22 +1,25 @@
-@props(['id' => null, 'maxWidth' => null, 'title', 'content', 'footer'])
+{{-- resources/views/components/confirmation-modal.blade.php --}}
+@props(['id' => null, 'maxWidth' => null]) {{-- Removed title, content, footer as they come from slots --}}
 
-{{-- Assuming x-modal is a base Bootstrap modal component like modal-motac-generic.blade.php --}}
-{{-- This component provides the modal-content part --}}
+{{-- This component defines the content structure for a confirmation-style dialog,
+     assuming x-modal provides the outer Bootstrap modal shell and standard slots.
+     Ensure x-modal is styled according to MOTAC theme. --}}
 <x-modal :id="$id" :maxWidth="$maxWidth" {{ $attributes }}>
-  {{-- The modal-dialog part should be handled by the x-modal component itself --}}
-  {{-- This content populates the .modal-content div --}}
-  <div class="modal-header">
-    @if(isset($title))
-    <h4 class="modal-title">{{ $title }}</h4>
-    @endif
-    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('Close') }}"></button>
-  </div>
-  <div class="modal-body">
-    {{ $content }}
-  </div>
-  @if(isset($footer))
-  <div class="modal-footer">
-    {{ $footer }}
-  </div>
-  @endif
+  <x-slot name="title">
+      <div class="d-flex align-items-center">
+        {{-- Example: Add a default warning icon for confirmation modals if not overridden --}}
+        <i class="bi bi-exclamation-triangle-fill text-warning me-2 fs-4"></i>
+        {{ $title }} {{-- Slot for title --}}
+      </div>
+  </x-slot>
+
+  <x-slot name="content">
+    <div class="text-sm text-gray-600"> {{-- Generic styling, ensure it matches MOTAC theme's muted text --}}
+      {{ $content }} {{-- Slot for content --}}
+    </div>
+  </x-slot>
+
+  <x-slot name="footer">
+    {{ $footer }} {{-- Slot for footer buttons --}}
+  </x-slot>
 </x-modal>

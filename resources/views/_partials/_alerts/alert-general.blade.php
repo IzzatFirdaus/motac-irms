@@ -1,68 +1,61 @@
 {{-- resources/views/_partials/_alerts/alert-general.blade.php --}}
-{{-- Displays global session-based flash messages and validation errors using Bootstrap 5. --}}
+{{-- Displays global session-based flash messages and validation errors using the x-alert component. --}}
 @php
     $alertMessage = null;
     $alertLevel = 'info'; // Default level
-    $alertIcon = 'ti-info-circle'; // Default icon
+    $alertTitle = null;
 
+    // Determine alert details from session flash messages
     if (session()->has('success')) {
         $alertMessage = session('success');
         $alertLevel = 'success';
+        // Title can be sourced from your x-alert component's defaults or set explicitly here
+        // For simplicity, we'll let x-alert handle default titles based on type if not set here
+        // $alertTitle = __('Berjaya!');
     } elseif (session()->has('error')) {
         $alertMessage = session('error');
         $alertLevel = 'danger';
+        // $alertTitle = __('Ralat!');
     } elseif (session()->has('warning')) {
         $alertMessage = session('warning');
         $alertLevel = 'warning';
+        // $alertTitle = __('Amaran!');
     } elseif (session()->has('info')) {
         $alertMessage = session('info');
         $alertLevel = 'info';
+        // $alertTitle = __('Makluman');
     } elseif (session()->has('message')) {
         $sessionMessage = session('message');
         if (is_array($sessionMessage) && isset($sessionMessage['content'])) {
             $alertMessage = $sessionMessage['content'];
             $alertLevel = $sessionMessage['level'] ?? 'info';
+            $alertTitle = $sessionMessage['title'] ?? null; // Use title from session if provided
         } elseif (is_string($sessionMessage)) {
             $alertMessage = $sessionMessage;
+            // Default title for generic string message can be set or let x-alert decide
         }
     }
-
-    // Determine icon based on the final alert level
-    $alertIcon = match (strtolower($alertLevel)) {
-        'success' => 'ti-circle-check',
-        'danger' => 'ti-alert-triangle',
-        'warning' => 'ti-alert-hexagon',
-        default => 'ti-info-circle',
-    };
 @endphp
 
+{{-- Display Session-Based Flash Message using x-alert --}}
 @if ($alertMessage)
-  {{-- Uses Helper to get Bootstrap alert class e.g., alert-success, alert-danger --}}
-  <div class="alert alert-{{ \App\Helpers\Helpers::getAlertClass($alertLevel) }} alert-dismissible d-flex align-items-center fade show" role="alert">
-    <span class="alert-icon alert-icon-lg me-2">
-      <i class="ti {{ $alertIcon }} ti-sm"></i> {{-- Tabler Icon --}}
-    </span>
-    <div class="d-flex flex-column ps-1">
-      <p class="mb-0 alert-message-content">{{ __($alertMessage) }}</p>
-    </div>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('Tutup') }}"></button>
-  </div>
+    <x-alert :type="$alertLevel"
+             @if($alertTitle) title="{{ $alertTitle }}" @endif
+             :message="__($alertMessage)"
+             dismissible="true" />
 @endif
 
-{{-- Display Laravel Validation Errors --}}
+{{-- Display Laravel Validation Errors using x-alert --}}
 @if ($errors->any())
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <div class="d-flex">
-            <span class="alert-icon alert-icon-lg me-2"><i class="ti ti-alert-octagon ti-sm"></i></span>
-            <div class="d-flex flex-column ps-1">
-                <h5 class="alert-heading mb-2">{{ __('Amaran! Sila semak ralat input berikut:') }}</h5>
-                <ul class="list-unstyled mb-0">
-                    @foreach ($errors->all() as $error)
-                        <li><small>{{ $error }}</small></li>
-                    @endforeach
-                </ul>
-            </div>
-        </div>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('Tutup') }}"></button>
-    </div>
+    <x-alert type="danger"
+             :title="__('Amaran! Sila semak ralat input berikut:')"
+             dismissible="true">
+        {{-- The default icon for 'danger' will be used from x-alert component --}}
+        {{-- Error messages are passed into the default slot of the x-alert component --}}
+        <ul class="list-unstyled mb-0 small ps-0">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </x-alert>
 @endif

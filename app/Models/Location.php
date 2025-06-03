@@ -11,9 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-
-// use Illuminate\Support\Facades\Auth; // Only needed if inline blameable in boot() is used
-// Remove: use App\Models\Device; // If it was explicitly imported
+// No 'use App\Models\Device;'
 
 /**
  * Location Model.
@@ -38,8 +36,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\User|null $deleter
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Equipment> $equipment
  * @property-read int|null $equipment_count
- * // Removed: @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Device> $devices
- * // Removed: @property-read int|null $devices_count
+ * // Removed Device PHPDoc properties
+ *
  * @method static Builder<static>|Location active()
  * @method static Builder<static>|Location byCity(string $city)
  * @method static Builder<static>|Location byCountry(string $country)
@@ -54,6 +52,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static Builder<static>|Location whereDeletedBy($value)
  * @method static Builder<static>|Location whereDescription($value)
  * @method static Builder<static>|Location whereId($value)
+ * @method static Builder<static>|Location whereIsActive($value)
  * @method static Builder<static>|Location whereName($value)
  * @method static Builder<static>|Location whereUpdatedAt($value)
  * @method static Builder<static>|Location whereUpdatedBy($value)
@@ -72,7 +71,7 @@ class Location extends Model
         'name', 'description',
         'address', 'city', 'state', 'country', 'postal_code',
         'is_active',
-        // 'created_by', 'updated_by', // Handled by BlameableObserver
+        // 'created_by', 'updated_by', // Assumed handled by BlameableObserver
     ];
 
     protected $casts = [
@@ -86,46 +85,13 @@ class Location extends Model
         'is_active' => true,
     ];
 
+    // Commented out boot method assuming BlameableObserver handles audit fields.
+    // If local boot for blameable is needed, it can be reinstated.
     /*
-    // Commented out assuming global BlameableObserver handles created_by, updated_by, deleted_by.
     protected static function boot(): void
     {
         parent::boot();
-        static::creating(function (self $model): void {
-            if (Auth::check()) {
-                $currentUser = Auth::user();
-                if (is_null($model->created_by) && property_exists($model, 'created_by')) {
-                    $model->created_by = $currentUser->id;
-                }
-                if (is_null($model->updated_by) && property_exists($model, 'updated_by')) {
-                    $model->updated_by = $currentUser->id;
-                }
-            }
-        });
-        static::updating(function (self $model): void {
-            if (Auth::check() && property_exists($model, 'updated_by') && !$model->isDirty('updated_by')) {
-                $currentUser = Auth::user();
-                $model->updated_by = $currentUser->id;
-            }
-        });
-        if (in_array(SoftDeletes::class, class_uses_recursive(static::class))) {
-            static::deleting(function (self $model): void {
-                if (Auth::check() && property_exists($model, 'deleted_by') && !$model->isDirty('deleted_by')) {
-                    $currentUser = Auth::user();
-                    $model->deleted_by = $currentUser->id;
-                    $model->saveQuietly();
-                }
-            });
-            static::restoring(function (self $model): void {
-                if (property_exists($model, 'deleted_by')) {
-                    $model->deleted_by = null;
-                }
-                if (Auth::check() && property_exists($model, 'updated_by') && !$model->isDirty('updated_by')) {
-                    $currentUser = Auth::user();
-                    $model->updated_by = $currentUser->id;
-                }
-            });
-        }
+        // ... (Blameable logic if not using global observer) ...
     }
     */
 
@@ -137,18 +103,8 @@ class Location extends Model
     /** @return HasMany<Equipment> */
     public function equipment(): HasMany
     {
-        // Assumes 'equipment' table has 'location_id' as per your Equipment model.
         return $this->hasMany(Equipment::class, 'location_id');
     }
-
-    /**
-     * Removed devices relationship as Device model is not part of MOTAC system.
-     * @return HasMany
-     */
-    // public function devices(): HasMany
-    // {
-    //     return $this->hasMany(Device::class, 'location_id');
-    // }
 
     // Blameable relationships
     public function creator(): BelongsTo
@@ -178,14 +134,12 @@ class Location extends Model
     /** @param Builder<Location> $query */
     public function scopeByCity(Builder $query, string $city): Builder
     {
-        // Assumes 'city' column exists
         return $query->where('city', $city);
     }
 
     /** @param Builder<Location> $query */
     public function scopeByCountry(Builder $query, string $country): Builder
     {
-        // Assumes 'country' column exists
         return $query->where('country', $country);
     }
 }

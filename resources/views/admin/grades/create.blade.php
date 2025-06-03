@@ -10,7 +10,8 @@
 
                 <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
                     <h1 class="h2 fw-bold text-dark mb-0">{{ __('Tambah Gred Baru') }}</h1>
-                    <a href="{{ route('admin.grades.index') }}"
+                    {{-- Corrected route name --}}
+                    <a href="{{ route('settings.grades.index') }}"
                         class="btn btn-sm btn-secondary d-inline-flex align-items-center">
                         <i class="bi bi-arrow-left me-1"></i>
                         {{ __('Kembali ke Senarai Gred') }}
@@ -42,8 +43,8 @@
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 @endif
-
-                <form action="{{ route('admin.grades.store') }}" method="POST">
+                {{-- Corrected route name --}}
+                <form action="{{ route('settings.grades.store') }}" method="POST">
                     @csrf
                     <div class="card shadow-sm">
                         <div class="card-header bg-light py-3">
@@ -56,24 +57,11 @@
                                 <input type="text" name="name" id="name"
                                     class="form-control form-control-sm @error('name') is-invalid @enderror" required
                                     value="{{ old('name') }}"
-                                    placeholder="{{ __('Cth: Pegawai Tadbir N41, Juruteknik FT19') }}">
+                                    placeholder="{{ __('Cth: N41, 41, JUSA C') }}">
                                 @error('name')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-
-                            {{-- The System Design for `grades` table has `name` (e.g., "41", "N19") and `level` (integer).
-                             It does not explicitly show a `code` field for grades table.
-                             If `code` is different from `name`, ensure it's in your migration.
-                             The MyMail form (PDF pg. 27) combines scheme and number in the Gred options.
-                             Let's assume 'name' is for display like "N41" and 'level' is the numerical part "41" for comparison.
-                             If 'code' is meant to be the scheme like "N", "F", "JUSA", then the label should reflect that.
-                             The current `name` field example "Pegawai Tadbir N41" seems more like a position name with grade.
-                             Let's adjust `name` to be just the grade identifier (e.g., N41, 41, JUSA C)
-                             and `level` to be the numeric part for sorting/comparison.
-                             The field `code` is not in the system design for the `grades` table (PDF pg. 7).
-                             It's present in `departments` table though. I'll remove 'code' for now unless it's a custom addition.
-                        --}}
 
                             <div class="mb-3">
                                 <label for="level" class="form-label fw-medium">{{ __('Tahap Gred (Angka)') }}<span
@@ -89,7 +77,6 @@
                                 @enderror
                             </div>
 
-
                             <div class="mb-3">
                                 <label for="description" class="form-label fw-medium">{{ __('Keterangan') }}</label>
                                 <textarea name="description" id="description" rows="3"
@@ -100,7 +87,6 @@
                                 @enderror
                             </div>
 
-                            {{-- System Design fields for `grades` table (PDF pg. 7): name, level, min_approval_grade_id, is_approver_grade --}}
                             <div class="mb-3">
                                 <div class="form-check form-switch">
                                     <input type="checkbox" name="is_approver_grade" id="is_approver_grade" value="1"
@@ -124,7 +110,6 @@
                                 <select name="min_approval_grade_id" id="min_approval_grade_id"
                                     class="form-select form-select-sm @error('min_approval_grade_id') is-invalid @enderror">
                                     <option value="">-- {{ __('Tiada / Tidak Perlu') }} --</option>
-                                    {{-- Populate with existing grades, ensure $gradesList is passed from controller --}}
                                     @isset($gradesList)
                                         @foreach ($gradesList as $g)
                                             <option value="{{ $g->id }}"
@@ -142,15 +127,10 @@
                                 @enderror
                             </div>
 
-                            {{-- The `requires_approval` checkbox seems redundant if `is_approver_grade` and `min_approval_grade_id` cover the logic.
-                              The system design does not explicitly list `requires_approval` boolean on the `grades` table.
-                              It mentions `is_approver_grade` (boolean) and `min_approval_grade_id` (foreignId).
-                              I'll remove the `requires_approval` checkbox to align better with the system design's `grades` table.
-                         --}}
-
                         </div>
                         <div class="card-footer text-end bg-light py-3">
-                            <a href="{{ route('admin.grades.index') }}" class="btn btn-outline-secondary me-2">
+                             {{-- Corrected route name --}}
+                            <a href="{{ route('settings.grades.index') }}" class="btn btn-outline-secondary me-2">
                                 <i class="bi bi-x-lg me-1"></i> {{ __('Batal') }}
                             </a>
                             <button type="submit" class="btn btn-primary d-inline-flex align-items-center px-4">

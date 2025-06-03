@@ -4,15 +4,18 @@ namespace App\Livewire\ResourceManagement\Admin\Equipment;
 
 use App\Models\Department;
 use App\Models\Equipment;
+use App\Models\LoanTransactionItem; // Correctly import the model
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule as ValidationRule;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title; // Import the Title attribute
 use Livewire\Component;
 use Livewire\WithPagination;
 
 #[Layout('layouts.app')]
+#[Title('Pengurusan Peralatan ICT')] // Use a literal string for the attribute
 class Index extends Component
 {
     use AuthorizesRequests;
@@ -23,6 +26,10 @@ class Index extends Component
     public string $filterStatus = '';
     public string $filterCondition = '';
     public ?int $filterDepartmentId = null;
+
+    // Sorting properties
+    public string $sortField = 'created_at';
+    public string $sortDirection = 'desc';
 
     public bool $showCreateModal = false;
     public bool $showEditModal = false;
@@ -36,7 +43,7 @@ class Index extends Component
     // Form fields for create/edit modals
     public string $asset_type = '';
     public ?string $brand = null;
-    public ?string $model_name = null;
+    public ?string $model_name = null; // Maps to Equipment 'model'
     public string $serial_number = '';
     public string $tag_id = '';
     public ?string $purchase_date = null;
@@ -46,6 +53,15 @@ class Index extends Component
     public ?string $notes = null;
     public string $condition_status = '';
     public ?int $department_id = null;
+
+    public ?string $item_code = null;
+    public ?string $description = null;
+    public ?float $purchase_price = null;
+    public ?string $acquisition_type = null;
+    public ?string $classification = null;
+    public ?string $funded_by = null;
+    public ?string $supplier_name = null;
+    public ?array $specifications = null;
 
     protected string $paginationTheme = 'bootstrap';
 
@@ -59,26 +75,43 @@ class Index extends Component
         if (defined(Equipment::class . '::CONDITION_GOOD')) {
             $this->condition_status = Equipment::CONDITION_GOOD;
         }
+        // If you still want the title to be dynamically translatable,
+        // you could dispatch an event here to your layout file:
+        // $this->dispatch('update-page-title', title: __('Pengurusan Peralatan ICT'));
+        // Your layout would then need to listen for this event.
     }
 
-    // Computed property for equipment list
+    public function sortBy(string $field): void
+    {
+        if (!in_array($field, ['tag_id', 'asset_type', 'brand', 'model', 'status', 'condition_status', 'created_at'])) {
+            return;
+        }
+
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortField = $field;
+            $this->sortDirection = 'asc';
+        }
+        $this->resetPage();
+    }
+
     public function getEquipmentListProperty()
     {
         $query = Equipment::with([
                 'department:id,name',
                 'creator:id,name',
                 'updater:id,name',
-                // Corrected relationship path:
                 'activeLoanTransactionItem.loanTransaction.loanApplication.user:id,name'
-            ])
-            ->orderBy('created_at', 'desc');
+            ]);
 
         if (!empty($this->searchTerm)) {
             $query->where(function ($q) {
                 $q->where('tag_id', 'like', '%' . $this->searchTerm . '%')
                   ->orWhere('serial_number', 'like', '%' . $this->searchTerm . '%')
                   ->orWhere('brand', 'like', '%' . $this->searchTerm . '%')
-                  ->orWhere('model', 'like', '%' . $this->searchTerm . '%');
+                  ->orWhere('model', 'like', '%' . $this->searchTerm . '%')
+                  ->orWhere('item_code', 'like', '%' . $this->searchTerm . '%');
             });
         }
         if (!empty($this->filterAssetType)) {
@@ -94,10 +127,11 @@ class Index extends Component
             $query->where('department_id', $this->filterDepartmentId);
         }
 
+        $query->orderBy($this->sortField, $this->sortDirection);
+
         return $query->paginate(10);
     }
 
-    // Computed properties for filter options
     public function getDepartmentOptionsProperty(): \Illuminate\Support\Collection
     {
         return Department::orderBy('name')->pluck('name', 'id');
@@ -115,12 +149,22 @@ class Index extends Component
     {
         return defined(Equipment::class . '::$CONDITION_STATUSES_LABELS') ? Equipment::$CONDITION_STATUSES_LABELS : [];
     }
-
+    public function getAcquisitionTypeOptionsProperty(): array
+    {
+        return defined(Equipment::class . '::$ACQUISITION_TYPES_LABELS') ? Equipment::$ACQUISITION_TYPES_LABELS : [];
+    }
+    public function getClassificationOptionsProperty(): array
+    {
+        return defined(Equipment::class . '::$CLASSIFICATION_LABELS') ? Equipment::$CLASSIFICATION_LABELS : [];
+    }
 
     public function openCreateModal(): void
     {
         $this->authorize('create', Equipment::class);
         $this->resetForm();
+        $this->editingEquipment = new Equipment();
+        $this->status = Equipment::STATUS_AVAILABLE;
+        $this->condition_status = Equipment::CONDITION_GOOD;
         $this->showEditModal = false;
         $this->showCreateModal = true;
         $this->dispatch('open-modal', modalId: 'equipmentFormModal');
@@ -130,8 +174,17 @@ class Index extends Component
     {
         $this->authorize('create', Equipment::class);
         $validated = $this->validate($this->formRules(false));
+
         $validatedData = $validated;
         $validatedData['model'] = $this->model_name;
+        $fillableFields = (new Equipment())->getFillable();
+        foreach ($fillableFields as $field) {
+            if (property_exists($this, $field) && !isset($validatedData[$field]) && $field !== 'model_name') {
+                 if ($this->$field !== null) {
+                    $validatedData[$field] = $this->$field;
+                 }
+            }
+        }
         unset($validatedData['model_name']);
 
         Equipment::create($validatedData);
@@ -158,6 +211,15 @@ class Index extends Component
         $this->condition_status = $equipment->condition_status;
         $this->department_id = $equipment->department_id;
 
+        $this->item_code = $equipment->item_code;
+        $this->description = $equipment->description;
+        $this->purchase_price = $equipment->purchase_price;
+        $this->acquisition_type = $equipment->acquisition_type;
+        $this->classification = $equipment->classification;
+        $this->funded_by = $equipment->funded_by;
+        $this->supplier_name = $equipment->supplier_name;
+        $this->specifications = $equipment->specifications;
+
         $this->showCreateModal = false;
         $this->showEditModal = true;
         $this->dispatch('open-modal', modalId: 'equipmentFormModal');
@@ -171,8 +233,15 @@ class Index extends Component
         }
         $this->authorize('update', $this->editingEquipment);
         $validated = $this->validate($this->formRules(true, $this->editingEquipment->id));
+
         $validatedData = $validated;
         $validatedData['model'] = $this->model_name;
+        $fillableFields = (new Equipment())->getFillable();
+        foreach ($fillableFields as $field) {
+            if (property_exists($this, $field) && !isset($validatedData[$field]) && $field !== 'model_name') {
+                $validatedData[$field] = $this->$field;
+            }
+        }
         unset($validatedData['model_name']);
 
         $this->editingEquipment->update($validatedData);
@@ -197,19 +266,31 @@ class Index extends Component
         $this->authorize('delete', $this->deletingEquipment);
 
         try {
-            if ($this->deletingEquipment->loanApplicationItems()->exists() || $this->deletingEquipment->loanTransactionItems()->exists()) {
-                $this->dispatch('toastr', type: 'error', message: __('Peralatan ini tidak boleh dipadam kerana mempunyai rekod pinjaman berkaitan.'));
-            } else {
-                $this->deletingEquipment->delete();
-                $this->dispatch('toastr', type: 'success', message: __('Peralatan ICT berjaya dipadam.'));
+            if ($this->deletingEquipment->loanTransactionItems()->exists()) {
+                $activeLoan = $this->deletingEquipment->loanTransactionItems()
+                                ->whereNotIn('status', [
+                                    LoanTransactionItem::STATUS_ITEM_RETURNED_GOOD,
+                                    LoanTransactionItem::STATUS_ITEM_RETURNED_MINOR_DAMAGE,
+                                    LoanTransactionItem::STATUS_ITEM_RETURNED_MAJOR_DAMAGE,
+                                    LoanTransactionItem::STATUS_ITEM_REPORTED_LOST,
+                                    LoanTransactionItem::STATUS_ITEM_UNSERVICEABLE_ON_RETURN,
+                                ])->exists();
+                if ($activeLoan) {
+                    $this->dispatch('toastr', type: 'error', message: __('Peralatan ini tidak boleh dipadam kerana mempunyai rekod pinjaman aktif atau item yang belum dipulangkan sepenuhnya.'));
+                    $this->closeModal();
+                    return;
+                }
             }
+
+            $this->deletingEquipment->delete();
+            $this->dispatch('toastr', type: 'success', message: __('Peralatan ICT berjaya dipadam.'));
         } catch (\Illuminate\Database\QueryException $e) {
             Log::error("Error deleting equipment ID {$this->deletingEquipment->id}: {$e->getMessage()}");
             $errorCode = $e->errorInfo[1] ?? null;
             if ($errorCode == 1451 || str_contains(strtolower($e->getMessage()), 'foreign key constraint')) {
-                $this->dispatch('toastr', type: 'error', message: __('Peralatan ini tidak boleh dipadam kerana mempunyai rekod berkaitan (cth: dalam transaksi pinjaman).'));
+                $this->dispatch('toastr', type: 'error', message: __('Peralatan ini tidak boleh dipadam kerana mempunyai rekod berkaitan (cth: dalam transaksi pinjaman lampau). Sila pastikan semua rekod berkaitan telah diarkib atau dialih.'));
             } else {
-                $this->dispatch('toastr', type: 'error', message: __('Gagal memadam peralatan ICT. Sila hubungi pentadbir.'));
+                $this->dispatch('toastr', type: 'error', message: __('Gagal memadam peralatan ICT. Sila hubungi pentadbir. Error: ' . $e->getMessage()));
             }
         } catch (\Exception $e) {
             Log::error("General error deleting equipment ID {$this->deletingEquipment->id}: {$e->getMessage()}");
@@ -221,7 +302,15 @@ class Index extends Component
     public function openViewModal(Equipment $equipment): void
     {
         $this->authorize('view', $equipment);
-        $this->viewingEquipment = $equipment->loadMissing(['department:id,name', 'creator:id,name', 'updater:id,name']);
+        $this->viewingEquipment = $equipment->loadMissing([
+            'department:id,name',
+            'creator:id,name',
+            'updater:id,name',
+            'equipmentCategory:id,name',
+            'subCategory:id,name',
+            'definedLocation:id,name',
+            'activeLoanTransactionItem.loanTransaction.loanApplication.user:id,name'
+        ]);
         $this->showViewModal = true;
         $this->dispatch('open-modal', modalId: 'viewEquipmentModal');
     }
@@ -242,9 +331,24 @@ class Index extends Component
         $this->showEditModal = false;
         $this->showDeleteModal = false;
         $this->showViewModal = false;
+
         $this->resetForm();
+        $this->editingEquipment = new Equipment();
+        $this->deletingEquipment = null;
         $this->viewingEquipment = null;
         $this->resetErrorBag();
+    }
+
+    public function resetFilters(): void
+    {
+        $this->searchTerm = '';
+        $this->filterAssetType = '';
+        $this->filterStatus = '';
+        $this->filterCondition = '';
+        $this->filterDepartmentId = null;
+        $this->sortField = 'created_at';
+        $this->sortDirection = 'desc';
+        $this->resetPage();
     }
 
     public function updatingSearchTerm(): void { $this->resetPage(); }
@@ -261,27 +365,41 @@ class Index extends Component
             'assetTypeOptions' => $this->assetTypeOptions,
             'statusOptions' => $this->statusOptions,
             'conditionStatusOptions' => $this->conditionStatusOptions,
-        ])->title(__('Pengurusan Peralatan ICT'));
+        ]);
+        // If you opt to set title via render():
+        // ->title(__('Pengurusan Peralatan ICT'));
+        // However, ensure this doesn't re-introduce the constant expression error.
+        // The #[Title] attribute with a literal string is safer for compile-time evaluation.
     }
 
     protected function formRules(bool $isEditMode = false, ?int $equipmentIdToIgnore = null): array
     {
-        $assetTypeKeys = !empty($this->assetTypeOptions) ? array_keys($this->assetTypeOptions) : (defined(Equipment::class . '::$ASSET_TYPES_LABELS') ? array_keys(Equipment::$ASSET_TYPES_LABELS) : []);
-        $statusKeys = !empty($this->statusOptions) ? array_keys($this->statusOptions) : (defined(Equipment::class . '::$STATUSES_LABELS') ? array_keys(Equipment::$STATUSES_LABELS) : []);
-        $conditionStatusKeys = !empty($this->conditionStatusOptions) ? array_keys($this->conditionStatusOptions) : (defined(Equipment::class . '::$CONDITION_STATUSES_LABELS') ? array_keys(Equipment::$CONDITION_STATUSES_LABELS) : []);
+        $assetTypeKeys = array_keys(Equipment::getAssetTypeOptions());
+        $statusKeys = array_keys(Equipment::getOperationalStatusesList());
+        $conditionStatusKeys = array_keys(Equipment::getConditionStatusesList());
+        $acquisitionTypeKeys = array_keys(Equipment::getAcquisitionTypeOptions());
+        $classificationKeys = array_keys(Equipment::getClassificationOptions());
 
         return [
-            'asset_type' => ['required', 'string', 'max:255', ValidationRule::in($assetTypeKeys)],
-            'brand' => 'nullable|string|max:255',
-            'model_name' => 'nullable|string|max:255',
-            'serial_number' => ['required', 'string', 'max:255', $isEditMode ? ValidationRule::unique('equipment', 'serial_number')->ignore($equipmentIdToIgnore) : ValidationRule::unique('equipment', 'serial_number')],
-            'tag_id' => ['required', 'string', 'max:255', $isEditMode ? ValidationRule::unique('equipment', 'tag_id')->ignore($equipmentIdToIgnore) : ValidationRule::unique('equipment', 'tag_id')],
+            'asset_type' => ['required', 'string', 'max:50', ValidationRule::in($assetTypeKeys)],
+            'brand' => 'nullable|string|max:100',
+            'model_name' => 'nullable|string|max:100',
+            'serial_number' => ['nullable', 'string', 'max:100', $isEditMode ? ValidationRule::unique('equipment', 'serial_number')->ignore($equipmentIdToIgnore) : ValidationRule::unique('equipment', 'serial_number')],
+            'tag_id' => ['required', 'string', 'max:50', $isEditMode ? ValidationRule::unique('equipment', 'tag_id')->ignore($equipmentIdToIgnore) : ValidationRule::unique('equipment', 'tag_id')],
+            'item_code' => ['nullable', 'string', 'max:50', $isEditMode ? ValidationRule::unique('equipment', 'item_code')->ignore($equipmentIdToIgnore) : ValidationRule::unique('equipment', 'item_code')],
+            'description' => 'nullable|string|max:1000',
             'purchase_date' => 'nullable|date_format:Y-m-d',
+            'purchase_price' => 'nullable|numeric|min:0|max:9999999.99',
             'warranty_expiry_date' => 'nullable|date_format:Y-m-d|after_or_equal:purchase_date',
             'status' => ['required', 'string', ValidationRule::in($statusKeys)],
-            'current_location' => 'nullable|string|max:255',
-            'notes' => 'nullable|string|max:1000',
             'condition_status' => ['required', 'string', ValidationRule::in($conditionStatusKeys)],
+            'current_location' => 'nullable|string|max:255',
+            'acquisition_type' => ['nullable', 'string', ValidationRule::in($acquisitionTypeKeys)],
+            'classification' => ['nullable', 'string', ValidationRule::in($classificationKeys)],
+            'funded_by' => 'nullable|string|max:100',
+            'supplier_name' => 'nullable|string|max:100',
+            'notes' => 'nullable|string|max:2000',
+            'specifications' => 'nullable|array',
             'department_id' => 'nullable|integer|exists:departments,id',
         ];
     }
@@ -299,6 +417,15 @@ class Index extends Component
         $this->notes = null;
         $this->department_id = null;
 
+        $this->item_code = null;
+        $this->description = null;
+        $this->purchase_price = null;
+        $this->acquisition_type = null;
+        $this->classification = null;
+        $this->funded_by = null;
+        $this->supplier_name = null;
+        $this->specifications = null;
+
         if (defined(Equipment::class . '::STATUS_AVAILABLE')) {
             $this->status = Equipment::STATUS_AVAILABLE;
         } else {
@@ -312,5 +439,6 @@ class Index extends Component
 
         $this->editingEquipment = new Equipment();
         $this->deletingEquipment = null;
+        $this->resetErrorBag();
     }
 }

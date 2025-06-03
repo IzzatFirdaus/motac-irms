@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Sections\Navbar;
 
-use App\Models\Import;
+// Removed: use App\Models\Import;
 use App\Models\User; // Ensure User model is imported if not already
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -13,8 +13,8 @@ use Livewire\Component;
 class Navbar extends Component
 {
   public Collection $unreadNotifications;
-  public bool $activeProgressBar = false;
-  public int $percentage = 0;
+  // Removed: public bool $activeProgressBar = false;
+  // Removed: public int $percentage = 0;
 
   public string $defaultProfilePhotoUrl = '/assets/img/avatars/1.png';
   public string $profileShowRoute = '/profile/show';
@@ -34,7 +34,7 @@ class Navbar extends Component
   {
     $this->unreadNotifications = collect();
     $this->refreshNotifications();
-    $this->updateProgressBar();
+    // Removed: $this->updateProgressBar();
 
     $this->canViewAdminSettings = Auth::check() && Auth::user()->hasRole('Admin');
 
@@ -82,24 +82,24 @@ class Navbar extends Component
       : collect();
   }
 
-  #[On('activeProgressBar')]
-  public function updateProgressBar(): void
-  {
-    $import = Import::latest()->first();
-
-    if ($import && $import->status === 'processing') {
-      $this->activeProgressBar = true;
-      $this->percentage = $import->total_rows > 0
-        ? (int) round($import->processed_rows / ($import->total_rows / 100))
-        : 0;
-    } else {
-      if ($this->activeProgressBar && $import && $import->status === 'completed') {
-        // $this->dispatch('toastr', ['type' => 'success', 'message' => __('Import completed successfully!')]);
-      }
-      $this->percentage = $import && ($import->status === 'completed' || $import->status === 'failed') ? 100 : 0;
-      $this->activeProgressBar = false;
-    }
-  }
+  // Removed: #[On('activeProgressBar')]
+  // Removed: public function updateProgressBar(): void
+  // {
+  //   $import = Import::latest()->first();
+  //
+  //   if ($import && $import->status === 'processing') {
+  //     $this->activeProgressBar = true;
+  //     $this->percentage = $import->total_rows > 0
+  //       ? (int) round($import->processed_rows / ($import->total_rows / 100))
+  //       : 0;
+  //   } else {
+  //     if ($this->activeProgressBar && $import && $import->status === 'completed') {
+  //       // $this->dispatch('toastr', ['type' => 'success', 'message' => __('Import completed successfully!')]);
+  //     }
+  //     $this->percentage = $import && ($import->status === 'completed' || $import->status === 'failed') ? 100 : 0;
+  //     $this->activeProgressBar = false;
+  //   }
+  // }
 
   public function markNotificationAsRead(string $notificationId): void
   {

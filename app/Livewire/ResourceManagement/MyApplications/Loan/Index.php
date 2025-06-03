@@ -1,93 +1,121 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Livewire\ResourceManagement\MyApplications\Loan;
 
 use App\Models\LoanApplication;
-use App\Models\User; // Assuming User model is used for Auth
+use App\Models\User; // For type hinting Auth::user()
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
+use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Layout;
+// Removed: use Livewire\Attributes\Title as LivewireTitle; // No longer using the attribute on the method
 use Livewire\Component;
 use Livewire\WithPagination;
 
-#[Layout('layouts.app')] // Ensure your layout file is at resources/views/layouts/app.blade.php
+/**
+ * Livewire component for listing the authenticated user's ICT Loan Applications.
+ * Handles searching, filtering by status, and pagination.
+ * System Design Ref: User Dashboard (6.2), ICT Equipment Loan Workflow & Data (4.3, 5.2)
+ */
+#[Layout('layouts.app')] // Specifies the Blade layout file
 class Index extends Component
 {
-    use AuthorizesRequests;
-    use WithPagination;
+  use AuthorizesRequests;
+  use WithPagination;
 
-    public string $searchTerm = '';
-    public string $filterStatus = ''; // Empty string means 'all'
-    protected string $paginationTheme = 'bootstrap';
+  public string $searchTerm = '';
+  public string $filterStatus = ''; // Empty string or 'all' defaults to showing all statuses
+  protected string $paginationTheme = 'bootstrap'; // Use Bootstrap styling for pagination
 
-    public function mount(): void
-    {
-        $this->authorize('viewAny', LoanApplication::class);
+  protected int $perPage = 10; // Configurable items per page for pagination
+
+  /**
+   * Authorize the user and set the page title when the component mounts.
+   * System Design Ref: Role-Based Access & Security (2.0)
+   */
+  public function mount(): void
+  {
+    $this->authorize('viewAny', LoanApplication::class);
+
+    // Set the page title by dispatching an event
+    $pageTitle = $this->generatePageTitle();
+    $this->dispatch('update-page-title', title: $pageTitle);
+  }
+
+  /**
+   * Helper method to generate the page title string.
+   */
+  public function generatePageTitle(): string
+  {
+    $appName = __(config('variables.templateName', 'Sistem Pengurusan Sumber Bersepadu MOTAC'));
+    return __('Senarai Permohonan Pinjaman ICT Saya') . ' - ' . $appName;
+  }
+
+  /**
+   * Computed property to fetch and paginate the user's loan applications.
+   * Accessed in Blade as $this->loanApplications.
+   */
+  public function getLoanApplicationsProperty()
+  {
+    /** @var User|null $user */
+    $user = Auth::user();
+
+    if (!$user) {
+      Log::warning('MyApplications\Loan\Index: Unauthenticated access attempt.');
+      return LoanApplication::whereRaw('1 = 0')->paginate($this->perPage); // Return empty paginator
     }
 
-    /**
-     * Computed property for loan applications.
-     * Accessed in Blade as $applications because it's passed as 'applications' from render().
-     */
-    public function getLoanApplicationsProperty()
-    {
-        /** @var User $user */
-        $user = Auth::user();
-        if (!$user) {
-            // Return an empty paginator if no user is authenticated
-            return LoanApplication::where('id', -1)->paginate(10);
-        }
+    $query = LoanApplication::where('user_id', $user->id)
+      ->orderBy('updated_at', 'desc');
 
-        $query = LoanApplication::where('user_id', $user->id)
-            // ->with(['applicationItems']) // Eager load items if needed for display in the list
-            ->orderBy('created_at', 'desc');
-
-        if (!empty($this->searchTerm)) {
-            $query->where(function ($q) {
-                $q->where('id', 'like', '%' . $this->searchTerm . '%')
-                  ->orWhere('purpose', 'like', '%' . $this->searchTerm . '%');
-                  // Add other searchable fields for loans if necessary
-            });
-        }
-
-        // Ensure 'all' or empty string doesn't apply a status filter
-        if (!empty($this->filterStatus) && $this->filterStatus !== 'all' && $this->filterStatus !== '') {
-            $query->where('status', $this->filterStatus);
-        }
-
-        return $query->paginate(10); // Adjust items per page as needed
+    if (!empty($this->searchTerm)) {
+      $search = '%' . $this->searchTerm . '%';
+      $query->where(function ($q) use ($search) {
+        $q->where('id', 'like', $search)
+          ->orWhere('purpose', 'like', 'search');
+      });
     }
 
-    /**
-     * Computed property for status options.
-     * Accessed in Blade as $statusOptions because it's passed as 'statusOptions' from render().
-     */
-    public function getStatusOptionsProperty(): array
-    {
-        // Ensure LoanApplication::getStatusOptions() exists and returns an array like:
-        // ['draft' => 'Draf', 'pending_support' => 'Menunggu Sokongan', ...]
-        // The '' key is for the "All Statuses" default option.
-        return ['' => __('Semua Status')] + (LoanApplication::getStatusOptions() ?? []);
+    if (!empty($this->filterStatus) && $this->filterStatus !== 'all' && $this->filterStatus !== '') {
+      $query->where('status', $this->filterStatus);
     }
 
-    // Reset pagination when searchTerm changes
-    public function updatingSearchTerm(): void
-    {
-        $this->resetPage();
-    }
+    return $query->paginate($this->perPage);
+  }
 
-    // Reset pagination when filterStatus changes
-    public function updatedFilterStatus(): void // Corrected Livewire hook name from updatingFilterStatus
-    {
-        $this->resetPage();
-    }
+  /**
+   * Computed property to provide status options for the filter dropdown.
+   */
+  public function getStatusOptionsProperty(): array
+  {
+    $options = LoanApplication::getStatusOptions() ?? [];
+    return ['' => __('Semua Status')] + $options;
+  }
 
-    public function render(): View
-    {
-        return view('livewire.resource-management.my-applications.loan.index', [
-            'applications' => $this->loanApplications, // Accesses the getLoanApplicationsProperty()
-            'statusOptions' => $this->statusOptions,   // Accesses the getStatusOptionsProperty()
-        ])->title(__('Status Permohonan Pinjaman Saya'));
-    }
+  public function updatingSearchTerm(): void
+  {
+    $this->resetPage();
+  }
+
+  public function updatedFilterStatus(): void
+  {
+    $this->resetPage();
+  }
+
+  public function resetFilters(): void
+  {
+    $this->reset(['searchTerm', 'filterStatus']);
+    $this->resetPage();
+  }
+
+  public function render(): View
+  {
+    return view('livewire.resource-management.my-applications.loan.index', [
+      'applications' => $this->loanApplications,
+      'statusOptions' => $this->statusOptions,
+    ]);
+  }
 }

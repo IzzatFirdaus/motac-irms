@@ -16,77 +16,76 @@ class LoanTransactionItemFactory extends EloquentFactory
 
     public function definition(): array
     {
-        // $auditUserId = User::orderBy('id')->first()?->id ?? User::factory()->create()->id; // Blameable
-
         $loanTransaction = LoanTransaction::inRandomOrder()->first() ?? LoanTransaction::factory()->create();
-        $equipment = Equipment::where('status', Equipment::STATUS_AVAILABLE) // Prefer available equipment
+        $equipment = Equipment::where('status', Equipment::STATUS_AVAILABLE)
             ->inRandomOrder()->first() ?? Equipment::factory()->available()->create();
-
 
         $loanApplicationItemId = null;
         if ($loanTransaction->loanApplication) {
-            // Try to find a matching application item type if possible, or a random one
             $appItem = $loanTransaction->loanApplication
                 ->applicationItems()
-                ->where('equipment_type', $equipment->asset_type) // Match asset type
+                ->where('equipment_type', $equipment->asset_type)
                 ->inRandomOrder()
                 ->first();
             $loanApplicationItemId = $appItem?->id;
 
-            if (!$loanApplicationItemId) { // Fallback to any item from the application
+            if (!$loanApplicationItemId) {
                 $loanApplicationItemId = $loanTransaction->loanApplication->applicationItems()->inRandomOrder()->first()?->id;
             }
         }
 
+        $itemStatuses = LoanTransactionItem::getStatusesList();
+        $itemConditionStatusesKeys = LoanTransactionItem::getConditionStatusesList(); // Get keys for random selection
 
-        $itemStatuses = LoanTransactionItem::getStatusesList(); // Uses getter [cite: 7]
-        $itemConditionStatuses = LoanTransactionItem::getConditionStatusesList(); // Uses getter [cite: 7]
-
-        $chosenStatusKey = $this->faker->randomElement(array_keys($itemStatuses ?: [LoanTransactionItem::VAL_STATUS_ISSUED]));
+        // Use correct constant from Model as fallback
+        $chosenStatusKey = $this->faker->randomElement($itemStatuses ?: [LoanTransactionItem::STATUS_ITEM_ISSUED]);
         $conditionOnReturnKey = null;
 
-        if (in_array($chosenStatusKey, [ // Check against actual VAL_ constants [cite: 7]
-            LoanTransactionItem::VAL_STATUS_RETURNED_GOOD,
-            LoanTransactionItem::VAL_STATUS_RETURNED_MINOR_DAMAGE, // Assuming this constant exists
-            LoanTransactionItem::VAL_STATUS_RETURNED_MAJOR_DAMAGE, // Assuming this constant exists
-            LoanTransactionItem::VAL_STATUS_REPORTED_LOST,       // Assuming this constant exists
-            LoanTransactionItem::VAL_STATUS_UNSERVICEABLE,       // Assuming this constant exists
+        // Use correct constants from Model
+        if (in_array($chosenStatusKey, [
+            LoanTransactionItem::STATUS_ITEM_RETURNED_GOOD,
+            LoanTransactionItem::STATUS_ITEM_RETURNED_MINOR_DAMAGE,
+            LoanTransactionItem::STATUS_ITEM_RETURNED_MAJOR_DAMAGE,
+            LoanTransactionItem::STATUS_ITEM_REPORTED_LOST,
+            LoanTransactionItem::STATUS_ITEM_UNSERVICEABLE_ON_RETURN, // Corrected Constant
         ])) {
-            // Only set condition_on_return if the status implies a return event
-            if ($chosenStatusKey === LoanTransactionItem::VAL_STATUS_RETURNED_GOOD) {
-                $conditionOnReturnKey = Equipment::CONDITION_GOOD; // Map to Equipment condition
-            } elseif ($chosenStatusKey === LoanTransactionItem::VAL_STATUS_RETURNED_MINOR_DAMAGE) {
+            if ($chosenStatusKey === LoanTransactionItem::STATUS_ITEM_RETURNED_GOOD) {
+                $conditionOnReturnKey = Equipment::CONDITION_GOOD;
+            } elseif ($chosenStatusKey === LoanTransactionItem::STATUS_ITEM_RETURNED_MINOR_DAMAGE) {
                 $conditionOnReturnKey = Equipment::CONDITION_MINOR_DAMAGE;
-            } elseif ($chosenStatusKey === LoanTransactionItem::VAL_STATUS_RETURNED_MAJOR_DAMAGE) {
+            } elseif ($chosenStatusKey === LoanTransactionItem::STATUS_ITEM_RETURNED_MAJOR_DAMAGE) {
                 $conditionOnReturnKey = Equipment::CONDITION_MAJOR_DAMAGE;
-            } elseif ($chosenStatusKey === LoanTransactionItem::VAL_STATUS_UNSERVICEABLE) {
+            } elseif ($chosenStatusKey === LoanTransactionItem::STATUS_ITEM_UNSERVICEABLE_ON_RETURN) { // Corrected Constant
                 $conditionOnReturnKey = Equipment::CONDITION_UNSERVICEABLE;
-            } else { // For reported_lost or other general returned statuses
-                $conditionOnReturnKey = Arr::random(array_keys($itemConditionStatuses ?: [Equipment::CONDITION_FAIR])); // Fallback condition
+            } elseif ($chosenStatusKey === LoanTransactionItem::STATUS_ITEM_REPORTED_LOST) {
+                $conditionOnReturnKey = Equipment::CONDITION_LOST; // Explicitly map lost status
+            } else {
+                // Fallback condition for other returned statuses if any; ensure $itemConditionStatusesKeys is not empty
+                $conditionOnReturnKey = !empty($itemConditionStatusesKeys)
+                    ? Arr::random($itemConditionStatusesKeys)
+                    : Equipment::CONDITION_FAIR; // Default fallback
             }
         }
-
 
         return [
             'loan_transaction_id' => $loanTransaction->id,
             'equipment_id' => $equipment->id,
-            'loan_application_item_id' => $loanApplicationItemId, // As per design (Section 4.3)
-            'quantity_transacted' => 1, // Typically 1 for specific serialized equipment
-            'status' => $chosenStatusKey, // As per design (Section 4.3)
-            'condition_on_return' => $conditionOnReturnKey, // As per design (Section 4.3), should match Equipment model's condition enum values
-            'accessories_checklist_issue' => $loanTransaction->type == LoanTransaction::TYPE_ISSUE ? json_encode($this->faker->randomElements(['Power Adapter', 'Mouse', 'Bag'], $this->faker->numberBetween(0, 3))) : null, // As per design (Section 4.3)
-            'accessories_checklist_return' => $loanTransaction->type == LoanTransaction::TYPE_RETURN ? json_encode($this->faker->randomElements(['Power Adapter', 'Mouse', 'Bag'], $this->faker->numberBetween(0, 3))) : null, // As per design (Section 4.3)
-            'item_notes' => $this->faker->optional(0.2)->sentence, // As per design (Section 4.3)
-            // 'created_by', 'updated_by' handled by BlameableObserver
+            'loan_application_item_id' => $loanApplicationItemId,
+            'quantity_transacted' => 1,
+            'status' => $chosenStatusKey,
+            'condition_on_return' => $conditionOnReturnKey,
+            'accessories_checklist_issue' => $loanTransaction->type == LoanTransaction::TYPE_ISSUE ? json_encode($this->faker->randomElements(['Power Adapter', 'Mouse', 'Bag'], $this->faker->numberBetween(0, 3))) : null,
+            'accessories_checklist_return' => $loanTransaction->type == LoanTransaction::TYPE_RETURN ? json_encode($this->faker->randomElements(['Power Adapter', 'Mouse', 'Bag'], $this->faker->numberBetween(0, 3))) : null,
+            'item_notes' => $this->faker->optional(0.2)->sentence,
         ];
     }
 
     public function issued(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => LoanTransactionItem::VAL_STATUS_ISSUED,
+            'status' => LoanTransactionItem::STATUS_ITEM_ISSUED, // Corrected Constant
             'condition_on_return' => null,
-            'accessories_checklist_issue' => json_encode($this->faker->randomElements(['Power Adapter', 'Mouse', 'Bag'], $this->faker->numberBetween(1, 3))), // Ensure some accessories on issue
+            'accessories_checklist_issue' => json_encode($this->faker->randomElements(['Power Adapter', 'Mouse', 'Bag'], $this->faker->numberBetween(1, 3))),
             'accessories_checklist_return' => null,
         ]);
     }
@@ -94,22 +93,27 @@ class LoanTransactionItemFactory extends EloquentFactory
     public function returnedGood(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => LoanTransactionItem::VAL_STATUS_RETURNED_GOOD,
-            'condition_on_return' => Equipment::CONDITION_GOOD, // Matches Equipment condition
+            'status' => LoanTransactionItem::STATUS_ITEM_RETURNED_GOOD, // Corrected Constant
+            'condition_on_return' => Equipment::CONDITION_GOOD,
             'accessories_checklist_return' => $attributes['accessories_checklist_issue'] ?? json_encode($this->faker->randomElements(['Power Adapter', 'Mouse', 'Bag'], $this->faker->numberBetween(1, 3))),
         ]);
     }
+
     public function returnedDamaged(): static
     {
-        $damageConditions = [Equipment::CONDITION_MINOR_DAMAGE, Equipment::CONDITION_MAJOR_DAMAGE, Equipment::CONDITION_UNSERVICEABLE];
+        $damageConditions = [Equipment::CONDITION_MINOR_DAMAGE, Equipment::CONDITION_MAJOR_DAMAGE];
+        // Use a defined damage status from the model
+        $itemDamageStatuses = [
+            LoanTransactionItem::STATUS_ITEM_RETURNED_MINOR_DAMAGE,
+            LoanTransactionItem::STATUS_ITEM_RETURNED_MAJOR_DAMAGE
+        ];
         return $this->state(fn (array $attributes) => [
-            'status' => LoanTransactionItem::VAL_STATUS_RETURNED_DAMAGED, // Assuming this VAL_ constant exists
+            'status' => Arr::random($itemDamageStatuses), // Pick a specific damage status
             'condition_on_return' => Arr::random($damageConditions),
-            'item_notes' => $attributes['item_notes'] ?? $this->faker->sentence, // Add a note for damage
-            'accessories_checklist_return' => json_encode($this->faker->randomElements(['Power Adapter', 'Mouse', 'Bag'], $this->faker->numberBetween(0, 2))), // Maybe some accessories missing/damaged
+            'item_notes' => $attributes['item_notes'] ?? $this->faker->sentence,
+            'accessories_checklist_return' => json_encode($this->faker->randomElements(['Power Adapter', 'Mouse', 'Bag'], $this->faker->numberBetween(0, 2))),
         ]);
     }
-
 
     public function forTransaction(LoanTransaction|int $loanTransaction): static
     {
@@ -121,7 +125,7 @@ class LoanTransactionItemFactory extends EloquentFactory
         return $this->state(['equipment_id' => $equipment instanceof Equipment ? $equipment->id : $equipment]);
     }
 
-    public function forLoanApplicationItem(LoanApplicationItem|int|null $loanAppItem): static // Allow null
+    public function forLoanApplicationItem(LoanApplicationItem|int|null $loanAppItem): static
     {
         return $this->state(['loan_application_item_id' => $loanAppItem instanceof LoanApplicationItem ? $loanAppItem->id : $loanAppItem]);
     }

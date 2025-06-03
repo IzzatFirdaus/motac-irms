@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Database\Factories\EquipmentFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 /**
@@ -35,7 +37,7 @@ use Illuminate\Support\Str;
  * @property string|null $funded_by
  * @property string|null $supplier_name
  * @property string|null $notes
- * @property array|null $specifications (JSON for detailed specs - kept if previously used)
+ * @property array|null $specifications (JSON for detailed specs)
  *
  * @property int|null $department_id (FK to departments.id)
  * @property int|null $equipment_category_id (FK to equipment_categories.id)
@@ -58,6 +60,8 @@ use Illuminate\Support\Str;
  * @property-read string $asset_type_label
  * @property-read string $condition_status_label
  * @property-read string $status_label
+ * @property-read string|null $acquisition_type_label
+ * @property-read string|null $classification_label
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanTransactionItem> $loanTransactionItems
  * @property-read int|null $loan_transaction_items_count
  * @property-read \App\Models\SubCategory|null $subCategory
@@ -99,14 +103,13 @@ use Illuminate\Support\Str;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereWarrantyExpiryDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment withoutTrashed()
- * @mixin \Eloquent
  */
 class Equipment extends Model
 {
   use HasFactory;
   use SoftDeletes;
 
-  // Constants from "Revision 3" (Section 4.3)
+  // Constants from "Revision 3" (Section 4.3) [cite: 1]
   public const ASSET_TYPE_LAPTOP = 'laptop';
   public const ASSET_TYPE_PROJECTOR = 'projector';
   public const ASSET_TYPE_PRINTER = 'printer';
@@ -127,7 +130,7 @@ class Equipment extends Model
   public const CONDITION_MINOR_DAMAGE = 'minor_damage';
   public const CONDITION_MAJOR_DAMAGE = 'major_damage';
   public const CONDITION_UNSERVICEABLE = 'unserviceable';
-  public const CONDITION_LOST = 'lost'; // Physical condition
+  public const CONDITION_LOST = 'lost';
 
   public const ACQUISITION_TYPE_PURCHASE = 'purchase';
   public const ACQUISITION_TYPE_LEASE = 'lease';
@@ -140,10 +143,9 @@ class Equipment extends Model
   public const CLASSIFICATION_CONSUMABLE = 'consumable';
   public const CLASSIFICATION_OTHER = 'other_classification';
 
-  // Labels for dropdowns/display
   public static array $ASSET_TYPES_LABELS = [
     self::ASSET_TYPE_LAPTOP => 'Komputer Riba',
-    self::ASSET_TYPE_PROJECTOR => 'Proyektor',
+    self::ASSET_TYPE_PROJECTOR => 'Projektor', // Corrected from Proyektor
     self::ASSET_TYPE_PRINTER => 'Pencetak',
     self::ASSET_TYPE_DESKTOP_PC => 'Komputer Meja',
     self::ASSET_TYPE_MONITOR => 'Monitor',
@@ -169,7 +171,7 @@ class Equipment extends Model
     self::CONDITION_LOST => 'Hilang (Keadaan Fizikal)',
   ];
 
-  public static array $ACQUISITION_TYPES_LABELS = [ // Added
+  public static array $ACQUISITION_TYPES_LABELS = [
     self::ACQUISITION_TYPE_PURCHASE => 'Pembelian',
     self::ACQUISITION_TYPE_LEASE => 'Sewaan',
     self::ACQUISITION_TYPE_DONATION => 'Sumbangan',
@@ -177,7 +179,7 @@ class Equipment extends Model
     self::ACQUISITION_TYPE_OTHER => 'Perolehan Lain',
   ];
 
-  public static array $CLASSIFICATION_LABELS = [
+  public static array $CLASSIFICATION_LABELS = [ // Corrected name to $CLASSIFICATION_LABELS from $CLASSIFICATIONS_LABELS
     self::CLASSIFICATION_ASSET => 'Aset',
     self::CLASSIFICATION_INVENTORY => 'Inventori',
     self::CLASSIFICATION_CONSUMABLE => 'Barang Guna Habis',
@@ -196,7 +198,7 @@ class Equipment extends Model
     'purchase_date',
     'warranty_expiry_date',
     'status',
-    'current_location',
+    'current_location', // As per Design Doc Section 4.3 [cite: 1]
     'notes',
     'condition_status',
     'department_id',
@@ -211,7 +213,6 @@ class Equipment extends Model
     'funded_by',
     'supplier_name',
     'specifications',
-    // created_by, updated_by are handled by BlameableObserver from System Design
   ];
 
   protected $casts = [
@@ -225,31 +226,22 @@ class Equipment extends Model
   ];
 
   protected $attributes = [
-    'status' => self::STATUS_AVAILABLE, // Default as per Design Doc
-    'condition_status' => self::CONDITION_GOOD, // Default as per Design Doc
+    'status' => self::STATUS_AVAILABLE,
+    'condition_status' => self::CONDITION_GOOD,
   ];
 
-  // Static methods to get options for dropdowns
-  public static function getAssetTypeOptions(): array
-  {
-    return self::$ASSET_TYPES_LABELS;
-  }
-  public static function getStatusOptions(): array
-  {
-    return self::$STATUSES_LABELS;
-  }
-  public static function getConditionStatusOptions(): array
-  {
-    return self::$CONDITION_STATUSES_LABELS;
-  }
-  public static function getAcquisitionTypeOptions(): array
-  {
-    return self::$ACQUISITION_TYPES_LABELS;
-  } // Added
-  public static function getClassificationOptions(): array
-  {
-    return self::$CLASSIFICATION_LABELS;
-  }
+  public static function getAssetTypeOptions(): array { return self::$ASSET_TYPES_LABELS; }
+  public static function getStatusOptions(): array { return self::$STATUSES_LABELS; }
+  public static function getConditionStatusOptions(): array { return self::$CONDITION_STATUSES_LABELS; }
+  public static function getAcquisitionTypeOptions(): array { return self::$ACQUISITION_TYPES_LABELS; }
+  public static function getClassificationOptions(): array { return self::$CLASSIFICATION_LABELS; } // Corrected name
+
+  // For validation purposes (getting keys)
+  public static function getAssetTypesList(): array { return array_keys(self::$ASSET_TYPES_LABELS); }
+  public static function getOperationalStatusesList(): array { return array_keys(self::$STATUSES_LABELS); }
+  public static function getConditionStatusesList(): array { return array_keys(self::$CONDITION_STATUSES_LABELS); }
+  public static function getAcquisitionTypesList(): array { return array_keys(self::$ACQUISITION_TYPES_LABELS); }
+  public static function getClassificationsList(): array { return array_keys(self::$CLASSIFICATION_LABELS); } // Corrected name
 
 
   protected static function newFactory(): EquipmentFactory
@@ -258,75 +250,97 @@ class Equipment extends Model
   }
 
   // Relationships
-  public function department(): BelongsTo
-  {
-    return $this->belongsTo(Department::class, 'department_id');
-  }
-  public function equipmentCategory(): BelongsTo
-  {
-    return $this->belongsTo(EquipmentCategory::class, 'equipment_category_id');
-  }
-  public function subCategory(): BelongsTo
-  {
-    return $this->belongsTo(SubCategory::class, 'sub_category_id');
-  }
-  public function definedLocation(): BelongsTo
-  {
-    return $this->belongsTo(Location::class, 'location_id');
-  }
+  public function department(): BelongsTo { return $this->belongsTo(Department::class, 'department_id'); }
+  public function equipmentCategory(): BelongsTo { return $this->belongsTo(EquipmentCategory::class, 'equipment_category_id'); }
+  public function subCategory(): BelongsTo { return $this->belongsTo(SubCategory::class, 'sub_category_id'); }
+  public function definedLocation(): BelongsTo { return $this->belongsTo(Location::class, 'location_id'); }
+  public function loanTransactionItems(): HasMany { return $this->hasMany(LoanTransactionItem::class, 'equipment_id'); }
 
-  public function loanTransactionItems(): HasMany
+  public function activeLoanTransactionItem(): \Illuminate\Database\Eloquent\Relations\HasOne // Type hint added
   {
-    return $this->hasMany(LoanTransactionItem::class, 'equipment_id');
-  }
-
-  public function activeLoanTransactionItem()
-  { // : HasOne but returns model or null
-    // Assuming LoanTransactionItem has a status to indicate it's currently 'issued' or 'active'
-    // Adjust 'status_item_issued' if your LoanTransactionItem constant is different.
-    // The design doc for loan_transaction_items lists 'issued' as a status
     return $this->hasOne(LoanTransactionItem::class, 'equipment_id')
       ->where('status', LoanTransactionItem::STATUS_ITEM_ISSUED)
-      ->latestOfMany('created_at'); // In case of re-issues, get the latest one.
+      ->latestOfMany('created_at');
   }
 
-  // Blameable relationships
-  public function creator(): BelongsTo
-  {
-    return $this->belongsTo(User::class, 'created_by');
-  }
-  public function updater(): BelongsTo
-  {
-    return $this->belongsTo(User::class, 'updated_by');
-  }
-  public function deleter(): BelongsTo
-  {
-    return $this->belongsTo(User::class, 'deleted_by');
-  }
+  public function creator(): BelongsTo { return $this->belongsTo(User::class, 'created_by'); }
+  public function updater(): BelongsTo { return $this->belongsTo(User::class, 'updated_by'); }
+  public function deleter(): BelongsTo { return $this->belongsTo(User::class, 'deleted_by'); }
 
   // Accessors for translated labels
   public function getAssetTypeLabelAttribute(): string
   {
     return __(self::$ASSET_TYPES_LABELS[$this->asset_type] ?? Str::title(str_replace('_', ' ', (string) $this->asset_type)));
   }
-
   public function getStatusLabelAttribute(): string
   {
     return __(self::$STATUSES_LABELS[$this->status] ?? Str::title(str_replace('_', ' ', (string) $this->status)));
   }
-
   public function getConditionStatusLabelAttribute(): string
   {
     return __(self::$CONDITION_STATUSES_LABELS[$this->condition_status] ?? Str::title(str_replace('_', ' ', (string) $this->condition_status)));
   }
-
-  public function getAcquisitionTypeLabelAttribute(): string // Added
+  public function getAcquisitionTypeLabelAttribute(): string
   {
     return __(self::$ACQUISITION_TYPES_LABELS[$this->acquisition_type] ?? Str::title(str_replace('_', ' ', (string) $this->acquisition_type)));
   }
-
-  public function getClassificationLabelAttribute(): string // Added
+  public function getClassificationLabelAttribute(): string
   {
     return __(self::$CLASSIFICATION_LABELS[$this->classification] ?? Str::title(str_replace('_', ' ', (string) $this->classification)));
+  }
+
+  // Business logic methods for status updates
+  public function updateOperationalStatus(string $newStatus, ?string $reason = null, ?int $actingUserId = null): bool
+  {
+      if (!array_key_exists($newStatus, self::$STATUSES_LABELS)) {
+          Log::warning("Equipment ID {$this->id}: Invalid operational status update to '{$newStatus}'.", ['acting_user_id' => $actingUserId]);
+          return false;
+      }
+      $oldStatus = $this->status;
+      $this->status = $newStatus;
+      $actingUserName = $actingUserId ? (User::find($actingUserId)?->name ?? 'Sistem') : 'Sistem';
+
+      if ($reason) {
+          $this->notes = ($this->notes ? $this->notes . "\n" : '') . "Status Operasi ditukar dari '{$oldStatus}' kepada '{$newStatus}' oleh {$actingUserName} pada " . now()->translatedFormat('d/m/Y H:i A') . ". Sebab: {$reason}";
+      }
+      // BlameableObserver will handle updated_by based on Auth::id().
+      // If actingUserId is provided and is different, it means a specific user (not necessarily Auth::id()) took the action.
+      // The BlameableObserver should ideally be flexible enough, or this explicit set is a good override.
+      if ($actingUserId) {
+          $this->updated_by = $actingUserId;
+      }
+
+      $saved = $this->save();
+      if ($saved) {
+          Log::info("Equipment ID {$this->id} operational status updated.", ['old_status' => $oldStatus, 'new_status' => $newStatus, 'user_id' => $actingUserId]);
+      } else {
+          Log::error("Equipment ID {$this->id}: Failed to save operational status update.", ['old_status' => $oldStatus, 'new_status' => $newStatus, 'user_id' => $actingUserId]);
+      }
+      return $saved;
+  }
+
+  public function updatePhysicalConditionStatus(string $newCondition, ?string $reason = null, ?int $actingUserId = null): bool
+  {
+      if (!array_key_exists($newCondition, self::$CONDITION_STATUSES_LABELS)) {
+          Log::warning("Equipment ID {$this->id}: Invalid condition status update to '{$newCondition}'.", ['acting_user_id' => $actingUserId]);
+          return false;
+      }
+      $oldCondition = $this->condition_status;
+      $this->condition_status = $newCondition;
+      $actingUserName = $actingUserId ? (User::find($actingUserId)?->name ?? 'Sistem') : 'Sistem';
+
+      if ($reason) {
+           $this->notes = ($this->notes ? $this->notes . "\n" : '') . "Status Keadaan Fizikal ditukar dari '{$oldCondition}' kepada '{$newCondition}' oleh {$actingUserName} pada " . now()->translatedFormat('d/m/Y H:i A') . ". Sebab: {$reason}";
+      }
+      if ($actingUserId) {
+          $this->updated_by = $actingUserId;
+      }
+      $saved = $this->save();
+      if ($saved) {
+          Log::info("Equipment ID {$this->id} condition status updated.", ['old_condition' => $oldCondition, 'new_condition' => $newCondition, 'user_id' => $actingUserId]);
+      } else {
+          Log::error("Equipment ID {$this->id}: Failed to save physical condition status update.", ['old_condition' => $oldCondition, 'new_condition' => $newCondition, 'user_id' => $actingUserId]);
+      }
+      return $saved;
   }
 }

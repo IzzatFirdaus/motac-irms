@@ -10,10 +10,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Loan Transaction Model.
+ * System Design Reference: MOTAC Integrated Resource Management System (Revision 3) - Section 4.3
  *
  * @property int $id
  * @property int $loan_application_id
@@ -37,9 +40,12 @@ use Illuminate\Support\Str;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ *
  * @property-read \App\Models\LoanApplication $loanApplication
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanTransactionItem> $loanTransactionItems
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanTransactionItem> $items Alias
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanTransactionItem> $items Alias for loanTransactionItems
+ * @property-read int|null $loan_transaction_items_count
+ * @property-read int|null $items_count
  * @property-read \App\Models\User|null $issuingOfficer
  * @property-read \App\Models\User|null $receivingOfficer
  * @property-read \App\Models\User|null $returningOfficer
@@ -47,42 +53,16 @@ use Illuminate\Support\Str;
  * @property-read \App\Models\User|null $creator
  * @property-read \App\Models\User|null $updater
  * @property-read \App\Models\User|null $deleter
- * @property-read LoanTransaction|null $relatedIssueTransaction
- * @property-read string $typeTranslated Accessor: type_translated
- * @property-read string $statusTranslated Accessor: status_translated
- * @property string|null $due_date Applicable for issue transactions
- * @property-read string $status_translated
- * @property-read string $type_translated
- * @property-read int|null $items_count
- * @property-read int|null $loan_transaction_items_count
- * @method static \Database\Factories\LoanTransactionFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereAccessoriesChecklistOnIssue($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereAccessoriesChecklistOnReturn($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereCreatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereDeletedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereDueDate($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereIssueTimestamp($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereIssuingOfficerId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereLoanApplicationId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereReceivingOfficerId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereReturnAcceptingOfficerId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereReturnNotes($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereReturnTimestamp($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereReturningOfficerId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereTransactionDate($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereType($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereUpdatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction withoutTrashed()
+ * @property-read LoanTransaction|null $relatedIssueTransaction If this is a return transaction, this points to the original issue transaction
+ * @property-read string $type_label Translated type
+ * @property-read string $status_label Translated status
+ * @method static LoanTransactionFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|LoanTransaction newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|LoanTransaction newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|LoanTransaction onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|LoanTransaction query()
+ * @method static \Illuminate\Database\Eloquent\Builder|LoanTransaction withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|LoanTransaction withoutTrashed()
  * @mixin \Eloquent
  */
 class LoanTransaction extends Model
@@ -93,17 +73,20 @@ class LoanTransaction extends Model
     public const TYPE_ISSUE = 'issue';
     public const TYPE_RETURN = 'return';
 
-    // Statuses for a transaction itself
+    // Statuses for a transaction itself as per System Design (Rev 3)
     public const STATUS_PENDING = 'pending';
     public const STATUS_ISSUED = 'issued';
+    public const STATUS_RETURNED = 'returned'; // Added general returned status
     public const STATUS_RETURNED_PENDING_INSPECTION = 'returned_pending_inspection';
     public const STATUS_RETURNED_GOOD = 'returned_good';
     public const STATUS_RETURNED_DAMAGED = 'returned_damaged';
-    public const STATUS_ITEMS_REPORTED_LOST = 'items_reported_lost'; // If all items in TX are lost, or primary outcome
-    public const STATUS_RETURNED_WITH_LOSS = 'returned_with_loss'; // Added
-    public const STATUS_RETURNED_WITH_DAMAGE_AND_LOSS = 'returned_with_damage_and_loss'; // Added
+    public const STATUS_ITEMS_REPORTED_LOST = 'items_reported_lost';
+    public const STATUS_RETURNED_WITH_LOSS = 'returned_with_loss';
+    public const STATUS_RETURNED_WITH_DAMAGE_AND_LOSS = 'returned_with_damage_and_loss';
+    public const STATUS_PARTIALLY_RETURNED = 'partially_returned';
     public const STATUS_COMPLETED = 'completed';
     public const STATUS_CANCELLED = 'cancelled';
+    public const STATUS_OVERDUE = 'overdue';
 
     public static array $TYPES_LABELS = [
         self::TYPE_ISSUE => 'Pengeluaran',
@@ -113,14 +96,17 @@ class LoanTransaction extends Model
     public static array $STATUSES_LABELS = [
         self::STATUS_PENDING => 'Menunggu Tindakan',
         self::STATUS_ISSUED => 'Telah Dikeluarkan',
+        self::STATUS_RETURNED => 'Telah Dipulangkan (Umum)', // Added label
         self::STATUS_RETURNED_PENDING_INSPECTION => 'Pemulangan (Menunggu Semakan)',
         self::STATUS_RETURNED_GOOD => 'Dipulangkan (Keadaan Baik)',
         self::STATUS_RETURNED_DAMAGED => 'Dipulangkan (Ada Kerosakan)',
         self::STATUS_ITEMS_REPORTED_LOST => 'Item Dilaporkan Hilang',
         self::STATUS_RETURNED_WITH_LOSS => 'Dipulangkan (Dengan Kehilangan)',
         self::STATUS_RETURNED_WITH_DAMAGE_AND_LOSS => 'Dipulangkan (Dengan Kerosakan & Kehilangan)',
+        self::STATUS_PARTIALLY_RETURNED => 'Dipulangkan Sebahagian',
         self::STATUS_COMPLETED => 'Selesai',
         self::STATUS_CANCELLED => 'Dibatalkan',
+        self::STATUS_OVERDUE => 'Tertunggak (Transaksi)',
     ];
 
     protected $table = 'loan_transactions';
@@ -140,36 +126,14 @@ class LoanTransaction extends Model
         'return_timestamp' => 'datetime',
         'accessories_checklist_on_issue' => 'array',
         'accessories_checklist_on_return' => 'array',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'deleted_at' => 'datetime',
     ];
 
-    // Static helpers
-    public static function getTypesOptions(): array
-    {
-        return self::$TYPES_LABELS;
-    }
-    public static function getStatusOptions(): array
-    {
-        return self::$STATUSES_LABELS;
-    }
-    public static function getStatusesList(): array
-    {
-        return array_keys(self::$STATUSES_LABELS);
-    } // Corrected to return keys for list
-
-    /**
-     * Placeholder for static method to define default eager loaded relations.
-     * Implement this to return an array of relation names.
-     * e.g., return ['loanApplication.user', 'issuingOfficer', ...];
-     */
-    public static function getDefinedDefaultRelationsStatic(): array
-    {
-        return ['loanApplication.user', 'loanTransactionItems.equipment', 'issuingOfficer', 'receivingOfficer', 'returningOfficer', 'returnAcceptingOfficer'];
-    }
-
-    // Default attributes can be set if a common initial status is desired
-    // protected $attributes = [
-    // 'status' => self::STATUS_PENDING,
-    // ];
+    protected $attributes = [
+        'status' => self::STATUS_PENDING,
+    ];
 
     protected static function newFactory(): LoanTransactionFactory
     {
@@ -177,70 +141,87 @@ class LoanTransaction extends Model
     }
 
     // Relationships
-    public function loanApplication(): BelongsTo
-    {
-        return $this->belongsTo(LoanApplication::class, 'loan_application_id');
-    }
-    public function loanTransactionItems(): HasMany
-    {
-        return $this->hasMany(LoanTransactionItem::class, 'loan_transaction_id');
-    }
-    public function items(): HasMany
-    {
-        return $this->loanTransactionItems();
-    }
+    public function loanApplication(): BelongsTo { return $this->belongsTo(LoanApplication::class, 'loan_application_id'); }
+    public function loanTransactionItems(): HasMany { return $this->hasMany(LoanTransactionItem::class, 'loan_transaction_id'); }
+    public function items(): HasMany { return $this->loanTransactionItems(); }
 
-    public function issuingOfficer(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'issuing_officer_id');
-    }
-    public function receivingOfficer(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'receiving_officer_id');
-    }
-    public function returningOfficer(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'returning_officer_id');
-    }
-    public function returnAcceptingOfficer(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'return_accepting_officer_id');
-    }
+    public function issuingOfficer(): BelongsTo { return $this->belongsTo(User::class, 'issuing_officer_id'); }
+    public function receivingOfficer(): BelongsTo { return $this->belongsTo(User::class, 'receiving_officer_id'); }
+    public function returningOfficer(): BelongsTo { return $this->belongsTo(User::class, 'returning_officer_id'); }
+    public function returnAcceptingOfficer(): BelongsTo { return $this->belongsTo(User::class, 'return_accepting_officer_id'); }
 
-    public function relatedIssueTransaction(): BelongsTo
-    {
-        return $this->belongsTo(LoanTransaction::class, 'related_transaction_id');
-    }
+    public function relatedIssueTransaction(): BelongsTo { return $this->belongsTo(LoanTransaction::class, 'related_transaction_id'); }
 
-    public function creator(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-    public function updater(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'updated_by');
-    }
-    public function deleter(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'deleted_by');
-    }
+    public function creator(): BelongsTo { return $this->belongsTo(User::class, 'created_by'); }
+    public function updater(): BelongsTo { return $this->belongsTo(User::class, 'updated_by'); }
+    public function deleter(): BelongsTo { return $this->belongsTo(User::class, 'deleted_by'); }
 
     // Accessors
-    public function getTypeTranslatedAttribute(): string
+    public function getTypeLabelAttribute(): string
     {
-        return self::$TYPES_LABELS[$this->type] ?? Str::title(str_replace('_', ' ', (string) $this->type));
+        return self::getTypeLabel($this->type);
     }
 
-    public function getStatusTranslatedAttribute(): string
+    public function getStatusLabelAttribute(): string
     {
-        return self::$STATUSES_LABELS[$this->status] ?? Str::title(str_replace('_', ' ', (string) $this->status));
+        return self::getStatusLabel($this->status);
     }
 
+    // Static helpers for labels and options
+    public static function getTypeLabel(string $typeKey): string
+    {
+        return __(self::$TYPES_LABELS[$typeKey] ?? Str::title(str_replace('_', ' ', $typeKey)));
+    }
+    public static function getStatusLabel(string $statusKey): string
+    {
+        return __(self::$STATUSES_LABELS[$statusKey] ?? Str::title(str_replace('_', ' ', $statusKey)));
+    }
+
+    public static function getTypesOptions(): array { return self::$TYPES_LABELS; }
+    public static function getStatusOptions(): array { return self::$STATUSES_LABELS; }
+    public static function getStatusesList(): array { return array_keys(self::$STATUSES_LABELS); }
+
+    public function isIssue(): bool
+    {
+        return $this->type === self::TYPE_ISSUE;
+    }
+
+    public function isReturn(): bool
+    {
+        return $this->type === self::TYPE_RETURN;
+    }
+
+    public function isFullyClosedOrReturned(): bool
+    {
+        return in_array($this->status, [
+            self::STATUS_RETURNED, // Added general returned
+            self::STATUS_RETURNED_GOOD,
+            self::STATUS_RETURNED_DAMAGED,
+            self::STATUS_ITEMS_REPORTED_LOST,
+            self::STATUS_RETURNED_WITH_LOSS,
+            self::STATUS_RETURNED_WITH_DAMAGE_AND_LOSS,
+            self::STATUS_COMPLETED,
+            self::STATUS_CANCELLED,
+        ]);
+    }
+
+    public static function getDefinedDefaultRelationsStatic(): array
+    {
+        return [
+            'loanApplication.user', 'loanTransactionItems.equipment', 'issuingOfficer',
+            'receivingOfficer', 'returningOfficer', 'returnAcceptingOfficer', 'relatedIssueTransaction'
+        ];
+    }
 
     public function updateParentLoanApplicationStatus(): void
     {
         if ($this->loanApplication) {
-            $this->loanApplication->updateOverallStatusAfterTransaction();
+            Log::info("Triggering updateOverallStatusAfterTransaction for LoanApplication ID {$this->loanApplication->id} from LoanTransaction ID {$this->id}");
+            if (method_exists($this->loanApplication, 'updateOverallStatusAfterTransaction')) {
+                $this->loanApplication->updateOverallStatusAfterTransaction();
+            } else {
+                Log::warning("Method updateOverallStatusAfterTransaction not found on LoanApplication model.");
+            }
         }
     }
 }

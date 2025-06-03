@@ -1,32 +1,20 @@
 {{-- resources/views/approvals/history.blade.php --}}
-@extends('layouts.app') {{-- Ensure layouts.app is Bootstrap-compatible --}}
+@extends('layouts.app')
 
 @section('title', __('Sejarah Kelulusan'))
 
 @section('content')
-    <div class="container py-4"> {{-- Bootstrap container --}}
+    <div class="container py-4">
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
             <h1 class="h2 fw-bold text-dark mb-0">{{ __('Sejarah Kelulusan') }}</h1>
-            <a href="{{ route('approval.dashboard') }}" {{-- Make sure this route is correct for your app's approval dashboard --}}
+            <a href="{{ route('approvals.dashboard') }}" {{-- System Design reference for approver dashboard [cite: 151, 165, 166, 229, 435] --}}
                 class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center">
                 <i class="bi bi-speedometer2 me-1"></i>
                 {{ __('Papan Pemuka Kelulusan') }}
             </a>
         </div>
 
-
-        @if (session()->has('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-        @if (session()->has('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
+        @include('partials.alert-messages') {{-- Assuming a partial for session messages --}}
 
         <div class="card shadow-sm">
             <div class="card-header bg-light py-3">
@@ -40,7 +28,7 @@
                 </div>
             @else
                 <div class="table-responsive">
-                    <table class="table table-hover table-striped mb-0 align-middle"> {{-- Added align-middle --}}
+                    <table class="table table-hover table-striped mb-0 align-middle">
                         <thead class="table-light">
                             <tr>
                                 <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">ID</th>
@@ -62,7 +50,7 @@
                         </thead>
                         <tbody>
                             @foreach ($approvals as $approval)
-                                @php($approvableItem = $approval->approvable) {{-- Changed variable name for clarity --}}
+                                @php $approvableItem = $approval->approvable; @endphp
                                 <tr>
                                     <td class="px-3 py-2 small text-dark">#{{ $approval->id ?? 'N/A' }}</td>
                                     <td class="px-3 py-2 small text-muted">
@@ -71,22 +59,21 @@
                                         @elseif ($approvableItem instanceof \App\Models\LoanApplication)
                                             <i class="bi bi-laptop me-1 text-success"></i>{{ __('Pinjaman ICT') }}
                                         @else
-                                            <i
-                                                class="bi bi-question-circle me-1 text-secondary"></i>{{ __('Jenis Tidak Diketahui') }}
+                                            <i class="bi bi-question-circle me-1 text-secondary"></i>{{ __('Jenis Tidak Diketahui') }}
                                         @endif
-                                        (#{{ $approvableItem->id ?? 'N/A' }})
+                                        (#{{ optional($approvableItem)->id ?? 'N/A' }})
                                     </td>
                                     <td class="px-3 py-2 small text-muted">
-                                        {{ $approvableItem->user->name ?? ($approvableItem->user->full_name ?? 'N/A') }}
+                                        {{ optional(optional($approvableItem)->user)->name ?? optional(optional($approvableItem)->user)->full_name ?? __('Tidak Diketahui') }}
                                     </td>
                                     <td class="px-3 py-2 small text-muted">
-                                        {{ $approval->created_at?->translatedFormat('d M Y, H:i A') ?? 'N/A' }}</td>
+                                        {{ optional($approval->created_at)->translatedFormat('d M Y, H:i A') ?? 'N/A' }}</td>
                                     <td class="px-3 py-2 small">
-                                        {{-- Assuming x-approval-status-badge or similar component handles this well --}}
                                         <x-approval-status-badge :status="$approval->status" />
                                     </td>
                                     <td class="px-3 py-2 small text-muted">
-                                        {{ $approval->officer->name ?? ($approval->officer->full_name ?? 'N/A') }}</td>
+                                        {{ optional($approval->officer)->name ?? optional($approval->officer)->full_name ?? __('Tidak Diketahui') }}
+                                    </td>
                                     <td class="px-3 py-2 small text-muted">
                                         {{ optional($approval->approval_timestamp)->translatedFormat('d M Y, H:i A') ?? 'N/A' }}
                                     </td>
@@ -101,22 +88,20 @@
                                             @endcan
                                             @if ($approvableItem)
                                                 @php
-                                                    $applicationDetailRoute = '#!'; // Default
+                                                    $applicationDetailRouteName = null;
+                                                    $applicationDetailRouteParams = null;
                                                     if ($approvableItem instanceof \App\Models\EmailApplication) {
-                                                        $applicationDetailRoute = route(
-                                                            'resource-management.my-applications.email-applications.show',
-                                                            $approvableItem->id,
-                                                        );
+                                                        // Ensure this route name matches your web.php for viewing a user's own email application details [cite: 150]
+                                                        $applicationDetailRouteName = 'email-applications.show';
+                                                        $applicationDetailRouteParams = $approvableItem->id;
                                                     } elseif ($approvableItem instanceof \App\Models\LoanApplication) {
-                                                        $applicationDetailRoute = route(
-                                                            'resource-management.my-applications.loan-applications.show',
-                                                            $approvableItem->id,
-                                                        );
+                                                        // Ensure this route name matches your web.php for viewing a user's own loan application details [cite: 150]
+                                                        $applicationDetailRouteName = 'loan-applications.show';
+                                                        $applicationDetailRouteParams = $approvableItem->id;
                                                     }
                                                 @endphp
-                                                @if (Route::has(Str::after($applicationDetailRoute, url('/'))))
-                                                    {{-- Check if route exists before linking --}}
-                                                    <a href="{{ $applicationDetailRoute }}"
+                                                @if ($applicationDetailRouteName && Route::has($applicationDetailRouteName))
+                                                    <a href="{{ route($applicationDetailRouteName, $applicationDetailRouteParams) }}"
                                                         class="btn btn-sm btn-outline-primary border-0 p-1"
                                                         title="{{ __('Lihat Permohonan Asal') }}">
                                                         <i class="bi bi-file-earmark-text-fill"></i>
@@ -133,7 +118,7 @@
 
                 @if ($approvals->hasPages())
                     <div class="card-footer bg-light border-top-0 py-3 d-flex justify-content-center">
-                        {{ $approvals->links() }} {{-- Ensure Laravel pagination is set to Bootstrap in AppServiceProvider --}}
+                        {{ $approvals->links() }}
                     </div>
                 @endif
             @endif

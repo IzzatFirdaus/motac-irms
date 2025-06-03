@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Foundation\Bus\DispatchesJobs; // Corrected trait name from source if it was 'Dispatchable'
+use Illuminate\Foundation\Bus\DispatchesJobs; // Standard Laravel trait
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
 
@@ -13,9 +13,9 @@ class Controller extends BaseController
     use DispatchesJobs;
     use ValidatesRequests;
 
-    // You could add shared helper methods or properties here if needed by many controllers,
-    // but often, custom traits or services are a better approach for shared functionality
-    // to keep the base controller lean.
+    // Shared helper methods or properties can be added here if needed by many controllers.
+    // However, for more complex shared functionality, custom traits or services are often preferred
+    // to maintain a lean base controller.
 
     // Example:
     // protected function getDefaultPerPage(): int

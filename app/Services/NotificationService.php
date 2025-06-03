@@ -33,15 +33,12 @@ use Illuminate\Support\Facades\Notification as NotificationFacade;
 
 /**
  * Service to encapsulate logic for dispatching various notifications.
+ * System Design Reference: MOTAC Integrated Resource Management System (Revision 3) - Section 3.1, 9.5
  */
 final class NotificationService
 {
     private const LOG_AREA = 'NotificationService:';
 
-    /**
-     * Notifies an applicant about a status update on their application
-     * using the dedicated ApplicationStatusUpdatedNotification.
-     */
     public function notifyApplicantStatusUpdate(
         EmailApplication|LoanApplication $application,
         string $oldStatus,
@@ -64,6 +61,7 @@ final class NotificationService
         ]);
 
         try {
+            // Call matches the constructor of ApplicationStatusUpdatedNotification.php
             $notification = new ApplicationStatusUpdatedNotification($application, $oldStatus, $newStatus);
             $applicant->notify($notification);
             Log::info(self::LOG_AREA." ApplicationStatusUpdatedNotification sent to Applicant ID {$applicantId}.");
@@ -74,16 +72,13 @@ final class NotificationService
         }
     }
 
-    /**
-     * Notifies a user with a generic DefaultUserNotification.
-     */
     public function notifyUserWithDefaultNotification(
         User $userToNotify,
         string $taskTitle,
         string $taskMessage,
         ?Model $relatedItem = null,
         ?string $actionUrl = null,
-        string $actionText = 'Lihat Butiran' // Default localized
+        string $actionText = 'Lihat Butiran'
     ): void {
         $userId = $userToNotify->id ?? 'N/A_USER_ID';
         $itemInfo = $relatedItem ? " related to ".($relatedItem::class)." ID ".($relatedItem->id ?? 'N/A') : '';
@@ -93,13 +88,24 @@ final class NotificationService
         ]);
 
         try {
-            $greeting = __('Salam Sejahtera, :name,', ['name' => $userToNotify->name ?? __('Pengguna')]);
+            $greetingKey = __('Salam Sejahtera, :name,', ['name' => $userToNotify->name ?? __('Pengguna')]);
+            $additionalData = [];
+            if ($relatedItem) {
+                $additionalData = [
+                    'related_item_type' => $relatedItem->getMorphClass(),
+                    'related_item_id' => $relatedItem->id,
+                    'icon' => $this->getIconForModel($relatedItem),
+                ];
+            }
+
+            // Call aligns with DefaultUserNotification.php constructor
             $notification = new DefaultUserNotification(
-                $taskTitle,
-                $greeting,
-                $taskMessage,
+                $taskTitle,       // $subjectKey
+                $greetingKey,     // $greetingKey
+                [$taskMessage],   // $lines (as array)
                 $actionUrl,
-                $actionText
+                $actionText,      // $actionTextKey
+                $additionalData
             );
             $userToNotify->notify($notification);
             Log::info(self::LOG_AREA." DefaultUserNotification sent to User ID {$userId}.");
@@ -110,119 +116,137 @@ final class NotificationService
         }
     }
 
-    /**
-     * Dispatches a given Notification object to a group of users.
-     */
+    private function getIconForModel(?Model $model): string
+    {
+        if ($model instanceof EmailApplication) return 'ti ti-mail';
+        if ($model instanceof LoanApplication) return 'ti ti-archive';
+        if ($model instanceof Approval) return 'ti ti-clipboard-check';
+        return 'ti ti-info-circle';
+    }
+
     public function notifyGroup(
         iterable|User $users,
         Notification $notificationInstance,
         ?Model $relatedModel = null
     ): void {
         $context = $relatedModel ? ($relatedModel::class)." ID ".($relatedModel->id ?? 'N/A') : 'general context';
-        Log::info(self::LOG_AREA." Preparing to send group notification ".($notificationInstance::class)." for {$context}.");
+        $notificationClass = $notificationInstance::class;
+
+        $notifiables = ($users instanceof User) ? [$users] : $users;
+        $userCount = 0;
+        if (is_iterable($notifiables)) {
+            if (is_array($notifiables) || $notifiables instanceof SupportCollection || $notifiables instanceof EloquentCollection) {
+                $userCount = count($notifiables);
+            } else {
+                foreach ($notifiables as $_) { $userCount++; }
+            }
+        }
+
+        if ($userCount === 0) {
+             Log::warning(self::LOG_AREA."Attempted to send group notification '{$notificationClass}' but no users provided for context: {$context}.");
+             return;
+        }
+
+        Log::info(self::LOG_AREA." Preparing to send group notification ".($notificationClass)." for {$context} to {$userCount} user(s).");
 
         try {
-            NotificationFacade::send($users, $notificationInstance);
-            $userCount = $users instanceof User ? 1 : count($users instanceof SupportCollection ? $users->all() : $users);
-            Log::info(self::LOG_AREA." Group notification ".($notificationInstance::class)." dispatched to {$userCount} users for {$context}.");
+            NotificationFacade::send($notifiables, $notificationInstance);
+            Log::info(self::LOG_AREA." Group notification ".($notificationClass)." dispatched to {$userCount} users for {$context}.");
         } catch (Exception $e) {
-            Log::error(self::LOG_AREA." Failed group notification dispatch of ".($notificationInstance::class)." for {$context}: ".$e->getMessage(), [
+            Log::error(self::LOG_AREA." Failed group notification dispatch of ".($notificationClass)." for {$context}: ".$e->getMessage(), [
                 'exception' => $e
             ]);
         }
     }
 
-    // --- Specific Notification Dispatch Methods ---
-
+    // Method implementations follow, using class_exists for robustness
     public function notifyApplicantApplicationSubmitted(EmailApplication|LoanApplication $application): void
     {
-        if (!$application->user) {
-            Log::warning(self::LOG_AREA."Applicant missing for ApplicationSubmitted: ".($application->id ?? 'N/A'));
-            return;
-        }
-        $this->notifyGroup($application->user, new ApplicationSubmitted($application), $application);
+        if (!$application->user) return;
+        if (class_exists(ApplicationSubmitted::class)) {
+            $this->notifyGroup($application->user, new ApplicationSubmitted($application), $application);
+        } else { Log::error(self::LOG_AREA."ApplicationSubmitted class not found."); }
     }
 
     public function notifyApproverApplicationNeedsAction(Approval $approvalTask, Model $approvableItem, User $approver): void
     {
-        $this->notifyGroup($approver, new ApplicationNeedsAction($approvalTask, $approvableItem), $approvableItem);
+        if (class_exists(ApplicationNeedsAction::class)) {
+            $this->notifyGroup($approver, new ApplicationNeedsAction($approvalTask, $approvableItem), $approvableItem);
+        } else { Log::error(self::LOG_AREA."ApplicationNeedsAction class not found."); }
     }
 
     public function notifyApplicantApplicationApproved(EmailApplication|LoanApplication $application): void
     {
-        if (!$application->user) {
-            Log::warning(self::LOG_AREA."Applicant missing for ApplicationApproved: ".($application->id ?? 'N/A'));
-            return;
-        }
-        $this->notifyGroup($application->user, new ApplicationApproved($application), $application);
+        if (!$application->user) return;
+        if (class_exists(ApplicationApproved::class)) {
+            $this->notifyGroup($application->user, new ApplicationApproved($application), $application);
+        } else { Log::error(self::LOG_AREA."ApplicationApproved class not found."); }
     }
 
     public function notifyApplicantApplicationRejected(EmailApplication|LoanApplication $application, User $rejecter, ?string $reason): void
     {
-        if (!$application->user) {
-            Log::warning(self::LOG_AREA."Applicant missing for ApplicationRejected: ".($application->id ?? 'N/A'));
-            return;
-        }
-        $this->notifyGroup($application->user, new ApplicationRejected($application, $rejecter, $reason), $application);
+        if (!$application->user) return;
+        if (class_exists(ApplicationRejected::class)) {
+            $this->notifyGroup($application->user, new ApplicationRejected($application, $rejecter, $reason), $application);
+        } else { Log::error(self::LOG_AREA."ApplicationRejected class not found."); }
     }
 
-    /** @param User|iterable<User> $admins */
     public function notifyAdminEmailReadyForProcessing(EmailApplication $application, User|iterable $admins): void
     {
-        $this->notifyGroup($admins, new EmailApplicationReadyForProcessingNotification($application), $application);
+        if (class_exists(EmailApplicationReadyForProcessingNotification::class)) {
+            $this->notifyGroup($admins, new EmailApplicationReadyForProcessingNotification($application), $application);
+        } else { Log::error(self::LOG_AREA."EmailApplicationReadyForProcessingNotification class not found."); }
     }
 
     public function notifyApplicantEmailProvisioned(EmailApplication $application): void
     {
-        if (!$application->user) {
-            Log::warning(self::LOG_AREA."Applicant missing for EmailProvisioned: ".($application->id ?? 'N/A'));
-            return;
-        }
-        $this->notifyGroup($application->user, new EmailProvisionedNotification($application), $application);
+        if (!$application->user) return;
+        if (class_exists(EmailProvisionedNotification::class)) {
+            $this->notifyGroup($application->user, new EmailProvisionedNotification($application), $application);
+        } else { Log::error(self::LOG_AREA."EmailProvisionedNotification class not found."); }
     }
 
-    /** @param User|iterable<User> $admins */
-    public function notifyAdminProvisioningFailed(EmailApplication $application, string $failureReason, User|iterable $admins, ?User $triggeringAdmin = null, ?array $errorDetails = null): void
+    public function notifyAdminProvisioningFailed(EmailApplication $application, string $failureReason, User|iterable $admins, ?User $triggeringAdmin = null): void
     {
-        // Pass errorDetails to the constructor if ProvisioningFailedNotification is updated to accept it
-        $this->notifyGroup($admins, new ProvisioningFailedNotification($application, $failureReason, $triggeringAdmin /*, $errorDetails */), $application);
+        if (class_exists(ProvisioningFailedNotification::class)) {
+            $this->notifyGroup($admins, new ProvisioningFailedNotification($application, $failureReason, $triggeringAdmin), $application);
+        } else { Log::error(self::LOG_AREA."ProvisioningFailedNotification class not found."); }
     }
 
-    /** @param User|iterable<User> $bpmStaff */
     public function notifyBpmLoanReadyForIssuance(LoanApplication $application, User|iterable $bpmStaff): void
     {
-        $this->notifyGroup($bpmStaff, new LoanApplicationReadyForIssuanceNotification($application), $application);
+        if (class_exists(LoanApplicationReadyForIssuanceNotification::class)) {
+            $this->notifyGroup($bpmStaff, new LoanApplicationReadyForIssuanceNotification($application), $application);
+        } else { Log::error(self::LOG_AREA."LoanApplicationReadyForIssuanceNotification class not found."); }
     }
 
     public function notifyApplicantEquipmentIssued(LoanApplication $application, LoanTransaction $issueTransaction, User $issuedByOfficer): void
     {
-        if (!$application->user) {
-            Log::warning(self::LOG_AREA."Applicant missing for EquipmentIssued: ".($application->id ?? 'N/A'));
-            return;
-        }
-        $this->notifyGroup($application->user, new EquipmentIssuedNotification($application, $issueTransaction, $issuedByOfficer), $application);
+        if (!$application->user) return;
+        if (class_exists(EquipmentIssuedNotification::class)) {
+            $this->notifyGroup($application->user, new EquipmentIssuedNotification($application, $issueTransaction, $issuedByOfficer), $application);
+        } else { Log::error(self::LOG_AREA."EquipmentIssuedNotification class not found."); }
     }
 
     public function notifyApplicantEquipmentReturned(LoanApplication $application, LoanTransaction $returnTransaction, User $returnAcceptingOfficer): void
     {
-        if (!$application->user) {
-            Log::warning(self::LOG_AREA."Applicant missing for EquipmentReturned: ".($application->id ?? 'N/A'));
-            return;
-        }
-        $this->notifyGroup($application->user, new EquipmentReturnedNotification($application, $returnTransaction, $returnAcceptingOfficer), $application);
+        if (!$application->user) return;
+        if (class_exists(EquipmentReturnedNotification::class)) {
+            $this->notifyGroup($application->user, new EquipmentReturnedNotification($application, $returnTransaction, $returnAcceptingOfficer), $application);
+        } else { Log::error(self::LOG_AREA."EquipmentReturnedNotification class not found."); }
     }
 
     public function notifyUserEquipmentReturnReminder(LoanApplication $application, int $daysUntilReturn, User $userToNotify): void
     {
-        $this->notifyGroup($userToNotify, new EquipmentReturnReminderNotification($application, $daysUntilReturn), $application);
+        if (class_exists(EquipmentReturnReminderNotification::class)) {
+            $this->notifyGroup($userToNotify, new EquipmentReturnReminderNotification($application, $daysUntilReturn), $application);
+        } else { Log::error(self::LOG_AREA."EquipmentReturnReminderNotification class not found."); }
     }
 
-    /**
-     * @param User|iterable<User> $partiesToNotify
-     * @param EloquentCollection<int, \App\Models\LoanTransactionItem> $incidentItems
-     */
     public function notifyRelevantPartiesEquipmentIncident(LoanApplication $application, EloquentCollection $incidentItems, string $incidentType, User|iterable $partiesToNotify): void
     {
-        $this->notifyGroup($partiesToNotify, new EquipmentIncidentNotification($application, $incidentItems, $incidentType), $application);
+        if (class_exists(EquipmentIncidentNotification::class)) {
+            $this->notifyGroup($partiesToNotify, new EquipmentIncidentNotification($application, $incidentItems, $incidentType), $application);
+        } else { Log::error(self::LOG_AREA."EquipmentIncidentNotification class not found."); }
     }
 }

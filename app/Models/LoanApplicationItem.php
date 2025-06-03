@@ -14,8 +14,9 @@ use Illuminate\Support\Str;
 
 /**
  * Loan Application Item Model.
- * 
- * Represents a type of equipment and quantity requested in a loan application.
+ * * Represents a type of equipment and quantity requested in a loan application.
+ * System Design Reference: MOTAC Integrated Resource Management System (Revision 3) - Section 4.3
+ * Migration context: 2025_04_22_105519_create_loan_application_items_table.php includes 'status' column.
  *
  * @property int $id
  * @property int $loan_application_id
@@ -24,10 +25,11 @@ use Illuminate\Support\Str;
  * @property int|null $quantity_approved
  * @property int $quantity_issued Default: 0
  * @property int $quantity_returned Default: 0
+ * @property string $status Status of this specific requested item (enum from migration)
  * @property string|null $notes Notes for this specific item request
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
+ * @property int|null $created_by (Handled by BlameableObserver)
+ * @property int|null $updated_by (Handled by BlameableObserver)
+ * @property int|null $deleted_by (Handled by BlameableObserver)
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
@@ -37,7 +39,6 @@ use Illuminate\Support\Str;
  * @property-read \App\Models\User|null $updater
  * @property-read \App\Models\User|null $deleter
  * @property-read string $equipmentTypeLabel Accessor for equipment_type label
- * @property string $status Status of this specific requested item
  * @property-read string $equipment_type_label
  * @property-read int|null $loan_transaction_items_count
  * @method static \Database\Factories\LoanApplicationItemFactory factory($count = null, $state = [])
@@ -56,6 +57,7 @@ use Illuminate\Support\Str;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereQuantityApproved($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereQuantityIssued($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereQuantityRequested($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereQuantityReturned($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereUpdatedBy($value)
@@ -68,15 +70,21 @@ class LoanApplicationItem extends Model
     use HasFactory;
     use SoftDeletes;
 
+    // Note: Actual enum values for 'status' are defined in the migration
+    // 2025_04_22_105519_create_loan_application_items_table.php
+    // e.g., 'pending_approval', 'item_approved', etc.
+    // This model should ideally have constants for these if they are referenced in code.
+
     protected $table = 'loan_application_items';
 
     protected $fillable = [
         'loan_application_id',
-        'equipment_type', // String identifier like 'laptop', 'projector'
+        'equipment_type',
         'quantity_requested',
         'quantity_approved',
         'quantity_issued',
         'quantity_returned',
+        'status', // Added to fillable
         'notes',
         // created_by, updated_by handled by BlameableObserver
     ];
@@ -91,6 +99,7 @@ class LoanApplicationItem extends Model
     protected $attributes = [
         'quantity_issued' => 0,
         'quantity_returned' => 0,
+        // 'status' => 'pending_approval', // Default status if applicable, should match migration default
     ];
 
     protected static function newFactory(): LoanApplicationItemFactory
@@ -104,15 +113,10 @@ class LoanApplicationItem extends Model
         return $this->belongsTo(LoanApplication::class, 'loan_application_id');
     }
 
-    /**
-     * Get all loan transaction items associated with this application item.
-     * This links the requested item to its actual issuance/return transactions.
-     */
     public function loanTransactionItems(): HasMany
     {
         return $this->hasMany(LoanTransactionItem::class, 'loan_application_item_id');
     }
-
 
     // Blameable relationships
     public function creator(): BelongsTo
@@ -136,29 +140,14 @@ class LoanApplicationItem extends Model
         return Equipment::$ASSET_TYPES_LABELS[$this->equipment_type] ?? Str::title(str_replace('_', ' ', (string) $this->equipment_type));
     }
 
-    /**
-     * Update quantities based on a transaction item.
-     * Typically called when a LoanTransactionItem is created or its status changes.
-     */
-    public function updateQuantitiesFromTransactionItem(LoanTransactionItem $transactionItem): void
-    {
-        if ($transactionItem->loanTransaction?->type === LoanTransaction::TYPE_ISSUE &&
-            $transactionItem->status === LoanTransactionItem::STATUS_ITEM_ISSUED) {
-            // This logic might be too simple if items can be un-issued or issue transactions cancelled.
-            // Recalculating sums from all related transaction items is more robust.
-            // $this->increment('quantity_issued', $transactionItem->quantity_transacted);
-        } elseif ($transactionItem->loanTransaction?->type === LoanTransaction::TYPE_RETURN &&
-            in_array($transactionItem->status, LoanTransactionItem::$RETURN_APPLICABLE_STATUSES)) {
-            // $this->increment('quantity_returned', $transactionItem->quantity_transacted);
-        }
-        // For more robust quantity updates, sum from related LoanTransactionItems
-        $this->recalculateQuantities();
-        $this->save();
-    }
+    // Accessor for status label (assuming you might add status constants/labels here or use a helper)
+    // public function getStatusLabelAttribute(): string
+    // {
+    //     // Example: return self::$ITEM_STATUS_LABELS[$this->status] ?? Str::title($this->status);
+    //     return Str::title(str_replace('_', ' ', (string) $this->status));
+    // }
 
-    /**
-     * Recalculates issued and returned quantities based on associated transaction items.
-     */
+
     public function recalculateQuantities(): void
     {
         $this->loadMissing('loanTransactionItems.loanTransaction');
@@ -169,8 +158,9 @@ class LoanApplicationItem extends Model
         foreach ($this->loanTransactionItems as $item) {
             if ($item->loanTransaction?->type === LoanTransaction::TYPE_ISSUE && $item->status === LoanTransactionItem::STATUS_ITEM_ISSUED) {
                 $issuedQty += $item->quantity_transacted;
-            } elseif ($item->loanTransaction?->type === LoanTransaction::TYPE_RETURN && in_array($item->status, LoanTransactionItem::$RETURN_APPLICABLE_STATUSES)) {
-                // Only count actual returns, not "reported_lost" as "returned quantity" unless business logic dictates
+            } elseif ($item->loanTransaction?->type === LoanTransaction::TYPE_RETURN &&
+                      is_array(LoanTransactionItem::$RETURN_APPLICABLE_STATUSES) && // Ensure it's an array
+                      in_array($item->status, LoanTransactionItem::$RETURN_APPLICABLE_STATUSES)) {
                 if (!in_array($item->status, [LoanTransactionItem::STATUS_ITEM_REPORTED_LOST])) {
                     $returnedQty += $item->quantity_transacted;
                 }
@@ -178,6 +168,10 @@ class LoanApplicationItem extends Model
         }
         $this->quantity_issued = $issuedQty;
         $this->quantity_returned = $returnedQty;
-    }
 
+        // If this method modifies attributes, it should save.
+        if ($this->isDirty(['quantity_issued', 'quantity_returned'])) {
+            $this->save();
+        }
+    }
 }

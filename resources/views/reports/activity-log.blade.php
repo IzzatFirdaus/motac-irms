@@ -13,7 +13,7 @@
                 @if (Route::has('admin.reports.index'))
                     <div class="mt-2 flex-shrink-0">
                         <a href="{{ route('admin.reports.index') }}"
-                           class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center">
+                            class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center">
                             <i class="ti ti-arrow-left me-1"></i>
                             {{ __('Back to Reports') }}
                         </a>
@@ -93,7 +93,10 @@
                     @endif
                 @else
                     <div class="alert alert-warning d-flex align-items-center" role="alert">
-                        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Warning:"><use xlink:href="#exclamation-triangle-fill"/></svg>
+                        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img"
+                            aria-label="Warning:">
+                            <use xlink:href="#exclamation-triangle-fill" />
+                        </svg>
                         {{-- Define SVG for Bootstrap Icons if not globally available --}}
                         {{-- <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
                             <symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">

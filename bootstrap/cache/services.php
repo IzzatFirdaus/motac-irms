@@ -48,9 +48,13 @@
     44 => 'Livewire\\LivewireServiceProvider',
     45 => 'App\\Providers\\AppServiceProvider',
     46 => 'App\\Providers\\AuthServiceProvider',
-    47 => 'App\\Providers\\EventServiceProvider',
-    48 => 'App\\Providers\\RouteServiceProvider',
-    49 => 'App\\Providers\\MenuServiceProvider',
+    47 => 'App\\Providers\\BroadcastServiceProvider',
+    48 => 'App\\Providers\\EventServiceProvider',
+    49 => 'App\\Providers\\RouteServiceProvider',
+    50 => 'App\\Providers\\MenuServiceProvider',
+    51 => 'App\\Providers\\FortifyServiceProvider',
+    52 => 'App\\Providers\\JetstreamServiceProvider',
+    53 => 'App\\Providers\\QueryLogServiceProvider',
   ),
   'eager' => 
   array (
@@ -85,9 +89,13 @@
     28 => 'Livewire\\LivewireServiceProvider',
     29 => 'App\\Providers\\AppServiceProvider',
     30 => 'App\\Providers\\AuthServiceProvider',
-    31 => 'App\\Providers\\EventServiceProvider',
-    32 => 'App\\Providers\\RouteServiceProvider',
-    33 => 'App\\Providers\\MenuServiceProvider',
+    31 => 'App\\Providers\\BroadcastServiceProvider',
+    32 => 'App\\Providers\\EventServiceProvider',
+    33 => 'App\\Providers\\RouteServiceProvider',
+    34 => 'App\\Providers\\MenuServiceProvider',
+    35 => 'App\\Providers\\FortifyServiceProvider',
+    36 => 'App\\Providers\\JetstreamServiceProvider',
+    37 => 'App\\Providers\\QueryLogServiceProvider',
   ),
   'deferred' => 
   array (

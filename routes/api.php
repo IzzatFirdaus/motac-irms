@@ -22,7 +22,7 @@ Route::middleware('auth:sanctum')
     ->get('/user', function (Request $request) {
         return $request->user()->load(['roles', 'permissions']); // Optionally load roles/permissions
     })
-    ->name('api.auth.user'); // More specific name [cite: 2]
+    ->name('api.auth.user'); // More specific name 
 
 // MOTAC System Specific API Routes (Versioned)
 Route::prefix('v1')

@@ -16,57 +16,44 @@ class LoanTransactionFactory extends EloquentFactory
 
     public function definition(): array
     {
-        // $auditUser = User::orderBy('id')->first() ?? User::factory()->create(['name' => 'Default Audit User (LTFactory)']);
-        // $auditUserId = $auditUser->id; // Blameable
-
         $application = LoanApplication::inRandomOrder()->first() ?? LoanApplication::factory()->create();
-
-        // Assuming LoanTransaction model has these static public arrays or methods
-        $transactionTypes = LoanTransaction::getTypesList(); // e.g. LoanTransaction::TYPE_ISSUE
-        $transactionStatuses = LoanTransaction::getStatusesList(); // e.g. LoanTransaction::STATUS_ISSUED
+        $transactionTypes = LoanTransaction::getTypesOptions();
+        $transactionStatuses = LoanTransaction::getStatusesList();
 
         $transactionDate = Carbon::parse($this->faker->dateTimeBetween('-6 months', 'now'));
         $chosenType = $this->faker->randomElement(array_keys($transactionTypes ?: [LoanTransaction::TYPE_ISSUE]));
 
-        // 'due_date' field is not in the system design (Section 4.3) for loan_transactions table.
-        // If it's a custom addition, it's fine. Otherwise, it should be removed.
-        // For now, assuming it exists based on the factory.
         $dueDate = null;
         if ($chosenType == LoanTransaction::TYPE_ISSUE && $application->loan_end_date) {
             $dueDate = Carbon::parse($application->loan_end_date);
         }
 
-
         $issuingOfficerId = null;
-        $receivingOfficerId = null; // Person physically receiving
+        $receivingOfficerId = null;
         $accessoriesIssue = null;
-        $issueTimestamp = null; // Redundant if transaction_date serves this for 'issue' type
+        $issueTimestamp = null;
         $issueNotes = null;
 
-        $returningOfficerId = null; // Person physically returning
+        $returningOfficerId = null;
         $returnAcceptingOfficerId = null;
         $accessoriesReturn = null;
-        $returnTimestamp = null; // Redundant if transaction_date serves this for 'return' type
+        $returnTimestamp = null;
         $returnNotes = null;
-
-        // 'related_transaction_id' as per design (Section 4.3)
         $relatedTransactionId = null;
 
-
         if ($chosenType == LoanTransaction::TYPE_ISSUE) {
-            $issuingOfficerId = User::inRandomOrder()->first()?->id; // BPM Staff
-            $receivingOfficerId = $application->user_id; // Applicant or responsible officer
+            $issuingOfficerId = User::inRandomOrder()->first()?->id;
+            $receivingOfficerId = $application->user_id;
             $accessoriesIssue = $this->faker->randomElements(['Power Adapter', 'Beg Laptop', 'Mouse Wayarles'], $this->faker->numberBetween(0, 3));
-            $issueTimestamp = $transactionDate; // Same as transaction_date for issue
+            $issueTimestamp = $transactionDate;
             $issueNotes = $this->faker->optional(0.4)->sentence;
         } elseif ($chosenType == LoanTransaction::TYPE_RETURN) {
-            $returningOfficerId = $application->user_id; // Applicant or responsible officer
-            $returnAcceptingOfficerId = User::inRandomOrder()->first()?->id; // BPM Staff
+            $returningOfficerId = $application->user_id;
+            $returnAcceptingOfficerId = User::inRandomOrder()->first()?->id;
             $accessoriesReturn = $this->faker->randomElements(['Power Adapter', 'Beg Laptop', 'Mouse Wayarles'], $this->faker->numberBetween(0, 3));
-            $returnTimestamp = $transactionDate; // Same as transaction_date for return
+            $returnTimestamp = $transactionDate;
             $returnNotes = $this->faker->optional(0.5)->sentence;
 
-            // Try to find a related issue transaction
             $relatedIssueTx = LoanTransaction::where('loan_application_id', $application->id)
                                 ->where('type', LoanTransaction::TYPE_ISSUE)
                                 ->latest('transaction_date')
@@ -78,20 +65,19 @@ class LoanTransactionFactory extends EloquentFactory
             'loan_application_id' => $application->id,
             'type' => $chosenType,
             'transaction_date' => $transactionDate,
-            // 'due_date' => $dueDate?->toDateString(), // If this field exists
+            'due_date' => $dueDate?->toDateString(),
             'issuing_officer_id' => $issuingOfficerId,
             'receiving_officer_id' => $receivingOfficerId,
-            'accessories_checklist_on_issue' => $accessoriesIssue, // Cast to JSON in model
+            'accessories_checklist_on_issue' => $accessoriesIssue,
             'issue_notes' => $issueNotes,
-            'issue_timestamp' => $issueTimestamp, // As per design (Section 4.3) - might be same as transaction_date
+            'issue_timestamp' => $issueTimestamp,
             'returning_officer_id' => $returningOfficerId,
             'return_accepting_officer_id' => $returnAcceptingOfficerId,
-            'accessories_checklist_on_return' => $accessoriesReturn, // Cast to JSON in model
-            'return_timestamp' => $returnTimestamp, // As per design (Section 4.3) - might be same as transaction_date
+            'accessories_checklist_on_return' => $accessoriesReturn,
+            'return_timestamp' => $returnTimestamp,
             'return_notes' => $returnNotes,
-            'related_transaction_id' => $relatedTransactionId, // As per design (Section 4.3)
-            'status' => $this->faker->randomElement(array_keys($transactionStatuses ?: [LoanTransaction::STATUS_COMPLETED])), // Fallback
-            // 'created_by', 'updated_by' handled by BlameableObserver
+            'related_transaction_id' => $relatedTransactionId,
+            'status' => $this->faker->randomElement(array_keys($transactionStatuses ?: [LoanTransaction::STATUS_COMPLETED])),
         ];
     }
 
@@ -106,7 +92,7 @@ class LoanTransactionFactory extends EloquentFactory
                 'type' => LoanTransaction::TYPE_ISSUE,
                 'transaction_date' => $transactionDate,
                 'issue_timestamp' => $transactionDate,
-                // 'due_date' => Carbon::parse($application->loan_end_date)->toDateString(), // if due_date field exists
+                'due_date' => $application->loan_end_date ? Carbon::parse($application->loan_end_date)->toDateString() : null,
                 'status' => LoanTransaction::STATUS_ISSUED,
                 'issuing_officer_id' => $attributes['issuing_officer_id'] ?? User::inRandomOrder()->first()?->id,
                 'receiving_officer_id' => $attributes['receiving_officer_id'] ?? $application->user_id,
@@ -119,13 +105,10 @@ class LoanTransactionFactory extends EloquentFactory
                 return;
             }
 
-            $loanApplication = $transaction->loanApplication()->first(); // Ensure it's the correct instance
-            // $auditUserId = $transaction->created_by ?? (User::first()?->id ?? User::factory()->create()->id); // Blameable
+            $loanApplication = $transaction->loanApplication()->first();
 
             if ($loanApplication && $loanApplication->applicationItems()->exists()) {
                 foreach ($loanApplication->applicationItems as $appItem) {
-                    /** @var \App\Models\LoanApplicationItem $appItem */
-                    // Issue quantity based on approved, less already issued for this appItem
                     $alreadyIssuedForAppItem = LoanTransactionItem::where('loan_application_item_id', $appItem->id)
                                                 ->whereHas('loanTransaction', fn ($q) => $q->where('type', LoanTransaction::TYPE_ISSUE))
                                                 ->sum('quantity_transacted');
@@ -137,19 +120,14 @@ class LoanTransactionFactory extends EloquentFactory
                             ->take($quantityToIssue)->get();
 
                         foreach ($availableEquipment as $eq) {
-                            if ($quantityToIssue <= 0) {
-                                break;
-                            }
+                            if ($quantityToIssue <= 0) break;
                             LoanTransactionItem::factory()
                                 ->for($transaction)
                                 ->for($eq, 'equipment')
                                 ->for($appItem, 'loanApplicationItem')
                                 ->issued()
-                                ->create([
-                                    'quantity_transacted' => 1, // Issue one specific unit at a time
-                                    // 'created_by' => $auditUserId, 'updated_by' => $auditUserId
-                                ]);
-                            $eq->update(['status' => Equipment::STATUS_ON_LOAN]); // Simple status update
+                                ->create(['quantity_transacted' => 1]);
+                            $eq->update(['status' => Equipment::STATUS_ON_LOAN]);
                             $quantityToIssue--;
                         }
                     }
@@ -166,7 +144,6 @@ class LoanTransactionFactory extends EloquentFactory
             $transactionDate = Carbon::parse($attributes['transaction_date'] ?? $this->faker->dateTimeBetween(Carbon::parse($issueDate)->addDay(), Carbon::parse($application->loan_end_date ?? 'now')->addDays(5)));
             $returnNotes = $this->faker->optional(0.4)->sentence;
 
-            // Find a related issue transaction
             $relatedIssueTx = LoanTransaction::where('loan_application_id', $application->id)
                                 ->where('type', LoanTransaction::TYPE_ISSUE)
                                 ->latest('transaction_date')
@@ -189,7 +166,6 @@ class LoanTransactionFactory extends EloquentFactory
                 return;
             }
 
-            // $auditUserId = $transaction->created_by ?? (User::first()?->id ?? User::factory()->create()->id); // Blameable
             $relatedIssueTransactionId = $transaction->related_transaction_id ??
                                         LoanTransaction::where('loan_application_id', $transaction->loan_application_id)
                                             ->where('type', LoanTransaction::TYPE_ISSUE)
@@ -198,19 +174,17 @@ class LoanTransactionFactory extends EloquentFactory
             if ($relatedIssueTransactionId) {
                 $issuedItems = LoanTransactionItem::where('loan_transaction_id', $relatedIssueTransactionId)->get();
                 foreach ($issuedItems as $issuedItem) {
-                    /** @var \App\Models\LoanTransactionItem $issuedItem */
                     if ($issuedItem->equipment) {
                         LoanTransactionItem::factory()
                             ->for($transaction)
                             ->for($issuedItem->equipment, 'equipment')
                             ->for($issuedItem->loanApplicationItem, 'loanApplicationItem')
-                            ->returned() // Sets status and condition
+                            // MODIFIED: Changed ->returned() to ->returnedGood()
+                            ->returnedGood()
                             ->create([
-                                'quantity_transacted' => $issuedItem->quantity_transacted, // Return same quantity as issued in that item line
-                                // 'created_by' => $auditUserId, 'updated_by' => $auditUserId
-                                'accessories_checklist_issue' => $issuedItem->accessories_checklist_issue, // Carry over issue checklist
+                                'quantity_transacted' => $issuedItem->quantity_transacted,
+                                'accessories_checklist_issue' => $issuedItem->accessories_checklist_issue,
                             ]);
-                        // Logic to determine actual condition on return and update equipment status accordingly
                         $conditionOnReturn = $transaction->status === LoanTransaction::STATUS_RETURNED_DAMAGED ? Equipment::CONDITION_MINOR_DAMAGE : Equipment::CONDITION_GOOD;
                         $issuedItem->equipment->update(['status' => Equipment::STATUS_AVAILABLE, 'condition_status' => $conditionOnReturn]);
                     }
@@ -219,12 +193,10 @@ class LoanTransactionFactory extends EloquentFactory
         });
     }
 
-
     public function deleted(): static
     {
         return $this->state(fn (array $attributes) => [
             'deleted_at' => now(),
-            // 'deleted_by' handled by BlameableObserver
         ]);
     }
 

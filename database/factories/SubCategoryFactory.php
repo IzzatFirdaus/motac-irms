@@ -4,7 +4,7 @@ namespace Database\Factories;
 
 use App\Models\EquipmentCategory;
 use App\Models\SubCategory;
-use App\Models\User; // Correctly imported
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -16,44 +16,32 @@ class SubCategoryFactory extends Factory
     {
         $equipmentCategoryId = EquipmentCategory::inRandomOrder()->first()?->id;
         if (!$equipmentCategoryId && class_exists(EquipmentCategory::class) && method_exists(EquipmentCategory::class, 'factory')) {
+            // If EquipmentCategory factory needs audit user, it should handle it or be passed from seeder
             $equipmentCategoryId = EquipmentCategory::factory()->create()->id;
         }
 
-        $userId = User::inRandomOrder()->first()?->id;
-        if (!$userId && class_exists(User::class) && method_exists(User::class, 'factory')) {
-            $userId = User::factory()->create()->id;
-        }
+        // $userId = User::inRandomOrder()->first()?->id; // No longer explicitly needed here for blameable
+        // if (!$userId && class_exists(User::class) && method_exists(User::class, 'factory')) {
+        //     $userId = User::factory()->create()->id;
+        // }
 
         $createdAt = $this->faker->dateTimeBetween('-1 year', 'now');
         $updatedAt = $this->faker->dateTimeBetween($createdAt, 'now');
-        $deletedAt = $this->faker
-            ->optional(0.1)
-            ->dateTimeBetween($createdAt, 'now');
-
-        // Determine deleter ID only if it's soft deleted
-        $deleterId = null;
-        if ($deletedAt) {
-            $deleterId = User::inRandomOrder()->first()?->id ?? $userId; // Corrected: Use User model directly
-        }
-
+        $deletedAt = $this->faker->optional(0.1)->dateTimeBetween($createdAt, 'now'); // For soft delete simulation
+        // $deleterId will be handled by trashed() state or BlameableObserver for soft delete event
 
         return [
             'equipment_category_id' => $equipmentCategoryId,
             'name' => $this->faker->unique()->words(2, true) . ' SubCategory',
             'description' => $this->faker->optional(0.7)->sentence,
             'is_active' => $this->faker->boolean(95),
-            'created_by' => $userId,
-            'updated_by' => $userId,
-            'deleted_by' => $deleterId, // Use the determined deleterId
+            // 'created_by', 'updated_by', 'deleted_by' (for non-trashed) handled by BlameableObserver
             'created_at' => Carbon::parse($createdAt),
             'updated_at' => Carbon::parse($updatedAt),
             'deleted_at' => $deletedAt ? Carbon::parse($deletedAt) : null,
         ];
     }
 
-    /**
-     * Indicate that the subcategory is inactive.
-     */
     public function inactive(): static
     {
         return $this->state(
@@ -63,9 +51,6 @@ class SubCategoryFactory extends Factory
         );
     }
 
-    /**
-     * Indicate that the subcategory is soft deleted.
-     */
     public function trashed(): static
     {
         $deleterId = User::inRandomOrder()->first()?->id;
@@ -76,14 +61,11 @@ class SubCategoryFactory extends Factory
         return $this->state(
             fn (array $attributes) => [
                 'deleted_at' => Carbon::now(),
-                'deleted_by' => $deleterId,
+                'deleted_by' => $deleterId, // Explicitly set deleter for this state action
             ]
         );
     }
 
-    /**
-     * Scope the subcategory to a specific EquipmentCategory.
-     */
     public function forEquipmentCategory(EquipmentCategory|int $equipmentCategory): static
     {
         $equipmentCategoryId = $equipmentCategory instanceof EquipmentCategory

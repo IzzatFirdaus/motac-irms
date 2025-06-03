@@ -8,10 +8,11 @@
     @if (session()->has('error'))
         <x-alert type="danger" :message="session('error')" class="mb-4"/>
     @endif
+    {{-- More specific error display for multiple items --}}
     @if ($errors->any())
         <x-alert type="danger" class="mb-4">
             <p class="fw-semibold">{{ __('Sila perbetulkan ralat berikut:') }}</p>
-            <ul class="mt-1 list-disc ps-4"> {{-- Using ps-4 for Bootstrap-like list padding --}}
+            <ul class="mt-1 list-unstyled ps-4 mb-0">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
@@ -27,17 +28,18 @@
         <p class="mb-1"><span class="fw-semibold">{{ __('Tarikh Pinjaman') }}:</span> {{ $loanApplication->loan_start_date ? $loanApplication->loan_start_date->translatedFormat(config('app.date_format_my', 'd/m/Y')) : __('N/A') }}</p>
         <p class="mb-0"><span class="fw-semibold">{{ __('Tarikh Dijangka Pulang') }}:</span> {{ $loanApplication->loan_end_date ? $loanApplication->loan_end_date->translatedFormat(config('app.date_format_my', 'd/m/Y')) : __('N/A') }}</p>
 
-        @if ($loanApplication->applicationItems->isNotEmpty()) {{-- Changed from items to applicationItems for clarity if that's your relation name --}}
-            <h6 class="mt-3 mb-2 fw-semibold">{{ __('Item Peralatan Dimohon:') }}</h6>
+        @if ($loanApplication->applicationItems->isNotEmpty())
+            <h6 class="mt-3 mb-2 fw-semibold">{{ __('Item Peralatan Dimohon & Diluluskan:') }}</h6>
             <div class="table-responsive border rounded">
                 <table class="table table-sm table-striped mb-0">
                     <thead class="table-light">
                         <tr>
                             <th class="small px-3 py-2">#</th>
                             <th class="small px-3 py-2">{{ __('Jenis Peralatan') }}</th>
-                            <th class="small px-3 py-2">{{ __('Kuantiti Dimohon') }}</th>
-                            <th class="small px-3 py-2">{{ __('Kuantiti Diluluskan') }}</th>
-                            <th class="small px-3 py-2">{{ __('Catatan') }}</th>
+                            <th class="small px-3 py-2">{{ __('Qty. Mohon') }}</th>
+                            <th class="small px-3 py-2">{{ __('Qty. Lulus') }}</th>
+                            <th class="small px-3 py-2">{{ __('Qty. Telah Dikeluarkan') }}</th>
+                            <th class="small px-3 py-2">{{ __('Baki Untuk Dikeluarkan') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -47,7 +49,8 @@
                             <td class="small px-3 py-2">{{ $item->equipment_type ? (\App\Models\Equipment::$ASSET_TYPES_LABELS[$item->equipment_type] ?? Str::title(str_replace('_', ' ', $item->equipment_type))) : __('N/A') }}</td>
                             <td class="small px-3 py-2">{{ $item->quantity_requested ?? __('N/A') }}</td>
                             <td class="small px-3 py-2">{{ $item->quantity_approved ?? __('N/A') }}</td>
-                            <td class="small px-3 py-2">{{ $item->notes ?? '-' }}</td>
+                            <td class="small px-3 py-2">{{ $item->quantity_issued ?? 0 }}</td>
+                            <td class="small px-3 py-2 fw-bold">{{ ($item->quantity_approved ?? 0) - ($item->quantity_issued ?? 0) }}</td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -58,66 +61,131 @@
 
     <form wire:submit.prevent="submitIssue">
         <x-card card-title="{{ __('Rekod Pengeluaran Peralatan Sebenar') }}">
-            {{-- Select Equipment to Issue --}}
-            <div class="mb-3">
-                <label for="selectedEquipmentIds" class="form-label fw-semibold">{{ __('Pilih Peralatan untuk Dikeluarkan') }}*:</label>
-                {{-- Consider using a more user-friendly multiple select component if you have one (e.g., TomSelect, Select2 via wrapper) --}}
-                <select wire:model.defer="selectedEquipmentIds" id="selectedEquipmentIds" class="form-select @error('selectedEquipmentIds') is-invalid @enderror @error('selectedEquipmentIds.*') is-invalid @enderror" multiple required size="5">
-                    @forelse ($availableEquipment as $equipment)
-                        <option value="{{ $equipment->id }}">
-                            {{ $equipment->asset_type_label }}: {{ $equipment->brand }} {{ $equipment->model }} (Tag: {{ $equipment->tag_id ?? __('N/A') }})
-                        </option>
-                    @empty
-                        <option value="" disabled>{{ __('Tiada peralatan tersedia yang sepadan dengan jenis yang diluluskan.') }}</option>
-                    @endforelse
-                </select>
-                @error('selectedEquipmentIds') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                @error('selectedEquipmentIds.*') <div class="invalid-feedback">{{ $message }}</div> @enderror
-            </div>
 
-            {{-- Accessories Checklist --}}
-            <div class="mb-3">
-                <label class="form-label fw-semibold">{{ __('Senarai Semak Aksesori Dikeluarkan') }}:</label>
-                <div class="row">
-                    @foreach ($allAccessoriesList as $accessory)
-                        <div class="col-md-6 col-lg-4">
-                            <div class="form-check">
-                                <input type="checkbox" wire:model.defer="accessories" value="{{ $accessory }}" id="accessory-{{ Str::slug($accessory) }}" class="form-check-input">
-                                <label class="form-check-label" for="accessory-{{ Str::slug($accessory) }}">{{ $accessory }}</label>
-                            </div>
+            @foreach ($issueItems as $index => $issueItem)
+                <div wire:key="issue-item-{{ $index }}" class="border rounded p-3 mb-3 {{ $loop->odd ? 'bg-light-subtle' : '' }}">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0 fw-semibold">{{ __('Item Pengeluaran #') }}{{ $index + 1 }}</h6>
+                        @if (count($issueItems) > 1)
+                            <button type="button" wire:click="removeIssueItem({{ $index }})" class="btn btn-sm btn-outline-danger" title="{{__('Buang Item Ini')}}">
+                                <i class="bi bi-trash"></i> {{__('Buang')}}
+                            </button>
+                        @endif
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6 mb-3">
+                            <label for="issueItems_{{ $index }}_loan_application_item_id" class="form-label">{{ __('Rujuk Item Permohonan Asal') }} <span class="text-danger">*</span></label>
+                            <select wire:model.live="issueItems.{{ $index }}.loan_application_item_id" id="issueItems_{{ $index }}_loan_application_item_id" class="form-select @error('issueItems.'.$index.'.loan_application_item_id') is-invalid @enderror">
+                                <option value="">-- {{ __('Pilih Item Asal') }} --</option>
+                                @foreach ($loanApplication->applicationItems as $appItem)
+                                    @if (($appItem->quantity_approved ?? 0) > ($appItem->quantity_issued ?? 0) || (isset($issueItems[$index]['loan_application_item_id']) && $issueItems[$index]['loan_application_item_id'] == $appItem->id) ) {{-- Allow selecting if already selected or still has balance --}}
+                                        <option value="{{ $appItem->id }}">
+                                            {{ $appItem->equipment_type ? (\App\Models\Equipment::$ASSET_TYPES_LABELS[$appItem->equipment_type] ?? Str::title(str_replace('_', ' ', $appItem->equipment_type))) : 'N/A' }}
+                                            ({{ __('Lulus') }}: {{ $appItem->quantity_approved ?? 0 }}, {{ __('Dikeluarkan') }}: {{ $appItem->quantity_issued ?? 0 }})
+                                        </option>
+                                    @endif
+                                @endforeach
+                            </select>
+                            @error('issueItems.'.$index.'.loan_application_item_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
-                    @endforeach
+
+                        <div class="col-md-6 mb-3">
+                            <label for="issueItems_{{ $index }}_equipment_id" class="form-label">{{ __('Peralatan Spesifik (Tag ID)') }} <span class="text-danger">*</span></label>
+                            <select wire:model.defer="issueItems.{{ $index }}.equipment_id" id="issueItems_{{ $index }}_equipment_id" class="form-select @error('issueItems.'.$index.'.equipment_id') is-invalid @enderror" @if(empty($issueItems[$index]['equipment_type'])) disabled @endif>
+                                <option value="">-- {{ __('Pilih Peralatan') }} --</option>
+                                @foreach ($availableEquipment as $equipment)
+                                    @if ($equipment->asset_type === ($issueItems[$index]['equipment_type'] ?? null))
+                                        <option value="{{ $equipment->id }}">
+                                            {{ $equipment->tag_id ?? $equipment->serial_number ?? ('ID:'.$equipment->id) }} - {{ $equipment->brand }} {{ $equipment->model }}
+                                        </option>
+                                    @endif
+                                @endforeach
+                                @if(!empty($issueItems[$index]['equipment_type']) && collect($availableEquipment)->where('asset_type', $issueItems[$index]['equipment_type'])->isEmpty())
+                                    <option value="" disabled>{{ __('Tiada peralatan jenis ini tersedia.') }}</option>
+                                @endif
+                            </select>
+                            @error('issueItems.'.$index.'.equipment_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="issueItems_{{ $index }}_quantity_issued" class="form-label">{{ __('Kuantiti Dikeluarkan') }} <span class="text-danger">*</span></label>
+                        <input type="number" wire:model.defer="issueItems.{{ $index }}.quantity_issued" id="issueItems_{{ $index }}_quantity_issued" class="form-control @error('issueItems.'.$index.'.quantity_issued') is-invalid @enderror" min="1" max="{{ $issueItems[$index]['max_quantity_issuable'] ?? 1 }}">
+                        <div class="form-text">{{__('Baki boleh dikeluarkan untuk item permohonan ini:')}} {{ $issueItems[$index]['max_quantity_issuable'] ?? 0 }}</div>
+                        @error('issueItems.'.$index.'.quantity_issued') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">{{ __('Aksesori Dikeluarkan (Item Ini)') }}:</label>
+                        <div class="row">
+                            @foreach ($allAccessoriesList as $accessory)
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="form-check">
+                                        <input type="checkbox" wire:model.defer="issueItems.{{ $index }}.accessories_checklist_item" value="{{ $accessory }}" id="accessory_{{ $index }}_{{ Str::slug($accessory) }}" class="form-check-input">
+                                        <label class="form-check-label" for="accessory_{{ $index }}_{{ Str::slug($accessory) }}">{{ $accessory }}</label>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                        @error('issueItems.'.$index.'.accessories_checklist_item') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="issueItems_{{ $index }}_issue_item_notes" class="form-label">{{ __('Catatan (Item Ini)') }}:</label>
+                        <textarea wire:model.defer="issueItems.{{ $index }}.issue_item_notes" id="issueItems_{{ $index }}_issue_item_notes" class="form-control @error('issueItems.'.$index.'.issue_item_notes') is-invalid @enderror" rows="2"></textarea>
+                        @error('issueItems.'.$index.'.issue_item_notes') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
                 </div>
-                @error('accessories') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+            @endforeach
+
+            <button type="button" wire:click="addIssueItem" class="btn btn-sm btn-outline-secondary mb-3">
+                <i class="bi bi-plus-circle"></i> {{ __('Tambah Item Pengeluaran') }}
+            </button>
+
+            <hr class="my-4">
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="receiving_officer_id" class="form-label fw-semibold">{{ __('Pegawai Penerima (Pengguna/Wakil)') }} <span class="text-danger">*</span></label>
+                    <select wire:model.defer="receiving_officer_id" id="receiving_officer_id" class="form-select @error('receiving_officer_id') is-invalid @enderror">
+                        <option value="">-- {{ __('Pilih Pegawai') }} --</option>
+                        @foreach($users ?? [] as $user)
+                            <option value="{{ $user->id }}">{{ $user->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('receiving_officer_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="transaction_date" class="form-label fw-semibold">{{ __('Tarikh Transaksi Pengeluaran') }} <span class="text-danger">*</span></label>
+                    <input type="date" wire:model.defer="transaction_date" id="transaction_date" class="form-control @error('transaction_date') is-invalid @enderror">
+                    @error('transaction_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
             </div>
 
-            {{-- Issue Notes --}}
             <div class="mb-3">
-                <label for="issue_notes" class="form-label fw-semibold">{{ __('Catatan Pengeluaran') }}:</label>
-                <textarea wire:model.defer="issue_notes" id="issue_notes" class="form-control @error('issue_notes') is-invalid @enderror" rows="3" placeholder="cth: Beg bercalar sedikit"></textarea>
+                <label for="issue_notes" class="form-label fw-semibold">{{ __('Catatan Keseluruhan Pengeluaran') }}:</label>
+                <textarea wire:model.defer="issue_notes" id="issue_notes" class="form-control @error('issue_notes') is-invalid @enderror" rows="3" placeholder="{{__('cth: Sila jaga peralatan dengan baik.')}}"></textarea>
                 @error('issue_notes') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
 
-            {{-- Processed By --}}
             <div class="mb-3">
-                <label class="form-label fw-semibold">{{ __('Diproses Oleh') }}:</label>
-                <p class="form-control-static">{{ Auth::user()->name ?? __('N/A') }}</p>
+                <label class="form-label fw-semibold">{{ __('Diproses Oleh (Pegawai Pengeluar)') }}:</label>
+                <p class="form-control-plaintext">{{ Auth::user()->name ?? __('N/A') }}</p>
             </div>
+
         </x-card>
 
-        <div class="text-center mt-4">
+        <div class="text-center mt-4 d-flex justify-content-end">
+            <a href="{{ route('loan-applications.show', $loanApplication->id) }}" class="btn btn-secondary me-2">
+                <i class="bi bi-x-circle me-1"></i>
+                {{ __('Batal') }}
+            </a>
             <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="submitIssue">
                 <span wire:loading wire:target="submitIssue" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                <span wire:loading.remove wire:target="submitIssue"><i class="ti ti-check me-1"></i></span>
-                {{ __('Rekod Pengeluaran Peralatan') }}
+                <span wire:loading.remove wire:target="submitIssue"><i class="bi bi-check-lg me-1"></i></span>
+                {{ __('Sahkan & Rekod Pengeluaran Peralatan') }}
             </button>
         </div>
     </form>
-
-     <div class="mt-4 text-center">
-         <a href="{{ route('resource-management.my-applications.loan-applications.show', $loanApplication->id) }}" class="btn btn-secondary">
-            <i class="ti ti-arrow-left me-1"></i>
-            {{ __('Kembali ke Butiran Permohonan') }}
-         </a>
-     </div>
 </div>

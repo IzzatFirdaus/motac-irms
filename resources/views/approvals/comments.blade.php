@@ -9,10 +9,10 @@
                 {!! nl2br(e($approval->comments)) !!}
             </div>
         @else
-            <p class="text-muted fst-italic small mb-0">{{ __('Tiada catatan disediakan.') }}</p> {{-- Bootstrap muted and italic, added mb-0 for tighter spacing if no comments --}}
+            <p class="text-muted fst-italic small mb-0">{{ __('Tiada catatan disediakan.') }}</p> {{-- Bootstrap muted and italic --}}
         @endif
     </div>
 @else
-    {{-- Optional: Error message or nothing if $approval is not set --}}
-    {{-- <div class="mb-3 alert alert-warning small p-2">{{ __('Data kelulusan tidak tersedia untuk catatan.') }}</div> --}}
+    {{-- Fallback if $approval object is not passed or is null (currently commented out) --}}
+    {{-- <div class="mb-3 alert alert-warning small p-2">{{ __('Data kelulusan tidak tersedia untuk paparan catatan.') }}</div> --}}
 @endif

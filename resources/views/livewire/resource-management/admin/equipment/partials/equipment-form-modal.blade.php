@@ -2,8 +2,8 @@
 <div wire:ignore.self class="modal fade" id="equipmentFormModal" tabindex="-1" aria-labelledby="equipmentFormModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <form wire:submit.prevent="{{ $editingEquipment && $editingEquipment->exists ? 'updateEquipment' : 'createEquipment' }}">
-            <div class="modal-content">
-                <div class="modal-header">
+            <div class="modal-content"> {{-- Ensure .modal-content is styled by MOTAC theme --}}
+                <div class="modal-header"> {{-- Ensure .modal-header is styled by MOTAC theme --}}
                     <h5 class="modal-title" id="equipmentFormModalLabel">
                         @if ($editingEquipment && $editingEquipment->exists)
                             {{ __('Kemaskini Peralatan ICT') }}: #{{ $editingEquipment->tag_id ?? $editingEquipment->id }}
@@ -13,10 +13,9 @@
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" wire:click="closeModal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    {{-- Display validation errors --}}
+                <div class="modal-body"> {{-- Ensure .modal-body is styled by MOTAC theme --}}
                     @if ($errors->any())
-                        <div class="alert alert-danger mb-3">
+                        <div class="alert alert-danger mb-3"> {{-- Ensure .alert-danger uses MOTAC danger color --}}
                             <p class="fw-semibold">{{ __('Sila perbetulkan ralat berikut:') }}</p>
                             <ul class="mt-1 mb-0 ps-4">
                                 @foreach ($errors->all() as $error)
@@ -32,7 +31,7 @@
                             <label for="modal_asset_type" class="form-label fw-medium">{{ __('Jenis Aset') }} <span class="text-danger">*</span></label>
                             <select wire:model.defer="asset_type" id="modal_asset_type" class="form-select form-select-sm @error('asset_type') is-invalid @enderror" required>
                                 <option value="">-- {{ __('Pilih Jenis Aset') }} --</option>
-                                @foreach ($assetTypeOptions as $value => $label) {{-- From AdminEquipmentIndexLW component --}}
+                                @foreach ($assetTypeOptions as $value => $label)
                                     <option value="{{ $value }}">{{ __($label) }}</option>
                                 @endforeach
                             </select>
@@ -72,7 +71,7 @@
                             <label for="modal_department_id" class="form-label fw-medium">{{ __('Bahagian Pemilik/Penempatan') }}</label>
                             <select wire:model.defer="department_id" id="modal_department_id" class="form-select form-select-sm @error('department_id') is-invalid @enderror">
                                 <option value="">-- {{ __('Pilih Bahagian') }} --</option>
-                                @foreach ($departmentOptions as $id => $name) {{-- From AdminEquipmentIndexLW component --}}
+                                @foreach ($departmentOptions as $id => $name)
                                     <option value="{{ $id }}">{{ $name }}</option>
                                 @endforeach
                             </select>
@@ -100,7 +99,7 @@
                             <label for="modal_status" class="form-label fw-medium">{{ __('Status Operasi') }} <span class="text-danger">*</span></label>
                             <select wire:model.defer="status" id="modal_status" class="form-select form-select-sm @error('status') is-invalid @enderror" required>
                                 <option value="">-- {{ __('Pilih Status Operasi') }} --</option>
-                                @foreach ($statusOptions as $value => $label) {{-- From AdminEquipmentIndexLW component --}}
+                                @foreach ($statusOptions as $value => $label)
                                     <option value="{{ $value }}">{{ __($label) }}</option>
                                 @endforeach
                             </select>
@@ -112,7 +111,7 @@
                             <label for="modal_condition_status" class="form-label fw-medium">{{ __('Status Keadaan Fizikal') }} <span class="text-danger">*</span></label>
                             <select wire:model.defer="condition_status" id="modal_condition_status" class="form-select form-select-sm @error('condition_status') is-invalid @enderror" required>
                                 <option value="">-- {{ __('Pilih Status Keadaan') }} --</option>
-                                @foreach ($conditionStatusOptions as $value => $label) {{-- From AdminEquipmentIndexLW component --}}
+                                @foreach ($conditionStatusOptions as $value => $label)
                                     <option value="{{ $value }}">{{ __($label) }}</option>
                                 @endforeach
                             </select>
@@ -134,10 +133,11 @@
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer"> {{-- Ensure .modal-footer is styled by MOTAC theme --}}
                     <button type="button" class="btn btn-outline-secondary" wire:click="closeModal" data-bs-dismiss="modal">{{ __('Batal') }}</button>
-                    <button type="submit" class="btn btn-primary" wire:loading.attr="disabled">
+                    <button type="submit" class="btn btn-primary" wire:loading.attr="disabled"> {{-- Ensure .btn-primary uses MOTAC primary color --}}
                         <span wire:loading wire:target="{{ ($editingEquipment && $editingEquipment->exists) ? 'updateEquipment' : 'createEquipment' }}" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        {{-- Icons are already Bootstrap Icons --}}
                         <i wire:loading.remove class="bi {{ ($editingEquipment && $editingEquipment->exists) ? 'bi-save-fill' : 'bi-plus-circle-fill' }} me-1"></i>
                         @if ($editingEquipment && $editingEquipment->exists)
                             {{ __('Kemaskini Peralatan') }}

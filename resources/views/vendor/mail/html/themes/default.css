@@ -1,7 +1,43 @@
-.button-motac_primary {
-    background-color: #0050A0; /* MOTAC Primary Blue */
-    border-top: 10px solid #0050A0;
-    border-right: 18px solid #0050A0;
-    border-bottom: 10px solid #0050A0;
-    border-left: 18px solid #0050A0;
+@import url('https://fonts.googleapis.com/css?family=Noto+Sans:400,700&display=swap'); /* Optional: Attempt to load Noto Sans, email client support varies */
+/*-- resources/views/vendor/mail/html/themes/default.css --}}*/
+
+/* Global styles for Markdown emails, aligning with MOTAC where possible */
+body {
+    font-family: 'Noto Sans', Arial, 'Helvetica Neue', Helvetica, sans-serif; /* Noto Sans first, then fallbacks */
+    color: #212529; /* MOTAC Text Color from Design Doc (Light Mode) */
 }
+
+a {
+    color: #0055A4; /* MOTAC Primary Blue for links */
+}
+
+/* MOTAC Themed Primary Button for Markdown Emails */
+.button-motac_primary {
+    background-color: #0055A4; /* MOTAC Primary Blue from Design Doc 2.1 */
+    border: none; /* Remove default borders if any, rely on background */
+    color: #ffffff; /* Ensure text is white for contrast */
+    /* Padding is usually handled by the mail::button component, but can be adjusted here if needed */
+    /* e.g., padding: 10px 18px; */
+    /* text-decoration: none; (usually handled by mail::button) */
+}
+
+/* Optional: Add styles for other button colors if you plan to use them */
+/*
+.button-motac_success {
+    background-color: #28A745; // MOTAC Success Green
+    color: #ffffff;
+}
+
+.button-motac_danger {
+    background-color: #DC3545; // MOTAC Critical Red
+    color: #ffffff;
+}
+*/
+
+/* You can also style other Markdown components here, like panels, tables, etc. */
+/*
+.panel {
+    border-left: 5px solid #0055A4; // MOTAC Primary Blue for panel accent
+    background-color: #f8f9fa; // MOTAC Background (Light Mode)
+}
+*/

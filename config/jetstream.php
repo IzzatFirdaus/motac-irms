@@ -16,7 +16,7 @@ return [
     |
     */
 
-    'stack' => 'livewire',
+    'stack' => 'livewire', //
 
     /*
      |--------------------------------------------------------------------------
@@ -44,7 +44,7 @@ return [
     |
     */
 
-    'guard' => 'sanctum',
+    'guard' => 'sanctum', //
 
     /*
     |--------------------------------------------------------------------------
@@ -59,8 +59,8 @@ return [
 
     'features' => [
         // Features::termsAndPrivacyPolicy(),
-        Features::profilePhotos(),
-        // Features::api(),
+        Features::profilePhotos(), // Enabled as User model has profile_photo_path
+        Features::api(), // REVISED: Uncommented if Jetstream's API features are desired for system APIs
         // Features::teams(['invitations' => true]),
         // Features::accountDeletion(),
     ],
@@ -76,6 +76,6 @@ return [
     |
     */
 
-    'profile_photo_disk' => 'public',
+    'profile_photo_disk' => 'public', //
 
 ];

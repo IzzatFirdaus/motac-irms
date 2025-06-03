@@ -1,65 +1,72 @@
 <?php
 
-// Custom Theme & Layout Configuration for MOTAC RMS
+// Custom Theme & Layout Configuration for MOTAC Integrated Resource Management System
 // -------------------------------------------------------------------------------------
-// ! IMPORTANT: Clear browser local storage after changes to see effects.
+// ! IMPORTANT: Clear browser local storage after changes if the theme customizer was used during development.
 // This file's structure is read by App\Helpers\Helpers::appClasses() using Config::get('custom.custom').
-// System Design Reference: 3.3 Helpers::appClasses() merges with config('custom.custom').
+// It allows for environment-variable-driven theme configuration with sensible MOTAC defaults.
+// Design Language Refs: Overall branding (1.1, 2.1, 7.1), Layout (implied by 6.2 Dashboards)
+// System Design Ref: 3.3 (AppServiceProvider/Helpers for global data), 6.1 (Branding and Layout)
 
 return [
-  'custom' => [ // This outer 'custom' key is what Config::get('custom.custom') refers to.
-    'myLayout' => env('THEME_LAYOUT', 'vertical'), // Options: 'vertical', 'horizontal'
-    'myTheme' => env('THEME_SKIN', 'theme-default'), // Options: 'theme-default', 'theme-bordered', 'theme-semi-dark'
-    'myStyle' => env('THEME_STYLE', 'light'), // Options: 'light', 'dark'
+  // The 'custom' key is used by Config::get('custom.custom') in Helpers.php
+  'custom' => [
+    // --- Core Theme Settings ---
+    'myLayout' => env('THEME_LAYOUT', 'vertical'), // Default: 'vertical'. Options: 'vertical', 'horizontal'. (Aligns with Design Doc 3.1 Vertical Side Navigation)
+    'myTheme' => env('THEME_SKIN', 'theme-motac'),  // Default: 'theme-motac'. Options could be 'theme-default', 'theme-bordered', 'theme-semi-dark'. Assumes 'theme-motac' will contain MOTAC specific styling.
+    'myStyle' => env('THEME_STYLE', 'light'),     // Default: 'light'. Options: 'light', 'dark'. (Design Doc 5.0 Dark Mode)
 
-    // RTL Support settings for the theme
-    // 'myRTLSupport' => true: Theme has distinct LTR/RTL CSS asset files (e.g., core.css vs. core-rtl.css)
-    // 'myRTLMode' => true:  Attempt to set default HTML dir to 'rtl' if no other language/session preference dictates it.
-    // System Design & "The Big Picture" imply dynamic RTL based on language.
-    'myRTLSupport' => env('THEME_RTL_ASSETS_SUPPORT', true), // Does the theme have separate RTL asset files?
-    'myRTLMode' => env('THEME_DEFAULT_RTL_MODE', false),    // Should the site default to RTL if no other preference?
+    // --- RTL Support ---
+    // 'myRTLSupport': true if theme has distinct LTR/RTL CSS (e.g., core.css vs. core-rtl.css).
+    // 'myRTLMode': true to default HTML dir to 'rtl'. MOTAC is primarily LTR (Bahasa Melayu).
+    'myRTLSupport' => env('THEME_RTL_ASSETS_SUPPORT', true), // Assumes theme supports separate RTL assets.
+    'myRTLMode' => env('THEME_DEFAULT_RTL_MODE', false),    // Default to LTR for MOTAC.
 
-    // Customizer UI Panel settings
-    'hasCustomizer' => env('THEME_HAS_CUSTOMIZER_JS', true),   // Load template-customizer.js or not
-    'displayCustomizer' => env('THEME_DISPLAY_CUSTOMIZER_UI', true), // Show the customizer UI panel or not
+    // --- Theme Customizer UI Panel (for development/admin, typically disabled for end-users) ---
+    'hasCustomizer' => env('THEME_HAS_CUSTOMIZER_JS', false),   // Load template-customizer.js? Default to false for production.
+    'displayCustomizer' => env('THEME_DISPLAY_CUSTOMIZER_UI', false), // Show the customizer UI panel? Default to false.
 
-    // Layout behavior flags
-    'menuFixed' => env('THEME_MENU_FIXED', true),
-    'menuCollapsed' => env('THEME_MENU_COLLAPSED', false), // Default to expanded menu
-    'navbarFixed' => env('THEME_NAVBAR_FIXED', true),
-    'navbarDetached' => env('THEME_NAVBAR_DETACHED', false), // If navbar should be detached or full-width style
-    'footerFixed' => env('THEME_FOOTER_FIXED', false),
+    // --- Layout Behavior Flags (Fixed vs. Static elements) ---
+    // Design Language: Modern Government Aesthetic often implies clear, stable navigation.
+    'menuFixed' => env('THEME_MENU_FIXED', true),             // Default: true (Fixed sidebar)
+    'menuCollapsed' => env('THEME_MENU_COLLAPSED', false),    // Default: false (Menu expanded by default)
+    'navbarFixed' => env('THEME_NAVBAR_FIXED', true),           // Default: true (Fixed top navbar)
+    'navbarDetached' => env('THEME_NAVBAR_DETACHED', false),   // Default: false (Full-width, integrated navbar typical for formal systems)
+    'footerFixed' => env('THEME_FOOTER_FIXED', false),          // Default: false (Static footer)
 
-    // Horizontal Menu specific (if 'myLayout' is 'horizontal')
+    // --- Horizontal Menu Specific (only if 'myLayout' is 'horizontal') ---
     'showDropdownOnHover' => env('THEME_HORIZONTAL_MENU_HOVER', true),
 
-    // Container settings (used by Helpers.php to set defaults for layouts)
-    'container' => env('THEME_CONTENT_CONTAINER', 'container-xxl'), // Options: 'container-fluid', 'container-xxl'
-    'containerNav' => env('THEME_NAVBAR_CONTAINER', 'container-xxl'), // Options: 'container-fluid', 'container-xxl'
+    // --- Content Container Settings ---
+    // 'container-fluid' for full-width, 'container-xxl' (or similar) for boxed.
+    // Design Language: "Clean, uncluttered interfaces" could support either, but fluid is often more modern.
+    'container' => env('THEME_CONTENT_CONTAINER', 'container-fluid'), // Default: 'container-fluid' for main content area
+    'containerNav' => env('THEME_NAVBAR_CONTAINER', 'container-fluid'), // Default: 'container-fluid' for navbar content
 
-    // For Helpers::appClasses() to pass to template-customizer.js
-    'contentNavbar' => env('THEME_CONTENT_NAVBAR', true), // If navbar is part of the main content area layout
-    'isMenu' => env('THEME_IS_MENU', true),
-    'isNavbar' => env('THEME_IS_NAVBAR', true),
-    'isFooter' => env('THEME_IS_FOOTER', true),
-    'isFlex' => env('THEME_IS_FLEX_LAYOUT', false), // For specific flexbox page layouts
+    // --- Flags for Conditional Rendering in Layouts (passed via Helpers::appClasses) ---
+    'contentNavbar' => env('THEME_CONTENT_NAVBAR', true), // Does the layout typically include a navbar above content?
+    'isMenu' => env('THEME_IS_MENU', true),             // Is a sidebar menu generally present?
+    'isNavbar' => env('THEME_IS_NAVBAR', true),          // Is a top navbar generally present?
+    'isFooter' => env('THEME_IS_FOOTER', true),          // Is a footer generally present?
+    'isFlex' => env('THEME_IS_FLEX_LAYOUT', false),      // For special page layouts requiring top-level flex container.
 
-    // Example for a theme primary color, if Helpers.php or JS needs it
-    'primaryColor' => env('THEME_PRIMARY_COLOR', '#696cff'), // Default theme primary color
+    // --- MOTAC Specific Branding Colors ---
+    // Design Language 2.1: Primary Color (MOTAC Blue)
+    'primaryColor' => env('THEME_PRIMARY_COLOR_MOTAC', '#0055A4'), // MOTAC Blue
 
-    // Controls to show/hide in the template customizer UI panel
-    // This list should match controls handled in template-customizer.js
+    // --- Controls to show/hide in the Template Customizer UI Panel ---
+    // (Relevant if 'displayCustomizer' is true, primarily for development)
     'customizerControls' => [
-      'rtl',          // Toggle RTL/LTR
       'style',        // Toggle Light/Dark mode
-      'themes',       // Select different color themes/skins
-      'layoutType',   // Menu type (static, fixed, offcanvas) - if applicable
-      // 'layoutMenuFlipped', // If horizontal menu flipping is an option
-      'showDropdownOnHover', // For horizontal menu
-      'layoutNavbarFixed',
-      'layoutFooterFixed',
-      'menuFixed',        // Added
-      'menuCollapsed',    // Added
+      // 'rtl',       // Toggle RTL/LTR (usually controlled by language selection in MOTAC)
+      // 'themes',    // Select different color themes/skins (MOTAC likely has one primary theme)
+      'layoutType',   // Menu type (static, fixed) - if applicable beyond 'menuFixed'
+      'menuFixed',
+      'menuCollapsed',
+      'layoutNavbarFixed', // Corresponds to navbarFixed
+      // 'layoutNavbarType', // If navbar has types like 'sticky', 'static', 'hidden'
+      'layoutFooterFixed', // Corresponds to footerFixed
+      // 'showDropdownOnHover', // For horizontal menu, if applicable
     ],
   ],
 ];

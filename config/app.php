@@ -11,7 +11,7 @@ return [
     |--------------------------------------------------------------------------
     | Design Language: Prominent MOTAC Branding
     */
-  'name' => env('APP_NAME', 'Sistem Pengurusan Sumber MOTAC'), // MOTAC specific name [cite: 27]
+  'name' => env('APP_NAME', 'Sistem Pengurusan Sumber MOTAC'), // MOTAC specific name
 
   /*
     |--------------------------------------------------------------------------
@@ -41,7 +41,7 @@ return [
     |--------------------------------------------------------------------------
     | System Design Reference: 3.3 AppServiceProvider sets 'Asia/Kuala_Lumpur'.
     */
-  'timezone' => env('APP_TIMEZONE', 'Asia/Kuala_Lumpur'), // MOTAC specific timezone [cite: 28]
+  'timezone' => env('APP_TIMEZONE', 'Asia/Kuala_Lumpur'), // MOTAC specific timezone
 
   /*
     |--------------------------------------------------------------------------
@@ -49,14 +49,14 @@ return [
     |--------------------------------------------------------------------------
     | Design Language: Bahasa Melayu as Primary Language
     */
-  'locale' => env('APP_LOCALE', 'ms'), // CORRECTED: Changed 'my' to 'ms' for Bahasa Melayu [cite: 29]
+  'locale' => env('APP_LOCALE', 'ms'), // CORRECTED: Changed 'my' to 'ms' for Bahasa Melayu
 
   /*
     |--------------------------------------------------------------------------
     | Application Fallback Locale
     |--------------------------------------------------------------------------
     */
-  'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'), // English as fallback [cite: 30]
+  'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'), // English as fallback
 
   /*
     |--------------------------------------------------------------------------
@@ -68,7 +68,7 @@ return [
     | System Design Reference: LanguageController.php, LocaleMiddleware.php
     */
   'available_locales' => [
-    'ms' => ['name' => 'Bahasa Melayu', 'script' => 'Latn', 'native' => 'Bahasa Melayu', 'regional' => 'ms_MY', 'direction' => 'ltr', 'display' => true], // CORRECTED: Changed key 'my' to 'ms' [cite: 31, 32]
+    'ms' => ['name' => 'Bahasa Melayu', 'script' => 'Latn', 'native' => 'Bahasa Melayu', 'regional' => 'ms_MY', 'direction' => 'ltr', 'display' => true], // CORRECTED: Changed key 'my' to 'ms'
     'en' => ['name' => 'English',       'script' => 'Latn', 'native' => 'English',       'regional' => 'en_US', 'direction' => 'ltr', 'display' => true],
     // 'ar' => ['name' => 'العربية',       'script' => 'Arab', 'native' => 'العربية',       'regional' => 'ar_AE', 'direction' => 'rtl', 'display' => true], // Example for Arabic
   ],
@@ -78,7 +78,7 @@ return [
     | Faker Locale
     |--------------------------------------------------------------------------
     */
-  'faker_locale' => env('APP_FAKER_LOCALE', 'ms_MY'), // For Malaysian context data [cite: 33]
+  'faker_locale' => env('APP_FAKER_LOCALE', 'ms_MY'), // For Malaysian context data
 
   /*
     |--------------------------------------------------------------------------
@@ -108,31 +108,28 @@ return [
     /*
      * Package Service Providers Below
      */
-    // Illuminate\Auth\AuthServiceProvider::class,
-    // Illuminate\Broadcasting\BroadcastServiceProvider::class,
-    // ... other Illuminate providers ...
-
-    // Spatie\Permission\PermissionServiceProvider::class,
+    // Example: Spatie\Permission\PermissionServiceProvider::class,
 
     // Add Livewire Service Provider here
-    Livewire\LivewireServiceProvider::class, // UNCOMMENTED/ADDED THIS LINE
+    Livewire\LivewireServiceProvider::class, // REVISED: Uncommented as Livewire is core
 
     /*
      * Application Service Providers...
      */
-    App\Providers\AppServiceProvider::class,
-    App\Providers\AuthServiceProvider::class,
-    // App\Providers\BroadcastServiceProvider::class,
-    App\Providers\EventServiceProvider::class,
-    App\Providers\RouteServiceProvider::class,
-    // App\Providers\QueryLogServiceProvider::class,
-    // App\Providers\TelescopeServiceProvider::class,
-    // Add any other custom application service providers that were commented out
-    // based on your project's needs. For example:
-    // App\Providers\FortifyServiceProvider::class,
-    // App\Providers\JetstreamServiceProvider::class,
-    App\Providers\MenuServiceProvider::class,
+    App\Providers\AppServiceProvider::class, // Core application services, view composers
+    App\Providers\AuthServiceProvider::class, // Policies and gates
+    App\Providers\BroadcastServiceProvider::class, // Uncommented as WebSockets are confirmed necessary
+    App\Providers\EventServiceProvider::class, // Model observers like BlameableObserver
+    App\Providers\RouteServiceProvider::class, // Route configuration
+    App\Providers\MenuServiceProvider::class, // Menu data loading
 
+    // Optional providers from design, should be uncommented if used:
+    App\Providers\FortifyServiceProvider::class, // Confirmed usage in Rev 3.5
+    App\Providers\JetstreamServiceProvider::class, // Confirmed usage in Rev 3.5
+
+    // Development/Debugging Providers (usually conditional based on environment)
+    App\Providers\QueryLogServiceProvider::class, // Listed in Rev 3.5 Shared Components
+    // App\Providers\TelescopeServiceProvider::class, // If using Laravel Telescope
   ])->toArray(),
 
   /*
@@ -142,7 +139,7 @@ return [
     | System Design Reference: 9.7 Shared Components (Helper alias).
     */
   'aliases' => Facade::defaultAliases()->merge([
-    'Helper' => App\Helpers\Helpers::class,
+    'Helper' => App\Helpers\Helpers::class, //
     // 'Excel' => Maatwebsite\Excel\Facades\Excel::class, // Example if using Laravel Excel
   ])->toArray(),
 

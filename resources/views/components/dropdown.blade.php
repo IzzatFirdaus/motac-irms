@@ -1,7 +1,8 @@
-@props(['id' => 'navbarDropdown', 'align' => 'end']) {{-- Added align prop for Bootstrap 5 (start, end) --}}
+{{-- resources/views/components/dropdown.blade.php --}}
+@props(['id' => 'navbarDropdown', 'align' => 'end', 'triggerClass' => 'nav-link dropdown-toggle']) {{-- Added triggerClass --}}
 
 <li class="nav-item dropdown">
-  <a id="{{ $id }}" {!! $attributes->merge(['class' => 'nav-link dropdown-toggle']) !!} href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+  <a id="{{ $id }}" {!! $attributes->merge(['class' => $triggerClass]) !!} href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     {{ $trigger }}
   </a>
 

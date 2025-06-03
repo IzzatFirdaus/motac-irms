@@ -15,8 +15,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str; // For UUID generation
 
 /**
- * 
- *
  * @property string $id
  * @property string $type
  * @property string $notifiable_type
@@ -33,6 +31,7 @@ use Illuminate\Support\Str; // For UUID generation
  * @property-read \App\Models\User|null $updater
  * @property-read \App\Models\User|null $deleter
  * @property-read \Illuminate\Database\Eloquent\Model $notifiable
+ *
  * @method static Builder<static>|Notification byNotifiable(\Illuminate\Database\Eloquent\Model $notifiableModel)
  * @method static Builder<static>|Notification byType(array|string $type)
  * @method static \Database\Factories\NotificationFactory factory($count = null, $state = [])
@@ -56,9 +55,10 @@ use Illuminate\Support\Str; // For UUID generation
  * @method static Builder<static>|Notification whereUpdatedBy($value)
  * @method static Builder<static>|Notification withTrashed()
  * @method static Builder<static>|Notification withoutTrashed()
+ *
  * @mixin \Eloquent
  */
-final class Notification extends Model // Consider extending Illuminate\Notifications\DatabaseNotification
+final class Notification extends Model
 {
     use HasFactory;
     use SoftDeletes;
@@ -70,80 +70,64 @@ final class Notification extends Model // Consider extending Illuminate\Notifica
     protected $table = 'notifications';
 
     protected $fillable = [
-        'id', // UUIDs should be fillable if you set them manually or via factory
+        'id',
         'type', 'notifiable_type', 'notifiable_id',
         'data', 'read_at',
-        'created_by', 'updated_by', 'deleted_by', // Audit fields
+        'created_by', 'updated_by', 'deleted_by',
     ];
 
     protected $casts = [
         'data' => 'array',
         'read_at' => 'datetime',
-        // Timestamps are already handled by Eloquent as Carbon instances.
-        // 'created_at' => 'datetime', // Redundant if using standard timestamps
-        // 'updated_at' => 'datetime', // Redundant if using standard timestamps
-        // 'deleted_at' => 'datetime', // Handled by SoftDeletes trait
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'deleted_at' => 'datetime',
     ];
 
     protected static function boot(): void
     {
         parent::boot();
 
-        // Generate UUID for new records if ID is not already set.
         static::creating(function (self $model): void {
             if (empty($model->{$model->getKeyName()})) {
                 $model->{$model->getKeyName()} = Str::uuid()->toString();
             }
-            // Set created_by and updated_by if an authenticated user exists.
             if (Auth::check()) {
                 /** @var User $user */
                 $user = Auth::user();
                 if (is_null($model->created_by)) {
                     $model->created_by = $user->id;
                 }
-                if (is_null($model->updated_by)) { // Also set updated_by on creation
+                if (is_null($model->updated_by)) {
                     $model->updated_by = $user->id;
                 }
             }
         });
 
-        // Set updated_by if an authenticated user exists when updating.
         static::updating(function (self $model): void {
-            if (Auth::check() && !$model->isDirty('updated_by')) { // Check if updated_by is not being manually set
+            if (Auth::check() && !$model->isDirty('updated_by')) {
                 /** @var User $user */
                 $user = Auth::user();
                 $model->updated_by = $user->id;
             }
         });
 
-        // Set deleted_by if an authenticated user exists when soft deleting.
-        // This relies on the model using the SoftDeletes trait.
         if (in_array(SoftDeletes::class, class_uses_recursive(self::class))) {
             static::deleting(function (self $model): void {
-                // Ensure deleted_by is only set if it's not already set (e.g., during a force delete or previous attempt)
-                // and an authenticated user is present.
                 if (Auth::check() && property_exists($model, 'deleted_by') && is_null($model->deleted_by)) {
                     /** @var User $user */
                     $user = Auth::user();
                     $model->deleted_by = $user->id;
-                    // IMPORTANT: The SoftDeletes trait handles saving `deleted_at`.
-                    // Calling $model->save() or $model->saveQuietly() here can interfere
-                    // with the SoftDeletes process or cause double database queries.
-                    // Just setting the property is usually enough as the main delete operation will persist it.
-                    // However, if the SoftDeletes trait's `performDeleteOnModel` doesn't save other dirty attributes,
-                    // then you might need $model->save() BEFORE the actual delete happens, or this approach is taken.
-                    // For simplicity, let's assume we set it, and the regular save operation of SoftDeletes picks it up.
-                    // If issues arise (deleted_by not saving), one might need to hook into `saving` on soft delete.
-                    // For now, this direct set should be picked up by the update query of SoftDeletes.
+                    // No need to call $model->saveQuietly(); here.
+                    // The SoftDeletes trait will handle saving `deleted_at` and other dirty attributes
+                    // (including deleted_by if set here) when the actual delete operation proceeds.
                 }
             });
 
-            // Clear deleted_by when restoring.
             static::restoring(function (self $model): void {
                 if (property_exists($model, 'deleted_by')) {
                     $model->deleted_by = null;
                 }
-                // Optionally update 'updated_by' on restore as well
                 if (Auth::check() && !$model->isDirty('updated_by')) {
                     /** @var User $user */
                     $user = Auth::user();

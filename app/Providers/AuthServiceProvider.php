@@ -2,51 +2,55 @@
 
 namespace App\Providers;
 
+// Core Models with Policies
 use App\Models\Approval;
-use App\Models\Department;
-use App\Models\EmailApplication; // For Gate::before type hinting
-// Models for Policies - System Design Section 4 & 8.1
+use App\Models\EmailApplication;
 use App\Models\Equipment;
 use App\Models\Grade;
 use App\Models\LoanApplication;
 use App\Models\LoanTransaction;
+use App\Models\User;
+// Organizational Models that might have policies
+use App\Models\Department;
 use App\Models\Position;
+// Supporting Models (uncomment if policies are created)
 // use App\Models\EquipmentCategory;
 // use App\Models\SubCategory;
 // use App\Models\Location;
-use App\Models\User;
 // use App\Models\LoanApplicationItem;
-use App\Policies\ApprovalPolicy;
 // use App\Models\LoanTransactionItem;
-use App\Policies\DepartmentPolicy;
 // use App\Models\Setting;
 // use App\Models\Import;
+// use App\Models\Notification as CustomNotification;
 
-// Policies - System Design Section 3.1, 8.1, 9
+// Corresponding Policies
+use App\Policies\ApprovalPolicy;
 use App\Policies\EmailApplicationPolicy;
 use App\Policies\EquipmentPolicy;
 use App\Policies\GradePolicy;
 use App\Policies\LoanApplicationPolicy;
 use App\Policies\LoanTransactionPolicy;
-use App\Policies\PositionPolicy;
+use App\Policies\UserPolicy;
+use App\Policies\DepartmentPolicy; // Uncomment if DepartmentPolicy is created
+use App\Policies\PositionPolicy;   // Uncomment if PositionPolicy is created
 // use App\Policies\EquipmentCategoryPolicy;
 // use App\Policies\SubCategoryPolicy;
 // use App\Policies\LocationPolicy;
-use App\Policies\UserPolicy;
 // use App\Policies\LoanApplicationItemPolicy;
-use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 // use App\Policies\LoanTransactionItemPolicy;
-use Illuminate\Support\Facades\Gate;
-
 // use App\Policies\SettingPolicy;
 // use App\Policies\ImportPolicy;
+// use App\Policies\NotificationPolicy;
+
+use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 
 class AuthServiceProvider extends ServiceProvider
 {
     /**
      * The model to policy mappings for the application.
      * System Design Reference: 3.3 AuthServiceProvider registers all model policies.
-     * This array should map Eloquent models to their corresponding policy classes.
+     * This array maps Eloquent models to their corresponding policy classes.
      *
      * @var array<class-string, class-string>
      */
@@ -55,26 +59,27 @@ class AuthServiceProvider extends ServiceProvider
         Approval::class => ApprovalPolicy::class,
         EmailApplication::class => EmailApplicationPolicy::class,
         Equipment::class => EquipmentPolicy::class,
-        Grade::class => GradePolicy::class,           // For managing grades themselves
+        Grade::class => GradePolicy::class,
         LoanApplication::class => LoanApplicationPolicy::class,
         LoanTransaction::class => LoanTransactionPolicy::class,
-        User::class => UserPolicy::class,             // For managing user profiles, CRUD operations on users
+        User::class => UserPolicy::class,
 
-        // Organizational Structure Models (Uncomment and create policies if specific rules are needed beyond basic role checks)
-        // Department::class => DepartmentPolicy::class, // System Design 9.1
-        // Position::class => PositionPolicy::class,     // System Design 9.1
+        // Organizational Structure Models
+        // Uncomment and create policy if specific authorization rules are needed beyond general roles.
+        // Department::class => DepartmentPolicy::class, // System Design [cite: 490] implies policy could exist
+        // Position::class => PositionPolicy::class,     // System Design [cite: 490] implies policy could exist
 
-        // Detail Models (Uncomment if they need specific policies beyond their parent's policy or general role checks)
-        // EquipmentCategory::class => EquipmentCategoryPolicy::class,
-        // SubCategory::class => SubCategoryPolicy::class,
-        // Location::class => LocationPolicy::class,
+        // Supporting Detail Models (often authorization is derived from parent)
         // LoanApplicationItem::class => LoanApplicationItemPolicy::class,
         // LoanTransactionItem::class => LoanTransactionItemPolicy::class,
+        // EquipmentCategory::class => EquipmentCategoryPolicy::class,
+        // SubCategory::class => SubCategoryPolicy::class, // Assuming SubCategory is an alias for App\Models\SubCategory
+        // Location::class => LocationPolicy::class,       // Assuming Location is an alias for App\Models\Location
 
-        // Other Models if they require specific authorization logic
+        // System Utility Models
         // Setting::class => SettingPolicy::class,
         // Import::class => ImportPolicy::class,
-        // \App\Models\Notification::class => \App\Policies\NotificationPolicy::class, // Example
+        // CustomNotification::class => NotificationPolicy::class, // If App\Models\Notification is aliased to CustomNotification
     ];
 
     /**
@@ -86,20 +91,20 @@ class AuthServiceProvider extends ServiceProvider
 
         // Implicitly grant users with the 'Admin' role all permissions.
         // This must match the exact role name used in your Spatie setup (e.g., seeded roles).
-        // System Design Reference: 3.3, 8.1 - Admin override.
+        // System Design Reference: [cite: 56, 193, 340, 477] (Admin override).
         Gate::before(function (User $user, string $ability) {
-            // Ensure 'Admin' is the standardized role name as per System Design 8.1
             // The hasRole check is provided by the Spatie\Permission\Traits\HasRoles trait on the User model.
-            if ($user->hasRole('Admin')) { // Use the exact role name
-                return true; // Admin can do anything
+            // Ensure 'Admin' is the standardized role name as per System Design[cite: 8, 292, 576].
+            if ($user->hasRole('Admin')) {
+                return true; // Admin can perform any action
             }
-            return null; // Important: return null to allow other policies or gates to run
+            return null; // Important: return null to allow other policies or gates to define abilities
         });
 
         // Define any other global gates here if needed.
-        // Example:
+        // Example Gate for viewing system logs:
         // Gate::define('view-system-logs', function (User $user) {
-        //     return $user->hasPermissionTo('view system logs'); // Requires Spatie permission
+        //     return $user->hasPermissionTo('view_system_logs'); // Requires Spatie permission
         // });
     }
 }

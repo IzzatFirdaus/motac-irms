@@ -6,12 +6,14 @@ use App\Models\Department;
 use App\Models\LoanApplication;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title; // Import the Title attribute
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 
 #[Layout('layouts.app')]
+#[Title('Laporan Permohonan Pinjaman Peralatan ICT')] // Set the title using the attribute (System Design Rev 3.5 refers to reports)
 class LoanApplicationsReport extends Component
 {
     use AuthorizesRequests;
@@ -20,8 +22,8 @@ class LoanApplicationsReport extends Component
     // Filter properties
     public ?string $filterStatus = '';
     public ?int $filterDepartmentId = null; // Filter by applicant's department
-    public ?string $filterDateFrom = null; // Based on loan_start_date
-    public ?string $filterDateTo = null;   // Based on loan_start_date range end
+    public ?string $filterDateFrom = null; // Based on application creation date
+    public ?string $filterDateTo = null;   // Based on application creation date range end
     public string $searchTerm = ''; // Search by applicant name, purpose, ID
 
     // Sorting properties
@@ -33,45 +35,46 @@ class LoanApplicationsReport extends Component
 
     public function mount()
     {
-        // $this->authorize('viewAny', LoanApplication::class); // Example policy
-        Log::info("Livewire\LoanApplicationsReport: Generating Loan Applications Report page.", [
-            'admin_user_id' => Auth::id(),
+        // Example: $this->authorize('viewAnyReport', LoanApplication::class); // Policy for viewing reports
+        Log::info("Livewire\\LoanApplicationsReport: Component mounted by Admin User ID: " . (Auth::id() ?? 'Guest'), [
             'ip_address' => request()->ip(),
         ]);
     }
 
+    // Computed property for fetching report data
     public function getReportDataProperty()
     {
-        // Revision 3 LoanApplication fields: user_id, purpose, loan_start_date, loan_end_date, status
-        // User fields: name, department_id
+        // Eager loading based on what's displayed in the report blade and System Design fields
         $query = LoanApplication::with([
-            'user:id,name,department_id', 'user.department:id,name',
-            'applicationItems', // For item count or types if needed
-            'responsibleOfficer:id,name',
-            'supportingOfficer:id,name'
+            'user:id,name,department_id',      // System Design: User model fields
+            'user.department:id,name',         // System Design: Department model fields
+            'applicationItems',                // System Design: LoanApplicationItem relation
+            // 'responsibleOfficer:id,name',   // Load if displayed in report
+            // 'supportingOfficer:id,name'     // Load if displayed in report
         ]);
 
         if (!empty($this->searchTerm)) {
             $search = '%' . strtolower($this->searchTerm) . '%';
             $query->where(function ($q) use ($search) {
-                $q->whereRaw('LOWER(id) LIKE ?', [$search]) // Assuming ID is numeric, direct like might be tricky. Cast if needed.
-                  ->orWhereRaw('LOWER(purpose) LIKE ?', [$search])
+                // Searching ID with LIKE implies ID might be treated as a string or for partial matches.
+                // If ID is purely numeric and exact match is needed, a direct where clause is better.
+                $q->where('id', 'like', $search)
+                  ->orWhereRaw('LOWER(purpose) LIKE ?', [$search]) // Purpose search from System Design
                   ->orWhereHas('user', function ($userQuery) use ($search) {
-                      $userQuery->whereRaw('LOWER(name) LIKE ?', [$search]);
+                      $userQuery->whereRaw('LOWER(name) LIKE ?', [$search]); // User name search
                   });
             });
         }
         if (!empty($this->filterStatus)) {
-            $query->where('status', $this->filterStatus);
+            $query->where('status', $this->filterStatus); // Status field from System Design
         }
         if (!empty($this->filterDepartmentId)) {
-            $query->whereHas('user', function ($userQuery) {
-                $userQuery->where('department_id', $this->filterDepartmentId);
+            $query->whereHas('user.department', function ($deptQuery) { // Department relation on User
+                $deptQuery->where('id', $this->filterDepartmentId);
             });
         }
         if (!empty($this->filterDateFrom)) {
-            // Filter by application's creation date or loan_start_date as appropriate
-            $query->whereDate('created_at', '>=', $this->filterDateFrom);
+            $query->whereDate('created_at', '>=', $this->filterDateFrom); // Filtering by application creation date
         }
         if (!empty($this->filterDateTo)) {
             $query->whereDate('created_at', '<=', $this->filterDateTo);
@@ -80,33 +83,42 @@ class LoanApplicationsReport extends Component
         $query->orderBy($this->sortBy, $this->sortDirection);
 
         $reportData = $query->paginate($this->perPage);
-        Log::info("Livewire\LoanApplicationsReport: Fetched {$reportData->total()} loan applications.", ['admin_user_id' => Auth::id()]);
+        Log::info("Livewire\\LoanApplicationsReport: Fetched {$reportData->total()} loan applications for report.", [
+            'admin_user_id' => Auth::id(),
+            'filters' => $this->getPublicFilters(),
+        ]);
         return $reportData;
     }
 
-    // Options for filters
+    // Options for filter dropdowns
     public function getStatusOptionsProperty(): array
     {
-        // Ensure LoanApplication model has this static property/method as per "Revision 3" (4.3)
-        return LoanApplication::$STATUS_OPTIONS ?? (defined(LoanApplication::class . '::STATUS_DRAFT') ? LoanApplication::getStatusOptions() : []);
+        // Assuming LoanApplication model has $STATUS_OPTIONS static array as per System Design & provided model
+        return LoanApplication::$STATUS_OPTIONS ?? []; //
     }
+
     public function getDepartmentOptionsProperty(): \Illuminate\Support\Collection
     {
+        // Assuming Department model has is_active field as per System Design
         return Department::where('is_active', true)->orderBy('name')->pluck('name', 'id');
     }
 
+    // Method to apply filters (called by a button or on property update)
     public function applyFilters(): void
     {
-        $this->resetPage();
+        $this->resetPage(); // Reset pagination when filters are applied
     }
 
+    // Livewire lifecycle hook for when a public property is updated
     public function updating($property): void
     {
-        if (in_array($property, ['filterStatus', 'filterDepartmentId', 'filterDateFrom', 'filterDateTo', 'searchTerm'])) {
+        // Reset pagination if any filter property changes
+        if (in_array($property, ['filterStatus', 'filterDepartmentId', 'filterDateFrom', 'filterDateTo', 'searchTerm', 'perPage'])) {
             $this->resetPage();
         }
     }
 
+    // Method for setting sort column and direction
     public function setSortBy(string $column): void
     {
         if ($this->sortBy === $column) {
@@ -118,12 +130,27 @@ class LoanApplicationsReport extends Component
         $this->resetPage();
     }
 
+    // Method to reset all filters
     public function resetFilters(): void
     {
-        $this->reset(['filterStatus', 'filterDepartmentId', 'filterDateFrom', 'filterDateTo', 'searchTerm', 'sortBy', 'sortDirection']);
+        $this->reset(['filterStatus', 'filterDepartmentId', 'filterDateFrom', 'filterDateTo', 'searchTerm']);
         $this->sortBy = 'created_at'; // Default sort
         $this->sortDirection = 'desc'; // Default direction
         $this->resetPage();
+    }
+
+    private function getPublicFilters(): array
+    {
+        return [
+            'searchTerm' => $this->searchTerm,
+            'filterStatus' => $this->filterStatus,
+            'filterDepartmentId' => $this->filterDepartmentId,
+            'filterDateFrom' => $this->filterDateFrom,
+            'filterDateTo' => $this->filterDateTo,
+            'sortBy' => $this->sortBy,
+            'sortDirection' => $this->sortDirection,
+            'perPage' => $this->perPage,
+        ];
     }
 
     public function render()
@@ -132,6 +159,6 @@ class LoanApplicationsReport extends Component
             'reportData' => $this->reportDataProperty,
             'statusOptions' => $this->statusOptionsProperty,
             'departmentOptions' => $this->departmentOptionsProperty,
-        ])->title(__('Laporan Permohonan Pinjaman Peralatan'));
+        ]);
     }
 }

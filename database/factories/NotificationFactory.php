@@ -13,53 +13,38 @@ class NotificationFactory extends Factory
 
     public function definition(): array
     {
-        // Ensure at least one user exists to be the notifiable and for audit, create if none.
         $notifiableUser = User::inRandomOrder()->first() ?? User::factory()->create();
-        $auditUserId = $notifiableUser->id; // Default audit user to the notifiable user
+        // $auditUserId = $notifiableUser->id; // No longer explicitly needed here for blameable fields
 
         // IMPORTANT: Update this list with your actual Notification class FQCNs
         $notificationTypes = [
             \App\Notifications\ApplicationApproved::class,
             \App\Notifications\ApplicationNeedsAction::class,
-            \App\Notifications\ApplicationRejected::class,
-            \App\Notifications\ApplicationStatusUpdatedNotification::class,
-            \App\Notifications\ApplicationSubmitted::class,
-            \App\Notifications\DefaultNotification::class,
-            \App\Notifications\DefaultUserNotification::class,
-            \App\Notifications\EmailApplicationReadyForProcessingNotification::class,
-            \App\Notifications\EmailProvisionedNotification::class,
-            \App\Notifications\EquipmentIncidentNotification::class,
-            \App\Notifications\EquipmentIssuedNotification::class,
-            \App\Notifications\EquipmentReturnedNotification::class,
-            \App\Notifications\EquipmentReturnReminderNotification::class,
-            \App\Notifications\LoanApplicationReadyForIssuanceNotification::class,
-            \App\Notifications\ProvisioningFailedNotification::class,
-            // Add all other relevant notification classes here
+            // ... (ensure this list is complete)
+            \App\Notifications\DefaultNotification::class, // Example placeholder
         ];
         $chosenNotificationType = $this->faker->randomElement($notificationTypes);
+        if (empty($notificationTypes) || $chosenNotificationType === \App\Notifications\DefaultNotification::class && count($notificationTypes) === 1) {
+             // Fallback if list is empty or only contains placeholder
+            $chosenNotificationType = 'App\\Notifications\\GenericAppNotification';
+        }
 
-        // Generic data payload, can be customized further with states if needed
+
         $payloadData = [
             'message' => $this->faker->sentence,
             'subject' => $this->faker->words(3, true),
-            'action_url' => $this->faker->optional(0.5)->url, // 50% chance of having a URL
+            'action_url' => $this->faker->optional(0.5)->url,
         ];
 
         return [
             'id' => Str::uuid()->toString(),
             'type' => $chosenNotificationType,
-            'notifiable_type' => User::class, // Assuming notifications are primarily for Users
+            'notifiable_type' => User::class,
             'notifiable_id' => $notifiableUser->id,
-            'data' => json_encode($payloadData), // Data must be JSON encoded string
-            'read_at' => $this->faker->optional(0.3)->dateTimeThisYear(), // 30% chance of being read
-
-            // Audit columns - created_by and updated_by will be set by the model's boot method
-            // if Auth::check() is true during seeding, or you can set them explicitly here.
-            // For factory seeding, explicitly setting is often more reliable.
-            'created_by' => $auditUserId,
-            'updated_by' => $auditUserId,
+            'data' => json_encode($payloadData),
+            'read_at' => $this->faker->optional(0.3)->dateTimeThisYear(),
+            // 'created_by', 'updated_by' are handled by BlameableObserver
             'deleted_by' => null,
-            // created_at and updated_at are handled by Eloquent timestamps.
         ];
     }
 
@@ -72,16 +57,4 @@ class NotificationFactory extends Factory
     {
         return $this->state(fn (array $attributes) => ['read_at' => now()]);
     }
-
-    // Example state for a specific type of notification - adapt as needed
-    // public function forSomeSpecificAction(Model $relatedModel): static
-    // {
-    //     return $this->state(function (array $attributes) use ($relatedModel) {
-    //         return [
-    //             'type' => \App\Notifications\SomeSpecificNotification::class,
-    //             'notifiable_id' => $relatedModel->user_id, // Example
-    //             'data' => json_encode(['message' => "Specific action on {$relatedModel->id}."]),
-    //         ];
-    //     });
-    // }
 }

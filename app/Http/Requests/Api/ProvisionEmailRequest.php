@@ -4,37 +4,43 @@ namespace App\Http\Requests\Api;
 
 use App\Models\EmailApplication;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule; // For status constant
+use Illuminate\Validation\Rule;
 
 class ProvisionEmailRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        // Primary auth via Sanctum on route. Additional checks if token needs specific abilities.
-        return true;
-    }
+  public function authorize(): bool
+  {
+    // Assuming Sanctum route middleware handles primary auth.
+    // Add $this->user()->tokenCan('email:provision') if specific ability is needed.
+    return true;
+  }
 
-    public function rules(): array
-    {
-        return [
-            'application_id' => [
-                'required',
-                'integer',
-                Rule::exists('email_applications', 'id')
-                // ->where('status', EmailApplication::STATUS_APPROVED) // Could enforce status here, but controller gives better response
-            ],
-            'final_assigned_email' => 'required|email|max:255',
-            'user_id_assigned' => 'nullable|string|max:255',
-        ];
-    }
+  public function rules(): array
+  {
+    return [
+      'application_id' => [
+        'required',
+        'integer',
+        Rule::exists('email_applications', 'id')
+            // ->where('status', EmailApplication::STATUS_APPROVED) // Controller handles for better response
+      ],
+      'final_assigned_email' => ['required', 'email:rfc,dns', 'max:255'],
+      'user_id_assigned' => ['nullable', 'string', 'max:255', 'alpha_dash:ascii'],
+    ];
+  }
 
-    public function messages(): array
-    {
-        return [
-            'application_id.required' => __('The email application ID is required.'),
-            'application_id.exists' => __('The selected email application ID is invalid or does not exist.'),
-            'final_assigned_email.required' => __('The final assigned email address is required.'),
-            'final_assigned_email.email' => __('The final assigned email must be a valid email address.'),
-        ];
-    }
+  public function messages(): array
+  {
+    return [
+      'application_id.required' => __('ID Permohonan E-mel diperlukan.'),
+      'application_id.integer' => __('ID Permohonan E-mel mestilah nombor bulat.'),
+      'application_id.exists' => __('ID Permohonan E-mel yang dipilih tidak sah atau tidak wujud.'),
+      'final_assigned_email.required' => __('Alamat e-mel akhir yang akan diberikan adalah mandatori.'),
+      'final_assigned_email.email' => __('Alamat e-mel akhir mestilah alamat e-mel yang sah.'),
+      'final_assigned_email.max' => __('Alamat e-mel akhir tidak boleh melebihi :max aksara.'),
+      'user_id_assigned.string' => __('ID Pengguna yang diberikan mestilah dalam format teks.'),
+      'user_id_assigned.max' => __('ID Pengguna yang diberikan tidak boleh melebihi :max aksara.'),
+      'user_id_assigned.alpha_dash' => __('ID Pengguna hanya boleh mengandungi aksara alpha-numerik, sengkang, dan garis bawah.'),
+    ];
+  }
 }

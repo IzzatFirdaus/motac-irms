@@ -11,31 +11,16 @@
                 <h1 class="h2 fw-bold text-dark mb-0">
                     {{ __('Kemaskini Peralatan') }} <span class="text-primary">#{{ $equipment->tag_id ?? $equipment->id }}</span>
                 </h1>
-                <a href="{{ route('admin.equipment.show', $equipment) }}" class="btn btn-sm btn-secondary d-inline-flex align-items-center">
+                {{-- Corrected route name --}}
+                <a href="{{ route('resource-management.equipment-admin.show', $equipment) }}" class="btn btn-sm btn-secondary d-inline-flex align-items-center">
                     <i class="bi bi-eye-fill me-1"></i> {{ __('Lihat Butiran') }}
                 </a>
             </div>
 
+            @include('_partials._alerts.alert-general') {{-- Assuming general alert partial --}}
 
-            @if ($errors->any())
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <h5 class="alert-heading fw-bold">{{ __('Sila perbetulkan ralat di bawah:') }}</h5>
-                    <ul class="mb-0 ps-3">
-                        @foreach ($errors->all() as $error)
-                            <li><small>{{ $error }}</small></li>
-                        @endforeach
-                    </ul>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            @endif
-            @if (session('success'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            @endif
-
-            <form action="{{ route('admin.equipment.update', $equipment) }}" method="POST" class="needs-validation" novalidate>
+            {{-- Corrected route name --}}
+            <form action="{{ route('resource-management.equipment-admin.update', $equipment) }}" method="POST" class="needs-validation" novalidate>
                 @csrf
                 @method('PUT')
                 <div class="card shadow-sm">
@@ -44,7 +29,6 @@
                     </div>
                     <div class="card-body p-3 p-md-4">
                         <div class="row g-3">
-                            {{-- Asset Tag ID Field --}}
                             <div class="col-md-6">
                                 <label for="tag_id" class="form-label fw-medium">{{ __('No. Tag Aset') }} <span class="text-danger">*</span></label>
                                 <input type="text" name="tag_id" id="tag_id" value="{{ old('tag_id', $equipment->tag_id) }}" required
@@ -52,11 +36,9 @@
                                 @error('tag_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
 
-                            {{-- Asset Type Dropdown --}}
                             <div class="col-md-6">
                                 <label for="asset_type" class="form-label fw-medium">{{ __('Jenis Aset') }} <span class="text-danger">*</span></label>
-                                <select name="asset_type" id="asset_type" required
-                                        class="form-select form-select-sm @error('asset_type') is-invalid @enderror">
+                                <select name="asset_type" id="asset_type" required class="form-select form-select-sm @error('asset_type') is-invalid @enderror">
                                     <option value="">-- {{ __('Pilih Jenis') }} --</option>
                                     @foreach ($equipmentTypes as $typeValue => $typeLabel)
                                         <option value="{{ $typeValue }}" {{ old('asset_type', $equipment->asset_type) == $typeValue ? 'selected' : '' }}>
@@ -111,8 +93,7 @@
 
                             <div class="col-md-6">
                                 <label for="status" class="form-label fw-medium">{{ __('Status Operasi') }} <span class="text-danger">*</span></label>
-                                <select name="status" id="status" required
-                                        class="form-select form-select-sm @error('status') is-invalid @enderror">
+                                <select name="status" id="status" required class="form-select form-select-sm @error('status') is-invalid @enderror">
                                     <option value="">-- {{ __('Pilih Status') }} --</option>
                                      @foreach ($statusOptions as $statusValue => $statusLabel)
                                         <option value="{{ $statusValue }}" {{ old('status', $equipment->status) == $statusValue ? 'selected' : '' }}>
@@ -125,8 +106,7 @@
 
                             <div class="col-md-6">
                                 <label for="condition_status" class="form-label fw-medium">{{ __('Status Kondisi Fizikal') }} <span class="text-danger">*</span></label>
-                                <select name="condition_status" id="condition_status" required
-                                        class="form-select form-select-sm @error('condition_status') is-invalid @enderror">
+                                <select name="condition_status" id="condition_status" required class="form-select form-select-sm @error('condition_status') is-invalid @enderror">
                                     <option value="">-- {{ __('Pilih Kondisi') }} --</option>
                                      @foreach ($conditionStatusOptions as $statusValue => $statusLabel)
                                         <option value="{{ $statusValue }}" {{ old('condition_status', $equipment->condition_status) == $statusValue ? 'selected' : '' }}>
@@ -144,7 +124,7 @@
                                 @error('current_location') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
 
-                            <div class="col-md-6">
+                            <div class="col-md-6"> {{-- Controller passes $departments for this view --}}
                                 <label for="department_id" class="form-label fw-medium">{{ __('Jabatan Pemilik (Jika ada)') }}</label>
                                 <select name="department_id" id="department_id" class="form-select form-select-sm @error('department_id') is-invalid @enderror">
                                     <option value="">-- {{ __('Pilih Jabatan') }} --</option>
@@ -159,13 +139,13 @@
                                 @error('department_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
 
-                            <div class="col-md-6">
+                            <div class="col-md-6"> {{-- Assuming $centers might be passed or this field is optional --}}
                                 <label for="center_id" class="form-label fw-medium">{{ __('Pusat (Jika berkaitan)') }}</label>
                                 <select name="center_id" id="center_id" class="form-select form-select-sm @error('center_id') is-invalid @enderror">
                                     <option value="">-- {{ __('Pilih Pusat') }} --</option>
-                                    @isset($centers)
+                                    @isset($centers) {{-- Ensure $centers is passed from controller if used --}}
                                         @foreach ($centers as $center)
-                                            <option value="{{ $center->id }}" {{ old('center_id', $equipment->center_id) == $center->id ? 'selected' : '' }}>
+                                            <option value="{{ $center->id }}" {{ old('center_id', $equipment->center_id ?? null) == $center->id ? 'selected' : '' }}>
                                                 {{ $center->name }}
                                             </option>
                                         @endforeach
@@ -183,7 +163,8 @@
                         </div>
                     </div>
                     <div class="card-footer text-end bg-light py-3 border-top">
-                        <a href="{{ route('admin.equipment.show', $equipment) }}" class="btn btn-outline-secondary me-2">
+                        {{-- Corrected route name --}}
+                        <a href="{{ route('resource-management.equipment-admin.show', $equipment) }}" class="btn btn-outline-secondary me-2">
                             <i class="bi bi-x-lg me-1"></i> {{ __('Batal') }}
                         </a>
                         <button type="submit" class="btn btn-primary d-inline-flex align-items-center">

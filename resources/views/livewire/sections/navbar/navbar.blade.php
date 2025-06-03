@@ -1,179 +1,238 @@
 {{-- resources/views/livewire/sections/navbar/navbar.blade.php --}}
+{{--
+  Top Navigation Bar for MOTAC Integrated Resource Management System (Livewire Component View).
+  Design Language References:
+  - 1.1 Professionalism: MOTAC branding.
+  - 1.2 User-Centricity: Bahasa Melayu First, clear user info & actions.
+  - 2.1 Color Palette: Primary color (var(--motac-primary)) for background/accents.
+  - 2.2 Typography: Noto Sans (via theme CSS).
+  - 2.4 Iconography: Bootstrap Icons (bi-*).
+  - 3.1 Navigation: Top Action Bar (Logo, Language Toggle, User Profile with Role Badge).
+  - 5.0 Dark Mode: Theme switcher.
+  - 6.2 Accessibility: aria-labels, keyboard navigable dropdowns.
+--}}
 <div>
     @php
-        $configData = \App\Helpers\Helpers::appClasses();
-        $currentLocale = App::getLocale(); // Current locale e.g., 'ms', 'en'
-        // $activeTheme is derived from $configData['style'] which should reflect the current theme (light/dark)
-        $activeTheme = $configData['style'] ?? 'light';
+        // Get the current application locale key
+        $appCurrentLocaleKey = app()->getLocale();
+        // Get the data for the current locale from the component's public property
+        $currentLocaleViewData = $this->availableLocales[$appCurrentLocaleKey] ?? null;
 
-        // Get the flag code for the currently active locale.
-        // This assumes $availableLocales is a public property from your Livewire component,
-        // processed in its mount() method to include 'flag_code'.
-        $currentFlagCode = $availableLocales[$currentLocale]['flag_code'] ?? 'us'; // Default to 'us' if not found
+        // Determine the flag code for the current locale
+        $viewCurrentFlagCode = $currentLocaleViewData && isset($currentLocaleViewData['flag_code'])
+                            ? $currentLocaleViewData['flag_code']
+                            : (str_starts_with($appCurrentLocaleKey, 'en') ? 'us' : 'my'); // Fallback logic
+
+        // Determine the display name for the current locale
+        $viewCurrentLocaleName = $currentLocaleViewData && isset($currentLocaleViewData['name'])
+                            ? __($currentLocaleViewData['name']) // Translate the name
+                            : Str::upper($appCurrentLocaleKey);   // Fallback to uppercase locale key
     @endphp
 
-    @push('custom-css')
+    @pushOnce('custom-css')
+        {{-- Styles specific to this navbar component --}}
         <style>
             .animation-fade { animation: fade 2s infinite; }
             .animation-rotate { animation: rotation 2s infinite linear; }
             @keyframes fade { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
             @keyframes rotation { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-            .navbar-dropdown .dropdown-menu { min-width: 22rem; } /* Ensures notification dropdown is wide enough */
-            .object-fit-cover { object-fit: cover; } /* Utility class for images */
-        </style>
-    @endpush
 
-    @if (isset($navbarDetached) && $navbarDetached === 'navbar-detached')
-        <nav class="layout-navbar {{ $containerNav ?? 'container-fluid' }} navbar navbar-expand-xl {{ $navbarDetached }} align-items-center bg-navbar-theme" id="layout-navbar" aria-label="Top Navigation">
+            .navbar-dropdown .dropdown-menu { min-width: 22rem; }
+            .navbar-dropdown .dropdown-notifications-list { max-height: 350px; overflow-y: auto; }
+            .object-fit-cover { object-fit: cover; }
+            .motac-role-badge { font-size: 0.7rem; padding: 0.2em 0.5em; vertical-align: middle; margin-left: 0.5rem; }
+        </style>
+    @endPushOnce
+
+    {{-- The class 'bg-navbar-theme' should be styled by your MOTAC theme to use var(--motac-primary) and appropriate text/icon colors --}}
+    @if (!empty($this->navbarDetachedClass))
+        <nav class="layout-navbar {{ $this->containerNav }} navbar navbar-expand-xl {{ $this->navbarDetachedClass }} align-items-center bg-navbar-theme"
+            id="layout-navbar" aria-label="{{ __('Navigasi Atas Utama') }}">
     @else
-        <nav class="layout-navbar navbar navbar-expand-xl align-items-center bg-navbar-theme" id="layout-navbar" aria-label="Top Navigation">
-            <div class="{{ $containerNav ?? 'container-fluid' }}">
+        <nav class="layout-navbar navbar navbar-expand-xl align-items-center bg-navbar-theme" id="layout-navbar"
+            aria-label="{{ __('Navigasi Atas Utama') }}">
+            <div class="{{ $this->containerNav }}">
     @endif
 
-        {{-- Branding: Displayed on larger screens or when navbar is not detached --}}
-        @if (isset($navbarFull) && $navbarFull)
-            <div class="navbar-brand app-brand demo d-none d-xl-flex py-0 me-4">
-                <a href="{{ url('/') }}" class="app-brand-link gap-2">
-                    <span class="app-brand-logo demo">
-                        {{-- Use config for logo path, fallback to default --}}
-                        <img src="{{ asset(config('variables.templateLogoSvg', 'assets/img/logo/motac-logo.svg')) }}" alt="{{ __('Logo MOTAC') }}" height="24">
-                    </span>
-                    <span class="app-brand-text demo menu-text fw-bold">{{ __(config('variables.templateName', 'Sistem MOTAC')) }}</span>
+    @if ($this->navbarFull ?? false)
+        <div class="navbar-brand app-brand demo d-none d-xl-flex py-0 me-4">
+            <a href="{{ url('/') }}" class="app-brand-link gap-2">
+                <span class="app-brand-logo demo">
+                    {{-- Design Doc 3.1 & 7.1: MOTAC logo lockup, height ~40px. Use SVG. --}}
+                    <img src="{{ asset($this->configData['templateLogoSvg'] ?? 'assets/img/logo/motac-logo-lockup.svg') }}"
+                        alt="{{ __('Logo Kementerian Pelancongan, Seni dan Budaya Malaysia') }}" height="36">
+                </span>
+                {{-- <span class="app-brand-text demo menu-text fw-bold">{{ __(config('app.name', 'Sistem MOTAC')) }}</span> --}}
+            </a>
+            @unless ($this->navbarHideToggle ?? false)
+                <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-xl-none"
+                    aria-label="{{ __('Buka/Tutup Menu') }}">
+                    {{-- Iconography: Design Language 2.4. Changed from ti-x --}}
+                    <i class="bi bi-x fs-3 align-middle"></i>
                 </a>
-                {{-- Navbar toggle (for mobile view when $navbarFull is true) --}}
-                @unless(isset($navbarHideToggle) && $navbarHideToggle)
-                    <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-xl-none">
-                        <i class="ti ti-x ti-sm align-middle"></i>
-                    </a>
-                @endunless
-            </div>
-        @endif
+            @endunless
+        </div>
+    @endif
 
-        {{-- Main Layout Menu Toggle Button (Hamburger) --}}
-        @unless(isset($navbarHideToggle) && $navbarHideToggle)
-            <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 {{ isset($menuHorizontal) && $menuHorizontal ? 'd-xl-none' : '' }} {{ isset($contentNavbar) ? 'd-xl-none' : '' }}">
-                <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)" aria-label="Toggle Menu">
-                    <i class="ti ti-menu-2 ti-sm"></i>
-                </a>
-            </div>
-        @endunless
+    @unless ($this->navbarHideToggle ?? false)
+        <div
+            class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0
+                        {{ ($this->menuHorizontal ?? false) ? 'd-xl-none' : '' }}
+                        {{ ($this->contentNavbar ?? false) ? 'd-xl-none' : '' }}">
+            <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)"
+                aria-label="{{ __('Buka/Tutup Menu Sisi') }}">
+                {{-- Iconography: Design Language 2.4. Changed from ti-menu-2 --}}
+                <i class="bi bi-list fs-3"></i>
+            </a>
+        </div>
+    @endunless
 
-        <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
-            {{-- Theme Switcher --}}
-            <div class="navbar-nav align-items-center">
-                <a wire:ignore class="nav-link style-switcher-toggle hide-arrow" href="javascript:void(0);" title="{{ $activeTheme === 'dark' ? __('Mod Cerah') : __('Mod Gelap') }}">
-                    <i class="ti {{ $activeTheme === 'dark' ? 'ti-sun' : 'ti-moon-stars' }} ti-sm"></i>
-                </a>
-            </div>
+    <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+        <div class="navbar-nav align-items-center">
+            <a wire:ignore class="nav-link style-switcher-toggle hide-arrow" href="javascript:void(0);"
+                title="{{ $this->activeTheme === 'dark' ? __('Tukar ke Mod Cerah') : __('Tukar ke Mod Gelap') }}"
+                aria-label="{{ $this->activeTheme === 'dark' ? __('Tukar ke Mod Cerah') : __('Tukar ke Mod Gelap') }}"
+                onclick="@this.dispatch('toggleTheme')"> {{-- Dispatch event for theme toggle --}}
+                {{-- Iconography: Design Language 2.4. Changed from ti-sun/ti-moon-stars --}}
+                <i class="bi {{ $this->activeTheme === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill' }} fs-5"></i>
+            </a>
+        </div>
 
-            {{-- Offline Indicator (Powered by Livewire) --}}
-            <div wire:offline class="text-danger ms-2 me-2" title="{{ __('Anda kini di luar talian.') }}">
-                <i class="animation-fade ti ti-wifi-off fs-4"></i>
-            </div>
+        <div wire:offline class="text-danger ms-2 me-2" title="{{ __('Sambungan Internet Terputus') }}">
+            {{-- Iconography: Design Language 2.4. Changed from ti-wifi-off --}}
+            <span class="animation-fade"><i class="bi bi-wifi-off fs-4"></i></span>
+        </div>
 
-            <ul class="navbar-nav flex-row align-items-center ms-auto" role="menubar">
-                {{-- Import Progress Bar (Display if $activeProgressBar is true and percentage is within range) --}}
-                @if ($activeProgressBar && $percentage > 0 && $percentage < 100)
-                    <li wire:poll.1s="updateProgressBar" class="nav-item mx-3" style="width: 200px;" role="none">
-                        <div class="progress" style="height: 12px;" title="{{ __('Proses Import Data') }} {{ $percentage }}%">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" role="progressbar"
-                                 style="width: {{ $percentage }}%;" aria-valuenow="{{ $percentage }}" aria-valuemin="0" aria-valuemax="100">
-                                <small>{{ $percentage }}%</small>
-                            </div>
+        <ul class="navbar-nav flex-row align-items-center ms-auto" role="menubar">
+            {{-- Removed Import Progress Bar section as the functionality was removed from the PHP component
+            @if ($this->activeProgressBar && $this->percentage >= 0 && $this->percentage <= 100)
+                <li wire:poll.750ms="updateProgressBar" class="nav-item mx-3" style="width: 200px;" role="none">
+                    <div class="progress" style="height: 12px;"
+                        title="{{ __('Proses Import Data: :percentage%', ['percentage' => $this->percentage]) }}"
+                        aria-valuenow="{{ $this->percentage }}" aria-valuemin="0" aria-valuemax="100"
+                        aria-label="{{ __('Kemajuan Import Data') }}">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" role="progressbar"
+                            style="width: {{ $this->percentage }}%;">
+                            <small>{{ $this->percentage > 0 ? $this->percentage.'%':'' }}</small>
                         </div>
-                    </li>
-                @endif
-
-                {{-- Language Switcher --}}
-                <li class="nav-item dropdown-language dropdown me-2 me-xl-1" role="none">
-                    <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown" role="menuitem" aria-haspopup="true" aria-expanded="false" aria-label="{{ __('Tukar Bahasa') }}">
-                        {{-- EDITED LINE: Dynamically set flag based on processed $currentFlagCode --}}
-                        <i class="fi fi-{{ $currentFlagCode }} fis rounded-circle me-1 fs-3"></i>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end" role="menu">
-                        {{-- $availableLocales comes from the Livewire component's public property --}}
-                        @foreach ($availableLocales as $localeKey => $localeData)
-                            @if($localeData['display'] ?? false)
-                                <li>
-                                    <a class="dropdown-item {{ $currentLocale === $localeKey ? 'active' : '' }}"
-                                       href="{{ route('language.swap', ['locale' => $localeKey]) }}"
-                                       aria-label="{{ $localeData['name'] }}">
-                                        {{-- EDITED LINE: Use flag_code from $localeData, fallback to 'us' --}}
-                                        <i class="fi fi-{{ $localeData['flag_code'] ?: 'us' }} fis rounded-circle me-2 fs-4"></i>
-                                        {{ __($localeData['name']) }}
-                                    </a>
-                                </li>
-                            @endif
-                        @endforeach
-                    </ul>
+                    </div>
                 </li>
+            @endif
+            --}}
 
+            <li class="nav-item dropdown-language dropdown me-2 me-xl-1" role="none">
+                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown"
+                    role="menuitem" aria-haspopup="true" aria-expanded="false" aria-label="{{ __('Pilihan Bahasa') }}">
+                    <i class="fi fi-{{ $viewCurrentFlagCode }} fis rounded-circle me-1 fs-4"></i> {{-- Use corrected flag code --}}
+                    <span class="d-none d-sm-inline-block">{{ $viewCurrentLocaleName }}</span> {{-- Use corrected display name --}}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" role="menu"
+                    aria-labelledby="{{ __('Pilihan Bahasa') }}">
+                    @foreach ($this->availableLocales as $localeKey => $localeData)
+                        @if ($localeData['display'] ?? false) {{-- Check if locale should be displayed --}}
+                            <li role="none">
+                                {{-- Use app()->getLocale() for comparison --}}
+                                <a class="dropdown-item {{ app()->getLocale() === $localeKey ? 'active' : '' }}"
+                                    href="{{ route('language.swap', ['locale' => $localeKey]) }}"
+                                    aria-label="{{ __($localeData['name']) }}" hreflang="{{ $localeKey }}"
+                                    lang="{{ $localeKey }}" role="menuitem">
+                                    <i class="fi fi-{{ $localeData['flag_code'] ?: 'xx' }} fis rounded-circle me-2 fs-4"></i>
+                                    {{ __($localeData['name']) }}
+                                </a>
+                            </li>
+                        @endif
+                    @endforeach
+                </ul>
+            </li>
+
+            @auth
                 {{-- Notifications Dropdown --}}
-                {{-- IMPORTANT: The "View not found" error indicates the path below is incorrect for your project. --}}
-                {{-- Please VERIFY and CORRECT the path to your notifications partial. --}}
-                {{-- Example: If your file is at resources/views/partials/navbar_notifications.blade.php, --}}
-                {{-- then use @include('partials.navbar_notifications') --}}
                 <li class="nav-item dropdown-notifications navbar-dropdown dropdown me-3 me-xl-2" role="none">
-                    <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" aria-label="{{ __('Notifikasi') }}">
-                        <i class="ti ti-bell ti-md"></i>
-                        @if ($unreadNotifications->count())
-                            <span class="badge bg-danger rounded-pill badge-notifications">{{ $unreadNotifications->count() }}</span>
+                    <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown"
+                        data-bs-auto-close="outside" aria-expanded="false" aria-label="{{ __('Notifikasi') }}">
+                        {{-- Iconography: Design Language 2.4. Changed from ti-bell --}}
+                        <i class="bi bi-bell-fill fs-5"></i>
+                        @if ($this->unreadNotifications->count())
+                            <span
+                                class="badge bg-danger rounded-pill badge-notifications">{{ $this->unreadNotifications->count() }}</span> {{-- Ensure bg-danger is MOTAC themed --}}
                         @endif
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end py-0" wire:ignore.self> {{-- wire:ignore.self helps with BS dropdowns in Livewire --}}
+                    <ul class="dropdown-menu dropdown-menu-end py-0" wire:ignore.self>
                         <li class="dropdown-menu-header border-bottom">
                             <div class="dropdown-header d-flex align-items-center py-3">
                                 <h5 class="text-body mb-0 me-auto">{{ __('Notifikasi') }}</h5>
-                                @if ($unreadNotifications->count())
-                                    <a wire:click.prevent='markAllNotificationsAsRead' href="javascript:void(0)" class="text-body" title="{{__('Tandakan semua sudah dibaca')}}"><i class="ti ti-mail-opened fs-4"></i></a>
+                                @if ($this->unreadNotifications->count())
+                                    <button wire:click.prevent='markAllNotificationsAsRead'
+                                        class="btn btn-sm btn-text-secondary p-0 border-0"
+                                        title="{{ __('Tandakan semua sudah dibaca') }}"
+                                        aria-label="{{ __('Tandakan semua sudah dibaca') }}">
+                                        {{-- Iconography: Design Language 2.4. Changed from ti-mail-opened --}}
+                                        <i class="bi bi-envelope-open-fill fs-4"></i>
+                                    </button>
                                 @endif
-                                {{-- Refresh button with loading state --}}
-                                <a wire:click.prevent='$dispatch("refreshNotifications")' href="javascript:void(0)" class="text-body ms-2" title="{{__('Muat Semula')}}">
-                                    <div wire:loading.remove wire:target="refreshNotifications"><i class="ti ti-refresh fs-4"></i></div>
-                                    <div wire:loading wire:target="refreshNotifications"><span class="animation-rotate"><i class="ti ti-refresh fs-4"></i></span></div>
-                                </a>
+                                <button wire:click.prevent='$dispatch("refreshNotifications")'
+                                    class="btn btn-sm btn-text-secondary p-0 border-0 ms-2" title="{{ __('Muat Semula') }}"
+                                    aria-label="{{ __('Muat Semula Notifikasi') }}">
+                                    <span wire:loading.remove wire:target="refreshNotifications">
+                                        {{-- Iconography: Design Language 2.4. Changed from ti-refresh --}}
+                                        <i class="bi bi-arrow-clockwise fs-4"></i>
+                                    </span>
+                                    <span wire:loading wire:target="refreshNotifications" class="animation-rotate">
+                                        <i class="bi bi-arrow-clockwise fs-4"></i>
+                                    </span>
+                                </button>
                             </div>
                         </li>
-                        <li class="dropdown-notifications-list scrollable-container" style="max-height: 300px; {{-- Adjust max-height as needed --}}">
+                        <li class="dropdown-notifications-list scrollable-container">
                             <ul class="list-group list-group-flush">
-                                @forelse ($unreadNotifications as $notification)
+                                @forelse ($this->unreadNotifications as $notification)
                                     @php
-                                        $notificationData = $notification->data; // Access data once
-                                        $notificationLink = Arr::get($notificationData, 'link', '#');
+                                        $notificationData = $notification->data;
+                                        $notificationLink = Arr::get($notificationData, 'link', '#!');
+                                        $level = Arr::get($notificationData, 'level', 'info');
+                                        // Ensure $icon variable from notificationData contains full Bootstrap Icon class like "bi bi-info-circle-fill"
+                                        $iconClass = Arr::get($notificationData, 'icon', 'bi bi-info-circle-fill');
                                     @endphp
                                     <li class="list-group-item list-group-item-action dropdown-notifications-item"
                                         wire:click="handleNotificationClick('{{ $notification->id }}', '{{ $notificationLink }}')"
-                                        style="cursor:pointer;">
+                                        style="cursor:pointer;" role="listitem">
                                         <div class="d-flex">
                                             <div class="flex-shrink-0 me-3">
                                                 <div class="avatar">
-                                                    <span class="avatar-initial rounded-circle bg-label-{{ Arr::get($notificationData, 'level', 'info') }}">
-                                                        <i class="ti {{ Arr::get($notificationData, 'icon', 'ti-info-circle') }}"></i>
+                                                    {{-- Ensure bg-label-* classes align with MOTAC colors --}}
+                                                    <span
+                                                        class="avatar-initial rounded-circle bg-label-{{ $level }}">
+                                                        {{-- Iconography: Design Language 2.4. Use $iconClass --}}
+                                                        <i class="{{ $iconClass }}"></i>
                                                     </span>
                                                 </div>
                                             </div>
                                             <div class="flex-grow-1">
-                                                <h6 class="mb-1 small fw-semibold">{{ __(Arr::get($notificationData, 'title', __('Notifikasi Sistem'))) }}</h6>
-                                                <p class="mb-0 small text-wrap">{{ __(Arr::get($notificationData, 'message', __('Tiada butiran.'))) }}</p>
-                                                <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
+                                                <h6 class="mb-1 small fw-semibold">
+                                                    {{ __(Arr::get($notificationData, 'title', __('Notifikasi Sistem'))) }}
+                                                </h6>
+                                                <p class="mb-0 small text-wrap">
+                                                    {{ __(Arr::get($notificationData, 'message', __('Tiada butiran.'))) }}
+                                                </p>
+                                                <small
+                                                    class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
                                             </div>
-                                            {{-- The dot is usually for unread, but these are all unread. Click marks as read. --}}
                                             <div class="flex-shrink-0 dropdown-notifications-actions">
-                                                <a href="javascript:void(0)" class="dropdown-notifications-read"><span class="badge badge-dot"></span></a>
-                                                {{-- <a href="javascript:void(0)" class="dropdown-notifications-archive"><span class="ti ti-x"></span></a> --}}
+                                                <span class="badge badge-dot bg-primary"></span> {{-- Ensure bg-primary uses MOTAC primary --}}
                                             </div>
                                         </div>
                                     </li>
                                 @empty
-                                    <li class="list-group-item text-center text-muted small py-3">
+                                    <li class="list-group-item text-center text-muted small py-3" role="listitem">
                                         {{ __('Tiada notifikasi baharu buat masa ini.') }}
                                     </li>
                                 @endforelse
                             </ul>
                         </li>
-                        @if(Auth::check() && Auth::user()->notifications()->count() > 0) {{-- Check if there are ANY notifications (read or unread) --}}
+                        @if (Auth::user()->notifications()->count() > 0)
                             <li class="dropdown-menu-footer border-top">
-                                <a href="{{ route('notifications.index') }}" class="dropdown-item d-flex justify-content-center text-primary p-2 h-px-40">
+                                <a href="{{ route('notifications.index') }}"
+                                    class="dropdown-item d-flex justify-content-center text-primary p-2 h-px-40">
                                     {{ __('Lihat Semua Notifikasi') }}
                                 </a>
                             </li>
@@ -181,83 +240,83 @@
                     </ul>
                 </li>
 
-                {{-- User Menu Dropdown --}}
-                {{-- IMPORTANT: Also verify this @include path if you encounter similar "View not found" errors for it. --}}
-                <li class="nav-item navbar-dropdown dropdown-user dropdown">
-                    <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown" aria-label="{{ __('Profil Pengguna') }}">
+                {{-- User Profile Dropdown --}}
+                <li class="nav-item navbar-dropdown dropdown-user dropdown" role="none">
+                    <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown"
+                        aria-label="{{ __('Menu Pengguna') }}" role="menuitem" aria-haspopup="true"
+                        aria-expanded="false">
                         <div class="avatar avatar-online">
-                            <img src="{{ Auth::user()->profile_photo_url ?? asset($defaultProfilePhotoUrl ?? 'assets/img/avatars/default-avatar.png') }}"
-                                 alt="{{ Auth::user()->name ?? __('Pengguna') }}"
-                                 class="w-px-40 h-auto rounded-circle object-fit-cover">
+                            <img src="{{ Auth::user()->profile_photo_url ?? asset($this->defaultProfilePhotoUrl ?? 'assets/img/avatars/default-avatar.png') }}"
+                                alt="{{ __('Avatar :name', ['name' => Auth::user()->name]) }}"
+                                class="w-px-40 h-auto rounded-circle object-fit-cover">
                         </div>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li>
-                            <a class="dropdown-item" href="{{ Route::has('profile.show') ? route('profile.show') : '#' }}">
+                    <ul class="dropdown-menu dropdown-menu-end" role="menu"
+                        aria-labelledby="{{ __('Menu Pengguna') }}">
+                        <li role="none">
+                            <a class="dropdown-item"
+                                href="{{ Route::has('profile.show') ? route('profile.show') : '#' }}" role="menuitem">
                                 <div class="d-flex align-items-center">
                                     <div class="flex-shrink-0 me-3">
                                         <div class="avatar avatar-online">
-                                            <img src="{{ Auth::user()->profile_photo_url ?? asset($defaultProfilePhotoUrl ?? 'assets/img/avatars/default-avatar.png') }}"
-                                                 alt="{{ Auth::user()->name ?? 'Avatar' }}"
-                                                 class="w-px-40 h-auto rounded-circle object-fit-cover">
+                                            <img src="{{ Auth::user()->profile_photo_url ?? asset($this->defaultProfilePhotoUrl ?? 'assets/img/avatars/default-avatar.png') }}"
+                                                alt="{{ __('Avatar :name', ['name' => Auth::user()->name]) }}"
+                                                class="w-px-40 h-auto rounded-circle object-fit-cover">
                                         </div>
                                     </div>
                                     <div class="flex-grow-1">
-                                        <span class="fw-semibold d-block">{{ Auth::user()->name ?? __('Pengguna Tetamu') }}</span>
-                                        <small class="text-muted">{{ Auth::check() ? Str::title(Auth::user()->getRoleNames()->first() ?? __('Pengguna')) : __('Pengguna') }}</small>
+                                        <span class="fw-semibold d-block">{{ Auth::user()->name }}</span>
+                                        {{-- MOTAC Role Badge - Ensure bg-primary uses MOTAC primary color --}}
+                                        <span class="badge rounded-pill bg-primary motac-role-badge">
+                                            {{ Str::title(Auth::user()->getRoleNames()->first() ?? __('Pengguna')) }}
+                                        </span>
                                     </div>
                                 </div>
                             </a>
                         </li>
-                        <li><hr class="dropdown-divider"></li>
-                        {{-- Ensure profile.show route exists or use a valid alternative --}}
-                        <li><a class="dropdown-item" href="{{ Route::has('profile.show') ? route('profile.show') : '#' }}"><i class="ti ti-user-circle me-2 ti-sm"></i> {{ __('Profil Saya') }}</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item"
+                                href="{{ Route::has('profile.show') ? route('profile.show') : '#' }}" role="menuitem">
+                                {{-- Iconography: Design Language 2.4. Changed from ti-user-circle --}}
+                                <i class="bi bi-person-circle me-2 fs-6"></i> {{ __('Profil Saya') }}</a></li>
 
-                        @if (Auth::check() && Auth::user()->hasRole('Admin'))
-                            {{-- EDITED: Point "Tetapan Sistem" to a relevant settings page, e.g., user settings. Adjust if a more general settings dashboard exists. --}}
-                            <li><a class="dropdown-item" href="{{ route('settings.users.index') }}"><i class="ti ti-settings me-2 ti-sm"></i> {{ __('Tetapan Sistem') }}</a></li>
+                        @if (Auth::user()->hasRole('Admin'))
+                            <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}" role="menuitem">
+                                {{-- Iconography: Design Language 2.4. Changed from ti-settings --}}
+                                <i class="bi bi-gear-fill me-2 fs-6"></i> {{ __('Pentadbiran Sistem') }}</a></li>
                         @endif
 
-                        {{-- Add other links like API Keys, Billing, FAQ if applicable --}}
-                        {{-- <li><a class="dropdown-item" href="#"><i class="ti ti-credit-card me-2 ti-sm"></i> {{ __('Langganan') }}</a></li> --}}
-
-                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
                         <li>
                             <a class="dropdown-item" href="{{ route('logout') }}"
-                               onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                <i class="ti ti-logout me-2 ti-sm"></i> {{ __('Log Keluar') }}
+                                onclick="event.preventDefault(); document.getElementById('logout-form-navbar').submit();" {{-- Unique ID for form --}}
+                                role="menuitem">
+                                {{-- Iconography: Design Language 2.4. Changed from ti-logout --}}
+                                <i class="bi bi-box-arrow-right me-2 fs-6"></i> {{ __('Log Keluar') }}
                             </a>
-                            <form id="logout-form" method="POST" action="{{ route('logout') }}" style="display: none;">@csrf</form>
+                            <form id="logout-form-navbar" method="POST" action="{{ route('logout') }}"
+                                style="display: none;">@csrf</form>
                         </li>
                     </ul>
                 </li>
-            </ul>
-        </div>
+            @else {{-- If not authenticated --}}
+                <li class="nav-item" role="none">
+                    <a class="nav-link" href="{{ route('login') }}" role="menuitem">
+                        {{-- Iconography: Design Language 2.4. Changed from ti-login --}}
+                        <i class="bi bi-box-arrow-in-right me-2 fs-5"></i>
+                        <span class="align-middle">{{ __('Log Masuk') }}</span>
+                    </a>
+                </li>
+            @endauth
+        </ul>
+    </div>
 
-        {{-- Search Bar (Optional, if not in $navbarFull mode but still needed) --}}
-        {{-- Example:
-        @if (!isset($navbarFull) && $navbarDetached === 'navbar-detached')
-            <div class="navbar-nav align-items-center @if (isset($searchVisible) && $searchVisible) {{ 'ms-auto' }} @endif">
-                <form class="navbar-nav-right ..." action="{{ url('app/invoice/list') }}">
-                    <div class="input-group input-group-merge">
-                        <span class="input-group-text"><i class="ti ti-search"></i></span>
-                        <input type="text" class="form-control" placeholder="{{__('Search...')}}" aria-label="{{__('Search...')}}">
-                    </div>
-                </form>
-            </div>
-        @endif
-        --}}
-
-        {{-- Optional end toggle if navbar is detached and not $navbarFull --}}
-        @if (!isset($navbarFull) && (isset($navbarDetached) && $navbarDetached === 'navbar-detached'))
-            <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-none d-xl-block">
-                <i class="ti ti-menu-2 ti-sm align-middle"></i>
-            </a>
-        @endif
-
-    {{-- Closing div for $containerNav if not detached --}}
-    @if (!isset($navbarDetached) || $navbarDetached === '')
-        </div> {{-- End .container-fluid or custom $containerNav --}}
+    @if (empty($this->navbarDetachedClass) && !($this->navbarFull ?? false) )
+        </div> {{-- End .container-fluid or custom $this->containerNav if navbar not detached --}}
     @endif
-    </nav>
+</nav>
 </div>

@@ -1,16 +1,19 @@
-@props(['id' => null, 'maxWidth' => null, 'title', 'content', 'footer'])
+{{-- resources/views/components/dialog-modal.blade.php --}}
+@props(['id' => null, 'maxWidth' => null]) {{-- Removed title, content, footer as they come from slots --}}
 
-{{-- Assuming x-modal is a base Bootstrap modal component like modal-motac-generic.blade.php --}}
+{{-- This component is a general dialog, assuming x-modal provides the
+     outer Bootstrap modal shell and standard named slots.
+     Ensure x-modal is styled according to MOTAC theme. --}}
 <x-modal :id="$id" :maxWidth="$maxWidth" {{ $attributes }}>
     <x-slot name="title">
-        {{ $title }}
+        {{ $title }} {{-- Slot for title --}}
     </x-slot>
 
     <x-slot name="content">
-        {{ $content }}
+        {{ $content }} {{-- Slot for content --}}
     </x-slot>
 
     <x-slot name="footer">
-        {{ $footer }}
+        {{ $footer }} {{-- Slot for footer buttons --}}
     </x-slot>
 </x-modal>

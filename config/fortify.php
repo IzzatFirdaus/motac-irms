@@ -73,7 +73,7 @@ return [
     |
     */
 
-    'home' => RouteServiceProvider::HOME,
+    'home' => RouteServiceProvider::HOME, //
 
     /*
     |--------------------------------------------------------------------------
@@ -115,8 +115,8 @@ return [
     */
 
     'limiters' => [
-        'login' => 'login',
-        'two-factor' => 'two-factor',
+        'login' => 'login', // Rate limiter defined in FortifyServiceProvider
+        'two-factor' => 'two-factor', // Rate limiter defined in FortifyServiceProvider
     ],
 
     /*
@@ -146,13 +146,13 @@ return [
     'features' => [
         Features::registration(),
         Features::resetPasswords(),
-        // Features::emailVerification(),
-        // Features::updateProfileInformation(),
+        Features::emailVerification(), // REVISED: Uncommented as User model has email_verified_at and EventServiceProvider registers SendEmailVerificationNotification
+        Features::updateProfileInformation(), // REVISED: Uncommented as UpdateUserProfileInformation action is configured in FortifyServiceProvider
         Features::updatePasswords(),
-        // Features::twoFactorAuthentication([
-        //     'confirm' => true,
-        //     'confirmPassword' => true,
-        //     // 'window' => 0,
-        // ]),
+        Features::twoFactorAuthentication([ // REVISED: Uncommented as User model has 2FA fields and FortifyServiceProvider handles 2FA rate limiting
+            'confirm' => true,
+            'confirmPassword' => true, // Recommended for security
+            // 'window' => 0,
+        ]),
     ],
 ];

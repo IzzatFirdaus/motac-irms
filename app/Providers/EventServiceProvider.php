@@ -2,30 +2,31 @@
 
 namespace App\Providers;
 
+// Models to be observed by BlameableObserver
 use App\Models\Approval;
 use App\Models\Department;
 use App\Models\EmailApplication;
 use App\Models\Equipment;
-// Models to be observed by BlameableObserver
 use App\Models\EquipmentCategory;
 use App\Models\Grade;
-use App\Models\Import;
+use App\Models\Import;                     // If settings are database-driven and auditable
 use App\Models\LoanApplication;
 use App\Models\LoanApplicationItem;
 use App\Models\LoanTransaction;
 use App\Models\LoanTransactionItem;
-use App\Models\Location as EquipmentLocation; // Using alias for clarity
-use App\Models\Notification as CustomNotification;   // Using alias for clarity
+use App\Models\Location as EquipmentLocation;         // Alias for clarity
+use App\Models\Notification as CustomNotification;    // Alias for clarity if it's your custom App\Models\Notification
 use App\Models\Position;
-use App\Models\Setting;
-use App\Models\SubCategory as EquipmentSubCategory;
+use App\Models\Setting;                     // If import processes are auditable
+use App\Models\SubCategory as EquipmentSubCategory; // Alias for clarity
 use App\Models\User;
-use App\Observers\BlameableObserver;
-use Illuminate\Auth\Events\Registered;     // If settings are database-driven and auditable
-use Illuminate\Auth\Listeners\SendEmailVerificationNotification;      // If import processes are auditable
-use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider; // Aliased to avoid conflict with Illuminate\Notifications\Notification
-// Observer
-use Illuminate\Support\Facades\Event;
+use App\Observers\BlameableObserver; // Ensure this observer exists and functions as expected
+
+// Laravel Events & Listeners
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
+use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+// use Illuminate\Support\Facades\Event; // Not explicitly used in this file's current content
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -36,7 +37,7 @@ class EventServiceProvider extends ServiceProvider
      */
     protected $listen = [
         Registered::class => [
-            SendEmailVerificationNotification::class, // Standard Laravel listener
+            SendEmailVerificationNotification::class, // Standard Laravel listener for new user registration
         ],
         // Example for custom events, if any are defined for the system:
         // \App\Events\ApplicationStatusChanged::class => [
@@ -48,10 +49,10 @@ class EventServiceProvider extends ServiceProvider
     /**
      * The model observers for your application.
      * This array registers the BlameableObserver for all models that require
-     * created_by, updated_by, and/or deleted_by audit trails as per System Design.
+     * created_by, updated_by, and/or deleted_by audit trails as per System Design[cite: 47, 312, 352].
+     * Ensure BlameableObserver correctly sets user IDs.
      *
-     *
-     * @var array<class-string, array<int, class-string>>
+     * @var array<class-string, array<int, class-string<\object>>>
      */
     protected $observers = [
         // User & Organizational Data Models
@@ -75,16 +76,16 @@ class EventServiceProvider extends ServiceProvider
         // Inventory & Supporting Models
         Equipment::class => [BlameableObserver::class],
         EquipmentCategory::class => [BlameableObserver::class],
-        EquipmentSubCategory::class => [BlameableObserver::class], // Using alias
-        EquipmentLocation::class => [BlameableObserver::class],   // Using alias
+        EquipmentSubCategory::class => [BlameableObserver::class], // Uses alias: SubCategory as EquipmentSubCategory
+        EquipmentLocation::class => [BlameableObserver::class],   // Uses alias: Location as EquipmentLocation
 
         // System Utility Models (if they have blameable fields as per DB design)
         Setting::class => [BlameableObserver::class], // If 'settings' table is used and audited
         Import::class => [BlameableObserver::class],  // If 'imports' table is used and audited
 
-        // Custom Notification Model
-        // Assumes your App\Models\Notification model has blameable fields.
-        CustomNotification::class => [BlameableObserver::class],
+        // Custom Notification Model (if it has blameable fields)
+        // System Design Ref: Custom model for DB notifications with audit trails
+        CustomNotification::class => [BlameableObserver::class], // Uses alias: Notification as CustomNotification
     ];
 
     /**
@@ -95,7 +96,7 @@ class EventServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Laravel automatically registers observers defined in the $observers property.
-        // Calling parent::boot() is good practice if the parent class has boot logic.
+        // Calling parent::boot() is good practice if the parent ServiceProvider's boot method has logic.
         parent::boot();
     }
 
@@ -107,6 +108,6 @@ class EventServiceProvider extends ServiceProvider
      */
     public function shouldDiscoverEvents(): bool
     {
-        return false;
+        return false; // Explicit registration is generally preferred for clarity
     }
 }

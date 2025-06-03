@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Config; // Import Config facade
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -19,49 +20,41 @@ class MenuServiceProvider extends ServiceProvider
 
     /**
      * Bootstrap services.
-     * Loads MOTAC vertical menu structure from JSON and shares with all views.
+     * Loads MOTAC vertical menu structure from config/menu.php and shares it with all views.
+     * System Design Reference: Assumes config/menu.php is now the primary source,
+     * updating behavior from original design doc mention of verticalMenu.json.
      */
     public function boot(): void
     {
-        // Path to your MOTAC-specific verticalMenu.json
-        $motacMenuPath = base_path('resources/menu/verticalMenu.json');
-        $menuDataObject = new stdClass(); // Default to an object
-        $menuDataObject->menu = [];   // Ensure 'menu' property exists as an array
+        $menuDataObject = new stdClass(); // Default to an empty object
+        $menuDataObject->menu = [];   // Ensure 'menu' property exists as an array by default
 
-        if (file_exists($motacMenuPath)) {
-            try {
-                $jsonContent = file_get_contents($motacMenuPath);
+        try {
+            // Attempt to load menu data from config/menu.php
+            // The config/menu.php file should return an array with a 'menu' key,
+            // which itself is an array of menu items.
+            $menuConfigArray = Config::get('menu.menu');
 
-                if ($jsonContent === false) {
-                    Log::error('[MenuServiceProvider] Failed to read MOTAC verticalMenu.json. Path: ' . $motacMenuPath);
-                } else {
-                    if (trim($jsonContent) === '') {
-                        Log::warning('[MenuServiceProvider] MOTAC verticalMenu.json is empty. Using default empty menu structure.');
-                    } else {
-                        $decoded = json_decode($jsonContent); // Decodes to an object by default
-
-                        if (json_last_error() === JSON_ERROR_NONE) {
-                            if (is_object($decoded) && property_exists($decoded, 'menu') && is_array($decoded->menu)) {
-                                $menuDataObject = $decoded; // Use the fully decoded object if valid
-                                Log::debug('[MenuServiceProvider] Successfully decoded MOTAC verticalMenu.json.');
-                            } else {
-                                Log::error('[MenuServiceProvider] MOTAC verticalMenu.json is valid JSON but not in the expected object format (e.g., {"menu": []}). Structure type: ' . gettype($decoded));
-                            }
-                        } else {
-                            Log::error('[MenuServiceProvider] JSON decoding failed for MOTAC verticalMenu.json: ' . json_last_error_msg());
-                        }
-                    }
-                }
-            } catch (\Throwable $e) {
-                Log::critical('[MenuServiceProvider] Exception occurred while processing MOTAC menu JSON: ' . $e->getMessage());
+            if (is_array($menuConfigArray)) {
+                $menuDataObject->menu = $menuConfigArray;
+                Log::debug('[MenuServiceProvider] Successfully loaded MOTAC menu data from config/menu.php.');
+            } elseif ($menuConfigArray === null) {
+                Log::warning('[MenuServiceProvider] Menu configuration key "menu.menu" not found or is null in config/menu.php. Using default empty menu structure.');
+                // $menuDataObject is already set to default empty menu
+            } else {
+                Log::error('[MenuServiceProvider] Menu data from config/menu.php is not in the expected array format. Structure type: ' . gettype($menuConfigArray) . '. Using default empty menu structure.');
+                // $menuDataObject remains default empty menu
             }
-        } else {
-            Log::warning('[MenuServiceProvider] MOTAC menu file not found: ' . $motacMenuPath);
+        } catch (\Throwable $e) { // Catch any generic error during config access
+            Log::critical('[MenuServiceProvider] Exception occurred while processing MOTAC menu configuration: ' . $e->getMessage(), ['exception' => $e]);
+            // $menuDataObject remains default empty menu
         }
 
-        // Share the $menuDataObject (which has a ->menu property as an array of items)
+        // Share the $menuDataObject (which is guaranteed to have a ->menu property as an array)
         // This $menuData will be globally available in all Blade views.
         View::share('menuData', $menuDataObject);
-        Log::debug('[MenuServiceProvider] MOTAC menuData shared with views: ' . json_encode($menuDataObject));
+        // Avoid logging potentially large menu structure in production if not needed for debugging,
+        // or consider logging only a count or a summary.
+        // Log::debug('[MenuServiceProvider] MOTAC menuData shared with views: ' . json_encode($menuDataObject));
     }
 }

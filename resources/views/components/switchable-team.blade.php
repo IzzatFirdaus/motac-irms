@@ -1,22 +1,24 @@
-@props(['team', 'component' => 'dropdown-link'])
+{{-- resources/views/components/switchable-team.blade.php --}}
+@props(['team', 'component' => 'dropdown-link']) {{-- dropdown-link is a Bootstrap component, good. --}}
 
 <form method="POST" action="{{ route('current-team.update') }}" id="switch-team-form-{{ $team->id }}">
-  @method('PUT')
-  @csrf
+    @method('PUT')
+    @csrf
 
-  <input type="hidden" name="team_id" value="{{ $team->id }}">
+    <input type="hidden" name="team_id" value="{{ $team->id }}">
 
-  <x-dynamic-component :component="$component" href="#"
-    x-on:click.prevent="document.getElementById('switch-team-form-{{ $team->id }}').submit()"> {{-- Using Alpine for click if component supports it, or original onclick --}}
-    <div class="d-flex align-items-center">
-      @if (Auth::check() && Auth::user()->isCurrentTeam($team))
-        <svg class="me-2 text-success" width="18" height="18" fill="none" stroke-linecap="round" stroke-linejoin="round" {{-- Adjusted size slightly --}}
-          stroke-width="2" stroke="currentColor" viewBox="0 0 24 24">
-          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-      @endif
+    <x-dynamic-component :component="$component" href="#"
+        x-on:click.prevent="document.getElementById('switch-team-form-{{ $team->id }}').submit()">
+        <div class="d-flex align-items-center">
+            @if (Auth::check() && Auth::user()->isCurrentTeam($team))
+                {{-- Replaced inline SVG with Bootstrap Icon --}}
+                <i class="bi bi-check-circle-fill me-2 text-success" style="font-size: 1.1rem;"></i>
+            @else
+                {{-- Placeholder for alignment if no icon, or a different icon for non-current teams --}}
+                <span style="width: 1.1rem; margin-right: 0.5rem;"></span> {{-- Adjust width to match icon --}}
+            @endif
 
-      <div class="text-truncate">{{ $team->name }}</div> {{-- Added text-truncate in case team names are long --}}
-    </div>
-  </x-dynamic-component>
+            <div class="text-truncate">{{ $team->name }}</div>
+        </div>
+    </x-dynamic-component>
 </form>

@@ -1,131 +1,135 @@
-@push('custom-css')
-{{-- If using Select2 for Head of Department --}}
-<link rel="stylesheet" href="{{asset('assets/vendor/libs/select2/select2.css')}}"/>
-@endpush
+{{-- resources/views/_partials/_modals/modal-department.blade.php --}}
 
-<div wire:ignore.self class="modal fade" id="departmentModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-simple"> {{-- Increased size for more fields --}}
-    <div class="modal-content p-0 p-md-5">
-      <div class="modal-body">
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        <div class="text-center mb-4">
-          <h3 class="mb-2">{{ $isEdit ? __('Update Department') : __('New Department') }}</h3>
-          <p class="text-muted">{{ __('Please fill out the following information') }}</p>
-        </div>
-        <form wire:submit.prevent="submitDepartment" class="row g-3">
-          <div class="col-md-6 mb-3">
-            <label for="departmentName" class="form-label w-100">{{ __('Name') }} <span class="text-danger">*</span></label>
-            <input wire:model.defer='departmentName' id="departmentName" class="form-control @error('departmentName') is-invalid @enderror" type="text" />
+@pushOnce('custom-css')
+<link rel="stylesheet" href="{{asset('assets/vendor/libs/select2/select2.css')}}"/>
+@endPushOnce
+
+<div wire:ignore.self class="modal fade" id="departmentModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="departmentModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="departmentModalLabel">
+            <i class="bi {{ $isEditMode ? 'bi-pencil-square' : 'bi-building-fill-add' }} me-2 fs-5"></i>
+            {{ $isEditMode ? __('Kemaskini Jabatan') : __('Tambah Jabatan Baharu') }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{__('Tutup')}}"></button>
+      </div>
+      <div class="modal-body p-3 p-md-4">
+        {{-- Linter warnings about unassigned $message (PHP1412) within @error blocks are false positives. --}}
+        <form wire:submit.prevent="submitDepartment" id="departmentFormModal" class="row g-3">
+
+          <div class="col-md-6">
+            <label for="departmentNameModal" class="form-label w-100">{{ __('Nama Jabatan') }} <span class="text-danger">*</span></label>
+            <input wire:model.defer='departmentName' id="departmentNameModal" class="form-control @error('departmentName') is-invalid @enderror" type="text" placeholder="{{__('Cth: Bahagian Kewangan')}}"/>
             @error('departmentName') <div class="invalid-feedback">{{ $message }}</div> @enderror
           </div>
 
-          <div class="col-md-6 mb-3">
-            <label for="departmentCode" class="form-label w-100">{{ __('Code') }}</label>
-            <input wire:model.defer='departmentCode' id="departmentCode" class="form-control @error('departmentCode') is-invalid @enderror" type="text" />
+          <div class="col-md-6">
+            <label for="departmentCodeModal" class="form-label w-100">{{ __('Kod Jabatan') }}</label>
+            <input wire:model.defer='departmentCode' id="departmentCodeModal" class="form-control @error('departmentCode') is-invalid @enderror" type="text" placeholder="{{__('Cth: KEW, ICT')}}"/>
             @error('departmentCode') <div class="invalid-feedback">{{ $message }}</div> @enderror
           </div>
 
-          <div class="col-md-6 mb-3">
-            <label for="departmentBranchType" class="form-label w-100">{{ __('Branch Type') }} <span class="text-danger">*</span></label>
-            <select wire:model.defer='departmentBranchType' id="departmentBranchType" class="form-select @error('departmentBranchType') is-invalid @enderror">
-              <option value="">{{ __('Select Branch Type') }}</option>
-              <option value="{{ \App\Models\Department::BRANCH_TYPE_HQ }}">{{ __('Headquarters') }}</option>
-              <option value="{{ \App\Models\Department::BRANCH_TYPE_STATE }}">{{ __('State') }}</option>
+          <div class="col-md-6">
+            <label for="departmentBranchTypeModal" class="form-label w-100">{{ __('Jenis Cawangan') }} <span class="text-danger">*</span></label>
+            <select wire:model.defer='departmentBranchType' id="departmentBranchTypeModal" class="form-select @error('departmentBranchType') is-invalid @enderror">
+              <option value="">{{ __('-- Pilih Jenis Cawangan --') }}</option>
+              @foreach(\App\Models\Department::getBranchTypeOptions() as $value => $label) {{-- Assumes method returns value => translated_label --}}
+                <option value="{{ $value }}">{{ e($label) }}</option>
+              @endforeach
             </select>
             @error('departmentBranchType') <div class="invalid-feedback">{{ $message }}</div> @enderror
           </div>
 
-          {{-- Assuming $users is passed from Livewire component for HOD selection --}}
-          {{-- If not using Select2, a simple select can be used. --}}
-          <div wire:ignore class="col-md-6 mb-3">
-            <label for="select2DepartmentHeadId" class="form-label w-100">{{ __('Head of Department') }}</label>
-            <select wire:model.defer='departmentHeadId' id="select2DepartmentHeadId" class="select2 form-select @error('departmentHeadId') is-invalid @enderror">
-              <option value="">{{ __('Select Head of Department (Optional)') }}</option>
+          <div wire:ignore class="col-md-6">
+            <label for="select2DepartmentHeadIdModal" class="form-label w-100">{{ __('Ketua Jabatan (Pilihan)') }}</label>
+            <select wire:model.defer='departmentHeadId' id="select2DepartmentHeadIdModal" class="select2-department-head form-select @error('departmentHeadId') is-invalid @enderror" data-placeholder="{{ __('Pilih Ketua Jabatan') }}">
+              <option value="">{{ __('Pilih Ketua Jabatan (Pilihan)') }}</option>
+              {{-- $usersForHodSelection should be passed from the parent Livewire component --}}
               @foreach($usersForHodSelection ?? [] as $user)
-                <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
+                @if(is_object($user))
+                    <option value="{{ $user->id }}">{{ e($user->name) }} ({{ e($user->email) }})</option>
+                @endif
               @endforeach
             </select>
             @error('departmentHeadId') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
           </div>
 
-          <div class="col-12 mb-3">
-            <label for="departmentDescription" class="form-label w-100">{{ __('Description') }}</label>
-            <textarea wire:model.defer='departmentDescription' id="departmentDescription" class="form-control @error('departmentDescription') is-invalid @enderror" rows="3"></textarea>
+          <div class="col-12">
+            <label for="departmentDescriptionModal" class="form-label w-100">{{ __('Keterangan (Pilihan)') }}</label>
+            <textarea wire:model.defer='departmentDescription' id="departmentDescriptionModal" class="form-control @error('departmentDescription') is-invalid @enderror" rows="3" placeholder="{{__('Terangkan fungsi utama jabatan ini...')}}"></textarea>
             @error('departmentDescription') <div class="invalid-feedback">{{ $message }}</div> @enderror
           </div>
 
-          <div class="col-12 mb-4">
-            <div class="form-check">
-              <input wire:model.defer='departmentIsActive' class="form-check-input" type="checkbox" id="departmentIsActive" />
-              <label class="form-check-label" for="departmentIsActive">
-                {{ __('Is Active') }}
+          <div class="col-12">
+            <div class="form-check form-switch">
+              <input wire:model.defer='departmentIsActive' class="form-check-input" type="checkbox" id="departmentIsActiveModal" />
+              <label class="form-check-label" for="departmentIsActiveModal">
+                {{ __('Jadikan Jabatan Ini Aktif') }}
               </label>
             </div>
              @error('departmentIsActive') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
           </div>
-
-          <div class="col-12 text-center">
-            <button type="submit" class="btn btn-primary me-sm-3 me-1">
-              <span wire:loading wire:target="submitDepartment" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-              {{ __('Submit') }}
-            </button>
-            <button type="reset" class="btn btn-label-secondary btn-reset" data-bs-dismiss="modal" aria-label="Close">{{ __('Cancel') }}</button>
-          </div>
         </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+            <i class="bi bi-x-lg me-1"></i>{{ __('Batal') }}
+        </button>
+        <button type="submit" class="btn btn-primary d-inline-flex align-items-center" form="departmentFormModal"
+                wire:loading.attr="disabled" wire:target="submitDepartment">
+            <span wire:loading wire:target="submitDepartment" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            <i class="bi {{ $isEditMode ? 'bi-save-fill' : 'bi-check-lg' }} me-1" wire:loading.remove wire:target="submitDepartment"></i>
+            {{ $isEditMode ? __('Simpan Perubahan') : __('Tambah Jabatan') }}
+        </button>
       </div>
     </div>
   </div>
 </div>
 
-@push('custom-scripts')
-{{-- If using Select2 for Head of Department --}}
+@pushOnce('custom-scripts')
 <script src="{{asset('assets/vendor/libs/select2/select2.js')}}"></script>
+<script src="{{asset('assets/vendor/libs/select2/i18n/ms.js')}}"></script>
 <script>
-  document.addEventListener('livewire:load', function () {
+  document.addEventListener('livewire:initialized', function () {
     if (typeof jQuery !== 'undefined' && typeof $.fn.select2 === 'function') {
-        const initHodSelect2 = () => {
-            const selectEl = $('#select2DepartmentHeadId');
+        const departmentModalElement = document.getElementById('departmentModal');
+        const selectEl = $('#select2DepartmentHeadIdModal');
+
+        const initHodSelect2InModal = () => {
             if (selectEl.length) {
-                if (selectEl.data('select2')) { // Destroy if already initialized
+                if (selectEl.hasClass("select2-hidden-accessible")) {
                     selectEl.select2('destroy');
                 }
-                selectEl.wrap('<div class="position-relative"></div>').select2({
-                    placeholder: "{{ __('Select Head of Department (Optional)') }}",
-                    dropdownParent: $('#departmentModal'), // Attach to modal
-                    allowClear: true
-                }).on('change', function (e) {
-                    @this.set('departmentHeadId', $(this).val());
+                selectEl.select2({
+                    placeholder: "{{ __('Pilih Ketua Jabatan (Pilihan)') }}",
+                    dropdownParent: $(departmentModalElement),
+                    allowClear: true,
+                    language: "ms"
                 });
+                let currentHodId = @this.get('departmentHeadId');
+                selectEl.val(currentHodId).trigger('change.select2');
             }
         };
 
-        initHodSelect2(); // Initial call
+        if (departmentModalElement && selectEl.length) {
+            $(departmentModalElement).on('shown.bs.modal', function () {
+                initHodSelect2InModal();
+            });
+            selectEl.on('change', function (e) {
+                @this.set('departmentHeadId', $(this).val());
+            });
+        }
 
-        Livewire.on('departmentModalOpened', () => { // Or a more specific event after data is loaded
-            initHodSelect2();
-            // If departmentHeadId is set in Livewire, trigger change for Select2
-            let currentHodId = @this.get('departmentHeadId');
-            if(currentHodId) {
-                 $('#select2DepartmentHeadId').val(currentHodId).trigger('change.select2');
-            } else {
-                 $('#select2DepartmentHeadId').val(null).trigger('change.select2');
+        Livewire.on('departmentModalOpened', () => {
+            if (selectEl.data('select2')) {
+                let currentHodId = @this.get('departmentHeadId');
+                selectEl.val(currentHodId).trigger('change.select2');
             }
         });
-         // Re-initialize Select2 when the modal is shown
-        $('#departmentModal').on('shown.bs.modal', function () {
-            initHodSelect2();
-            let currentHodId = @this.get('departmentHeadId'); // Ensure this reflects the current state
-            if(currentHodId) {
-                 $('#select2DepartmentHeadId').val(currentHodId).trigger('change.select2');
-            } else {
-                 $('#select2DepartmentHeadId').val(null).trigger('change.select2');
-            }
-        });
-
-
     } else {
         console.error("jQuery or Select2 is not loaded for department modal.");
     }
   });
 </script>
-@endpush
+@endPushOnce

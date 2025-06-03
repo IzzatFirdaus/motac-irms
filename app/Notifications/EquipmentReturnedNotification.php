@@ -4,16 +4,16 @@ namespace App\Notifications;
 
 use App\Models\Equipment;
 use App\Models\LoanApplication;
-use App\Models\LoanTransaction; // Added for type hinting
-use App\Models\LoanTransactionItem; // Added for instanceof
+use App\Models\LoanTransaction;
+use App\Models\LoanTransactionItem;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Log; // Added for consistency
-use Illuminate\Support\Facades\Route; // Added for date formatting
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Route;
 
 class EquipmentReturnedNotification extends Notification implements ShouldQueue
 {
@@ -28,17 +28,18 @@ class EquipmentReturnedNotification extends Notification implements ShouldQueue
         LoanTransaction $returnTransaction,
         User $returnAcceptingOfficer
     ) {
-        $this->loanApplication = $loanApplication->loadMissing('user'); // Load applicant
+        $this->loanApplication = $loanApplication->loadMissing('user');
+        // Corrected relationship to load equipment details for each item
         $this->returnTransaction = $returnTransaction->loadMissing(['loanTransactionItems.equipment']);
         $this->returnAcceptingOfficer = $returnAcceptingOfficer;
     }
 
-    public function via(User $notifiable): array // Type hinted $notifiable
+    public function via(User $notifiable): array // Changed to User
     {
         return ['mail', 'database'];
     }
 
-    public function toMail(User $notifiable): MailMessage // Type hinted $notifiable
+    public function toMail(User $notifiable): MailMessage // Changed to User
     {
         $applicantName = $this->loanApplication->user?->name ?? $notifiable->name ?? __('Pemohon');
         $applicationId = $this->loanApplication->id ?? 'N/A';
@@ -53,13 +54,14 @@ class EquipmentReturnedNotification extends Notification implements ShouldQueue
             ->line(__('Butiran peralatan yang dipulangkan:'));
 
         if ($this->returnTransaction->loanTransactionItems->isNotEmpty()) {
-            foreach ($this->returnTransaction->loanTransactionItems as $item) {
+            foreach($this->returnTransaction->loanTransactionItems as $item) {
                 /** @var LoanTransactionItem $item */
                 $equipment = $item->equipment;
                 if ($equipment instanceof Equipment) {
-                    $assetTypeDisplay = $equipment->assetTypeDisplay ?? __('Peralatan');
+                    // Using assetTypeDisplay from Equipment model
+                    $assetTypeDisplay = $equipment->assetTypeDisplay ?? __('Peralatan Tidak Dikenali');
                     $brandAndModel = trim(($equipment->brand ?? '') . ' ' . ($equipment->model ?? ''));
-                    $conditionDisplay = $item->condition_on_return ? (Equipment::getConditionStatusesList()[$item->condition_on_return] ?? ucfirst(str_replace('_', ' ', $item->condition_on_return))) : __('Tidak dinyatakan');
+                    $conditionDisplay = $item->condition_on_return ? (Equipment::getConditionStatusOptions()[$item->condition_on_return] ?? ucfirst(str_replace('_', ' ', $item->condition_on_return))) : __('Tidak dinyatakan');
 
                     $mailMessage->line(
                         "- **{$assetTypeDisplay}**" . ($brandAndModel ? " ({$brandAndModel})" : "") .
@@ -69,13 +71,12 @@ class EquipmentReturnedNotification extends Notification implements ShouldQueue
                         ($item->item_notes ? " ".__('Catatan Item').": {$item->item_notes}" : '')
                     );
                 } else {
-                    $mailMessage->line(__("- Butiran peralatan tidak lengkap untuk item transaksi ID: :id", ['id' => $item->id]));
+                     $mailMessage->line(__("- Butiran peralatan tidak lengkap untuk item transaksi ID: :id", ['id' => $item->id]));
                 }
             }
         } else {
-            $mailMessage->line(__("Tiada butiran item spesifik untuk transaksi pemulangan ini."));
+             $mailMessage->line(__("Tiada butiran item spesifik untuk transaksi pemulangan ini."));
         }
-
 
         if ($this->returnTransaction->return_notes) {
             $mailMessage->line('');
@@ -83,16 +84,18 @@ class EquipmentReturnedNotification extends Notification implements ShouldQueue
         }
 
         $applicationUrl = '#';
-        $routeName = 'resource-management.my-applications.loan.show'; // Standardized route name
+        // Standardized route name
+        $routeName = 'resource-management.my-applications.loan.show';
         if ($this->loanApplication->id && Route::has($routeName)) {
             try {
-                $applicationUrl = route($routeName, $this->loanApplication->id);
+                // Ensure correct parameter name
+                $applicationUrl = route($routeName, ['loan_application' => $this->loanApplication->id]);
             } catch (\Exception $e) {
                 Log::error('Error generating URL for EquipmentReturnedNotification mail action: ' . $e->getMessage(), [
                     'loan_application_id' => $this->loanApplication->id ?? null,
                     'exception' => $e,
                 ]);
-                $applicationUrl = '#'; // Fallback
+                $applicationUrl = '#';
             }
         }
 
@@ -110,7 +113,7 @@ class EquipmentReturnedNotification extends Notification implements ShouldQueue
         return $mailMessage;
     }
 
-    public function toArray(User $notifiable): array // Type hinted $notifiable
+    public function toArray(User $notifiable): array // Changed to User
     {
         $itemsDetails = $this->returnTransaction->loanTransactionItems->map(function (LoanTransactionItem $txItem) {
             $equipment = $txItem->equipment;
@@ -118,12 +121,13 @@ class EquipmentReturnedNotification extends Notification implements ShouldQueue
                 return [
                     'transaction_item_id' => $txItem->id,
                     'equipment_id' => $equipment->id,
-                    'asset_type' => $equipment->assetTypeDisplay ?? __('Peralatan'),
+                    // Using assetTypeDisplay from Equipment model
+                    'asset_type' => $equipment->assetTypeDisplay ?? __('Peralatan Tidak Dikenali'),
                     'brand_model' => trim(($equipment->brand ?? '') . ' ' . ($equipment->model ?? '')),
                     'tag_id' => $equipment->tag_id,
                     'serial_number' => $equipment->serial_number,
                     'quantity_returned' => $txItem->quantity_transacted,
-                    'condition_on_return' => $txItem->condition_on_return ? (Equipment::getConditionStatusesList()[$txItem->condition_on_return] ?? ucfirst(str_replace('_', ' ', $txItem->condition_on_return))) : __('Tidak dinyatakan'),
+                    'condition_on_return' => $txItem->condition_on_return ? (Equipment::getConditionStatusOptions()[$txItem->condition_on_return] ?? ucfirst(str_replace('_', ' ', $txItem->condition_on_return))) : __('Tidak dinyatakan'),
                     'item_notes' => $txItem->item_notes,
                 ];
             }
@@ -134,29 +138,31 @@ class EquipmentReturnedNotification extends Notification implements ShouldQueue
         $applicantName = $this->loanApplication->user?->name ?? __('Pemohon');
 
         $applicationUrl = '#';
+        // Standardized route name
         $routeName = 'resource-management.my-applications.loan.show';
         if ($loanAppId && Route::has($routeName)) {
             try {
-                $applicationUrl = route($routeName, $loanAppId);
+                 // Ensure correct parameter name
+                $applicationUrl = route($routeName, ['loan_application' => $loanAppId]);
             } catch (\Exception $e) {
                 Log::error('Error generating URL for EquipmentReturnedNotification toArray: ' . $e->getMessage(), ['loan_application_id' => $loanAppId]);
-                $applicationUrl = '#'; // Fallback
+                $applicationUrl = '#';
             }
         }
         $transactionDate = $this->returnTransaction->transaction_date instanceof Carbon
-            ? $this->returnTransaction->transaction_date->format(config('app.date_format', 'Y-m-d'))
+            ? $this->returnTransaction->transaction_date->format(config('app.date_format_my', 'd/m/Y')) // Use configured date format
             : null;
 
         return [
             'loan_application_id' => $loanAppId,
             'applicant_name' => $applicantName,
             'return_transaction_id' => $this->returnTransaction->id ?? null,
-            'returned_by_name' => $this->returnTransaction->returningOfficer?->name ?? __('Tidak direkodkan'), // Assuming returningOfficer relationship
+            'returned_by_name' => $this->returnTransaction->returningOfficer?->name ?? __('Tidak direkodkan'),
             'accepted_by_officer_name' => $this->returnAcceptingOfficer->name,
             'transaction_date' => $transactionDate,
             'subject' => __("Peralatan Dipulangkan (Permohonan #:id)", ['id' => $loanAppId ?? 'N/A']),
             'message' => __("Peralatan bagi Permohonan Pinjaman #:id oleh :name telah dipulangkan.", ['id' => $loanAppId ?? 'N/A', 'name' => $applicantName]),
-            'url' => ($applicationUrl !== '#') ? $applicationUrl : null,
+            'url' => ($applicationUrl !== '#' && filter_var($applicationUrl, FILTER_VALIDATE_URL)) ? $applicationUrl : null,
             'returned_items' => $itemsDetails,
             'overall_status' => $this->loanApplication->status === LoanApplication::STATUS_RETURNED ? __('Selesai') : __('Sebahagian Dipulangkan'),
             'icon' => 'ti ti-transfer-in',

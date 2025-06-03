@@ -7,10 +7,12 @@
 
     <div class="card shadow-sm mb-4">
         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-            <h6 class="m-0 fw-semibold text-primary"><i class="ti ti-list-check me-2"></i>{{ __('Tugasan Kelulusan Anda') }}</h6>
+            {{-- Icon: ti-list-check changed to bi-list-check --}}
+            <h6 class="m-0 fw-semibold text-primary"><i class="bi bi-list-check me-2"></i>{{ __('Tugasan Kelulusan Anda') }}</h6>
             <div>
                 <button wire:click="refreshDataEvent" class="btn btn-sm btn-outline-secondary">
-                    <i class="ti ti-refresh me-1"></i> {{ __('Muat Semula') }}
+                    {{-- Icon: ti-refresh changed to bi-arrow-clockwise --}}
+                    <i class="bi bi-arrow-clockwise me-1"></i> {{ __('Muat Semula') }}
                 </button>
             </div>
         </div>
@@ -38,11 +40,12 @@
                     <input wire:model.live.debounce.300ms="searchTerm" type="text" id="searchTerm" class="form-control form-control-sm" placeholder="{{ __('Cari ID Permohonan, Nama Pemohon...') }}">
                 </div>
                 <div class="col-md-2">
-                     <button type="button" wire:click="resetFilters" class="btn btn-sm btn-outline-secondary w-100"><i class="ti ti-rotate-clockwise-2 me-1"></i>{{ __('Set Semula') }}</button>
+                     {{-- Icon: ti-rotate-clockwise-2 changed to bi-arrow-counterclockwise --}}
+                     <button type="button" wire:click="resetFilters" class="btn btn-sm btn-outline-secondary w-100"><i class="bi bi-arrow-counterclockwise me-1"></i>{{ __('Set Semula') }}</button>
                 </div>
             </div>
 
-            <div wire:loading.delay.long class="text-center my-3 py-5"> {{-- Added .delay.long --}}
+            <div wire:loading.delay.long class="text-center my-3 py-5">
                 <div class="spinner-border text-primary" role="status" style="width: 2.5rem; height: 2.5rem;">
                     <span class="visually-hidden">{{ __('Memuatkan...') }}</span>
                 </div>
@@ -78,15 +81,18 @@
                                 </td>
                                 <td class="px-3 py-2 small">
                                     @if($approval->approvable_type === \App\Models\EmailApplication::class)
-                                        <i class="ti ti-mail text-info me-1"></i>{{ __('Emel/ID') }}
+                                        {{-- Icon: ti-mail changed to bi-envelope --}}
+                                        <i class="bi bi-envelope text-info me-1"></i>{{ __('Emel/ID') }}
                                     @elseif($approval->approvable_type === \App\Models\LoanApplication::class)
-                                        <i class="ti ti-device-laptop text-primary me-1"></i>{{ __('Pinjaman ICT') }}
+                                        {{-- Icon: ti-device-laptop changed to bi-laptop --}}
+                                        <i class="bi bi-laptop text-primary me-1"></i>{{ __('Pinjaman ICT') }}
                                     @endif
                                 </td>
                                 <td class="px-3 py-2 small">{{ $approval->approvable?->user?->name ?? __('N/A') }}</td>
                                 <td class="px-3 py-2 small">{{ $approval->approvable?->created_at?->translatedFormat(config('app.datetime_format_my_short', 'd M Y, H:i')) ?? 'N/A' }}</td>
                                 <td class="px-3 py-2 small">{{ $approval->stage_translated ?? __(Str::title(str_replace('_', ' ', $approval->stage))) }}</td>
                                 <td class="px-3 py-2 small">
+                                    {{-- Assuming Helpers::getStatusColorClass aligns with Design Doc Section 3.3 status colors for badges --}}
                                     <span class="badge {{ App\Helpers\Helpers::getStatusColorClass($approval->status, 'bootstrap_badge') }} rounded-pill">
                                         {{ $approval->status_translated ?? __(Str::title(str_replace('_', ' ', $approval->status))) }}
                                     </span>
@@ -94,15 +100,17 @@
                                 <td class="text-center px-3 py-2">
                                     @if($approval->status === \App\Models\Approval::STATUS_PENDING)
                                         @can('update', $approval) {{-- Policy Check --}}
+                                            {{-- Icon: ti-edit-circle, ti-xs changed to bi-pencil-square --}}
                                             <button wire:click="openApprovalActionModal({{ $approval->id }})" class="btn btn-xs btn-primary">
-                                                <i class="ti ti-edit-circle ti-xs me-1"></i> {{ __('Tindakan') }}
+                                                <i class="bi bi-pencil-square me-1"></i> {{ __('Tindakan') }}
                                             </button>
                                         @else
                                              <span class="text-muted small"><em>{{__('Tiada kebenaran')}}</em></span>
                                         @endcan
                                     @else
+                                    {{-- Icon: ti-checks, ti-xs changed to bi-check2-all --}}
                                     <button class="btn btn-xs btn-secondary" disabled>
-                                        <i class="ti ti-checks ti-xs me-1"></i> {{ __('Selesai') }}
+                                        <i class="bi bi-check2-all me-1"></i> {{ __('Selesai') }}
                                     </button>
                                     @endif
                                 </td>
@@ -110,7 +118,8 @@
                         @empty
                             <tr>
                                 <td colspan="8" class="text-center py-4">
-                                    <i class="ti ti-mood-empty ti-lg text-muted mb-2 d-block"></i>
+                                    {{-- Icon: ti-mood-empty, ti-lg changed to bi-emoji-frown --}}
+                                    <i class="bi bi-emoji-frown fs-2 text-muted mb-2 d-block"></i>
                                     {{ __('Tiada tugasan kelulusan ditemui.') }}
                                 </td>
                             </tr>
@@ -129,7 +138,7 @@
     {{-- Approval Action Modal --}}
     @if($showApprovalActionModal && $selectedApproval)
     <div class="modal fade show" id="approvalActionModal" tabindex="-1" aria-labelledby="approvalActionModalLabel" style="display: block; background-color: rgba(0,0,0,0.5);" aria-modal="true" role="dialog" wire:ignore.self>
-        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"> {{-- Added modal-lg for more space --}}
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="approvalActionModalLabel">{{ __('Tindakan Kelulusan untuk Permohonan #') }}{{ $selectedApproval->approvable_id }}
@@ -149,8 +158,10 @@
 
                                     <dt class="col-sm-4">{{ __('Jenis Permohonan:') }}</dt>
                                     <dd class="col-sm-8">
-                                        @if($approvableItem instanceof \App\Models\EmailApplication) <i class="ti ti-mail text-info me-1"></i>{{ __('Permohonan Emel/ID') }}
-                                        @elseif($approvableItem instanceof \App\Models\LoanApplication) <i class="ti ti-device-laptop text-primary me-1"></i>{{ __('Permohonan Pinjaman ICT') }}
+                                        {{-- Icon: ti-mail changed to bi-envelope --}}
+                                        @if($approvableItem instanceof \App\Models\EmailApplication) <i class="bi bi-envelope text-info me-1"></i>{{ __('Permohonan Emel/ID') }}
+                                        {{-- Icon: ti-device-laptop changed to bi-laptop --}}
+                                        @elseif($approvableItem instanceof \App\Models\LoanApplication) <i class="bi bi-laptop text-primary me-1"></i>{{ __('Permohonan Pinjaman ICT') }}
                                         @endif
                                     </dd>
 
@@ -183,8 +194,9 @@
                                      <dd class="col-sm-8 mt-2">{{ $approvableItem->created_at?->translatedFormat(config('app.datetime_format_my')) ?? 'N/A' }}</dd>
                                 </dl>
                                 @if($this->getViewApplicationRouteForSelected())
+                                {{-- Icon: ti-external-link, ti-xs changed to bi-box-arrow-up-right --}}
                                 <a href="{{ $this->getViewApplicationRouteForSelected() }}" target="_blank" class="btn btn-sm btn-outline-info mt-2">
-                                    <i class="ti ti-external-link ti-xs me-1"></i>{{ __('Lihat Permohonan Penuh') }}
+                                    <i class="bi bi-box-arrow-up-right me-1" style="font-size: .75em;"></i>{{ __('Lihat Permohonan Penuh') }}
                                 </a>
                                 @endif
                             </div>
@@ -212,7 +224,8 @@
                         <button type="button" wire:click="closeModal" class="btn btn-secondary">{{ __('Batal') }}</button>
                         <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="submitDecision">
                             <span wire:loading wire:target="submitDecision" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                            <span wire:loading.remove wire:target="submitDecision"><i class="ti ti-check me-1"></i></span>
+                            {{-- Icon: ti-check changed to bi-check-lg --}}
+                            <span wire:loading.remove wire:target="submitDecision"><i class="bi bi-check-lg me-1"></i></span>
                             {{ __('Hantar Keputusan') }}
                         </button>
                     </div>
@@ -220,35 +233,32 @@
             </div>
         </div>
     </div>
-    {{-- Modal backdrop is handled by Bootstrap when modal is shown/hidden via JS --}}
-    {{-- <div class="modal-backdrop fade show" id="backdrop" style="display: @if($showApprovalActionModal) block @else none @endif;"></div> --}}
     @endif
 
-    @push('page-script') {{-- Ensure stack name is unique if multiple components on a page use it --}}
+    @push('page-script')
     <script>
         document.addEventListener('livewire:initialized', () => {
             const approvalModalElement = document.getElementById('approvalActionModal');
             let approvalModalInstance = null;
 
             if (approvalModalElement) {
-                // Get existing instance if any, otherwise create new
                 approvalModalInstance = bootstrap.Modal.getInstance(approvalModalElement);
                 if (!approvalModalInstance) {
                     approvalModalInstance = new bootstrap.Modal(approvalModalElement, {
-                        backdrop: 'static', // Keep modal open on outside click
-                        keyboard: false    // Prevent closing with Esc key
+                        backdrop: 'static',
+                        keyboard: false
                     });
                 }
             }
 
-            @this.on('openApprovalActionModalEvent', () => { // Renamed event for clarity
+            @this.on('openApprovalActionModalEvent', () => {
                 if(approvalModalInstance) {
                     approvalModalInstance.show();
                 } else {
                     console.warn('Approval modal instance not found for open event.');
                 }
             });
-            @this.on('closeApprovalActionModalEvent', () => { // Renamed event for clarity
+            @this.on('closeApprovalActionModalEvent', () => {
                 if(approvalModalInstance) {
                     approvalModalInstance.hide();
                 } else {

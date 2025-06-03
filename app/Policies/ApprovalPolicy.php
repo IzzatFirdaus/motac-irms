@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use App\Models\Approval;
-use App\Models\User;
+use App\Models\User; //
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Auth\Access\Response;
 
@@ -26,10 +26,10 @@ class ApprovalPolicy
 
         // Check if the user's grade is marked as an approver grade
         // OR if their grade level meets a configured minimum.
-        // Design Ref: Sections 4.1 (grades.is_approver_grade), 7.2 (motac.approval.min_approver_grade_level)
-        $minApprovalGradeLevel = config('motac.approval.min_approver_grade_level');
+        // Design Ref: Sections 4.1 (grades.is_approver_grade), 3.3 (motac.approval.min_general_view_approval_grade_level)
+        $minApprovalGradeLevel = config('motac.approval.min_general_view_approval_grade_level'); // Updated to use general key
         if (
-            ($user->grade && $user->grade->is_approver_grade) ||
+            ($user->grade && $user->grade->is_approver_grade) || //
             ($user->grade && is_numeric($minApprovalGradeLevel) && $user->grade->level >= $minApprovalGradeLevel)
         ) {
             return Response::allow();
@@ -54,11 +54,6 @@ class ApprovalPolicy
         if ($approval->officer_id === $user->id) { // User is the assigned officer
             return Response::allow();
         }
-
-        // Potentially allow the creator of the approvable item to view its approvals too
-        // if ($approval->approvable && property_exists($approval->approvable, 'user_id') && $approval->approvable->user_id === $user->id) {
-        //     return Response::allow();
-        // }
 
         return Response::deny('Anda tidak mempunyai kebenaran untuk melihat kelulusan ini.');
     }
@@ -90,7 +85,7 @@ class ApprovalPolicy
         // Assigned officer can update only if it's their task and it's pending
         // Design Ref: Section 4.4 (approvals.status: 'pending')
         return $approval->officer_id === $user->id &&
-          $approval->status === Approval::STATUS_PENDING // Assuming STATUS_PENDING constant exists in Approval model and maps to 'pending'
+          $approval->status === Approval::STATUS_PENDING // Assuming STATUS_PENDING constant exists in Approval model
           ? Response::allow()
           : Response::deny('Anda tidak mempunyai kebenaran untuk mengambil tindakan ke atas kelulusan ini atau ia tidak lagi menunggu tindakan.');
     }

@@ -5,137 +5,138 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Database\Eloquent\Model;
 
-// Import seeders that will be definitely called for clarity
-// Many are commented out as per your original file, to be enabled as needed.
-use Database\Seeders\RoleAndPermissionSeeder; // Called
-use Database\Seeders\AdminUserSeeder;       // Called
-use Database\Seeders\DepartmentSeeder;      // Called
-use Database\Seeders\GradesSeeder;          // Called
-use Database\Seeders\PositionSeeder;        // Called
-use Database\Seeders\LocationSeeder;        // Called
-use Database\Seeders\EquipmentCategorySeeder; // Called
-use Database\Seeders\SubCategoriesSeeder;   // Called
-use Database\Seeders\EquipmentSeeder;       // Called
-use Database\Seeders\SettingsSeeder;        // Called
-use Database\Seeders\UserSeeder;            // Optional, called if uncommented
+// Explicitly import seeders that are actively called
+use Database\Seeders\RoleAndPermissionSeeder;
+use Database\Seeders\AdminUserSeeder;
+use Database\Seeders\DepartmentSeeder;
+use Database\Seeders\GradesSeeder;
+use Database\Seeders\PositionSeeder;
+use Database\Seeders\LocationSeeder;
+use Database\Seeders\EquipmentCategorySeeder;
+use Database\Seeders\SubCategoriesSeeder;
+use Database\Seeders\EquipmentSeeder;
+use Database\Seeders\SettingsSeeder;
+use Database\Seeders\UserSeeder;
+
+// Import seeders that are now uncommented
+use Database\Seeders\EmailApplicationSeeder;
+use Database\Seeders\LoanApplicationSeeder;
+use Database\Seeders\LoanTransactionSeeder; // Ensure this file exists
+use Database\Seeders\ApprovalSeeder;        // Ensure this file exists
+use Database\Seeders\NotificationSeeder;
+
+// Import others if/when uncommented below:
+// use Database\Seeders\CenterSeeder;
+// use Database\Seeders\LoanApplicationItemSeeder; // Usually handled by LoanApplicationSeeder's factory
+// use Database\Seeders\ImportSeeder;
+// use Database\Seeders\ChangelogSeeder;
+// use Database\Seeders\ContractsSeeder;
+// use Database\Seeders\LeavesSeeder;
+// use Database\Seeders\HolidaysSeeder;
+
+// For checking User/Equipment counts if uncommenting parts of transactional data
+use App\Models\User as AppUser;
+use App\Models\Equipment as AppEquipment;
+
 
 class DatabaseSeeder extends Seeder
 {
   /**
    * Seed the application's database.
    * This method orchestrates the calling of other seeder classes.
-   * The order is important to satisfy foreign key constraints.
-   * Referenced Design: MOTAC Integrated Resource Management System (Revision 3)
+   * The order is important to satisfy foreign key constraints,
+   * aligned with MOTAC Integrated Resource Management System (Revision 3).
    */
   public function run(): void
   {
-    $logChannel = 'stderr'; // Use stderr for console visibility during seeding
+    $originalPreventLazyLoading = Model::preventsLazyLoading();
+    Model::preventLazyLoading(false);
+
+    $logChannel = 'stderr';
 
     Log::channel($logChannel)->info('================================================================');
-    Log::channel($logChannel)->info('🚀 STARTING DATABASE SEEDING PROCESS - Rev 3 🚀');
+    Log::channel($logChannel)->info('🚀 STARTING DATABASE SEEDING PROCESS - MOTAC RMS (Rev 3) 🚀');
     Log::channel($logChannel)->info('================================================================');
 
     DB::statement('SET FOREIGN_KEY_CHECKS=0;');
     Log::channel($logChannel)->info('Foreign key checks DISABLED.');
 
-    // SECTION 1: ROLES, PERMISSIONS & ADMIN USERS
-    // Design Doc: 4.1 (Users table for created_by), 8.1 (RBAC)
+    // SECTION 1: ROLES, PERMISSIONS & ADMINISTRATIVE USERS
     Log::channel($logChannel)->info('SECTION 1: Seeding Roles, Permissions & Admin Users...');
     $this->call([
-      RoleAndPermissionSeeder::class, // Seeds roles (Admin, BPM Staff, IT Admin, User, Approver, HOD) & permissions
-      AdminUserSeeder::class,         // Creates predefined admin/system users with specific roles (e.g., 'Admin', 'IT Admin')
+      RoleAndPermissionSeeder::class,
+      AdminUserSeeder::class,
     ]);
     Log::channel($logChannel)->info('✅ Roles, Permissions & Admin Users have been seeded.');
 
     // SECTION 2: ORGANIZATIONAL MASTER DATA
-    // Design Doc: 4.1 (Departments, Grades, Positions)
     Log::channel($logChannel)->info('SECTION 2: Seeding Organizational Master Data...');
     $this->call([
-      DepartmentSeeder::class,        // Seeds MOTAC Divisions/Units
-      GradesSeeder::class,            // Seeds Staff Grades
-      PositionSeeder::class,          // Seeds Staff Positions
-      LocationSeeder::class,          // Seeds Physical Locations (for equipment placement, etc.)
-      // CenterSeeder::class,         // Uncomment if 'Service Center' or similar entities are used
+      DepartmentSeeder::class,
+      GradesSeeder::class,
+      PositionSeeder::class,
+      LocationSeeder::class,
+      // CenterSeeder::class,
     ]);
     Log::channel($logChannel)->info('✅ Organizational Master Data has been seeded.');
 
-    // SECTION 3: GENERAL USERS - Optional, but useful for development/testing
-    // Depends on Roles, Departments, Grades, Positions
-    Log::channel($logChannel)->info('SECTION 3: Seeding General Users (if UserSeeder is called)...');
-    $this->call(UserSeeder::class); // Creates a batch of general users for testing with various roles
+    // SECTION 3: GENERAL USERS
+    Log::channel($logChannel)->info('SECTION 3: Seeding General Users...');
+    $this->call(UserSeeder::class);
     Log::channel($logChannel)->info('✅ General Users have been seeded.');
 
 
-    // SECTION 4: ICT EQUIPMENT MASTER DATA
-    // Design Doc: 4.3 (EquipmentCategory, SubCategory)
-    Log::channel($logChannel)->info('SECTION 4: Seeding ICT Equipment Master Data...');
+    // SECTION 4: ICT EQUIPMENT MASTER DATA (LOOKUPS)
+    Log::channel($logChannel)->info('SECTION 4: Seeding ICT Equipment Master Data (Lookups)...');
     $this->call([
-      EquipmentCategorySeeder::class, // Seeds Equipment Categories (e.g., Laptop, Projector)
-      SubCategoriesSeeder::class,     // Seeds Equipment Sub-Categories (linked to EquipmentCategory)
+      EquipmentCategorySeeder::class,
+      SubCategoriesSeeder::class,
     ]);
-    Log::channel($logChannel)->info('✅ ICT Equipment Master Data has been seeded.');
+    Log::channel($logChannel)->info('✅ ICT Equipment Master Data (Lookups) have been seeded.');
 
-    // SECTION 5: ICT EQUIPMENT ASSETS
-    // Design Doc: 4.3 (Equipment table)
-    // Depends on Users (for created_by), Departments, Locations, EquipmentCategories, SubCategories
+    // SECTION 5: ICT EQUIPMENT ASSETS (MAIN DATA)
     Log::channel($logChannel)->info('SECTION 5: Seeding ICT Equipment Assets...');
     $this->call([
-      EquipmentSeeder::class,         // Seeds ICT equipment records (requires robust factory)
+      EquipmentSeeder::class,
     ]);
     Log::channel($logChannel)->info('✅ ICT Equipment Assets have been seeded.');
 
-    // SECTION 6: SAMPLE TRANSACTIONAL DATA - Optional, for testing workflows
-    // Design Doc: 4.2 (EmailApplications), 4.3 (LoanApplications, etc.), 4.4 (Approvals)
-    // These would depend heavily on Users and Equipment already being seeded.
-    Log::channel($logChannel)->info('SECTION 6: Seeding Sample Transactional Data (Commented out by default)...');
-    /*
+    // SECTION 6: SAMPLE TRANSACTIONAL DATA (Optional, for testing workflows)
+    Log::channel($logChannel)->info('SECTION 6: Seeding Sample Transactional Data...');
+    // It's good practice to ensure prerequisite data exists before seeding transactions
+    if (AppUser::count() > 0 && AppEquipment::count() > 0) {
         $this->call([
-            EmailApplicationSeeder::class,  // Seeds sample email applications
-            LoanApplicationSeeder::class,   // Seeds sample ICT loan applications
-            // Further seeders for items within these applications, transactions, and approvals
-            // LoanApplicationItemSeeder::class,
-            // LoanTransactionSeeder::class, // (and LoanTransactionItemSeeder if separate)
-            // ApprovalSeeder::class, // Polymorphic approvals for samples
+            EmailApplicationSeeder::class,
+            LoanApplicationSeeder::class,
+            // LoanApplicationItemSeeder::class, // Usually handled by LoanApplicationFactory's afterCreating hook
+            LoanTransactionSeeder::class,     // Ensure LoanTransactionSeeder.php exists and uses its factory
+            ApprovalSeeder::class,            // Ensure ApprovalSeeder.php exists and uses its factory
         ]);
-        Log::channel($logChannel)->info('✅ Sample Transactional Data has been seeded (if not commented out).');
-        */
+        Log::channel($logChannel)->info('✅ Sample Transactional Data has been seeded.');
+    } else {
+       Log::channel($logChannel)->warning('⚠️ Skipping Sample Transactional Data: Prerequisite User or Equipment data missing.');
+    }
+
 
     // SECTION 7: SYSTEM SETTINGS & UTILITIES
-    // Design Doc: 3.1 (Settings model), 4.4 (Notifications custom table)
     Log::channel($logChannel)->info('SECTION 7: Seeding System Settings & Utilities...');
     $this->call([
-      SettingsSeeder::class,          // Seeds initial application settings
-      // NotificationSeeder::class,   // Seeds sample notifications (custom table)
-      // ImportSeeder::class,         // Seeds sample import records (if Import model is used)
-      // ChangelogSeeder::class,      // If changelogs are maintained and seeded
+      SettingsSeeder::class,
+      NotificationSeeder::class,   // Factory exists
+      // ImportSeeder::class,
+      // ChangelogSeeder::class,
     ]);
     Log::channel($logChannel)->info('✅ System Settings & Utilities have been seeded.');
-
-    // HRMS SPECIFIC SEEDERS from your first DatabaseSeeder example (commented out as MOTAC scope is primary)
-    // If these are needed, ensure their models and factories also align with any Revision 3 changes.
-    /*
-        Log::channel($logChannel)->info('SECTION HRMS: Seeding HRMS Specific Data (Commented out by default)...');
-        $this->call([
-            ContractsSeeder::class,
-            LeavesSeeder::class,
-            HolidaysSeeder::class,
-            // EmployeesSeeder::class, // UserSeeder above might cover employees or be distinct
-            // FingerprintSeeder::class,
-            // AttendanceSeeder::class,
-            // DiscountSeeder::class,
-            // EmployeeLeaveSeeder::class,
-            // TimelineSeeder::class,
-            // CenterHolidaySeeder::class,
-        ]);
-        Log::channel($logChannel)->info('✅ HRMS Specific Data has been seeded (if not commented out).');
-        */
 
     DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     Log::channel($logChannel)->info('Foreign key checks ENABLED.');
 
     Log::channel($logChannel)->info('================================================================');
-    Log::channel($logChannel)->info('🎉 DATABASE SEEDING PROCESS COMPLETED! 🎉');
+    Log::channel($logChannel)->info('🎉 DATABASE SEEDING PROCESS COMPLETED! (MOTAC RMS - Rev 3) 🎉');
     Log::channel($logChannel)->info('================================================================');
+
+    Model::preventLazyLoading($originalPreventLazyLoading);
   }
 }

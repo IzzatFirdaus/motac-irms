@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreEmailApplicationRequest;
+use App\Http\Requests\SubmitEmailApplicationRequest;
 use App\Http\Requests\UpdateEmailApplicationRequest;
 use App\Models\EmailApplication;
-use App\Models\User; // Ensure User model is imported
+use App\Models\User;
 use App\Services\EmailApplicationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -22,19 +23,11 @@ class EmailApplicationController extends Controller
         $this->emailApplicationService = $emailApplicationService;
         $this->middleware('auth');
 
-        // Authorize resource methods.
-        // System Design (Rev 3, Source 493)
         $this->authorizeResource(EmailApplication::class, 'email_application', [
-            'except' => ['index', 'create', 'edit'], // Assuming Livewire handles these views/forms
+            'except' => ['index', 'create', 'edit'],
         ]);
     }
 
-    /**
-     * Store a newly created email application draft.
-     * System Design (Rev 3, Source 302, 493)
-     * @param  \App\Http\Requests\StoreEmailApplicationRequest  $request
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function store(StoreEmailApplicationRequest $request): RedirectResponse
     {
         /** @var User $user */
@@ -44,14 +37,14 @@ class EmailApplicationController extends Controller
         Log::info("EmailApplicationController@store: User ID {$user->id} storing new email application draft.");
 
         try {
-            $application = $this->emailApplicationService->createApplication(
+            $application = $this->emailApplicationService->createDraftApplication(
                 $validatedData,
                 $user
             );
             Log::info("Email application draft ID: {$application->id} created successfully by User ID: {$user->id}.");
 
             return redirect()
-                ->route('email-applications.show', $application) // Route name confirmed from web.php
+                ->route('email-applications.show', $application)
                 ->with('success', __('Draf permohonan e-mel berjaya dicipta. Anda boleh menyunting atau menghantarnya untuk kelulusan.'));
         } catch (Throwable $e) {
             Log::error("Error storing email application draft for User ID: {$user->id}.", [
@@ -63,59 +56,16 @@ class EmailApplicationController extends Controller
         }
     }
 
-    /**
-     * Display the specified email application.
-     * System Design (Rev 3, Source 302, 493)
-     * @param  \App\Models\EmailApplication  $emailApplication
-     * @return \Illuminate\View\View
-     */
     public function show(EmailApplication $emailApplication): View
     {
         Log::info("EmailApplicationController@show: User ID ".Auth::id()." viewing EmailApplication ID {$emailApplication->id}.");
 
-        // Define the user fields needed for the 'user-info-card' and other parts of the view.
-        // This ensures 'title' and other attributes are explicitly loaded.
-        // Refer to User model (System Design Rev 3, Source 69-70) for available fields.
-        $userFieldsToSelect = [
-            'id', 'name', 'title', 'full_name', 'identification_number',
-            'motac_email', 'email', 'mobile_number', 'profile_photo_path',
-            'position_id', 'grade_id', 'department_id', 'user_id_assigned',
-            'service_status', // Added as it might be relevant for applicant info display
-            // Add any other user fields you directly access or pass to components from $emailApplication->user
-        ];
-
-        // Fields for officer models (like supportingOfficer, approval->officer, creator, updater)
-        // Often a more limited set is needed, e.g., id and name. Adjust as necessary.
-        $officerFieldsToSelect = ['id', 'name', 'title', 'full_name', 'grade_id', 'email'];
-
-
-        $emailApplication->loadMissing([
-            // Explicitly select fields for the main user (applicant)
-            'user:' . implode(',', $userFieldsToSelect),
-            'user.department:id,name', // Select specific fields for related department
-            'user.grade:id,name',      // Select specific fields for related grade
-            'user.position:id,name',   // Select specific fields for related position
-
-            // Load supporting officer and their grade.
-            // Use $officerFieldsToSelect or $userFieldsToSelect based on display needs.
-            'supportingOfficer:' . implode(',', $officerFieldsToSelect),
-            'supportingOfficer.grade:id,name',
-
-            'approvals.officer:' . implode(',', $officerFieldsToSelect), // For officers in the approval history
-            'creator:' . implode(',', $officerFieldsToSelect),      // Blameable: creator
-            'updater:' . implode(',', $officerFieldsToSelect),      // Blameable: updater
-        ]);
+        // Use the default relations defined in the service for consistency
+        $emailApplication->loadMissing($this->emailApplicationService->getDefaultEmailApplicationRelations());
 
         return view('email-applications.show', compact('emailApplication'));
     }
 
-    /**
-     * Update the specified email application in storage.
-     * System Design (Rev 3, Source 302, 493)
-     * @param  \App\Http\Requests\UpdateEmailApplicationRequest  $request
-     * @param  \App\Models\EmailApplication  $emailApplication
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function update(UpdateEmailApplicationRequest $request, EmailApplication $emailApplication): RedirectResponse
     {
         /** @var User $user */
@@ -127,14 +77,14 @@ class EmailApplicationController extends Controller
                 'application_status' => $emailApplication->status,
             ]);
             return redirect()
-                ->route('email-applications.show', $emailApplication) // Route name confirmed
+                ->route('email-applications.show', $emailApplication)
                 ->with('error', __('Hanya draf permohonan yang boleh dikemaskini.'));
         }
 
         Log::info("EmailApplicationController@update: User ID {$user->id} attempting to update EmailApplication ID {$emailApplication->id}.");
 
         try {
-            $updatedApplication = $this->emailApplicationService->updateApplication(
+            $updatedApplication = $this->emailApplicationService->updateDraftApplication(
                 $emailApplication,
                 $validatedData,
                 $user
@@ -142,7 +92,7 @@ class EmailApplicationController extends Controller
             Log::info("EmailApplication ID {$updatedApplication->id} updated successfully by User ID {$user->id}.");
 
             return redirect()
-                ->route('email-applications.show', $updatedApplication) // Route name confirmed
+                ->route('email-applications.show', $updatedApplication)
                 ->with('success', __('Permohonan e-mel berjaya dikemaskini.'));
         } catch (Throwable $e) {
             Log::error("Error updating EmailApplication ID {$emailApplication->id} by User ID {$user->id}.", [
@@ -154,83 +104,66 @@ class EmailApplicationController extends Controller
         }
     }
 
-    /**
-     * Submit a draft application for approval.
-     * System Design (Rev 3, Source 302, 493)
-     * @param  \App\Models\EmailApplication  $emailApplication
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function submitApplication(EmailApplication $emailApplication): RedirectResponse
+    public function submitApplication(SubmitEmailApplicationRequest $request, EmailApplication $emailApplication): RedirectResponse
     {
         /** @var User $user */
-        $user = Auth::user();
-
-        $this->authorize('submit', $emailApplication);
+        $user = $request->user();
+        $validatedData = $request->validated();
 
         Log::info("EmailApplicationController@submitApplication: User ID {$user->id} attempting to submit EmailApplication ID {$emailApplication->id}.");
 
         try {
-            $submittedApplication = $this->emailApplicationService->submitApplication(
+            $submittedApplication = $this->emailApplicationService->submitDraftApplication(
                 $emailApplication,
+                $validatedData,
                 $user
             );
             Log::info("EmailApplication ID {$submittedApplication->id} submitted successfully by User ID {$user->id}. Status: {$submittedApplication->status}");
 
             return redirect()
-                ->route('email-applications.show', $submittedApplication) // Route name confirmed
+                ->route('email-applications.show', $submittedApplication)
                 ->with('success', __('Permohonan e-mel berjaya dihantar untuk kelulusan.'));
         } catch (Throwable $e) {
             Log::error("Error submitting EmailApplication ID {$emailApplication->id} by User ID {$user->id}.", [
                 'error' => $e->getMessage(),
                 'exception_trace_snippet' => substr($e->getTraceAsString(), 0, 500),
+                'request_data' => $request->except(['_token', 'password', 'password_confirmation']),
             ]);
             $errorMessage = ($e instanceof \RuntimeException || $e instanceof \InvalidArgumentException)
                 ? $e->getMessage()
                 : __('Gagal menghantar permohonan e-mel disebabkan ralat sistem.');
-            return redirect()->route('email-applications.show', $emailApplication)->with('error', $errorMessage); // Route name confirmed
+            return redirect()->route('email-applications.show', $emailApplication)->with('error', $errorMessage);
         }
     }
 
-    /**
-     * Remove the specified email application (soft delete).
-     * System Design (Rev 3, Source 302, 493)
-     * @param  \App\Models\EmailApplication  $emailApplication
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function destroy(EmailApplication $emailApplication): RedirectResponse
     {
         /** @var User $user */
         $user = Auth::user();
-
-        $this->authorize('delete', $emailApplication); // Authorization check
+        $this->authorize('delete', $emailApplication);
 
         if (!$emailApplication->isDraft()) {
             Log::warning("User ID {$user->id} attempt to delete non-draft EmailApplication ID {$emailApplication->id}.", [
                 'application_status' => $emailApplication->status,
             ]);
             return redirect()
-                ->route('email-applications.show', $emailApplication) // Route name confirmed
+                ->route('email-applications.show', $emailApplication)
                 ->with('error', __('Hanya draf permohonan yang boleh dibuang.'));
         }
-
         Log::info("EmailApplicationController@destroy: User ID {$user->id} attempting to soft delete EmailApplication ID {$emailApplication->id}.");
-
         try {
-            $this->emailApplicationService->deleteApplication( // Assuming service method handles actual deletion
+            $this->emailApplicationService->deleteApplication(
                 $emailApplication,
                 $user
             );
-
             Log::info("EmailApplication ID {$emailApplication->id} soft deleted successfully by User ID {$user->id}.");
-            // System design (Source 210) indicates index is handled by Livewire (EmailApplicationsIndexLW)
-            return redirect()->route('email-applications.index') // Route name confirmed
+            return redirect()->route('email-applications.index')
                 ->with('success', __('Permohonan e-mel berjaya dibuang.'));
         } catch (Throwable $e) {
             Log::error("Error soft deleting EmailApplication ID {$emailApplication->id} by User ID {$user->id}.", [
                 'error' => $e->getMessage(),
                 'exception_trace_snippet' => substr($e->getTraceAsString(), 0, 500),
             ]);
-            // It might be better to redirect to the index or show page with error
             return redirect()->route('email-applications.show', $emailApplication)
                              ->with('error', __('Gagal membuang permohonan e-mel disebabkan ralat sistem: ') . $e->getMessage());
         }

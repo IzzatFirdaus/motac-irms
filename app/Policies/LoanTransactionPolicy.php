@@ -1,12 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
 use App\Models\LoanApplication;
 use App\Models\LoanTransaction;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Support\Facades\Log; // Retaining Log facade
+use Illuminate\Support\Facades\Log;
+use Illuminate\Auth\Access\Response;
 
 class LoanTransactionPolicy
 {
@@ -14,105 +17,109 @@ class LoanTransactionPolicy
 
     public function before(User $user, string $ability): ?bool
     {
-        // Ensure User model uses Spatie's HasRoles trait
-        if ($user->hasRole('Admin')) { // Role 'Admin'
+        if ($user->hasRole('Admin')) {
             return true;
         }
-
         return null;
     }
 
-    public function viewAny(User $user): bool
+    public function viewAny(User $user): Response|bool
     {
-        // Ensure 'BPM Staff' role exists and is assigned
-        // Roles 'Admin', 'BPM Staff'
-        return $user->hasAnyRole(['Admin', 'BPM Staff']); // Admins covered by before
+        return $user->hasAnyRole(['Admin', 'BPM Staff'])
+            ? Response::allow()
+            : Response::deny(__('Anda tidak mempunyai kebenaran untuk melihat senarai transaksi pinjaman.'));
     }
 
-    public function view(User $user, LoanTransaction $loanTransaction): bool
+    public function view(User $user, LoanTransaction $loanTransaction): Response|bool
     {
-        // Roles 'Admin', 'BPM Staff'
-        if ($user->hasAnyRole(['Admin', 'BPM Staff'])) { // Admins covered by before
-            return true;
+        if ($user->hasAnyRole(['Admin', 'BPM Staff'])) {
+            return Response::allow();
         }
-        // Ensure loanApplication relationship exists and has user_id and responsible_officer_id
-        // Design Ref: Section 4.3 (loan_applications.user_id, loan_applications.responsible_officer_id)
+        // Design Ref (Rev. 3.5): Section 4.3 (loan_applications.user_id, loan_applications.responsible_officer_id)
         if ($loanTransaction->loanApplication) {
             if ((int) $user->id === (int) $loanTransaction->loanApplication->user_id) {
-                return true;
+                return Response::allow();
             }
-            // Check if responsible_officer_id is set before accessing responsibleOfficer relationship or its id
             if ($loanTransaction->loanApplication->responsible_officer_id && (int) $user->id === (int) $loanTransaction->loanApplication->responsible_officer_id) {
-                return true;
+                return Response::allow();
             }
         }
-
-        return false;
+        return Response::deny(__('Anda tidak mempunyai kebenaran untuk melihat transaksi pinjaman ini.'));
     }
 
-    public function createIssue(User $user, LoanApplication $loanApplication): bool
+    public function createIssue(User $user, LoanApplication $loanApplication): Response|bool
     {
-        // CRUCIAL: LoanApplication model MUST have isApproved() and isPartiallyIssued() methods.
-        // These methods should check $this->status against LoanApplication status constants.
-        // Design Ref: Section 4.3 (loan_applications.status: 'approved', 'partially_issued')
-        $isReadyForIssuance = false;
-        if (method_exists($loanApplication, 'isApproved') && $loanApplication->isApproved()) {
-            $isReadyForIssuance = true;
-        }
-        if (method_exists($loanApplication, 'isPartiallyIssued') && $loanApplication->isPartiallyIssued()) {
-            $isReadyForIssuance = true;
-        }
-        if (! method_exists($loanApplication, 'isApproved') || ! method_exists($loanApplication, 'isPartiallyIssued')) {
-            Log::warning("LoanTransactionPolicy: LoanApplication model ID {$loanApplication->id} is missing isApproved() or isPartiallyIssued() methods.");
+        // Design Ref (Rev. 3.5): Section 4.3 (loan_applications.status: 'approved', 'partially_issued')
+        // Assumes LoanApplication.php model has a canBeIssued() method.
+        $isReadyForIssuance = method_exists($loanApplication, 'canBeIssued') && $loanApplication->canBeIssued();
+
+        if (!method_exists($loanApplication, 'canBeIssued')) {
+             Log::warning("LoanTransactionPolicy: LoanApplication model ID {$loanApplication->id} is missing canBeIssued() method.");
+             // Fallback to direct status check if method doesn't exist for some reason
+             $isReadyForIssuance = in_array($loanApplication->status, [
+                 LoanApplication::STATUS_APPROVED,
+                 LoanApplication::STATUS_PARTIALLY_ISSUED
+             ]);
         }
 
-        // Roles 'Admin', 'BPM Staff'
-        return $user->hasAnyRole(['Admin', 'BPM Staff']) && $isReadyForIssuance;
+        if (!$user->hasAnyRole(['Admin', 'BPM Staff'])) {
+            return Response::deny(__('Hanya Admin atau Staf BPM yang boleh memulakan proses pengeluaran.'));
+        }
+
+        return $isReadyForIssuance
+            ? Response::allow()
+            : Response::deny(__('Permohonan pinjaman ini tidak dalam status yang membenarkan pengeluaran peralatan.'));
     }
 
-    public function createReturn(User $user, LoanTransaction $issueLoanTransaction): bool
+    public function createReturn(User $user, LoanTransaction $issueLoanTransaction): Response|bool
     {
-        // CRUCIAL: LoanTransaction model MUST have isIssue() and isFullyClosedOrReturned() methods.
-        // isIssue() checks $this->type; isFullyClosedOrReturned() checks its status or related items.
-        // Design Ref: Section 4.3 (loan_transactions.type: 'issue'; loan_transactions.status)
-        if (! method_exists($issueLoanTransaction, 'isIssue') || ! method_exists($issueLoanTransaction, 'isFullyClosedOrReturned')) {
+        // Design Ref (Rev. 3.5): Section 4.3 (loan_transactions.type: 'issue'; loan_transactions.status)
+        if (!method_exists($issueLoanTransaction, 'isIssue') || !method_exists($issueLoanTransaction, 'isFullyClosedOrReturned')) {
             Log::error("LoanTransactionPolicy: LoanTransaction model is missing isIssue() or isFullyClosedOrReturned() methods for Tx ID {$issueLoanTransaction->id}. Denying return creation.");
-            return false; // Fail safe
+            return Response::deny(__('Konfigurasi sistem tidak lengkap untuk memproses pemulangan.'));
         }
 
-        // Roles 'Admin', 'BPM Staff'
-        return $user->hasAnyRole(['Admin', 'BPM Staff']) &&
-          $issueLoanTransaction->isIssue() &&
-          ! $issueLoanTransaction->isFullyClosedOrReturned();
+        if (!$user->hasAnyRole(['Admin', 'BPM Staff'])) {
+            return Response::deny(__('Hanya Admin atau Staf BPM yang boleh memproses pemulangan.'));
+        }
+
+        return $issueLoanTransaction->isIssue() && !$issueLoanTransaction->isFullyClosedOrReturned()
+            ? Response::allow()
+            : Response::deny(__('Transaksi pengeluaran ini tidak sah atau telahpun selesai dipulangkan sepenuhnya.'));
     }
 
-    public function update(User $user, LoanTransaction $loanTransaction): bool
+    public function update(User $user, LoanTransaction $loanTransaction): Response|bool
     {
-        // Transactions generally immutable by non-admins
-        return $user->hasRole('Admin'); // Role 'Admin'. Admins implicitly allowed by before(), but explicit can be here too.
+        return $user->hasRole('Admin')
+            ? Response::allow()
+            : Response::deny(__('Anda tidak mempunyai kebenaran untuk mengemaskini transaksi pinjaman.'));
     }
 
-    public function delete(User $user, LoanTransaction $loanTransaction): bool
+    public function delete(User $user, LoanTransaction $loanTransaction): Response|bool
     {
-        // Deleting transactions is highly sensitive
-        return $user->hasRole('Admin'); // Role 'Admin'
+        return $user->hasRole('Admin')
+            ? Response::allow()
+            : Response::deny(__('Anda tidak mempunyai kebenaran untuk memadam transaksi pinjaman.'));
     }
 
-    public function restore(User $user, LoanTransaction $loanTransaction): bool
+    public function restore(User $user, LoanTransaction $loanTransaction): Response|bool
     {
-        // Role 'Admin'
-        return $user->hasRole('Admin') || $user->hasPermissionTo('restore_loan_transactions');
+        return $user->hasRole('Admin') || $user->hasPermissionTo('restore_loan_transactions')
+            ? Response::allow()
+            : Response::deny(__('Anda tidak mempunyai kebenaran untuk memulihkan transaksi pinjaman.'));
     }
 
-    public function forceDelete(User $user, LoanTransaction $loanTransaction): bool
+    public function forceDelete(User $user, LoanTransaction $loanTransaction): Response|bool
     {
-        // Role 'Admin'
-        return $user->hasRole('Admin') || $user->hasPermissionTo('force_delete_loan_transactions');
+        return $user->hasRole('Admin') || $user->hasPermissionTo('force_delete_loan_transactions')
+            ? Response::allow()
+            : Response::deny(__('Anda tidak mempunyai kebenaran untuk memadam transaksi pinjaman ini secara kekal.'));
     }
 
-    public function viewAnyIssued(User $user): bool
+    public function viewAnyIssued(User $user): Response|bool
     {
-        // Roles 'Admin', 'BPM Staff'
-        return $user->hasAnyRole(['Admin', 'BPM Staff']);
+        return $user->hasAnyRole(['Admin', 'BPM Staff'])
+            ? Response::allow()
+            : Response::deny(__('Anda tidak mempunyai kebenaran untuk melihat senarai transaksi pengeluaran.'));
     }
 }

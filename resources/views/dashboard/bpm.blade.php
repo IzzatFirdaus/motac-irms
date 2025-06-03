@@ -1,93 +1,141 @@
 {{-- resources/views/dashboard/bpm.blade.php --}}
-@extends('layouts.app') {{-- Assuming layouts.app is your main application layout --}}
+@extends('layouts.app')
 
 @section('title', __('Papan Pemuka Staf BPM'))
 
 @section('content')
-<div class="container-fluid">
-    {{-- Page Header --}}
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-body">{{ __('Papan Pemuka Staf BPM (Pengurusan Peralatan)') }}</h1>
-        {{-- Optional: Quick links for BPM staff --}}
-        <div>
-            {{-- @if(Route::has('resource-management.admin.equipment-admin.create'))
-            <a href="{{ route('resource-management.admin.equipment-admin.create') }}" class="btn btn-primary btn-sm shadow-sm me-2">
-                <i class="ti ti-plus ti-xs me-1"></i> {{ __('Tambah Peralatan Baharu') }}
-            </a>
-            @endif
-            @if(Route::has('resource-management.admin.equipment-admin.index'))
-            <a href="{{ route('resource-management.admin.equipment-admin.index') }}" class="btn btn-outline-secondary btn-sm shadow-sm">
-                <i class="ti ti-list-details ti-xs me-1"></i> {{ __('Lihat Inventori Penuh') }}
-            </a>
-            @endif --}}
+    <div class="container-fluid py-4">
+        {{-- Page Header --}}
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-dark fw-bold">{{ __('Papan Pemuka Staf BPM (Pengurusan Peralatan ICT)') }}</h1>
+            <div>
+                @if (Route::has('admin.equipment.create'))
+                    <a href="{{ route('admin.equipment.create') }}"
+                        class="btn btn-primary btn-sm shadow-sm me-2 motac-btn-primary d-inline-flex align-items-center">
+                        <i class="bi bi-plus-circle-fill me-1"></i> {{-- Bootstrap Icon --}}
+                        {{ __('Tambah Peralatan Baharu') }}
+                    </a>
+                @endif
+                @if (Route::has('admin.equipment.index'))
+                    <a href="{{ route('admin.equipment.index') }}"
+                        class="btn btn-outline-secondary btn-sm shadow-sm motac-btn-outline d-inline-flex align-items-center">
+                        <i class="bi bi-list-ul me-1"></i> {{-- Bootstrap Icon --}}
+                        {{ __('Lihat Inventori Penuh') }}
+                    </a>
+                @endif
+            </div>
         </div>
-    </div>
 
-    {{-- Section for Outstanding Loan Applications (Pending Issuance/Action by BPM) --}}
-    {{-- System Design 6.2: BPM Equipment Staff Interface (processing equipment issuance and returns) --}}
-    <div class="row">
-        <div class="col-12 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 fw-bold text-primary">{{ __('Permohonan Pinjaman Menunggu Tindakan Pengeluaran') }}</h6>
-                    {{-- Link to a page showing all such applications if applicable --}}
-                </div>
-                <div class="card-body p-0">
-                    {{-- This Livewire component should list applications approved and ready for issuance. --}}
-                    @livewire('resource-management.admin.bpm.outstanding-loans')
+        {{-- Section for Outstanding Loan Applications (Pending Issuance/Action by BPM) --}}
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card shadow-sm motac-card">
+                    <div
+                        class="card-header py-3 d-flex flex-row align-items-center justify-content-between motac-card-header">
+                        <h6 class="m-0 fw-bold text-primary d-flex align-items-center">
+                           <i class="bi bi-box-arrow-up-right me-2"></i> {{-- Bootstrap Icon --}}
+                           {{ __('Permohonan Pinjaman Menunggu Tindakan Pengeluaran') }}
+                        </h6>
+                        @if (Route::has('admin.loans.pending-issuance'))
+                            <a href="{{ route('admin.loans.pending-issuance') }}"
+                                class="btn btn-sm btn-outline-primary motac-btn-outline">
+                                {{ __('Lihat Semua') }}
+                            </a>
+                        @endif
+                    </div>
+                    <div class="card-body p-0">
+                        @livewire('resource-management.admin.bpm.outstanding-loans', [
+                            'itemsPerPage' => 10,
+                        ])
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    {{-- Section for Currently Issued Loans (for tracking returns) --}}
-    <div class="row">
-        <div class="col-12 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 fw-bold text-primary">{{ __('Status Peralatan ICT Sedang Dipinjam') }}</h6>
-                     {{-- Link to a page showing all issued items if applicable --}}
-                </div>
-                <div class="card-body p-0">
-                    {{-- This Livewire component lists items currently on loan and perhaps due for return. --}}
-                    @livewire('resource-management.admin.bpm.issued-loans')
+        {{-- Section for Currently Issued Loans (for tracking returns) --}}
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card shadow-sm motac-card">
+                    <div
+                        class="card-header py-3 d-flex flex-row align-items-center justify-content-between motac-card-header">
+                        <h6 class="m-0 fw-bold text-primary d-flex align-items-center">
+                            <i class="bi bi-box-arrow-in-left me-2"></i> {{-- Bootstrap Icon --}}
+                            {{ __('Status Peralatan ICT Sedang Dipinjam (Menunggu Pemulangan)') }}</h6>
+                        @if (Route::has('admin.loans.issued'))
+                            <a href="{{ route('admin.loans.issued') }}"
+                                class="btn btn-sm btn-outline-primary motac-btn-outline">
+                                {{ __('Lihat Semua') }}
+                            </a>
+                        @endif
+                    </div>
+                    <div class="card-body p-0">
+                        @livewire('resource-management.admin.bpm.issued-loans', [
+                            'itemsPerPage' => 10,
+                            'highlightOverdue' => true,
+                        ])
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    {{-- Placeholder for other relevant BPM sections --}}
-    {{--
-    <div class="row">
-        <div class="col-lg-6 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-header py-3"><h6 class="m-0 fw-bold text-primary">{{ __('Ringkasan Stok Inventori') }}</h6></div>
-                <div class="card-body">
-                    <p>{{ __('Laptop Tersedia:') }} <strong>XX</strong> {{ __('unit') }}</p>
-                    <p>{{ __('Projektor Tersedia:') }} <strong>YY</strong> {{ __('unit') }}</p>
-                    <a href="{{-- route('resource-management.admin.equipment-admin.index') --}}"{{-- class="btn btn-sm btn-info">{{ __('Lihat Inventori Terperinci') }}</a>
+        {{-- Optional: BPM Staff Specific Summary Widgets --}}
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow-sm h-100 motac-card">
+                    <div class="card-header py-3 motac-card-header d-flex align-items-center">
+                        <i class="bi bi-archive-fill me-2 text-primary"></i> {{-- Bootstrap Icon --}}
+                        <h6 class="m-0 fw-bold text-primary">{{ __('Ringkasan Stok Inventori') }}</h6>
+                    </div>
+                    <div class="card-body motac-card-body">
+                        <p class="mb-2 d-flex align-items-center"><i
+                                class="bi bi-laptop-fill me-2 text-success"></i>{{ __('Laptop Tersedia:') }}
+                            <strong class="text-dark ms-1">{{ $availableLaptopsCount ?? __('N/A') }}</strong>
+                            <span class="ms-1">{{ __('unit') }}</span></p>
+                        <p class="mb-2 d-flex align-items-center"><i
+                                class="bi bi-projector-fill me-2 text-success"></i>{{ __('Projektor Tersedia:') }} <strong
+                                class="text-dark ms-1">{{ $availableProjectorsCount ?? __('N/A') }}</strong>
+                            <span class="ms-1">{{ __('unit') }}</span></p>
+                        <p class="mb-3 d-flex align-items-center"><i
+                                class="bi bi-printer-fill me-2 text-success"></i>{{ __('Pencetak Tersedia:') }} <strong
+                                class="text-dark ms-1">{{ $availablePrintersCount ?? __('N/A') }}</strong>
+                            <span class="ms-1">{{ __('unit') }}</span></p>
+                        @if (Route::has('admin.equipment.index'))
+                            <a href="{{ route('admin.equipment.index') }}" class="btn btn-sm btn-outline-info motac-btn-outline d-inline-flex align-items-center"><i
+                                    class="bi bi-search me-1"></i>{{ __('Lihat Inventori Terperinci') }}</a> {{-- Changed icon --}}
+                        @endif
+                        @if (!isset($availableLaptopsCount))
+                            <p class="text-muted small mt-3">
+                                {{ __('Data stok akan dipaparkan di sini.') }}</p>
+                        @endif
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-lg-6 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-header py-3"><h6 class="m-0 fw-bold text-primary">{{ __('Peralatan Perlu Selenggaraan') }}</h6></div>
-                <div class="card-body">
-                     <p>{{ __('Senarai peralatan yang ditanda untuk selenggaraan akan dipaparkan di sini.') }}</p>
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow-sm h-100 motac-card">
+                    <div class="card-header py-3 motac-card-header d-flex align-items-center">
+                        <i class="bi bi-tools me-2 text-primary"></i> {{-- Bootstrap Icon --}}
+                        <h6 class="m-0 fw-bold text-primary">{{ __('Peralatan Perlu Selenggaraan') }}</h6>
+                    </div>
+                    <div class="card-body motac-card-body d-flex align-items-center justify-content-center" style="min-height: 150px;"> {{-- Centering placeholder --}}
+                        <p class="text-muted small text-center">
+                            <i class="bi bi-tools fs-2 d-block mb-2"></i>
+                            {{ __('Senarai peralatan yang ditanda untuk selenggaraan atau kerosakan akan dipaparkan di sini.') }}
+                        </p>
+                        {{-- @livewire('resource-management.admin.bpm.maintenance-list') --}}
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    --}}
-</div>
 @endsection
 
-@push('page-style')
-    {{-- Page-specific styles for the BPM dashboard, if any --}}
-    {{-- <link rel="stylesheet" href="{{ asset('assets/css/bpm-dashboard.css') }}"> --}}
-@endpush
+{{-- @push('page-style') --}}
+{{-- @endpush --}}
 
-@push('page-script')
-    {{-- Page-specific JavaScript for the BPM dashboard, if any --}}
-    {{-- <script src="{{ asset('assets/js/bpm-dashboard.js') }}"></script> --}}
-@endpush
+{{-- @push('page-script') --}}
+    {{-- <script>
+        // document.addEventListener('DOMContentLoaded', function() {
+        //     console.log("BPM Staff dashboard scripts initialized.");
+        // });
+    // </script> --}}
+{{-- @endpush --}}

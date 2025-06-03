@@ -10,7 +10,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
-use Illuminate\Mail\Mailables\Attachment; // For attachments() method signature
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -22,121 +22,116 @@ use Illuminate\Support\Facades\Log;
  */
 final class LoanApplicationReturned extends Mailable implements ShouldQueue
 {
-  use Queueable;
-  use SerializesModels;
+    use Queueable;
+    use SerializesModels;
 
-  /**
-   * The loan application instance.
-   * Public for automatic availability in the Blade view.
-   */
-  public LoanApplication $loanApplication;
+    public LoanApplication $loanApplication;
+    public LoanTransaction $loanTransaction;
 
-  /**
-   * The loan transaction instance for the returned item(s).
-   * Public for automatic availability in the Blade view.
-   */
-  public LoanTransaction $loanTransaction;
+    /**
+     * Create a new message instance.
+     *
+     * @param  \App\Models\LoanApplication  $loanApplication  The loan application model instance.
+     * @param  \App\Models\LoanTransaction  $loanTransaction  The loan transaction model instance for the returned item.
+     */
+    public function __construct(LoanApplication $loanApplication, LoanTransaction $loanTransaction)
+    {
+        $this->loanApplication = $loanApplication->loadMissing('user');
+        // Eager load relationships needed for the email content
+        $this->loanTransaction = $loanTransaction->loadMissing([
+            'loanTransactionItems.equipment', // For equipment details
+            'returnAcceptingOfficer', // For who accepted the return
+            'issuingOfficer' // Fallback if accepting officer not present
+        ]);
 
-  /**
-   * Create a new message instance.
-   *
-   * @param  \App\Models\LoanApplication  $loanApplication  The loan application model instance.
-   * @param  \App\Models\LoanTransaction  $loanTransaction  The loan transaction model instance for the returned item.
-   */
-  public function __construct(LoanApplication $loanApplication, LoanTransaction $loanTransaction)
-  {
-    $this->loanApplication = $loanApplication->loadMissing('user'); // Eager load user for envelope
-    $this->loanTransaction = $loanTransaction->loadMissing('equipment'); // Eager load equipment for envelope
-    // $this->onQueue('emails'); // Consider adding if a specific queue is desired
-
-    Log::info('LoanApplicationReturned Mailable: Instance created.', [
-      'loan_application_id' => $this->loanApplication->id,
-      'loan_transaction_id' => $this->loanTransaction->id,
-    ]);
-  }
-
-  /**
-   * Get the message envelope.
-   * Defines the subject, sender, and recipients of the email.
-   */
-  public function envelope(): Envelope
-  {
-    $applicationId = $this->loanApplication->id ?? 'N/A';
-    /** @phpstan-ignore-next-line nullCoalesce.expr, nullsafe.neverNull */
-    $applicantName = $this->loanApplication->user?->full_name ??
-      ($this->loanApplication->user?->name ?? 'Pemohon');
-
-    /** @phpstan-ignore-next-line nullsafe.neverNull */
-    $equipmentDetails = $this->loanTransaction->equipment?->model ??
-      ($this->loanTransaction->equipment?->tag_id ?? 'Peralatan ICT');
-
-    /** @phpstan-ignore-next-line nullsafe.neverNull */
-    $recipientEmail = $this->loanApplication->user?->email;
-    $toAddresses = [];
-
-    if ($recipientEmail) {
-      $toAddresses[] = new Address($recipientEmail, $applicantName);
-      Log::info(
-        "LoanApplicationReturned Mailable: Recipient identified for Loan Application ID: {$applicationId}.",
-        ['recipient_email' => $recipientEmail]
-      );
-    } else {
-      Log::error(
-        "LoanApplicationReturned Mailable: Recipient email not found for Loan Application ID: {$applicationId}. Notification cannot be sent.",
-        [
-          'loan_application_id' => $applicationId,
-          'applicant_user_id' => $this->loanApplication->user_id ?? 'N/A',
-        ]
-      );
+        Log::info('LoanApplicationReturned Mailable: Instance created.', [
+            'loan_application_id' => $this->loanApplication->id,
+            'loan_transaction_id' => $this->loanTransaction->id,
+        ]);
     }
 
-    $subject = "Notifikasi {$equipmentDetails} Telah Dipulangkan (Permohonan #{$applicationId} - {$applicantName})";
+    /**
+     * Get the message envelope.
+     */
+    public function envelope(): Envelope
+    {
+        $applicationId = $this->loanApplication->id ?? 'N/A';
+        /** @phpstan-ignore-next-line nullCoalesce.expr, nullsafe.neverNull */
+        $applicantName = $this->loanApplication->user?->full_name ??
+                         ($this->loanApplication->user?->name ?? 'Pemohon');
 
-    Log::info('LoanApplicationReturned Mailable: Preparing email envelope.', [
-      'loan_application_id' => $applicationId,
-      'subject' => $subject,
-      'to_recipients' => $toAddresses,
-    ]);
+        // Attempt to get primary equipment details for the subject from the first item if available
+        $firstItemEquipment = $this->loanTransaction->loanTransactionItems->first()?->equipment;
+        $equipmentDetailsForSubject = $firstItemEquipment?->model ?? ($firstItemEquipment?->tag_id ?? 'Peralatan ICT');
 
-    return new Envelope(
-      to: $toAddresses,
-      subject: $subject,
-      tags: ['loan-application', 'returned-notification'], // As per original
-      metadata: [
-        'loan_application_id' => (string) ($this->loanApplication->id ?? 'unknown'),
-        'loan_transaction_id' => (string) ($this->loanTransaction->id ?? 'unknown'),
-        'applicant_id' => (string) ($this->loanApplication->user_id ?? 'unknown'),
-        'equipment_id' => (string) ($this->loanTransaction->equipment_id ?? 'unknown'),
-      ]
-      // from: new Address(config('mail.from.address'), config('mail.from.name')), // Example from original
-    );
-  }
 
-  /**
-   * Get the message content definition.
-   * Defines the Blade view and data passed to the view.
-   */
-  public function content(): Content
-  {
-    Log::info('LoanApplicationReturned Mailable: Preparing email content.', [
-      'loan_application_id' => $this->loanApplication->id ?? 'N/A',
-      'loan_transaction_id' => $this->loanTransaction->id ?? 'N/A',
-      'view' => 'emails.loan-application-returned',
-    ]);
+        /** @phpstan-ignore-next-line nullsafe.neverNull */
+        $recipientEmail = $this->loanApplication->user?->email;
+        $toAddresses = [];
 
-    return new Content(
-      view: 'emails.loan-application-returned'
-      // 'loanApplication' and 'loanTransaction' are automatically available due to public properties
-    );
-  }
+        if ($recipientEmail) {
+            $toAddresses[] = new Address($recipientEmail, $applicantName);
+            Log::info(
+                "LoanApplicationReturned Mailable: Recipient identified for Loan Application ID: {$applicationId}.",
+                ['recipient_email' => $recipientEmail]
+            );
+        } else {
+            Log::error(
+                "LoanApplicationReturned Mailable: Recipient email not found for Loan Application ID: {$applicationId}. Notification cannot be sent.",
+                [
+                    'loan_application_id' => $applicationId,
+                    'applicant_user_id' => $this->loanApplication->user_id ?? 'N/A',
+                ]
+            );
+        }
 
-  /**
-   * Get the attachments for the message.
-   *
-   * @return array<int, \Illuminate\Mail\Mailables\Attachment> An array of Attachment objects.
-   */
-  public function attachments(): array
-  {
-    return []; // No attachments by default
-  }
+        $subject = "Notifikasi {$equipmentDetailsForSubject} Telah Dipulangkan (Permohonan #{$applicationId} - {$applicantName})";
+
+        Log::info('LoanApplicationReturned Mailable: Preparing email envelope.', [
+            'loan_application_id' => $applicationId,
+            'subject' => $subject,
+            'to_recipients' => count($toAddresses) > 0 ? $toAddresses[0]->address : 'N/A',
+        ]);
+
+        return new Envelope(
+            to: $toAddresses,
+            subject: $subject,
+            tags: ['loan-application', 'returned-notification'],
+            metadata: [
+                'loan_application_id' => (string) ($this->loanApplication->id ?? 'unknown'),
+                'loan_transaction_id' => (string) ($this->loanTransaction->id ?? 'unknown'),
+                'applicant_id' => (string) ($this->loanApplication->user_id ?? 'unknown'),
+            ]
+        );
+    }
+
+    /**
+     * Get the message content definition.
+     */
+    public function content(): Content
+    {
+        Log::info('LoanApplicationReturned Mailable: Preparing email content.', [
+            'loan_application_id' => $this->loanApplication->id ?? 'N/A',
+            'loan_transaction_id' => $this->loanTransaction->id ?? 'N/A',
+            'view' => 'emails.loan-application-returned',
+        ]);
+
+        return new Content(
+            view: 'emails.loan-application-returned',
+            with: [
+                'loanApplication' => $this->loanApplication,
+                'loanTransaction' => $this->loanTransaction,
+            ]
+        );
+    }
+
+    /**
+     * Get the attachments for the message.
+     *
+     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     */
+    public function attachments(): array
+    {
+        return []; // No attachments by default
+    }
 }

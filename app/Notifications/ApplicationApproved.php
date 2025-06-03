@@ -38,10 +38,32 @@ final class ApplicationApproved extends Notification implements ShouldQueue
         return ['mail', 'database'];
     }
 
+    private function formatDate($date, $format = null): string
+    {
+        // Ensure consistent date formatting, align with config/app.php if date_format_my is defined there
+        $defaultFormat = $format ?? config('app.date_format_my', 'd/m/Y');
+        if ($this->application instanceof LoanApplication && $format === null) { // Loan applications often use datetime
+            $defaultFormat = config('app.datetime_format_my', 'd/m/Y H:i A');
+        }
+
+        if ($date instanceof Carbon) {
+            return $date->format($defaultFormat);
+        }
+        if (is_string($date)) {
+            try {
+                return Carbon::parse($date)->format($defaultFormat);
+            } catch (\Exception $e) {
+                return __('Tidak dinyatakan');
+            }
+        }
+        return __('Tidak dinyatakan');
+    }
+
 
     public function toMail(User $notifiable): MailMessage
     {
-        $applicantName = $this->application->user->name ?? $notifiable->name ?? 'Pemohon';
+        // Corrected: Safe access to user name
+        $applicantName = $this->application->user?->name ?? $notifiable->name ?? __('Pemohon');
         $applicationId = $this->application->id ?? 'N/A';
 
         $isLoanApp = $this->application instanceof LoanApplication;
@@ -58,6 +80,7 @@ final class ApplicationApproved extends Notification implements ShouldQueue
         if ($isLoanApp) {
             /** @var LoanApplication $loanApp */
             $loanApp = $this->application;
+            // Using specific datetime format for loans as per previous version of this file.
             $startDate = $this->formatDate($loanApp->loan_start_date, config('app.datetime_format_my', 'd/m/Y H:i A'));
             $endDate = $this->formatDate($loanApp->loan_end_date, config('app.datetime_format_my', 'd/m/Y H:i A'));
 
@@ -65,15 +88,15 @@ final class ApplicationApproved extends Notification implements ShouldQueue
                 $mailMessage->line(__('Tujuan: :purpose', ['purpose' => $loanApp->purpose]));
             }
             $mailMessage->line(__('Tempoh Pinjaman: Dari :startDate hingga :endDate', ['startDate' => $startDate, 'endDate' => $endDate]));
-            $mailMessage->line(__('Sila berhubung dengan pegawai berkaitan di Bahagian Perkhidmatan Pengurusan Bangunan & Aset (BPM) untuk urusan pengambilan peralatan.'));
+            $mailMessage->line(__('Sila berhubung dengan pegawai berkaitan di Bahagian Pengurusan Maklumat (BPM) untuk urusan pengambilan peralatan.'));
 
         } else {
             /** @var EmailApplication $emailApp */
             $emailApp = $this->application;
             if ($emailApp->application_reason_notes) {
-                $mailMessage->line(__('Tujuan/Catatan: :reason', ['reason' => $emailApp->application_reason_notes]));
+                 $mailMessage->line(__('Tujuan/Catatan: :reason', ['reason' => $emailApp->application_reason_notes]));
             }
-            $mailMessage->line(__('Pihak BPM akan memproses permohonan anda dan akan memaklumkan setelah akaun/ID pengguna anda sedia untuk digunakan.'));
+             $mailMessage->line(__('Pihak BPM akan memproses permohonan anda dan akan memaklumkan setelah akaun/ID pengguna anda sedia untuk digunakan.'));
         }
 
         $mailMessage
@@ -85,9 +108,11 @@ final class ApplicationApproved extends Notification implements ShouldQueue
 
         if ($this->application->id) {
             if ($isLoanApp) {
-                $routeName = 'resource-management.my-applications.loan.show'; // Or specific admin view if for BPM
+                // Standardized route name for user's view of their loan applications
+                $routeName = 'resource-management.my-applications.loan.show';
                 $routeParameters = ['loan_application' => $this->application->id];
             } else {
+                // Standardized route name for user's view of their email applications
                 $routeName = 'resource-management.my-applications.email.show';
                 $routeParameters = ['email_application' => $this->application->id];
             }
@@ -141,7 +166,7 @@ final class ApplicationApproved extends Notification implements ShouldQueue
             'application_type_morph' => $applicationMorphClass,
             'application_type_display' => $applicationTypeDisplay,
             'applicant_user_id' => $this->application->user_id ?? $notifiable->id,
-            'status_key' => 'approved', // Generic approved status
+            'status_key' => 'approved',
             'subject' => $subjectText,
             'message' => $messageText,
             'icon' => 'ti ti-circle-check',
@@ -151,6 +176,7 @@ final class ApplicationApproved extends Notification implements ShouldQueue
             /** @var LoanApplication $loanApp */
             $loanApp = $this->application;
             $data['purpose'] = $loanApp->purpose ?? null;
+            // Using date_format_my for consistency in array data if datetime is not needed
             $data['loan_start_date'] = $this->formatDate($loanApp->loan_start_date);
             $data['loan_end_date'] = $this->formatDate($loanApp->loan_end_date);
         } else {
@@ -164,7 +190,7 @@ final class ApplicationApproved extends Notification implements ShouldQueue
         $routeParameters = [];
         $routeName = null;
 
-        if ($applicationId !== null) {
+         if ($applicationId !== null) {
             if ($isLoanApp) {
                 $routeName = 'resource-management.my-applications.loan.show';
                 $routeParameters = ['loan_application' => $applicationId];
@@ -185,33 +211,16 @@ final class ApplicationApproved extends Notification implements ShouldQueue
                     ]);
                     $applicationUrl = '#'; // Fallback
                 }
-            } elseif ($routeName) {
-                Log::warning('Route not found for in-app ApplicationApproved notification.', [
-                   'application_id' => $applicationId,
-                   'application_type' => $applicationMorphClass,
-                   'route_name' => $routeName,
+            } elseif ($routeName) { // Log if route name was set but not found
+                 Log::warning('Route not found for in-app ApplicationApproved notification.', [
+                    'application_id' => $applicationId,
+                    'application_type' => $applicationMorphClass,
+                    'route_name' => $routeName,
                 ]);
             }
         }
         $data['url'] = ($applicationUrl !== '#' && filter_var($applicationUrl, FILTER_VALIDATE_URL)) ? $applicationUrl : null;
 
-
         return $data;
-    }
-
-    private function formatDate($date, $format = null): string
-    {
-        $format = $format ?? config('app.date_format_my', 'd/m/Y');
-        if ($date instanceof Carbon) {
-            return $date->format($format);
-        }
-        if (is_string($date)) {
-            try {
-                return Carbon::parse($date)->format($format);
-            } catch (\Exception $e) {
-                return __('Tidak dinyatakan');
-            }
-        }
-        return __('Tidak dinyatakan');
     }
 }

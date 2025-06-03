@@ -1,8 +1,4 @@
 {{-- resources/views/components/banner.blade.php --}}
-{{-- A banner component for displaying flash messages, typically at the top of the page. --}}
-{{-- System Design: "The Big Picture" mentions <x-banner /> for flash messages. (Comment from original file) --}}
-{{-- Design Language: Clear Instructions & Actionable Feedback --}}
-
 @props(['style' => session('flash.bannerStyle', 'success'), 'message' => session('flash.banner')])
 
 <div x-data="{
@@ -13,45 +9,49 @@
      }"
      x-show="show && message"
      x-init="
-        Livewire.on('banner-message', detail => { // Changed event.detail to detail for clarity
+        Livewire.on('banner-message', detail => {
             style = detail.style || 'info';
             message = detail.message;
             show = true;
-            clearTimeout(timeout); // Clear previous timeout if any
+            clearTimeout(timeout);
             timeout = setTimeout(() => show = false, detail.timeout || 7000);
         });
-        if (message && !Livewire.firstLoad) { // Only run auto-hide for session messages after initial load if displayed by Livewire
+        if (message) { // Simplified auto-hide for initial session message
             clearTimeout(timeout);
             timeout = setTimeout(() => show = false, 7000);
-        } else if (message) { // For initial session message on page load
-             clearTimeout(timeout);
-             timeout = setTimeout(() => show = false, 7000);
         }
      "
-     style="display: none;" {{-- Initially hidden, shown by Alpine.js --}}
-     class="alert alert-dismissible fade show px-4 py-3 m-0 border-0 rounded-0" {{-- Added rounded-0 if it's a top banner --}}
+     style="display: none;"
+     class="alert alert-dismissible fade show px-4 py-3 m-0 border-0 rounded-0" {{-- Ensure rounded-0 if it's a full-width top banner --}}
      :class="{
+        'alert-success': style == 'success', /* Let MOTAC theme define text/bg for .alert-success */
+        'alert-danger': style == 'danger',   /* Let MOTAC theme define text/bg for .alert-danger */
+        'alert-warning': style == 'warning', /* Let MOTAC theme define text/bg for .alert-warning (usually dark text on yellow) */
+        'alert-info': style == 'info' || (style !== 'success' && style !== 'danger' && style !== 'warning') /* Default, MOTAC themed */
+        /* Original explicit classes (can be used if your theme doesn't override Bootstrap alerts sufficiently):
         'alert-success text-white bg-success': style == 'success',
         'alert-danger text-white bg-danger': style == 'danger',
-        'alert-warning text-dark bg-warning': style == 'warning', // text-dark for better contrast on yellow
+        'alert-warning text-dark bg-warning': style == 'warning',
         'alert-info text-white bg-info': style == 'info' || (style !== 'success' && style !== 'danger' && style !== 'warning')
+        */
      }"
      role="alert">
 
     <div class="d-flex align-items-center">
         {{-- Icon --}}
         <div class="flex-shrink-0 me-2">
+            {{-- Using Bootstrap Icons as per Design Doc 2.4 --}}
             <template x-if="style == 'success'">
-                <i class="ti ti-circle-check ti-lg"></i>
+                <i class="bi bi-check-circle-fill fs-5"></i> {{-- fs-5 for ti-lg equivalent --}}
             </template>
             <template x-if="style == 'danger'">
-                <i class="ti ti-alert-triangle ti-lg"></i>
+                <i class="bi bi-exclamation-triangle-fill fs-5"></i>
             </template>
             <template x-if="style == 'warning'">
-                <i class="ti ti-alert-hexagon ti-lg"></i>
+                <i class="bi bi-exclamation-triangle-fill fs-5"></i> {{-- Often same icon for warning/danger, adjust if needed --}}
             </template>
-            <template x-if="style !== 'success' && style !== 'danger' && style !== 'warning'"> {{-- Simplified condition --}}
-                <i class="ti ti-info-circle ti-lg"></i>
+            <template x-if="style !== 'success' && style !== 'danger' && style !== 'warning'">
+                <i class="bi bi-info-circle-fill fs-5"></i>
             </template>
         </div>
 
@@ -61,12 +61,12 @@
         </div>
 
         {{-- Dismiss Button --}}
-        <div class="flex-shrink-0 ms-auto ps-3"> {{-- ms-auto and ps-3 for spacing --}}
+        <div class="flex-shrink-0 ms-auto ps-3">
             <button type="button"
                     class="btn-close"
-                    :class="{'btn-close-white': style == 'success' || style == 'danger' || style == 'info'}"
+                    {{-- :class="{'btn-close-white': style == 'success' || style == 'danger' || style == 'info'}" --}} {{-- btn-close-white is applied by Bootstrap based on alert variant contrast --}}
                     aria-label="{{ __('Tutup') }}"
-                    x-on:click="show = false; message = null; clearTimeout(timeout);"></button> {{-- Clear message and timeout on manual close --}}
+                    x-on:click="show = false; message = null; clearTimeout(timeout);"></button>
         </div>
     </div>
 </div>

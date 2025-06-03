@@ -1,27 +1,31 @@
-{{-- Most likely, this would be a Livewire component itself, e.g.,
-     // app/Livewire/Pages/ComingSoonPage.php
-     // resources/views/livewire/pages/coming-soon-page.blade.php
-     // And then your route would point to ComingSoonPage::class
---}}
+{{-- resources/views/livewire/pages/coming-soon-page.blade.php or a similar Blade view --}}
 <div>
 
-  @section('title', 'Coming soon!') {{-- This @section('title') works if the layout this extends yields 'title' --}}
+    @section('title', __('Sedang Dibangunkan')) {{-- Design Language 1.2: Bahasa Melayu First --}}
 
-  {{-- If this is a full-page Livewire component extending livewire.layouts.app,
-       the title is usually set via #[Title('Coming Soon!')] attribute in the component class.
-       Or, if commonMaster.blade.php is the direct parent and uses @yield('title'), this is fine.
+    {{--
+    Comments about Livewire component title attribute vs. @section are noted and correct.
+    This @section('title') approach is standard for Blade views extending a layout that @yields('title').
   --}}
 
-  <div style="text-align: center">
-    <div class="container-xxl container-p-y">
-      <div class="misc-wrapper">
-        <h2 class="mb-1 mx-2">{{ __(('Under Development')) }} 🚀</h2>
-        <p class="mb-4 mx-2">{{ __("We're creating something awesome. Please keep calm until it's ready!") }}</p>
-        <div class="mt-4">
-          <img src="{{ asset('assets/img/illustrations/page-misc-launching-soon.png') }}" width="140"
-               alt="page-misc-launching-soon" class="img-fluid">
+    {{--
+    Inline style is acceptable for simple, one-off pages.
+    Ensure Noto Sans font (Design Language 2.2) is applied globally via commonMaster.blade.php or main theme CSS.
+  --}}
+    <div style="text-align: center;">
+        <div class="container-xxl container-p-y">
+            <div class="misc-wrapper">
+                {{-- Design Language 1.4: Formal Tone. Emoji removed. Text changed to formal BM. --}}
+                <h2 class="mb-1 mx-2">{{ __('Fungsi Ini Sedang Dibangunkan') }}</h2>
+                <p class="mb-4 mx-2">
+                    {{-- Design Language 1.4: Formal Tone. Text changed to formal BM. --}}
+                    {{ __('Kami sedang berusaha untuk menambah baik fungsi ini. Ia akan tersedia tidak lama lagi. Terima kasih atas kesabaran anda.') }}
+                </p>
+                <div class="mt-4">
+                    <img src="{{ asset('assets/img/illustrations/page-misc-launching-soon.png') }}" width="140"
+                        alt="{{ __('Ilustrasi - Sedang Dibangunkan') }}" class="img-fluid"> {{-- Improved alt text --}}
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 </div>

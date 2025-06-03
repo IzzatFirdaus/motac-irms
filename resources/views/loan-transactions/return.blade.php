@@ -1,115 +1,124 @@
 {{-- resources/views/loan-transactions/return.blade.php --}}
 @extends('layouts.app')
 
-@section('title', __('Rekod Pulangan Peralatan'))
+@section('title', __('Rekod Pulangan Peralatan untuk Transaksi #') . $loanTransaction->id) {{-- $loanTransaction is the ISSUE transaction --}}
 
 @section('content')
 <div class="container py-4">
     <div class="row justify-content-center">
-        <div class="col-md-10 col-lg-8">
+        <div class="col-md-10 col-lg-9">
 
-            <h2 class="h2 fw-bold text-dark mb-4">{{ __('Rekod Pulangan Peralatan untuk Permohonan Pinjaman') }} #{{ $loanApplication->id }}</h2>
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                <h1 class="h2 fw-bold text-dark mb-0">{{ __('Rekod Pulangan Peralatan') }}</h1>
+                 <span class="text-muted small">{{__('Untuk Permohonan Pinjaman')}} #{{ $loanApplication->id }} / {{__('Transaksi Keluar')}} #{{ $loanTransaction->id }}</span>
+            </div>
 
-            @if ($errors->any())
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <h5 class="alert-heading">{{ __('Ralat Pengesahan:') }}</h5>
-                    <ul class="mb-0">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            @endif
-
-            @if (session()->has('success'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            @endif
-            @if (session()->has('error'))
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    {{ session('error') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            @endif
+            @include('partials.validation-errors-alt')
+            @include('partials.alert-messages')
 
             <div class="card shadow-sm mb-4">
-                <div class="card-header">
-                    <h3 class="h5 card-title mb-0">{{ __('Butiran Permohonan Pinjaman') }}</h3>
+                <div class="card-header bg-light py-3">
+                    <h2 class="h5 card-title mb-0 fw-semibold">{{ __('Butiran Permohonan Pinjaman Berkaitan') }}</h2>
                 </div>
-                <div class="card-body small">
-                    <p class="mb-1"><span class="fw-semibold">{{ __('Pemohon:') }}</span> {{ $loanApplication->user->name ?? 'N/A' }}</p>
-                    <p class="mb-1"><span class="fw-semibold">{{ __('Tujuan Permohonan:') }}</span> {{ $loanApplication->purpose ?? 'N/A' }}</p>
-                    <p class="mb-1"><span class="fw-semibold">{{ __('Tarikh Pinjaman:') }}</span> {{ $loanApplication->loan_start_date?->format('d/m/Y') ?? 'N/A' }}</p>
-                    <p class="mb-0"><span class="fw-semibold">{{ __('Tarikh Dijangka Pulang:') }}</span> {{ $loanApplication->loan_end_date?->format('d/m/Y') ?? 'N/A' }}</p>
+                <div class="card-body p-4 small">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4 text-muted">{{ __('Pemohon:') }}</dt>
+                        <dd class="col-sm-8">{{ e(optional($loanApplication->user)->name ?? __('N/A')) }}</dd>
+                        <dt class="col-sm-4 text-muted">{{ __('Tujuan Permohonan:') }}</dt>
+                        <dd class="col-sm-8" style="white-space: pre-wrap;">{{ e($loanApplication->purpose ?? __('N/A')) }}</dd>
+                        <dt class="col-sm-4 text-muted">{{ __('Tarikh Pinjaman:') }}</dt>
+                        <dd class="col-sm-8">{{ optional($loanApplication->loan_start_date)->translatedFormat('d M Y, H:i A') ?? __('N/A') }}</dd>
+                        <dt class="col-sm-4 text-muted">{{ __('Tarikh Dijangka Pulang:') }}</dt>
+                        <dd class="col-sm-8">{{ optional($loanApplication->loan_end_date)->translatedFormat('d M Y, H:i A') ?? __('N/A') }}</dd>
+                    </dl>
 
-                    @if ($issuedTransactions->isNotEmpty())
-                        <h4 class="h6 fw-semibold mt-3 mb-2">{{ __('Peralatan Sedang Dipinjam Untuk Permohonan Ini:') }}</h4>
+                    {{-- $issuedItemsForThisTransaction: LoanTransactionItems from the specific $loanTransaction being returned. Passed from controller. --}}
+                    @if (!empty($issuedItemsForThisTransaction) && $issuedItemsForThisTransaction->count() > 0)
+                        <h3 class="h6 fw-semibold mt-3 mb-2 pt-2 border-top">{{ __('Peralatan Dikeluarkan Dalam Transaksi Ini (#') }}{{ $loanTransaction->id }})</h3>
                         <div class="table-responsive">
-                            <table class="table table-sm table-bordered">
+                            <table class="table table-sm table-bordered table-striped mb-0">
                                 <thead class="table-light">
                                     <tr>
-                                        <th class="small">{{ __('Peralatan (Tag ID)') }}</th>
-                                        <th class="small">{{ __('Tarikh Dikeluarkan') }}</th>
-                                        <th class="small">{{ __('Aksesori Dikeluarkan') }}</th>
+                                        <th class="small text-uppercase text-muted fw-medium ps-2">{{ __('Peralatan (Tag ID)') }}</th>
+                                        <th class="small text-uppercase text-muted fw-medium">{{ __('Tarikh Dikeluarkan') }}</th>
+                                        <th class="small text-uppercase text-muted fw-medium">{{ __('Aksesori Semasa Dikeluarkan') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($issuedTransactions as $transaction)
+                                    @foreach ($issuedItemsForThisTransaction as $item)
+                                         @if(is_object($item) && $item->equipment)
                                         <tr>
-                                            <td class="small">
-                                                {{ $transaction->equipment->brand ?? '' }} {{ $transaction->equipment->model ?? '' }}
-                                                (Tag: {{ $transaction->equipment->tag_id ?? 'N/A' }})
+                                            <td class="small ps-2">
+                                                {{ e(optional($item->equipment)->brand_model_serial ?? optional($item->equipment)->tag_id) }}
                                             </td>
-                                            <td class="small">{{ $transaction->issue_timestamp?->format('d/m/Y H:i') ?? 'N/A' }}</td>
-                                            <td class="small">{{ implode(', ', json_decode($transaction->accessories_checklist_on_issue, true) ?? []) ?: '-' }}</td>
+                                            <td class="small">{{ optional($loanTransaction->issue_timestamp)->translatedFormat('d M Y, H:i A') ?? __('N/A') }}</td>
+                                            <td class="small">{{ implode(', ', json_decode($loanTransaction->accessories_checklist_on_issue ?? '[]', true)) ?: '-' }}</td>
                                         </tr>
+                                        @endif
                                     @endforeach
                                 </tbody>
                             </table>
                         </div>
                     @else
-                        <p class="text-muted fst-italic mt-2 small">{{ __('Tiada peralatan sedang dipinjam untuk permohonan ini.') }}</p>
+                        <p class="text-warning fst-italic mt-2 small"><i class="bi bi-exclamation-circle me-1"></i>{{ __('Tiada butiran item ditemui untuk transaksi pengeluaran ini.') }}</p>
                     @endif
                 </div>
             </div>
 
-            <form action="{{ route('loan-transactions.storeReturn', $loanApplication) }}" method="POST">
+            {{-- The form posts to storeReturn, passing the original ISSUE $loanTransaction as a parameter for context --}}
+            <form action="{{ route('loan-transactions.storeReturn', $loanTransaction) }}" method="POST">
                 @csrf
+                <input type="hidden" name="loan_application_id" value="{{ $loanApplication->id }}">
+                {{-- related_transaction_id (the ID of the issue transaction) is implicitly $loanTransaction->id in the controller --}}
+
                 <div class="card shadow-sm mb-4">
-                    <div class="card-header">
-                        <h3 class="h5 card-title mb-0">{{ __('Rekod Pulangan Peralatan') }}</h3>
+                    <div class="card-header bg-light py-3">
+                        <h2 class="h5 card-title mb-0 fw-semibold">{{ __('Rekod Pemulangan Peralatan') }}</h2>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body p-4">
                         <div class="mb-3">
-                            <label for="transaction_ids" class="form-label fw-semibold">{{ __('Pilih Peralatan yang Dipulangkan') }}<span class="text-danger">*</span></label>
-                            <select name="transaction_ids[]" id="transaction_ids" class="form-select @error('transaction_ids') is-invalid @enderror @error('transaction_ids.*') is-invalid @enderror" multiple required size="5">
-                                @foreach ($issuedTransactions as $transaction)
-                                    <option value="{{ $transaction->id }}" {{ in_array($transaction->id, old('transaction_ids', [])) ? 'selected' : '' }}>
-                                        {{ $transaction->equipment->brand ?? '' }} {{ $transaction->equipment->model ?? '' }}
-                                        (Tag: {{ $transaction->equipment->tag_id ?? 'N/A' }})
-                                        - Dikeluarkan: {{ $transaction->issue_timestamp?->format('d/m/Y') }}
-                                    </option>
-                                @endforeach
+                            <label for="loan_transaction_item_ids" class="form-label fw-semibold">{{ __('Pilih Item Peralatan yang Dipulangkan dari Transaksi Pengeluaran Ini') }}<span class="text-danger">*</span></label>
+                            <p class="form-text small mt-0 mb-2 text-muted">{{__('Pilih semua item dari transaksi pengeluaran #')}}{{ $loanTransaction->id }} {{__('yang sedang dipulangkan.')}}</p>
+                            {{-- $issuedItemsForThisTransaction: LoanTransactionItems for the specific $loanTransaction. Passed from controller. --}}
+                            <select name="loan_transaction_item_ids[]" id="loan_transaction_item_ids" class="form-select @error('loan_transaction_item_ids') is-invalid @enderror @error('loan_transaction_item_ids.*') is-invalid @enderror" multiple required size="5">
+                                @if(!empty($issuedItemsForThisTransaction) && $issuedItemsForThisTransaction->count() > 0)
+                                    @foreach ($issuedItemsForThisTransaction as $item)
+                                        @if(is_object($item) && $item->equipment)
+                                        <option value="{{ $item->id }}" {{ in_array($item->id, old('loan_transaction_item_ids', [])) ? 'selected' : '' }}>
+                                            {{ e(optional($item->equipment)->brand_model_serial ?? optional($item->equipment)->tag_id) }}
+                                            ({{ e(optional(\App\Models\Equipment::getAssetTypeOptions())[optional($item->equipment)->asset_type] ?? '') }})
+                                        </option>
+                                        @endif
+                                    @endforeach
+                                @else
+                                    <option disabled>{{__('Tiada item dari transaksi ini untuk dipulangkan.')}}</option>
+                                @endif
                             </select>
-                            @error('transaction_ids') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            @error('transaction_ids.*') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            @error('loan_transaction_item_ids') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            @error('loan_transaction_item_ids.*') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                        {{-- Note: For per-item condition on return, form structure would need to be more complex (e.g., dynamic rows for each selected item). --}}
+                        {{-- This current form captures general notes and accessories for the batch return. --}}
+                         <div class="alert alert-info small py-2">
+                            <i class="bi bi-info-circle-fill me-1"></i> {{__('Nota: Keadaan setiap item akan dinilai oleh pegawai BPM. Sila nyatakan sebarang kerosakan atau kehilangan dalam catatan di bawah.')}}
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-semibold">{{ __('Senarai Semak Aksesori Dipulangkan:') }}</label>
-                            <p class="form-text small mt-0 mb-2">{{ __('Sila tandakan aksesori yang dipulangkan bersama peralatan yang dipilih.') }}</p>
+                            <p class="form-text small mt-0 mb-2 text-muted">{{ __('Sila tandakan aksesori yang dipulangkan bersama peralatan.') }}</p>
                             <div class="row">
-                                @foreach ($allAccessoriesList as $accessory)
-                                    <div class="col-md-6">
+                                {{-- $allAccessoriesList from config('motac.loan_accessories_list') [cite: 348] --}}
+                                @forelse ($allAccessoriesList ?? [] as $accessory)
+                                    <div class="col-md-6 col-lg-4">
                                         <div class="form-check">
                                             <input type="checkbox" name="accessories_on_return[]" value="{{ $accessory }}" id="return-accessory-{{ Str::slug($accessory) }}" class="form-check-input @error('accessories_on_return') is-invalid @enderror" {{ in_array($accessory, old('accessories_on_return', [])) ? 'checked' : '' }}>
-                                            <label class="form-check-label small" for="return-accessory-{{ Str::slug($accessory) }}">{{ $accessory }}</label>
+                                            <label class="form-check-label small" for="return-accessory-{{ Str::slug($accessory) }}">{{ e($accessory) }}</label>
                                         </div>
                                     </div>
-                                @endforeach
+                                @empty
+                                    <div class="col-12"><p class="small text-muted fst-italic">{{__('Tiada senarai aksesori standard dikonfigurasi.')}}</p></div>
+                                @endforelse
                             </div>
                             @error('accessories_on_return') <div class="d-block invalid-feedback">{{ $message }}</div> @enderror
                              @error('accessories_on_return.*') <div class="d-block invalid-feedback">{{ $message }}</div> @enderror
@@ -117,21 +126,40 @@
 
                         <div class="mb-3">
                             <label for="return_notes" class="form-label fw-semibold">{{ __('Catatan Pulangan (cth: kerosakan, item hilang):') }}</label>
-                            <textarea name="return_notes" id="return_notes" class="form-control @error('return_notes') is-invalid @enderror" rows="3">{{ old('return_notes') }}</textarea>
+                            <textarea name="return_notes" id="return_notes" class="form-control @error('return_notes') is-invalid @enderror" rows="3" placeholder="Nyatakan sebarang kerosakan, kehilangan, atau maklumat tambahan berkaitan pemulangan.">{{ old('return_notes') }}</textarea>
                             @error('return_notes') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold d-block mb-1">{{ __('Diterima Oleh:') }}</label>
-                            <p class="form-control-plaintext px-1 py-0">{{ Auth::user()->name ?? 'N/A' }}</p>
-                            <input type="hidden" name="return_accepting_officer_id" value="{{ Auth::id() }}">
-                             @error('return_accepting_officer_id') <div class="d-block text-danger small">{{ $message }}</div> @enderror
+                        <hr class="my-4">
+                        <div class="row g-3">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold d-block mb-1">{{ __('Pemulangan Diterima Oleh (Pegawai BPM):') }}</label>
+                                <p class="form-control-plaintext px-1 py-0 text-dark">{{ Auth::user()->name ?? __('N/A') }}</p>
+                                <input type="hidden" name="return_accepting_officer_id" value="{{ Auth::id() }}">
+                                @error('return_accepting_officer_id') <div class="d-block text-danger small mt-1">{{ $message }}</div> @enderror
+                            </div>
+                             <div class="col-md-6 mb-3">
+                                <label for="returning_officer_id" class="form-label fw-semibold">{{ __('Peralatan Dipulangkan Oleh (Pemohon/Wakil)') }}<span class="text-danger">*</span></label>
+                                 {{-- $loanApplicantAndResponsibleOfficer (Collection of User models) should be passed from controller --}}
+                                <select name="returning_officer_id" id="returning_officer_id" class="form-select @error('returning_officer_id') is-invalid @enderror" required>
+                                    <option value="">-- {{__('Pilih Pemulang')}} --</option>
+                                    @if(!empty($loanApplicantAndResponsibleOfficer) && $loanApplicantAndResponsibleOfficer->count())
+                                        @foreach($loanApplicantAndResponsibleOfficer as $officer)
+                                            @if(is_object($officer))
+                                            <option value="{{ $officer->id }}" {{ old('returning_officer_id', $loanApplication->user_id) == $officer->id ? 'selected' : '' }}>
+                                                {{ e($officer->name) }} {{ $officer->id == $loanApplication->user_id ? __('(Pemohon)') : (optional($loanApplication->responsibleOfficer)->id == $officer->id ? __('(Peg. Bertanggungjawab)') : '') }}
+                                            </option>
+                                            @endif
+                                        @endforeach
+                                    @endif
+                                </select>
+                                @error('returning_officer_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="text-center mt-4 mb-3">
-                    <button type="submit" class="btn btn-primary btn-lg d-inline-flex align-items-center">
+                    <button type="submit" class="btn btn-primary btn-lg d-inline-flex align-items-center px-5">
                         <i class="bi bi-check-circle-fill me-2"></i>
                         {{ __('Rekod Pulangan Peralatan') }}
                     </button>
@@ -139,8 +167,8 @@
             </form>
 
             <div class="text-center mt-4">
-                <a href="{{ route('loan-applications.show', $loanApplication) }}" class="btn btn-secondary d-inline-flex align-items-center">
-                     <i class="bi bi-arrow-left me-2"></i>
+                <a href="{{ route('loan-applications.show', $loanApplication) }}" class="btn btn-outline-secondary d-inline-flex align-items-center">
+                     <i class="bi bi-arrow-left-circle me-1"></i>
                     {{ __('Kembali ke Butiran Permohonan') }}
                 </a>
             </div>

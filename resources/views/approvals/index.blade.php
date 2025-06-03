@@ -10,31 +10,19 @@
                 {{ __('Tugasan Kelulusan Menunggu Tindakan Saya') }}
             </h1>
             <div>
-                {{-- Link to Livewire Dashboard or a history page --}}
-                {{-- CORRECTED ROUTE NAME BELOW --}}
-                <a href="{{ route('approvals.dashboard') }}"
+                <a href="{{ route('approvals.dashboard') }}" {{-- System Design reference for approver dashboard --}}
                     class="btn btn-sm btn-outline-primary text-decoration-none d-inline-flex align-items-center me-2">
                     <i class="bi bi-speedometer2 me-1"></i> {{ __('Papan Pemuka Kelulusan') }}
                 </a>
-                <a href="{{ route('approvals.history') }}" {{-- Ensure this route name is correct --}}
+                <a href="{{ route('approvals.history') }}"
                     class="btn btn-sm btn-outline-secondary text-decoration-none d-inline-flex align-items-center">
                     <i class="bi bi-clock-history me-1"></i> {{ __('Sejarah Kelulusan Saya') }}
                 </a>
             </div>
         </div>
 
-        @if (session()->has('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-        @if (session()->has('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
+        {{-- Corrected path to your general alert partial --}}
+        @include('_partials._alerts.alert-general')
 
         <div class="card shadow-sm">
             <div class="card-header bg-light py-3">
@@ -73,20 +61,21 @@
                                     <td class="px-3 py-2 small text-muted">
                                         @if ($approvableItem instanceof \App\Models\EmailApplication)
                                             <i class="bi bi-envelope-at me-1 text-info"></i>{{ __('Permohonan Emel') }}
-                                            #{{ $approvableItem->id }}
+                                            #{{ optional($approvableItem)->id }}
                                         @elseif ($approvableItem instanceof \App\Models\LoanApplication)
                                             <i class="bi bi-laptop me-1 text-success"></i>{{ __('Pinjaman ICT') }}
-                                            #{{ $approvableItem->id }}
+                                            #{{ optional($approvableItem)->id }}
                                         @else
-                                            <i
-                                                class="bi bi-question-circle me-1 text-secondary"></i>{{ __('Tidak Diketahui') }}
+                                            <i class="bi bi-question-circle me-1 text-secondary"></i>{{ __('Tidak Diketahui') }}
                                         @endif
                                     </td>
-                                    <td class="px-3 py-2 small text-muted">{{ $approvableItem->user->name ?? 'N/A' }}</td>
+                                    <td class="px-3 py-2 small text-muted">
+                                        {{ optional(optional($approvableItem)->user)->name ?? __('Tidak Diketahui') }}
+                                    </td>
                                     <td class="px-3 py-2 small text-muted">
                                         {{ \App\Models\Approval::getStageDisplayName($approvalTask->stage) }}</td>
                                     <td class="px-3 py-2 small text-muted">
-                                        {{ $approvalTask->created_at->translatedFormat('d M Y, H:i A') }}</td>
+                                        {{ optional($approvalTask->created_at)->translatedFormat('d M Y, H:i A') }}</td>
                                     <td class="px-3 py-2 text-center">
                                         @can('update', $approvalTask)
                                             <a href="{{ route('approvals.show', $approvalTask->id) }}"
