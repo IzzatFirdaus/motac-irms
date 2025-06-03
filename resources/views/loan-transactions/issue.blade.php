@@ -29,8 +29,13 @@
                     <span class="text-muted small">{{__('Untuk Permohonan Pinjaman')}} #{{ $loanApplication->id }}</span>
                 </div>
 
-                @include('partials.validation-errors-alt')
-                @include('partials.alert-messages')
+                {{-- Display Validation Errors --}}
+                <x-alert-errors />
+
+                {{-- Display Session Flash Messages --}}
+                @if (session('message'))
+                    <x-alert :type="session('type', 'info')" :message="session('message')" dismissible="true" />
+                @endif
 
                 {{-- Loan Application Details for Context --}}
                 <div class="card shadow-sm mb-4">
@@ -123,8 +128,8 @@
                                     {{ __('Sila tandakan aksesori yang disertakan bersama peralatan yang dipilih.') }}
                                 </p>
                                 <div class="row">
-                                    {{-- $allAccessoriesList (array) should be passed from the controller, e.g., from config('motac.loan_accessories_list') [cite: 348] --}}
-                                    @forelse ($allAccessoriesList ?? [] as $accessory)
+                                    {{-- $allAccessoriesList (array) should be passed from the controller, e.g., from config('motac.loan_accessories_list') --}}
+                                    @forelse ($allAccessoriesList ?? config('motac.loan_accessories_list', []) as $accessory) {{-- Added config reference for robustness --}}
                                         <div class="col-md-6 col-lg-4">
                                             <div class="form-check">
                                                 <input type="checkbox" name="accessories[]" value="{{ $accessory }}" id="accessory-{{ Str::slug($accessory) }}" class="form-check-input @error('accessories') is-invalid @enderror" {{ in_array($accessory, old('accessories', [])) ? 'checked' : '' }}>
