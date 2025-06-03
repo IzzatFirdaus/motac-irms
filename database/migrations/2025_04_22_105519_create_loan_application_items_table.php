@@ -26,6 +26,12 @@ return new class extends Migration
       $table->id();
       $table->foreignId('loan_application_id')->constrained('loan_applications')->cascadeOnDelete();
 
+      $table->foreignId('equipment_id')
+            ->nullable()
+            ->constrained('equipment')
+            ->nullOnDelete()
+            ->comment('Links to the equipment catalog');
+
       $table->string('equipment_type')->comment('e.g., Laptop, Projektor, LCD Monitor');
       $table->unsignedInteger('quantity_requested');
       $table->unsignedInteger('quantity_approved')->nullable();
@@ -48,10 +54,15 @@ return new class extends Migration
   public function down(): void
   {
     Schema::table('loan_application_items', function (Blueprint $table) {
-      $foreignKeysToDrop = ['loan_application_id', 'created_by', 'updated_by', 'deleted_by'];
+      $foreignKeysToDrop = ['loan_application_id', 'equipment_id', 'created_by', 'updated_by', 'deleted_by']; // Added 'equipment_id'
       foreach ($foreignKeysToDrop as $key) {
         if (Schema::hasColumn('loan_application_items', $key)) {
           try {
+            // Check if the foreign key exists before trying to drop it
+            // Note: Laravel's default foreign key naming convention is table_column_foreign
+            // However, constrained() might use a different one if the column name is complex.
+            // A more robust check might involve inspecting the schema manager for existing foreign keys.
+            // For simplicity, we'll assume the default naming or that dropForeign handles non-existent keys gracefully in newer Laravel.
             $table->dropForeign([$key]);
           } catch (\Exception $e) {
             Log::warning("Could not drop foreign key for {$key} on loan_application_items table: " . $e->getMessage());

@@ -7,10 +7,9 @@
     <div class="container py-4">
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
             <h1 class="h2 fw-bold text-dark mb-0">{{ __('Senarai Pinjaman Menunggu Pengeluaran') }}</h1>
-            {{-- Optional: Link to BPM dashboard or related pages --}}
         </div>
 
-        @include('partials.alert-messages')
+        @include('_partials._alerts.alert-general') {{-- CORRECTED INCLUDE PATH --}}
 
         @if ($loanApplications->isEmpty())
             <div class="alert alert-info text-center shadow-sm rounded-3" role="alert">
@@ -39,12 +38,14 @@
                                 @foreach ($loanApplications as $application)
                                     <tr>
                                         <td class="px-3 py-2 small text-dark fw-medium">
+                                            {{-- This route 'loan-applications.show' is global and correct --}}
                                             <a href="{{ route('loan-applications.show', $application->id) }}" class="text-decoration-none" title="{{__('Lihat Permohonan')}}">
                                                 #{{ $application->id }}
                                             </a>
                                         </td>
                                         <td class="px-3 py-2 small text-muted">
                                             @if ($application->user)
+                                                {{-- This route 'users.show' is global and correct --}}
                                                 <a href="{{ route('users.show', $application->user->id) }}" class="text-decoration-none" title="{{__('Lihat Profil Pemohon')}}">
                                                     {{ e($application->user->name ?? __('N/A')) }}
                                                 </a>
@@ -66,8 +67,9 @@
                                             @endif
                                         </td>
                                         <td class="px-3 py-2 text-end">
-                                            <a href="{{ route('loan-transactions.issue.form', $application) }}"
-                                                class="btn btn-sm btn-warning text-dark d-inline-flex align-items-center"> {{-- Warning color for pending action --}}
+                                            {{-- CORRECTED ROUTE NAME --}}
+                                            <a href="{{ route('resource-management.bpm.loan-transactions.issue.form', $application) }}"
+                                                class="btn btn-sm btn-warning text-dark d-inline-flex align-items-center">
                                                 <i class="bi bi-box-arrow-up-right me-1"></i>
                                                 {{ __('Proses Pengeluaran') }}
                                             </a>

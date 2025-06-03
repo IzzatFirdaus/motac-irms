@@ -1,198 +1,171 @@
-@extends('layouts.app')
+{{-- Removed: @extends('layouts.app') --}}
+{{-- Removed: @section('title', __('Pengurusan Pengguna Sistem')) --}}
 
-@section('title', __('Pengurusan Pengguna Sistem'))
+<div class="container mt-4"> {{-- This is the single root element --}}
+    {{-- The @section('title', ...) directive has been removed from here.
+         The #[Title(...)] attribute in your component class handles the page title. --}}
 
-@section('content')
-    <div class="container-fluid px-lg-4 py-4">
-
-        {{-- Page Header and Create Button --}}
-        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div class="row mb-3 align-items-center pb-2 border-bottom">
+        <div class="col">
             <h1 class="h2 fw-bold text-dark mb-0 d-flex align-items-center">
-                <i class="bi bi-people-fill me-2"></i>{{ __('Pengurusan Pengguna Sistem') }}
+                <i class="bi bi-people-fill me-2"></i>
+                {{ __('Pengurusan Pengguna Sistem') }}
             </h1>
-            {{-- Use a regular anchor tag with wire:navigate for full page navigation --}}
+        </div>
+        <div class="col text-end">
             @can('create', App\Models\User::class)
-                <a href="{{ route('settings.users.create') }}" wire:navigate
-                    class="btn btn-primary d-inline-flex align-items-center">
-                    <i class="fas fa-plus me-1"></i> {{ __('Tambah Pengguna Baru') }}
-                </a>
+                <button wire:click="redirectToCreateUser" class="btn btn-primary d-inline-flex align-items-center text-uppercase small fw-semibold px-3 py-2 motac-btn-primary">
+                    <i class="bi bi-plus-lg me-1"></i> {{ __('Tambah Pengguna') }}
+                </button>
             @endcan
         </div>
+    </div>
 
-        {{-- Display Session Flash Messages using x-alert component --}}
-        {{-- Replaces the manual @if (session()->has('message')) and @if (session()->has('error')) blocks --}}
-        @if (session('message'))
-            <x-alert :type="session('type', 'success')" :message="session('message')" dismissible="true" />
-        @elseif (session('error'))
-            <x-alert type="danger" :message="session('error')" dismissible="true" />
-        @endif
+    @include('_partials._alerts.alert-general')
 
-        {{-- Search and Filter Controls --}}
-        <div class="card mb-4 shadow-sm motac-card">
-            <div class="card-header bg-light py-3 motac-card-header d-flex align-items-center">
-                <i class="bi bi-funnel-fill me-2 text-primary"></i>
-                <h5 class="mb-0 fw-medium text-dark">{{ __('Carian dan Saringan') }}</h5>
-            </div>
-            <div class="card-body p-3 motac-card-body">
-                <div class="row g-3">
-                    <div class="col-lg-6 col-md-12">
-                        <label for="userSearchAdmin" class="form-label form-label-sm fw-medium">{{ __('Carian (Nama, Emel, No. KP, Jabatan)') }}</label>
-                        <input wire:model.live.debounce.300ms="search" type="text" id="userSearchAdmin"
-                            placeholder="{{ __('Masukkan kata kunci...') }}"
-                            class="form-control form-control-sm">
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                        <label for="userRoleFilterAdmin" class="form-label form-label-sm fw-medium">{{ __('Saring Ikut Peranan') }}</label>
-                        <select wire:model.live="filterRole" id="userRoleFilterAdmin" class="form-select form-select-sm">
-                            <option value="">{{ __('Semua Peranan') }}</option>
-                            @foreach($rolesForFilter as $roleNameValue => $roleNameDisplay)
-                                <option value="{{ $roleNameValue }}">{{ $roleNameDisplay }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                        <label for="userStatusFilterAdmin" class="form-label form-label-sm fw-medium">{{ __('Saring Ikut Status') }}</label>
-                        <select wire:model.live="filterStatus" id="userStatusFilterAdmin" class="form-select form-select-sm">
-                            <option value="">{{ __('Semua Status') }}</option>
-                            {{-- Assuming User::STATUS_ACTIVE and User::STATUS_INACTIVE are constants --}}
-                            <option value="{{ \App\Models\User::STATUS_ACTIVE }}">{{ __('Aktif') }}</option>
-                            <option value="{{ \App\Models\User::STATUS_INACTIVE }}">{{ __('Tidak Aktif') }}</option>
-                        </select>
-                    </div>
+    <div class="card shadow-sm motac-card">
+        <div class="card-header bg-light py-3 motac-card-header d-flex align-items-center">
+            <i class="bi bi-filter me-2 text-primary"></i>
+            <h5 class="mb-0 fw-medium text-dark">{{ __('Penapis') }}</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6 col-lg-4">
+                    <label for="search" class="form-label small fw-medium text-muted">{{ __('Carian') }}</label>
+                    <input type="text" wire:model.live.debounce.500ms="search" class="form-control" id="search" placeholder="{{ __('Carian Nama, Emel, No. Kad Pengenalan...') }}">
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <label for="filterRole" class="form-label small fw-medium text-muted">{{ __('Peranan') }}</label>
+                    <select wire:model.live="filterRole" class="form-select" id="filterRole">
+                        <option value="">{{ __('Semua Peranan') }}</option>
+                        @foreach($rolesForFilter as $roleName => $roleLabel)
+                            <option value="{{ $roleName }}">{{ $roleLabel }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <label for="filterStatus" class="form-label small fw-medium text-muted">{{ __('Status') }}</label>
+                    <select wire:model.live="filterStatus" class="form-select" id="filterStatus">
+                        <option value="">{{ __('Semua Status') }}</option>
+                        @foreach($statusOptions as $statusValue => $statusLabel)
+                            <option value="{{ $statusValue }}">{{ $statusLabel }}</option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
         </div>
+    </div>
 
-        {{-- Users Table --}}
-        <div class="card shadow-sm motac-card">
-            <div class="card-header bg-light py-3 motac-card-header d-flex flex-wrap justify-content-between align-items-center">
-                <h5 class="mb-0 fw-medium text-dark d-flex align-items-center">
-                    <i class="bi bi-list-ul me-2 text-primary"></i>{{ __('Rekod Pengguna') }}
-                </h5>
-                @if ($usersList->total() > 0)
-                    <span class="text-muted small">
-                        {{ __('Memaparkan :start - :end daripada :total rekod', [
-                            'start' => $usersList->firstItem(),
-                            'end' => $usersList->lastItem(),
-                            'total' => $usersList->total(),
-                        ]) }}
-                    </span>
-                @endif
-            </div>
-            <div class="table-responsive">
-                <table class="table table-hover table-striped mb-0 align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="small text-uppercase text-muted fw-medium px-3 py-2" wire:click="sortBy('name')" role="button">
-                                {{ __('Nama') }} <small class="text-muted">({{ __('Emel Utama') }})</small>
-                                @if ($sortField === 'name')
-                                    <i class="fas fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }} ms-1"></i>
-                                @else
-                                    <i class="fas fa-sort ms-1"></i>
-                                @endif
-                            </th>
-                            <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Emel MOTAC') }}</th>
-                            <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('No. KP') }}</th>
-                            <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Jabatan') }}</th>
-                            <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Peranan') }}</th>
-                            <th class="small text-uppercase text-muted fw-medium px-3 py-2" wire:click="sortBy('status')" role="button">
-                                {{ __('Status') }}
-                                @if ($sortField === 'status')
-                                    <i class="fas fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }} ms-1"></i>
-                                @else
-                                    <i class="fas fa-sort ms-1"></i>
-                                @endif
-                            </th>
-                            <th class="text-end small text-uppercase text-muted fw-medium px-3 py-2"><span class="visually-hidden">{{ __('Tindakan') }}</span></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                         <tr wire:loading.class.delay="opacity-50" class="transition-opacity">
-                            <td colspan="7" class="p-0 border-0">
-                                <div wire:loading.flex class="progress bg-transparent rounded-0" style="height: 2px; width: 100%;" role="progressbar" aria-label="Loading...">
-                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary"></div>
-                                </div>
-                            </td>
-                        </tr>
-                        @forelse ($usersList as $user)
-                            <tr wire:key="user-{{ $user->id }}">
-                                <td class="px-3 py-2 small">
-                                    <div class="d-flex align-items-center">
-                                        <div class="avatar avatar-sm me-2">
-                                            <img src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}" class="rounded-circle">
-                                        </div>
-                                        <div>
-                                            <span class="text-dark fw-medium">{{ $user->title ? \App\Models\User::getTitleOptions()[$user->title].' ' : '' }}{{ $user->name }}</span>
-                                            <div class="text-muted" style="font-size: 0.85em;">{{ $user->email }}</div>
+    <div class="card shadow-sm mt-4 motac-card">
+        <div class="card-header bg-light py-3 motac-card-header d-flex align-items-center">
+            <i class="bi bi-list-ul me-2 text-primary"></i>
+            <h5 class="mb-0 fw-medium text-dark">{{ __('Senarai Pengguna') }}</h5>
+        </div>
+        <div class="card-body p-0 motac-card-body">
+            @if ($usersList->count() > 0)
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Nama') }}</th>
+                                <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Emel MOTAC') }}</th>
+                                <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('No. Kad Pengenalan') }}</th>
+                                <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Jabatan') }}</th>
+                                <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Peranan') }}</th>
+                                <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Status') }}</th>
+                                <th class="text-end small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Tindakan') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($usersList as $user)
+                                <tr wire:key="user-{{ $user->id }}">
+                                    <td class="px-3 py-2">
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-2">
+                                                <img src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}" class="rounded-circle" width="40" height="40">
+                                            </div>
+                                            <div>
+                                                <span class="fw-medium text-dark">{{ $user->title }} {{ $user->name }}</span>
+                                                <div class="small text-muted">{{ $user->email }}</div>
+                                            </div>
                                         </div>
                                     </td>
-                                    <td class="px-3 py-2 small text-muted">{{ $user->motac_email ?? '-'}}</td>
-                                    <td class="px-3 py-2 small text-muted">{{ $user->identification_number ?? '-'}}</td>
-                                    <td class="px-3 py-2 small text-muted">{{ optional($user->department)->name ?? '-' }}</td>
-                                    <td class="px-3 py-2 small text-muted">
-                                        @forelse ($user->roles as $role)
-                                            <span class="badge text-bg-secondary me-1 fw-normal">{{ $role->name }}</span>
-                                        @empty
-                                            <span class="text-muted fst-italic small">{{__('Tiada peranan')}}</span>
-                                        @endforelse
+                                    <td class="px-3 py-2 small">{{ $user->motac_email ?? '-' }}</td>
+                                    <td class="px-3 py-2 small">{{ $user->identification_number ?? '-' }}</td>
+                                    <td class="px-3 py-2 small">
+                                        {{ $user->department->name ?? '-' }}
                                     </td>
                                     <td class="px-3 py-2 small">
-                                        <span class="badge rounded-pill {{ \App\Helpers\Helpers::getStatusColorClass($user->status, 'user_status') }}">
-                                            {{ \App\Models\User::getStatusOptions()[$user->status] ?? $user->status }}
+                                        @if ($user->roles->isNotEmpty())
+                                            @foreach ($user->roles as $role)
+                                                <span class="badge bg-primary-subtle text-primary-emphasis rounded-pill">{{ $role->name }}</span>
+                                            @endforeach
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
+                                    <td class="px-3 py-2">
+                                        <span class="badge bg-{{ $user->status === 'active' ? 'success' : 'danger' }}-subtle text-{{ $user->status === 'active' ? 'success' : 'danger' }}-emphasis rounded-pill">
+                                            {{ $statusOptions[$user->status] }}
                                         </span>
                                     </td>
                                     <td class="px-3 py-2 text-end">
                                         @can('view', $user)
-                                            <a href="{{ route('settings.users.show', $user->id) }}" wire:navigate class="btn btn-sm btn-icon btn-outline-info border-0 me-1" title="{{ __('Lihat Profil') }}">
-                                                <i class="bi bi-eye-fill fs-6 lh-1"></i>
+                                            <a href="{{ route('settings.users.show', $user->id) }}" class="btn btn-sm btn-icon btn-outline-primary border-0 me-1 motac-btn-icon" title="{{ __('Lihat') }}">
+                                                <i class="bi bi-eye-fill fs-6"></i>
                                             </a>
                                         @endcan
                                         @can('update', $user)
-                                            <a href="{{ route('settings.users.edit', $user->id) }}" wire:navigate class="btn btn-sm btn-icon btn-outline-primary border-0 me-1" title="{{ __('Kemaskini') }}">
-                                                <i class="bi bi-pencil-fill fs-6 lh-1"></i>
+                                            <a href="{{ route('settings.users.edit', $user->id) }}" class="btn btn-sm btn-icon btn-outline-primary border-0 me-1 motac-btn-icon" title="{{ __('Kemaskini') }}">
+                                                <i class="bi bi-pencil-fill fs-6"></i>
                                             </a>
                                         @endcan
-                                        @if(Auth::user()->id !== $user->id)
-                                            @can('delete', $user)
-                                                <button wire:click="confirmUserDeletion({{ $user->id }}, '{{ $user->name }}')" type="button" class="btn btn-sm btn-icon btn-outline-danger border-0" title="{{ __('Padam') }}">
-                                                    <i class="bi bi-trash3-fill fs-6 lh-1"></i>
-                                                </button>
-                                            @endcan
-                                        @endif
+                                        @can('delete', $user)
+                                            <button wire:click="confirmUserDeletion({{ $user->id }}, '{{ $user->name }}')" class="btn btn-sm btn-icon btn-outline-danger border-0 motac-btn-icon" title="{{ __('Padam') }}">
+                                                <i class="bi bi-trash3-fill fs-6"></i>
+                                            </button>
+                                        @endcan
                                     </td>
                                 </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="7" class="px-3 py-5 text-center">
-                                       <div class="d-flex flex-column align-items-center text-muted small">
-                                            <i class="bi bi-people fs-1 mb-2 text-secondary"></i>
-                                             <p>{{ __('Tiada rekod pengguna ditemui berdasarkan tapisan semasa.') }}</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforelse
-                </tbody>
-            </table>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                @if ($usersList->hasPages())
+                    <div class="card-footer bg-light border-top py-3 motac-card-footer d-flex justify-content-center">
+                        {{ $usersList->links() }}
+                    </div>
+                @endif
+            @else
+                <div class="alert alert-info text-center m-3">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    {{ __('Tiada pengguna ditemui.') }}
+                </div>
+            @endif
         </div>
-
-        @if ($usersList->hasPages())
-            <div class="card-footer bg-light border-top d-flex justify-content-center py-2 motac-card-footer">
-                {{ $usersList->links() }}
-            </div>
-        @endif
-    </div>
     </div>
 
-    {{-- Universal Delete Confirmation Modal (x-data for Alpine.js) --}}
-    {{-- This modal is expected to be a global component or included where needed. --}}
-    {{-- It listens for 'open-delete-modal' dispatch and calls the specified deleteMethod. --}}
-    <div x-data="{ show: @entangle('showDeleteConfirmationModal').live, itemId: null, itemDescription: '', deleteMethod: '' }"
-        @open-delete-modal.window="show = true; itemId = $event.detail.id; itemDescription = $event.detail.itemDescription; deleteMethod = $event.detail.deleteMethod;"
-        x-show="show" class="modal fade" tabindex="-1" style="display: {{ $showDeleteConfirmationModal ? 'block' : 'none' }};" aria-modal="true" role="dialog">
+    <div x-data="{ show: false, itemId: null, itemDescription: '', deleteMethod: '', modelClass: '' }"
+         x-show="show"
+         @open-delete-modal.window="
+            show = true;
+            itemId = $event.detail.id;
+            itemDescription = $event.detail.itemDescription;
+            deleteMethod = $event.detail.deleteMethod;
+            modelClass = $event.detail.modelClass;
+         "
+         class="modal fade"
+         :class="{ 'show': show }"
+         style="display: none;"
+         aria-modal="true"
+         role="dialog">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">{{ __('Sahkan Pemadaman') }}</h5>
+            <div class="modal-content motac-modal-content">
+                <div class="modal-header motac-modal-header">
+                    <h5 class="modal-title d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
+                        {{ __('Sahkan Pemadaman') }}
+                    </h5>
                     <button type="button" class="btn-close" @click="show = false" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -200,27 +173,17 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" @click="show = false">{{ __('Batal') }}</button>
-                    {{-- CORRECTED: The $wire.call() syntax for dynamic method invocation in Livewire --}}
                     <button type="button" class="btn btn-danger" @click="$wire.call(deleteMethod, itemId); show = false;">{{ __('Padam') }}</button>
                 </div>
             </div>
         </div>
     </div>
+</div> {{-- End of the single root element --}}
 
-    @push('scripts')
-    <script>
-        document.addEventListener('livewire:initialized', () => {
-            // Livewire.on('open-delete-modal', params => { // If using a simpler dispatch without explicit @entangle
-            //     var modal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
-            //     modal.show();
-            // });
-            // Livewire.on('close-delete-modal', () => { // If using a simpler dispatch without explicit @entangle
-            //     var modal = bootstrap.Modal.getInstance(document.getElementById('deleteConfirmationModal'));
-            //     if (modal) {
-            //         modal.hide();
-            //     }
-            // });
-        });
-    </script>
-    @endpush
-@endsection
+@push('scripts')
+<script>
+    document.addEventListener('livewire:initialized', () => {
+        // We are using Alpine.js for the modal, so no additional JS is needed for the modal toggle.
+    });
+</script>
+@endpush

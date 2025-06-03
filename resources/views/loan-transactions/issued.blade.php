@@ -7,12 +7,11 @@
     <div class="container py-4">
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
             <h1 class="h2 fw-bold text-dark mb-0">{{ __('Senarai Peralatan Sedang Dipinjam') }}</h1>
-            {{-- Optional: Link to BPM dashboard or related pages --}}
         </div>
 
-        @include('partials.alert-messages')
+        @include('_partials._alerts.alert-general') {{-- CORRECTED INCLUDE PATH --}}
 
-        @if ($issuedLoanItems->isEmpty()) {{-- Changed variable name for clarity --}}
+        @if ($issuedLoanItems->isEmpty())
             <div class="alert alert-info text-center shadow-sm rounded-3" role="alert">
                 <i class="bi bi-info-circle-fill fs-3 me-2 align-middle"></i>
                 <span class="align-middle">{{ __('Tiada peralatan sedang dipinjam pada masa ini.') }}</span>
@@ -37,11 +36,11 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {{-- Assuming $issuedLoanItems is a collection of LoanTransactionItem models --}}
                                 @foreach ($issuedLoanItems as $item)
                                     <tr>
                                         <td class="px-3 py-2 small text-dark fw-medium">
                                             @if($item->equipment)
+                                                {{-- This route 'equipment.show' is global and correct --}}
                                                 <a href="{{ route('equipment.show', $item->equipment_id) }}" title="{{__('Lihat Peralatan')}}">
                                                     {{ e(optional($item->equipment)->brand_model_serial ?? optional($item->equipment)->tag_id) }}
                                                 </a>
@@ -52,6 +51,7 @@
                                         <td class="px-3 py-2 small text-muted">{{ e(optional($item->equipment)->asset_type_label ?? '') }}</td>
                                         <td class="px-3 py-2 small text-muted">
                                             @if (optional($item->loanTransaction->loanApplication)->user)
+                                                {{-- This route 'users.show' is global and correct --}}
                                                 <a href="{{ route('users.show', $item->loanTransaction->loanApplication->user->id) }}" title="{{__('Lihat Profil Pemohon')}}">
                                                     {{ e(optional($item->loanTransaction->loanApplication->user)->name ?? __('N/A')) }}
                                                 </a>
@@ -60,6 +60,7 @@
                                             @endif
                                         </td>
                                         <td class="px-3 py-2 small">
+                                            {{-- This route 'loan-applications.show' is global and correct --}}
                                              <a href="{{ route('loan-applications.show', $item->loanTransaction->loan_application_id) }}" title="{{__('Lihat Permohonan')}}">
                                                 #{{ $item->loanTransaction->loan_application_id }}
                                             </a>
@@ -71,17 +72,16 @@
                                             {{ optional(optional($item->loanTransaction->loanApplication)->loan_end_date)->translatedFormat('d M Y') ?? __('N/A') }}
                                         </td>
                                         <td class="px-3 py-2 text-center">
-                                            {{-- Link to the return form using the relevant issue LoanTransaction ID --}}
-                                            {{-- The original code linked $transaction (which was iterated) to the return form. --}}
-                                            {{-- Here $item is LoanTransactionItem, so we use its parent $item->loanTransaction --}}
-                                            @can('createReturn', $item->loanTransaction->loanApplication) {{-- Policy might be on LoanApplication or LoanTransaction --}}
-                                            <a href="{{ route('loan-transactions.return.form', $item->loanTransaction) }}"
+                                            @can('createReturn', $item->loanTransaction->loanApplication)
+                                            {{-- CORRECTED ROUTE NAME --}}
+                                            <a href="{{ route('resource-management.bpm.loan-transactions.return.form', $item->loanTransaction) }}"
                                                 class="btn btn-sm btn-success d-inline-flex align-items-center">
                                                 <i class="bi bi-arrow-return-left me-1"></i>
                                                 {{ __('Rekod Pulangan') }}
                                             </a>
                                             @endcan
-                                            <a href="{{ route('loan-transactions.show', $item->loanTransaction) }}"
+                                            {{-- CORRECTED ROUTE NAME --}}
+                                            <a href="{{ route('resource-management.bpm.loan-transactions.show', $item->loanTransaction) }}"
                                                 class="btn btn-sm btn-outline-secondary ms-1 d-inline-flex align-items-center" title="{{__('Lihat Transaksi')}}">
                                                 <i class="bi bi-eye-fill"></i>
                                             </a>

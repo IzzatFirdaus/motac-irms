@@ -1,21 +1,20 @@
 {{-- resources/views/reports/loan-applications.blade.php --}}
 <x-app-layout>
-    @section('title', __('Laporan Permohonan Pinjaman Peralatan ICT')) {{-- Added title --}}
+    @section('title', __('Laporan Permohonan Pinjaman Peralatan ICT'))
 
-    <div class="container-fluid py-4"> {{-- Added container-fluid and padding --}}
+    <div class="container-fluid py-4">
         <div class="card shadow-sm mb-4 motac-card">
             <div class="card-header bg-light py-3">
                 <div class="d-flex flex-wrap align-items-center justify-content-between">
                     <h3 class="h5 mb-0 fw-semibold d-flex align-items-center">
-                        <i class="bi bi-journal-arrow-down me-2"></i>{{-- Bootstrap Icon --}}
+                        <i class="bi bi-journal-arrow-down me-2"></i>
                         {{ __('Laporan Permohonan Pinjaman Peralatan ICT') }}
                     </h3>
-                    {{-- Ensure this route name 'admin.reports.index' is correct as per your web.php --}}
-                    @if (Route::has('reports.index')) {{-- Changed to reports.index assuming it's in reports group --}}
+                    @if (Route::has('reports.index'))
                         <div class="mt-2 mt-sm-0 flex-shrink-0">
                             <a href="{{ route('reports.index') }}"
                                class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center motac-btn-outline">
-                                <i class="bi bi-arrow-left me-1"></i> {{-- Bootstrap Icon --}}
+                                <i class="bi bi-arrow-left me-1"></i>
                                 {{ __('Kembali ke Senarai Laporan') }}
                             </a>
                         </div>
@@ -24,7 +23,6 @@
             </div>
 
             <div class="card-body">
-                {{-- Corrected path to your general alert partial --}}
                 @include('_partials._alerts.alert-general')
 
                 <div class="table-responsive">
@@ -47,10 +45,10 @@
                                         <td class="px-3 py-2 small text-muted">{{ Str::limit($application->purpose, 40) }}</td>
                                         <td class="px-3 py-2 small text-muted">{{ $application->loan_start_date?->translatedFormat('d M Y') }}</td>
                                         <td class="px-3 py-2 small">
-                                            {{-- Ensure App\Helpers\Helpers::getStatusColorClass exists and handles these statuses --}}
-                                            {{-- Or use a dedicated component like <x-loan-application-status-badge :status="$application->status" /> --}}
-                                            <span class="badge rounded-pill {{ App\Helpers\Helpers::getStatusColorClass($application->status) }} fw-normal">
-                                                {{ $application->status_translated ?? __(Str::title(str_replace('_', ' ', $application->status))) }}
+                                            {{-- CORRECTED: Added 'loan_application' as the second argument --}}
+                                            <span class="badge rounded-pill {{ App\Helpers\Helpers::getStatusColorClass($application->status ?? 'default', 'loan_application') }} fw-normal">
+                                                {{-- Assuming $application has a status_label accessor or you fallback --}}
+                                                {{ $application->status_label ?? __(Str::title(str_replace('_', ' ', $application->status))) }}
                                             </span>
                                         </td>
                                     </tr>
@@ -64,8 +62,8 @@
                             </div>
                         @endif
                     @else
-                        <div class="alert alert-info d-flex align-items-center text-center" role="alert"> {{-- Added text-center --}}
-                            <i class="bi bi-info-circle-fill me-2"></i> {{-- Bootstrap Icon --}}
+                        <div class="alert alert-info d-flex align-items-center text-center" role="alert">
+                            <i class="bi bi-info-circle-fill me-2"></i>
                             <div>
                                 {{ __('Tiada permohonan pinjaman ditemui untuk dipaparkan dalam laporan ini.') }}
                             </div>

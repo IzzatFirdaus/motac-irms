@@ -9,15 +9,13 @@
             <div class="col-12">
                 <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
                      <h1 class="h2 fw-bold text-dark mb-0">@yield('title')</h1>
-                     {{-- Optional: Add relevant action buttons or links here --}}
                 </div>
 
-                @include('partials.alert-messages')
+                @include('_partials._alerts.alert-general') {{-- CORRECTED INCLUDE PATH --}}
 
                 <div class="card shadow-sm">
                     <div class="card-header bg-light py-3">
                         <h2 class="h5 card-title fw-semibold mb-0">{{ __('Rekod Transaksi Pengeluaran') }}</h2>
-                        {{-- Add any filter or search forms here if needed --}}
                     </div>
                     <div class="card-body p-0">
                         @if ($issuedTransactions->isEmpty())
@@ -45,6 +43,7 @@
                                             <tr>
                                                 <td class="px-3 py-2 small text-dark fw-medium">#{{ $transaction->id }}</td>
                                                 <td class="px-3 py-2 small">
+                                                    {{-- This route 'loan-applications.show' is global and correct --}}
                                                     <a href="{{ route('loan-applications.show', $transaction->loanApplication) }}" class="text-decoration-none fw-medium" title="{{__('Lihat Permohonan')}}">
                                                         #{{ $transaction->loan_application_id }}
                                                     </a>
@@ -58,14 +57,15 @@
                                                 <td class="px-3 py-2 small text-muted text-center">{{ $transaction->loanTransactionItems->count() }}</td>
                                                 <td class="px-3 py-2 text-center">
                                                     <div class="btn-group btn-group-sm" role="group" aria-label="{{__('Tindakan untuk Transaksi #')}}{{$transaction->id}}">
-                                                        <a href="{{ route('loan-transactions.show', $transaction) }}"
+                                                        {{-- CORRECTED ROUTE NAME --}}
+                                                        <a href="{{ route('resource-management.bpm.loan-transactions.show', $transaction) }}"
                                                             class="btn btn-outline-primary" title="{{ __('Lihat Butiran Transaksi') }}">
                                                             <i class="bi bi-eye-fill"></i>
                                                         </a>
-                                                        {{-- Check if the transaction status itself allows for return processing, or if its associated application allows return --}}
-                                                        @if ($transaction->loanApplication && $transaction->loanApplication->canBeReturned() && !$transaction->isFullyClosedOrReturned()) {{-- Add isFullyClosedOrReturned() to LoanTransaction model --}}
-                                                            @can('createReturn', $transaction->loanApplication) {{-- Policy check can be on LoanApplication or LoanTransaction --}}
-                                                                <a href="{{ route('loan-transactions.return.form', $transaction) }}"
+                                                        @if ($transaction->loanApplication && $transaction->loanApplication->canBeReturned() && !$transaction->isFullyClosedOrReturned())
+                                                            @can('createReturn', $transaction->loanApplication)
+                                                                {{-- CORRECTED ROUTE NAME --}}
+                                                                <a href="{{ route('resource-management.bpm.loan-transactions.return.form', $transaction) }}"
                                                                     class="btn btn-success" title="{{ __('Proses Pulangan') }}">
                                                                     <i class="bi bi-arrow-return-left"></i>
                                                                 </a>

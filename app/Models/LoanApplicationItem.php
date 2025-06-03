@@ -4,174 +4,178 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Database\Factories\LoanApplicationItemFactory;
+use Database\Factories\LoanApplicationItemFactory; // Correct import for the specific factory
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany; // For transaction items related to this app item
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
+use App\Models\LoanTransaction; // Import if LoanTransaction constants are used directly
+use App\Models\LoanTransactionItem as TransactionItemModel; // Alias if LoanTransactionItem is too verbose or conflicts
 
 /**
  * Loan Application Item Model.
- * * Represents a type of equipment and quantity requested in a loan application.
- * System Design Reference: MOTAC Integrated Resource Management System (Revision 3) - Section 4.3
- * Migration context: 2025_04_22_105519_create_loan_application_items_table.php includes 'status' column.
+ * Represents a type of equipment and quantity requested in a loan application.
  *
  * @property int $id
  * @property int $loan_application_id
- * @property string $equipment_type Type of equipment requested (e.g., 'laptop', 'projector')
+ * @property string $equipment_type
  * @property int $quantity_requested
  * @property int|null $quantity_approved
- * @property int $quantity_issued Default: 0
- * @property int $quantity_returned Default: 0
- * @property string $status Status of this specific requested item (enum from migration)
- * @property string|null $notes Notes for this specific item request
- * @property int|null $created_by (Handled by BlameableObserver)
- * @property int|null $updated_by (Handled by BlameableObserver)
- * @property int|null $deleted_by (Handled by BlameableObserver)
+ * @property int $quantity_issued
+ * @property int $quantity_returned
+ * @property string $status
+ * @property string|null $notes
+ * @property int|null $created_by
+ * @property int|null $updated_by
+ * @property int|null $deleted_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \App\Models\LoanApplication $loanApplication
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanTransactionItem> $loanTransactionItems
- * @property-read \App\Models\User|null $creator
- * @property-read \App\Models\User|null $updater
- * @property-read \App\Models\User|null $deleter
- * @property-read string $equipmentTypeLabel Accessor for equipment_type label
- * @property-read string $equipment_type_label
- * @property-read int|null $loan_transaction_items_count
- * @method static \Database\Factories\LoanApplicationItemFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereCreatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereDeletedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereEquipmentType($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereLoanApplicationId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereNotes($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereQuantityApproved($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereQuantityIssued($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereQuantityRequested($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereQuantityReturned($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereUpdatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem withoutTrashed()
- * @mixin \Eloquent
+ *
+ * @property-read LoanApplication $loanApplication
+ * @property-read \Illuminate\Database\Eloquent\Collection|TransactionItemModel[] $loanTransactionItems
+ * @property-read string $status_label
  */
 class LoanApplicationItem extends Model
 {
-    use HasFactory;
-    use SoftDeletes;
+  use HasFactory;
+  use SoftDeletes;
 
-    // Note: Actual enum values for 'status' are defined in the migration
-    // 2025_04_22_105519_create_loan_application_items_table.php
-    // e.g., 'pending_approval', 'item_approved', etc.
-    // This model should ideally have constants for these if they are referenced in code.
+  public const STATUS_ITEM_REQUESTED = 'requested';
+  public const STATUS_ITEM_APPROVED = 'approved';
+  public const STATUS_ITEM_REJECTED = 'rejected';
+  public const STATUS_ITEM_PARTIALLY_ALLOCATED = 'partially_allocated';
+  public const STATUS_ITEM_ALLOCATED = 'allocated';
+  public const STATUS_ITEM_UNAVAILABLE = 'unavailable';
+  public const STATUS_ITEM_ISSUED = 'issued';
+  public const STATUS_ITEM_RETURNED = 'returned';
+  public const STATUS_ITEM_CANCELLED = 'cancelled';
 
-    protected $table = 'loan_application_items';
+  public const ITEM_STATUS_LABELS = [
+    self::STATUS_ITEM_REQUESTED => 'Dimohon',
+    self::STATUS_ITEM_APPROVED => 'Diluluskan (Item)',
+    self::STATUS_ITEM_REJECTED => 'Ditolak (Item)',
+    self::STATUS_ITEM_PARTIALLY_ALLOCATED => 'Diperuntukkan Sebahagian',
+    self::STATUS_ITEM_ALLOCATED => 'Diperuntukkan',
+    self::STATUS_ITEM_UNAVAILABLE => 'Tidak Tersedia',
+    self::STATUS_ITEM_ISSUED => 'Telah Dikeluarkan',
+    self::STATUS_ITEM_RETURNED => 'Telah Dipulangkan',
+    self::STATUS_ITEM_CANCELLED => 'Dibatalkan (Item)',
+  ];
 
-    protected $fillable = [
-        'loan_application_id',
-        'equipment_type',
-        'quantity_requested',
-        'quantity_approved',
-        'quantity_issued',
-        'quantity_returned',
-        'status', // Added to fillable
-        'notes',
-        // created_by, updated_by handled by BlameableObserver
-    ];
+  protected $fillable = [
+    'loan_application_id',
+    'equipment_type',
+    'quantity_requested',
+    'quantity_approved',
+    'quantity_issued',
+    'quantity_returned',
+    'status',
+    'notes',
+  ];
 
-    protected $casts = [
-        'quantity_requested' => 'integer',
-        'quantity_approved' => 'integer',
-        'quantity_issued' => 'integer',
-        'quantity_returned' => 'integer',
-    ];
+  protected $casts = [
+    'quantity_requested' => 'integer',
+    'quantity_approved' => 'integer',
+    'quantity_issued' => 'integer',
+    'quantity_returned' => 'integer',
+    'created_at' => 'datetime',
+    'updated_at' => 'datetime',
+    'deleted_at' => 'datetime',
+  ];
 
-    protected $attributes = [
-        'quantity_issued' => 0,
-        'quantity_returned' => 0,
-        // 'status' => 'pending_approval', // Default status if applicable, should match migration default
-    ];
+  protected static function booted(): void
+  {
+    static::creating(function ($item) {
+      if (empty($item->status)) {
+        $item->status = self::STATUS_ITEM_REQUESTED;
+      }
+      $item->quantity_issued = $item->quantity_issued ?? 0;
+      $item->quantity_returned = $item->quantity_returned ?? 0;
+    });
 
-    protected static function newFactory(): LoanApplicationItemFactory
-    {
-        return LoanApplicationItemFactory::new();
-    }
+    static::deleting(function ($loanApplicationItem) {
+      DB::transaction(function () use ($loanApplicationItem) {
+        $loanApplicationItem->loanTransactionItems()->delete();
+      });
+    });
+  }
 
-    // Relationships
-    public function loanApplication(): BelongsTo
-    {
-        return $this->belongsTo(LoanApplication::class, 'loan_application_id');
-    }
+  /**
+   * Define the factory for the model.
+   */
+  protected static function newFactory(): LoanApplicationItemFactory // Corrected return type
+  {
+    return LoanApplicationItemFactory::new();
+  }
 
-    public function loanTransactionItems(): HasMany
-    {
-        return $this->hasMany(LoanTransactionItem::class, 'loan_application_item_id');
-    }
+  // Relationships
 
-    // Blameable relationships
-    public function creator(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
+  public function loanApplication(): BelongsTo
+  {
+    return $this->belongsTo(LoanApplication::class);
+  }
 
-    public function updater(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'updated_by');
-    }
+  public function loanTransactionItems(): HasMany
+  {
+    return $this->hasMany(TransactionItemModel::class, 'loan_application_item_id'); // Using alias
+  }
 
-    public function deleter(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'deleted_by');
-    }
+  // Accessors
 
-    // Accessor for equipment_type label
-    public function getEquipmentTypeLabelAttribute(): string
-    {
-        return Equipment::$ASSET_TYPES_LABELS[$this->equipment_type] ?? Str::title(str_replace('_', ' ', (string) $this->equipment_type));
-    }
+  public function getStatusLabelAttribute(): string
+  {
+    return self::ITEM_STATUS_LABELS[$this->status] ?? Str::title(str_replace('_', ' ', (string) $this->status));
+  }
 
-    // Accessor for status label (assuming you might add status constants/labels here or use a helper)
-    // public function getStatusLabelAttribute(): string
-    // {
-    //     // Example: return self::$ITEM_STATUS_LABELS[$this->status] ?? Str::title($this->status);
-    //     return Str::title(str_replace('_', ' ', (string) $this->status));
-    // }
+  public function equipment()
+  {
+    return $this->belongsTo(Equipment::class);
+  }
 
 
-    public function recalculateQuantities(): void
-    {
-        $this->loadMissing('loanTransactionItems.loanTransaction');
+  // Helper Methods
 
-        $issuedQty = 0;
-        $returnedQty = 0;
+  public function recalculateQuantities(): void
+  {
+    $this->loadMissing('loanTransactionItems.loanTransaction');
 
-        foreach ($this->loanTransactionItems as $item) {
-            if ($item->loanTransaction?->type === LoanTransaction::TYPE_ISSUE && $item->status === LoanTransactionItem::STATUS_ITEM_ISSUED) {
-                $issuedQty += $item->quantity_transacted;
-            } elseif ($item->loanTransaction?->type === LoanTransaction::TYPE_RETURN &&
-                      is_array(LoanTransactionItem::$RETURN_APPLICABLE_STATUSES) && // Ensure it's an array
-                      in_array($item->status, LoanTransactionItem::$RETURN_APPLICABLE_STATUSES)) {
-                if (!in_array($item->status, [LoanTransactionItem::STATUS_ITEM_REPORTED_LOST])) {
-                    $returnedQty += $item->quantity_transacted;
-                }
-            }
+    $issuedQty = 0;
+    $returnedQty = 0;
+
+    foreach ($this->loanTransactionItems as $transactionItem) {
+      if ($transactionItem->loanTransaction) {
+        if (
+          $transactionItem->loanTransaction->type === LoanTransaction::TYPE_ISSUE &&
+          // Assuming STATUS_ITEM_ISSUED is a constant in your LoanTransactionItem model
+          $transactionItem->status === TransactionItemModel::STATUS_ITEM_ISSUED
+        ) {
+          $issuedQty += $transactionItem->quantity_transacted;
+        } elseif (
+          $transactionItem->loanTransaction->type === LoanTransaction::TYPE_RETURN &&
+          // Assuming $RETURN_APPLICABLE_STATUSES is a static array in LoanTransactionItem
+          is_array(TransactionItemModel::$RETURN_APPLICABLE_STATUSES) &&
+          in_array($transactionItem->status, TransactionItemModel::$RETURN_APPLICABLE_STATUSES)
+        ) {
+          // Assuming STATUS_ITEM_REPORTED_LOST is a constant in LoanTransactionItem
+          if (!in_array($transactionItem->status, [TransactionItemModel::STATUS_ITEM_REPORTED_LOST])) {
+            $returnedQty += $transactionItem->quantity_transacted;
+          }
         }
-        $this->quantity_issued = $issuedQty;
-        $this->quantity_returned = $returnedQty;
-
-        // If this method modifies attributes, it should save.
-        if ($this->isDirty(['quantity_issued', 'quantity_returned'])) {
-            $this->save();
-        }
+      }
     }
+
+    $this->quantity_issued = $issuedQty;
+    $this->quantity_returned = $returnedQty;
+
+    if ($this->isDirty(['quantity_issued', 'quantity_returned'])) {
+      $this->save();
+      // if ($this->loanApplication) {
+      //     $this->loanApplication->updateOverallStatus();
+      // }
+    }
+  }
 }

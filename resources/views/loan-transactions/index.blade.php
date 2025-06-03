@@ -8,10 +8,9 @@
 
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
             <h1 class="h2 fw-bold text-dark mb-0">{{ __('Senarai Semua Transaksi Pinjaman ICT') }}</h1>
-            {{-- Optional: Add a link to create a new transaction if applicable from a general list --}}
         </div>
 
-        @include('partials.alert-messages') {{-- Common partial for session messages --}}
+        @include('_partials._alerts.alert-general') {{-- CORRECTED INCLUDE PATH --}}
 
         @isset($loanTransactions)
             @if ($loanTransactions->isEmpty())
@@ -43,7 +42,7 @@
                                             <td class="px-3 py-2 small text-dark fw-medium">#{{ $transaction->id }}</td>
                                             <td class="px-3 py-2 small text-dark">
                                                 <span class="badge rounded-pill {{ $transaction->type === \App\Models\LoanTransaction::TYPE_ISSUE ? 'bg-info-subtle text-info-emphasis border border-info-subtle' : 'bg-primary-subtle text-primary-emphasis border border-primary-subtle' }}">
-                                                    {{ e($transaction->type_label) }} {{-- Using accessor --}}
+                                                    {{ e($transaction->type_label) }}
                                                 </span>
                                             </td>
                                             <td class="px-3 py-2 small">
@@ -57,11 +56,11 @@
                                             </td>
                                             <td class="px-3 py-2 small text-muted">{{ optional($transaction->transaction_date)->translatedFormat('d M Y, H:i A') ?? optional($transaction->created_at)->translatedFormat('d M Y, H:i A') }}</td>
                                             <td class="px-3 py-2 small">
-                                                {{-- Create this Blade component for consistent status display --}}
                                                 <x-loan-transaction-status-badge :status="$transaction->status" />
                                             </td>
                                             <td class="px-3 py-2 text-end">
-                                                <a href="{{ route('loan-transactions.show', $transaction) }}"
+                                                {{-- CORRECTED ROUTE NAME --}}
+                                                <a href="{{ route('resource-management.bpm.loan-transactions.show', $transaction) }}"
                                                     class="btn btn-sm btn-outline-primary d-inline-flex align-items-center">
                                                     <i class="bi bi-eye-fill me-1"></i> {{ __('Lihat') }}
                                                 </a>
@@ -73,7 +72,6 @@
                         </div>
                     </div>
                 </div>
-                {{-- The PHP0418 error is a linter false positive. $loanTransactions->links() is correct. --}}
                 @if ($loanTransactions instanceof \Illuminate\Contracts\Pagination\LengthAwarePaginator && $loanTransactions->hasPages())
                     <div class="mt-4 d-flex justify-content-center">
                         {{ $loanTransactions->links() }}

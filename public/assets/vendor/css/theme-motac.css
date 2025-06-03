@@ -12,65 +12,65 @@
   /* ---------------------------------------------------- */
   /* 2.1 Color Palette - Light Mode */
   /* ---------------------------------------------------- */
-  --motac-blue: #0055a4; /* Primary (MOTAC Blue) */
-  --motac-maroon: #8c1d40; /* Secondary */
+  --motac-blue: #0055a4; /* Primary (MOTAC Blue) */ /* */
+  --motac-maroon: #8c1d40; /* Secondary */ /* */
 
-  --motac-bg-light: #f8f9fa; /* Main content background */
-  --motac-surface-light: #ffffff; /* Cards, form panels */
-  --motac-text-light: #212529; /* Primary text */
-  --motac-text-muted-light: #6c757d; /* Muted text */
-  --motac-border-light: #dee2e6; /* Borders, dividers */
+  --motac-bg-light: #f8f9fa; /* Main content background */ /* */
+  --motac-surface-light: #ffffff; /* Cards, form panels */ /* */
+  --motac-text-light: #212529; /* Primary text */ /* */
+  --motac-text-muted-light: #6c757d; /* Muted text */ /* */
+  --motac-border-light: #dee2e6; /* Borders, dividers */ /* */
 
   /* Semantic Colors - Using Bootstrap's defaults for consistency unless specified */
-  --motac-critical: #dc3545; /* Errors, destructive actions */
-  --motac-success: #28a745; /* Completed actions */
-  --motac-warning: #ffc107; /* Pending, warnings */
-  --motac-info: #17a2b8; /* Informational */
+  --motac-critical: #dc3545; /* Errors, destructive actions */ /* */
+  --motac-success: #28a745; /* Completed actions */ /* */
+  --motac-warning: #ffc107; /* Pending, warnings */ /* */
+  --motac-info: #17a2b8; /* Informational */ /* */
 
   /* Bootstrap Overrides (map to MOTAC colors) */
-  --bs-primary: var(--motac-blue);
-  --bs-secondary: var(--motac-maroon);
-  --bs-background: var(--motac-bg-light);
-  --bs-surface: var(--motac-surface-light);
-  --bs-body-bg: var(--motac-bg-light);
-  --bs-body-color: var(--motac-text-light);
-  --bs-border-color: var(--motac-border-light);
+  --bs-primary: var(--motac-blue); /* */
+  --bs-secondary: var(--motac-maroon); /* */
+  --bs-background: var(--motac-bg-light); /* */
+  --bs-surface: var(--motac-surface-light); /* */
+  --bs-body-bg: var(--motac-bg-light); /* */
+  --bs-body-color: var(--motac-text-light); /* */
+  --bs-border-color: var(--motac-border-light); /* */
 
-  --bs-success: var(--motac-success);
-  --bs-warning: var(--motac-warning);
-  --bs-danger: var(--motac-critical);
-  --bs-info: var(--motac-info);
+  --bs-success: var(--motac-success); /* */
+  --bs-warning: var(--motac-warning); /* */
+  --bs-danger: var(--motac-critical); /* */
+  --bs-info: var(--motac-info); /* */
 
   /* ---------------------------------------------------- */
   /* 2.2 Typography - Noto Sans */
   /* ---------------------------------------------------- */
-  --bs-font-sans-serif: 'Noto Sans', sans-serif;
-  --bs-body-font-family: var(--bs-font-sans-serif);
-  --bs-body-line-height: 1.6; /* Optimal readability for Bahasa Melayu */
+  --bs-font-sans-serif: 'Noto Sans', sans-serif; /* */
+  --bs-body-font-family: var(--bs-font-sans-serif); /* */
+  --bs-body-line-height: 1.6; /* Optimal readability for Bahasa Melayu */ /* */
 
   /* Font Scale */
-  --bs-h1-font-size: 1.75rem; /* 28px */
-  --bs-h2-font-size: 1.5rem; /* 24px */
-  --bs-h3-font-size: 1.25rem; /* 20px */
-  --bs-body-font-size: 0.875rem; /* 14px */
-  --motac-label-font-size: 0.75rem; /* 12px */
+  --bs-h1-font-size: 1.75rem; /* 28px */ /* */
+  --bs-h2-font-size: 1.5rem; /* 24px */ /* */
+  --bs-h3-font-size: 1.25rem; /* 20px */ /* */
+  --bs-body-font-size: 0.875rem; /* 14px */ /* */
+  --motac-label-font-size: 0.75rem; /* 12px */ /* */
 
   /* ---------------------------------------------------- */
   /* 2.3 Spacing System - 4px Baseline Grid */
   /* ---------------------------------------------------- */
-  --bs-spacer: 0.25rem; /* 4px */
+  --bs-spacer: 0.25rem; /* 4px */ /* */
 
-  --bs-spacing-0: 0;
-  --bs-spacing-1: var(--bs-spacer); /* 4px */
-  --bs-spacing-2: calc(var(--bs-spacer) * 2); /* 8px */
-  --bs-spacing-3: calc(var(--bs-spacer) * 3); /* 12px */
-  --bs-spacing-4: calc(var(--bs-spacer) * 4); /* 16px */
-  --bs-spacing-5: calc(var(--bs-spacer) * 6); /* 24px */
-  --bs-spacing-6: calc(var(--bs-spacer) * 8); /* 32px */
+  --bs-spacing-0: 0; /* */
+  --bs-spacing-1: var(--bs-spacer); /* 4px */ /* */
+  --bs-spacing-2: calc(var(--bs-spacer) * 2); /* 8px */ /* */
+  --bs-spacing-3: calc(var(--bs-spacer) * 3); /* 12px */ /* */
+  --bs-spacing-4: calc(var(--bs-spacer) * 4); /* 16px */ /* */
+  --bs-spacing-5: calc(var(--bs-spacer) * 6); /* 24px */ /* */
+  --bs-spacing-6: calc(var(--bs-spacer) * 8); /* 32px */ /* */
 
   /* Map Bootstrap's default spacing to the 4px grid for consistency */
-  --bs-gutter-x: calc(var(--bs-spacing-4) * 1.5); /* 24px */
-  --bs-gutter-y: var(--bs-spacing-4); /* 16px */
+  --bs-gutter-x: calc(var(--bs-spacing-4) * 1.5); /* 24px */ /* */
+  --bs-gutter-y: var(--bs-spacing-4); /* 16px */ /* */
 }
 
 /* ---------------------------------------------------- */
@@ -78,104 +78,104 @@
 /* ---------------------------------------------------- */
 [data-bs-theme='dark'] {
   /* Color Palette - Dark Mode */
-  --motac-blue: #3d8fd1; /* Primary (brighter for dark background) */
-  --motac-maroon: #a9496b; /* Secondary */
+  --motac-blue: #3d8fd1; /* Primary (brighter for dark background) */ /* */
+  --motac-maroon: #a9496b; /* Secondary */ /* */
 
-  --motac-bg-dark: #121826; /* Main content background */
-  --motac-surface-dark: #1e293b; /* Cards, form panels */
-  --motac-text-dark: #e9ecef; /* Primary text */
-  --motac-text-muted-dark: #adb5bd; /* Muted text */
-  --motac-border-dark: #495057; /* Borders, dividers */
+  --motac-bg-dark: #121826; /* Main content background */ /* */
+  --motac-surface-dark: #1e293b; /* Cards, form panels */ /* */
+  --motac-text-dark: #e9ecef; /* Primary text */ /* */
+  --motac-text-muted-dark: #adb5bd; /* Muted text */ /* */
+  --motac-border-dark: #495057; /* Borders, dividers */ /* */
 
   /* Semantic Colors for Dark Mode (adjust as needed for visibility) */
-  --motac-critical: #f87171;
-  --motac-success: #4ade80;
-  --motac-warning: #facc15;
-  --motac-info: #60a5fa;
+  --motac-critical: #f87171; /* */
+  --motac-success: #4ade80; /* */
+  --motac-warning: #facc15; /* */
+  --motac-info: #60a5fa; /* */
 
   /* Bootstrap Overrides for Dark Mode */
-  --bs-primary: var(--motac-blue);
-  --bs-secondary: var(--motac-maroon);
-  --bs-background: var(--motac-bg-dark);
-  --bs-surface: var(--motac-surface-dark);
-  --bs-body-bg: var(--motac-bg-dark);
-  --bs-body-color: var(--motac-text-dark);
-  --bs-border-color: var(--motac-border-dark);
+  --bs-primary: var(--motac-blue); /* */
+  --bs-secondary: var(--motac-maroon); /* */
+  --bs-background: var(--motac-bg-dark); /* */
+  --bs-surface: var(--motac-surface-dark); /* */
+  --bs-body-bg: var(--motac-bg-dark); /* */
+  --bs-body-color: var(--motac-text-dark); /* */
+  --bs-border-color: var(--motac-border-dark); /* */
 
-  --bs-success: var(--motac-success);
-  --bs-warning: var(--motac-warning);
-  --bs-danger: var(--motac-critical);
-  --bs-info: var(--motac-info);
+  --bs-success: var(--motac-success); /* */
+  --bs-warning: var(--motac-warning); /* */
+  --bs-danger: var(--motac-critical); /* */
+  --bs-info: var(--motac-info); /* */
 
   /* Form control adjustments for dark mode */
   .form-control,
   .form-select,
   .form-control:focus,
   .form-select:focus {
-    background-color: rgba(255, 255, 255, 0.05); /* Subtle dark input background */
-    border-color: var(--motac-border-dark);
-    color: var(--motac-text-dark);
+    background-color: rgba(255, 255, 255, 0.05); /* Subtle dark input background */ /* */
+    border-color: var(--motac-border-dark); /* */
+    color: var(--motac-text-dark); /* */
   }
 
   .form-control::placeholder {
-    color: var(--motac-text-muted-dark);
+    color: var(--motac-text-muted-dark); /* */
   }
 
   /* Card background for dark mode */
   .motac-card,
   .card {
-    background-color: var(--motac-surface-dark);
-    border-color: var(--motac-border-dark);
+    background-color: var(--motac-surface-dark); /* */
+    border-color: var(--motac-border-dark); /* */
   }
   .motac-card-header,
   .card-header {
-    background-color: rgba(255, 255, 255, 0.03); /* Lighter header for contrast */
-    border-bottom-color: var(--motac-border-dark);
-    color: var(--motac-text-dark);
+    background-color: rgba(255, 255, 255, 0.03); /* Lighter header for contrast */ /* */
+    border-bottom-color: var(--motac-border-dark); /* */
+    color: var(--motac-text-dark); /* */
   }
 
   /* Table styles for dark mode */
   .table {
-    --bs-table-bg: var(--motac-surface-dark);
-    --bs-table-striped-bg: rgba(255, 255, 255, 0.02);
-    --bs-table-hover-bg: rgba(255, 255, 255, 0.05);
-    --bs-table-border-color: var(--motac-border-dark);
-    color: var(--motac-text-dark);
+    --bs-table-bg: var(--motac-surface-dark); /* */
+    --bs-table-striped-bg: rgba(255, 255, 255, 0.02); /* */
+    --bs-table-hover-bg: rgba(255, 255, 255, 0.05); /* */
+    --bs-table-border-color: var(--motac-border-dark); /* */
+    color: var(--motac-text-dark); /* */
   }
   .table-hover > tbody > tr:hover {
-    color: var(--motac-text-dark);
+    color: var(--motac-text-dark); /* */
   }
 
   /* List group for dark mode */
   .list-group-item {
-    background-color: var(--motac-surface-dark);
-    border-color: var(--motac-border-dark);
-    color: var(--motac-text-dark);
+    background-color: var(--motac-surface-dark); /* */
+    border-color: var(--motac-border-dark); /* */
+    color: var(--motac-text-dark); /* */
   }
   .list-group-item-action:hover {
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: rgba(255, 255, 255, 0.05); /* */
   }
 
   /* Alert adjustments for dark mode */
   .alert-warning {
-    --bs-alert-bg: rgba(var(--bs-warning-rgb), 0.15);
-    --bs-alert-border-color: var(--motac-warning);
-    --bs-alert-color: var(--motac-text-dark);
+    --bs-alert-bg: rgba(var(--bs-warning-rgb), 0.15); /* */
+    --bs-alert-border-color: var(--motac-warning); /* */
+    --bs-alert-color: var(--motac-text-dark); /* */
   }
   .alert-info {
-    --bs-alert-bg: rgba(var(--bs-info-rgb), 0.15);
-    --bs-alert-border-color: var(--motac-info);
-    --bs-alert-color: var(--motac-text-dark);
+    --bs-alert-bg: rgba(var(--bs-info-rgb), 0.15); /* */
+    --bs-alert-border-color: var(--motac-info); /* */
+    --bs-alert-color: var(--motac-text-dark); /* */
   }
   .alert-success {
-    --bs-alert-bg: rgba(var(--bs-success-rgb), 0.15);
-    --bs-alert-border-color: var(--motac-success);
-    --bs-alert-color: var(--motac-text-dark);
+    --bs-alert-bg: rgba(var(--bs-success-rgb), 0.15); /* */
+    --bs-alert-border-color: var(--motac-success); /* */
+    --bs-alert-color: var(--motac-text-dark); /* */
   }
   .alert-danger {
-    --bs-alert-bg: rgba(var(--bs-danger-rgb), 0.15);
-    --bs-alert-border-color: var(--motac-critical);
-    --bs-alert-color: var(--motac-text-dark);
+    --bs-alert-bg: rgba(var(--bs-danger-rgb), 0.15); /* */
+    --bs-alert-border-color: var(--motac-critical); /* */
+    --bs-alert-color: var(--motac-text-dark); /* */
   }
 }
 
@@ -183,11 +183,11 @@
 /* Global Body Styles */
 /* ---------------------------------------------------- */
 body {
-  font-family: var(--bs-body-font-family);
-  font-size: var(--bs-body-font-size);
-  line-height: var(--bs-body-line-height);
-  background-color: var(--bs-body-bg);
-  color: var(--bs-body-color);
+  font-family: var(--bs-body-font-family); /* */
+  font-size: var(--bs-body-font-size); /* */
+  line-height: var(--bs-body-line-height); /* */
+  background-color: var(--bs-body-bg); /* */
+  color: var(--bs-body-color); /* */
 }
 
 /* ---------------------------------------------------- */
@@ -195,234 +195,240 @@ body {
 /* ---------------------------------------------------- */
 h1,
 .h1 {
-  font-size: var(--bs-h1-font-size);
-  font-weight: 600; /* Semibold */
-  line-height: 1.2;
-  color: var(--bs-body-color);
+  font-size: var(--bs-h1-font-size); /* */
+  font-weight: 600; /* Semibold */ /* */
+  line-height: 1.2; /* */
+  color: var(--bs-body-color); /* */
 }
 h2,
 .h2 {
-  font-size: var(--bs-h2-font-size);
-  font-weight: 600; /* Semibold */
-  line-height: 1.3;
-  color: var(--bs-body-color);
+  font-size: var(--bs-h2-font-size); /* */
+  font-weight: 600; /* Semibold */ /* */
+  line-height: 1.3; /* */
+  color: var(--bs-body-color); /* */
 }
 h3,
 .h3 {
-  font-size: var(--bs-h3-font-size);
-  font-weight: 500; /* Medium */
-  line-height: 1.4;
-  color: var(--bs-body-color);
+  font-size: var(--bs-h3-font-size); /* */
+  font-weight: 500; /* Medium */ /* */
+  line-height: 1.4; /* */
+  color: var(--bs-body-color); /* */
 }
 
 /* Labels and small text */
 label,
 .motac-form-label {
-  font-size: var(--bs-body-font-size); /* Default Bootstrap label size */
-  font-weight: 500; /* Medium */
-  color: var(--bs-body-color); /* Ensure label color matches body text */
+  font-size: var(--bs-body-font-size); /* Default Bootstrap label size */ /* */
+  font-weight: 500; /* Medium */ /* */
+  color: var(--bs-body-color); /* Ensure label color matches body text */ /* */
 }
 small,
 .form-text {
-  font-size: var(--motac-label-font-size); /* 12px */
-  color: var(--motac-text-muted-light);
+  font-size: var(--motac-label-font-size); /* 12px */ /* */
+  color: var(--motac-text-muted-light); /* */
 }
 
 /* Override Bootstrap's default text-muted for light mode */
 .text-muted {
-  color: var(--motac-text-muted-light) !important;
+  color: var(--motac-text-muted-light) !important; /* */
 }
 
 /* ---------------------------------------------------- */
 /* 3.1 Navigation - Top Action Bar & Vertical Side Navigation */
 /* ---------------------------------------------------- */
 .motac-navbar {
-  background-color: var(--bs-primary);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-  height: 56px; /* Standard navbar height */
+  background-color: var(--bs-primary); /* */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */ /* */
+  height: 56px; /* Standard navbar height */ /* */
 }
 .motac-navbar .navbar-brand span {
-  font-weight: 600; /* Semibold */
-  font-size: 1.125rem; /* Slightly larger title */
-  color: white;
+  font-weight: 600; /* Semibold */ /* */
+  font-size: 1.125rem; /* Slightly larger title */ /* */
+  color: white; /* */
 }
 .motac-navbar .dropdown-toggle {
-  color: rgba(255, 255, 255, 0.85); /* Lighter text for contrast */
-  border-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.85); /* Lighter text for contrast */ /* */
+  border-color: rgba(255, 255, 255, 0.2); /* */
 }
 .motac-navbar .dropdown-toggle:hover {
-  color: white;
-  background-color: rgba(255, 255, 255, 0.1);
+  color: white; /* */
+  background-color: rgba(255, 255, 255, 0.1); /* */
 }
 .motac-navbar .btn-link {
-  color: white;
+  color: white; /* */
 }
 .motac-navbar .btn-link:hover {
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(255, 255, 255, 0.75); /* */
 }
 .motac-navbar .dropdown-menu {
-  background-color: var(--bs-surface);
-  border-color: var(--bs-border-color);
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  background-color: var(--bs-surface); /* */
+  border-color: var(--bs-border-color); /* */
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15); /* */
 }
 .motac-navbar .dropdown-item {
-  color: var(--bs-body-color);
+  color: var(--bs-body-color); /* */
 }
 .motac-navbar .dropdown-item:hover {
-  background-color: rgba(var(--bs-primary-rgb), 0.1);
-  color: var(--bs-primary);
+  background-color: rgba(var(--bs-primary-rgb), 0.1); /* */
+  color: var(--bs-primary); /* */
 }
 
 /* Sidebar Styles */
 .motac-sidebar {
-  width: 60px; /* Collapsed width */
-  background-color: var(--bs-surface);
-  border-right: 1px solid var(--bs-border-color);
-  position: fixed;
-  top: 56px; /* Below navbar */
-  bottom: 0;
-  left: 0;
-  z-index: 100;
-  overflow-y: auto;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); /* Easing as per design */
-  padding-top: 1rem;
+  width: 60px; /* Collapsed width */ /* */
+  background-color: var(--bs-surface); /* */
+  border-right: 1px solid var(--bs-border-color); /* */
+  position: fixed; /* */
+  top: 56px; /* Below navbar */ /* */
+  bottom: 0; /* */
+  left: 0; /* */
+  z-index: 100; /* */
+  overflow-y: auto; /* */
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); /* Easing as per design */ /* */
+  padding-top: 1rem; /* */
+  display: -ms-flexbox; /* For IE 10 */
   display: flex;
-  flex-direction: column; /* For push logout to bottom */
+  -ms-flex-direction: column; /* For IE 10+ */
+  flex-direction: column; /* */
 }
 
 .motac-sidebar.expanded {
-  width: 240px; /* Expanded width */
+  width: 240px; /* Expanded width */ /* */
 }
 
 .motac-sidebar .sidebar-logo {
-  padding: var(--bs-spacing-0) var(--bs-spacing-4) var(--bs-spacing-5); /* 0 16px 24px */
-  display: none; /* Hidden when collapsed */
-  border-bottom: 1px solid var(--bs-border-color);
-  margin-bottom: var(--bs-spacing-4); /* 16px */
+  padding: var(--bs-spacing-0) var(--bs-spacing-4) var(--bs-spacing-5); /* 0 16px 24px */ /* */
+  display: none; /* Hidden when collapsed */ /* */
+  border-bottom: 1px solid var(--bs-border-color); /* */
+  margin-bottom: var(--bs-spacing-4); /* 16px */ /* */
 }
 
 .motac-sidebar.expanded .sidebar-logo {
-  display: block; /* Visible when expanded */
+  display: block; /* Visible when expanded */ /* */
 }
 .motac-sidebar .sidebar-logo h5,
 .motac-sidebar .sidebar-logo p {
-  color: var(--bs-body-color); /* Ensure text color in logo area is correct */
+  color: var(--bs-body-color); /* Ensure text color in logo area is correct */ /* */
 }
 .motac-sidebar .sidebar-logo p {
-  color: var(--motac-text-muted-light); /* Muted for subtitle */
+  color: var(--motac-text-muted-light); /* Muted for subtitle */ /* */
 }
 
 .motac-sidebar .nav-link {
-  padding: 0.75rem 1rem; /* Adjust padding using 4px grid: 12px 16px */
-  color: var(--bs-body-color);
-  border-radius: 0.25rem;
-  margin: 0.25rem 0.5rem; /* 4px 8px */
-  display: flex;
-  align-items: center;
-  white-space: nowrap;
-  overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 0.75rem 1rem; /* Adjust padding using 4px grid: 12px 16px */ /* */
+  color: var(--bs-body-color); /* */
+  border-radius: 0.25rem; /* */
+  margin: 0.25rem 0.5rem; /* 4px 8px */ /* */
+  display: -ms-flexbox;
+  display: flex; /* */
+  -ms-flex-align: center; /* For IE 10+ */
+  align-items: center; /* */
+  white-space: nowrap; /* */
+  overflow: hidden; /* */
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); /* */
 }
 
 .motac-sidebar .nav-link:hover {
-  background-color: rgba(var(--bs-primary-rgb), 0.1);
-  color: var(--bs-primary);
+  background-color: rgba(var(--bs-primary-rgb), 0.1); /* */
+  color: var(--bs-primary); /* */
 }
 
 .motac-sidebar .nav-link.active {
-  background-color: rgba(var(--bs-primary-rgb), 0.15);
-  color: var(--bs-primary);
-  font-weight: 500; /* Medium */
+  background-color: rgba(var(--bs-primary-rgb), 0.15); /* */
+  color: var(--bs-primary); /* */
+  font-weight: 500; /* Medium */ /* */
 }
 
 .motac-sidebar .nav-link .bi {
-  font-size: 1.25rem; /* 20px for icons */
-  min-width: 24px; /* Ensure consistent icon alignment */
-  margin-right: 0; /* No margin when collapsed */
-  transition: margin-right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  font-size: 1.25rem; /* 20px for icons */ /* */
+  min-width: 24px; /* Ensure consistent icon alignment */ /* */
+  margin-right: 0; /* No margin when collapsed */ /* */
+  transition: margin-right 0.3s cubic-bezier(0.16, 1, 0.3, 1); /* */
 }
 
 .motac-sidebar.expanded .nav-link .bi {
-  margin-right: var(--bs-spacing-4); /* 16px margin when expanded */
+  margin-right: var(--bs-spacing-4); /* 16px margin when expanded */ /* */
 }
 
 .motac-sidebar .nav-text {
-  opacity: 0;
-  width: 0; /* Hidden when collapsed */
-  overflow: hidden;
-  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 0; /* */
+  width: 0; /* Hidden when collapsed */ /* */
+  overflow: hidden; /* */
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), width 0.3s cubic-bezier(0.16, 1, 0.3, 1); /* */
 }
 
 .motac-sidebar.expanded .nav-text {
-  opacity: 1;
-  width: auto; /* Visible when expanded */
+  opacity: 1; /* */
+  width: auto; /* Visible when expanded */ /* */
 }
 
 .motac-sidebar .nav-item.mt-auto {
   /* Pushes logout to bottom */
-  margin-top: auto !important;
-  padding-bottom: var(--bs-spacing-4); /* Add some padding at the bottom */
+  margin-top: auto !important; /* */
+  padding-bottom: var(--bs-spacing-4); /* Add some padding at the bottom */ /* */
 }
 
 .motac-sidebar .sidebar-toggle {
-  text-align: center;
-  padding-bottom: var(--bs-spacing-4);
-  padding-top: var(--bs-spacing-3);
-  border-top: 1px solid var(--bs-border-color); /* Separator for toggle button */
-  margin-top: auto; /* Push to the very bottom */
+  text-align: center; /* */
+  padding-bottom: var(--bs-spacing-4); /* */
+  padding-top: var(--bs-spacing-3); /* */
+  border-top: 1px solid var(--bs-border-color); /* Separator for toggle button */ /* */
+  margin-top: auto; /* Push to the very bottom */ /* */
 }
 .motac-sidebar.expanded .sidebar-toggle {
-  padding-left: var(--bs-spacing-4);
-  padding-right: var(--bs-spacing-4);
+  padding-left: var(--bs-spacing-4); /* */
+  padding-right: var(--bs-spacing-4); /* */
 }
 .motac-sidebar .sidebar-toggle .btn {
-  width: 40px; /* Icon-only width */
-  height: 40px;
-  padding: var(--bs-spacing-2); /* 8px */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: var(--bs-primary);
-  border-color: var(--bs-primary);
+  width: 40px; /* Icon-only width */ /* */
+  height: 40px; /* */
+  padding: var(--bs-spacing-2); /* 8px */ /* */
+  display: -ms-flexbox;
+  display: flex; /* */
+  -ms-flex-pack: center; /* For IE 10+ (center alignment) */
+  justify-content: center; /* */
+  align-items: center; /* */
+  color: var(--bs-primary); /* */
+  border-color: var(--bs-primary); /* */
 }
 .motac-sidebar.expanded .sidebar-toggle .btn {
-  width: auto; /* Auto width when expanded */
-  min-width: 120px; /* Minimum width for text */
-  padding: var(--bs-spacing-2) var(--bs-spacing-3);
+  width: auto; /* Auto width when expanded */ /* */
+  min-width: 120px; /* Minimum width for text */ /* */
+  padding: var(--bs-spacing-2) var(--bs-spacing-3); /* */
 }
 
 .motac-sidebar .sidebar-toggle .btn .d-none {
-  display: none !important; /* Hide text by default */
+  display: none !important; /* Hide text by default */ /* */
 }
 .motac-sidebar.expanded .sidebar-toggle .btn .d-none {
-  display: inline-block !important; /* Show text when expanded */
+  display: inline-block !important; /* Show text when expanded */ /* */
 }
 .motac-sidebar .sidebar-toggle .btn i {
-  margin-right: 0;
+  margin-right: 0; /* */
 }
 .motac-sidebar.expanded .sidebar-toggle .btn i {
-  margin-right: var(--bs-spacing-2); /* 8px */
+  margin-right: var(--bs-spacing-2); /* 8px */ /* */
 }
 
 /* Main Content Area */
 .motac-main {
-  margin-left: 60px; /* Corresponds to collapsed sidebar width */
-  padding: 1.5rem; /* 24px */
-  min-height: calc(100vh - 56px - 60px); /* Full viewport height minus navbar and footer */
-  transition: margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  margin-left: 60px; /* Corresponds to collapsed sidebar width */ /* */
+  padding: 1.5rem; /* 24px */ /* */
+  min-height: calc(100vh - 56px - 60px); /* Full viewport height minus navbar and footer */ /* */
+  transition: margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1); /* */
 }
 
 .motac-sidebar.expanded + .motac-main {
-  margin-left: 240px; /* Corresponds to expanded sidebar width */
+  margin-left: 240px; /* Corresponds to expanded sidebar width */ /* */
 }
 
 /* ---------------------------------------------------- */
 /* 3.2 Data Inputs - Form Field Standards */
 /* ---------------------------------------------------- */
 .motac-form-label.mandatory::after {
-  content: ' *'; /* Space before asterisk for better readability */
-  color: var(--bs-danger);
-  margin-left: 0.25rem; /* 4px */
+  content: ' *'; /* Space before asterisk for better readability */ /* */
+  color: var(--bs-danger); /* */
+  margin-left: 0.25rem; /* 4px */ /* */
 }
 
 /* Custom form control styling */
@@ -430,307 +436,310 @@ small,
 .form-select,
 .form-control:focus,
 .form-select:focus {
-  border-radius: 0.25rem; /* Standard Bootstrap small radius */
-  border-color: var(--bs-border-color);
-  box-shadow: none !important; /* Remove default Bootstrap focus shadow */
-  transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 0.25rem; /* Standard Bootstrap small radius */ /* */
+  border-color: var(--bs-border-color); /* */
+  box-shadow: none !important; /* Remove default Bootstrap focus shadow */ /* */
+  transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1); /* */
 }
 
 .form-control:focus,
 .form-select:focus {
-  border-color: var(--bs-primary); /* Primary blue on focus */
-  outline: 3px solid rgba(var(--bs-primary-rgb), 0.25); /* Focus indicator 25% opacity */
+  border-color: var(--bs-primary); /* Primary blue on focus */ /* */
+  outline: 3px solid rgba(var(--bs-primary-rgb), 0.25); /* Focus indicator 25% opacity */ /* */
 }
 
 /* Custom form section styling */
 .form-section {
-  margin-bottom: var(--bs-spacing-6); /* 32px */
-  padding-bottom: var(--bs-spacing-5); /* 24px */
-  border-bottom: 1px solid var(--bs-border-color); /* Subtle divider */
+  margin-bottom: var(--bs-spacing-6); /* 32px */ /* */
+  padding-bottom: var(--bs-spacing-5); /* 24px */ /* */
+  border-bottom: 1px solid var(--bs-border-color); /* Subtle divider */ /* */
 }
 .form-section:last-of-type {
-  border-bottom: none; /* No border for the last section */
-  margin-bottom: var(--bs-spacing-4); /* Smaller margin for last section */
-  padding-bottom: var(--bs-spacing-0);
+  border-bottom: none; /* No border for the last section */ /* */
+  margin-bottom: var(--bs-spacing-4); /* Smaller margin for last section */ /* */
+  padding-bottom: var(--bs-spacing-0); /* */
 }
 
 .section-title {
-  font-weight: 600; /* Semibold */
-  margin-bottom: var(--bs-spacing-5); /* 24px */
-  padding-bottom: var(--bs-spacing-2); /* 8px */
-  border-bottom: 2px solid var(--bs-primary); /* Primary blue underscore */
-  position: relative;
-  color: var(--bs-body-color);
+  font-weight: 600; /* Semibold */ /* */
+  margin-bottom: var(--bs-spacing-5); /* 24px */ /* */
+  padding-bottom: var(--bs-spacing-2); /* 8px */ /* */
+  border-bottom: 2px solid var(--bs-primary); /* Primary blue underscore */ /* */
+  position: relative; /* */
+  color: var(--bs-body-color); /* */
 }
 .section-title::after {
-  content: '';
-  position: absolute;
-  bottom: -2px; /* Align with border-bottom */
-  left: 0;
-  width: 60px; /* Accent line length */
-  height: 2px;
-  background: var(--bs-primary);
-  opacity: 0.75; /* Slightly muted accent line */
+  content: ''; /* */
+  position: absolute; /* */
+  bottom: -2px; /* Align with border-bottom */ /* */
+  left: 0; /* */
+  width: 60px; /* Accent line length */ /* */
+  height: 2px; /* */
+  background: var(--bs-primary); /* */
+  opacity: 0.75; /* Slightly muted accent line */ /* */
 }
 
 /* Certification Block */
 .certification-block {
-  background-color: var(--motac-bg-light); /* Lighter background for emphasis */
-  border: 1px solid var(--bs-border-color);
-  border-radius: 0.5rem;
-  padding: var(--bs-spacing-4); /* 16px */
-  margin-top: var(--bs-spacing-5); /* 24px */
+  background-color: var(--motac-bg-light); /* Lighter background for emphasis */ /* */
+  border: 1px solid var(--bs-border-color); /* */
+  border-radius: 0.5rem; /* */
+  padding: var(--bs-spacing-4); /* 16px */ /* */
+  margin-top: var(--bs-spacing-5); /* 24px */ /* */
 }
 [data-bs-theme='dark'] .certification-block {
-  background-color: var(--motac-surface-dark);
+  background-color: var(--motac-surface-dark); /* */
 }
 .certification-block .form-check-label {
-  font-size: var(--bs-body-font-size);
-  font-weight: normal;
-  color: var(--bs-body-color);
+  font-size: var(--bs-body-font-size); /* */
+  font-weight: normal; /* */
+  color: var(--bs-body-color); /* */
 }
 
 /* ---------------------------------------------------- */
 /* 3.3 Status Indicators */
 /* ---------------------------------------------------- */
 .motac-status-badge {
-  padding: 0.25rem 0.75rem; /* 4px 12px */
-  border-radius: 1rem; /* Pill shape */
-  font-size: var(--motac-label-font-size); /* 12px */
-  font-weight: 500; /* Medium */
-  display: inline-flex;
-  align-items: center;
-  gap: var(--bs-spacing-1); /* 4px gap for icon */
+  padding: 0.25rem 0.75rem; /* 4px 12px */ /* */
+  border-radius: 1rem; /* Pill shape */ /* */
+  font-size: var(--motac-label-font-size); /* 12px */ /* */
+  font-weight: 500; /* Medium */ /* */
+  display: inline-flex; /* */
+  align-items: center; /* */
+  gap: var(--bs-spacing-1); /* 4px gap for icon */ /* */
 }
 .motac-status-badge .bi {
-  font-size: 0.875rem; /* Icon size within badge */
+  font-size: 0.875rem; /* Icon size within badge */ /* */
 }
 
 /* Specific status colors (rgba for subtle background, solid for text/border) */
 .status-pending {
-  background-color: rgba(var(--bs-warning-rgb), 0.1);
-  color: var(--bs-warning);
-  border: 1px solid var(--bs-warning);
+  background-color: rgba(var(--bs-warning-rgb), 0.1); /* */
+  color: var(--bs-warning); /* */
+  border: 1px solid var(--bs-warning); /* */
 }
 .status-approved {
-  background-color: rgba(var(--bs-success-rgb), 0.1);
-  color: var(--bs-success);
-  border: 1px solid var(--bs-success);
+  background-color: rgba(var(--bs-success-rgb), 0.1); /* */
+  color: var(--bs-success); /* */
+  border: 1px solid var(--bs-success); /* */
 }
 .status-rejected {
-  background-color: rgba(var(--bs-danger-rgb), 0.1);
-  color: var(--bs-danger);
-  border: 1px solid var(--bs-danger);
+  background-color: rgba(var(--bs-danger-rgb), 0.1); /* */
+  color: var(--bs-danger); /* */
+  border: 1px solid var(--bs-danger); /* */
 }
 .status-completed {
-  background-color: rgba(var(--bs-primary-rgb), 0.1);
-  color: var(--bs-primary);
-  border: 1px solid var(--bs-primary);
+  background-color: rgba(var(--bs-primary-rgb), 0.1); /* */
+  color: var(--bs-primary); /* */
+  border: 1px solid var(--bs-primary); /* */
 }
 
 /* ---------------------------------------------------- */
 /* 3.4 Dashboard Widgets */
 /* ---------------------------------------------------- */
 .motac-stat-card {
-  background-color: var(--bs-surface);
-  border: 1px solid var(--bs-border-color);
-  border-radius: 0.5rem; /* Standard card radius */
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* Subtle shadow */
-  overflow: hidden;
-  height: 100%;
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  text-align: center;
-  padding: var(--bs-spacing-4); /* 16px */
-  margin-bottom: var(--bs-spacing-4); /* 16px */
+  background-color: var(--bs-surface); /* */
+  border: 1px solid var(--bs-border-color); /* */
+  border-radius: 0.5rem; /* Standard card radius */ /* */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* Subtle shadow */ /* */
+  overflow: hidden; /* */
+  height: 100%; /* */
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1); /* */
+  text-align: center; /* */
+  padding: var(--bs-spacing-4); /* 16px */ /* */
+  margin-bottom: var(--bs-spacing-4); /* 16px */ /* */
 }
 
 .motac-stat-card:hover {
-  transform: translateY(-3px); /* Slight lift on hover */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* More pronounced shadow */
+  transform: translateY(-3px); /* Slight lift on hover */ /* */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* More pronounced shadow */ /* */
 }
 
 .motac-stat-card .stat-icon {
-  font-size: 2.5rem; /* Larger icon */
-  line-height: 1;
-  margin-bottom: var(--bs-spacing-3); /* 12px */
-  color: var(--bs-primary); /* Default primary icon color */
+  font-size: 2.5rem; /* Larger icon */ /* */
+  line-height: 1; /* */
+  margin-bottom: var(--bs-spacing-3); /* 12px */ /* */
+  color: var(--bs-primary); /* Default primary icon color */ /* */
 }
 
 .motac-stat-card .text-primary {
-  color: var(--bs-primary) !important;
+  color: var(--bs-primary) !important; /* */
 }
 .motac-stat-card .text-warning {
-  color: var(--bs-warning) !important;
+  color: var(--bs-warning) !important; /* */
 }
 .motac-stat-card .text-success {
-  color: var(--bs-success) !important;
+  color: var(--bs-success) !important; /* */
 }
 .motac-stat-card .text-danger {
-  color: var(--bs-danger) !important;
+  color: var(--bs-danger) !important; /* */
 }
 
 .motac-stat-card h3 {
-  font-size: var(--bs-h2-font-size); /* Use H2 size for the value */
-  margin-bottom: var(--bs-spacing-1); /* 4px */
-  color: var(--bs-body-color);
+  font-size: var(--bs-h2-font-size); /* Use H2 size for the value */ /* */
+  margin-bottom: var(--bs-spacing-1); /* 4px */ /* */
+  color: var(--bs-body-color); /* */
 }
 .motac-stat-card p {
-  font-size: var(--bs-body-font-size);
-  color: var(--motac-text-muted-light);
-  margin-bottom: var(--bs-spacing-0);
+  font-size: var(--bs-body-font-size); /* */
+  color: var(--motac-text-muted-light); /* */
+  margin-bottom: var(--bs-spacing-0); /* */
 }
 
 /* Specific card styles for general use */
 .motac-card {
-  background-color: var(--bs-surface);
-  border: 1px solid var(--bs-border-color);
-  border-radius: 0.5rem;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  margin-bottom: var(--bs-spacing-5); /* 24px */
-  overflow: hidden;
+  background-color: var(--bs-surface); /* */
+  border: 1px solid var(--bs-border-color); /* */
+  border-radius: 0.5rem; /* */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* */
+  margin-bottom: var(--bs-spacing-5); /* 24px */ /* */
+  overflow: hidden; /* */
 }
 
 .motac-card-header {
-  background-color: rgba(0, 0, 0, 0.03); /* Light background for header */
-  border-bottom: 1px solid var(--bs-border-color);
-  padding: 1rem 1.5rem; /* 16px 24px */
-  font-weight: 600; /* Semibold */
-  color: var(--bs-body-color);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  background-color: rgba(0, 0, 0, 0.03); /* Light background for header */ /* */
+  border-bottom: 1px solid var(--bs-border-color); /* */
+  padding: 1rem 1.5rem; /* 16px 24px */ /* */
+  font-weight: 600; /* Semibold */ /* */
+  color: var(--bs-body-color); /* */
+  display: flex; /* */
+  align-items: center; /* */
+  justify-content: space-between; /* */
 }
 .motac-card-header h5 {
-  margin-bottom: 0;
-  font-weight: 600;
+  margin-bottom: 0; /* */
+  font-weight: 600; /* */
 }
 
 .motac-card-body {
-  padding: 1.5rem; /* 24px */
+  padding: 1.5rem; /* 24px */ /* */
 }
 
 /* List group in cards */
 .list-group-item {
-  background-color: var(--bs-surface);
-  border-color: var(--bs-border-color);
-  color: var(--bs-body-color);
+  background-color: var(--bs-surface); /* */
+  border-color: var(--bs-border-color); /* */
+  color: var(--bs-body-color); /* */
 }
 .list-group-item-action:hover {
-  background-color: rgba(var(--bs-primary-rgb), 0.05);
-  color: var(--bs-primary);
+  background-color: rgba(var(--bs-primary-rgb), 0.05); /* */
+  color: var(--bs-primary); /* */
 }
 
 /* Alert styles */
 .alert {
-  border-radius: 0.375rem;
-  font-size: var(--bs-body-font-size);
+  border-radius: 0.375rem; /* */
+  font-size: var(--bs-body-font-size); /* */
 }
 .alert .bi {
-  font-size: 1.25rem;
-  vertical-align: middle;
+  font-size: 1.25rem; /* */
+  vertical-align: middle; /* */
 }
 
 /* ---------------------------------------------------- */
 /* 4.1 ICT Loan Management - Equipment Checklist */
 /* ---------------------------------------------------- */
 .checklist-item {
-  display: flex;
-  align-items: center;
-  gap: var(--bs-spacing-3); /* 12px */
-  padding: var(--bs-spacing-2) var(--bs-spacing-0); /* 8px 0 */
-  border-bottom: 1px solid var(--bs-border-color);
+  display: flex; /* */
+  align-items: center; /* */
+  gap: var(--bs-spacing-3); /* 12px */ /* */
+  padding: var(--bs-spacing-2) var(--bs-spacing-0); /* 8px 0 */ /* */
+  border-bottom: 1px solid var(--bs-border-color); /* */
 }
 .checklist-item:last-child {
-  border-bottom: none;
+  border-bottom: none; /* */
 }
 .checklist-item .form-check-input {
-  margin-top: 0;
+  margin-top: 0; /* */
 }
 .checklist-item label {
-  flex-grow: 1;
-  margin-bottom: 0;
+  -ms-flex-positive: 1; /* For IE 10+ */
+  flex-grow: 1; /* */
+  margin-bottom: 0; /* */
 }
 .checklist-item .btn {
-  flex-shrink: 0;
-  min-width: 100px;
+  flex-shrink: 0; /* */
+  min-width: 100px; /* */
 }
 
 /* ---------------------------------------------------- */
 /* Buttons */
 /* ---------------------------------------------------- */
 .btn {
-  border-radius: 0.25rem; /* Consistent border radius */
-  font-weight: 500; /* Medium */
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 0.25rem; /* Consistent border radius */ /* */
+  font-weight: 500; /* Medium */ /* */
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); /* */
 }
 
 .btn-primary {
-  background-color: var(--bs-primary);
-  border-color: var(--bs-primary);
-  color: white;
+  background-color: var(--bs-primary); /* */
+  border-color: var(--bs-primary); /* */
+  color: white; /* */
 }
 .btn-primary:hover {
-  background-color: darken(var(--bs-primary), 10%); /* Adjust based on actual primary */
-  border-color: darken(var(--bs-primary), 10%);
+  /* REVISED: Replaced SCSS darken() with pre-calculated hex value */
+  background-color: #004483; /* Darker shade of #0055a4 (var(--bs-primary) in light mode) */
+  border-color: #003b73; /* Even darker or same for border */
 }
 [data-bs-theme='dark'] .btn-primary:hover {
-  background-color: lighten(var(--bs-primary), 10%); /* Adjust for dark mode */
-  border-color: lighten(var(--bs-primary), 10%);
+  /* REVISED: Replaced SCSS lighten() with pre-calculated hex value */
+  background-color: #5ca9e0; /* Lighter shade of #3d8fd1 (var(--bs-primary) in dark mode) */
+  border-color: #529bd8; /* Slightly different or same for border */
 }
 
 .btn-outline-secondary {
-  border-color: var(--bs-border-color);
-  color: var(--bs-body-color);
+  border-color: var(--bs-border-color); /* */
+  color: var(--bs-body-color); /* */
 }
 .btn-outline-secondary:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-  border-color: var(--bs-border-color);
-  color: var(--bs-body-color);
+  background-color: rgba(0, 0, 0, 0.05); /* */
+  border-color: var(--bs-border-color); /* */
+  color: var(--bs-body-color); /* */
 }
 [data-bs-theme='dark'] .btn-outline-secondary {
-  border-color: var(--motac-border-dark);
-  color: var(--motac-text-dark);
+  border-color: var(--motac-border-dark); /* */
+  color: var(--motac-text-dark); /* */
 }
 [data-bs-theme='dark'] .btn-outline-secondary:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-  border-color: var(--motac-border-dark);
-  color: var(--motac-text-dark);
+  background-color: rgba(255, 255, 255, 0.05); /* */
+  border-color: var(--motac-border-dark); /* */
+  color: var(--motac-text-dark); /* */
 }
 
 /* ---------------------------------------------------- */
 /* 6.1 Keyboard Navigation - Focus Indicators */
 /* ---------------------------------------------------- */
 *:focus-visible {
-  outline: 3px solid rgba(var(--bs-primary-rgb), 0.6); /* Clear blue outline with 60% opacity */
-  outline-offset: 2px; /* Offset to not overlap element */
-  transition: outline-color 0.2s ease-in-out;
+  outline: 3px solid rgba(var(--bs-primary-rgb), 0.6); /* Clear blue outline with 60% opacity */ /* */
+  outline-offset: 2px; /* Offset to not overlap element */ /* */
+  transition: outline-color 0.2s ease-in-out; /* */
 }
 /* For form controls, use the adjusted focus style */
 .form-control:focus-visible,
 .form-select:focus-visible {
-  outline: 3px solid rgba(var(--bs-primary-rgb), 0.25); /* Less opaque for form fields */
-  outline-offset: 0;
+  outline: 3px solid rgba(var(--bs-primary-rgb), 0.25); /* Less opaque for form fields */ /* */
+  outline-offset: 0; /* */
 }
 
 /* ---------------------------------------------------- */
 /* Footer */
 /* ---------------------------------------------------- */
 .motac-footer {
-  background-color: var(--bs-surface);
-  border-top: 1px solid var(--bs-border-color);
-  padding: 1rem 1.5rem; /* 16px 24px */
-  margin-left: 60px; /* Aligned with collapsed sidebar */
-  transition: margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  color: var(--motac-text-muted-light);
+  background-color: var(--bs-surface); /* */
+  border-top: 1px solid var(--bs-border-color); /* */
+  padding: 1rem 1.5rem; /* 16px 24px */ /* */
+  margin-left: 60px; /* Aligned with collapsed sidebar */ /* */
+  transition: margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1); /* */
+  color: var(--motac-text-muted-light); /* */
 }
 
 .motac-sidebar.expanded + .motac-main + .motac-footer {
-  margin-left: 240px; /* Aligned with expanded sidebar */
+  margin-left: 240px; /* Aligned with expanded sidebar */ /* */
 }
 
 .motac-footer p {
-  margin-bottom: 0;
-  font-size: 0.75rem; /* 12px */
+  margin-bottom: 0; /* */
+  font-size: 0.75rem; /* 12px */ /* */
 }
 
 /* ---------------------------------------------------- */
@@ -739,71 +748,71 @@ small,
 @media (max-width: 991.98px) {
   /* Bootstrap's lg breakpoint for desktop collapse */
   .motac-sidebar {
-    width: 60px; /* Always collapsed on smaller desktops/tablets unless actively expanded by toggle */
+    width: 60px; /* Always collapsed on smaller desktops/tablets unless actively expanded by toggle */ /* */
   }
   .motac-main {
-    margin-left: 60px;
+    margin-left: 60px; /* */
   }
   .motac-sidebar.expanded {
-    width: 240px; /* Still allows manual expansion */
+    width: 240px; /* Still allows manual expansion */ /* */
   }
   .motac-sidebar.expanded + .motac-main {
-    margin-left: 240px;
+    margin-left: 240px; /* */
   }
   .motac-footer {
-    margin-left: 60px;
+    margin-left: 60px; /* */
   }
   .motac-sidebar.expanded + .motac-main + .motac-footer {
-    margin-left: 240px;
+    margin-left: 240px; /* */
   }
 
   /* Hide sidebar text on smaller screens when collapsed */
   .motac-sidebar .nav-text {
-    opacity: 0;
-    width: 0;
-    overflow: hidden;
+    opacity: 0; /* */
+    width: 0; /* */
+    overflow: hidden; /* */
   }
   .motac-sidebar .nav-link .bi {
-    margin-right: 0;
+    margin-right: 0; /* */
   }
   /* Only show text when explicitly expanded on smaller screens */
   .motac-sidebar.expanded .nav-text {
-    opacity: 1;
-    width: auto;
+    opacity: 1; /* */
+    width: auto; /* */
   }
   .motac-sidebar.expanded .nav-link .bi {
-    margin-right: var(--bs-spacing-4);
+    margin-right: var(--bs-spacing-4); /* */
   }
 
   .motac-sidebar .sidebar-toggle .btn .d-none {
-    display: none !important;
+    display: none !important; /* */
   }
   .motac-sidebar.expanded .sidebar-toggle .btn .d-none {
-    display: inline-block !important;
+    display: inline-block !important; /* */
   }
 }
 
 @media (max-width: 767.98px) {
   /* Bootstrap's md breakpoint for mobile */
   .motac-sidebar {
-    transform: translateX(-100%); /* Hide sidebar off-screen by default */
-    width: 240px; /* Full width when opened on mobile */
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Add shadow when opened */
+    transform: translateX(-100%); /* Hide sidebar off-screen by default */ /* */
+    width: 240px; /* Full width when opened on mobile */ /* */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Add shadow when opened */ /* */
   }
   .motac-sidebar.expanded {
-    transform: translateX(0); /* Slide in when expanded */
-    width: 240px;
+    transform: translateX(0); /* Slide in when expanded */ /* */
+    width: 240px; /* */
   }
   .motac-main,
   .motac-footer {
-    margin-left: 0; /* Main content takes full width */
+    margin-left: 0; /* Main content takes full width */ /* */
   }
   .motac-sidebar.expanded + .motac-main + .motac-footer {
-    margin-left: 0; /* Footer also full width */
+    margin-left: 0; /* Footer also full width */ /* */
   }
 
   /* Adjust navbar brand for smaller screens if needed */
   .motac-navbar .navbar-brand {
-    font-size: 1rem;
+    font-size: 1rem; /* */
   }
 }

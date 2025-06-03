@@ -12,13 +12,13 @@
                     <h1 class="h2 fw-bold text-dark mb-0">
                         {{ __('Butiran Transaksi Pinjaman Peralatan ICT') }} #{{ $loanTransaction->id }}
                     </h1>
+                    {{-- This route name is already fully qualified and correct --}}
                     <a href="{{ route('resource-management.bpm.loan-transactions.index') }}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center">
                         <i class="bi bi-list-ul me-1"></i> {{__('Senarai Semua Transaksi')}}
                     </a>
                 </div>
 
-                {{-- Corrected include path for general alert messages --}}
-                @include('_partials._alerts.alert-general')
+                @include('_partials._alerts.alert-general') {{-- Ensuring consistent alert partial --}}
 
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-light py-3">
@@ -28,6 +28,7 @@
                         <dl class="row g-3 small">
                             <dt class="col-sm-4 text-muted">{{ __('ID Permohonan Pinjaman Berkaitan:') }}</dt>
                             <dd class="col-sm-8">
+                                {{-- This route 'loan-applications.show' is global and correct --}}
                                 <a href="{{ route('loan-applications.show', $loanTransaction->loanApplication) }}" class="text-decoration-none fw-medium">
                                     #{{ $loanTransaction->loan_application_id ?? __('N/A') }}
                                 </a>
@@ -55,6 +56,7 @@
                                 @foreach ($loanTransaction->loanTransactionItems as $item)
                                     <li class="list-group-item px-0 d-flex flex-column flex-sm-row justify-content-between align-items-sm-start py-2">
                                         <div>
+                                            {{-- This route 'equipment.show' is global and correct --}}
                                             <a href="{{ route('equipment.show', $item->equipment_id) }}" class="text-decoration-none fw-medium">
                                                 {{ e(optional($item->equipment)->brand_model_serial ?? (optional($item->equipment)->tag_id ?? __('Peralatan ID: ') . $item->equipment_id)) }}
                                             </a>
@@ -62,6 +64,7 @@
                                         </div>
                                         @if ($loanTransaction->isReturn())
                                             <span class="badge bg-light text-dark border rounded-pill mt-1 mt-sm-0">
+                                                {{-- Assuming 'condition_on_return_label' is an accessor on LoanTransactionItem model --}}
                                                 {{__('Keadaan Semasa Dipulangkan')}}: {{ e($item->condition_on_return_label ?? __('Tidak Dinyatakan')) }}
                                             </span>
                                         @endif
@@ -89,7 +92,6 @@
                                 <dd class="col-sm-8">{{ optional($loanTransaction->issue_timestamp)->translatedFormat('d M Y, H:i A') ?? __('N/A') }}</dd>
 
                                 <dt class="col-sm-4 text-muted">{{ __('Aksesori Dikeluarkan:') }}</dt>
-                                {{-- Removed json_decode as it's already an array due to model casting --}}
                                 <dd class="col-sm-8">{{ implode(', ', $loanTransaction->accessories_checklist_on_issue ?: ['-']) }}</dd>
 
                                 <dt class="col-sm-4 text-muted">{{ __('Catatan Pengeluaran:') }}</dt>
@@ -116,7 +118,6 @@
                                 <dd class="col-sm-8">{{ optional($loanTransaction->return_timestamp)->translatedFormat('d M Y, H:i A') ?? __('N/A') }}</dd>
 
                                 <dt class="col-sm-4 text-muted">{{ __('Aksesori Dipulangkan:') }}</dt>
-                                {{-- Removed json_decode as it's already an array due to model casting --}}
                                 <dd class="col-sm-8">{{ implode(', ', $loanTransaction->accessories_checklist_on_return ?: ['-']) }}</dd>
 
                                 <dt class="col-sm-4 text-muted">{{ __('Catatan Pemulangan:') }}</dt>
@@ -139,6 +140,7 @@
                 @endif
 
                 <div class="text-center mt-4">
+                    {{-- This route 'loan-applications.show' is global and correct --}}
                     <a href="{{ route('loan-applications.show', $loanTransaction->loanApplication) }}"
                         class="btn btn-outline-secondary d-inline-flex align-items-center">
                         <i class="bi bi-arrow-left-circle me-1"></i>

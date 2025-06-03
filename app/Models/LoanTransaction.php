@@ -56,6 +56,8 @@ use Illuminate\Support\Facades\Log;
  * @property-read LoanTransaction|null $relatedIssueTransaction If this is a return transaction, this points to the original issue transaction
  * @property-read string $type_label Translated type
  * @property-read string $status_label Translated status
+ * @property-read string $item_name Representative item name for the transaction (accessor)
+ * @property-read int $quantity Total quantity of items in the transaction (accessor)
  * @method static LoanTransactionFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder|LoanTransaction newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|LoanTransaction newQuery()
@@ -135,6 +137,9 @@ class LoanTransaction extends Model
         'status' => self::STATUS_PENDING,
     ];
 
+    // ADDED: Append new accessors to array/JSON forms if needed, optional.
+    // protected $appends = ['item_name', 'quantity', 'status_label', 'type_label'];
+
     protected static function newFactory(): LoanTransactionFactory
     {
         return LoanTransactionFactory::new();
@@ -166,6 +171,44 @@ class LoanTransaction extends Model
     {
         return self::getStatusLabel($this->status);
     }
+
+    /**
+     * Get a representative item name for the transaction.
+     * For simplicity, returns the name of the first equipment item.
+     * If multiple distinct items, it might show "Multiple Items" or similar.
+     */
+    public function getItemNameAttribute(): string
+    {
+        if ($this->relationLoaded('loanTransactionItems') && $this->loanTransactionItems->isNotEmpty()) {
+            $firstItem = $this->loanTransactionItems->first();
+            if ($firstItem && $firstItem->relationLoaded('equipment') && $firstItem->equipment) {
+                // Assuming Equipment model has a 'name' or 'model' attribute
+                return $firstItem->equipment->name ?? $firstItem->equipment->model ?? __('Item Peralatan');
+            }
+            return __('Item Tidak Diketahui');
+        } elseif ($this->loanTransactionItems()->exists()) { // Fallback if not eager loaded, but less efficient
+            $firstItem = $this->loanTransactionItems()->with('equipment')->first();
+            if ($firstItem && $firstItem->equipment) {
+                return $firstItem->equipment->name ?? $firstItem->equipment->model ?? __('Item Peralatan');
+            }
+             return __('Item Tidak Diketahui');
+        }
+        return __('Tiada Item');
+    }
+
+    /**
+     * Get the total quantity of items transacted in this loan transaction.
+     */
+    public function getQuantityAttribute(): int
+    {
+        // Ensure loanTransactionItems relationship is loaded to avoid N+1 if called in a loop
+        if ($this->relationLoaded('loanTransactionItems')) {
+            return (int) $this->loanTransactionItems->sum('quantity_transacted');
+        }
+        // Fallback if not eager loaded, less efficient
+        return (int) $this->loanTransactionItems()->sum('quantity_transacted');
+    }
+
 
     // Static helpers for labels and options
     public static function getTypeLabel(string $typeKey): string

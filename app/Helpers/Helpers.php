@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Helpers; // Ensure this namespace is correct for your application structure
+namespace App\Helpers;
 
 // Model imports for status constants
 use App\Models\Approval;
@@ -17,248 +17,228 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Log; // For logging potential issues
-use Illuminate\Support\Facades\Route; // Added for currentRouteName
-use Illuminate\Support\Facades\Request; // Added for Request::is
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Request;
 
 final class Helpers
 {
-    /**
-     * Provides application-wide classes and configurations for views.
-     * Aligns with MOTAC Design Language and System Design (Rev. 3).
-     * Design Language Refs: 1.2 (Bahasa Melayu First), 2.1 (Color Palette), 7.1 (Logo Usage)
-     * System Design Refs: 3.3 (AppServiceProvider for global data), 6.1 (Branding and Layout)
-     */
-    public static function appClasses(): array
-    {
-        $themeCustomConfig = Config::get('custom.custom', []); // Theme-specific customizations
-        $isConsole = App::runningInConsole();
+  /**
+   * Provides application-wide classes and configurations for views.
+   * Aligns with MOTAC Design Language and System Design (Rev. 3).
+   * Design Language Refs: 1.2 (Bahasa Melayu First), 2.1 (Color Palette), 7.1 (Logo Usage)
+   * System Design Refs: 3.3 (AppServiceProvider for global data), 6.1 (Branding and Layout)
+   */
+  public static function appClasses(): array
+  {
+    $themeCustomConfig = Config::get('custom.custom', []); // Theme-specific customizations
+    $isConsole = App::runningInConsole();
 
-        // Locale and Text Direction (Design Language 1.2: Bahasa Melayu First - LTR)
-        $defaultLocale = Config::get('app.locale', 'ms'); // Default to 'ms' (Bahasa Melayu)
-        $sessionLocale = $isConsole ? $defaultLocale : Session::get('locale', $defaultLocale);
-        $currentLocale = str_replace('_', '-', $sessionLocale);
+    // Locale and Text Direction (Design Language 1.2: Bahasa Melayu First - LTR)
+    $defaultLocale = Config::get('app.locale', 'ms'); // Default to 'ms' (Bahasa Melayu)
+    $locale = $isConsole ? $defaultLocale : (Session::has('locale') ? Session::get('locale') : $defaultLocale);
+    App::setLocale($locale); // Set application locale
+    $textDirection = $locale === 'ar' ? 'rtl' : 'ltr'; // For RTL support if needed
 
-        $defaultStyle = $themeCustomConfig['myStyle'] ?? 'light'; // Default to light mode
-        $currentStyle = $isConsole ? $defaultStyle : Session::get('theme_style', $defaultStyle);
-        $layout = $themeCustomConfig['myLayout'] ?? 'vertical';
+    // Retrieve values from custom.php configuration with default fallbacks
+    $myLayout = $themeCustomConfig['myLayout'] ?? 'vertical';
+    $myTheme = $themeCustomConfig['myTheme'] ?? 'theme-motac';
+    $myStyle = $themeCustomConfig['myStyle'] ?? 'light';
+    $myRTLSupport = $themeCustomConfig['myRTLSupport'] ?? false;
+    $navbarFull = $themeCustomConfig['navbarFull'] ?? false;
+    $contentNavbar = $themeCustomConfig['contentNavbar'] ?? true;
+    $isMenu = $themeCustomConfig['isMenu'] ?? true;
+    $isNavbar = $themeCustomConfig['isNavbar'] ?? true;
+    $isFooter = $themeCustomConfig['isFooter'] ?? true;
+    $isFlex = $themeCustomConfig['isFlex'] ?? false;
+    $primaryColor = $themeCustomConfig['primaryColor'] ?? '#0055A4'; // MOTAC Blue default
 
-        $defaultData = [
-            'templateName' => __(config('variables.templateName', 'Sistem Pengurusan Sumber Bersepadu MOTAC')),
-            'templateDescription' => __(config('variables.templateDescription', 'Sistem Dalaman Kementerian Pelancongan, Seni dan Budaya Malaysia untuk Pengurusan Sumber Elektronik dan ICT.')),
-            'templateKeyword' => __(config('variables.templateKeyword', 'motac, bpm, sistem bersepadu, pengurusan sumber, pinjaman ict, permohonan emel, kerajaan malaysia')),
-            'appFavicon' => config('variables.appFavicon', 'assets/img/favicon/favicon-motac.ico'),
-            'templateLogoSvg' => config('variables.templateLogoSvg', 'assets/img/logo/motac-logo.svg'),
-            'productPage' => $isConsole ? config('app.url', '/') : url('/'),
-            'repositoryUrl' => config('variables.repositoryUrl', ''),
-            'locale' => $currentLocale,
-            'style' => $currentStyle,
-            'theme' => $themeCustomConfig['myTheme'] ?? 'theme-motac',
-            'layout' => $layout,
-            'isMenu' => $themeCustomConfig['isMenu'] ?? true,
-            'isNavbar' => $themeCustomConfig['isNavbar'] ?? true,
-            'isFooter' => $themeCustomConfig['isFooter'] ?? true,
-            'contentNavbar' => $themeCustomConfig['contentNavbar'] ?? ($layout === 'horizontal' ? false : true),
-            'menuFixed' => $themeCustomConfig['menuFixed'] ?? true,
-            'menuCollapsed' => $themeCustomConfig['menuCollapsed'] ?? false,
-            'navbarFixed' => $themeCustomConfig['navbarFixed'] ?? true,
-            'primaryColor' => $themeCustomConfig['primaryColor'] ?? '#0055A4',
-            'navbarDetached' => $themeCustomConfig['navbarDetached'] ?? ($layout === 'vertical' ? true : false),
-            'footerFixed' => $themeCustomConfig['footerFixed'] ?? false,
-            'container' => $themeCustomConfig['container'] ?? 'container-fluid',
-            'containerNav' => $themeCustomConfig['containerNav'] ?? 'container-fluid',
-            'hasCustomizer' => $themeCustomConfig['hasCustomizer'] ?? false,
-            'displayCustomizer' => $themeCustomConfig['displayCustomizer'] ?? false,
-            'customizerHidden' => !($themeCustomConfig['displayCustomizer'] ?? false),
-            'assetsPath' => $isConsole
-                ? (rtrim(config('app.asset_url', config('app.url', '/')) ?? '', '/') . '/assets/') // MODIFIED LINE
-                : (function_exists('asset') ? asset('assets/') : '/assets/'),
-            'baseUrl' => $isConsole
-                ? config('app.url', '/')
-                : (function_exists('url') ? url('/') : '/'),
-            'myRTLSupport' => $themeCustomConfig['myRTLSupport'] ?? true,
-            'defaultTextDirectionFromConfig' => ($themeCustomConfig['myRTLMode'] ?? false) ? 'rtl' : 'ltr',
-            'isFlex' => $themeCustomConfig['isFlex'] ?? false,
-            'showMenu' => $themeCustomConfig['showMenu'] ?? true,
-            'contentLayout' => $themeCustomConfig['contentLayout'] ?? ($layout === 'horizontal' ? 'compact' : 'wide'),
-        ];
-
-        $sessionTextDirection = $isConsole ? null : Session::get('textDirection');
-        if (isset($sessionTextDirection) && in_array($sessionTextDirection, ['ltr', 'rtl'])) {
-            $textDirection = $sessionTextDirection;
-        } elseif ($defaultData['myRTLSupport'] && in_array($currentLocale, ['ar', 'he', 'fa'])) {
-            $textDirection = 'rtl';
-        } else {
-            $textDirection = $defaultData['defaultTextDirectionFromConfig'];
-        }
-
-        $defaultData['textDirection'] = $textDirection;
-        $defaultData['rtlSupport'] = ($textDirection === 'rtl' && $defaultData['myRTLSupport']) ? '/rtl' : '';
-        $defaultData['bsTheme'] = ($defaultData['style'] === 'dark') ? 'dark' : 'light';
-
-        return array_merge($defaultData, $themeCustomConfig);
+    // Customizer related settings
+    $hasCustomizer = Config::get('custom.hasCustomizer', false); // Whether customizer JS is included
+    $displayCustomizer = $themeCustomConfig['displayCustomizer'] ?? false; // Whether customizer UI is visible
+    $customizerControls = $themeCustomConfig['customizerControls'] ?? [
+      //'style',
+      'layoutType',
+      'menuFixed',
+      'menuCollapsed',
+      'layoutNavbarFixed',
+      'layoutFooterFixed'
+    ];
+    if ($myRTLSupport) {
+      $customizerControls[] = 'rtl';
     }
 
-    public static function updatePageConfig(array $pageConfigs): void
-    {
-        if (empty($pageConfigs)) {
-            return;
-        }
-        $existingConfig = Config::get('custom.custom', []);
-        $newConfig = array_merge($existingConfig, $pageConfigs);
-        Config::set('custom.custom', $newConfig);
+    // Layout classes based on configuration
+    $navbarDetached = ($myLayout === 'vertical' && $contentNavbar) ? 'navbar-detached' : '';
+    $menuFixed = ($myLayout === 'vertical' && $isMenu) ? 'layout-menu-fixed' : '';
+    $menuCollapsed = ($myLayout === 'vertical' && ($themeCustomConfig['menuCollapsed'] ?? false)) ? 'layout-menu-collapsed' : '';
+    $navbarFixed = ($isNavbar && ($themeCustomConfig['navbarFixed'] ?? true)) ? 'layout-navbar-fixed' : '';
+    $footerFixed = ($isFooter && ($themeCustomConfig['footerFixed'] ?? false)) ? 'layout-footer-fixed' : '';
+
+    // Combine all settings for easy access in views
+    return [
+      'myLayout' => $myLayout,
+      'myTheme' => $myTheme,
+      'myStyle' => $myStyle,
+      'textDirection' => $textDirection,
+      'rtlSupport' => $myRTLSupport ? '/rtl' : '', // Path for RTL CSS if needed
+      'navbarFull' => $navbarFull,
+      'contentNavbar' => $contentNavbar,
+      'isMenu' => $isMenu,
+      'isNavbar' => $isNavbar,
+      'isFooter' => $isFooter,
+      'isFlex' => $isFlex,
+      'hasCustomizer' => $hasCustomizer,
+      'displayCustomizer' => $displayCustomizer,
+      'customizerControls' => $customizerControls,
+      'primaryColor' => $primaryColor,
+      'navbarDetached' => $navbarDetached,
+      'menuFixed' => $menuFixed,
+      'menuCollapsed' => $menuCollapsed,
+      'navbarFixed' => $navbarFixed,
+      'footerFixed' => $footerFixed,
+      'pageClasses' => implode(' ', [
+        $myLayout . '-layout',
+        $myTheme,
+        $myStyle . '-style',
+        $navbarDetached,
+        $menuFixed,
+        $menuCollapsed,
+        $navbarFixed,
+        $footerFixed,
+      ]),
+      'assetsPath' => asset('assets/'), // Base path for assets
+      'appLogo' => 'assets/img/logo/motac-logo.svg', // Default MOTAC logo
+      'templateName' => 'MOTAC IRMS', // Application name
+      'showDropdownOnHover' => $themeCustomConfig['showDropdownOnHover'] ?? false, // For horizontal menu dropdown
+    ];
+  }
+
+  /**
+   * Helper function to update the page configuration based on the current page.
+   * This is primarily for theme customization from a `pageConfigs` array.
+   *
+   * @param array $pageConfigs
+   * @return string Empty string (side effect: updates config)
+   */
+  public static function updatePageConfig(array $pageConfigs): string
+  {
+    foreach ($pageConfigs as $key => $val) {
+      Config::set('custom.custom.' . $key, $val);
+    }
+    return '';
+  }
+
+  /**
+   * Checks if a menu item is directly active or if its branch contains the active route.
+   */
+  public static function isMotacMenuItemActiveRecursiveCheck(
+    $item,
+    $currentRouteName,
+    &$isAnyChildActiveGlobalScope,
+    $userRole
+  ): bool {
+    $canViewItem =
+      $userRole === 'Admin' ||
+      !isset($item->role) ||
+      empty((array) $item->role) ||
+      (is_string($item->role) && $userRole === $item->role) ||
+      (is_array($item->role) && in_array($userRole, $item->role)); // Added check for array of roles
+
+    if (!$canViewItem) {
+      $isAnyChildActiveGlobalScope = false;
+      return false;
     }
 
-    public static function getStatusColorClass(string $status, ?string $context = null): string
-    {
-        $normalizedStatus = strtolower(str_replace([' ', '-'], '_', $status));
-        return match ($normalizedStatus) {
-            User::STATUS_ACTIVE => 'text-bg-success',
-            User::STATUS_INACTIVE => 'text-bg-secondary',
-            EmailApplication::STATUS_DRAFT => 'bg-light text-dark border',
-            EmailApplication::STATUS_PENDING_SUPPORT => 'text-bg-warning',
-            EmailApplication::STATUS_PENDING_ADMIN => 'text-bg-info',
-            EmailApplication::STATUS_APPROVED => 'text-primary bg-primary-subtle border border-primary-subtle',
-            EmailApplication::STATUS_PROCESSING => 'text-bg-primary',
-            EmailApplication::STATUS_COMPLETED => 'text-bg-success',
-            EmailApplication::STATUS_REJECTED => 'text-bg-danger',
-            EmailApplication::STATUS_PROVISION_FAILED => 'text-danger bg-danger-subtle border border-danger-subtle',
-            LoanApplication::STATUS_DRAFT => 'bg-light text-dark border',
-            LoanApplication::STATUS_PENDING_SUPPORT, LoanApplication::STATUS_PENDING_HOD_REVIEW => 'text-bg-warning',
-            LoanApplication::STATUS_PENDING_BPM_REVIEW => 'text-info bg-info-subtle border border-info-subtle',
-            LoanApplication::STATUS_APPROVED => 'text-primary bg-primary-subtle border border-primary-subtle',
-            LoanApplication::STATUS_PARTIALLY_ISSUED => 'text-info bg-info-subtle border border-info-subtle',
-            LoanApplication::STATUS_ISSUED => 'text-bg-info',
-            LoanApplication::STATUS_RETURNED => 'text-bg-success',
-            LoanApplication::STATUS_OVERDUE => 'text-danger bg-danger-subtle border border-danger-subtle',
-            LoanApplication::STATUS_CANCELLED, LoanApplication::STATUS_REJECTED => 'text-bg-danger',
-            Equipment::STATUS_AVAILABLE => 'text-success bg-success-subtle border border-success-subtle',
-            Equipment::STATUS_ON_LOAN => 'text-bg-info',
-            Equipment::STATUS_UNDER_MAINTENANCE => 'text-warning bg-warning-subtle border border-warning-subtle',
-            Equipment::STATUS_DISPOSED => 'text-bg-secondary border',
-            Equipment::STATUS_LOST => 'text-bg-danger',
-            Equipment::STATUS_DAMAGED_NEEDS_REPAIR => 'text-danger bg-warning-subtle border border-warning-subtle',
-            Equipment::CONDITION_NEW => 'text-primary bg-primary-subtle border border-primary-subtle',
-            Equipment::CONDITION_GOOD => 'text-success bg-success-subtle border border-success-subtle',
-            Equipment::CONDITION_FAIR => 'text-info bg-info-subtle border border-info-subtle',
-            Equipment::CONDITION_MINOR_DAMAGE => 'text-warning bg-warning-subtle border border-warning-subtle',
-            Equipment::CONDITION_MAJOR_DAMAGE => 'text-danger bg-danger-subtle border border-danger-subtle',
-            Equipment::CONDITION_UNSERVICEABLE => 'text-bg-secondary border',
-            LoanTransaction::STATUS_PENDING => 'text-bg-secondary',
-            LoanTransaction::STATUS_ISSUED => 'text-bg-info',
-            LoanTransaction::STATUS_RETURNED_PENDING_INSPECTION => 'text-warning bg-warning-subtle border border-warning-subtle',
-            LoanTransaction::STATUS_RETURNED_GOOD => 'text-bg-success',
-            LoanTransaction::STATUS_RETURNED_DAMAGED => 'text-danger bg-warning-subtle border border-warning-subtle',
-            LoanTransaction::STATUS_ITEMS_REPORTED_LOST => 'text-bg-danger',
-            LoanTransaction::STATUS_COMPLETED => 'text-bg-success',
-            LoanTransaction::STATUS_CANCELLED => 'text-bg-danger border',
-            LoanTransactionItem::STATUS_ITEM_ISSUED => 'text-info bg-info-subtle border border-info-subtle',
-            LoanTransactionItem::STATUS_ITEM_RETURNED_PENDING_INSPECTION => 'text-warning bg-warning-subtle border border-warning-subtle',
-            LoanTransactionItem::STATUS_ITEM_RETURNED_GOOD => 'text-success bg-success-subtle border border-success-subtle',
-            LoanTransactionItem::STATUS_ITEM_RETURNED_MINOR_DAMAGE => 'text-warning bg-warning-subtle border border-warning-subtle',
-            LoanTransactionItem::STATUS_ITEM_RETURNED_MAJOR_DAMAGE => 'text-danger bg-danger-subtle border border-danger-subtle',
-            LoanTransactionItem::STATUS_ITEM_REPORTED_LOST => 'text-bg-danger',
-            LoanTransactionItem::STATUS_ITEM_UNSERVICEABLE_ON_RETURN => 'text-bg-secondary border',
-            Approval::STATUS_PENDING => 'text-bg-warning',
-            Approval::STATUS_APPROVED => 'text-bg-success',
-            default => 'text-dark bg-light border',
-        };
+    $isDirectlyActive =
+      (isset($item->routeName) && $currentRouteName === $item->routeName) ||
+      (isset($item->url) && Request::is(ltrim($item->url, '/'))) ||
+      (isset($item->routeNamePrefix) && str_starts_with($currentRouteName, $item->routeNamePrefix));
+
+    if ($isDirectlyActive) {
+      $isAnyChildActiveGlobalScope = true;
+      return true;
     }
 
-    public static function getAlertClass(string $statusType): string
-    {
-        return match (strtolower($statusType)) {
-            'success', 'completed', 'approved' => 'success',
-            'info', 'information', 'notice', 'processing' => 'info',
-            'warning', 'pending', 'attention' => 'warning',
-            'error', 'danger', 'failed', 'rejected', 'cancelled' => 'danger',
-            default => 'secondary',
-        };
+    if (isset($item->submenu) && is_array($item->submenu) && !empty($item->submenu)) {
+      foreach ($item->submenu as $subItem) {
+        // Pass $isAnyChildActiveGlobalScope by reference for child checks to update the parent's knowledge
+        if (static::isMotacMenuItemActiveRecursiveCheck($subItem, $currentRouteName, $isAnyChildActiveGlobalScope, $userRole)) {
+          // If a child path sets $isAnyChildActiveGlobalScope to true, this branch is active
+          return true;
+        }
+      }
+    }
+    // If this item itself is not active, and no child made the branch active,
+    // then this specific path doesn't make the menu active.
+    // The $isAnyChildActiveGlobalScope is primarily for the caller to know if *any* part of the
+    // originally passed item's tree was active.
+    // For the return value of *this specific call*, if not directly active, and no children were active, it's false.
+    // The final value of $isAnyChildActiveGlobalScope is determined by the recursive calls.
+    return false;
+  }
+
+  public static function getStatusColorClass(string $status, string $type): string
+  {
+    $statusColors = [
+      'loan_application' => [ // Changed from 'loan' to be more specific if needed
+        LoanApplication::STATUS_DRAFT => 'bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle',
+        LoanApplication::STATUS_PENDING_SUPPORT => 'bg-warning-subtle text-warning-emphasis border border-warning-subtle',
+        LoanApplication::STATUS_PENDING_HOD_REVIEW => 'bg-info-subtle text-info-emphasis border border-info-subtle',
+        LoanApplication::STATUS_PENDING_BPM_REVIEW => 'bg-info-subtle text-info-emphasis border border-info-subtle',
+        LoanApplication::STATUS_APPROVED => 'bg-success-subtle text-success-emphasis border border-success-subtle',
+        LoanApplication::STATUS_REJECTED => 'bg-danger-subtle text-danger-emphasis border border-danger-subtle',
+        LoanApplication::STATUS_ISSUED => 'bg-primary-subtle text-primary-emphasis border border-primary-subtle',
+        LoanApplication::STATUS_PARTIALLY_ISSUED => 'bg-primary-subtle text-primary-emphasis border border-primary-subtle',
+        LoanApplication::STATUS_OVERDUE => 'bg-danger-subtle text-danger-emphasis border border-danger-subtle',
+        LoanApplication::STATUS_RETURNED => 'bg-light text-dark border border-secondary-subtle',
+        LoanApplication::STATUS_CANCELLED => 'bg-dark-subtle text-dark-emphasis border border-dark-subtle',
+        LoanApplication::STATUS_PARTIALLY_RETURNED_PENDING_INSPECTION => 'bg-info-subtle text-info-emphasis border border-info-subtle',
+      ],
+      'email_application' => [ // Changed from 'email'
+        EmailApplication::STATUS_DRAFT => 'bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle',
+        EmailApplication::STATUS_PENDING_SUPPORT => 'bg-warning-subtle text-warning-emphasis border border-warning-subtle',
+        EmailApplication::STATUS_PENDING_ADMIN => 'bg-info-subtle text-info-emphasis border border-info-subtle',
+        EmailApplication::STATUS_APPROVED => 'bg-success-subtle text-success-emphasis border border-success-subtle',
+        EmailApplication::STATUS_REJECTED => 'bg-danger-subtle text-danger-emphasis border border-danger-subtle',
+        EmailApplication::STATUS_PROCESSING => 'bg-primary-subtle text-primary-emphasis border border-primary-subtle',
+        EmailApplication::STATUS_COMPLETED => 'bg-success-subtle text-success-emphasis border border-success-subtle',
+        EmailApplication::STATUS_PROVISION_FAILED => 'bg-danger-subtle text-danger-emphasis border border-danger-subtle',
+        EmailApplication::STATUS_CANCELLED => 'bg-dark-subtle text-dark-emphasis border border-dark-subtle',
+      ],
+      // Add other types like 'loan_transaction', 'equipment_status' if needed
+    ];
+
+    $defaultClass = 'bg-light text-dark border';
+
+    return $statusColors[$type][$status] ?? $defaultClass;
+  }
+
+  /**
+   * ADDED: Helper function to format dates consistently.
+   *
+   * @param mixed $dateValue The date to format (Carbon instance, string, or null).
+   * @param string $formatKey The key for the date format string in config('app.date_formats')
+   * or a direct PHP date format string.
+   * @param string|null $default The default string to return if date is invalid or null.
+   * @return string|null
+   */
+  public static function formatDate($dateValue, string $formatKey = 'date_format_my_short', ?string $default = null): ?string
+  {
+    if (is_null($dateValue)) {
+      return $default;
     }
 
-    public static function formatDate($date, string $formatType = 'date_format_my'): string
-    {
-        if (is_null($date)) {
-            return '-';
-        }
-        if (!$date instanceof Carbon) {
-            try {
-                $date = Carbon::parse((string) $date);
-            } catch (\Exception $e) {
-                Log::warning("Helpers::formatDate - Could not parse date: " . (string)$date, ['exception' => $e->getMessage()]);
-                return (string) $date;
-            }
-        }
-        $defaultDateFormat = 'd/m/Y';
-        $defaultDateTimeFormat = 'd/m/Y, h:i A';
-        $format = config('app.' . $formatType, ($formatType === 'datetime_format_my' ? $defaultDateTimeFormat : $defaultDateFormat));
-        return $date->translatedFormat($format);
+    try {
+      $date = ($dateValue instanceof Carbon) ? $dateValue : Carbon::parse((string) $dateValue);
+
+      // Check if formatKey is a key in config or a direct format string
+      $formatString = Config::get('app.date_formats.' . $formatKey, $formatKey);
+
+      return $date->translatedFormat($formatString);
+    } catch (\Exception $e) {
+      Log::warning("Helpers::formatDate - Failed to parse or format date value: " . (is_object($dateValue) ? get_class($dateValue) : (string) $dateValue) . " with format key: {$formatKey}. Error: " . $e->getMessage());
+      return $default ?? (is_string($dateValue) ? $dateValue : __('Tarikh Tidak Sah')); // Return original string or default if parsing fails
     }
-
-    /**
-     * Checks if a menu item is directly active based on current route or URL.
-     *
-     * @param object $menuItem The menu item (expected to have properties like url, routeName, routeNamePrefix).
-     * @param string|null $currentRouteName The name of the current route.
-     * @return bool True if the menu item is directly active, false otherwise.
-     */
-    public static function isMenuItemDirectlyActive(object $menuItem, ?string $currentRouteName): bool
-    {
-        // Check URL first if present and not a placeholder
-        if (isset($menuItem->url) && $menuItem->url !== 'javascript:void(0);' && $menuItem->url !== '#') {
-            $itemUrl = ltrim($menuItem->url, '/'); // Normalize for Request::is()
-            if (Request::is($itemUrl) || Request::is($itemUrl . '/*')) {
-                return true;
-            }
-        }
-        // Check exact route name match
-        if (isset($menuItem->routeName) && $currentRouteName && $menuItem->routeName === $currentRouteName) {
-            return true;
-        }
-        // Check route name prefix match
-        if (isset($menuItem->routeNamePrefix) && $currentRouteName && str_starts_with($currentRouteName, $menuItem->routeNamePrefix)) {
-            return true;
-        }
-        // Fallback for 'slug' if used and no routeName/routeNamePrefix, implies direct match
-        if (isset($menuItem->slug) && !isset($menuItem->routeName) && !isset($menuItem->routeNamePrefix) && $menuItem->slug === $currentRouteName) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Checks if a menu item or any of its children (recursively) is active.
-     * This determines if a parent branch should be marked as "open".
-     *
-     * @param object $menuItem The menu item.
-     * @param string|null $currentRouteName The name of the current route.
-     * @param string|null $currentUserRole The role of the current user (for permission checks).
-     * @return bool True if the branch (item or its children) is active, false otherwise.
-     */
-    public static function isMenuBranchActive(object $menuItem, ?string $currentRouteName, ?string $currentUserRole): bool
-    {
-        if (static::isMenuItemDirectlyActive($menuItem, $currentRouteName)) {
-            return true;
-        }
-
-        if (isset($menuItem->submenu) && is_array($menuItem->submenu) && !empty($menuItem->submenu)) {
-            foreach ($menuItem->submenu as $subMenuItem) {
-                // Check if user can view this submenu item first
-                $canViewSubmenu = false;
-                if ($currentUserRole === 'Admin') {
-                    $canViewSubmenu = true;
-                } elseif (isset($subMenuItem->role)) {
-                    $rolesArray = is_array($subMenuItem->role) ? $subMenuItem->role : [$subMenuItem->role];
-                    $canViewSubmenu = in_array($currentUserRole, $rolesArray);
-                } else {
-                    $canViewSubmenu = true; // No specific role, assume viewable
-                }
-
-                if ($canViewSubmenu && static::isMenuBranchActive($subMenuItem, $currentRouteName, $currentUserRole)) {
-                    return true; // If any child branch is active, this parent branch is active
-                }
-            }
-        }
-        return false;
-    }
+  }
 }

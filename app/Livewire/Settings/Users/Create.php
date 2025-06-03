@@ -135,7 +135,7 @@ class Create extends Component
   {
     // Ensure this view name matches your Blade file name.
     // If your Blade file is 'create-user.blade.php', use 'create-user'.
-    return view('livewire.settings.users.create-user');
+    return view('livewire.settings.users.create');
   }
 
   protected function rules(): array

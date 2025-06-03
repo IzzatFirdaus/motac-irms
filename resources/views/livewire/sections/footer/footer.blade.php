@@ -13,9 +13,9 @@
        The 'content-footer' class can be kept if it provides useful base styling from your theme. --}}
   <footer class="content-footer footer motac-footer">
     @php
-        // $configData is globally available via commonMaster.blade.php
-        // This ensures container class consistency with the main layout, typically 'container-fluid'.
-        $containerClass = $configData['containerNav'] ?? $containerNav ?? 'container-fluid';
+        // $containerNav is now correctly determined and passed from the Footer.php Livewire component.
+        // $configData is globally available via commonMaster.blade.php but not directly needed here for containerClass.
+        $containerClass = $containerNav; // Directly use the value passed from the component
     @endphp
     <div class="{{ $containerClass }}">
       {{--

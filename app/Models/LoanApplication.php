@@ -66,6 +66,9 @@ use Carbon\Carbon;
  * @property-read \App\Models\User|null $updater
  * @property-read \App\Models\User|null $deleter
  * @property-read string $status_label
+ * @property-read string $item_name (Accessor)
+ * @property-read int $quantity (Accessor)
+ * @property-read \Illuminate\Support\Carbon|null $expected_return_date (Accessor)
  * @property-read string $full_name (Assuming this accessor might exist on User or LoanApplication if needed)
  *
  * @method static LoanApplicationFactory factory($count = null, $state = [])
@@ -94,7 +97,7 @@ class LoanApplication extends Model
   public const STATUS_RETURNED = 'returned';
   public const STATUS_OVERDUE = 'overdue';
   public const STATUS_CANCELLED = 'cancelled';
-  public const STATUS_PARTIALLY_RETURNED_PENDING_INSPECTION = 'partially_returned_pending_inspection'; // ADDED: Missing constant
+  public const STATUS_PARTIALLY_RETURNED_PENDING_INSPECTION = 'partially_returned_pending_inspection';
 
 
   public static array $STATUS_OPTIONS = [
@@ -109,7 +112,7 @@ class LoanApplication extends Model
     self::STATUS_RETURNED => 'Semua Peralatan Telah Dipulangkan',
     self::STATUS_OVERDUE => 'Tertunggak Pemulangan Peralatan',
     self::STATUS_CANCELLED => 'Dibatalkan',
-    self::STATUS_PARTIALLY_RETURNED_PENDING_INSPECTION => 'Dipulangkan Sebahagian (Menunggu Semakan)', // ADDED: Label for new status
+    self::STATUS_PARTIALLY_RETURNED_PENDING_INSPECTION => 'Dipulangkan Sebahagian (Menunggu Semakan)',
   ];
 
   protected $table = 'loan_applications';
@@ -154,6 +157,11 @@ class LoanApplication extends Model
   protected $attributes = [
     'status' => self::STATUS_DRAFT,
   ];
+
+  // ADDED: Append new accessors to array/JSON forms if they should always be included.
+  // Optional, depending on usage. For dashboard display, direct access is usually fine.
+  // protected $appends = ['status_label', 'item_name', 'quantity', 'expected_return_date'];
+
 
   public static function getStatusOptions(): array
   {
@@ -209,7 +217,7 @@ class LoanApplication extends Model
   {
     return $this->hasMany(LoanApplicationItem::class, 'loan_application_id');
   }
-  public function items(): HasMany
+  public function items(): HasMany // Alias
   {
     return $this->loanApplicationItems();
   }
@@ -242,6 +250,50 @@ class LoanApplication extends Model
     return self::getStatusLabel($this->status);
   }
 
+  /**
+   * ADDED: Accessor for item_name.
+   * For the dashboard's "Perkara" (Subject/Matter) column,
+   * this will use the loan's purpose.
+   */
+  public function getItemNameAttribute(): string
+  {
+    if (!empty($this->purpose)) {
+        return Str::limit($this->purpose, 50); // Limit length for display
+    }
+
+    // Fallback if purpose is empty but items exist (more complex, requires eager loading 'loanApplicationItems')
+    if ($this->relationLoaded('loanApplicationItems') && $this->loanApplicationItems->isNotEmpty()) {
+        $itemTypes = $this->loanApplicationItems->pluck('equipment_type')->unique()->implode(', ');
+        return Str::limit($itemTypes ?: __('Pelbagai Peralatan'), 50);
+    }
+
+    return __('Tiada Butiran');
+  }
+
+  /**
+   * ADDED: Accessor for overall quantity of requested items in the application.
+   */
+  public function getQuantityAttribute(): int
+  {
+      // Ensure loanApplicationItems relationship is loaded to avoid N+1 if called in a loop
+      if ($this->relationLoaded('loanApplicationItems')) {
+          return (int) $this->loanApplicationItems->sum('quantity_requested');
+      }
+      // Fallback if not eager loaded for some reason, though less efficient.
+      // It's better to ensure eager loading in the component.
+      return (int) $this->loanApplicationItems()->sum('quantity_requested');
+  }
+
+  /**
+   * ADDED: Accessor for expected_return_date.
+   * This assumes loan_end_date is the expected return date.
+   */
+  public function getExpectedReturnDateAttribute(): ?Carbon
+  {
+      return $this->loan_end_date;
+  }
+
+
   // Helper Methods for status checks
   public function isDraft(): bool
   {
@@ -252,6 +304,13 @@ class LoanApplication extends Model
   {
     return $this->status === self::STATUS_REJECTED;
   }
+
+  // Duplicated method name, using the one from HasMany relationship definition
+  // public function applicationItems()
+  // {
+  //   return $this->hasMany(LoanApplicationItem::class);
+  // }
+
 
   public function canBeIssued(): bool
   {
@@ -274,13 +333,13 @@ class LoanApplication extends Model
 
   public function isOverdue(): bool
   {
-    if (!in_array($this->status, [self::STATUS_ISSUED, self::STATUS_PARTIALLY_ISSUED, self::STATUS_OVERDUE])) {
+    if (!in_array($this->status, [self::STATUS_ISSUED, self::STATUS_PARTIALLY_ISSUED, self::STATUS_OVERDUE, self::STATUS_PARTIALLY_RETURNED_PENDING_INSPECTION])) { // Added partially_returned_pending_inspection
       return false;
     }
     if ($this->status === self::STATUS_OVERDUE) return true;
 
     if ($this->loan_end_date && Carbon::parse($this->loan_end_date)->isPast()) {
-      $unreturnedIssuedItems = $this->loanApplicationItems() // Changed from applicationItems to loanApplicationItems
+      $unreturnedIssuedItems = $this->loanApplicationItems()
         ->where('quantity_issued', '>', DB::raw('IFNULL(quantity_returned, 0)'))
         ->exists();
       return $unreturnedIssuedItems;
@@ -330,64 +389,57 @@ class LoanApplication extends Model
 
   public function updateOverallStatusAfterTransaction(): void
   {
+    // Ensure relationships are loaded if not already
+    $this->loadMissing('loanApplicationItems');
+
     $totalRequested = $this->loanApplicationItems->sum('quantity_requested');
-    $totalIssued = $this->loanApplicationItems->sum('quantity_issued'); // Changed from applicationItems
-    $totalReturned = $this->loanApplicationItems->sum('quantity_returned'); // Changed from applicationItems
+    $totalIssued = $this->loanApplicationItems->sum('quantity_issued');
+    $totalReturned = $this->loanApplicationItems->sum('quantity_returned');
+
+    $originalStatus = $this->status; // Keep track of original status for logging
 
     if ($totalIssued == 0 && $totalReturned == 0) {
-      // No items issued yet. If status is approved, keep it. Otherwise, no change if still pending.
-      // No explicit status change needed here, as the initial state is already set based on approval flow.
-    } elseif ($totalIssued > 0 && $totalReturned === $totalIssued) {
-      // All issued items have been returned
-      $this->status = self::STATUS_RETURNED;
+        // If no items ever issued, status should remain based on approval flow (e.g., approved, pending)
+        // No change here unless it was 'issued' or 'returned' incorrectly before.
+        if ($this->status === self::STATUS_ISSUED || $this->status === self::STATUS_PARTIALLY_ISSUED || $this->status === self::STATUS_RETURNED) {
+            // This state is unusual if nothing was issued. Revert to approved if it was.
+            // Or, this could be a cancellation case after approval but before issue.
+            // For now, we assume if it got to 'issued', it implies items were meant to be issued.
+            // This condition implies something went wrong if items were not actually recorded as issued.
+        }
+    } elseif ($totalIssued > 0 && $totalReturned >= $totalIssued) {
+        // All items that were issued have been returned (or more, which is an anomaly)
+        $this->status = self::STATUS_RETURNED;
     } elseif ($totalIssued > 0 && $totalReturned < $totalIssued) {
-      // Some items are still out or partially returned
-      if ($totalIssued === $totalRequested) {
-        // All requested items were issued, but not all returned
-        $this->status = self::STATUS_ISSUED; // Keep issued, as some are still out
-      } else {
-        // Some requested were issued, and some are still out
-        $this->status = self::STATUS_PARTIALLY_ISSUED;
-      }
+        // Some items are still out (not fully returned)
+        // Check if all *requested* items were issued initially
+        if ($totalIssued >= $totalRequested) { // All requested (or more, anomaly) were issued
+            $this->status = self::STATUS_ISSUED; // Still considered 'Issued' as not everything is back
+        } else { // Not all requested items were issued, implies partially issued
+            $this->status = self::STATUS_PARTIALLY_ISSUED;
+        }
 
-      // Check if there are any items currently awaiting inspection from a return
-      $hasItemsPendingInspection = $this->loanTransactions()
-        ->where('type', LoanTransaction::TYPE_RETURN)
-        ->whereIn('status', [
-          LoanTransaction::STATUS_RETURNED_PENDING_INSPECTION,
-          LoanTransaction::STATUS_RETURNED_GOOD, // Could be in this state after a quick return
-          LoanTransaction::STATUS_RETURNED_DAMAGED,
-          LoanTransaction::STATUS_RETURNED_WITH_LOSS,
-          LoanTransaction::STATUS_RETURNED_WITH_DAMAGE_AND_LOSS,
-          LoanTransaction::STATUS_PARTIALLY_RETURNED // General partially returned
-        ])
-        ->exists();
-
-      // If there are partial returns but some items are still out (not fully returned),
-      // we might set it to a "partially returned pending inspection" state if relevant.
-      // This logic needs to be carefully considered based on your desired application lifecycle.
-      if ($hasItemsPendingInspection && $totalReturned > 0 && $totalReturned < $totalIssued) {
-        $this->status = self::STATUS_PARTIALLY_RETURNED_PENDING_INSPECTION;
-      }
-    } elseif ($totalIssued > 0 && $totalIssued === $totalRequested && $totalReturned < $totalIssued) {
-      // All requested items were issued, but not all returned yet
-      $this->status = self::STATUS_ISSUED;
+        // If any returned items are pending inspection, it could influence the overall status
+        // For simplicity in this method, we'll primarily base it on quantities.
+        // A more granular status like 'partially_returned_pending_inspection' might be set by LoanTransactionService
+        // if needed, and this method would respect it if it's already set, or refine it.
     }
+    // else, no items were ever issued, so status remains as per approval workflow (e.g., draft, approved)
 
-    // Handle overdue logic: Check if loan_end_date is in the past and status is issued/partially_issued
+    // Overdue Check: This should apply if items are still out (issued or partially issued) and past due date
     if (
-      $this->loan_end_date && $this->loan_end_date->isPast() &&
-      ($this->status === self::STATUS_ISSUED ||
-        $this->status === self::STATUS_PARTIALLY_ISSUED ||
-        $this->status === self::STATUS_PARTIALLY_RETURNED_PENDING_INSPECTION) // Also check if partially returned and overdue
+      $this->loan_end_date &&
+      $this->loan_end_date->isPast() &&
+      in_array($this->status, [self::STATUS_ISSUED, self::STATUS_PARTIALLY_ISSUED])
     ) {
       $this->status = self::STATUS_OVERDUE;
     }
 
-
     if ($this->isDirty('status')) {
-      $this->save();
-      Log::info("LoanApplication ID {$this->id} overall status updated to '{$this->status}' based on transaction item changes.");
+        $this->save();
+        Log::info("LoanApplication ID {$this->id} overall status changed from '{$originalStatus}' to '{$this->status}' based on transaction item sums. Requested: {$totalRequested}, Issued: {$totalIssued}, Returned: {$totalReturned}.");
+    } else {
+        Log::info("LoanApplication ID {$this->id} overall status remains '{$this->status}'. Requested: {$totalRequested}, Issued: {$totalIssued}, Returned: {$totalReturned}.");
     }
   }
 }

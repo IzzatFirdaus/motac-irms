@@ -36,7 +36,11 @@ class Index extends Component
 
   public function getUsersListProperty()
   {
-    $query = User::select(
+    // Corrected query chain:
+    // 1. Use an array for User::select([...]) for clarity and robustness.
+    // 2. Removed duplicated ->with() and ->orderBy() calls.
+    // 3. Ensured the method chaining is continuous.
+    $query = User::select([
         'id',
         'name',
         'email',
@@ -45,10 +49,10 @@ class Index extends Component
         'status',
         'title',
         'department_id',
-        'profile_photo_path' // Add 'profile_photo_path' here
-    ) //
-      ->with(['department:id,name', 'roles:id,name'])
-      ->orderBy('name', 'asc');
+        'profile_photo_path'
+    ])
+    ->with(['department:id,name', 'roles:id,name'])
+    ->orderBy('name', 'asc');
 
     if (!empty($this->search)) {
       $query->where(function ($q) {
@@ -107,7 +111,7 @@ class Index extends Component
       'id' => $userId,
       'itemDescription' => __('pengguna') . ' ' . $userName,
       'deleteMethod' => 'deleteUser',
-      'modelClass' => User::class
+      'modelClass' => User::class // Note: 'modelClass' is dispatched but not used by your Alpine modal's x-data
     ]);
   }
 
@@ -131,8 +135,8 @@ class Index extends Component
   {
     return view('livewire.settings.users.index', [
       'usersList' => $this->usersList,
-      'rolesForFilter' => $this->rolesForFilter,
-      'statusOptions' => $this->statusOptions,
+      'rolesForFilter' => $this->rolesForFilter, // This was already being passed correctly
+      'statusOptions' => $this->statusOptions,   // This was already being passed correctly
     ]);
   }
 }

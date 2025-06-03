@@ -116,8 +116,8 @@
                                 {{ $application->loan_end_date ? Carbon\Carbon::parse($application->loan_end_date)->translatedFormat(config('app.date_format_my', 'd/m/Y')) : 'N/A' }}
                             </td>
                             <td class="px-3 py-2 align-middle small text-center">
-                                {{-- Ensure Helpers::getStatusColorClass maps to MOTAC theme badge colors (Design Language 2.1, 3.3) --}}
-                                <span class="badge rounded-pill {{ App\Helpers\Helpers::getStatusColorClass($application->status ?? 'default') }}">
+                                {{-- CORRECTED: Added the second argument 'loan' for type --}}
+                                <span class="badge rounded-pill {{ App\Helpers\Helpers::getStatusColorClass($application->status ?? 'default', 'loan') }}">
                                     {{ __($application->status_translated ?? Str::studly($application->status)) }}
                                 </span>
                             </td>

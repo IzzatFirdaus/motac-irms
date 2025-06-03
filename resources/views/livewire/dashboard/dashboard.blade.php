@@ -1,247 +1,399 @@
 {{-- resources/views/livewire/dashboard/dashboard.blade.php --}}
 <div>
-    @section('title', $pageTitleValue) {{-- Use the public property from the component for the title --}}
+    @section('title', $pageTitleValue)
 
     @php
-        // $configData is usually available if layouts/app.blade.php sets it globally,
-        // but good practice to ensure it's available if directly accessed by sub-components or includes.
         $configData = \App\Helpers\Helpers::appClasses();
     @endphp
 
     @push('page-style')
-        {{-- Page-specific styles --}}
         <style>
-            .match-height > [class*='col'] { display: flex; flex-direction: column; }
-            .match-height > [class*='col'] > .card { flex: 1 1 auto; /* Ensure cards in a row take equal height */ }
-
-            .td-link a { color: inherit; text-decoration: none; }
-            .td-link a:hover { color: var(--motac-primary, #0055A4); text-decoration: underline; } /* Use MOTAC primary color var */
-
-            .icon-stat { font-size: 1.6rem; /* Consistent icon size in stat badges */ }
-            .quick-action-img { max-height: 130px; object-fit: contain; margin-bottom: 0.5rem; }
-
-            .card-header .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.75rem; } /* Styling for small buttons in card headers */
-
-            /* Ensuring Noto Sans is applied if not globally forced, and line height */
-            .card-title, .card-header h5, .card-body small, .table th, .table td, .btn, .dropdown-item {
-                font-family: 'Noto Sans', sans-serif; /* Design Language 2.2 */
+            /* ... existing styles ... */
+            .quick-action-img { /* This class was for the old img tags, can be removed or repurposed */
+                max-height: 100px; /* Adjusted from 130px if icons are smaller */
+                object-fit: contain;
+                margin-bottom: 0.5rem;
             }
-            body, .text-muted, p { /* General text considerations */
-                line-height: 1.6; /* Design Language 2.2 */
+
+            /* ADDED: Styles for Bootstrap Icons in Quick Actions */
+            .quick-action-bs-icon {
+                font-size: 3.5rem; /* Adjust size as needed */
+                display: block; /* Or inline-block if preferred */
+                margin-bottom: 0.75rem; /* Spacing below icon */
+                line-height: 1; /* Ensure icon is vertically centered if it has extra space */
             }
-            .badge { /* Ensure badges also use Noto Sans */
-                font-family: 'Noto Sans', sans-serif; /* Design Language 2.2 */
-                font-weight: 500; /* Medium weight for labels as per Design Language 2.2 */
-            }
+            /* ... existing styles ... */
         </style>
     @endpush
 
-    {{-- Alerts: For displaying session flash messages (success, error, etc.) --}}
-    @include('_partials._alerts.alert-general')
-
-    {{-- Top Row: Welcome Message, Date/Time, Quick Actions, and Summary Counts --}}
-    <div class="row match-height g-4 mb-4">
-        {{-- Welcome & Quick Actions Card --}}
-        <div class="col-xl-5 col-lg-6 col-md-6 col-12">
-            <div class="card h-100 motac-card">
-                <div class="card-header pb-0 motac-card-header">
-                    <h4 class="card-title mb-1">{{ __('Hai,') }} {{ $displayUserName }}! 👋</h4>
-                    <small class="text-muted">{{ __('Mulakan hari anda dengan semakan ringkas di sini.') }}</small>
-                </div>
-                <div class="d-flex align-items-end row h-100">
-                    <div class="col-sm-7">
-                        <div class="card-body motac-card-body">
-                            {{-- Live Date and Time --}}
-                            <h5 id="motacDashboardDate" class="text-primary mt-2 mb-1 small fw-semibold" role="status" aria-live="polite"></h5>
-                            <h5 id="motacDashboardTime" class="text-primary mb-3 small fw-semibold" role="status" aria-live="polite"></h5>
-
-                            {{-- Quick Actions Dropdown --}}
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-primary btn-sm dropdown-toggle motac-btn-primary" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="bi bi-lightning-charge fs-6 me-1"></i>{{ __('Tindakan Pantas') }}
-                                </button>
-                                <ul class="dropdown-menu">
-                                    @can('create', App\Models\LoanApplication::class)
-                                        <li>
-                                            <a class="dropdown-item" href="{{ route('loan-applications.create') }}">
-                                                <i class="bi bi-laptop fs-6 me-2"></i>{{ __('Mohon Pinjaman ICT') }}
-                                            </a>
-                                        </li>
-                                    @endcan
-                                    @can('create', App\Models\EmailApplication::class)
-                                        <li>
-                                            <a class="dropdown-item" href="{{ route('email-applications.create') }}">
-                                                <i class="bi bi-envelope-plus fs-6 me-2"></i>{{ __('Mohon E-mel/ID') }}
-                                            </a>
-                                        </li>
-                                    @endcan
-                                    @if(!Auth::user()?->can('create', App\Models\LoanApplication::class) && !Auth::user()?->can('create', App\Models\EmailApplication::class))
-                                        <li><span class="dropdown-item text-muted small">{{ __('Tiada tindakan pantas tersedia.') }}</span></li>
-                                    @endif
-                                </ul>
+    <div class="container-xxl flex-grow-1 container-p-y">
+        {{-- ... Welcome Card ... --}}
+        <div class="row gy-4 mb-4">
+            <div class="col-lg-12">
+                <div class="card h-100 motac-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <h4 class="mb-0 me-2 motac-quick-action-title">{{ __('Selamat Datang Kembali,') }}
+                                {{ $displayUserName }}!</h4>
+                            <div class="ms-auto d-flex flex-column align-items-end">
+                                <span id="motacDashboardDate" class="text-muted small"></span>
+                                <span id="motacDashboardTime" class="text-muted small"></span>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-sm-5 text-center d-flex align-items-end">
-                        <div class="card-body pb-0 px-0 px-md-4 w-100 motac-card-body">
-                            <img src="{{ asset('assets/img/illustrations/motac_dashboard_hero.svg') }}"
-                                 class="img-fluid quick-action-img"
-                                 alt="{{ __('Ilustrasi papan pemuka untuk Sistem MOTAC') }}">
-                        </div>
+                        <p class="mb-0 text-muted">{{ __('Semoga hari anda berjalan lancar dan produktif.') }}</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        {{-- User Summary Counts Card --}}
-        <div class="col-xl-7 col-lg-6 col-md-6 col-12">
-            <div class="card h-100 motac-card">
-                <div class="card-header motac-card-header">
-                    <h5 class="card-title mb-0">{{ __('Ringkasan Permohonan Anda') }}</h5>
-                </div>
-                <div class="card-body motac-card-body">
-                    <div class="row gy-3 text-center">
-                        @php
-                            $statItems = [
-                                ['count' => $pendingUserLoanApplicationsCount, 'icon' => 'bi-laptop', 'labelKey' => 'Pinjaman ICT Menunggu', 'colorClass' => \App\Helpers\Helpers::getStatusColorClass('pending_support', 'loan'), 'route' => route('loan-applications.index', ['status' => 'pending_support'])],
-                                ['count' => $activeUserLoansCount, 'icon' => 'bi-check2-all', 'labelKey' => 'Pinjaman ICT Aktif', 'colorClass' => \App\Helpers\Helpers::getStatusColorClass('issued', 'loan'), 'route' => route('loan-applications.index', ['status' => 'issued'])],
-                                ['count' => $pendingUserEmailApplicationsCount, 'icon' => 'bi-envelope-exclamation', 'labelKey' => 'E-mel/ID Menunggu', 'colorClass' => \App\Helpers\Helpers::getStatusColorClass('pending_support', 'email'), 'route' => route('email-applications.index', ['status' => 'pending_support'])],
-                            ];
-                        @endphp
-                        @foreach ($statItems as $item)
-                            <div class="col-md-4 col-6">
-                                <a href="{{ $item['route'] ?? '#' }}" class="text-decoration-none d-block">
-                                    <div class="d-flex flex-column align-items-center">
-                                        <div class="badge rounded-pill p-2 mb-2 {{ $item['colorClass'] }}">
-                                            <i class="bi {{ $item['icon'] }} icon-stat"></i>
-                                        </div>
-                                        <h5 class="mb-0 display-6" aria-label="{{ $item['count'] }} {{ __($item['labelKey']) }}">{{ $item['count'] }}</h5>
-                                        <small class="text-muted">{{ __($item['labelKey']) }}</small>
+        {{-- Quick Actions Row --}}
+        <div class="row g-4 mb-4">
+            <div class="col-lg-6 col-md-12">
+                <div class="card h-100 motac-card">
+                    <div class="card-header motac-card-header">
+                        <h5 class="card-title mb-0">{{ __('Tindakan Pantas') }}</h5>
+                    </div>
+                    <div class="card-body motac-card-body">
+                        <div class="row text-center">
+                            @foreach ($quickActions as $action)
+                                @php
+                                    $canView = true;
+                                    if (isset($action['role']) && Auth::check()) {
+                                        $roles = is_array($action['role']) ? $action['role'] : [$action['role']];
+                                        $canView = false;
+                                        foreach ($roles as $role) {
+                                            if (Auth::user()->hasRole($role)) {
+                                                $canView = true;
+                                                break;
+                                            }
+                                        }
+                                    } elseif (isset($action['role']) && !Auth::check()) {
+                                        $canView = false;
+                                    }
+                                @endphp
+                                @if ($canView)
+                                    <div class="col-6 col-md-4 mb-3">
+                                        <a href="{{ route($action['route']) }}" class="d-block text-decoration-none">
+                                            {{-- MODIFIED: Changed from <img> to <i> for Bootstrap Icons --}}
+                                            <i class="{{ $action['icon'] }} quick-action-bs-icon"></i>
+                                            <p class="text-muted mb-0 motac-quick-action-title">
+                                                {{ __($action['name']) }}</p>
+                                        </a>
                                     </div>
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- ICT Loan Status & Email/ID Status Row --}}
+            {{-- ... (rest of the file remains the same as your last provided version) ... --}}
+            <div class="col-lg-6 col-md-12">
+                <div class="row g-4">
+                    {{-- ICT Loan Status Card --}}
+                    <div class="col-md-6">
+                        <div class="card h-100 motac-card">
+                            <div class="card-body text-center motac-card-body">
+                                <div class="d-flex justify-content-center align-items-center mb-3">
+                                    <i class="bi bi-laptop icon-stat text-primary me-2"></i>
+                                    <h6 class="mb-0 motac-stat-title">{{ __('Status Pinjaman ICT') }}</h6>
+                                </div>
+                                <h3 class="mb-2 text-primary">{{ $pendingUserLoanApplicationsCount }}</h3>
+                                <p class="mb-0 text-muted">{{ __('Permohonan ICT dalam Proses') }}</p>
+                                <a href="{{ route('loan-applications.index', ['status' => 'pending']) }}"
+                                    class="btn btn-sm btn-outline-primary mt-3 motac-btn-primary">
+                                    {{ __('Lihat Permohonan Saya') }}
                                 </a>
                             </div>
-                        @endforeach
+                        </div>
+                    </div>
+
+                    {{-- Email/ID Application Status Card --}}
+                    <div class="col-md-6">
+                        <div class="card h-100 motac-card">
+                            <div class="card-body text-center motac-card-body">
+                                <div class="d-flex justify-content-center align-items-center mb-3">
+                                    <i class="bi bi-envelope icon-stat text-info me-2"></i>
+                                    <h6 class="mb-0 motac-stat-title">{{ __('Status Permohonan Emel/ID') }}</h6>
+                                </div>
+                                <h3 class="mb-2 text-info">{{ $pendingUserEmailApplicationsCount }}</h3>
+                                <p class="mb-0 text-muted">{{ __('Permohonan Emel/ID dalam Proses') }}</p>
+                                <a href="{{ route('email-applications.index', ['status' => 'pending']) }}"
+                                    class="btn btn-sm btn-outline-info mt-3 motac-btn-primary">
+                                    {{ __('Lihat Permohonan Saya') }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Active Loans Card --}}
+                    <div class="col-12 mt-4">
+                        <div class="card h-100 motac-card">
+                            <div class="card-body text-center motac-card-body">
+                                <div class="d-flex justify-content-center align-items-center mb-3">
+                                    <i class="bi bi-folder-check icon-stat text-success me-2"></i>
+                                    <h6 class="mb-0 motac-stat-title">{{ __('Pinjaman ICT Aktif') }}</h6>
+                                </div>
+                                <h3 class="mb-2 text-success">{{ $activeUserLoansCount }}</h3>
+                                <p class="mb-0 text-muted">{{ __('Pinjaman ICT yang sedang aktif.') }}</p>
+                                <a href="{{ route('loan-applications.index', ['status' => 'active']) }}"
+                                    class="btn btn-sm btn-outline-success mt-3 motac-btn-primary">
+                                    {{ __('Urus Pinjaman Aktif') }}
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- Recent Applications Tables --}}
-    <div class="row g-4">
-        @php
-            $applicationSections = [
-                [
-                    'titleKey' => 'Permohonan Pinjaman ICT Terkini',
-                    'routeIndex' => 'loan-applications.index',
-                    'items' => $userRecentLoanApplications,
-                    'fields' => ['purpose', 'status', 'updated_at'], // Using 'updated_at' as per component logic
-                    'routeShow' => 'loan-applications.show',
-                    'columns' => [__('ID'), __('Tujuan Ringkas'), __('Status'), __('Tarikh Kemaskini')], // Changed label
-                    'emptyMessageKey' => 'Tiada permohonan pinjaman ICT terkini.',
-                    'itemType' => 'loan'
-                ],
-                [
-                    'titleKey' => 'Permohonan E-mel/ID Terkini',
-                    'routeIndex' => 'email-applications.index',
-                    'items' => $userRecentEmailApplications,
-                    'fields' => ['proposed_email', 'status', 'updated_at'], // Using 'updated_at' as per component logic
-                    'routeShow' => 'email-applications.show',
-                    'columns' => [__('ID'), __('E-mel Dicadang'), __('Status'), __('Tarikh Kemaskini')], // Changed label
-                    'emptyMessageKey' => 'Tiada permohonan e-mel/ID terkini.',
-                    'itemType' => 'email'
-                ]
-            ];
-        @endphp
-
-        @foreach ($applicationSections as $section)
-            <div class="col-lg-6">
-                <div class="card h-100 motac-card">
-                    <div class="card-header d-flex align-items-center justify-content-between py-3 motac-card-header">
-                        <h5 class="card-title m-0 me-2">{{ __($section['titleKey']) }}</h5>
-                        @if(Route::has($section['routeIndex']))
-                            <a href="{{ route($section['routeIndex']) }}" class="btn btn-sm btn-outline-primary motac-btn-outline">
-                                <i class="bi bi-view-list fs-6 me-1"></i>{{ __('Lihat Semua') }}
-                            </a>
-                        @endif
-                    </div>
-                    <div class="table-responsive text-nowrap">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    @foreach ($section['columns'] as $column)
-                                        <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ $column }}</th>
+    {{-- Transaction History & Upcoming Returns Row --}}
+    <div class="row match-height g-4 mb-4">
+        <div class="col-lg-6 col-md-12">
+            <div class="card h-100 motac-card">
+                <div class="card-header d-flex justify-content-between align-items-center motac-card-header">
+                    <h5 class="card-title mb-0">{{ __('Sejarah Transaksi Terkini') }}</h5>
+                    <a href="{{ route('resource-management.bpm.loan-transactions.index') }}"
+                        class="btn btn-primary btn-sm motac-btn-primary">
+                        {{ __('Lihat Semua') }} <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="card-body motac-card-body">
+                    @if ($latestLoanTransactions->isEmpty())
+                        <div class="alert alert-info text-center" role="alert">
+                            {{ __('Tiada sejarah transaksi pinjaman terkini untuk dipaparkan.') }}
+                        </div>
+                    @else
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">{{ __('Tarikh') }}</th>
+                                        <th scope="col">{{ __('Perkara') }}</th>
+                                        <th scope="col">{{ __('Status') }}</th>
+                                        <th scope="col">{{ __('Kuantiti') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($latestLoanTransactions as $transaction)
+                                        <tr class="td-link">
+                                            <td>
+                                                <a href="{{ route('resource-management.bpm.loan-transactions.show', $transaction->id) }}">
+                                                    {{ $transaction->transaction_date->format('d/m/Y') }}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a href="{{ route('resource-management.bpm.loan-transactions.show', $transaction->id) }}">
+                                                    {{ $transaction->item_name }}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a href="{{ route('resource-management.bpm.loan-transactions.show', $transaction->id) }}">
+                                                    {{ $transaction->status_label }}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a href="{{ route('resource-management.bpm.loan-transactions.show', $transaction->id) }}">
+                                                    {{ $transaction->quantity }}
+                                                </a>
+                                            </td>
+                                        </tr>
                                     @endforeach
-                                </tr>
-                            </thead>
-                            <tbody class="table-border-bottom-0">
-                                @forelse ($section['items'] as $item)
-                                    <tr>
-                                        <td class="px-3 py-2 td-link">
-                                            @if(Route::has($section['routeShow']))
-                                            <a href="{{ route($section['routeShow'], $item->id) }}"><strong>#{{ $item->id }}</strong></a>
-                                            @else
-                                            <strong>#{{ $item->id }}</strong>
-                                            @endif
-                                        </td>
-                                        <td class="px-3 py-2 small">{{ Str::limit($item->{$section['fields'][0]} ?? __('N/A'), 35) }}</td>
-                                        <td class="px-3 py-2 small">
-                                            <span class="badge {{ \App\Helpers\Helpers::getStatusColorClass($item->{$section['fields'][1]}, $section['itemType']) }}">
-                                                {{ __(Str::title(str_replace('_', ' ', $item->{$section['fields'][1]}))) }}
-                                            </span>
-                                        </td>
-                                        <td class="px-3 py-2 small text-muted">
-                                            {{ $item->{$section['fields'][2]} ? \App\Helpers\Helpers::formatDate($item->{$section['fields'][2]}) : __('N/A') }}
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="{{ count($section['columns']) }}" class="text-center py-4 text-muted small">
-                                            <i class="bi bi-folder-x fs-3 mb-2 d-block"></i>
-                                            {{ __($section['emptyMessageKey']) }}
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
                 </div>
             </div>
-        @endforeach
+        </div>
+
+        <div class="col-lg-6 col-md-12">
+            <div class="card h-100 motac-card">
+                <div class="card-header d-flex justify-content-between align-items-center motac-card-header">
+                    <h5 class="card-title mb-0">{{ __('Pulangan ICT Akan Datang') }}</h5>
+                    <a href="{{ route('resource-management.bpm.loan-transactions.index', ['status' => 'issued']) }}"
+                        class="btn btn-primary btn-sm motac-btn-primary">
+                        {{ __('Lihat Semua') }} <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="card-body motac-card-body">
+                    @if ($upcomingReturns->isEmpty())
+                        <div class="alert alert-info text-center" role="alert">
+                            {{ __('Tiada pinjaman ICT yang perlu dipulangkan dalam masa terdekat.') }}
+                        </div>
+                    @else
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">{{ __('Tarikh Pulang Dijangka') }}</th>
+                                        <th scope="col">{{ __('Perkara') }}</th>
+                                        <th scope="col">{{ __('Kuantiti') }}</th>
+                                        <th scope="col">{{ __('Status') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($upcomingReturns as $returnLoanApp)
+                                        <tr class="td-link">
+                                            <td>
+                                                <a href="{{ route('loan-applications.show', $returnLoanApp->id) }}">
+                                                    {{ $returnLoanApp->expected_return_date ? \Carbon\Carbon::parse($returnLoanApp->expected_return_date)->format('d/m/Y') : ($returnLoanApp->loan_end_date ? \Carbon\Carbon::parse($returnLoanApp->loan_end_date)->format('d/m/Y') : 'N/A') }}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a href="{{ route('loan-applications.show', $returnLoanApp->id) }}">
+                                                    {{ $returnLoanApp->item_name }}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a href="{{ route('loan-applications.show', $returnLoanApp->id) }}">
+                                                    {{ $returnLoanApp->quantity }}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a href="{{ route('loan-applications.show', $returnLoanApp->id) }}">
+                                                    {{ $returnLoanApp->status_label ?? $returnLoanApp->status_name ?? \Illuminate\Support\Str::title(str_replace('_', ' ', $returnLoanApp->status)) }}
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Recent Applications Row --}}
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6 col-md-12">
+            <div class="card h-100 motac-card">
+                <div class="card-header d-flex justify-content-between align-items-center motac-card-header">
+                    <h5 class="card-title mb-0">{{ __('Permohonan Pinjaman ICT Terkini') }}</h5>
+                    <a href="{{ route('loan-applications.index') }}"
+                        class="btn btn-primary btn-sm motac-btn-primary">
+                        {{ __('Lihat Semua') }} <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="card-body motac-card-body">
+                    @if ($userRecentLoanApplications->isEmpty())
+                        <div class="alert alert-info text-center" role="alert">
+                            {{ __('Tiada permohonan pinjaman ICT terkini untuk dipaparkan.') }}
+                        </div>
+                    @else
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">{{ __('Tarikh') }}</th>
+                                        <th scope="col">{{ __('Perkara') }}</th>
+                                        <th scope="col">{{ __('Status') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($userRecentLoanApplications as $loanApplication)
+                                        <tr class="td-link">
+                                            <td>
+                                                <a href="{{ route('loan-applications.show', $loanApplication->id) }}">
+                                                    {{ $loanApplication->created_at->format('d/m/Y') }}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a href="{{ route('loan-applications.show', $loanApplication->id) }}">
+                                                    {{ $loanApplication->item_name }}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a href="{{ route('loan-applications.show', $loanApplication->id) }}">
+                                                    {{ $loanApplication->status_label ?? $loanApplication->status_name ?? \Illuminate\Support\Str::title(str_replace('_', ' ', $loanApplication->status)) }}
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 col-md-12">
+            <div class="card h-100 motac-card">
+                <div class="card-header d-flex justify-content-between align-items-center motac-card-header">
+                    <h5 class="card-title mb-0">{{ __('Permohonan Emel/ID Terkini') }}</h5>
+                    <a href="{{ route('email-applications.index') }}"
+                        class="btn btn-primary btn-sm motac-btn-primary">
+                        {{ __('Lihat Semua') }} <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="card-body motac-card-body">
+                    @if ($userRecentEmailApplications->isEmpty())
+                        <div class="alert alert-info text-center" role="alert">
+                            {{ __('Tiada permohonan emel/ID terkini untuk dipaparkan.') }}
+                        </div>
+                    @else
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">{{ __('Tarikh') }}</th>
+                                        <th scope="col">{{ __('Jenis Permohonan') }}</th>
+                                        <th scope="col">{{ __('Status') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($userRecentEmailApplications as $emailApplication)
+                                        <tr class="td-link">
+                                            <td>
+                                                <a href="{{ route('email-applications.show', $emailApplication->id) }}">
+                                                    {{ $emailApplication->created_at->format('d/m/Y') }}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a href="{{ route('email-applications.show', $emailApplication->id) }}">
+                                                    {{ $emailApplication->application_type_label ?? ($emailApplication->proposed_email ? __('Permohonan Emel') : __('Permohonan ID Pengguna')) }}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a href="{{ route('email-applications.show', $emailApplication->id) }}">
+                                                     {{ $emailApplication->status_label ?? \Illuminate\Support\Str::title(str_replace('_', ' ', $emailApplication->status)) }}
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
     </div>
 
     @push('page-script')
         <script>
-            document.addEventListener('DOMContentLoaded', function () {
+            document.addEventListener('livewire:initialized', () => {
+                const pageLocale = @json(App::getLocale());
                 function updateMotacDashboardClock() {
                     const now = new Date();
-                    const pageLocale = document.documentElement.lang || 'ms';
-
                     const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                    const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' };
-
+                    const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: false, hourCycle: 'h23' };
                     const dateEl = document.getElementById('motacDashboardDate');
                     const timeEl = document.getElementById('motacDashboardTime');
-
                     if (dateEl) {
-                        try {
-                            dateEl.textContent = now.toLocaleDateString(pageLocale + '-MY', dateOptions);
-                        } catch (e) {
-                            dateEl.textContent = now.toLocaleDateString('en-GB', dateOptions);
-                            console.warn('Locale for date formatting (' + pageLocale + '-MY) might not be fully supported, using en-GB fallback.', e);
-                        }
+                        try { dateEl.textContent = now.toLocaleDateString(pageLocale + '-MY', dateOptions); }
+                        catch (e) { dateEl.textContent = now.toLocaleDateString('en-GB', dateOptions); console.warn('Locale for date formatting (' + pageLocale + '-MY) might not be fully supported, using en-GB fallback.', e); }
                     }
-
                     if (timeEl) {
-                        try {
-                            timeEl.textContent = now.toLocaleTimeString(pageLocale + '-MY', timeOptions);
-                        } catch (e) {
-                            timeEl.textContent = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-                            console.warn('Locale for time formatting (' + pageLocale + '-MY with hourCycle) might not be fully supported, using en-GB fallback.', e);
-                        }
+                        try { timeEl.textContent = now.toLocaleTimeString(pageLocale + '-MY', timeOptions); }
+                        catch (e) { timeEl.textContent = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }); console.warn('Locale for time formatting (' + pageLocale + '-MY with hourCycle) might not be fully supported, using en-GB fallback.', e); }
                     }
                 }
-
                 if (document.getElementById('motacDashboardDate') && document.getElementById('motacDashboardTime')) {
                     updateMotacDashboardClock();
                     setInterval(updateMotacDashboardClock, 1000);

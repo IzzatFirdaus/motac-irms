@@ -1,7 +1,7 @@
 {{-- resources/views/loan-transactions/return.blade.php --}}
 @extends('layouts.app')
 
-@section('title', __('Rekod Pulangan Peralatan untuk Transaksi #') . $loanTransaction->id) {{-- $loanTransaction is the ISSUE transaction --}}
+@section('title', __('Rekod Pulangan Peralatan untuk Transaksi #') . $loanTransaction->id)
 
 @section('content')
 <div class="container py-4">
@@ -13,8 +13,20 @@
                  <span class="text-muted small">{{__('Untuk Permohonan Pinjaman')}} #{{ $loanApplication->id }} / {{__('Transaksi Keluar')}} #{{ $loanTransaction->id }}</span>
             </div>
 
-            @include('partials.validation-errors-alt')
-            @include('partials.alert-messages')
+            {{-- CORRECTED: Use consistent general alert partial --}}
+            @include('_partials._alerts.alert-general')
+            {{-- If 'partials.validation-errors-alt' was specific, ensure its content is merged or use the general one --}}
+            {{-- For simplicity, showing only general errors. If validation-errors-alt is distinct and needed, keep it or merge logic --}}
+             @if ($errors->any()) {{-- Explicitly handling $errors if not covered by general alerts for form pages --}}
+                <x-alert type="danger" :title="__('Amaran! Sila semak ralat input berikut:')" dismissible="true">
+                    <ul class="list-unstyled mb-0 small ps-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </x-alert>
+            @endif
+
 
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-light py-3">
@@ -32,7 +44,6 @@
                         <dd class="col-sm-8">{{ optional($loanApplication->loan_end_date)->translatedFormat('d M Y, H:i A') ?? __('N/A') }}</dd>
                     </dl>
 
-                    {{-- $issuedItemsForThisTransaction: LoanTransactionItems from the specific $loanTransaction being returned. Passed from controller. --}}
                     @if (!empty($issuedItemsForThisTransaction) && $issuedItemsForThisTransaction->count() > 0)
                         <h3 class="h6 fw-semibold mt-3 mb-2 pt-2 border-top">{{ __('Peralatan Dikeluarkan Dalam Transaksi Ini (#') }}{{ $loanTransaction->id }})</h3>
                         <div class="table-responsive">
@@ -52,7 +63,7 @@
                                                 {{ e(optional($item->equipment)->brand_model_serial ?? optional($item->equipment)->tag_id) }}
                                             </td>
                                             <td class="small">{{ optional($loanTransaction->issue_timestamp)->translatedFormat('d M Y, H:i A') ?? __('N/A') }}</td>
-                                            <td class="small">{{ implode(', ', json_decode($loanTransaction->accessories_checklist_on_issue ?? '[]', true)) ?: '-' }}</td>
+                                            <td class="small">{{ implode(', ', $item->accessories_checklist_issue ?? ($loanTransaction->accessories_checklist_on_issue ?? [])) ?: '-' }}</td>
                                         </tr>
                                         @endif
                                     @endforeach
@@ -65,11 +76,10 @@
                 </div>
             </div>
 
-            {{-- The form posts to storeReturn, passing the original ISSUE $loanTransaction as a parameter for context --}}
-            <form action="{{ route('loan-transactions.storeReturn', $loanTransaction) }}" method="POST">
+            {{-- CORRECTED ROUTE NAME (assuming it's defined in web.php with this full name) --}}
+            <form action="{{ route('resource-management.bpm.loan-transactions.storeReturn', $loanTransaction) }}" method="POST">
                 @csrf
                 <input type="hidden" name="loan_application_id" value="{{ $loanApplication->id }}">
-                {{-- related_transaction_id (the ID of the issue transaction) is implicitly $loanTransaction->id in the controller --}}
 
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-light py-3">
@@ -79,7 +89,6 @@
                         <div class="mb-3">
                             <label for="loan_transaction_item_ids" class="form-label fw-semibold">{{ __('Pilih Item Peralatan yang Dipulangkan dari Transaksi Pengeluaran Ini') }}<span class="text-danger">*</span></label>
                             <p class="form-text small mt-0 mb-2 text-muted">{{__('Pilih semua item dari transaksi pengeluaran #')}}{{ $loanTransaction->id }} {{__('yang sedang dipulangkan.')}}</p>
-                            {{-- $issuedItemsForThisTransaction: LoanTransactionItems for the specific $loanTransaction. Passed from controller. --}}
                             <select name="loan_transaction_item_ids[]" id="loan_transaction_item_ids" class="form-select @error('loan_transaction_item_ids') is-invalid @enderror @error('loan_transaction_item_ids.*') is-invalid @enderror" multiple required size="5">
                                 @if(!empty($issuedItemsForThisTransaction) && $issuedItemsForThisTransaction->count() > 0)
                                     @foreach ($issuedItemsForThisTransaction as $item)
@@ -98,8 +107,6 @@
                             @error('loan_transaction_item_ids.*') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
-                        {{-- Note: For per-item condition on return, form structure would need to be more complex (e.g., dynamic rows for each selected item). --}}
-                        {{-- This current form captures general notes and accessories for the batch return. --}}
                          <div class="alert alert-info small py-2">
                             <i class="bi bi-info-circle-fill me-1"></i> {{__('Nota: Keadaan setiap item akan dinilai oleh pegawai BPM. Sila nyatakan sebarang kerosakan atau kehilangan dalam catatan di bawah.')}}
                         </div>
@@ -108,8 +115,7 @@
                             <label class="form-label fw-semibold">{{ __('Senarai Semak Aksesori Dipulangkan:') }}</label>
                             <p class="form-text small mt-0 mb-2 text-muted">{{ __('Sila tandakan aksesori yang dipulangkan bersama peralatan.') }}</p>
                             <div class="row">
-                                {{-- $allAccessoriesList from config('motac.loan_accessories_list') [cite: 348] --}}
-                                @forelse ($allAccessoriesList ?? [] as $accessory)
+                                @forelse ($allAccessoriesList ?? config('motac.loan_accessories_list', []) as $accessory)
                                     <div class="col-md-6 col-lg-4">
                                         <div class="form-check">
                                             <input type="checkbox" name="accessories_on_return[]" value="{{ $accessory }}" id="return-accessory-{{ Str::slug($accessory) }}" class="form-check-input @error('accessories_on_return') is-invalid @enderror" {{ in_array($accessory, old('accessories_on_return', [])) ? 'checked' : '' }}>
@@ -139,7 +145,6 @@
                             </div>
                              <div class="col-md-6 mb-3">
                                 <label for="returning_officer_id" class="form-label fw-semibold">{{ __('Peralatan Dipulangkan Oleh (Pemohon/Wakil)') }}<span class="text-danger">*</span></label>
-                                 {{-- $loanApplicantAndResponsibleOfficer (Collection of User models) should be passed from controller --}}
                                 <select name="returning_officer_id" id="returning_officer_id" class="form-select @error('returning_officer_id') is-invalid @enderror" required>
                                     <option value="">-- {{__('Pilih Pemulang')}} --</option>
                                     @if(!empty($loanApplicantAndResponsibleOfficer) && $loanApplicantAndResponsibleOfficer->count())
@@ -167,6 +172,7 @@
             </form>
 
             <div class="text-center mt-4">
+                {{-- This route 'loan-applications.show' is global and correct --}}
                 <a href="{{ route('loan-applications.show', $loanApplication) }}" class="btn btn-outline-secondary d-inline-flex align-items-center">
                      <i class="bi bi-arrow-left-circle me-1"></i>
                     {{ __('Kembali ke Butiran Permohonan') }}

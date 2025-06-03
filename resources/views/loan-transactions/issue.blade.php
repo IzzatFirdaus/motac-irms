@@ -15,13 +15,22 @@
                     <span class="text-muted small">{{__('Untuk Permohonan Pinjaman')}} #{{ $loanApplication->id }}</span>
                 </div>
 
-                {{-- Display Validation Errors --}}
-                <x-alert-errors />
-
-                {{-- Display Session Flash Messages --}}
-                @if (session('message'))
-                    <x-alert :type="session('type', 'info')" :message="session('message')" dismissible="true" />
+                {{-- Component for Validation Errors (ensure x-alert-errors or similar exists and is correct) --}}
+                {{-- Assuming x-alert-errors wraps logic similar to _partials._alerts.alert-general for $errors --}}
+                @if ($errors->any())
+                    <x-alert type="danger" :title="__('Amaran! Sila semak ralat input berikut:')" dismissible="true">
+                        <ul class="list-unstyled mb-0 small ps-0">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </x-alert>
                 @endif
+
+
+                {{-- Display Session Flash Messages using the component approach or the general partial --}}
+                 @include('_partials._alerts.alert-general')
+
 
                 {{-- Loan Application Details for Context --}}
                 <div class="card shadow-sm mb-4">
@@ -80,7 +89,8 @@
                 </div>
 
                 {{-- Form to Record Issuance --}}
-                <form action="{{ route('loan-transactions.storeIssue', $loanApplication) }}" method="POST">
+                {{-- CORRECTED ROUTE NAME (assuming it's defined in web.php with this full name) --}}
+                <form action="{{ route('resource-management.bpm.loan-transactions.storeIssue', $loanApplication) }}" method="POST">
                     @csrf
                     <div class="card shadow-sm mb-4">
                         <div class="card-header bg-light py-3">
@@ -89,7 +99,6 @@
                         <div class="card-body p-4">
                             <div class="mb-3">
                                 <label for="equipment_ids" class="form-label fw-semibold">{{ __('Pilih Peralatan untuk Dikeluarkan (dari Inventori)') }}<span class="text-danger">*</span></label>
-                                {{-- $availableEquipment (Collection of App\Models\Equipment) should be passed from the controller --}}
                                 <select name="equipment_ids[]" id="equipment_ids" class="form-select @error('equipment_ids') is-invalid @enderror @error('equipment_ids.*') is-invalid @enderror" multiple required size="8">
                                     @if(!empty($availableEquipment) && $availableEquipment->count())
                                         @foreach ($availableEquipment as $equipment)
@@ -114,8 +123,7 @@
                                     {{ __('Sila tandakan aksesori yang disertakan bersama peralatan yang dipilih.') }}
                                 </p>
                                 <div class="row">
-                                    {{-- $allAccessoriesList (array) should be passed from the controller, e.g., from config('motac.loan_accessories_list') --}}
-                                    @forelse ($allAccessoriesList ?? config('motac.loan_accessories_list', []) as $accessory) {{-- Added config reference for robustness --}}
+                                    @forelse ($allAccessoriesList ?? config('motac.loan_accessories_list', []) as $accessory)
                                         <div class="col-md-6 col-lg-4">
                                             <div class="form-check">
                                                 <input type="checkbox" name="accessories[]" value="{{ $accessory }}" id="accessory-{{ Str::slug($accessory) }}" class="form-check-input @error('accessories') is-invalid @enderror" {{ in_array($accessory, old('accessories', [])) ? 'checked' : '' }}>
@@ -147,7 +155,6 @@
                                 </div>
                                  <div class="col-md-6 mb-3">
                                     <label for="receiving_officer_id" class="form-label fw-semibold">{{ __('Peralatan Diterima Oleh (Pemohon/Wakil)') }}<span class="text-danger">*</span></label>
-                                    {{-- $loanApplicantAndResponsibleOfficer (Collection of User models) should be passed from controller --}}
                                     <select name="receiving_officer_id" id="receiving_officer_id" class="form-select @error('receiving_officer_id') is-invalid @enderror" required>
                                         <option value="">-- {{__('Pilih Penerima')}} --</option>
                                         @if(!empty($loanApplicantAndResponsibleOfficer) && $loanApplicantAndResponsibleOfficer->count())
@@ -175,6 +182,7 @@
                 </form>
 
                 <div class="text-center mt-4">
+                    {{-- This route 'loan-applications.show' is global and correct --}}
                     <a href="{{ route('loan-applications.show', $loanApplication) }}" class="btn btn-outline-secondary d-inline-flex align-items-center">
                         <i class="bi bi-arrow-left-circle me-1"></i>
                         {{ __('Kembali ke Butiran Permohonan') }}
