@@ -4,7 +4,6 @@
         <h1 class="h2 fw-semibold text-dark mb-2 mb-sm-0 d-flex align-items-center">
             <i class="bi bi-journal-arrow-down me-2"></i>{{ __('Laporan Permohonan Pinjaman Peralatan') }}
         </h1>
-        {{-- Optional: Export Button --}}
     </div>
 
     <div class="card shadow-sm mb-4 motac-card">
@@ -114,7 +113,8 @@
                             <td class="px-3 py-2 small text-muted">{{ Carbon\Carbon::parse($item->loan_start_date)->translatedFormat(config('app.datetime_format_my', 'd/m/Y H:i A')) }}</td>
                             <td class="px-3 py-2 small text-muted">{{ Carbon\Carbon::parse($item->loan_end_date)->translatedFormat(config('app.datetime_format_my', 'd/m/Y H:i A')) }}</td>
                             <td class="px-3 py-2 small">
-                                <span class="badge rounded-pill {{ \App\Helpers\Helpers::getStatusColorClass($item->status) }} fw-normal">
+                                {{-- CORRECTED: Added 'loan_application' as the second argument --}}
+                                <span class="badge rounded-pill {{ \App\Helpers\Helpers::getStatusColorClass($item->status ?? 'default', 'loan_application') }} fw-normal">
                                     {{ $statusOptions[$item->status] ?? __(Str::title(str_replace('_',' ',$item->status))) }}
                                 </span>
                             </td>
@@ -123,7 +123,7 @@
                         <tr>
                             <td colspan="8" class="px-3 py-5 text-center">
                                <div class="d-flex flex-column align-items-center text-muted small">
-                                    <i class="bi bi-table fs-1 mb-2 text-secondary"></i> {{-- Bootstrap Icon --}}
+                                    <i class="bi bi-table fs-1 mb-2 text-secondary"></i>
                                     {{ __('Tiada data laporan ditemui untuk saringan ini.') }}
                                 </div>
                             </td>

@@ -4,10 +4,6 @@
         <h1 class="h2 fw-semibold text-dark mb-2 mb-sm-0 d-flex align-items-center">
             <i class="bi bi-envelope-check-fill me-2"></i>{{ __('Laporan Akaun E-mel') }}
         </h1>
-        {{-- Optional: Export Button
-        <button wire:click="exportReport" class="btn btn-sm btn-outline-success d-inline-flex align-items-center">
-            <i class="bi bi-file-earmark-excel-fill me-1"></i> {{__('Eksport Laporan')}}
-        </button> --}}
     </div>
 
     <div class="card shadow-sm mb-4 motac-card">
@@ -79,8 +75,7 @@
                         <th class="small text-uppercase text-muted fw-medium px-3 py-2" wire:click="setSortBy('id')"
                             role="button" style="cursor:pointer;">
                             {{ __('ID Mohon') }} @if ($sortBy === 'id')
-                                <i
-                                    class="bi {{ $sortDirection === 'asc' ? 'bi-sort-numeric-down' : 'bi-sort-numeric-up-alt' }}"></i>
+                                <i class="bi {{ $sortDirection === 'asc' ? 'bi-sort-numeric-down' : 'bi-sort-numeric-up-alt' }}"></i>
                             @else
                                 <i class="bi bi-arrow-down-up text-muted opacity-50" style="font-size: 0.8em;"></i>
                             @endif
@@ -88,8 +83,7 @@
                         <th class="small text-uppercase text-muted fw-medium px-3 py-2"
                             wire:click="setSortBy('user_name')" role="button" style="cursor:pointer;">
                             {{ __('Pemohon') }} @if ($sortBy === 'user_name')
-                                <i
-                                    class="bi {{ $sortDirection === 'asc' ? 'bi-sort-alpha-down' : 'bi-sort-alpha-up-alt' }}"></i>
+                                <i class="bi {{ $sortDirection === 'asc' ? 'bi-sort-alpha-down' : 'bi-sort-alpha-up-alt' }}"></i>
                             @else
                                 <i class="bi bi-arrow-down-up text-muted opacity-50" style="font-size: 0.8em;"></i>
                             @endif
@@ -100,8 +94,7 @@
                         <th class="small text-uppercase text-muted fw-medium px-3 py-2"
                             wire:click="setSortBy('proposed_email')" role="button" style="cursor:pointer;">
                             {{ __('Emel Dicadang') }} @if ($sortBy === 'proposed_email')
-                                <i
-                                    class="bi {{ $sortDirection === 'asc' ? 'bi-sort-alpha-down' : 'bi-sort-alpha-up-alt' }}"></i>
+                                <i class="bi {{ $sortDirection === 'asc' ? 'bi-sort-alpha-down' : 'bi-sort-alpha-up-alt' }}"></i>
                             @else
                                 <i class="bi bi-arrow-down-up text-muted opacity-50" style="font-size: 0.8em;"></i>
                             @endif
@@ -109,8 +102,7 @@
                         <th class="small text-uppercase text-muted fw-medium px-3 py-2"
                             wire:click="setSortBy('final_assigned_email')" role="button" style="cursor:pointer;">
                             {{ __('Emel Diluluskan') }} @if ($sortBy === 'final_assigned_email')
-                                <i
-                                    class="bi {{ $sortDirection === 'asc' ? 'bi-sort-alpha-down' : 'bi-sort-alpha-up-alt' }}"></i>
+                                <i class="bi {{ $sortDirection === 'asc' ? 'bi-sort-alpha-down' : 'bi-sort-alpha-up-alt' }}"></i>
                             @else
                                 <i class="bi bi-arrow-down-up text-muted opacity-50" style="font-size: 0.8em;"></i>
                             @endif
@@ -118,8 +110,7 @@
                         <th class="small text-uppercase text-muted fw-medium px-3 py-2" wire:click="setSortBy('status')"
                             role="button" style="cursor:pointer;">
                             {{ __('Status') }} @if ($sortBy === 'status')
-                                <i
-                                    class="bi {{ $sortDirection === 'asc' ? 'bi-sort-alpha-down' : 'bi-sort-alpha-up-alt' }}"></i>
+                                <i class="bi {{ $sortDirection === 'asc' ? 'bi-sort-alpha-down' : 'bi-sort-alpha-up-alt' }}"></i>
                             @else
                                 <i class="bi bi-arrow-down-up text-muted opacity-50" style="font-size: 0.8em;"></i>
                             @endif
@@ -137,10 +128,8 @@
                 <tbody>
                     <tr wire:loading.class.delay="opacity-50 table-loading-row" class="transition-opacity">
                         <td colspan="8" class="p-0" style="border:none;">
-                            <div wire:loading.flex class="progress" style="height: 2px; width: 100%;"
-                                role="progressbar" aria-label="{{ __('Memuatkan...') }}">
-                                <div class="progress-bar progress-bar-striped progress-bar-animated"
-                                    style="width: 100%"></div>
+                             <div wire:loading.flex class="progress" style="height: 2px; width: 100%;" role="progressbar" aria-label="{{__('Memuatkan...')}}">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>
                             </div>
                         </td>
                     </tr>
@@ -157,8 +146,8 @@
                             <td class="px-3 py-2 small text-muted">{{ $item->proposed_email ?? '-' }}</td>
                             <td class="px-3 py-2 small text-muted">{{ $item->final_assigned_email ?? '-' }}</td>
                             <td class="px-3 py-2 small">
-                                <span
-                                    class="badge rounded-pill {{ \App\Helpers\Helpers::getStatusColorClass($item->status) }}">
+                                {{-- CORRECTED: Added 'email_application' as the second argument --}}
+                                <span class="badge rounded-pill {{ \App\Helpers\Helpers::getStatusColorClass($item->status ?? 'default', 'email_application') }}">
                                     {{ $statusOptions[$item->status] ?? __(Str::title(str_replace('_', ' ', $item->status))) }}
                                 </span>
                             </td>
@@ -169,8 +158,8 @@
                     @empty
                         <tr>
                             <td colspan="8" class="px-3 py-5 text-center">
-                                <div class="d-flex flex-column align-items-center text-muted small">
-                                    <i class="bi bi-table fs-1 mb-2 text-secondary"></i> {{-- Bootstrap Icon --}}
+                               <div class="d-flex flex-column align-items-center text-muted small">
+                                    <i class="bi bi-table fs-1 mb-2 text-secondary"></i>
                                     {{ __('Tiada data laporan ditemui untuk saringan ini.') }}
                                 </div>
                             </td>
