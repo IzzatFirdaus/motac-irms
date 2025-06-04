@@ -4,10 +4,15 @@
 @php
     $approvableItem = $approval->approvable; // Variable for easier access
     $itemTypeDisplay = __('Permohonan Tidak Diketahui'); // Default
+
+    // Determine the type string for the resource-status-panel component
+    $resourceStatusPanelType = 'unknown'; // Default for safety
     if ($approvableItem instanceof \App\Models\EmailApplication) {
         $itemTypeDisplay = __('Permohonan Emel/ID Pengguna');
+        $resourceStatusPanelType = 'email_application';
     } elseif ($approvableItem instanceof \App\Models\LoanApplication) {
         $itemTypeDisplay = __('Permohonan Pinjaman Peralatan ICT');
+        $resourceStatusPanelType = 'loan_application';
     }
 @endphp
 
@@ -94,7 +99,8 @@
                                         {{ __('Status Keseluruhan Permohonan') }}:</dt>
                                     <dd class="col-sm-8 col-lg-9">
                                         {{-- Ensure x-resource-status-panel component exists and is correctly called --}}
-                                        <x-resource-status-panel :resource="$approvableItem" statusAttribute="status" class="badge" :showIcon="true" />
+                                        {{-- Pass the $resourceStatusPanelType variable as the 'type' prop --}}
+                                        <x-resource-status-panel :resource="$approvableItem" statusAttribute="status" class="badge" :showIcon="true" :type="$resourceStatusPanelType" />
                                     </dd>
 
                                     @if (property_exists($approvableItem, 'purpose') && !empty($approvableItem->purpose))
@@ -120,11 +126,11 @@
                                             -
                                             {{ optional($approvableItem->loan_end_date)->translatedFormat('d M Y') }}
                                         </dd>
-                                        @if ($approvableItem->relationLoaded('applicationItems') && $approvableItem->applicationItems->isNotEmpty())
+                                        @if ($approvableItem->relationLoaded('loanApplicationItems') && $approvableItem->loanApplicationItems->isNotEmpty())
                                             <dt class="col-12 fw-medium text-muted mt-2">{{ __('Item Dipohon') }}:</dt>
                                             <dd class="col-12">
                                                 <ul class="list-unstyled ps-1 mb-0">
-                                                    @foreach ($approvableItem->applicationItems as $item)
+                                                    @foreach ($approvableItem->loanApplicationItems as $item)
                                                         <li class="mb-1"><i class="bi bi-caret-right-fill text-secondary me-1 small"></i>{{ e(optional(\App\Models\Equipment::getAssetTypeOptions())[$item->equipment_type] ?? $item->equipment_type) }}
                                                             (Qty: {{ $item->quantity_requested }})
                                                             @if ($item->notes)

@@ -28,7 +28,7 @@ class EquipmentPolicy
   {
     // Adjusted to use Spatie's hasAnyRole and hasPermissionTo for clarity
     // Roles 'Admin', 'BPM Staff', 'IT Admin'
-    return $user->hasAnyRole(['Admin', 'BPM Staff', 'IT Admin']) || $user->hasPermissionTo('view_equipment')
+    return $user->hasAnyRole(['Admin', 'BPM Staff', 'IT Admin']) || $user->hasPermissionTo('view_equipment', 'web') // Specify 'web' guard
       ? Response::allow()
       : Response::deny(__('Anda tidak mempunyai kebenaran untuk melihat inventori peralatan.'));
   }
@@ -37,7 +37,7 @@ class EquipmentPolicy
   {
     // Allow if user has general view permission or specific logic (e.g., if it's assigned to their department)
     // Roles 'Admin', 'BPM Staff', 'IT Admin'
-    return $user->hasAnyRole(['Admin', 'BPM Staff', 'IT Admin']) || $user->hasPermissionTo('view_equipment') // || ($equipment->department_id === $user->department_id) // Example additional logic
+    return $user->hasAnyRole(['Admin', 'BPM Staff', 'IT Admin']) || $user->hasPermissionTo('view_equipment', 'web') // || ($equipment->department_id === $user->department_id) // Example additional logic, Specify 'web' guard
       ? Response::allow()
       : Response::deny(__('Anda tidak mempunyai kebenaran untuk melihat aset peralatan ini.'));
   }
@@ -45,7 +45,7 @@ class EquipmentPolicy
   public function create(User $user): Response|bool
   {
     // Roles 'Admin', 'BPM Staff'
-    return $user->hasAnyRole(['Admin', 'BPM Staff']) || $user->hasPermissionTo('create_equipment')
+    return $user->hasAnyRole(['Admin', 'BPM Staff']) || $user->hasPermissionTo('create_equipment', 'web') // Specify 'web' guard
       ? Response::allow()
       : Response::deny(__('Anda tidak mempunyai kebenaran untuk mencipta aset peralatan.'));
   }
@@ -59,7 +59,7 @@ class EquipmentPolicy
     }
 
     // Roles 'Admin', 'BPM Staff'
-    return $user->hasAnyRole(['Admin', 'BPM Staff']) || $user->hasPermissionTo('update_equipment')
+    return $user->hasAnyRole(['Admin', 'BPM Staff']) || $user->hasPermissionTo('update_equipment', 'web') // Specify 'web' guard
       ? Response::allow()
       : Response::deny(__('Anda tidak mempunyai kebenaran untuk mengemaskini aset peralatan ini.'));
   }
@@ -72,7 +72,7 @@ class EquipmentPolicy
     }
 
     // Roles 'Admin', 'BPM Staff'
-    return $user->hasAnyRole(['Admin', 'BPM Staff']) || $user->hasPermissionTo('delete_equipment')
+    return $user->hasAnyRole(['Admin', 'BPM Staff']) || $user->hasPermissionTo('delete_equipment', 'web') // Specify 'web' guard
       ? Response::allow()
       : Response::deny(__('Anda tidak mempunyai kebenaran untuk memadam aset peralatan ini.'));
   }
@@ -80,7 +80,7 @@ class EquipmentPolicy
   public function restore(User $user, Equipment $equipment): Response|bool
   {
     // Roles 'Admin', 'BPM Staff'
-    return $user->hasAnyRole(['Admin', 'BPM Staff']) || $user->hasPermissionTo('restore_equipment')
+    return $user->hasAnyRole(['Admin', 'BPM Staff']) || $user->hasPermissionTo('restore_equipment', 'web') // Specify 'web' guard
       ? Response::allow()
       : Response::deny(__('Anda tidak mempunyai kebenaran untuk memulihkan aset peralatan ini.'));
   }
@@ -94,7 +94,7 @@ class EquipmentPolicy
 
     // Force delete usually restricted to super admin or BPM Staff with specific permission
     // Role 'Admin', 'BPM Staff'
-    return $user->hasRole('Admin') || ($user->hasAnyRole(['BPM Staff']) && $user->hasPermissionTo('force_delete_equipment'))
+    return $user->hasRole('Admin') || ($user->hasAnyRole(['BPM Staff']) && $user->hasPermissionTo('force_delete_equipment', 'web')) // Specify 'web' guard
       ? Response::allow()
       : Response::deny(__('Anda tidak mempunyai kebenaran untuk memadam aset peralatan ini secara kekal.'));
   }

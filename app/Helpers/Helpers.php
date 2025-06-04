@@ -10,8 +10,7 @@ use App\Models\EmailApplication;
 use App\Models\Equipment;
 use App\Models\LoanApplication;
 use App\Models\LoanTransaction;
-use App\Models\LoanTransactionItem;
-use App\Models\User;
+use App\Models\User; // Assuming User model for appClasses if roles are checked there
 
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
@@ -20,6 +19,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Str; // Added Str for string manipulation
 
 final class Helpers
 {
@@ -206,7 +206,38 @@ final class Helpers
         EmailApplication::STATUS_PROVISION_FAILED => 'bg-danger-subtle text-danger-emphasis border border-danger-subtle',
         EmailApplication::STATUS_CANCELLED => 'bg-dark-subtle text-dark-emphasis border border-dark-subtle',
       ],
-      // Add other types like 'loan_transaction', 'equipment_status' if needed
+      'approval' => [
+          Approval::STATUS_PENDING => 'bg-warning-subtle text-warning-emphasis border border-warning-subtle',
+          Approval::STATUS_APPROVED => 'bg-success-subtle text-success-emphasis border border-success-subtle',
+          Approval::STATUS_REJECTED => 'bg-danger-subtle text-danger-emphasis border border-danger-subtle',
+          // Assuming 'canceled' is a possible status for Approval model. Add more as needed.
+          // Note: If Approval model doesn't have a CANCELED constant, this will cause an error.
+          // It's good practice to ensure all constants used here are defined in their respective models.
+          // For now, I'll add it based on the previous context provided.
+          Approval::STATUS_CANCELED => 'bg-dark-subtle text-dark-emphasis border border-dark-subtle',
+      ],
+      'loan_transaction' => [
+          LoanTransaction::STATUS_PENDING => 'bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle',
+          LoanTransaction::STATUS_ISSUED => 'bg-primary-subtle text-primary-emphasis border border-primary-subtle',
+          LoanTransaction::STATUS_RETURNED => 'bg-success-subtle text-success-emphasis border border-success-subtle',
+          LoanTransaction::STATUS_RETURNED_PENDING_INSPECTION => 'bg-info-subtle text-info-emphasis border border-info-subtle',
+          LoanTransaction::STATUS_RETURNED_GOOD => 'bg-success-subtle text-success-emphasis border border-success-subtle',
+          LoanTransaction::STATUS_RETURNED_DAMAGED => 'bg-warning-subtle text-warning-emphasis border border-warning-subtle',
+          LoanTransaction::STATUS_ITEMS_REPORTED_LOST => 'bg-danger-subtle text-danger-emphasis border border-danger-subtle',
+          LoanTransaction::STATUS_RETURNED_WITH_LOSS => 'bg-danger-subtle text-danger-emphasis border border-danger-subtle',
+          LoanTransaction::STATUS_RETURNED_WITH_DAMAGE_AND_LOSS => 'bg-danger-subtle text-danger-emphasis border border-danger-subtle',
+          LoanTransaction::STATUS_PARTIALLY_RETURNED => 'bg-warning-subtle text-warning-emphasis border border-warning-subtle',
+          LoanTransaction::STATUS_COMPLETED => 'bg-success-subtle text-success-emphasis border border-success-subtle',
+          LoanTransaction::STATUS_CANCELLED => 'bg-dark-subtle text-dark-emphasis border border-dark-subtle',
+          LoanTransaction::STATUS_OVERDUE => 'bg-danger-subtle text-danger-emphasis border border-danger-subtle',
+      ],
+      'equipment_status' => [
+          Equipment::STATUS_AVAILABLE => 'bg-success-subtle text-success-emphasis border border-success-subtle',
+          Equipment::STATUS_ON_LOAN => 'bg-primary-subtle text-primary-emphasis border border-primary-subtle',
+          Equipment::STATUS_UNDER_MAINTENANCE => 'bg-info-subtle text-info-emphasis border border-info-subtle',
+          Equipment::STATUS_DAMAGED_NEEDS_REPAIR => 'bg-warning-subtle text-warning-emphasis border border-warning-subtle',
+          Equipment::STATUS_DISPOSED => 'bg-dark-subtle text-dark-emphasis border border-dark-subtle',
+      ],
     ];
 
     $defaultClass = 'bg-light text-dark border';
@@ -215,7 +246,7 @@ final class Helpers
   }
 
   /**
-   * ADDED: Helper function to format dates consistently.
+   * Helper function to format dates consistently.
    *
    * @param mixed $dateValue The date to format (Carbon instance, string, or null).
    * @param string $formatKey The key for the date format string in config('app.date_formats')

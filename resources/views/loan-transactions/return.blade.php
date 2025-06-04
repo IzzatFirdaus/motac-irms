@@ -10,7 +10,7 @@
 
             <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
                 <h1 class="h2 fw-bold text-dark mb-0">{{ __('Rekod Pulangan Peralatan') }}</h1>
-                 <span class="text-muted small">{{__('Untuk Permohonan Pinjaman')}} #{{ $loanApplication->id }} / {{__('Transaksi Keluar')}} #{{ $loanTransaction->id }}</span>
+                 <span class="text-muted small">{{__('Untuk Permohonan Pinjaman')}} #{{ $loanTransaction->loanApplication->id }} / {{__('Transaksi Keluar')}} #{{ $loanTransaction->id }}</span>
             </div>
 
             {{-- CORRECTED: Use consistent general alert partial --}}
@@ -35,13 +35,13 @@
                 <div class="card-body p-4 small">
                     <dl class="row mb-0">
                         <dt class="col-sm-4 text-muted">{{ __('Pemohon:') }}</dt>
-                        <dd class="col-sm-8">{{ e(optional($loanApplication->user)->name ?? __('N/A')) }}</dd>
+                        <dd class="col-sm-8">{{ e(optional($loanTransaction->loanApplication->user)->name ?? __('N/A')) }}</dd>
                         <dt class="col-sm-4 text-muted">{{ __('Tujuan Permohonan:') }}</dt>
-                        <dd class="col-sm-8" style="white-space: pre-wrap;">{{ e($loanApplication->purpose ?? __('N/A')) }}</dd>
+                        <dd class="col-sm-8" style="white-space: pre-wrap;">{{ e($loanTransaction->loanApplication->purpose ?? __('N/A')) }}</dd>
                         <dt class="col-sm-4 text-muted">{{ __('Tarikh Pinjaman:') }}</dt>
-                        <dd class="col-sm-8">{{ optional($loanApplication->loan_start_date)->translatedFormat('d M Y, H:i A') ?? __('N/A') }}</dd>
+                        <dd class="col-sm-8">{{ optional($loanTransaction->loanApplication->loan_start_date)->translatedFormat('d M Y, H:i A') ?? __('N/A') }}</dd>
                         <dt class="col-sm-4 text-muted">{{ __('Tarikh Dijangka Pulang:') }}</dt>
-                        <dd class="col-sm-8">{{ optional($loanApplication->loan_end_date)->translatedFormat('d M Y, H:i A') ?? __('N/A') }}</dd>
+                        <dd class="col-sm-8">{{ optional($loanTransaction->loanApplication->loan_end_date)->translatedFormat('d M Y, H:i A') ?? __('N/A') }}</dd>
                     </dl>
 
                     @if (!empty($issuedItemsForThisTransaction) && $issuedItemsForThisTransaction->count() > 0)
@@ -79,7 +79,7 @@
             {{-- CORRECTED ROUTE NAME (assuming it's defined in web.php with this full name) --}}
             <form action="{{ route('resource-management.bpm.loan-transactions.storeReturn', $loanTransaction) }}" method="POST">
                 @csrf
-                <input type="hidden" name="loan_application_id" value="{{ $loanApplication->id }}">
+                <input type="hidden" name="loan_application_id" value="{{ $loanTransaction->loanApplication->id }}">
 
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-light py-3">
@@ -150,8 +150,8 @@
                                     @if(!empty($loanApplicantAndResponsibleOfficer) && $loanApplicantAndResponsibleOfficer->count())
                                         @foreach($loanApplicantAndResponsibleOfficer as $officer)
                                             @if(is_object($officer))
-                                            <option value="{{ $officer->id }}" {{ old('returning_officer_id', $loanApplication->user_id) == $officer->id ? 'selected' : '' }}>
-                                                {{ e($officer->name) }} {{ $officer->id == $loanApplication->user_id ? __('(Pemohon)') : (optional($loanApplication->responsibleOfficer)->id == $officer->id ? __('(Peg. Bertanggungjawab)') : '') }}
+                                            <option value="{{ $officer->id }}" {{ old('returning_officer_id', $loanTransaction->loanApplication->user_id) == $officer->id ? 'selected' : '' }}>
+                                                {{ e($officer->name) }} {{ $officer->id == $loanTransaction->loanApplication->user_id ? __('(Pemohon)') : (optional($loanTransaction->loanApplication->responsibleOfficer)->id == $officer->id ? __('(Peg. Bertanggungjawab)') : '') }}
                                             </option>
                                             @endif
                                         @endforeach
@@ -173,7 +173,7 @@
 
             <div class="text-center mt-4">
                 {{-- This route 'loan-applications.show' is global and correct --}}
-                <a href="{{ route('loan-applications.show', $loanApplication) }}" class="btn btn-outline-secondary d-inline-flex align-items-center">
+                <a href="{{ route('loan-applications.show', $loanTransaction->loanApplication) }}" class="btn btn-outline-secondary d-inline-flex align-items-center">
                      <i class="bi bi-arrow-left-circle me-1"></i>
                     {{ __('Kembali ke Butiran Permohonan') }}
                 </a>

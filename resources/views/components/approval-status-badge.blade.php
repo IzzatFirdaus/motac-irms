@@ -2,10 +2,12 @@
 @props(['status'])
 
 @php
-    // This helper function is key. It must return Bootstrap 5 badge classes
-    // (e.g., "bg-success-subtle text-success-emphasis", "bg-warning-subtle text-warning-emphasis", "bg-danger-subtle text-danger-emphasis")
-    // that align with your MOTAC themed semantic colors.
-    $statusClass = \App\Helpers\Helpers::getStatusColorClass($status); // Example: Might pass 'badge' type: getStatusColorClass($status, 'badge')
+    $statusValue = strtolower($status ?? 'unknown');
+    // Define the appropriate type for approval statuses
+    $type = 'approval'; //
+
+    // Call the helper with both status and type
+    $statusClass = \App\Helpers\Helpers::getStatusColorClass($statusValue, $type); //
     $statusText = __(ucfirst(str_replace('_', ' ', $status))); // Translated status text
 @endphp
 

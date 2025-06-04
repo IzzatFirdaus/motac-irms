@@ -27,7 +27,8 @@ class EmailApplicationPolicy
     {
         // Admins (by before), IT Admins, or users with specific permission can view all.
         // Design Ref: Sections 5.1 (IT Admin role)
-        if ($user->hasAnyRole(['IT Admin']) || $user->hasPermissionTo('view_any_email_applications')) { // Standardized to 'IT Admin'
+        // Explicitly specify 'web' guard as permissions are seeded with 'web' guard.
+        if ($user->hasAnyRole(['IT Admin']) || $user->hasPermissionTo('view_all_email_applications', 'web')) { // Standardized to 'IT Admin'
             return Response::allow();
         }
 
@@ -39,10 +40,10 @@ class EmailApplicationPolicy
         // Admins (by before), owner, IT Admins, assigned supporting officer,
         // or users with general view permission.
         // Design Ref: Section 4.2 (email_applications.user_id, email_applications.supporting_officer_id)
-        return $user->id === $emailApplication->user_id ||
-               $user->id === $emailApplication->supporting_officer_id ||
+        return $user->id === $emailApplication->user_id || //
+               $user->id === $emailApplication->supporting_officer_id || //
                $user->hasAnyRole(['IT Admin']) || // Standardized to 'IT Admin'
-               $user->hasPermissionTo('view_email_applications')
+               $user->hasPermissionTo('view_email_applications', 'web') // Explicitly specify 'web' guard
             ? Response::allow()
             : Response::deny(__('Anda tidak mempunyai kebenaran untuk melihat permohonan e-mel ini.'));
     }
@@ -63,7 +64,7 @@ class EmailApplicationPolicy
             return Response::allow();
         }
         // IT Admin can update certain fields at certain stages (e.g., final_assigned_email, status).
-        // Design Ref: Section 5.1 (IT Admin provisioning), Section 4.2 (email_applications.status)
+        // Design Ref: Section 5.1 (IT Admin provisioning) , Section 4.2 (email_applications.status)
         if ($user->hasRole('IT Admin') && in_array($emailApplication->status, [ // Standardized to 'IT Admin'
             EmailApplication::STATUS_PENDING_ADMIN, //
             EmailApplication::STATUS_APPROVED, //
@@ -102,8 +103,8 @@ class EmailApplicationPolicy
         // Uses specific config key from motac.php
         $minGradeLevel = config('motac.approval.min_email_supporting_officer_grade_level', 9); //
 
-        return $user->hasPermissionTo('act_as_email_support_officer') &&
-               ($user->grade && $user->grade->level >= $minGradeLevel) &&
+        return $user->hasPermissionTo('act_on_approval_tasks', 'web') && // Changed permission for clarity, explicitly specify 'web' guard
+               ($user->grade && $user->grade->level >= $minGradeLevel) && //
                $emailApplication->status === EmailApplication::STATUS_PENDING_SUPPORT //
             ? Response::allow()
             : Response::deny(__('Anda tidak layak untuk menyokong permohonan ini atau ia tidak menunggu sokongan.'));
@@ -112,7 +113,7 @@ class EmailApplicationPolicy
     public function processByIT(User $user, EmailApplication $emailApplication): Response|bool
     {
         // IT Admin can process applications that are 'approved' or 'pending_admin'
-        // Design Ref: Section 5.1 (IT Admin processing), Section 4.2 (email_applications.status: 'approved', 'pending_admin')
+        // Design Ref: Section 5.1 (IT Admin processing) , Section 4.2 (email_applications.status: 'approved', 'pending_admin')
         return $user->hasRole('IT Admin') && // Standardized to 'IT Admin'
                in_array($emailApplication->status, [EmailApplication::STATUS_APPROVED, EmailApplication::STATUS_PENDING_ADMIN]) //
             ? Response::allow()

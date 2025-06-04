@@ -44,9 +44,10 @@
                                 <span class="d-block" style="font-size: 0.75rem;">{{ $loanApplication->user?->department?->name ?? '' }}</span>
                             </td>
                             <td class="px-3 py-2 align-middle small text-muted">
-                                @if ($loanApplication->applicationItems->isNotEmpty())
+                                {{-- Changed applicationItems to loanApplicationItems --}}
+                                @if ($loanApplication->loanApplicationItems->isNotEmpty())
                                     <ul class="list-unstyled ps-2 mb-0" style="font-size: 0.8rem;">
-                                        @foreach ($loanApplication->applicationItems as $item)
+                                        @foreach ($loanApplication->loanApplicationItems as $item)
                                             @if ($item->quantity_issued > 0)
                                                 <li>
                                                     <i class="bi bi-chevron-right text-secondary me-1" style="font-size: 0.7rem;"></i>
@@ -97,7 +98,9 @@
                                 @endif
                             </td>
                             <td class="px-3 py-2 align-middle small">
-                                <span class="badge rounded-pill {{ \App\Helpers\Helpers::getStatusColorClass($loanApplication->status, 'bootstrap_badge') }}">
+                                {{-- The getStatusColorClass helper needs the actual 'type' of resource (e.g., 'loan_application') --}}
+                                {{-- It's currently using 'bootstrap_badge' which is likely incorrect. --}}
+                                <span class="badge rounded-pill {{ \App\Helpers\Helpers::getStatusColorClass($loanApplication->status, 'loan_application') }}">
                                     {{ $loanApplication->status_translated ?? __(Str::title(str_replace('_', ' ', $loanApplication->status))) }}
                                 </span>
                             </td>

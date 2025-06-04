@@ -35,7 +35,7 @@ class OutstandingLoans extends Component
             ->with([
                 'user:id,name,department_id',
                 'user.department:id,name',
-                'applicationItems', // No need for detailed equipment details at this high-level list for outstanding loans; can be fetched on the "issue" form/view.
+                'loanApplicationItems', // Changed from 'applicationItems'
                 'approvals' // To see who approved
             ])
             ->whereIn('status', [

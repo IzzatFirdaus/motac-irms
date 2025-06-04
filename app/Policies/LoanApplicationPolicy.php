@@ -30,7 +30,9 @@ class LoanApplicationPolicy
   {
     // Admins handled by before().
     // BPM Staff or users with specific permission can view all.
-    return $user->hasRole('BPM Staff') ||
+    // ADDED: Approvers should be able to view loan applications for their dashboard/tasks.
+    return $user->hasRole('BPM Staff') || //
+      $user->hasRole('Approver') || // Allow Approvers to view any loan applications
       $user->can('view_all_loan_applications') // Assumes a permission like 'view_all_loan_applications'
       ? Response::allow()
       : Response::deny(__('Anda tidak mempunyai kebenaran untuk melihat senarai permohonan pinjaman ini.'));
@@ -44,11 +46,12 @@ class LoanApplicationPolicy
     // Owner, BPM staff, or users with general view permission.
     // Also consider if responsible officer, supporting officer or current approver should view.
     // Design Ref (Rev. 3.5): LoanApplication model fields
-    return $user->id === $loanApplication->user_id ||
-      $user->id === $loanApplication->responsible_officer_id ||
-      $user->id === $loanApplication->supporting_officer_id ||
-      ($loanApplication->current_approval_officer_id && $user->id === $loanApplication->current_approval_officer_id) ||
-      $user->hasRole('BPM Staff') ||
+    return $user->id === $loanApplication->user_id || //
+      $user->id === $loanApplication->responsible_officer_id || //
+      $user->id === $loanApplication->supporting_officer_id || //
+      ($loanApplication->current_approval_officer_id && $user->id === $loanApplication->current_approval_officer_id) || //
+      $user->hasRole('BPM Staff') || //
+      $user->hasRole('Approver') || // Allow Approvers to view specific loan applications
       $user->can('view_loan_applications') // Assumes a general permission
       ? Response::allow()
       : Response::deny(__('Anda tidak mempunyai kebenaran untuk melihat permohonan pinjaman ini.'));
@@ -61,7 +64,7 @@ class LoanApplicationPolicy
   {
     // Any authenticated user can attempt to create. (Eligibility rules apply separately)
     // Design Ref (Rev. 3.5): Section 7.1
-    return $user->id !== null
+    return $user->id !== null //
       ? Response::allow()
       : Response::deny(__('Anda mesti log masuk untuk membuat permohonan pinjaman.'));
   }
@@ -115,7 +118,7 @@ class LoanApplicationPolicy
     // Applicant submits their own draft or previously rejected application.
     // Design Ref (Rev. 3.5): LoanApplication model status
     $canSubmit = ($user->id === $loanApplication->user_id &&
-      ($loanApplication->isDraft() || $loanApplication->status === LoanApplication::STATUS_REJECTED));
+      ($loanApplication->isDraft() || $loanApplication->status === LoanApplication::STATUS_REJECTED)); //
 
     return $canSubmit
       ? Response::allow()
@@ -131,13 +134,14 @@ class LoanApplicationPolicy
   {
     // Design Ref (Rev. 3.5): LoanApplication model status constants
     $isPending = in_array($loanApplication->status, [
-      LoanApplication::STATUS_PENDING_SUPPORT,
-      LoanApplication::STATUS_PENDING_HOD_REVIEW,
-      LoanApplication::STATUS_PENDING_BPM_REVIEW,
+      LoanApplication::STATUS_PENDING_SUPPORT, //
+      LoanApplication::STATUS_PENDING_HOD_REVIEW, //
+      LoanApplication::STATUS_PENDING_BPM_REVIEW, //
     ]);
 
     // User must have a role/permission that allows them to be an approver in general.
-    return $user->can('be_loan_approver') && $isPending // Example permission
+    // This allows Approver and HOD roles to approve loan applications
+    return ($user->hasRole('Approver') || $user->hasRole('HOD')) && $isPending //
       ? Response::allow()
       : Response::deny(__('Permohonan ini tidak dalam status menunggu kelulusan atau anda tiada kebenaran umum untuk meluluskan.'));
   }
@@ -145,14 +149,14 @@ class LoanApplicationPolicy
   /**
    * Determine whether the user can process issuance for the loan application.
    * Typically performed by BPM staff after approval.
-   * Design Ref (Rev. 3.5): Section 5.2, Role names, LoanApplication model status
+   * Design Ref (Rev. 3.5): Section 5.2 , Role names , LoanApplication model status
    */
   public function processIssuance(User $user, LoanApplication $loanApplication): Response|bool
   {
-    $canProcess = $user->hasRole('BPM Staff') &&
+    $canProcess = $user->hasRole('BPM Staff') && //
       in_array($loanApplication->status, [
-        LoanApplication::STATUS_APPROVED,
-        LoanApplication::STATUS_PARTIALLY_ISSUED,
+        LoanApplication::STATUS_APPROVED, //
+        LoanApplication::STATUS_PARTIALLY_ISSUED, //
       ]);
 
     return $canProcess
@@ -163,15 +167,15 @@ class LoanApplicationPolicy
   /**
    * Determine whether the user can process return for the loan application.
    * Typically performed by BPM staff.
-   * Design Ref (Rev. 3.5): Section 5.2, Role names, LoanApplication model status
+   * Design Ref (Rev. 3.5): Section 5.2 , Role names , LoanApplication model status
    */
   public function processReturn(User $user, LoanApplication $loanApplication): Response|bool
   {
-    $canProcess = $user->hasRole('BPM Staff') &&
+    $canProcess = $user->hasRole('BPM Staff') && //
       in_array($loanApplication->status, [
-        LoanApplication::STATUS_ISSUED,
-        LoanApplication::STATUS_PARTIALLY_ISSUED,
-        LoanApplication::STATUS_OVERDUE,
+        LoanApplication::STATUS_ISSUED, //
+        LoanApplication::STATUS_PARTIALLY_ISSUED, //
+        LoanApplication::STATUS_OVERDUE, //
       ]);
 
     return $canProcess

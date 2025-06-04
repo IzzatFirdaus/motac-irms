@@ -67,6 +67,7 @@ use App\Traits\Blameable;
  * @property-read int|null $loan_transaction_items_count
  * @property-read \App\Models\SubCategory|null $subCategory
  * @property-read \App\Models\User|null $updater // Provided by Blameable trait
+ * @property-read string $brand_model_serial // ADDED: Accessor for combined brand, model, serial/tag
  *
  * @method static \Database\Factories\EquipmentFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment newModelQuery()
@@ -95,7 +96,7 @@ use App\Traits\Blameable;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment wherePurchaseDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment wherePurchasePrice($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereSerialNumber($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereStatus($value)
+ * @method static \Illuminate\Database->Eloquent\Builder<static>|Equipment whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereSubCategoryId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereSupplierName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereTagId($value)
@@ -293,6 +294,33 @@ class Equipment extends Model
   {
     return __(self::$CLASSIFICATION_LABELS[$this->classification] ?? Str::title(str_replace('_', ' ', (string) $this->classification)));
   }
+
+  /**
+   * Accessor for combining brand, model, and serial/tag for display.
+   *
+   * @return string
+   */
+  public function getBrandModelSerialAttribute(): string
+  {
+      $parts = [];
+      if (!empty($this->brand)) {
+          $parts[] = $this->brand;
+      }
+      if (!empty($this->model)) {
+          $parts[] = $this->model;
+      }
+
+      $description = implode(' ', $parts);
+
+      if (!empty($this->serial_number)) {
+          return $description . ' (S/N: ' . $this->serial_number . ')';
+      } elseif (!empty($this->tag_id)) {
+          return $description . ' (Tag ID: ' . $this->tag_id . ')';
+      }
+
+      return $description ?: __('Peralatan Tidak Bernama');
+  }
+
 
   // Business logic methods for status updates
   public function updateOperationalStatus(string $newStatus, ?string $reason = null, ?int $actingUserId = null): bool

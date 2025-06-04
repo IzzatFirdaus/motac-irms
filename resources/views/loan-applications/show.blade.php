@@ -18,7 +18,8 @@
                     </div>
                     <div class="mt-2 mt-md-0">
                         {{-- Ensure x-resource-status-panel expects :resource and optionally statusAttribute --}}
-                        <x-resource-status-panel :resource="$loanApplication" statusAttribute="status" {{-- This model has getStatusLabelAttribute --}}
+                        {{-- UPDATED: Added type="loan_application" --}}
+                        <x-resource-status-panel :resource="$loanApplication" statusAttribute="status" type="loan_application" {{-- This model has getStatusLabelAttribute --}}
                             class="fs-5 px-3 py-2 shadow-sm" :showIcon="true" />
                     </div>
                 </div>
@@ -250,8 +251,9 @@
                                                         {{ __('Transaksi') }} #{{ $transaction->id }} - <span
                                                             class="fw-normal">{{-- Ensure \App\Models\LoanTransaction::getTypeLabel() method exists --}}{{ e(__(\App\Models\LoanTransaction::getTypeLabel($transaction->type))) }}</span>
                                                     </h3>
+                                                    {{-- UPDATED: Added type="loan_transaction" --}}
                                                     <x-resource-status-panel :resource="$transaction" statusAttribute="status"
-                                                        class="fs-6 px-2 py-1" :showIcon="true" />
+                                                        type="loan_transaction" class="fs-6 px-2 py-1" :showIcon="true" />
                                                 </div>
                                                 <p class="small text-muted mb-2">{{ __('Tarikh Transaksi') }}:
                                                     {{ optional($transaction->transaction_date)->translatedFormat('d M Y, h:i A') }}

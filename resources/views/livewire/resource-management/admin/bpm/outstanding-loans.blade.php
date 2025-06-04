@@ -98,9 +98,10 @@
                                                 {{ $application->loan_end_date?->translatedFormat(config('app.date_format_my_short', 'd M Y')) ?? __('N/A') }}
                                             </td>
                                             <td class="align-middle small px-3 py-2">
-                                                @if ($application->applicationItems->where('quantity_approved', '>', 0)->isNotEmpty())
+                                                {{-- Changed applicationItems to loanApplicationItems --}}
+                                                @if ($application->loanApplicationItems->where('quantity_approved', '>', 0)->isNotEmpty())
                                                     <ul class="list-unstyled mb-0 ps-0">
-                                                        @foreach ($application->applicationItems->where('quantity_approved', '>', 0) as $item)
+                                                        @foreach ($application->loanApplicationItems->where('quantity_approved', '>', 0) as $item)
                                                             <li>
                                                                 {{ $item->equipment_type ? \App\Models\Equipment::$ASSET_TYPES_LABELS[$item->equipment_type] ?? Str::title(str_replace('_', ' ', $item->equipment_type)) : __('N/A') }}
                                                                 ({{ __('Diluluskan') }}:

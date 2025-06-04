@@ -3,6 +3,7 @@
     'resource',
     'statusAttribute' => 'status',
     'statusTextPrefix' => '',
+    'type', // ADD THIS LINE: Define the 'type' prop
     'icon' => null, // Optional: pass 'true' to auto-select based on status, or a specific BI class
     'showIcon' => false // Simpler prop to control icon visibility
 ])
@@ -22,7 +23,8 @@
         $formattedStatus = __(Illuminate\Support\Str::title(str_replace('_', ' ', $statusValue)));
     }
 
-    $statusClass = \App\Helpers\Helpers::getStatusColorClass($statusValue); // Expected to return MOTAC-themed badge classes
+    // UPDATED LINE: Pass both $statusValue and $type
+    $statusClass = \App\Helpers\Helpers::getStatusColorClass($statusValue, $type);
 
     $statusIconClass = '';
     if ($showIcon === true) { // Auto-select icon based on status value

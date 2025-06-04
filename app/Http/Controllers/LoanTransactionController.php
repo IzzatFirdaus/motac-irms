@@ -93,6 +93,155 @@ final class LoanTransactionController extends Controller
   }
 
   /**
+   * Show the form for recording equipment issuance for a specific loan application.
+   * This method is called from the route 'resource-management.bpm.loan-transactions.issue.form'
+   *
+   * @param  \App\Models\LoanApplication  $loanApplication
+   * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+   */
+  public function showIssueForm(LoanApplication $loanApplication): View|RedirectResponse
+  {
+      try {
+          $this->authorize('processIssuance', $loanApplication);
+      } catch (AuthorizationException $e) {
+          Log::warning("LoanTransactionController@showIssueForm: Unauthorized attempt to access issue form for LoanApplication ID {$loanApplication->id}.", [
+              'user_id' => Auth::id(),
+              'error' => $e->getMessage(),
+          ]);
+          return redirect()->route('dashboard')->with('error', __('Anda tidak mempunyai kebenaran untuk merekodkan pengeluaran untuk permohonan ini.'));
+      }
+
+      // Fetch available equipment. You might want to filter this further
+      // based on equipment type requested in the loan application.
+      $availableEquipment = Equipment::where('status', Equipment::STATUS_AVAILABLE)->get();
+
+      // Collect the loan applicant and responsible officer for the receiving officer dropdown
+      $loanApplicantAndResponsibleOfficer = collect([
+          $loanApplication->user,
+          optional($loanApplication->responsibleOfficer)
+      ])->filter()->unique('id');
+
+      $allAccessoriesList = config('motac.loan_accessories_list', []);
+
+      Log::info("LoanTransactionController@showIssueForm: User ID " . Auth::id() . " accessing issue form for LoanApplication ID {$loanApplication->id}.");
+
+      return view('loan-transactions.issue', compact(
+          'loanApplication',
+          'availableEquipment',
+          'loanApplicantAndResponsibleOfficer',
+          'allAccessoriesList'
+      ));
+  }
+
+  /**
+   * Store the recorded equipment issuance.
+   * This method is called from the route 'resource-management.bpm.loan-transactions.storeIssue'
+   *
+   * @param  \Illuminate\Http\Request  $request
+   * @param  \App\Models\LoanApplication  $loanApplication
+   * @return \Illuminate\Http\RedirectResponse
+   */
+  public function storeIssue(Request $request, LoanApplication $loanApplication): RedirectResponse
+  {
+      try {
+          $this->authorize('processIssuance', $loanApplication);
+      } catch (AuthorizationException $e) {
+          Log::warning("LoanTransactionController@storeIssue: Unauthorized attempt to store issue for LoanApplication ID {$loanApplication->id}.", [
+              'user_id' => Auth::id(),
+              'error' => $e->getMessage(),
+          ]);
+          return redirect()->back()->with('error', __('Anda tidak mempunyai kebenaran untuk merekodkan pengeluaran ini.'));
+      }
+
+      $request->validate([
+          'equipment_ids' => 'required|array|min:1',
+          'equipment_ids.*' => 'exists:equipment,id',
+          'accessories' => 'nullable|array',
+          'accessories.*' => 'string|max:255',
+          'issue_notes' => 'nullable|string|max:1000',
+          'issuing_officer_id' => 'required|exists:users,id',
+          'receiving_officer_id' => 'required|exists:users,id',
+      ], [
+          'equipment_ids.required' => __('Sila pilih sekurang-kurangnya satu peralatan untuk dikeluarkan.'),
+          'equipment_ids.*.exists' => __('Salah satu peralatan yang dipilih tidak wujud.'),
+          'issuing_officer_id.required' => __('Pegawai pemprosesan perlu dikenal pasti.'),
+          'issuing_officer_id.exists' => __('Pegawai pemprosesan tidak sah.'),
+          'receiving_officer_id.required' => __('Sila pilih pegawai yang akan menerima peralatan.'),
+          'receiving_officer_id.exists' => __('Pegawai penerima tidak sah.'),
+      ]);
+
+      DB::beginTransaction();
+      try {
+          // Create the main loan transaction record
+          $transaction = new LoanTransaction();
+          $transaction->loan_application_id = $loanApplication->id;
+          $transaction->type = LoanTransaction::TYPE_ISSUE;
+          $transaction->transaction_date = now();
+          $transaction->issuing_officer_id = $request->input('issuing_officer_id');
+          $transaction->receiving_officer_id = $request->input('receiving_officer_id');
+          $transaction->accessories_checklist_on_issue = $request->input('accessories') ? json_encode($request->input('accessories')) : null;
+          $transaction->issue_notes = $request->input('issue_notes');
+          $transaction->issue_timestamp = now();
+          $transaction->status = LoanTransaction::STATUS_ISSUED;
+          $transaction->created_by = Auth::id();
+          $transaction->save();
+
+          $issuedCount = 0;
+          foreach ($request->input('equipment_ids') as $equipmentId) {
+              $equipment = Equipment::findOrFail($equipmentId);
+
+              // Update equipment status
+              $equipment->status = Equipment::STATUS_ON_LOAN;
+              $equipment->save();
+
+              // Create LoanTransactionItem
+              $transaction->loanTransactionItems()->create([
+                  'equipment_id' => $equipmentId,
+                  // Find the corresponding LoanApplicationItem for this equipment type
+                  'loan_application_item_id' => $loanApplication->loanApplicationItems()
+                                                                ->where('equipment_type', $equipment->asset_type)
+                                                                ->first()?->id,
+                  'quantity_transacted' => 1, // Assuming one equipment unit per transaction item
+                  'status' => LoanTransactionItem::STATUS_ITEM_ISSUED,
+                  'accessories_checklist_issue' => $request->input('accessories') ? json_encode($request->input('accessories')) : null,
+                  'item_notes' => $request->input('issue_notes'),
+                  'created_by' => Auth::id(),
+              ]);
+
+              // Increment quantity_issued on LoanApplicationItem
+              $loanApplicationItem = $loanApplication->loanApplicationItems
+                  ->where('equipment_type', $equipment->asset_type)
+                  ->first();
+
+              if ($loanApplicationItem) {
+                  $loanApplicationItem->increment('quantity_issued');
+                  $issuedCount++;
+              }
+          }
+
+          // Update the overall LoanApplication status
+          $loanApplication->updateOverallStatusAfterTransaction();
+
+          DB::commit();
+
+          Log::info("LoanTransactionController@storeIssue: User ID " . Auth::id() . " successfully recorded issuance for LoanApplication ID {$loanApplication->id}. Issued {$issuedCount} items.");
+          return redirect()->route('resource-management.bpm.issued-loans')
+                           ->with('success', __('Pengeluaran peralatan berjaya direkodkan.'));
+
+      } catch (\Exception $e) {
+          DB::rollBack();
+          Log::error("LoanTransactionController@storeIssue: Error recording loan issuance for LoanApplication ID {$loanApplication->id}. Error: " . $e->getMessage(), [
+              'user_id' => Auth::id(),
+              'exception' => $e,
+              'request_data' => $request->all()
+          ]);
+          return redirect()->back()->withInput()
+                           ->with('error', __('Gagal merekodkan pengeluaran peralatan. Sila cuba lagi: ') . $e->getMessage());
+      }
+  }
+
+
+  /**
    * Show the form for recording equipment return for a specific issue transaction.
    * This method is called from the route 'resource-management.bpm.loan-transactions.return.form'
    *
@@ -158,14 +307,14 @@ final class LoanTransactionController extends Controller
     // The `try` block was incorrectly placed or terminated in your previous snippet,
     // causing the `catch` to be unexpected.
     // We ensure the whole logic of the method is wrapped correctly.
-    try {
-      $this->authorize('processReturn', [$loanTransaction, $loanTransaction->loanApplication]);
+    try { // This `try` block should enclose the main logic of the method
+        $this->authorize('processReturn', [$loanTransaction, $loanTransaction->loanApplication]);
     } catch (AuthorizationException $e) {
-      Log::warning("LoanTransactionController@storeReturn: Unauthorized attempt to store return for LoanTransaction ID {$loanTransaction->id}.", [
-        'user_id' => Auth::id(),
-        'error' => $e->getMessage(),
-      ]);
-      return redirect()->back()->with('error', __('Anda tidak mempunyai kebenaran untuk merekodkan pulangan ini.'));
+        Log::warning("LoanTransactionController@storeReturn: Unauthorized attempt to store return for LoanTransaction ID {$loanTransaction->id}.", [
+            'user_id' => Auth::id(),
+            'error' => $e->getMessage(),
+        ]);
+        return redirect()->back()->with('error', __('Anda tidak mempunyai kebenaran untuk merekodkan pulangan ini.'));
     }
 
     // Validate the incoming request data
