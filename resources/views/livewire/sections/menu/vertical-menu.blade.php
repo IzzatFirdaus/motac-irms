@@ -1,172 +1,124 @@
 {{-- resources/views/livewire/sections/menu/vertical-menu.blade.php --}}
-{{--
-  Vertical Sidebar Menu for MOTAC Integrated Resource Management System.
-  Refactored to use Bootstrap Collapse for vertical submenus.
---}}
 <div>
     @php
-        $currentRouteName = Route::currentRouteName();
-        // $layoutType is used for $activeOpenClass, keep as is if other parts of your theme rely on it.
-        // For Bootstrap collapse, 'open' part of $activeOpenClass on the <li> might be redundant
-        // if Bootstrap's 'show' on the <ul> handles the visual state.
-        // However, themes often use 'open' on the <li> for styling the parent itself when expanded.
-        $layoutType = $configData['layout'] ?? 'vertical';
-        $activeOpenClass = $layoutType === 'vertical' ? 'active open' : 'active';
-        $currentUserRole = $role;
-
-        // Helper function for active states 
-        if (!function_exists('isMotacMenuItemActiveRecursiveCheck')) {
-            function isMotacMenuItemActiveRecursiveCheck(
-                $item,
-                $currentRouteName,
-                &$isAnyChildActiveGlobalScope, // This will be set to true if this item or any child is active
-                $userRole
-            ) {
-                $canViewItem =
-                    $userRole === 'Admin' ||
-                    !isset($item->role) ||
-                    empty((array) $item->role) ||
-                    in_array($userRole, (array) $item->role);
-
-                if (!$canViewItem) {
-                    return false;
-                }
-
-                // Check direct route match
-                if (isset($item->routeName) && $item->routeName === $currentRouteName) {
-                    $isAnyChildActiveGlobalScope = true;
-                    return true;
-                }
-
-                // Check route prefix match (for parent menu items)
-                if (isset($item->routeNamePrefix) && str_starts_with($currentRouteName, $item->routeNamePrefix)) {
-                    $isAnyChildActiveGlobalScope = true;
-                    return true;
-                }
-
-                // Check URL match (if no routeName)
-                if (isset($item->url) && $item->url !== 'javascript:void(0);' && ltrim((string)Request::url(), '/') === ltrim((string)url($item->url), '/')) {
-                    $isAnyChildActiveGlobalScope = true;
-                    return true;
-                }
-
-                // Check for active slug (if available)
-                if (isset($item->slug) && str_contains($currentRouteName, $item->slug)) {
-                    $isAnyChildActiveGlobalScope = true;
-                    return true;
-                }
-
-                // Recursively check submenu
-                if (isset($item->submenu) && is_array($item->submenu) && !empty($item->submenu)) {
-                    foreach ($item->submenu as $subItem) {
-                        if (isMotacMenuItemActiveRecursiveCheck($subItem, $currentRouteName, $isAnyChildActiveGlobalScope, $userRole)) {
-                            // If any child is active, this branch is active. No need to continue checking other children.
-                            return true;
-                        }
-                    }
-                }
-                return false;
-            }
-        }
+        // $configData is made available via Helper::appClasses()
+        // $menuData is made available globally by MenuServiceProvider loading verticalMenu.json [cite: 79]
+        // $role is a public property from the VerticalMenu.php Livewire component [cite: 1]
+        $configData = Helper::appClasses();
     @endphp
 
-    <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme" aria-label="Navigasi Sistem">
-        @if (!($navbarFull ?? false))
-            <div class="app-brand demo px-3 py-2 border-bottom">
-                <a href="{{ url('/') }}" class="app-brand-link d-flex align-items-center gap-2">
+    <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+
+        @if (!isset($navbarFull))
+            {{-- Condition from original template, $navbarFull might be a global/config variable --}}
+            <div class="app-brand demo">
+                <a href="{{ url('/') }}" class="app-brand-link">
                     <span class="app-brand-logo demo">
-                        <img src="{{ asset($configData['appLogo'] ?? 'assets/img/logo/motac-logo.svg') }}"
-                            alt="{{ __('Logo Aplikasi') }}" height="32">
+                        {{-- Use appLogo from $configData for consistency --}}
+                        {{-- Ensure _partials.macros or direct img tag points to the correct logo --}}
+                        {{-- For example, if _partials.macros expects a path: --}}
+                        {{-- @include('_partials.macros', ['logo_path' => $configData['appLogo'] ?? 'assets/img/logo/motac-logo.svg', "height"=>20]) --}}
+                        {{-- Or directly using an img tag: --}}
+                        <img src="{{ asset($configData['appLogo'] ?? 'assets/img/logo/motac-logo-icon.svg') }}"
+                            alt="App Logo" height="22">
                     </span>
-                    <span class="app-brand-text fw-semibold">{{ __($configData['templateName'] ?? 'Sistem MOTAC') }}</span>
+                    <span
+                        class="app-brand-text demo menu-text fw-bold ms-2">{{ $configData['templateName'] ?? config('app.name') }}</span>
                 </a>
-                <a href="javascript:void(0);" class="layout-menu-toggle menu-link ms-auto">
-                    <i class="ti ti-x ti-sm align-middle d-block d-xl-none"></i>
+
+                {{-- REVISED: Removed style="visibility: hidden" to ensure toggle is visible --}}
+                <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
+                    <i class="ti menu-toggle-icon d-none d-xl-block ti-sm align-middle"></i>
+                    <i class="ti ti-x d-block d-xl-none ti-sm align-middle"></i>
                 </a>
             </div>
         @endif
 
         <div class="menu-inner-shadow"></div>
 
-        <ul class="menu-inner py-1" id="vertical-menu-list" role="menu">
-            @if (isset($menuData) && property_exists($menuData, 'menu') && is_array($menuData->menu))
-                @forelse ($menuData->menu as $menu)
+        <ul class="menu-inner py-1">
+            @if (isset($menuData) && isset($menuData->menu))
+                @foreach ($menuData->menu as $menu)
+                    {{-- Role-based access check using $role from VerticalMenu.php component --}}
+                    {{-- The JSON uses "role": ["Role1", "Role2"] [cite: 4] --}}
                     @php
-                        $isAnyChildActive = false;
-                        $canViewMenu = isMotacMenuItemActiveRecursiveCheck($menu, $currentRouteName, $isAnyChildActive, $currentUserRole);
-                        $hasSubmenu = isset($menu->submenu) && is_array($menu->submenu) && !empty($menu->submenu);
-
-                        $isCurrentBranchActive = $isAnyChildActive; // From recursive check
-                        $menuItemClass = $isCurrentBranchActive ? $activeOpenClass : '';
-
-                        // Determine the unique ID for this menu item's submenu (if it has one)
-                        $targetCollapseId = $hasSubmenu ? 'menu-' . Str::slug($menu->name) . '-' . uniqid() : null;
+                        $menuRoles = isset($menu->role) ? (is_array($menu->role) ? $menu->role : [$menu->role]) : [];
                     @endphp
+                    @if (
+                        $role === 'Admin' ||
+                            (isset($menu->role) && !empty($menuRoles) && in_array($role, $menuRoles)) ||
+                            (!isset($menu->role) && isset($menu->menuHeader)))
+                        {{-- Show header if no specific role or if user has role. Admin sees all. --}}
 
-                    {{-- Render menu header or regular menu item --}}
-                    @if (isset($menu->menuHeader))
-                        @if ($canViewMenu)
-                            <li class="menu-header small text-uppercase" role="separator">
-                                <span class="menu-header-text">{{ __($menu->menuHeader) }}</span>
+                        {{-- Menu headers from verticalMenu.json [cite: 4] --}}
+                        @if (isset($menu->menuHeader))
+                            <li class="menu-header small text-uppercase">
+                                <span
+                                    class="menu-header-text">{{ isset($menu->name) ? __($menu->name) : (isset($menu->menuHeader) ? __($menu->menuHeader) : '') }}</span>
                             </li>
-                        @endif
-                    @else
-                        {{-- Regular menu item --}}
-                        @if ($canViewMenu)
-                            <li class="menu-item {{ $menuItemClass }}" role="none">
-                                <a href="{{ $hasSubmenu ? 'javascript:void(0);' : (isset($menu->routeName) && Route::has($menu->routeName) ? route($menu->routeName) : ($menu->url ?? 'javascript:void(0);')) }}"
-                                    class="menu-link {{ $hasSubmenu ? 'menu-toggle' : '' }}"
-                                    @if ($hasSubmenu)
-                                        data-bs-toggle="collapse"
-                                        aria-expanded="{{ $isCurrentBranchActive ? 'true' : 'false' }}"
-                                        data-bs-target="#{{ $targetCollapseId }}"
-                                        aria-controls="{{ $targetCollapseId }}"
-                                        role="button"
-                                    @else
-                                        role="menuitem"
-                                    @endif
-                                    @if (!empty($menu->target) && !$hasSubmenu) target="{{ $menu->target }}" @endif>
+                        @else
+                            {{-- Active menu item logic --}}
+                            @php
+                                $activeClass = null;
+                                $currentRouteName = Route::currentRouteName();
+
+                                // Exact match for slug or routeName specified in JSON [cite: 4]
+                                if ($currentRouteName === ($menu->routeName ?? ($menu->slug ?? null))) {
+                                    $activeClass = 'active';
+                                }
+                                // If it has a submenu, check if current route name starts with any of its slug prefixes or routeNamePrefix
+                                // This makes the parent "active open"
+                                elseif (isset($menu->submenu)) {
+                                    $matchAgainst = $menu->routeNamePrefix ?? ($menu->slug ?? null);
+                                    if ($matchAgainst) {
+                                        if (is_array($matchAgainst)) {
+                                            foreach ($matchAgainst as $slug_or_prefix) {
+                                                if (str_starts_with($currentRouteName, $slug_or_prefix)) {
+                                                    $activeClass = 'active open';
+                                                    break;
+                                                }
+                                            }
+                                        } else {
+                                            if (str_starts_with($currentRouteName, $matchAgainst)) {
+                                                $activeClass = 'active open';
+                                            }
+                                        }
+                                    }
+                                }
+                            @endphp
+
+                            {{-- Main menu item --}}
+                            <li class="menu-item {{ $activeClass }}">
+                                <a href="{{ isset($menu->url) ? url($menu->url) : 'javascript:void(0);' }}"
+                                    class="{{ isset($menu->submenu) ? 'menu-link menu-toggle' : 'menu-link' }}"
+                                    @if (isset($menu->target) and !empty($menu->target)) target="{{ $menu->target }}" @endif>
                                     @isset($menu->icon)
-                                        <i class="menu-icon tf-icons {{ $menu->icon }}"></i>
+                                        <i class="{{ $menu->icon }}"></i>
                                     @endisset
-                                    <div class="menu-item-label">{{ __($menu->name ?? '-') }}</div>
+                                    <div>{{ isset($menu->name) ? __($menu->name) : '' }}</div>
                                     @isset($menu->badge)
-                                        <span class="badge bg-label-{{ $menu->badge[0] }} rounded-pill ms-auto">
-                                            {{ __($menu->badge[1]) }}
-                                        </span>
+                                        <div class="badge bg-label-{{ $menu->badge[0] }} rounded-pill ms-auto">
+                                            {{ $menu->badge[1] }}</div>
                                     @endisset
                                 </a>
 
-                                @if ($hasSubmenu)
-                                    @include('livewire.sections.menu.recursive-submenu', [
-                                        'submenuItems' => $menu->submenu,
-                                        'parentSubmenuId' => $targetCollapseId,
-                                        'isParentBranchActive' => $isCurrentBranchActive, // To set 'show' class
-                                        'currentRole' => $currentUserRole,
+                                {{-- Include submenu if it exists --}}
+                                @isset($menu->submenu)
+                                    {{-- Pass $menu->submenu and $role to the submenu partial --}}
+                                    @include('layouts.sections.menu.submenu', [
+                                        'menu' => $menu->submenu,
+                                        'role' => $role,
                                         'configData' => $configData,
-                                        'currentRouteName' => $currentRouteName,
-                                        'activeOpenClass' => $activeOpenClass,
-                                        'level' => 1 // For generating unique IDs in nested submenus
                                     ])
-                                @endif
+                                @endisset
                             </li>
                         @endif
                     @endif
-                @empty
-                    <li class="menu-item" role="none">
-                        <a href="javascript:void(0);" class="menu-link" role="menuitem">
-                            <i class="menu-icon bi bi-exclamation-circle-fill"></i>
-                            <div class="menu-item-label">{{ __('Tiada item menu untuk dipaparkan.') }}</div>
-                        </a>
-                    </li>
-                @endforelse
+                @endforeach
             @else
-                <li class="menu-item" role="none">
-                    <a href="javascript:void(0);" class="menu-link" role="menuitem">
-                        <i class="menu-icon bi bi-x-octagon-fill"></i>
-                        <div class="menu-item-label">{{ __('Struktur data menu tidak sah atau tiada.') }}</div>
-                    </a>
-                </li>
+                <li class="menu-item"><a href="#" class="menu-link">
+                        <div>{{ __('menu.not_available') }}</div>
+                    </a></li>
             @endif
         </ul>
     </aside>

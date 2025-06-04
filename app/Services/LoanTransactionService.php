@@ -492,7 +492,7 @@ final class LoanTransactionService
       // and update the overall status of the loan application.
       if ($deleted && $loanApplication) {
         // Reload applicationItems to ensure we have the latest state after txItem deletions
-        foreach ($loanApplication->applicationItems()->get() as $appItem) {
+        foreach ($loanApplication->loanApplicationItems()->get() as $appItem) {
           $appItem->recalculateQuantities(); // This should sum up remaining valid tx items
           $appItem->save();
         }

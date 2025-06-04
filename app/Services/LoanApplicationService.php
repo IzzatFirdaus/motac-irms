@@ -157,7 +157,7 @@ final class LoanApplicationService
           $application = LoanApplication::create($applicationData);
 
           foreach ($validatedData['items'] as $item) {
-              $application->applicationItems()->create([
+              $application->loanApplicationItems()->create([
                   'equipment_type' => $item['equipment_type'],
                   'quantity_requested' => (int) $item['quantity_requested'],
                   'notes' => $item['notes'] ?? null,
@@ -278,7 +278,7 @@ final class LoanApplicationService
     }
 
     return DB::transaction(function () use ($application) {
-      $application->applicationItems()->delete();
+      $application->loanApplicationItems()->delete();
       $application->approvals()->delete();
       $deleted = $application->delete();
 
@@ -436,7 +436,7 @@ final class LoanApplicationService
 
   protected function syncApplicationItems(LoanApplication $application, array $itemsData): void
   {
-    $existingItemIds = $application->applicationItems()->pluck('id')->all();
+    $existingItemIds = $application->loanApplicationItems()->pluck('id')->all();
     $processedItemIds = [];
     $itemPayloadsToCreate = [];
 
@@ -467,7 +467,7 @@ final class LoanApplicationService
     }
 
     if (!empty($itemPayloadsToCreate)) {
-      $createdItems = $application->applicationItems()->createMany($itemPayloadsToCreate);
+      $createdItems = $application->loanApplicationItems()->createMany($itemPayloadsToCreate);
       foreach ($createdItems as $createdItem) {
         $processedItemIds[] = $createdItem->id;
       }
@@ -475,7 +475,7 @@ final class LoanApplicationService
 
     $idsToDelete = array_diff($existingItemIds, $processedItemIds);
     if (!empty($idsToDelete)) {
-      $application->applicationItems()->whereIn('id', $idsToDelete)->delete();
+      $application->loanApplicationItems()->whereIn('id', $idsToDelete)->delete();
       Log::info(self::LOG_AREA . "Removed items no longer in submission or marked for deletion.", ['deleted_ids' => $idsToDelete, 'application_id' => $application->id]);
     }
   }

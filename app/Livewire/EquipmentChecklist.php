@@ -9,8 +9,9 @@ use App\Models\User;
 use App\Services\LoanApplicationService;
 use App\Services\LoanTransactionService;
 use Exception;
+use Illuminate\Auth\Access\AuthorizationException; // Corrected import for AuthorizationException
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Http\RedirectResponse; // Added for return type
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -20,8 +21,6 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
-
-// Removed duplicate Illuminate\Http\RedirectResponse if it was already there from your original
 
 #[Layout('layouts.app')]
 #[Title('Equipment Checklist')]
@@ -77,9 +76,10 @@ class EquipmentChecklist extends Component
 
         try {
             if ($this->loanApplicationId) {
-                $this->loanApplication = $this->loanApplicationService->findLoanApplication(
+                // FIX: Changed findLoanApplication to findLoanApplicationById
+                $this->loanApplication = $this->loanApplicationService->findLoanApplicationById(
                     $this->loanApplicationId,
-                    ['user', 'applicationItems.equipment', 'responsibleOfficer', 'loanTransactions.loanTransactionItems.equipment', 'loanTransactions.issuingOfficer', 'loanTransactions.receivingOfficer', 'loanTransactions.returningOfficer', 'loanTransactions.returnAcceptingOfficer']
+                    ['user', 'loanApplicationItems.equipment', 'responsibleOfficer', 'loanTransactions.loanTransactionItems.equipment', 'loanTransactions.issuingOfficer', 'loanTransactions.receivingOfficer', 'loanTransactions.returningOfficer', 'loanTransactions.returnAcceptingOfficer'] // FIX: Changed 'applicationItems' to 'loanApplicationItems' here for consistency and correctness
                 );
 
                 if (!$this->loanApplication) {
@@ -89,7 +89,8 @@ class EquipmentChecklist extends Component
                 Log::debug("Loaded Loan Application ID {$this->loanApplicationId}.");
 
                 if ($this->transactionType === LoanTransaction::TYPE_ISSUE) {
-                    $this->availableEquipmentOptions = $this->loanApplication->applicationItems
+                    // FIX: Changed 'applicationItems' to 'loanApplicationItems' here
+                    $this->availableEquipmentOptions = $this->loanApplication->loanApplicationItems
                         ->filter(function ($item) {
                             return ($item->quantity_approved ?? 0) > ($item->quantity_issued ?? 0);
                         })
@@ -146,7 +147,7 @@ class EquipmentChecklist extends Component
         }
     }
 
-    public function processTransaction(): ?RedirectResponse // MODIFIED return type
+    public function processTransaction(): ?RedirectResponse
     {
         Log::info('Attempting to process transaction.', [
             'loanApplicationId' => $this->loanApplicationId,
@@ -163,7 +164,8 @@ class EquipmentChecklist extends Component
             }
 
             if (!$this->loanApplication) {
-                $this->loanApplication = $this->loanApplicationService->findLoanApplication($this->loanApplicationId);
+                // FIX: Changed findLoanApplication to findLoanApplicationById
+                $this->loanApplication = $this->loanApplicationService->findLoanApplicationById($this->loanApplicationId);
                 if (!$this->loanApplication) {
                     throw new ModelNotFoundException("Permohonan Pinjaman dengan ID {$this->loanApplicationId} tidak ditemui.");
                 }
@@ -174,7 +176,8 @@ class EquipmentChecklist extends Component
                 throw new ModelNotFoundException("Peralatan dengan ID {$this->selectedEquipmentId} tidak ditemui.");
             }
 
-            $applicationItem = $this->loanApplication->applicationItems()
+            // FIX: Changed 'applicationItems' to 'loanApplicationItems' here
+            $applicationItem = $this->loanApplication->loanApplicationItems()
                 ->where('equipment_type', $equipmentToTransact->asset_type)
                 ->first();
 
@@ -238,11 +241,11 @@ class EquipmentChecklist extends Component
             } else {
                 session()->flash('error', 'Jenis transaksi tidak sah.');
                 DB::rollBack();
-                return null; // MODIFIED: Explicitly return null for void path or if no redirect
+                return null;
             }
             DB::commit();
             $this->dispatch('toastr', type: 'success', message: session('success'));
-            return redirect()->route('resource-management.my-applications.loan-applications.show', $this->loanApplicationId); // This is line 259 from original error
+            return redirect()->route('resource-management.my-applications.loan-applications.show', $this->loanApplicationId);
 
         } catch (ValidationException $e) {
             DB::rollBack();
@@ -252,7 +255,7 @@ class EquipmentChecklist extends Component
             DB::rollBack();
             session()->flash('error', __('Data tidak ditemui: ') . $e->getMessage());
             $this->dispatch('toastr', type: 'error', message: __('Data tidak ditemui: ') . $e->getMessage());
-        } catch (AuthorizationException $e) { // Assuming this is Illuminate\Auth\Access\AuthorizationException
+        } catch (AuthorizationException $e) { // FIX: This now refers to Illuminate\Auth\Access\AuthorizationException
             DB::rollBack();
             session()->flash('error', __('Anda tidak dibenarkan untuk tindakan ini: ') . $e->getMessage());
             $this->dispatch('toastr', type: 'error', message: __('Anda tidak dibenarkan untuk tindakan ini.'));
@@ -262,7 +265,7 @@ class EquipmentChecklist extends Component
             Log::error('Error processing transaction: '.$e->getMessage(), ['exception' => $e]);
             $this->dispatch('toastr', type: 'error', message: __('Ralat sistem. Sila cuba lagi.'));
         }
-        return null; // MODIFIED: Ensure a return path if an exception is caught and handled
+        return null;
     }
 
     public function resetForm(): void
@@ -276,25 +279,25 @@ class EquipmentChecklist extends Component
     }
 
     #[Computed]
-    public function isIssue(): bool // Corrected to match property access pattern
+    public function isIssue(): bool
     {
         return $this->transactionType === LoanTransaction::TYPE_ISSUE;
     }
 
     #[Computed]
-    public function isReturn(): bool // Corrected to match property access pattern
+    public function isReturn(): bool
     {
         return $this->transactionType === LoanTransaction::TYPE_RETURN;
     }
 
     #[Computed]
-    public function isViewingOnly(): bool // Corrected to match property access pattern
+    public function isViewingOnly(): bool
     {
-        return $this->transactionType === 'view' || (!$this->isIssue() && !$this->isReturn()); // Call as method here for internal logic
+        return $this->transactionType === 'view' || (!$this->isIssue() && !$this->isReturn());
     }
 
     #[Computed]
-    public function onLoanEquipment() // MODIFIED: Renamed method
+    public function onLoanEquipment()
     {
         if ($this->loanApplication && $this->transactionType === LoanTransaction::TYPE_RETURN) {
             return Equipment::whereHas('loanTransactionItems.loanTransaction', function ($query) {
@@ -310,16 +313,12 @@ class EquipmentChecklist extends Component
 
     public function render()
     {
-        // Using the optional refactor for render method
         $officerOptions = User::role(['Admin', 'BPM Staff', 'IT Admin'])->orderBy('name')->pluck('name', 'id')->toArray();
         $returningOfficerOptions = $this->loanApplication?->user ? [$this->loanApplication->user->id => $this->loanApplication->user->name] : [];
         $conditionStatusOptions = Equipment::getConditionStatusesList();
-        $onLoanEquipmentOptions = $this->onLoanEquipment()->mapWithKeys(function ($eq) { // Call as method
+        $onLoanEquipmentOptions = $this->onLoanEquipment()->mapWithKeys(function ($eq) {
             return [$eq->id => "{$eq->brand} {$eq->model} (Tag: {$eq->tag_id})"];
         })->toArray();
-
-        // Public properties like $this->loanApplication, $this->equipment etc.
-        // and computed properties like $this->isIssue, $this->isReturn are automatically available.
 
         return view('livewire.equipment-checklist', [
             'officerOptions' => $officerOptions,

@@ -43,7 +43,7 @@ class AdminUserSeeder extends Seeder
     }
 
     $defaultDept = Department::updateOrCreate(
-      ['code' => 'BPM'], // ** CRITICAL: Lookup by unique code **
+      ['code' => 'BPM'],
       [
         'name' => 'Bahagian Pengurusan Maklumat (BPM MOTAC)',
         'branch_type' => Department::BRANCH_TYPE_HQ,
@@ -54,6 +54,18 @@ class AdminUserSeeder extends Seeder
       ]
     );
     Log::info("AdminUserSeeder: Ensured default department '{$defaultDept->name}' (Code: {$defaultDept->code}) exists.");
+
+    $approverGrade = Grade::updateOrCreate(
+      ['name' => 'F41'],
+      [
+        'level' => 41,
+        'is_approver_grade' => true,
+        'created_by' => $auditUserId,
+        'updated_by' => $auditUserId,
+      ]
+    );
+    Log::info("AdminUserSeeder: Ensured approver grade '{$approverGrade->name}' exists.");
+
 
     $defaultGrade = Grade::updateOrCreate(
       ['name' => 'F41'],
@@ -135,6 +147,25 @@ class AdminUserSeeder extends Seeder
         'department_id' => $defaultDept->id,
         'position_id' => $defaultPos->id,
         'grade_id' => $defaultGrade->id,
+      ],
+      [
+        'role_name' => 'Approver',
+        'name' => 'Pegawai Penyokong (Approver)',
+        'email' => 'approver@motac.gov.my',
+        'password' => 'Motac.1234', // Choose a secure default password
+        'title' => User::TITLE_PUAN ?? 'Puan',
+        'identification_number' => '780505050005',
+        'mobile_number' => '01156789012',
+        'personal_email' => 'approver@motac.gov.my',
+        'motac_email' => 'approver.spsb@motac.gov.my',
+        'user_id_assigned' => 'MOTACAPP001',
+        'service_status' => User::SERVICE_STATUS_TETAP ?? '1',
+        'appointment_type' => User::APPOINTMENT_TYPE_BAHARU ?? '1',
+        'status' => User::STATUS_ACTIVE ?? 'active',
+        'level' => '14',
+        'department_id' => $defaultDept->id, // Assign to a default department
+        'position_id' => $defaultPos->id, // Assign to a default position
+        'grade_id' => $approverGrade->id, // Crucially, assign to the approver grade
       ],
       [
         'role_name' => 'User',

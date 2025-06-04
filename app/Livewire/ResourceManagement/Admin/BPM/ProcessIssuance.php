@@ -177,7 +177,7 @@ class ProcessIssuance extends Component
             $loanAppItemId = $this->issueItems[$index]['loan_application_item_id'] ?? null;
 
             if ($loanAppItemId) {
-                $appItem = $this->loanApplication->applicationItems()->find($loanAppItemId);
+                $appItem = $this->loanApplication->loanApplicationItems()->find($loanAppItemId);
                 if ($appItem) {
                     $this->issueItems[$index]['max_quantity_issuable'] = ($appItem->quantity_approved ?? 0) - ($appItem->quantity_issued ?? 0);
                     $this->issueItems[$index]['equipment_type'] = $appItem->equipment_type;

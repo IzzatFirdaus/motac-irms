@@ -76,7 +76,8 @@ class LoanApplicationFactory extends EloquentFactory
     public function configure(): static
     {
         return $this->afterCreating(function (LoanApplication $loanApplication) {
-            if ($loanApplication->status !== (defined(LoanApplication::class.'::STATUS_DRAFT') ? LoanApplication::STATUS_DRAFT : 'draft') && $loanApplication->applicationItems()->count() === 0) {
+            // FIX APPLIED HERE: Changed applicationItems() to loanApplicationItems()
+            if ($loanApplication->status !== (defined(LoanApplication::class.'::STATUS_DRAFT') ? LoanApplication::STATUS_DRAFT : 'draft') && $loanApplication->loanApplicationItems()->count() === 0) {
                 LoanApplicationItem::factory()
                     ->count($this->faker->numberBetween(1, 3))
                     ->for($loanApplication)
@@ -173,7 +174,8 @@ class LoanApplicationFactory extends EloquentFactory
         ]);
     }
     public function certified(): static { return $this->state(['applicant_confirmation_timestamp' => now()->subMinutes(10)]); }
-    public function withItems(int $count = 2): static { return $this->has(LoanApplicationItem::factory()->count($count), 'applicationItems'); }
+    // FIX APPLIED HERE: Changed 'applicationItems' to 'loanApplicationItems' to match the relationship method name in LoanApplication model
+    public function withItems(int $count = 2): static { return $this->has(LoanApplicationItem::factory()->count($count), 'loanApplicationItems'); }
     public function deleted(): static { return $this->state(['deleted_at' => now()]); }
 
     private function generateTimestampsForStatus(string $status, Carbon $applicationDate, Carbon $loanStartDate, Carbon $loanEndDate): array

@@ -23,14 +23,14 @@ class LoanTransactionItemFactory extends EloquentFactory
         $loanApplicationItemId = null;
         if ($loanTransaction->loanApplication) {
             $appItem = $loanTransaction->loanApplication
-                ->applicationItems()
+                ->loanApplicationItems()
                 ->where('equipment_type', $equipment->asset_type)
                 ->inRandomOrder()
                 ->first();
             $loanApplicationItemId = $appItem?->id;
 
             if (!$loanApplicationItemId) {
-                $loanApplicationItemId = $loanTransaction->loanApplication->applicationItems()->inRandomOrder()->first()?->id;
+                $loanApplicationItemId = $loanTransaction->loanApplication->loanApplicationItems()->inRandomOrder()->first()?->id;
             }
         }
 

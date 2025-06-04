@@ -11,7 +11,6 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Log;
-// Removed: use Spatie\Permission\Models\Role; // Not directly used if checking roles via User model
 
 class LoanTransactionSeeder extends Seeder
 {
@@ -20,10 +19,6 @@ class LoanTransactionSeeder extends Seeder
     Log::info('Starting Loan Transactions seeding (Revised Officer Logic)...');
 
     $auditUserForAudit = User::orderBy('id')->first();
-    // Removed: $auditUserId = $auditUserForAudit?->id ?? User::factory()->create(['name' => 'Audit User (LTSeeder)'])->id;
-    // BlameableObserver should handle created_by/updated_by if Auth::user() can be set for CLI,
-    // or factories can set them if explicit audit user is needed for seeded data.
-    // For this seeder, we'll rely on factories/observer for those fields on created records.
 
     if (LoanApplication::count() === 0) {
       Log::warning('No Loan Applications found. Some transactions may not be linked effectively or created.');
@@ -31,7 +26,7 @@ class LoanTransactionSeeder extends Seeder
     if (Equipment::count() === 0) {
       Log::warning('No Equipment found. Transaction items may not link to specific equipment.');
     }
-    if (User::count() === 0) { // Simpler check if any user exists for officer roles
+    if (User::count() === 0) {
       Log::error('No Users for officers/audit. Aborting LoanTransactionsSeeder.');
       return;
     }
@@ -43,7 +38,7 @@ class LoanTransactionSeeder extends Seeder
 
     if ($officerIds->isEmpty()) {
       Log::warning('No BPM/Admin officers found based on roles. Transactions may use any user as fallback for officer assignments.');
-      $officerIds = User::pluck('id'); // Fallback to any user
+      $officerIds = User::pluck('id');
       if ($officerIds->isEmpty()) {
         Log::error('No users at all to act as officers. Aborting LoanTransactionsSeeder.');
         return;
@@ -54,7 +49,7 @@ class LoanTransactionSeeder extends Seeder
       LoanApplication::STATUS_APPROVED,
       LoanApplication::STATUS_PARTIALLY_ISSUED,
     ])
-      ->with('applicationItems') // Corrected eager loading
+      ->with('loanApplicationItems') // <--- THIS IS THE CRUCIAL FIX HERE
       ->get();
 
     $availableEquipmentCollection = Equipment::where('status', Equipment::STATUS_AVAILABLE)
@@ -64,10 +59,9 @@ class LoanTransactionSeeder extends Seeder
 
     Log::info("Attempting to seed 'Issued' Loan Transactions for {$approvedApplications->count()} applications...");
     foreach ($approvedApplications as $application) {
-      if ($availableEquipmentCollection->isEmpty() && $application->applicationItems()->exists()) { // Check if items are actually requested
+      if ($availableEquipmentCollection->isEmpty() && $application->loanApplicationItems()->exists()) { // Check using correct relationship
         Log::warning("No more available equipment to issue for application ID: {$application->id}");
-        // Don't break globally, just for this application if it needs equipment
-        // continue; // or break if you want to stop all if one fails to find equipment
+        break;
       }
 
       $transaction = LoanTransaction::factory()
@@ -78,7 +72,7 @@ class LoanTransactionSeeder extends Seeder
           'receiving_officer_id' => $application->user_id,
         ]);
 
-      foreach ($application->applicationItems as $appItem) {
+      foreach ($application->loanApplicationItems as $appItem) { // <--- ENSURE THIS USES CORRECT RELATIONSHIP
         $quantityToIssue = $appItem->quantity_approved ?? $appItem->quantity_requested;
         for ($i = 0; $i < $quantityToIssue; $i++) {
           if ($availableEquipmentCollection->isEmpty()) {
@@ -97,23 +91,21 @@ class LoanTransactionSeeder extends Seeder
           $equipmentToIssue->update(['status' => Equipment::STATUS_ON_LOAN]);
         }
       }
-      // The factory or a service should ideally update the application status
       if ($application->status !== LoanApplication::STATUS_ISSUED) {
           $application->update(['status' => LoanApplication::STATUS_ISSUED]);
       }
       $issuedTransactionsCollection->add($transaction);
-      if ($issuedTransactionsCollection->count() >= 20) break; // Limit seeded transactions
+      if ($issuedTransactionsCollection->count() >= 20) break;
     }
     Log::info("Created {$issuedTransactionsCollection->count()} 'Issued' Loan Transactions with items.");
 
     $transactionsToReturn = $issuedTransactionsCollection
-      ->where('type', LoanTransaction::TYPE_ISSUE) // Should be actual issued transactions
-      // ->where('status', LoanTransaction::STATUS_ISSUED) // This status might have changed if application became overdue
+      ->where('type', LoanTransaction::TYPE_ISSUE)
       ->take(ceil($issuedTransactionsCollection->count() * 0.7));
 
     Log::info("Attempting to seed 'Returned' Loan Transactions for {$transactionsToReturn->count()} issued transactions...");
     foreach ($transactionsToReturn as $issueTransaction) {
-      if (!$issueTransaction->loanApplication) continue; // Defensive check
+      if (!$issueTransaction->loanApplication) continue;
 
       $returnTransaction = LoanTransaction::factory()
         ->return()
@@ -133,25 +125,22 @@ class LoanTransactionSeeder extends Seeder
           ->for($returnTransaction)
           ->for($issuedItem->equipment, 'equipment')
           ->for($issuedItem->loanApplicationItem, 'loanApplicationItem')
-          ->returnedGood() // Example state
+          ->returnedGood()
           ->create([
             'quantity_transacted' => $issuedItem->quantity_transacted,
             'accessories_checklist_issue' => $issuedItem->accessories_checklist_issue,
           ]);
         $issuedItem->equipment->update(['status' => Equipment::STATUS_AVAILABLE]);
       }
-      // The factory or a service should ideally update the application status
       if ($issueTransaction->loanApplication->status !== LoanApplication::STATUS_RETURNED) {
           $issueTransaction->loanApplication->update(['status' => LoanApplication::STATUS_RETURNED]);
       }
-      // Mark the original issue transaction as completed or a specific status indicating it has been returned against
-      if ($issueTransaction->status !== LoanTransaction::STATUS_COMPLETED && $issueTransaction->status !== LoanTransaction::STATUS_RETURNED) { // Avoid re-updating if already in a final return-related state
+      if ($issueTransaction->status !== LoanTransaction::STATUS_COMPLETED && $issueTransaction->status !== LoanTransaction::STATUS_RETURNED) {
           $issueTransaction->update(['status' => LoanTransaction::STATUS_COMPLETED]);
       }
     }
     Log::info("Created {$transactionsToReturn->count()} 'Returned' Loan Transactions.");
 
-    // Mark some remaining issued applications as overdue
     $remainingIssuedForOverdue = LoanApplication::where('status', LoanApplication::STATUS_ISSUED)
       ->whereDate('loan_end_date', '<', Carbon::now()->toDateString())
       ->limit(5)
@@ -160,10 +149,9 @@ class LoanTransactionSeeder extends Seeder
     Log::info("Attempting to mark {$remainingIssuedForOverdue->count()} applications as overdue...");
     foreach ($remainingIssuedForOverdue as $app) {
       $app->update(['status' => LoanApplication::STATUS_OVERDUE]);
-      // Also update related active issue transactions to overdue status
       $app->loanTransactions()
         ->where('type', LoanTransaction::TYPE_ISSUE)
-        ->where('status', LoanTransaction::STATUS_ISSUED) // Only update transactions that are still marked as just 'issued'
+        ->where('status', LoanTransaction::STATUS_ISSUED)
         ->update(['status' => LoanTransaction::STATUS_OVERDUE]);
     }
     Log::info('Marked applications and relevant transactions as overdue.');
