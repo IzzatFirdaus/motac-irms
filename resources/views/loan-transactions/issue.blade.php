@@ -69,7 +69,7 @@
                             <dd class="col-sm-8">{{ optional($loanApplication->loan_end_date)->translatedFormat('d M Y, H:i A') ?? __('N/A') }}</dd>
                         </dl>
 
-                        @if ($loanApplication->applicationItems->isNotEmpty())
+                        @if ($loanApplication->loanApplicationItems->isNotEmpty()) {{-- Changed applicationItems to loanApplicationItems --}}
                             <h3 class="h6 fw-semibold mt-3 mb-2 pt-2 border-top">{{ __('Item Peralatan Dimohon & Diluluskan:') }}</h3>
                             <div class="table-responsive">
                                 <table class="table table-sm table-bordered table-striped mb-0">
@@ -83,7 +83,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($loanApplication->applicationItems as $item)
+                                        @foreach ($loanApplication->loanApplicationItems as $item) {{-- Changed applicationItems to loanApplicationItems --}}
                                             <tr>
                                                 <td class="small ps-2">{{ $loop->iteration }}.</td>
                                                 <td class="small">{{ e(optional(\App\Models\Equipment::getAssetTypeOptions())[$item->equipment_type] ?? Str::title(str_replace('_',' ',$item->equipment_type))) ?? __('N/A') }}</td>
