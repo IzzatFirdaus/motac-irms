@@ -4,7 +4,7 @@
 ******************************************************************************/
 
 .light-style .menu .app-brand.demo {
-  height: 64px;
+  height: 64px; /* Overall height of the brand area in the menu */
 }
 
 .dark-style .menu .app-brand.demo {
@@ -12,37 +12,45 @@
 }
 
 .app-brand-logo.demo {
-  display: flexbox;
-  display: flex;
+  display: flex; /* Modern standard */
   justify-content: center;
   align-items: center;
-  width: 34px;
-  height: 24px;
+  /* MODIFIED: Adjust container to accommodate 32px image from verticalMenu.blade.php */
+  width: auto; /* Allow width to be intrinsic to content or set by image */
+  min-width: 32px; /* Ensure at least space for a square 32px logo */
+  height: 32px;    /* Match the image height from verticalMenu.blade.php */
   -ms-flex-align: center;
   -ms-flex-pack: center;
 }
 
-.app-brand-logo.demo svg {
-  width: 35px;
-  height: 24px;
+.app-brand-logo.demo svg,
+.app-brand-logo.demo img { /* Applied to img as well if used instead of SVG */
+  /* Let inline attributes or specific CSS for the img/svg control dimensions if needed,
+     or set explicitly here if demo.css is the source of truth for logo size.
+     If img has inline height="32", this rule for height might be overridden for the img.
+     Making it max-height ensures it doesn't exceed container if container is smaller. */
+  max-width: 100%;
+  max-height: 100%; /* Image will not exceed the container's 32px height */
+  object-fit: contain; /* Ensures aspect ratio is maintained */
 }
 
 .app-brand-text.demo {
-  font-size: 1.375rem;
+  font-size: 1.375rem; /* Approx 22px, from original template */
+  /* Consider aligning with MOTAC typography if different from theme-motac.css */
 }
 
-/* ! For .layout-navbar-fixed added fix padding top tpo .layout-page */
+/* ! For .layout-navbar-fixed added fix padding top to .layout-page */
 .layout-navbar-fixed .layout-wrapper:not(.layout-without-menu) .layout-page {
-  padding-top: 64px !important;
+  padding-top: 64px !important; /* Height of a typical fixed navbar */
 }
 
 .layout-navbar-fixed .layout-wrapper:not(.layout-horizontal, .layout-without-menu) .layout-page {
-  padding-top: 78px !important;
+  padding-top: 78px !important; /* Likely for specific layouts with an additional fixed element or taller navbar */
 }
 
 /* Navbar page z-index issue solution */
 .content-wrapper .navbar {
-  z-index: auto;
+  z-index: auto; /* Or a specific value if needed for stacking contexts */
 }
 
 /*
@@ -100,20 +108,15 @@
 ******************************************************************************/
 
 .layout-demo-wrapper {
-  display: -webkit-box;
-  display: flexbox;
   display: flex;
   flex-direction: column;
   align-items: center;
   margin-top: 1rem;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
 }
 
 .layout-demo-placeholder img {
-  width: 900px;
+  width: 900px; /* Original fixed width */
+  max-width: 100%; /* Make it responsive */
 }
 
 .layout-demo-info {

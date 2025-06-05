@@ -98,9 +98,9 @@
                             <td class="px-3 py-2 small text-muted">{{ $item->user?->department?->name ?? 'N/A' }}</td>
                             <td class="px-3 py-2 small text-muted" style="min-width: 200px; max-width:300px; white-space: pre-wrap;">{{ Str::limit($item->purpose, 100) }}</td>
                             <td class="px-3 py-2 small text-muted" style="min-width: 200px;">
-                                @if($item->applicationItems->isNotEmpty())
+                                @if($item->loanApplicationItems->isNotEmpty())
                                     <ul class="list-unstyled mb-0">
-                                        @foreach($item->applicationItems as $appItem)
+                                        @foreach($item->loanApplicationItems as $appItem)
                                             <li>• {{ $appItem->equipment_type ? (\App\Models\Equipment::$ASSET_TYPES_LABELS[$appItem->equipment_type] ?? Str::title(str_replace('_',' ',$appItem->equipment_type))) : 'N/A' }}
                                                 ({{ __('Kuantiti Mohon:') }} {{ $appItem->quantity_requested }})
                                             </li>

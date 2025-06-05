@@ -116,10 +116,10 @@
             @elseif ($application instanceof \App\Models\LoanApplication)
                 <p><strong>{{ __('Tarikh Pinjaman') }}:</strong> {{ $application->loan_start_date?->translatedFormat(config('app.date_format_my','d/m/Y')) ?? 'N/A' }}</p>
                 <p><strong>{{ __('Tarikh Pemulangan Dijangka') }}:</strong> {{ $application->loan_end_date?->translatedFormat(config('app.date_format_my','d/m/Y')) ?? 'N/A' }}</p>
-                @if ($application->applicationItems->isNotEmpty())
+                @if ($application->loanApplicationItems->isNotEmpty())
                     <p><strong>{{ __('Peralatan yang Dimohon') }}:</strong></p>
                     <ul>
-                        @foreach ($application->applicationItems as $item)
+                        @foreach ($application->loanApplicationItems as $item)
                             <li>
                                 {{ $item->equipment_type ?? __('Peralatan Tidak Diketahui') }}
                                 ({{ __('Kuantiti') }}: {{ $item->quantity_requested ?? 1 }})
