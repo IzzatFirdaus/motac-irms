@@ -270,6 +270,25 @@ Route::middleware([
     });
 });
 
+Route::middleware(['web', 'auth:sanctum', 'verified'])->group(function () {
+    // ... other authenticated routes ...
+
+    // Example: Log Viewer Route
+    // If your log viewer package handles its own routing and controllers,
+    // you might need to find where its routes are registered to add your middleware,
+    // or it might offer a configuration option for adding middleware.
+
+    // If you are defining it manually or can override its middleware:
+    Route::get('/log-viewer', [\Opcodes\LogViewer\Http\Controllers\IndexController::class, '__invoke']) // Example controller
+        ->name('log-viewer.index') // This matches your menu config
+        ->middleware(['authorize.logviewer']); // Apply your new authorization middleware
+
+    // If the log viewer package uses a route group, you can apply it there:
+    // Route::group(['prefix' => 'log-viewer', 'middleware' => ['authorize.logviewer']], function () {
+    //     // Package routes would be defined here by the package, or you'd include them
+    // });
+});
+
 // Fallback route
 Route::fallback(function () { //
     return response()->view('errors.404', [], 404);

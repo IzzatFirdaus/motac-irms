@@ -80,12 +80,14 @@ class Kernel extends HttpKernel
     // System Design 3.2 (Webhook security)
     // Refinement: Uncommented - Ensure App\Http\Middleware\ValidateWebhookSignature::class exists or is created.
     // This middleware would internally use App\Validator\CustomSignatureValidator.
-    'validate.webhook.signature' => \App\Http\Middleware\ValidateWebhookSignature::class,
+    'validate.webhook.signature' => \App\Http\Middleware\ValidateSignature::class,
 
     // Custom grade-based authorization middleware
     // System Design 3.1 (Middleware for grade levels)
     // Refinement: Uncommented as the middleware files CheckGradeLevel.php and CheckUserGrade.php were provided.
     'check.gradelevel' => \App\Http\Middleware\CheckGradeLevel::class,
     'check.usergrade' => \App\Http\Middleware\CheckUserGrade::class,
+
+    'authorize.logviewer' => \App\Http\Middleware\AuthorizeLogViewer::class,
   ];
 }

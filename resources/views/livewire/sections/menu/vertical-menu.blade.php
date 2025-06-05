@@ -2,7 +2,6 @@
 <div>
     @php
         // $menuData, $role, and $configData are available as public properties from the component.
-        // These were set in the mount() method.
         $currentUserRoleForMenu = $role; // Use the $role property from the component.
     @endphp
 
@@ -27,14 +26,10 @@
         <div class="menu-inner-shadow"></div>
 
         <ul class="menu-inner py-1" role="menu">
-            {{-- This $menuData refers to the public $menuData property of the Livewire component --}}
             @if (isset($menuData) && property_exists($menuData, 'menu') && is_array($menuData->menu) && count($menuData->menu) > 0)
                 @foreach ($menuData->menu as $menu)
                     @php
-                        // Ensure $menu is an object if it's coming from JSON decoded as assoc array then cast to object
-                        // If $menu is already an object from config/menu.php, this is fine.
                         $menu = (object) $menu;
-
                         $canViewMenu = false;
                         if ($currentUserRoleForMenu === 'Admin') {
                             $canViewMenu = true;
@@ -45,31 +40,39 @@
                         }
 
                         $isActive = false;
-                        $currentRouteName = Route::currentRouteName(); // Make sure Route facade is used or $currentRouteName is passed
+                        $currentRouteName = Route::currentRouteName();
 
                         if (isset($menu->routeName) && $menu->routeName === $currentRouteName) {
                             $isActive = true;
                         } elseif (isset($menu->routeNamePrefix) && $currentRouteName && str_starts_with($currentRouteName, $menu->routeNamePrefix)) {
                             $isActive = true;
                         } elseif (!empty($menu->submenu)) {
-                            // This active check for submenus might need to be more robust for deeper levels
-                            // For now, checking direct children:
-                            foreach ($menu->submenu as $subItem) {
-                                $subItem = (object) $subItem; // Ensure object access
-                                if (isset($subItem->routeName) && $subItem->routeName === $currentRouteName) {
-                                    $isActive = true; break;
-                                }
-                                if (isset($subItem->routeNamePrefix) && $currentRouteName && str_starts_with($currentRouteName, $subItem->routeNamePrefix)){
-                                    $isActive = true; break;
-                                }
-                                // Add recursive check here if needed for deeper submenus to activate parent
+                            // Check if any child (recursive) is active to mark parent as active/open
+                            // This might require the same recursive check function or a simplified version
+                            // For now, relying on the isMotacMenuItemActiveRecursiveCheckView from recursive-submenu.blade.php for its children
+                            // For the parent itself, we can use a flag that recursive-submenu might update or check its direct children
+                            $isAnyChildActive = false;
+                            if (function_exists('isMotacMenuItemActiveRecursiveCheckView')) { // Check if function from recursive-submenu is loaded/available
+                                isMotacMenuItemActiveRecursiveCheckView($menu, $currentRouteName, $isAnyChildActive, $currentUserRoleForMenu);
+                            }
+                             if ($isAnyChildActive) {
+                                $isActive = true;
                             }
                         }
 
                         $hasSubmenu = isset($menu->submenu) && is_array($menu->submenu) && count($menu->submenu) > 0;
-                        $menuItemClass = $isActive ? ($hasSubmenu ? 'active open' : 'active') : '';
-                        $menuLinkClass = $hasSubmenu ? 'menu-link menu-toggle' : 'menu-link';
-                        $menuHref = $menu->url ?? (isset($menu->routeName) && Route::has((string)$menu->routeName) ? route((string)$menu->routeName) : 'javascript:void(0);');
+                        // For top-level items that are parents, href should be javascript:void(0) if no direct link
+                        $menuHref = ($hasSubmenu && empty($menu->url) && empty($menu->routeName))
+                                    ? 'javascript:void(0);'
+                                    : ($menu->url ?? (isset($menu->routeName) && Route::has((string)$menu->routeName) ? route((string)$menu->routeName) : 'javascript:void(0);'));
+
+                        $menuLinkClass = 'menu-link' . ($hasSubmenu ? ' menu-toggle' : '');
+                        $menuItemClass = $isActive ? 'active' : ''; // Simpler active class for parent, 'open' will be handled by collapse 'show'
+                        if ($hasSubmenu && $isActive) {
+                           // For BS5 collapse, parent being 'active' doesn't automatically mean 'open'
+                           // 'open' or 'show' on the ul.menu-sub is controlled by $isParentBranchActive in recursive-submenu
+                        }
+                        $firstLevelSubmenuId = $hasSubmenu ? 'submenu-' . Illuminate\Support\Str::slug($menu->name ?? 'menu') . '-' . $loop->index : null;
                     @endphp
 
                     @if ($canViewMenu)
@@ -79,14 +82,18 @@
                             </li>
                         @else
                             <li class="menu-item {{ $menuItemClass }}" role="none">
-                                <a href="{{ $menuHref }}" class="{{ $menuLinkClass }}"
-                                    role="menuitem"
-                                    @if (isset($menu->target) && !empty($menu->target)) target="{{ $menu->target }}" rel="noopener noreferrer" @endif
-                                    @if ($hasSubmenu) aria-haspopup="true" aria-expanded="{{ $isActive ? 'true' : 'false' }}" @endif>
+                                <a href="{{ $menuHref }}"
+                                   class="{{ $menuLinkClass }}"
+                                   role="menuitem"
+                                   @if (isset($menu->target) && !empty($menu->target) && !$hasSubmenu) target="{{ $menu->target }}" rel="noopener noreferrer" @endif
+                                   @if ($hasSubmenu)
+                                       data-bs-toggle="collapse"
+                                       data-bs-target="#{{ $firstLevelSubmenuId }}"
+                                       aria-expanded="{{ $isActive ? 'true' : 'false' }}"
+                                       aria-controls="{{ $firstLevelSubmenuId }}"
+                                   @endif
+                                >
                                     @isset($menu->icon)
-                                        {{-- Ensure Bootstrap icons are used if that's the chosen format --}}
-                                        {{-- If $menu->icon contains full class like 'tf-icons ti ti-icon', then: <i class="{{ $menu->icon }}"></i> --}}
-                                        {{-- If $menu->icon is just 'icon-name' for Bootstrap: --}}
                                         <i class="menu-icon bi bi-{{ $menu->icon }}"></i>
                                     @endisset
                                     <div class="menu-item-label">{{ __(($menu->name ?? null) ? $menu->name : '-') }}</div>
@@ -98,11 +105,19 @@
                                 </a>
 
                                 @if ($hasSubmenu)
-                                    @include('layouts.sections.menu.submenu', [
-                                        'menu' => $menu->submenu, // Pass the submenu array
-                                        'role' => $currentUserRoleForMenu,
+                                    @php
+                                        // Determine the class for 'active open' based on layout
+                                        $activeOpenClassForSubmenu = ($configData['myLayout'] ?? 'vertical') === 'vertical' ? 'active open' : 'active';
+                                    @endphp
+                                    @include('livewire.sections.menu.recursive-submenu', [
+                                        'submenuItems' => $menu->submenu,
+                                        'parentSubmenuId' => $firstLevelSubmenuId,
+                                        'isParentBranchActive' => $isActive, // This will add 'show' to the ul.menu-sub.collapse
+                                        'currentRole' => $currentUserRoleForMenu,
                                         'configData' => $configData,
-                                        'currentRouteName' => $currentRouteName
+                                        'currentRouteName' => $currentRouteName,
+                                        'activeOpenClass' => $activeOpenClassForSubmenu, // Pass this down
+                                        'level' => 1 // Starting level for the first set of submenus
                                     ])
                                 @endif
                             </li>

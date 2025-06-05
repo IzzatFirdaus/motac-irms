@@ -20,7 +20,6 @@ use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Throwable;
-use Spatie\Permission\Models\Role; //During Testing only
 
 #[Layout('layouts.app')]
 class ApplicationForm extends Component
@@ -177,97 +176,88 @@ class ApplicationForm extends Component
     }
   }
 
+  // ##### EDITED loadInitialDropdownData with extensive logging #####
   public function loadInitialDropdownData(): void
   {
-    /** @var User|null $currentUser */
-    $currentUser = Auth::user();
-    $currentUserId = $currentUser?->id;
+      /** @var User|null $currentUser */
+      $currentUser = Auth::user();
+      $currentUserId = $currentUser?->id;
 
-    $minSupportGradeLevel = (int) config('motac.approval.min_loan_support_grade_level', 41); // [cite: 86]
+      $minSupportGradeLevel = (int) config('motac.approval.min_loan_support_grade_level', 41);
 
-    Log::debug('----------------------------------------------------');
-    Log::debug('loadInitialDropdownData: Initiated.');
-    Log::debug('Current User ID (Applicant): ' . $currentUserId . ' (' . $currentUser?->email . ')');
-    Log::debug('Minimum Support Grade Level Required: ' . $minSupportGradeLevel);
+      Log::debug('----------------------------------------------------');
+      Log::debug('loadInitialDropdownData: Initiated.');
+      Log::debug('Current User ID (Applicant): ' . $currentUserId . ' (' . $currentUser?->email . ')');
+      Log::debug('Minimum Support Grade Level Required: ' . $minSupportGradeLevel);
 
-    $allActiveUsers = User::where('status', User::STATUS_ACTIVE)
-      ->with(['grade:id,name,level', 'position:id,name'])
-      ->orderBy('name')
-      ->get();
+      // Step 1: Get ALL users who are active, to see their raw data before further filtering
+      $allActiveUsers = User::where('status', User::STATUS_ACTIVE)
+          ->with(['grade:id,name,level', 'position:id,name']) // Eager load grade and position
+          ->orderBy('name')
+          ->get();
 
-    Log::debug('All Active Users fetched (before grade/self exclusion): ' . $allActiveUsers->count(), $allActiveUsers->map(function ($user) use ($currentUserId) {
-      return [
-        'id' => $user->id,
-        'name' => $user->name,
-        'email' => $user->email,
-        'status' => $user->status,
-        'grade_id' => $user->grade_id,
-        'grade_name' => $user->grade?->name,
-        'grade_level' => $user->grade?->level,
-        'position_name' => $user->position?->name,
-        'is_current_applicant' => $user->id === $currentUserId,
-      ];
-    })->toArray());
+      Log::debug('All Active Users fetched (before grade/self exclusion): ' . $allActiveUsers->count(), $allActiveUsers->map(function($user) use ($currentUserId) {
+          return [
+              'id' => $user->id,
+              'name' => $user->name,
+              'email' => $user->email,
+              'status' => $user->status, // Should be User::STATUS_ACTIVE
+              'grade_id' => $user->grade_id,
+              'grade_name' => $user->grade?->name,
+              'grade_level' => $user->grade?->level, // CRITICAL: Check this value for Admin/Approver
+              'position_name' => $user->position?->name,
+              'is_current_applicant' => $user->id === $currentUserId,
+          ];
+      })->toArray());
 
-    // ##### START: EDITED FOR TESTING PURPOSES #####
-    // This query is modified to restrict selection of supporting officers
-    // to users with specific roles for easier testing of approval flows.
-    // In a production environment, this role filter might be removed or adjusted
-    // to rely solely on grade levels or other criteria.
-    $officersQueryBase = User::where('status', User::STATUS_ACTIVE)
-                         ->where('id', '!=', $currentUserId); // Exclude the applicant
+      // Step 2: The actual query for supporting officers
+      $officersQuery = User::where('status', User::STATUS_ACTIVE)
+                           ->where('id', '!=', $currentUserId); // Exclude the applicant
 
-    // FOR TESTING ONLY: Filter by specific roles.
-    // This ensures that for testing, only users from AdminUserSeeder with these roles
-    // (and meeting grade criteria) appear in the "Supporting Officer" dropdown.
-    // This helps in selecting a known user (e.g., Admin, Approver) as the first-level approver.
-    $officersQuery = clone $officersQueryBase; // Clone to keep the base query clean
-    $officersQuery->whereHas('roles', function ($query) {
-        $query->whereIn('name', ['Admin', 'Approver', 'BPM Staff']); // Added 'Admin' to allow selecting Admin as supporting officer
-        Log::debug('loadInitialDropdownData: TESTING - Filtering supporting officer candidates by roles: Admin, Approver, BPM Staff.');
-    });
-    // ##### END: EDITED FOR TESTING PURPOSES #####
+      // Apply the whereHas condition
+      $potentialOfficersAfterGradeFilter = $officersQuery->whereHas('grade', function ($query) use ($minSupportGradeLevel) {
+              $query->where('level', '>=', $minSupportGradeLevel);
+          })
+          ->with(['position:id,name', 'grade:id,name,level']) // Eager load again for verification
+          ->orderBy('name')
+          ->get();
 
-    // Apply the grade level condition
-    $potentialOfficersAfterGradeFilter = $officersQuery->whereHas('grade', function ($query) use ($minSupportGradeLevel) {
-      $query->where('level', '>=', $minSupportGradeLevel);
-    })
-      ->with(['position:id,name', 'grade:id,name,level'])
-      ->orderBy('name')
-      ->get();
+      Log::debug('Potential Supporting Officers (after status, self-exclusion, and grade level filter): ' . $potentialOfficersAfterGradeFilter->count(), $potentialOfficersAfterGradeFilter->map(function($user) {
+          return [
+              'id' => $user->id,
+              'name' => $user->name,
+              'email' => $user->email,
+              'grade_name' => $user->grade?->name,
+              'grade_level' => $user->grade?->level, // CRITICAL: Ensure this is >= $minSupportGradeLevel
+          ];
+      })->toArray());
 
-    Log::debug('Potential Supporting Officers (after status, self-exclusion, role (testing), and grade level filter): ' . $potentialOfficersAfterGradeFilter->count(), $potentialOfficersAfterGradeFilter->map(function ($user) {
-      return [
-        'id' => $user->id,
-        'name' => $user->name,
-        'email' => $user->email,
-        'grade_name' => $user->grade?->name,
-        'grade_level' => $user->grade?->level,
-      ];
-    })->toArray());
+      $this->supportingOfficerOptions = $potentialOfficersAfterGradeFilter->mapWithKeys(function ($user) {
+              $positionName = $user->position?->name ?? __('Tiada Jawatan');
+              $gradeName = $user->grade?->name ?? __('Tiada Gred');
+              return [$user->id => "{$user->name} ({$positionName} - {$gradeName})"];
+          })->toArray();
 
-    $this->supportingOfficerOptions = $potentialOfficersAfterGradeFilter->mapWithKeys(function ($user) {
-      $positionName = $user->position?->name ?? __('Tiada Jawatan');
-      $gradeName = $user->grade?->name ?? __('Tiada Gred');
-      return [$user->id => "{$user->name} ({$positionName} - {$gradeName})"];
-    })->toArray();
+      Log::debug('Final supportingOfficerOptions (User IDs in dropdown): ', array_keys($this->supportingOfficerOptions));
+      Log::debug('----------------------------------------------------');
 
-    Log::debug('Final supportingOfficerOptions (User IDs in dropdown): ', array_keys($this->supportingOfficerOptions));
-    Log::debug('----------------------------------------------------');
 
-    $this->equipmentTypeOptions = Equipment::getAssetTypeOptions() ?? [];
+      // Original equipmentTypeOptions loading
+      $this->equipmentTypeOptions = Equipment::getAssetTypeOptions() ?? [];
 
-    // Responsible officer options - also excludes current user
-    $this->responsibleOfficerOptions = User::where('status', User::STATUS_ACTIVE)
-      ->where('id', '!=', $currentUserId)
-      ->with(['position:id,name', 'grade:id,name'])
-      ->orderBy('name')->get()->mapWithKeys(function ($user) {
-        $positionName = $user->position?->name ?? __('Tiada Jawatan');
-        $gradeName = $user->grade?->name ?? __('Tiada Gred');
-        return [$user->id => "{$user->name} ({$positionName} - {$gradeName})"];
-      })->toArray();
-    Log::debug('Final responsibleOfficerOptions keys:', array_keys($this->responsibleOfficerOptions));
+      // Responsible officer options - check this logic too if relevant for other issues
+      $this->responsibleOfficerOptions = User::where('status', User::STATUS_ACTIVE)
+        ->where('id', '!=', $currentUserId) // Also excludes current user
+        ->with(['position:id,name', 'grade:id,name'])
+        ->orderBy('name')->get()->mapWithKeys(function ($user) {
+          $positionName = $user->position?->name ?? __('Tiada Jawatan');
+          $gradeName = $user->grade?->name ?? __('Tiada Gred');
+          return [$user->id => "{$user->name} ({$positionName} - {$gradeName})"];
+        })->toArray();
+      Log::debug('Final responsibleOfficerOptions keys:', array_keys($this->responsibleOfficerOptions));
   }
+  // ##### END EDITED loadInitialDropdownData #####
+
 
   public function addLoanItem(bool $dispatchEvent = true): void
   {
@@ -340,7 +330,7 @@ class ApplicationForm extends Component
         $dataForService['responsible_officer_id'] = $validatedData['responsible_officer_id'] ?? null;
       }
 
-      $dataForService['supporting_officer_id'] = $this->supporting_officer_id;
+      $dataForService['supporting_officer_id'] = $this->supporting_officer_id; // Correctly uses the component property
 
       $dataForService['applicant_confirmation_timestamp'] = (!$isDraft && ($validatedData['applicant_confirmation'] ?? false)) ? now() : null;
 
@@ -519,7 +509,7 @@ class ApplicationForm extends Component
   {
     $nowForValidation = Carbon::now()->startOfMinute()->toDateTimeString();
     $currentUserId = Auth::id();
-    $minSupportGradeLevel = (int) config('motac.approval.min_loan_support_grade_level', 41); // [cite: 86]
+    $minSupportGradeLevel = (int) config('motac.approval.min_loan_support_grade_level', 41);
 
     $rules = [
       'applicant_phone' => ['required', 'string', 'max:20', 'regex:/^([0-9\s\-\+\(\)]*)$/'],
@@ -539,31 +529,47 @@ class ApplicationForm extends Component
       ],
 
       'supporting_officer_id' => [
-        Rule::requiredIf($isSubmittingForApproval),
-        'nullable',
-        'integer',
-        Rule::exists('users', 'id')->where(function ($query) {
-          Log::debug('[Validation] Checking Rule::exists for supporting_officer_id.'); // Add this
-          $query->where('status', User::STATUS_ACTIVE)->whereNull('deleted_at');
-        }),
-        function ($attribute, $value, $fail) use ($minSupportGradeLevel) {
-          if ($value) {
-            $officer = User::with('grade:id,name,level')->find($value);
+    Rule::requiredIf($isSubmittingForApproval),
+    'nullable',
+    'integer',
+    Rule::exists('users', 'id')->where(function ($query) {
+        Log::debug('[Validation] Checking Rule::exists for supporting_officer_id.'); // Add this
+        $query->where('status', User::STATUS_ACTIVE)->whereNull('deleted_at');
+    }),
+    function ($attribute, $value, $fail) use ($minSupportGradeLevel) {
+        Log::debug("[Validation] Custom closure for supporting_officer_id: Value = {$value}, MinLevel = {$minSupportGradeLevel}"); // Add this
+        if ($value) {
+            $officer = User::with('grade:id,name,level')->find($value); // Eager load specific grade columns
             if ($officer) {
-              // Ganti pemeriksaan property_exists dengan pemeriksaan langsung
-              if (!$officer->grade || is_null($officer->grade->level)) {
-                $fail(__('Pegawai Penyokong yang dipilih tidak sah (gred tidak lengkap).'));
-                return;
-              }
-              if ($officer->grade->level < $minSupportGradeLevel) {
-                $fail(__('Pegawai Penyokong yang dipilih tidak sah (tahap gred tidak mencukupi).'));
-                return;
-              }
+                Log::debug("[Validation] Officer Found: ID={$officer->id}, Name={$officer->name}"); // Add this
+                Log::debug("[Validation] Officer Grade details: ", $officer->grade ? $officer->grade->toArray() : ['Grade relationship is null']); // Add this
+
+                if (!$officer->grade) {
+                    Log::warning("[Validation] Officer {$officer->id} has no grade relationship loaded/set.");
+                    $fail(__('Pegawai Penyokong yang dipilih tidak sah (tiada gred).')); // More specific temp message
+                    return;
+                }
+                if (!property_exists($officer->grade, 'level') || is_null($officer->grade->level)) {
+                     Log::warning("[Validation] Officer {$officer->id} grade has no 'level' property or level is null. Grade data: ", $officer->grade->toArray());
+                    $fail(__('Pegawai Penyokong yang dipilih tidak sah (gred tidak lengkap).')); // More specific temp message
+                    return;
+                }
+                if ($officer->grade->level < $minSupportGradeLevel) {
+                    Log::warning("[Validation] Officer {$officer->id} grade level {$officer->grade->level} is less than required {$minSupportGradeLevel}.");
+                    $fail(__('Pegawai Penyokong yang dipilih tidak sah (tahap gred tidak mencukupi).')); // More specific temp message
+                    return;
+                }
+                 Log::info("[Validation] Officer {$officer->id} grade level {$officer->grade->level} MEETS required {$minSupportGradeLevel}. Validation should pass here.");
+
+            } else {
+                Log::warning("[Validation] Officer not found for ID: {$value} in custom closure rule.");
+                // This case should ideally be caught by Rule::exists if it runs first and fails.
+                $fail(__('Pegawai Penyokong yang dipilih tidak ditemui (custom rule).'));
             }
-          }
-        },
-        Rule::when($currentUserId, ['different:' . $currentUserId]),
-      ],
+        }
+    },
+    Rule::when($currentUserId, ['different:' . $currentUserId]),
+],
 
       'loan_application_items' => ['required', 'array', 'min:1'],
       'loan_application_items.*.id' => ['nullable', 'integer'],
