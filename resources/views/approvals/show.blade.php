@@ -45,16 +45,9 @@
                     </div>
 
                     <div class="card-body p-3 p-sm-4">
-                        {{-- REMOVED: @include('partials.alert-messages') --}}
-                        {{-- Assuming session messages and validation errors (if any from POST to this page)
-                             are handled globally by _partials._alerts.alert-general.blade.php
-                             included in your main layout (e.g., layouts.app.blade.php) --}}
+                        {{-- Global alerts handled by layouts.app.blade.php --}}
 
                         @if ($errors->any())
-                            {{-- This specific error block can remain if you want errors displayed right here
-                                 in addition to any global alerts, or if alert-general is not global.
-                                 However, _partials._alerts.alert-general.blade.php also handles $errors->any()
-                                 so this might be duplicative if _partials._alerts.alert-general is in layouts.app.blade.php --}}
                             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                                 <h5 class="alert-heading fw-bold"><i
                                         class="bi bi-x-octagon-fill me-2"></i>{{ __('Sila perbetulkan ralat berikut:') }}
@@ -98,8 +91,6 @@
                                     <dt class="col-sm-4 col-lg-3 fw-medium text-muted">
                                         {{ __('Status Keseluruhan Permohonan') }}:</dt>
                                     <dd class="col-sm-8 col-lg-9">
-                                        {{-- Ensure x-resource-status-panel component exists and is correctly called --}}
-                                        {{-- Pass the $resourceStatusPanelType variable as the 'type' prop --}}
                                         <x-resource-status-panel :resource="$approvableItem" statusAttribute="status" class="badge" :showIcon="true" :type="$resourceStatusPanelType" />
                                     </dd>
 
@@ -132,7 +123,7 @@
                                                 <ul class="list-unstyled ps-1 mb-0">
                                                     @foreach ($approvableItem->loanApplicationItems as $item)
                                                         <li class="mb-1"><i class="bi bi-caret-right-fill text-secondary me-1 small"></i>{{ e(optional(\App\Models\Equipment::getAssetTypeOptions())[$item->equipment_type] ?? $item->equipment_type) }}
-                                                            (Qty: {{ $item->quantity_requested }})
+                                                            (Kuantiti Dipohon: {{ $item->quantity_requested }})
                                                             @if ($item->notes)
                                                                 <span class="text-muted fst-italic d-block ps-3">- {{ e($item->notes) }}</span>
                                                             @endif
@@ -182,7 +173,7 @@
                             @can('update', $approval)
                                 <section class="mt-4 pt-4 border-top">
                                     <h3 class="h6 fw-semibold text-dark mb-3"><i class="bi bi-pencil-fill me-2"></i>{{ __('Rekod Keputusan Anda') }}</h3>
-                                    <form action="{{ route('approvals.recordDecision', $approval->id) }}" method="POST">
+                                    <form action="{{ route('approvals.recordDecision', $approval->id) }}" method="POST" id="approvalDecisionForm">
                                         @csrf
                                         <div class="mb-3">
                                             <label for="decision" class="form-label fw-medium">{{ __('Keputusan') }} <span class="text-danger">*</span></label>
@@ -197,6 +188,36 @@
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
+
+                                        {{-- Adjusting Quantities Section --}}
+                                        @if ($approvableItem instanceof \App\Models\LoanApplication && $approvableItem->loanApplicationItems->isNotEmpty())
+                                            <div id="quantity_adjustment_section" style="display:none;"> {{-- Initially hidden, shown by JS if 'Luluskan' selected --}}
+                                                <hr>
+                                                <h4 class="h6 fw-semibold text-dark my-3"><i class="bi bi-list-check me-2"></i>{{ __('Penyesuaian Kuantiti Item (Jika Perlu)') }}</h4>
+                                                <p class="small text-muted">{{ __('Masukkan kuantiti yang diluluskan untuk setiap item. Jika tiada perubahan, nilai akan kekal seperti kuantiti dipohon.') }}</p>
+                                                @foreach ($approvableItem->loanApplicationItems as $index => $item)
+                                                    <div class="mb-3 p-2 border rounded bg-light-subtle">
+                                                        <p class="mb-1 small">
+                                                            <strong>{{ __('Item') }}:</strong> {{ e(optional(\App\Models\Equipment::getAssetTypeOptions())[$item->equipment_type] ?? $item->equipment_type) }} <br>
+                                                            <strong>{{ __('Kuantiti Dipohon') }}:</strong> {{ $item->quantity_requested }}
+                                                        </p>
+                                                        <label for="items_approved_{{ $item->id }}_quantity_approved" class="form-label form-label-sm">{{ __('Kuantiti Diluluskan (Max: :qty)', ['qty' => $item->quantity_requested]) }}:</label>
+                                                        <input type="number"
+                                                               name="items_approved[{{ $item->id }}][quantity_approved]"
+                                                               id="items_approved_{{ $item->id }}_quantity_approved"
+                                                               class="form-control form-control-sm @error('items_approved.'.$item->id.'.quantity_approved') is-invalid @enderror"
+                                                               value="{{ old('items_approved.'.$item->id.'.quantity_approved', $item->quantity_approved ?? $item->quantity_requested) }}"
+                                                               min="0"
+                                                               max="{{ $item->quantity_requested }}">
+                                                        @error('items_approved.'.$item->id.'.quantity_approved')
+                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                        {{-- End Adjusting Quantities Section --}}
+
                                         <div class="mb-3">
                                             <label for="comments" class="form-label fw-medium">{{ __('Catatan Tambahan (Jika Ada)') }} <span id="comments_required_star" class="text-danger fst-italic" style="display:none;">* {{ __('Wajib diisi jika ditolak') }}</span></label>
                                             <textarea name="comments" id="comments" rows="4" class="form-control @error('comments') is-invalid @enderror" placeholder="{{ __('Sila berikan justifikasi jika menolak permohonan.') }}">{{ old('comments') }}</textarea>
@@ -233,19 +254,30 @@
                 const decisionSelect = document.getElementById('decision');
                 const commentsInput = document.getElementById('comments');
                 const commentsRequiredStar = document.getElementById('comments_required_star');
+                const quantityAdjustmentSection = document.getElementById('quantity_adjustment_section');
 
-                if (decisionSelect && commentsInput && commentsRequiredStar) {
-                    const toggleCommentsRequired = () => {
-                        if (decisionSelect.value === '{{ \App\Models\Approval::STATUS_REJECTED }}') {
-                            commentsRequiredStar.style.display = 'inline';
-                            commentsInput.setAttribute('required', 'required');
-                        } else {
-                            commentsRequiredStar.style.display = 'none';
-                            commentsInput.removeAttribute('required');
+                if (decisionSelect) { // Combined checks for decisionSelect related elements
+                    const toggleRequiredElements = () => {
+                        if (commentsInput && commentsRequiredStar) {
+                             if (decisionSelect.value === '{{ \App\Models\Approval::STATUS_REJECTED }}') {
+                                commentsRequiredStar.style.display = 'inline';
+                                commentsInput.setAttribute('required', 'required');
+                            } else {
+                                commentsRequiredStar.style.display = 'none';
+                                commentsInput.removeAttribute('required');
+                            }
+                        }
+
+                        if (quantityAdjustmentSection) {
+                            if (decisionSelect.value === '{{ \App\Models\Approval::STATUS_APPROVED }}') {
+                                quantityAdjustmentSection.style.display = 'block';
+                            } else {
+                                quantityAdjustmentSection.style.display = 'none';
+                            }
                         }
                     };
-                    decisionSelect.addEventListener('change', toggleCommentsRequired);
-                    toggleCommentsRequired(); // Initial check on page load
+                    decisionSelect.addEventListener('change', toggleRequiredElements);
+                    toggleRequiredElements(); // Initial check on page load
                 }
             });
         </script>

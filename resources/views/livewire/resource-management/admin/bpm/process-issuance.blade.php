@@ -28,7 +28,7 @@
         <p class="mb-1"><span class="fw-semibold">{{ __('Tarikh Pinjaman') }}:</span> {{ $loanApplication->loan_start_date ? $loanApplication->loan_start_date->translatedFormat(config('app.date_format_my', 'd/m/Y')) : __('N/A') }}</p>
         <p class="mb-0"><span class="fw-semibold">{{ __('Tarikh Dijangka Pulang') }}:</span> {{ $loanApplication->loan_end_date ? $loanApplication->loan_end_date->translatedFormat(config('app.date_format_my', 'd/m/Y')) : __('N/A') }}</p>
 
-        @if ($loanApplication->applicationItems->isNotEmpty())
+        @if ($loanApplication->loanApplicationItems->isNotEmpty())
             <h6 class="mt-3 mb-2 fw-semibold">{{ __('Item Peralatan Dimohon & Diluluskan:') }}</h6>
             <div class="table-responsive border rounded">
                 <table class="table table-sm table-striped mb-0">
@@ -36,21 +36,21 @@
                         <tr>
                             <th class="small px-3 py-2">#</th>
                             <th class="small px-3 py-2">{{ __('Jenis Peralatan') }}</th>
-                            <th class="small px-3 py-2">{{ __('Qty. Mohon') }}</th>
-                            <th class="small px-3 py-2">{{ __('Qty. Lulus') }}</th>
-                            <th class="small px-3 py-2">{{ __('Qty. Telah Dikeluarkan') }}</th>
-                            <th class="small px-3 py-2">{{ __('Baki Untuk Dikeluarkan') }}</th>
+                            <th class="small px-3 py-2 text-center">{{ __('Qty. Mohon') }}</th>
+                            <th class="small px-3 py-2 text-center">{{ __('Qty. Lulus') }}</th>
+                            <th class="small px-3 py-2 text-center">{{ __('Qty. Telah Dikeluarkan') }}</th>
+                            <th class="small px-3 py-2 text-center">{{ __('Baki Untuk Dikeluarkan') }}</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($loanApplication->applicationItems as $item)
+                        @foreach ($loanApplication->loanApplicationItems as $item)
                         <tr>
                             <td class="small px-3 py-2">{{ $loop->iteration }}</td>
                             <td class="small px-3 py-2">{{ $item->equipment_type ? (\App\Models\Equipment::$ASSET_TYPES_LABELS[$item->equipment_type] ?? Str::title(str_replace('_', ' ', $item->equipment_type))) : __('N/A') }}</td>
-                            <td class="small px-3 py-2">{{ $item->quantity_requested ?? __('N/A') }}</td>
-                            <td class="small px-3 py-2">{{ $item->quantity_approved ?? __('N/A') }}</td>
-                            <td class="small px-3 py-2">{{ $item->quantity_issued ?? 0 }}</td>
-                            <td class="small px-3 py-2 fw-bold">{{ ($item->quantity_approved ?? 0) - ($item->quantity_issued ?? 0) }}</td>
+                            <td class="small px-3 py-2 text-center">{{ $item->quantity_requested ?? __('N/A') }}</td>
+                            <td class="small px-3 py-2 text-center">{{ $item->quantity_approved ?? __('N/A') }}</td>
+                            <td class="small px-3 py-2 text-center">{{ $item->quantity_issued ?? 0 }}</td>
+                            <td class="small px-3 py-2 text-center fw-bold">{{ ($item->quantity_approved ?? 0) - ($item->quantity_issued ?? 0) }}</td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -78,7 +78,7 @@
                             <label for="issueItems_{{ $index }}_loan_application_item_id" class="form-label">{{ __('Rujuk Item Permohonan Asal') }} <span class="text-danger">*</span></label>
                             <select wire:model.live="issueItems.{{ $index }}.loan_application_item_id" id="issueItems_{{ $index }}_loan_application_item_id" class="form-select @error('issueItems.'.$index.'.loan_application_item_id') is-invalid @enderror">
                                 <option value="">-- {{ __('Pilih Item Asal') }} --</option>
-                                @foreach ($loanApplication->applicationItems as $appItem)
+                                @foreach ($loanApplication->loanApplicationItems as $appItem)
                                     @if (($appItem->quantity_approved ?? 0) > ($appItem->quantity_issued ?? 0) || (isset($issueItems[$index]['loan_application_item_id']) && $issueItems[$index]['loan_application_item_id'] == $appItem->id) ) {{-- Allow selecting if already selected or still has balance --}}
                                         <option value="{{ $appItem->id }}">
                                             {{ $appItem->equipment_type ? (\App\Models\Equipment::$ASSET_TYPES_LABELS[$appItem->equipment_type] ?? Str::title(str_replace('_', ' ', $appItem->equipment_type))) : 'N/A' }}
@@ -111,7 +111,8 @@
 
                     <div class="mb-3">
                         <label for="issueItems_{{ $index }}_quantity_issued" class="form-label">{{ __('Kuantiti Dikeluarkan') }} <span class="text-danger">*</span></label>
-                        <input type="number" wire:model.defer="issueItems.{{ $index }}.quantity_issued" id="issueItems_{{ $index }}_quantity_issued" class="form-control @error('issueItems.'.$index.'.quantity_issued') is-invalid @enderror" min="1" max="{{ $issueItems[$index]['max_quantity_issuable'] ?? 1 }}">
+                        {{-- ADJUSTED: max attribute uses ?? 0 --}}
+                        <input type="number" wire:model.live="issueItems.{{ $index }}.quantity_issued" id="issueItems_{{ $index }}_quantity_issued" class="form-control @error('issueItems.'.$index.'.quantity_issued') is-invalid @enderror" min="1" max="{{ $issueItems[$index]['max_quantity_issuable'] ?? 0 }}">
                         <div class="form-text">{{__('Baki boleh dikeluarkan untuk item permohonan ini:')}} {{ $issueItems[$index]['max_quantity_issuable'] ?? 0 }}</div>
                         @error('issueItems.'.$index.'.quantity_issued') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
@@ -119,16 +120,20 @@
                     <div class="mb-3">
                         <label class="form-label">{{ __('Aksesori Dikeluarkan (Item Ini)') }}:</label>
                         <div class="row">
-                            @foreach ($allAccessoriesList as $accessory)
+                            @foreach ($allAccessoriesList as $accessory) {{-- for source of $allAccessoriesList --}}
                                 <div class="col-md-6 col-lg-4">
                                     <div class="form-check">
-                                        <input type="checkbox" wire:model.defer="issueItems.{{ $index }}.accessories_checklist_item" value="{{ $accessory }}" id="accessory_{{ $index }}_{{ Str::slug($accessory) }}" class="form-check-input">
+                                        <input type="checkbox" wire:model.defer="issueItems.{{ $index }}.accessories_checklist_item" value="{{ $accessory }}" id="accessory_{{ $index }}_{{ Str::slug($accessory) }}" class="form-check-input @error('issueItems.'.$index.'.accessories_checklist_item.'.$loop->index) is-invalid @enderror @error('issueItems.'.$index.'.accessories_checklist_item') is-invalid @enderror">
                                         <label class="form-check-label" for="accessory_{{ $index }}_{{ Str::slug($accessory) }}">{{ $accessory }}</label>
                                     </div>
                                 </div>
                             @endforeach
                         </div>
-                        @error('issueItems.'.$index.'.accessories_checklist_item') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                        @error('issueItems.'.$index.'.accessories_checklist_item') <div class="d-block invalid-feedback">{{ $message }}</div> @enderror
+                        {{-- Example for wildcard errors on array items, if needed --}}
+                        {{-- @foreach($errors->get('issueItems.'.$index.'.accessories_checklist_item.*') as $message)
+                            <div class="d-block invalid-feedback">{{ $message[0] }}</div>
+                        @endforeach --}}
                     </div>
 
                     <div class="mb-3">
@@ -145,19 +150,60 @@
 
             <hr class="my-4">
 
+            {{-- CONDITIONAL UI EXAMPLE: Overall Accessories Checklist for the Transaction --}}
+            {{-- To enable this:
+                 1. Uncomment this HTML block.
+                 2. Add `public array $overall_accessories_checklist = [];` to ProcessIssuance.php component.
+                 3. Add validation for `overall_accessories_checklist` in rules() method of ProcessIssuance.php.
+                 4. Ensure `LoanTransactionService`'s `processNewIssue` and `createTransaction` methods
+                    can receive and store this overall list in `LoanTransaction->accessories_checklist_on_issue`.
+            --}}
+            {{--
+            <div class="mb-3">
+                <label class="form-label fw-semibold">{{ __('Senarai Semak Aksesori Keseluruhan (Transaksi)') }}:</label>
+                <p class="form-text small mt-0 mb-2 text-muted">
+                    {{ __('Sila tandakan aksesori umum yang disertakan untuk keseluruhan transaksi ini, jika berbeza dari item spesifik.') }}
+                </p>
+                <div class="row">
+                    @forelse ($allAccessoriesList as $accessoryKey => $accessoryName)
+                        <div class="col-md-6 col-lg-4">
+                            <div class="form-check">
+                                <input type="checkbox" wire:model.defer="overall_accessories_checklist" value="{{ $accessoryName }}" id="overall_accessory_{{ Str::slug($accessoryName) }}"
+                                       class="form-check-input @error('overall_accessories_checklist') is-invalid @enderror @error('overall_accessories_checklist.'.$accessoryKey) is-invalid @enderror">
+                                <label class="form-check-label small" for="overall_accessory_{{ Str::slug($accessoryName) }}">{{ $accessoryName }}</label>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="col-12">
+                            <p class="small text-muted fst-italic">{{__('Tiada senarai aksesori standard dikonfigurasi.')}}</p>
+                        </div>
+                    @endforelse
+                </div>
+                @error('overall_accessories_checklist') <div class="d-block invalid-feedback">{{ $message }}</div> @enderror
+                @foreach($errors->get('overall_accessories_checklist.*') as $message)
+                    <div class="d-block invalid-feedback">{{ $message[0] }}</div>
+                @endforeach
+            </div>
+            <hr class="my-4">
+            --}}
+
+
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="receiving_officer_id" class="form-label fw-semibold">{{ __('Pegawai Penerima (Pengguna/Wakil)') }} <span class="text-danger">*</span></label>
                     <select wire:model.defer="receiving_officer_id" id="receiving_officer_id" class="form-select @error('receiving_officer_id') is-invalid @enderror">
                         <option value="">-- {{ __('Pilih Pegawai') }} --</option>
                         @foreach($users ?? [] as $user)
-                            <option value="{{ $user->id }}">{{ $user->name }}</option>
+                            {{-- Pre-select if it's the loan applicant --}}
+                            <option value="{{ $user->id }}" {{ $user->id == $loanApplication->user_id ? 'selected' : '' }}>{{ $user->name }}</option>
                         @endforeach
                     </select>
                     @error('receiving_officer_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="transaction_date" class="form-label fw-semibold">{{ __('Tarikh Transaksi Pengeluaran') }} <span class="text-danger">*</span></label>
+                    {{-- Current implementation uses type="date". If time input is required, change to datetime-local: --}}
+                    {{-- <input type="datetime-local" wire:model.defer="transaction_date" id="transaction_date" class="form-control @error('transaction_date') is-invalid @enderror"> --}}
                     <input type="date" wire:model.defer="transaction_date" id="transaction_date" class="form-control @error('transaction_date') is-invalid @enderror">
                     @error('transaction_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>

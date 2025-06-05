@@ -60,7 +60,7 @@ class ApprovalDashboard extends Component
                 'approvable' => function ($morphTo) {
                     $morphTo->morphWith([
                         EmailApplication::class => ['user:id,name,department_id', 'user.department:id,name'],
-                        LoanApplication::class => ['user:id,name,department_id', 'user.department:id,name', 'applicationItems'],
+                        LoanApplication::class => ['user:id,name,department_id', 'user.department:id,name', 'loanApplicationItems'],
                     ]);
                 }
             ])

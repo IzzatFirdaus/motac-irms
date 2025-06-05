@@ -23,7 +23,7 @@ class LoanApplicationReadyForIssuanceNotification extends Notification implement
     {
         $this->loanApplication = $loanApplication;
         // Eager load the applicant (user) and the application items
-        $this->loanApplication->loadMissing(['user', 'responsibleOfficer', 'applicationItems']); // Corrected: load applicationItems
+        $this->loanApplication->loadMissing(['user', 'responsibleOfficer', 'loanApplicationItems']); // Corrected: load applicationItems
         // $this->onQueue('notifications'); // This is fine if you want to queue it
     }
 
@@ -51,9 +51,9 @@ class LoanApplicationReadyForIssuanceNotification extends Notification implement
             ->line(__('Pegawai Bertanggungjawab Asal (Pemohon): :responsibleOfficerName', ['responsibleOfficerName' => $responsibleOfficerName]));
 
         // List items from loan_application_items (applicationItems relationship)
-        if ($loanApp->applicationItems && $loanApp->applicationItems->isNotEmpty()) {
+        if ($loanApp->loanApplicationItems && $loanApp->loanApplicationItems->isNotEmpty()) {
             $mailMessage->line(__('Butiran peralatan yang diluluskan untuk dikeluarkan:'));
-            foreach ($loanApp->applicationItems as $item) {
+            foreach ($loanApp->loanApplicationItems as $item) {
                 /** @var LoanApplicationItem $item */
                 // Assuming LoanApplicationItem has quantity_approved or defaults to quantity_requested
                 $quantityToIssue = $item->quantity_approved ?? $item->quantity_requested;
@@ -100,7 +100,7 @@ class LoanApplicationReadyForIssuanceNotification extends Notification implement
             }
         }
 
-        $itemDetails = $loanApp->applicationItems->map(function ($item) {
+        $itemDetails = $loanApp->loanApplicationItems->map(function ($item) {
             /** @var LoanApplicationItem $item */
             return "{$item->equipment_type} (Kuantiti: ".($item->quantity_approved ?? $item->quantity_requested).')';
         })->toArray();

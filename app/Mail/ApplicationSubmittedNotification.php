@@ -56,7 +56,7 @@ final class ApplicationSubmittedNotification extends Mailable implements ShouldQ
         if ($application instanceof EmailApplication) {
             $application->loadMissing(['groupMembers']);
         } elseif ($application instanceof LoanApplication) {
-            $application->loadMissing(['applicationItems.equipment']);
+            $application->loadMissing(['loanApplicationItems.equipment']);
         }
 
         $this->application = $application;

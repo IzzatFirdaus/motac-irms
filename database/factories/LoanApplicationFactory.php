@@ -36,7 +36,15 @@ class LoanApplicationFactory extends EloquentFactory
         }
 
         $defaultStatus = defined(LoanApplication::class.'::STATUS_DRAFT') ? LoanApplication::STATUS_DRAFT : 'draft';
+        // Ensure the new status is part of the selectable statuses if it exists
         $selectableStatuses = array_filter($allStatuses, fn ($statusKey) => $statusKey !== $defaultStatus);
+
+        // Prioritize new status for seeding if present, otherwise fallback
+        $statusPendingApproverReview = defined(LoanApplication::class.'::STATUS_PENDING_APPROVER_REVIEW') ? LoanApplication::STATUS_PENDING_APPROVER_REVIEW : 'pending_approver_review';
+        if (!in_array($statusPendingApproverReview, $selectableStatuses) && in_array($statusPendingApproverReview, $allStatuses)) {
+            // This case should not happen if getStatusKeys() is correct and includes the new status
+        }
+
         $chosenStatusKey = !empty($selectableStatuses)
             ? $this->faker->randomElement($selectableStatuses)
             : (defined(LoanApplication::class.'::STATUS_PENDING_SUPPORT') ? LoanApplication::STATUS_PENDING_SUPPORT : $defaultStatus);
@@ -47,8 +55,6 @@ class LoanApplicationFactory extends EloquentFactory
             'user_id' => $applicantUser->id,
             'responsible_officer_id' => $responsibleOfficerUser->id,
             'supporting_officer_id' => $this->faker->boolean(50) ? (User::whereNotIn('id', [$applicantUser->id, $responsibleOfficerUser->id])->inRandomOrder()->first()?->id) : null,
-
-            // Revised purpose generation to remove dependency on 'catchPhrase' and 'bs' formatters
             'purpose' => $this->faker->sentence(mt_rand(6, 15)),
             'location' => $this->faker->city . ', ' . $this->faker->streetName,
             'return_location' => $this->faker->optional(0.3)->city . ', ' . $this->faker->streetName,
@@ -58,7 +64,6 @@ class LoanApplicationFactory extends EloquentFactory
             'rejection_reason' => $chosenStatusKey === (defined(LoanApplication::class.'::STATUS_REJECTED') ? LoanApplication::STATUS_REJECTED : 'rejected') ? $this->faker->sentence() : null,
             'applicant_confirmation_timestamp' => $timestamps['applicant_confirmation_timestamp'],
             'admin_notes' => $this->faker->optional(0.1)->paragraph,
-
             'submitted_at' => $timestamps['submitted_at'],
             'approved_at' => $timestamps['approved_at'],
             'approved_by' => $timestamps['approved_by'],
@@ -66,7 +71,6 @@ class LoanApplicationFactory extends EloquentFactory
             'rejected_by' => $timestamps['rejected_by'],
             'cancelled_at' => $timestamps['cancelled_at'],
             'cancelled_by' => $timestamps['cancelled_by'],
-
             'created_at' => $applicationDate,
             'updated_at' => $applicationDate->copy()->addMinutes($this->faker->numberBetween(10, 1000)),
             'deleted_at' => null,
@@ -76,7 +80,6 @@ class LoanApplicationFactory extends EloquentFactory
     public function configure(): static
     {
         return $this->afterCreating(function (LoanApplication $loanApplication) {
-            // FIX APPLIED HERE: Changed applicationItems() to loanApplicationItems()
             if ($loanApplication->status !== (defined(LoanApplication::class.'::STATUS_DRAFT') ? LoanApplication::STATUS_DRAFT : 'draft') && $loanApplication->loanApplicationItems()->count() === 0) {
                 LoanApplicationItem::factory()
                     ->count($this->faker->numberBetween(1, 3))
@@ -84,20 +87,28 @@ class LoanApplicationFactory extends EloquentFactory
                     ->create();
             }
 
+            $statusPendingSupport = defined(LoanApplication::class.'::STATUS_PENDING_SUPPORT') ? LoanApplication::STATUS_PENDING_SUPPORT : 'pending_support';
+            $statusPendingApproverReview = defined(LoanApplication::class.'::STATUS_PENDING_APPROVER_REVIEW') ? LoanApplication::STATUS_PENDING_APPROVER_REVIEW : 'pending_approver_review';
+            $statusPendingBpmReview = defined(LoanApplication::class.'::STATUS_PENDING_BPM_REVIEW') ? LoanApplication::STATUS_PENDING_BPM_REVIEW : 'pending_bpm_review';
+
             $pendingApprovalStatuses = [
-                defined(LoanApplication::class.'::STATUS_PENDING_SUPPORT') ? LoanApplication::STATUS_PENDING_SUPPORT : 'pending_support',
-                defined(LoanApplication::class.'::STATUS_PENDING_HOD_REVIEW') ? LoanApplication::STATUS_PENDING_HOD_REVIEW : 'pending_hod_review',
-                defined(LoanApplication::class.'::STATUS_PENDING_BPM_REVIEW') ? LoanApplication::STATUS_PENDING_BPM_REVIEW : 'pending_bpm_review',
+                $statusPendingSupport,
+                $statusPendingApproverReview, // Updated from PENDING_HOD_REVIEW
+                $statusPendingBpmReview,
             ];
 
             if (in_array($loanApplication->status, $pendingApprovalStatuses) && $loanApplication->approvals()->count() === 0 && class_exists(Approval::class)) {
                 $currentApprovalStage = null;
-                if ($loanApplication->status === (defined(LoanApplication::class.'::STATUS_PENDING_SUPPORT') ? LoanApplication::STATUS_PENDING_SUPPORT : 'pending_support')) {
-                    $currentApprovalStage = defined(Approval::class.'::STAGE_LOAN_SUPPORT_REVIEW') ? Approval::STAGE_LOAN_SUPPORT_REVIEW : 'loan_support_review';
-                } elseif ($loanApplication->status === (defined(LoanApplication::class.'::STATUS_PENDING_HOD_REVIEW') ? LoanApplication::STATUS_PENDING_HOD_REVIEW : 'pending_hod_review')) {
-                    $currentApprovalStage = defined(Approval::class.'::STAGE_LOAN_HOD_REVIEW') ? Approval::STAGE_LOAN_HOD_REVIEW : 'loan_hod_review';
-                } elseif ($loanApplication->status === (defined(LoanApplication::class.'::STATUS_PENDING_BPM_REVIEW') ? LoanApplication::STATUS_PENDING_BPM_REVIEW : 'pending_bpm_review')) {
-                    $currentApprovalStage = defined(Approval::class.'::STAGE_LOAN_BPM_REVIEW') ? Approval::STAGE_LOAN_BPM_REVIEW : 'loan_bpm_review';
+                $stageLoanSupportReview = defined(Approval::class.'::STAGE_LOAN_SUPPORT_REVIEW') ? Approval::STAGE_LOAN_SUPPORT_REVIEW : 'loan_support_review';
+                $stageLoanApproverReview = defined(Approval::class.'::STAGE_LOAN_APPROVER_REVIEW') ? Approval::STAGE_LOAN_APPROVER_REVIEW : 'loan_approver_review'; // New stage
+                $stageLoanBpmReview = defined(Approval::class.'::STAGE_LOAN_BPM_REVIEW') ? Approval::STAGE_LOAN_BPM_REVIEW : 'loan_bpm_review';
+
+                if ($loanApplication->status === $statusPendingSupport) {
+                    $currentApprovalStage = $stageLoanSupportReview;
+                } elseif ($loanApplication->status === $statusPendingApproverReview) { // Updated status check
+                    $currentApprovalStage = $stageLoanApproverReview; // Updated stage assignment
+                } elseif ($loanApplication->status === $statusPendingBpmReview) {
+                    $currentApprovalStage = $stageLoanBpmReview;
                 }
 
                 if ($currentApprovalStage) {
@@ -105,18 +116,19 @@ class LoanApplicationFactory extends EloquentFactory
 
                     if (!$officerForApproval) {
                         $roleForStage = null;
-                        if ($currentApprovalStage === (defined(Approval::class.'::STAGE_LOAN_SUPPORT_REVIEW') ? Approval::STAGE_LOAN_SUPPORT_REVIEW : 'loan_support_review')) {
-                             $roleForStage = 'Approver';
-                        } elseif ($currentApprovalStage === (defined(Approval::class.'::STAGE_LOAN_HOD_REVIEW') ? Approval::STAGE_LOAN_HOD_REVIEW : 'loan_hod_review')) {
-                            $roleForStage = 'HOD';
-                        } elseif ($currentApprovalStage === (defined(Approval::class.'::STAGE_LOAN_BPM_REVIEW') ? Approval::STAGE_LOAN_BPM_REVIEW : 'loan_bpm_review')) {
+                        if ($currentApprovalStage === $stageLoanSupportReview) {
+                             $roleForStage = 'Approver'; // Or specific supporting role
+                        } elseif ($currentApprovalStage === $stageLoanApproverReview) { // Updated stage check
+                            $roleForStage = 'Approver'; // Role for the new "Approver Review" stage (e.g., general 'Approver', or could be specific like 'Section Head')
+                        } elseif ($currentApprovalStage === $stageLoanBpmReview) {
                             $roleForStage = 'BPM Staff';
                         }
 
                         if ($roleForStage) {
-                             $officerForApproval = User::role($roleForStage)->inRandomOrder()->first();
+                             $officerForApproval = User::role($roleForStage)->where('id', '!=', $loanApplication->user_id)->inRandomOrder()->first();
                         }
-                        $officerForApproval = $officerForApproval ?? User::inRandomOrder()->first() ?? User::factory()->create();
+                        // Fallback if no specific role officer found or role not defined
+                        $officerForApproval = $officerForApproval ?? User::where('id', '!=', $loanApplication->user_id)->inRandomOrder()->first() ?? User::factory()->create();
                     }
 
                     Approval::factory()
@@ -140,8 +152,20 @@ class LoanApplicationFactory extends EloquentFactory
             'submitted_at' => now()->subMinutes(10)
         ]);
     }
-    public function pendingHodReview(): static { return $this->pendingSupport()->state(['status' => defined(LoanApplication::class.'::STATUS_PENDING_HOD_REVIEW') ? LoanApplication::STATUS_PENDING_HOD_REVIEW : 'pending_hod_review']); }
-    public function pendingBpmReview(): static { return $this->pendingHodReview()->state(['status' => defined(LoanApplication::class.'::STATUS_PENDING_BPM_REVIEW') ? LoanApplication::STATUS_PENDING_BPM_REVIEW : 'pending_bpm_review']); }
+    // Updated state method name and logic
+    public function pendingApproverReview(): static {
+        return $this->pendingSupport()->state([
+            'status' => defined(LoanApplication::class.'::STATUS_PENDING_APPROVER_REVIEW') ? LoanApplication::STATUS_PENDING_APPROVER_REVIEW : 'pending_approver_review'
+        ]);
+    }
+    // public function pendingHodReview(): static { return $this->pendingSupport()->state(['status' => defined(LoanApplication::class.'::STATUS_PENDING_HOD_REVIEW') ? LoanApplication::STATUS_PENDING_HOD_REVIEW : 'pending_hod_review']); } // Old state
+
+    public function pendingBpmReview(): static {
+        // Now depends on pendingApproverReview as the preceding state
+        return $this->pendingApproverReview()->state([
+            'status' => defined(LoanApplication::class.'::STATUS_PENDING_BPM_REVIEW') ? LoanApplication::STATUS_PENDING_BPM_REVIEW : 'pending_bpm_review'
+        ]);
+    }
     public function approved(): static {
         return $this->pendingBpmReview()->state([
             'status' => defined(LoanApplication::class.'::STATUS_APPROVED') ? LoanApplication::STATUS_APPROVED : 'approved',
@@ -150,7 +174,7 @@ class LoanApplicationFactory extends EloquentFactory
         ]);
     }
     public function rejected(): static {
-        return $this->pendingSupport()->state([
+        return $this->pendingSupport()->state([ // Or pendingApproverReview if rejection can happen at that stage too
             'status' => defined(LoanApplication::class.'::STATUS_REJECTED') ? LoanApplication::STATUS_REJECTED : 'rejected',
             'rejection_reason' => $this->faker->sentence,
             'rejected_at' => now(),
@@ -174,7 +198,6 @@ class LoanApplicationFactory extends EloquentFactory
         ]);
     }
     public function certified(): static { return $this->state(['applicant_confirmation_timestamp' => now()->subMinutes(10)]); }
-    // FIX APPLIED HERE: Changed 'applicationItems' to 'loanApplicationItems' to match the relationship method name in LoanApplication model
     public function withItems(int $count = 2): static { return $this->has(LoanApplicationItem::factory()->count($count), 'loanApplicationItems'); }
     public function deleted(): static { return $this->state(['deleted_at' => now()]); }
 

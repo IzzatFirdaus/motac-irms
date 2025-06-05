@@ -6,7 +6,7 @@
     or system overview relevant to your users.
 --}}
 
-@extends('layouts.app') {{-- Assuming layouts.app is your MOTAC-themed Bootstrap layout --}}
+@extends('layouts.app') {{-- Assuming layouts.app is your MOTAC-themed Bootstrap layout --}} /* [cite: 3] */
 
 @section('title', __('Selamat Datang ke Sistem MOTAC'))
 
@@ -23,11 +23,11 @@
                 </p>
                 {{-- Example Button to Dashboard --}}
                 @auth
-                    <a href="{{ route('dashboard') }}" class="btn btn-primary btn-lg mt-3">
+                    <a href="{{ route('dashboard') }}" class="btn btn-primary btn-lg mt-3"> /* [cite: 3] */
                         <i class="bi bi-speedometer2 me-2"></i>{{ __('Pergi ke Papan Pemuka') }}
                     </a>
                 @else
-                    <a href="{{ route('login') }}" class="btn btn-primary btn-lg mt-3">
+                    <a href="{{ route('login') }}" class="btn btn-primary btn-lg mt-3"> /* [cite: 3] */
                         <i class="bi bi-box-arrow-in-right me-2"></i>{{ __('Log Masuk') }}
                     </a>
                 @endauth
@@ -46,7 +46,8 @@
                         {{ __('Mohon akaun emel rasmi MOTAC atau ID pengguna untuk sistem dalaman dengan mudah melalui platform ini.') }}
                     </p>
                     @auth
-                        <a href="{{-- route('email-applications.create') --}}" class="btn btn-outline-light btn-sm"> {{-- Placeholder route --}}
+                        {{-- MODIFIED: Corrected route name based on web.php --}}
+                        <a href="{{ route('email-applications.create') }}" class="btn btn-outline-light btn-sm"> /* [cite: 3] */
                             <i class="bi bi-plus-circle-fill me-1"></i>{{ __('Buat Permohonan Emel Baru') }}
                         </a>
                     @endauth
@@ -63,7 +64,8 @@
                         {{ __('Perlukan peralatan ICT untuk tugasan rasmi? Semak ketersediaan dan buat permohonan pinjaman di sini.') }}
                     </p>
                     @auth
-                        <a href="{{-- route('loan-applications.create') --}}" class="btn btn-outline-primary btn-sm"> {{-- Placeholder route --}}
+                        {{-- MODIFIED: Corrected route name based on web.php --}}
+                        <a href="{{ route('loan-applications.create') }}" class="btn btn-outline-primary btn-sm"> /* [cite: 3] */
                             <i class="bi bi-handbag-fill me-1"></i> {{ __('Mohon Pinjaman Peralatan') }}
                         </a>
                     @endauth

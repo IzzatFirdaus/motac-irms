@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Notifications;
 
-use App\Models\Equipment;
-use App\Models\LoanApplication;
-use App\Models\LoanTransaction;
-use App\Models\LoanTransactionItem;
-use App\Models\User;
+use App\Models\Equipment; //
+use App\Models\LoanApplication; //
+use App\Models\LoanTransaction; //
+use App\Models\LoanTransactionItem; //
+use App\Models\User; //
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -34,12 +34,12 @@ final class EquipmentIssuedNotification extends Notification implements ShouldQu
         $this->issuedByOfficer = $issuedByOfficer;
     }
 
-    public function via(User $notifiable): array // Changed to User
+    public function via(User $notifiable): array
     {
         return ['mail', 'database'];
     }
 
-    public function toMail(User $notifiable): MailMessage // Changed to User
+    public function toMail(User $notifiable): MailMessage
     {
         $applicantName = $this->loanApplication->user?->name ?? $notifiable->name ?? __('Pemohon');
         $applicationId = $this->loanApplication->id ?? 'N/A';
@@ -56,7 +56,8 @@ final class EquipmentIssuedNotification extends Notification implements ShouldQu
                 /** @var LoanTransactionItem $item */
                 $equipment = $item->equipment;
                 if ($equipment instanceof Equipment) {
-                    $assetTypeDisplay = $equipment->assetTypeDisplay ?? __('Peralatan');
+                    // CHANGED: Use asset_type_label accessor
+                    $assetTypeDisplay = $equipment->asset_type_label ?? __('Peralatan'); //
                     $brandAndModel = trim(($equipment->brand ?? '') . ' ' . ($equipment->model ?? ''));
 
                     $mailMessage->line(
@@ -76,15 +77,13 @@ final class EquipmentIssuedNotification extends Notification implements ShouldQu
         $mailMessage->line(__('Sila pastikan anda menjaga peralatan dengan baik dan memulangkannya sebelum atau pada tarikh tamat tempoh pinjaman.'));
 
         $applicationUrl = '#';
-        // Standardized route name
-        $routeName = 'resource-management.my-applications.loan.show';
+        $routeName = 'resource-management.my-applications.loan.show'; // Standardized route name
         if ($this->loanApplication->id && Route::has($routeName)) {
             try {
-                // Ensure correct parameter name for the route
                 $applicationUrl = route($routeName, ['loan_application' => $this->loanApplication->id]);
             } catch (\Exception $e) {
                 Log::error('Error generating URL for EquipmentIssuedNotification mail: ' . $e->getMessage(), ['loan_application_id' => $this->loanApplication->id]);
-                $applicationUrl = '#';
+                $applicationUrl = '#'; // Fallback
             }
         }
 
@@ -97,7 +96,7 @@ final class EquipmentIssuedNotification extends Notification implements ShouldQu
         return $mailMessage;
     }
 
-    public function toArray(User $notifiable): array // Changed to User
+    public function toArray(User $notifiable): array
     {
         $applicationId = $this->loanApplication->id ?? null;
         $applicantName = $this->loanApplication->user?->name ?? __('Pemohon');
@@ -106,7 +105,8 @@ final class EquipmentIssuedNotification extends Notification implements ShouldQu
         $itemsDetails = $this->issueTransaction->loanTransactionItems->map(function (LoanTransactionItem $item) {
             $equipment = $item->equipment;
             if ($equipment instanceof Equipment) {
-                 $assetTypeDisplay = $equipment->assetTypeDisplay ?? __('Peralatan');
+                 // CHANGED: Use asset_type_label accessor
+                 $assetTypeDisplay = $equipment->asset_type_label ?? __('Peralatan'); //
                  $brandAndModel = trim(($equipment->brand ?? '') . ' ' . ($equipment->model ?? ''));
                 return "{$assetTypeDisplay}" . ($brandAndModel ? " ({$brandAndModel})" : "") . ", Tag: ".($equipment->tag_id ?? '-').", Siri: ".($equipment->serial_number ?? '-')." - Kuantiti: {$item->quantity_transacted}";
             }
@@ -114,15 +114,13 @@ final class EquipmentIssuedNotification extends Notification implements ShouldQu
         })->toArray();
 
         $applicationUrl = '#';
-        // Standardized route name
-        $routeName = 'resource-management.my-applications.loan.show';
+        $routeName = 'resource-management.my-applications.loan.show'; // Standardized route name
         if ($applicationId && Route::has($routeName)) {
             try {
-                 // Ensure correct parameter name for the route
                 $applicationUrl = route($routeName, ['loan_application' => $applicationId]);
             } catch (\Exception $e) {
                 Log::error('Error generating URL for EquipmentIssuedNotification array: ' . $e->getMessage(), ['loan_application_id' => $applicationId]);
-                 $applicationUrl = '#';
+                 $applicationUrl = '#'; // Fallback
             }
         }
 

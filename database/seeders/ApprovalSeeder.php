@@ -69,11 +69,10 @@ class ApprovalSeeder extends Seeder
 
             Approval::factory()
                 ->forApprovable($application)
-                ->stage(Approval::STAGE_EMAIL_SUPPORT_REVIEW) // Changed from generic STAGE_SUPPORT_REVIEW
+                ->stage(Approval::STAGE_EMAIL_SUPPORT_REVIEW)
                 ->status($chosenStatus)
                 ->create([
                     'officer_id' => $officerId,
-                    // created_by, updated_by handled by BlameableObserver or factory
                 ]);
 
             $firstApproval = $application->approvals()->where('stage', Approval::STAGE_EMAIL_SUPPORT_REVIEW)->latest()->first();
@@ -87,7 +86,6 @@ class ApprovalSeeder extends Seeder
                     ->status($nextChosenStatus)
                     ->create([
                         'officer_id' => $nextOfficerId,
-                        // created_by, updated_by handled by BlameableObserver or factory
                     ]);
             }
         }
@@ -101,11 +99,10 @@ class ApprovalSeeder extends Seeder
 
             Approval::factory()
                 ->forApprovable($application)
-                ->stage(Approval::STAGE_LOAN_SUPPORT_REVIEW) // Changed from generic STAGE_SUPPORT_REVIEW
+                ->stage(Approval::STAGE_LOAN_SUPPORT_REVIEW)
                 ->status($chosenStatus)
                 ->create([
                     'officer_id' => $officerId,
-                    // created_by, updated_by handled by BlameableObserver or factory
                 ]);
 
             $firstApproval = $application->approvals()->where('stage', Approval::STAGE_LOAN_SUPPORT_REVIEW)->latest()->first();
@@ -115,15 +112,15 @@ class ApprovalSeeder extends Seeder
                 $nextChosenStatus = Arr::random($approvalStatuses);
                 Approval::factory()
                     ->forApprovable($application)
-                    ->stage(Approval::STAGE_LOAN_HOD_REVIEW)
+                    ->stage(Approval::STAGE_LOAN_APPROVER_REVIEW) // MODIFIED from STAGE_LOAN_HOD_REVIEW
                     ->status($nextChosenStatus)
                     ->create([
                         'officer_id' => $nextOfficerId,
-                        // created_by, updated_by handled by BlameableObserver or factory
                     ]);
-                // Optionally add BPM review stage if HOD approved
-                $hodApproval = $application->approvals()->where('stage', Approval::STAGE_LOAN_HOD_REVIEW)->latest()->first();
-                if ($hodApproval && $hodApproval->status === Approval::STATUS_APPROVED) {
+
+                // Optionally add BPM review stage if HOD (now Approver) approved
+                $approverReviewApproval = $application->approvals()->where('stage', Approval::STAGE_LOAN_APPROVER_REVIEW)->latest()->first(); // MODIFIED variable name and stage
+                if ($approverReviewApproval && $approverReviewApproval->status === Approval::STATUS_APPROVED) { // MODIFIED variable name
                     if ($officerIds->isEmpty()) continue;
                     $bpmOfficerId = $officerIds->random();
                     $bpmChosenStatus = Arr::random($approvalStatuses);
@@ -144,11 +141,10 @@ class ApprovalSeeder extends Seeder
             Approval::factory()
                 ->count(3)
                 ->forApprovable($randomApprovable)
-                ->stage(Approval::STAGE_GENERAL_REVIEW) // Using a more generic stage
-                ->deleted() // This state in ApprovalFactory should handle deleted_at and ideally deleted_by
+                ->stage(Approval::STAGE_GENERAL_REVIEW)
+                ->deleted()
                 ->create([
                     'officer_id' => $officerIds->random(),
-                    // created_by, updated_by handled by BlameableObserver or factory
                 ]);
             Log::info('Created 3 soft-deleted approvals.');
         }
@@ -162,7 +158,7 @@ class ApprovalSeeder extends Seeder
     protected function getPotentialOfficerIds(?int $excludeUserId = null): EloquentCollection
     {
         // Define roles that typically handle approvals
-        $approverRoleNames = ['Admin', 'BPM Staff', 'IT Admin', 'HOD', 'Approver']; // Adjust as per your RoleAndPermissionSeeder
+        $approverRoleNames = ['Admin', 'BPM Staff', 'IT Admin', 'HOD', 'Approver'];
 
         $query = User::query()->whereHas('roles', function (Builder $q) use ($approverRoleNames) {
             $q->whereIn('name', $approverRoleNames);

@@ -35,7 +35,7 @@ final class ApplicationSubmitted extends Notification implements ShouldQueue
         $this->application = $application;
         // Eager load necessary relations
         if ($this->application instanceof LoanApplication) {
-            $this->application->loadMissing(['user:id,name,email', 'applicationItems:id,loan_application_id,equipment_type,quantity_requested']);
+            $this->application->loadMissing(['user:id,name,email', 'loanApplicationItems:id,loan_application_id,equipment_type,quantity_requested']);
             $this->applicationTypeDisplay = __('Permohonan Pinjaman Peralatan ICT');
         } elseif ($this->application instanceof EmailApplication) {
             $this->application->loadMissing(['user:id,name,email']);
@@ -89,9 +89,9 @@ final class ApplicationSubmitted extends Notification implements ShouldQueue
                             'endDate' => $this->formatDate($loanApp->loan_end_date)
                         ]));
 
-            if ($loanApp->applicationItems && $loanApp->applicationItems->count() > 0) {
+            if ($loanApp->loanApplicationItems && $loanApp->loanApplicationItems->count() > 0) {
                 $mailMessage->line(" ")->line(__('Senarai Peralatan Dimohon:'));
-                foreach ($loanApp->applicationItems as $item) {
+                foreach ($loanApp->loanApplicationItems as $item) {
                     $mailMessage->line(__('- Jenis: :eqType (Kuantiti: :qty)', [
                         'eqType' => $item->equipment_type,
                         'qty' => $item->quantity_requested

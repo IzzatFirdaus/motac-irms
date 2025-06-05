@@ -32,22 +32,13 @@
         console.log('%c[SCRIPTS.BLADE.PHP] DOMContentLoaded event fired!', 'color: #28a745; font-weight: bold;');
 
         // --- START: Global Theme Toggling JavaScript ---
-        console.log('%c[Theme Script] Initializing theme functions...', 'color: #007bff; font-weight: bold;');
-        const THEME_STORAGE_KEY = 'motac_theme'; // Made key more specific
+        // console.log('%c[Theme Script] Initializing theme functions...', 'color: #007bff; font-weight: bold;'); // Can be verbose
+        const THEME_STORAGE_KEY = 'motac_theme';
         const HTML_ELEMENT = document.documentElement;
         const DEFAULT_THEME = 'light'; // Your system's default theme
 
-        function applyTheme(theme) {
-            console.log('[Theme] Applying theme now:', theme);
-            HTML_ELEMENT.setAttribute('data-bs-theme', theme);
-            updateNavbarThemeSwitcherIcon(theme); // Update the icon in the navbar
-        }
-
         function updateNavbarThemeSwitcherIcon(theme) {
-            console.log('[Theme] Attempting to update navbar icon for theme:', theme);
             const switcherLink = document.getElementById('motacNavbarThemeSwitcher');
-            console.log('[Theme] Switcher link element (ID: motacNavbarThemeSwitcher):', switcherLink);
-
             if (switcherLink) {
                 const icon = switcherLink.querySelector('i');
                 if (icon) {
@@ -57,21 +48,27 @@
                     icon.className = `bi ${theme === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill'} fs-5`;
                     switcherLink.setAttribute('title', theme === 'dark' ? darkModeTitle : lightModeTitle);
                     switcherLink.setAttribute('aria-label', theme === 'dark' ? darkModeTitle : lightModeTitle);
-                    console.log('[Theme] Navbar icon class updated to:', icon.className);
+                    // console.log('[Theme Script] Navbar icon class updated to:', icon.className); // Verbose
                 } else {
-                    console.error('[Theme] Icon element (<i> tag) NOT found inside theme switcher link.');
+                    // This error is relevant if the switcher link exists but its icon tag is missing.
+                    console.error('[Theme Script] Icon element (<i> tag) NOT found inside #motacNavbarThemeSwitcher.');
                 }
             } else {
-                console.warn('[Theme] Theme switcher link with ID "motacNavbarThemeSwitcher" NOT found in DOM. Icon cannot be updated.');
+                // This is an informational message, expected on pages like /login where the switcher is not present.
+                console.info('[Theme Script] Optional: motacNavbarThemeSwitcher element not found. Navbar icon update skipped.');
             }
         }
 
+        function applyTheme(theme) {
+            // console.log('[Theme Script] Applying theme to HTML element:', theme); // Verbose
+            HTML_ELEMENT.setAttribute('data-bs-theme', theme);
+            updateNavbarThemeSwitcherIcon(theme); // This will update the icon if the element exists
+        }
+
         window.globalToggleAppTheme = function() {
-            console.log('%c[Theme] globalToggleAppTheme function CALLED by click!', 'color: #28a745; font-weight: bold;');
+            console.log('%c[Theme Script] globalToggleAppTheme function CALLED!', 'color: #28a745; font-weight: bold;');
             let currentTheme = HTML_ELEMENT.getAttribute('data-bs-theme') || DEFAULT_THEME;
-            console.log('[Theme] Current theme before toggle:', currentTheme);
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            console.log('[Theme] New theme to apply:', newTheme);
 
             localStorage.setItem(THEME_STORAGE_KEY, newTheme);
             applyTheme(newTheme);
@@ -81,63 +78,110 @@
             }
         };
 
-        function initializeTheme() {
-            console.log('[Theme] initializeTheme function started.');
+        function initializeCoreTheme() {
+            // console.log('[Theme Script] initializeCoreTheme function started.'); // Verbose
             const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
-            const serverSetTheme = HTML_ELEMENT.getAttribute('data-bs-theme'); // Theme set by server on initial render
+            const serverSetTheme = HTML_ELEMENT.getAttribute('data-bs-theme'); // Theme potentially set by server-side on initial render
             const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             let determinedTheme = DEFAULT_THEME; // Default to 'light'
 
-            console.log('[Theme] - localStorage theme ("' + THEME_STORAGE_KEY + '"):', storedTheme);
-            console.log('[Theme] - Server-set data-bs-theme attribute:', serverSetTheme);
-            console.log('[Theme] - System prefers dark scheme:', systemPrefersDark);
-
             if (storedTheme) {
                 determinedTheme = storedTheme;
-                console.log('[Theme] Priority 1: Using stored theme from localStorage:', determinedTheme);
             } else if (serverSetTheme && (serverSetTheme === 'light' || serverSetTheme === 'dark')) {
-                // If no localStorage preference, respect what the server initially rendered
+                // Respect server-set theme if no local storage override
                 determinedTheme = serverSetTheme;
-                console.log('[Theme] Priority 2: Using server-set theme (no localStorage override):', determinedTheme);
             } else if (systemPrefersDark) {
                 determinedTheme = 'dark';
-                console.log('[Theme] Priority 3: Using system preference (dark):', determinedTheme);
-            } else {
-                console.log('[Theme] Priority 4: Using default theme (light):', determinedTheme);
             }
+            // else, determinedTheme remains DEFAULT_THEME
 
-            console.log('[Theme] Final initial theme to apply by initializeTheme():', determinedTheme);
+            // console.log('[Theme Script] Final initial theme to apply:', determinedTheme); // Verbose
             applyTheme(determinedTheme);
         }
 
-        // Check if the switcher element exists before trying to initialize.
-        // The element might be missing if the navbar isn't rendered or if it was removed.
-        if (document.readyState === 'loading') { // DOM not ready yet
-            console.warn('[Theme Script] DOM not ready when script is parsed. Initialization deferred to DOMContentLoaded.');
-        } else { // DOM is already ready (interactive or complete)
-             console.log('[Theme Script] DOM was already ready. Checking for switcher element.');
-             if(document.getElementById('motacNavbarThemeSwitcher')) {
-                 console.log('[Theme Script] motacNavbarThemeSwitcher element IS present. Initializing theme logic immediately.');
-                 initializeTheme();
-             } else {
-                 console.warn('[Theme Script] motacNavbarThemeSwitcher element NOT present when trying immediate initialization.');
-             }
-        }
+        // Always initialize the core theme settings (e.g., setting data-bs-theme on <html>).
+        // The updateNavbarThemeSwitcherIcon function (called within applyTheme)
+        // will gracefully handle cases where the switcher UI element is not present.
+        initializeCoreTheme();
         // --- END: Global Theme Toggling JavaScript ---
 
         // Existing Toastr and Bootstrap components initialization
         if (typeof toastr !== 'undefined') {
-            toastr.options = { /* ... your toastr options ... */ };
-            window.addEventListener('toastr', event => { /* ... your toastr listener ... */ });
+            toastr.options = {
+                "closeButton": true,
+                "debug": false,
+                "newestOnTop": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "preventDuplicates": true,
+                "onclick": null,
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "5000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+                // ... any other specific toastr options you use ...
+            };
+            window.addEventListener('toastr', event => {
+                if (event.detail && event.detail.type && event.detail.message) {
+                    if (toastr[event.detail.type]) {
+                        toastr[event.detail.type](event.detail.message, event.detail.title || null);
+                    } else {
+                        console.warn('[Scripts.blade.php] Invalid Toastr type:', event.detail.type);
+                    }
+                }
+            });
         } else {
             console.warn('[Scripts.blade.php] Toastr library not found.');
         }
-        const getBsInstance = (id, Comp) => { /* ... */ };
-        window.addEventListener('openModal', e => getBsInstance(e.detail?.elementId, bootstrap.Modal)?.show());
-        window.addEventListener('closeModal', e => getBsInstance(e.detail?.elementId, bootstrap.Modal)?.hide());
-        // ... other listeners ...
+
+        // Placeholder for getBsInstance as it was in your original file.
+        // The modal listeners below use Bootstrap's static methods directly for robustness.
+        const getBsInstance = (id, Comp) => {
+            /* User's original placeholder comment or actual implementation for getBsInstance */
+            // console.warn('[Scripts.blade.php] getBsInstance is a placeholder and might need implementation if used elsewhere.');
+            return null; // Default placeholder behavior
+        };
+
+        window.addEventListener('openModal', e => {
+            const modalId = e.detail?.elementId;
+            if (modalId) {
+                const element = document.getElementById(modalId);
+                if (element) {
+                    let instance = bootstrap.Modal.getInstance(element);
+                    if (!instance) {
+                        instance = new bootstrap.Modal(element);
+                    }
+                    instance.show();
+                } else {
+                    console.warn('[Scripts.blade.php] Element with ID "' + modalId + '" not found for openModal event.');
+                }
+            }
+        });
+
+        window.addEventListener('closeModal', e => {
+            const modalId = e.detail?.elementId;
+            if (modalId) {
+                const element = document.getElementById(modalId);
+                if (element) {
+                    const instance = bootstrap.Modal.getInstance(element);
+                    instance?.hide(); // Use optional chaining as instance might be null if not initialized
+                } else {
+                    console.warn('[Scripts.blade.php] Element with ID "' + modalId + '" not found for closeModal event.');
+                }
+            }
+        });
+
+        // Initialize all Bootstrap tooltips on the page
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.map(function(el) { return new bootstrap.Tooltip(el); });
+        tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // ... any other global listeners or initializations ...
     });
 </script>
 

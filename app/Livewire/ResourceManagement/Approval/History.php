@@ -73,7 +73,7 @@ class History extends Component
                 'approvable' => function ($morphTo) {
                     $morphTo->morphWith([
                         EmailApplication::class => ['user:id,name,title'],
-                        LoanApplication::class => ['user:id,name,title', 'applicationItems:id,loan_application_id,equipment_type,quantity_approved'],
+                        LoanApplication::class => ['user:id,name,title', 'loanApplicationItems:id,loan_application_id,equipment_type,quantity_approved'],
                     ]);
                 },
                 'officer:id,name,title',
@@ -125,7 +125,7 @@ class History extends Component
                                     ->orWhere('personal_email', 'like', $searchTerm);
                           });
                           if ($type === LoanApplication::class) {
-                              $morphQ->orWhereHas('applicationItems.equipment', function ($itemQ) use ($searchTerm) {
+                              $morphQ->orWhereHas('loanApplicationItems.equipment', function ($itemQ) use ($searchTerm) {
                                   $itemQ->where('tag_id', 'like', $searchTerm)
                                         ->orWhere('model', 'like', $searchTerm) // Assuming equipment model has 'model'
                                         ->orWhere('brand', 'like', $searchTerm); // Assuming equipment model has 'brand'

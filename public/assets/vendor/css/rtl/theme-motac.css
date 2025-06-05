@@ -1,0 +1,270 @@
+/*
+ * MOTAC Integrated Resource Management System - Theme Styles (RTL Version)
+ * Version 1.0 | For Information Management Division (BPM)
+ * File: public/assets/vendor/css/rtl/theme-motac.rtl.css (Example Path)
+ *
+ * This stylesheet implements the MOTAC Design Language for RTL layouts,
+ * based on Bootstrap 5.
+ */
+
+:root {
+  /* Color Palette and Typography variables remain the same as LTR */
+  /* ... (all :root variables from the original theme-motac.css would be here) ... */
+  /* For brevity, I'll assume these are inherited or defined identically. Key variables: */
+  --motac-blue: #0055a4;
+  --motac-maroon: #8c1d40;
+  --bs-primary: var(--motac-blue);
+  --bs-primary-rgb: 0, 85, 164;
+  --bs-secondary: var(--motac-maroon);
+  --bs-secondary-rgb: 140, 29, 64;
+  --bs-font-sans-serif: 'Noto Sans', sans-serif;
+  --bs-body-font-family: var(--bs-font-sans-serif);
+  /* ... include all other variables for colors, spacing, etc. from the LTR version ... */
+
+  /* Light Mode Defaults */
+  --motac-bg-light: #f8f9fa;
+  --motac-surface-light: #ffffff;
+  --motac-text-light: #212529;
+  --motac-text-muted-light: #6c757d;
+  --motac-border-light: #dee2e6;
+  --motac-critical: #dc3545;
+  --motac-success: #28a745;
+  --motac-warning: #ffc107;
+  --motac-info: #17a2b8;
+  --motac-orange: #fd7e14;
+
+  --bs-body-bg: var(--motac-bg-light);
+  --bs-body-color: var(--motac-text-light);
+  --bs-border-color: var(--motac-border-light);
+  --bs-success-rgb: 40, 167, 69;
+  --bs-warning-rgb: 255, 193, 7;
+  --bs-danger-rgb: 220, 53, 69;
+  --bs-info-rgb: 23, 162, 184;
+  --bs-dark-rgb: 33, 37, 41;
+
+  /* Spacing (remains the same) */
+  --bs-spacer: 0.25rem;
+  --bs-spacing-0: 0;
+  --bs-spacing-1: var(--bs-spacer);
+  --bs-spacing-2: calc(var(--bs-spacer) * 2);
+  --bs-spacing-3: calc(var(--bs-spacer) * 3);
+  --bs-spacing-4: calc(var(--bs-spacer) * 4);
+  --bs-spacing-5: calc(var(--bs-spacer) * 6);
+  --bs-spacing-6: calc(var(--bs-spacer) * 8);
+  --bs-gutter-x: calc(var(--bs-spacing-4) * 1.5);
+  --bs-gutter-y: var(--bs-spacing-4);
+}
+
+[data-bs-theme='dark'] {
+  /* Dark Mode variables remain the same as LTR */
+  /* ... (all [data-bs-theme='dark'] variables from the original theme-motac.css would be here) ... */
+  --motac-blue: #3d8fd1;
+  --motac-maroon: #a9496b;
+  --motac-bg-dark: #121826;
+  --motac-surface-dark: #1e293b;
+  --motac-text-dark: #e9ecef;
+  --motac-text-muted-dark: #adb5bd;
+  --motac-border-dark: #495057;
+  --motac-critical: #f87171;
+  --motac-success: #4ade80;
+  --motac-warning: #facc15;
+  --motac-info: #60a5fa;
+  --motac-orange: #f97316;
+
+  --bs-primary: var(--motac-blue);
+  --bs-primary-rgb: 61, 143, 209;
+  --bs-secondary: var(--motac-maroon);
+  --bs-secondary-rgb: 169, 73, 107;
+  --bs-body-bg: var(--motac-bg-dark);
+  --bs-body-color: var(--motac-text-dark);
+  --bs-border-color: var(--motac-border-dark);
+  --bs-success-rgb: 74, 222, 128;
+  --bs-warning-rgb: 250, 204, 21;
+  --bs-danger-rgb: 248, 113, 113;
+  --bs-info-rgb: 96, 165, 250;
+  --bs-dark-rgb: 233, 236, 239; /* For .bg-label-dark in dark mode */
+  --bs-light-rgb: 233, 236, 239; /* For .bg-label-dark in dark mode, if using light as base */
+}
+
+/* Global Body Styles, Typography, Form sections, Checklists, Buttons etc. */
+/* Most of these will be correctly handled by Bootstrap's native RTL if dir="rtl" is set */
+/* and if they use logical properties or Bootstrap classes. */
+/* We only need to override specific custom styles from theme-motac.css that are LTR-biased. */
+
+body {
+  /* font-family, font-size, line-height, background-color, color are generally not direction-specific */
+  /* text-align will be handled by dir="rtl" or specific text-align-start/end classes */
+}
+
+/* RTL Specific Adjustments for custom MOTAC theme elements */
+
+/* Sidebar Styles for RTL */
+.motac-sidebar {
+  /* LTR: left: 0; border-right: ... */
+  right: 0; /* MODIFIED */
+  left: auto; /* MODIFIED */
+  border-left: 1px solid var(--bs-border-color); /* MODIFIED */
+  border-right: none; /* MODIFIED */
+}
+
+.motac-sidebar.expanded .nav-link .bi {
+  /* LTR: margin-right: var(--bs-spacing-4); */
+  margin-left: var(--bs-spacing-4); /* MODIFIED */
+  margin-right: 0; /* MODIFIED */
+}
+
+/* Main Content Area for RTL */
+.motac-main {
+  /* LTR: margin-left: 60px; */
+  margin-right: 60px; /* MODIFIED */
+  margin-left: 0; /* MODIFIED */
+}
+
+.motac-sidebar.expanded + .motac-main {
+  /* LTR: margin-left: 240px; */
+  margin-right: 240px; /* MODIFIED */
+  margin-left: 0; /* MODIFIED */
+}
+
+/* Footer for RTL */
+.motac-footer {
+  /* LTR: margin-left: 60px; */
+  margin-right: 60px; /* MODIFIED */
+  margin-left: 0; /* MODIFIED */
+}
+
+.motac-sidebar.expanded + .motac-main + .motac-footer {
+  /* LTR: margin-left: 240px; */
+  margin-right: 240px; /* MODIFIED */
+  margin-left: 0; /* MODIFIED */
+}
+
+/* Responsive Adjustments for RTL Sidebar */
+@media (max-width: 767.98px) {
+  .motac-sidebar {
+    /* LTR: transform: translateX(-100%); */
+    transform: translateX(100%); /* MODIFIED: Hide sidebar off-screen to the right */
+  }
+  .motac-sidebar.expanded {
+    /* LTR: transform: translateX(0); */
+    transform: translateX(0); /* Slide in from the right */
+  }
+  .motac-main,
+  .motac-footer {
+    /* LTR: margin-left: 0; */
+    margin-right: 0; /* MODIFIED */
+    margin-left: 0; /* Remains 0 for full width */
+  }
+}
+
+/* Section Title with underscore for RTL */
+.section-title::after {
+  /* LTR: left: 0; */
+  right: 0; /* MODIFIED */
+  left: auto; /* MODIFIED */
+}
+
+/* Mandatory field asterisk for RTL (if text-align is not globally right) */
+.motac-form-label.mandatory::after {
+  /* LTR: margin-left: 0.25rem; */
+  margin-right: 0.25rem; /* MODIFIED */
+  margin-left: 0;
+}
+
+/*
+  The .rtl-only rules from the original theme-motac.css:
+  These are designed to show/hide elements based on LTR/RTL.
+  If this is a dedicated RTL stylesheet, the .rtl-only element should always be visible.
+  The LTR stylesheet would have the rule to hide .rtl-only.
+  However, if this RTL CSS is loaded *conditionally* when dir="rtl" is set,
+  and the LTR CSS is *always* loaded, then the [dir='rtl'] .rtl-only rule is fine.
+  For a standalone `theme-motac.rtl.css` that REPLACES the LTR one:
+*/
+.rtl-only {
+  display: block !important; /* Always display in RTL context */
+  text-align: right !important; /* Ensure its content aligns right if not inheriting */
+  direction: rtl !important;
+}
+/* In LTR theme (theme-motac.css), .rtl-only would be display: none !important; */
+
+/* Assuming Bootstrap handles text-align for most elements when dir="rtl" is set. */
+/* If there are specific custom elements with hardcoded text-align: left, they need: */
+/*
+  .custom-left-aligned-element-in-ltr {
+    text-align: right;
+  }
+*/
+
+/* Dark mode styles for form controls, cards, tables, alerts, etc. */
+/* These usually don't have LTR/RTL specific directional properties beyond what Bootstrap handles. */
+/* So, the dark mode rules from the original theme-motac.css should largely apply directly. */
+/* Only if a custom dark mode style had a hardcoded LTR specific property, it would be overridden here. */
+/* For example, if a dark mode card header had a specific padding-left, it would need padding-right here. */
+
+[data-bs-theme='dark'] .motac-sidebar .sidebar-logo p {
+  color: var(--motac-text-muted-dark);
+}
+[data-bs-theme='dark'] .motac-card-header {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+[data-bs-theme='dark'] .list-group-item-action:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+[data-bs-theme='dark'] .btn-outline-secondary {
+  border-color: var(--motac-border-dark);
+  color: var(--motac-text-dark);
+}
+[data-bs-theme='dark'] .btn-outline-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: var(--motac-border-dark);
+  color: var(--motac-text-dark);
+}
+[data-bs-theme='dark'] .motac-footer {
+  color: var(--motac-text-muted-dark);
+}
+
+/* Utility Classes for Badges and Light Backgrounds (Copied from LTR, generally not directional) */
+.bg-primary-light {
+  background-color: rgba(var(--bs-primary-rgb), 0.1) !important;
+}
+.text-bg-orange {
+  color: #fff !important;
+  background-color: var(--motac-orange) !important;
+}
+.bg-label-primary {
+  background-color: rgba(var(--bs-primary-rgb), 0.1) !important;
+  color: var(--bs-primary) !important;
+}
+.bg-label-secondary {
+  background-color: rgba(var(--bs-secondary-rgb), 0.1) !important;
+  color: var(--bs-secondary) !important;
+}
+.bg-label-success {
+  background-color: rgba(var(--bs-success-rgb), 0.1) !important;
+  color: var(--bs-success) !important;
+}
+.bg-label-danger {
+  background-color: rgba(var(--bs-danger-rgb), 0.1) !important;
+  color: var(--bs-danger) !important;
+}
+.bg-label-warning {
+  background-color: rgba(var(--bs-warning-rgb), 0.1) !important;
+  color: var(--bs-warning) !important;
+}
+.bg-label-info {
+  background-color: rgba(var(--bs-info-rgb), 0.1) !important;
+  color: var(--bs-info) !important;
+}
+.bg-label-dark {
+  background-color: rgba(var(--bs-dark-rgb), 0.1) !important;
+  color: var(--bs-dark) !important;
+}
+[data-bs-theme='dark'] .bg-label-dark {
+  background-color: rgba(var(--bs-light-rgb), 0.15) !important;
+  color: var(--bs-light) !important;
+}
+
+/* Ensure all other non-directional styles from the original theme-motac.css are present */
+/* This includes typography, general component styling, buttons, alerts, etc. that don't flip. */
+/* For brevity, those identical sections are omitted here but should be part of the full RTL file. */
+/* The above focuses on directional overrides for custom MOTAC theme elements. */

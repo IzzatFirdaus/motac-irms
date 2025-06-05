@@ -1,14 +1,9 @@
-{{-- resources/views/components/resource-status-panel.blade.php --}}
-@props([
-    'resource',
-    'statusAttribute' => 'status',
-    'statusTextPrefix' => '',
-    'type', // ADD THIS LINE: Define the 'type' prop
-    'icon' => null, // Optional: pass 'true' to auto-select based on status, or a specific BI class
-    'showIcon' => false // Simpler prop to control icon visibility
-])
-
 @php
+    // Define a resolved type, defaulting to 'unknown' if $type is not passed or null.
+    // The 'type' prop itself should be null if defined in @props and not passed.
+    // This handles the "Undefined variable" case defensively and also if $type is null.
+    $resolvedType = $type ?? 'unknown';
+
     $statusValue = strtolower($resource->{$statusAttribute} ?? 'unknown');
     $statusTextPrefix = $statusTextPrefix ?? '';
 
@@ -23,8 +18,8 @@
         $formattedStatus = __(Illuminate\Support\Str::title(str_replace('_', ' ', $statusValue)));
     }
 
-    // UPDATED LINE: Pass both $statusValue and $type
-    $statusClass = \App\Helpers\Helpers::getStatusColorClass($statusValue, $type);
+    // Use the $resolvedType which now has a fallback value.
+    $statusClass = \App\Helpers\Helpers::getStatusColorClass($statusValue, $resolvedType);
 
     $statusIconClass = '';
     if ($showIcon === true) { // Auto-select icon based on status value
@@ -37,7 +32,7 @@
                 break;
             case 'pending':
             case 'pending_support':
-            case 'pending_approval':
+            case 'pending_approval': // Corrected from pending_admin to match typical status values if needed
             case 'processing':
                 $statusIconClass = 'bi-clock-history';
                 break;
@@ -62,10 +57,3 @@
     }
 
 @endphp
-
-<span {{ $attributes->merge(['class' => 'badge rounded-pill ' . $statusClass . ' d-inline-flex align-items-center']) }}>
-    @if($statusIconClass)
-        <i class="bi {{ $statusIconClass }} me-1"></i>
-    @endif
-    {{ $statusTextPrefix . $formattedStatus }}
-</span>

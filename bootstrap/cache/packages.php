@@ -138,6 +138,13 @@
       0 => 'Pixinvent\\Jetstrap\\JetstrapServiceProvider',
     ),
   ),
+  'railsware/mailtrap-php' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Mailtrap\\Bridge\\Laravel\\MailtrapSdkProvider',
+    ),
+  ),
   'spatie/laravel-activitylog' => 
   array (
     'providers' => 

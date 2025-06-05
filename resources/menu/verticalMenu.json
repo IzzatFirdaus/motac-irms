@@ -3,76 +3,82 @@
     {
       "url": "/dashboard",
       "name": "menu.dashboard",
-      "icon": "menu-icon tf-icons ti ti-smart-home",
+      "icon": "house-door-fill",
       "slug": "dashboard",
       "routeName": "dashboard",
-      "role": ["Admin", "BPM Staff", "IT Admin", "Employee", "Approver"]
+      "role": ["Admin", "BPM Staff", "IT Admin", "User", "Approver"]
     },
     {
       "menuHeader": "menu.section.resource_management",
       "name": "menu.section.resource_management",
-      "role": ["Admin", "BPM Staff", "IT Admin", "Employee", "Approver"]
+      "role": ["Admin", "BPM Staff", "IT Admin", "User", "Approver"]
     },
     {
       "name": "menu.my_applications.title",
-      "icon": "menu-icon tf-icons ti ti-folder-search",
+      "icon": "folder-check",
       "slug": "my-applications",
-      "role": ["Employee", "Admin", "BPM Staff", "IT Admin", "Approver"],
+      "role": ["User", "Admin", "BPM Staff", "IT Admin", "Approver"],
       "submenu": [
         {
           "url": "/email-applications",
           "name": "menu.my_applications.email",
+          "icon": "envelope-paper-fill",
           "slug": "email-applications.index",
           "routeName": "email-applications.index",
-          "role": ["Employee"]
+          "role": ["User"]
         },
         {
           "url": "/loan-applications",
           "name": "menu.my_applications.loan",
+          "icon": "laptop-fill",
           "slug": "loan-applications.index",
           "routeName": "loan-applications.index",
-          "role": ["Employee"]
+          "role": ["User"]
         }
       ]
     },
     {
       "name": "menu.apply_for_resources.title",
-      "icon": "menu-icon tf-icons ti ti-file-plus",
+      "icon": "file-earmark-plus-fill",
       "slug": "application-forms",
-      "role": ["Employee", "Admin"],
+      "role": ["User", "Admin"],
       "submenu": [
         {
           "url": "/email-applications/create",
           "name": "menu.apply_for_resources.email",
+          "icon": "envelope-plus-fill",
           "slug": "email-applications.create",
-          "routeName": "email-applications.create"
+          "routeName": "email-applications.create",
+          "role": ["User"]
         },
         {
           "url": "/loan-applications/create",
           "name": "menu.apply_for_resources.loan",
+          "icon": "box-arrow-up-right",
           "slug": "loan-applications.create",
-          "routeName": "loan-applications.create"
+          "routeName": "loan-applications.create",
+          "role": ["User"]
         }
       ]
     },
     {
       "url": "/approvals/dashboard",
       "name": "menu.approvals_dashboard",
-      "icon": "menu-icon tf-icons ti ti-user-check",
+      "icon": "person-check-fill",
       "slug": "approvals.dashboard",
       "routeName": "approvals.dashboard",
       "role": ["Admin", "Approver", "BPM Staff", "IT Admin"]
     },
     {
       "name": "menu.administration.title",
-      "icon": "menu-icon tf-icons ti ti-settings-cog",
+      "icon": "gear-wide-connected",
       "slug": "resource-management",
       "routeNamePrefix": "resource-management",
       "role": ["Admin", "BPM Staff", "IT Admin"],
       "submenu": [
         {
           "name": "menu.administration.bpm_operations.title",
-          "icon": "menu-icon tf-icons ti ti-tool",
+          "icon": "tools",
           "slug": "resource-management.bpm",
           "routeNamePrefix": "resource-management.bpm",
           "role": ["Admin", "BPM Staff"],
@@ -80,12 +86,14 @@
             {
               "url": "/resource-management/bpm/outstanding-loans",
               "name": "menu.administration.bpm_operations.outstanding_loans",
+              "icon": "hourglass-split",
               "slug": "resource-management.bpm.outstanding-loans",
               "routeName": "resource-management.bpm.outstanding-loans"
             },
             {
               "url": "/resource-management/bpm/issued-loans",
               "name": "menu.administration.bpm_operations.issued_loans",
+              "icon": "box-arrow-in-up-right",
               "slug": "resource-management.bpm.issued-loans",
               "routeName": "resource-management.bpm.issued-loans"
             }
@@ -94,7 +102,7 @@
         {
           "url": "/resource-management/equipment-admin",
           "name": "menu.administration.equipment_management",
-          "icon": "menu-icon tf-icons ti ti-device-laptop",
+          "icon": "pc-display",
           "slug": "resource-management.equipment-admin.index",
           "routeName": "resource-management.equipment-admin.index",
           "role": ["Admin", "BPM Staff"]
@@ -102,7 +110,7 @@
         {
           "url": "/resource-management/email-applications-admin",
           "name": "menu.administration.email_applications",
-          "icon": "menu-icon tf-icons ti ti-mail-cog",
+          "icon": "envelope-gear-fill",
           "slug": "resource-management.email-applications-admin.index",
           "routeName": "resource-management.email-applications-admin.index",
           "role": ["Admin", "IT Admin"]
@@ -110,7 +118,7 @@
         {
           "url": "/resource-management/users-admin",
           "name": "menu.administration.users_list",
-          "icon": "menu-icon tf-icons ti ti-users-group",
+          "icon": "people-fill",
           "slug": "resource-management.users-admin.index",
           "routeName": "resource-management.users-admin.index",
           "role": ["Admin"]
@@ -123,7 +131,7 @@
     },
     {
       "name": "menu.settings.title",
-      "icon": "menu-icon tf-icons ti ti-adjustments-horizontal",
+      "icon": "sliders",
       "slug": "settings",
       "routeNamePrefix": "settings",
       "role": ["Admin"],
@@ -131,30 +139,35 @@
         {
           "url": "/settings/users",
           "name": "menu.settings.user_management",
+          "icon": "person-lines-fill",
           "slug": "settings.users.index",
           "routeName": "settings.users.index"
         },
         {
           "url": "/settings/roles",
           "name": "menu.settings.roles_permissions",
+          "icon": "person-badge-fill",
           "slug": "settings.roles.index",
           "routeName": "settings.roles.index"
         },
         {
           "url": "/settings/grades",
           "name": "menu.settings.grades_management",
+          "icon": "bar-chart-steps",
           "slug": "settings.grades.index",
           "routeName": "settings.grades.index"
         },
         {
           "url": "/settings/departments",
           "name": "menu.settings.departments_management",
+          "icon": "building-fill",
           "slug": "settings.departments.index",
           "routeName": "settings.departments.index"
         },
         {
           "url": "/settings/positions",
           "name": "menu.settings.positions_management",
+          "icon": "person-workspace",
           "slug": "settings.positions.index",
           "routeName": "settings.positions.index"
         }
@@ -162,7 +175,7 @@
     },
     {
       "name": "menu.reports.title",
-      "icon": "menu-icon tf-icons ti ti-chart-bar",
+      "icon": "file-earmark-bar-graph-fill",
       "slug": "reports",
       "routeNamePrefix": "reports",
       "role": ["Admin", "BPM Staff"],
@@ -170,24 +183,28 @@
         {
           "url": "/reports/equipment-inventory",
           "name": "menu.reports.equipment_report",
+          "icon": "card-list",
           "slug": "reports.equipment-inventory",
           "routeName": "reports.equipment-inventory"
         },
         {
           "url": "/reports/email-accounts",
           "name": "menu.reports.email_accounts_report",
+          "icon": "envelope-check-fill",
           "slug": "reports.email-accounts",
           "routeName": "reports.email-accounts"
         },
         {
           "url": "/reports/loan-applications",
           "name": "menu.reports.loan_applications_report",
+          "icon": "journal-text",
           "slug": "reports.loan-applications",
           "routeName": "reports.loan-applications"
         },
         {
           "url": "/reports/activity-log",
           "name": "menu.reports.user_activity_report",
+          "icon": "person-bounding-box",
           "slug": "reports.activity-log",
           "routeName": "reports.activity-log",
           "role": ["Admin"]
@@ -197,9 +214,9 @@
     {
       "url": "/log-viewer",
       "name": "menu.system_logs",
-      "icon": "menu-icon tf-icons ti ti-file-text",
+      "icon": "file-text-fill",
       "slug": "log-viewer.index",
-      "routeName": "log-viewer.index", 
+      "routeName": "log-viewer.index",
       "target": "_blank",
       "role": ["Admin"]
     }

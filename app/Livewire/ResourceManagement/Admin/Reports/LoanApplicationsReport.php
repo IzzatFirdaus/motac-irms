@@ -48,7 +48,7 @@ class LoanApplicationsReport extends Component
         $query = LoanApplication::with([
             'user:id,name,department_id',      // System Design: User model fields
             'user.department:id,name',         // System Design: Department model fields
-            'applicationItems',                // System Design: LoanApplicationItem relation
+            'loanApplicationItems',                // System Design: LoanApplicationItem relation
             // 'responsibleOfficer:id,name',   // Load if displayed in report
             // 'supportingOfficer:id,name'     // Load if displayed in report
         ]);

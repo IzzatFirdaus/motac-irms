@@ -211,7 +211,7 @@ return [
         'loan_start_date' => __('Tarikh Mula Pinjaman'),
         'loan_end_date' => __('Tarikh Akhir Pinjaman'),
         'responsible_officer_id' => __('Pegawai Bertanggungjawab'),
-        'applicationItems' => __('Item Pinjaman'),
+        'loanApplicationItems' => __('Item Pinjaman'),
         'applicationItems.*.equipment_type' => __('Jenis Peralatan'),
         'applicationItems.*.quantity_requested' => __('Kuantiti Dimohon'),
 

@@ -61,10 +61,8 @@
     </div>
 
     <div wire:loading.remove>
-        {{-- Corrected: Changed $this->pendingApprovalTasks to $this->approvalTasks --}}
         @if ($this->approvalTasks->isEmpty())
             <x-alert type="info" class="d-flex align-items-center">
-                 {{-- Iconography: Design Language 2.4. Changed from ti-info-circle --}}
                  <span class="alert-icon me-2"><i class="bi bi-info-circle-fill fs-4"></i></span>
                 {{ __('Tiada tugasan kelulusan yang sepadan dengan tapisan semasa.') }}
             </x-alert>
@@ -84,13 +82,11 @@
                             </tr>
                         </thead>
                         <tbody class="table-border-bottom-0">
-                            {{-- Corrected: Changed $this->pendingApprovalTasks to $this->approvalTasks --}}
                             @foreach ($this->approvalTasks as $approvalTask)
                                 @php $approvable = $approvalTask->approvable; @endphp
                                 <tr wire:key="approval-task-{{ $approvalTask->id }}">
                                     <td class="px-3 py-2 small"><strong>#{{ $approvalTask->id }}</strong></td>
                                     <td class="px-3 py-2 small">
-                                        {{-- Iconography: Design Language 2.4. Changed from ti-* --}}
                                         @if ($approvable instanceof \App\Models\EmailApplication) <i class="bi bi-envelope-fill text-info me-1"></i>{{ __('E-mel/ID') }}
                                         @elseif ($approvable instanceof \App\Models\LoanApplication) <i class="bi bi-laptop text-primary me-1"></i>{{ __('Pinjaman ICT') }}
                                         @else <i class="bi bi-file-earmark-text-fill text-secondary me-1"></i>{{ __('Tidak Diketahui') }}
@@ -100,8 +96,6 @@
                                     <td class="px-3 py-2 small">{{ optional(optional($approvable)->user)->name ?? (optional($approvable)->applicant_name ?? __('N/A')) }}</td>
                                     <td class="px-3 py-2 small">{{ __(App\Models\Approval::getStageDisplayName($approvalTask->stage)) }}</td>
                                     <td class="px-3 py-2 small">
-                                        {{-- Ensure Helpers::getStatusColorClass provides MOTAC themed badge classes --}}
-                                        {{-- Corrected: Assuming getBootstrapStatusColorClass is the correct method name from Helpers --}}
                                         <span class="badge {{ \App\Helpers\Helpers::getStatusColorClass($approvalTask->status, 'approval') }}">{{ __(Str::title(str_replace('_', ' ', $approvalTask->status))) }}</span>
                                     </td>
                                     <td class="px-3 py-2 small">{{ $approvalTask->created_at->translatedFormat(config('app.date_format_my_short', 'd M Y')) }}</td>
@@ -109,18 +103,31 @@
                                         @if ($approvalTask->status === \App\Models\Approval::STATUS_PENDING)
                                             @can('update', $approvalTask)
                                                 <button type="button" wire:click="openApprovalModal({{ $approvalTask->id }})"
-                                                        class="btn btn-sm btn-primary"> {{-- Ensure .btn-primary is MOTAC themed --}}
-                                                    {{-- Iconography: Design Language 2.4. Changed from ti-edit --}}
+                                                        class="btn btn-sm btn-primary">
                                                     <i class="bi bi-pencil-square me-1"></i>{{ __('Semak & Bertindak') }}
                                                 </button>
                                             @else
-                                                <span class="text-muted small"><em>{{ __('Tiada kebenaran bertindak') }}</em></span>
+                                                {{-- Link to controller's show view if user can view but not update the task directly via modal --}}
+                                                @can('view', $approvalTask)
+                                                <a href="{{ route('approvals.show', $approvalTask->id) }}" class="btn btn-sm btn-outline-secondary">
+                                                    <i class="bi bi-eye-fill me-1"></i>{{ __('Lihat Butiran') }}
+                                                </a>
+                                                @else
+                                                <span class="text-muted small"><em>{{ __('Tiada kebenaran') }}</em></span>
+                                                @endcan
                                             @endcan
                                         @else
-                                             <a href="{{ $this->getViewApplicationRoute($approvalTask) }}" class="btn btn-sm btn-outline-secondary"> {{-- Ensure .btn-outline-secondary is MOTAC themed --}}
-                                                {{-- Iconography: Design Language 2.4. Changed from ti-eye --}}
-                                                <i class="bi bi-eye-fill me-1"></i>{{ __('Lihat Butiran') }}
-                                            </a>
+                                             {{-- Assuming getViewApplicationRoute is a method in your Livewire component returning a valid URL --}}
+                                             @if(method_exists($this, 'getViewApplicationRoute') && $this->getViewApplicationRoute($approvalTask))
+                                                 <a href="{{ $this->getViewApplicationRoute($approvalTask) }}" class="btn btn-sm btn-outline-secondary">
+                                                     <i class="bi bi-eye-fill me-1"></i>{{ __('Lihat Butiran') }}
+                                                 </a>
+                                             @else
+                                                {{-- Fallback if route method doesn't exist or returns null --}}
+                                                <a href="{{ route('approvals.show', $approvalTask->id) }}" class="btn btn-sm btn-outline-secondary">
+                                                    <i class="bi bi-eye-fill me-1"></i>{{ __('Lihat Tugasan') }}
+                                                </a>
+                                             @endif
                                         @endif
                                     </td>
                                 </tr>
@@ -128,10 +135,9 @@
                         </tbody>
                     </table>
                 </div>
-                {{-- Corrected: Changed $this->pendingApprovalTasks to $this->approvalTasks --}}
                 @if ($this->approvalTasks->hasPages())
                     <div class="card-footer bg-light border-top d-flex justify-content-center py-2 motac-card-footer">
-                        {{ $this->approvalTasks->links() }} {{-- Ensure pagination is Bootstrap 5 styled and MOTAC themed --}}
+                        {{ $this->approvalTasks->links() }}
                     </div>
                 @endif
             </div>
@@ -144,55 +150,83 @@
              style="display: @if($showApprovalModal) block; background-color: rgba(0,0,0,0.5); @else none; @endif"
              aria-labelledby="approvalActionModalLabel" @if($showApprovalModal) aria-modal="true" role="dialog" @else aria-hidden="true" @endif wire:ignore.self>
             <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-                <div class="modal-content"> {{-- Ensure .modal-content is MOTAC themed --}}
+                <div class="modal-content">
                     <form wire:submit.prevent="recordDecision">
-                        <div class="modal-header"> {{-- Ensure .modal-header is MOTAC themed --}}
+                        <div class="modal-header">
                             <h5 class="modal-title d-flex align-items-center" id="approvalActionModalLabel">
-                                <i class="bi bi-clipboard-check-fill me-2"></i> {{-- Added Icon --}}
+                                <i class="bi bi-clipboard-check-fill me-2"></i>
                                 {{ __('Semak Tugasan Kelulusan') }} #{{ $this->currentApprovalDetails->id }}
                                 <small class="d-block text-muted fw-normal mt-1 ms-2">({{ __(App\Models\Approval::getStageDisplayName($this->currentApprovalDetails->stage)) }})</small>
                             </h5>
                             <button type="button" class="btn-close" wire:click="closeApprovalModal" aria-label="{{__('Tutup')}}"></button>
                         </div>
                         <div class="modal-body">
-                            @php $item = $this->currentApprovable; @endphp
-                            @if ($item)
-                                <div class="mb-3 p-3 border rounded bg-light-subtle"> {{-- Ensure bg-light-subtle is MOTAC themed --}}
+                            @php $approvableItemFromDetails = $this->currentApprovalDetails->approvable; @endphp
+                            @if ($approvableItemFromDetails)
+                                <div class="mb-3 p-3 border rounded bg-light-subtle">
                                     <h6 class="mb-2 fw-semibold">{{ __('Butiran Permohonan') }}</h6>
-                                    <dl class="row mb-0 small"> {{-- Added small class for denser info display --}}
+                                    <dl class="row mb-0 small">
                                         <dt class="col-sm-4">{{ __('Jenis Permohonan') }}</dt>
                                         <dd class="col-sm-8">
-                                            {{-- Iconography: Design Language 2.4. Changed from ti-* --}}
-                                            @if ($item instanceof \App\Models\EmailApplication) <i class="bi bi-envelope-fill text-info me-1"></i>{{ __('Permohonan E-mel/ID') }}
-                                            @elseif ($item instanceof \App\Models\LoanApplication) <i class="bi bi-laptop text-primary me-1"></i>{{ __('Permohonan Pinjaman ICT') }}
+                                            @if ($approvableItemFromDetails instanceof \App\Models\EmailApplication) <i class="bi bi-envelope-fill text-info me-1"></i>{{ __('Permohonan E-mel/ID') }}
+                                            @elseif ($approvableItemFromDetails instanceof \App\Models\LoanApplication) <i class="bi bi-laptop text-primary me-1"></i>{{ __('Permohonan Pinjaman ICT') }}
                                             @endif
-                                            (#{{ $item->id }})
+                                            (#{{ $approvableItemFromDetails->id }})
                                         </dd>
                                         <dt class="col-sm-4">{{ __('Pemohon') }}</dt>
-                                        <dd class="col-sm-8">{{ optional($item->user)->name ?? (optional($item)->applicant_name ?? __('N/A')) }}</dd>
+                                        <dd class="col-sm-8">{{ optional($approvableItemFromDetails->user)->name ?? (optional($approvableItemFromDetails)->applicant_name ?? __('N/A')) }}</dd>
 
-                                        @if ($item instanceof \App\Models\EmailApplication)
+                                        @if ($approvableItemFromDetails instanceof \App\Models\EmailApplication)
                                             <dt class="col-sm-4">{{ __('E-mel Dicadang') }}</dt>
-                                            <dd class="col-sm-8">{{ $item->proposed_email ?? __('N/A') }}</dd>
+                                            <dd class="col-sm-8">{{ $approvableItemFromDetails->proposed_email ?? __('N/A') }}</dd>
                                             <dt class="col-sm-4">{{ __('Tujuan/Catatan') }}</dt>
-                                            <dd class="col-sm-8">{{ $item->application_reason_notes ?? __('N/A') }}</dd>
-                                        @elseif ($item instanceof \App\Models\LoanApplication)
+                                            <dd class="col-sm-8">{{ $approvableItemFromDetails->application_reason_notes ?? __('N/A') }}</dd>
+                                        @elseif ($approvableItemFromDetails instanceof \App\Models\LoanApplication)
                                             <dt class="col-sm-4">{{ __('Tujuan Pinjaman') }}</dt>
-                                            <dd class="col-sm-8" style="white-space: pre-wrap;">{{ $item->purpose ?? __('N/A') }}</dd>
+                                            <dd class="col-sm-8" style="white-space: pre-wrap;">{{ $approvableItemFromDetails->purpose ?? __('N/A') }}</dd>
                                             <dt class="col-sm-4">{{ __('Lokasi Penggunaan') }}</dt>
-                                            <dd class="col-sm-8">{{ $item->location ?? __('N/A') }}</dd>
+                                            <dd class="col-sm-8">{{ $approvableItemFromDetails->location ?? __('N/A') }}</dd>
                                             <dt class="col-sm-4">{{ __('Tempoh Pinjaman') }}</dt>
                                             <dd class="col-sm-8">
-                                                {{ optional($item->loan_start_date)->translatedFormat(config('app.datetime_format_my', 'd M Y, g:i A')) }} -
-                                                {{ optional($item->loan_end_date)->translatedFormat(config('app.datetime_format_my', 'd M Y, g:i A')) }}
+                                                {{ optional($approvableItemFromDetails->loan_start_date)->translatedFormat(config('app.datetime_format_my', 'd M Y, g:i A')) }} -
+                                                {{ optional($approvableItemFromDetails->loan_end_date)->translatedFormat(config('app.datetime_format_my', 'd M Y, g:i A')) }}
                                             </dd>
-                                            @if ($item->applicationItems && $item->applicationItems->count() > 0)
+                                            {{-- Display Loan Application Items for Quantity Adjustment --}}
+                                            @if ($this->approvalDecision === \App\Models\Approval::STATUS_APPROVED && $approvableItemFromDetails->loanApplicationItems->isNotEmpty())
+                                                <dt class="col-sm-12 mt-3 fw-semibold">{{ __('Penyesuaian Kuantiti Item (Jika Perlu)') }}:</dt>
+                                                <dd class="col-sm-12">
+                                                    @foreach ($this->approvalItems as $index => $approvalItemData)
+                                                        <div class="mb-2 p-2 border rounded-1 bg-white">
+                                                            @php
+                                                                // Find the original application item to display its details
+                                                                $originalLoanItem = $approvableItemFromDetails->loanApplicationItems->firstWhere('id', $approvalItemData['loan_application_item_id']);
+                                                            @endphp
+                                                            @if($originalLoanItem)
+                                                            <p class="mb-1 small">
+                                                                <strong>{{ __('Item') }}:</strong> {{ e(optional(\App\Models\Equipment::getAssetTypeOptions())[$originalLoanItem->equipment_type] ?? $originalLoanItem->equipment_type) }} <br>
+                                                                <strong>{{ __('Kuantiti Dipohon') }}:</strong> {{ $originalLoanItem->quantity_requested }}
+                                                            </p>
+                                                            <label for="approvalItems_{{ $index }}_quantity_approved" class="form-label form-label-sm">{{ __('Kuantiti Diluluskan (Max: :qty)',['qty' => $originalLoanItem->quantity_requested]) }}:</label>
+                                                            <input type="number"
+                                                                   wire:model.lazy="approvalItems.{{ $index }}.quantity_approved"
+                                                                   id="approvalItems_{{ $index }}_quantity_approved"
+                                                                   class="form-control form-control-sm @error('approvalItems.'.$index.'.quantity_approved') is-invalid @enderror"
+                                                                   min="0"
+                                                                   max="{{ $originalLoanItem->quantity_requested }}">
+                                                            @error('approvalItems.'.$index.'.quantity_approved')
+                                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                            @enderror
+                                                            @endif
+                                                        </div>
+                                                    @endforeach
+                                                </dd>
+                                            @elseif ($approvableItemFromDetails->loanApplicationItems->isNotEmpty())
                                                 <dt class="col-sm-12 mt-2">{{ __('Item Dipohon:') }}</dt>
                                                 <dd class="col-sm-12">
-                                                    <ul class="list-unstyled ps-3">
-                                                        @foreach ($item->applicationItems as $loanItem)
+                                                    <ul class="list-unstyled ps-3 mb-0">
+                                                        @foreach ($approvableItemFromDetails->loanApplicationItems as $loanItem)
                                                             <li>- {{ $loanItem->equipment_type ? (\App\Models\Equipment::ASSET_TYPES_LABELS[$loanItem->equipment_type] ?? Str::title(str_replace('_', ' ', $loanItem->equipment_type))) : 'N/A' }}
-                                                                ({{ __('Kuantiti') }}: {{ $loanItem->quantity_requested }})
+                                                                ({{ __('Kuantiti Dipohon') }}: {{ $loanItem->quantity_requested }})
                                                             </li>
                                                         @endforeach
                                                     </ul>
@@ -200,9 +234,8 @@
                                             @endif
                                         @endif
                                         <dt class="col-sm-4 mt-2">{{ __('Tarikh Mohon') }}</dt>
-                                        <dd class="col-sm-8 mt-2">{{ optional($item->created_at)->translatedFormat(config('app.datetime_format_my', 'd M Y, g:i A')) }}</dd>
+                                        <dd class="col-sm-8 mt-2">{{ optional($approvableItemFromDetails->created_at)->translatedFormat(config('app.datetime_format_my', 'd M Y, g:i A')) }}</dd>
                                     </dl>
-                                    {{-- Assuming getViewApplicationRoute is a method in your Livewire component --}}
                                     @if(method_exists($this, 'getViewApplicationRoute') && $this->getViewApplicationRoute($this->currentApprovalDetails))
                                         <a href="{{ $this->getViewApplicationRoute($this->currentApprovalDetails) }}" target="_blank" class="btn btn-sm btn-outline-info mt-2">
                                             <i class="bi bi-box-arrow-up-right me-1"></i>{{ __('Lihat Permohonan Penuh') }}
@@ -217,7 +250,6 @@
                                 <label for="approvalDecisionModal" class="form-label fw-semibold">{{ __('Keputusan Anda') }} <span class="text-danger">*</span></label>
                                 <select wire:model.live="approvalDecision" id="approvalDecisionModal" class="form-select @error('approvalDecision') is-invalid @enderror">
                                     <option value="">-- {{ __('Pilih Keputusan') }} --</option>
-                                    {{-- Assuming Approval::getDecisionStatuses() returns key-value pairs for statuses --}}
                                     @foreach(\App\Models\Approval::getDecisionStatuses() as $statusValue => $statusLabel)
                                         <option value="{{ $statusValue }}">{{ __($statusLabel) }}</option>
                                     @endforeach
@@ -237,10 +269,10 @@
                                 {{ __('Memproses keputusan...') }}
                             </div>
                         </div>
-                        <div class="modal-footer"> {{-- Ensure .modal-footer is MOTAC themed --}}
+                        <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" wire:click="closeApprovalModal">{{ __('Batal') }}</button>
-                            <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="recordDecision"> {{-- Ensure .btn-primary is MOTAC themed --}}
-                                <i class="bi bi-send-check-fill me-1"></i> {{-- Added Icon --}}
+                            <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="recordDecision">
+                                <i class="bi bi-send-check-fill me-1"></i>
                                 {{ __('Hantar Keputusan') }}
                             </button>
                         </div>
@@ -260,12 +292,12 @@
                      }
                 }
 
-                @this.on('showApprovalModalEvent', () => { // Changed from showApprovalModalJs to match dispatch in PHP
+                @this.on('showApprovalModalEvent', () => {
                     if(approvalModalInstance) {
                         approvalModalInstance.show();
                     }
                 });
-                @this.on('closeApprovalModalEvent', () => { // Changed from hideApprovalModalJs to match dispatch in PHP
+                @this.on('closeApprovalModalEvent', () => {
                     if(approvalModalInstance && approvalModalInstance._isShown) {
                         approvalModalInstance.hide();
                     }

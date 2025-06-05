@@ -123,7 +123,10 @@ if (document.getElementById('layout-menu')) {
     }
   } else {
     // Removed style switcher element if not using template customizer
-    styleSwitcherToggleEl.parentElement.remove();
+    // MODIFIED: Added null check for styleSwitcherToggleEl and its parentElement
+    if (styleSwitcherToggleEl && styleSwitcherToggleEl.parentElement) {
+      styleSwitcherToggleEl.parentElement.remove();
+    }
   }
 
   // Update light/dark image based on current style
@@ -142,14 +145,17 @@ if (document.getElementById('layout-menu')) {
   if (language !== null && langDropdown.length) {
     // getting selected flag's name and icon class
     let selectedDropdownItem = document.querySelector('a[data-language=' + language + ']');
-    let selectedFlag = selectedDropdownItem.childNodes[1].className;
-
-    // add 'selected' class to current language's dropdown options
-    selectedDropdownItem.classList.add('selected');
-
-    // set selected language's flag
-    let setLangFlag = (document.querySelector('.dropdown-language .dropdown-toggle').childNodes[1].className =
-      selectedFlag);
+    // Null check for selectedDropdownItem and its childNodes
+    if (selectedDropdownItem && selectedDropdownItem.childNodes && selectedDropdownItem.childNodes.length > 1) {
+        let selectedFlag = selectedDropdownItem.childNodes[1].className;
+        // add 'selected' class to current language's dropdown options
+        selectedDropdownItem.classList.add('selected');
+        // set selected language's flag
+        let langToggle = document.querySelector('.dropdown-language .dropdown-toggle');
+        if (langToggle && langToggle.childNodes && langToggle.childNodes.length > 1) {
+            langToggle.childNodes[1].className = selectedFlag;
+        }
+    }
   }
 
   // Notification
@@ -174,7 +180,8 @@ if (document.getElementById('layout-menu')) {
     });
   }
 
-  // Notification: Mark as read/unread onclick of dot
+  // Notification: Mark as read/unread onclick of dot (This comment seems to be a duplicate from above)
+  // Assuming this section is for "Archive Message"
   const notificationArchiveMessageList = document.querySelectorAll('.dropdown-notifications-archive');
   notificationArchiveMessageList.forEach(item => {
     item.addEventListener('click', event => {
@@ -193,15 +200,20 @@ if (document.getElementById('layout-menu')) {
 
   // Accordion active class
   const accordionActiveFunction = function (e) {
-    if (e.type == 'show.bs.collapse' || e.type == 'show.bs.collapse') {
-      e.target.closest('.accordion-item').classList.add('active');
-    } else {
-      e.target.closest('.accordion-item').classList.remove('active');
+    const accordionItem = e.target.closest('.accordion-item');
+    if (!accordionItem) return; // Defensive check
+
+    // MODIFIED: Corrected condition, an 'else if' can be used for 'hide' if specific behavior is needed.
+    // The original logic was: if it's 'show.bs.collapse', add 'active', else (e.g., on 'hide.bs.collapse'), remove 'active'.
+    if (e.type === 'show.bs.collapse') {
+      accordionItem.classList.add('active');
+    } else if (e.type === 'hide.bs.collapse') { // Be explicit for clarity
+      accordionItem.classList.remove('active');
     }
   };
 
   const accordionTriggerList = [].slice.call(document.querySelectorAll('.accordion'));
-  const accordionList = accordionTriggerList.map(function (accordionTriggerEl) {
+  accordionTriggerList.map(function (accordionTriggerEl) {
     accordionTriggerEl.addEventListener('show.bs.collapse', accordionActiveFunction);
     accordionTriggerEl.addEventListener('hide.bs.collapse', accordionActiveFunction);
   });
@@ -242,13 +254,13 @@ if (document.getElementById('layout-menu')) {
           if (window.innerWidth < window.Helpers.LAYOUT_BREAKPOINT) {
             if (document.getElementById('layout-menu')) {
               if (document.getElementById('layout-menu').classList.contains('menu-horizontal')) {
-                menu.switchMenu('vertical');
+                if (menu) menu.switchMenu('vertical'); // Check if menu is initialized
               }
             }
           } else {
             if (document.getElementById('layout-menu')) {
               if (document.getElementById('layout-menu').classList.contains('menu-vertical')) {
-                menu.switchMenu('horizontal');
+                if (menu) menu.switchMenu('horizontal'); // Check if menu is initialized
               }
             }
           }
@@ -363,15 +375,23 @@ if (typeof $ !== 'undefined') {
 
       // Search JSON
       var searchJson = 'search-vertical.json'; // For vertical layout
+      // jQuery's .hasClass() is safe on an empty set (if #layout-menu doesn't exist).
+      // It will simply return false.
       if ($('#layout-menu').hasClass('menu-horizontal')) {
-        var searchJson = 'search-horizontal.json'; // For vertical layout
+        searchJson = 'search-horizontal.json'; // For horizontal layout
       }
       // Search API AJAX call
       var searchData = $.ajax({
-        url: assetsPath + 'json/' + searchJson, //? Use your own search api instead
+        url: assetsPath + 'json/' + searchJson, //? Use your own search api instead. assetsPath needs to be defined.
         dataType: 'json',
         async: false
       }).responseJSON;
+
+      if (!searchData) { // Prevent errors if searchData fails to load
+        console.error("Failed to load search data from: " + assetsPath + 'json/' + searchJson);
+        return; // Exit if search data is not available
+      }
+
       // Init typeahead on searchInput
       searchInput.each(function () {
         var $this = $(this);
@@ -391,17 +411,17 @@ if (typeof $ !== 'undefined') {
               name: 'pages',
               display: 'name',
               limit: 5,
-              source: filterConfig(searchData.pages),
+              source: filterConfig(searchData.pages || []), // Add fallback for pages
               templates: {
                 header: '<h6 class="suggestions-header text-primary mb-0 mx-3 mt-3 pb-2">Pages</h6>',
                 suggestion: function ({ url, icon, name }) {
                   return (
                     '<a href="' +
-                    baseUrl +
+                    baseUrl + // Ensure baseUrl is defined globally
                     url +
                     '">' +
                     '<div>' +
-                    '<i class="ti ' +
+                    '<i class="ti ' + // This still uses ti-* icons
                     icon +
                     ' me-2"></i>' +
                     '<span class="align-middle">' +
@@ -423,7 +443,7 @@ if (typeof $ !== 'undefined') {
               name: 'files',
               display: 'name',
               limit: 4,
-              source: filterConfig(searchData.files),
+              source: filterConfig(searchData.files || []), // Add fallback for files
               templates: {
                 header: '<h6 class="suggestions-header text-primary mb-0 mx-3 mt-3 pb-2">Files</h6>',
                 suggestion: function ({ src, name, subtitle, meta }) {
@@ -431,7 +451,7 @@ if (typeof $ !== 'undefined') {
                     '<a href="javascript:;">' +
                     '<div class="d-flex w-50">' +
                     '<img class="me-3" src="' +
-                    assetsPath +
+                    assetsPath + // Ensure assetsPath is defined globally
                     src +
                     '" alt="' +
                     name +
@@ -463,17 +483,17 @@ if (typeof $ !== 'undefined') {
               name: 'members',
               display: 'name',
               limit: 4,
-              source: filterConfig(searchData.members),
+              source: filterConfig(searchData.members || []), // Add fallback for members
               templates: {
                 header: '<h6 class="suggestions-header text-primary mb-0 mx-3 mt-3 pb-2">Members</h6>',
                 suggestion: function ({ name, src, subtitle }) {
                   return (
                     '<a href="' +
-                    baseUrl +
+                    baseUrl + // Ensure baseUrl is defined globally
                     'app/user/view/account">' +
                     '<div class="d-flex align-items-center">' +
                     '<img class="rounded-circle me-3" src="' +
-                    assetsPath +
+                    assetsPath + // Ensure assetsPath is defined globally
                     src +
                     '" alt="' +
                     name +
@@ -501,13 +521,15 @@ if (typeof $ !== 'undefined') {
           //On typeahead result render.
           .bind('typeahead:render', function () {
             // Show content backdrop,
-            contentBackdrop.addClass('show').removeClass('fade');
+            if (contentBackdrop.length) { // Check if contentBackdrop exists
+                contentBackdrop.addClass('show').removeClass('fade');
+            }
           })
           // On typeahead select
           .bind('typeahead:select', function (ev, suggestion) {
             // Open selected page
-            if (suggestion.url !== 'javascript:;') {
-              window.location = baseUrl + suggestion.url;
+            if (suggestion.url && suggestion.url !== 'javascript:;') { // Check if suggestion.url exists
+              window.location = baseUrl + suggestion.url; // Ensure baseUrl is defined
             }
           })
           // On typeahead close
@@ -516,15 +538,21 @@ if (typeof $ !== 'undefined') {
             searchInput.val('');
             $this.typeahead('val', '');
             // Hide search input wrapper
-            searchInputWrapper.addClass('d-none');
+            if (searchInputWrapper.length) { // Check if searchInputWrapper exists
+                searchInputWrapper.addClass('d-none');
+            }
             // Fade content backdrop
-            contentBackdrop.addClass('fade').removeClass('show');
+            if (contentBackdrop.length) { // Check if contentBackdrop exists
+                contentBackdrop.addClass('fade').removeClass('show');
+            }
           });
 
         // On searchInput keyup, Fade content backdrop if search input is blank
         searchInput.on('keyup', function () {
           if (searchInput.val() == '') {
-            contentBackdrop.addClass('fade').removeClass('show');
+            if (contentBackdrop.length) { // Check if contentBackdrop exists
+                contentBackdrop.addClass('fade').removeClass('show');
+            }
           }
         });
       });
@@ -532,14 +560,21 @@ if (typeof $ !== 'undefined') {
       // Init PerfectScrollbar in search result
       var psSearch;
       $('.navbar-search-suggestion').each(function () {
-        psSearch = new PerfectScrollbar($(this)[0], {
-          wheelPropagation: false,
-          suppressScrollX: true
-        });
+        // Check if element exists and is visible before initializing PerfectScrollbar
+        // $(this).is(':visible') might be useful if the element can be hidden initially.
+        // For now, just checking length which .each() already implies.
+        if ($(this)[0]) { // Ensure the DOM element exists
+            psSearch = new PerfectScrollbar($(this)[0], {
+                wheelPropagation: false,
+                suppressScrollX: true
+            });
+        }
       });
 
       searchInput.on('keyup', function () {
-        psSearch.update();
+        if (psSearch) { // Check if psSearch is initialized
+            psSearch.update();
+        }
       });
     }
   });

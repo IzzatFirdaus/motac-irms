@@ -73,7 +73,7 @@
                                             :id="'loan_app_item_id_' + index" x-model="item.loan_application_item_id"
                                             @change="updateAvailableEquipmentAndMaxQty(index)" required>
                                             <option value="">-- {{ __('Pilih Item Asal') }} --</option>
-                                            @foreach ($loanApplication->applicationItems as $appItem)
+                                            @foreach ($loanApplication->loanApplicationItems as $appItem)
                                                 @if (($appItem->quantity_approved ?? 0) > ($appItem->quantity_issued ?? 0))
                                                     <option value="{{ $appItem->id }}"
                                                         data-equipment-type="{{ $appItem->equipment_type }}"

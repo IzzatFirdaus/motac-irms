@@ -165,37 +165,55 @@
                         class="form-check-label fw-medium">{{ __('Pemohon adalah Pegawai Bertanggungjawab.') }}</label>
                 </div>
 
-                {{-- Show responsible officer details IF applicant IS the responsible officer --}}
                 @if ($applicant_is_responsible_officer)
-                    <p class="text-muted mb-3 fst-italic">
-                        {{ __('Bahagian ini hanya perlu diisi jika Pegawai Bertanggungjawab bukan Pemohon. Jika Pemohon adalah Pegawai Bertanggungjawab, maklumat pemohon akan digunakan.') }}
+                    {{-- Show responsible officer details IF applicant IS the responsible officer --}}
+                    <p class="text-muted mb-3 fst-italic small">
+                        {{ __('Memandangkan anda adalah Pegawai Bertanggungjawab, maklumat anda di Bahagian 1 akan digunakan.') }}
                     </p>
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label
-                                class="form-label fw-medium">{{ __('Nama Penuh Pegawai Bertanggungjawab') }}</label>
+                            <label class="form-label fw-medium">{{ __('Nama Penuh Pegawai Bertanggungjawab') }}</label>
                             <p class="form-control-plaintext p-2 border rounded bg-light-subtle mb-0">
-                                {{ $this->responsibleOfficerName }}</p>
+                                {{ $this->responsibleOfficerName }}</p> {{-- This will be applicant's name --}}
                         </div>
                         <div class="col-md-6">
-                            <label
-                                class="form-label fw-medium">{{ __('No.Telefon Pegawai Bertanggungjawab') }}</label>
+                            <label class="form-label fw-medium">{{ __('No.Telefon Pegawai Bertanggungjawab') }}</label>
                             <p class="form-control-plaintext p-2 border rounded bg-light-subtle mb-0">
-                                {{ $this->responsibleOfficerPhone }}</p>
+                                {{ $this->responsibleOfficerPhone }}</p> {{-- This will be applicant's phone --}}
                         </div>
                         <div class="col-md-12">
-                            <label
-                                class="form-label fw-medium">{{ __('Jawatan & Gred Pegawai Bertanggungjawab') }}</label>
+                            <label class="form-label fw-medium">{{ __('Jawatan & Gred Pegawai Bertanggungjawab') }}</label>
                             <p class="form-control-plaintext p-2 border rounded bg-light-subtle mb-0">
-                                {{ $this->responsibleOfficerPositionAndGrade }}</p>
+                                {{ $this->responsibleOfficerPositionAndGrade }}</p> {{-- This will be applicant's position & grade --}}
+                        </div>
+                    </div>
+                @else
+                    {{-- ADDED: UI to select a different Responsible Officer --}}
+                    <p class="text-muted mb-3 fst-italic small">
+                        {{ __('Sila pilih Pegawai Bertanggungjawab untuk pinjaman ini.') }}
+                    </p>
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label for="responsible_officer_id" class="form-label fw-medium">{{ __('Nama Penuh Pegawai Bertanggungjawab') }}<span class="text-danger">*</span></label>
+                            <select id="responsible_officer_id" wire:model.defer="responsible_officer_id" class="form-select @error('responsible_officer_id') is-invalid @enderror">
+                                <option value="">-- {{ __('Pilih Pegawai Bertanggungjawab') }} --</option>
+                                @foreach ($responsibleOfficerOptions as $id => $name)
+                                    <option value="{{ $id }}">{{ $name }}</option>
+                                @endforeach
+                            </select>
+                            @error('responsible_officer_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            {{-- Note: Displaying the selected officer's details (position, grade, phone) dynamically would require more complex Livewire updates or AlpineJS. --}}
+                            {{-- For now, selection is prioritized as per Issue #1. --}}
                         </div>
                     </div>
                 @endif
             </div>
         </div>
 
-        {{-- MAKLUMAT PEGAWAI PENYOKONG --}}
-        {{--
+        {{-- ADDED/UNCOMMENTED: MAKLUMAT PEGAWAI PENYOKONG --}}
+        {{-- As per BORANG PINJAMAN PERALATAN ICT 2024 SEWAAN C.pdf (Bahagian 5) --}}
         <div class="card motac-card mb-4">
             <div class="card-header motac-card-header p-3">
                 <h2 class="h5 mb-0 fw-semibold d-flex align-items-center">
@@ -217,7 +235,6 @@
                 </div>
             </div>
         </div>
-        --}}
 
         {{-- BAHAGIAN 3: MAKLUMAT PERALATAN --}}
         <div class="card motac-card mb-4">
@@ -242,7 +259,7 @@
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <h3 class="h6 mb-0 fw-medium text-primary">{{ __('Peralatan #') }}{{ $index + 1 }}
                                 </h3>
-                                @if (count($loan_application_items) > 1)
+                                @if (count(array_filter($loan_application_items, fn($i) => empty($i['_delete']))) > 1 || (isset($item['_delete']) && $item['_delete']))
                                     <button type="button" wire:click="removeLoanItem({{ $index }})"
                                         title="{{ __('Buang Peralatan') }}"
                                         class="btn btn-sm btn-icon btn-text-danger p-0">
@@ -250,6 +267,7 @@
                                     </button>
                                 @endif
                             </div>
+                            @if (empty($item['_delete']))
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label for="item_{{ $index }}_equipment_type"
@@ -291,6 +309,13 @@
                                     @enderror
                                 </div>
                             </div>
+                            @else
+                                <div class="alert alert-warning small p-2" role="alert">
+                                    {{ __('Item ini akan dipadam semasa simpan.') }}
+                                    <strong>{{ $item['equipment_type'] ? $this->equipmentTypeOptions[$item['equipment_type']] : '' }}</strong>
+                                    ({{ __('Kuantiti') }}: {{ $item['quantity_requested'] }})
+                                </div>
+                            @endif
                         </div>
                     @empty
                         <div class="text-center py-3 border rounded bg-light-subtle">
@@ -366,9 +391,9 @@
                         </li>
                     </ol>
                 </div>
-                @error('termsScrolled')
+                {{-- @error('termsScrolled')
                     <div class="text-danger small mt-1">{{ $message }}</div>
-                @enderror
+                @enderror --}}
             </div>
         </div>
 
@@ -404,8 +429,9 @@
 
         {{-- Action Buttons --}}
         <div class="d-flex justify-content-end gap-2 pt-3">
+            @if (!$isEditMode || ($isEditMode && $this->loanApplicationInstance?->isDraft()))
             <button type="button" wire:click="resetFormForCreate" class="btn btn-outline-secondary text-uppercase">
-                <i class="bi bi-arrow-counterclockwise me-1"></i> {{ __('Reset Borang') }}
+                <i class="bi bi-arrow-counterclockwise me-1"></i> {{ __('Set Semula') }}
             </button>
             <button type="button" wire:click="saveAsDraft" wire:loading.attr="disabled" wire:target="saveAsDraft"
                 class="btn btn-secondary text-uppercase">
@@ -417,10 +443,11 @@
                     {{ __('Menyimpan...') }}
                 </span>
             </button>
+            @endif
             <button type="submit" wire:loading.attr="disabled" wire:target="submitLoanApplication"
-                class="btn btn-primary text-uppercase" x-bind:disabled="!termsScrolled || !applicantConfirmation">
+                class="btn btn-primary text-uppercase" x-bind:disabled="!applicantConfirmation && !termsScrolled"> {{-- Adjusted disabled condition slightly if termsScrolled remains relevant for UI enable/disable --}}
                 <span wire:loading.remove wire:target="submitLoanApplication">
-                    <i class="bi bi-send-check-fill me-1"></i> {{ __('Hantar Permohonan') }}
+                    <i class="bi bi-send-check-fill me-1"></i> {{ $isEditMode && $this->loanApplicationInstance?->status !== \App\Models\LoanApplication::STATUS_DRAFT ? __('Kemaskini & Hantar Semula') : __('Hantar Permohonan') }}
                 </span>
                 <span wire:loading wire:target="submitLoanApplication" class="d-inline-flex align-items-center">
                     <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
@@ -429,11 +456,11 @@
             </button>
         </div>
         <div class="text-end mt-2">
-            <template x-if="!termsScrolled">
+             <template x-if="!termsScrolled && @js($isSubmittingForApproval ?? false)"> {{-- Only show if actually submitting and termsScrolled validation is active --}}
                 <small class="text-warning fst-italic"><i class="bi bi-exclamation-circle"></i>
                     {{ __('Sila skrol Syarat-syarat Permohonan untuk mengaktifkan butang Hantar.') }}</small>
             </template>
-            <template x-if="termsScrolled && !applicantConfirmation">
+            <template x-if="!applicantConfirmation && @js($isSubmittingForApproval ?? false)"> {{-- Only show if actually submitting --}}
                 <small class="text-warning fst-italic"><i class="bi bi-exclamation-circle"></i>
                     {{ __('Sila buat Pengesahan Pemohon untuk mengaktifkan butang Hantar.') }}</small>
             </template>
@@ -442,8 +469,7 @@
 
     {{-- Footer for Document Number and Effective Date --}}
     <div class="text-center text-muted small mt-5 pt-3 border-top">
-        <p class="mb-0">{{ __('No. Dokumen: PK.(S).KPK.08.(L3) Pin. 1') }}</p>
+        <p class="mb-0">{{ __('No. Dokumen: PK.(S).MOTAC.07.(L3) Pin. 1') }}</p>
         <p class="mb-0">{{ __('Tarikh Kuatkuasa: 1/1/2024') }}</p>
     </div>
-
 </div>

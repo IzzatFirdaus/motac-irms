@@ -1,75 +1,86 @@
 {{-- resources/views/layouts/sections/menu/submenu.blade.php --}}
-{{-- This partial expects $menu (the array of submenu items), $role, and $configData to be passed to it --}}
-<ul class="menu-sub">
-    @if (isset($menu))
-        @foreach ($menu as $submenu)
-            {{-- Role-based access check for submenu items --}}
+{{-- This partial expects $menu (the array of submenu items), $role (current user's role), $configData, and $currentRouteName to be passed to it --}}
+<ul class="menu-sub" role="menu">
+    @if (isset($menu) && is_array($menu))
+        @foreach ($menu as $submenuItem)
             @php
-                $submenuRoles = isset($submenu->role)
-                    ? (is_array($submenu->role)
-                        ? $submenu->role
-                        : [$submenu->role])
-                    : [];
-            @endphp
-            @if (
-                $role === 'Admin' ||
-                    (isset($submenu->role) && !empty($submenuRoles) && in_array($role, $submenuRoles)) ||
-                    !isset($submenu->role)) {{-- Show if Admin, user has role, or if submenu item has no specific roles defined (making it public within its parent context) --}}
+                // Ensure $submenuItem is an object for consistent property access
+                $submenuItem = (object) $submenuItem;
 
-                {{-- Active submenu item logic --}}
-                @php
-                    $activeClass = null;
-                    $active = ($configData['layout'] ?? 'vertical') === 'vertical' ? 'active open' : 'active'; // Parent class if child is active
-                    $currentRouteName = Route::currentRouteName();
+                // Role check for the submenu item
+                $canViewSubmenuItem = false;
+                if ($role === 'Admin') { // $role is the current user's role passed from the parent
+                    $canViewSubmenuItem = true;
+                } elseif (isset($submenuItem->role)) {
+                    $canViewSubmenuItem = in_array($role, (array) $submenuItem->role);
+                } else {
+                    // Default visibility for submenu items without a specific role: visible if user is authenticated
+                    $canViewSubmenuItem = Auth::check();
+                }
 
-                    // Exact match for slug or routeName specified in JSON [cite: 4]
-                    if ($currentRouteName === ($submenu->routeName ?? ($submenu->slug ?? null))) {
-                        $activeClass = 'active';
-                    }
-                    // If this submenu item itself has children, check if current route name starts with its slug prefixes or routeNamePrefix
-                    elseif (isset($submenu->submenu)) {
-                        $matchAgainst = $submenu->routeNamePrefix ?? ($submenu->slug ?? null);
-                        if ($matchAgainst) {
-                            if (is_array($matchAgainst)) {
-                                foreach ($matchAgainst as $slug_or_prefix) {
-                                    if (str_starts_with($currentRouteName, $slug_or_prefix)) {
-                                        $activeClass = $active; // 'active open' for vertical
-                                        break;
-                                    }
-                                }
-                            } else {
-                                if (str_starts_with($currentRouteName, $matchAgainst)) {
-                                    $activeClass = $active; // 'active open' for vertical
-                                }
-                            }
+                // Active state determination
+                $subActiveCheck = false;
+                if (isset($currentRouteName) && isset($submenuItem->routeName) && $currentRouteName === $submenuItem->routeName) {
+                    $subActiveCheck = true;
+                } elseif (isset($currentRouteName) && isset($submenuItem->routeNamePrefix) && str_starts_with($currentRouteName, $submenuItem->routeNamePrefix)) {
+                    $subActiveCheck = true;
+                } elseif (!empty($submenuItem->submenu)) {
+                    // Recursive check for active state in nested submenus can be added here if needed
+                    // For simplicity, this example doesn't go deeper for the 'open' state beyond direct children's prefix.
+                    // A more complex helper function might be needed for deeply nested active states.
+                    foreach($submenuItem->submenu as $nestedSub) {
+                        $nestedSub = (object) $nestedSub;
+                        if (isset($currentRouteName) && (($currentRouteName === ($nestedSub->routeName ?? null)) || (isset($nestedSub->routeNamePrefix) && str_starts_with($currentRouteName, $nestedSub->routeNamePrefix)))) {
+                            $subActiveCheck = true; break;
                         }
                     }
-                @endphp
+                }
 
-                <li class="menu-item {{ $activeClass }}">
-                    <a href="{{ isset($submenu->url) ? url($submenu->url) : 'javascript:void(0)' }}"
-                        class="{{ isset($submenu->submenu) ? 'menu-link menu-toggle' : 'menu-link' }}"
-                        @if (isset($submenu->target) and !empty($submenu->target)) target="{{ $submenu->target }}" @endif>
-                        @if (isset($submenu->icon)) {{-- Icons are optional for submenus --}}
-                            <i class="{{ $submenu->icon }}"></i>
-                        @endif
-                        <div>{{ isset($submenu->name) ? __($submenu->name) : '' }}</div>
-                        @isset($submenu->badge)
-                            <div class="badge bg-label-{{ $submenu->badge[0] }} rounded-pill ms-auto">
-                                {{ $submenu->badge[1] }}</div>
+                $subHasSubmenu = isset($submenuItem->submenu) && is_array($submenuItem->submenu) && count($submenuItem->submenu) > 0;
+
+                // Determine classes for active state and submenu toggling
+                // $configData should be available; check for 'myLayout' or default to 'vertical'
+                $layoutTypeForSubmenu = $configData['myLayout'] ?? ($configData['layout'] ?? 'vertical'); // Check both keys or default
+                $activeOpenClassForSubmenu = $layoutTypeForSubmenu === 'vertical' ? 'active open' : 'active';
+                $subMenuItemClass = $subActiveCheck ? ($subHasSubmenu ? $activeOpenClassForSubmenu : 'active') : '';
+
+                // Determine href for the link
+                $subHref = $submenuItem->url ?? (isset($submenuItem->routeName) && Route::has((string)$submenuItem->routeName) ? route((string)$submenuItem->routeName) : 'javascript:void(0);');
+            @endphp
+
+            @if ($canViewSubmenuItem)
+                <li class="menu-item {{ $subMenuItemClass }}" role="none">
+                    <a href="{{ $subHref }}"
+                        class="{{ $subHasSubmenu ? 'menu-link menu-toggle' : 'menu-link' }}"
+                        role="menuitem"
+                        @if (isset($submenuItem->target) && !empty($submenuItem->target)) target="{{ $submenuItem->target }}" rel="noopener noreferrer" @endif
+                        @if ($subHasSubmenu) aria-haspopup="true" aria-expanded="{{ $subActiveCheck ? 'true' : 'false' }}" @endif >
+
+                        @isset($submenuItem->icon)
+                            {{-- Assuming Bootstrap icons, where $submenuItem->icon is just the name like 'envelope-paper-fill' --}}
+                            <i class="menu-icon bi bi-{{ $submenuItem->icon }}"></i>
+                        @endisset
+
+                        {{-- Robust label rendering --}}
+                        <div>{{ __(($submenuItem->name ?? null) ? $submenuItem->name : '-') }}</div>
+
+                        @isset($submenuItem->badge)
+                            <div class="badge bg-label-{{ $submenuItem->badge[0] }} rounded-pill ms-auto">
+                                {{ __($submenuItem->badge[1]) }}</div>
                         @endisset
                     </a>
 
-                    {{-- Recursively include submenu if it exists --}}
-                    @if (isset($submenu->submenu))
+                    {{-- Recursive include for nested submenus --}}
+                    @if ($subHasSubmenu)
                         @include('layouts.sections.menu.submenu', [
-                            'menu' => $submenu->submenu,
-                            'role' => $role,
-                            'configData' => $configData,
+                            'menu' => $submenuItem->submenu, // Pass the nested submenu array
+                            'role' => $role,                 // Pass the current user's role
+                            'configData' => $configData,     // Pass configData
+                            'currentRouteName' => $currentRouteName // Pass current route name
                         ])
-                    @endisset
-            </li>
-        @endif
-    @endforeach
-@endif
+                    @endif
+                </li>
+            @endif
+        @endforeach
+    @endif
 </ul>

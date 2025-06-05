@@ -18,6 +18,9 @@ return [
     // General minimum grade level for viewing any approval records, if not specifically overridden.
     // Used by ApprovalPolicy::viewAny as a general rule.
     'min_general_view_approval_grade_level' => env('MOTAC_MIN_GENERAL_VIEW_APPROVAL_GRADE_LEVEL', 9),
+
+    // New key for the "General Approver" stage after initial support officer for loan applications
+    'min_loan_general_approver_grade_level' => env('MOTAC_MIN_LOAN_GENERAL_APPROVER_GRADE_LEVEL', 44), // Example: Grade 44 or higher
   ],
 
   'email_provisioning' => [

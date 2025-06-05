@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Models\Approval;
 use App\Models\LoanApplication;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -9,177 +10,188 @@ use Illuminate\Auth\Access\Response;
 
 class LoanApplicationPolicy
 {
-  use HandlesAuthorization;
+    use HandlesAuthorization;
 
-  /**
-   * Perform pre-authorization checks.
-   * Admins can do anything.
-   */
-  public function before(User $user, string $ability): ?bool
-  {
-    if ($user->hasRole('Admin')) { // Standardized role 'Admin'
-      return true;
+    public function before(User $user, string $ability): ?bool
+    {
+        if ($user->hasRole('Admin')) { // Standardized role 'Admin'
+            return true;
+        }
+        return null;
     }
-    return null;
-  }
 
-  /**
-   * Determine whether the user can view any loan applications (e.g., a full list).
-   */
-  public function viewAny(User $user): Response|bool
-  {
-    // Admins handled by before().
-    // BPM Staff or users with specific permission can view all.
-    // ADDED: Approvers should be able to view loan applications for their dashboard/tasks.
-    return $user->hasRole('BPM Staff') || //
-      $user->hasRole('Approver') || // Allow Approvers to view any loan applications
-      $user->can('view_all_loan_applications') // Assumes a permission like 'view_all_loan_applications'
-      ? Response::allow()
-      : Response::deny(__('Anda tidak mempunyai kebenaran untuk melihat senarai permohonan pinjaman ini.'));
-  }
+    public function viewAny(User $user): Response|bool
+    {
+        // Adjusted to allow any authenticated user to view their own,
+        // plus specific roles for broader access.
+        return $user->id !== null // Any authenticated user can potentially see a list (filtered to their own by controller/service)
+            ? Response::allow()
+            : Response::deny(__('Anda tidak mempunyai kebenaran untuk melihat senarai permohonan pinjaman ini.'));
+    }
 
-  /**
-   * Determine whether the user can view the specified loan application.
-   */
-  public function view(User $user, LoanApplication $loanApplication): Response|bool
-  {
-    // Owner, BPM staff, or users with general view permission.
-    // Also consider if responsible officer, supporting officer or current approver should view.
-    // Design Ref (Rev. 3.5): LoanApplication model fields
-    return $user->id === $loanApplication->user_id || //
-      $user->id === $loanApplication->responsible_officer_id || //
-      $user->id === $loanApplication->supporting_officer_id || //
-      ($loanApplication->current_approval_officer_id && $user->id === $loanApplication->current_approval_officer_id) || //
-      $user->hasRole('BPM Staff') || //
-      $user->hasRole('Approver') || // Allow Approvers to view specific loan applications
-      $user->can('view_loan_applications') // Assumes a general permission
-      ? Response::allow()
-      : Response::deny(__('Anda tidak mempunyai kebenaran untuk melihat permohonan pinjaman ini.'));
-  }
+    public function view(User $user, LoanApplication $loanApplication): Response|bool
+    {
+        return $user->id === $loanApplication->user_id || // Applicant
+            $user->id === $loanApplication->responsible_officer_id || // Responsible officer
+            $user->id === $loanApplication->supporting_officer_id || // Supporting officer
+            ($loanApplication->current_approval_officer_id && $user->id === $loanApplication->current_approval_officer_id) || // Current approver
+            $user->hasRole(['BPM Staff', 'Approver', 'HOD']) || // Added HOD for viewing
+            $user->can('view_loan_applications') // General permission
+            ? Response::allow()
+            : Response::deny(__('Anda tidak mempunyai kebenaran untuk melihat permohonan pinjaman ini.'));
+    }
 
-  /**
-   * Determine whether the user can create loan applications.
-   */
-  public function create(User $user): Response|bool
-  {
-    // Any authenticated user can attempt to create. (Eligibility rules apply separately)
-    // Design Ref (Rev. 3.5): Section 7.1
-    return $user->id !== null //
-      ? Response::allow()
-      : Response::deny(__('Anda mesti log masuk untuk membuat permohonan pinjaman.'));
-  }
+    public function create(User $user): Response|bool
+    {
+        // Any authenticated user can attempt to create
+        return $user->id !== null
+            ? Response::allow()
+            : Response::deny(__('Anda mesti log masuk untuk membuat permohonan pinjaman.'));
+    }
 
-  /**
-   * Determine whether the user can update the specified loan application.
-   * Only the applicant can update their own draft application.
-   * Design Ref (Rev. 3.5): LoanApplication model status
-   */
-  public function update(User $user, LoanApplication $loanApplication): Response|bool
-  {
-    // Using isDraft() method from LoanApplication model or direct status check if is_draft is an accessor
-    // The provided LoanApplication model in a previous turn had isDraft() method.
-    return $user->id === $loanApplication->user_id && $loanApplication->isDraft()
-      ? Response::allow()
-      : Response::deny(__('Anda hanya boleh mengemaskini draf permohonan anda sahaja.'));
-  }
+    public function update(User $user, LoanApplication $loanApplication): Response|bool
+    {
+        // Applicant can update their own draft or rejected application
+        return $user->id === $loanApplication->user_id &&
+               ($loanApplication->isDraft() || $loanApplication->status === LoanApplication::STATUS_REJECTED) //
+            ? Response::allow()
+            : Response::deny(__('Anda hanya boleh mengemaskini draf permohonan anda atau permohonan yang telah ditolak.'));
+    }
 
-  /**
-   * Determine whether the user can delete the specified loan application.
-   * Only the applicant can delete their own draft application.
-   * Design Ref (Rev. 3.5): LoanApplication model status
-   */
-  public function delete(User $user, LoanApplication $loanApplication): Response|bool
-  {
-    // Using isDraft() method from LoanApplication model or direct status check
-    return $user->id === $loanApplication->user_id && $loanApplication->isDraft()
-      ? Response::allow()
-      : Response::deny(__('Anda hanya boleh memadam draf permohonan anda sahaja.'));
-  }
+    public function delete(User $user, LoanApplication $loanApplication): Response|bool
+    {
+         // Applicant can delete their own draft application
+        return $user->id === $loanApplication->user_id && $loanApplication->isDraft()
+            ? Response::allow()
+            : Response::deny(__('Anda hanya boleh memadam draf permohonan anda sahaja.'));
+    }
 
-  public function restore(User $user, LoanApplication $loanApplication): Response|bool
-  {
-    return $user->can('restore_loan_applications') // Assumes permission
-      ? Response::allow()
-      : Response::deny(__('Anda tidak mempunyai kebenaran untuk memulihkan permohonan pinjaman ini.'));
-  }
+    public function restore(User $user, LoanApplication $loanApplication): Response|bool
+    {
+        // Only users with specific permission (typically Admins)
+        return $user->can('restore_loan_applications')
+            ? Response::allow()
+            : Response::deny(__('Anda tidak mempunyai kebenaran untuk memulihkan permohonan pinjaman ini.'));
+    }
 
-  public function forceDelete(User $user, LoanApplication $loanApplication): Response|bool
-  {
-    return $user->can('force_delete_loan_applications') // Assumes permission
-      ? Response::allow()
-      : Response::deny(__('Anda tidak mempunyai kebenaran untuk memadam permohonan pinjaman ini secara kekal.'));
-  }
+    public function forceDelete(User $user, LoanApplication $loanApplication): Response|bool
+    {
+        // Only users with specific permission (typically Admins)
+        return $user->can('force_delete_loan_applications')
+            ? Response::allow()
+            : Response::deny(__('Anda tidak mempunyai kebenaran untuk memadam permohonan pinjaman ini secara kekal.'));
+    }
 
-  /**
-   * Determine whether the user can submit a draft or rejected loan application.
-   */
-  public function submit(User $user, LoanApplication $loanApplication): Response|bool
-  {
-    // Applicant submits their own draft or previously rejected application.
-    // Design Ref (Rev. 3.5): LoanApplication model status
-    $canSubmit = ($user->id === $loanApplication->user_id &&
-      ($loanApplication->isDraft() || $loanApplication->status === LoanApplication::STATUS_REJECTED)); //
+    public function submit(User $user, LoanApplication $loanApplication): Response|bool
+    {
+        $canSubmit = ($user->id === $loanApplication->user_id && // Applicant
+            ($loanApplication->isDraft() || $loanApplication->status === LoanApplication::STATUS_REJECTED)); // Can submit draft or rejected
 
-    return $canSubmit
-      ? Response::allow()
-      : Response::deny(__('Anda tidak mempunyai kebenaran untuk menghantar permohonan ini atau statusnya tidak membenarkan penghantaran.'));
-  }
+        return $canSubmit
+            ? Response::allow()
+            : Response::deny(__('Anda tidak mempunyai kebenaran untuk menghantar permohonan ini atau statusnya tidak membenarkan penghantaran.'));
+    }
 
-  /**
-   * Determine whether the user has the general ability to *be assigned* an approval task for loan applications.
-   * Actual processing of an approval task is governed by ApprovalPolicy.
-   * This checks if the application is in a state to be approved by *someone*.
-   */
-  public function approve(User $user, LoanApplication $loanApplication): Response|bool
-  {
-    // Design Ref (Rev. 3.5): LoanApplication model status constants
-    $isPending = in_array($loanApplication->status, [
-      LoanApplication::STATUS_PENDING_SUPPORT, //
-      LoanApplication::STATUS_PENDING_HOD_REVIEW, //
-      LoanApplication::STATUS_PENDING_BPM_REVIEW, //
-    ]);
+    public function recordDecision(User $user, LoanApplication $loanApplication): Response|bool
+    {
+        // Admin override handled by before() method.
 
-    // User must have a role/permission that allows them to be an approver in general.
-    // This allows Approver and HOD roles to approve loan applications
-    return ($user->hasRole('Approver') || $user->hasRole('HOD')) && $isPending //
-      ? Response::allow()
-      : Response::deny(__('Permohonan ini tidak dalam status menunggu kelulusan atau anda tiada kebenaran umum untuk meluluskan.'));
-  }
+        $actionableStatuses = [
+            LoanApplication::STATUS_PENDING_SUPPORT,
+            LoanApplication::STATUS_PENDING_APPROVER_REVIEW,
+            LoanApplication::STATUS_PENDING_BPM_REVIEW,
+        ];
+        if (!in_array($loanApplication->status, $actionableStatuses)) {
+            return Response::deny(__('Permohonan ini tidak dalam status yang boleh diproses untuk kelulusan/penolakan.'));
+        }
 
-  /**
-   * Determine whether the user can process issuance for the loan application.
-   * Typically performed by BPM staff after approval.
-   * Design Ref (Rev. 3.5): Section 5.2 , Role names , LoanApplication model status
-   */
-  public function processIssuance(User $user, LoanApplication $loanApplication): Response|bool
-  {
-    $canProcess = $user->hasRole('BPM Staff') && //
-      in_array($loanApplication->status, [
-        LoanApplication::STATUS_APPROVED, //
-        LoanApplication::STATUS_PARTIALLY_ISSUED, //
-      ]);
+        // Determine current stage key based on application status if not directly set on application
+        $currentStageKey = $loanApplication->current_approval_stage;
+        if (!$currentStageKey) {
+             switch ($loanApplication->status) {
+                case LoanApplication::STATUS_PENDING_SUPPORT:
+                    $currentStageKey = Approval::STAGE_LOAN_SUPPORT_REVIEW;
+                    break;
+                case LoanApplication::STATUS_PENDING_APPROVER_REVIEW:
+                    $currentStageKey = Approval::STAGE_LOAN_APPROVER_REVIEW;
+                    break;
+                case LoanApplication::STATUS_PENDING_BPM_REVIEW:
+                    $currentStageKey = Approval::STAGE_LOAN_BPM_REVIEW;
+                    break;
+                default:
+                    return Response::deny(__('Peringkat kelulusan semasa untuk permohonan ini tidak dapat dikenal pasti.'));
+            }
+        }
 
-    return $canProcess
-      ? Response::allow()
-      : Response::deny(__('Anda tidak mempunyai kebenaran untuk mengeluarkan peralatan bagi permohonan ini atau statusnya tidak membenarkan (mesti Diluluskan atau Sebahagian Dikeluarkan).'));
-  }
+        $pendingApprovalTask = $loanApplication->approvals()
+                                ->where('status', Approval::STATUS_PENDING)
+                                ->where('stage', $currentStageKey)
+                                ->where('officer_id', $user->id)
+                                ->orderBy('created_at', 'desc')
+                                ->first();
 
-  /**
-   * Determine whether the user can process return for the loan application.
-   * Typically performed by BPM staff.
-   * Design Ref (Rev. 3.5): Section 5.2 , Role names , LoanApplication model status
-   */
-  public function processReturn(User $user, LoanApplication $loanApplication): Response|bool
-  {
-    $canProcess = $user->hasRole('BPM Staff') && //
-      in_array($loanApplication->status, [
-        LoanApplication::STATUS_ISSUED, //
-        LoanApplication::STATUS_PARTIALLY_ISSUED, //
-        LoanApplication::STATUS_OVERDUE, //
-      ]);
+        if ($pendingApprovalTask) {
+            // Stage-specific grade checks
+            if ($currentStageKey === Approval::STAGE_LOAN_SUPPORT_REVIEW) {
+                $minSupportGradeLevel = (int) config('motac.approval.min_loan_support_grade_level', 41);
+                if (!$user->grade || (int) $user->grade->level < $minSupportGradeLevel) {
+                    return Response::deny(__('Gred anda (:userGrade) tidak memenuhi syarat minima (Gred :minGrade) untuk menyokong permohonan ini.', ['userGrade' => $user->grade?->name ?? 'N/A', 'minGrade' => $minSupportGradeLevel]));
+                }
+            } elseif ($currentStageKey === Approval::STAGE_LOAN_APPROVER_REVIEW) {
+                // Use the new config key for general approver stage
+                $minGeneralApproverGradeLevel = (int) config('motac.approval.min_loan_general_approver_grade_level', config('motac.approval.min_loan_support_grade_level', 41)); // Fallback to support grade if new key not set
+                if (!$user->grade || (int) $user->grade->level < $minGeneralApproverGradeLevel) {
+                    return Response::deny(__('Gred anda (:userGrade) tidak memenuhi syarat minima (Gred :minGrade) untuk peringkat kelulusan ini.', ['userGrade' => $user->grade?->name ?? 'N/A', 'minGrade' => $minGeneralApproverGradeLevel]));
+                }
+            }
+            // Add other stage-specific role/grade checks here if necessary for STAGE_LOAN_BPM_REVIEW etc.
 
-    return $canProcess
-      ? Response::allow()
-      : Response::deny(__('Anda tidak mempunyai kebenaran untuk memproses pemulangan bagi permohonan ini atau statusnya tidak membenarkan (mesti Dikeluarkan, Sebahagian Dikeluarkan, atau Tertunggak).'));
-  }
+            return Response::allow();
+        }
+
+        return Response::deny(__('Anda tidak ditetapkan sebagai pegawai pelulus untuk permohonan ini pada peringkat semasa atau tiada tugasan kelulusan aktif untuk anda.'));
+    }
+
+    public function approve(User $user, LoanApplication $loanApplication): Response|bool
+    {
+        // This is a more general check. `recordDecision` is more specific for the actual action.
+        // This might be used for UI elements like "Can this user generally approve applications?"
+        $isPending = in_array($loanApplication->status, [
+            LoanApplication::STATUS_PENDING_SUPPORT,
+            LoanApplication::STATUS_PENDING_APPROVER_REVIEW,
+            LoanApplication::STATUS_PENDING_BPM_REVIEW,
+        ]);
+
+        return ($user->hasRole(['Approver', 'HOD', 'BPM Staff'])) && $isPending
+            ? Response::allow()
+            : Response::deny(__('Permohonan ini tidak dalam status menunggu kelulusan atau anda tiada kebenaran umum untuk meluluskan.'));
+    }
+
+    public function processIssuance(User $user, LoanApplication $loanApplication): Response|bool
+    {
+        $canProcess = $user->hasRole('BPM Staff') &&
+            in_array($loanApplication->status, [
+                LoanApplication::STATUS_APPROVED,
+                LoanApplication::STATUS_PARTIALLY_ISSUED,
+            ]);
+
+        return $canProcess
+            ? Response::allow()
+            : Response::deny(__('Anda tidak mempunyai kebenaran untuk mengeluarkan peralatan bagi permohonan ini atau statusnya tidak membenarkan (mesti Diluluskan atau Sebahagian Dikeluarkan).'));
+    }
+
+    public function processReturn(User $user, LoanApplication $loanApplication): Response|bool
+    {
+        $canProcess = $user->hasRole('BPM Staff') &&
+            in_array($loanApplication->status, [
+                LoanApplication::STATUS_ISSUED,
+                LoanApplication::STATUS_PARTIALLY_ISSUED,
+                LoanApplication::STATUS_OVERDUE,
+                LoanApplication::STATUS_PARTIALLY_RETURNED_PENDING_INSPECTION,
+            ]);
+
+        return $canProcess
+            ? Response::allow()
+            : Response::deny(__('Anda tidak mempunyai kebenaran untuk memproses pemulangan bagi permohonan ini atau statusnya tidak membenarkan.'));
+    }
 }

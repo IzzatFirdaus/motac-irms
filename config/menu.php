@@ -5,99 +5,92 @@
 return [
     /*
     |--------------------------------------------------------------------------
-    | Vertical Menu Data
+    | Vertical Menu Data (Refactored for Bootstrap Icons)
     |--------------------------------------------------------------------------
     |
-    | This structure is directly used by App\Livewire\Sections\Menu\VerticalMenu.php
-    | by accessing config('menu.menu').
-    |
-    | Structure for each item:
-    | - name: The display name of the menu item (translatable string key).
-    | - icon: Tabler Icon class (e.g., 'ti ti-smart-home').
-    | - routeName: The Laravel named route for the menu item.
-    | - routeNamePrefix: A prefix for routes to make parent menu active (e.g., 'admin.users').
-    | - url: A direct URL if not using a named route.
-    | - submenu: An array of submenu items, following the same structure.
-    | - menuHeader: If set, this item will be a header text.
-    | - role: An array or string of roles that can see this menu item.
-    | - slug: A string identifier, often used for active state checking.
-    | - target: HTML target attribute for links (e.g., '_blank').
+    | - icon: Bootstrap Icon name (e.g., 'house-door-fill').
     |
     */
     'menu' => [
         [
             'url' => '/dashboard',
             'name' => 'menu.dashboard',
-            'icon' => 'menu-icon tf-icons ti ti-smart-home',
+            'icon' => 'house-door-fill', // Changed from 'menu-icon tf-icons ti ti-smart-home'
             'slug' => 'dashboard',
             'routeName' => 'dashboard',
-            'role' => ['Admin', 'BPM Staff', 'IT Admin', 'Employee', 'Approver'],
+            'role' => ['Admin', 'BPM Staff', 'IT Admin', 'User', 'Approver'], // "User" instead of "Employee"
         ],
         [
             'menuHeader' => 'menu.section.resource_management',
-            'name' => 'menu.section.resource_management', // name property added for consistency if menuHeader is also an item
-            'role' => ['Admin', 'BPM Staff', 'IT Admin', 'Employee', 'Approver'],
+            'name' => 'menu.section.resource_management',
+            'role' => ['Admin', 'BPM Staff', 'IT Admin', 'User', 'Approver'], // "User"
         ],
         [
             'name' => 'menu.my_applications.title',
-            'icon' => 'menu-icon tf-icons ti ti-folder-search',
+            'icon' => 'folder-check', // Changed from 'menu-icon tf-icons ti ti-folder-search', consistent with original JSON
             'slug' => 'my-applications',
-            'role' => ['Employee', 'Admin', 'BPM Staff', 'IT Admin', 'Approver'],
+            'role' => ['User', 'Admin', 'BPM Staff', 'IT Admin', 'Approver'], // "User"
             'submenu' => [
                 [
                     'url' => '/email-applications',
                     'name' => 'menu.my_applications.email',
+                    'icon' => 'envelope-paper-fill', // Added from original JSON
                     'slug' => 'email-applications.index',
                     'routeName' => 'email-applications.index',
-                    'role' => ['Employee'],
+                    'role' => ['User'], // "User"
                 ],
                 [
                     'url' => '/loan-applications',
                     'name' => 'menu.my_applications.loan',
+                    'icon' => 'laptop-fill', // Added from original JSON
                     'slug' => 'loan-applications.index',
                     'routeName' => 'loan-applications.index',
-                    'role' => ['Employee'],
+                    'role' => ['User'], // "User"
                 ],
             ],
         ],
         [
             'name' => 'menu.apply_for_resources.title',
-            'icon' => 'menu-icon tf-icons ti ti-file-plus',
+            'icon' => 'file-earmark-plus-fill', // Changed from 'menu-icon tf-icons ti ti-file-plus', consistent with original JSON
             'slug' => 'application-forms',
-            'role' => ['Employee', 'Admin'],
+            'role' => ['User', 'Admin'], // "User"
             'submenu' => [
                 [
                     'url' => '/email-applications/create',
                     'name' => 'menu.apply_for_resources.email',
+                    'icon' => 'envelope-plus-fill', // Added from original JSON
                     'slug' => 'email-applications.create',
                     'routeName' => 'email-applications.create',
+                    'role' => ['User'],
                 ],
                 [
                     'url' => '/loan-applications/create',
                     'name' => 'menu.apply_for_resources.loan',
+                    'icon' => 'box-arrow-up-right', // Added from original JSON
                     'slug' => 'loan-applications.create',
                     'routeName' => 'loan-applications.create',
+                    'role' => ['User'],
                 ],
             ],
         ],
         [
             'url' => '/approvals/dashboard',
             'name' => 'menu.approvals_dashboard',
-            'icon' => 'menu-icon tf-icons ti ti-user-check',
+            'icon' => 'person-check-fill', // Changed from 'menu-icon tf-icons ti ti-user-check'
             'slug' => 'approvals.dashboard',
             'routeName' => 'approvals.dashboard',
             'role' => ['Admin', 'Approver', 'BPM Staff', 'IT Admin'],
         ],
         [
             'name' => 'menu.administration.title',
-            'icon' => 'menu-icon tf-icons ti ti-settings-cog',
+            'icon' => 'gear-wide-connected', // Changed from 'menu-icon tf-icons ti ti-settings-cog'
             'slug' => 'resource-management',
             'routeNamePrefix' => 'resource-management',
             'role' => ['Admin', 'BPM Staff', 'IT Admin'],
             'submenu' => [
                 [
                     'name' => 'menu.administration.bpm_operations.title',
-                    'icon' => 'menu-icon tf-icons ti ti-tool', // Icon can be added to submenu parents too
+                    'icon' => 'tools', // Changed from 'menu-icon tf-icons ti ti-tool'
                     'slug' => 'resource-management.bpm',
                     'routeNamePrefix' => 'resource-management.bpm',
                     'role' => ['Admin', 'BPM Staff'],
@@ -105,12 +98,14 @@ return [
                         [
                             'url' => '/resource-management/bpm/outstanding-loans',
                             'name' => 'menu.administration.bpm_operations.outstanding_loans',
+                            'icon' => 'hourglass-split', // Added from original JSON
                             'slug' => 'resource-management.bpm.outstanding-loans',
                             'routeName' => 'resource-management.bpm.outstanding-loans',
                         ],
                         [
                             'url' => '/resource-management/bpm/issued-loans',
                             'name' => 'menu.administration.bpm_operations.issued_loans',
+                            'icon' => 'box-arrow-in-up-right', // Added from original JSON
                             'slug' => 'resource-management.bpm.issued-loans',
                             'routeName' => 'resource-management.bpm.issued-loans',
                         ],
@@ -119,7 +114,7 @@ return [
                 [
                     'url' => '/resource-management/equipment-admin',
                     'name' => 'menu.administration.equipment_management',
-                    'icon' => 'menu-icon tf-icons ti ti-device-laptop',
+                    'icon' => 'pc-display', // Changed from 'menu-icon tf-icons ti ti-device-laptop', consistent with original JSON
                     'slug' => 'resource-management.equipment-admin.index',
                     'routeName' => 'resource-management.equipment-admin.index',
                     'role' => ['Admin', 'BPM Staff'],
@@ -127,7 +122,7 @@ return [
                 [
                     'url' => '/resource-management/email-applications-admin',
                     'name' => 'menu.administration.email_applications',
-                    'icon' => 'menu-icon tf-icons ti ti-mail-cog',
+                    'icon' => 'envelope-gear-fill', // Changed from 'menu-icon tf-icons ti ti-mail-cog'
                     'slug' => 'resource-management.email-applications-admin.index',
                     'routeName' => 'resource-management.email-applications-admin.index',
                     'role' => ['Admin', 'IT Admin'],
@@ -135,7 +130,7 @@ return [
                 [
                     'url' => '/resource-management/users-admin',
                     'name' => 'menu.administration.users_list',
-                    'icon' => 'menu-icon tf-icons ti ti-users-group',
+                    'icon' => 'people-fill', // Changed from 'menu-icon tf-icons ti ti-users-group'
                     'slug' => 'resource-management.users-admin.index',
                     'routeName' => 'resource-management.users-admin.index',
                     'role' => ['Admin'],
@@ -144,12 +139,12 @@ return [
         ],
         [
             'menuHeader' => 'menu.section.system_config',
-            'name' => 'menu.section.system_config', // name property added
+            'name' => 'menu.section.system_config',
             'role' => ['Admin'],
         ],
         [
             'name' => 'menu.settings.title',
-            'icon' => 'menu-icon tf-icons ti ti-adjustments-horizontal',
+            'icon' => 'sliders', // Changed from 'menu-icon tf-icons ti ti-adjustments-horizontal'
             'slug' => 'settings',
             'routeNamePrefix' => 'settings',
             'role' => ['Admin'],
@@ -157,30 +152,35 @@ return [
                 [
                     'url' => '/settings/users',
                     'name' => 'menu.settings.user_management',
+                    'icon' => 'person-lines-fill', // Added from original JSON
                     'slug' => 'settings.users.index',
                     'routeName' => 'settings.users.index',
                 ],
                 [
                     'url' => '/settings/roles',
                     'name' => 'menu.settings.roles_permissions',
+                    'icon' => 'person-badge-fill', // Added from original JSON
                     'slug' => 'settings.roles.index',
                     'routeName' => 'settings.roles.index',
                 ],
                 [
                     'url' => '/settings/grades',
                     'name' => 'menu.settings.grades_management',
+                    'icon' => 'bar-chart-steps', // Added from original JSON
                     'slug' => 'settings.grades.index',
                     'routeName' => 'settings.grades.index',
                 ],
                 [
                     'url' => '/settings/departments',
                     'name' => 'menu.settings.departments_management',
+                    'icon' => 'building-fill', // Added from original JSON
                     'slug' => 'settings.departments.index',
                     'routeName' => 'settings.departments.index',
                 ],
                 [
                     'url' => '/settings/positions',
                     'name' => 'menu.settings.positions_management',
+                    'icon' => 'person-workspace', // Added from original JSON
                     'slug' => 'settings.positions.index',
                     'routeName' => 'settings.positions.index',
                 ],
@@ -188,7 +188,7 @@ return [
         ],
         [
             'name' => 'menu.reports.title',
-            'icon' => 'menu-icon tf-icons ti ti-chart-bar',
+            'icon' => 'file-earmark-bar-graph-fill', // Changed from 'menu-icon tf-icons ti ti-chart-bar'
             'slug' => 'reports',
             'routeNamePrefix' => 'reports',
             'role' => ['Admin', 'BPM Staff'],
@@ -196,24 +196,28 @@ return [
                 [
                     'url' => '/reports/equipment-inventory',
                     'name' => 'menu.reports.equipment_report',
+                    'icon' => 'card-list', // Added from original JSON
                     'slug' => 'reports.equipment-inventory',
                     'routeName' => 'reports.equipment-inventory',
                 ],
                 [
                     'url' => '/reports/email-accounts',
                     'name' => 'menu.reports.email_accounts_report',
+                    'icon' => 'envelope-check-fill', // Added from original JSON
                     'slug' => 'reports.email-accounts',
                     'routeName' => 'reports.email-accounts',
                 ],
                 [
                     'url' => '/reports/loan-applications',
                     'name' => 'menu.reports.loan_applications_report',
+                    'icon' => 'journal-text', // Added.
                     'slug' => 'reports.loan-applications',
                     'routeName' => 'reports.loan-applications',
                 ],
                 [
                     'url' => '/reports/activity-log',
                     'name' => 'menu.reports.user_activity_report',
+                    'icon' => 'person-bounding-box', // Added from original JSON
                     'slug' => 'reports.activity-log',
                     'routeName' => 'reports.activity-log',
                     'role' => ['Admin'],
@@ -223,7 +227,7 @@ return [
         [
             'url' => '/log-viewer',
             'name' => 'menu.system_logs',
-            'icon' => 'menu-icon tf-icons ti ti-file-text',
+            'icon' => 'file-text-fill', // Changed from 'menu-icon tf-icons ti ti-file-text'
             'slug' => 'log-viewer.index',
             'routeName' => 'log-viewer.index',
             'target' => '_blank',

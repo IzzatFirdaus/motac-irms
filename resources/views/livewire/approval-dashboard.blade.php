@@ -179,11 +179,11 @@
                                         <dd class="col-sm-8">
                                             {{ $approvableItem->loan_start_date?->translatedFormat(config('app.datetime_format_my_short')) }} - {{ $approvableItem->loan_end_date?->translatedFormat(config('app.datetime_format_my_short')) }}
                                         </dd>
-                                        @if($approvableItem->applicationItems->count())
+                                        @if($approvableItem->loanApplicationItems->count())
                                         <dt class="col-sm-12 mt-2">{{__('Item Dimohon:')}}</dt>
                                         <dd class="col-sm-12">
                                             <ul class="list-unstyled ps-1 mb-0">
-                                            @foreach($approvableItem->applicationItems as $loanItem)
+                                            @foreach($approvableItem->loanApplicationItems as $loanItem)
                                                 <li>• {{ $loanItem->equipment_type ? (\App\Models\Equipment::$ASSET_TYPES_LABELS[$loanItem->equipment_type] ?? Str::title(str_replace('_', ' ', $loanItem->equipment_type))) : 'N/A' }} (Qty: {{ $loanItem->quantity_requested }})</li>
                                             @endforeach
                                             </ul>

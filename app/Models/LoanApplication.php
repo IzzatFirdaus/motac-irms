@@ -29,7 +29,7 @@ use Carbon\Carbon;
  * @property string|null $return_location
  * @property \Illuminate\Support\Carbon $loan_start_date
  * @property \Illuminate\Support\Carbon $loan_end_date
- * @property string $status (enum: 'draft', 'pending_support', 'pending_hod_review', 'pending_bpm_review', 'approved', 'rejected', 'partially_issued', 'issued', 'returned', 'overdue', 'cancelled', default: 'draft')
+ * @property string $status (enum: 'draft', 'pending_support', 'pending_approver_review', 'pending_bpm_review', 'approved', 'rejected', 'partially_issued', 'issued', 'returned', 'overdue', 'cancelled', default: 'draft') // Updated enum description
  * @property string|null $rejection_reason
  * @property \Illuminate\Support\Carbon|null $applicant_confirmation_timestamp
  * @property \Illuminate\Support\Carbon|null $submitted_at
@@ -88,7 +88,8 @@ class LoanApplication extends Model
   // Status Constants
   public const STATUS_DRAFT = 'draft';
   public const STATUS_PENDING_SUPPORT = 'pending_support';
-  public const STATUS_PENDING_HOD_REVIEW = 'pending_hod_review';
+  // public const STATUS_PENDING_HOD_REVIEW = 'pending_hod_review'; // Old constant
+  public const STATUS_PENDING_APPROVER_REVIEW = 'pending_approver_review'; // New constant
   public const STATUS_PENDING_BPM_REVIEW = 'pending_bpm_review';
   public const STATUS_APPROVED = 'approved';
   public const STATUS_REJECTED = 'rejected';
@@ -103,7 +104,8 @@ class LoanApplication extends Model
   public static array $STATUS_OPTIONS = [
     self::STATUS_DRAFT => 'Draf',
     self::STATUS_PENDING_SUPPORT => 'Menunggu Sokongan Pegawai (Gred 41+)',
-    self::STATUS_PENDING_HOD_REVIEW => 'Menunggu Kelulusan Ketua Jabatan/Unit',
+    // self::STATUS_PENDING_HOD_REVIEW => 'Menunggu Kelulusan Ketua Jabatan/Unit', // Old option
+    self::STATUS_PENDING_APPROVER_REVIEW => 'Menunggu Kelulusan Pegawai Pelulus', // New option
     self::STATUS_PENDING_BPM_REVIEW => 'Menunggu Semakan & Kelulusan BPM',
     self::STATUS_APPROVED => 'Diluluskan (Sedia Untuk Pengeluaran)',
     self::STATUS_REJECTED => 'Ditolak',

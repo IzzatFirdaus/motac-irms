@@ -1,8 +1,11 @@
 @php
     // $configData and Helper::appClasses() are from the original template.
-    // Their usage for 'style' for background shapes might be removed if MOTAC uses a simpler background.
-    // $configData = Helper::appClasses();
-    $illustrationStyleSuffix = isset($configData) ? '-' . $configData['style'] : ''; // Kept for background shape if used
+    // Their usage for 'myStyle' for background shapes might be removed if MOTAC uses a simpler background.
+    // $configData = Helper::appClasses(); // This line can remain commented if $configData is globally available.
+
+    // Corrected to use 'myStyle' and ensure $configData is set before accessing its keys.
+    // The error "Undefined array key 'style'" implies $configData itself is set.
+    $illustrationStyleSuffix = isset($configData['myStyle']) ? '-' . $configData['myStyle'] : '';
 @endphp
 
 @extends('layouts.blankLayout') {{-- This MUST be your MOTAC-themed blank layout --}}

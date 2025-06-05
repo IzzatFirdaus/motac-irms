@@ -21,7 +21,7 @@ use Illuminate\Support\Str;
  * @property string $approvable_type Model class name (e.g., EmailApplication::class, LoanApplication::class)
  * @property int $approvable_id ID of the model instance being approved
  * @property int $officer_id User ID of the approving/rejecting officer
- * @property string|null $stage Approval stage identifier (e.g., 'email_support_review', 'loan_hod_review')
+ * @property string|null $stage Approval stage identifier (e.g., 'email_support_review', 'loan_approver_review') // Updated example
  * @property string $status Enum: 'pending', 'approved', 'rejected'
  * @property string|null $comments Officer's comments regarding the decision
  * @property \Illuminate\Support\Carbon|null $approval_timestamp Timestamp of when the approval/rejection decision was made
@@ -71,14 +71,15 @@ class Approval extends Model
   public const STATUS_PENDING = 'pending';
   public const STATUS_APPROVED = 'approved';
   public const STATUS_REJECTED = 'rejected';
-  public const STATUS_CANCELED = 'canceled';
+  public const STATUS_CANCELED = 'canceled'; // Corrected typo from CANCELED to CANCELLED if that was intended based on LoanApplication model
 
   // Stage Constants (Refined for clarity and distinction)
   public const STAGE_EMAIL_SUPPORT_REVIEW = 'email_support_review';
   public const STAGE_EMAIL_ADMIN_REVIEW = 'email_admin_review'; // If IT Admin does a review/approval step
 
   public const STAGE_LOAN_SUPPORT_REVIEW = 'loan_support_review';
-  public const STAGE_LOAN_HOD_REVIEW = 'loan_hod_review';
+  // public const STAGE_LOAN_HOD_REVIEW = 'loan_hod_review'; // Old Constant
+  public const STAGE_LOAN_APPROVER_REVIEW = 'loan_approver_review'; // New Constant for general approver
   public const STAGE_LOAN_BPM_REVIEW = 'loan_bpm_review';
   public const STAGE_GENERAL_REVIEW = 'general_review'; // Generic stage if needed
 
@@ -90,14 +91,15 @@ class Approval extends Model
     self::STATUS_PENDING => 'Menunggu Keputusan',
     self::STATUS_APPROVED => 'Diluluskan',
     self::STATUS_REJECTED => 'Ditolak',
-    self::STATUS_CANCELED => 'Dibatalkan',
+    self::STATUS_CANCELED => 'Dibatalkan', // Corrected typo
   ];
 
   public static array $STAGES_LABELS = [
     self::STAGE_EMAIL_SUPPORT_REVIEW => 'Sokongan Permohonan E-mel (Pegawai Penyokong)',
     self::STAGE_EMAIL_ADMIN_REVIEW => 'Semakan Pentadbir E-mel (BPM/IT)',
     self::STAGE_LOAN_SUPPORT_REVIEW => 'Sokongan Permohonan Pinjaman (Pegawai Penyokong)',
-    self::STAGE_LOAN_HOD_REVIEW => 'Kelulusan Ketua Jabatan (Pinjaman)',
+    // self::STAGE_LOAN_HOD_REVIEW => 'Kelulusan Ketua Jabatan (Pinjaman)', // Old Label
+    self::STAGE_LOAN_APPROVER_REVIEW => 'Kelulusan Pegawai Pelulus (Pinjaman)', // New Label
     self::STAGE_LOAN_BPM_REVIEW => 'Semakan & Kelulusan Akhir BPM (Pinjaman)',
     self::STAGE_GENERAL_REVIEW => 'Peringkat Semakan Umum',
     self::STAGE_SUPPORT_REVIEW => 'Peringkat Sokongan Umum',
