@@ -1,20 +1,20 @@
-{{-- contact-us.blade.php --}}
+{{-- resources/views/livewire/contact-us.blade.php --}}
 <div>
-    {{-- @section('title', __('Hubungi Kami')) --}}
+    @section('title', __('Hubungi Kami')) {{-- Set the page title --}}
 
     <div class="container py-5">
         <div class="row justify-content-center">
             <div class="col-md-10 col-lg-8">
-                {{-- Card styling will come from global MOTAC theme for .card --}}
+                {{-- Card styling will inherit from global MOTAC theme. Added shadow-sm for subtle depth. --}}
                 <div class="card shadow-sm">
-                    {{-- card-header bg-primary text-white should align with MOTAC Primary Blue from theme --}}
-                    <div class="card-header bg-primary text-white">
-                        {{-- Icon: ti-message-circle-2-filled changed to bi-chat-left-dots-fill --}}
-                        <h4 class="mb-0 text-white"><i
-                                class="bi bi-chat-left-dots-fill me-2"></i>{{ __('Hubungi Bahagian Pengurusan Maklumat (BPM), MOTAC') }}
+                    {{-- Card header using MOTAC primary blue. Padding adjusted for consistency. --}}
+                    <div class="card-header bg-primary text-white p-3"> {{-- Using p-3 for padding similar to dashboard's motac-card-header --}}
+                        <h4 class="mb-0 text-white d-flex align-items-center">
+                            <i class="bi bi-chat-left-dots-fill me-2"></i>{{-- Bootstrap Icon --}}
+                            {{ __('Hubungi Bahagian Pengurusan Maklumat (BPM), MOTAC') }}
                         </h4>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body p-4"> {{-- Using p-4 for padding similar to dashboard's motac-card-body --}}
                         <p class="lead">
                             {{ __('Untuk sebarang pertanyaan, bantuan teknikal, atau maklum balas berkaitan Sistem Pengurusan Sumber Bersepadu MOTAC (Emel/ID Pengguna & Pinjaman Peralatan ICT), sila hubungi kami melalui maklumat di bawah:') }}
                         </p>
@@ -23,9 +23,11 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                {{-- Icon: ti-map-pin-filled changed to bi-geo-alt-fill --}}
-                                <h5><i class="bi bi-geo-alt-fill me-2 text-primary"></i>{{ __('Alamat') }}</h5>
-                                <address class="mb-0">
+                                <h5>
+                                    <i class="bi bi-geo-alt-fill me-2 text-primary"></i>{{-- Bootstrap Icon --}}
+                                    {{ __('Alamat') }}
+                                </h5>
+                                <address class="mb-0" style="line-height: 1.6;"> {{-- Improved line-height for address block --}}
                                     Bahagian Pengurusan Maklumat (BPM)<br>
                                     Kementerian Pelancongan, Seni dan Budaya Malaysia (MOTAC)<br>
                                     Aras 5, Blok D4, Kompleks D,<br>
@@ -36,30 +38,33 @@
                                 </address>
                             </div>
                             <div class="col-md-6 mb-3">
-                                {{-- Icon: ti-phone-call changed to bi-telephone-fill --}}
-                                <h5><i class="bi bi-telephone-fill me-2 text-primary"></i>{{ __('Telefon') }}</h5>
+                                <h5>
+                                    <i class="bi bi-telephone-fill me-2 text-primary"></i>{{-- Bootstrap Icon --}}
+                                    {{ __('Telefon') }}
+                                </h5>
                                 <p class="mb-2">Unit Operasi Rangkaian dan Khidmat Pengguna (Helpdesk BPM):<br>
                                     +603-8000 8000 (samb. xxxx) </p>
 
-                                {{-- Icon: ti-mail-filled changed to bi-envelope-fill --}}
-                                <h5><i class="bi bi-envelope-fill me-2 text-primary"></i>{{ __('E-mel') }}</h5>
-                                <p class="mb-0"><a
-                                        href="mailto:bpm.helpdesk@motac.gov.my">bpm.helpdesk@motac.gov.my</a> </p>
+                                <h5 class="mt-3"> {{-- Added margin-top for better separation --}}
+                                    <i class="bi bi-envelope-fill me-2 text-primary"></i>{{-- Bootstrap Icon --}}
+                                    {{ __('E-mel') }}
+                                </h5>
+                                <p class="mb-0"><a href="mailto:bpm.helpdesk@motac.gov.my" class="text-primary">bpm.helpdesk@motac.gov.my</a></p>
                             </div>
                         </div>
 
                         <hr class="my-4">
 
-                        {{-- Icon: ti-alarm-filled changed to bi-clock-history --}}
-                        <h5 class="mb-3"><i
-                                class="bi bi-clock-history me-2 text-primary"></i>{{ __('Waktu Operasi Meja Bantuan') }}
+                        <h5 class="mb-3">
+                            <i class="bi bi-clock-history me-2 text-primary"></i>{{-- Bootstrap Icon --}}
+                            {{ __('Waktu Operasi Meja Bantuan') }}
                         </h5>
                         <p class="mb-1"><strong>{{ __('Isnin - Jumaat:') }}</strong> 8:30 PG - 5:00 PTG</p>
                         <p class="mb-0"><strong>{{ __('Tutup:') }}</strong>
                             {{ __('Sabtu, Ahad & Cuti Umum Malaysia') }}</p>
 
-                        {{-- Optional: Simple Contact Form - Requires Livewire component logic --}}
-                        {{-- If implementing, ensure icons are also Bootstrap Icons e.g. <i class="bi bi-chat-right-text me-2"></i> --}}
+                        {{-- Optional: Simple Contact Form - Remains commented. --}}
+                        {{-- If re-enabled, it uses Bootstrap classes and should align well. --}}
                         {{--
                         <hr class="my-4">
                         <h5 class="mb-3"><i class="bi bi-chat-right-text me-2 text-primary"></i>{{ __('Hantar Mesej Pantas') }}</h5>
@@ -89,7 +94,7 @@
                         </form>
                         --}}
                     </div>
-                    <div class="card-footer text-muted small">
+                    <div class="card-footer text-muted small p-3"> {{-- Added p-3 for padding --}}
                         {{ __('Sila pastikan anda memberikan maklumat yang lengkap untuk memudahkan pihak kami memberi bantuan.') }}
                     </div>
                 </div>

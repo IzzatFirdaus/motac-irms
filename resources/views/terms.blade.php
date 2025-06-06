@@ -1,20 +1,18 @@
+{{-- resources/views/terms.blade.php --}}
 @php
-    // $configData = \App\Helpers\Helpers::appClasses(); // Only uncomment if blankLayout or its content specifically needs $configData here.
     $customizerHidden = 'customizer-hide'; // Theme-specific variable
 @endphp
 
-@extends('layouts.blankLayout') {{-- This MUST be your MOTAC-themed blank layout --}}
+@extends('layouts.blankLayout') {{-- Uses the MOTAC-themed blank layout --}}
 
-@section('title', __('Terma Perkhidmatan'))
+@section('title', __('Terma Perkhidmatan')) {{-- Translatable page title --}}
 
 @section('page-style')
-    {{-- page-auth.css from the base theme, provides structure for auth pages --}}
-    <link rel="stylesheet" href="{{ asset('assets/vendor/css/pages/page-auth.css') }}">
+    {{-- Removed page-auth.css, relying on simpler structure --}}
     <style>
-        /* Inline styles to ensure Noto Sans and MOTAC theme colors apply to Markdown content */
-        .card-body-markdown { /* Added a specific class for more targeted styling */
-            font-family: 'Noto Sans', sans-serif !important; /* Enforce Noto Sans */
-            color: var(--bs-body-color); /* Uses Bootstrap's body color, themed by MOTAC theme */
+        .card-body-markdown {
+            font-family: 'Noto Sans', sans-serif !important;
+            color: var(--bs-body-color);
             line-height: 1.6;
         }
 
@@ -24,14 +22,24 @@
         .card-body-markdown h4,
         .card-body-markdown h5,
         .card-body-markdown h6 {
-            font-family: 'Noto Sans', sans-serif !important; /* Enforce Noto Sans for headings */
-            color: var(--bs-emphasis-color); /* Uses Bootstrap's emphasis color, themed by MOTAC theme */
+            font-family: 'Noto Sans', sans-serif !important;
+            color: var(--bs-emphasis-color);
             margin-top: 1.5em;
             margin-bottom: 0.5em;
+            font-weight: 600;
         }
-        .card-body-markdown h1 { font-size: 1.75rem; }
-        .card-body-markdown h2 { font-size: 1.5rem; }
-        .card-body-markdown h3 { font-size: 1.25rem; }
+
+        .card-body-markdown h1 {
+            font-size: 1.75rem;
+        }
+
+        .card-body-markdown h2 {
+            font-size: 1.5rem;
+        }
+
+        .card-body-markdown h3 {
+            font-size: 1.25rem;
+        }
 
         .card-body-markdown p {
             margin-bottom: 1em;
@@ -39,40 +47,64 @@
 
         .card-body-markdown ul,
         .card-body-markdown ol {
-            padding-left: 2em; /* Standard padding for lists */
+            padding-left: 2em;
             margin-bottom: 1em;
         }
 
         .card-body-markdown a {
-            color: var(--bs-primary); /* Uses Bootstrap's primary color, themed as MOTAC Blue */
+            color: var(--bs-primary);
             text-decoration: underline;
         }
+
         .card-body-markdown a:hover {
-            color: var(--bs-primary-darken); /* Assuming a darker primary for hover, or use default hover */
+            filter: brightness(90%);
         }
+
         .card-body-markdown strong {
-            font-weight: 600; /* Semibold for strong tags */
+            font-weight: 600;
+        }
+
+        .app-brand-text {
+            /* Ensure consistent app brand text styling if needed */
+            color: var(--bs-body-color) !important;
         }
     </style>
 @endsection
 
 @section('content')
-    <div class="authentication-wrapper authentication-basic px-4 py-4">
-        <div class="authentication-inner" style="max-width: 800px; margin: auto;"> {{-- Increased max-width for readability --}}
-            <div class="app-brand justify-content-center mb-4">
-                <a href="{{ url('/') }}" class="app-brand-link gap-2">
-                    <x-application-logo style="height: 40px; width: auto;" />
-                </a>
-            </div>
-            <div class="card shadow-sm">
-                <div class="card-body p-4 p-md-5 card-body-markdown"> {{-- Added card-body-markdown class --}}
-                    {!! $terms !!} {{-- Content comes from this variable (HTML from Markdown) --}}
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-10 col-lg-8 col-xl-7"> {{-- Centered column for terms content --}}
+
+                {{-- Application Logo and Name - Above the card --}}
+                <div class="app-brand justify-content-center mb-4">
+                    <a href="{{ url('/') }}" class="app-brand-link gap-2">
+                        <span class="app-brand-logo demo">
+                            <img src="{{ asset('assets/img/logo/motac-logo.svg') }}" alt="{{ __('Logo MOTAC IRMS') }}"
+                                style="height: 32px; width: auto;">
+                        </span>
+                        <span
+                            class="app-brand-text demo text-body fw-bold fs-4 ms-1 app-brand-text">{{ __('motac-irms') }}</span>
+                    </a>
                 </div>
-            </div>
-            <div class="text-center mt-4 mb-3">
-                <a href="{{ url('/') }}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center">
-                    <i class="bi bi-arrow-left-circle-fill me-1"></i>{{ __('Kembali ke Laman Utama') }}
-                </a>
+
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white p-3">
+                        <h4 class="mb-0 text-white d-flex align-items-center">
+                            <i class="bi bi-file-text-fill me-2"></i> {{-- Icon for Terms --}}
+                            {{ __('Terma Perkhidmatan') }}
+                        </h4>
+                    </div>
+                    <div class="card-body p-4 card-body-markdown">
+                        {!! $terms !!} {{-- Renders HTML content from Markdown --}}
+                    </div>
+                </div>
+
+                <div class="text-center mt-4 mb-3">
+                    <a href="{{ url('/') }}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center">
+                        <i class="bi bi-arrow-left-circle-fill me-1"></i>{{ __('Kembali ke Laman Utama') }}
+                    </a>
+                </div>
             </div>
         </div>
     </div>

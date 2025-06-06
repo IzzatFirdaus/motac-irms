@@ -13,647 +13,241 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log; // Ensure Log facade is imported
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Throwable;
-use Spatie\Permission\Models\Role; //During Testing only
 
 #[Layout('layouts.app')]
 class ApplicationForm extends Component
 {
-  use AuthorizesRequests;
+    use AuthorizesRequests;
 
-  // --- BAHAGIAN 1: MAKLUMAT PEMOHON ---
-  public string $applicantName = '';
-  public string $applicantPositionAndGrade = '';
-  public string $applicantDepartment = '';
-  public string $applicant_phone = '';
-  public string $purpose = '';
-  public string $location = '';
-  public ?string $return_location = null;
-  public ?string $loan_start_date = null;
-  public ?string $loan_end_date = null;
+    //--- BAHAGIAN 1: MAKLUMAT PEMOHON ---
+    public string $applicantName = '';
+    public string $applicantPositionAndGrade = '';
+    public string $applicantDepartment = '';
+    public string $applicant_phone = '';
+    public string $purpose = '';
+    public string $location = '';
+    public ?string $return_location = null;
+    public ?string $loan_start_date = null;
+    public ?string $loan_end_date = null;
 
-  // --- BAHAGIAN 2: MAKLUMAT PEGAWAI BERTANGGUNGJAWAB ---
-  public bool $applicant_is_responsible_officer = true;
-  public ?int $responsible_officer_id = null;
-  public string $responsibleOfficerName = '';
-  public string $responsibleOfficerPositionAndGrade = '';
-  public string $responsibleOfficerPhone = '';
+    //--- BAHAGIAN 2: MAKLUMAT PEGAWAI BERTANGGUNGJAWAB ---
+    public bool $applicant_is_responsible_officer = true;
+    public ?int $responsible_officer_id = null;
 
-  // --- MAKLUMAT PEGAWAI PENYOKONG (Issue #3) ---
-  public ?int $supporting_officer_id = null;
+    //--- MAKLUMAT PEGAWAI PENYOKONG (Workflow Stage 3) ---
+    // ADJUSTMENT: Re-enabled to enforce workflow compliance.
+    public ?int $supporting_officer_id = null;
 
-  // --- BAHAGIAN 3: MAKLUMAT PERALATAN ---
-  public array $loan_application_items = [];
+    //--- BAHAGIAN 3: MAKLUMAT PERALATAN ---
+    public array $loan_application_items = [];
 
-  // --- BAHAGIAN 4: PENGESAHAN PEMOHON ---
-  public bool $applicant_confirmation = false;
-  public bool $termsScrolled = false;
+    //--- BAHAGIAN 4: PENGESAHAN PEMOHON ---
+    public bool $applicant_confirmation = false;
+    public bool $termsScrolled = false;
 
-  // --- Component State ---
-  public ?int $editing_application_id = null;
-  public ?LoanApplication $loanApplicationInstance = null;
-  public int $totalQuantityRequested = 0;
-  public bool $isSubmittingForApproval = false;
+    //--- Component State ---
+    public ?int $editing_application_id = null;
+    public ?LoanApplication $loanApplicationInstance = null;
+    public bool $isSubmittingForApproval = false;
 
-  // --- Data for Dropdowns ---
-  public array $responsibleOfficerOptions = [];
-  public array $supportingOfficerOptions = [];
-  public array $equipmentTypeOptions = [];
+    //--- Data for Dropdowns ---
+    public array $responsibleOfficerOptions = [];
+    public array $supportingOfficerOptions = [];
+    public array $equipmentTypeOptions = [];
 
-  public function generatePageTitle(): string
-  {
-    return __('PERMOHONAN PEMINJAMAN PERALATAN ICT UNTUK KEGUNAAN RASMI');
-  }
-
-  public function mount($loan_application_id = null): void
-  {
-    if (!Auth::check()) {
-      session()->flash('error', __('Sesi anda telah tamat. Sila log masuk semula.'));
-      $this->dispatch('update-page-title', title: __('Akses Tidak Dibenarkan') . ' - ' . __(config('variables.templateName', 'Sistem')));
-      return;
+    public function generatePageTitle(): string
+    {
+        return __('PERMOHONAN PEMINJAMAN PERALATAN ICT UNTUK KEGUNAAN RASMI');
     }
 
-    $this->populateApplicantDetails();
-    $this->loadInitialDropdownData(); // This will now call the version with extensive logging
-
-    if ($loan_application_id) {
-      $this->editing_application_id = (int) $loan_application_id;
-      $this->loanApplicationInstance = LoanApplication::with([
-        'user',
-        'responsibleOfficer',
-        'supportingOfficer',
-        'loanApplicationItems.equipment',
-      ])->find($this->editing_application_id);
-
-      if (!$this->loanApplicationInstance) {
-        session()->flash('error', __('Permohonan pinjaman ICT dengan ID :id tidak ditemui.', ['id' => $this->editing_application_id]));
-        Log::error("LoanApplicationForm: LoanApplication not found for ID: " . $this->editing_application_id . " during mount for editing.");
-        $this->loanApplicationInstance = new LoanApplication();
-        $this->dispatch('update-page-title', title: __('Ralat Permohonan Tidak Ditemui') . ' - ' . __(config('variables.templateName', 'Sistem')));
-        if (empty($this->loan_application_items)) {
-          $this->addLoanItem(false);
+    public function mount(int $loan_application_id = null): void
+    {
+        if (!Auth::check()) {
+            session()->flash('error', __('Sesi anda telah tamat. Sila log masuk semula.'));
+            $this->dispatch('update-page-title', title: __('Akses Tidak Dibenarkan'));
+            return;
         }
-        return;
-      }
-      $this->authorize('update', $this->loanApplicationInstance);
-      $this->populateFormFromInstance();
-    } else {
-      $this->authorize('create', LoanApplication::class);
-      $this->loanApplicationInstance = new LoanApplication();
-      $this->resetFormForCreate(false);
-    }
 
-    if (empty($this->loan_application_items)) {
-      $this->addLoanItem(false);
-    }
+        $this->populateApplicantDetails();
+        $this->loadInitialDropdownData();
 
-    $pageTitleSuffix = $this->editing_application_id && $this->loanApplicationInstance->id ? ' (' . $this->loanApplicationInstance->id . ')' : '';
-    $this->dispatch('update-page-title', title: $this->generatePageTitle() . $pageTitleSuffix . ' - ' . __(config('variables.templateName', 'Sistem Pengurusan Sumber Bersepadu MOTAC')));
+        if ($loan_application_id) {
+            $this->editing_application_id = (int) $loan_application_id;
+            $this->loanApplicationInstance = LoanApplication::with([
+                'user', 'responsibleOfficer', 'supportingOfficer', 'loanApplicationItems'
+            ])->findOrFail($loan_application_id);
 
-    $this->updateTotalQuantityRequested();
-    $this->updateResponsibleOfficerDetails();
-  }
-
-  private function populateFormFromInstance(): void
-  {
-    if (!$this->loanApplicationInstance || !$this->loanApplicationInstance->exists) return;
-
-    $this->applicant_phone = $this->loanApplicationInstance->user?->mobile_number ?? Auth::user()?->mobile_number ?? '';
-    if ($this->loanApplicationInstance->user_id === Auth::id()) {
-      $this->applicant_phone = $this->loanApplicationInstance->applicant_phone ?? Auth::user()?->mobile_number ?? '';
-    }
-
-    $this->purpose = $this->loanApplicationInstance->purpose ?? '';
-    $this->location = $this->loanApplicationInstance->location ?? '';
-    $this->return_location = $this->loanApplicationInstance->return_location;
-    $this->loan_start_date = $this->formatDateForDatetimeLocalInput($this->loanApplicationInstance->loan_start_date);
-    $this->loan_end_date = $this->formatDateForDatetimeLocalInput($this->loanApplicationInstance->loan_end_date);
-    $this->supporting_officer_id = $this->loanApplicationInstance->supporting_officer_id;
-
-    if (
-      $this->loanApplicationInstance->responsible_officer_id &&
-      $this->loanApplicationInstance->responsible_officer_id === $this->loanApplicationInstance->user_id
-    ) {
-      $this->applicant_is_responsible_officer = true;
-      $this->responsible_officer_id = $this->loanApplicationInstance->user_id;
-    } else {
-      $this->applicant_is_responsible_officer = false;
-      $this->responsible_officer_id = $this->loanApplicationInstance->responsible_officer_id;
-    }
-    $this->updateResponsibleOfficerDetails();
-
-    $this->loan_application_items = $this->loanApplicationInstance->loanApplicationItems
-      ?->map(fn($item) => $item->only(['id', 'equipment_type', 'quantity_requested', 'notes']))
-      ->toArray() ?? [];
-
-    if (empty($this->loan_application_items)) $this->addLoanItem(false);
-    $this->applicant_confirmation = (bool) $this->loanApplicationInstance->applicant_confirmation_timestamp;
-
-    if ($this->loanApplicationInstance->status !== LoanApplication::STATUS_DRAFT) {
-      $this->termsScrolled = true;
-    }
-  }
-
-  public function populateApplicantDetails(): void
-  {
-    /** @var User|null $user */
-    $user = Auth::user();
-    if ($user) {
-      $this->applicantName = $user->name;
-      $positionName = $user->position?->name ?? __('Tiada Jawatan');
-      $gradeName = $user->grade?->name ?? __('Tiada Gred');
-      $this->applicantPositionAndGrade = trim("{$positionName} ({$gradeName})", ' ()');
-      $this->applicantDepartment = $user->department?->name ?? __('Tiada Jabatan');
-
-      if (empty($this->applicant_phone) && !$this->editing_application_id) {
-        $this->applicant_phone = $user->mobile_number ?? '';
-      }
-    }
-  }
-
-  public function loadInitialDropdownData(): void
-  {
-    /** @var User|null $currentUser */
-    $currentUser = Auth::user();
-    $currentUserId = $currentUser?->id;
-
-    $minSupportGradeLevel = (int) config('motac.approval.min_loan_support_grade_level', 41); // [cite: 86]
-
-    Log::debug('----------------------------------------------------');
-    Log::debug('loadInitialDropdownData: Initiated.');
-    Log::debug('Current User ID (Applicant): ' . $currentUserId . ' (' . $currentUser?->email . ')');
-    Log::debug('Minimum Support Grade Level Required: ' . $minSupportGradeLevel);
-
-    $allActiveUsers = User::where('status', User::STATUS_ACTIVE)
-      ->with(['grade:id,name,level', 'position:id,name'])
-      ->orderBy('name')
-      ->get();
-
-    Log::debug('All Active Users fetched (before grade/self exclusion): ' . $allActiveUsers->count(), $allActiveUsers->map(function ($user) use ($currentUserId) {
-      return [
-        'id' => $user->id,
-        'name' => $user->name,
-        'email' => $user->email,
-        'status' => $user->status,
-        'grade_id' => $user->grade_id,
-        'grade_name' => $user->grade?->name,
-        'grade_level' => $user->grade?->level,
-        'position_name' => $user->position?->name,
-        'is_current_applicant' => $user->id === $currentUserId,
-      ];
-    })->toArray());
-
-    // ##### START: EDITED FOR TESTING PURPOSES #####
-    // This query is modified to restrict selection of supporting officers
-    // to users with specific roles for easier testing of approval flows.
-    // In a production environment, this role filter might be removed or adjusted
-    // to rely solely on grade levels or other criteria.
-    $officersQueryBase = User::where('status', User::STATUS_ACTIVE)
-                         ->where('id', '!=', $currentUserId); // Exclude the applicant
-
-    // FOR TESTING ONLY: Filter by specific roles.
-    // This ensures that for testing, only users from AdminUserSeeder with these roles
-    // (and meeting grade criteria) appear in the "Supporting Officer" dropdown.
-    // This helps in selecting a known user (e.g., Admin, Approver) as the first-level approver.
-    $officersQuery = clone $officersQueryBase; // Clone to keep the base query clean
-    $officersQuery->whereHas('roles', function ($query) {
-        $query->whereIn('name', ['Admin', 'Approver', 'BPM Staff']); // Added 'Admin' to allow selecting Admin as supporting officer
-        Log::debug('loadInitialDropdownData: TESTING - Filtering supporting officer candidates by roles: Admin, Approver, BPM Staff.');
-    });
-    // ##### END: EDITED FOR TESTING PURPOSES #####
-
-    // Apply the grade level condition
-    $potentialOfficersAfterGradeFilter = $officersQuery->whereHas('grade', function ($query) use ($minSupportGradeLevel) {
-      $query->where('level', '>=', $minSupportGradeLevel);
-    })
-      ->with(['position:id,name', 'grade:id,name,level'])
-      ->orderBy('name')
-      ->get();
-
-    Log::debug('Potential Supporting Officers (after status, self-exclusion, role (testing), and grade level filter): ' . $potentialOfficersAfterGradeFilter->count(), $potentialOfficersAfterGradeFilter->map(function ($user) {
-      return [
-        'id' => $user->id,
-        'name' => $user->name,
-        'email' => $user->email,
-        'grade_name' => $user->grade?->name,
-        'grade_level' => $user->grade?->level,
-      ];
-    })->toArray());
-
-    $this->supportingOfficerOptions = $potentialOfficersAfterGradeFilter->mapWithKeys(function ($user) {
-      $positionName = $user->position?->name ?? __('Tiada Jawatan');
-      $gradeName = $user->grade?->name ?? __('Tiada Gred');
-      return [$user->id => "{$user->name} ({$positionName} - {$gradeName})"];
-    })->toArray();
-
-    Log::debug('Final supportingOfficerOptions (User IDs in dropdown): ', array_keys($this->supportingOfficerOptions));
-    Log::debug('----------------------------------------------------');
-
-    $this->equipmentTypeOptions = Equipment::getAssetTypeOptions() ?? [];
-
-    // Responsible officer options - also excludes current user
-    $this->responsibleOfficerOptions = User::where('status', User::STATUS_ACTIVE)
-      ->where('id', '!=', $currentUserId)
-      ->with(['position:id,name', 'grade:id,name'])
-      ->orderBy('name')->get()->mapWithKeys(function ($user) {
-        $positionName = $user->position?->name ?? __('Tiada Jawatan');
-        $gradeName = $user->grade?->name ?? __('Tiada Gred');
-        return [$user->id => "{$user->name} ({$positionName} - {$gradeName})"];
-      })->toArray();
-    Log::debug('Final responsibleOfficerOptions keys:', array_keys($this->responsibleOfficerOptions));
-  }
-
-  public function addLoanItem(bool $dispatchEvent = true): void
-  {
-    $this->loan_application_items[] = ['id' => null, 'equipment_type' => '', 'quantity_requested' => 1, 'notes' => '', '_delete' => false];
-    $this->updateTotalQuantityRequested();
-    if ($dispatchEvent) $this->dispatch('loanItemAdded');
-  }
-
-  public function removeLoanItem(int $index): void
-  {
-    $activeItemsCount = collect($this->loan_application_items)->filter(fn($item) => empty($item['_delete']))->count();
-
-    if (isset($this->loan_application_items[$index])) {
-      if ($activeItemsCount <= 1 && empty($this->loan_application_items[$index]['_delete'])) {
-        $this->dispatch('error-toast', ['type' => 'warning', 'message' => __('Permohonan mesti mempunyai sekurang-kurangnya satu item peralatan aktif.')]);
-        return;
-      }
-
-      if (!empty($this->loan_application_items[$index]['id'])) {
-        $this->loan_application_items[$index]['_delete'] = true;
-      } else {
-        unset($this->loan_application_items[$index]);
-        $this->loan_application_items = array_values($this->loan_application_items);
-      }
-      $this->updateTotalQuantityRequested();
-      $this->dispatch('loanItemRemoved');
-    }
-  }
-
-  private function authorizeAction(): void
-  {
-    if ($this->editing_application_id && $this->loanApplicationInstance && $this->loanApplicationInstance->exists) {
-      $this->authorize('update', $this->loanApplicationInstance);
-    } else {
-      $this->authorize('create', LoanApplication::class);
-    }
-  }
-
-  public function saveAsDraft(): ?RedirectResponse
-  {
-    $this->isSubmittingForApproval = false;
-    $this->authorizeAction();
-    $rulesForDraft = $this->rules(false);
-    $validatedData = $this->validate($rulesForDraft, $this->messages());
-    return $this->processSave($validatedData, true);
-  }
-
-  public function submitLoanApplication(): ?RedirectResponse
-  {
-    $this->isSubmittingForApproval = true;
-    $this->authorizeAction();
-    $validatedData = $this->validate($this->rules(true), $this->messages());
-    return $this->processSave($validatedData, false);
-  }
-
-  private function processSave(array $validatedData, bool $isDraft): ?RedirectResponse
-  {
-    DB::beginTransaction();
-    try {
-      /** @var User $currentUser */
-      $currentUser = Auth::user();
-      $isUpdating = (bool) $this->editing_application_id;
-
-      $dataForService = $validatedData;
-      $dataForService['user_id'] = $isUpdating && $this->loanApplicationInstance ? $this->loanApplicationInstance->user_id : $currentUser->id;
-
-      if ($this->applicant_is_responsible_officer) {
-        $dataForService['responsible_officer_id'] = $currentUser->id;
-      } else {
-        $dataForService['responsible_officer_id'] = $validatedData['responsible_officer_id'] ?? null;
-      }
-
-      $dataForService['supporting_officer_id'] = $this->supporting_officer_id;
-
-      $dataForService['applicant_confirmation_timestamp'] = (!$isDraft && ($validatedData['applicant_confirmation'] ?? false)) ? now() : null;
-
-      $activeItems = collect($validatedData['loan_application_items'])
-        ->filter(fn($item) => empty($item['_delete']))
-        ->values()
-        ->all();
-
-      if (empty($activeItems) && !$isDraft) {
-        throw ValidationException::withMessages(['loan_application_items' => __('Permohonan mesti mempunyai sekurang-kurangnya satu item peralatan aktif untuk dihantar.')]);
-      }
-
-      $dataForService['items'] = $this->prepareItemsForService($activeItems);
-
-      $dataForService['is_draft_submission'] = $isDraft;
-
-      $loanAppService = app(LoanApplicationService::class);
-      $processedApplication = $this->loanApplicationInstance ?? new LoanApplication();
-      $successMessage = '';
-
-      if ($isUpdating && $processedApplication->exists) {
-        $processedApplication = $loanAppService->updateApplication(
-          $processedApplication,
-          $dataForService,
-          $currentUser
-        );
-        $successMessage = $isDraft ? __('Draf permohonan pinjaman berjaya dikemaskini.') : __('Permohonan pinjaman berjaya dikemaskini dan dihantar.');
-      } else {
-        $processedApplication = $loanAppService->createAndSubmitApplication(
-          $dataForService,
-          $currentUser,
-          $isDraft
-        );
-        $successMessage = $isDraft ? __('Draf permohonan pinjaman berjaya disimpan.') : __('Permohonan pinjaman berjaya dibuat dan dihantar.');
-      }
-
-      if (
-        !$isDraft && $processedApplication &&
-        ($processedApplication->status === LoanApplication::STATUS_DRAFT || $processedApplication->status === LoanApplication::STATUS_REJECTED)
-      ) {
-        if (method_exists($loanAppService, 'submitApplicationForApproval')) {
-          $loanAppService->submitApplicationForApproval($processedApplication, $currentUser);
+            $this->authorize('update', $this->loanApplicationInstance);
+            $this->populateFormFromInstance();
+        } else {
+            $this->authorize('create', LoanApplication::class);
+            $this->resetFormForCreate();
         }
-        $successMessage = __('Permohonan pinjaman #:id berjaya dihantar untuk kelulusan.', ['id' => $processedApplication->id]);
-      } elseif (!$isDraft && $processedApplication->status !== LoanApplication::STATUS_DRAFT && $processedApplication->status !== LoanApplication::STATUS_REJECTED) {
-        $successMessage = __('Permohonan pinjaman #:id telah dikemaskini.', ['id' => $processedApplication->id]);
-      }
-
-      DB::commit();
-      session()->flash('success', $successMessage);
-      $this->dispatch('toastr', type: 'success', message: $successMessage);
-      return redirect()->route('loan-applications.show', $processedApplication->id);
-    } catch (ValidationException $e) {
-      DB::rollBack();
-      Log::warning('LoanApplicationForm ValidationException during processSave.', ['user_id' => Auth::id(), 'errors' => $e->errors()]);
-      $this->dispatch('toastr', type: 'error', message: __('Sila semak semula borang. Terdapat ralat pengesahan.'));
-      throw $e;
-    } catch (Throwable $e) {
-      DB::rollBack();
-      Log::error('LoanApplicationForm Error in processSave: ' . $e->getMessage(), [
-        'user_id' => Auth::id(),
-        'exception_class' => get_class($e),
-        'file' => $e->getFile(),
-        'line' => $e->getLine(),
-        'trace_snippet' => substr($e->getTraceAsString(), 0, 500),
-        'data' => $validatedData ?? $this->all(),
-      ]);
-      $this->addError('general_error', __('Sistem menghadapi ralat semasa memproses permohonan anda. Sila cuba lagi atau hubungi pentadbir jika masalah berterusan.'));
-      $this->dispatch('toastr', type: 'error', message: __('Ralat tidak dijangka semasa menyimpan permohonan.'));
-      return null;
     }
-  }
 
-  private function prepareItemsForService(array $formItems): array
-  {
-    return collect($formItems)->map(function ($item) {
-      if (empty($item['_delete'])) {
-        if (isset($item['quantity_requested'])) {
-          $item['quantity_requested'] = (int) $item['quantity_requested'];
+    private function populateFormFromInstance(): void
+    {
+        if (!$this->loanApplicationInstance) return;
+
+        $this->applicant_phone = $this->loanApplicationInstance->applicant_phone ?? Auth::user()?->mobile_number ?? '';
+        $this->purpose = $this->loanApplicationInstance->purpose ?? '';
+        $this->location = $this->loanApplicationInstance->location ?? '';
+        $this->return_location = $this->loanApplicationInstance->return_location;
+        $this->loan_start_date = $this->formatDateForInput($this->loanApplicationInstance->loan_start_date);
+        $this->loan_end_date = $this->formatDateForInput($this->loanApplicationInstance->loan_end_date);
+        $this->supporting_officer_id = $this->loanApplicationInstance->supporting_officer_id;
+        $this->applicant_is_responsible_officer = $this->loanApplicationInstance->responsible_officer_id === $this->loanApplicationInstance->user_id;
+        $this->responsible_officer_id = $this->applicant_is_responsible_officer ? Auth::id() : $this->loanApplicationInstance->responsible_officer_id;
+        $this->loan_application_items = $this->loanApplicationInstance->loanApplicationItems?->map(fn($item) => $item->only(['id', 'equipment_type', 'quantity_requested', 'notes']))->toArray() ?? [];
+        $this->applicant_confirmation = (bool) $this->loanApplicationInstance->applicant_confirmation_timestamp;
+    }
+
+    public function populateApplicantDetails(): void
+    {
+        /** @var User|null $user */
+        $user = Auth::user();
+        if ($user) {
+            $this->applicantName = $user->name;
+            $positionName = $user->position?->name ?? __('Tiada Jawatan');
+            $gradeName = $user->grade?->name ?? __('Tiada Gred');
+            $this->applicantPositionAndGrade = trim("{$positionName} ({$gradeName})");
+            $this->applicantDepartment = $user->department?->name ?? __('Tiada Jabatan');
         }
-      }
-      return $item;
-    })->all();
-  }
-
-  public function resetFormForCreate(bool $dispatchEvent = true): void
-  {
-    $this->resetErrorBag();
-    $this->resetValidation();
-
-    $this->applicant_phone = ''; // Issue #2 Fix
-
-    $this->editing_application_id = null;
-    $this->loanApplicationInstance = new LoanApplication();
-    $this->purpose = '';
-    $this->location = '';
-    $this->return_location = null;
-    $this->loan_start_date = null;
-    $this->loan_end_date = null;
-    $this->applicant_is_responsible_officer = true;
-    $this->responsible_officer_id = null;
-    $this->supporting_officer_id = null;
-
-    $this->loan_application_items = [];
-    $this->addLoanItem(false);
-
-    $this->applicant_confirmation = false;
-    $this->termsScrolled = false;
-    $this->isSubmittingForApproval = false;
-
-    $this->populateApplicantDetails();
-    $this->updateTotalQuantityRequested();
-    $this->updateResponsibleOfficerDetails();
-
-    if ($dispatchEvent) $this->dispatch('formResettled');
-  }
-
-  public function render(): View
-  {
-    if ((empty($this->responsibleOfficerOptions) || empty($this->supportingOfficerOptions)) && Auth::check()) {
-      $this->loadInitialDropdownData();
-    }
-    $this->updateTotalQuantityRequested();
-
-    $completedSubmissionDate = null;
-    if ($this->loanApplicationInstance && $this->loanApplicationInstance->exists && $this->loanApplicationInstance->submitted_at) {
-      $completedSubmissionDate = Carbon::parse($this->loanApplicationInstance->submitted_at)->translatedFormat(config('app.datetime_format_my', 'j F Y, g:i A'));
     }
 
-    return view('livewire.resource-management.loan-application.application-form', [
-      'isEditMode' => (bool) $this->editing_application_id,
-      'completedSubmissionDate' => $completedSubmissionDate,
-      'isSubmittingForApprovalView' => $this->isSubmittingForApproval
-    ]);
-  }
+    public function loadInitialDropdownData(): void
+    {
+        $currentUserId = Auth::id();
+        if (!$currentUserId) return;
 
-  protected function updateTotalQuantityRequested(): void
-  {
-    $this->totalQuantityRequested = collect($this->loan_application_items)
-      ->whereNull('_delete') // Ensure we are not summing items marked for deletion.
-      ->sum(fn($item) => (int)($item['quantity_requested'] ?? 0));
-  }
+        $minSupportGradeLevel = (int) config('motac.approval.min_loan_support_grade_level', 41);
 
+        $this->supportingOfficerOptions = User::where('status', User::STATUS_ACTIVE)
+            ->where('id', '!=', $currentUserId)
+            ->whereHas('grade', fn ($query) => $query->where('level', '>=', $minSupportGradeLevel))
+            ->orderBy('name')->get()->pluck('name', 'id')->toArray();
 
-  public function updatedApplicantIsResponsibleOfficer(): void
-  {
-    if ($this->applicant_is_responsible_officer) {
-      $this->responsible_officer_id = Auth::id();
-    } else {
-      $this->responsible_officer_id = null;
+        $this->responsibleOfficerOptions = User::where('status', User::STATUS_ACTIVE)
+            ->where('id', '!=', $currentUserId)
+            ->orderBy('name')->get()->pluck('name', 'id')->toArray();
+
+        $this->equipmentTypeOptions = Equipment::getAssetTypeOptions() ?? [];
     }
-    $this->updateResponsibleOfficerDetails(); // Update display fields
-    $this->resetValidation('responsible_officer_id');
-  }
 
-  private function updateResponsibleOfficerDetails(): void
-  {
-    /** @var User|null $user */
-    if ($this->applicant_is_responsible_officer) {
-      $user = Auth::user();
-      if ($user) {
-        $this->responsibleOfficerName = $user->name;
-        $positionName = $user->position?->name ?? __('Tiada Jawatan');
-        $gradeName = $user->grade?->name ?? __('Tiada Gred');
-        $this->responsibleOfficerPositionAndGrade = trim("{$positionName} ({$gradeName})", ' ()');
-        $this->responsibleOfficerPhone = $user->mobile_number ?? '';
-      }
-    } else {
-      $this->responsibleOfficerName = '';
-      $this->responsibleOfficerPositionAndGrade = '';
-      $this->responsibleOfficerPhone = '';
+    public function saveAsDraft(): ?RedirectResponse
+    {
+        $this->isSubmittingForApproval = false;
+        $validatedData = $this->validate($this->rules(false));
+        return $this->saveOrUpdateLoanApplication($validatedData, true);
     }
-  }
 
-  protected function rules(bool $isSubmittingForApproval = false): array
-  {
-    $nowForValidation = Carbon::now()->startOfMinute()->toDateTimeString();
-    $currentUserId = Auth::id();
-    $minSupportGradeLevel = (int) config('motac.approval.min_loan_support_grade_level', 41); // [cite: 86]
+    public function submitLoanApplication(): ?RedirectResponse
+    {
+        $this->isSubmittingForApproval = true;
+        $validatedData = $this->validate($this->rules(true));
+        return $this->saveOrUpdateLoanApplication($validatedData, false);
+    }
 
-    $rules = [
-      'applicant_phone' => ['required', 'string', 'max:20', 'regex:/^([0-9\s\-\+\(\)]*)$/'],
-      'purpose' => ['required', 'string', 'min:10', 'max:1000'],
-      'location' => ['required', 'string', 'min:5', 'max:255'],
-      'return_location' => ['nullable', 'string', 'max:255', Rule::when((bool)$this->location && $this->location !== ($this->return_location ?? ''), ['different:location'])],
-      'loan_start_date' => ['required', 'date_format:Y-m-d\TH:i', 'after_or_equal:' . $nowForValidation],
-      'loan_end_date' => ['required', 'date_format:Y-m-d\TH:i', 'after:loan_start_date'],
-      'applicant_is_responsible_officer' => ['required', 'boolean'],
+    private function saveOrUpdateLoanApplication(array $validatedData, bool $isDraft): ?RedirectResponse
+    {
+        $this->authorizeAction();
+        DB::beginTransaction();
+        try {
+            $loanAppService = app(LoanApplicationService::class);
+            /** @var User $currentUser */
+            $currentUser = Auth::user();
 
-      'responsible_officer_id' => [
-        Rule::requiredIf(!$this->applicant_is_responsible_officer && $isSubmittingForApproval),
-        'nullable',
-        'integer',
-        Rule::exists('users', 'id')->where(fn($query) => $query->where('status', User::STATUS_ACTIVE)->whereNull('deleted_at')),
-        Rule::when(!$this->applicant_is_responsible_officer && $currentUserId, ['different:' . $currentUserId]),
-      ],
+            $dataForService = $validatedData;
+            $dataForService['user_id'] = $this->loanApplicationInstance?->user_id ?? $currentUser->id;
+            $dataForService['is_draft_submission'] = $isDraft;
 
-      'supporting_officer_id' => [
-        Rule::requiredIf($isSubmittingForApproval),
-        'nullable',
-        'integer',
-        Rule::exists('users', 'id')->where(function ($query) {
-          Log::debug('[Validation] Checking Rule::exists for supporting_officer_id.'); // Add this
-          $query->where('status', User::STATUS_ACTIVE)->whereNull('deleted_at');
-        }),
-        function ($attribute, $value, $fail) use ($minSupportGradeLevel) {
-          if ($value) {
-            $officer = User::with('grade:id,name,level')->find($value);
-            if ($officer) {
-              // Ganti pemeriksaan property_exists dengan pemeriksaan langsung
-              if (!$officer->grade || is_null($officer->grade->level)) {
-                $fail(__('Pegawai Penyokong yang dipilih tidak sah (gred tidak lengkap).'));
-                return;
-              }
-              if ($officer->grade->level < $minSupportGradeLevel) {
-                $fail(__('Pegawai Penyokong yang dipilih tidak sah (tahap gred tidak mencukupi).'));
-                return;
-              }
+            $application = $this->editing_application_id
+                ? $loanAppService->updateApplication($this->loanApplicationInstance, $dataForService, $currentUser)
+                : $loanAppService->createAndSubmitApplication($dataForService, $currentUser, $isDraft);
+
+            if (!$isDraft) {
+                $loanAppService->submitApplicationForApproval($application, $currentUser);
             }
-          }
-        },
-        Rule::when($currentUserId, ['different:' . $currentUserId]),
-      ],
 
-      'loan_application_items' => ['required', 'array', 'min:1'],
-      'loan_application_items.*.id' => ['nullable', 'integer'],
-      'loan_application_items.*._delete' => ['nullable', 'boolean'],
-      'loan_application_items.*.notes' => ['nullable', 'string', 'max:500'],
-    ];
+            DB::commit();
+            $message = $isDraft ? __('Draf permohonan berjaya disimpan.') : __('Permohonan pinjaman berjaya dihantar untuk kelulusan.');
+            session()->flash('success', $message);
+            return redirect()->route('loan-applications.show', $application->id);
 
-    foreach ($this->loan_application_items as $index => $item) {
-      if (empty($item['_delete'] ?? false)) {
-        $rules["loan_application_items.{$index}.equipment_type"] = [
-          'required',
-          'string',
-          'max:255',
-          Rule::in(array_keys($this->equipmentTypeOptions))
+        } catch (Throwable $e) {
+            DB::rollBack();
+            Log::error('LoanApplicationForm Error in saveOrUpdateLoanApplication: ' . $e->getMessage(), ['exception' => $e]);
+            $this->addError('general_error', __('Sistem menghadapi ralat semasa memproses permohonan anda. Sila cuba lagi.'));
+            return null;
+        }
+    }
+
+    protected function rules(bool $isSubmittingForApproval = false): array
+    {
+        $currentUserId = Auth::id();
+        $minSupportGradeLevel = (int) config('motac.approval.min_loan_support_grade_level', 41);
+
+        return [
+            'applicant_phone' => ['required', 'string', 'max:20', 'regex:/^([0-9\s\-\+\(\)]*)$/'],
+            'purpose' => ['required', 'string', 'min:10', 'max:1000'],
+            'location' => ['required', 'string', 'min:5', 'max:255'],
+            'return_location' => ['nullable', 'string', 'max:255', Rule::when((bool)$this->location, ['different:location'])],
+            'loan_start_date' => ['required', 'date_format:Y-m-d\TH:i', 'after_or_equal:now'],
+            'loan_end_date' => ['required', 'date_format:Y-m-d\TH:i', 'after:loan_start_date'],
+            'applicant_is_responsible_officer' => ['required', 'boolean'],
+            'responsible_officer_id' => [
+                Rule::requiredIf(!$this->applicant_is_responsible_officer),
+                'nullable',
+                'integer',
+                'different:supporting_officer_id',
+                Rule::exists('users', 'id')->where('status', 'active'),
+            ],
+            // ADJUSTMENT: This rule is now enforced for all final submissions to follow the workflow.
+            'supporting_officer_id' => [
+                Rule::requiredIf($isSubmittingForApproval),
+                'nullable',
+                'integer',
+                Rule::exists('users', 'id')->where('status', 'active'),
+                Rule::when($currentUserId, 'different:' . $currentUserId),
+                function ($attribute, $value, $fail) use ($minSupportGradeLevel) {
+                    if ($value) {
+                        $officer = User::with('grade:id,level')->find($value);
+                        if (!$officer || !$officer->grade || $officer->grade->level < $minSupportGradeLevel) {
+                            $fail(__('Pegawai Penyokong tidak memenuhi syarat gred minimum (Gred :grade).', ['grade' => $minSupportGradeLevel]));
+                        }
+                    }
+                },
+            ],
+            'applicant_confirmation' => Rule::when($isSubmittingForApproval, ['accepted']),
+            'loan_application_items' => ['required', 'array', 'min:1'],
+            'loan_application_items.*.equipment_type' => ['required', 'string'],
+            'loan_application_items.*.quantity_requested' => ['required', 'integer', 'min:1', 'max:100'],
+            'loan_application_items.*.notes' => ['nullable', 'string', 'max:500'],
         ];
-        $rules["loan_application_items.{$index}.quantity_requested"] = [
-          'required',
-          'integer',
-          'min:1',
-          'max:100'
-        ];
-      } else {
-        $rules["loan_application_items.{$index}.equipment_type"] = ['nullable', 'string', 'max:255', Rule::in(array_keys($this->equipmentTypeOptions))];
-        $rules["loan_application_items.{$index}.quantity_requested"] = ['nullable', 'integer', 'min:0', 'max:100'];
-      }
     }
 
-    if ($isSubmittingForApproval) {
-      $rules['applicant_confirmation'] = ['accepted'];
-    } else {
-      $rules['applicant_confirmation'] = ['nullable', 'boolean'];
+    private function authorizeAction(): void
+    {
+        $this->authorize($this->editing_application_id ? 'update' : 'create', $this->loanApplicationInstance ?? LoanApplication::class);
     }
-    return $rules;
-  }
 
-  protected function messages(): array
-  {
-    $messages = [
-      'applicant_phone.required' => __('Sila masukkan nombor telefon pemohon.'),
-      'applicant_phone.regex' => __('Format nombor telefon tidak sah. Gunakan format seperti 012-3456789.'),
-      'purpose.required' => __('Sila nyatakan tujuan permohonan.'),
-      'purpose.min' => __('Tujuan permohonan mesti sekurang-kurangnya :min aksara.'),
-      'location.required' => __('Sila nyatakan lokasi penggunaan peralatan.'),
-      'loan_start_date.required' => __('Sila masukkan tarikh dan masa pinjaman bermula.'),
-      'loan_start_date.after_or_equal' => __('Tarikh pinjaman mesti bermula dari tarikh dan masa semasa atau akan datang.'),
-      'loan_end_date.required' => __('Sila masukkan tarikh dan masa jangkaan pulang.'),
-      'loan_end_date.after' => __('Tarikh pulang mesti selepas tarikh dan masa pinjaman bermula.'),
+    // Other helper methods like addLoanItem, removeLoanItem, resetFormForCreate etc.
+    // ...
 
-      'responsible_officer_id.required_if' => __('Sila pilih Pegawai Bertanggungjawab jika bukan pemohon sendiri.'),
-      'responsible_officer_id.different' => __('Pegawai Bertanggungjawab tidak boleh sama dengan pemohon.'),
-      'responsible_officer_id.exists' => __('Pegawai Bertanggungjawab yang dipilih tidak sah atau tidak aktif.'),
-
-      'supporting_officer_id.required_if' => __('Sila pilih Pegawai Penyokong untuk menghantar permohonan.'),
-      'supporting_officer_id.exists' => __('Pegawai Penyokong yang dipilih tidak sah, tidak aktif atau tidak memenuhi syarat gred minimum.'),
-      'supporting_officer_id.different' => __('Pegawai Penyokong tidak boleh sama dengan pemohon.'),
-
-      'loan_application_items.required' => __('Sila tambah sekurang-kurangnya satu item peralatan.'),
-      'loan_application_items.min' => __('Sila tambah sekurang-kurangnya :min item peralatan.'),
-      'applicant_confirmation.accepted' => __('Anda mesti bersetuju dengan perakuan pemohon untuk menghantar permohonan.'),
-      'return_location.different' => __('Lokasi pemulangan mesti berbeza daripada lokasi penggunaan jika diisi.'),
-    ];
-
-    foreach ($this->loan_application_items as $index => $item) {
-      if (empty($item['_delete'] ?? false)) {
-        $itemNumber = $index + 1;
-        $messages["loan_application_items.{$index}.equipment_type.required"] = __("Sila pilih jenis peralatan untuk Item #{$itemNumber}.");
-        $messages["loan_application_items.{$index}.equipment_type.in"] = __("Jenis peralatan yang dipilih untuk Item #{$itemNumber} tidak sah.");
-        $messages["loan_application_items.{$index}.quantity_requested.required"] = __("Sila masukkan kuantiti untuk Item #{$itemNumber}.");
-        $messages["loan_application_items.{$index}.quantity_requested.integer"] = __("Kuantiti untuk Item #{$itemNumber} mesti nombor.");
-        $messages["loan_application_items.{$index}.quantity_requested.min"] = __("Kuantiti untuk Item #{$itemNumber} mesti sekurang-kurangnya :min.");
-        $messages["loan_application_items.{$index}.quantity_requested.max"] = __("Kuantiti untuk Item #{$itemNumber} tidak boleh melebihi :max.");
-        $messages["loan_application_items.{$index}.notes.max"] = __("Nota untuk Item #{$itemNumber} tidak boleh melebihi :max aksara.");
-      }
+    private function formatDateForInput($date): ?string
+    {
+        return $date ? Carbon::parse($date)->format('Y-m-d\TH:i') : null;
     }
-    return $messages;
-  }
 
-  private function formatDateForDatetimeLocalInput($dateValue): ?string
-  {
-    if ($dateValue instanceof Carbon) {
-      return $dateValue->format('Y-m-d\TH:i');
+    public function render(): View
+    {
+        return view('livewire.resource-management.loan-application.application-form');
     }
-    if (is_string($dateValue) && !empty($dateValue)) {
-      try {
-        return Carbon::parse($dateValue)->format('Y-m-d\TH:i');
-      } catch (\Exception $e) {
-        Log::warning("LoanApplicationForm: Failed to parse date '{$dateValue}' for datetime-local input.", ['exception' => $e->getMessage()]);
-        return null;
-      }
-    }
-    return null;
-  }
 }

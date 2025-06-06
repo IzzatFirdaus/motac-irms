@@ -202,7 +202,7 @@ class LoanApplicationController extends Controller
   {
     /** @var \App\Models\User $user */
     $user = $request->user();
-    $this->authorize('submit', $loanApplication);
+    // $this->authorize('submit', $loanApplication); // REMOVED: This is now handled by middleware in the routes/web.php file.
 
     Log::info("LoanApplicationController@submitApplication: User ID {$user->id} attempting to submit LoanApplication ID {$loanApplication->id} (traditional flow).");
 

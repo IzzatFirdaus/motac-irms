@@ -49,7 +49,7 @@
     <title>@yield('title', __('Halaman Utama')) | {{ config('variables.templateName', 'Sistem MOTAC') }}</title>
     <meta name="description" content="@yield('description', config('variables.templateDescription', 'Sistem Pengurusan Sumber Bersepadu MOTAC'))" />
     <meta name="keywords" content="@yield('keywords', config('variables.templateKeyword', 'motac, bpm, sistem dalaman'))" />
-    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
+    <link rel="icon" type="image/x-icon" href="{{ asset('assets/img/favicon/favicon-motac.ico') }}" />
 
     {{-- Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
