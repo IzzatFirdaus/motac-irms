@@ -1,7 +1,7 @@
 <?php
 
 return [
-  // ICT Equipment Loan Form (BORANG PINJAMAN PERALATAN ICT)
+
   'ict_loan_form_title' => 'BORANG PERMOHONAN PEMINJAMAN PERALATAN ICT UNTUK KEGUNAAN RASMI',
   'bpm_office_display' => 'Bahagian Pengurusan Maklumat',
   'date_application_received_label' => 'TARIKH BORANG PERMOHONAN LENGKAP DITERIMA',
@@ -24,13 +24,13 @@ return [
   'table_header_bil' => 'Bil.',
   'table_header_equipment_type' => 'Jenis Peralatan',
   'table_header_quantity' => 'Kuantiti',
-  'table_header_remarks' => 'Catatan', // from PDF, my.json has "Note"
+  'table_header_remarks' => 'Catatan',
 
   'section_applicant_confirmation_ict' => 'BAHAGIAN 4 | PENGESAHAN PEMOHON (PEGAWAI BERTANGGUNGJAWAB)',
   'text_applicant_declaration_ict' => 'Saya dengan ini mengesahkan dan memperakukan bahawa semua peralatan yang dipinjam adalah untuk kegunaan rasmi dan berada di bawah tanggungjawab dan penyeliaan saya sepanjang tempoh tersebut;',
-  'label_date' => 'Tarikh', // from my.json "Date": "Tarikh"
+  'label_date' => 'Tarikh',
   'label_signature_stamp' => 'Tandatangan & Cop (jika ada):',
-  'label_name' => 'Nama', // from my.json "Name": "Nama"
+  'label_name' => 'Nama',
 
   'section_section_unit_endorsement' => 'BAHAGIAN 5 | PENGESAHAN BAHAGIAN / UNIT / SEKSYEN',
   'instruction_support_grade_ict' => 'Permohonan yang lengkap diisi oleh pemohon hendaklah DISOKONG OLEH PEGAWAI SEKURANG-KURANGNYA GRED 41 DAN KE ATAS.',
@@ -48,7 +48,7 @@ return [
 
   'section_loan_details_ict' => 'BAHAGIAN 8 | MAKLUMAT PEMINJAMAN',
   'table_header_brand_model' => 'JENAMA DAN MODEL',
-  'table_header_serial_tag_id' => 'NO. SIRI / TAG ID',  // my.json has "Serial Number": "Nombor Siri"
+  'table_header_serial_tag_id' => 'NO. SIRI / TAG ID',
   'table_header_accessories' => 'AKSESORI',
   'checkbox_power_adapter' => 'Power Adapter',
   'checkbox_bag' => 'Beg',
@@ -58,7 +58,7 @@ return [
   'checkbox_remote' => 'Remote',
   'checkbox_others_specify' => 'Lain-lain. Nyatakan :',
 
-  // Email/User ID Application Form
+
   'email_user_id_application_title' => 'Permohonan Emel & ID Pengguna MOTAC',
   'section_applicant_declaration_email' => 'PERAKUAN PEMOHON',
   'text_applicant_declaration_lead_in_email' => 'Saya dengan ini mengesahkan bahawa:',
@@ -82,19 +82,19 @@ return [
 
   'label_full_name_title' => 'Nama Penuh & Gelaran:*',
   'placeholder_full_name_example' => 'Contoh: Annis Anwari',
-  'label_nric_no' => 'No. Kad Pengenalan:*',  // my.json has "National Number": "Nombor Nasional"
+  'label_nric_no' => 'No. Kad Pengenalan:*',
   'label_passport_no' => 'No. Pasport/Staff:*',
   'placeholder_nric_example' => 'Contoh: 800707-02-5044',
   'label_grade' => 'Gred:',
   'placeholder_select_grade' => '- Pilih Gred -',
-  'label_position' => 'Jawatan', // from my.json "Position": "Jawatan"
+  'label_position' => 'Jawatan',
   'placeholder_select_position' => '- Pilih Jawatan -',
-  'label_motac_dept_unit' => 'MOTAC Negeri/ Bahagian/ Unit:*', // Maps to Department concept
+  'label_motac_dept_unit' => 'MOTAC Negeri/ Bahagian/ Unit:*',
   'placeholder_select_motac_dept_unit' => '- Pilih MOTAC Negeri/Bahagian/Unit -',
   'label_level_floor' => 'Aras',
   'placeholder_select_level_floor' => '-Pilih Aras -',
-  'label_mobile_number' => 'No. Telefon Bimbit:*', // my.json has "Mobile": "Mudah Alih"
-  'label_personal_email' => 'E-mel Peribadi', // from my.json "Email": "E-mel"
+  'label_mobile_number' => 'No. Telefon Bimbit:*',
+  'label_personal_email' => 'E-mel Peribadi',
   'placeholder_personal_email_example' => 'Contoh: annisanwari@gmail.com',
   'label_group_email' => 'Group Email:',
   'placeholder_group_email_example' => 'Contoh: group all, groupunit',
@@ -152,40 +152,83 @@ return [
     '1' => '1',
     '2' => '2',
   ],
-  'label_service_start_date' => 'Tarikh Mula Berkhidmat', // my.json has "Start date": "Tarikh mula"
-  'label_service_end_date' => 'Tarikh Akhir Berkhidmat', // my.json has "End Date": "Tarikh Tamat"
-  'label_address' => 'Alamat', //
-  'label_acquisition_date' => 'Tarikh Perolehan', //
-  'label_acquisition_type' => 'Jenis Perolehan', //
-  'label_category' => 'Kategori', //
-  'label_center' => 'Pusat', //
-  'label_contract_id' => 'ID Kontrak', //
-  'label_degree' => 'Ijazah', //
-  'label_employee' => 'Pekerja', //
-  'label_expected_price' => 'Harga Dijangka', //
-  'label_father_name' => 'Nama Bapa', //
-  'label_first_name' => 'Nama Pertama', //
-  'label_gender' => 'Jantina', //
-  'label_handed_date' => 'Tarikh Serahan', //
-  'label_id' => 'ID', //
-  'label_last_name' => 'Nama Akhir', //
-  'label_mother_name' => 'Nama Ibu', //
-  'label_national_number' => 'Nombor Nasional', //
-  'label_old_id' => 'ID Lama', //
-  'label_password' => 'Kata Laluan', //
-  'label_quit_date' => 'Tarikh berhenti', //
-  'label_rate' => 'Kadar', //
-  'label_real_price' => 'Harga Sebenar', //
-  'label_reason' => 'Sebab', //
-  'label_record_info' => 'Maklumat Rekod', //
-  'label_serial_number' => 'Nombor Siri', //
-  'label_sub_category' => 'Sub-Kategori', //
-  'label_birth_place' => 'Tempat Kelahiran', // Derived from "Birth & Place": "Kelahiran & Tempat"
-  'label_select_gender' => 'Pilih Jantina', //
-  'placeholder_select_dot' => 'Pilih..', //
-  'search_id_category' => 'Cari (ID, Kategori...)', //
-  'search_id_name' => 'Cari (ID, Nama...)', //
-  'search_id_old_id_serial' => 'Cari (ID, ID Lama, Nombor Siri...)', //
-  'search_id_sub_category' => 'Cari (ID, Sub-Kategori...)', //
-  'search_placeholder' => 'Cari...', //
+  'label_service_start_date' => 'Tarikh Mula Berkhidmat',
+  'label_service_end_date' => 'Tarikh Akhir Berkhidmat',
+  'label_address' => 'Alamat',
+  'label_acquisition_date' => 'Tarikh Perolehan',
+  'label_acquisition_type' => 'Jenis Perolehan',
+  'label_category' => 'Kategori',
+  'label_center' => 'Pusat',
+  'label_contract_id' => 'ID Kontrak',
+  'label_degree' => 'Ijazah',
+  'label_employee' => 'Pekerja',
+  'label_expected_price' => 'Harga Dijangka',
+  'label_father_name' => 'Nama Bapa',
+  'label_first_name' => 'Nama Pertama',
+  'label_gender' => 'Jantina',
+  'label_handed_date' => 'Tarikh Serahan',
+  'label_id' => 'ID',
+  'label_last_name' => 'Nama Akhir',
+  'label_mother_name' => 'Nama Ibu',
+  'label_national_number' => 'Nombor Nasional',
+  'label_old_id' => 'ID Lama',
+  'label_password' => 'Kata Laluan',
+  'label_quit_date' => 'Tarikh berhenti',
+  'label_rate' => 'Kadar',
+  'label_real_price' => 'Harga Sebenar',
+  'label_reason' => 'Sebab',
+  'label_record_info' => 'Maklumat Rekod',
+  'label_serial_number' => 'Nombor Siri',
+  'label_sub_category' => 'Sub-Kategori',
+  'label_birth_place' => 'Tempat Kelahiran',
+  'label_select_gender' => 'Pilih Jantina',
+  'placeholder_select_dot' => 'Pilih..',
+  'search_id_category' => 'Cari (ID, Kategori...)',
+  'search_id_name' => 'Cari (ID, Nama...)',
+  'search_id_old_id_serial' => 'Cari (ID, ID Lama, Nombor Siri...)',
+  'search_id_sub_category' => 'Cari (ID, Sub-Kategori...)',
+  'search_placeholder' => 'Cari...',
+
+  // Loan Application - Responsible/Supporting Officers
+  'label_responsible_officer_name' => 'Nama Penuh Pegawai Bertanggungjawab',
+  'placeholder_select_responsible_officer' => 'Pilih Pegawai Bertanggungjawab',
+  'label_supporting_officer_name' => 'Nama Penuh Pegawai Penyokong',
+  'placeholder_select_supporting_officer' => 'Pilih Pegawai Penyokong',
+  'text_supporter_grade_requirement' => 'Pegawai Penyokong mestilah sekurang-kurangnya Gred :grade atau setara.',
+
+  // Loan Application - Equipment Items
+  'title_equipment_item' => 'Peralatan #:index',
+  'label_equipment_type' => 'Jenis Peralatan',
+  'placeholder_select_type' => 'Pilih Jenis',
+  'label_quantity' => 'Kuantiti',
+  'label_remarks' => 'Catatan',
+  'placeholder_equipment_remarks' => 'Cth: Model spesifik, perisian khas, dll.',
+  'text_no_equipment_added' => 'Sila tambah sekurang-kurangnya satu item peralatan.',
+
+  // Equipment Type Options
+  'option_equipment_laptop' => 'Komputer Riba',
+  'option_equipment_projector' => 'Projektor',
+  'option_equipment_printer' => 'Pencetak',
+  'option_equipment_desktop' => 'Komputer Meja',
+  'option_equipment_monitor' => 'Monitor',
+  'option_equipment_other' => 'Lain-lain Peralatan ICT',
+
+  // Placeholders for ICT Loan Form
+  'placeholder_phone_number' => 'Cth: 012-3456789',
+  'placeholder_purpose' => 'Nyatakan tujuan permohonan peralatan ICT...',
+  'placeholder_usage_location' => 'Cth: Bilik Mesyuarat Utama, Aras 10',
+  'placeholder_return_location' => 'Cth: Kaunter BPM (Jika berbeza)',
+
+  // Corrected Equipment Type Options
+  'option_equipment_desktop_pc' => 'Komputer Meja',
+  'option_equipment_other_ict' => 'Lain-lain Peralatan ICT',
+
+  // Form header
+  'text_form_ref_no' => 'No. Rujukan Borang: PK.(S).MOTAC.07.(L3)',
+
+  // Form Footer Information
+  'text_document_no' => 'No. Dokumen:',
+  'text_effective_date' => 'Tarikh Kuatkuasa:',
+
+  'label_expected_return_location' => 'Lokasi Dijangka Pulang',
 ];

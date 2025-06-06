@@ -9,8 +9,8 @@ use App\Models\LoanApplication;
 use App\Models\LoanTransaction;
 use App\Models\LoanTransactionItem;
 use App\Models\User;
-use App\Notifications\EquipmentIssuedNotification;    // Ensure this Notification class exists
-use App\Notifications\EquipmentReturnedNotification;  // Ensure this Notification class exists
+use App\Notifications\EquipmentIssuedNotification;
+use App\Notifications\EquipmentReturnedNotification;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Carbon;
@@ -40,23 +40,7 @@ final class LoanTransactionService
 
   /**
    * Creates a loan transaction (issue or return) and its associated items.
-   * Updates equipment statuses and loan application status accordingly.
-   *
-   * @param LoanApplication $loanApplication The parent loan application.
-   * @param string $type Transaction type (LoanTransaction::TYPE_ISSUE or LoanTransaction::TYPE_RETURN).
-   * @param User $actingOfficer The officer performing the transaction (issuing officer for issues, return accepting officer for returns).
-   * @param array<int, array{
-   * equipment_id: int,
-   * quantity: int,
-   * loan_application_item_id?: int|null,
-   * original_loan_transaction_item_id?: int|null, // For returns, ID of the item from original issue Tx
-   * notes?: string|null,
-   * accessories_data?: array|string|null, // Can be item-specific accessories
-   * condition_on_return?: string|null, // For returns
-   * item_status_on_return?: string|null // For returns
-   * }> $itemData Array of items involved in the transaction.
-   * @param array<string, mixed> $extraDetails Additional details for LoanTransaction (e.g., transaction_date, other officer IDs, notes, related_transaction_id, status_override).
-   * @return LoanTransaction The created loan transaction.
+   * This is the core private method that handles database operations.
    */
   public function createTransaction(
     LoanApplication $loanApplication,
@@ -89,41 +73,29 @@ final class LoanTransactionService
         'status' => $extraDetails['status_override'] ?? LoanTransaction::STATUS_PENDING,
       ];
 
-      $issuingOfficer = null;
-      $receivingOfficerForIssue = null;
-      $returningOfficerForReturn = null;
-      $returnAcceptingOfficer = null;
-
       if ($type === LoanTransaction::TYPE_ISSUE) {
-        $issuingOfficer = $actingOfficer;
-        $receivingOfficerUser = User::find($extraDetails['receiving_officer_id'] ?? $loanApplication->user_id);
+        $receivingOfficerUser = User::find($extraDetails['receiving_officer_id'] ?? null);
         if (!$receivingOfficerUser) throw new InvalidArgumentException("Pegawai Penerima (receiving_officer_id) tidak sah.");
-        $receivingOfficerForIssue = $receivingOfficerUser;
 
-        $transactionDetails['issuing_officer_id'] = $issuingOfficer->id;
-        $transactionDetails['receiving_officer_id'] = $receivingOfficerForIssue->id;
-        $transactionDetails['accessories_checklist_on_issue'] = $extraDetails['accessories_checklist_on_issue'] ?? null;
+        $transactionDetails['issuing_officer_id'] = $actingOfficer->id;
+        $transactionDetails['receiving_officer_id'] = $receivingOfficerUser->id;
         $transactionDetails['issue_notes'] = $extraDetails['issue_notes'] ?? null;
         $transactionDetails['issue_timestamp'] = $transactionDetails['transaction_date'];
       } elseif ($type === LoanTransaction::TYPE_RETURN) {
-        $returnAcceptingOfficer = $actingOfficer;
-        $returningOfficerUser = User::find($extraDetails['returning_officer_id'] ?? $loanApplication->user_id);
+        $returningOfficerUser = User::find($extraDetails['returning_officer_id'] ?? null);
         if (!$returningOfficerUser) throw new InvalidArgumentException("Pegawai Yang Memulangkan (returning_officer_id) tidak sah.");
-        $returningOfficerForReturn = $returningOfficerUser;
 
-        $transactionDetails['return_accepting_officer_id'] = $returnAcceptingOfficer->id;
-        $transactionDetails['returning_officer_id'] = $returningOfficerForReturn->id;
-        $transactionDetails['accessories_checklist_on_return'] = $extraDetails['accessories_checklist_on_return'] ?? null;
+        $transactionDetails['return_accepting_officer_id'] = $actingOfficer->id;
+        $transactionDetails['returning_officer_id'] = $returningOfficerUser->id;
         $transactionDetails['return_notes'] = $extraDetails['return_notes'] ?? null;
         $transactionDetails['return_timestamp'] = $transactionDetails['transaction_date'];
         $transactionDetails['related_transaction_id'] = $extraDetails['related_transaction_id'] ?? null;
       }
 
-      /** @var LoanTransaction $transaction */
       $transaction = LoanTransaction::create($transactionDetails);
       $txIdLog = $transaction->id;
 
-      foreach ($itemData as $idx => $item) {
+      foreach ($itemData as $item) {
         $equipment = Equipment::findOrFail($item['equipment_id']);
         $quantityTransacted = (int)($item['quantity'] ?? 1);
 
@@ -131,193 +103,138 @@ final class LoanTransactionService
           'equipment_id' => $equipment->id,
           'loan_application_item_id' => $item['loan_application_item_id'] ?? null,
           'quantity_transacted' => $quantityTransacted,
-          'item_notes' => $item['notes'] ?? ($item['issue_item_notes'] ?? ($item['return_item_notes'] ?? null)),
+          'item_notes' => $item['notes'] ?? null,
         ];
 
         if ($type === LoanTransaction::TYPE_ISSUE) {
           $txItemData['status'] = LoanTransactionItem::STATUS_ITEM_ISSUED;
-          $txItemData['accessories_checklist_issue'] = is_array($item['accessories_data'] ?? null)
-            ? $item['accessories_data']
-            : (is_string($item['accessories_data'] ?? null) ? json_decode($item['accessories_data'], true) : null);
-
-          $this->equipmentService->changeOperationalStatus($equipment, Equipment::STATUS_ON_LOAN, $actingOfficer, __("Dikeluarkan melalui Transaksi Pinjaman #:txId untuk Permohonan #:appId", ['txId' => $txIdLog, 'appId' => $appIdLog]));
-          if ($equipment->condition_status === Equipment::CONDITION_NEW) {
-            $this->equipmentService->changeConditionStatus($equipment, Equipment::CONDITION_GOOD, $actingOfficer, __("Status keadaan ditukar kepada 'Baik' semasa pengeluaran pertama (Transaksi #:txId).", ['txId' => $txIdLog]));
-          }
+          $this->equipmentService->changeOperationalStatus($equipment, Equipment::STATUS_ON_LOAN, $actingOfficer, __("Dikeluarkan melalui Transaksi Pinjaman #:txId", ['txId' => $txIdLog]));
         } elseif ($type === LoanTransaction::TYPE_RETURN) {
-          $conditionOnReturn = $item['condition_on_return'] ?? $equipment->condition_status;
+          $conditionOnReturn = $item['condition_on_return'] ?? Equipment::CONDITION_GOOD;
           $itemStatusOnReturn = $item['item_status_on_return'] ?? $this->determineItemStatusOnReturn($conditionOnReturn);
-
-          if (!in_array($conditionOnReturn, Equipment::getConditionStatusesList(), true)) {
-            throw new InvalidArgumentException("Status keadaan tidak sah '{$conditionOnReturn}' untuk peralatan ID: {$equipment->id} dalam item #{$idx}.");
-          }
-          if (!in_array($itemStatusOnReturn, LoanTransactionItem::getStatusOptionsList(), true)) {
-            throw new InvalidArgumentException("Status item transaksi tidak sah '{$itemStatusOnReturn}' untuk peralatan ID: {$equipment->id} dalam item #{$idx}.");
-          }
 
           $txItemData['status'] = $itemStatusOnReturn;
           $txItemData['condition_on_return'] = $conditionOnReturn;
-          $txItemData['accessories_checklist_return'] = is_array($item['accessories_data'] ?? null)
-            ? $item['accessories_data']
-            : (is_string($item['accessories_data'] ?? null) ? json_decode($item['accessories_data'], true) : null);
 
           $newEquipmentOpStatus = Equipment::STATUS_AVAILABLE;
-          $itemStatusLabel = LoanTransactionItem::getStatusLabel($itemStatusOnReturn);
+          if ($conditionOnReturn === Equipment::CONDITION_LOST) $newEquipmentOpStatus = Equipment::STATUS_LOST;
+          elseif (in_array($conditionOnReturn, [Equipment::CONDITION_MINOR_DAMAGE, Equipment::CONDITION_MAJOR_DAMAGE])) $newEquipmentOpStatus = Equipment::STATUS_UNDER_MAINTENANCE;
+          elseif ($conditionOnReturn === Equipment::CONDITION_UNSERVICEABLE) $newEquipmentOpStatus = Equipment::STATUS_DISPOSED;
 
-          if ($itemStatusOnReturn === LoanTransactionItem::STATUS_ITEM_REPORTED_LOST || $conditionOnReturn === Equipment::CONDITION_LOST) {
-            $newEquipmentOpStatus = Equipment::STATUS_LOST;
-          } elseif (in_array($itemStatusOnReturn, [LoanTransactionItem::STATUS_ITEM_RETURNED_MINOR_DAMAGE, LoanTransactionItem::STATUS_ITEM_RETURNED_MAJOR_DAMAGE])) {
-            $newEquipmentOpStatus = Equipment::STATUS_UNDER_MAINTENANCE;
-          } elseif ($itemStatusOnReturn === LoanTransactionItem::STATUS_ITEM_UNSERVICEABLE_ON_RETURN || $conditionOnReturn === Equipment::CONDITION_UNSERVICEABLE) {
-            $newEquipmentOpStatus = Equipment::STATUS_DISPOSED;
-          }
-          $this->equipmentService->changeOperationalStatus($equipment, $newEquipmentOpStatus, $actingOfficer, __("Dikembalikan melalui Transaksi #:txId. Status Item Pemulangan: :itemStatus", ['txId' => $txIdLog, 'itemStatus' => $itemStatusLabel]));
-
+          $this->equipmentService->changeOperationalStatus($equipment, $newEquipmentOpStatus, $actingOfficer, __("Dikembalikan melalui Transaksi #:txId", ['txId' => $txIdLog]));
           if ($conditionOnReturn !== $equipment->condition_status) {
-            $this->equipmentService->changeConditionStatus($equipment, $conditionOnReturn, $actingOfficer, __("Keadaan fizikal dikemaskini semasa pemulangan (Transaksi #:txId).", ['txId' => $txIdLog]));
+            $this->equipmentService->changeConditionStatus($equipment, $conditionOnReturn, $actingOfficer, __("Keadaan dikemaskini semasa pemulangan (Transaksi #:txId)", ['txId' => $txIdLog]));
           }
         }
-        /** @var LoanTransactionItem $transactionItem */
         $transactionItem = $transaction->loanTransactionItems()->create($txItemData);
-
         if ($transactionItem->loanApplicationItem) {
           $transactionItem->loanApplicationItem->recalculateQuantities();
-          $transactionItem->loanApplicationItem->save();
         }
-        Log::debug(self::LOG_AREA . "Created LoanTransactionItem ID: {$transactionItem->id} for Tx ID: {$txIdLog}");
       }
 
-      if ($type === LoanTransaction::TYPE_ISSUE) {
-        $transaction->status = LoanTransaction::STATUS_ISSUED;
-      } elseif ($type === LoanTransaction::TYPE_RETURN) {
-        $transaction->status = $this->determineOverallReturnTransactionStatus($itemData);
-      }
+      $transaction->status = ($type === LoanTransaction::TYPE_ISSUE) ? LoanTransaction::STATUS_ISSUED : $this->determineOverallReturnTransactionStatus($itemData);
       $transaction->save();
 
       $loanApplication->updateOverallStatusAfterTransaction();
-      Log::debug(self::LOG_AREA . "Called updateOverallStatusAfterTransaction for LoanApplication ID: {$appIdLog}");
-
       DB::commit();
-      Log::info(self::LOG_AREA . "Loan transaction ID {$txIdLog} of type '{$type}' created successfully with status '{$transaction->status}'.");
 
-      $recipient = $loanApplication->user;
-      if ($recipient) {
-        if ($type === LoanTransaction::TYPE_ISSUE && $issuingOfficer && class_exists(EquipmentIssuedNotification::class)) {
-          $recipient->notify(new EquipmentIssuedNotification($loanApplication, $transaction, $issuingOfficer));
-        } elseif ($type === LoanTransaction::TYPE_RETURN && $returnAcceptingOfficer && class_exists(EquipmentReturnedNotification::class)) {
-          $recipient->notify(new EquipmentReturnedNotification($loanApplication, $transaction, $returnAcceptingOfficer));
+      Log::info(self::LOG_AREA . "Loan transaction ID {$txIdLog} of type '{$type}' created successfully.");
+
+      if ($loanApplication->user) {
+        if ($type === LoanTransaction::TYPE_ISSUE) {
+          $this->notificationService->notifyApplicantEquipmentIssued($loanApplication, $transaction, $actingOfficer);
+        } elseif ($type === LoanTransaction::TYPE_RETURN) {
+          $this->notificationService->notifyApplicantEquipmentReturned($loanApplication, $transaction, $actingOfficer);
         }
       }
 
-      return $transaction->fresh([
-        'loanTransactionItems.equipment',
-        'loanApplication',
-        'issuingOfficer:id,name',
-        'receivingOfficer:id,name',
-        'returningOfficer:id,name',
-        'returnAcceptingOfficer:id,name',
-      ]);
-    } catch (ModelNotFoundException $e) {
-      DB::rollBack();
-      Log::error(self::LOG_AREA . "Model tidak ditemui semasa penciptaan transaksi untuk App ID {$appIdLog}.", ['exception_message' => $e->getMessage()]);
-      throw new ModelNotFoundException(__('Satu atau lebih rekod berkaitan tidak ditemui: ') . $e->getMessage(), $e->getCode(), $e);
-    } catch (InvalidArgumentException $e) {
-      DB::rollBack();
-      Log::error(self::LOG_AREA . "Argumen tidak sah semasa penciptaan transaksi untuk App ID {$appIdLog}: " . $e->getMessage());
-      throw $e;
+      return $transaction->fresh(['loanTransactionItems.equipment', 'loanApplication', 'issuingOfficer:id,name', 'receivingOfficer:id,name', 'returningOfficer:id,name', 'returnAcceptingOfficer:id,name']);
     } catch (Throwable $e) {
       DB::rollBack();
-      Log::error(self::LOG_AREA . "Ralat generik semasa penciptaan transaksi untuk App ID {$appIdLog}: " . $e->getMessage(), ['exception_class' => get_class($e), 'trace_snippet' => substr($e->getTraceAsString(), 0, 500)]);
+      Log::error(self::LOG_AREA . "Error creating transaction for App ID {$appIdLog}: " . $e->getMessage(), ['exception' => $e]);
       throw new RuntimeException(__('Gagal mencipta transaksi pinjaman: ') . $e->getMessage(), (int) $e->getCode(), $e);
     }
   }
 
   /**
-   * Processes a new equipment issuance transaction based on validated request data.
+   * Processes a new equipment issuance transaction.
    */
+  // --- EDITED CODE: START ---
+  // The method signature is updated to be more explicit and decoupled from the form request.
   public function processNewIssue(
     LoanApplication $loanApplication,
-    array $validatedData, // From IssueEquipmentRequest
-    User $issuingOfficer // BPM Staff
+    array $itemsPayload,
+    User $issuingOfficer,
+    array $transactionDetails
   ): LoanTransaction {
-    Log::info(self::LOG_AREA . "Processing new issue for LA ID: {$loanApplication->id} by User ID: {$issuingOfficer->id}", ['data_keys' => array_keys($validatedData)]);
+    // --- EDITED CODE: END ---
+    Log::info(self::LOG_AREA . "Processing new issue for LA ID: {$loanApplication->id} by User ID: {$issuingOfficer->id}", [
+      'item_count' => count($itemsPayload),
+      'details_keys' => array_keys($transactionDetails)
+    ]);
 
     $itemDataForTransaction = [];
-    foreach ($validatedData['items'] as $requestedItem) {
+    foreach ($itemsPayload as $requestedItem) {
       $itemDataForTransaction[] = [
         'equipment_id' => (int)$requestedItem['equipment_id'],
-        'quantity' => (int)$requestedItem['quantity_issued'],
+        'quantity' => 1, // Each row represents one serialized item
         'loan_application_item_id' => (int)$requestedItem['loan_application_item_id'],
         'notes' => $requestedItem['issue_item_notes'] ?? null,
         'accessories_data' => $requestedItem['accessories_checklist_item'] ?? null,
       ];
     }
 
-    if (empty($itemDataForTransaction)) {
-      throw new InvalidArgumentException('Tiada item sah dipilih untuk pengeluaran.');
-    }
-
-    $transactionDetails = [
-      'receiving_officer_id' => (int)$validatedData['receiving_officer_id'], // User from form
-      'transaction_date' => Carbon::parse($validatedData['transaction_date']),
-      'issue_notes' => $validatedData['issue_notes'] ?? null,
-    ];
-
+    // The details are now passed in a dedicated array.
     return $this->createTransaction(
       $loanApplication,
       LoanTransaction::TYPE_ISSUE,
-      $issuingOfficer, // The BPM staff acting
+      $issuingOfficer,
       $itemDataForTransaction,
       $transactionDetails
     );
   }
 
   /**
-   * Processes the return of equipment items based on validated request data.
+   * Processes the return of equipment items.
    */
+  // --- EDITED CODE: START ---
+  // The method signature is updated to be more explicit.
   public function processExistingReturn(
-    LoanTransaction $issueTransaction, // Original ISSUE transaction
-    array $validatedData, // From ProcessReturnRequest
-    User $returnAcceptingOfficer // BPM Staff
+    LoanTransaction $issueTransaction,
+    array $itemsPayload,
+    User $returnAcceptingOfficer,
+    array $transactionDetails
   ): LoanTransaction {
+    // --- EDITED CODE: END ---
     $loanApplication = $issueTransaction->loanApplication;
-    Log::info(self::LOG_AREA . "Processing return against Issue Tx ID: {$issueTransaction->id} for LA ID: {$loanApplication->id} by User ID: {$returnAcceptingOfficer->id}", ['data_keys' => array_keys($validatedData)]);
+    Log::info(self::LOG_AREA . "Processing return against Issue Tx ID: {$issueTransaction->id} for LA ID: {$loanApplication->id} by User ID: {$returnAcceptingOfficer->id}", [
+      'item_count' => count($itemsPayload)
+    ]);
 
     $itemDataForTransaction = [];
-    foreach ($validatedData['items'] as $returnedItem) {
-      /** @var LoanTransactionItem|null $originalIssuedItem */
+    foreach ($itemsPayload as $returnedItem) {
       $originalIssuedItem = LoanTransactionItem::find((int)$returnedItem['loan_transaction_item_id']);
       if (!$originalIssuedItem || $originalIssuedItem->loan_transaction_id !== $issueTransaction->id) {
         throw new InvalidArgumentException("Item transaksi asal dengan ID {$returnedItem['loan_transaction_item_id']} tidak sah.");
       }
-
       $itemDataForTransaction[] = [
         'equipment_id' => $originalIssuedItem->equipment_id,
-        'quantity' => (int)$returnedItem['quantity_returned'],
+        'quantity' => 1, // Each row represents one serialized item
         'loan_application_item_id' => $originalIssuedItem->loan_application_item_id,
         'original_loan_transaction_item_id' => $originalIssuedItem->id,
         'notes' => $returnedItem['return_item_notes'] ?? null,
-        'accessories_data' => $returnedItem['accessories_checklist_item'] ?? null,
         'condition_on_return' => $returnedItem['condition_on_return'],
-        'item_status_on_return' => $returnedItem['item_status_on_return'],
+        'item_status_on_return' => $this->determineItemStatusOnReturn($returnedItem['condition_on_return']),
       ];
     }
 
-    if (empty($itemDataForTransaction)) {
-      throw new InvalidArgumentException('Tiada item sah dipilih untuk pemulangan.');
-    }
-
-    $transactionDetails = [
-      'returning_officer_id' => (int)$validatedData['returning_officer_id'], // User from form
-      'transaction_date' => Carbon::parse($validatedData['transaction_date']),
-      'return_notes' => $validatedData['return_notes'] ?? null,
-      'related_transaction_id' => $issueTransaction->id,
-    ];
+    // The details are now passed in a dedicated array.
+    $transactionDetails['related_transaction_id'] = $issueTransaction->id;
 
     return $this->createTransaction(
       $loanApplication,
       LoanTransaction::TYPE_RETURN,
-      $returnAcceptingOfficer, // The BPM staff acting
+      $returnAcceptingOfficer,
       $itemDataForTransaction,
       $transactionDetails
     );

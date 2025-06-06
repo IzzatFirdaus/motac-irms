@@ -3,48 +3,54 @@
 namespace App\Livewire\ResourceManagement\Admin\BPM;
 
 use App\Models\LoanApplication;
-use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-#[Layout('layouts.app')] // Ensure layouts.app is Bootstrap-compatible
+#[Layout('layouts.app')]
 class OutstandingLoans extends Component
 {
     use AuthorizesRequests;
     use WithPagination;
 
     public string $searchTerm = '';
-    protected string $paginationTheme = 'bootstrap'; // Converted to Bootstrap
+    protected string $paginationTheme = 'bootstrap';
+
+    // Added properties to control sorting
+    public string $sortBy = 'updated_at';
+    public string $sortDirection = 'desc';
 
     public function mount(): void
     {
-        $this->authorize('viewAny', LoanApplication::class); // General BPM permission
+        $this->authorize('viewAny', LoanApplication::class);
     }
 
-    public function getOutstandingApplicationsProperty() // Changed to computed property
+    // Method to handle changing the sort column and direction
+    public function sortBy(string $field): void
     {
-        /** @var User $user */
-        $user = Auth::user();
-        // BPM staff should see applications that are approved and awaiting issuance by them,
-        // or partially issued and awaiting further issuance.
+        if ($this->sortBy === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            // Default to ascending when changing columns, or descending for dates
+            $this->sortDirection = in_array($field, ['updated_at', 'loan_end_date']) ? 'desc' : 'asc';
+        }
+        $this->sortBy = $field;
+        $this->resetPage();
+    }
+
+
+    public function getOutstandingApplicationsProperty()
+    {
+        $this->authorize('viewAny', LoanApplication::class);
+
         $query = LoanApplication::query()
             ->with([
-                'user:id,name,department_id',
-                'user.department:id,name',
-                'loanApplicationItems', // Changed from 'applicationItems'
-                'approvals' // To see who approved
+                'user:id,name',
+                'loanApplicationItems'
             ])
-            ->whereIn('status', [
-                LoanApplication::STATUS_APPROVED, // Approved by HOD, ready for BPM action
-                LoanApplication::STATUS_PENDING_BPM_REVIEW, // If BPM has a specific review stage before issuance
-                // LoanApplication::STATUS_PARTIALLY_ISSUED, // If BPM can continue issuing for partially issued ones (currently commented out, depends on workflow)
-            ]);
-        // Optionally, filter by applications where current_approval_stage is specifically for BPM
-        // ->where('current_approval_stage', Approval::STAGE_LOAN_BPM_REVIEW) // Example, if you have such a field
+            ->where('status', LoanApplication::STATUS_APPROVED);
 
         if (!empty($this->searchTerm)) {
             $searchTerm = '%' . $this->searchTerm . '%';
@@ -57,7 +63,13 @@ class OutstandingLoans extends Component
             });
         }
 
-        return $query->orderBy('updated_at', 'desc')->paginate(10); // Show most recently updated applications first
+        // The query now uses the dynamic sorting properties
+        $validSorts = ['id', 'purpose', 'loan_end_date', 'updated_at'];
+        if (in_array($this->sortBy, $validSorts)) {
+            $query->orderBy($this->sortBy, $this->sortDirection);
+        }
+
+        return $query->paginate(10);
     }
 
     public function updatingSearchTerm(): void
@@ -68,7 +80,7 @@ class OutstandingLoans extends Component
     public function render(): View
     {
         return view('livewire.resource-management.admin.bpm.outstanding-loans', [
-            'applications' => $this->outstandingApplications, // Access computed property
-        ])->title(__('Permohonan Pinjaman Tertunggak (Tindakan BPM)'));
+            'applications' => $this->outstandingApplications,
+        ])->title(__('Permohonan Pinjaman Untuk Diproses (Tindakan BPM)'));
     }
 }
