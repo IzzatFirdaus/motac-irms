@@ -25,9 +25,6 @@ class EquipmentController extends Controller
 
     /**
      * Display a listing of the equipment.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\View\View
      */
     public function index(Request $request): View
     {
@@ -60,7 +57,7 @@ class EquipmentController extends Controller
 
         // Non-privileged users only see 'available' equipment, unless they specifically filter status
         // Ensure User model has hasAnyRole method and Equipment model has STATUS_AVAILABLE constant.
-        if ($user && method_exists($user, 'hasAnyRole') && !$user->hasAnyRole(['Admin', 'BPM Staff', 'IT Admin']) && !$request->filled('status')) {
+        if ($user && method_exists($user, 'hasAnyRole') && ! $user->hasAnyRole(['Admin', 'BPM Staff', 'IT Admin']) && ! $request->filled('status')) {
             if (defined(Equipment::class.'::STATUS_AVAILABLE')) {
                 $filters['status'] = Equipment::STATUS_AVAILABLE;
             } else {
@@ -81,7 +78,6 @@ class EquipmentController extends Controller
         $classifications = Equipment::getClassificationOptions();
         $locations = Location::where('is_active', true)->orderBy('name')->get(['id', 'name']);
 
-
         $viewData = [
             'equipmentList' => $equipmentPaginator,
             'requestFilters' => $request->only(['asset_type', 'status', 'condition_status', 'classification', 'location_id', 'search']),
@@ -98,8 +94,7 @@ class EquipmentController extends Controller
     /**
      * Display the specified equipment.
      *
-     * @param \App\Models\Equipment $equipment Route model bound instance
-     * @return \Illuminate\View\View
+     * @param  \App\Models\Equipment  $equipment  Route model bound instance
      */
     public function show(Equipment $equipment): View
     {

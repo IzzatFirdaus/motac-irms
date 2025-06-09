@@ -2,170 +2,105 @@
 
 namespace App\Livewire\Sections\Navbar;
 
-use App\Models\User;
-use Illuminate\Database\Eloquent\Collection as EloquentCollection; // Use Eloquent Collection
-use Illuminate\Support\Facades\Auth;
+use App\Helpers\Helpers;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Livewire\Attributes\On;
 use Livewire\Component;
-use App\Helpers\Helpers; // For accessing appClasses
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str; // Added
-use Illuminate\Support\Facades\Route; // Added
 
 class Navbar extends Component
 {
-  public EloquentCollection $unreadNotifications; // Changed to EloquentCollection
+    // --- State Properties ---
+    public string $containerNav = 'container-fluid';
+    public string $navbarDetachedClass = '';
+    public bool $navbarFull = true;
+    public bool $navbarHideToggle = false;
+    public array $availableLocales = [];
+    protected string $localeConfigKey = 'app.available_locales';
 
-  public string $defaultProfilePhotoUrl;
-  public string $profileShowRoute = 'profile.show';
-  public string $adminSettingsRoute = 'admin.dashboard';
-  public bool $canViewAdminSettings = false;
+    // FIX: This public property MUST be declared here to be accessible in the Blade view.
+    public ?string $activeTheme = null;
 
-  public string $containerNav = 'container-fluid';
-  public string $navbarDetachedClass = '';
-  public bool $navbarFull = true;
-  public bool $navbarHideToggle = false;
-  public ?string $activeTheme = null;
+    /**
+     * Mount the component.
+     */
+    public function mount(
+        string $containerNav = 'container-fluid',
+        string $navbarDetachedClass = '',
+        ?bool $navbarFull = null,
+        ?bool $navbarHideToggle = null
+    ): void {
+        $configData = Helpers::appClasses();
 
-  public array $availableLocales = [];
-  protected string $localeConfigKey = 'app.available_locales';
+        // FIX: This line initializes the $activeTheme property when the component is loaded.
+        // This allows for role-based themes to be set on the initial page load.
+        $this->activeTheme = $configData['myStyle'] ?? 'light';
 
-  public function mount(
-    string $containerNav = 'container-fluid',
-    string $navbarDetachedClass = '',
-    ?bool $navbarFull = null,
-    ?bool $navbarHideToggle = null
-  ): void {
-    $configData = Helpers::appClasses();
+        $this->containerNav = $containerNav;
+        $this->navbarDetachedClass = $navbarDetachedClass;
+        $this->navbarFull = $navbarFull ?? ($configData['navbarFull'] ?? true);
+        $this->navbarHideToggle = $navbarHideToggle ?? (($configData['myLayout'] ?? 'vertical') === 'horizontal');
 
-    $this->containerNav = $containerNav;
-    $this->navbarDetachedClass = $navbarDetachedClass;
-    $this->navbarFull = $navbarFull ?? ($configData['navbarFull'] ?? true);
-    // Assuming 'menuHorizontal' might be a key in $configData or derived from 'myLayout'
-    $this->navbarHideToggle = $navbarHideToggle ?? ($configData['menuHorizontal'] ?? ($configData['myLayout'] === 'horizontal' ?? false));
-
-    $this->defaultProfilePhotoUrl = asset('assets/img/avatars/default-avatar.png');
-
-    $this->unreadNotifications = new EloquentCollection(); // Initialize as empty EloquentCollection
-    if (Auth::check()) {
-      /** @var User $user */
-      $user = Auth::user();
-      $this->refreshNotifications();
-      $this->canViewAdminSettings = $user->hasRole('Admin');
+        // Initialize language switcher
+        $this->initializeLocales();
     }
 
-    $configuredLocales = config($this->localeConfigKey, []);
-    $processedLocales = [];
-    foreach ($configuredLocales as $localeKey => $properties) {
-      if (!is_array($properties)) {
-        Log::warning("Navbar: Locale properties for '{$localeKey}' is not an array. Skipping.");
-        continue;
-      }
-      $countryCode = 'default';
-      if (!empty($properties['regional'])) {
-        $parts = explode('_', $properties['regional']);
-        if (count($parts) === 2) {
-          $countryCode = strtolower($parts[1]);
+    /**
+     * FIX: This event listener syncs the component's state when the theme is changed on the client-side.
+     */
+    #[On('themeHasChanged')]
+    public function syncTheme($theme)
+    {
+        Log::debug('[Navbar Component]: Syncing server state to theme "' . $theme . '".');
+        $this->activeTheme = $theme;
+    }
+
+    private function initializeLocales(): void
+    {
+        $configuredLocales = config($this->localeConfigKey, []);
+        $processedLocales = [];
+        foreach ($configuredLocales as $localeKey => $properties) {
+            if (!is_array($properties)) {
+                continue;
+            }
+            $countryCode = 'default';
+            if (!empty($properties['regional'])) {
+                $parts = explode('_', $properties['regional']);
+                if (count($parts) === 2) {
+                    $countryCode = strtolower($parts[1]);
+                }
+            }
+            $processedLocales[$localeKey] = $properties;
+            $processedLocales[$localeKey]['flag_code'] = !empty($countryCode) && $countryCode !== 'default' ? $countryCode : ($localeKey === 'ms' ? 'my' : ($localeKey === 'en' ? 'us' : $localeKey));
         }
-      }
-      $processedLocales[$localeKey] = $properties;
-      // More specific fallback for flag_code, ensuring 'my' for 'ms' and 'us' for 'en' as common defaults
-      $processedLocales[$localeKey]['flag_code'] = !empty($countryCode) && $countryCode !== 'default' ? $countryCode : ($localeKey === 'ms' ? 'my' : ($localeKey === 'en' ? 'us' : $localeKey));
+        $this->availableLocales = $processedLocales;
     }
-    $this->availableLocales = $processedLocales;
 
-    if (is_null($this->activeTheme)) {
-      $this->activeTheme = $configData['myStyle'] ?? 'light';
+    protected function getCurrentLocaleViewData(): array
+    {
+        $appCurrentLocaleKey = app()->getLocale();
+        $currentLocaleConfig = $this->availableLocales[$appCurrentLocaleKey] ?? null;
+
+        $flagCode = $appCurrentLocaleKey === 'ms' ? 'my' : ($appCurrentLocaleKey === 'en' ? 'us' : $appCurrentLocaleKey);
+        $displayName = Str::upper($appCurrentLocaleKey);
+
+        if ($currentLocaleConfig && is_array($currentLocaleConfig)) {
+            $flagCode = $currentLocaleConfig['flag_code'] ?? $flagCode;
+            $displayName = isset($currentLocaleConfig['name']) ? __($currentLocaleConfig['name']) : Str::upper($appCurrentLocaleKey);
+        }
+
+        return [
+            'key' => $appCurrentLocaleKey,
+            'flag_code' => $flagCode,
+            'name' => $displayName,
+        ];
     }
-  }
 
-  public function render(): View
-  {
-    return view('livewire.sections.navbar.navbar', [
-      'currentLocaleData' => $this->getCurrentLocaleViewData(),
-      'configData' => Helpers::appClasses()
-    ]);
-  }
-
-  #[On('refreshNotifications')]
-  public function refreshNotifications(): void
-  {
-    /** @var User|null $user */
-    $user = Auth::user();
-    $this->unreadNotifications = $user
-      ? $user->unreadNotifications()->latest()->take(10)->get()
-      : new EloquentCollection();
-  }
-
-  public function markNotificationAsRead(string $notificationId): void
-  {
-    /** @var User|null $user */
-    $user = Auth::user();
-    if ($user) {
-      $notification = $user->unreadNotifications()->where('id', $notificationId)->first();
-      if ($notification) {
-        $notification->markAsRead();
-        $this->refreshNotifications();
-      }
+    public function render(): View
+    {
+        return view('livewire.sections.navbar.navbar', [
+            'currentLocaleData' => $this->getCurrentLocaleViewData(),
+        ]);
     }
-  }
-
-  public function markAllNotificationsAsRead(): void
-  {
-    /** @var User|null $user */
-    $user = Auth::user();
-    if ($user) {
-      $user->unreadNotifications->markAsRead();
-      $this->refreshNotifications();
-    }
-  }
-
-  public function handleNotificationClick(string $notificationId, ?string $link = null): void
-  {
-    $this->markNotificationAsRead($notificationId);
-    if ($link && $link !== '#!') {
-      if (Str::startsWith($link, ['http://', 'https://', '/'])) {
-        redirect()->to($link);
-      } elseif (Route::has($link)) {
-        redirect()->route($link);
-      } else {
-        Log::warning("Navbar: Notification link '{$link}' is not a valid URL or route name.");
-      }
-    }
-  }
-
-  protected function getCurrentLocaleViewData(): array
-  {
-    $appCurrentLocaleKey = app()->getLocale();
-    $currentLocaleConfig = $this->availableLocales[$appCurrentLocaleKey] ?? null;
-
-    $flagCode = $appCurrentLocaleKey === 'ms' ? 'my' : ($appCurrentLocaleKey === 'en' ? 'us' : $appCurrentLocaleKey); // Default flag
-    $displayName = Str::upper($appCurrentLocaleKey);
-
-    if ($currentLocaleConfig && is_array($currentLocaleConfig)) {
-      $flagCode = $currentLocaleConfig['flag_code'] ?? $flagCode; // Use pre-calculated flag_code from mount
-      $displayName = isset($currentLocaleConfig['name']) ? __($currentLocaleConfig['name']) : Str::upper($appCurrentLocaleKey);
-    }
-    return [
-      'key' => $appCurrentLocaleKey,
-      'flag_code' => $flagCode,
-      'name' => $displayName,
-    ];
-  }
-
-  #[On('themeHasChanged')]
-  public function syncTheme($theme)
-  {
-    // Note: Due to wire:ignore on the switcher, this won't directly update the icon itself.
-    // JavaScript is already handling the icon.
-    // This is useful if the component needs to know the theme for other conditional logic.
-    $this->activeTheme = $theme;
-
-    // You might want to update the server-side session/config as well,
-    // so that Helpers::appClasses() picks up the correct theme on the next full request.
-    // This could involve calling a method on TemplateCustomizer if it handles saving.
-    // For example:
-    // session(['custom_theme_style' => $theme]); // And ensure Helpers.php reads from this session key
-  }
 }

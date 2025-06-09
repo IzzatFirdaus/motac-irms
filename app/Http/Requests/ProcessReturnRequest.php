@@ -9,9 +9,9 @@ use App\Models\LoanTransaction;
 use App\Models\LoanTransactionItem;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Carbon;
 
 final class ProcessReturnRequest extends FormRequest
 {
@@ -19,7 +19,7 @@ final class ProcessReturnRequest extends FormRequest
     {
         /** @var User|null $user */
         $user = Auth::user();
-        if (!$user) {
+        if (! $user) {
             return false;
         }
 
@@ -34,6 +34,7 @@ final class ProcessReturnRequest extends FormRequest
             //
             return $user->can('processReturn', [$issueTransaction, $issueTransaction->loanApplication]);
         }
+
         return false;
     }
 
@@ -66,7 +67,7 @@ final class ProcessReturnRequest extends FormRequest
                     if ($issueTransactionId) {
                         // Ensure the item ID belongs to the specific issue transaction being processed
                         $query->where('loan_transaction_id', $issueTransactionId)
-                              ->where('status', LoanTransactionItem::STATUS_ITEM_ISSUED); // Only issued items can be returned
+                            ->where('status', LoanTransactionItem::STATUS_ITEM_ISSUED); // Only issued items can be returned
                     } else {
                         // Fail validation if no issue transaction context (should be caught by route model binding)
                         $query->whereRaw('1 = 0');
@@ -83,14 +84,14 @@ final class ProcessReturnRequest extends FormRequest
                     $parts = explode('.', $attribute);
                     $originalIssuedItemId = $parts[1] ?? null; // This is the key of the item in the items array
 
-                    if (!$originalIssuedItemId || !is_numeric($originalIssuedItemId)) {
+                    if (! $originalIssuedItemId || ! is_numeric($originalIssuedItemId)) {
                         return; // Other rules should catch invalid item ID
                     }
 
                     /** @var LoanTransactionItem|null $originalIssuedItem */
-                    $originalIssuedItem = LoanTransactionItem::find((int)$originalIssuedItemId);
+                    $originalIssuedItem = LoanTransactionItem::find((int) $originalIssuedItemId);
 
-                    if (!$originalIssuedItem || !$issueTransactionFromRoute || $originalIssuedItem->loan_transaction_id !== $issueTransactionFromRoute->id) {
+                    if (! $originalIssuedItem || ! $issueTransactionFromRoute || $originalIssuedItem->loan_transaction_id !== $issueTransactionFromRoute->id) {
                         return; // Not a valid item from this issue transaction
                     }
 
@@ -144,17 +145,15 @@ final class ProcessReturnRequest extends FormRequest
 
     /**
      * Prepare the data for validation.
-     *
-     * @return void
      */
     protected function prepareForValidation(): void
     {
-        if (!$this->has('transaction_date') && !$this->filled('transaction_date')) {
+        if (! $this->has('transaction_date') && ! $this->filled('transaction_date')) {
             $this->merge([
                 'transaction_date' => Carbon::now()->format('Y-m-d H:i:s'),
             ]);
         }
-         if ($this->input('items') === null && !$this->has('items')) {
+        if ($this->input('items') === null && ! $this->has('items')) {
             $this->merge(['items' => []]);
         }
     }

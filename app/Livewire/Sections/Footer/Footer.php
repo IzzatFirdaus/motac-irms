@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Sections\Footer;
 
-use Livewire\Component;
-use App\Helpers\Helpers; // Import the Helpers class
+use App\Helpers\Helpers;
+use Livewire\Component; // Import the Helpers class
 
 class Footer extends Component
 {
@@ -27,7 +27,7 @@ class Footer extends Component
         // returned by Helpers::appClasses(). This revised logic uses $configData['myLayout'].
 
         return view('livewire.sections.footer.footer', [
-            'containerNav' => $containerNavForFooter
+            'containerNav' => $containerNavForFooter,
         ]);
     }
 }

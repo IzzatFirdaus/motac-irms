@@ -55,7 +55,6 @@ use Spatie\Permission\Traits\HasRoles;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- *
  * @property-read \App\Models\Department|null $department
  * @property-read \App\Models\Grade|null $grade
  * @property-read \App\Models\Position|null $position
@@ -69,225 +68,251 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Permission> $permissions
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
+ *
  * @mixin \Eloquent
  */
 class User extends Authenticatable
 {
-  use HasApiTokens;
-  use HasFactory;
-  use HasProfilePhoto;
-  use HasRoles;
-  use Notifiable;
-  use SoftDeletes;
-  use TwoFactorAuthenticatable;
+    use HasApiTokens;
+    use HasFactory;
+    use HasProfilePhoto;
+    use HasRoles;
+    use Notifiable;
+    use SoftDeletes;
+    use TwoFactorAuthenticatable;
 
-  public const STATUS_ACTIVE = 'active';
-  public const STATUS_INACTIVE = 'inactive';
-  public const STATUS_PENDING = 'pending';
+    public const STATUS_ACTIVE = 'active';
 
-  public const SERVICE_STATUS_TETAP = '1';
-  public const SERVICE_STATUS_KONTRAK_MYSTEP = '2';
-  public const SERVICE_STATUS_PELAJAR_INDUSTRI = '3';
-  public const SERVICE_STATUS_OTHER_AGENCY = '4';
+    public const STATUS_INACTIVE = 'inactive';
 
-  public const APPOINTMENT_TYPE_BAHARU = '1';
-  public const APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN = '2';
-  public const APPOINTMENT_TYPE_LAIN_LAIN = '3';
+    public const STATUS_PENDING = 'pending';
 
-  public const TITLE_ENCIK = 'Encik';
-  public const TITLE_PUAN = 'Puan';
-  public const TITLE_CIK = 'Cik';
-  public const TITLE_DR = 'Dr.';
-  public const TITLE_IR = 'Ir.';
+    public const SERVICE_STATUS_TETAP = '1';
 
-  public static array $TITLE_OPTIONS = [
-    self::TITLE_ENCIK => 'Encik',
-    self::TITLE_PUAN => 'Puan',
-    self::TITLE_CIK => 'Cik',
-    self::TITLE_DR => 'Dr.',
-    self::TITLE_IR => 'Ir.',
-  ];
+    public const SERVICE_STATUS_KONTRAK_MYSTEP = '2';
 
-  public static array $STATUS_OPTIONS = [
-    self::STATUS_ACTIVE => 'Aktif',
-    self::STATUS_INACTIVE => 'Tidak Aktif',
-    self::STATUS_PENDING => 'Menunggu Pengesahan',
-  ];
+    public const SERVICE_STATUS_PELAJAR_INDUSTRI = '3';
 
-  public static array $SERVICE_STATUS_LABELS = [
-    self::SERVICE_STATUS_TETAP => 'Tetap',
-    self::SERVICE_STATUS_KONTRAK_MYSTEP => 'Lantikan Kontrak / MyStep',
-    self::SERVICE_STATUS_PELAJAR_INDUSTRI => 'Pelajar Latihan Industri (Ibu Pejabat Sahaja)',
-    self::SERVICE_STATUS_OTHER_AGENCY => 'E-mel Sandaran (Agensi Lain di MOTAC)',
-  ];
+    public const SERVICE_STATUS_OTHER_AGENCY = '4';
 
-  public static array $APPOINTMENT_TYPE_LABELS = [
-    self::APPOINTMENT_TYPE_BAHARU => 'Baharu',
-    self::APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN => 'Kenaikan Pangkat/Pertukaran',
-    self::APPOINTMENT_TYPE_LAIN_LAIN => 'Lain-lain',
-  ];
+    public const APPOINTMENT_TYPE_BAHARU = '1';
 
-  protected $table = 'users';
+    public const APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN = '2';
 
-  protected $fillable = [
-    'name',
-    'email',
-    'password',
-    'title',
-    'identification_number',
-    'passport_number',
-    'profile_photo_path',
-    'position_id',
-    'grade_id',
-    'department_id',
-    'level',
-    'mobile_number',
-    'personal_email',
-    'motac_email',
-    'user_id_assigned',
-    'service_status',
-    'appointment_type',
-    'previous_department_name',
-    'previous_department_email',
-    'status',
-    'email_verified_at',
-  ];
+    public const APPOINTMENT_TYPE_LAIN_LAIN = '3';
 
-  protected $hidden = [
-    'password',
-    'remember_token',
-    'two_factor_recovery_codes',
-    'two_factor_secret',
-  ];
+    public const TITLE_ENCIK = 'Encik';
 
-  protected $appends = ['profile_photo_url'];
+    public const TITLE_PUAN = 'Puan';
 
-  protected $casts = [
-    'email_verified_at' => 'datetime',
-    'password' => 'hashed',
-    'two_factor_confirmed_at' => 'datetime',
-    'created_at' => 'datetime',
-    'updated_at' => 'datetime',
-    'deleted_at' => 'datetime',
-  ];
+    public const TITLE_CIK = 'Cik';
 
-  protected $attributes = [
-    'status' => self::STATUS_ACTIVE,
-  ];
+    public const TITLE_DR = 'Dr.';
 
-  public static function getStatusOptions(): array
-  {
-    return self::$STATUS_OPTIONS;
-  }
-  public static function getServiceStatusOptions(): array
-  {
-    return self::$SERVICE_STATUS_LABELS;
-  }
-  public static function getAppointmentTypeOptions(): array
-  {
-    return self::$APPOINTMENT_TYPE_LABELS;
-  }
-  public static function getTitleOptions(): array
-  {
-    return self::$TITLE_OPTIONS;
-  }
-  public static function getLevelOptions(): array
-  {
-    $levels = [];
-    for ($i = 1; $i <= 18; $i++) {
-      $levels[(string)$i] = (string)$i;
+    public const TITLE_IR = 'Ir.';
+
+    public static array $TITLE_OPTIONS = [
+        self::TITLE_ENCIK => 'Encik',
+        self::TITLE_PUAN => 'Puan',
+        self::TITLE_CIK => 'Cik',
+        self::TITLE_DR => 'Dr.',
+        self::TITLE_IR => 'Ir.',
+    ];
+
+    public static array $STATUS_OPTIONS = [
+        self::STATUS_ACTIVE => 'Aktif',
+        self::STATUS_INACTIVE => 'Tidak Aktif',
+        self::STATUS_PENDING => 'Menunggu Pengesahan',
+    ];
+
+    public static array $SERVICE_STATUS_LABELS = [
+        self::SERVICE_STATUS_TETAP => 'Tetap',
+        self::SERVICE_STATUS_KONTRAK_MYSTEP => 'Lantikan Kontrak / MyStep',
+        self::SERVICE_STATUS_PELAJAR_INDUSTRI => 'Pelajar Latihan Industri (Ibu Pejabat Sahaja)',
+        self::SERVICE_STATUS_OTHER_AGENCY => 'E-mel Sandaran (Agensi Lain di MOTAC)',
+    ];
+
+    public static array $APPOINTMENT_TYPE_LABELS = [
+        self::APPOINTMENT_TYPE_BAHARU => 'Baharu',
+        self::APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN => 'Kenaikan Pangkat/Pertukaran',
+        self::APPOINTMENT_TYPE_LAIN_LAIN => 'Lain-lain',
+    ];
+
+    protected $table = 'users';
+
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'title',
+        'identification_number',
+        'passport_number',
+        'profile_photo_path',
+        'position_id',
+        'grade_id',
+        'department_id',
+        'level',
+        'mobile_number',
+        'personal_email',
+        'motac_email',
+        'user_id_assigned',
+        'service_status',
+        'appointment_type',
+        'previous_department_name',
+        'previous_department_email',
+        'status',
+        'email_verified_at',
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+        'two_factor_recovery_codes',
+        'two_factor_secret',
+    ];
+
+    protected $appends = ['profile_photo_url'];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+        'two_factor_confirmed_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'deleted_at' => 'datetime',
+    ];
+
+    protected $attributes = [
+        'status' => self::STATUS_ACTIVE,
+    ];
+
+    public static function getStatusOptions(): array
+    {
+        return self::$STATUS_OPTIONS;
     }
-    return $levels;
-  }
 
-  /**
-   * Get the display name for a given service status key.
-   *
-   * @param string|null $statusKey
-   * @return string
-   */
-  public static function getServiceStatusDisplayName(?string $statusKey): string
-  {
-    return __(self::$SERVICE_STATUS_LABELS[$statusKey] ?? Str::title(str_replace('_', ' ', (string) $statusKey)));
-  }
+    public static function getServiceStatusOptions(): array
+    {
+        return self::$SERVICE_STATUS_LABELS;
+    }
 
-  protected static function newFactory(): UserFactory
-  {
-    return UserFactory::new();
-  }
+    public static function getAppointmentTypeOptions(): array
+    {
+        return self::$APPOINTMENT_TYPE_LABELS;
+    }
 
-  // Relationships
-  public function department(): BelongsTo
-  {
-    return $this->belongsTo(Department::class, 'department_id');
-  }
-  public function grade(): BelongsTo
-  {
-    return $this->belongsTo(Grade::class, 'grade_id');
-  }
-  public function position(): BelongsTo
-  {
-    return $this->belongsTo(Position::class, 'position_id');
-  }
+    public static function getTitleOptions(): array
+    {
+        return self::$TITLE_OPTIONS;
+    }
 
-  public function emailApplications(): HasMany
-  {
-    return $this->hasMany(EmailApplication::class, 'user_id');
-  }
-  public function loanApplicationsAsApplicant(): HasMany
-  {
-    return $this->hasMany(LoanApplication::class, 'user_id');
-  }
-  public function loanApplicationsAsResponsibleOfficer(): HasMany
-  {
-    return $this->hasMany(LoanApplication::class, 'responsible_officer_id');
-  }
-  public function loanApplicationsAsSupportingOfficer(): HasMany
-  {
-    return $this->hasMany(LoanApplication::class, 'supporting_officer_id');
-  }
-  public function approvalsMade(): HasMany
-  {
-    return $this->hasMany(Approval::class, 'officer_id');
-  }
+    public static function getLevelOptions(): array
+    {
+        $levels = [];
+        for ($i = 1; $i <= 18; $i++) {
+            $levels[(string) $i] = (string) $i;
+        }
 
-  public function creator(): BelongsTo
-  {
-    return $this->belongsTo(User::class, 'created_by');
-  }
-  public function updater(): BelongsTo
-  {
-    return $this->belongsTo(User::class, 'updated_by');
-  }
-  public function deleter(): BelongsTo
-  {
-    return $this->belongsTo(User::class, 'deleted_by');
-  }
+        return $levels;
+    }
 
-  // Helper methods for roles
-  public function isAdmin(): bool
-  {
-    return $this->hasRole('Admin');
-  }
-  public function isBpmStaff(): bool
-  {
-    return $this->hasRole('BPM Staff');
-  }
-  public function isItAdmin(): bool
-  {
-    return $this->hasRole('IT Admin');
-  }
-  public function isApprover(): bool
-  {
-    return $this->hasRole('Approver');
-  }
-  public function isHod(): bool
-  {
-    return $this->hasRole('HOD');
-  }
+    /**
+     * Get the display name for a given service status key.
+     */
+    public static function getServiceStatusDisplayName(?string $statusKey): string
+    {
+        return __(self::$SERVICE_STATUS_LABELS[$statusKey] ?? Str::title(str_replace('_', ' ', (string) $statusKey)));
+    }
 
-  public function routeNotificationForMail($notification = null): array|string
-  {
-    return $this->motac_email ?: $this->email;
-  }
+    protected static function newFactory(): UserFactory
+    {
+        return UserFactory::new();
+    }
+
+    // Relationships
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class, 'department_id');
+    }
+
+    public function grade(): BelongsTo
+    {
+        return $this->belongsTo(Grade::class, 'grade_id');
+    }
+
+    public function position(): BelongsTo
+    {
+        return $this->belongsTo(Position::class, 'position_id');
+    }
+
+    public function emailApplications(): HasMany
+    {
+        return $this->hasMany(EmailApplication::class, 'user_id');
+    }
+
+    public function loanApplicationsAsApplicant(): HasMany
+    {
+        return $this->hasMany(LoanApplication::class, 'user_id');
+    }
+
+    public function loanApplicationsAsResponsibleOfficer(): HasMany
+    {
+        return $this->hasMany(LoanApplication::class, 'responsible_officer_id');
+    }
+
+    public function loanApplicationsAsSupportingOfficer(): HasMany
+    {
+        return $this->hasMany(LoanApplication::class, 'supporting_officer_id');
+    }
+
+    public function approvalsMade(): HasMany
+    {
+        return $this->hasMany(Approval::class, 'officer_id');
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function deleter(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deleted_by');
+    }
+
+    // Helper methods for roles
+    public function isAdmin(): bool
+    {
+        return $this->hasRole('Admin');
+    }
+
+    public function isBpmStaff(): bool
+    {
+        return $this->hasRole('BPM Staff');
+    }
+
+    public function isItAdmin(): bool
+    {
+        return $this->hasRole('IT Admin');
+    }
+
+    public function isApprover(): bool
+    {
+        return $this->hasRole('Approver');
+    }
+
+    public function isHod(): bool
+    {
+        return $this->hasRole('HOD');
+    }
+
+    public function routeNotificationForMail($notification = null): array|string
+    {
+        return $this->motac_email ?: $this->email;
+    }
 }

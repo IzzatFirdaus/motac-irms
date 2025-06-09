@@ -63,7 +63,8 @@ class RouteServiceProvider extends ServiceProvider
         RateLimiter::for('login', function (Request $request) {
             // Throttle by a combination of the login identifier (e.g., email) and IP address
             $loginIdentifier = $request->input(config('fortify.username', 'email'), ''); // Get the configured username field (defaults to 'email')
-            $throttleKey = Str::transliterate(Str::lower($loginIdentifier) . '|' . $request->ip());
+            $throttleKey = Str::transliterate(Str::lower($loginIdentifier).'|'.$request->ip());
+
             return Limit::perMinute(5)->by($throttleKey); // Corrected to use $throttleKey
         });
     }

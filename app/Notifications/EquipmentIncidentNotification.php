@@ -21,14 +21,16 @@ final class EquipmentIncidentNotification extends Notification implements Should
     use Queueable;
 
     private LoanApplication $loanApplication;
+
     /** @var EloquentCollection<int, LoanTransactionItem> */
     private EloquentCollection $incidentItems;
+
     private string $incidentType; // 'lost' or 'damaged'
 
     /**
      * Create a new notification instance.
      *
-     * @param EloquentCollection<int, LoanTransactionItem> $incidentItems
+     * @param  EloquentCollection<int, LoanTransactionItem>  $incidentItems
      */
     public function __construct(
         LoanApplication $loanApplication,
@@ -39,7 +41,7 @@ final class EquipmentIncidentNotification extends Notification implements Should
         $this->incidentItems = $incidentItems->loadMissing(['equipment', 'loanTransaction']); // Ensure equipment details are loaded
         $this->incidentType = $incidentType;
 
-        if (!in_array($incidentType, ['lost', 'damaged'])) {
+        if (! in_array($incidentType, ['lost', 'damaged'])) {
             throw new \InvalidArgumentException("Invalid incident type: {$incidentType}. Must be 'lost' or 'damaged'.");
         }
     }
@@ -71,7 +73,7 @@ final class EquipmentIncidentNotification extends Notification implements Should
             $detailsHeader = __('Butiran peralatan yang rosak:');
         }
 
-        $mailMessage = (new MailMessage())
+        $mailMessage = (new MailMessage)
             ->subject($subject)
             ->greeting($greetingLine)
             ->line($introLine)
@@ -100,7 +102,7 @@ final class EquipmentIncidentNotification extends Notification implements Should
                     $mailMessage->line(__('- Butiran peralatan tidak tersedia untuk item transaksi ID: :itemId', ['itemId' => $itemId]));
                     Log::warning("EquipmentIncidentNotification ({$this->incidentType}): Equipment details missing for LoanTransactionItem ID {$itemId}.", [
                         'item_id' => $itemId,
-                        'loan_application_id' => $applicationId
+                        'loan_application_id' => $applicationId,
                     ]);
                 }
             }
@@ -108,7 +110,6 @@ final class EquipmentIncidentNotification extends Notification implements Should
         } else {
             $mailMessage->line(__('Tiada butiran item spesifik dilaporkan untuk insiden ini.'));
         }
-
 
         if ($this->incidentType === 'lost') {
             $mailMessage->line(__('Sila hubungi Unit ICT untuk maklumat lanjut atau tindakan yang diperlukan.'));
@@ -159,6 +160,7 @@ final class EquipmentIncidentNotification extends Notification implements Should
             if ($this->incidentType === 'damaged') {
                 $details['condition_on_return'] = $item->condition_on_return;
             }
+
             return $details;
         })->toArray();
 

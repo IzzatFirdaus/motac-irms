@@ -3,29 +3,30 @@
 namespace App\Notifications;
 
 use App\Models\LoanApplication; // Assuming it's for LoanApplication, can be made more generic
-use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Database\Eloquent\Model; // <--- ADD THIS LINE
+use Illuminate\Support\Facades\Log; // <--- ADD THIS LINE
 
 class OrphanedApplicationRequiresAttentionNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
     public Model $application; // Using generic Model type
+
     public string $applicationTypeDisplay;
+
     public string $reason;
 
     /**
      * Create a new notification instance.
      *
-     * @param Model $application The orphaned application instance (e.g., LoanApplication)
-     * @param string $reason A brief reason why it's orphaned (e.g., "No approver found")
+     * @param  Model  $application  The orphaned application instance (e.g., LoanApplication)
+     * @param  string  $reason  A brief reason why it's orphaned (e.g., "No approver found")
      */
-    public function __construct(Model $application, string $reason = "No suitable approver could be automatically assigned.") //
+    public function __construct(Model $application, string $reason = 'No suitable approver could be automatically assigned.') //
     {
         $this->application = $application;
         $this->reason = $reason;
@@ -42,14 +43,13 @@ class OrphanedApplicationRequiresAttentionNotification extends Notification impl
             $this->applicationTypeDisplay = __('Permohonan Sistem');
         }
 
-        Log::info("OrphanedApplicationRequiresAttentionNotification created for " . get_class($application) . " ID: {$application->id}");
+        Log::info('OrphanedApplicationRequiresAttentionNotification created for '.get_class($application)." ID: {$application->id}");
     }
 
     /**
      * Get the notification's delivery channels.
      *
      * @param  mixed  $notifiable
-     * @return array
      */
     public function via($notifiable): array
     {
@@ -60,7 +60,6 @@ class OrphanedApplicationRequiresAttentionNotification extends Notification impl
      * Get the mail representation of the notification.
      *
      * @param  mixed  $notifiable
-     * @return \Illuminate\Notifications\Messages\MailMessage
      */
     public function toMail($notifiable): MailMessage
     {
@@ -93,7 +92,6 @@ class OrphanedApplicationRequiresAttentionNotification extends Notification impl
      * Get the array representation of the notification.
      *
      * @param  mixed  $notifiable
-     * @return array
      */
     public function toArray($notifiable): array
     {

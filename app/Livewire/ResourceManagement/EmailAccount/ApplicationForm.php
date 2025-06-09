@@ -4,21 +4,20 @@ declare(strict_types=1);
 
 namespace App\Livewire\ResourceManagement\EmailAccount;
 
-use App\Models\User;
 use App\Models\EmailApplication;
 use App\Models\Grade;
-use App\Services\EmailApplicationService;
+use App\Models\User;
 use App\Policies\EmailApplicationPolicy;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
-use Livewire\Attributes\Layout;
-use Livewire\Attributes\Computed; // Added import for Computed attribute
-use Illuminate\Support\Facades\Auth;
+use App\Services\EmailApplicationService;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log; // Added import for Computed attribute
 use Illuminate\Validation\Rule;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\View\View;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Layout;
+use Livewire\Component;
 use Throwable;
 
 /**
@@ -30,45 +29,68 @@ class ApplicationForm extends Component
     use AuthorizesRequests;
 
     public User $user;
+
     public ?EmailApplication $applicationToEdit = null;
 
     // Form Properties
     public string $service_status_selection = '';
+
     public string $appointment_type_selection = '';
+
     public ?string $previous_department_name = null;
+
     public ?string $previous_department_email = null;
+
     public string $application_reason_notes = '';
+
     public ?string $proposed_email = null;
+
     public ?string $group_email_request_name = null;
+
     public ?string $contact_person_name = null;
+
     public ?string $contact_person_email = null;
+
     public ?string $service_start_date = null;
+
     public ?string $service_end_date = null;
+
     public ?string $supporting_officer_name = null;
+
     public ?string $supporting_officer_grade = null;
+
     public ?string $supporting_officer_email = null;
 
     public bool $cert_info_is_true = false;
+
     public bool $cert_data_usage_agreed = false;
+
     public bool $cert_email_responsibility_agreed = false;
 
     // Display-only properties
     public string $applicantName = '';
+
     public string $applicantPositionAndGrade = '';
+
     public string $applicantDepartment = '';
+
     public string $applicantEmail = '';
+
     public string $applicantPhone = '';
 
     // Dropdown options
     public array $serviceStatusOptions = [];
+
     public array $appointmentTypeOptions = [];
+
     public array $supportingOfficerGradeOptions = [];
 
     public function title(): string
     {
         $baseTitle = $this->applicationToEdit ? __('Kemaskini Draf Permohonan E-mel/ID') : __('Borang Permohonan E-mel / ID Pengguna MOTAC');
         $appName = __(config('variables.templateName', 'Sistem Pengurusan Sumber Bersepadu MOTAC'));
-        return $baseTitle . ' - ' . $appName;
+
+        return $baseTitle.' - '.$appName;
     }
 
     public function mount($email_application_id = null): void
@@ -76,19 +98,20 @@ class ApplicationForm extends Component
         /** @var User|null $loggedInUser */
         $loggedInUser = Auth::user();
 
-        if (!$loggedInUser) {
+        if (! $loggedInUser) {
             session()->flash('error', __('Sila log masuk untuk membuat atau mengemaskini permohonan.'));
-            $this->user = new User();
+            $this->user = new User;
             $this->populateApplicantDetails();
             $this->loadDropdownOptions();
             $this->skipRender(); // Consider if redirecting to login is better
+
             return;
         }
 
-        $this->user = User::with(['position', 'grade', 'department'])->find($loggedInUser->id) ?? new User();
-        if (!$this->user->exists) {
-             session()->flash('error', __('Gagal memuatkan maklumat pengguna sepenuhnya. Sila pastikan profil anda lengkap.'));
-             Log::error("EmailAccount\ApplicationForm mount: Failed to load full user details for authenticated user ID: " . $loggedInUser->id);
+        $this->user = User::with(['position', 'grade', 'department'])->find($loggedInUser->id) ?? new User;
+        if (! $this->user->exists) {
+            session()->flash('error', __('Gagal memuatkan maklumat pengguna sepenuhnya. Sila pastikan profil anda lengkap.'));
+            Log::error("EmailAccount\ApplicationForm mount: Failed to load full user details for authenticated user ID: ".$loggedInUser->id);
         }
 
         $this->populateApplicantDetails();
@@ -98,10 +121,11 @@ class ApplicationForm extends Component
             // This line (97) was flagged by PHP0410, but EmailApplication::find() returns ?EmailApplication which is correct.
             $this->applicationToEdit = EmailApplication::find($email_application_id);
 
-            if (!$this->applicationToEdit) {
+            if (! $this->applicationToEdit) {
                 session()->flash('error', __('Permohonan yang ingin dikemaskini tidak ditemui.'));
-                Log::warning("EmailAccount\ApplicationForm mount: EmailApplication not found for ID: " . $email_application_id);
-                $this->redirectRoute('email-applications.index', navigate:true);
+                Log::warning("EmailAccount\ApplicationForm mount: EmailApplication not found for ID: ".$email_application_id);
+                $this->redirectRoute('email-applications.index', navigate: true);
+
                 return;
             }
             $this->authorize('update', $this->applicationToEdit);
@@ -116,7 +140,7 @@ class ApplicationForm extends Component
     protected function populateApplicantDetails(): void
     {
         if ($this->user->exists) {
-            $this->applicantName = trim(($this->user->title ?? '') . ' ' . ($this->user->name ?? ''));
+            $this->applicantName = trim(($this->user->title ?? '').' '.($this->user->name ?? ''));
             $positionName = optional($this->user->position)->name;
             $gradeName = optional($this->user->grade)->name;
             $this->applicantPositionAndGrade = ($positionName || $gradeName) ? trim("{$positionName} ({$gradeName})", ' ()') : __('Tiada Maklumat Jawatan/Gred');
@@ -134,7 +158,9 @@ class ApplicationForm extends Component
 
     protected function populateFormForEdit(): void
     {
-        if (!$this->applicationToEdit) return;
+        if (! $this->applicationToEdit) {
+            return;
+        }
 
         $this->service_status_selection = $this->user->service_status ?? $this->applicationToEdit->user->service_status ?? '';
         $this->appointment_type_selection = $this->user->appointment_type ?? $this->applicationToEdit->user->appointment_type ?? '';
@@ -151,23 +177,23 @@ class ApplicationForm extends Component
         $this->supporting_officer_name = $this->applicationToEdit->supporting_officer_name;
         $this->supporting_officer_grade = $this->applicationToEdit->supporting_officer_grade;
         $this->supporting_officer_email = $this->applicationToEdit->supporting_officer_email;
-        $this->cert_info_is_true = (bool)$this->applicationToEdit->cert_info_is_true;
-        $this->cert_data_usage_agreed = (bool)$this->applicationToEdit->cert_data_usage_agreed;
-        $this->cert_email_responsibility_agreed = (bool)$this->applicationToEdit->cert_email_responsibility_agreed;
+        $this->cert_info_is_true = (bool) $this->applicationToEdit->cert_info_is_true;
+        $this->cert_data_usage_agreed = (bool) $this->applicationToEdit->cert_data_usage_agreed;
+        $this->cert_email_responsibility_agreed = (bool) $this->applicationToEdit->cert_email_responsibility_agreed;
     }
 
     protected function loadDropdownOptions(): void
     {
-        $this->serviceStatusOptions = ['' => '-- ' . __('Pilih Taraf Perkhidmatan') . ' --'] + User::getServiceStatusOptions();
-        $this->appointmentTypeOptions = ['' => '-- ' . __('Pilih Jenis Pelantikan') . ' --'] + User::getAppointmentTypeOptions();
-        $this->supportingOfficerGradeOptions = ['' => '-- ' . __('Pilih Gred Pegawai Penyokong') . ' --'] + (method_exists(Grade::class, 'getSupportingOfficerGradeOptions') ? Grade::getSupportingOfficerGradeOptions() : []);
+        $this->serviceStatusOptions = ['' => '-- '.__('Pilih Taraf Perkhidmatan').' --'] + User::getServiceStatusOptions();
+        $this->appointmentTypeOptions = ['' => '-- '.__('Pilih Jenis Pelantikan').' --'] + User::getAppointmentTypeOptions();
+        $this->supportingOfficerGradeOptions = ['' => '-- '.__('Pilih Gred Pegawai Penyokong').' --'] + (method_exists(Grade::class, 'getSupportingOfficerGradeOptions') ? Grade::getSupportingOfficerGradeOptions() : []);
     }
 
     protected function rules(): array
     {
         $uniqueProposedEmailRule = Rule::unique('email_applications', 'proposed_email')
-                                ->when($this->applicationToEdit, fn ($rule) => $rule->ignore($this->applicationToEdit->id))
-                                ->whereNull('deleted_at');
+            ->when($this->applicationToEdit, fn ($rule) => $rule->ignore($this->applicationToEdit->id))
+            ->whereNull('deleted_at');
 
         $rules = [
             'service_status_selection' => ['required', Rule::in(array_keys(User::getServiceStatusOptions()))],
@@ -183,11 +209,12 @@ class ApplicationForm extends Component
         ];
         $rules['previous_department_name'] = $this->shouldShowPreviousDepartmentFields() ? ['required', 'string', 'max:255'] : ['nullable', 'string', 'max:255'];
         $rules['previous_department_email'] = $this->shouldShowPreviousDepartmentFields() ? ['required', 'email:rfc,dns', 'max:255'] : ['nullable', 'email:rfc,dns', 'max:255'];
-        $rules['service_start_date'] = $this->shouldShowServiceDates() ? ['required', 'date',] : ['nullable', 'date'];
+        $rules['service_start_date'] = $this->shouldShowServiceDates() ? ['required', 'date'] : ['nullable', 'date'];
         $rules['service_end_date'] = $this->shouldShowServiceDates() ? ['required', 'date', 'after_or_equal:service_start_date'] : ['nullable', 'date', 'after_or_equal:service_start_date'];
         $rules['group_email_request_name'] = ['nullable', 'string', 'max:255'];
-        $rules['contact_person_name'] = ['nullable', Rule::requiredIf((bool)($this->group_email_request_name ?? '')), 'string', 'max:255'];
-        $rules['contact_person_email'] = ['nullable', Rule::requiredIf((bool)($this->group_email_request_name ?? '')), 'email:rfc,dns', 'max:255'];
+        $rules['contact_person_name'] = ['nullable', Rule::requiredIf((bool) ($this->group_email_request_name ?? '')), 'string', 'max:255'];
+        $rules['contact_person_email'] = ['nullable', Rule::requiredIf((bool) ($this->group_email_request_name ?? '')), 'email:rfc,dns', 'max:255'];
+
         return $rules;
     }
 
@@ -245,6 +272,7 @@ class ApplicationForm extends Component
         } else {
             $commonData['certification_timestamp'] = null;
         }
+
         return $commonData;
     }
 
@@ -260,9 +288,10 @@ class ApplicationForm extends Component
             $application = null;
 
             if ($this->applicationToEdit) {
-                if (!$this->applicationToEdit->isDraft()) {
-                     session()->flash('error', __('Hanya draf permohonan yang boleh dikemaskini. Permohonan ini telah dihantar atau diproses.'));
-                     return;
+                if (! $this->applicationToEdit->isDraft()) {
+                    session()->flash('error', __('Hanya draf permohonan yang boleh dikemaskini. Permohonan ini telah dihantar atau diproses.'));
+
+                    return;
                 }
                 $application = $emailAppService->updateDraftApplication($this->applicationToEdit, $commonData, $this->user);
                 session()->flash('message', ['type' => 'success', 'content' => __('Draf permohonan #:id berjaya dikemaskini.', ['id' => $application->id])]);
@@ -274,7 +303,7 @@ class ApplicationForm extends Component
                 $this->redirectRoute('email-applications.show', ['email_application' => $application->id], navigate: true);
             }
         } catch (Throwable $e) {
-            Log::error('EmailAccount\ApplicationForm Error in saveApplicationAsDraft: ' . $e->getMessage(), ['exception' => $e, 'formData' => $this->all()]);
+            Log::error('EmailAccount\ApplicationForm Error in saveApplicationAsDraft: '.$e->getMessage(), ['exception' => $e, 'formData' => $this->all()]);
             session()->flash('error', __('Gagal menyimpan draf permohonan. Sila semak input anda atau hubungi pentadbir sistem.'));
         }
     }
@@ -284,9 +313,10 @@ class ApplicationForm extends Component
         $this->authorizeAction(true);
         $validatedData = $this->validate();
 
-        if (!$this->cert_info_is_true || !$this->cert_data_usage_agreed || !$this->cert_email_responsibility_agreed) {
+        if (! $this->cert_info_is_true || ! $this->cert_data_usage_agreed || ! $this->cert_email_responsibility_agreed) {
             $this->addError('certification_error', __('Semua perakuan pemohon mesti ditanda untuk menghantar permohonan.'));
             $this->dispatch('error-toast', ['message' => __('Sila lengkapkan semua perakuan pemohon.')]);
+
             return;
         }
         $commonData = $this->prepareCommonApplicationData($validatedData);
@@ -311,7 +341,7 @@ class ApplicationForm extends Component
                 $this->redirectRoute('email-applications.show', ['email_application' => $application->id], navigate: true);
             }
         } catch (Throwable $e) {
-            Log::error('EmailAccount\ApplicationForm Error in submitApplicationForApproval: ' . $e->getMessage(), ['exception' => $e, 'formData' => $this->all()]);
+            Log::error('EmailAccount\ApplicationForm Error in submitApplicationForApproval: '.$e->getMessage(), ['exception' => $e, 'formData' => $this->all()]);
             session()->flash('error', __('Gagal menghantar permohonan. Sila hubungi pentadbir sistem jika masalah berterusan.'));
         }
     }
@@ -331,15 +361,15 @@ class ApplicationForm extends Component
         $this->resetErrorBag();
         $this->resetValidation();
 
-        if ($prefillFromUser && $this->user->exists && !$this->applicationToEdit) {
+        if ($prefillFromUser && $this->user->exists && ! $this->applicationToEdit) {
             $this->service_status_selection = $this->user->service_status ?? '';
             $this->appointment_type_selection = $this->user->appointment_type ?? '';
-        } elseif (!$this->applicationToEdit) {
+        } elseif (! $this->applicationToEdit) {
             $this->service_status_selection = '';
             $this->appointment_type_selection = '';
         }
 
-        if (!$this->applicationToEdit) {
+        if (! $this->applicationToEdit) {
             $this->previous_department_name = null;
             $this->previous_department_email = null;
             $this->service_start_date = null;
@@ -376,37 +406,39 @@ class ApplicationForm extends Component
     public function shouldShowServiceDates(): bool
     {
         $statusesWithoutDates = [User::SERVICE_STATUS_TETAP, ''];
-        return !in_array($this->service_status_selection, $statusesWithoutDates, true);
+
+        return ! in_array($this->service_status_selection, $statusesWithoutDates, true);
     }
 
     public function updatedServiceStatusSelection($value): void
     {
         $this->resetValidation('service_status_selection');
-        if (!$this->shouldShowServiceDates()) {
+        if (! $this->shouldShowServiceDates()) {
             $this->service_start_date = null;
             $this->service_end_date = null;
             $this->resetValidation(['service_start_date', 'service_end_date']);
         }
-        Log::debug("EmailAccount\ApplicationForm: Service status selected: " . $value);
+        Log::debug("EmailAccount\ApplicationForm: Service status selected: ".$value);
     }
 
     public function updatedAppointmentTypeSelection($value): void
     {
         $this->resetValidation('appointment_type_selection');
-        if (!$this->shouldShowPreviousDepartmentFields()) {
+        if (! $this->shouldShowPreviousDepartmentFields()) {
             $this->previous_department_name = null;
             $this->previous_department_email = null;
             $this->resetValidation(['previous_department_name', 'previous_department_email']);
         }
-        Log::debug("EmailAccount\ApplicationForm: Appointment type selected: " . $value);
+        Log::debug("EmailAccount\ApplicationForm: Appointment type selected: ".$value);
     }
 
     public function render(): View
     {
-        if (!$this->user->exists && Auth::check()) {
-            $this->user = User::with(['position', 'grade', 'department'])->find(Auth::id()) ?? new User();
+        if (! $this->user->exists && Auth::check()) {
+            $this->user = User::with(['position', 'grade', 'department'])->find(Auth::id()) ?? new User;
             $this->populateApplicantDetails();
         }
+
         return view('livewire.resource-management.email-account.application-form');
     }
 }

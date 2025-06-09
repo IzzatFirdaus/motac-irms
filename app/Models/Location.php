@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+
 // No 'use App\Models\Device;'
 
 /**
@@ -58,6 +59,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static Builder<static>|Location whereUpdatedBy($value)
  * @method static Builder<static>|Location withTrashed()
  * @method static Builder<static>|Location withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class Location extends Model
@@ -111,10 +113,12 @@ class Location extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
     public function updater(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
+
     public function deleter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by');

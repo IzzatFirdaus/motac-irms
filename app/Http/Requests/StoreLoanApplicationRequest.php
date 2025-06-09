@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Equipment;
 use App\Models\LoanApplication;
-use App\Models\User;
-use App\Models\Equipment; // For asset type options
+use App\Models\User; // For asset type options
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -14,6 +14,7 @@ class StoreLoanApplicationRequest extends FormRequest
     {
         /** @var User|null $user */
         $user = $this->user();
+
         // System Design: LoanApplicationPolicy for 'create'
         return $user && $user->can('create', LoanApplication::class);
     }
@@ -81,8 +82,8 @@ class StoreLoanApplicationRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        if ($this->input('items') === null && !$this->has('items')) {
-          $this->merge(['items' => []]);
+        if ($this->input('items') === null && ! $this->has('items')) {
+            $this->merge(['items' => []]);
         }
     }
 }

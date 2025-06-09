@@ -27,7 +27,6 @@ use Illuminate\Support\Str; // For Str::title
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- *
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
  * @property-read int|null $users_count
  * @property-read \App\Models\User|null $headOfDepartment User relationship for HOD
@@ -56,93 +55,95 @@ use Illuminate\Support\Str; // For Str::title
  * @method static \Illuminate\Database\Eloquent\Builder|Department whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Department withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|Department withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class Department extends Model
 {
-  use HasFactory;
-  use SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
 
-  public const BRANCH_TYPE_STATE = 'state';
-  public const BRANCH_TYPE_HQ = 'headquarters';
+    public const BRANCH_TYPE_STATE = 'state';
 
-  public static array $BRANCH_TYPE_LABELS = [
-    self::BRANCH_TYPE_STATE => 'Pejabat Negeri',
-    self::BRANCH_TYPE_HQ => 'Ibu Pejabat',
-  ];
+    public const BRANCH_TYPE_HQ = 'headquarters';
 
-  protected $table = 'departments';
+    public static array $BRANCH_TYPE_LABELS = [
+        self::BRANCH_TYPE_STATE => 'Pejabat Negeri',
+        self::BRANCH_TYPE_HQ => 'Ibu Pejabat',
+    ];
 
-  protected $fillable = [
-    'name',
-    'branch_type',
-    'code',
-    'description',
-    'is_active',
-    'head_of_department_id', // Corrected to match migration and design
-    // created_by, updated_by are handled by BlameableObserver
-  ];
+    protected $table = 'departments';
 
-  protected $casts = [
-    'is_active' => 'boolean',
-    'created_at' => 'datetime',
-    'updated_at' => 'datetime',
-    'deleted_at' => 'datetime',
-  ];
+    protected $fillable = [
+        'name',
+        'branch_type',
+        'code',
+        'description',
+        'is_active',
+        'head_of_department_id', // Corrected to match migration and design
+        // created_by, updated_by are handled by BlameableObserver
+    ];
 
-  protected $attributes = [
-    'is_active' => true,
-  ];
+    protected $casts = [
+        'is_active' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'deleted_at' => 'datetime',
+    ];
 
-  /**
-   * Get the options for branch types, typically for dropdowns.
-   */
-  public static function getBranchTypeOptions(): array
-  {
-    return array_map(fn($label) => __($label), self::$BRANCH_TYPE_LABELS);
-  }
+    protected $attributes = [
+        'is_active' => true,
+    ];
 
-  /**
-   * Get the display label for a given branch type key.
-   */
-  public static function getBranchTypeLabel(string $typeKey): string
-  {
-    return __(self::$BRANCH_TYPE_LABELS[$typeKey] ?? Str::title(str_replace('_', ' ', $typeKey)));
-  }
+    /**
+     * Get the options for branch types, typically for dropdowns.
+     */
+    public static function getBranchTypeOptions(): array
+    {
+        return array_map(fn ($label) => __($label), self::$BRANCH_TYPE_LABELS);
+    }
 
-  // Relationships
-  public function users(): HasMany
-  {
-    return $this->hasMany(User::class);
-  }
+    /**
+     * Get the display label for a given branch type key.
+     */
+    public static function getBranchTypeLabel(string $typeKey): string
+    {
+        return __(self::$BRANCH_TYPE_LABELS[$typeKey] ?? Str::title(str_replace('_', ' ', $typeKey)));
+    }
 
-  /**
-   * Get the user who is the head of this department.
-   */
-  public function headOfDepartment(): BelongsTo
-  {
-    return $this->belongsTo(User::class, 'head_of_department_id'); // Corrected foreign key
-  }
+    // Relationships
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class);
+    }
 
-  // Blameable relationships
-  public function creator(): BelongsTo
-  {
-    return $this->belongsTo(User::class, 'created_by');
-  }
+    /**
+     * Get the user who is the head of this department.
+     */
+    public function headOfDepartment(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'head_of_department_id'); // Corrected foreign key
+    }
 
-  public function updater(): BelongsTo
-  {
-    return $this->belongsTo(User::class, 'updated_by');
-  }
+    // Blameable relationships
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 
-  public function deleter(): BelongsTo
-  {
-    return $this->belongsTo(User::class, 'deleted_by');
-  }
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
 
-  // Accessor for branch type label
-  public function getBranchTypeLabelAttribute(): string
-  {
-    return self::getBranchTypeLabel($this->branch_type);
-  }
+    public function deleter(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deleted_by');
+    }
+
+    // Accessor for branch type label
+    public function getBranchTypeLabelAttribute(): string
+    {
+        return self::getBranchTypeLabel($this->branch_type);
+    }
 }

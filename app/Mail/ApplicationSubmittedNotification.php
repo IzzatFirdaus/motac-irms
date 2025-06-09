@@ -47,7 +47,7 @@ final class ApplicationSubmittedNotification extends Mailable implements ShouldQ
                 'type' => is_object($application) ? $application::class : gettype($application),
                 'application_id' => $application->id ?? 'N/A',
             ]);
-            throw new \InvalidArgumentException($errorMessage . ' Must be EmailApplication or LoanApplication.');
+            throw new \InvalidArgumentException($errorMessage.' Must be EmailApplication or LoanApplication.');
         }
 
         // Eager load necessary relationships
@@ -80,10 +80,10 @@ final class ApplicationSubmittedNotification extends Mailable implements ShouldQ
           : __('Tindakan Diperlukan: Permohonan Pinjaman Peralatan ICT Baru Dihantar');
 
         if ($this->application->user) {
-            $subject .= ' oleh ' . $this->application->user->name;
+            $subject .= ' oleh '.$this->application->user->name;
         }
         if ($this->application->id) {
-            $subject .= ' (#' . $this->application->id . ')';
+            $subject .= ' (#'.$this->application->id.')';
         }
 
         return new Envelope(

@@ -14,28 +14,23 @@ class SubCategoryFactory extends Factory
 
     public function definition(): array
     {
+        // Use a Malaysian locale for faker
+        $msFaker = \Faker\Factory::create('ms_MY');
+
         $equipmentCategoryId = EquipmentCategory::inRandomOrder()->first()?->id;
-        if (!$equipmentCategoryId && class_exists(EquipmentCategory::class) && method_exists(EquipmentCategory::class, 'factory')) {
-            // If EquipmentCategory factory needs audit user, it should handle it or be passed from seeder
+        if (! $equipmentCategoryId && class_exists(EquipmentCategory::class) && method_exists(EquipmentCategory::class, 'factory')) {
             $equipmentCategoryId = EquipmentCategory::factory()->create()->id;
         }
 
-        // $userId = User::inRandomOrder()->first()?->id; // No longer explicitly needed here for blameable
-        // if (!$userId && class_exists(User::class) && method_exists(User::class, 'factory')) {
-        //     $userId = User::factory()->create()->id;
-        // }
-
         $createdAt = $this->faker->dateTimeBetween('-1 year', 'now');
         $updatedAt = $this->faker->dateTimeBetween($createdAt, 'now');
-        $deletedAt = $this->faker->optional(0.1)->dateTimeBetween($createdAt, 'now'); // For soft delete simulation
-        // $deleterId will be handled by trashed() state or BlameableObserver for soft delete event
+        $deletedAt = $this->faker->optional(0.1)->dateTimeBetween($createdAt, 'now');
 
         return [
             'equipment_category_id' => $equipmentCategoryId,
-            'name' => $this->faker->unique()->words(2, true) . ' SubCategory',
-            'description' => $this->faker->optional(0.7)->sentence,
+            'name' => $msFaker->unique()->words(2, true).' Sub-Kategori',
+            'description' => $msFaker->optional(0.7)->sentence,
             'is_active' => $this->faker->boolean(95),
-            // 'created_by', 'updated_by', 'deleted_by' (for non-trashed) handled by BlameableObserver
             'created_at' => Carbon::parse($createdAt),
             'updated_at' => Carbon::parse($updatedAt),
             'deleted_at' => $deletedAt ? Carbon::parse($deletedAt) : null,
@@ -54,14 +49,14 @@ class SubCategoryFactory extends Factory
     public function trashed(): static
     {
         $deleterId = User::inRandomOrder()->first()?->id;
-        if (!$deleterId && class_exists(User::class) && method_exists(User::class, 'factory')) {
+        if (! $deleterId && class_exists(User::class) && method_exists(User::class, 'factory')) {
             $deleterId = User::factory()->create()->id;
         }
 
         return $this->state(
             fn (array $attributes) => [
                 'deleted_at' => Carbon::now(),
-                'deleted_by' => $deleterId, // Explicitly set deleter for this state action
+                'deleted_by' => $deleterId,
             ]
         );
     }

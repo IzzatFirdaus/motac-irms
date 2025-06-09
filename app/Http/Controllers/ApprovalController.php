@@ -41,11 +41,12 @@ class ApprovalController extends Controller
                         LoanApplication::class => ['user:id,name'], //
                     ]);
                 },
-                'officer:id,name' //
+                'officer:id,name', //
             ])
             ->orderBy('created_at', 'asc')
             ->paginate(config('pagination.default_size', 15));
         Log::debug("ApprovalController@index: Fetched {$pendingApprovals->total()} pending approval tasks."); //
+
         return view('approvals.index', ['approvals' => $pendingApprovals]);
     }
 
@@ -63,11 +64,12 @@ class ApprovalController extends Controller
                         LoanApplication::class => ['user:id,name'], //
                     ]);
                 },
-                'officer:id,name' //
+                'officer:id,name', //
             ])
             ->orderBy('updated_at', 'desc')
             ->paginate(config('pagination.default_size', 15));
         Log::debug("ApprovalController@showHistory: Fetched {$completedApprovals->total()} completed approval tasks."); //
+
         return view('approvals.history', ['approvals' => $completedApprovals]);
     }
 
@@ -77,6 +79,7 @@ class ApprovalController extends Controller
             $this->authorize('view', $approval);
         } catch (AuthorizationException $e) {
             Log::warning("ApprovalController@show: Authorization failed for Approval ID {$approval->id}. User ID: ".Auth::id().". Error: {$e->getMessage()}"); //
+
             return redirect()->route('approvals.index')->with('error', __('Anda tidak mempunyai kebenaran untuk melihat tugasan kelulusan ini.'));
         }
         Log::debug("ApprovalController@show: Loading approval task ID {$approval->id}."); //
@@ -110,7 +113,7 @@ class ApprovalController extends Controller
                         'loanApplicationItems:id,loan_application_id,equipment_type,quantity_requested,quantity_approved,notes', // Ensure all needed fields are here
                     ],
                 ]);
-            }
+            },
         ]);
 
         return view('approvals.show', compact('approval'));
@@ -125,7 +128,7 @@ class ApprovalController extends Controller
         $validatedData = $request->validated();
 
         Log::info("ApprovalController@recordDecision: User ID {$processingUser->id} recording decision for Approval Task ID {$approval->id}.", //
-            ['decision' => $validatedData['decision'], 'has_comments' => !empty($validatedData['comments'])]
+            ['decision' => $validatedData['decision'], 'has_comments' => ! empty($validatedData['comments'])]
         );
 
         $itemQuantitiesForService = null;
@@ -164,15 +167,16 @@ class ApprovalController extends Controller
 
             // Redirect to the specific application's show page after decision
             if ($approval->approvable instanceof LoanApplication) { //
-                 return redirect()->route('loan-applications.show', $approval->approvable_id)->with('success', $message); //
+                return redirect()->route('loan-applications.show', $approval->approvable_id)->with('success', $message); //
             } elseif ($approval->approvable instanceof EmailApplication) { //
-                 return redirect()->route('email-applications.show', $approval->approvable_id)->with('success', $message); //
+                return redirect()->route('email-applications.show', $approval->approvable_id)->with('success', $message); //
             }
 
             return redirect()->route('approvals.dashboard')->with('success', $message); // Fallback redirect
 
         } catch (AuthorizationException $e) { //
             Log::error("ApprovalController@recordDecision: Authorization error for Approval ID {$approval->id}. User ID: {$processingUser->id}.", ['error' => $e->getMessage()]); //
+
             return redirect()->back()->withInput()->with('error', __('Anda tidak mempunyai kebenaran untuk membuat keputusan ini.')); //
         } catch (Throwable $e) { //
             Log::error("ApprovalController@recordDecision: Error processing approval for ID {$approval->id}. User ID: {$processingUser->id}.", [ //
@@ -180,7 +184,8 @@ class ApprovalController extends Controller
                 'trace' => substr($e->getTraceAsString(), 0, 500), //
                 'request_data' => $request->except(['_token', '_method']), //
             ]);
-            return redirect()->back()->withInput()->with('error', __('Gagal merekod keputusan disebabkan oleh ralat sistem: ') . $e->getMessage()); //
+
+            return redirect()->back()->withInput()->with('error', __('Gagal merekod keputusan disebabkan oleh ralat sistem: ').$e->getMessage()); //
         }
     }
 }

@@ -6,7 +6,8 @@ use App\Models\Approval;
 use App\Models\EmailApplication;
 use App\Models\LoanApplication;
 use App\Models\User;
-use Illuminate\Contracts\View\View; // Standard type hint
+use Carbon\Carbon; // Standard type hint
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
@@ -16,8 +17,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
-use Livewire\WithPagination;
-use Carbon\Carbon; // Added: Import the Carbon class
+use Livewire\WithPagination; // Added: Import the Carbon class
 
 #[Layout('layouts.app')]
 class History extends Component
@@ -41,13 +41,15 @@ class History extends Component
     public string $search = '';
 
     protected string $paginationTheme = 'bootstrap';
+
     protected int $perPage = 15;
 
     #[Title]
     public function pageTitle(): string
     {
         $appName = __(config('variables.templateName', 'Sistem Pengurusan Sumber Bersepadu MOTAC'));
-        return __('Sejarah Kelulusan Saya') . ' - ' . $appName;
+
+        return __('Sejarah Kelulusan Saya').' - '.$appName;
     }
 
     #[Computed(persist: false)]
@@ -55,15 +57,16 @@ class History extends Component
     {
         /** @var User|null $user */
         $user = Auth::user();
-        if (!$user) {
+        if (! $user) {
             Log::warning('Livewire.Approval.History: User not authenticated.');
+
             return new LengthAwarePaginator([], 0, $this->perPage, $this->resolvePage());
         }
 
         // $this->authorize('viewHistory', Approval::class); // Optional: Policy check
 
-        Log::debug('Livewire.Approval.History: Fetching approval history for user ID ' . $user->id, [
-            'filters' => $this->only(['filterType', 'filterDecision', 'dateFrom', 'dateTo', 'search'])
+        Log::debug('Livewire.Approval.History: Fetching approval history for user ID '.$user->id, [
+            'filters' => $this->only(['filterType', 'filterDecision', 'dateFrom', 'dateTo', 'search']),
         ]);
 
         $query = Approval::query()
@@ -81,11 +84,11 @@ class History extends Component
 
         if ($this->filterType !== 'all') {
             $morphMap = \Illuminate\Database\Eloquent\Relations\Relation::morphMap();
-            $modelClass = $morphMap[$this->filterType] ?? ('App\\Models\\' . ucfirst(str_replace('_', '', $this->filterType)));
+            $modelClass = $morphMap[$this->filterType] ?? ('App\\Models\\'.ucfirst(str_replace('_', '', $this->filterType)));
             if (class_exists($modelClass) && is_subclass_of($modelClass, \Illuminate\Database\Eloquent\Model::class)) {
                 $query->where('approvable_type', app($modelClass)->getMorphClass());
             } else {
-                Log::warning('Livewire.Approval.History: Invalid filterType ' . $this->filterType);
+                Log::warning('Livewire.Approval.History: Invalid filterType '.$this->filterType);
             }
         }
 
@@ -98,41 +101,45 @@ class History extends Component
         if ($this->dateFrom) {
             try {
                 $query->whereDate('approval_timestamp', '>=', Carbon::parse($this->dateFrom)->toDateString());
-            } catch (\Exception $e) { Log::error('Invalid dateFrom for Approval History: ' . $this->dateFrom, ['exception' => $e]); }
+            } catch (\Exception $e) {
+                Log::error('Invalid dateFrom for Approval History: '.$this->dateFrom, ['exception' => $e]);
+            }
         }
         if ($this->dateTo) {
             try {
                 $query->whereDate('approval_timestamp', '<=', Carbon::parse($this->dateTo)->toDateString());
-            } catch (\Exception $e) { Log::error('Invalid dateTo for Approval History: ' . $this->dateTo, ['exception' => $e]); }
+            } catch (\Exception $e) {
+                Log::error('Invalid dateTo for Approval History: '.$this->dateTo, ['exception' => $e]);
+            }
         }
 
         if (trim($this->search) !== '') {
-            $searchTerm = '%' . trim($this->search) . '%';
+            $searchTerm = '%'.trim($this->search).'%';
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('id', 'like', $searchTerm)
-                  ->orWhere('comments', 'like', $searchTerm)
-                  ->orWhere('stage', 'like', $searchTerm)
-                  ->orWhereHasMorph('approvable', [EmailApplication::class, LoanApplication::class],
-                      function ($morphQ, $type) use ($searchTerm) {
-                          $morphQ->where('id', 'like', $searchTerm);
-                          if ($type === EmailApplication::class) {
-                              $morphQ->orWhere('proposed_email', 'like', $searchTerm);
-                          } elseif ($type === LoanApplication::class) {
-                              $morphQ->orWhere('purpose', 'like', $searchTerm);
-                          }
-                          $morphQ->orWhereHas('user', function ($userQ) use ($searchTerm) {
-                              $userQ->where('name', 'like', $searchTerm)
+                    ->orWhere('comments', 'like', $searchTerm)
+                    ->orWhere('stage', 'like', $searchTerm)
+                    ->orWhereHasMorph('approvable', [EmailApplication::class, LoanApplication::class],
+                        function ($morphQ, $type) use ($searchTerm) {
+                            $morphQ->where('id', 'like', $searchTerm);
+                            if ($type === EmailApplication::class) {
+                                $morphQ->orWhere('proposed_email', 'like', $searchTerm);
+                            } elseif ($type === LoanApplication::class) {
+                                $morphQ->orWhere('purpose', 'like', $searchTerm);
+                            }
+                            $morphQ->orWhereHas('user', function ($userQ) use ($searchTerm) {
+                                $userQ->where('name', 'like', $searchTerm)
                                     ->orWhere('personal_email', 'like', $searchTerm);
-                          });
-                          if ($type === LoanApplication::class) {
-                              $morphQ->orWhereHas('loanApplicationItems.equipment', function ($itemQ) use ($searchTerm) {
-                                  $itemQ->where('tag_id', 'like', $searchTerm)
+                            });
+                            if ($type === LoanApplication::class) {
+                                $morphQ->orWhereHas('loanApplicationItems.equipment', function ($itemQ) use ($searchTerm) {
+                                    $itemQ->where('tag_id', 'like', $searchTerm)
                                         ->orWhere('model', 'like', $searchTerm) // Assuming equipment model has 'model'
                                         ->orWhere('brand', 'like', $searchTerm); // Assuming equipment model has 'brand'
-                              });
-                          }
-                      }
-                  );
+                                });
+                            }
+                        }
+                    );
             });
         }
 

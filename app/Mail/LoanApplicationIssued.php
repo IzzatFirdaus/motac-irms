@@ -11,7 +11,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
-use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -27,6 +26,7 @@ final class LoanApplicationIssued extends Mailable implements ShouldQueue
     use SerializesModels;
 
     public LoanApplication $loanApplication;
+
     public EloquentCollection $issueTransactions; // Property to hold issue transactions
 
     /**
@@ -40,13 +40,13 @@ final class LoanApplicationIssued extends Mailable implements ShouldQueue
             'user', // For applicant details
             'transactions' => function ($query) {
                 $query->where('type', LoanTransaction::TYPE_ISSUE)
-                      ->with('loanTransactionItems.equipment'); // Eager load items and their equipment
-            }
+                    ->with('loanTransactionItems.equipment'); // Eager load items and their equipment
+            },
         ]);
 
         // Assign the filtered and loaded issue transactions to the public property
         $this->issueTransactions = $this->loanApplication->transactions
-                                       ->where('type', LoanTransaction::TYPE_ISSUE);
+            ->where('type', LoanTransaction::TYPE_ISSUE);
 
         $this->onQueue('emails'); // Specify a queue name
 

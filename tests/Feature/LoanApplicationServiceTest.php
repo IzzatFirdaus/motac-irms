@@ -6,33 +6,39 @@
 
 namespace Tests\Feature; // Or Tests\Unit if you move it
 
-use Tests\TestCase;
-use App\Services\LoanApplicationService;
-use App\Services\ApprovalService;
-use App\Services\LoanTransactionService;
-use App\Services\NotificationService;
-use App\Models\User;
+use App\Models\Approval;
+use App\Models\Department;
+use App\Models\Equipment;
+use App\Models\Grade;
 use App\Models\LoanApplication;
 use App\Models\LoanApplicationItem;
-use App\Models\Equipment;
-use App\Models\Department;
-use App\Models\Grade;
-use App\Models\Approval;
+use App\Models\User;
+use App\Services\ApprovalService;
+use App\Services\LoanApplicationService;
+use App\Services\LoanTransactionService;
+use App\Services\NotificationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use InvalidArgumentException;
 use RuntimeException;
+use Tests\TestCase;
 
 class LoanApplicationServiceTest extends TestCase
 {
     use RefreshDatabase;
 
     protected LoanApplicationService $loanApplicationService;
+
     protected User $applicant;
+
     protected User $hod;
+
     protected User $supportingOfficer;
+
     protected Department $department;
+
     protected Grade $applicantGrade;
+
     protected Grade $supportingOfficerGrade;
 
     protected function setUp(): void
@@ -164,7 +170,7 @@ class LoanApplicationServiceTest extends TestCase
             'loan_end_date' => now()->addDays(5)->toDateTimeString(),
             'responsible_officer_id' => $this->applicant->id,
             'items' => [
-                ['equipment_type' => $equipment->asset_type, 'quantity_requested' => 1]
+                ['equipment_type' => $equipment->asset_type, 'quantity_requested' => 1],
             ],
             'applicant_confirmation' => false, // Missing confirmation
             'supporting_officer_id' => $this->supportingOfficer->id,
@@ -172,7 +178,6 @@ class LoanApplicationServiceTest extends TestCase
 
         $this->loanApplicationService->createAndSubmitApplication($applicationData, $this->applicant, false);
     }
-
 
     /**
      * Test submitting a draft loan application for approval.
@@ -190,7 +195,6 @@ class LoanApplicationServiceTest extends TestCase
             $this->app->make(LoanTransactionService::class),
             $notificationServiceMock
         );
-
 
         $draftApplication = LoanApplication::factory()->create([
             'user_id' => $this->applicant->id,
@@ -222,7 +226,6 @@ class LoanApplicationServiceTest extends TestCase
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage(__('Hanya draf permohonan atau permohonan yang ditolak boleh dihantar semula. Status semasa: Diluluskan'));
 
-
         $application = LoanApplication::factory()->create([
             'user_id' => $this->applicant->id,
             'status' => LoanApplication::STATUS_APPROVED, // Invalid status for submission
@@ -248,7 +251,6 @@ class LoanApplicationServiceTest extends TestCase
         $this->loanApplicationService->submitApplicationForApproval($application, $this->applicant);
     }
 
-
     /**
      * Test updating an existing draft loan application.
      */
@@ -266,7 +268,7 @@ class LoanApplicationServiceTest extends TestCase
                 // Potentially add item update data here
             ],
             'supporting_officer_id' => $this->supportingOfficer->id, // Example of updatable field
-             // 'applicant_confirmation' => false, // Can remain false for draft
+            // 'applicant_confirmation' => false, // Can remain false for draft
         ];
 
         $updatedApplication = $this->loanApplicationService->updateApplication(
@@ -281,12 +283,10 @@ class LoanApplicationServiceTest extends TestCase
         $this->assertEquals(LoanApplication::STATUS_DRAFT, $updatedApplication->status);
     }
 
-
     public function test_update_application_fails_if_not_draft_or_rejected(): void
     {
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage(__('Hanya draf permohonan atau permohonan yang ditolak boleh dikemaskini. Status semasa: Dalam Kelulusan Sokongan'));
-
 
         $application = LoanApplication::factory()->create([
             'user_id' => $this->applicant->id,
@@ -328,7 +328,6 @@ class LoanApplicationServiceTest extends TestCase
 
         $this->loanApplicationService->deleteApplication($application, $this->applicant);
     }
-
 
     // Add more tests for:
     // - Logic for finding the Head of Department for an application (if handled by this service or ApprovalService)

@@ -5,12 +5,12 @@ namespace App\Livewire\ResourceManagement\Admin\Reports;
 use App\Models\Department;
 use App\Models\LoanApplication;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log; // Import the Title attribute
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title; // Import the Title attribute
+use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
 
 #[Layout('layouts.app')]
 #[Title('Laporan Permohonan Pinjaman Peralatan ICT')] // Set the title using the attribute (System Design Rev 3.5 refers to reports)
@@ -21,22 +21,28 @@ class LoanApplicationsReport extends Component
 
     // Filter properties
     public ?string $filterStatus = '';
+
     public ?int $filterDepartmentId = null; // Filter by applicant's department
+
     public ?string $filterDateFrom = null; // Based on application creation date
+
     public ?string $filterDateTo = null;   // Based on application creation date range end
+
     public string $searchTerm = ''; // Search by applicant name, purpose, ID
 
     // Sorting properties
     public string $sortBy = 'created_at';
+
     public string $sortDirection = 'desc';
 
     protected string $paginationTheme = 'bootstrap';
+
     public int $perPage = 15;
 
     public function mount()
     {
         // Example: $this->authorize('viewAnyReport', LoanApplication::class); // Policy for viewing reports
-        Log::info("Livewire\\LoanApplicationsReport: Component mounted by Admin User ID: " . (Auth::id() ?? 'Guest'), [
+        Log::info('Livewire\\LoanApplicationsReport: Component mounted by Admin User ID: '.(Auth::id() ?? 'Guest'), [
             'ip_address' => request()->ip(),
         ]);
     }
@@ -53,30 +59,30 @@ class LoanApplicationsReport extends Component
             // 'supportingOfficer:id,name'     // Load if displayed in report
         ]);
 
-        if (!empty($this->searchTerm)) {
-            $search = '%' . strtolower($this->searchTerm) . '%';
+        if (! empty($this->searchTerm)) {
+            $search = '%'.strtolower($this->searchTerm).'%';
             $query->where(function ($q) use ($search) {
                 // Searching ID with LIKE implies ID might be treated as a string or for partial matches.
                 // If ID is purely numeric and exact match is needed, a direct where clause is better.
                 $q->where('id', 'like', $search)
-                  ->orWhereRaw('LOWER(purpose) LIKE ?', [$search]) // Purpose search from System Design
-                  ->orWhereHas('user', function ($userQuery) use ($search) {
-                      $userQuery->whereRaw('LOWER(name) LIKE ?', [$search]); // User name search
-                  });
+                    ->orWhereRaw('LOWER(purpose) LIKE ?', [$search]) // Purpose search from System Design
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->whereRaw('LOWER(name) LIKE ?', [$search]); // User name search
+                    });
             });
         }
-        if (!empty($this->filterStatus)) {
+        if (! empty($this->filterStatus)) {
             $query->where('status', $this->filterStatus); // Status field from System Design
         }
-        if (!empty($this->filterDepartmentId)) {
+        if (! empty($this->filterDepartmentId)) {
             $query->whereHas('user.department', function ($deptQuery) { // Department relation on User
                 $deptQuery->where('id', $this->filterDepartmentId);
             });
         }
-        if (!empty($this->filterDateFrom)) {
+        if (! empty($this->filterDateFrom)) {
             $query->whereDate('created_at', '>=', $this->filterDateFrom); // Filtering by application creation date
         }
-        if (!empty($this->filterDateTo)) {
+        if (! empty($this->filterDateTo)) {
             $query->whereDate('created_at', '<=', $this->filterDateTo);
         }
 
@@ -87,6 +93,7 @@ class LoanApplicationsReport extends Component
             'admin_user_id' => Auth::id(),
             'filters' => $this->getPublicFilters(),
         ]);
+
         return $reportData;
     }
 

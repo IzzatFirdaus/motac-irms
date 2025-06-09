@@ -26,7 +26,7 @@ class MenuServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $menuDataObject = new stdClass(); // Default to an empty object
+        $menuDataObject = new stdClass; // Default to an empty object
         $menuDataObject->menu = [];   // Ensure 'menu' property exists as an array by default
 
         try {
@@ -42,11 +42,11 @@ class MenuServiceProvider extends ServiceProvider
                 Log::warning('[MenuServiceProvider] Menu configuration key "menu.menu" not found or is null in config/menu.php. Using default empty menu structure.');
                 // $menuDataObject is already set to default empty menu
             } else {
-                Log::error('[MenuServiceProvider] Menu data from config/menu.php is not in the expected array format. Structure type: ' . gettype($menuConfigArray) . '. Using default empty menu structure.');
+                Log::error('[MenuServiceProvider] Menu data from config/menu.php is not in the expected array format. Structure type: '.gettype($menuConfigArray).'. Using default empty menu structure.');
                 // $menuDataObject remains default empty menu
             }
         } catch (\Throwable $e) { // Catch any generic error during config access
-            Log::critical('[MenuServiceProvider] Exception occurred while processing MOTAC menu configuration: ' . $e->getMessage(), ['exception' => $e]);
+            Log::critical('[MenuServiceProvider] Exception occurred while processing MOTAC menu configuration: '.$e->getMessage(), ['exception' => $e]);
             // $menuDataObject remains default empty menu
         }
 

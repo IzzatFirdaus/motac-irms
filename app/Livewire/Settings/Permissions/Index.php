@@ -2,13 +2,13 @@
 
 namespace App\Livewire\Settings\Permissions;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule as ValidationRule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Spatie\Permission\Models\Permission;
-use Illuminate\Support\Facades\Auth;
 
 // Consider using a PermissionService for business logic if it grows more complex
 // use App\Services\PermissionService;
@@ -20,12 +20,17 @@ class Index extends Component
     use WithPagination;
 
     public bool $showModal = false;
+
     public bool $isEditMode = false;
+
     public ?Permission $editingPermission = null;
+
     public string $name = ''; // For the form input
 
     public bool $showDeleteConfirmationModal = false;
+
     public ?int $permissionIdToDelete = null;
+
     public string $permissionNameToDelete = '';
 
     protected string $paginationTheme = 'bootstrap';
@@ -42,7 +47,7 @@ class Index extends Component
     {
         // Ensure a 'manage_permissions' gate or permission is defined
         abort_unless(Auth::user()->can('manage_permissions'), 403, __('Tindakan tidak dibenarkan.'));
-        $this->editingPermission = new Permission(); // Initialize for type-hinting and create form
+        $this->editingPermission = new Permission; // Initialize for type-hinting and create form
     }
 
     public function create(): void
@@ -98,6 +103,7 @@ class Index extends Component
             // Important: Check if the permission is assigned to any roles
             if ($permission->roles()->count() > 0) {
                 session()->flash('error', __('Kebenaran ":name" tidak boleh dipadam kerana ia telah ditugaskan kepada peranan.', ['name' => $permission->name]));
+
                 return;
             }
             $this->permissionIdToDelete = $id;
@@ -121,6 +127,7 @@ class Index extends Component
             if ($permission->roles()->count() > 0) {
                 session()->flash('error', __('Kebenaran ":name" tidak boleh dipadam kerana ia telah ditugaskan kepada peranan.', ['name' => $permission->name]));
                 $this->closeDeleteConfirmationModal();
+
                 return;
             }
             $permission->delete();
@@ -139,9 +146,10 @@ class Index extends Component
     public function render()
     {
         $permissions = Permission::orderBy('name')->paginate(10);
+
         // View path assumes blade file is at resources/views/livewire/settings/permissions/index.blade.php
         return view('livewire.settings.permissions.index', [
-          'permissions' => $permissions,
+            'permissions' => $permissions,
         ]);
     }
 
@@ -150,21 +158,22 @@ class Index extends Component
         $permissionIdToIgnore = ($this->isEditMode && $this->editingPermission && $this->editingPermission->id)
                                 ? $this->editingPermission->id
                                 : null;
+
         return [
-          'name' => [
-            'required',
-            'string',
-            'min:3',    // Ensures permission names are reasonably descriptive
-            'max:125',  // Max length based on Spatie's default migration
-            ValidationRule::unique('permissions', 'name')->ignore($permissionIdToIgnore),
-          ],
+            'name' => [
+                'required',
+                'string',
+                'min:3',    // Ensures permission names are reasonably descriptive
+                'max:125',  // Max length based on Spatie's default migration
+                ValidationRule::unique('permissions', 'name')->ignore($permissionIdToIgnore),
+            ],
         ];
     }
 
     private function resetInputFields(): void
     {
         $this->name = '';
-        $this->editingPermission = new Permission(); // Reset to a new instance
+        $this->editingPermission = new Permission; // Reset to a new instance
         $this->isEditMode = false;
         $this->resetErrorBag(); // Clear validation errors
         $this->resetValidation(); // Reset validation state

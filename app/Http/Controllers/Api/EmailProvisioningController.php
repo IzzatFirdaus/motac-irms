@@ -27,9 +27,6 @@ class EmailProvisioningController extends Controller
     /**
      * Handle the API request to provision an email account.
      * SDD Ref: 3.1
-     *
-     * @param  \App\Http\Requests\Api\ProvisionEmailRequest  $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function provisionEmailAccount(ProvisionEmailRequest $request): JsonResponse
     {
@@ -52,16 +49,17 @@ class EmailProvisioningController extends Controller
             // Example: $this->authorize('provisionViaApi', $application);
 
             // Ensure EmailApplication model has an isApproved() method.
-            if (!$application->isApproved()) {
-                Log::warning("API: Provisioning attempted for non-approved EmailApplication.", [
+            if (! $application->isApproved()) {
+                Log::warning('API: Provisioning attempted for non-approved EmailApplication.', [
                     'application_id' => $application->id,
                     'current_status' => $application->status,
                     'acting_user_id' => $actingUser?->id,
                 ]);
+
                 return response()->json([
                     'message' => 'Email application is not in an approved state for provisioning.',
                     'application_status' => $application->status,
-                    'code' => 'INVALID_STATUS'
+                    'code' => 'INVALID_STATUS',
                 ], 409); // HTTP 409 Conflict
             }
 
@@ -79,6 +77,7 @@ class EmailProvisioningController extends Controller
             // This API endpoint's main role is to trigger the provisioning and report its direct outcome.
             if ($result['success']) {
                 Log::info('API: Email provisioning service reported success.', ['application_id' => $application->id, 'result' => $result]);
+
                 return response()->json([
                     'message' => $result['message'] ?? 'Email provisioning successful.',
                     'data' => [
@@ -90,20 +89,23 @@ class EmailProvisioningController extends Controller
                 ], 200);
             } else {
                 Log::error('API: Email provisioning service reported failure.', ['application_id' => $application->id, 'result' => $result, 'acting_user_id' => $actingUser?->id]);
+
                 return response()->json([
                     'message' => $result['message'] ?? 'Email provisioning failed.',
                     'error_code' => $result['error_code'] ?? 'PROVISIONING_FAILED',
-                    'data' => ['application_id' => $application->id]
+                    'data' => ['application_id' => $application->id],
                 ], isset($result['status_code']) && is_int($result['status_code']) ? $result['status_code'] : 500);
             }
         } catch (ModelNotFoundException $e) {
             Log::warning('API: Email application not found.', ['application_id' => $validatedData['application_id'] ?? 'N/A']);
+
             return response()->json(['message' => 'Email application not found.', 'code' => 'NOT_FOUND'], 404);
         } catch (\Throwable $e) {
             Log::critical('API: Unexpected error during email provisioning.', [
                 'application_id' => $validatedData['application_id'] ?? 'N/A', 'exception' => $e->getMessage(),
-                'trace_snippet' => substr($e->getTraceAsString(),0, 500), 'acting_user_id' => $actingUser?->id,
+                'trace_snippet' => substr($e->getTraceAsString(), 0, 500), 'acting_user_id' => $actingUser?->id,
             ]);
+
             return response()->json(['message' => 'An internal server error occurred.', 'code' => 'INTERNAL_ERROR'], 500);
         }
     }

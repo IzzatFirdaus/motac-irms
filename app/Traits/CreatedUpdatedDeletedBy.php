@@ -2,8 +2,8 @@
 
 namespace App\Traits;
 
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Database\Eloquent\SoftDeletes; // Import SoftDeletes to check its usage
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth; // Import SoftDeletes to check its usage
 
 trait CreatedUpdatedDeletedBy
 {
@@ -27,7 +27,7 @@ trait CreatedUpdatedDeletedBy
         // Set updated_by when a model is being updated.
         static::updating(function ($model) use ($userId) {
             // Only set if updated_by is not being manually changed during this update operation
-            if (!$model->isDirty('updated_by')) {
+            if (! $model->isDirty('updated_by')) {
                 $model->updated_by = $userId;
             }
         });
@@ -37,7 +37,7 @@ trait CreatedUpdatedDeletedBy
         if (in_array(SoftDeletes::class, class_uses_recursive(static::class))) {
             static::deleting(function ($model) use ($userId) {
                 // Only set if deleted_by is not being manually changed during this delete operation
-                if (!$model->isDirty('deleted_by')) {
+                if (! $model->isDirty('deleted_by')) {
                     $model->deleted_by = $userId;
                     // When soft deleting, Eloquent handles the save. We just need to set the attribute.
                     // No need for $model->save() or $model->update() here as it will be part of the delete operation.
@@ -50,7 +50,7 @@ trait CreatedUpdatedDeletedBy
             static::restoring(function ($model) use ($userId) {
                 $model->deleted_by = null;
                 // Optionally, also update 'updated_by' on restore
-                if (!$model->isDirty('updated_by')) {
+                if (! $model->isDirty('updated_by')) {
                     $model->updated_by = $userId;
                 }
             });

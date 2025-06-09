@@ -38,7 +38,7 @@ class ApprovalSeeder extends Seeder
             Log::info('No EmailApplications found. Creating some for ApprovalSeeder.');
             EmailApplication::factory(5)->create([
                 'user_id' => $auditUser->id,
-                'supporting_officer_id' => $officerIds->isNotEmpty() ? $officerIds->random() : null
+                'supporting_officer_id' => $officerIds->isNotEmpty() ? $officerIds->random() : null,
             ]);
             $emailApplications = EmailApplication::all();
         }
@@ -50,7 +50,7 @@ class ApprovalSeeder extends Seeder
             Log::info('No LoanApplications found. Creating some for ApprovalSeeder.');
             LoanApplication::factory(5)->create([
                 'user_id' => $auditUser->id,
-                'responsible_officer_id' => $officerIds->isNotEmpty() ? $officerIds->random() : null
+                'responsible_officer_id' => $officerIds->isNotEmpty() ? $officerIds->random() : null,
             ]);
             $loanApplications = LoanApplication::all();
         }
@@ -63,7 +63,9 @@ class ApprovalSeeder extends Seeder
 
         Log::info('Seeding Approvals for Email Applications...');
         foreach ($emailApplications as $application) {
-            if ($officerIds->isEmpty()) continue; // Skip if no officers
+            if ($officerIds->isEmpty()) {
+                continue;
+            } // Skip if no officers
             $officerId = $officerIds->random();
             $chosenStatus = Arr::random($approvalStatuses);
 
@@ -77,7 +79,9 @@ class ApprovalSeeder extends Seeder
 
             $firstApproval = $application->approvals()->where('stage', Approval::STAGE_EMAIL_SUPPORT_REVIEW)->latest()->first();
             if ($firstApproval && $firstApproval->status === Approval::STATUS_APPROVED) {
-                if ($officerIds->isEmpty()) continue;
+                if ($officerIds->isEmpty()) {
+                    continue;
+                }
                 $nextOfficerId = $officerIds->random();
                 $nextChosenStatus = Arr::random($approvalStatuses);
                 Approval::factory()
@@ -93,7 +97,9 @@ class ApprovalSeeder extends Seeder
 
         Log::info('Seeding Approvals for Loan Applications...');
         foreach ($loanApplications as $application) {
-            if ($officerIds->isEmpty()) continue;
+            if ($officerIds->isEmpty()) {
+                continue;
+            }
             $officerId = $officerIds->random();
             $chosenStatus = Arr::random($approvalStatuses);
 
@@ -107,7 +113,9 @@ class ApprovalSeeder extends Seeder
 
             $firstApproval = $application->approvals()->where('stage', Approval::STAGE_LOAN_SUPPORT_REVIEW)->latest()->first();
             if ($firstApproval && $firstApproval->status === Approval::STATUS_APPROVED) {
-                if ($officerIds->isEmpty()) continue;
+                if ($officerIds->isEmpty()) {
+                    continue;
+                }
                 $nextOfficerId = $officerIds->random();
                 $nextChosenStatus = Arr::random($approvalStatuses);
                 Approval::factory()
@@ -121,7 +129,9 @@ class ApprovalSeeder extends Seeder
                 // Optionally add BPM review stage if HOD (now Approver) approved
                 $approverReviewApproval = $application->approvals()->where('stage', Approval::STAGE_LOAN_APPROVER_REVIEW)->latest()->first(); // MODIFIED variable name and stage
                 if ($approverReviewApproval && $approverReviewApproval->status === Approval::STATUS_APPROVED) { // MODIFIED variable name
-                    if ($officerIds->isEmpty()) continue;
+                    if ($officerIds->isEmpty()) {
+                        continue;
+                    }
                     $bpmOfficerId = $officerIds->random();
                     $bpmChosenStatus = Arr::random($approvalStatuses);
                     Approval::factory()
@@ -172,8 +182,10 @@ class ApprovalSeeder extends Seeder
 
         if ($userIds->isEmpty()) {
             Log::warning('No specific officers found by roles, returning up to 5 random user IDs as fallback for seeder.');
+
             return User::inRandomOrder()->limit(5)->pluck('id');
         }
+
         return $userIds;
     }
 }

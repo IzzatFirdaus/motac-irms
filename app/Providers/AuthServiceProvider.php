@@ -4,27 +4,25 @@ namespace App\Providers;
 
 // Core Models with Policies
 use App\Models\Approval;
+use App\Models\Department;
 use App\Models\EmailApplication;
 use App\Models\Equipment;
 use App\Models\Grade;
 use App\Models\LoanApplication;
 use App\Models\LoanTransaction;
-use App\Models\User;
 // Organizational Models that might have policies
-use App\Models\Department;
-use App\Models\Position; // Ensure this is imported
-
+use App\Models\Position;
+use App\Models\User; // Ensure this is imported
 // Corresponding Policies
 use App\Policies\ApprovalPolicy;
+use App\Policies\DepartmentPolicy;
 use App\Policies\EmailApplicationPolicy;
 use App\Policies\EquipmentPolicy;
 use App\Policies\GradePolicy;
 use App\Policies\LoanApplicationPolicy;
 use App\Policies\LoanTransactionPolicy;
-use App\Policies\UserPolicy;
-use App\Policies\DepartmentPolicy;
-use App\Policies\PositionPolicy;   // Ensure this is imported
-
+use App\Policies\PositionPolicy;
+use App\Policies\UserPolicy;   // Ensure this is imported
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
@@ -48,12 +46,11 @@ class AuthServiceProvider extends ServiceProvider
         User::class => UserPolicy::class,
 
         // Organizational Structure Models
-        //Department::class => DepartmentPolicy::class, // Uncomment if DepartmentPolicy is created
-        Position::class => PositionPolicy::class,     // Uncomment and add this line
+        Department::class => DepartmentPolicy::class, // EDITED: UNCOMMENTED THIS LINE
+        Position::class => PositionPolicy::class,     // EDITED: UNCOMMENTED THIS LINE
 
         // Supporting Detail Models (often authorization is derived from parent)
         // LoanApplicationItem::class => LoanApplicationItemPolicy::class,
-        // LoanTransactionItem::class => LoanTransactionItemPolicy::class,
         // EquipmentCategory::class => EquipmentCategoryPolicy::class,
         // SubCategory::class => SubCategoryPolicy::class,
         // Location::class => LocationPolicy::class,
@@ -80,6 +77,7 @@ class AuthServiceProvider extends ServiceProvider
             if ($user->hasRole('Admin')) {
                 return true; // Admin can perform any action
             }
+
             return null; // Important: return null to allow other policies or gates to define abilities
         });
 

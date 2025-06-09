@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Livewire\ResourceManagement\LoanApplication;
 
+use App\Models\Equipment;
 use App\Models\LoanApplication;
 use App\Models\User;
-use App\Models\Equipment;
 use App\Services\LoanApplicationService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -24,297 +25,333 @@ use Throwable;
 #[Layout('layouts.app')]
 class ApplicationForm extends Component
 {
-  use AuthorizesRequests;
+    use AuthorizesRequests;
 
-  //--- Properties ---
-  public string $applicantName = '';
-  public string $applicantPositionAndGrade = '';
-  public string $applicantDepartment = '';
-  public string $applicant_phone = '';
-  public string $purpose = '';
-  public string $location = '';
-  public ?string $return_location = null;
-  public ?string $loan_start_date = null;
-  public ?string $loan_end_date = null;
-  public bool $applicant_is_responsible_officer = true;
-  public string $responsible_officer_name = '';
-  public string $responsible_officer_position = '';
-  public string $responsible_officer_phone = '';
-  public ?int $supporting_officer_id = null;
-  public array $loan_application_items = [];
-  public bool $applicant_confirmation = false;
-  public bool $termsScrolled = false;
-  public ?int $editing_application_id = null;
-  public ?LoanApplication $loanApplicationInstance = null;
-  public bool $isSubmittingForApproval = false;
-  public bool $isEditMode = false;
-  public ?string $completedSubmissionDate = null;
-  public array $supportingOfficerOptions = [];
-  public array $equipmentTypeOptions = [];
+    // --- Component State ---
+    public ?LoanApplication $loanApplicationInstance = null;
+    public ?int $editing_application_id = null;
+    public bool $isEditMode = false;
 
-  public function updatedApplicantIsResponsibleOfficer(bool $value): void
-  {
-    if ($value) {
-      $this->reset([
-        'responsible_officer_name',
-        'responsible_officer_position',
-        'responsible_officer_phone'
-      ]);
-    }
-    $this->resetErrorBag(['responsible_officer_name', 'responsible_officer_position', 'responsible_officer_phone']);
-  }
+    // --- Form Data Properties ---
+    public string $applicantName = '';
+    public string $applicantPositionAndGrade = '';
+    public string $applicantDepartment = '';
+    public string $applicant_phone = '';
+    public string $purpose = '';
+    public string $location = '';
+    public ?string $return_location = null;
+    public ?string $loan_start_date = null;
+    public ?string $loan_end_date = null;
+    public bool $applicant_is_responsible_officer = true;
+    public ?int $responsible_officer_id = null;
+    public ?int $supporting_officer_id = null;
+    public array $loan_application_items = [];
+    public bool $applicant_confirmation = false;
 
-  public function mount(?int $loan_application_id = null): void
-  {
-    if (!Auth::check()) {
-      session()->flash('error', __('messages.session_expired'));
-      return;
-    }
+    // --- UI & Select Options ---
+    public bool $termsScrolled = false;
+    public array $supportingOfficerOptions = [];
+    public array $equipmentTypeOptions = [];
+    public array $responsibleOfficerOptions = [];
 
-    $this->populateApplicantDetails();
-    $this->loadInitialDropdownData();
-
-    if ($loan_application_id) {
-      $this->isEditMode = true;
-      $this->editing_application_id = $loan_application_id;
-      $this->loanApplicationInstance = LoanApplication::with('user', 'supportingOfficer', 'loanApplicationItems', 'submittedByUser')->findOrFail($loan_application_id);
-      $this->authorize('update', $this->loanApplicationInstance);
-      $this->populateFormFromInstance();
-    } else {
-      $this->authorize('create', LoanApplication::class);
-      $this->resetFormForCreate();
-    }
-  }
-
-  protected function rules(bool $isSubmittingForApproval = false): array
-  {
-    $currentUserId = Auth::id();
-    $minSupportGradeLevel = (int) config('motac.approval.min_loan_support_grade_level', 41);
-
-    return [
-      'applicant_phone' => ['required', 'string', 'max:20', 'regex:/^([0-9\s\-\+\(\)]*)$/'],
-      'purpose' => ['required', 'string', 'min:10', 'max:1000'],
-      'location' => ['required', 'string', 'min:5', 'max:255'],
-
-      // The missing validation rule for the optional return_location field is added here.
-      'return_location' => ['nullable', 'string', 'max:255'],
-
-      'loan_start_date' => ['required', 'date_format:Y-m-d\TH:i', 'after_or_equal:now'],
-      'loan_end_date' => ['required', 'date_format:Y-m-d\TH:i', 'after:loan_start_date'],
-      'applicant_is_responsible_officer' => ['required', 'boolean'],
-      'responsible_officer_name' => [Rule::requiredIf(!$this->applicant_is_responsible_officer), 'nullable', 'string', 'max:255'],
-      'responsible_officer_position' => [Rule::requiredIf(!$this->applicant_is_responsible_officer), 'nullable', 'string', 'max:255'],
-      'responsible_officer_phone' => [Rule::requiredIf(!$this->applicant_is_responsible_officer), 'nullable', 'string', 'max:20'],
-      'supporting_officer_id' => [
-        Rule::requiredIf($isSubmittingForApproval),
-        'nullable',
-        'integer',
-        Rule::exists('users', 'id')->where('status', 'active'),
-        Rule::when($currentUserId, 'different:' . $currentUserId),
-        function ($attribute, $value, $fail) use ($minSupportGradeLevel) {
-          if ($value) {
-            $officer = User::with('grade:id,level')->find($value);
-            if (!$officer || !$officer->grade || $officer->grade->level < $minSupportGradeLevel) {
-              $fail(__('messages.supporter_grade_requirement_failed', ['grade' => $minSupportGradeLevel]));
-            }
-          }
-        },
-      ],
-      'applicant_confirmation' => Rule::when($isSubmittingForApproval, ['accepted']),
-      'loan_application_items' => ['required', 'array', 'min:1'],
-      'loan_application_items.*.equipment_type' => ['required', 'string'],
-      'loan_application_items.*.quantity_requested' => ['required', 'integer', 'min:1'],
-      'loan_application_items.*.notes' => ['nullable', 'string', 'max:500'],
-    ];
-  }
-
-  public function saveAsDraft(): ?RedirectResponse
-  {
-    return $this->saveOrUpdateLoanApplication(true);
-  }
-
-  public function submitLoanApplication(): ?RedirectResponse
-  {
-    return $this->saveOrUpdateLoanApplication(false);
-  }
-
-  private function saveOrUpdateLoanApplication(bool $isDraft): ?RedirectResponse
-  {
-    $this->isSubmittingForApproval = !$isDraft;
-    $this->authorizeAction();
-    $this->resetErrorBag();
-    $validatedData = $this->validate($this->rules(!$isDraft));
-
-    DB::beginTransaction();
-    try {
-      /** @var User $currentUser */
-      $currentUser = Auth::user();
-      $loanAppService = app(LoanApplicationService::class);
-
-      $dataForService = $validatedData;
-
-      if ($this->editing_application_id) {
-        $application = $loanAppService->updateApplication($this->loanApplicationInstance, $dataForService, $currentUser);
-        if (!$isDraft) {
-          $loanAppService->submitApplicationForApproval($application, $currentUser);
+    /**
+     * Mounts the component, loading an existing application for editing or initializing a new one.
+     */
+    public function mount(?int $loan_application_id = null): void
+    {
+        $this->isEditMode = !is_null($loan_application_id);
+        if ($this->isEditMode) {
+            $this->editing_application_id = $loan_application_id;
+            $this->loadExistingApplication();
+        } else {
+            $this->initializeNewApplication();
         }
-      } else {
-        $application = $loanAppService->createAndSubmitApplication($dataForService, $currentUser, $isDraft);
-      }
 
-      DB::commit();
-      $message = $isDraft ? __('messages.draft_saved_successfully') : __('messages.application_submitted_successfully');
-      session()->flash('success', $message);
-      return redirect()->route('loan-applications.show', $application->id);
-    } catch (ValidationException $e) {
-      DB::rollBack();
-      throw $e;
-    } catch (Throwable $e) {
-      DB::rollBack();
-      Log::error('Error in saveOrUpdateLoanApplication: ' . $e->getMessage(), ['exception' => $e]);
-      $this->addError('general_error', __('messages.system_error_generic'));
-      return null;
-    }
-  }
-
-  private function populateApplicantDetails(): void
-  {
-    /** @var User $user */
-    $user = Auth::user();
-    if ($user) {
-      $this->applicantName = $user->name;
-      $this->applicant_phone = $user->mobile_number ?? '';
-      $this->applicantPositionAndGrade = trim(($user->position?->name ?? '') . ' (' . ($user->grade?->name ?? '') . ')');
-      $this->applicantDepartment = $user->department?->name ?? '';
-    }
-  }
-
-  private function populateFormFromInstance(): void
-  {
-    if (!$this->loanApplicationInstance) return;
-
-    $instance = $this->loanApplicationInstance;
-    $this->purpose = $instance->purpose;
-    $this->location = $instance->location;
-    $this->return_location = $instance->return_location;
-    $this->loan_start_date = $this->formatDateForInput($instance->loan_start_date);
-    $this->loan_end_date = $this->formatDateForInput($instance->loan_end_date);
-
-    $this->applicant_is_responsible_officer = empty($instance->responsible_officer_name);
-    if (!$this->applicant_is_responsible_officer) {
-      $this->responsible_officer_name = $instance->responsible_officer_name;
-      $this->responsible_officer_position = $instance->responsible_officer_position;
-      $this->responsible_officer_phone = $instance->responsible_officer_phone;
+        $this->loadSelectOptions();
+        $this->updatedApplicantIsResponsibleOfficer($this->applicant_is_responsible_officer);
     }
 
-    $this->supporting_officer_id = $instance->supporting_officer_id;
-    $this->applicant_confirmation = $instance->applicant_confirmation_timestamp !== null;
-
-    $this->loan_application_items = $instance->loanApplicationItems->map(fn($item) => [
-      'id' => $item->id,
-      'equipment_type' => $item->equipment_type,
-      'quantity_requested' => $item->quantity_requested,
-      'notes' => $item->notes,
-    ])->toArray();
-
-    if ($instance->submitted_at) {
-      $this->completedSubmissionDate = $instance->submitted_at->format(config('app.datetime_format_my', 'd M Y, h:i A'));
+    /**
+     * Generates the title for the page based on the current mode (new/edit).
+     * @return string The translated page title.
+     */
+    public function generatePageTitle(): string
+    {
+        return $this->isEditMode
+            ? __('forms.title_edit_application_ict')
+            : __('forms.title_new_application_ict');
     }
-  }
 
-  public function loadInitialDropdownData(): void
-  {
-    $currentUserId = Auth::id();
-    if (!$currentUserId) return;
-
-    $minSupportGradeLevel = (int) config('motac.approval.min_loan_support_grade_level', 41);
-
-    $this->supportingOfficerOptions = User::where('status', User::STATUS_ACTIVE)
-      ->where('id', '!=', $currentUserId)
-      ->whereHas('grade', fn($query) => $query->where('level', '>=', $minSupportGradeLevel))
-      ->orderBy('name')->get()->pluck('name', 'id')->toArray();
-
-    $this->equipmentTypeOptions = Equipment::getAssetTypeOptions() ?? [];
-  }
-
-  public function resetFormForCreate(): void
-  {
-    $this->reset([
-      'purpose',
-      'location',
-      'return_location',
-      'loan_start_date',
-      'loan_end_date',
-      'supporting_officer_id',
-      'loan_application_items',
-      'applicant_confirmation',
-      'editing_application_id',
-      'loanApplicationInstance',
-      'isEditMode',
-      'completedSubmissionDate',
-      'responsible_officer_name',
-      'responsible_officer_position',
-      'responsible_officer_phone'
-    ]);
-
-    $this->resetValidation();
-    $this->populateApplicantDetails();
-    $this->addLoanItem(false);
-  }
-
-  public function addLoanItem(bool $dispatchEvent = true): void
-  {
-    $this->loan_application_items[] = ['id' => null, 'equipment_type' => '', 'quantity_requested' => 1, 'notes' => ''];
-    if ($dispatchEvent) $this->dispatch('loanItemAdded');
-  }
-
-  public function removeLoanItem(int $index): void
-  {
-    if (count($this->loan_application_items) > 1) {
-      unset($this->loan_application_items[$index]);
-      $this->loan_application_items = array_values($this->loan_application_items);
-    } else {
-      session()->flash('error', __('messages.loan_requires_min_one_item'));
+    /**
+     * Loads form state from the browser's localStorage cache.
+     * This is called by the Alpine.js component on initialization.
+     * @param array $cachedData The data retrieved from localStorage.
+     */
+    public function loadStateFromCache(array $cachedData): void
+    {
+        // Only load from cache if we are creating a new application
+        if (!$this->isEditMode) {
+            $this->purpose = $cachedData['purpose'] ?? '';
+            $this->location = $cachedData['location'] ?? '';
+            $this->return_location = $cachedData['return_location'] ?? null;
+            $this->loan_start_date = $cachedData['loan_start_date'] ?? null;
+            $this->loan_end_date = $cachedData['loan_end_date'] ?? null;
+        }
     }
-  }
 
-  /**
-   * Loads form state from data saved in the browser's localStorage.
-   * This is called by Alpine.js when the page initializes.
-   *
-   * @param array $cachedData The associative array of cached form data.
-   * @return void
-   */
-  public function loadStateFromCache(array $cachedData): void
-  {
-    // For each field, assign the cached value if it exists, otherwise keep the current value.
-    $this->purpose = $cachedData['purpose'] ?? $this->purpose;
-    $this->location = $cachedData['location'] ?? $this->location;
-    $this->return_location = $cachedData['return_location'] ?? $this->return_location;
-    $this->loan_start_date = $cachedData['loan_start_date'] ?? $this->loan_start_date;
-    $this->loan_end_date = $cachedData['loan_end_date'] ?? $this->loan_end_date;
+    /**
+     * Initializes the form for a new application, pre-filling applicant data.
+     */
+    private function initializeNewApplication(): void
+    {
+        $this->authorize('create', LoanApplication::class);
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $this->applicantName = $user->name;
+        $this->applicantPositionAndGrade = ($user->position?->name ?? 'N/A') . ' (' . ($user->grade?->name ?? 'N/A') . ')';
+        $this->applicantDepartment = $user->department?->name ?? 'N/A';
+        $this->applicant_phone = $user->mobile_number ?? '';
+        $this->addLoanItem(); // Start with one empty item row
+    }
 
-    // Note: For security and simplicity, we are not caching officer selections.
-    // Caching the dynamically added equipment items is also more complex and is omitted here.
-  }
+    /**
+     * Loads an existing application's data into the form for editing.
+     */
+    private function loadExistingApplication(): void
+    {
+        try {
+            /** @var LoanApplication $application */
+            $application = LoanApplication::with([
+                'user', 'responsibleOfficer', 'supportingOfficer', 'loanApplicationItems'
+            ])->findOrFail($this->editing_application_id);
 
-  private function authorizeAction(): void
-  {
-    $this->authorize($this->editing_application_id ? 'update' : 'create', $this->loanApplicationInstance ?? LoanApplication::class);
-  }
+            $this->loanApplicationInstance = $application;
+            $this->authorize('update', $this->loanApplicationInstance);
 
-  private function formatDateForInput(?Carbon $date): ?string
-  {
-    return $date ? $date->format('Y-m-d\TH:i') : null;
-  }
+            $user = $application->user;
+            $this->applicantName = $user?->name ?? '';
+            $this->applicantPositionAndGrade = ($user?->position?->name ?? 'N/A') . ' (' . ($user?->grade?->name ?? 'N/A') . ')';
+            $this->applicantDepartment = $user?->department?->name ?? 'N/A';
+            $this->applicant_phone = $application->applicant_phone ?? $user->mobile_number ?? '';
 
-  public function generatePageTitle(): string
-  {
-    return __('forms.ict_loan_form_title');
-  }
+            $this->purpose = $application->purpose;
+            $this->location = $application->location;
+            $this->return_location = $application->return_location;
+            $this->loan_start_date = $this->formatDateForInput($application->loan_start_date);
+            $this->loan_end_date = $this->formatDateForInput($application->loan_end_date);
 
-  public function render(): View
-  {
-    return view('livewire.resource-management.loan-application.application-form');
-  }
+            $this->applicant_is_responsible_officer = $application->responsible_officer_id === $application->user_id;
+            $this->responsible_officer_id = $application->responsible_officer_id;
+            $this->supporting_officer_id = $application->supporting_officer_id;
+
+            $this->applicant_confirmation = !is_null($application->applicant_confirmation_timestamp);
+
+            $this->loan_application_items = $application->loanApplicationItems->map(fn ($item) =>
+                $item->only(['id', 'equipment_type', 'quantity_requested', 'notes'])
+            )->toArray();
+
+            if (empty($this->loan_application_items)) {
+                $this->addLoanItem();
+            }
+        } catch (Throwable $e) {
+            Log::error('Error loading existing loan application: ' . $e->getMessage(), ['id' => $this->editing_application_id]);
+            session()->flash('error', 'Gagal memuatkan data permohonan yang sedia ada.');
+            $this->redirectRoute('dashboard', navigate: true);
+        }
+    }
+
+    /**
+     * Loads options for select dropdowns like equipment types and officers.
+     */
+    private function loadSelectOptions(): void
+    {
+        $this->equipmentTypeOptions = Equipment::getAssetTypeOptions();
+
+        // Load users who can be responsible/supporting officers, excluding the current user.
+        $officerList = User::where('status', 'active')
+            ->where('id', '!=', Auth::id())
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        $this->supportingOfficerOptions = $officerList->pluck('name', 'id')->toArray();
+        $this->responsibleOfficerOptions = $officerList->pluck('name', 'id')->toArray();
+    }
+
+    /**
+     * Adds a new, empty item row to the application.
+     */
+    public function addLoanItem(): void
+    {
+        // ##### FIX APPLIED HERE #####
+        // Removed 'id' => null from the array for new items to prevent MassAssignmentException.
+        $this->loan_application_items[] = ['equipment_type' => '', 'quantity_requested' => 1, 'notes' => ''];
+    }
+
+    /**
+     * Removes an item row from the application.
+     */
+    public function removeLoanItem(int $index): void
+    {
+        if (count($this->loan_application_items) > 1) {
+            unset($this->loan_application_items[$index]);
+            $this->loan_application_items = array_values($this->loan_application_items); // Re-index array
+        } else {
+            $this->dispatch('swal:info', title: 'Tidak Dibenarkan', message: 'Setiap permohonan mesti mempunyai sekurang-kurangnya satu item.');
+        }
+    }
+
+    /**
+     * Handles changes to the "applicant is responsible officer" checkbox.
+     */
+    public function updatedApplicantIsResponsibleOfficer(bool $value): void
+    {
+        if ($value) {
+            $this->responsible_officer_id = null;
+        }
+    }
+
+    /**
+     * Defines the validation rules for the form.
+     */
+    public function rules(bool $forSubmission = false): array
+    {
+        $rules = [
+            'applicant_phone' => ['required', 'string', 'regex:/^(\+?6?01)[0-9]{8,9}$/'],
+            'purpose' => ['required', 'string', 'min:10', 'max:500'],
+            'location' => ['required', 'string', 'min:5', 'max:255'],
+            'return_location' => ['nullable', 'string', 'max:255', Rule::when($this->return_location, ['different:location'])],
+            'loan_start_date' => ['required', 'date', 'after_or_equal:' . now()->startOfDay()->toDateTimeString()],
+            'loan_end_date' => ['required', 'date', 'after:loan_start_date'],
+            'applicant_is_responsible_officer' => ['boolean'],
+            'responsible_officer_id' => [
+                Rule::requiredIf(!$this->applicant_is_responsible_officer),
+                'nullable',
+                'exists:users,id',
+            ],
+            'supporting_officer_id' => [
+                'nullable', // Supporting officer is optional on draft, but validated by the service on submission.
+                'exists:users,id',
+            ],
+            'loan_application_items' => ['required', 'array', 'min:1'],
+            'loan_application_items.*.id' => ['nullable', 'integer'],
+            'loan_application_items.*.equipment_type' => ['required', 'string', Rule::in(array_keys($this->equipmentTypeOptions))],
+            'loan_application_items.*.quantity_requested' => ['required', 'integer', 'min:1', 'max:10'],
+            'loan_application_items.*.notes' => ['nullable', 'string', 'max:255'],
+        ];
+
+        if ($forSubmission) {
+            $rules['applicant_confirmation'] = ['accepted'];
+            // Make supporting officer required only on final submission.
+            $rules['supporting_officer_id'][0] = 'required';
+        }
+
+        return $rules;
+    }
+
+    /**
+     * Defines custom validation messages.
+     */
+    public function messages(): array
+    {
+        $messages = [
+            'applicant_phone.regex' => 'Format nombor telefon tidak sah. Cth: 0123456789',
+            'purpose.required' => 'Sila nyatakan tujuan permohonan.',
+            'loan_start_date.after_or_equal' => 'Tarikh pinjaman mesti bermula dari hari ini atau akan datang.',
+            'loan_end_date.after' => 'Tarikh pulang mesti selepas tarikh pinjaman.',
+            'responsible_officer_id.required_if' => 'Sila pilih Pegawai Bertanggungjawab.',
+            'supporting_officer_id.required' => 'Sila pilih Pegawai Penyokong untuk menghantar permohonan.',
+            'applicant_confirmation.accepted' => 'Anda mesti bersetuju dengan perakuan pemohon untuk menghantar.',
+            'return_location.different' => 'Lokasi pemulangan mesti berbeza daripada lokasi penggunaan.',
+        ];
+
+        foreach ($this->loan_application_items as $index => $item) {
+            $itemNumber = $index + 1;
+            $messages["loan_application_items.{$index}.equipment_type.required"] = "Sila pilih jenis peralatan untuk Item #{$itemNumber}.";
+            $messages["loan_application_items.{$index}.quantity_requested.required"] = "Sila masukkan kuantiti untuk Item #{$itemNumber}.";
+        }
+
+        return $messages;
+    }
+
+    /**
+     * Saves the form data as a draft.
+     */
+    public function saveAsDraft(): ?RedirectResponse
+    {
+        return $this->processSave(true);
+    }
+
+    /**
+     * Submits the form data for approval.
+     */
+    public function submitLoanApplication(): ?RedirectResponse
+    {
+        return $this->processSave(false);
+    }
+
+    /**
+     * Central logic to process saving or submitting the application.
+     */
+    private function processSave(bool $isDraft): ?RedirectResponse
+    {
+        $validatedData = $this->validate($this->rules(!$isDraft), $this->messages());
+
+        $serviceData = Arr::except($validatedData, ['loan_application_items', 'applicant_is_responsible_officer']);
+        $serviceData['items'] = $validatedData['loan_application_items'];
+        $serviceData['is_draft_submission'] = $isDraft;
+
+        DB::beginTransaction();
+        try {
+            $service = app(LoanApplicationService::class);
+            /** @var \App\Models\User $user */
+            $user = Auth::user();
+            $application = null;
+
+            if ($this->isEditMode && $this->loanApplicationInstance) {
+                $this->authorize('update', $this->loanApplicationInstance);
+                $application = $service->updateApplication($this->loanApplicationInstance, $serviceData, $user);
+            } else {
+                $this->authorize('create', LoanApplication::class);
+                $application = $service->createAndSubmitApplication($serviceData, $user, $isDraft);
+            }
+
+            if (!$isDraft) {
+                $application = $service->submitApplicationForApproval($application, $user);
+            }
+
+            DB::commit();
+
+            if ($isDraft) {
+                session()->flash('success', 'Draf permohonan anda telah berjaya disimpan.');
+                return redirect()->route('loan-applications.edit', ['loan_application_id' => $application->id]);
+            } else {
+                session()->flash('success', 'Permohonan anda telah berjaya dihantar untuk kelulusan.');
+                return redirect()->route('loan-applications.show', ['loan_application' => $application->id]);
+            }
+        } catch (ValidationException $e) {
+            DB::rollBack();
+            throw $e;
+        } catch (Throwable $e) {
+            DB::rollBack();
+            Log::error('Error processing loan application: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            $this->dispatch('swal:error', title: 'Ralat!', message: 'Gagal memproses permohonan: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Formats a date string for a date input field.
+     */
+    private function formatDateForInput($date): ?string
+    {
+        return $date ? Carbon::parse($date)->format('Y-m-d\TH:i') : null;
+    }
+
+    /**
+     * Renders the component view.
+     */
+    public function render(): View
+    {
+        return view('livewire.resource-management.loan-application.application-form');
+    }
 }

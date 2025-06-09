@@ -40,8 +40,8 @@ class EmailProvisionedNotification extends Notification implements ShouldQueue
         $applicantName = $this->emailApplication->user?->name ?? $notifiable->name ?? __('Pemohon');
         $applicationId = $this->emailApplication->id ?? 'N/A';
 
-        $mailMessage = (new MailMessage())
-            ->subject(__("Makluman: Akaun E-mel/ID Pengguna ICT MOTAC Anda Telah Sedia (#:id)", ['id' => $applicationId]))
+        $mailMessage = (new MailMessage)
+            ->subject(__('Makluman: Akaun E-mel/ID Pengguna ICT MOTAC Anda Telah Sedia (#:id)', ['id' => $applicationId]))
             ->greeting(__('Tahniah, :name!', ['name' => $applicantName]));
 
         $assignedEmail = $this->emailApplication->final_assigned_email;
@@ -62,7 +62,6 @@ class EmailProvisionedNotification extends Notification implements ShouldQueue
             $mailMessage->line(__('Sila semak sistem untuk butiran akaun anda atau nantikan maklumat lanjut daripada BPM.'));
         }
 
-
         $applicationUrl = '#';
         $routeName = 'resource-management.my-applications.email.show'; // Standardized route
         if ($this->emailApplication->id && Route::has($routeName)) {
@@ -82,7 +81,8 @@ class EmailProvisionedNotification extends Notification implements ShouldQueue
         }
 
         $mailMessage->line(__('Sila jaga kerahsiaan kata laluan anda.'))
-                      ->salutation(__('Sekian, terima kasih.'));
+            ->salutation(__('Sekian, terima kasih.'));
+
         return $mailMessage;
     }
 
@@ -95,15 +95,14 @@ class EmailProvisionedNotification extends Notification implements ShouldQueue
 
         $messageText = __('Akaun e-mel/ID pengguna MOTAC anda (#:appId) kini aktif.', ['appId' => $applicationId ?? 'N/A']);
         if ($assignedEmail) {
-            $messageText .= ' ' . __('E-mel: :email.', ['email' => $assignedEmail]);
+            $messageText .= ' '.__('E-mel: :email.', ['email' => $assignedEmail]);
         }
         if ($assignedUserId) {
-            $messageText .= ' ' . __('ID Pengguna: :userId.', ['userId' => $assignedUserId]);
+            $messageText .= ' '.__('ID Pengguna: :userId.', ['userId' => $assignedUserId]);
         }
-        if (!$assignedEmail && !$assignedUserId) {
+        if (! $assignedEmail && ! $assignedUserId) {
             $messageText = __('Proses penyediaan akaun/ID pengguna ICT anda (#:appId) telah selesai.', ['appId' => $applicationId ?? 'N/A']);
         }
-
 
         $applicationUrl = '#';
         $routeName = 'resource-management.my-applications.email.show';
@@ -111,7 +110,7 @@ class EmailProvisionedNotification extends Notification implements ShouldQueue
             try {
                 $applicationUrl = route($routeName, ['email_application' => $applicationId]);
             } catch (\Throwable $e) {
-                Log::error("Error generating URL for EmailProvisionedNotification toArray: " . $e->getMessage(), ['application_id' => $applicationId]);
+                Log::error('Error generating URL for EmailProvisionedNotification toArray: '.$e->getMessage(), ['application_id' => $applicationId]);
                 $applicationUrl = '#'; // Fallback
             }
         }

@@ -15,14 +15,14 @@ return new class extends Migration
         $itemStatuses = [
             'issued', 'returned_pending_inspection', 'returned_good',
             'returned_minor_damage', 'returned_major_damage',
-            'reported_lost', 'unserviceable_on_return'
+            'reported_lost', 'unserviceable_on_return',
         ];
         $defaultStatus = 'issued'; // Or another suitable default from the list
 
         // Condition statuses should match keys from Equipment::$CONDITION_STATUSES_LABELS
         $conditionStatuses = [
             'new', 'good', 'fair', 'minor_damage',
-            'major_damage', 'unserviceable', 'lost'
+            'major_damage', 'unserviceable', 'lost',
             // 'as_issued' was in migration default, but not in Equipment model constants.
             // Using Equipment model constants/keys for consistency.
         ];
@@ -58,10 +58,14 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('loan_transaction_items', function (Blueprint $table) {
-             $foreignKeys = ['loan_transaction_id', 'equipment_id', 'loan_application_item_id', 'created_by', 'updated_by', 'deleted_by'];
-            foreach($foreignKeys as $key) {
+            $foreignKeys = ['loan_transaction_id', 'equipment_id', 'loan_application_item_id', 'created_by', 'updated_by', 'deleted_by'];
+            foreach ($foreignKeys as $key) {
                 if (Schema::hasColumn('loan_transaction_items', $key)) {
-                     try { $table->dropForeign([$key]); } catch (\Exception $e) { Log::warning("Failed to drop FK {$key} on loan_transaction_items: ". $e->getMessage());}
+                    try {
+                        $table->dropForeign([$key]);
+                    } catch (\Exception $e) {
+                        Log::warning("Failed to drop FK {$key} on loan_transaction_items: ".$e->getMessage());
+                    }
                 }
             }
         });

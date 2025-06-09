@@ -18,104 +18,64 @@ final class ApplicationRejected extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    private EmailApplication|LoanApplication $application;
-    private User $rejecter;
-    private ?string $rejectionReason;
+    public EmailApplication|LoanApplication $application;
 
-    public function __construct(
-        EmailApplication|LoanApplication $application,
-        User $rejecter,
-        ?string $rejectionReason
-    ) {
-        $this->application = $application;
-        $this->application->loadMissing('user'); // Added eager loading
+    public User $rejecter;
+
+    public ?string $rejectionReason;
+
+    public function __construct(EmailApplication|LoanApplication $application, User $rejecter, ?string $rejectionReason)
+    {
+        $this->application = $application->loadMissing('user');
         $this->rejecter = $rejecter;
         $this->rejectionReason = $rejectionReason;
-        Log::info('ApplicationRejected notification created for '.$application::class." ID: ".($application->id ?? 'N/A')." by User ID: {$rejecter->id}.");
     }
 
-    public function getApplication(): EmailApplication|LoanApplication
-    {
-        return $this->application;
-    }
-
-    public function getRejecter(): User
-    {
-        return $this->rejecter;
-    }
-
-    public function getRejectionReason(): ?string
-    {
-        return $this->rejectionReason;
-    }
-
-    public function via(User $notifiable): array // Standardized to User
+    public function via(User $notifiable): array
     {
         return ['mail', 'database'];
     }
 
-    public function toMail(User $notifiable): MailMessage
+    public function getActionUrl(): string
     {
-        $applicationId = $this->application->id ?? 'N/A';
+        $viewUrl = '#';
         $isLoanApp = $this->application instanceof LoanApplication;
-        $applicationTypeDisplay = $isLoanApp
-            ? __('Permohonan Pinjaman Peralatan ICT')
-            : __('Permohonan Akaun E-mel/ID Pengguna');
-
-        // Corrected: Prioritize loaded applicant user from the application model
-        $applicantName = $this->application->user?->name ?? $notifiable->name ?? __('Pemohon');
-        $rejecterName = $this->rejecter->name ?? __('Pegawai Pelulus');
-
-        $mailMessage = (new MailMessage())
-            ->subject(__(':appType Ditolak (#:appId)', ['appType' => $applicationTypeDisplay, 'appId' => $applicationId]))
-            ->greeting(__('Salam Sejahtera, :name,', ['name' => $applicantName]))
-            ->error()
-            ->line(__('Dukacita dimaklumkan bahawa :appType anda (ID: #:appId) telah **ditolak**.', ['appType' => $applicationTypeDisplay, 'appId' => $applicationId]));
-
-        if ($this->rejectionReason !== null && trim($this->rejectionReason) !== '') {
-            $mailMessage->line(__('Sebab penolakan oleh :rejecterName:', ['rejecterName' => $rejecterName]));
-            $mailMessage->line($this->rejectionReason);
-        } else {
-            $mailMessage->line(__('Permohonan anda ditolak oleh :rejecterName. Tiada sebab khusus dinyatakan.',['rejecterName' => $rejecterName]));
-        }
-        $mailMessage->line('');
-
-        $viewApplicationUrl = '#';
-        $routeParameters = [];
-        $routeName = null;
 
         if ($this->application->id) {
-            if ($isLoanApp) {
-                // Standardized route name
-                $routeName = 'resource-management.my-applications.loan.show';
-                $routeParameters = ['loan_application' => $this->application->id];
-            } else {
-                // Standardized route name
-                $routeName = 'resource-management.my-applications.email.show';
-                $routeParameters = ['email_application' => $this->application->id];
-            }
+            $routeName = $isLoanApp
+              ? 'resource-management.my-applications.loan.show'
+              : 'resource-management.my-applications.email.show';
+            $routeParameters = $isLoanApp
+              ? ['loan_application' => $this->application->id]
+              : ['email_application' => $this->application->id];
 
-            if ($routeName && Route::has($routeName)) {
+            if (Route::has($routeName)) {
                 try {
-                    $viewApplicationUrl = route($routeName, $routeParameters);
+                    $viewUrl = route($routeName, $routeParameters);
                 } catch (\Exception $e) {
-                     Log::error('Error generating URL for ApplicationRejected mail: '.$e->getMessage(), [
-                        'application_id' => $this->application->id ?? null,
-                        'application_type' => $this->application::class,
-                        'route_name' => $routeName,
-                    ]);
-                    $viewApplicationUrl = '#';
+                    Log::error('Error generating URL for ApplicationRejected mail: '.$e->getMessage(), ['application_id' => $this->application->id]);
+
+                    return '#';
                 }
             }
         }
 
+        return $viewUrl;
+    }
 
-        if ($viewApplicationUrl !== '#' && filter_var($viewApplicationUrl, FILTER_VALIDATE_URL)) {
-            $mailMessage->action(__('Lihat Butiran Permohonan'), $viewApplicationUrl);
-        }
-        $mailMessage->line(__('Jika anda mempunyai sebarang pertanyaan, sila hubungi Bahagian Pengurusan Maklumat (BPM) atau pegawai yang bertanggungjawab.'));
+    public function toMail(User $notifiable): MailMessage
+    {
+        $isLoanApp = $this->application instanceof LoanApplication;
+        $applicationTypeDisplay = $isLoanApp
+          ? __('Permohonan Pinjaman Peralatan ICT')
+          : __('Permohonan Akaun E-mel/ID Pengguna');
+        $applicationId = $this->application->id ?? 'N/A';
 
-        return $mailMessage->salutation(__('Sekian, harap maklum.'));
+        $subject = __(':appType Ditolak (#:appId)', ['appType' => $applicationTypeDisplay, 'appId' => $applicationId]);
+
+        return (new MailMessage)
+            ->subject($subject)
+            ->view('emails.application-rejected', ['notification' => $this, 'notifiable' => $notifiable]);
     }
 
     public function toArray(User $notifiable): array
@@ -123,8 +83,8 @@ final class ApplicationRejected extends Notification implements ShouldQueue
         $applicationId = $this->application->id ?? null;
         $isLoanApp = $this->application instanceof LoanApplication;
         $applicationTypeDisplay = $isLoanApp
-            ? __('Permohonan Pinjaman Peralatan ICT')
-            : __('Permohonan Akaun E-mel/ID Pengguna');
+          ? __('Permohonan Pinjaman Peralatan ICT')
+          : __('Permohonan Akaun E-mel/ID Pengguna');
         $applicationMorphClass = $this->application->getMorphClass();
 
         $rejectedBy = $this->rejecter->name ?? 'N/A';
@@ -147,7 +107,7 @@ final class ApplicationRejected extends Notification implements ShouldQueue
         $routeParameters = [];
         $routeName = null;
 
-         if ($applicationId !== null) {
+        if ($applicationId !== null) {
             if ($isLoanApp) {
                 $routeName = 'resource-management.my-applications.loan.show';
                 $routeParameters = ['loan_application' => $applicationId];

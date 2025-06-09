@@ -13,14 +13,16 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Route; // Added for consistency
+use Illuminate\support\facades\route; // Added for consistency
 
 class ApplicationStatusUpdatedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
     private EmailApplication|LoanApplication|Model $application;
+
     private string $oldStatus;
+
     private string $newStatus;
 
     public function __construct(
@@ -60,16 +62,15 @@ class ApplicationStatusUpdatedNotification extends Notification implements Shoul
         $oldStatusDisplay = $this->getStatusLabel($this->application, $this->oldStatus);
         $newStatusDisplay = $this->getStatusLabel($this->application, $this->newStatus);
 
-
-        $mailMessage = (new MailMessage())
-          ->subject(__("Status :appType Anda Dikemaskini (#:appId)", ['appType' => $applicationTypeDisplay, 'appId' => $applicationId]))
-          ->greeting(__('Salam Sejahtera, :name,', ['name' => $applicantName]))
-          ->line(__("Status :appType anda telah dikemaskini dalam sistem.", ['appType' => $applicationTypeDisplay]))
-          ->line(__('**Nombor Rujukan Permohonan:** #:id', ['id' => $applicationId]))
-          ->line(__('**Ringkasan:** :summary', ['summary' => $applicationSummary]))
-          ->line(__('Status terdahulu: **:oldStatus**', ['oldStatus' => $oldStatusDisplay]))
-          ->line(__('Status terkini: **:newStatus**', ['newStatus' => $newStatusDisplay]))
-          ->line(__('Sila log masuk ke sistem untuk melihat butiran penuh permohonan anda.'));
+        $mailMessage = (new MailMessage)
+            ->subject(__('Status :appType Anda Dikemaskini (#:appId)', ['appType' => $applicationTypeDisplay, 'appId' => $applicationId]))
+            ->greeting(__('Salam Sejahtera, :name,', ['name' => $applicantName]))
+            ->line(__('Status :appType anda telah dikemaskini dalam sistem.', ['appType' => $applicationTypeDisplay]))
+            ->line(__('**Nombor Rujukan Permohonan:** #:id', ['id' => $applicationId]))
+            ->line(__('**Ringkasan:** :summary', ['summary' => $applicationSummary]))
+            ->line(__('Status terdahulu: **:oldStatus**', ['oldStatus' => $oldStatusDisplay]))
+            ->line(__('Status terkini: **:newStatus**', ['newStatus' => $newStatusDisplay]))
+            ->line(__('Sila log masuk ke sistem untuk melihat butiran penuh permohonan anda.'));
 
         $applicationUrl = '#';
         $routeParameters = [];
@@ -87,9 +88,9 @@ class ApplicationStatusUpdatedNotification extends Notification implements Shoul
             try {
                 $applicationUrl = route($routeName, $routeParameters);
             } catch (\Exception $e) {
-                Log::error('Error generating URL for ApplicationStatusUpdatedNotification mail: ' . $e->getMessage(), [
-                  'application_id' => $this->application->id ?? null,
-                  'route_name' => $routeName,
+                Log::error('Error generating URL for ApplicationStatusUpdatedNotification mail: '.$e->getMessage(), [
+                    'application_id' => $this->application->id ?? null,
+                    'route_name' => $routeName,
                 ]);
                 $applicationUrl = '#'; // Fallback
             }
@@ -139,32 +140,32 @@ class ApplicationStatusUpdatedNotification extends Notification implements Shoul
                         $applicationUrl = $generatedUrl;
                     }
                 } catch (\Exception $e) {
-                    Log::error('Error generating URL for ApplicationStatusUpdatedNotification toArray: ' . $e->getMessage(), [
-                      'application_id' => $applicationId,
-                      'route_name' => $routeName,
+                    Log::error('Error generating URL for ApplicationStatusUpdatedNotification toArray: '.$e->getMessage(), [
+                        'application_id' => $applicationId,
+                        'route_name' => $routeName,
                     ]);
                 }
             }
         }
 
         return [
-          'application_type_morph' => $applicationMorphClass,
-          'application_type_display' => $applicationTypeDisplay,
-          'application_id' => $applicationId,
-          'applicant_id' => $applicantId,
-          'subject' => __("Status :appType Dikemaskini (#:id)", ['appType' => $applicationTypeDisplay, 'id' => $applicationId ?? 'N/A']),
-          'message' => __("Status :appType anda (#:id) telah dikemaskini dari **:oldStatus** ke **:newStatus**.", [
-            'appType' => $applicationTypeDisplay,
-            'id' => $applicationId ?? 'N/A',
-            'oldStatus' => $oldStatusDisplay,
-            'newStatus' => $newStatusDisplay,
-          ]),
-          'url' => $applicationUrl,
-          'old_status_key' => $this->oldStatus,
-          'new_status_key' => $this->newStatus,
-          'old_status_display' => $oldStatusDisplay,
-          'new_status_display' => $newStatusDisplay,
-          'icon' => 'ti ti-refresh-alert', // Example icon
+            'application_type_morph' => $applicationMorphClass,
+            'application_type_display' => $applicationTypeDisplay,
+            'application_id' => $applicationId,
+            'applicant_id' => $applicantId,
+            'subject' => __('Status :appType Dikemaskini (#:id)', ['appType' => $applicationTypeDisplay, 'id' => $applicationId ?? 'N/A']),
+            'message' => __('Status :appType anda (#:id) telah dikemaskini dari **:oldStatus** ke **:newStatus**.', [
+                'appType' => $applicationTypeDisplay,
+                'id' => $applicationId ?? 'N/A',
+                'oldStatus' => $oldStatusDisplay,
+                'newStatus' => $newStatusDisplay,
+            ]),
+            'url' => $applicationUrl,
+            'old_status_key' => $this->oldStatus,
+            'new_status_key' => $this->newStatus,
+            'old_status_display' => $oldStatusDisplay,
+            'new_status_display' => $newStatusDisplay,
+            'icon' => 'ti ti-refresh-alert', // Example icon
         ];
     }
 
@@ -175,8 +176,10 @@ class ApplicationStatusUpdatedNotification extends Notification implements Shoul
     {
         if (method_exists($application, 'getStatusOptions') || property_exists($application, 'STATUS_OPTIONS')) {
             $options = $application::getStatusOptions(); // Assuming a static method or public static property
+
             return $options[$statusKey] ?? ucfirst(str_replace('_', ' ', $statusKey));
         }
+
         return ucfirst(str_replace('_', ' ', $statusKey));
     }
 }

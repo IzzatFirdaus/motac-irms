@@ -45,6 +45,7 @@ use Illuminate\Support\Facades\Schema;
  * @property-read \App\Models\User|null $creator
  * @property-read \App\Models\User|null $deleter
  * @property-read \App\Models\User|null $updater
+ *
  * @method static \Database\Factories\SettingFactory factory($count = null, $state = [])
  */
 class Setting extends Model
@@ -53,6 +54,7 @@ class Setting extends Model
     use SoftDeletes;
 
     protected const SETTINGS_CACHE_KEY = 'application_settings';
+
     protected $table = 'settings';
 
     protected $fillable = [
@@ -83,9 +85,10 @@ class Setting extends Model
         return Cache::rememberForever(self::SETTINGS_CACHE_KEY, function (): ?self {
             Log::debug('Cache miss for application settings. Fetching from database.');
             $settings = self::first();
-            if (!$settings) {
+            if (! $settings) {
                 Log::warning('Application settings record not found in database. Consider running SettingsSeeder.');
             }
+
             return $settings;
         });
     }
@@ -96,6 +99,7 @@ class Setting extends Model
         if ($settings && (property_exists($settings, $key) || array_key_exists($key, $settings->getAttributes()) || method_exists($settings, $key))) {
             return $settings->{$key} ?? $default;
         }
+
         return $default;
     }
 
@@ -104,9 +108,10 @@ class Setting extends Model
         DB::beginTransaction();
         try {
             $settings = self::firstOrNew([]);
-            if (!in_array($key, $settings->getFillable()) && !Schema::hasColumn($settings->getTable(), $key)) {
+            if (! in_array($key, $settings->getFillable()) && ! Schema::hasColumn($settings->getTable(), $key)) {
                 Log::error("Attempted to set unknown or non-fillable/non-column setting key: {$key}.");
                 DB::rollBack();
+
                 return false;
             }
             $settings->{$key} = $value;
@@ -119,6 +124,7 @@ class Setting extends Model
             } else {
                 Log::error("Failed to save setting '{$key}'.");
             }
+
             return $saved;
         } catch (\Throwable $e) {
             DB::rollBack();
@@ -130,12 +136,14 @@ class Setting extends Model
     public static function forget(string $key): bool
     {
         $settings = self::getSettingsRecord();
-        if (!$settings) {
+        if (! $settings) {
             Log::warning("Attempted to forget setting '{$key}', but no settings record exists.");
+
             return false;
         }
-        if (!in_array($key, $settings->getFillable()) && !Schema::hasColumn($settings->getTable(), $key)) {
+        if (! in_array($key, $settings->getFillable()) && ! Schema::hasColumn($settings->getTable(), $key)) {
             Log::warning("Attempted to forget unknown or non-fillable/non-column setting key: {$key}");
+
             return false;
         }
 
@@ -148,6 +156,7 @@ class Setting extends Model
         } else {
             Log::error("Failed to set setting '{$key}' to null.");
         }
+
         return $saved;
     }
 
@@ -158,17 +167,61 @@ class Setting extends Model
     }
 
     // Specific getters for new fields
-    public static function getApplicationName(): ?string { return self::get('application_name', 'MOTAC RMS'); }
-    public static function getDefaultSystemEmail(): ?string { return self::get('default_system_email'); }
-    public static function getDefaultLoanPeriodDays(): int { return (int) self::get('default_loan_period_days', 7); }
-    public static function getMaxLoanItemsPerApplication(): int { return (int) self::get('max_loan_items_per_application', 5); }
-    public static function getContactUsEmail(): ?string { return self::get('contact_us_email'); }
-    public static function isSystemInMaintenanceMode(): bool { return (bool) self::get('system_maintenance_mode', false); }
-    public static function getSystemMaintenanceMessage(): ?string { return self::get('system_maintenance_message'); }
+    public static function getApplicationName(): ?string
+    {
+        return self::get('application_name', 'MOTAC RMS');
+    }
 
-    public static function getSmsApiUsername(): ?string { $value = self::get('sms_api_username'); return is_string($value) || $value === null ? $value : null; }
-    public static function getSmsApiPassword(): ?string { $value = self::get('sms_api_password'); return is_string($value) || $value === null ? $value : null; }
-    public static function getSmsApiSender(): ?string { $value = self::get('sms_api_sender'); return is_string($value) || $value === null ? $value : null; }
+    public static function getDefaultSystemEmail(): ?string
+    {
+        return self::get('default_system_email');
+    }
+
+    public static function getDefaultLoanPeriodDays(): int
+    {
+        return (int) self::get('default_loan_period_days', 7);
+    }
+
+    public static function getMaxLoanItemsPerApplication(): int
+    {
+        return (int) self::get('max_loan_items_per_application', 5);
+    }
+
+    public static function getContactUsEmail(): ?string
+    {
+        return self::get('contact_us_email');
+    }
+
+    public static function isSystemInMaintenanceMode(): bool
+    {
+        return (bool) self::get('system_maintenance_mode', false);
+    }
+
+    public static function getSystemMaintenanceMessage(): ?string
+    {
+        return self::get('system_maintenance_message');
+    }
+
+    public static function getSmsApiUsername(): ?string
+    {
+        $value = self::get('sms_api_username');
+
+        return is_string($value) || $value === null ? $value : null;
+    }
+
+    public static function getSmsApiPassword(): ?string
+    {
+        $value = self::get('sms_api_password');
+
+        return is_string($value) || $value === null ? $value : null;
+    }
+
+    public static function getSmsApiSender(): ?string
+    {
+        $value = self::get('sms_api_sender');
+
+        return is_string($value) || $value === null ? $value : null;
+    }
 
     protected static function boot(): void
     {
@@ -184,9 +237,23 @@ class Setting extends Model
         });
     }
 
-    protected static function newFactory(): SettingFactory { return SettingFactory::new(); }
+    protected static function newFactory(): SettingFactory
+    {
+        return SettingFactory::new();
+    }
 
-    public function creator(): BelongsTo { return $this->belongsTo(User::class, 'created_by'); }
-    public function updater(): BelongsTo { return $this->belongsTo(User::class, 'updated_by'); }
-    public function deleter(): BelongsTo { return $this->belongsTo(User::class, 'deleted_by'); }
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function deleter(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deleted_by');
+    }
 }

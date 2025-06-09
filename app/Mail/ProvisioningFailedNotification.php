@@ -9,7 +9,6 @@ use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -25,15 +24,17 @@ final class ProvisioningFailedNotification extends Mailable implements ShouldQue
     use SerializesModels;
 
     public EmailApplication $application;
+
     public string $reason;
+
     public ?User $adminUser;
 
     /**
      * Create a new message instance.
      *
-     * @param \App\Models\EmailApplication $application The email application instance.
-     * @param string $reason The reason for the provisioning failure.
-     * @param \App\Models\User|null $adminUser The admin user associated with the provisioning attempt (optional).
+     * @param  \App\Models\EmailApplication  $application  The email application instance.
+     * @param  string  $reason  The reason for the provisioning failure.
+     * @param  \App\Models\User|null  $adminUser  The admin user associated with the provisioning attempt (optional).
      */
     public function __construct(EmailApplication $application, string $reason, ?User $adminUser = null)
     {
@@ -57,9 +58,9 @@ final class ProvisioningFailedNotification extends Mailable implements ShouldQue
         $applicationId = $this->application->id ?? 'N/A';
         $applicantName = $this->application->user?->name ?? 'Pemohon Tidak Diketahui'; // Relies on 'user' being loaded
 
-        $subject = __('Pemberitahuan Gagal Peruntukan E-mel: Permohonan #') .
-                   $applicationId .
-                   __(' oleh ') .
+        $subject = __('Pemberitahuan Gagal Peruntukan E-mel: Permohonan #').
+                   $applicationId.
+                   __(' oleh ').
                    $applicantName;
 
         Log::info('ProvisioningFailedNotification Mailable: Preparing envelope.', [
@@ -72,7 +73,7 @@ final class ProvisioningFailedNotification extends Mailable implements ShouldQue
             tags: [
                 'email-provisioning',
                 'failed',
-                'application-' . $applicationId,
+                'application-'.$applicationId,
             ],
             metadata: [
                 'application_id' => (string) $applicationId,

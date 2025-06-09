@@ -13,21 +13,33 @@ class EquipmentForm extends Component
     public ?Equipment $equipmentInstance = null;
 
     public string $asset_type = '';
+
     public string $brand = '';
+
     public string $model_name = ''; // Using model_name to avoid conflict with Eloquent's internal $model
+
     public string $serial_number = '';
+
     public string $tag_id = '';
+
     public ?string $purchase_date = null;
+
     public ?string $warranty_expiry_date = null;
+
     public string $status = '';
+
     public string $current_location = '';
+
     public string $notes = '';
+
     public string $condition_status = '';
 
     public bool $isEditing = false;
 
     public array $assetTypeOptions = [];
+
     public array $statusOptions = [];
+
     public array $conditionStatusOptions = [];
 
     public function mount(?int $equipmentId = null): void
@@ -41,7 +53,7 @@ class EquipmentForm extends Component
             $this->isEditing = true;
             $this->populateFields();
         } else {
-            $this->equipmentInstance = new Equipment();
+            $this->equipmentInstance = new Equipment;
             // Set default values from Equipment model attributes or manually
             $this->status = $this->equipmentInstance->getAttributes()['status'] ?? Equipment::STATUS_AVAILABLE; //
             $this->condition_status = $this->equipmentInstance->getAttributes()['condition_status'] ?? Equipment::CONDITION_NEW; //
@@ -121,7 +133,7 @@ class EquipmentForm extends Component
         $this->resetValidation();
         $this->resetExcept('assetTypeOptions', 'statusOptions', 'conditionStatusOptions');
         $this->isEditing = false;
-        $this->equipmentInstance = new Equipment();
+        $this->equipmentInstance = new Equipment;
         $this->status = $this->equipmentInstance->getAttributes()['status'] ?? Equipment::STATUS_AVAILABLE; //
         $this->condition_status = $this->equipmentInstance->getAttributes()['condition_status'] ?? Equipment::CONDITION_NEW; //
     }

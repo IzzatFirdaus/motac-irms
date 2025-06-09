@@ -39,8 +39,8 @@ final class EmailApplicationReadyForProcessingNotification extends Notification 
         $purposeOrNotes = $this->emailApplication->application_reason_notes ?? __('Tiada Tujuan Dinyatakan');
         $applicationId = $this->emailApplication->id ?? 'N/A';
 
-        $mailMessage = (new MailMessage())
-            ->subject(__("Permohonan E-mel Baru Diluluskan & Sedia Untuk Penyediaan (#:id)", ['id' => $applicationId]))
+        $mailMessage = (new MailMessage)
+            ->subject(__('Permohonan E-mel Baru Diluluskan & Sedia Untuk Penyediaan (#:id)', ['id' => $applicationId]))
             ->greeting(__('Salam Pentadbir ICT,')) // Changed greeting to be more specific
             ->line(__('Terdapat permohonan akaun e-mel ICT MOTAC baru yang telah diluluskan dan sedia untuk proses penyediaan (provisioning).'))
             ->line(__('**Nombor Rujukan Permohonan:** #:id', ['id' => $applicationId]))
@@ -65,7 +65,6 @@ final class EmailApplicationReadyForProcessingNotification extends Notification 
             }
         }
 
-
         if ($adminApplicationUrl !== '#') {
             $mailMessage->action(__('Lihat Permohonan'), $adminApplicationUrl);
         }
@@ -83,7 +82,7 @@ final class EmailApplicationReadyForProcessingNotification extends Notification 
         $adminRouteName = 'admin.email-applications.show'; // Standardized admin route
         if ($applicationId !== null && Route::has($adminRouteName)) {
             try {
-                 $generatedUrl = route($adminRouteName, ['email_application' => $applicationId]); // Pass correct param name
+                $generatedUrl = route($adminRouteName, ['email_application' => $applicationId]); // Pass correct param name
                 if (filter_var($generatedUrl, FILTER_VALIDATE_URL)) {
                     $adminApplicationUrl = $generatedUrl;
                 }
@@ -101,8 +100,8 @@ final class EmailApplicationReadyForProcessingNotification extends Notification 
             'application_id' => $applicationId,
             'applicant_id' => $applicantId,
             'applicant_name' => $applicantName,
-            'subject' => __("Permohonan E-mel Sedia Untuk Penyediaan (#:id)", ['id' => $applicationId ?? 'N/A']),
-            'message' => __("Permohonan E-mel ICT (#:id) oleh :name sedia untuk penyediaan.", ['id' => $applicationId ?? 'N/A', 'name' => $applicantName]),
+            'subject' => __('Permohonan E-mel Sedia Untuk Penyediaan (#:id)', ['id' => $applicationId ?? 'N/A']),
+            'message' => __('Permohonan E-mel ICT (#:id) oleh :name sedia untuk penyediaan.', ['id' => $applicationId ?? 'N/A', 'name' => $applicantName]),
             'url' => $adminApplicationUrl,
             'status_key' => 'ready_for_processing', // Changed 'status' to 'status_key' for consistency
             'icon' => 'ti ti-mail-forward',

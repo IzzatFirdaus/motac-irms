@@ -16,14 +16,12 @@ class AllowAdminDuringMaintenance
      * Allows users with specific roles to access the application during maintenance mode.
      * System Design Reference: 3.1 Custom Middleware
      *
-     * @param  \Illuminate\Http\Request  $request
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function handle(Request $request, Closure $next): Response
     {
         if (app()->isDownForMaintenance()) {
-            if (!Auth::check()) {
+            if (! Auth::check()) {
                 // If not logged in during maintenance, redirect to login
                 // Ensure your login route is accessible or explicitly allowed.
                 return redirect()->route('login'); // Assuming 'login' is your named login route

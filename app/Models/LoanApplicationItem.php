@@ -10,8 +10,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+
 // Removed direct import of LoanTransaction as it's used via $transactionItem->loanTransaction
 // Ensure LoanTransactionItem is correctly aliased or used if its constants are directly accessed here.
 // use App\Models\LoanTransactionItem as TransactionItemModel; // Already aliased in original
@@ -35,7 +36,6 @@ use Illuminate\Support\Facades\DB;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- *
  * @property-read LoanApplication $loanApplication
  * @property-read \Illuminate\Database\Eloquent\Collection|LoanTransactionItem[] $loanTransactionItems
  * @property-read string $status_label
@@ -47,12 +47,19 @@ class LoanApplicationItem extends Model
 
     // Constants based on the ENUM values in the migration
     public const STATUS_PENDING_APPROVAL = 'pending_approval';
+
     public const STATUS_ITEM_APPROVED = 'item_approved';
+
     public const STATUS_ITEM_REJECTED = 'item_rejected';
+
     public const STATUS_AWAITING_ISSUANCE = 'awaiting_issuance';
+
     public const STATUS_FULLY_ISSUED = 'fully_issued';
+
     public const STATUS_PARTIALLY_ISSUED = 'partially_issued';
+
     public const STATUS_FULLY_RETURNED = 'fully_returned';
+
     public const STATUS_ITEM_CANCELLED = 'item_cancelled';
 
     public const ITEM_STATUS_LABELS = [
@@ -156,7 +163,7 @@ class LoanApplicationItem extends Model
                     is_array(LoanTransactionItem::$RETURN_APPLICABLE_STATUSES) && //
                     in_array($transactionItem->status, LoanTransactionItem::$RETURN_APPLICABLE_STATUSES) //
                 ) {
-                    if (!in_array($transactionItem->status, [LoanTransactionItem::STATUS_ITEM_REPORTED_LOST])) { //
+                    if (! in_array($transactionItem->status, [LoanTransactionItem::STATUS_ITEM_REPORTED_LOST])) { //
                         $returnedQty += $transactionItem->quantity_transacted;
                     }
                 }

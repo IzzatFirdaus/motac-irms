@@ -1,10 +1,10 @@
 <?php
 
 return [
-
   'ict_loan_form_title' => 'BORANG PERMOHONAN PEMINJAMAN PERALATAN ICT UNTUK KEGUNAAN RASMI',
   'bpm_office_display' => 'Bahagian Pengurusan Maklumat',
   'date_application_received_label' => 'TARIKH BORANG PERMOHONAN LENGKAP DITERIMA',
+  'text_form_ref_no' => 'No. Rujukan Borang: PK.(S).MOTAC.07.(L3)',
 
   'section_applicant_info_ict' => 'BAHAGIAN 1 | MAKLUMAT PEMOHON',
   'label_full_name' => 'Nama Penuh*',
@@ -12,19 +12,29 @@ return [
   'label_department_unit' => 'Bahagian/Unit*',
   'label_application_purpose' => 'Tujuan Permohonan*',
   'label_phone_number' => 'No.Telefon*',
-  'label_location_ict' => 'Lokasi*',
+  'label_location_ict' => 'Lokasi (Penggunaan)*',
   'label_loan_date' => 'Tarikh Pinjaman*',
   'label_expected_return_date' => 'Tarikh Dijangka Pulang*',
+  'label_expected_return_location' => 'Lokasi Dijangka Pulang',
 
   'section_responsible_officer_info' => 'BAHAGIAN 2 | MAKLUMAT PEGAWAI BERTANGGUNGJAWAB',
   'instruction_responsible_officer_is_applicant' => 'Sila tandakan jika Pemohon adalah Pegawai Bertanggungjawab.',
   'instruction_responsible_officer_different' => 'Bahagian ini hanya perlu diisi jika Pegawai Bertanggungjawab bukan Pemohon.',
+  'label_responsible_officer_name' => 'Nama Penuh Pegawai Bertanggungjawab',
+  'placeholder_select_responsible_officer' => 'Pilih Pegawai Bertanggungjawab',
 
   'section_equipment_details_ict' => 'BAHAGIAN 3 | MAKLUMAT PERALATAN',
   'table_header_bil' => 'Bil.',
   'table_header_equipment_type' => 'Jenis Peralatan',
   'table_header_quantity' => 'Kuantiti',
   'table_header_remarks' => 'Catatan',
+  'title_equipment_item' => 'Peralatan #:index',
+  'label_equipment_type' => 'Jenis Peralatan',
+  'placeholder_select_type' => 'Pilih Jenis',
+  'label_quantity' => 'Kuantiti',
+  'label_remarks' => 'Catatan',
+  'placeholder_equipment_remarks' => 'Cth: Model spesifik, perisian khas, dll.',
+  'text_no_equipment_added' => 'Sila tambah sekurang-kurangnya satu item peralatan.',
 
   'section_applicant_confirmation_ict' => 'BAHAGIAN 4 | PENGESAHAN PEMOHON (PEGAWAI BERTANGGUNGJAWAB)',
   'text_applicant_declaration_ict' => 'Saya dengan ini mengesahkan dan memperakukan bahawa semua peralatan yang dipinjam adalah untuk kegunaan rasmi dan berada di bawah tanggungjawab dan penyeliaan saya sepanjang tempoh tersebut;',
@@ -52,12 +62,11 @@ return [
   'table_header_accessories' => 'AKSESORI',
   'checkbox_power_adapter' => 'Power Adapter',
   'checkbox_bag' => 'Beg',
-  'checkbox_mouse' => 'Mouse',
+  'checkbox_mouse' => 'Tetikus',
   'checkbox_usb_cable' => 'Kabel USB',
   'checkbox_hdmi_vga_cable' => 'Kabel HDMI/VGA',
-  'checkbox_remote' => 'Remote',
+  'checkbox_remote' => 'Alat Kawalan Jauh',
   'checkbox_others_specify' => 'Lain-lain. Nyatakan :',
-
 
   'email_user_id_application_title' => 'Permohonan Emel & ID Pengguna MOTAC',
   'section_applicant_declaration_email' => 'PERAKUAN PEMOHON',
@@ -85,7 +94,7 @@ return [
   'label_nric_no' => 'No. Kad Pengenalan:*',
   'label_passport_no' => 'No. Pasport/Staff:*',
   'placeholder_nric_example' => 'Contoh: 800707-02-5044',
-  'label_grade' => 'Gred:',
+  'label_grade' => 'Gred',
   'placeholder_select_grade' => '- Pilih Gred -',
   'label_position' => 'Jawatan',
   'placeholder_select_position' => '- Pilih Jawatan -',
@@ -96,62 +105,62 @@ return [
   'label_mobile_number' => 'No. Telefon Bimbit:*',
   'label_personal_email' => 'E-mel Peribadi',
   'placeholder_personal_email_example' => 'Contoh: annisanwari@gmail.com',
-  'label_group_email' => 'Group Email:',
+  'label_group_email' => 'E-mel Kumpulan',
   'placeholder_group_email_example' => 'Contoh: group all, groupunit',
   'label_previous_department_name' => 'Jabatan Terdahulu',
   'label_previous_department_email' => 'E-mel Rasmi Jabatan Terdahulu',
 
-  'label_contact_person_name_admin_eo_cc' => 'Nama Admin/EO/CC:',
+  'label_contact_person_name_admin_eo_cc' => 'Nama Admin/EO/CC',
   'placeholder_contact_person_name_example' => 'Contoh: Rashid Bin Sardi',
-  'label_contact_person_email_admin_eo_cc' => 'E-mel Admin/EO/CC:',
+  'label_contact_person_email_admin_eo_cc' => 'E-mel Admin/EO/CC',
   'placeholder_contact_person_email_example' => 'Contoh: rashid@motac.gov.my',
-  'label_proposed_id_email_reason' => 'Cadangan ID/E-mel Tujuan/Catatan:',
+  'label_proposed_id_email_reason' => 'Cadangan ID/E-mel Tujuan/Catatan',
   'placeholder_proposed_id_email_reason_example' => 'Contoh: annis@motac.gov.my/ Permohonan bagi Pegawai baharu bertukar masuk',
+  'label_proposed_email' => 'E-mel Cadangan',
 
   'section_supporting_officer_info' => 'MAKLUMAT PEGAWAI PENYOKONG',
-  'label_supporter_name' => 'Nama:',
+  'label_supporter_name' => 'Nama',
   'placeholder_supporter_name_example' => 'Contoh: Nur Faridah Jasni',
-  'label_supporter_email' => 'E-mel:',
+  'label_supporter_email' => 'E-mel',
   'placeholder_supporter_email_example' => 'Contoh: nur.faridah@motac.gov.my',
-  'label_supporter_grade' => 'Gred:',
+  'label_supporter_grade' => 'Gred',
+  'label_supporting_officer_name' => 'Nama Penuh Pegawai Penyokong',
+  'placeholder_select_supporting_officer' => 'Pilih Pegawai Penyokong',
+  'text_supporter_grade_requirement' => 'Pegawai Penyokong mestilah sekurang-kurangnya Gred :grade atau setara.',
 
   'service_status_options' => [
-    '' => '- Pilih Taraf Perkhidmatan -',
-    'tetap' => 'Tetap',
-    'lantikan_kontrak_mystep' => 'Lantikan Kontrak / MyStep',
-    'pelajar_latihan_industri' => 'Pelajar Latihan Industri (Ibu Pejabat Sahaja)',
-    'other_agency_existing_mailbox' => 'Bertugas di MOTAC (Mailbox Agensi Utama)',
+      '' => '- Pilih Taraf Perkhidmatan -',
+      'tetap' => 'Tetap',
+      'lantikan_kontrak_mystep' => 'Lantikan Kontrak / MyStep',
+      'pelajar_latihan_industri' => 'Pelajar Latihan Industri (Ibu Pejabat Sahaja)',
+      'other_agency_existing_mailbox' => 'Bertugas di MOTAC (Mailbox Agensi Utama)',
   ],
-
   'appointment_type_options' => [
-    '' => '- Pilih Pelantikan -',
-    'baharu' => 'Baharu',
-    'kenaikan_pangkat_pertukaran' => 'Kenaikan Pangkat/Pertukaran',
-    'lain_lain' => 'Lain-lain',
+      '' => '- Pilih Pelantikan -',
+      'baharu' => 'Baharu',
+      'kenaikan_pangkat_pertukaran' => 'Kenaikan Pangkat/Pertukaran',
+      'lain_lain' => 'Lain-lain',
   ],
-
   'position_options_example' => [
-    '' => '- Pilih Jawatan -',
-    '1' => 'Menteri',
-    '21' => 'Pegawai Teknologi Maklumat (F)',
+      '' => '- Pilih Jawatan -',
+      '1' => 'Menteri',
+      '21' => 'Pegawai Teknologi Maklumat (F)',
   ],
-
   'grade_options_example' => [
-    '' => '- Pilih Gred -',
-    '9' => '9 (41)',
-    '41' => '41',
+      '' => '- Pilih Gred -',
+      '9' => '9 (41)',
+      '41' => '41',
   ],
-
   'department_options_example' => [
-    '' => '- Pilih MOTAC Negeri/Bahagian/Unit -',
-    '18' => 'Pengurusan Maklumat',
+      '' => '- Pilih MOTAC Negeri/Bahagian/Unit -',
+      '18' => 'Pengurusan Maklumat',
+  ],
+  'level_options' => [
+      '' => '-Pilih Aras -',
+      '1' => '1',
+      '2' => '2',
   ],
 
-  'level_options' => [
-    '' => '-Pilih Aras -',
-    '1' => '1',
-    '2' => '2',
-  ],
   'label_service_start_date' => 'Tarikh Mula Berkhidmat',
   'label_service_end_date' => 'Tarikh Akhir Berkhidmat',
   'label_address' => 'Alamat',
@@ -161,7 +170,7 @@ return [
   'label_center' => 'Pusat',
   'label_contract_id' => 'ID Kontrak',
   'label_degree' => 'Ijazah',
-  'label_employee' => 'Pekerja',
+  'label_employee' => 'Kakitangan',
   'label_expected_price' => 'Harga Dijangka',
   'label_father_name' => 'Nama Bapa',
   'label_first_name' => 'Nama Pertama',
@@ -170,7 +179,7 @@ return [
   'label_id' => 'ID',
   'label_last_name' => 'Nama Akhir',
   'label_mother_name' => 'Nama Ibu',
-  'label_national_number' => 'Nombor Nasional',
+  'label_national_number' => 'Nombor Kad Pengenalan',
   'label_old_id' => 'ID Lama',
   'label_password' => 'Kata Laluan',
   'label_quit_date' => 'Tarikh berhenti',
@@ -182,53 +191,36 @@ return [
   'label_sub_category' => 'Sub-Kategori',
   'label_birth_place' => 'Tempat Kelahiran',
   'label_select_gender' => 'Pilih Jantina',
+  'label_select_decision' => '-- Pilih Keputusan --',
+  'label_application_id_display' => 'ID Permohonan',
+  'label_qty' => 'Kuantiti',
+
   'placeholder_select_dot' => 'Pilih..',
   'search_id_category' => 'Cari (ID, Kategori...)',
   'search_id_name' => 'Cari (ID, Nama...)',
   'search_id_old_id_serial' => 'Cari (ID, ID Lama, Nombor Siri...)',
   'search_id_sub_category' => 'Cari (ID, Sub-Kategori...)',
   'search_placeholder' => 'Cari...',
+  'search_application_placeholder' => 'Cari (ID, Emel Cadangan, Tujuan)',
+  'search_enter_keywords' => 'Masukkan kata kunci...',
+  'search_by_id_purpose_applicant' => 'Cari mengikut ID, tujuan, pemohon...',
 
-  // Loan Application - Responsible/Supporting Officers
-  'label_responsible_officer_name' => 'Nama Penuh Pegawai Bertanggungjawab',
-  'placeholder_select_responsible_officer' => 'Pilih Pegawai Bertanggungjawab',
-  'label_supporting_officer_name' => 'Nama Penuh Pegawai Penyokong',
-  'placeholder_select_supporting_officer' => 'Pilih Pegawai Penyokong',
-  'text_supporter_grade_requirement' => 'Pegawai Penyokong mestilah sekurang-kurangnya Gred :grade atau setara.',
-
-  // Loan Application - Equipment Items
-  'title_equipment_item' => 'Peralatan #:index',
-  'label_equipment_type' => 'Jenis Peralatan',
-  'placeholder_select_type' => 'Pilih Jenis',
-  'label_quantity' => 'Kuantiti',
-  'label_remarks' => 'Catatan',
-  'placeholder_equipment_remarks' => 'Cth: Model spesifik, perisian khas, dll.',
-  'text_no_equipment_added' => 'Sila tambah sekurang-kurangnya satu item peralatan.',
-
-  // Equipment Type Options
-  'option_equipment_laptop' => 'Komputer Riba',
-  'option_equipment_projector' => 'Projektor',
-  'option_equipment_printer' => 'Pencetak',
-  'option_equipment_desktop' => 'Komputer Meja',
-  'option_equipment_monitor' => 'Monitor',
-  'option_equipment_other' => 'Lain-lain Peralatan ICT',
-
-  // Placeholders for ICT Loan Form
   'placeholder_phone_number' => 'Cth: 012-3456789',
   'placeholder_purpose' => 'Nyatakan tujuan permohonan peralatan ICT...',
   'placeholder_usage_location' => 'Cth: Bilik Mesyuarat Utama, Aras 10',
   'placeholder_return_location' => 'Cth: Kaunter BPM (Jika berbeza)',
 
-  // Corrected Equipment Type Options
-  'option_equipment_desktop_pc' => 'Komputer Meja',
-  'option_equipment_other_ict' => 'Lain-lain Peralatan ICT',
-
-  // Form header
-  'text_form_ref_no' => 'No. Rujukan Borang: PK.(S).MOTAC.07.(L3)',
-
-  // Form Footer Information
-  'text_document_no' => 'No. Dokumen:',
   'text_effective_date' => 'Tarikh Kuatkuasa:',
+  'text_document_no' => 'No. Dokumen:',
 
-  'label_expected_return_location' => 'Lokasi Dijangka Pulang',
+  'title_new_application_ict' => 'Permohonan Pinjaman Peralatan ICT Baharu',
+  'title_edit_application_ict' => 'Sunting Permohonan Pinjaman Peralatan ICT',
+  'button_update_and_resubmit' => 'Kemaskini & Hantar Semula',
+
+  'option_equipment_laptop' => 'Komputer Riba',
+  'option_equipment_projector' => 'Projektor',
+  'option_equipment_printer' => 'Pencetak',
+  'option_equipment_desktop_pc' => 'Komputer Meja',
+  'option_equipment_monitor' => 'Monitor',
+  'option_equipment_other_ict' => 'Lain-lain Peralatan ICT',
 ];

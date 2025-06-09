@@ -54,31 +54,31 @@ final class EquipmentService
         }
 
         // Apply filters
-        if (!empty($filters['status']) && $filters['status'] !== 'all') {
+        if (! empty($filters['status']) && $filters['status'] !== 'all') {
             $query->where('status', $filters['status']);
         }
-        if (!empty($filters['condition_status']) && $filters['condition_status'] !== 'all') {
+        if (! empty($filters['condition_status']) && $filters['condition_status'] !== 'all') {
             $query->where('condition_status', $filters['condition_status']);
         }
-        if (!empty($filters['asset_type']) && $filters['asset_type'] !== 'all') {
+        if (! empty($filters['asset_type']) && $filters['asset_type'] !== 'all') {
             $query->where('asset_type', $filters['asset_type']);
         }
-        if (!empty($filters['location_id'])) {
+        if (! empty($filters['location_id'])) {
             $query->where('location_id', $filters['location_id']);
         }
-        if (!empty($filters['department_id'])) {
+        if (! empty($filters['department_id'])) {
             $query->where('department_id', $filters['department_id']);
         }
-        if (!empty($filters['classification']) && $filters['classification'] !== 'all') {
+        if (! empty($filters['classification']) && $filters['classification'] !== 'all') {
             $query->where('classification', $filters['classification']);
         }
-        if (!empty($filters['acquisition_type']) && $filters['acquisition_type'] !== 'all') {
+        if (! empty($filters['acquisition_type']) && $filters['acquisition_type'] !== 'all') {
             $query->where('acquisition_type', $filters['acquisition_type']);
         }
 
         // Apply search term across multiple fields
         if (isset($filters['search']) && is_string($filters['search']) && trim($filters['search']) !== '') {
-            $searchTerm = '%' . trim($filters['search']) . '%';
+            $searchTerm = '%'.trim($filters['search']).'%';
             $query->where(function ($q) use ($searchTerm): void {
                 // Assuming 'name' field might exist in future or is contextually relevant for search.
                 // If 'name' is not on equipment model, remove it or alias to a searchable field like 'item_code' or 'description'.
@@ -129,7 +129,7 @@ final class EquipmentService
      */
     public function findEquipmentById(int $id, array $with = []): ?Equipment
     {
-        Log::debug(self::LOG_AREA . ' findEquipmentById called', ['id' => $id, 'with' => $with]);
+        Log::debug(self::LOG_AREA.' findEquipmentById called', ['id' => $id, 'with' => $with]);
         // Default relations typically needed when viewing a single equipment item
         // MODIFIED: Removed 'grade' as it's not defined on Equipment model
         $defaultWith = [
@@ -140,22 +140,23 @@ final class EquipmentService
             // 'grade', // Removed
             'creator',
             'updater',
-            'loanTransactionItems.loanTransaction' // This assumes LoanTransactionItem has a loanTransaction relationship
+            'loanTransactionItems.loanTransaction', // This assumes LoanTransactionItem has a loanTransaction relationship
         ];
         $finalWith = array_unique(array_merge($defaultWith, $with));
 
         $query = Equipment::query(); // Start a new query
 
-        if (!empty($finalWith)) {
+        if (! empty($finalWith)) {
             $query->with($finalWith);
         }
 
         /** @var Equipment|null $equipment */
         $equipment = $query->find($id); // find() should be called on the query builder
 
-        if (!$equipment) {
-            Log::notice(self::LOG_AREA . " Equipment with ID {$id} not found.");
+        if (! $equipment) {
+            Log::notice(self::LOG_AREA." Equipment with ID {$id} not found.");
         }
+
         return $equipment;
     }
 
@@ -165,22 +166,24 @@ final class EquipmentService
      *
      * @param  array<string, mixed>  $data  Validated data for creating equipment.
      * @return Equipment The newly created equipment model.
+     *
      * @throws RuntimeException If creation fails.
      */
     public function createEquipment(array $data): Equipment
     {
-        Log::info(self::LOG_AREA . ' Attempting to create equipment.', ['data_keys' => array_keys($data)]);
+        Log::info(self::LOG_AREA.' Attempting to create equipment.', ['data_keys' => array_keys($data)]);
         DB::beginTransaction();
         try {
             /** @var Equipment $equipment */
             $equipment = Equipment::create($data);
             DB::commit();
-            Log::info(self::LOG_AREA . ' Equipment created successfully.', ['equipment_id' => $equipment->id]);
+            Log::info(self::LOG_AREA.' Equipment created successfully.', ['equipment_id' => $equipment->id]);
+
             return $equipment;
         } catch (Throwable $e) {
             DB::rollBack();
-            Log::error(self::LOG_AREA . ' Failed to create equipment: ' . $e->getMessage(), ['exception_class' => get_class($e), 'trace_snippet' => substr($e->getTraceAsString(), 0, 500), 'data' => $data]);
-            throw new RuntimeException(__('Gagal mencipta item peralatan: ') . $e->getMessage(), 0, $e);
+            Log::error(self::LOG_AREA.' Failed to create equipment: '.$e->getMessage(), ['exception_class' => get_class($e), 'trace_snippet' => substr($e->getTraceAsString(), 0, 500), 'data' => $data]);
+            throw new RuntimeException(__('Gagal mencipta item peralatan: ').$e->getMessage(), 0, $e);
         }
     }
 
@@ -191,21 +194,23 @@ final class EquipmentService
      * @param  Equipment  $equipment  The equipment model instance to update.
      * @param  array<string, mixed>  $data  Validated data for updating equipment.
      * @return bool True if update was successful, false otherwise.
+     *
      * @throws RuntimeException If update fails.
      */
     public function updateEquipment(Equipment $equipment, array $data): bool
     {
-        Log::info(self::LOG_AREA . ' Attempting to update equipment.', ['equipment_id' => $equipment->id, 'data_keys' => array_keys($data)]);
+        Log::info(self::LOG_AREA.' Attempting to update equipment.', ['equipment_id' => $equipment->id, 'data_keys' => array_keys($data)]);
         DB::beginTransaction();
         try {
             $updated = $equipment->update($data);
             DB::commit();
-            Log::info(self::LOG_AREA . ' Equipment ID ' . $equipment->id . ' update status: ' . ($updated ? 'Success' : 'No changes or failed'));
+            Log::info(self::LOG_AREA.' Equipment ID '.$equipment->id.' update status: '.($updated ? 'Success' : 'No changes or failed'));
+
             return $updated;
         } catch (Throwable $e) {
             DB::rollBack();
-            Log::error(self::LOG_AREA . ' Failed to update equipment ID ' . $equipment->id . ': ' . $e->getMessage(), ['exception_class' => get_class($e), 'trace_snippet' => substr($e->getTraceAsString(), 0, 500), 'data' => $data]);
-            throw new RuntimeException(__('Gagal mengemaskini item peralatan: ') . $e->getMessage(), 0, $e);
+            Log::error(self::LOG_AREA.' Failed to update equipment ID '.$equipment->id.': '.$e->getMessage(), ['exception_class' => get_class($e), 'trace_snippet' => substr($e->getTraceAsString(), 0, 500), 'data' => $data]);
+            throw new RuntimeException(__('Gagal mengemaskini item peralatan: ').$e->getMessage(), 0, $e);
         }
     }
 
@@ -215,13 +220,14 @@ final class EquipmentService
      *
      * @param  Equipment  $equipment  The equipment model instance to delete.
      * @return bool True if soft delete was successful.
+     *
      * @throws RuntimeException If deletion is not allowed (e.g., on loan) or fails.
      */
     public function deleteEquipment(Equipment $equipment): bool
     {
-        Log::info(self::LOG_AREA . ' Attempting to soft delete equipment.', ['equipment_id' => $equipment->id, 'current_status' => $equipment->status]);
+        Log::info(self::LOG_AREA.' Attempting to soft delete equipment.', ['equipment_id' => $equipment->id, 'current_status' => $equipment->status]);
         if ($equipment->status === Equipment::STATUS_ON_LOAN) {
-            Log::warning(self::LOG_AREA . " Attempt to delete equipment ID {$equipment->id} that is currently on loan.");
+            Log::warning(self::LOG_AREA." Attempt to delete equipment ID {$equipment->id} that is currently on loan.");
             throw new RuntimeException(__('Tidak boleh memadam peralatan yang sedang dalam pinjaman. Sila pastikan peralatan telah dipulangkan terlebih dahulu.'));
         }
 
@@ -229,12 +235,13 @@ final class EquipmentService
         try {
             $deleted = $equipment->delete();
             DB::commit();
-            Log::info(self::LOG_AREA . ' Equipment ID ' . $equipment->id . ' soft deleted status: ' . ($deleted ? 'Success' : 'Failed'));
+            Log::info(self::LOG_AREA.' Equipment ID '.$equipment->id.' soft deleted status: '.($deleted ? 'Success' : 'Failed'));
+
             return (bool) $deleted;
         } catch (Throwable $e) {
             DB::rollBack();
-            Log::error(self::LOG_AREA . ' Failed to soft delete equipment ID ' . $equipment->id . ': ' . $e->getMessage(), ['exception_class' => get_class($e), 'trace_snippet' => substr($e->getTraceAsString(), 0, 500)]);
-            throw new RuntimeException(__('Gagal memadam item peralatan: ') . $e->getMessage(), 0, $e);
+            Log::error(self::LOG_AREA.' Failed to soft delete equipment ID '.$equipment->id.': '.$e->getMessage(), ['exception_class' => get_class($e), 'trace_snippet' => substr($e->getTraceAsString(), 0, 500)]);
+            throw new RuntimeException(__('Gagal memadam item peralatan: ').$e->getMessage(), 0, $e);
         }
     }
 
@@ -244,17 +251,18 @@ final class EquipmentService
      */
     public function restoreEquipment(Equipment $equipment): bool
     {
-        Log::info(self::LOG_AREA . ' Attempting to restore equipment.', ['equipment_id' => $equipment->id]);
+        Log::info(self::LOG_AREA.' Attempting to restore equipment.', ['equipment_id' => $equipment->id]);
         DB::beginTransaction();
         try {
             $restored = $equipment->restore();
             DB::commit();
-            Log::info(self::LOG_AREA . ' Equipment ID ' . $equipment->id . ' restored status: ' . ($restored ? 'Success' : 'Failed/No action'));
+            Log::info(self::LOG_AREA.' Equipment ID '.$equipment->id.' restored status: '.($restored ? 'Success' : 'Failed/No action'));
+
             return (bool) $restored;
         } catch (Throwable $e) {
             DB::rollBack();
-            Log::error(self::LOG_AREA . ' Failed to restore equipment ID ' . $equipment->id . ': ' . $e->getMessage(), ['exception_class' => get_class($e), 'trace_snippet' => substr($e->getTraceAsString(), 0, 500)]);
-            throw new RuntimeException(__('Gagal memulihkan item peralatan: ') . $e->getMessage(), 0, $e);
+            Log::error(self::LOG_AREA.' Failed to restore equipment ID '.$equipment->id.': '.$e->getMessage(), ['exception_class' => get_class($e), 'trace_snippet' => substr($e->getTraceAsString(), 0, 500)]);
+            throw new RuntimeException(__('Gagal memulihkan item peralatan: ').$e->getMessage(), 0, $e);
         }
     }
 
@@ -263,9 +271,9 @@ final class EquipmentService
      */
     public function forceDeleteEquipment(Equipment $equipment): bool
     {
-        Log::warning(self::LOG_AREA . ' Attempting to FORCE DELETE equipment.', ['equipment_id' => $equipment->id]);
+        Log::warning(self::LOG_AREA.' Attempting to FORCE DELETE equipment.', ['equipment_id' => $equipment->id]);
         if ($equipment->loanTransactionItems()->exists()) {
-             Log::error(self::LOG_AREA . " Attempt to FORCE DELETE equipment ID {$equipment->id} that has loan history.");
+            Log::error(self::LOG_AREA." Attempt to FORCE DELETE equipment ID {$equipment->id} that has loan history.");
             throw new RuntimeException(__('Tidak boleh memadam peralatan ini secara kekal kerana ia mempunyai sejarah transaksi pinjaman.'));
         }
 
@@ -273,12 +281,13 @@ final class EquipmentService
         try {
             $forceDeleted = $equipment->forceDelete();
             DB::commit();
-            Log::info(self::LOG_AREA . ' Equipment ID ' . $equipment->id . ' FORCE DELETED status: ' . ($forceDeleted ? 'Success' : 'Failed'));
+            Log::info(self::LOG_AREA.' Equipment ID '.$equipment->id.' FORCE DELETED status: '.($forceDeleted ? 'Success' : 'Failed'));
+
             return (bool) $forceDeleted;
         } catch (Throwable $e) {
             DB::rollBack();
-            Log::error(self::LOG_AREA . ' Failed to force delete equipment ID ' . $equipment->id . ': ' . $e->getMessage(), ['exception_class' => get_class($e), 'trace_snippet' => substr($e->getTraceAsString(), 0, 500)]);
-            throw new RuntimeException(__('Gagal memadam item peralatan secara kekal: ') . $e->getMessage(), 0, $e);
+            Log::error(self::LOG_AREA.' Failed to force delete equipment ID '.$equipment->id.': '.$e->getMessage(), ['exception_class' => get_class($e), 'trace_snippet' => substr($e->getTraceAsString(), 0, 500)]);
+            throw new RuntimeException(__('Gagal memadam item peralatan secara kekal: ').$e->getMessage(), 0, $e);
         }
     }
 
@@ -292,7 +301,7 @@ final class EquipmentService
         User $actingUser,
         ?string $reason = null
     ): bool {
-        Log::info(self::LOG_AREA . ' Attempting to update equipment operational status.', [
+        Log::info(self::LOG_AREA.' Attempting to update equipment operational status.', [
             'equipment_id' => $equipment->id,
             'current_status' => $equipment->status,
             'new_status' => $newOperationalStatus,
@@ -300,15 +309,15 @@ final class EquipmentService
             'reason' => $reason,
         ]);
 
-        if (!in_array($newOperationalStatus, Equipment::getOperationalStatusesList())) {
+        if (! in_array($newOperationalStatus, Equipment::getOperationalStatusesList())) {
             throw new InvalidArgumentException("Status operasi tidak sah: {$newOperationalStatus}");
         }
 
         if ($equipment->status === Equipment::STATUS_ON_LOAN && $newOperationalStatus !== Equipment::STATUS_ON_LOAN) {
-            Log::warning(self::LOG_AREA . " Equipment ID {$equipment->id} is currently ON_LOAN. Status change to '{$newOperationalStatus}' should typically be handled via a return transaction.");
+            Log::warning(self::LOG_AREA." Equipment ID {$equipment->id} is currently ON_LOAN. Status change to '{$newOperationalStatus}' should typically be handled via a return transaction.");
         }
         if ($newOperationalStatus === Equipment::STATUS_ON_LOAN && $equipment->status !== Equipment::STATUS_ON_LOAN) {
-             Log::warning(self::LOG_AREA . " Equipment ID {$equipment->id} status is being manually set to ON_LOAN. This is typically handled by an issue transaction.");
+            Log::warning(self::LOG_AREA." Equipment ID {$equipment->id} status is being manually set to ON_LOAN. This is typically handled by an issue transaction.");
         }
 
         DB::beginTransaction();
@@ -316,12 +325,13 @@ final class EquipmentService
             $defaultReason = $reason ?? __('Status operasi dikemaskini oleh pentadbir.');
             $updated = $equipment->updateOperationalStatus($newOperationalStatus, $defaultReason, $actingUser->id);
             DB::commit();
-            Log::info(self::LOG_AREA . ' Equipment ID ' . $equipment->id . ' operational status updated to ' . $newOperationalStatus . ': ' . ($updated ? 'Success' : 'No changes or failed'));
+            Log::info(self::LOG_AREA.' Equipment ID '.$equipment->id.' operational status updated to '.$newOperationalStatus.': '.($updated ? 'Success' : 'No changes or failed'));
+
             return $updated;
         } catch (Throwable $e) {
             DB::rollBack();
-            Log::error(self::LOG_AREA . ' Failed to update equipment ID ' . $equipment->id . ' operational status: ' . $e->getMessage(), ['exception_class' => get_class($e), 'trace_snippet' => substr($e->getTraceAsString(), 0, 500)]);
-            throw new RuntimeException(__('Gagal mengemaskini status operasi peralatan: ') . $e->getMessage(), (int) $e->getCode(), $e);
+            Log::error(self::LOG_AREA.' Failed to update equipment ID '.$equipment->id.' operational status: '.$e->getMessage(), ['exception_class' => get_class($e), 'trace_snippet' => substr($e->getTraceAsString(), 0, 500)]);
+            throw new RuntimeException(__('Gagal mengemaskini status operasi peralatan: ').$e->getMessage(), (int) $e->getCode(), $e);
         }
     }
 
@@ -335,7 +345,7 @@ final class EquipmentService
         User $actingUser,
         ?string $reason = null
     ): bool {
-        Log::info(self::LOG_AREA . ' Attempting to update equipment physical condition status.', [
+        Log::info(self::LOG_AREA.' Attempting to update equipment physical condition status.', [
             'equipment_id' => $equipment->id,
             'current_condition' => $equipment->condition_status,
             'new_condition' => $newConditionStatus,
@@ -343,7 +353,7 @@ final class EquipmentService
             'reason' => $reason,
         ]);
 
-        if (!in_array($newConditionStatus, Equipment::getConditionStatusesList())) {
+        if (! in_array($newConditionStatus, Equipment::getConditionStatusesList())) {
             throw new InvalidArgumentException("Status keadaan fizikal tidak sah: {$newConditionStatus}");
         }
 
@@ -352,12 +362,13 @@ final class EquipmentService
             $defaultReason = $reason ?? __('Status keadaan fizikal dikemaskini oleh pentadbir.');
             $updated = $equipment->updatePhysicalConditionStatus($newConditionStatus, $defaultReason, $actingUser->id);
             DB::commit();
-            Log::info(self::LOG_AREA . ' Equipment ID ' . $equipment->id . ' physical condition status updated to ' . $newConditionStatus . ': ' . ($updated ? 'Success' : 'No changes or failed'));
+            Log::info(self::LOG_AREA.' Equipment ID '.$equipment->id.' physical condition status updated to '.$newConditionStatus.': '.($updated ? 'Success' : 'No changes or failed'));
+
             return $updated;
         } catch (Throwable $e) {
             DB::rollBack();
-            Log::error(self::LOG_AREA . ' Failed to update equipment ID ' . $equipment->id . ' physical condition status: ' . $e->getMessage(), ['exception_class' => get_class($e), 'trace_snippet' => substr($e->getTraceAsString(), 0, 500)]);
-            throw new RuntimeException(__('Gagal mengemaskini status keadaan fizikal peralatan: ') . $e->getMessage(), (int) $e->getCode(), $e);
+            Log::error(self::LOG_AREA.' Failed to update equipment ID '.$equipment->id.' physical condition status: '.$e->getMessage(), ['exception_class' => get_class($e), 'trace_snippet' => substr($e->getTraceAsString(), 0, 500)]);
+            throw new RuntimeException(__('Gagal mengemaskini status keadaan fizikal peralatan: ').$e->getMessage(), (int) $e->getCode(), $e);
         }
     }
 }

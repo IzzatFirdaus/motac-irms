@@ -4,108 +4,89 @@ namespace Database\Factories;
 
 use App\Models\Grade;
 use App\Models\Position;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory as EloquentFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 class PositionFactory extends EloquentFactory
 {
     protected $model = Position::class;
 
+    /**
+     * The official list of MOTAC position names.
+     *
+     * @var array
+     */
+    private static $motacPositions = [
+        'Menteri', 'Timbalan Menteri', 'Ketua Setiausaha', 'Timbalan Ketua Setiausaha', 'Setiausaha Bahagian',
+        'Setiausaha Akhbar', 'Setiausaha Sulit Kanan', 'Setiausaha Sulit', 'Pegawai Tugas-Tugas Khas',
+        'Timbalan Setiausaha Bahagian', 'Ketua Unit', 'Pegawai Khas', 'Pegawai Media', 'Pengarah', 'Timbalan Pengarah',
+        'Penolong Pengarah', 'Ketua Penolong Setiausaha Kanan (M)', 'Ketua Penolong Setiausaha (M)',
+        'Penolong Setiausaha Kanan (M)', 'Penolong Setiausaha (M)', 'Pegawai Teknologi Maklumat (F)',
+        'Pegawai Kebudayaan (B)', 'Penasihat Undang-Undang (L)', 'Pegawai Psikologi (S)', 'Akauntan (WA)',
+        'Pegawai Hal Ehwal Islam (S)', 'Pegawai Penerangan (S)', 'Jurutera (J)', 'Kurator (S)', 'Jurukur Bahan (J)',
+        'Arkitek (J)', 'Pegawai Arkib (S)', 'Juruaudit (W)', 'Perangkawan (E)', 'Pegawai Siasatan (P)',
+        'Penguasa Imigresen (KP)', 'Pereka (B)', 'Peguam Persekutuan (L)', 'Penolong Pegawai Teknologi Maklumat',
+        'Penolong Pegawai hal Ehwal Islam (S)', 'Penolong Pegawai Undang-Undang (L)',
+        'Penolong Pegawai Teknologi Maklumat_2', 'Penolong Juruaudit', 'Penolong Jurutera', 'Penolong Pegawai Tadbir',
+        'Penolong Pegawai Penerangan (S)', 'Penolong Pegawai Psikologi (S)', 'Penolong Pegawai Siasatan (P)',
+        'Penolong Pegawai Arkib (S)', 'Jurufotografi', 'Penolong Penguasa Imigresen (KP)', 'Penolong Pustakawan (S)',
+        'Setiausaha Pejabat (N)', 'Pembantu Setiausaha Pejabat (N)', 'Pembantu Tadbir (Perkeranian/Operasi) (N)',
+        'Penolong Akauntan (W)', 'Pembantu Tadbir (Kewangan) (W)', 'Pembantu Operasi (N)',
+        'Pembantu Keselamatan (KP)', 'Juruteknik Komputer (FT)', 'Pemandu Kenderaan (H)', 'Pembantu Khidmat (H)',
+        'MySTEP', 'Pelajar Latihan Industri', 'Pegawai Imigresen',
+    ];
+
     public function definition(): array
     {
-        $auditUser = User::orderBy('id')->first();
-        if (!$auditUser && class_exists(User::class) && method_exists(User::class, 'factory')) {
-            $auditUser = User::factory()->create(['name' => 'Default Audit User (PosFactory)']);
-        }
-        $auditUserId = $auditUser?->id;
+        $msFaker = \Faker\Factory::create('ms_MY');
 
-        $gradeId = Grade::inRandomOrder()->value('id');
-        if (!$gradeId && class_exists(Grade::class) && method_exists(Grade::class, 'factory')) {
-            $defaultGrade = Grade::factory()->create([
-                'name' => 'Default Grade (PosFactory-' . $this->faker->unique()->word() . ')',
-                'level' => $this->faker->numberBetween(10, 50),
-                'is_approver_grade' => $this->faker->boolean,
-                'created_by' => $auditUserId,
-                'updated_by' => $auditUserId
-            ]);
-            $gradeId = $defaultGrade->id;
+        // Pick a realistic position name from the official list.
+        // The ->unique() modifier ensures we don't pick the same name twice in a single run.
+        $positionName = $this->faker->unique()->randomElement(self::$motacPositions);
+
+        // Find the corresponding seeded position to get its ID, which is used to find a related grade.
+        $seededPosition = Position::where('name', $positionName)->first();
+
+        // Find a real grade that is linked to this specific position.
+        $gradeId = null;
+        if ($seededPosition) {
+            // Find a grade where the position_id matches our selected position's ID.
+            $grade = Grade::where('position_id', $seededPosition->id)->inRandomOrder()->first();
+            $gradeId = $grade?->id;
         }
 
-        $createdAt = Carbon::parse($this->faker->dateTimeBetween('-3 years', 'now'));
-        $updatedAt = Carbon::parse($this->faker->dateTimeBetween($createdAt, 'now'));
+        // Fallback logic: If seeders haven't been run, or no grade was found,
+        // pick any random grade that exists.
+        if (! $gradeId) {
+            $gradeId = Grade::inRandomOrder()->value('id');
+        }
 
         return [
-            'name' => $this->faker->unique()->jobTitle(),
-            'description' => $this->faker->optional(0.7)->sentence(10, true), // Corrected from ->bs
+            'name' => $positionName,
+            'description' => $msFaker->optional(0.7)->sentence(10, true),
             'is_active' => $this->faker->boolean(90),
             'grade_id' => $gradeId,
-            'created_by' => $auditUserId,
-            'updated_by' => $auditUserId,
-            'deleted_by' => null,
-            'created_at' => $createdAt,
-            'updated_at' => $updatedAt,
-            'deleted_at' => null,
+            'created_at' => Carbon::parse($this->faker->dateTimeBetween('-3 years', 'now')),
+            'updated_at' => fn (array $attributes) => Carbon::parse($this->faker->dateTimeBetween($attributes['created_at'], 'now')),
         ];
     }
 
     public function active(): static
     {
-        return $this->state(fn(array $attributes) => ['is_active' => true]);
+        return $this->state(fn (array $attributes) => ['is_active' => true]);
     }
 
     public function inactive(): static
     {
-        return $this->state(fn(array $attributes) => ['is_active' => false]);
+        return $this->state(fn (array $attributes) => ['is_active' => false]);
     }
 
     public function deleted(): static
     {
-        $deleter = User::orderBy('id')->first();
-         if (!$deleter && class_exists(User::class) && method_exists(User::class, 'factory')) {
-            $deleter = User::factory()->create(['name' => 'Deleter User Fallback (PosFactory)']);
-        }
-
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'deleted_at' => now(),
-            'deleted_by' => $attributes['deleted_by'] ?? $deleter?->id,
             'is_active' => false,
         ]);
-    }
-
-    public function withDetails(string $name, Model|EloquentFactory|int|null $grade = null): static
-    {
-        $gradeId = null;
-        if ($grade instanceof Model) {
-            $gradeId = $grade->id;
-        } elseif ($grade instanceof EloquentFactory) { // $grade here is a factory instance e.g. Grade::factory()
-            $auditUser = User::orderBy('id')->first();
-            if (!$auditUser && class_exists(User::class) && method_exists(User::class, 'factory')) {
-                $auditUser = User::factory()->create(['name' => 'Audit User for Grade in PosFactory']);
-            }
-            if (method_exists($grade, 'create')) { // Check if it's a factory instance
-                 $gradeId = $grade->create([
-                    'name' => 'Grade for ' . $name . ' (' . $this->faker->unique()->word() .')', // Ensure unique name
-                    'level' => $this->faker->numberBetween(10,50),
-                    'created_by' => $auditUser?->id,
-                    'updated_by' => $auditUser?->id
-                    ])->id;
-            }
-        } elseif (is_int($grade)) {
-            $gradeId = $grade;
-        }
-
-        return $this->state(function (array $attributes) use ($name, $gradeId) {
-            $finalGradeId = $gradeId ?? $attributes['grade_id'] ?? null;
-            if ($finalGradeId === null && Grade::count() > 0) {
-                $finalGradeId = Grade::inRandomOrder()->value('id');
-            }
-            return [
-                'name' => $name,
-                'grade_id' => $finalGradeId,
-            ];
-        });
     }
 
     public function forGrade(Grade|int $grade): static

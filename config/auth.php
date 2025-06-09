@@ -47,7 +47,7 @@ return [
         'sanctum' => [
             'driver' => 'sanctum', // Use 'sanctum' driver for token-based auth
             'provider' => 'users', // Typically uses the same 'users' provider
-                                   // unless you have a separate user model/table for API users.
+            // unless you have a separate user model/table for API users.
         ],
     ],
 

@@ -5,119 +5,72 @@ namespace App\Policies;
 use App\Models\EmailApplication;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Auth\Access\Response;
 
 class EmailApplicationPolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * Perform pre-authorization checks.
-     */
     public function before(User $user, string $ability): ?bool
     {
-        if ($user->hasRole('Admin')) { // Standardized to 'Admin'
+        if ($user->hasRole('Admin')) {
             return true;
         }
 
         return null;
     }
 
-    public function viewAny(User $user): Response|bool
+    public function viewAny(User $user): bool
     {
-        // Admins (by before), IT Admins, or users with specific permission can view all.
-        // Design Ref: Sections 5.1 (IT Admin role)
-        // Explicitly specify 'web' guard as permissions are seeded with 'web' guard.
-        if ($user->hasAnyRole(['IT Admin']) || $user->hasPermissionTo('view_all_email_applications', 'web')) { // Standardized to 'IT Admin'
-            return Response::allow();
-        }
-
-        return Response::deny(__('Anda tidak mempunyai kebenaran untuk melihat senarai permohonan e-mel.'));
+        // ADJUSTMENT: Changed from role check to a permission check.
+        return $user->can('view_all_email_applications');
     }
 
-    public function view(User $user, EmailApplication $emailApplication): Response|bool
+    public function view(User $user, EmailApplication $emailApplication): bool
     {
-        // Admins (by before), owner, IT Admins, assigned supporting officer,
-        // or users with general view permission.
-        // Design Ref: Section 4.2 (email_applications.user_id, email_applications.supporting_officer_id)
-        return $user->id === $emailApplication->user_id || //
-               $user->id === $emailApplication->supporting_officer_id || //
-               $user->hasAnyRole(['IT Admin']) || // Standardized to 'IT Admin'
-               $user->hasPermissionTo('view_email_applications', 'web') // Explicitly specify 'web' guard
-            ? Response::allow()
-            : Response::deny(__('Anda tidak mempunyai kebenaran untuk melihat permohonan e-mel ini.'));
+        // ADJUSTMENT: Simplified to check for general permission or ownership.
+        return $user->id === $emailApplication->user_id ||
+               $user->id === $emailApplication->supporting_officer_id ||
+               $user->can('view_email_applications');
     }
 
-    public function create(User $user): Response|bool
+    public function create(User $user): bool
     {
-        // Any authenticated user can generally create an application.
-        return $user->exists
-            ? Response::allow()
-            : Response::deny(__('Anda mesti log masuk untuk membuat permohonan e-mel.'));
+        return $user->can('create_email_applications');
     }
 
-    public function update(User $user, EmailApplication $emailApplication): Response|bool
+    public function update(User $user, EmailApplication $emailApplication): bool
     {
-        // Owner can update if it's a draft.
-        // Assumes EmailApplication model has an isDraft() method or accessor.
         if ($user->id === $emailApplication->user_id && $emailApplication->isDraft()) {
-            return Response::allow();
-        }
-        // IT Admin can update certain fields at certain stages (e.g., final_assigned_email, status).
-        // Design Ref: Section 5.1 (IT Admin provisioning) , Section 4.2 (email_applications.status)
-        if ($user->hasRole('IT Admin') && in_array($emailApplication->status, [ // Standardized to 'IT Admin'
-            EmailApplication::STATUS_PENDING_ADMIN, //
-            EmailApplication::STATUS_APPROVED, //
-            EmailApplication::STATUS_PROCESSING, //
-            EmailApplication::STATUS_COMPLETED, //
-            EmailApplication::STATUS_PROVISION_FAILED, //
-        ])) {
-            return Response::allow();
+            return true;
         }
 
-        return Response::deny(__('Anda tidak mempunyai kebenaran untuk mengemaskini permohonan e-mel ini.'));
+        // ADJUSTMENT: Changed from role check to permission check for IT Admin edits.
+        return $user->can('process_email_provisioning') && in_array($emailApplication->status, [
+            EmailApplication::STATUS_PENDING_ADMIN,
+            EmailApplication::STATUS_APPROVED,
+            EmailApplication::STATUS_PROCESSING,
+        ]);
     }
 
-    public function delete(User $user, EmailApplication $emailApplication): Response|bool
+    public function delete(User $user, EmailApplication $emailApplication): bool
     {
-        // Owner can delete if it's a draft. Admins can delete (via before).
-        // Assumes EmailApplication model has an isDraft() method or accessor.
-        return $user->id === $emailApplication->user_id && $emailApplication->isDraft()
-            ? Response::allow()
-            : Response::deny(__('Anda tidak mempunyai kebenaran untuk memadam permohonan e-mel ini.'));
+        return $user->id === $emailApplication->user_id && $emailApplication->isDraft();
     }
 
-    public function submit(User $user, EmailApplication $emailApplication): Response|bool
+    public function submit(User $user, EmailApplication $emailApplication): bool
     {
-        // Owner can submit if it's a draft.
-        // Assumes EmailApplication model has an isDraft() method or accessor.
-        return $user->id === $emailApplication->user_id && $emailApplication->isDraft()
-            ? Response::allow()
-            : Response::deny(__('Hanya draf permohonan boleh dihantar.'));
+        return $user->id === $emailApplication->user_id && $emailApplication->isDraft();
     }
 
-    public function actAsSupportingOfficer(User $user, EmailApplication $emailApplication): Response|bool
+    public function processByIT(User $user, EmailApplication $emailApplication): bool
     {
-        // Design Ref: Sections 5.1, 7.2 (Grade 9+ for supporting officer)
-        // Design Ref: Section 4.2 (email_applications.status: 'pending_support')
-        // Uses specific config key from motac.php
-        $minGradeLevel = config('motac.approval.min_email_supporting_officer_grade_level', 9); //
-
-        return $user->hasPermissionTo('act_on_approval_tasks', 'web') && // Changed permission for clarity, explicitly specify 'web' guard
-               ($user->grade && $user->grade->level >= $minGradeLevel) && //
-               $emailApplication->status === EmailApplication::STATUS_PENDING_SUPPORT //
-            ? Response::allow()
-            : Response::deny(__('Anda tidak layak untuk menyokong permohonan ini atau ia tidak menunggu sokongan.'));
+        // ADJUSTMENT: Changed from role check to a permission check.
+        return $user->can('process_email_provisioning') &&
+               in_array($emailApplication->status, [EmailApplication::STATUS_APPROVED, EmailApplication::STATUS_PENDING_ADMIN]);
     }
 
-    public function processByIT(User $user, EmailApplication $emailApplication): Response|bool
+    public function viewAnyAdmin(User $user): bool
     {
-        // IT Admin can process applications that are 'approved' or 'pending_admin'
-        // Design Ref: Section 5.1 (IT Admin processing) , Section 4.2 (email_applications.status: 'approved', 'pending_admin')
-        return $user->hasRole('IT Admin') && // Standardized to 'IT Admin'
-               in_array($emailApplication->status, [EmailApplication::STATUS_APPROVED, EmailApplication::STATUS_PENDING_ADMIN]) //
-            ? Response::allow()
-            : Response::deny(__('Hanya Pentadbir IT boleh memproses permohonan ini pada peringkat ini.'));
+        return $user->can('view_any_admin_email_applications');
     }
-
 }

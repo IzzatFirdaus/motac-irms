@@ -29,24 +29,41 @@ class EquipmentChecklist extends Component
     use \Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
     public $loanApplicationId;
+
     public $selectedEquipmentId;
+
     public $transactionType;
+
     public $officerId;
+
     public array $accessories = [];
+
     public string $notes = '';
+
     public ?LoanTransaction $loanTransaction = null;
+
     public ?LoanApplication $loanApplication = null;
+
     public ?Equipment $equipment = null;
+
     public array $allAccessoriesList = [];
+
     public string $equipmentConditionOnReturn = '';
+
     public string $returnNotes = '';
+
     public $receivingOfficerId;
+
     public $returnAcceptingOfficerId;
+
     public $returningOfficerId;
+
     public array $viewData = [];
+
     public array $availableEquipmentOptions = [];
 
     protected LoanApplicationService $loanApplicationService;
+
     protected LoanTransactionService $loanTransactionService;
 
     public function boot(
@@ -82,7 +99,7 @@ class EquipmentChecklist extends Component
                     ['user', 'loanApplicationItems.equipment', 'responsibleOfficer', 'loanTransactions.loanTransactionItems.equipment', 'loanTransactions.issuingOfficer', 'loanTransactions.receivingOfficer', 'loanTransactions.returningOfficer', 'loanTransactions.returnAcceptingOfficer'] // FIX: Changed 'applicationItems' to 'loanApplicationItems' here for consistency and correctness
                 );
 
-                if (!$this->loanApplication) {
+                if (! $this->loanApplication) {
                     Log::warning("Loan Application ID {$this->loanApplicationId} not found during mount.");
                     throw new ModelNotFoundException("Loan Application ID {$this->loanApplicationId} not found.");
                 }
@@ -96,11 +113,11 @@ class EquipmentChecklist extends Component
                         })
                         ->mapWithKeys(function ($appItem) {
                             return Equipment::where('asset_type', $appItem->equipment_type)
-                                       ->where('status', Equipment::STATUS_AVAILABLE)
-                                       ->get()
-                                       ->mapWithKeys(function ($eq) {
-                                           return [$eq->id => "{$eq->brand} {$eq->model} (Tag: {$eq->tag_id}) - Jenis: {$eq->asset_type_label}"];
-                                       });
+                                ->where('status', Equipment::STATUS_AVAILABLE)
+                                ->get()
+                                ->mapWithKeys(function ($eq) {
+                                    return [$eq->id => "{$eq->brand} {$eq->model} (Tag: {$eq->tag_id}) - Jenis: {$eq->asset_type_label}"];
+                                });
                         })->flatten()->toArray();
                 }
 
@@ -110,7 +127,7 @@ class EquipmentChecklist extends Component
                         ['loanTransactionItems.equipment']
                     );
 
-                    if (!$this->loanTransaction || (int) $this->loanTransaction->loan_application_id !== (int) $this->loanApplicationId) {
+                    if (! $this->loanTransaction || (int) $this->loanTransaction->loan_application_id !== (int) $this->loanApplicationId) {
                         Log::warning("Loan Transaction ID {$loanTransactionId} not found or does not belong to Loan Application ID {$this->loanApplicationId}.");
                         throw new ModelNotFoundException("Loan Transaction ID {$loanTransactionId} not found for this application.");
                     }
@@ -137,12 +154,14 @@ class EquipmentChecklist extends Component
             }
             $this->initializeOfficerIds();
         } catch (ModelNotFoundException $e) {
-            session()->flash('error', __('Data tidak dijumpai: ') . $e->getMessage());
-            Log::error('EquipmentChecklist: Model not found during mount: ' . $e->getMessage(), ['exception' => $e]);
+            session()->flash('error', __('Data tidak dijumpai: ').$e->getMessage());
+            Log::error('EquipmentChecklist: Model not found during mount: '.$e->getMessage(), ['exception' => $e]);
+
             return;
         } catch (Exception $e) {
-            session()->flash('error', __('Ralat berlaku semasa memuatkan senarai semak: ') . $e->getMessage());
-            Log::error('EquipmentChecklist: Error during mount: ' . $e->getMessage(), ['exception' => $e]);
+            session()->flash('error', __('Ralat berlaku semasa memuatkan senarai semak: ').$e->getMessage());
+            Log::error('EquipmentChecklist: Error during mount: '.$e->getMessage(), ['exception' => $e]);
+
             return;
         }
     }
@@ -159,20 +178,20 @@ class EquipmentChecklist extends Component
         DB::beginTransaction();
         try {
             $currentUser = Auth::user();
-            if (!$currentUser) {
+            if (! $currentUser) {
                 throw new Exception('Pengguna tidak dikenalpasti.');
             }
 
-            if (!$this->loanApplication) {
+            if (! $this->loanApplication) {
                 // FIX: Changed findLoanApplication to findLoanApplicationById
                 $this->loanApplication = $this->loanApplicationService->findLoanApplicationById($this->loanApplicationId);
-                if (!$this->loanApplication) {
+                if (! $this->loanApplication) {
                     throw new ModelNotFoundException("Permohonan Pinjaman dengan ID {$this->loanApplicationId} tidak ditemui.");
                 }
             }
 
             $equipmentToTransact = Equipment::find($this->selectedEquipmentId);
-            if (!$equipmentToTransact) {
+            if (! $equipmentToTransact) {
                 throw new ModelNotFoundException("Peralatan dengan ID {$this->selectedEquipmentId} tidak ditemui.");
             }
 
@@ -241,10 +260,12 @@ class EquipmentChecklist extends Component
             } else {
                 session()->flash('error', 'Jenis transaksi tidak sah.');
                 DB::rollBack();
+
                 return null;
             }
             DB::commit();
             $this->dispatch('toastr', type: 'success', message: session('success'));
+
             return redirect()->route('resource-management.my-applications.loan-applications.show', $this->loanApplicationId);
 
         } catch (ValidationException $e) {
@@ -253,18 +274,19 @@ class EquipmentChecklist extends Component
             throw $e;
         } catch (ModelNotFoundException $e) {
             DB::rollBack();
-            session()->flash('error', __('Data tidak ditemui: ') . $e->getMessage());
-            $this->dispatch('toastr', type: 'error', message: __('Data tidak ditemui: ') . $e->getMessage());
+            session()->flash('error', __('Data tidak ditemui: ').$e->getMessage());
+            $this->dispatch('toastr', type: 'error', message: __('Data tidak ditemui: ').$e->getMessage());
         } catch (AuthorizationException $e) { // FIX: This now refers to Illuminate\Auth\Access\AuthorizationException
             DB::rollBack();
-            session()->flash('error', __('Anda tidak dibenarkan untuk tindakan ini: ') . $e->getMessage());
+            session()->flash('error', __('Anda tidak dibenarkan untuk tindakan ini: ').$e->getMessage());
             $this->dispatch('toastr', type: 'error', message: __('Anda tidak dibenarkan untuk tindakan ini.'));
         } catch (Exception $e) {
             DB::rollBack();
-            session()->flash('error', __('Ralat sistem semasa memproses transaksi: ') . $e->getMessage());
+            session()->flash('error', __('Ralat sistem semasa memproses transaksi: ').$e->getMessage());
             Log::error('Error processing transaction: '.$e->getMessage(), ['exception' => $e]);
             $this->dispatch('toastr', type: 'error', message: __('Ralat sistem. Sila cuba lagi.'));
         }
+
         return null;
     }
 
@@ -293,7 +315,7 @@ class EquipmentChecklist extends Component
     #[Computed]
     public function isViewingOnly(): bool
     {
-        return $this->transactionType === 'view' || (!$this->isIssue() && !$this->isReturn());
+        return $this->transactionType === 'view' || (! $this->isIssue() && ! $this->isReturn());
     }
 
     #[Computed]
@@ -302,12 +324,13 @@ class EquipmentChecklist extends Component
         if ($this->loanApplication && $this->transactionType === LoanTransaction::TYPE_RETURN) {
             return Equipment::whereHas('loanTransactionItems.loanTransaction', function ($query) {
                 $query->where('loan_application_id', $this->loanApplication->id)
-                      ->where('type', LoanTransaction::TYPE_ISSUE)
-                      ->where('status', LoanTransaction::STATUS_ISSUED);
+                    ->where('type', LoanTransaction::TYPE_ISSUE)
+                    ->where('status', LoanTransaction::STATUS_ISSUED);
             })
-            ->where('status', Equipment::STATUS_ON_LOAN)
-            ->get();
+                ->where('status', Equipment::STATUS_ON_LOAN)
+                ->get();
         }
+
         return collect();
     }
 
@@ -371,6 +394,7 @@ class EquipmentChecklist extends Component
                 return [];
             default:
                 Log::warning('EquipmentChecklist: Invalid transaction type for validation.', ['type' => $this->transactionType]);
+
                 return [];
         }
     }

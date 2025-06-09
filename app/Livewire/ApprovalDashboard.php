@@ -27,13 +27,18 @@ class ApprovalDashboard extends Component
     use WithPagination;
 
     public string $filterType = 'all'; // 'all', EmailApplication::class, LoanApplication::class
+
     public string $searchTerm = '';
+
     public string $filterStatus = Approval::STATUS_PENDING; // Default to pending
 
     // Modal properties for taking action
     public bool $showApprovalActionModal = false;
+
     public ?Approval $selectedApproval = null;
+
     public string $decision = ''; // 'approved' or 'rejected'
+
     public string $comments = '';
 
     protected string $paginationTheme = 'bootstrap'; // <-- CONVERTED TO BOOTSTRAP
@@ -50,7 +55,7 @@ class ApprovalDashboard extends Component
     {
         /** @var \App\Models\User|null $officer */
         $officer = Auth::user();
-        if (!$officer) {
+        if (! $officer) {
             return new LengthAwarePaginator([], 0, 10, 1, ['path' => request()->url(), 'query' => request()->query()]);
         }
 
@@ -62,7 +67,7 @@ class ApprovalDashboard extends Component
                         EmailApplication::class => ['user:id,name,department_id', 'user.department:id,name'],
                         LoanApplication::class => ['user:id,name,department_id', 'user.department:id,name', 'loanApplicationItems'],
                     ]);
-                }
+                },
             ])
             ->orderBy('created_at', 'desc');
 
@@ -74,20 +79,20 @@ class ApprovalDashboard extends Component
             $query->where('approvable_type', $this->filterType);
         }
 
-        if (!empty($this->searchTerm)) {
+        if (! empty($this->searchTerm)) {
             $query->where(function ($q) {
                 $q->whereHasMorph('approvable', [LoanApplication::class, EmailApplication::class], function ($qAppro, $type) {
                     $qAppro->whereHas('user', function ($qUser) {
-                        $qUser->where('name', 'like', '%' . $this->searchTerm . '%')
-                              ->orWhere('email', 'like', '%' . $this->searchTerm . '%');
+                        $qUser->where('name', 'like', '%'.$this->searchTerm.'%')
+                            ->orWhere('email', 'like', '%'.$this->searchTerm.'%');
                     });
                     if ($type === LoanApplication::class) {
-                        $qAppro->orWhere('purpose', 'like', '%' . $this->searchTerm . '%'); //
+                        $qAppro->orWhere('purpose', 'like', '%'.$this->searchTerm.'%'); //
                     } elseif ($type === EmailApplication::class) {
-                        $qAppro->orWhere('proposed_email', 'like', '%' . $this->searchTerm . '%') //
-                               ->orWhere('purpose', 'like', '%' . $this->searchTerm . '%'); //
+                        $qAppro->orWhere('proposed_email', 'like', '%'.$this->searchTerm.'%') //
+                            ->orWhere('purpose', 'like', '%'.$this->searchTerm.'%'); //
                     }
-                })->orWhere('id', 'like', '%' . $this->searchTerm . '%'); //
+                })->orWhere('id', 'like', '%'.$this->searchTerm.'%'); //
             });
         }
 
@@ -98,21 +103,23 @@ class ApprovalDashboard extends Component
     {
         $this->resetPage();
     }
+
     public function updatedSearchTerm(): void
     {
         $this->resetPage();
     }
+
     public function updatedFilterStatus(): void
     {
         $this->resetPage();
     }
 
-
     public function openApprovalActionModal(int $approvalId): void
     {
         $this->selectedApproval = Approval::with('approvable.user')->find($approvalId);
-        if (!$this->selectedApproval) {
+        if (! $this->selectedApproval) {
             $this->dispatch('toastr', type: 'error', message: __('Rekod kelulusan tidak ditemui.'));
+
             return;
         }
         // $this->authorize('actOn', $this->selectedApproval); // Authorization check
@@ -129,7 +136,7 @@ class ApprovalDashboard extends Component
             'comments' => [Rule::requiredIf($this->decision === Approval::STATUS_REJECTED), 'nullable', 'string', 'min:5', 'max:1000'],
         ]);
 
-        if (!$this->selectedApproval) {
+        if (! $this->selectedApproval) {
             return;
         }
 
@@ -152,7 +159,7 @@ class ApprovalDashboard extends Component
             $this->dispatch('toastr', type: 'error', message: __('Anda tidak dibenarkan untuk tindakan ini.'));
         } catch (Throwable $e) {
             Log::error('ApprovalDashboard: Error submitting decision.', ['exception' => $e, 'user_id' => $user->id]);
-            $this->dispatch('toastr', type: 'error', message: __('Gagal merekodkan keputusan: ') . $e->getMessage());
+            $this->dispatch('toastr', type: 'error', message: __('Gagal merekodkan keputusan: ').$e->getMessage());
         }
     }
 
@@ -172,7 +179,6 @@ class ApprovalDashboard extends Component
     {
         unset($this->approvalTasks);
     }
-
 
     public function render(): View
     {

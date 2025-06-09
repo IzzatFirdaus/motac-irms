@@ -3,12 +3,12 @@
 namespace App\Livewire\Settings\Departments;
 
 use App\Models\Department;
-use Livewire\Component;
-use Livewire\WithPagination;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Validation\Rule as ValidationRule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
-use Illuminate\Validation\Rule as ValidationRule;
+use Livewire\Component;
+use Livewire\WithPagination;
 
 // Consider using a DepartmentService for business logic if it grows complex
 // use App\Services\DepartmentService;
@@ -17,32 +17,43 @@ use Illuminate\Validation\Rule as ValidationRule;
 #[Title('Pengurusan Jabatan')]
 class Index extends Component
 {
-    use WithPagination;
     use AuthorizesRequests;
+    use WithPagination;
 
     public string $search = '';
+
     public string $sortField = 'name';
+
     public string $sortDirection = 'asc';
 
     public bool $showModal = false;
+
     public bool $isEditMode = false;
+
     public ?Department $editingDepartment = null;
 
     // Form fields
     public string $name = '';
+
     public string $code = '';
+
     public string $branch_type = '';
+
     public string $description = '';
+
     public bool $is_active = true;
     // public ?int $head_of_department_id = null; // Add if you want to manage HOD here
 
     public bool $showDeleteConfirmationModal = false;
+
     public ?int $departmentIdToDelete = null;
+
     public string $departmentNameToDelete = '';
 
     public array $branchTypeOptions = [];
 
     protected array $queryString = ['search', 'sortField', 'sortDirection'];
+
     protected string $paginationTheme = 'bootstrap';
 
     // Optional: Inject DepartmentService if you implement it
@@ -56,10 +67,10 @@ class Index extends Component
     public function mount(): void
     {
         $this->authorize('viewAny', Department::class); // Assuming DepartmentPolicy exists
-        $this->editingDepartment = new Department(); // Initialize for type hinting and new creations
+        $this->editingDepartment = new Department; // Initialize for type hinting and new creations
         $this->branchTypeOptions = Department::getBranchTypeOptions(); // Assumes a static method on Department model
-                                                                    // or define directly: ['headquarters' => 'Headquarters', 'state' => 'State'];
-        if (empty($this->branch_type) && !empty($this->branchTypeOptions)) {
+        // or define directly: ['headquarters' => 'Headquarters', 'state' => 'State'];
+        if (empty($this->branch_type) && ! empty($this->branchTypeOptions)) {
             $this->branch_type = array_key_first($this->branchTypeOptions);
         }
     }
@@ -81,9 +92,9 @@ class Index extends Component
         $query = Department::query()
             // ->with('headOfDepartment:id,name') // Eager load HOD if managing here
             ->when($this->search, function ($q) {
-                $q->where('name', 'like', '%' . $this->search . '%')
-                  ->orWhere('code', 'like', '%' . $this->search . '%')
-                  ->orWhere('description', 'like', '%' . $this->search . '%');
+                $q->where('name', 'like', '%'.$this->search.'%')
+                    ->orWhere('code', 'like', '%'.$this->search.'%')
+                    ->orWhere('description', 'like', '%'.$this->search.'%');
             });
 
         if ($this->sortField) {
@@ -91,6 +102,7 @@ class Index extends Component
         } else {
             $query->orderBy('name', 'asc'); // Default sort
         }
+
         return $query->paginate(10);
     }
 
@@ -161,8 +173,9 @@ class Index extends Component
             // Requires Department model to have a users() relationship.
             // Example: public function users() { return $this->hasMany(User::class); }
             if ($department->users()->count() > 0) {
-                 session()->flash('error', __('Jabatan ":name" tidak boleh dipadam kerana ia telah ditugaskan kepada pengguna.', ['name' => $department->name]));
-                 return;
+                session()->flash('error', __('Jabatan ":name" tidak boleh dipadam kerana ia telah ditugaskan kepada pengguna.', ['name' => $department->name]));
+
+                return;
             }
             // Add other checks if department is linked to other models like equipment [cite: 79]
 
@@ -170,7 +183,7 @@ class Index extends Component
             $this->departmentNameToDelete = $department->name;
             $this->showDeleteConfirmationModal = true;
         } else {
-             session()->flash('error', __('Jabatan tidak ditemui.'));
+            session()->flash('error', __('Jabatan tidak ditemui.'));
         }
     }
 
@@ -187,6 +200,7 @@ class Index extends Component
             if ($department->users()->count() > 0) { // Assuming users relationship
                 session()->flash('error', __('Jabatan ":name" tidak boleh dipadam kerana ia telah ditugaskan kepada pengguna.', ['name' => $department->name]));
                 $this->closeDeleteConfirmationModal();
+
                 return;
             }
             // Add other dependency checks here (e.g., equipment)
@@ -209,6 +223,7 @@ class Index extends Component
         $departmentIdToIgnore = ($this->isEditMode && $this->editingDepartment && $this->editingDepartment->id)
                                 ? $this->editingDepartment->id
                                 : null;
+
         return [
             'name' => ['required', 'string', 'max:255', ValidationRule::unique('departments', 'name')->ignore($departmentIdToIgnore)],
             'code' => ['nullable', 'string', 'max:50', ValidationRule::unique('departments', 'code')->ignore($departmentIdToIgnore)],
@@ -228,13 +243,13 @@ class Index extends Component
         $this->is_active = true; // Default to active for new entries
         // $this->head_of_department_id = null; // If managing HOD
 
-        if (!empty($this->branchTypeOptions)) {
+        if (! empty($this->branchTypeOptions)) {
             $this->branch_type = array_key_first($this->branchTypeOptions);
         } else {
             $this->branch_type = '';
         }
 
-        $this->editingDepartment = new Department(); // Reset to a new instance
+        $this->editingDepartment = new Department; // Reset to a new instance
         $this->isEditMode = false;
         $this->resetErrorBag();
         $this->resetValidation();

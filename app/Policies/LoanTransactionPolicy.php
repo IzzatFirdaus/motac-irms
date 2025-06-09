@@ -8,8 +8,8 @@ use App\Models\LoanApplication;
 use App\Models\LoanTransaction;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Support\Facades\Log;
 
 class LoanTransactionPolicy
 {
@@ -17,10 +17,6 @@ class LoanTransactionPolicy
 
     /**
      * Perform pre-authorization checks.
-     *
-     * @param  \App\Models\User  $user
-     * @param  string  $ability
-     * @return bool|null
      */
     public function before(User $user, string $ability): ?bool
     {
@@ -28,14 +24,12 @@ class LoanTransactionPolicy
         if ($user->hasRole('Admin')) {
             return true;
         }
+
         return null; // Continue to specific policy methods
     }
 
     /**
      * Determine whether the user can view any loan transactions.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Auth\Access\Response|bool
      */
     public function viewAny(User $user): Response|bool
     {
@@ -46,10 +40,6 @@ class LoanTransactionPolicy
 
     /**
      * Determine whether the user can view the specific loan transaction.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\LoanTransaction  $loanTransaction
-     * @return \Illuminate\Auth\Access\Response|bool
      */
     public function view(User $user, LoanTransaction $loanTransaction): Response|bool
     {
@@ -65,15 +55,12 @@ class LoanTransactionPolicy
                 return Response::allow();
             }
         }
+
         return Response::deny(__('Anda tidak mempunyai kebenaran untuk melihat transaksi pinjaman ini.'));
     }
 
     /**
      * Determine whether the user can create an issue transaction.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\LoanApplication  $loanApplication
-     * @return \Illuminate\Auth\Access\Response|bool
      */
     public function createIssue(User $user, LoanApplication $loanApplication): Response|bool
     {
@@ -81,16 +68,16 @@ class LoanTransactionPolicy
         // Assumes LoanApplication.php model has a canBeIssued() method.
         $isReadyForIssuance = method_exists($loanApplication, 'canBeIssued') && $loanApplication->canBeIssued();
 
-        if (!method_exists($loanApplication, 'canBeIssued')) {
-             Log::warning("LoanTransactionPolicy: LoanApplication model ID {$loanApplication->id} is missing canBeIssued() method. Falling back to direct status check.");
-             // Fallback to direct status check if method doesn't exist for some reason
-             $isReadyForIssuance = in_array($loanApplication->status, [
-                 LoanApplication::STATUS_APPROVED,
-                 LoanApplication::STATUS_PARTIALLY_ISSUED
-             ]);
+        if (! method_exists($loanApplication, 'canBeIssued')) {
+            Log::warning("LoanTransactionPolicy: LoanApplication model ID {$loanApplication->id} is missing canBeIssued() method. Falling back to direct status check.");
+            // Fallback to direct status check if method doesn't exist for some reason
+            $isReadyForIssuance = in_array($loanApplication->status, [
+                LoanApplication::STATUS_APPROVED,
+                LoanApplication::STATUS_PARTIALLY_ISSUED,
+            ]);
         }
 
-        if (!$user->hasAnyRole(['Admin', 'BPM Staff'])) {
+        if (! $user->hasAnyRole(['Admin', 'BPM Staff'])) {
             return Response::deny(__('Hanya Admin atau Staf BPM yang boleh memulakan proses pengeluaran.'));
         }
 
@@ -101,25 +88,22 @@ class LoanTransactionPolicy
 
     /**
      * Determine whether the user can create a return transaction (legacy method, consider processReturn).
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\LoanTransaction  $issueLoanTransaction
-     * @return \Illuminate\Auth\Access\Response|bool
      */
     public function createReturn(User $user, LoanTransaction $issueLoanTransaction): Response|bool
     {
         // Design Ref (Rev. 3.5): Section 4.3 (loan_transactions.type: 'issue'; loan_transactions.status)
-        if (!method_exists($issueLoanTransaction, 'isIssue') || !method_exists($issueLoanTransaction, 'isFullyClosedOrReturned')) {
+        if (! method_exists($issueLoanTransaction, 'isIssue') || ! method_exists($issueLoanTransaction, 'isFullyClosedOrReturned')) {
             Log::error("LoanTransactionPolicy: LoanTransaction model is missing isIssue() or isFullyClosedOrReturned() methods for Tx ID {$issueLoanTransaction->id}. Denying return creation.");
+
             return Response::deny(__('Konfigurasi sistem tidak lengkap untuk memproses pemulangan.'));
         }
 
-        if (!$user->hasAnyRole(['Admin', 'BPM Staff'])) {
+        if (! $user->hasAnyRole(['Admin', 'BPM Staff'])) {
             return Response::deny(__('Hanya Admin atau Staf BPM yang boleh memproses pemulangan.'));
         }
 
         // Allow if it's an issue transaction and not fully returned/closed
-        return $issueLoanTransaction->isIssue() && !$issueLoanTransaction->isFullyClosedOrReturned()
+        return $issueLoanTransaction->isIssue() && ! $issueLoanTransaction->isFullyClosedOrReturned()
             ? Response::allow()
             : Response::deny(__('Transaksi pengeluaran ini tidak sah atau telahpun selesai dipulangkan sepenuhnya.'));
     }
@@ -128,20 +112,18 @@ class LoanTransactionPolicy
      * Determine whether the user can process a return (view form and store).
      * This method is used by both the returnForm and storeReturn methods in the controller.
      *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\LoanTransaction  $issueLoanTransaction The original ISSUE transaction being returned.
-     * @param  \App\Models\LoanApplication  $loanApplication The related loan application.
-     * @return \Illuminate\Auth\Access\Response|bool
+     * @param  \App\Models\LoanTransaction  $issueLoanTransaction  The original ISSUE transaction being returned.
+     * @param  \App\Models\LoanApplication  $loanApplication  The related loan application.
      */
     public function processReturn(User $user, LoanTransaction $issueLoanTransaction, LoanApplication $loanApplication): Response|bool
     {
         // Only BPM Staff can process returns
-        if (!$user->hasAnyRole(['Admin', 'BPM Staff'])) {
+        if (! $user->hasAnyRole(['Admin', 'BPM Staff'])) {
             return Response::deny(__('Anda tidak mempunyai kebenaran untuk merekodkan pulangan peralatan.'));
         }
 
         // The transaction must be an 'issue' type
-        if (!$issueLoanTransaction->isIssue()) {
+        if (! $issueLoanTransaction->isIssue()) {
             return Response::deny(__('Transaksi yang dipilih bukan transaksi pengeluaran peralatan.'));
         }
 
@@ -155,11 +137,11 @@ class LoanTransactionPolicy
         // (e.g., cancelled, fully completed without return tracking, etc.)
         // Assuming LoanApplication has a method like canAcceptReturns() or status checks.
         // For example, if it's 'approved' or 'partially_issued' or 'issued'
-        if (!in_array($loanApplication->status, [
+        if (! in_array($loanApplication->status, [
             LoanApplication::STATUS_APPROVED,
             LoanApplication::STATUS_ISSUED,
             LoanApplication::STATUS_PARTIALLY_ISSUED,
-            LoanApplication::STATUS_PARTIALLY_RETURNED_PENDING_INSPECTION // If tracking partial returns at application level
+            LoanApplication::STATUS_PARTIALLY_RETURNED_PENDING_INSPECTION, // If tracking partial returns at application level
         ])) {
             return Response::deny(__('Status permohonan pinjaman tidak membenarkan proses pemulangan.'));
         }
@@ -169,10 +151,6 @@ class LoanTransactionPolicy
 
     /**
      * Determine whether the user can update the specific loan transaction.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\LoanTransaction  $loanTransaction
-     * @return \Illuminate\Auth\Access\Response|bool
      */
     public function update(User $user, LoanTransaction $loanTransaction): Response|bool
     {
@@ -184,10 +162,6 @@ class LoanTransactionPolicy
 
     /**
      * Determine whether the user can delete the specific loan transaction (soft delete).
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\LoanTransaction  $loanTransaction
-     * @return \Illuminate\Auth\Access\Response|bool
      */
     public function delete(User $user, LoanTransaction $loanTransaction): Response|bool
     {
@@ -199,10 +173,6 @@ class LoanTransactionPolicy
 
     /**
      * Determine whether the user can restore a soft-deleted loan transaction.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\LoanTransaction  $loanTransaction
-     * @return \Illuminate\Auth\Access\Response|bool
      */
     public function restore(User $user, LoanTransaction $loanTransaction): Response|bool
     {
@@ -213,10 +183,6 @@ class LoanTransactionPolicy
 
     /**
      * Determine whether the user can permanently delete the specific loan transaction.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\LoanTransaction  $loanTransaction
-     * @return \Illuminate\Auth\Access\Response|bool
      */
     public function forceDelete(User $user, LoanTransaction $loanTransaction): Response|bool
     {
@@ -227,9 +193,6 @@ class LoanTransactionPolicy
 
     /**
      * Determine whether the user can view any issued loan transactions.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Auth\Access\Response|bool
      */
     public function viewAnyIssued(User $user): Response|bool
     {

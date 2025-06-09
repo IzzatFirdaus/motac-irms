@@ -52,13 +52,14 @@ class EmailApplicationController extends Controller
                 'exception_trace_snippet' => substr($e->getTraceAsString(), 0, 500),
                 'request_data' => $request->except(['_token', 'password', 'password_confirmation']),
             ]);
-            return redirect()->back()->withInput()->with('error', __('Gagal mencipta draf permohonan e-mel: ') . $e->getMessage());
+
+            return redirect()->back()->withInput()->with('error', __('Gagal mencipta draf permohonan e-mel: ').$e->getMessage());
         }
     }
 
     public function show(EmailApplication $emailApplication): View
     {
-        Log::info("EmailApplicationController@show: User ID ".Auth::id()." viewing EmailApplication ID {$emailApplication->id}.");
+        Log::info('EmailApplicationController@show: User ID '.Auth::id()." viewing EmailApplication ID {$emailApplication->id}.");
 
         // Use the default relations defined in the service for consistency
         $emailApplication->loadMissing($this->emailApplicationService->getDefaultEmailApplicationRelations());
@@ -72,10 +73,11 @@ class EmailApplicationController extends Controller
         $user = $request->user();
         $validatedData = $request->validated();
 
-        if (!$emailApplication->isDraft()) {
+        if (! $emailApplication->isDraft()) {
             Log::warning("User ID {$user->id} attempt to update non-draft EmailApplication ID {$emailApplication->id}.", [
                 'application_status' => $emailApplication->status,
             ]);
+
             return redirect()
                 ->route('email-applications.show', $emailApplication)
                 ->with('error', __('Hanya draf permohonan yang boleh dikemaskini.'));
@@ -100,7 +102,8 @@ class EmailApplicationController extends Controller
                 'exception_trace_snippet' => substr($e->getTraceAsString(), 0, 500),
                 'request_data' => $request->except(['_token', 'password', 'password_confirmation']),
             ]);
-            return redirect()->back()->withInput()->with('error', __('Gagal mengemaskini permohonan e-mel: ') . $e->getMessage());
+
+            return redirect()->back()->withInput()->with('error', __('Gagal mengemaskini permohonan e-mel: ').$e->getMessage());
         }
     }
 
@@ -132,6 +135,7 @@ class EmailApplicationController extends Controller
             $errorMessage = ($e instanceof \RuntimeException || $e instanceof \InvalidArgumentException)
                 ? $e->getMessage()
                 : __('Gagal menghantar permohonan e-mel disebabkan ralat sistem.');
+
             return redirect()->route('email-applications.show', $emailApplication)->with('error', $errorMessage);
         }
     }
@@ -142,10 +146,11 @@ class EmailApplicationController extends Controller
         $user = Auth::user();
         $this->authorize('delete', $emailApplication);
 
-        if (!$emailApplication->isDraft()) {
+        if (! $emailApplication->isDraft()) {
             Log::warning("User ID {$user->id} attempt to delete non-draft EmailApplication ID {$emailApplication->id}.", [
                 'application_status' => $emailApplication->status,
             ]);
+
             return redirect()
                 ->route('email-applications.show', $emailApplication)
                 ->with('error', __('Hanya draf permohonan yang boleh dibuang.'));
@@ -157,6 +162,7 @@ class EmailApplicationController extends Controller
                 $user
             );
             Log::info("EmailApplication ID {$emailApplication->id} soft deleted successfully by User ID {$user->id}.");
+
             return redirect()->route('email-applications.index')
                 ->with('success', __('Permohonan e-mel berjaya dibuang.'));
         } catch (Throwable $e) {
@@ -164,8 +170,9 @@ class EmailApplicationController extends Controller
                 'error' => $e->getMessage(),
                 'exception_trace_snippet' => substr($e->getTraceAsString(), 0, 500),
             ]);
+
             return redirect()->route('email-applications.show', $emailApplication)
-                             ->with('error', __('Gagal membuang permohonan e-mel disebabkan ralat sistem: ') . $e->getMessage());
+                ->with('error', __('Gagal membuang permohonan e-mel disebabkan ralat sistem: ').$e->getMessage());
         }
     }
 }

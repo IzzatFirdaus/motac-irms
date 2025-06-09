@@ -20,9 +20,7 @@ class LanguageController extends Controller
      * Handle the language swap.
      * SDD Ref: 3.1
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  string  $locale The desired locale code (e.g., 'ms', 'en').
-     * @return \Illuminate\Http\RedirectResponse
+     * @param  string  $locale  The desired locale code (e.g., 'ms', 'en').
      */
     public function __invoke(Request $request, string $locale): RedirectResponse
     {

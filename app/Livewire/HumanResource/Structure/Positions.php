@@ -2,14 +2,15 @@
 
 namespace App\Livewire\HumanResource\Structure;
 
-use App\Models\Position;
-use App\Models\Grade; // For Grade selection
-use Livewire\Component;
-use Illuminate\Validation\Rule as ValidationRule; // Alias for Laravel's Rule
+use App\Models\Grade;
+use App\Models\Position; // For Grade selection
+use Illuminate\Validation\Rule as ValidationRule;
+use Livewire\Component; // Alias for Laravel's Rule
 
 class Positions extends Component
 {
     public $positions = [];
+
     public ?Position $positionInstance = null; // Explicitly type hinting
 
     // Form fields based on System Design
@@ -28,6 +29,7 @@ class Positions extends Component
     // public $vacanciesCount; // Removed as it's not in MOTAC System Design for positions table
 
     public bool $isEditMode = false;
+
     public ?int $confirmedId = null;
 
     // Options for dropdowns

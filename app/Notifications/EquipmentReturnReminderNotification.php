@@ -21,6 +21,7 @@ class EquipmentReturnReminderNotification extends Notification implements Should
     use Queueable;
 
     private LoanApplication $loanApplication;
+
     private int $daysUntilReturn; // Positive for upcoming, 0 for today, negative for overdue
 
     public function __construct(LoanApplication $loanApplication, int $daysUntilReturn)
@@ -56,6 +57,7 @@ class EquipmentReturnReminderNotification extends Notification implements Should
                 return __('Tidak dinyatakan');
             }
         }
+
         return __('Tidak dinyatakan');
     }
 
@@ -73,30 +75,30 @@ class EquipmentReturnReminderNotification extends Notification implements Should
         $greeting = __('Salam Sejahtera, :name,', ['name' => $applicantName]);
         $level = 'line';
 
-        $mailMessage = (new MailMessage());
+        $mailMessage = (new MailMessage);
 
         if ($daysUntilReturn > 0) {
-            $subject = __("Peringatan: Pulangan Peralatan Dalam :days Hari Lagi - Permohonan #:id", ['days' => $daysUntilReturn, 'id' => $applicationId]);
-            $mailMessage->line(__("Ini adalah peringatan mesra bahawa peralatan yang dipinjam di bawah Permohonan Pinjaman Peralatan ICT **#:id** perlu dipulangkan dalam masa **:days hari lagi**.", ['id' => $applicationId, 'days' => $daysUntilReturn]));
+            $subject = __('Peringatan: Pulangan Peralatan Dalam :days Hari Lagi - Permohonan #:id', ['days' => $daysUntilReturn, 'id' => $applicationId]);
+            $mailMessage->line(__('Ini adalah peringatan mesra bahawa peralatan yang dipinjam di bawah Permohonan Pinjaman Peralatan ICT **#:id** perlu dipulangkan dalam masa **:days hari lagi**.', ['id' => $applicationId, 'days' => $daysUntilReturn]));
         } elseif ($daysUntilReturn === 0) {
-            $subject = __("Peringatan: Pulangan Peralatan Hari Ini - Permohonan #:id", ['id' => $applicationId]);
-            $mailMessage->line(__("Ini adalah peringatan bahawa peralatan yang dipinjam di bawah Permohonan Pinjaman Peralatan ICT **#:id** perlu dipulangkan **HARI INI**.", ['id' => $applicationId]));
+            $subject = __('Peringatan: Pulangan Peralatan Hari Ini - Permohonan #:id', ['id' => $applicationId]);
+            $mailMessage->line(__('Ini adalah peringatan bahawa peralatan yang dipinjam di bawah Permohonan Pinjaman Peralatan ICT **#:id** perlu dipulangkan **HARI INI**.', ['id' => $applicationId]));
         } else {
             $daysOverdue = abs($daysUntilReturn);
-            $subject = __("PERHATIAN: Peralatan Pinjaman LEWAT Dipulangkan (:days Hari) - Permohonan #:id", ['days' => $daysOverdue, 'id' => $applicationId]);
+            $subject = __('PERHATIAN: Peralatan Pinjaman LEWAT Dipulangkan (:days Hari) - Permohonan #:id', ['days' => $daysOverdue, 'id' => $applicationId]);
             $mailMessage->error();
-            $mailMessage->line(__("Peralatan yang dipinjam di bawah Permohonan Pinjaman Peralatan ICT **#:id** telah **LEWAT DIPULANGKAN** selama **:days hari**.", ['id' => $applicationId, 'days' => $daysOverdue]));
+            $mailMessage->line(__('Peralatan yang dipinjam di bawah Permohonan Pinjaman Peralatan ICT **#:id** telah **LEWAT DIPULANGKAN** selama **:days hari**.', ['id' => $applicationId, 'days' => $daysOverdue]));
             $level = 'error';
         }
 
         $mailMessage->subject($subject)
             ->greeting($greeting)
-            ->line(__("Tarikh pemulangan yang dijangka adalah pada **:date**.", ['date' => $expectedReturnDate]));
+            ->line(__('Tarikh pemulangan yang dijangka adalah pada **:date**.', ['date' => $expectedReturnDate]));
 
         if ($level === 'error') {
-             $mailMessage->line(__("Sila pulangkan peralatan tersebut dengan kadar **SEGERA** di **:loc**.", ['loc' => $returnLocation]));
+            $mailMessage->line(__('Sila pulangkan peralatan tersebut dengan kadar **SEGERA** di **:loc**.', ['loc' => $returnLocation]));
         } else {
-            $mailMessage->line(__("Sila pastikan peralatan dipulangkan di **:loc** pada atau sebelum tarikh tersebut.", ['loc' => $returnLocation]));
+            $mailMessage->line(__('Sila pastikan peralatan dipulangkan di **:loc** pada atau sebelum tarikh tersebut.', ['loc' => $returnLocation]));
         }
         $mailMessage->line('');
 
@@ -111,7 +113,7 @@ class EquipmentReturnReminderNotification extends Notification implements Should
                 Log::error('Error generating URL for EquipmentReturnReminderNotification (toMail): '.$e->getMessage(), [
                     'exception' => $e,
                     'application_id' => $loanApplication->id ?? null,
-                    'route_name' => $routeName
+                    'route_name' => $routeName,
                 ]);
                 $applicationUrl = '#';
             }
@@ -141,39 +143,39 @@ class EquipmentReturnReminderNotification extends Notification implements Should
         $returnLocation = $loanApplication->return_location ?? __('Unit ICT, Bahagian Pengurusan Maklumat');
 
         $status = 'return_reminder';
-        $subject = __("Peringatan Pulangan Peralatan");
-        $message = "";
+        $subject = __('Peringatan Pulangan Peralatan');
+        $message = '';
         $icon = 'ti ti-calendar-event';
 
         if ($daysUntilReturn > 0) {
-            $subject = __("Peringatan: Peralatan Perlu Dipulangkan Dalam :days Hari", ['days' => $daysUntilReturn]);
-            $message = __("Peralatan untuk Permohonan #:id perlu dipulangkan dalam masa :days hari lagi (:date).", ['id' => $applicationId ?? 'N/A', 'days' => $daysUntilReturn, 'date' => $expectedReturnDate]);
+            $subject = __('Peringatan: Peralatan Perlu Dipulangkan Dalam :days Hari', ['days' => $daysUntilReturn]);
+            $message = __('Peralatan untuk Permohonan #:id perlu dipulangkan dalam masa :days hari lagi (:date).', ['id' => $applicationId ?? 'N/A', 'days' => $daysUntilReturn, 'date' => $expectedReturnDate]);
         } elseif ($daysUntilReturn === 0) {
-            $subject = __("Peringatan: Peralatan Perlu Dipulangkan Hari Ini");
-            $message = __("Peralatan untuk Permohonan #:id perlu dipulangkan hari ini (:date).", ['id' => $applicationId ?? 'N/A', 'date' => $expectedReturnDate]);
+            $subject = __('Peringatan: Peralatan Perlu Dipulangkan Hari Ini');
+            $message = __('Peralatan untuk Permohonan #:id perlu dipulangkan hari ini (:date).', ['id' => $applicationId ?? 'N/A', 'date' => $expectedReturnDate]);
         } else {
             $daysOverdue = abs($daysUntilReturn);
             $status = 'overdue'; // This correctly reflects the overdue status
-            $subject = __("PERHATIAN: Peralatan Lewat Dipulangkan (:days Hari)", ['days' => $daysOverdue]);
-            $message = __("Peralatan untuk Permohonan #:id telah lewat dipulangkan :days hari. Tarikh pulang jangkaan: :date.", ['id' => $applicationId ?? 'N/A', 'days' => $daysOverdue, 'date' => $expectedReturnDate]);
+            $subject = __('PERHATIAN: Peralatan Lewat Dipulangkan (:days Hari)', ['days' => $daysOverdue]);
+            $message = __('Peralatan untuk Permohonan #:id telah lewat dipulangkan :days hari. Tarikh pulang jangkaan: :date.', ['id' => $applicationId ?? 'N/A', 'days' => $daysOverdue, 'date' => $expectedReturnDate]);
             $icon = 'ti ti-alarm-snooze';
         }
         if ($applicationId) {
-             $subject .= __(" (#:id)", ['id' => $applicationId]);
+            $subject .= __(' (#:id)', ['id' => $applicationId]);
         }
 
         $applicationUrl = '#';
         // Standardized route name
         $routeName = 'resource-management.my-applications.loan.show';
-         if ($applicationId && Route::has($routeName)) {
+        if ($applicationId && Route::has($routeName)) {
             try {
-                 // Ensure correct parameter name for the route
+                // Ensure correct parameter name for the route
                 $applicationUrl = route($routeName, ['loan_application' => $applicationId]);
             } catch (\Exception $e) {
                 Log::error('Error generating URL for EquipmentReturnReminderNotification (toArray): '.$e->getMessage(), [
                     'exception' => $e,
                     'application_id' => $applicationId,
-                    'route_name' => $routeName
+                    'route_name' => $routeName,
                 ]);
                 $applicationUrl = '#';
             }

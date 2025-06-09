@@ -10,7 +10,6 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
-use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -26,6 +25,7 @@ final class LoanApplicationReturned extends Mailable implements ShouldQueue
     use SerializesModels;
 
     public LoanApplication $loanApplication;
+
     public LoanTransaction $loanTransaction;
 
     /**
@@ -41,7 +41,7 @@ final class LoanApplicationReturned extends Mailable implements ShouldQueue
         $this->loanTransaction = $loanTransaction->loadMissing([
             'loanTransactionItems.equipment', // For equipment details
             'returnAcceptingOfficer', // For who accepted the return
-            'issuingOfficer' // Fallback if accepting officer not present
+            'issuingOfficer', // Fallback if accepting officer not present
         ]);
 
         Log::info('LoanApplicationReturned Mailable: Instance created.', [
@@ -63,7 +63,6 @@ final class LoanApplicationReturned extends Mailable implements ShouldQueue
         // Attempt to get primary equipment details for the subject from the first item if available
         $firstItemEquipment = $this->loanTransaction->loanTransactionItems->first()?->equipment;
         $equipmentDetailsForSubject = $firstItemEquipment?->model ?? ($firstItemEquipment?->tag_id ?? 'Peralatan ICT');
-
 
         /** @phpstan-ignore-next-line nullsafe.neverNull */
         $recipientEmail = $this->loanApplication->user?->email;

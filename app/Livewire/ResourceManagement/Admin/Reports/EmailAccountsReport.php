@@ -5,11 +5,11 @@ namespace App\Livewire\ResourceManagement\Admin\Reports;
 use App\Models\EmailApplication;
 use App\Models\User; // For service status options
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
 
 #[Layout('layouts.app')]
 class EmailAccountsReport extends Component
@@ -19,16 +19,22 @@ class EmailAccountsReport extends Component
 
     // Filter properties
     public ?string $filterStatus = ''; // Use empty string for "All"
+
     public ?string $filterServiceStatus = ''; // Use empty string for "All"
+
     public ?string $filterDateFrom = null;
+
     public ?string $filterDateTo = null;
+
     public string $searchTerm = '';
 
     // Sorting properties
     public string $sortBy = 'created_at';
+
     public string $sortDirection = 'desc';
 
     protected string $paginationTheme = 'bootstrap';
+
     public int $perPage = 15;
 
     public function mount()
@@ -48,31 +54,31 @@ class EmailAccountsReport extends Component
         $query = EmailApplication::with(['user:id,name,service_status,department_id', 'user.department:id,name', 'supportingOfficer:id,name'])
             ->select('email_applications.*');
 
-        if (!empty($this->searchTerm)) {
-            $search = '%' . strtolower($this->searchTerm) . '%';
+        if (! empty($this->searchTerm)) {
+            $search = '%'.strtolower($this->searchTerm).'%';
             $query->where(function ($q) use ($search) {
                 $q->whereRaw('LOWER(proposed_email) LIKE ?', [$search])
-                  ->orWhereRaw('LOWER(final_assigned_email) LIKE ?', [$search])
-                  ->orWhereHas('user', function ($userQuery) use ($search) {
-                      $userQuery->whereRaw('LOWER(name) LIKE ?', [$search]);
-                  });
+                    ->orWhereRaw('LOWER(final_assigned_email) LIKE ?', [$search])
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->whereRaw('LOWER(name) LIKE ?', [$search]);
+                    });
             });
         }
 
-        if (!empty($this->filterStatus)) {
+        if (! empty($this->filterStatus)) {
             $query->where('status', $this->filterStatus);
         }
 
-        if (!empty($this->filterServiceStatus)) {
+        if (! empty($this->filterServiceStatus)) {
             $query->whereHas('user', function ($q) {
                 $q->where('service_status', $this->filterServiceStatus);
             });
         }
 
-        if (!empty($this->filterDateFrom)) {
+        if (! empty($this->filterDateFrom)) {
             $query->whereDate('email_applications.created_at', '>=', $this->filterDateFrom);
         }
-        if (!empty($this->filterDateTo)) {
+        if (! empty($this->filterDateTo)) {
             $query->whereDate('email_applications.created_at', '<=', $this->filterDateTo);
         }
 
@@ -80,13 +86,14 @@ class EmailAccountsReport extends Component
 
         $reportData = $query->paginate($this->perPage);
         Log::info("Livewire\EmailAccountsReport: Fetched {$reportData->total()} email applications.", ['admin_user_id' => Auth::id()]);
+
         return $reportData;
     }
 
     public function getStatusOptionsProperty(): array
     {
         // Ensure EmailApplication model has this static property/method as per "Revision 3" (4.2)
-        return EmailApplication::$STATUS_OPTIONS ?? (defined(EmailApplication::class . '::STATUS_DRAFT') ? EmailApplication::getStatusOptions() : []);
+        return EmailApplication::$STATUS_OPTIONS ?? (defined(EmailApplication::class.'::STATUS_DRAFT') ? EmailApplication::getStatusOptions() : []);
     }
 
     public function getServiceStatusOptionsProperty(): array

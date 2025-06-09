@@ -15,18 +15,17 @@ class CheckGradeLevel
      * Handle an incoming request.
      * Checks if the authenticated user's grade level meets the specified minimum.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      * @param  string|int  $minRequiredGradeLevelNumeric  The minimum numeric grade level required.
-     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function handle(Request $request, Closure $next, $minRequiredGradeLevelNumeric): Response
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             Log::warning('CheckGradeLevel: Unauthenticated user attempted to access grade-restricted route.', [ // [cite: 3]
-              'route_name' => $request->route()?->getName(),
-              'ip_address' => $request->ip(),
+                'route_name' => $request->route()?->getName(),
+                'ip_address' => $request->ip(),
             ]);
+
             return redirect()->route('login')->with('error', 'Sila log masuk untuk mengakses halaman ini.'); // [cite: 3]
         }
 
@@ -34,11 +33,11 @@ class CheckGradeLevel
         $user = Auth::user();
 
         // Ensure user has a grade and the grade has a numeric level property
-        if (!$user->grade || !isset($user->grade->level) || !is_numeric($user->grade->level)) {
+        if (! $user->grade || ! isset($user->grade->level) || ! is_numeric($user->grade->level)) {
             Log::warning('CheckGradeLevel: User does not have a valid or numeric grade level configured.', [ // [cite: 3]
-              'user_id' => $user->id,
-              'user_email' => $user->email,
-              'route_name' => $request->route()?->getName(),
+                'user_id' => $user->id,
+                'user_email' => $user->email,
+                'route_name' => $request->route()?->getName(),
             ]);
             abort(403, 'Akses Ditolak. Akaun anda tidak mempunyai Gred yang sah atau tahap Gred tidak ditetapkan.'); // [cite: 3]
         }
@@ -51,11 +50,11 @@ class CheckGradeLevel
         }
 
         Log::warning('CheckGradeLevel: User grade level insufficient.', [ // [cite: 3]
-          'user_id' => $user->id,
-          'user_email' => $user->email,
-          'user_grade_level' => $userGradeLevelNumeric,
-          'required_grade_level' => $requiredGradeLevel,
-          'route_name' => $request->route()?->getName(),
+            'user_id' => $user->id,
+            'user_email' => $user->email,
+            'user_grade_level' => $userGradeLevelNumeric,
+            'required_grade_level' => $requiredGradeLevel,
+            'route_name' => $request->route()?->getName(),
         ]);
         abort(403, 'Akses Ditolak. Tahap Gred anda tidak mencukupi untuk mengakses sumber ini.'); // [cite: 3]
     }

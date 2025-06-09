@@ -1,40 +1,39 @@
 {{-- resources/views/layouts/app.blade.php --}}
-@isset($pageConfigs)
-    {!! \App\Helpers\Helpers::updatePageConfig($pageConfigs) !!}
-@endisset
-
 @php
+    // Set page configuration if available
+    if (isset($pageConfigs)) {
+        \App\Helpers\Helpers::updatePageConfig($pageConfigs);
+    }
+
+    // Retrieve system-wide configuration from the helper
     $configData = \App\Helpers\Helpers::appClasses();
 
+    // --- Layout Control Variables ---
     $isMenu = $isMenu ?? ($configData['isMenu'] ?? true);
     $isNavbar = $isNavbar ?? ($configData['isNavbar'] ?? true);
     $isFooter = $isFooter ?? ($configData['isFooter'] ?? true);
-
     $container = $container ?? ($configData['container'] ?? 'container-fluid');
     $isFlex = $isFlex ?? ($configData['isFlex'] ?? false);
 
+    // --- CSS Class Strings for Layout States ---
     $navbarDetached = !empty($configData['navbarDetached']) ? 'navbar-detached' : '';
     $menuFixed = !empty($configData['menuFixed']) ? 'layout-menu-fixed' : '';
     $menuCollapsed = !empty($configData['menuCollapsed']) ? 'layout-menu-collapsed' : '';
     $navbarFixed = !empty($configData['navbarFixed']) ? 'layout-navbar-fixed' : '';
     $footerFixed = !empty($configData['footerFixed']) ? 'layout-footer-fixed' : '';
     $menuHover = !empty($configData['showDropdownOnHover']) ? 'layout-menu-hover' : '';
+    $templateName = \Illuminate\Support\Str::slug(config('variables.templateName', 'Sistem MOTAC'), '-');
 
-    $templateName = \Illuminate\Support\Str::slug(
-        config('variables.templateName', config('app.name', 'Sistem MOTAC')),
-        '-',
-    );
+    // This server-side variable sets the initial theme for the page load to prevent FOUC.
+    // The client-side script will take over from here.
     $currentThemeStyle = $configData['myStyle'] ?? 'light';
 
-    // $menuData is expected to be globally shared by MenuServiceProvider's View::share('menuData', $data).
-// It will be automatically available in this scope if shared correctly.
-// If MenuServiceProvider fails or View::share isn't effective here for some reason,
-    // $menuData passed to the component might be null or from a previous context if set by a controller.
-    // The Livewire component's mount method now has a fallback to try View::shared('menuData') directly.
+    // Prepare data for child components
     $currentUserRole = Auth::check() ? Auth::user()?->getRoleNames()->first() : null;
 
 @endphp
 
+{{-- The `class` and `data-bs-theme` attributes are set here on the server to prevent a "flash of unstyled content" --}}
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
     class="{{ $currentThemeStyle }}-style layout-navbar-fixed {{ $navbarFixed }} {{ $menuFixed }} {{ $footerFixed }} {{ $menuCollapsed }} {{ $menuHover }}"
     dir="{{ $configData['textDirection'] ?? 'ltr' }}" data-theme="{{ $configData['myTheme'] ?? 'theme-default' }}"
@@ -54,29 +53,15 @@
     {{-- Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Noto+Sans+JP:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;600;700&family=Noto+Sans+Display:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
-        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700&display=swap" rel="stylesheet" />
 
-    {{-- Bootstrap Icons --}}
+    {{-- Icons --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    {{-- Placeholder for Tabler Icons if strictly needed by core theme JS for menu toggles (prefer standardization to bi-*) --}}
-    {{-- <link rel="stylesheet" href="{{ asset('assets/vendor/fonts/tabler-icons.css') }}" /> --}}
-
-
-    {{-- Core CSS --}}
-    <link rel="stylesheet" href="{{ asset('assets/vendor/css' . ($configData['rtlSupport'] ?? '') . '/core.css') }}"
-        class="{{ $configData['hasCustomizer'] ?? false ? 'template-customizer-core-css' : '' }}" />
-
-    {{-- Theme CSS --}}
-    <link rel="stylesheet"
-        href="{{ asset('assets/vendor/css' . ($configData['rtlSupport'] ?? '') . '/' . ($configData['myTheme'] ?? 'theme-default') . '.css') }}"
-        {{-- This will load theme-motac.css --}}
-        class="{{ $configData['hasCustomizer'] ?? false ? 'template-customizer-theme-css' : '' }}" />
-
-    {{-- Custom App CSS (if demo.css is not used for application styles) --}}
-    {{-- <link rel="stylesheet" href="{{ asset('assets/css/app-motac.css') }}" /> --}}
+    {{-- Core & Theme CSS --}}
+    <link rel="stylesheet" href="{{ asset('assets/vendor/css' . ($configData['rtlSupport'] ?? '') . '/core.css') }}" class="{{ $configData['hasCustomizer'] ?? false ? 'template-customizer-core-css' : '' }}" />
+    <link rel="stylesheet" href="{{ asset('assets/vendor/css' . ($configData['rtlSupport'] ?? '') . '/' . ($configData['myTheme'] ?? 'theme-default') . '.css') }}" class="{{ $configData['hasCustomizer'] ?? false ? 'template-customizer-theme-css' : '' }}" />
+    <link rel="stylesheet" href="{{ asset('assets/vendor/css/theme-motac.css') }}" />
 
 
     {{-- Vendor Libs CSS --}}
@@ -87,29 +72,24 @@
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/sweetalert2/sweetalert2.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/spinkit/spinkit.css') }}" />
 
-    @yield('vendor-css')
+    {{-- Page-specific CSS --}}
     @yield('page-css')
 
+    {{-- Helpers --}}
     <script src="{{ asset('assets/vendor/js/helpers.js') }}"></script>
     @include('layouts.sections.scriptsIncludes')
 
     @livewireStyles
-    @stack('styles')
+    @stack('page-style')
 </head>
 
 <body>
-    {{-- Debug: Check if $menuData is set here from View::share before passing --}}
-    {{-- <script>console.log('app.blade.php - $menuData before Livewire component:', @json($menuData ?? null));</script> --}}
-    {{-- <script>console.log('app.blade.php - $currentUserRole before Livewire component:', @json($currentUserRole ?? null));</script> --}}
-    {{-- <script>console.log('app.blade.php - $configData before Livewire component keys:', @json(array_keys($configData ?? [])));</script> --}}
-
+    {{-- Main Layout Wrapper --}}
     <div class="layout-wrapper layout-content-navbar {{ $isNavbar ? '' : 'layout-without-navbar' }}">
         <div class="layout-container">
             @if ($isMenu)
-                {{-- Pass the $menuData that should be available from View::share() --}}
-                {{-- The Livewire component will also try View::shared('menuData') if this is null --}}
                 @livewire('sections.menu.vertical-menu', [
-                    'menuData' => $menuData ?? null, // Pass $menuData (could be null if View::share didn't populate it here)
+                    'menuData' => $menuData ?? null,
                     'role' => $currentUserRole,
                     'configData' => $configData,
                 ])
@@ -117,51 +97,122 @@
 
             <div class="layout-page">
                 @if ($isNavbar)
+                    {{-- The initial activeTheme is passed here to the navbar component --}}
                     @livewire('sections.navbar.navbar', [
                         'containerNav' => $configData['containerNav'] ?? 'container-fluid',
                         'navbarDetachedClass' => $navbarDetached,
                         'navbarFull' => $configData['navbarFull'] ?? true,
                         'navbarHideToggle' => ($configData['myLayout'] ?? 'vertical') === 'horizontal',
-                        'activeTheme' => $currentThemeStyle,
                     ])
                 @endif
 
                 <div class="content-wrapper" id="main-content">
                     @if ($isFlex)
                         <div class="{{ $container }} d-flex align-items-stretch flex-grow-1 p-0">
-                        @else
-                            <div class="{{ $container }} flex-grow-1 container-p-y">
-                    @endif
-
-                    @include('_partials._alerts.alert-general') {{-- Ensure this partial exists --}}
-
-                    @if (isset($slot))
-                        {{ $slot }}
                     @else
-                        @yield('content')
+                        <div class="{{ $container }} flex-grow-1 container-p-y">
                     @endif
 
-                </div>
+                        @include('_partials._alerts.alert-general')
 
-                @if ($isFooter)
-                    @livewire('sections.footer.footer')
-                @endif
-                <div class="content-backdrop fade"></div>
+                        @if (isset($slot))
+                            {{ $slot }}
+                        @else
+                            @yield('content')
+                        @endif
+                    </div>
+
+                    @if ($isFooter)
+                        @livewire('sections.footer.footer')
+                    @endif
+                    <div class="content-backdrop fade"></div>
+                </div>
             </div>
         </div>
-    </div>
 
-    @if ($isMenu)
-        <div class="layout-overlay layout-menu-toggle"></div>
-    @endif
-    <div class="drag-target"></div>
-
+        @if ($isMenu)
+            <div class="layout-overlay layout-menu-toggle"></div>
+        @endif
+        <div class="drag-target"></div>
     </div>
 
     @include('layouts.sections.scripts')
     @livewireScripts
-    @stack('scripts')
     @stack('page-script')
-</body>
 
+    {{-- START: Finalized Theme Switcher JavaScript --}}
+    <script>
+        /**
+         * MOTAC IRMS - Unified Theme Switcher Logic (Client-Side)
+         *
+         * This script manages the theme toggle instantly on the client-side
+         * to avoid waiting for a server roundtrip.
+         */
+        (function() {
+            'use strict';
+
+            const themeStorageKey = 'theme-preference';
+            const toggleAttrName = 'data-bs-toggle';
+            const toggleAttrValue = 'theme';
+
+            // Gets the theme preference from localStorage, or defaults to the system preference.
+            const getThemePreference = () => {
+                const storedTheme = localStorage.getItem(themeStorageKey);
+                if (storedTheme) {
+                    return storedTheme;
+                }
+                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            };
+
+            // Sets the theme on the <html> element and updates all toggle icons and tooltips.
+            const setTheme = (theme) => {
+                localStorage.setItem(themeStorageKey, theme);
+                document.documentElement.setAttribute('data-bs-theme', theme);
+
+                document.querySelectorAll(`[${toggleAttrName}="${toggleAttrValue}"]`).forEach(toggle => {
+                    const sunIcon = toggle.querySelector('.bi-sun-fill');
+                    const moonIcon = toggle.querySelector('.bi-moon-stars-fill');
+
+                    if (theme === 'dark') {
+                        // In dark mode, the button should offer to switch to light mode.
+                        toggle.setAttribute('title', 'Switch to light mode');
+                        toggle.setAttribute('aria-label', 'Switch to light mode');
+                        if (sunIcon) sunIcon.style.display = 'inline-block';
+                        if (moonIcon) moonIcon.style.display = 'none';
+                    } else {
+                        // In light mode, the button should offer to switch to dark mode.
+                        toggle.setAttribute('title', 'Switch to dark mode');
+                        toggle.setAttribute('aria-label', 'Switch to dark mode');
+                        if (sunIcon) sunIcon.style.display = 'none';
+                        if (moonIcon) moonIcon.style.display = 'inline-block';
+                    }
+                });
+
+                // Dispatch an event for Livewire or other parts of the app to listen to if needed.
+                if (window.Livewire) {
+                    window.Livewire.dispatch('themeHasChanged', {
+                        theme: theme
+                    });
+                }
+            };
+
+            // Add click listeners to all theme togglers when the page is ready.
+            window.addEventListener('DOMContentLoaded', () => {
+                // Set the theme immediately on page load
+                setTheme(getThemePreference());
+
+                document.querySelectorAll(`[${toggleAttrName}="${toggleAttrValue}"]`).forEach(toggle => {
+                    toggle.addEventListener('click', (event) => {
+                        event.preventDefault();
+                        const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+                        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                        setTheme(newTheme);
+                    });
+                });
+            });
+        })();
+    </script>
+    {{-- END: Finalized Theme Switcher JavaScript --}}
+
+</body>
 </html>

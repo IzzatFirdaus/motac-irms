@@ -2,31 +2,25 @@
 
 namespace App\View\Components;
 
+use Illuminate\Support\ViewErrorBag;
 use Illuminate\View\Component;
 use Illuminate\View\View;
-use Illuminate\Support\ViewErrorBag;
 
 class AlertErrors extends Component
 {
     /**
      * The title to display for the alert.
-     *
-     * @var string|null
      */
     public ?string $title;
 
     /**
      * The validation errors bag.
-     *
-     * @var \Illuminate\Support\ViewErrorBag
      */
     public ViewErrorBag $errors;
 
     /**
      * Create a new component instance.
      *
-     * @param string|null $title
-     * @param \Illuminate\Support\ViewErrorBag|null $errors
      * @return void
      */
     public function __construct(?string $title = null, ?ViewErrorBag $errors = null)
@@ -39,8 +33,6 @@ class AlertErrors extends Component
 
     /**
      * Get the view / contents that represent the component.
-     *
-     * @return \Illuminate\View\View
      */
     public function render(): View
     {

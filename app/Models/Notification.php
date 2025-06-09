@@ -88,7 +88,7 @@ final class Notification extends Model
     {
         parent::boot();
 
-        static::creating(function (self $model): void {
+        self::creating(function (self $model): void {
             if (empty($model->{$model->getKeyName()})) {
                 $model->{$model->getKeyName()} = Str::uuid()->toString();
             }
@@ -104,8 +104,8 @@ final class Notification extends Model
             }
         });
 
-        static::updating(function (self $model): void {
-            if (Auth::check() && !$model->isDirty('updated_by')) {
+        self::updating(function (self $model): void {
+            if (Auth::check() && ! $model->isDirty('updated_by')) {
                 /** @var User $user */
                 $user = Auth::user();
                 $model->updated_by = $user->id;
@@ -113,7 +113,7 @@ final class Notification extends Model
         });
 
         if (in_array(SoftDeletes::class, class_uses_recursive(self::class))) {
-            static::deleting(function (self $model): void {
+            self::deleting(function (self $model): void {
                 if (Auth::check() && property_exists($model, 'deleted_by') && is_null($model->deleted_by)) {
                     /** @var User $user */
                     $user = Auth::user();
@@ -124,11 +124,11 @@ final class Notification extends Model
                 }
             });
 
-            static::restoring(function (self $model): void {
+            self::restoring(function (self $model): void {
                 if (property_exists($model, 'deleted_by')) {
                     $model->deleted_by = null;
                 }
-                if (Auth::check() && !$model->isDirty('updated_by')) {
+                if (Auth::check() && ! $model->isDirty('updated_by')) {
                     /** @var User $user */
                     $user = Auth::user();
                     $model->updated_by = $user->id;
@@ -170,8 +170,10 @@ final class Notification extends Model
     {
         if (is_null($this->read_at)) {
             $this->forceFill(['read_at' => $this->freshTimestamp()])->save();
+
             return true;
         }
+
         return false;
     }
 
@@ -179,8 +181,10 @@ final class Notification extends Model
     {
         if (! is_null($this->read_at)) {
             $this->forceFill(['read_at' => null])->save();
+
             return true;
         }
+
         return false;
     }
 

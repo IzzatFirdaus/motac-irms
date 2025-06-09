@@ -13,6 +13,9 @@ class EquipmentCategoryFactory extends Factory
 
     public function definition(): array
     {
+        // Use a Malaysian locale for faker
+        $msFaker = \Faker\Factory::create('ms_MY');
+
         $auditUser = User::orderBy('id')->first() ?? User::factory()->create(['name' => 'Default Audit User (EqCatFactory)']);
         $auditUserId = $auditUser->id;
 
@@ -20,9 +23,10 @@ class EquipmentCategoryFactory extends Factory
         $updatedAt = Carbon::parse($this->faker->dateTimeBetween($createdAt, 'now'));
 
         return [
-            'name' => $this->faker->unique()->words(mt_rand(2, 4), true).' Category Group', // Example name
-            'description' => $this->faker->optional(0.8)->sentence,
-            'is_active' => $this->faker->boolean(90), // Added default for is_active
+            // Generate category name in Malay
+            'name' => $msFaker->unique()->words(mt_rand(2, 4), true).' Kumpulan Kategori',
+            'description' => $msFaker->optional(0.8)->sentence,
+            'is_active' => $this->faker->boolean(90),
             'created_by' => $auditUserId,
             'updated_by' => $auditUserId,
             'deleted_by' => null,

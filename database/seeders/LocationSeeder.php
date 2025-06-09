@@ -22,7 +22,7 @@ class LocationSeeder extends Seeder
         $adminUserForAudit = User::orderBy('id')->first();
         $auditUserId = $adminUserForAudit?->id;
 
-        if (!$auditUserId) {
+        if (! $auditUserId) {
             $adminUserForAudit = User::factory()->create(['name' => 'Audit User (LocationSeeder)']);
             $auditUserId = $adminUserForAudit->id;
             Log::info("Created a fallback audit user with ID {$auditUserId} for LocationSeeder.");
@@ -71,7 +71,7 @@ class LocationSeeder extends Seeder
                 'postal_code' => '30000',
                 'is_active' => true,
             ],
-             [
+            [
                 'name' => 'Auditorium Kementerian',
                 'description' => 'Auditorium utama untuk acara rasmi dan taklimat.',
                 'address' => 'Kementerian Pelancongan, Seni dan Budaya, Aras 2, Presint 5',
@@ -98,6 +98,7 @@ class LocationSeeder extends Seeder
         $targetCount = 10; // Reduced target for more focused default locations
         if (Location::count() >= $targetCount) {
             Log::info('Locations seeding complete (Revision 3).');
+
             return;
         }
         $needed = $targetCount - Location::count();

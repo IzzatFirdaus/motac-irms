@@ -28,63 +28,100 @@ final class EmailApplicationForm extends Component
     use AuthorizesRequests;
 
     public ?EmailApplication $application = null;
+
     public bool $isEdit = false;
+
     public ?int $applicationId = null;
 
     // Applicant details
     public ?string $applicant_title = '';
+
     public ?string $applicant_name = '';
+
     public ?string $applicant_identification_number = '';
+
     public ?string $applicant_passport_number = '';
+
     public ?string $applicant_jawatan_gred = '';
+
     public ?string $applicant_bahagian_unit = '';
+
     public ?string $applicant_level_aras = '';
+
     public ?string $applicant_mobile_number = '';
+
     public ?string $applicant_personal_email = '';
 
     // Form fields
     public string $service_status = '';
+
     public string $appointment_type = '';
+
     public ?string $previous_department_name = '';
+
     public ?string $previous_department_email = '';
+
     public ?string $service_start_date = null;
+
     public ?string $service_end_date = null;
+
     public string $purpose = '';
+
     public ?string $proposed_email = null;
+
     public bool $is_group_email_request = false;
+
     public ?string $group_email = null;
+
     public ?string $group_admin_name = null;
+
     public ?string $group_admin_email = null;
 
     // Supporting Officer
     public ?int $supporting_officer_id = null;
+
     public ?string $manual_supporting_officer_name = '';
+
     public ?string $manual_supporting_officer_grade_key = '';
+
     public ?string $manual_supporting_officer_email = '';
 
     // Certification
     public bool $cert_info_is_true = false;
+
     public bool $cert_data_usage_agreed = false;
+
     public bool $cert_email_responsibility_agreed = false;
 
     // Admin-specific
     public string $current_status_key = '';
+
     public string $editable_status_for_admin_key = '';
+
     public ?string $rejection_reason = null;
+
     public ?string $final_assigned_email = null;
+
     public ?string $final_assigned_user_id = null;
 
     // Options
     public SupportCollection $serviceStatusOptions;
+
     public SupportCollection $appointmentTypeOptions;
+
     public SupportCollection $gradeOptionsForSupportingOfficer;
+
     public SupportCollection $levelOptions;
+
     public SupportCollection $systemSupportingOfficers;
 
     // UI state
     public bool $showServiceDates = false;
+
     public bool $showPreviousDepartment = false;
+
     public bool $showApplicantJawatanGred = true;
+
     public bool $isPassportInputMode = false;
 
     protected EmailApplicationService $emailApplicationService;
@@ -99,7 +136,7 @@ final class EmailApplicationForm extends Component
         $user = Auth::user();
         $isFinalApplicantSubmission = false;
 
-        if (!$this->isEdit || ($this->application && $this->application->status === EmailApplication::STATUS_DRAFT)) {
+        if (! $this->isEdit || ($this->application && $this->application->status === EmailApplication::STATUS_DRAFT)) {
             if ($this->cert_info_is_true && $this->cert_data_usage_agreed && $this->cert_email_responsibility_agreed) {
                 $isFinalApplicantSubmission = true;
             }
@@ -108,7 +145,7 @@ final class EmailApplicationForm extends Component
         $rules = [
             'applicant_title' => ['nullable', 'string', 'max:50'],
             'applicant_name' => ['required', 'string', 'max:255'],
-            'applicant_identification_number' => [Rule::requiredIf(!$this->isPassportInputMode), 'nullable', 'string', 'regex:/^\d{6}-\d{2}-\d{4}$/'],
+            'applicant_identification_number' => [Rule::requiredIf(! $this->isPassportInputMode), 'nullable', 'string', 'regex:/^\d{6}-\d{2}-\d{4}$/'],
             'applicant_passport_number' => [Rule::requiredIf($this->isPassportInputMode), 'nullable', 'string', 'max:100'],
             'applicant_jawatan_gred' => [Rule::requiredIf($this->showApplicantJawatanGred), 'nullable', 'string', 'max:255'],
             'applicant_bahagian_unit' => [Rule::requiredIf($this->showApplicantJawatanGred), 'nullable', 'string', 'max:255'],
@@ -125,12 +162,12 @@ final class EmailApplicationForm extends Component
             'proposed_email' => [
                 'nullable', 'string', 'max:255',
                 Rule::when(
-                    fn ($input) => !empty($input->proposed_email),
+                    fn ($input) => ! empty($input->proposed_email),
                     [
                         'email:rfc,dns',
                         Rule::unique('email_applications', 'proposed_email')->ignore($this->applicationId),
                         Rule::unique('users', 'motac_email'),
-                        'regex:/^[a-zA-Z0-9._%+-]+@' . preg_quote(config('motac.email_provisioning.default_domain', 'motac.gov.my'), '/') . '$/i',
+                        'regex:/^[a-zA-Z0-9._%+-]+@'.preg_quote(config('motac.email_provisioning.default_domain', 'motac.gov.my'), '/').'$/i',
                     ]
                 ),
             ],
@@ -139,7 +176,7 @@ final class EmailApplicationForm extends Component
                 Rule::requiredIf($this->is_group_email_request), 'nullable', 'email:rfc,dns', 'max:255',
                 Rule::unique('email_applications', 'group_email')->ignore($this->applicationId),
                 Rule::unique('users', 'motac_email'),
-                'regex:/^[a-zA-Z0-9._%+-]+@' . preg_quote(config('motac.email_provisioning.default_domain', 'motac.gov.my'), '/') . '$/i',
+                'regex:/^[a-zA-Z0-9._%+-]+@'.preg_quote(config('motac.email_provisioning.default_domain', 'motac.gov.my'), '/').'$/i',
             ],
             'group_admin_name' => [Rule::requiredIf($this->is_group_email_request), 'nullable', 'string', 'max:255'],
             'group_admin_email' => [Rule::requiredIf($this->is_group_email_request), 'nullable', 'email:rfc,dns', 'max:255'],
@@ -168,6 +205,7 @@ final class EmailApplicationForm extends Component
                 Rule::unique('email_applications', 'final_assigned_user_id')->ignore($this->applicationId),
             ];
         }
+
         return $rules;
     }
 
@@ -180,9 +218,10 @@ final class EmailApplicationForm extends Component
     {
         /** @var User $user */
         $user = Auth::user();
-        if (!$user) {
+        if (! $user) {
             session()->flash('error', __('Sila log masuk untuk meneruskan.'));
-            $this->redirectRoute('login', navigate:true);
+            $this->redirectRoute('login', navigate: true);
+
             return;
         }
 
@@ -220,13 +259,13 @@ final class EmailApplicationForm extends Component
 
         $this->updatedServiceStatus($this->service_status);
         $this->updatedAppointmentType($this->appointment_type);
-        $this->is_group_email_request = !empty($this->group_email);
+        $this->is_group_email_request = ! empty($this->group_email);
     }
 
     public function updatedServiceStatus(string $value): void
     {
         $this->showServiceDates = in_array($value, [User::SERVICE_STATUS_KONTRAK_MYSTEP, User::SERVICE_STATUS_PELAJAR_INDUSTRI]);
-        $this->showApplicantJawatanGred = !in_array($value, [User::SERVICE_STATUS_PELAJAR_INDUSTRI, User::SERVICE_STATUS_OTHER_AGENCY]);
+        $this->showApplicantJawatanGred = ! in_array($value, [User::SERVICE_STATUS_PELAJAR_INDUSTRI, User::SERVICE_STATUS_OTHER_AGENCY]);
     }
 
     public function updatedAppointmentType(string $value): void
@@ -236,7 +275,7 @@ final class EmailApplicationForm extends Component
 
     public function toggleIdentifierInput(): void
     {
-        $this->isPassportInputMode = !$this->isPassportInputMode;
+        $this->isPassportInputMode = ! $this->isPassportInputMode;
         if ($this->isPassportInputMode) {
             $this->applicant_identification_number = null;
         } else {
@@ -249,8 +288,9 @@ final class EmailApplicationForm extends Component
     {
         /** @var User $currentUser */
         $currentUser = Auth::user();
-        if (!$currentUser) {
+        if (! $currentUser) {
             session()->flash('error', __('Sila log masuk untuk meneruskan.'));
+
             return $this->redirectRoute('login', navigate: true);
         }
 
@@ -272,7 +312,7 @@ final class EmailApplicationForm extends Component
             $applicationData['cert_email_responsibility_agreed'] = (bool) $this->cert_email_responsibility_agreed;
             $applicationData['status'] = $targetStatus;
 
-            if ($isFinalSubmission && (!$this->isEdit || ($this->application && $this->application->status === EmailApplication::STATUS_DRAFT))) {
+            if ($isFinalSubmission && (! $this->isEdit || ($this->application && $this->application->status === EmailApplication::STATUS_DRAFT))) {
                 $applicationData['certification_timestamp'] = now();
             }
 
@@ -302,7 +342,7 @@ final class EmailApplicationForm extends Component
                 $message = $isFinalSubmission ? __('Permohonan emel/ID berjaya dihantar.') : __('Draf permohonan emel/ID berjaya disimpan.');
             }
 
-            if ($isFinalSubmission && $this->application->status === EmailApplication::STATUS_PENDING_SUPPORT && !$currentUser->isAdmin() && !$currentUser->isItAdmin()) {
+            if ($isFinalSubmission && $this->application->status === EmailApplication::STATUS_PENDING_SUPPORT && ! $currentUser->isAdmin() && ! $currentUser->isItAdmin()) {
                 $this->emailApplicationService->processApplicationSubmission($this->application, $currentUser);
             }
 
@@ -313,26 +353,31 @@ final class EmailApplicationForm extends Component
             if ($this->isEdit && ($currentUser->isAdmin() || $currentUser->isItAdmin())) {
                 $this->application->refresh();
                 $this->fillFormFromModel();
+
                 return null;
             }
+
             return $this->redirectRoute('resource-management.my-applications.email.index', navigate: true);
 
         } catch (ValidationException $e) {
             DB::rollBack();
             Log::warning("EmailApplicationForm: Validation failed for User ID: {$currentUser->id}", ['errors' => $e->errors()]);
             $this->dispatch('toastr', type: 'error', message: __('Sila perbetulkan ralat pada borang.'));
+
             return null;
         } catch (AuthorizationException $e) {
             DB::rollBack();
             Log::error("EmailApplicationForm: Authorization failed for User ID: {$currentUser->id}", ['message' => $e->getMessage()]);
             session()->flash('error', __('Anda tidak dibenarkan untuk melakukan tindakan ini.'));
             $this->dispatch('toastr', type: 'error', message: __('Anda tidak dibenarkan untuk melakukan tindakan ini.'));
+
             return null;
         } catch (Throwable $e) {
             DB::rollBack();
             Log::error("EmailApplicationForm: Error submitting application for User ID: {$currentUser->id}", ['exception' => $e]);
-            session()->flash('error', __('Berlaku ralat tidak dijangka semasa memproses permohonan anda: ') . $e->getMessage());
+            session()->flash('error', __('Berlaku ralat tidak dijangka semasa memproses permohonan anda: ').$e->getMessage());
             $this->dispatch('toastr', type: 'error', message: __('Ralat sistem. Sila cuba lagi.'));
+
             return null;
         }
     }
@@ -344,11 +389,13 @@ final class EmailApplicationForm extends Component
 
     public function submitForApproval(): ?RedirectResponse
     {
-        if (!$this->cert_info_is_true || !$this->cert_data_usage_agreed || !$this->cert_email_responsibility_agreed) {
+        if (! $this->cert_info_is_true || ! $this->cert_data_usage_agreed || ! $this->cert_email_responsibility_agreed) {
             $this->addError('cert_info_is_true', __('Sila tandakan semua kotak perakuan untuk meneruskan.'));
             $this->dispatch('toastr', type: 'error', message: __('Sila lengkapkan semua perakuan.'));
+
             return null;
         }
+
         return $this->submitApplication(true);
     }
 
@@ -378,10 +425,10 @@ final class EmailApplicationForm extends Component
     {
         $this->applicant_title = $user->title;
         $this->applicant_name = $user->name;
-        $this->isPassportInputMode = empty($user->identification_number) && !empty($user->passport_number);
+        $this->isPassportInputMode = empty($user->identification_number) && ! empty($user->passport_number);
         $this->applicant_identification_number = $user->identification_number;
         $this->applicant_passport_number = $user->passport_number;
-        $this->applicant_jawatan_gred = ($user->position?->name ?? '') . ($user->grade?->name ? ' (Gred ' . $user->grade->name . ')' : '');
+        $this->applicant_jawatan_gred = ($user->position?->name ?? '').($user->grade?->name ? ' (Gred '.$user->grade->name.')' : '');
         $this->applicant_bahagian_unit = $user->department?->name;
         $this->applicant_level_aras = (string) $user->level;
         $this->applicant_mobile_number = $user->mobile_number;
@@ -390,7 +437,7 @@ final class EmailApplicationForm extends Component
 
     private function fillFormFromModel(): void
     {
-        if (!$this->application) {
+        if (! $this->application) {
             return;
         }
         if ($this->application->user) {
@@ -405,7 +452,7 @@ final class EmailApplicationForm extends Component
         $this->service_end_date = $this->application->service_end_date ? $this->application->service_end_date->format('Y-m-d') : null;
         $this->purpose = $this->application->purpose;
         $this->proposed_email = $this->application->proposed_email;
-        $this->is_group_email_request = !empty($this->application->group_email);
+        $this->is_group_email_request = ! empty($this->application->group_email);
         $this->group_email = $this->application->group_email;
         $this->group_admin_name = $this->application->group_admin_name;
         $this->group_admin_email = $this->application->group_admin_email;
@@ -413,9 +460,9 @@ final class EmailApplicationForm extends Component
         $this->manual_supporting_officer_name = $this->application->supporting_officer_name;
         $this->manual_supporting_officer_grade_key = $this->application->supporting_officer_grade;
         $this->manual_supporting_officer_email = $this->application->supporting_officer_email;
-        $this->cert_info_is_true = (bool)$this->application->cert_info_is_true;
-        $this->cert_data_usage_agreed = (bool)$this->application->cert_data_usage_agreed;
-        $this->cert_email_responsibility_agreed = (bool)$this->application->cert_email_responsibility_agreed;
+        $this->cert_info_is_true = (bool) $this->application->cert_info_is_true;
+        $this->cert_data_usage_agreed = (bool) $this->application->cert_data_usage_agreed;
+        $this->cert_email_responsibility_agreed = (bool) $this->application->cert_email_responsibility_agreed;
         $this->current_status_key = $this->application->status;
         $this->editable_status_for_admin_key = $this->application->status;
         $this->rejection_reason = $this->application->rejection_reason;
@@ -434,6 +481,7 @@ final class EmailApplicationForm extends Component
         if ($isFinalButtonClicked) {
             return EmailApplication::STATUS_PENDING_SUPPORT;
         }
+
         return EmailApplication::STATUS_DRAFT;
     }
 

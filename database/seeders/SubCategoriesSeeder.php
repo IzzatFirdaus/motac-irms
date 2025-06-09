@@ -23,7 +23,7 @@ class SubCategoriesSeeder extends Seeder
         $adminUserForAudit = User::orderBy('id')->first();
         $auditUserId = $adminUserForAudit?->id;
 
-        if (!$auditUserId) {
+        if (! $auditUserId) {
             $adminUserForAudit = User::factory()->create(['name' => 'Audit User (SubCatSeeder)']);
             $auditUserId = $adminUserForAudit->id;
             Log::info("Created a fallback audit user with ID {$auditUserId} for SubCategoriesSeeder.");
@@ -41,8 +41,9 @@ class SubCategoriesSeeder extends Seeder
             // $equipmentCategories = EquipmentCategory::all()->keyBy('name'); // Re-fetch
 
             if (EquipmentCategory::count() === 0) { // Check again after potential call
-                 Log::error('Failed to ensure EquipmentCategories exist. Cannot effectively seed SubCategories. Please run EquipmentCategorySeeder first.');
-                 return;
+                Log::error('Failed to ensure EquipmentCategories exist. Cannot effectively seed SubCategories. Please run EquipmentCategorySeeder first.');
+
+                return;
             }
             $equipmentCategories = EquipmentCategory::all()->keyBy('name'); // Re-fetch if seeder was called
         }
@@ -106,9 +107,9 @@ class SubCategoriesSeeder extends Seeder
                 Log::info("Created {$needed} additional subcategories using factory.");
             }
         } elseif ($equipmentCategories->isEmpty()) {
-            Log::warning("Skipping factory creation of SubCategories as no Equipment Categories exist to link to.");
+            Log::warning('Skipping factory creation of SubCategories as no Equipment Categories exist to link to.');
         } else {
-             Log::error('App\Models\SubCategory model or its factory not found. Cannot seed additional subcategories via factory.');
+            Log::error('App\Models\SubCategory model or its factory not found. Cannot seed additional subcategories via factory.');
         }
         Log::info('SubCategories seeding complete (Revision 3 - Factory based).');
     }

@@ -18,11 +18,14 @@ class UserActivityReport extends Component
 
     // Filter properties
     public string $searchTerm = ''; // Search by user name/email
+
     public ?int $filterDepartmentId = null;
+
     public ?string $filterRoleName = null;
 
     // Sorting properties
     public string $sortBy = 'name';
+
     public string $sortDirection = 'asc';
 
     protected string $paginationTheme = 'bootstrap';
@@ -40,13 +43,13 @@ class UserActivityReport extends Component
         $query = User::withCount([
             'emailApplications',
             'loanApplicationsAsApplicant', // Corrected to match User model's likely relationship name for loans initiated by user
-            'approvalsMade' // Corrected to match User model's likely relationship name for approvals made by user
+            'approvalsMade', // Corrected to match User model's likely relationship name for approvals made by user
         ])->with(['department', 'roles']); // Eager load department and roles
 
-        if (!empty($this->searchTerm)) {
+        if (! empty($this->searchTerm)) {
             $query->where(function ($q) {
-                $q->where('name', 'like', '%' . $this->searchTerm . '%')
-                  ->orWhere('email', 'like', '%' . $this->searchTerm . '%');
+                $q->where('name', 'like', '%'.$this->searchTerm.'%')
+                    ->orWhere('email', 'like', '%'.$this->searchTerm.'%');
             });
         }
         if ($this->filterDepartmentId) {
@@ -59,6 +62,7 @@ class UserActivityReport extends Component
         }
 
         $query->orderBy($this->sortBy, $this->sortDirection);
+
         return $query->paginate(15); // Or your preferred pagination number
     }
 
@@ -72,7 +76,6 @@ class UserActivityReport extends Component
     {
         return Role::orderBy('name')->pluck('name', 'name'); // Using name as value for easy filtering in whereHas
     }
-
 
     public function applyFilters(): void
     {

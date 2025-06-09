@@ -60,7 +60,7 @@ class ProvisioningFailedNotification extends Notification implements ShouldQueue
         $this->adminUser = $adminUser;
 
         Log::info(
-            "ProvisioningFailedNotification created for EmailApplication ID: ".
+            'ProvisioningFailedNotification created for EmailApplication ID: '.
             ($this->application->id ?? 'N/A').
             ". Error: {$this->errorMessage}".
             ($this->adminUser ? ". Triggered by Admin ID: {$this->adminUser->id}" : '')
@@ -131,8 +131,7 @@ class ProvisioningFailedNotification extends Notification implements ShouldQueue
             );
         }
 
-
-        $mailMessage = (new MailMessage())
+        $mailMessage = (new MailMessage)
             ->subject(__('Amaran: Gagal Memproses Akaun E-mel/ID Pengguna - Permohonan #:applicationId', ['applicationId' => $applicationId]))
             ->greeting(__('Salam Pentadbir ICT,'))
             ->error() // Mark as important
@@ -148,10 +147,10 @@ class ProvisioningFailedNotification extends Notification implements ShouldQueue
         $mailMessage->line('')
             ->line(__('Ralat yang berlaku:'))
             // Using HtmlString to allow preformatted error message display if it contains HTML or newlines.
-            ->line(new HtmlString("<pre style='background-color: #f8f8f8; padding: 10px; border: 1px solid #ddd; border-radius: 4px; white-space: pre-wrap; word-wrap: break-word;'>".htmlspecialchars($this->errorMessage)."</pre>"))
+            ->line(new HtmlString("<pre style='background-color: #f8f8f8; padding: 10px; border: 1px solid #ddd; border-radius: 4px; white-space: pre-wrap; word-wrap: break-word;'>".htmlspecialchars($this->errorMessage).'</pre>'))
             ->line('');
 
-        $mailMessage->line(__('Tindakan manual mungkin diperlukan untuk menyelesaikan isu ini.' . $triggeredByAdminInfo))
+        $mailMessage->line(__('Tindakan manual mungkin diperlukan untuk menyelesaikan isu ini.'.$triggeredByAdminInfo))
             ->line(__('Sila semak log sistem untuk maklumat lanjut dan ambil tindakan pembetulan yang sewajarnya.'));
 
         if ($viewUrl !== '#') {
@@ -219,7 +218,6 @@ class ProvisioningFailedNotification extends Notification implements ShouldQueue
             ? EmailApplication::STATUS_PROVISION_FAILED
             : 'provisioning_failed';
 
-
         return [
             'application_type_display' => __('Permohonan E-mel/ID Pengguna'),
             'application_type_morph' => $this->application->getMorphClass(),
@@ -235,7 +233,7 @@ class ProvisioningFailedNotification extends Notification implements ShouldQueue
                 [
                     'applicant_name' => $applicantName,
                     'application_id' => $applicationId ?? 'N/A',
-                    'error' => substr($this->errorMessage, 0, 100).(strlen($this->errorMessage) > 100 ? '...' : '') // Show a snippet of the error
+                    'error' => substr($this->errorMessage, 0, 100).(strlen($this->errorMessage) > 100 ? '...' : ''), // Show a snippet of the error
                 ]
             ),
             'url' => ($applicationUrl !== '#' && filter_var($applicationUrl, FILTER_VALIDATE_URL))

@@ -9,7 +9,6 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
-use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -25,7 +24,9 @@ final class WelcomeEmail extends Mailable implements ShouldQueue
     use SerializesModels;
 
     public User $user;
+
     public string $motacEmail;
+
     public string $password; // Initial password
 
     /**
@@ -77,7 +78,7 @@ final class WelcomeEmail extends Mailable implements ShouldQueue
         $metadata = [
             'user_id' => (string) ($this->user->id ?? 'unknown'),
             'motac_email' => $this->motacEmail,
-            'password_included_in_body' => !empty($this->password) ? 'true' : 'false',
+            'password_included_in_body' => ! empty($this->password) ? 'true' : 'false',
         ];
 
         Log::info('WelcomeEmail Mailable: Preparing envelope.', [

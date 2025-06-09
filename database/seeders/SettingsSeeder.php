@@ -22,7 +22,7 @@ class SettingsSeeder extends Seeder
         $adminUserForAudit = User::orderBy('id')->first(); // Get first user, likely an admin
         $auditUserId = $adminUserForAudit?->id;
 
-        if (!$auditUserId) {
+        if (! $auditUserId) {
             // Create a fallback user if no users exist (e.g., running seeders in a very specific order or fresh db)
             // This relies on UserFactory being correctly set up.
             $fallbackUser = User::factory()->create(['name' => 'Audit User (SettingsSeeder)']);

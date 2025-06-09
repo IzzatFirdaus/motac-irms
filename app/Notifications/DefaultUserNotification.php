@@ -15,10 +15,15 @@ final class DefaultUserNotification extends BaseNotification implements ShouldQu
     use Queueable;
 
     private string $subject;
+
     private string $greeting;
+
     private array $lines; // Changed from single 'line' to 'lines' array for more flexibility
+
     private ?string $actionUrl;
+
     private string $actionText;
+
     private array $additionalData;
 
     public function __construct(
@@ -41,15 +46,16 @@ final class DefaultUserNotification extends BaseNotification implements ShouldQu
     {
         $channels = ['database'];
         // Send email only if user has an email and email notifications are enabled for this type (example)
-        if (!empty($notifiable->email) && ($this->additionalData['send_email'] ?? true)) {
+        if (! empty($notifiable->email) && ($this->additionalData['send_email'] ?? true)) {
             $channels[] = 'mail';
         }
+
         return $channels;
     }
 
     public function toMail(User $notifiable): MailMessage
     {
-        $mailMessage = (new MailMessage())
+        $mailMessage = (new MailMessage)
             ->subject(__($this->subject)) // Assuming subject can be a translatable key or plain string
             ->greeting(__($this->greeting, ['name' => $notifiable->name])); // Personalize greeting
 
@@ -79,7 +85,7 @@ final class DefaultUserNotification extends BaseNotification implements ShouldQu
             'action_text' => __($this->actionText),
             'icon' => $this->additionalData['icon'] ?? 'ti ti-bell',
             'notification_type' => $this->additionalData['type'] ?? 'user_specific',
-             // Adding these for better context in UI if listing notifications
+            // Adding these for better context in UI if listing notifications
             'user_id' => $notifiable->id,
             'user_name' => $notifiable->name,
         ], $this->additionalData);

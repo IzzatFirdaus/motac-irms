@@ -13,10 +13,9 @@ class MiscErrorController extends Controller
     /**
      * Display a miscellaneous or generic error page.
      * SDD Ref:
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int $statusCode The HTTP status code for the error
-     * @param  string|null $message A custom message for the error
-     * @return \Illuminate\View\View
+     *
+     * @param  int  $statusCode  The HTTP status code for the error
+     * @param  string|null  $message  A custom message for the error
      */
     public function index(Request $request, int $statusCode = 500, ?string $message = null): View
     {

@@ -61,7 +61,7 @@ class BlameableObserver
     public function deleting(Model $model): void
     {
         // Ensure the model uses SoftDeletes trait
-        if (!in_array(SoftDeletes::class, class_uses_recursive(get_class($model)), true)) {
+        if (! in_array(SoftDeletes::class, class_uses_recursive(get_class($model)), true)) {
             return; // Not a soft-deleting model
         }
 
@@ -96,7 +96,7 @@ class BlameableObserver
      */
     public function restoring(Model $model): void
     {
-        if (!in_array(SoftDeletes::class, class_uses_recursive(get_class($model)), true)) {
+        if (! in_array(SoftDeletes::class, class_uses_recursive(get_class($model)), true)) {
             return; // Not a soft-deleting model
         }
 
@@ -119,6 +119,7 @@ class BlameableObserver
     {
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
+
         return $user?->id;
     }
 

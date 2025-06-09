@@ -5,19 +5,19 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller; // Base controller
-use App\Models\Equipment;
-use App\Models\Location;
-use App\Models\Department;
-use App\Models\EquipmentCategory;
-use App\Models\SubCategory; // Make sure SubCategory model is used if needed in views
-use App\Services\EquipmentService;
 use App\Http\Requests\Admin\StoreEquipmentRequest;
 use App\Http\Requests\Admin\UpdateEquipmentRequest;
+use App\Models\Department;
+use App\Models\Equipment;
+use App\Models\EquipmentCategory; // Make sure SubCategory model is used if needed in views
+use App\Models\Location;
+use App\Models\SubCategory;
+use App\Services\EquipmentService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\View\View;
 
 class EquipmentController extends Controller
 {
@@ -38,8 +38,6 @@ class EquipmentController extends Controller
 
     /**
      * Show the form for creating new equipment.
-     *
-     * @return \Illuminate\View\View
      */
     public function create(): View
     {
@@ -58,7 +56,6 @@ class EquipmentController extends Controller
         // For 'create' if not dynamic, you might pass all of them.
         $subCategories = SubCategory::where('is_active', true)->orderBy('name')->pluck('name', 'id');
 
-
         return view('admin.equipment.create', compact(
             'assetTypes',
             'initialStatuses',
@@ -74,9 +71,6 @@ class EquipmentController extends Controller
 
     /**
      * Store a newly created equipment in storage.
-     *
-     * @param \App\Http\Requests\Admin\StoreEquipmentRequest $request
-     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(StoreEquipmentRequest $request): RedirectResponse
     {
@@ -84,19 +78,18 @@ class EquipmentController extends Controller
         try {
             $this->equipmentService->createEquipment($request->validated());
             Log::info('Admin Equipment created successfully.', ['admin_user_id' => Auth::id()]);
+
             return redirect()->route('resource-management.equipment-admin.index')
-                             ->with('success', __('Peralatan ICT berjaya ditambah.'));
+                ->with('success', __('Peralatan ICT berjaya ditambah.'));
         } catch (\Exception $e) {
-            Log::error('Error storing equipment by admin: ' . $e->getMessage(), ['exception_class' => get_class($e), 'trace_snippet' => substr($e->getTraceAsString(),0,500)]);
-            return back()->with('error', __('Gagal menambah peralatan ICT: ') . $e->getMessage())->withInput();
+            Log::error('Error storing equipment by admin: '.$e->getMessage(), ['exception_class' => get_class($e), 'trace_snippet' => substr($e->getTraceAsString(), 0, 500)]);
+
+            return back()->with('error', __('Gagal menambah peralatan ICT: ').$e->getMessage())->withInput();
         }
     }
 
     /**
      * Display the specified equipment.
-     *
-     * @param \App\Models\Equipment $equipment
-     * @return \Illuminate\View\View
      */
     public function show(Equipment $equipment): View
     {
@@ -109,16 +102,14 @@ class EquipmentController extends Controller
             'definedLocation:id,name', // Assuming 'definedLocation' is the correct relationship to Location model
             'creator:id,name',         // Creator relation for audit trail
             'updater:id,name',         // Updater relation for audit trail
-            'loanTransactionItems.loanTransaction.loanApplication.user:id,name' // For detailed loan history
+            'loanTransactionItems.loanTransaction.loanApplication.user:id,name', // For detailed loan history
         ]);
+
         return view('admin.equipment.show', compact('equipment'));
     }
 
     /**
      * Show the form for editing the specified equipment.
-     *
-     * @param \App\Models\Equipment $equipment
-     * @return \Illuminate\View\View
      */
     public function edit(Equipment $equipment): View
     {
@@ -154,10 +145,6 @@ class EquipmentController extends Controller
 
     /**
      * Update the specified equipment in storage.
-     *
-     * @param \App\Http\Requests\Admin\UpdateEquipmentRequest $request
-     * @param \App\Models\Equipment $equipment
-     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(UpdateEquipmentRequest $request, Equipment $equipment): RedirectResponse
     {
@@ -165,19 +152,18 @@ class EquipmentController extends Controller
         try {
             $this->equipmentService->updateEquipment($equipment, $request->validated());
             Log::info("Admin Equipment ID: {$equipment->id} updated successfully.", ['admin_user_id' => Auth::id()]);
+
             return redirect()->route('resource-management.equipment-admin.index')
-                             ->with('success', __('Butiran peralatan ICT berjaya dikemaskini.'));
+                ->with('success', __('Butiran peralatan ICT berjaya dikemaskini.'));
         } catch (\Exception $e) {
-            Log::error("Error updating equipment ID {$equipment->id} by admin: " . $e->getMessage(), ['exception_class' => get_class($e), 'trace_snippet' => substr($e->getTraceAsString(),0,500)]);
-            return back()->with('error', __('Gagal mengemaskini peralatan ICT: ') . $e->getMessage())->withInput();
+            Log::error("Error updating equipment ID {$equipment->id} by admin: ".$e->getMessage(), ['exception_class' => get_class($e), 'trace_snippet' => substr($e->getTraceAsString(), 0, 500)]);
+
+            return back()->with('error', __('Gagal mengemaskini peralatan ICT: ').$e->getMessage())->withInput();
         }
     }
 
     /**
      * Remove the specified equipment from storage.
-     *
-     * @param \App\Models\Equipment $equipment
-     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(Equipment $equipment): RedirectResponse
     {
@@ -185,16 +171,18 @@ class EquipmentController extends Controller
         try {
             // Prevent deletion if the equipment is currently on loan
             if (defined(Equipment::class.'::STATUS_ON_LOAN') && $equipment->status === Equipment::STATUS_ON_LOAN) {
-                 return redirect()->route('resource-management.equipment-admin.index')
-                                 ->with('error', __('Peralatan tidak boleh dipadam kerana sedang dalam pinjaman.'));
+                return redirect()->route('resource-management.equipment-admin.index')
+                    ->with('error', __('Peralatan tidak boleh dipadam kerana sedang dalam pinjaman.'));
             }
             $this->equipmentService->deleteEquipment($equipment);
             Log::info("Admin Equipment ID: {$equipment->id} deleted successfully.", ['admin_user_id' => Auth::id()]);
+
             return redirect()->route('resource-management.equipment-admin.index')
-                             ->with('success', __('Peralatan ICT berjaya dipadam.'));
+                ->with('success', __('Peralatan ICT berjaya dipadam.'));
         } catch (\Exception $e) {
-             Log::error("Error deleting equipment ID {$equipment->id} by admin: " . $e->getMessage(), ['exception_class' => get_class($e), 'trace_snippet' => substr($e->getTraceAsString(),0,500)]);
-            return back()->with('error', __('Gagal memadam peralatan ICT: ') . $e->getMessage());
+            Log::error("Error deleting equipment ID {$equipment->id} by admin: ".$e->getMessage(), ['exception_class' => get_class($e), 'trace_snippet' => substr($e->getTraceAsString(), 0, 500)]);
+
+            return back()->with('error', __('Gagal memadam peralatan ICT: ').$e->getMessage());
         }
     }
 }

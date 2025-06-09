@@ -19,9 +19,7 @@ class LocaleMiddleware
      * Sets the application locale based on session or fallback.
      * Referenced in System Design 3.1, "The Big Picture" flow, and Kernel.php.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -33,7 +31,7 @@ class LocaleMiddleware
         $configuredLocales = Config::get('app.available_locales', []);
         $allowedLocaleKeys = [];
 
-        if (!empty($configuredLocales) && is_array($configuredLocales)) {
+        if (! empty($configuredLocales) && is_array($configuredLocales)) {
             if (isset($configuredLocales[0]) && is_string($configuredLocales[0])) {
                 // Handles simple array like ['en', 'my', 'ar'] (though associative is preferred for direction)
                 $allowedLocaleKeys = $configuredLocales;
@@ -49,7 +47,6 @@ class LocaleMiddleware
             $allowedLocaleKeys = [$fallbackLocale]; // At least allow the fallback
             Log::warning('LocaleMiddleware: config(\'app.available_locales\') is empty or misconfigured. Using only fallback.', ['fallback' => $fallbackLocale]);
         }
-
 
         if ($sessionLocale && in_array($sessionLocale, $allowedLocaleKeys, true)) {
             $finalLocale = $sessionLocale;

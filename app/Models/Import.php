@@ -8,8 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * 
- *
  * @property int $id
  * @property string $file_name Original client-side filename
  * @property string|null $original_file_name Stored if different from file_name or for reference
@@ -31,6 +29,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Import newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Import newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Import onlyTrashed()
@@ -58,6 +57,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Import whereUserId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Import withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Import withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class Import extends Model

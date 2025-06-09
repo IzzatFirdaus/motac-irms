@@ -13,9 +13,13 @@ class DefaultNotification extends Notification // implements ShouldQueue
     use Queueable;
 
     private User $subjectUser; // User this notification is about
+
     private string $message;
+
     private ?string $url;
+
     private string $subject;
+
     private string $icon;
 
     public function __construct(

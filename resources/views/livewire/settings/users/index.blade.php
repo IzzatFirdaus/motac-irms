@@ -1,10 +1,5 @@
-{{-- Removed: @extends('layouts.app') --}}
-{{-- Removed: @section('title', __('Pengurusan Pengguna Sistem')) --}}
-
-<div class="container mt-4"> {{-- This is the single root element --}}
-    {{-- The @section('title', ...) directive has been removed from here.
-         The #[Title(...)] attribute in your component class handles the page title. --}}
-
+{{-- resources/views/livewire/settings/users/index.blade.php --}}
+<div class="container mt-4">
     <div class="row mb-3 align-items-center pb-2 border-bottom">
         <div class="col">
             <h1 class="h2 fw-bold text-dark mb-0 d-flex align-items-center">
@@ -13,6 +8,7 @@
             </h1>
         </div>
         <div class="col text-end">
+            {{-- ADJUSTMENT: This button is now protected by a permission check. --}}
             @can('create', App\Models\User::class)
                 <button wire:click="redirectToCreateUser" class="btn btn-primary d-inline-flex align-items-center text-uppercase small fw-semibold px-3 py-2 motac-btn-primary">
                     <i class="bi bi-plus-lg me-1"></i> {{ __('Tambah Pengguna') }}
@@ -145,6 +141,7 @@
         </div>
     </div>
 
+    {{-- Modal Component --}}
     <div x-data="{ show: false, itemId: null, itemDescription: '', deleteMethod: '', modelClass: '' }"
          x-show="show"
          @open-delete-modal.window="
@@ -178,12 +175,4 @@
             </div>
         </div>
     </div>
-</div> {{-- End of the single root element --}}
-
-@push('scripts')
-<script>
-    document.addEventListener('livewire:initialized', () => {
-        // We are using Alpine.js for the modal, so no additional JS is needed for the modal toggle.
-    });
-</script>
-@endpush
+</div>

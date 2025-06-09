@@ -14,19 +14,16 @@ class EmailApplicationFactory extends EloquentFactory
 
     public function definition(): array
     {
+        // Use a Malaysian locale for faker
+        $msFaker = \Faker\Factory::create('ms_MY');
+
         $applicantUser = User::inRandomOrder()->first() ?? User::factory()->create();
 
-        $serviceStatusKeys = [];
-        if (method_exists(User::class, 'getServiceStatusOptions')) {
-            $serviceStatusKeys = array_keys(User::getServiceStatusOptions());
-        }
+        $serviceStatusKeys = method_exists(User::class, 'getServiceStatusOptions') ? array_keys(User::getServiceStatusOptions()) : [];
         $defaultServiceStatus = defined(User::class.'::SERVICE_STATUS_TETAP') ? User::SERVICE_STATUS_TETAP : '1';
         $selectedServiceStatus = empty($serviceStatusKeys) ? $defaultServiceStatus : $this->faker->randomElement($serviceStatusKeys);
 
-        $appointmentTypeKeys = [];
-        if (method_exists(User::class, 'getAppointmentTypeOptions')) {
-            $appointmentTypeKeys = array_keys(User::getAppointmentTypeOptions());
-        }
+        $appointmentTypeKeys = method_exists(User::class, 'getAppointmentTypeOptions') ? array_keys(User::getAppointmentTypeOptions()) : [];
         $defaultAppointmentType = defined(User::class.'::APPOINTMENT_TYPE_BAHARU') ? User::APPOINTMENT_TYPE_BAHARU : '1';
         $selectedAppointmentType = empty($appointmentTypeKeys) ? $defaultAppointmentType : $this->faker->randomElement($appointmentTypeKeys);
 
@@ -34,24 +31,21 @@ class EmailApplicationFactory extends EloquentFactory
 
         return [
             'user_id' => $applicantUser->id,
-
-            // Applicant Snapshot Fields (assuming these are in your EmailApplication model and migration)
-            'applicant_title' => $applicantUser->title ?? $this->faker->randomElement(array_values(User::$TITLE_OPTIONS ?? ['Encik'])),
+            'applicant_title' => $applicantUser->title ?? $this->faker->randomElement(array_values(User::$TITLE_OPTIONS ?? ['Encik', 'Puan', 'Cik'])),
             'applicant_name' => $applicantUser->name,
-            'applicant_identification_number' => $applicantUser->identification_number ?? $this->faker->numerify('######-##-####'),
+            'applicant_identification_number' => $applicantUser->identification_number ?? $msFaker->myKadNumber(null, true),
             'applicant_passport_number' => $applicantUser->passport_number,
-            'applicant_jawatan_gred' => ($applicantUser->position?->name ?? 'N/A') . ' / ' . ($applicantUser->grade?->name ?? 'N/A'),
+            'applicant_jawatan_gred' => ($applicantUser->position?->name ?? 'N/A').' / '.($applicantUser->grade?->name ?? 'N/A'),
             'applicant_bahagian_unit' => $applicantUser->department?->name ?? 'N/A',
-            'applicant_level_aras' => $applicantUser->level ?? (string)$this->faker->numberBetween(1,18),
-            'applicant_mobile_number' => $applicantUser->mobile_number ?? $this->faker->numerify('01#-#######'),
+            'applicant_level_aras' => $applicantUser->level ?? (string) $this->faker->numberBetween(1, 18),
+            'applicant_mobile_number' => $applicantUser->mobile_number ?? $msFaker->mobileNumber(true, true),
             'applicant_personal_email' => $applicantUser->personal_email ?? $applicantUser->email,
 
-            // Core Application Fields
             'service_status' => $selectedServiceStatus,
             'appointment_type' => $selectedAppointmentType,
 
-            'previous_department_name' => ($selectedAppointmentType === User::APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN) ? $this->faker->company : null,
-            'previous_department_email' => ($selectedAppointmentType === User::APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN) ? $this->faker->companyEmail : null,
+            'previous_department_name' => ($selectedAppointmentType === User::APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN) ? 'Jabatan '.$msFaker->company : null,
+            'previous_department_email' => ($selectedAppointmentType === User::APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN) ? $msFaker->userName.'@'.$this->faker->randomElement(['jpa.gov.my', 'customs.gov.my', 'treasury.gov.my']) : null,
 
             'service_start_date' => (in_array($selectedServiceStatus, [User::SERVICE_STATUS_KONTRAK_MYSTEP, User::SERVICE_STATUS_PELAJAR_INDUSTRI])) ? $this->faker->dateTimeBetween('-1 month', '+1 month')->format('Y-m-d') : null,
             'service_end_date' => function (array $attributes) use ($selectedServiceStatus) {
@@ -60,36 +54,24 @@ class EmailApplicationFactory extends EloquentFactory
                        null;
             },
 
-            'purpose' => $this->faker->sentence(10),
+            'purpose' => $msFaker->sentence(10),
             'proposed_email' => $this->faker->optional(0.3)->passthrough(
-                $this->faker->unique()->userName . '@' . config('mail.motac_domain', 'motac.gov.my')
+                $this->faker->unique()->userName.'@'.config('mail.motac_domain', 'motac.gov.my')
             ),
 
-            'group_email' => null,
-            'group_admin_name' => null,
-            'group_admin_email' => null,
+            'group_email' => null, 'group_admin_name' => null, 'group_admin_email' => null,
 
             'supporting_officer_id' => User::where('id', '!=', $applicantUser->id)->inRandomOrder()->first()?->id,
-            'supporting_officer_name' => null,
-            'supporting_officer_grade' => null,
-            'supporting_officer_email' => null,
+            'supporting_officer_name' => null, 'supporting_officer_grade' => null, 'supporting_officer_email' => null,
 
-            'status' => $this->faker->randomElement([
-                EmailApplication::STATUS_DRAFT,
-                EmailApplication::STATUS_PENDING_SUPPORT,
-            ]),
+            'status' => $this->faker->randomElement([EmailApplication::STATUS_DRAFT, EmailApplication::STATUS_PENDING_SUPPORT]),
 
-            'cert_info_is_true' => $isCertified,
-            'cert_data_usage_agreed' => $isCertified,
-            'cert_email_responsibility_agreed' => $isCertified,
+            'cert_info_is_true' => $isCertified, 'cert_data_usage_agreed' => $isCertified, 'cert_email_responsibility_agreed' => $isCertified,
             'certification_timestamp' => $isCertified ? $this->faker->dateTimeThisMonth() : null,
             'submitted_at' => ($isCertified && $this->faker->boolean(70)) ? $this->faker->dateTimeThisMonth() : null,
 
-            'rejection_reason' => null,
-            'final_assigned_email' => null,
-            'final_assigned_user_id' => null,
-            'processed_by' => null,
-            'processed_at' => null,
+            'rejection_reason' => null, 'final_assigned_email' => null, 'final_assigned_user_id' => null,
+            'processed_by' => null, 'processed_at' => null,
             'created_at' => $createdAt = $this->faker->dateTimeBetween('-2 months', '-1 day'),
             'updated_at' => $this->faker->dateTimeBetween($createdAt, 'now'),
         ];
@@ -97,14 +79,18 @@ class EmailApplicationFactory extends EloquentFactory
 
     public function forGroupEmail(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'group_email' => Str::slug($this->faker->words(2, true), '.') . '@' . config('mail.motac_domain', 'motac.gov.my'),
-            'group_admin_name' => $this->faker->name(),
-            'group_admin_email' => $this->faker->safeEmail(),
-            'proposed_email' => null,
-            'final_assigned_email' => $attributes['group_email'] ?? (Str::slug($this->faker->words(2, true), '.') . '@' . config('mail.motac_domain', 'motac.gov.my')),
-            'purpose' => $attributes['purpose'] ?? 'Request for group email: ' . ($attributes['group_email'] ?? 'N/A'),
-        ]);
+        return $this->state(function (array $attributes) {
+            $msFaker = \Faker\Factory::create('ms_MY');
+
+            return [
+                'group_email' => Str::slug($msFaker->words(2, true), '.').'@'.config('mail.motac_domain', 'motac.gov.my'),
+                'group_admin_name' => $msFaker->name(),
+                'group_admin_email' => $msFaker->safeEmail(),
+                'proposed_email' => null,
+                'final_assigned_email' => $attributes['group_email'] ?? (Str::slug($msFaker->words(2, true), '.').'@'.config('mail.motac_domain', 'motac.gov.my')),
+                'purpose' => $attributes['purpose'] ?? 'Permohonan untuk e-mel kumpulan: '.($attributes['group_email'] ?? 'N/A'),
+            ];
+        });
     }
 
     public function certified(): static
@@ -128,7 +114,7 @@ class EmailApplicationFactory extends EloquentFactory
     public function pendingAdmin(): static
     {
         return $this->pendingSupport()->state([
-            'status' => EmailApplication::STATUS_PENDING_ADMIN
+            'status' => EmailApplication::STATUS_PENDING_ADMIN,
         ]);
     }
 
@@ -159,26 +145,22 @@ class EmailApplicationFactory extends EloquentFactory
     {
         return $this->processing()->state(function (array $attributes) {
             $applicantUser = User::find($attributes['user_id']);
-            // $nameForSlug = $applicantUser?->name ?? ($this->faker->firstName . '.' . $this->faker->lastName); // Not directly used for finalEmail with unique()
-            // $baseEmailUser = Str::slug($nameForSlug, '.'); // Not directly used for finalEmail with unique()
-            $baseUserId = Str::slug($applicantUser?->name ?? ($this->faker->firstName . $this->faker->lastName), '');
+            $baseUserId = Str::slug($applicantUser?->name ?? ($this->faker->firstName.$this->faker->lastName), '');
 
             $isUserIdOnly = isset($attributes['service_status']) &&
                             $attributes['service_status'] === User::SERVICE_STATUS_PELAJAR_INDUSTRI;
 
             $finalEmail = null;
 
-            if (!$isUserIdOnly) {
-                // Use proposed_email if available (it's already unique from definition method),
-                // otherwise generate a new unique email using Faker's unique userName.
+            if (! $isUserIdOnly) {
                 $finalEmail = $attributes['proposed_email'] ??
-                              $this->faker->unique()->userName . '@' . config('mail.motac_domain', 'motac.gov.my');
+                              $this->faker->unique()->userName.'@'.config('mail.motac_domain', 'motac.gov.my');
             }
 
             return [
                 'status' => EmailApplication::STATUS_COMPLETED,
                 'final_assigned_email' => $finalEmail,
-                'final_assigned_user_id' => $baseUserId . $this->faker->unique()->randomNumber(4, true), // Ensure unique final_assigned_user_id
+                'final_assigned_user_id' => $baseUserId.$this->faker->unique()->randomNumber(4, true),
                 'processed_at' => $attributes['processed_at'] ?? now(),
             ];
         });
@@ -186,10 +168,14 @@ class EmailApplicationFactory extends EloquentFactory
 
     public function rejected(): static
     {
-        return $this->pendingSupport()->state([
-            'status' => EmailApplication::STATUS_REJECTED,
-            'rejection_reason' => $this->faker->sentence(),
-        ]);
+        return $this->pendingSupport()->state(function (array $attributes) {
+            $msFaker = \Faker\Factory::create('ms_MY');
+
+            return [
+                'status' => EmailApplication::STATUS_REJECTED,
+                'rejection_reason' => $msFaker->sentence(),
+            ];
+        });
     }
 
     public function provisionFailed(): static

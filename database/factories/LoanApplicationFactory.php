@@ -8,7 +8,7 @@ use App\Models\LoanApplicationItem;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory as EloquentFactory;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Log; // For logging potential issues
+use Illuminate\Support\Facades\Log;
 
 class LoanApplicationFactory extends EloquentFactory
 {
@@ -16,6 +16,9 @@ class LoanApplicationFactory extends EloquentFactory
 
     public function definition(): array
     {
+        // Use a Malaysian locale for faker
+        $msFaker = \Faker\Factory::create('ms_MY');
+
         $applicantUser = User::inRandomOrder()->first() ?? User::factory()->create();
         $responsibleOfficerUser = $this->faker->boolean(70)
             ? $applicantUser
@@ -36,16 +39,9 @@ class LoanApplicationFactory extends EloquentFactory
         }
 
         $defaultStatus = defined(LoanApplication::class.'::STATUS_DRAFT') ? LoanApplication::STATUS_DRAFT : 'draft';
-        // Ensure the new status is part of the selectable statuses if it exists
         $selectableStatuses = array_filter($allStatuses, fn ($statusKey) => $statusKey !== $defaultStatus);
 
-        // Prioritize new status for seeding if present, otherwise fallback
-        $statusPendingApproverReview = defined(LoanApplication::class.'::STATUS_PENDING_APPROVER_REVIEW') ? LoanApplication::STATUS_PENDING_APPROVER_REVIEW : 'pending_approver_review';
-        if (!in_array($statusPendingApproverReview, $selectableStatuses) && in_array($statusPendingApproverReview, $allStatuses)) {
-            // This case should not happen if getStatusKeys() is correct and includes the new status
-        }
-
-        $chosenStatusKey = !empty($selectableStatuses)
+        $chosenStatusKey = ! empty($selectableStatuses)
             ? $this->faker->randomElement($selectableStatuses)
             : (defined(LoanApplication::class.'::STATUS_PENDING_SUPPORT') ? LoanApplication::STATUS_PENDING_SUPPORT : $defaultStatus);
 
@@ -55,15 +51,15 @@ class LoanApplicationFactory extends EloquentFactory
             'user_id' => $applicantUser->id,
             'responsible_officer_id' => $responsibleOfficerUser->id,
             'supporting_officer_id' => $this->faker->boolean(50) ? (User::whereNotIn('id', [$applicantUser->id, $responsibleOfficerUser->id])->inRandomOrder()->first()?->id) : null,
-            'purpose' => $this->faker->sentence(mt_rand(6, 15)),
-            'location' => $this->faker->city . ', ' . $this->faker->streetName,
-            'return_location' => $this->faker->optional(0.3)->city . ', ' . $this->faker->streetName,
+            'purpose' => $msFaker->sentence(mt_rand(6, 15)),
+            'location' => $msFaker->city.', '.$msFaker->streetName,
+            'return_location' => $this->faker->optional(0.3)->passthrough($msFaker->city.', '.$msFaker->streetName),
             'loan_start_date' => $loanStartDate->format('Y-m-d H:i:s'),
             'loan_end_date' => $loanEndDate->format('Y-m-d H:i:s'),
             'status' => $chosenStatusKey,
-            'rejection_reason' => $chosenStatusKey === (defined(LoanApplication::class.'::STATUS_REJECTED') ? LoanApplication::STATUS_REJECTED : 'rejected') ? $this->faker->sentence() : null,
+            'rejection_reason' => $chosenStatusKey === (defined(LoanApplication::class.'::STATUS_REJECTED') ? LoanApplication::STATUS_REJECTED : 'rejected') ? $msFaker->sentence() : null,
             'applicant_confirmation_timestamp' => $timestamps['applicant_confirmation_timestamp'],
-            'admin_notes' => $this->faker->optional(0.1)->paragraph,
+            'admin_notes' => $msFaker->optional(0.1)->paragraph,
             'submitted_at' => $timestamps['submitted_at'],
             'approved_at' => $timestamps['approved_at'],
             'approved_by' => $timestamps['approved_by'],
@@ -93,20 +89,20 @@ class LoanApplicationFactory extends EloquentFactory
 
             $pendingApprovalStatuses = [
                 $statusPendingSupport,
-                $statusPendingApproverReview, // Updated from PENDING_HOD_REVIEW
+                $statusPendingApproverReview,
                 $statusPendingBpmReview,
             ];
 
             if (in_array($loanApplication->status, $pendingApprovalStatuses) && $loanApplication->approvals()->count() === 0 && class_exists(Approval::class)) {
                 $currentApprovalStage = null;
                 $stageLoanSupportReview = defined(Approval::class.'::STAGE_LOAN_SUPPORT_REVIEW') ? Approval::STAGE_LOAN_SUPPORT_REVIEW : 'loan_support_review';
-                $stageLoanApproverReview = defined(Approval::class.'::STAGE_LOAN_APPROVER_REVIEW') ? Approval::STAGE_LOAN_APPROVER_REVIEW : 'loan_approver_review'; // New stage
+                $stageLoanApproverReview = defined(Approval::class.'::STAGE_LOAN_APPROVER_REVIEW') ? Approval::STAGE_LOAN_APPROVER_REVIEW : 'loan_approver_review';
                 $stageLoanBpmReview = defined(Approval::class.'::STAGE_LOAN_BPM_REVIEW') ? Approval::STAGE_LOAN_BPM_REVIEW : 'loan_bpm_review';
 
                 if ($loanApplication->status === $statusPendingSupport) {
                     $currentApprovalStage = $stageLoanSupportReview;
-                } elseif ($loanApplication->status === $statusPendingApproverReview) { // Updated status check
-                    $currentApprovalStage = $stageLoanApproverReview; // Updated stage assignment
+                } elseif ($loanApplication->status === $statusPendingApproverReview) {
+                    $currentApprovalStage = $stageLoanApproverReview;
                 } elseif ($loanApplication->status === $statusPendingBpmReview) {
                     $currentApprovalStage = $stageLoanBpmReview;
                 }
@@ -114,20 +110,19 @@ class LoanApplicationFactory extends EloquentFactory
                 if ($currentApprovalStage) {
                     $officerForApproval = $loanApplication->supporting_officer_id ? User::find($loanApplication->supporting_officer_id) : null;
 
-                    if (!$officerForApproval) {
+                    if (! $officerForApproval) {
                         $roleForStage = null;
                         if ($currentApprovalStage === $stageLoanSupportReview) {
-                             $roleForStage = 'Approver'; // Or specific supporting role
-                        } elseif ($currentApprovalStage === $stageLoanApproverReview) { // Updated stage check
-                            $roleForStage = 'Approver'; // Role for the new "Approver Review" stage (e.g., general 'Approver', or could be specific like 'Section Head')
+                            $roleForStage = 'Approver';
+                        } elseif ($currentApprovalStage === $stageLoanApproverReview) {
+                            $roleForStage = 'Approver';
                         } elseif ($currentApprovalStage === $stageLoanBpmReview) {
                             $roleForStage = 'BPM Staff';
                         }
 
                         if ($roleForStage) {
-                             $officerForApproval = User::role($roleForStage)->where('id', '!=', $loanApplication->user_id)->inRandomOrder()->first();
+                            $officerForApproval = User::role($roleForStage)->where('id', '!=', $loanApplication->user_id)->inRandomOrder()->first();
                         }
-                        // Fallback if no specific role officer found or role not defined
                         $officerForApproval = $officerForApproval ?? User::where('id', '!=', $loanApplication->user_id)->inRandomOrder()->first() ?? User::factory()->create();
                     }
 
@@ -143,63 +138,101 @@ class LoanApplicationFactory extends EloquentFactory
         });
     }
 
-    // State methods
-    public function draft(): static { return $this->state(['status' => defined(LoanApplication::class.'::STATUS_DRAFT') ? LoanApplication::STATUS_DRAFT : 'draft']); }
-    public function pendingSupport(): static {
+    public function draft(): static
+    {
+        return $this->state(['status' => defined(LoanApplication::class.'::STATUS_DRAFT') ? LoanApplication::STATUS_DRAFT : 'draft']);
+    }
+
+    public function pendingSupport(): static
+    {
         return $this->state([
             'status' => defined(LoanApplication::class.'::STATUS_PENDING_SUPPORT') ? LoanApplication::STATUS_PENDING_SUPPORT : 'pending_support',
             'applicant_confirmation_timestamp' => now()->subMinutes(15),
-            'submitted_at' => now()->subMinutes(10)
+            'submitted_at' => now()->subMinutes(10),
         ]);
     }
-    // Updated state method name and logic
-    public function pendingApproverReview(): static {
-        return $this->pendingSupport()->state([
-            'status' => defined(LoanApplication::class.'::STATUS_PENDING_APPROVER_REVIEW') ? LoanApplication::STATUS_PENDING_APPROVER_REVIEW : 'pending_approver_review'
-        ]);
-    }
-    // public function pendingHodReview(): static { return $this->pendingSupport()->state(['status' => defined(LoanApplication::class.'::STATUS_PENDING_HOD_REVIEW') ? LoanApplication::STATUS_PENDING_HOD_REVIEW : 'pending_hod_review']); } // Old state
 
-    public function pendingBpmReview(): static {
-        // Now depends on pendingApproverReview as the preceding state
-        return $this->pendingApproverReview()->state([
-            'status' => defined(LoanApplication::class.'::STATUS_PENDING_BPM_REVIEW') ? LoanApplication::STATUS_PENDING_BPM_REVIEW : 'pending_bpm_review'
+    public function pendingApproverReview(): static
+    {
+        return $this->pendingSupport()->state([
+            'status' => defined(LoanApplication::class.'::STATUS_PENDING_APPROVER_REVIEW') ? LoanApplication::STATUS_PENDING_APPROVER_REVIEW : 'pending_approver_review',
         ]);
     }
-    public function approved(): static {
+
+    public function pendingBpmReview(): static
+    {
+        return $this->pendingApproverReview()->state([
+            'status' => defined(LoanApplication::class.'::STATUS_PENDING_BPM_REVIEW') ? LoanApplication::STATUS_PENDING_BPM_REVIEW : 'pending_bpm_review',
+        ]);
+    }
+
+    public function approved(): static
+    {
         return $this->pendingBpmReview()->state([
             'status' => defined(LoanApplication::class.'::STATUS_APPROVED') ? LoanApplication::STATUS_APPROVED : 'approved',
             'approved_at' => now(),
-            'approved_by' => User::inRandomOrder()->first()?->id ?? User::factory()->create()->id
+            'approved_by' => User::inRandomOrder()->first()?->id ?? User::factory()->create()->id,
         ]);
     }
-    public function rejected(): static {
-        return $this->pendingSupport()->state([ // Or pendingApproverReview if rejection can happen at that stage too
+
+    public function rejected(): static
+    {
+        $msFaker = \Faker\Factory::create('ms_MY');
+
+        return $this->pendingSupport()->state([
             'status' => defined(LoanApplication::class.'::STATUS_REJECTED') ? LoanApplication::STATUS_REJECTED : 'rejected',
-            'rejection_reason' => $this->faker->sentence,
+            'rejection_reason' => $msFaker->sentence,
             'rejected_at' => now(),
-            'rejected_by' => User::inRandomOrder()->first()?->id ?? User::factory()->create()->id
+            'rejected_by' => User::inRandomOrder()->first()?->id ?? User::factory()->create()->id,
         ]);
     }
-    public function issued(): static { return $this->approved()->state(['status' => defined(LoanApplication::class.'::STATUS_ISSUED') ? LoanApplication::STATUS_ISSUED : 'issued']); }
-    public function partiallyIssued(): static { return $this->approved()->state(['status' => defined(LoanApplication::class.'::STATUS_PARTIALLY_ISSUED') ? LoanApplication::STATUS_PARTIALLY_ISSUED : 'partially_issued']); }
-    public function returned(): static { return $this->issued()->state(['status' => defined(LoanApplication::class.'::STATUS_RETURNED') ? LoanApplication::STATUS_RETURNED : 'returned']); }
-    public function overdue(): static {
+
+    public function issued(): static
+    {
+        return $this->approved()->state(['status' => defined(LoanApplication::class.'::STATUS_ISSUED') ? LoanApplication::STATUS_ISSUED : 'issued']);
+    }
+
+    public function partiallyIssued(): static
+    {
+        return $this->approved()->state(['status' => defined(LoanApplication::class.'::STATUS_PARTIALLY_ISSUED') ? LoanApplication::STATUS_PARTIALLY_ISSUED : 'partially_issued']);
+    }
+
+    public function returned(): static
+    {
+        return $this->issued()->state(['status' => defined(LoanApplication::class.'::STATUS_RETURNED') ? LoanApplication::STATUS_RETURNED : 'returned']);
+    }
+
+    public function overdue(): static
+    {
         return $this->issued()->state([
             'status' => defined(LoanApplication::class.'::STATUS_OVERDUE') ? LoanApplication::STATUS_OVERDUE : 'overdue',
-            'loan_end_date' => now()->subDays(3)
+            'loan_end_date' => now()->subDays(3),
         ]);
     }
-    public function cancelled(): static {
+
+    public function cancelled(): static
+    {
         return $this->state([
             'status' => defined(LoanApplication::class.'::STATUS_CANCELLED') ? LoanApplication::STATUS_CANCELLED : 'cancelled',
             'cancelled_at' => now(),
-            'cancelled_by' => User::inRandomOrder()->first()?->id ?? User::factory()->create()->id
+            'cancelled_by' => User::inRandomOrder()->first()?->id ?? User::factory()->create()->id,
         ]);
     }
-    public function certified(): static { return $this->state(['applicant_confirmation_timestamp' => now()->subMinutes(10)]); }
-    public function withItems(int $count = 2): static { return $this->has(LoanApplicationItem::factory()->count($count), 'loanApplicationItems'); }
-    public function deleted(): static { return $this->state(['deleted_at' => now()]); }
+
+    public function certified(): static
+    {
+        return $this->state(['applicant_confirmation_timestamp' => now()->subMinutes(10)]);
+    }
+
+    public function withItems(int $count = 2): static
+    {
+        return $this->has(LoanApplicationItem::factory()->count($count), 'loanApplicationItems');
+    }
+
+    public function deleted(): static
+    {
+        return $this->state(['deleted_at' => now()]);
+    }
 
     private function generateTimestampsForStatus(string $status, Carbon $applicationDate, Carbon $loanStartDate, Carbon $loanEndDate): array
     {
@@ -211,36 +244,36 @@ class LoanApplicationFactory extends EloquentFactory
         ];
 
         $statusDraft = defined(LoanApplication::class.'::STATUS_DRAFT') ? LoanApplication::STATUS_DRAFT : 'draft';
-        $statusApproved = defined(LoanApplication::class.'::STATUS_APPROVED') ? LoanApplication::STATUS_APPROVED : 'approved';
-        $statusIssued = defined(LoanApplication::class.'::STATUS_ISSUED') ? LoanApplication::STATUS_ISSUED : 'issued';
-        $statusPartiallyIssued = defined(LoanApplication::class.'::STATUS_PARTIALLY_ISSUED') ? LoanApplication::STATUS_PARTIALLY_ISSUED : 'partially_issued';
-        $statusReturned = defined(LoanApplication::class.'::STATUS_RETURNED') ? LoanApplication::STATUS_RETURNED : 'returned';
-        $statusOverdue = defined(LoanApplication::class.'::STATUS_OVERDUE') ? LoanApplication::STATUS_OVERDUE : 'overdue';
-        $statusRejected = defined(LoanApplication::class.'::STATUS_REJECTED') ? LoanApplication::STATUS_REJECTED : 'rejected';
-        $statusCancelled = defined(LoanApplication::class.'::STATUS_CANCELLED') ? LoanApplication::STATUS_CANCELLED : 'cancelled';
-
-        if (!in_array($status, [$statusDraft])) {
+        if (! in_array($status, [$statusDraft])) {
             $timestamps['submitted_at'] = $applicationDate->copy()->addMinutes($this->faker->numberBetween(1, 60));
             $timestamps['applicant_confirmation_timestamp'] = $timestamps['submitted_at'];
         }
 
         $lastEventDate = $timestamps['submitted_at'] ? Carbon::parse($timestamps['submitted_at']) : $applicationDate;
 
-        if ($status === $statusApproved ||
-            in_array($status, [$statusIssued, $statusPartiallyIssued, $statusReturned, $statusOverdue])) {
-            $timestamps['approved_at'] = $lastEventDate->copy()->addDays($this->faker->numberBetween(1, 5))->addHours($this->faker->numberBetween(1,12));
+        $approvedStatuses = [
+            defined(LoanApplication::class.'::STATUS_APPROVED') ? LoanApplication::STATUS_APPROVED : 'approved',
+            defined(LoanApplication::class.'::STATUS_ISSUED') ? LoanApplication::STATUS_ISSUED : 'issued',
+            defined(LoanApplication::class.'::STATUS_PARTIALLY_ISSUED') ? LoanApplication::STATUS_PARTIALLY_ISSUED : 'partially_issued',
+            defined(LoanApplication::class.'::STATUS_RETURNED') ? LoanApplication::STATUS_RETURNED : 'returned',
+            defined(LoanApplication::class.'::STATUS_OVERDUE') ? LoanApplication::STATUS_OVERDUE : 'overdue',
+        ];
+
+        if (in_array($status, $approvedStatuses)) {
+            $timestamps['approved_at'] = $lastEventDate->copy()->addDays($this->faker->numberBetween(1, 5))->addHours($this->faker->numberBetween(1, 12));
             $timestamps['approved_by'] = User::inRandomOrder()->first()?->id ?? User::factory()->create()->id;
         }
 
-        if ($status === $statusRejected) {
-            $timestamps['rejected_at'] = $lastEventDate->copy()->addDays($this->faker->numberBetween(1, 5))->addHours($this->faker->numberBetween(1,12));
+        if ($status === (defined(LoanApplication::class.'::STATUS_REJECTED') ? LoanApplication::STATUS_REJECTED : 'rejected')) {
+            $timestamps['rejected_at'] = $lastEventDate->copy()->addDays($this->faker->numberBetween(1, 5))->addHours($this->faker->numberBetween(1, 12));
             $timestamps['rejected_by'] = User::inRandomOrder()->first()?->id ?? User::factory()->create()->id;
         }
 
-        if ($status === $statusCancelled) {
-            $timestamps['cancelled_at'] = $lastEventDate->copy()->addDays($this->faker->numberBetween(0, 5))->addHours($this->faker->numberBetween(1,12));
+        if ($status === (defined(LoanApplication::class.'::STATUS_CANCELLED') ? LoanApplication::STATUS_CANCELLED : 'cancelled')) {
+            $timestamps['cancelled_at'] = $lastEventDate->copy()->addDays($this->faker->numberBetween(0, 5))->addHours($this->faker->numberBetween(1, 12));
             $timestamps['cancelled_by'] = User::inRandomOrder()->first()?->id ?? User::factory()->create()->id;
         }
+
         return $timestamps;
     }
 }

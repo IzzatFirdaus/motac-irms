@@ -7,35 +7,20 @@
     <div class="container py-4">
         <div class="row justify-content-center">
             <div class="col-lg-9 col-xl-8">
-
                 <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
-                    <h1 class="h2 fw-bold text-dark mb-0">
-                        {{ __('Tambah Peralatan ICT Baharu') }}
+                    <h1 class="h2 fw-bold text-dark mb-0 d-flex align-items-center">
+                        <i class="bi bi-plus-circle-fill me-2"></i>{{ __('Tambah Peralatan ICT Baharu') }}
                     </h1>
-                    {{-- Ensure this route name matches your web.php (e.g., resource-management.equipment-admin.index) --}}
                     <a href="{{ route('resource-management.equipment-admin.index') }}"
                         class="btn btn-sm btn-outline-secondary motac-btn-outline d-inline-flex align-items-center">
-                        <i class="bi bi-arrow-left me-1"></i> {{ __('Kembali ke Senarai Peralatan') }}
+                        <i class="bi bi-arrow-left me-1"></i> {{ __('Kembali ke Senarai') }}
                     </a>
                 </div>
 
-                @if ($errors->any())
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <h5 class="alert-heading fw-bold"><i
-                                class="bi bi-exclamation-triangle-fill me-2"></i>{{ __('Sila Semak Semula Borang') }}</h5>
-                        <p class="mb-2 small">{{ __('Terdapat beberapa ralat yang perlu diperbetulkan:') }}</p>
-                        <ul class="mb-0 ps-3 small">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"
-                            aria-label="{{ __('Tutup') }}"></button>
-                    </div>
-                @endif
+                @include('_partials._alerts.alert-validation')
 
-                {{-- Ensure this route name matches your web.php (e.g., resource-management.equipment-admin.store) --}}
-                <form action="{{ route('resource-management.equipment-admin.store') }}" method="POST" class="needs-validation" novalidate>
+                <form action="{{ route('resource-management.equipment-admin.store') }}" method="POST"
+                    class="needs-validation" novalidate>
                     @csrf
                     <div class="card shadow-sm motac-card">
                         <div class="card-header bg-light py-3 motac-card-header">
@@ -47,26 +32,20 @@
                                 <div class="col-md-6">
                                     <label for="tag_id" class="form-label fw-medium">{{ __('No. Tag Aset') }} <span
                                             class="text-danger">*</span></label>
-                                    <input type="text" name="tag_id" id="tag_id" value="{{ old('tag_id') }}"
-                                        required class="form-control form-control-sm @error('tag_id') is-invalid @enderror"
-                                        placeholder="{{ __('Cth: MOTAC/BPM/ICT/LPT/2024/001') }}"
-                                        aria-describedby="tagIdHelp">
-                                    <div id="tagIdHelp" class="form-text small">
-                                        {{ __('Nombor unik pengenalan aset MOTAC.') }}</div>
+                                    <input type="text" name="tag_id" id="tag_id" value="{{ old('tag_id') }}" required
+                                        class="form-control form-control-sm @error('tag_id') is-invalid @enderror"
+                                        placeholder="{{ __('Cth: MOTAC/BPM/ICT/LPT/2024/001') }}">
                                     @error('tag_id')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-
                                 {{-- Asset Type Dropdown --}}
                                 <div class="col-md-6">
                                     <label for="asset_type" class="form-label fw-medium">{{ __('Jenis Peralatan') }} <span
                                             class="text-danger">*</span></label>
                                     <select name="asset_type" id="asset_type" required
                                         class="form-select form-select-sm @error('asset_type') is-invalid @enderror">
-                                        <option value="" disabled {{ old('asset_type') ? '' : 'selected' }}>--
-                                            {{ __('Pilih Jenis Peralatan') }} --</option>
-                                        {{-- $assetTypes variable passed from controller --}}
+                                        <option value="" disabled selected>-- {{ __('Pilih Jenis') }} --</option>
                                         @foreach ($assetTypes ?? [] as $typeValue => $typeLabel)
                                             <option value="{{ $typeValue }}"
                                                 {{ old('asset_type') == $typeValue ? 'selected' : '' }}>
@@ -78,7 +57,6 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-
                                 {{-- Brand Field --}}
                                 <div class="col-md-6">
                                     <label for="brand" class="form-label fw-medium">{{ __('Jenama') }}</label>
@@ -89,7 +67,6 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-
                                 {{-- Model Field --}}
                                 <div class="col-md-6">
                                     <label for="model" class="form-label fw-medium">{{ __('Model') }}</label>
@@ -100,7 +77,6 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-
                                 {{-- Serial Number Field --}}
                                 <div class="col-md-6">
                                     <label for="serial_number" class="form-label fw-medium">{{ __('No. Siri') }}</label>
@@ -112,7 +88,6 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-
                                 {{-- Purchase Date Field --}}
                                 <div class="col-md-6">
                                     <label for="purchase_date"
@@ -124,7 +99,6 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-
                                 {{-- Warranty Expiry Date Field --}}
                                 <div class="col-md-6">
                                     <label for="warranty_expiry_date"
@@ -136,15 +110,15 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-
                                 {{-- Status (Operational) Dropdown --}}
                                 <div class="col-md-6">
                                     <label for="status" class="form-label fw-medium">{{ __('Status Operasi') }} <span
                                             class="text-danger">*</span></label>
                                     <select name="status" id="status" required
                                         class="form-select form-select-sm @error('status') is-invalid @enderror">
-                                        <option value="" disabled {{ old('status', \App\Models\Equipment::STATUS_AVAILABLE) ? '' : 'selected' }}>-- {{ __('Pilih Status Operasi') }} --</option>
-                                        {{-- $statusOptions from controller --}}
+                                        <option value="" disabled
+                                            {{ old('status', \App\Models\Equipment::STATUS_AVAILABLE) ? '' : 'selected' }}>
+                                            -- {{ __('Pilih Status Operasi') }} --</option>
                                         @foreach ($statusOptions ?? [] as $statusValue => $statusLabel)
                                             <option value="{{ $statusValue }}"
                                                 {{ old('status', \App\Models\Equipment::STATUS_AVAILABLE) == $statusValue ? 'selected' : '' }}>
@@ -156,7 +130,6 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-
                                 {{-- Condition Status Dropdown --}}
                                 <div class="col-md-6">
                                     <label for="condition_status"
@@ -164,8 +137,9 @@
                                             class="text-danger">*</span></label>
                                     <select name="condition_status" id="condition_status" required
                                         class="form-select form-select-sm @error('condition_status') is-invalid @enderror">
-                                        <option value="" disabled {{ old('condition_status', \App\Models\Equipment::CONDITION_GOOD) ? '' : 'selected' }}>-- {{ __('Pilih Status Kondisi') }} --</option>
-                                        {{-- $conditionStatusOptions from controller --}}
+                                        <option value="" disabled
+                                            {{ old('condition_status', \App\Models\Equipment::CONDITION_GOOD) ? '' : 'selected' }}>
+                                            -- {{ __('Pilih Status Kondisi') }} --</option>
                                         @foreach ($conditionStatusOptions ?? [] as $statusValue => $statusLabel)
                                             <option value="{{ $statusValue }}"
                                                 {{ old('condition_status', \App\Models\Equipment::CONDITION_GOOD) == $statusValue ? 'selected' : '' }}>
@@ -177,7 +151,6 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-
                                 {{-- Current Location Details Field --}}
                                 <div class="col-md-6">
                                     <label for="current_location"
@@ -190,7 +163,6 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-
                                 {{-- Department Dropdown (Optional Owner) --}}
                                 <div class="col-md-6">
                                     <label for="department_id" class="form-label fw-medium">{{ __('Jabatan Pemilik') }}
@@ -199,7 +171,6 @@
                                         class="form-select form-select-sm @error('department_id') is-invalid @enderror">
                                         <option value="">-- {{ __('Pilih Jabatan') }} --</option>
                                         @isset($departments)
-                                            {{-- Corrected loop for plucked collection --}}
                                             @foreach ($departments as $departmentId => $departmentName)
                                                 <option value="{{ $departmentId }}"
                                                     {{ old('department_id') == $departmentId ? 'selected' : '' }}>
@@ -212,7 +183,6 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-
                                 <div class="col-12">
                                     <label for="description"
                                         class="form-label fw-medium">{{ __('Keterangan Tambahan (Cth: Spesifikasi)') }}</label>
@@ -223,7 +193,6 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-
                                 <div class="col-12">
                                     <label for="notes" class="form-label fw-medium">{{ __('Nota Dalaman') }}</label>
                                     <textarea name="notes" id="notes" rows="2"
@@ -236,14 +205,9 @@
                             </div>
                         </div>
                         <div class="card-footer text-end bg-light py-3 border-top motac-card-footer">
-                             {{-- Ensure this route name matches your web.php --}}
-                            <a href="{{ route('resource-management.equipment-admin.index') }}"
-                                class="btn btn-outline-secondary motac-btn-outline me-2">
-                                <i class="bi bi-x-lg me-1"></i> {{ __('Batal') }}
-                            </a>
                             <button type="submit"
                                 class="btn btn-primary d-inline-flex align-items-center motac-btn-primary">
-                                <i class="bi bi-save-fill me-2"></i> {{ __('Simpan Maklumat Peralatan') }}
+                                <i class="bi bi-save-fill me-2"></i> {{ __('Simpan Peralatan') }}
                             </button>
                         </div>
                     </div>

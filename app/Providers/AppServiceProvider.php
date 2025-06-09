@@ -12,14 +12,14 @@ use App\Services\LoanTransactionService; // Standard service import
 use App\Services\NotificationService;    // Standard service import
 use App\Services\UserService;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\App;      // Correct facade for app() helper
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Carbon;      // Correct facade for app() helper
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\View;
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Pagination\Paginator; // <--- ADD THIS LINE
+use Illuminate\Support\ServiceProvider; // <--- ADD THIS LINE
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -45,11 +45,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Enforce strict Eloquent mode in non-production environments
-        Model::shouldBeStrict(!$this->app->environment('production'));
+        Model::shouldBeStrict(! $this->app->environment('production'));
 
         // Configure Laravel Paginator to use Bootstrap 5 <--- ADD THESE LINES
         Paginator::useBootstrapFive();
-
 
         // Register Blade component aliases for convenience
         // Blade::component('layouts.app', 'app-layout'); // Example: <x-app-layout /> maps to resources/views/layouts/app.blade.php
@@ -60,6 +59,7 @@ class AppServiceProvider extends ServiceProvider
         Lang::handleMissingKeysUsing(function (string $key, array $replacements, string $locale) {
             $logMessage = "Missing translation key detected: [{$key}] for locale [{$locale}].";
             Log::warning($logMessage, ['replacements' => $replacements]);
+
             return $key; // Return the key itself to avoid breaking UI, makes missing keys noticeable
         });
 
@@ -68,12 +68,12 @@ class AppServiceProvider extends ServiceProvider
             $currentAppLocale = App::getLocale(); // Use App facade
             Carbon::setLocale($currentAppLocale);
         } catch (\Exception $e) {
-            Log::error("AppServiceProvider: Failed to set Carbon locale to '" . App::getLocale() . "'. Error: " . $e->getMessage(), ['exception_class' => get_class($e)]);
+            Log::error("AppServiceProvider: Failed to set Carbon locale to '".App::getLocale()."'. Error: ".$e->getMessage(), ['exception_class' => get_class($e)]);
             Carbon::setLocale(config('app.fallback_locale', 'en')); // Fallback to default if error
         }
 
         // Register view composers only in HTTP context (not console)
-        if (!$this->app->runningInConsole()) {
+        if (! $this->app->runningInConsole()) {
             View::composer('*', function (\Illuminate\View\View $view) { // Type hint $view
                 $configData = [];
                 try {
@@ -85,7 +85,7 @@ class AppServiceProvider extends ServiceProvider
                         throw new \Exception('Helpers::appClasses() method not found or Helpers class not loaded.');
                     }
                 } catch (\Exception $e) {
-                    Log::critical('AppServiceProvider View Composer (Helpers::appClasses) error: ' . $e->getMessage(), ['exception_class' => get_class($e)]);
+                    Log::critical('AppServiceProvider View Composer (Helpers::appClasses) error: '.$e->getMessage(), ['exception_class' => get_class($e)]);
                     // Provide a sensible default configData array if Helpers fails, matching your example
                     $configData = [
                         'templateName' => config('variables.templateName', __('Sistem MOTAC')),
@@ -93,7 +93,7 @@ class AppServiceProvider extends ServiceProvider
                         'style' => config('variables.style', 'light'), // theme-default or theme-bordered or theme-semi-dark
                         'theme' => config('variables.theme', 'theme-motac'), // Example default from your app
                         'layout' => config('variables.layout', 'vertical'),
-                        'assetsPath' => asset(config('variables.assetsPath', 'assets')) . '/',
+                        'assetsPath' => asset(config('variables.assetsPath', 'assets')).'/',
                         'baseUrl' => url('/'),
                         'locale' => App::getLocale(), // Use current app locale
                         'bsTheme' => config('variables.bsTheme', 'light'), // Bootstrap theme: light or dark

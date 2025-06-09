@@ -13,6 +13,9 @@ class LocationFactory extends Factory
 
     public function definition(): array
     {
+        // Use a Malaysian locale for faker
+        $msFaker = \Faker\Factory::create('ms_MY');
+
         $auditUser = User::orderBy('id')->first() ?? User::factory()->create(['name' => 'Default Audit User (LocFactory)']);
         $auditUserId = $auditUser->id;
 
@@ -20,14 +23,14 @@ class LocationFactory extends Factory
         $updatedAt = Carbon::parse($this->faker->dateTimeBetween($createdAt, 'now'));
 
         return [
-            'name' => $this->faker->unique()->company.' '.$this->faker->randomElement(['Office', 'Warehouse', 'Site', 'Branch', 'Storage Unit']),
-            'description' => $this->faker->optional(0.7)->sentence(10),
-            'address' => $this->faker->optional(0.8)->streetAddress, // Added
-            'city' => $this->faker->optional(0.8)->city,           // Added
-            'state' => $this->faker->optional(0.8)->state,          // Added
-            'country' => $this->faker->optional(0.8)->country,      // Added
-            'postal_code' => $this->faker->optional(0.8)->postcode,   // Added
-            'is_active' => $this->faker->boolean(90),               // Added
+            'name' => 'Aras '.$this->faker->numberBetween(1, 18).', '.$this->faker->randomElement(['Sayap Kiri', 'Sayap Kanan', 'Menara']),
+            'description' => $msFaker->optional(0.7)->sentence(10),
+            'address' => $msFaker->optional(0.8)->streetAddress,
+            'city' => $msFaker->optional(0.8)->city,
+            'state' => $msFaker->optional(0.8)->state,
+            'country' => 'Malaysia',
+            'postal_code' => $msFaker->optional(0.8)->postcode,
+            'is_active' => $this->faker->boolean(90),
             'created_by' => $auditUserId,
             'updated_by' => $auditUserId,
             'deleted_by' => null,

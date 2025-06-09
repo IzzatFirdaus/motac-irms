@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+
 // Removed: use Illuminate\Support\Facades\Auth;
 // Removed: use Illuminate\Support\Str; // Not used
 
@@ -31,7 +32,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- *
  * @property-read \App\Models\EquipmentCategory $equipmentCategory The parent equipment category.
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Equipment> $equipment Equipment items belonging to this sub-category.
  * @property-read int|null $equipment_count
@@ -47,6 +47,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static Builder|SubCategory active()
  * @method static Builder|SubCategory byCategory(int $categoryId)
  * @method static Builder|SubCategory byName(string $name)
+ *
  * @mixin \Eloquent
  */
 class SubCategory extends Model
@@ -93,16 +94,38 @@ class SubCategory extends Model
         return $this->hasMany(Equipment::class, 'sub_category_id');
     }
 
-    public function creator(): BelongsTo { return $this->belongsTo(User::class, 'created_by'); }
-    public function updater(): BelongsTo { return $this->belongsTo(User::class, 'updated_by'); }
-    public function deleter(): BelongsTo { return $this->belongsTo(User::class, 'deleted_by'); }
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function deleter(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deleted_by');
+    }
 
     public function isActive(): bool
     {
         return $this->is_active === true;
     }
 
-    public function scopeActive(Builder $query): Builder { return $query->where('is_active', true); }
-    public function scopeByCategory(Builder $query, int $categoryId): Builder { return $query->where('equipment_category_id', $categoryId); }
-    public function scopeByName(Builder $query, string $name): Builder { return $query->where('name', 'LIKE', '%'.$name.'%'); }
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->where('is_active', true);
+    }
+
+    public function scopeByCategory(Builder $query, int $categoryId): Builder
+    {
+        return $query->where('equipment_category_id', $categoryId);
+    }
+
+    public function scopeByName(Builder $query, string $name): Builder
+    {
+        return $query->where('name', 'LIKE', '%'.$name.'%');
+    }
 }

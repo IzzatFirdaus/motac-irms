@@ -4,27 +4,35 @@ namespace App\Livewire\HumanResource\Structure;
 
 use App\Models\Department;
 use App\Models\User; // For Head of Department selection
-use Livewire\Component;
-use Illuminate\Validation\Rule as ValidationRule; // Alias for Laravel's Rule class
+use Illuminate\Validation\Rule as ValidationRule;
+use Livewire\Component; // Alias for Laravel's Rule class
 
 class Departments extends Component
 {
     public $departments = [];
+
     public ?Department $departmentInstance = null;
 
     // Form fields based on System Design & your Department Model
     public string $name = '';
+
     public string $branch_type = ''; // Will hold keys like 'headquarters', 'state'
+
     public ?string $code = null;
+
     public ?string $description = null;
+
     public bool $is_active = true;
+
     public ?int $head_user_id = null;
 
     public bool $isEditMode = false;
+
     public ?int $confirmedId = null; // For delete confirmation
 
     // Options for dropdowns
     public array $branchTypeOptions = [];
+
     public array $userOptions = [];
 
     public function mount(): void
@@ -63,7 +71,7 @@ class Departments extends Component
             'name.unique' => __('Nama jabatan ini telah wujud.'),
             'branch_type.required' => __('Jenis cawangan diperlukan.'),
             'code.unique' => __('Kod jabatan ini telah wujud.'),
-            'head_user_id.exists' => __('Ketua jabatan yang dipilih tidak sah.')
+            'head_user_id.exists' => __('Ketua jabatan yang dipilih tidak sah.'),
         ];
     }
 
@@ -162,7 +170,7 @@ class Departments extends Component
         $this->name = '';
         // Set default branch_type using a key from your options, or a specific default if options could be empty
         // Using Department::BRANCH_TYPE_HQ as a fallback default if options are somehow not loaded yet
-        $this->branch_type = (!empty($this->branchTypeOptions) ? array_key_first($this->branchTypeOptions) : Department::BRANCH_TYPE_HQ);
+        $this->branch_type = (! empty($this->branchTypeOptions) ? array_key_first($this->branchTypeOptions) : Department::BRANCH_TYPE_HQ);
         $this->code = null;
         $this->description = null;
         $this->is_active = true;

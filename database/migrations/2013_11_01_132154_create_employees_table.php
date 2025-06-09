@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\Log; // For down method logging
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema; // For down method logging
 
 return new class extends Migration
 {
@@ -53,14 +53,14 @@ return new class extends Migration
             foreach ($foreignKeysToDrop as $key) {
                 if (Schema::hasColumn('employees', $key)) {
                     try {
-                        //Laravel generates FK names like employees_created_by_foreign
-                        $foreignKeyName = 'employees_' . $key . '_foreign';
+                        // Laravel generates FK names like employees_created_by_foreign
+                        $foreignKeyName = 'employees_'.$key.'_foreign';
                         // Check if constraint exists before dropping (more robust for some DBs)
                         // This part can be tricky as actual FK name might vary based on Laravel version/DB
                         // For simplicity, direct dropForeign is often used with try-catch.
                         $table->dropForeign([$key]);
                     } catch (\Exception $e) {
-                        Log::warning("Could not drop foreign key for {$key} on employees table: " . $e->getMessage());
+                        Log::warning("Could not drop foreign key for {$key} on employees table: ".$e->getMessage());
                     }
                 }
             }

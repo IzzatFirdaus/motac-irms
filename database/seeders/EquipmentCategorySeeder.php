@@ -22,7 +22,7 @@ class EquipmentCategorySeeder extends Seeder
         $adminUserForAudit = User::orderBy('id')->first();
         $auditUserId = $adminUserForAudit?->id;
 
-        if (!$auditUserId) {
+        if (! $auditUserId) {
             $adminUserForAudit = User::factory()->create(['name' => 'Audit User (EqCategorySeeder)']);
             $auditUserId = $adminUserForAudit->id;
             Log::info("Created a fallback audit user with ID {$auditUserId} for EquipmentCategorySeeder.");
@@ -87,6 +87,7 @@ class EquipmentCategorySeeder extends Seeder
         $targetCount = 10; // Adjust if more variety is needed from factory
         if (EquipmentCategory::count() >= $targetCount) {
             Log::info('EquipmentCategory seeding complete (Revision 3).');
+
             return;
         }
         $needed = $targetCount - EquipmentCategory::count();

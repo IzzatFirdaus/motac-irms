@@ -19,12 +19,12 @@ final class ApplicationApproved extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    private EmailApplication|LoanApplication $application;
+    public EmailApplication|LoanApplication $application;
 
     public function __construct(EmailApplication|LoanApplication $application)
     {
         $this->application = $application;
-        $this->application->loadMissing('user'); // Eager load user relationship
+        $this->application->loadMissing('user');
         Log::info('ApplicationApproved notification created for '.$application::class." ID: {$application->id}.");
     }
 
@@ -38,11 +38,10 @@ final class ApplicationApproved extends Notification implements ShouldQueue
         return ['mail', 'database'];
     }
 
-    private function formatDate($date, $format = null): string
+    public function formatDate($date, $format = null): string
     {
-        // Ensure consistent date formatting, align with config/app.php if date_format_my is defined there
         $defaultFormat = $format ?? config('app.date_format_my', 'd/m/Y');
-        if ($this->application instanceof LoanApplication && $format === null) { // Loan applications often use datetime
+        if ($this->application instanceof LoanApplication && $format === null) {
             $defaultFormat = config('app.datetime_format_my', 'd/m/Y H:i A');
         }
 
@@ -56,89 +55,49 @@ final class ApplicationApproved extends Notification implements ShouldQueue
                 return __('Tidak dinyatakan');
             }
         }
+
         return __('Tidak dinyatakan');
     }
 
-
     public function toMail(User $notifiable): MailMessage
     {
-        // Corrected: Safe access to user name
-        $applicantName = $this->application->user?->name ?? $notifiable->name ?? __('Pemohon');
-        $applicationId = $this->application->id ?? 'N/A';
-
         $isLoanApp = $this->application instanceof LoanApplication;
         $applicationTypeDisplay = $isLoanApp
-          ? __('Permohonan Pinjaman Peralatan ICT')
-          : __('Permohonan Akaun E-mel/ID Pengguna');
+            ? __('Permohonan Pinjaman Peralatan ICT')
+            : __('Permohonan Akaun E-mel/ID Pengguna');
+        $applicationId = $this->application->id ?? 'N/A';
+        $subject = __(':appType Diluluskan (#:id)', ['appType' => $applicationTypeDisplay, 'id' => $applicationId]);
 
-        $mailMessage = (new MailMessage())
-            ->subject(__(':appType Diluluskan (#:id)', ['appType' => $applicationTypeDisplay, 'id' => $applicationId]))
-            ->greeting(__("Salam Sejahtera, :name,", ['name' => $applicantName]))
-            ->line(__(':appType anda dengan ID #:id telah **diluluskan**.', ['appType' => $applicationTypeDisplay, 'id' => $applicationId]));
+        return (new MailMessage)
+            ->subject($subject)
+            ->view('emails.application-approved', ['notification' => $this]);
+    }
 
-
-        if ($isLoanApp) {
-            /** @var LoanApplication $loanApp */
-            $loanApp = $this->application;
-            // Using specific datetime format for loans as per previous version of this file.
-            $startDate = $this->formatDate($loanApp->loan_start_date, config('app.datetime_format_my', 'd/m/Y H:i A'));
-            $endDate = $this->formatDate($loanApp->loan_end_date, config('app.datetime_format_my', 'd/m/Y H:i A'));
-
-            if ($loanApp->purpose) {
-                $mailMessage->line(__('Tujuan: :purpose', ['purpose' => $loanApp->purpose]));
-            }
-            $mailMessage->line(__('Tempoh Pinjaman: Dari :startDate hingga :endDate', ['startDate' => $startDate, 'endDate' => $endDate]));
-            $mailMessage->line(__('Sila berhubung dengan pegawai berkaitan di Bahagian Pengurusan Maklumat (BPM) untuk urusan pengambilan peralatan.'));
-
-        } else {
-            /** @var EmailApplication $emailApp */
-            $emailApp = $this->application;
-            if ($emailApp->application_reason_notes) {
-                 $mailMessage->line(__('Tujuan/Catatan: :reason', ['reason' => $emailApp->application_reason_notes]));
-            }
-             $mailMessage->line(__('Pihak BPM akan memproses permohonan anda dan akan memaklumkan setelah akaun/ID pengguna anda sedia untuk digunakan.'));
-        }
-
-        $mailMessage
-            ->line(''); // Empty line for spacing
-
+    public function getActionUrl(): string
+    {
         $viewUrl = '#';
-        $routeParameters = [];
-        $routeName = null;
+        $isLoanApp = $this->application instanceof LoanApplication;
 
         if ($this->application->id) {
-            if ($isLoanApp) {
-                // Standardized route name for user's view of their loan applications
-                $routeName = 'resource-management.my-applications.loan.show';
-                $routeParameters = ['loan_application' => $this->application->id];
-            } else {
-                // Standardized route name for user's view of their email applications
-                $routeName = 'resource-management.my-applications.email.show';
-                $routeParameters = ['email_application' => $this->application->id];
-            }
+            $routeName = $isLoanApp
+                ? 'resource-management.my-applications.loan.show'
+                : 'resource-management.my-applications.email.show';
+            $routeParameters = $isLoanApp
+                ? ['loan_application' => $this->application->id]
+                : ['email_application' => $this->application->id];
 
-            if ($routeName && Route::has($routeName)) {
+            if (Route::has($routeName)) {
                 try {
                     $viewUrl = route($routeName, $routeParameters);
                 } catch (\Exception $e) {
-                    Log::error('Error generating URL for ApplicationApproved mail: '.$e->getMessage(), [
-                        'exception' => $e,
-                        'application_id' => $this->application->id ?? null,
-                        'application_type' => $this->application::class,
-                        'route_name' => $routeName,
-                    ]);
-                    $viewUrl = '#'; // Fallback
+                    Log::error('Error generating URL for ApplicationApproved mail: '.$e->getMessage(), ['application_id' => $this->application->id]);
+
+                    return '#';
                 }
             }
         }
 
-
-        if ($viewUrl !== '#' && filter_var($viewUrl, FILTER_VALIDATE_URL)) {
-            $mailMessage->action(__('Lihat Permohonan'), $viewUrl);
-        }
-        $mailMessage->line(__('Terima kasih.'));
-
-        return $mailMessage->salutation(__('Sekian, harap maklum.'));
+        return $viewUrl;
     }
 
     public function toArray(User $notifiable): array
@@ -150,10 +109,9 @@ final class ApplicationApproved extends Notification implements ShouldQueue
           : __('Permohonan Akaun E-mel/ID Pengguna');
         $applicationMorphClass = $this->application->getMorphClass();
 
-
         $subjectText = __(':appType Diluluskan', ['appType' => $applicationTypeDisplay]);
         if ($applicationId !== null) {
-            $subjectText .= __(" (#:id)", ['id' => $applicationId]);
+            $subjectText .= __(' (#:id)', ['id' => $applicationId]);
         }
 
         $messageText = __('Permohonan :type anda (#:id) telah diluluskan.', [
@@ -185,12 +143,11 @@ final class ApplicationApproved extends Notification implements ShouldQueue
             $data['application_reason_notes'] = $emailApp->application_reason_notes ?? null;
         }
 
-
         $applicationUrl = '#';
         $routeParameters = [];
         $routeName = null;
 
-         if ($applicationId !== null) {
+        if ($applicationId !== null) {
             if ($isLoanApp) {
                 $routeName = 'resource-management.my-applications.loan.show';
                 $routeParameters = ['loan_application' => $applicationId];
@@ -207,12 +164,12 @@ final class ApplicationApproved extends Notification implements ShouldQueue
                         'exception' => $e,
                         'application_id' => $applicationId,
                         'application_type' => $applicationMorphClass,
-                         'route_name' => $routeName,
+                        'route_name' => $routeName,
                     ]);
                     $applicationUrl = '#'; // Fallback
                 }
             } elseif ($routeName) { // Log if route name was set but not found
-                 Log::warning('Route not found for in-app ApplicationApproved notification.', [
+                Log::warning('Route not found for in-app ApplicationApproved notification.', [
                     'application_id' => $applicationId,
                     'application_type' => $applicationMorphClass,
                     'route_name' => $routeName,

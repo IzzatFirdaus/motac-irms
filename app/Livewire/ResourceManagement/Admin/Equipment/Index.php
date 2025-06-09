@@ -22,45 +22,73 @@ class Index extends Component
     use WithPagination;
 
     public string $searchTerm = '';
+
     public string $filterAssetType = '';
+
     public string $filterStatus = '';
+
     public string $filterCondition = '';
+
     public ?int $filterDepartmentId = null;
 
     // Sorting properties
     public string $sortField = 'created_at';
+
     public string $sortDirection = 'desc';
 
     public bool $showCreateModal = false;
+
     public bool $showEditModal = false;
+
     public bool $showDeleteModal = false;
+
     public bool $showViewModal = false;
 
     public ?Equipment $editingEquipment = null;
+
     public ?Equipment $deletingEquipment = null;
+
     public ?Equipment $viewingEquipment = null;
 
     // Form fields for create/edit modals
     public string $asset_type = '';
+
     public ?string $brand = null;
+
     public ?string $model_name = null; // Maps to Equipment 'model'
+
     public string $serial_number = '';
+
     public string $tag_id = '';
+
     public ?string $purchase_date = null;
+
     public ?string $warranty_expiry_date = null;
+
     public string $status = '';
+
     public ?string $current_location = null;
+
     public ?string $notes = null;
+
     public string $condition_status = '';
+
     public ?int $department_id = null;
 
     public ?string $item_code = null;
+
     public ?string $description = null;
+
     public ?float $purchase_price = null;
+
     public ?string $acquisition_type = null;
+
     public ?string $classification = null;
+
     public ?string $funded_by = null;
+
     public ?string $supplier_name = null;
+
     public ?array $specifications = null;
 
     protected string $paginationTheme = 'bootstrap';
@@ -68,11 +96,11 @@ class Index extends Component
     public function mount(): void
     {
         $this->authorize('viewAny', Equipment::class);
-        $this->editingEquipment = new Equipment();
-        if (defined(Equipment::class . '::STATUS_AVAILABLE')) {
+        $this->editingEquipment = new Equipment;
+        if (defined(Equipment::class.'::STATUS_AVAILABLE')) {
             $this->status = Equipment::STATUS_AVAILABLE;
         }
-        if (defined(Equipment::class . '::CONDITION_GOOD')) {
+        if (defined(Equipment::class.'::CONDITION_GOOD')) {
             $this->condition_status = Equipment::CONDITION_GOOD;
         }
         // If you still want the title to be dynamically translatable,
@@ -83,7 +111,7 @@ class Index extends Component
 
     public function sortBy(string $field): void
     {
-        if (!in_array($field, ['tag_id', 'asset_type', 'brand', 'model', 'status', 'condition_status', 'created_at'])) {
+        if (! in_array($field, ['tag_id', 'asset_type', 'brand', 'model', 'status', 'condition_status', 'created_at'])) {
             return;
         }
 
@@ -99,31 +127,31 @@ class Index extends Component
     public function getEquipmentListProperty()
     {
         $query = Equipment::with([
-                'department:id,name',
-                'creator:id,name',
-                'updater:id,name',
-                'activeLoanTransactionItem.loanTransaction.loanApplication.user:id,name'
-            ]);
+            'department:id,name',
+            'creator:id,name',
+            'updater:id,name',
+            'activeLoanTransactionItem.loanTransaction.loanApplication.user:id,name',
+        ]);
 
-        if (!empty($this->searchTerm)) {
+        if (! empty($this->searchTerm)) {
             $query->where(function ($q) {
-                $q->where('tag_id', 'like', '%' . $this->searchTerm . '%')
-                  ->orWhere('serial_number', 'like', '%' . $this->searchTerm . '%')
-                  ->orWhere('brand', 'like', '%' . $this->searchTerm . '%')
-                  ->orWhere('model', 'like', '%' . $this->searchTerm . '%')
-                  ->orWhere('item_code', 'like', '%' . $this->searchTerm . '%');
+                $q->where('tag_id', 'like', '%'.$this->searchTerm.'%')
+                    ->orWhere('serial_number', 'like', '%'.$this->searchTerm.'%')
+                    ->orWhere('brand', 'like', '%'.$this->searchTerm.'%')
+                    ->orWhere('model', 'like', '%'.$this->searchTerm.'%')
+                    ->orWhere('item_code', 'like', '%'.$this->searchTerm.'%');
             });
         }
-        if (!empty($this->filterAssetType)) {
+        if (! empty($this->filterAssetType)) {
             $query->where('asset_type', $this->filterAssetType);
         }
-        if (!empty($this->filterStatus)) {
+        if (! empty($this->filterStatus)) {
             $query->where('status', $this->filterStatus);
         }
-        if (!empty($this->filterCondition)) {
+        if (! empty($this->filterCondition)) {
             $query->where('condition_status', $this->filterCondition);
         }
-        if (!empty($this->filterDepartmentId)) {
+        if (! empty($this->filterDepartmentId)) {
             $query->where('department_id', $this->filterDepartmentId);
         }
 
@@ -139,30 +167,34 @@ class Index extends Component
 
     public function getAssetTypeOptionsProperty(): array
     {
-        return defined(Equipment::class . '::$ASSET_TYPES_LABELS') ? Equipment::$ASSET_TYPES_LABELS : [];
+        return defined(Equipment::class.'::$ASSET_TYPES_LABELS') ? Equipment::$ASSET_TYPES_LABELS : [];
     }
+
     public function getStatusOptionsProperty(): array
     {
-        return defined(Equipment::class . '::$STATUSES_LABELS') ? Equipment::$STATUSES_LABELS : [];
+        return defined(Equipment::class.'::$STATUSES_LABELS') ? Equipment::$STATUSES_LABELS : [];
     }
+
     public function getConditionStatusOptionsProperty(): array
     {
-        return defined(Equipment::class . '::$CONDITION_STATUSES_LABELS') ? Equipment::$CONDITION_STATUSES_LABELS : [];
+        return defined(Equipment::class.'::$CONDITION_STATUSES_LABELS') ? Equipment::$CONDITION_STATUSES_LABELS : [];
     }
+
     public function getAcquisitionTypeOptionsProperty(): array
     {
-        return defined(Equipment::class . '::$ACQUISITION_TYPES_LABELS') ? Equipment::$ACQUISITION_TYPES_LABELS : [];
+        return defined(Equipment::class.'::$ACQUISITION_TYPES_LABELS') ? Equipment::$ACQUISITION_TYPES_LABELS : [];
     }
+
     public function getClassificationOptionsProperty(): array
     {
-        return defined(Equipment::class . '::$CLASSIFICATION_LABELS') ? Equipment::$CLASSIFICATION_LABELS : [];
+        return defined(Equipment::class.'::$CLASSIFICATION_LABELS') ? Equipment::$CLASSIFICATION_LABELS : [];
     }
 
     public function openCreateModal(): void
     {
         $this->authorize('create', Equipment::class);
         $this->resetForm();
-        $this->editingEquipment = new Equipment();
+        $this->editingEquipment = new Equipment;
         $this->status = Equipment::STATUS_AVAILABLE;
         $this->condition_status = Equipment::CONDITION_GOOD;
         $this->showEditModal = false;
@@ -177,12 +209,12 @@ class Index extends Component
 
         $validatedData = $validated;
         $validatedData['model'] = $this->model_name;
-        $fillableFields = (new Equipment())->getFillable();
+        $fillableFields = (new Equipment)->getFillable();
         foreach ($fillableFields as $field) {
-            if (property_exists($this, $field) && !isset($validatedData[$field]) && $field !== 'model_name') {
-                 if ($this->$field !== null) {
+            if (property_exists($this, $field) && ! isset($validatedData[$field]) && $field !== 'model_name') {
+                if ($this->$field !== null) {
                     $validatedData[$field] = $this->$field;
-                 }
+                }
             }
         }
         unset($validatedData['model_name']);
@@ -227,8 +259,9 @@ class Index extends Component
 
     public function updateEquipment(): void
     {
-        if (!$this->editingEquipment || !$this->editingEquipment->exists) {
+        if (! $this->editingEquipment || ! $this->editingEquipment->exists) {
             $this->dispatch('toastr', type: 'error', message: __('Ralat: Tiada peralatan dipilih untuk dikemaskini.'));
+
             return;
         }
         $this->authorize('update', $this->editingEquipment);
@@ -236,9 +269,9 @@ class Index extends Component
 
         $validatedData = $validated;
         $validatedData['model'] = $this->model_name;
-        $fillableFields = (new Equipment())->getFillable();
+        $fillableFields = (new Equipment)->getFillable();
         foreach ($fillableFields as $field) {
-            if (property_exists($this, $field) && !isset($validatedData[$field]) && $field !== 'model_name') {
+            if (property_exists($this, $field) && ! isset($validatedData[$field]) && $field !== 'model_name') {
                 $validatedData[$field] = $this->$field;
             }
         }
@@ -259,8 +292,9 @@ class Index extends Component
 
     public function deleteEquipment(): void
     {
-        if (!$this->deletingEquipment) {
+        if (! $this->deletingEquipment) {
             $this->dispatch('toastr', type: 'error', message: __('Tiada peralatan dipilih untuk dipadam.'));
+
             return;
         }
         $this->authorize('delete', $this->deletingEquipment);
@@ -268,16 +302,17 @@ class Index extends Component
         try {
             if ($this->deletingEquipment->loanTransactionItems()->exists()) {
                 $activeLoan = $this->deletingEquipment->loanTransactionItems()
-                                ->whereNotIn('status', [
-                                    LoanTransactionItem::STATUS_ITEM_RETURNED_GOOD,
-                                    LoanTransactionItem::STATUS_ITEM_RETURNED_MINOR_DAMAGE,
-                                    LoanTransactionItem::STATUS_ITEM_RETURNED_MAJOR_DAMAGE,
-                                    LoanTransactionItem::STATUS_ITEM_REPORTED_LOST,
-                                    LoanTransactionItem::STATUS_ITEM_UNSERVICEABLE_ON_RETURN,
-                                ])->exists();
+                    ->whereNotIn('status', [
+                        LoanTransactionItem::STATUS_ITEM_RETURNED_GOOD,
+                        LoanTransactionItem::STATUS_ITEM_RETURNED_MINOR_DAMAGE,
+                        LoanTransactionItem::STATUS_ITEM_RETURNED_MAJOR_DAMAGE,
+                        LoanTransactionItem::STATUS_ITEM_REPORTED_LOST,
+                        LoanTransactionItem::STATUS_ITEM_UNSERVICEABLE_ON_RETURN,
+                    ])->exists();
                 if ($activeLoan) {
                     $this->dispatch('toastr', type: 'error', message: __('Peralatan ini tidak boleh dipadam kerana mempunyai rekod pinjaman aktif atau item yang belum dipulangkan sepenuhnya.'));
                     $this->closeModal();
+
                     return;
                 }
             }
@@ -290,7 +325,7 @@ class Index extends Component
             if ($errorCode == 1451 || str_contains(strtolower($e->getMessage()), 'foreign key constraint')) {
                 $this->dispatch('toastr', type: 'error', message: __('Peralatan ini tidak boleh dipadam kerana mempunyai rekod berkaitan (cth: dalam transaksi pinjaman lampau). Sila pastikan semua rekod berkaitan telah diarkib atau dialih.'));
             } else {
-                $this->dispatch('toastr', type: 'error', message: __('Gagal memadam peralatan ICT. Sila hubungi pentadbir. Error: ' . $e->getMessage()));
+                $this->dispatch('toastr', type: 'error', message: __('Gagal memadam peralatan ICT. Sila hubungi pentadbir. Error: '.$e->getMessage()));
             }
         } catch (\Exception $e) {
             Log::error("General error deleting equipment ID {$this->deletingEquipment->id}: {$e->getMessage()}");
@@ -309,7 +344,7 @@ class Index extends Component
             'equipmentCategory:id,name',
             'subCategory:id,name',
             'definedLocation:id,name',
-            'activeLoanTransactionItem.loanTransaction.loanApplication.user:id,name'
+            'activeLoanTransactionItem.loanTransaction.loanApplication.user:id,name',
         ]);
         $this->showViewModal = true;
         $this->dispatch('open-modal', modalId: 'viewEquipmentModal');
@@ -318,13 +353,13 @@ class Index extends Component
     public function closeModal(): void
     {
         if ($this->showCreateModal || $this->showEditModal) {
-             $this->dispatch('close-modal', modalId: 'equipmentFormModal');
+            $this->dispatch('close-modal', modalId: 'equipmentFormModal');
         }
         if ($this->showDeleteModal) {
-             $this->dispatch('close-modal', modalId: 'deleteConfirmationModal');
+            $this->dispatch('close-modal', modalId: 'deleteConfirmationModal');
         }
         if ($this->showViewModal) {
-             $this->dispatch('close-modal', modalId: 'viewEquipmentModal');
+            $this->dispatch('close-modal', modalId: 'viewEquipmentModal');
         }
 
         $this->showCreateModal = false;
@@ -333,7 +368,7 @@ class Index extends Component
         $this->showViewModal = false;
 
         $this->resetForm();
-        $this->editingEquipment = new Equipment();
+        $this->editingEquipment = new Equipment;
         $this->deletingEquipment = null;
         $this->viewingEquipment = null;
         $this->resetErrorBag();
@@ -351,11 +386,30 @@ class Index extends Component
         $this->resetPage();
     }
 
-    public function updatingSearchTerm(): void { $this->resetPage(); }
-    public function updatedFilterAssetType(): void { $this->resetPage(); }
-    public function updatedFilterStatus(): void { $this->resetPage(); }
-    public function updatedFilterCondition(): void { $this->resetPage(); }
-    public function updatedFilterDepartmentId(): void { $this->resetPage(); }
+    public function updatingSearchTerm(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedFilterAssetType(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedFilterStatus(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedFilterCondition(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedFilterDepartmentId(): void
+    {
+        $this->resetPage();
+    }
 
     public function render(): View
     {
@@ -426,18 +480,18 @@ class Index extends Component
         $this->supplier_name = null;
         $this->specifications = null;
 
-        if (defined(Equipment::class . '::STATUS_AVAILABLE')) {
+        if (defined(Equipment::class.'::STATUS_AVAILABLE')) {
             $this->status = Equipment::STATUS_AVAILABLE;
         } else {
             $this->status = '';
         }
-        if (defined(Equipment::class . '::CONDITION_GOOD')) {
+        if (defined(Equipment::class.'::CONDITION_GOOD')) {
             $this->condition_status = Equipment::CONDITION_GOOD;
         } else {
             $this->condition_status = '';
         }
 
-        $this->editingEquipment = new Equipment();
+        $this->editingEquipment = new Equipment;
         $this->deletingEquipment = null;
         $this->resetErrorBag();
     }

@@ -11,7 +11,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
-use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -27,6 +26,7 @@ final class LoanApplicationOverdueReminder extends Mailable implements ShouldQue
     use SerializesModels;
 
     public LoanApplication $loanApplication;
+
     public Collection $overdueItems; // Collection of LoanTransactionItem models that are overdue
 
     /**
@@ -58,7 +58,7 @@ final class LoanApplicationOverdueReminder extends Mailable implements ShouldQue
      */
     private function calculateOverdueItems(): Collection
     {
-        $issuedItemsCollection = new EloquentCollection(); // Will hold LoanTransactionItem models from issue transactions
+        $issuedItemsCollection = new EloquentCollection; // Will hold LoanTransactionItem models from issue transactions
         $returnedEquipmentIds = collect(); // Will hold equipment_ids that have been returned
 
         if ($this->loanApplication->relationLoaded('transactions')) {
@@ -85,10 +85,9 @@ final class LoanApplicationOverdueReminder extends Mailable implements ShouldQue
 
         // Filter the issued items to find those not in the returned list
         return $issuedItemsCollection->filter(function ($issuedItem) use ($returnedEquipmentIds) {
-            return $issuedItem->equipment_id && !$returnedEquipmentIds->contains($issuedItem->equipment_id);
+            return $issuedItem->equipment_id && ! $returnedEquipmentIds->contains($issuedItem->equipment_id);
         });
     }
-
 
     /**
      * Get the message envelope.

@@ -4,14 +4,14 @@ namespace App\Livewire\ResourceManagement\Admin\Reports;
 
 use App\Models\Department;
 use App\Models\Equipment;
-use App\Models\Location; // Added based on Revision 3 for equipment
-use App\Models\EquipmentCategory; // Added based on Revision 3
+use App\Models\EquipmentCategory; // Added based on Revision 3 for equipment
+use App\Models\Location; // Added based on Revision 3
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
 
 #[Layout('layouts.app')]
 class EquipmentReport extends Component
@@ -21,18 +21,26 @@ class EquipmentReport extends Component
 
     // Filter properties
     public ?string $filterAssetType = '';
+
     public ?string $filterStatus = '';
+
     public ?string $filterCondition = '';
+
     public ?int $filterDepartmentId = null;
+
     public ?int $filterLocationId = null;       // Added from Revision 3
+
     public ?int $filterCategoryId = null;       // Added from Revision 3
+
     public string $searchTerm = ''; // Search by tag, serial, model, brand, item_code
 
     // Sorting properties
     public string $sortBy = 'tag_id';
+
     public string $sortDirection = 'asc';
 
     protected string $paginationTheme = 'bootstrap';
+
     public int $perPage = 15;
 
     public function mount()
@@ -51,67 +59,72 @@ class EquipmentReport extends Component
             'department:id,name',
             'creator:id,name',
             'definedLocation:id,name', // Assuming relation name in Equipment model for location_id
-            'equipmentCategory:id,name' // Assuming relation name
+            'equipmentCategory:id,name', // Assuming relation name
         ]);
 
-        if (!empty($this->searchTerm)) {
-            $search = '%' . strtolower($this->searchTerm) . '%';
+        if (! empty($this->searchTerm)) {
+            $search = '%'.strtolower($this->searchTerm).'%';
             $query->where(function ($q) use ($search) {
                 $q->whereRaw('LOWER(tag_id) LIKE ?', [$search])
-                  ->orWhereRaw('LOWER(serial_number) LIKE ?', [$search])
-                  ->orWhereRaw('LOWER(model) LIKE ?', [$search])
-                  ->orWhereRaw('LOWER(brand) LIKE ?', [$search])
-                  ->orWhereRaw('LOWER(item_code) LIKE ?', [$search]); // Added from Revision 3
+                    ->orWhereRaw('LOWER(serial_number) LIKE ?', [$search])
+                    ->orWhereRaw('LOWER(model) LIKE ?', [$search])
+                    ->orWhereRaw('LOWER(brand) LIKE ?', [$search])
+                    ->orWhereRaw('LOWER(item_code) LIKE ?', [$search]); // Added from Revision 3
             });
         }
-        if (!empty($this->filterAssetType)) {
+        if (! empty($this->filterAssetType)) {
             $query->where('asset_type', $this->filterAssetType);
         }
-        if (!empty($this->filterStatus)) {
+        if (! empty($this->filterStatus)) {
             $query->where('status', $this->filterStatus);
         }
-        if (!empty($this->filterCondition)) {
+        if (! empty($this->filterCondition)) {
             $query->where('condition_status', $this->filterCondition);
         }
-        if (!empty($this->filterDepartmentId)) {
+        if (! empty($this->filterDepartmentId)) {
             $query->where('department_id', $this->filterDepartmentId);
         }
-        if (!empty($this->filterLocationId)) {
+        if (! empty($this->filterLocationId)) {
             $query->where('location_id', $this->filterLocationId); // Added from Revision 3
         }
-        if (!empty($this->filterCategoryId)) {
+        if (! empty($this->filterCategoryId)) {
             $query->where('equipment_category_id', $this->filterCategoryId); // Added from Revision 3
         }
-
 
         $query->orderBy($this->sortBy, $this->sortDirection);
 
         $reportData = $query->paginate($this->perPage);
         Log::info("Livewire\EquipmentReport: Fetched {$reportData->total()} equipment.", ['admin_user_id' => Auth::id()]);
+
         return $reportData;
     }
 
     // Options for filters
     public function getAssetTypeOptionsProperty(): array
     {
-        return Equipment::$ASSET_TYPES_LABELS ?? (defined(Equipment::class . '::ASSET_TYPE_LAPTOP') ? Equipment::getAssetTypeOptions() : []);
+        return Equipment::$ASSET_TYPES_LABELS ?? (defined(Equipment::class.'::ASSET_TYPE_LAPTOP') ? Equipment::getAssetTypeOptions() : []);
     }
+
     public function getStatusOptionsProperty(): array
     {
-        return Equipment::$STATUSES_LABELS ?? (defined(Equipment::class . '::STATUS_AVAILABLE') ? Equipment::getStatusOptions() : []);
+        return Equipment::$STATUSES_LABELS ?? (defined(Equipment::class.'::STATUS_AVAILABLE') ? Equipment::getStatusOptions() : []);
     }
+
     public function getConditionStatusOptionsProperty(): array
     {
-        return Equipment::$CONDITION_STATUSES_LABELS ?? (defined(Equipment::class . '::CONDITION_NEW') ? Equipment::getConditionStatusOptions() : []);
+        return Equipment::$CONDITION_STATUSES_LABELS ?? (defined(Equipment::class.'::CONDITION_NEW') ? Equipment::getConditionStatusOptions() : []);
     }
+
     public function getDepartmentOptionsProperty(): \Illuminate\Support\Collection
     {
         return Department::where('is_active', true)->orderBy('name')->pluck('name', 'id');
     }
+
     public function getLocationOptionsProperty(): \Illuminate\Support\Collection
     {
         return Location::where('is_active', true)->orderBy('name')->pluck('name', 'id'); // Added from Revision 3
     }
+
     public function getCategoryOptionsProperty(): \Illuminate\Support\Collection
     {
         return EquipmentCategory::where('is_active', true)->orderBy('name')->pluck('name', 'id'); // Added from Revision 3

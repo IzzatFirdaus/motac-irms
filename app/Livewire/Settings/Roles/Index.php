@@ -9,6 +9,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Spatie\Permission\Models\Permission;
+
 // use Spatie\Permission\Models\Role; // We will use the configured model string
 
 #[Layout('layouts.app')]
@@ -17,18 +18,25 @@ class Index extends Component
     use WithPagination;
 
     public bool $showModal = false;
+
     public bool $isEditMode = false;
+
     public ?\Spatie\Permission\Contracts\Role $editingRole = null; // Use contract for broader compatibility
+
     public string $name = '';
+
     public array $selectedPermissions = [];
 
     public bool $showDeleteConfirmationModal = false;
+
     public ?int $roleIdToDelete = null;
+
     public string $roleNameToDelete = '';
 
     public array $allPermissionsForView = [];
 
     protected string $paginationTheme = 'bootstrap';
+
     public array $coreRoles = []; // Public for Blade access
 
     public function mount(): void
@@ -38,7 +46,7 @@ class Index extends Component
 
         // Initialize with an instance of the configured Role model
         $roleModelClass = config('permission.models.role');
-        $this->editingRole = new $roleModelClass();
+        $this->editingRole = new $roleModelClass;
 
         $this->allPermissionsForView = Permission::orderBy('name')->pluck('name', 'id')->all();
     }
@@ -79,6 +87,7 @@ class Index extends Component
             if (in_array($this->editingRole->getOriginal('name'), $this->coreRoles) && $this->name !== $this->editingRole->getOriginal('name')) {
                 session()->flash('error', __('Peranan teras ":roleName" tidak boleh dinamakan semula.', ['roleName' => $this->editingRole->getOriginal('name')]));
                 $this->name = $this->editingRole->getOriginal('name');
+
                 return;
             }
             $this->editingRole->update($roleData);
@@ -110,10 +119,12 @@ class Index extends Component
         if ($role) {
             if (in_array($role->name, $this->coreRoles) || ($role->name === config('permission.super_admin_name', 'Super Admin') && config('permission.protect_super_admin_role', true))) {
                 session()->flash('error', __('Peranan teras atau Super Admin ":roleName" tidak boleh dipadam.', ['roleName' => $role->name]));
+
                 return;
             }
             if ($role->users()->count() > 0) {
                 session()->flash('error', __('Peranan tidak boleh dipadam kerana ia telah ditugaskan kepada pengguna.'));
+
                 return;
             }
             $this->roleIdToDelete = $id;
@@ -138,6 +149,7 @@ class Index extends Component
                 $role->users()->count() > 0) {
                 session()->flash('error', __('Pemadaman peranan :roleName tidak dibenarkan atau peranan masih mempunyai pengguna.', ['roleName' => $role->name]));
                 $this->closeDeleteConfirmationModal();
+
                 return;
             }
             $role->delete();
@@ -159,28 +171,29 @@ class Index extends Component
         $roleModelClass = config('permission.models.role');
 
         $roles = $roleModelClass::withCount([
-                'permissions',
-                'users as users_count' // Assumes your Role model has a 'users' relationship
-            ])
+            'permissions',
+            'users as users_count', // Assumes your Role model has a 'users' relationship
+        ])
             ->orderBy('name')
             ->paginate(10);
 
         return view('livewire.settings.roles.index', [
-          'roles' => $roles,
-          'allPermissionsForView' => $this->allPermissionsForView,
+            'roles' => $roles,
+            'allPermissionsForView' => $this->allPermissionsForView,
         ]);
     }
 
     protected function rules(): array
     {
         $roleIdToIgnore = ($this->isEditMode && $this->editingRole && $this->editingRole->exists) ? $this->editingRole->id : null;
+
         return [
-          'name' => [
-            'required', 'string', 'min:3', 'max:125',
-            ValidationRule::unique(config('permission.table_names.roles', 'roles'), 'name')->ignore($roleIdToIgnore),
-          ],
-          'selectedPermissions' => 'nullable|array',
-          'selectedPermissions.*' => 'exists:'.config('permission.table_names.permissions', 'permissions').',id',
+            'name' => [
+                'required', 'string', 'min:3', 'max:125',
+                ValidationRule::unique(config('permission.table_names.roles', 'roles'), 'name')->ignore($roleIdToIgnore),
+            ],
+            'selectedPermissions' => 'nullable|array',
+            'selectedPermissions.*' => 'exists:'.config('permission.table_names.permissions', 'permissions').',id',
         ];
     }
 
@@ -189,7 +202,7 @@ class Index extends Component
         $this->name = '';
         $this->selectedPermissions = [];
         $roleModelClass = config('permission.models.role');
-        $this->editingRole = new $roleModelClass();
+        $this->editingRole = new $roleModelClass;
         $this->isEditMode = false;
         $this->resetErrorBag();
         $this->resetValidation();

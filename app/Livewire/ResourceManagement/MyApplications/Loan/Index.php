@@ -8,15 +8,15 @@ use App\Models\Approval;
 use App\Models\LoanApplication;
 use App\Models\User;
 use App\Services\ApprovalService;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Illuminate\Validation\Rule;
-use Illuminate\Auth\Access\AuthorizationException; // Corrected namespace
 
 #[Layout('layouts.app')]
 class Index extends Component
@@ -25,13 +25,19 @@ class Index extends Component
     use WithPagination;
 
     public string $searchTerm = '';
+
     public string $filterStatus = '';
+
     protected string $paginationTheme = 'bootstrap';
+
     protected int $perPage = 10;
 
     public ?int $selectedApplicationId = null;
+
     public bool $showApprovalActionModal = false;
+
     public ?string $approvalActionType = null;
+
     public string $approvalComments = '';
 
     protected ApprovalService $approvalService;
@@ -59,21 +65,18 @@ class Index extends Component
     public function generatePageTitle(): string
     {
         $appName = __(config('variables.templateName', 'Sistem Pengurusan Sumber Bersepadu MOTAC'));
-        return __('Senarai Permohonan Pinjaman ICT Saya') . ' - ' . $appName;
+
+        return __('Senarai Permohonan Pinjaman ICT Saya').' - '.$appName;
     }
 
-    /**
-     * Computed property for loan applications.
-     * The user's original file uses $this->loanApplications in render.
-     * And this method name is getLoanApplicationsProperty which makes it $this->loanApplications.
-     */
     public function getLoanApplicationsProperty()
     {
         /** @var User|null $user */
         $user = Auth::user();
 
-        if (!$user) {
+        if (! $user) {
             Log::warning('MyApplications\Loan\Index: Unauthenticated access attempt.');
+
             return LoanApplication::whereRaw('1 = 0')->paginate($this->perPage);
         }
 
@@ -82,29 +85,33 @@ class Index extends Component
                 'user:id,name',
                 'responsibleOfficer:id,name',
                 'currentApprovalOfficer:id,name',
-                'approvals.officer:id,name'
+                'approvals.officer:id,name',
             ])
             ->orderBy('updated_at', 'desc');
 
-        if (!empty($this->searchTerm)) {
-            $search = '%' . $this->searchTerm . '%';
+        if (! empty($this->searchTerm)) {
+            $search = '%'.$this->searchTerm.'%';
             $query->where(function ($q) use ($search) {
-                if (is_numeric(str_replace('%','',$search))) {
-                     $q->orWhere('id', 'like', $search); // OrWhere because purpose might also match numeric IDs if purpose contains numbers
+                if (is_numeric(str_replace('%', '', $search))) {
+                    $q->orWhere('id', 'like', $search);
                 }
                 $q->orWhere('purpose', 'like', $search)
-                  ->orWhere('location', 'like', $search);
+                    ->orWhere('location', 'like', 'search');
             });
         }
 
-        if (!empty($this->filterStatus) && $this->filterStatus !== 'all' && $this->filterStatus !== '') {
+        if (! empty($this->filterStatus) && $this->filterStatus !== 'all' && $this->filterStatus !== '') {
             $query->where('status', $this->filterStatus);
         }
 
         $applications = $query->paginate($this->perPage);
 
-        $applications->getCollection()->transform(function (LoanApplication $application) { // Type hint $application
+        // This `transform` block is the corrected logic. It ensures that we iterate
+        // through the collection of applications and pass each individual model
+        // to the checkCanActOnApplication method, resolving the warning.
+        $applications->getCollection()->transform(function (LoanApplication $application) {
             $application->can_act_on = $this->checkCanActOnApplication($application);
+
             return $application;
         });
 
@@ -114,26 +121,28 @@ class Index extends Component
     public function getStatusOptionsProperty(): array
     {
         $options = LoanApplication::getStatusOptions() ?? [];
+
         return ['' => __('Semua Status')] + $options;
     }
 
     protected function checkCanActOnApplication(LoanApplication $application): bool
     {
         $user = Auth::user();
-        if (!$user) {
+        if (! $user) {
             return false;
         }
+
         return $user->can('recordDecision', $application);
     }
 
     public function showApproveModal(int $applicationId): void
     {
         $application = LoanApplication::findOrFail($applicationId);
-        if (!$this->checkCanActOnApplication($application)) {
-             session()->flash('error', __('Anda tidak dibenarkan untuk meluluskan permohonan ini.'));
-             return;
-        }
+        if (! $this->checkCanActOnApplication($application)) {
+            session()->flash('error', __('Anda tidak dibenarkan untuk meluluskan permohonan ini.'));
 
+            return;
+        }
         $this->selectedApplicationId = $application->id;
         $this->approvalActionType = 'approve';
         $this->approvalComments = '';
@@ -145,11 +154,11 @@ class Index extends Component
     public function showRejectModal(int $applicationId): void
     {
         $application = LoanApplication::findOrFail($applicationId);
-        if (!$this->checkCanActOnApplication($application)) {
-             session()->flash('error', __('Anda tidak dibenarkan untuk menolak permohonan ini.'));
-             return;
-        }
+        if (! $this->checkCanActOnApplication($application)) {
+            session()->flash('error', __('Anda tidak dibenarkan untuk menolak permohonan ini.'));
 
+            return;
+        }
         $this->selectedApplicationId = $application->id;
         $this->approvalActionType = 'reject';
         $this->approvalComments = '';
@@ -175,68 +184,55 @@ class Index extends Component
         $this->validate($this->rules, $this->messages);
 
         $application = LoanApplication::find($this->selectedApplicationId);
-        if(!$application){
+        if (! $application) {
             session()->flash('error', __('Permohonan tidak ditemui.'));
             $this->closeApprovalActionModal();
+
             return;
         }
 
-        /** @var User $user */
         $user = Auth::user();
-        if (!$this->checkCanActOnApplication($application)) {
-             session()->flash('error', __('Anda tidak lagi mempunyai kebenaran untuk tindakan ini.'));
-             $this->closeApprovalActionModal();
-             return;
+        if (! $this->checkCanActOnApplication($application)) {
+            session()->flash('error', __('Anda tidak lagi mempunyai kebenaran untuk tindakan ini.'));
+            $this->closeApprovalActionModal();
+
+            return;
         }
 
         $actionStatusForApprovalService = $this->approvalActionType === 'approve' ? Approval::STATUS_APPROVED : Approval::STATUS_REJECTED;
 
         try {
             $currentApprovalStageKey = $application->current_approval_stage ?? $application->status;
-
             $approvalTask = Approval::where('approvable_id', $application->id)
                 ->where('approvable_type', $application->getMorphClass())
                 ->where('stage', $currentApprovalStageKey)
                 ->where('status', Approval::STATUS_PENDING)
-                ->when(!$user->hasRole('Admin'), function ($query) use ($user) {
-                    return $query->where('officer_id', $user->id);
-                })
+                ->when(! $user->hasRole('Admin'), fn ($query) => $query->where('officer_id', $user->id))
                 ->first();
 
-            if (!$approvalTask && $user->hasRole('Admin')) {
-                // If admin is acting and no specific task, try to find ANY pending task for that stage
+            if (! $approvalTask && $user->hasRole('Admin')) {
                 $approvalTask = Approval::where('approvable_id', $application->id)
                     ->where('approvable_type', $application->getMorphClass())
                     ->where('stage', $currentApprovalStageKey)
                     ->where('status', Approval::STATUS_PENDING)
-                    ->orderBy('created_at', 'desc') // Get the latest if multiple for stage
+                    ->orderBy('created_at', 'desc')
                     ->first();
             }
 
+            if (! $approvalTask) {
+                session()->flash('error', __('Tiada tugasan kelulusan aktif yang sesuai ditemui untuk diproses.'));
+                $this->closeApprovalActionModal();
 
-            if (!$approvalTask) {
-                 session()->flash('error', __('Tiada tugasan kelulusan aktif yang sesuai ditemui untuk diproses. Semak status permohonan atau hubungi pentadbir.'));
-                 Log::warning("No active approval task found for LoanApplication #{$application->id} at stage '{$currentApprovalStageKey}' for user #{$user->id} to act upon.");
-                 $this->closeApprovalActionModal();
-                 return;
+                return;
             }
 
-            $this->approvalService->processApprovalDecision(
-                $approvalTask,
-                $actionStatusForApprovalService,
-                $user,
-                $this->approvalComments
-            );
-
+            $this->approvalService->processApprovalDecision($approvalTask, $actionStatusForApprovalService, $user, $this->approvalComments);
             session()->flash('success', __('Tindakan kelulusan telah berjaya direkodkan.'));
         } catch (AuthorizationException $e) {
-            Log::error("Authorization error during approval action for loan #{$application->id} by user #{$user->id}: " . $e->getMessage());
             session()->flash('error', $e->getMessage());
         } catch (\Exception $e) {
-            Log::error("Error processing approval action for loan #{$application->id} by user #{$user->id}: " . $e->getMessage(), ['exception' => $e]);
-            session()->flash('error', __('Gagal memproses tindakan kelulusan. Ralat: ') . $e->getMessage());
+            session()->flash('error', __('Gagal memproses tindakan kelulusan. Ralat: ').$e->getMessage());
         }
-
         $this->closeApprovalActionModal();
     }
 
@@ -248,6 +244,26 @@ class Index extends Component
         $this->approvalComments = '';
         $this->resetValidation();
         $this->dispatch('closeModal', elementId: 'approvalActionModal');
+    }
+
+    #[On('deleteLoanApplication')]
+    public function deleteLoanApplication($id)
+    {
+        try {
+            $application = LoanApplication::findOrFail($id);
+
+            $this->authorize('delete', $application);
+
+            $application->delete();
+
+            $this->dispatch('toastr', type: 'success', message: 'Permohonan draf #'.$id.' telah berjaya dipadam.');
+
+        } catch (AuthorizationException $e) {
+            $this->dispatch('toastr', type: 'error', message: 'Anda tidak mempunyai kebenaran untuk memadam permohonan ini.');
+        } catch (\Exception $e) {
+            Log::error('Failed to delete loan application: '.$e->getMessage());
+            $this->dispatch('toastr', type: 'error', message: 'Gagal memadam permohonan tersebut.');
+        }
     }
 
     public function updatingSearchTerm(): void
@@ -268,7 +284,6 @@ class Index extends Component
 
     public function render(): View
     {
-        // The user's original file used 'applications' as the key for the view.
         return view('livewire.resource-management.my-applications.loan.index', [
             'applications' => $this->loanApplications,
             'statusOptions' => $this->statusOptions,

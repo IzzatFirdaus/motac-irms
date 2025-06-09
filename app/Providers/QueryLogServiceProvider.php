@@ -2,11 +2,11 @@
 
 namespace App\Providers;
 
+use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Database\Events\QueryExecuted; // Import the QueryExecuted event
+use Illuminate\Support\ServiceProvider; // Import the QueryExecuted event
 
 class QueryLogServiceProvider extends ServiceProvider // Corrected class name
 {
@@ -32,7 +32,7 @@ class QueryLogServiceProvider extends ServiceProvider // Corrected class name
 
             DB::whenQueryingForLongerThan($longQueryThreshold, function ($connection, QueryExecuted $event) {
                 $url = 'N/A (Console or no request context)';
-                if (!App::runningInConsole()) {
+                if (! App::runningInConsole()) {
                     /** @var \Illuminate\Http\Request|null $currentRequest */
                     $currentRequest = request(); // Global helper
                     if ($currentRequest && method_exists($currentRequest, 'fullUrl')) {

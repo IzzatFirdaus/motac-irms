@@ -1,16 +1,10 @@
-<?php declare(strict_types=1);
+<?php
 
-// resources/lang/my/validation.php
 return [
     /*
     |--------------------------------------------------------------------------
     | Validation Language Lines
     |--------------------------------------------------------------------------
-    |
-    | The following language lines contain the default error messages used by
-    | the validator class. Some of these rules have multiple versions such
-    | as the size rules. Feel free to tweak each of these messages here.
-    | Design Language: Clear Instructions & Actionable Feedback (validation messages).
     */
 
     'accepted' => 'Medan :attribute mesti diterima.',
@@ -172,56 +166,47 @@ return [
     |--------------------------------------------------------------------------
     | Custom Validation Attributes
     |--------------------------------------------------------------------------
-    | You can specify custom names for attributes to make messages more friendly.
-    | Example: 'email' => 'Alamat E-mel Anda'
-    | System Design Reference: Dashboard Modals (modal-leaveWithEmployee.blade.php inputs)
     */
     'attributes' => [
         // User Model Fields
-        'name' => __('Nama Penuh'),
-        'email' => __('Alamat E-mel'),
-        'password' => __('Kata Laluan'),
-        'title' => __('Gelaran'),
-        'identification_number' => __('No. Kad Pengenalan'),
-        'passport_number' => __('No. Pasport'),
-        'position_id' => __('Jawatan'),
-        'grade_id' => __('Gred'),
-        'department_id' => __('Jabatan/Unit'),
-        'level' => __('Aras'),
-        'mobile_number' => __('No. Telefon Bimbit'),
-        'motac_email' => __('E-mel Rasmi MOTAC'),
-        'user_id_assigned' => __('ID Pengguna (Sistem)'),
-        'service_status' => __('Taraf Perkhidmatan'),
-        'appointment_type' => __('Jenis Pelantikan'),
-        'status' => __('Status'),
+        'name' => 'Nama Penuh',
+        'email' => 'Alamat E-mel',
+        'password' => 'Kata Laluan',
+        'title' => 'Gelaran',
+        'identification_number' => 'No. Kad Pengenalan',
+        'passport_number' => 'No. Pasport',
+        'position_id' => 'Jawatan',
+        'grade_id' => 'Gred',
+        'department_id' => 'Jabatan/Unit',
+        'level' => 'Aras',
+        'mobile_number' => 'No. Telefon Bimbit',
+        'motac_email' => 'E-mel Rasmi MOTAC',
+        'user_id_assigned' => 'ID Pengguna (Sistem)',
+        'service_status' => 'Taraf Perkhidmatan',
+        'appointment_type' => 'Jenis Pelantikan',
+        'status' => 'Status',
 
         // Email Application Fields
-        'application_reason_notes' => __('Tujuan/Catatan Permohonan'),
-        'proposed_email' => __('Cadangan E-mel ID'),
-        'contact_person_name' => __('Nama Admin/EO/CC'),
-        'contact_person_email' => __('E-mel Admin/EO/CC'),
-        'supporting_officer_id' => __('Pegawai Penyokong'),
-        'cert_info_is_true' => __('Perakuan Maklumat Benar'),
-        'cert_data_usage_agreed' => __('Perakuan Penggunaan Data'),
-        'cert_email_responsibility_agreed' => __('Perakuan Tanggungjawab E-mel'),
+        'application_reason_notes' => 'Tujuan/Catatan Permohonan',
+        'proposed_email' => 'Cadangan E-mel ID',
+        'contact_person_name' => 'Nama Admin/EO/CC',
+        'contact_person_email' => 'E-mel Admin/EO/CC',
+        'supporting_officer_id' => 'Pegawai Penyokong',
+        'cert_info_is_true' => 'Perakuan Maklumat Benar',
+        'cert_data_usage_agreed' => 'Perakuan Penggunaan Data',
+        'cert_email_responsibility_agreed' => 'Perakuan Tanggungjawab E-mel',
 
         // Loan Application Fields
-        'purpose' => __('Tujuan Pinjaman'),
-        'location' => __('Lokasi Penggunaan'),
-        'loan_start_date' => __('Tarikh Mula Pinjaman'),
-        'loan_end_date' => __('Tarikh Akhir Pinjaman'),
-        'responsible_officer_id' => __('Pegawai Bertanggungjawab'),
-        'loanApplicationItems' => __('Item Pinjaman'),
-        'applicationItems.*.equipment_type' => __('Jenis Peralatan'),
-        'applicationItems.*.quantity_requested' => __('Kuantiti Dimohon'),
-
-        // Modal Leave Fields (from modal-leaveWithEmployee)
-        'selectedEmployeeId' => __('Kakitangan'),
-        'newLeaveInfo.LeaveId' => __('Jenis Cuti'),
-        'newLeaveInfo.fromDate' => __('Tarikh Mula Cuti'),
-        'newLeaveInfo.toDate' => __('Tarikh Akhir Cuti'),
-        'newLeaveInfo.startAt' => __('Masa Mula Cuti'),
-        'newLeaveInfo.endAt' => __('Masa Akhir Cuti'),
-        'newLeaveInfo.note' => __('Catatan Cuti'),
+        'purpose' => 'Tujuan Pinjaman',
+        'location' => 'Lokasi Penggunaan',
+        'loan_start_date' => 'Tarikh Mula Pinjaman',
+        'loan_end_date' => 'Tarikh Akhir Pinjaman',
+        'responsible_officer_id' => 'Pegawai Bertanggungjawab',
+        'loan_application_items' => 'Item Pinjaman',
+        'loan_application_items.*.equipment_type' => 'Jenis Peralatan',
+        'loan_application_items.*.quantity_requested' => 'Kuantiti Dimohon',
+        'applicant_phone' => 'No. Telefon Pemohon',
+        'return_location' => 'Lokasi Pemulangan',
+        'applicant_confirmation' => 'Perakuan Pemohon',
     ],
 ];

@@ -8,7 +8,6 @@ return [
   'bpm_short_name' => 'BPM',
   'internal_system_description' => 'Internal Integrated Resource Management System for the Information Management Division, Ministry of Tourism, Arts and Culture Malaysia.',
 
-
   'button_continue' => 'Continue',
   'button_back' => 'Back',
   'button_reset' => 'Reset',
@@ -47,7 +46,6 @@ return [
   'button_change_language' => 'Change Language',
   'button_refresh' => 'Refresh',
 
-
   'menu_dashboard' => 'Dashboard',
   'menu_email_user_id_application' => 'Email/User ID Application',
   'menu_ict_equipment_loan' => 'ICT Equipment Loan',
@@ -76,7 +74,6 @@ return [
   'menu_logout' => 'Logout',
   'menu_notifications' => 'Notifications',
   'menu_my_profile' => 'My Profile',
-
 
   'label_status' => 'Status',
   'label_action' => 'Action',
@@ -134,7 +131,6 @@ return [
   'label_light_mode' => 'Light Mode',
   'label_dark_mode' => 'Dark Mode',
 
-
   'title_my_dashboard' => 'My Dashboard',
   'title_admin_dashboard' => 'Admin Dashboard',
   'title_application_details' => 'Application Details',
@@ -181,4 +177,16 @@ return [
   'button_remove_equipment' => 'Remove Equipment',
   'text_saving' => 'Saving...',
   'text_processing' => 'Processing...',
+  'dashboard_admin_title' => 'Administrator Dashboard',
+  'dashboard_total_users' => 'Total System Users',
+  'dashboard_manage_users' => 'Manage System Users',
+  'dashboard_pending_approvals' => 'Applications Awaiting Approval',
+  'dashboard_view_all_tasks' => 'View All Approval Tasks',
+  'dashboard_available_equipment' => 'Available ICT Equipment',
+  'dashboard_manage_inventory' => 'Manage Equipment Inventory',
+  'dashboard_loaned_equipment' => 'ICT Equipment on Loan',
+  'dashboard_view_active_loans' => 'View Active Loan List',
+  'dashboard_email_stats_title' => 'Email/User ID Application Statistics',
+  'dashboard_loan_stats_title' => 'ICT Equipment Loan Statistics',
+  'dashboard_latest_tasks_title' => 'Latest Approval Tasks',
 ];

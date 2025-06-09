@@ -103,7 +103,7 @@ return new class extends Migration
                     try {
                         $table->dropForeign([$column]);
                     } catch (\Exception $e) {
-                        Log::warning("Could not drop foreign key for column '{$column}' on 'equipment' table during migration rollback (it might not exist or have a non-conventional name): " . $e->getMessage());
+                        Log::warning("Could not drop foreign key for column '{$column}' on 'equipment' table during migration rollback (it might not exist or have a non-conventional name): ".$e->getMessage());
                     }
                 }
             }

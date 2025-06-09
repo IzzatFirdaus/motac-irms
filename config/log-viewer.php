@@ -2,7 +2,7 @@
 
 return [
 
-  /*
+    /*
     |--------------------------------------------------------------------------
     | Log Viewer
     |--------------------------------------------------------------------------
@@ -10,9 +10,9 @@ return [
     |
     */
 
-  'enabled' => env('LOG_VIEWER_ENABLED', true),
+    'enabled' => env('LOG_VIEWER_ENABLED', true),
 
-  /*
+    /*
     |--------------------------------------------------------------------------
     | Log Viewer Domain
     |--------------------------------------------------------------------------
@@ -21,9 +21,9 @@ return [
     |
     */
 
-  'route_domain' => null,
+    'route_domain' => null,
 
-  /*
+    /*
     |--------------------------------------------------------------------------
     | Log Viewer Route
     |--------------------------------------------------------------------------
@@ -31,9 +31,9 @@ return [
     |
     */
 
-  'route_path' => 'log-viewer',
+    'route_path' => 'log-viewer',
 
-  /*
+    /*
     |--------------------------------------------------------------------------
     | Back to system URL
     |--------------------------------------------------------------------------
@@ -44,11 +44,11 @@ return [
     |
     */
 
-  'back_to_system_url' => config('app.url', null),
+    'back_to_system_url' => config('app.url', null),
 
-  'back_to_system_label' => null, // Displayed by default: "Back to {{ app.name }}"
+    'back_to_system_label' => null, // Displayed by default: "Back to {{ app.name }}"
 
-  /*
+    /*
     |--------------------------------------------------------------------------
     | Log Viewer time zone.
     |--------------------------------------------------------------------------
@@ -57,9 +57,9 @@ return [
     |
     */
 
-  'timezone' => null,
+    'timezone' => null,
 
-  /*
+    /*
     |--------------------------------------------------------------------------
     | Log Viewer route middleware.
     |--------------------------------------------------------------------------
@@ -67,15 +67,15 @@ return [
     |
     */
 
-  'middleware' => [
-    'web',
-    'view_logs',
-    \Opcodes\LogViewer\Http\Middleware\AuthorizeLogViewer::class,
-    'auth:sanctum', // Ensure user is authenticated
+    'middleware' => [
+        'web',
+        'view_logs',
+        \Opcodes\LogViewer\Http\Middleware\AuthorizeLogViewer::class,
+        'auth:sanctum', // Ensure user is authenticated
 
-  ],
+    ],
 
-  /*
+    /*
     |--------------------------------------------------------------------------
     | Log Viewer API middleware.
     |--------------------------------------------------------------------------
@@ -84,12 +84,12 @@ return [
     |
     */
 
-  'api_middleware' => [
-    \Opcodes\LogViewer\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-    \Opcodes\LogViewer\Http\Middleware\AuthorizeLogViewer::class,
-  ],
+    'api_middleware' => [
+        \Opcodes\LogViewer\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+        \Opcodes\LogViewer\Http\Middleware\AuthorizeLogViewer::class,
+    ],
 
-  /*
+    /*
     |--------------------------------------------------------------------------
     | Log Viewer Remote hosts.
     |--------------------------------------------------------------------------
@@ -99,59 +99,59 @@ return [
     |
     */
 
-  'hosts' => [
-    'local' => [
-      'name' => ucfirst(env('APP_ENV', 'local')),
+    'hosts' => [
+        'local' => [
+            'name' => ucfirst(env('APP_ENV', 'local')),
+        ],
+
+        // 'staging' => [
+        //     'name' => 'Staging',
+        //     'host' => 'https://staging.example.com/log-viewer',
+        //     'auth' => [      // Example of HTTP Basic auth
+        //         'username' => 'username',
+        //         'password' => 'password',
+        //     ],
+        // ],
+        //
+        // 'production' => [
+        //     'name' => 'Production',
+        //     'host' => 'https://example.com/log-viewer',
+        //     'auth' => [      // Example of Bearer token auth
+        //         'token' => env('LOG_VIEWER_PRODUCTION_TOKEN'),
+        //     ],
+        //     'headers' => [
+        //         'X-Foo' => 'Bar',
+        //     ],
+        // ],
     ],
 
-    // 'staging' => [
-    //     'name' => 'Staging',
-    //     'host' => 'https://staging.example.com/log-viewer',
-    //     'auth' => [      // Example of HTTP Basic auth
-    //         'username' => 'username',
-    //         'password' => 'password',
-    //     ],
-    // ],
-    //
-    // 'production' => [
-    //     'name' => 'Production',
-    //     'host' => 'https://example.com/log-viewer',
-    //     'auth' => [      // Example of Bearer token auth
-    //         'token' => env('LOG_VIEWER_PRODUCTION_TOKEN'),
-    //     ],
-    //     'headers' => [
-    //         'X-Foo' => 'Bar',
-    //     ],
-    // ],
-  ],
-
-  /*
+    /*
     |--------------------------------------------------------------------------
     | Include file patterns
     |--------------------------------------------------------------------------
     |
     */
 
-  'include_files' => [
-    '*.log',
-    '**/*.log',
+    'include_files' => [
+        '*.log',
+        '**/*.log',
 
-    // You can include paths to other log types as well, such as apache, nginx, and more.
-    '/var/log/httpd/*',
-    '/var/log/nginx/*',
+        // You can include paths to other log types as well, such as apache, nginx, and more.
+        '/var/log/httpd/*',
+        '/var/log/nginx/*',
 
-    // MacOS Apple Silicon logs
-    '/opt/homebrew/var/log/nginx/*',
-    '/opt/homebrew/var/log/httpd/*',
-    '/opt/homebrew/var/log/php-fpm.log',
-    '/opt/homebrew/var/log/postgres*log',
-    '/opt/homebrew/var/log/redis*log',
-    '/opt/homebrew/var/log/supervisor*log',
+        // MacOS Apple Silicon logs
+        '/opt/homebrew/var/log/nginx/*',
+        '/opt/homebrew/var/log/httpd/*',
+        '/opt/homebrew/var/log/php-fpm.log',
+        '/opt/homebrew/var/log/postgres*log',
+        '/opt/homebrew/var/log/redis*log',
+        '/opt/homebrew/var/log/supervisor*log',
 
-    // '/absolute/paths/supported',
-  ],
+        // '/absolute/paths/supported',
+    ],
 
-  /*
+    /*
     |--------------------------------------------------------------------------
     | Exclude file patterns.
     |--------------------------------------------------------------------------
@@ -159,11 +159,11 @@ return [
     |
     */
 
-  'exclude_files' => [
-    // 'my_secret.log'
-  ],
+    'exclude_files' => [
+        // 'my_secret.log'
+    ],
 
-  /*
+    /*
     |--------------------------------------------------------------------------
     | Hide unknown files.
     |--------------------------------------------------------------------------
@@ -173,9 +173,9 @@ return [
     |
     */
 
-  'hide_unknown_files' => true,
+    'hide_unknown_files' => true,
 
-  /*
+    /*
     |--------------------------------------------------------------------------
     |  Shorter stack trace filters.
     |--------------------------------------------------------------------------
@@ -184,13 +184,13 @@ return [
     |
     */
 
-  'shorter_stack_trace_excludes' => [
-    '/vendor/symfony/',
-    '/vendor/laravel/framework/',
-    '/vendor/barryvdh/laravel-debugbar/',
-  ],
+    'shorter_stack_trace_excludes' => [
+        '/vendor/symfony/',
+        '/vendor/laravel/framework/',
+        '/vendor/barryvdh/laravel-debugbar/',
+    ],
 
-  /*
+    /*
     |--------------------------------------------------------------------------
     | Cache driver
     |--------------------------------------------------------------------------
@@ -199,9 +199,9 @@ return [
     |
     */
 
-  'cache_driver' => env('LOG_VIEWER_CACHE_DRIVER', null),
+    'cache_driver' => env('LOG_VIEWER_CACHE_DRIVER', null),
 
-  /*
+    /*
     |--------------------------------------------------------------------------
     | Chunk size when scanning log files lazily
     |--------------------------------------------------------------------------
@@ -209,7 +209,7 @@ return [
     |
     */
 
-  'lazy_scan_chunk_size_in_mb' => 50,
+    'lazy_scan_chunk_size_in_mb' => 50,
 
-  'strip_extracted_context' => true,
+    'strip_extracted_context' => true,
 ];

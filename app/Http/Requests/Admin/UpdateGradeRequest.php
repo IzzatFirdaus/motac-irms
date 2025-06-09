@@ -14,6 +14,7 @@ class UpdateGradeRequest extends FormRequest
     public function authorize(): bool
     {
         $grade = $this->route('grade'); // Get the grade instance from route model binding
+
         return $grade && $this->user()->can('update', $grade);
     }
 

@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\Approval;
 use App\Models\LoanApplication; // Added
-use App\Models\LoanApplicationItem; // Added for fetching item details
+// Added for fetching item details
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -15,7 +15,7 @@ class RecordApprovalDecisionRequest extends FormRequest
     {
         /** @var User|null $user */
         $user = $this->user(); //
-        if (!$user) { //
+        if (! $user) { //
             return false;
         }
 
@@ -64,15 +64,16 @@ class RecordApprovalDecisionRequest extends FormRequest
 
                     // Rule for each item's quantity_approved
                     // The key is items_approved.ITEM_ID.quantity_approved
-                    $rules['items_approved.' . $loanApplicationItemId . '.quantity_approved'] = [ //
+                    $rules['items_approved.'.$loanApplicationItemId.'.quantity_approved'] = [ //
                         'required', // Make it required if the parent array key items_approved[ITEM_ID] exists
                         'integer', //
                         'min:0', //
-                        'max:' . $maxQty, //
+                        'max:'.$maxQty, //
                     ];
                 }
             }
         }
+
         return $rules; //
     }
 
@@ -95,24 +96,25 @@ class RecordApprovalDecisionRequest extends FormRequest
         if ($approval && $approval->approvable instanceof LoanApplication && is_array($this->input('items_approved'))) { //
             foreach ($this->input('items_approved') as $loanApplicationItemId => $itemData) { //
                 $loanAppItem = null;
-                 if ($approval->approvable && method_exists($approval->approvable, 'loanApplicationItems')) {
+                if ($approval->approvable && method_exists($approval->approvable, 'loanApplicationItems')) {
                     $loanAppItem = $approval->approvable->loanApplicationItems()->find($loanApplicationItemId); //
                 }
-                $itemTypeDisplay = "Item"; // Default
+                $itemTypeDisplay = 'Item'; // Default
                 if ($loanAppItem && $loanAppItem->equipment_type) {
-                     $itemTypeDisplay = optional(\App\Models\Equipment::getAssetTypeOptions())[$loanAppItem->equipment_type] ?? $loanAppItem->equipment_type; //
-                } else if ($loanApplicationItemId) {
+                    $itemTypeDisplay = optional(\App\Models\Equipment::getAssetTypeOptions())[$loanAppItem->equipment_type] ?? $loanAppItem->equipment_type; //
+                } elseif ($loanApplicationItemId) {
                     $itemTypeDisplay = "Item ID {$loanApplicationItemId}"; //
                 }
 
                 $maxQty = $loanAppItem ? $loanAppItem->quantity_requested : 0; //
 
-                $messages['items_approved.' . $loanApplicationItemId . '.quantity_approved.required'] = __('Kuantiti diluluskan untuk :itemType wajib diisi.', ['itemType' => $itemTypeDisplay]); //
-                $messages['items_approved.' . $loanApplicationItemId . '.quantity_approved.integer'] = __('Kuantiti diluluskan untuk :itemType mesti nombor bulat.', ['itemType' => $itemTypeDisplay]); //
-                $messages['items_approved.' . $loanApplicationItemId . '.quantity_approved.min'] = __('Kuantiti diluluskan untuk :itemType tidak boleh kurang dari 0.', ['itemType' => $itemTypeDisplay]); //
-                $messages['items_approved.' . $loanApplicationItemId . '.quantity_approved.max'] = __('Kuantiti diluluskan untuk :itemType tidak boleh melebihi kuantiti dipohon (:max).', ['itemType' => $itemTypeDisplay, 'max' => $maxQty]); //
+                $messages['items_approved.'.$loanApplicationItemId.'.quantity_approved.required'] = __('Kuantiti diluluskan untuk :itemType wajib diisi.', ['itemType' => $itemTypeDisplay]); //
+                $messages['items_approved.'.$loanApplicationItemId.'.quantity_approved.integer'] = __('Kuantiti diluluskan untuk :itemType mesti nombor bulat.', ['itemType' => $itemTypeDisplay]); //
+                $messages['items_approved.'.$loanApplicationItemId.'.quantity_approved.min'] = __('Kuantiti diluluskan untuk :itemType tidak boleh kurang dari 0.', ['itemType' => $itemTypeDisplay]); //
+                $messages['items_approved.'.$loanApplicationItemId.'.quantity_approved.max'] = __('Kuantiti diluluskan untuk :itemType tidak boleh melebihi kuantiti dipohon (:max).', ['itemType' => $itemTypeDisplay, 'max' => $maxQty]); //
             }
         }
+
         return $messages; //
     }
 }

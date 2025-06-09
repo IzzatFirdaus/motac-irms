@@ -1,4 +1,3 @@
-{{-- resources/views/livewire/resource-management/my-applications/loan/index.blade.php --}}
 <div>
     @section('title', __('Status Permohonan Pinjaman Saya'))
 
@@ -74,18 +73,12 @@
             <table class="table table-hover table-striped mb-0 align-middle">
                 <thead class="table-light">
                     <tr>
-                        <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">
-                            {{ __('ID Permohonan') }}</th>
-                        <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">
-                            {{ __('Tujuan') }}</th>
-                        <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">
-                            {{ __('Tarikh Mula Pinjam') }}</th>
-                        <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">
-                            {{ __('Tarikh Hantar Balik') }}</th>
-                        <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2 text-center">
-                            {{ __('Status') }}</th>
-                        <th scope="col" class="text-center small text-uppercase text-muted fw-medium px-3 py-2">
-                            {{ __('Tindakan') }}</th>
+                        <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('ID Permohonan') }}</th>
+                        <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Tujuan') }}</th>
+                        <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Tarikh Mula Pinjam') }}</th>
+                        <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Tarikh Hantar Balik') }}</th>
+                        <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2 text-center">{{ __('Status') }}</th>
+                        <th scope="col" class="text-center small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Tindakan') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -101,8 +94,7 @@
                     @forelse ($applications as $application)
                         <tr wire:key="loan-app-{{ $application->id }}">
                             <td class="px-3 py-2 align-middle small text-dark fw-medium">#{{ $application->id }}</td>
-                            <td class="px-3 py-2 align-middle small text-muted"
-                                style="max-width: 300px; white-space: normal;">
+                            <td class="px-3 py-2 align-middle small text-muted" style="max-width: 300px; white-space: normal;">
                                 {{ Str::limit($application->purpose, 70) }}
                             </td>
                             <td class="px-3 py-2 align-middle small text-muted">
@@ -112,8 +104,11 @@
                                 {{ $application->loan_end_date ? Carbon\Carbon::parse($application->loan_end_date)->translatedFormat(config('app.date_format_my', 'd/m/Y')) : 'N/A' }}
                             </td>
                             <td class="px-3 py-2 align-middle small text-center">
+                                {{-- ======================================================== --}}
+                                {{-- == THE FIX IS APPLIED IN THE LINE BELOW == --}}
+                                {{-- ======================================================== --}}
                                 <span class="badge rounded-pill {{ App\Helpers\Helpers::getStatusColorClass($application->status ?? 'default', 'loan') }}">
-                                    {{ __($application->status_translated ?? Str::studly($application->status)) }}
+                                    {{ $application->status_label }}
                                 </span>
                             </td>
                             <td class="px-3 py-2 align-middle text-center">
@@ -231,5 +226,4 @@
     </div>
     <div class="modal-backdrop fade show" wire:ignore.self style="{{ $showApprovalActionModal ? '' : 'display:none;' }}"></div>
     @endif
-    {{-- Include your global delete confirmation modal component here, ensuring it uses Bootstrap Icons --}}
 </div>

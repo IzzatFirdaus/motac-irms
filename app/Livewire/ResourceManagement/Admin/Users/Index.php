@@ -16,7 +16,9 @@ class Index extends Component
     use WithPagination;
 
     public string $search = '';
+
     public ?string $filterRole = null; // Store role name or ID
+
     public array $roleOptions = [];
 
     protected string $paginationTheme = 'bootstrap';
@@ -30,20 +32,20 @@ class Index extends Component
     public function getUsersProperty()
     {
         $query = User::with(['department:id,name', 'roles:id,name'])
-          ->orderBy('name', 'asc');
+            ->orderBy('name', 'asc');
 
-        if (!empty($this->search)) {
+        if (! empty($this->search)) {
             $query->where(function ($q) {
-                $q->where('name', 'like', '%' . $this->search . '%')
-                  ->orWhere('email', 'like', '%' . $this->search . '%')
-                  ->orWhere('identification_number', 'like', '%' . $this->search . '%')
-                  ->orWhereHas('department', function ($deptQuery) {
-                      $deptQuery->where('name', 'like', '%' . $this->search . '%');
-                  });
+                $q->where('name', 'like', '%'.$this->search.'%')
+                    ->orWhere('email', 'like', '%'.$this->search.'%')
+                    ->orWhere('identification_number', 'like', '%'.$this->search.'%')
+                    ->orWhereHas('department', function ($deptQuery) {
+                        $deptQuery->where('name', 'like', '%'.$this->search.'%');
+                    });
             });
         }
 
-        if (!empty($this->filterRole)) {
+        if (! empty($this->filterRole)) {
             $query->whereHas('roles', function ($roleQuery) {
                 $roleQuery->where('name', $this->filterRole);
             });
@@ -66,6 +68,7 @@ class Index extends Component
     public function redirectToCreateUser(): \Illuminate\Http\RedirectResponse
     {
         $this->authorize('create', User::class);
+
         return redirect()->route('settings.users.create'); // Assuming you have such a route for the CreateUser component
     }
 
@@ -74,6 +77,7 @@ class Index extends Component
     {
         $user = User::findOrFail($userId);
         $this->authorize('update', $user);
+
         return redirect()->route('settings.users.edit', $user); // Assuming route for EditUser component
     }
 
@@ -90,12 +94,11 @@ class Index extends Component
         $this->dispatch('toastr', type: 'info', message: "Penghapusan pengguna ID: {$userId} memerlukan pengesahan (logik belum dilaksanakan sepenuhnya).");
     }
 
-
     public function render()
     {
         return view('livewire.resource-management.admin.users.index', [
-          'usersList' => $this->users, // Accesses getUsersProperty
-          'rolesForFilter' => $this->roleOptions,
+            'usersList' => $this->users, // Accesses getUsersProperty
+            'rolesForFilter' => $this->roleOptions,
         ])->title(__('Pengurusan Pentadbir Pengguna'));
     }
 }

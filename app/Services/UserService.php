@@ -32,12 +32,13 @@ final class UserService
      *
      * @param  array<string, mixed>  $data  User data including 'password'.
      * @return User The newly created User model.
+     *
      * @throws InvalidArgumentException If essential data like password is missing.
      * @throws RuntimeException If user creation fails at the database level.
      */
     public function createUser(array $data): User
     {
-        Log::info(self::LOG_AREA . ' Attempting to create user.', ['data_keys' => array_keys($data)]);
+        Log::info(self::LOG_AREA.' Attempting to create user.', ['data_keys' => array_keys($data)]);
         $preparedData = $this->prepareUserDataForCreation($data);
 
         return $this->executeInTransaction(
@@ -56,18 +57,20 @@ final class UserService
      * @param  User  $user  The User instance to update.
      * @param  array<string, mixed>  $data  Data to update.
      * @return bool True if the update resulted in changes being saved, false otherwise.
+     *
      * @throws RuntimeException If user update fails due to an exception.
      */
     public function updateUser(User $user, array $data): bool
     {
         $userId = $user->id;
-        Log::info(self::LOG_AREA . ' Attempting to update user.', [
+        Log::info(self::LOG_AREA.' Attempting to update user.', [
             'user_id' => $userId, 'data_keys' => array_keys($data),
         ]);
         $preparedData = $this->preparePasswordForUpdate($data);
 
         if (empty($preparedData)) {
-            Log::info(self::LOG_AREA . ' No updatable data provided for user update (after password preparation).', ['user_id' => $userId]);
+            Log::info(self::LOG_AREA.' No updatable data provided for user update (after password preparation).', ['user_id' => $userId]);
+
             return true; // No actual changes needed, operation considered successful.
         }
 
@@ -77,9 +80,10 @@ final class UserService
             ['user_id' => $userId, 'update_data_keys' => array_keys($preparedData)]
         );
 
-        if (!$updated) {
-            Log::info(self::LOG_AREA . ' User update for ID ' . $userId . ' did not result in changes or failed silently (event prevented save).');
+        if (! $updated) {
+            Log::info(self::LOG_AREA.' User update for ID '.$userId.' did not result in changes or failed silently (event prevented save).');
         }
+
         return $updated;
     }
 
@@ -88,12 +92,13 @@ final class UserService
      */
     public function getUserById(int $id): ?User
     {
-        Log::debug(self::LOG_AREA . ' Retrieving user by ID.', ['user_id' => $id]);
+        Log::debug(self::LOG_AREA.' Retrieving user by ID.', ['user_id' => $id]);
         /** @var User|null $user */
         $user = User::find($id);
-        if (!$user) {
-            Log::notice(self::LOG_AREA . ' User not found by ID.', ['user_id' => $id]);
+        if (! $user) {
+            Log::notice(self::LOG_AREA.' User not found by ID.', ['user_id' => $id]);
         }
+
         return $user;
     }
 
@@ -106,12 +111,13 @@ final class UserService
     public function getAllUsers(array $with = []): EloquentCollection
     {
         $logContext = empty($with) ? ['with_relations' => 'none'] : ['with_relations' => implode(', ', $with)];
-        Log::debug(self::LOG_AREA . ' Retrieving all users.', $logContext);
+        Log::debug(self::LOG_AREA.' Retrieving all users.', $logContext);
 
         $query = User::query();
-        if (!empty($with)) {
+        if (! empty($with)) {
             $query->with($with);
         }
+
         return $query->get();
     }
 
@@ -124,7 +130,7 @@ final class UserService
         if ($applicantGradeId === null) {
             return $query;
         }
-        Log::debug(self::LOG_AREA . ' Filtering users by applicant grade ID.', ['applicant_grade_id' => $applicantGradeId]);
+        Log::debug(self::LOG_AREA.' Filtering users by applicant grade ID.', ['applicant_grade_id' => $applicantGradeId]);
 
         return $query->whereHas('grade', function (EloquentBuilder $subQuery) use ($applicantGradeId): void {
             $subQuery->where('id', $applicantGradeId);
@@ -138,11 +144,12 @@ final class UserService
      */
     public function getUsersByRole(string $roleName): EloquentCollection
     {
-        Log::debug(self::LOG_AREA . ' Retrieving active users with role.', ['role_name' => $roleName]);
+        Log::debug(self::LOG_AREA.' Retrieving active users with role.', ['role_name' => $roleName]);
 
-        if (!method_exists(User::class, 'role') && !method_exists(User::query(), 'role')) {
-            Log::error(self::LOG_AREA . " User model or query builder does not have a 'role' scope/method. Cannot get users by role '{$roleName}'. Ensure Spatie/laravel-permission or similar is correctly set up on User model.");
-            return new EloquentCollection();
+        if (! method_exists(User::class, 'role') && ! method_exists(User::query(), 'role')) {
+            Log::error(self::LOG_AREA." User model or query builder does not have a 'role' scope/method. Cannot get users by role '{$roleName}'. Ensure Spatie/laravel-permission or similar is correctly set up on User model.");
+
+            return new EloquentCollection;
         }
 
         /** @phpstan-ignore-next-line */
@@ -156,7 +163,7 @@ final class UserService
     public function deleteUser(User $user): bool
     {
         $userId = $user->id;
-        Log::info(self::LOG_AREA . ' Attempting to soft delete user.', ['user_id' => $userId]);
+        Log::info(self::LOG_AREA.' Attempting to soft delete user.', ['user_id' => $userId]);
         $this->ensureNotDeletingAuthenticatedUser($user);
 
         $deleted = $this->executeInTransaction(
@@ -165,6 +172,7 @@ final class UserService
             ['user_id' => $userId]
         );
         $this->logDeletionOutcome($user, $deleted);
+
         return (bool) $deleted;
     }
 
@@ -175,23 +183,25 @@ final class UserService
     public function deactivateUser(User $user): bool
     {
         $userId = $user->id;
-        Log::info(self::LOG_AREA . ' Attempting to deactivate user.', ['user_id' => $userId]);
+        Log::info(self::LOG_AREA.' Attempting to deactivate user.', ['user_id' => $userId]);
 
-        if (!defined(User::class . '::STATUS_INACTIVE')) {
-            Log::critical(self::LOG_AREA . ' User::STATUS_INACTIVE constant is not defined in User model.');
+        if (! defined(User::class.'::STATUS_INACTIVE')) {
+            Log::critical(self::LOG_AREA.' User::STATUS_INACTIVE constant is not defined in User model.');
             throw new RuntimeException('Konfigurasi status pengguna tidak lengkap untuk proses nyahaktif.');
         }
 
         if ($user->status === User::STATUS_INACTIVE) {
-            Log::info(self::LOG_AREA . ' User is already inactive.', ['user_id' => $userId]);
+            Log::info(self::LOG_AREA.' User is already inactive.', ['user_id' => $userId]);
+
             return true;
         }
 
         $updated = $this->performUserDeactivation($user);
 
-        if (!$updated) {
-            Log::warning(self::LOG_AREA . ' User deactivation did not result in DB change for User ID: ' . $userId . ' (possibly due to events or no actual change).');
+        if (! $updated) {
+            Log::warning(self::LOG_AREA.' User deactivation did not result in DB change for User ID: '.$userId.' (possibly due to events or no actual change).');
         }
+
         return $updated;
     }
 
@@ -199,10 +209,12 @@ final class UserService
      * Executes a database callback within a transaction with standardized logging and error handling.
      *
      * @template T
-     * @param  \Closure(): T  $callback The database operation to execute.
-     * @param  string  $actionDescription A description of the action for logging.
-     * @param  array<string, mixed>  $logContext Additional context for logging.
+     *
+     * @param  \Closure(): T  $callback  The database operation to execute.
+     * @param  string  $actionDescription  A description of the action for logging.
+     * @param  array<string, mixed>  $logContext  Additional context for logging.
      * @return T The result of the callback.
+     *
      * @throws RuntimeException If the transaction fails.
      */
     private function executeInTransaction(\Closure $callback, string $actionDescription, array $logContext = [])
@@ -211,16 +223,17 @@ final class UserService
         try {
             $result = $callback();
             DB::commit();
-            Log::info(self::LOG_AREA . " Successfully " . $actionDescription . ".", $logContext);
+            Log::info(self::LOG_AREA.' Successfully '.$actionDescription.'.', $logContext);
+
             return $result;
         } catch (Throwable $e) {
             DB::rollBack();
-            Log::error(self::LOG_AREA . " Failed to " . $actionDescription . ".", array_merge($logContext, [
+            Log::error(self::LOG_AREA.' Failed to '.$actionDescription.'.', array_merge($logContext, [
                 'exception_message' => $e->getMessage(),
                 'exception_class' => get_class($e),
                 'trace_snippet' => substr($e->getTraceAsString(), 0, 500),
             ]));
-            throw new RuntimeException(__("Gagal untuk ") . $actionDescription . ": " . $e->getMessage(), (int) $e->getCode(), $e);
+            throw new RuntimeException(__('Gagal untuk ').$actionDescription.': '.$e->getMessage(), (int) $e->getCode(), $e);
         }
     }
 
@@ -229,6 +242,7 @@ final class UserService
      *
      * @param  array<string, mixed>  $data
      * @return array<string, mixed>
+     *
      * @throws InvalidArgumentException if password is not provided or invalid.
      */
     private function prepareUserDataForCreation(array $data): array
@@ -236,18 +250,18 @@ final class UserService
         if (isset($data['password']) && is_string($data['password']) && $data['password'] !== '') {
             $data['password'] = Hash::make($data['password']);
         } else {
-            Log::error(self::LOG_AREA . ' Password was not provided or was invalid during user creation preparation.', ['email' => $data['email'] ?? 'N/A']);
+            Log::error(self::LOG_AREA.' Password was not provided or was invalid during user creation preparation.', ['email' => $data['email'] ?? 'N/A']);
             // Correctly throwing the SPL InvalidArgumentException from global namespace
             throw new InvalidArgumentException(__('Kata laluan diperlukan untuk mencipta pengguna.'));
         }
 
-        if (!defined(User::class . '::STATUS_ACTIVE')) {
-            Log::critical(self::LOG_AREA . ' User::STATUS_ACTIVE constant is not defined. Critical configuration error.');
+        if (! defined(User::class.'::STATUS_ACTIVE')) {
+            Log::critical(self::LOG_AREA.' User::STATUS_ACTIVE constant is not defined. Critical configuration error.');
             throw new RuntimeException('Konfigurasi status pengguna (aktif) tidak dijumpai.');
         }
         $data['status'] = $data['status'] ?? User::STATUS_ACTIVE;
-        if (method_exists(User::class, 'getStatusKeys') && !in_array($data['status'], User::getStatusKeys())) {
-            Log::warning(self::LOG_AREA. "Invalid status '{$data['status']}' provided for user creation. Defaulting to active.", ['email' => $data['email'] ?? 'N/A']);
+        if (method_exists(User::class, 'getStatusKeys') && ! in_array($data['status'], User::getStatusKeys())) {
+            Log::warning(self::LOG_AREA."Invalid status '{$data['status']}' provided for user creation. Defaulting to active.", ['email' => $data['email'] ?? 'N/A']);
             $data['status'] = User::STATUS_ACTIVE;
         }
 
@@ -263,23 +277,25 @@ final class UserService
     private function preparePasswordForUpdate(array $data): array
     {
         if (array_key_exists('password', $data)) {
-            if (!empty($data['password']) && is_string($data['password'])) {
+            if (! empty($data['password']) && is_string($data['password'])) {
                 $data['password'] = Hash::make($data['password']);
             } else {
                 unset($data['password']);
             }
         }
+
         return $data;
     }
 
     /**
      * Ensures the authenticated user is not attempting to delete their own account.
+     *
      * @throws RuntimeException If self-deletion is attempted.
      */
     private function ensureNotDeletingAuthenticatedUser(User $userToDelete): void
     {
         if (Auth::check() && $userToDelete->id === Auth::id()) {
-            Log::warning(self::LOG_AREA . ' Attempt to delete own account prevented.', [
+            Log::warning(self::LOG_AREA.' Attempt to delete own account prevented.', [
                 'user_id' => $userToDelete->id,
             ]);
             throw new RuntimeException(__('Anda tidak boleh memadam akaun anda sendiri.'));
@@ -293,9 +309,9 @@ final class UserService
     {
         $userId = $user->id;
         if ($deletedStatus === true) {
-            Log::info(self::LOG_AREA . ' User soft deleted successfully.', ['user_id' => $userId]);
+            Log::info(self::LOG_AREA.' User soft deleted successfully.', ['user_id' => $userId]);
         } else {
-            Log::warning(self::LOG_AREA . ' User soft deletion failed or no action taken (delete event might have prevented it).', [
+            Log::warning(self::LOG_AREA.' User soft deletion failed or no action taken (delete event might have prevented it).', [
                 'user_id' => $userId, 'delete_result' => $deletedStatus,
             ]);
         }

@@ -10,114 +10,245 @@ use Illuminate\Support\Facades\Log;
 
 class GradesSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     * This seeder populates the grades table with the full list from the supplementary document.
+     * It relies on PositionSeeder having been run first.
+     */
     public function run(): void
     {
-        Log::info('Starting Grades seeding (Revision 3)...');
+        Log::info('Starting Grades seeding (Revision 3.5)...');
 
-        DB::statement('SET FOREIGN_KEY_CHECKS = 0;');
-        DB::table('grades')->truncate();
-        DB::statement('SET FOREIGN_KEY_CHECKS = 1;');
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        Grade::truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
         Log::info('Truncated grades table.');
 
         $adminUserForAudit = User::orderBy('id')->first();
         $auditUserId = $adminUserForAudit?->id;
-
-        if (!$auditUserId) {
-            $adminUserForAudit = User::factory()->create(['name' => 'Audit User (GradeSeeder)']);
-            $auditUserId = $adminUserForAudit->id;
-            Log::info("Created a fallback audit user with ID {$auditUserId} for GradesSeeder.");
-        } else {
+        if ($auditUserId) {
             Log::info("Using User ID {$auditUserId} for audit columns in GradesSeeder.");
         }
 
-        // Based on MyMail form, Gred 9 is a supporting officer grade [cite: 37]
-        // Based on ICT Loan Form, Gred 41 is a supporting officer grade [cite: 8]
-        // is_approver_grade will be true if the grade level is 9 or above.
-        // Specific policies will check actual grade level against configured minimums for different approval types.
+        // Complete list of 282 grades from MyMail form, linking to positions via position_id
         $grades = [
-            // Gred Penyokong (MyMail form) - Example Gred 9
-            [
-                'name' => '9', // Generic Grade 9, can be N9, W9 etc. in practice.
-                'level' => 9,
-                'is_approver_grade' => true, // Can approve (e.g., email applications)
-                'min_approval_grade_id' => null, // Not relevant if policies check level
-            ],
-            // Support Group
-            ['name' => 'N19', 'level' => 19, 'is_approver_grade' => true, 'min_approval_grade_id' => null],
-            ['name' => 'N22', 'level' => 22, 'is_approver_grade' => true, 'min_approval_grade_id' => null],
-            ['name' => 'N26', 'level' => 26, 'is_approver_grade' => true, 'min_approval_grade_id' => null],
-            ['name' => 'N29', 'level' => 29, 'is_approver_grade' => true, 'min_approval_grade_id' => null],
-            ['name' => 'N32', 'level' => 32, 'is_approver_grade' => true, 'min_approval_grade_id' => null],
-            ['name' => 'N36', 'level' => 36, 'is_approver_grade' => true, 'min_approval_grade_id' => null],
-            ['name' => 'FT19', 'level' => 19, 'is_approver_grade' => true, 'min_approval_grade_id' => null],
-            // FT29 from previous, likely also approver
-            ['name' => 'FT29', 'level' => 29, 'is_approver_grade' => true, 'min_approval_grade_id' => null],
-
-
-            // Management and Professional (Approvers >= 41 for ICT Loans)
-            ['name' => 'N41', 'level' => 41, 'is_approver_grade' => true, 'min_approval_grade_id' => null],
-            ['name' => 'N44', 'level' => 44, 'is_approver_grade' => true, 'min_approval_grade_id' => null],
-            ['name' => 'N48', 'level' => 48, 'is_approver_grade' => true, 'min_approval_grade_id' => null],
-            ['name' => 'N52', 'level' => 52, 'is_approver_grade' => true, 'min_approval_grade_id' => null],
-            ['name' => 'N54', 'level' => 54, 'is_approver_grade' => true, 'min_approval_grade_id' => null],
-            ['name' => 'FT41', 'level' => 41, 'is_approver_grade' => true, 'min_approval_grade_id' => null],
-            ['name' => 'FT44', 'level' => 44, 'is_approver_grade' => true, 'min_approval_grade_id' => null],
-            ['name' => 'FT48', 'level' => 48, 'is_approver_grade' => true, 'min_approval_grade_id' => null],
-            ['name' => 'FT52', 'level' => 52, 'is_approver_grade' => true, 'min_approval_grade_id' => null],
-            ['name' => 'FT54', 'level' => 54, 'is_approver_grade' => true, 'min_approval_grade_id' => null],
-
-            // Premier Grades (JUSA, Turus - All Approvers)
-            ['name' => 'JUSA C', 'level' => 56, 'is_approver_grade' => true, 'min_approval_grade_id' => null],
-            ['name' => 'JUSA B', 'level' => 58, 'is_approver_grade' => true, 'min_approval_grade_id' => null],
-            ['name' => 'JUSA A', 'level' => 60, 'is_approver_grade' => true, 'min_approval_grade_id' => null],
-            ['name' => 'TURUS III', 'level' => 62, 'is_approver_grade' => true, 'min_approval_grade_id' => null],
-            ['name' => 'TURUS II', 'level' => 64, 'is_approver_grade' => true, 'min_approval_grade_id' => null],
-            ['name' => 'TURUS I', 'level' => 66, 'is_approver_grade' => true, 'min_approval_grade_id' => null],
-             // From MyMail dropdown grade list
-            ['name' => 'Menteri', 'level' => 70, 'is_approver_grade' => true, 'min_approval_grade_id' => null], // Highest level
-            ['name' => 'Timbalan Menteri', 'level' => 68, 'is_approver_grade' => true, 'min_approval_grade_id' => null],
-            // Adding other values from the extensive MyMail Grade dropdown for completeness if they are distinct
-            // The 'class' attribute in MyMail's grade options seems to link to Jawatan ID, not relevant for grade 'name' directly
-            // Seeding all 282 grade variations from that dropdown might be excessive if 'level' and broad 'name' (like N41, FT41) are primary.
-            // For now, the list above covers common grades. The system should allow adding more grades via UI.
+            // This is the full array from our previous step.
+            ['name' => 'Menteri', 'position_id' => 1], ['name' => 'Timbalan Menteri', 'position_id' => 2],
+            ['name' => 'Turus III', 'position_id' => 3], ['name' => 'Jusa A', 'position_id' => 3],
+            ['name' => 'Jusa B', 'position_id' => 3], ['name' => 'Jusa C', 'position_id' => 3],
+            ['name' => 'Jusa A', 'position_id' => 4], ['name' => 'Jusa B', 'position_id' => 4],
+            ['name' => 'Jusa C', 'position_id' => 4], ['name' => 'Jusa A', 'position_id' => 5],
+            ['name' => 'Jusa B', 'position_id' => 5], ['name' => 'Jusa C', 'position_id' => 5],
+            ['name' => '(14) 54', 'position_id' => 5], ['name' => '(13) 52', 'position_id' => 5],
+            ['name' => '(12) 48', 'position_id' => 5], ['name' => '14 (54)', 'position_id' => 6],
+            ['name' => '13 (52)', 'position_id' => 6], ['name' => '(12) 48', 'position_id' => 6],
+            ['name' => '14 (54)', 'position_id' => 7], ['name' => '13 (52)', 'position_id' => 7],
+            ['name' => '12 (48)', 'position_id' => 7], ['name' => '14 (54)', 'position_id' => 8],
+            ['name' => '13 (52)', 'position_id' => 8], ['name' => '(12) 48', 'position_id' => 8],
+            ['name' => '14 (54)', 'position_id' => 9], ['name' => '13 (52)', 'position_id' => 9],
+            ['name' => '12 (48)', 'position_id' => 9], ['name' => '10 (44)', 'position_id' => 9],
+            ['name' => '9 (41)', 'position_id' => 9], ['name' => '14 (54)', 'position_id' => 10],
+            ['name' => '13 (52)', 'position_id' => 10], ['name' => '12 (48)', 'position_id' => 10],
+            ['name' => '14 (54)', 'position_id' => 11], ['name' => '13 (52)', 'position_id' => 11],
+            ['name' => '12 (48)', 'position_id' => 11], ['name' => '10 (44)', 'position_id' => 11],
+            ['name' => '9 (41)', 'position_id' => 11], ['name' => '14 (54)', 'position_id' => 12],
+            ['name' => '13 (52)', 'position_id' => 12], ['name' => '12 (48)', 'position_id' => 12],
+            ['name' => '10 (44)', 'position_id' => 12], ['name' => '9 (41)', 'position_id' => 12],
+            ['name' => '14 (54)', 'position_id' => 13], ['name' => '13 (52)', 'position_id' => 13],
+            ['name' => '12 (48)', 'position_id' => 13], ['name' => '14 (54)', 'position_id' => 14],
+            ['name' => '13 (52)', 'position_id' => 14], ['name' => '12 (48)', 'position_id' => 14],
+            ['name' => '10 (44)', 'position_id' => 14], ['name' => '9 (41)', 'position_id' => 14],
+            ['name' => '14 (54)', 'position_id' => 15], ['name' => '13 (52)', 'position_id' => 15],
+            ['name' => '12 (48)', 'position_id' => 15], ['name' => '10 (44)', 'position_id' => 15],
+            ['name' => '9 (41)', 'position_id' => 15], ['name' => '14 (54)', 'position_id' => 16],
+            ['name' => '13 (52)', 'position_id' => 16], ['name' => '12 (48)', 'position_id' => 16],
+            ['name' => '10 (44)', 'position_id' => 16], ['name' => '9 (41)', 'position_id' => 16],
+            ['name' => '13 (52)', 'position_id' => 17], ['name' => '12 (48)', 'position_id' => 17],
+            ['name' => '13 (52)', 'position_id' => 18], ['name' => '12 (48)', 'position_id' => 18],
+            ['name' => '10 (44)', 'position_id' => 19], ['name' => '9 (41)', 'position_id' => 20],
+            ['name' => '14 (54)', 'position_id' => 21], ['name' => '13 (52)', 'position_id' => 21],
+            ['name' => '12 (48)', 'position_id' => 21], ['name' => '10 (44)', 'position_id' => 21],
+            ['name' => '9 (41)', 'position_id' => 21], ['name' => '14 (53/54)', 'position_id' => 22],
+            ['name' => '13 (51/52)', 'position_id' => 22], ['name' => '12 (47/48)', 'position_id' => 22],
+            ['name' => '10 (43/44)', 'position_id' => 22], ['name' => '9 (41/42)', 'position_id' => 22],
+            ['name' => '7 (37/38)', 'position_id' => 22], ['name' => '6 (31/32)', 'position_id' => 22],
+            ['name' => '5 (29/30)', 'position_id' => 22], ['name' => '3 (25/26)', 'position_id' => 22],
+            ['name' => '2 (21/22)', 'position_id' => 22], ['name' => '1 (19)', 'position_id' => 22],
+            ['name' => '14 (54)', 'position_id' => 23], ['name' => '13 (52)', 'position_id' => 23],
+            ['name' => '12 (48)', 'position_id' => 23], ['name' => '10 (44)', 'position_id' => 23],
+            ['name' => '9 (41)', 'position_id' => 23], ['name' => '14 (54)', 'position_id' => 24],
+            ['name' => '13 (52)', 'position_id' => 24], ['name' => '12 (48)', 'position_id' => 24],
+            ['name' => '10 (44)', 'position_id' => 24], ['name' => '9 (41)', 'position_id' => 24],
+            ['name' => '14 (54)', 'position_id' => 25], ['name' => '14 (53/54)', 'position_id' => 25],
+            ['name' => '13 (51/52)', 'position_id' => 25], ['name' => '12 (47/48)', 'position_id' => 25],
+            ['name' => '10 (44)', 'position_id' => 25], ['name' => '8 (40)', 'position_id' => 25],
+            ['name' => '7 (38)', 'position_id' => 25], ['name' => '6 (32)', 'position_id' => 25],
+            ['name' => '5 (29)', 'position_id' => 25], ['name' => '4 (28)', 'position_id' => 25],
+            ['name' => '3 (26)', 'position_id' => 25], ['name' => '2 (22)', 'position_id' => 25],
+            ['name' => '1 (19)', 'position_id' => 25], ['name' => '14 (54)', 'position_id' => 26],
+            ['name' => '13 (52)', 'position_id' => 26], ['name' => '12 (48)', 'position_id' => 26],
+            ['name' => '10 (44)', 'position_id' => 26], ['name' => '9 (41)', 'position_id' => 26],
+            ['name' => '14 (54)', 'position_id' => 27], ['name' => '13 (52)', 'position_id' => 27],
+            ['name' => '12 (48)', 'position_id' => 27], ['name' => '10 (44)', 'position_id' => 27],
+            ['name' => '9 (41)', 'position_id' => 27], ['name' => '14 (54)', 'position_id' => 28],
+            ['name' => '13 (52)', 'position_id' => 28], ['name' => '12 (48)', 'position_id' => 28],
+            ['name' => '10 (44)', 'position_id' => 28], ['name' => '9 (41)', 'position_id' => 28],
+            ['name' => '14 (54)', 'position_id' => 29], ['name' => '13 (52)', 'position_id' => 29],
+            ['name' => '12 (48)', 'position_id' => 29], ['name' => '10 (44)', 'position_id' => 29],
+            ['name' => '9 (41)', 'position_id' => 29], ['name' => '14 (54)', 'position_id' => 30],
+            ['name' => '13 (52)', 'position_id' => 30], ['name' => '12 (48)', 'position_id' => 30],
+            ['name' => '10 (44)', 'position_id' => 30], ['name' => '9 (41)', 'position_id' => 30],
+            ['name' => '14 (54)', 'position_id' => 31], ['name' => '13 (52)', 'position_id' => 31],
+            ['name' => '12 (48)', 'position_id' => 31], ['name' => '10 (44)', 'position_id' => 31],
+            ['name' => '9 (41)', 'position_id' => 31], ['name' => '48', 'position_id' => 31],
+            ['name' => '14 (54)', 'position_id' => 32], ['name' => '13 (52)', 'position_id' => 32],
+            ['name' => '12 (48)', 'position_id' => 32], ['name' => '10 (44)', 'position_id' => 32],
+            ['name' => '8 (40)', 'position_id' => 32], ['name' => '7 (38)', 'position_id' => 32],
+            ['name' => '6 (32)', 'position_id' => 32], ['name' => '5 (29)', 'position_id' => 32],
+            ['name' => '14 (54)', 'position_id' => 33], ['name' => '13 (52)', 'position_id' => 33],
+            ['name' => '12 (48)', 'position_id' => 33], ['name' => '10 (44)', 'position_id' => 33],
+            ['name' => '9 (41)', 'position_id' => 33], ['name' => '14 (54)', 'position_id' => 34],
+            ['name' => '13 (52)', 'position_id' => 34], ['name' => '12 (48)', 'position_id' => 34],
+            ['name' => '10 (44)', 'position_id' => 34], ['name' => '9 (41)', 'position_id' => 34],
+            ['name' => '14 (53/54)', 'position_id' => 35], ['name' => '13 (51/52)', 'position_id' => 35],
+            ['name' => '12 (47/48)', 'position_id' => 35], ['name' => '10 (43/44)', 'position_id' => 35],
+            ['name' => '9 (41/42)', 'position_id' => 35], ['name' => '14 (54)', 'position_id' => 36],
+            ['name' => '13 (52)', 'position_id' => 36], ['name' => '12 (48)', 'position_id' => 36],
+            ['name' => '10 (44)', 'position_id' => 36], ['name' => '9 (41)', 'position_id' => 36],
+            ['name' => '14 (53/54)', 'position_id' => 37], ['name' => '13 (51/52)', 'position_id' => 37],
+            ['name' => '12 (47/48)', 'position_id' => 37], ['name' => '10 (43/44)', 'position_id' => 37],
+            ['name' => '9 (41/42)', 'position_id' => 37], ['name' => '7 (37/38)', 'position_id' => 37],
+            ['name' => '6 (31/32)', 'position_id' => 37], ['name' => '5 (29/30)', 'position_id' => 37],
+            ['name' => '3 (25/26)', 'position_id' => 37], ['name' => '2 (21/22)', 'position_id' => 37],
+            ['name' => '1 (19)', 'position_id' => 37], ['name' => '14 (54)', 'position_id' => 38],
+            ['name' => '13 (52)', 'position_id' => 38], ['name' => '12 (48)', 'position_id' => 38],
+            ['name' => '10 (44)', 'position_id' => 38], ['name' => '9 (41)', 'position_id' => 38],
+            ['name' => '8 (40)', 'position_id' => 39], ['name' => '7 (38)', 'position_id' => 39],
+            ['name' => '6 (32)', 'position_id' => 39], ['name' => '5 (29)', 'position_id' => 39],
+            ['name' => '8 (40)', 'position_id' => 40], ['name' => '7 (38)', 'position_id' => 40],
+            ['name' => '6 (32)', 'position_id' => 40], ['name' => '5 (29)', 'position_id' => 40],
+            ['name' => '8 (40)', 'position_id' => 41], ['name' => '7 (38)', 'position_id' => 41],
+            ['name' => '6 (32)', 'position_id' => 41], ['name' => '5 (29)', 'position_id' => 41],
+            ['name' => '8 (40)', 'position_id' => 42], ['name' => '7 (38)', 'position_id' => 42],
+            ['name' => '6 (32)', 'position_id' => 42], ['name' => '5 (29/30)', 'position_id' => 42],
+            ['name' => '8 (40)', 'position_id' => 43], ['name' => '7 (38)', 'position_id' => 43],
+            ['name' => '6 (32)', 'position_id' => 43], ['name' => '5 (29)', 'position_id' => 43],
+            ['name' => '8 (40)', 'position_id' => 44], ['name' => '7 (38)', 'position_id' => 44],
+            ['name' => '6 (32)', 'position_id' => 44], ['name' => '5 (29)', 'position_id' => 44],
+            ['name' => '8 (40)', 'position_id' => 45], ['name' => '7 (38)', 'position_id' => 45],
+            ['name' => '6 (32)', 'position_id' => 45], ['name' => '5 (29)', 'position_id' => 45],
+            ['name' => '8 (40)', 'position_id' => 46], ['name' => '7 (38)', 'position_id' => 46],
+            ['name' => '6 (32)', 'position_id' => 46], ['name' => '5 (29)', 'position_id' => 46],
+            ['name' => '8 (40)', 'position_id' => 47], ['name' => '7 (38)', 'position_id' => 47],
+            ['name' => '6 (32)', 'position_id' => 47], ['name' => '5 (29)', 'position_id' => 47],
+            ['name' => '8 (40)', 'position_id' => 48], ['name' => '7 (38)', 'position_id' => 48],
+            ['name' => '6 (32)', 'position_id' => 48], ['name' => '5 (29)', 'position_id' => 48],
+            ['name' => '8 (40)', 'position_id' => 49], ['name' => '7 (38)', 'position_id' => 49],
+            ['name' => '6 (32)', 'position_id' => 49], ['name' => '5 (29)', 'position_id' => 49],
+            ['name' => '8 (40)', 'position_id' => 40], // The noted duplicate entry from source
+            ['name' => '7 (38)', 'position_id' => 50], ['name' => '6 (32)', 'position_id' => 50],
+            ['name' => '5 (29)', 'position_id' => 50], ['name' => '8 (40)', 'position_id' => 51],
+            ['name' => '7 (38)', 'position_id' => 51], ['name' => '6 (32)', 'position_id' => 51],
+            ['name' => '5 (29)', 'position_id' => 51], ['name' => '8 (40)', 'position_id' => 52],
+            ['name' => '7 (38)', 'position_id' => 52], ['name' => '6 (32)', 'position_id' => 52],
+            ['name' => '5 (29)', 'position_id' => 52], ['name' => '8 (40)', 'position_id' => 53],
+            ['name' => '7 (38)', 'position_id' => 53], ['name' => '6 (32)', 'position_id' => 53],
+            ['name' => '5 (29/30)', 'position_id' => 53], ['name' => '2 (22)', 'position_id' => 54],
+            ['name' => '1 (19)', 'position_id' => 54], ['name' => '4 (28)', 'position_id' => 55],
+            ['name' => '3 (26)', 'position_id' => 55], ['name' => '2 (22)', 'position_id' => 55],
+            ['name' => '1 (19)', 'position_id' => 55], ['name' => '4 (28)', 'position_id' => 56],
+            ['name' => '3 (26)', 'position_id' => 56], ['name' => '2 (22)', 'position_id' => 56],
+            ['name' => '1 (19)', 'position_id' => 56], ['name' => '4 (28)', 'position_id' => 57],
+            ['name' => '3 (26)', 'position_id' => 57], ['name' => '2 (22)', 'position_id' => 57],
+            ['name' => '1 (19)', 'position_id' => 57], ['name' => '4 (28)', 'position_id' => 58],
+            ['name' => '3 (26)', 'position_id' => 58], ['name' => '2 (22)', 'position_id' => 58],
+            ['name' => '1 (19)', 'position_id' => 58], ['name' => '4 (28)', 'position_id' => 59],
+            ['name' => '3 (26)', 'position_id' => 59], ['name' => '2 (22)', 'position_id' => 59],
+            ['name' => '1 (19)', 'position_id' => 59], ['name' => '4 (28)', 'position_id' => 60],
+            ['name' => '3 (26)', 'position_id' => 60], ['name' => '2 (22)', 'position_id' => 60],
+            ['name' => '1 (19)', 'position_id' => 60], ['name' => '4 (28)', 'position_id' => 61],
+            ['name' => '3 (26)', 'position_id' => 61], ['name' => '2 (22)', 'position_id' => 61],
+            ['name' => '1 (19)', 'position_id' => 61], ['name' => '4 (28)', 'position_id' => 62],
+            ['name' => '3 (26)', 'position_id' => 62], ['name' => '2 (22)', 'position_id' => 62],
+            ['name' => '1 (19)', 'position_id' => 62], ['name' => '9 (41)', 'position_id' => 63],
+            ['name' => '5 (29)', 'position_id' => 63], ['name' => '1 (19)', 'position_id' => 63],
+            ['name' => 'Pelajar Latihan Industri', 'position_id' => 64], ['name' => '1 (19)', 'position_id' => 65],
+            ['name' => '2 (22)', 'position_id' => 65], ['name' => '3 (26)', 'position_id' => 65],
+            ['name' => '4 (28)', 'position_id' => 65],
         ];
 
-        Log::info('Creating specific grades (Revision 3)...');
-        foreach ($grades as $gradeData) {
-            // Update is_approver_grade based on level >= 9
-            $gradeData['is_approver_grade'] = ($gradeData['level'] >= 9);
+        // MODIFIED: Filter the source data for unique combinations before processing.
+        // This programmatically removes the duplicate entry ('8 (40)' for position_id 40)
+        // and guards against any other potential duplicates.
+        $uniqueGrades = collect($grades)->unique(function ($item) {
+            return $item['name'].'-'.$item['position_id'];
+        });
 
-            Grade::firstOrCreate(
-                ['name' => $gradeData['name']], // Unique by name
-                array_merge($gradeData, [
-                    'created_by' => $auditUserId,
-                    'updated_by' => $auditUserId,
-                ])
-            );
-        }
-        Log::info('Ensured specific grades exist.');
-
-        // The min_approval_grade_id field on the grades table might be less relevant
-        // if policies directly use configured grade levels (e.g., from config/motac.php).
-        // If it were to be used, it would point to a 'Grade' record that represents the minimum.
-        // For example, find Grade '9' and set its ID to other lower grades if that was the logic.
-        // However, since G9 itself is an approver grade, this field is not set for G9.
-        // This part is simplified as policies will likely check the user's grade level directly.
-        $grade9Instance = Grade::where('level', 9)->orderBy('id')->first();
-        if ($grade9Instance) {
-            Grade::where('is_approver_grade', true)
-                // ->where('level', '>=', $grade9Instance->level) // Not strictly necessary as already set by level check
-                // ->whereNull('min_approval_grade_id') // Only update if not set
-                // This logic is a bit circular if min_approval_grade_id points to itself.
-                // It's better handled by policies checking numeric levels.
-                // No update needed here for min_approval_grade_id based on current design.
-                ->update(['updated_by' => $auditUserId]); // Just ensure updated_by is set.
-            Log::info("Updated 'updated_by' for approver grades using User ID {$auditUserId}. min_approval_grade_id logic relies on policies.");
-        } else {
-            Log::warning("Grade with level 9 not found. Check seeding for Gred '9'.");
+        $dataToInsert = [];
+        foreach ($uniqueGrades as $gradeData) {
+            $level = $this->extractLevelFromName($gradeData['name']);
+            $dataToInsert[] = [
+                'name' => $gradeData['name'],
+                'position_id' => $gradeData['position_id'],
+                'level' => $level,
+                'is_approver_grade' => $level ? ($level >= 9) : false,
+                'created_by' => $auditUserId,
+                'updated_by' => $auditUserId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
         }
 
+        // Chunking the insert for better memory management and to avoid potential query size limits.
+        foreach (array_chunk($dataToInsert, 200) as $chunk) {
+            Grade::insert($chunk);
+        }
 
-        Log::info('Grades seeding complete (Revision 3).');
+        Log::info('Finished seeding '.count($dataToInsert).' unique grades.');
+    }
+
+    /**
+     * Extracts the primary numeric level from a grade name string.
+     * e.g., '14 (54)' -> 54, '9 (41/42)' -> 41, 'JUSA C' -> 56
+     */
+    private function extractLevelFromName(string $name): ?int
+    {
+        // Premier grades - highest priority
+        if (str_contains($name, 'Menteri')) {
+            return 90;
+        } // Arbitrary high level for political appointees
+        if (str_contains($name, 'Timbalan Menteri')) {
+            return 80;
+        }
+        if (str_contains($name, 'TURUS I')) {
+            return 76;
+        }
+        if (str_contains($name, 'TURUS II')) {
+            return 74;
+        }
+        if (str_contains($name, 'TURUS III')) {
+            return 72;
+        }
+        if (str_contains($name, 'JUSA A')) {
+            return 70;
+        }
+        if (str_contains($name, 'JUSA B')) {
+            return 68;
+        }
+        if (str_contains($name, 'JUSA C')) {
+            return 66;
+        }
+
+        // Extracts number from parenthesis, e.g., (54) or (41/42) -> 41
+        if (preg_match('/\((\d+)/', $name, $matches)) {
+            return (int) $matches[1];
+        }
+
+        // For plain numbers like '48'
+        if (is_numeric($name)) {
+            return (int) $name;
+        }
+
+        return null; // Default for non-standard grades like 'Pelajar Latihan Industri'
     }
 }

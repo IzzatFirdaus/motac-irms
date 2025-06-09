@@ -2,15 +2,15 @@
 
 namespace App\Livewire\Settings\Positions;
 
-use App\Models\Position;
-use App\Models\Grade; // Import Grade model
+use App\Models\Grade;
+use App\Models\Position; // Import Grade model
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Validation\Rule as ValidationRule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
-use Livewire\WithPagination;
-use Illuminate\Support\Facades\Auth; // Although not directly used if relying on $this->authorize, it's fine to keep.
-use Illuminate\Validation\Rule as ValidationRule; // Added missing import
+// Although not directly used if relying on $this->authorize, it's fine to keep.
+use Livewire\WithPagination; // Added missing import
 
 // Consider using a PositionService for business logic if it grows complex
 // use App\Services\PositionService;
@@ -23,19 +23,29 @@ class Index extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $sortField = 'name';
+
     public string $sortDirection = 'asc';
 
     public bool $showModal = false;
+
     public bool $isEditMode = false;
+
     public ?Position $editingPosition = null;
+
     public string $name = '';
+
     public ?int $grade_id = null;
+
     public string $description = '';
+
     public bool $is_active = true;
 
     public bool $showDeleteConfirmationModal = false;
+
     public ?int $positionIdToDelete = null;
+
     public string $positionNameToDelete = '';
 
     public array $gradeOptions = [];
@@ -54,7 +64,7 @@ class Index extends Component
     {
         $this->authorize('viewAny', Position::class); // Assuming PositionPolicy exists and is registered
         $this->gradeOptions = Grade::orderBy('name')->pluck('name', 'id')->all();
-        $this->editingPosition = new Position(); // Initialize for type hinting and new creations
+        $this->editingPosition = new Position; // Initialize for type hinting and new creations
     }
 
     public function sortBy(string $field): void
@@ -71,13 +81,14 @@ class Index extends Component
     {
         // Ensure Position model has a scopeSearch($query, $term) method.
         $query = Position::with('grade:id,name') // Eager load grade for display
-                         ->search($this->search); // Assumes a 'search' scope on Position model
+            ->search($this->search); // Assumes a 'search' scope on Position model
 
         if ($this->sortField) {
             $query->orderBy($this->sortField, $this->sortDirection);
         } else {
             $query->orderBy('name', 'asc'); // Default sort
         }
+
         return $query->paginate(10);
     }
 
@@ -144,13 +155,14 @@ class Index extends Component
             // E.g., public function users() { return $this->hasMany(User::class); }
             if ($position->users()->count() > 0) {
                 session()->flash('error', __('Jawatan ":name" tidak boleh dipadam kerana ia telah ditugaskan kepada pengguna.', ['name' => $position->name]));
+
                 return;
             }
             $this->positionIdToDelete = $id;
             $this->positionNameToDelete = $position->name;
             $this->showDeleteConfirmationModal = true;
         } else {
-             session()->flash('error', __('Jawatan tidak ditemui.'));
+            session()->flash('error', __('Jawatan tidak ditemui.'));
         }
     }
 
@@ -167,6 +179,7 @@ class Index extends Component
             if ($position->users()->count() > 0) {
                 session()->flash('error', __('Jawatan ":name" tidak boleh dipadam kerana ia telah ditugaskan kepada pengguna.', ['name' => $position->name]));
                 $this->closeDeleteConfirmationModal();
+
                 return;
             }
             $position->delete();
@@ -194,6 +207,7 @@ class Index extends Component
     protected function rules(): array
     {
         $positionIdToIgnore = ($this->isEditMode && $this->editingPosition && $this->editingPosition->id) ? $this->editingPosition->id : null;
+
         return [
             'name' => ['required', 'string', 'max:255', ValidationRule::unique('positions', 'name')->ignore($positionIdToIgnore)],
             'grade_id' => 'nullable|exists:grades,id', // A position might not always be tied to a grade
@@ -208,7 +222,7 @@ class Index extends Component
         $this->grade_id = null;
         $this->description = '';
         $this->is_active = true; // Default to active for new entries
-        $this->editingPosition = new Position(); // Reset to a new instance
+        $this->editingPosition = new Position; // Reset to a new instance
         $this->isEditMode = false;
         $this->resetErrorBag();
         $this->resetValidation();

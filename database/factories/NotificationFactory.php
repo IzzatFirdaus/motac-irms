@@ -13,27 +13,52 @@ class NotificationFactory extends Factory
 
     public function definition(): array
     {
+        // Use a Malaysian locale for faker
+        $msFaker = \Faker\Factory::create('ms_MY');
         $notifiableUser = User::inRandomOrder()->first() ?? User::factory()->create();
-        // $auditUserId = $notifiableUser->id; // No longer explicitly needed here for blameable fields
 
-        // IMPORTANT: Update this list with your actual Notification class FQCNs
+        // Updated and complete list of all notification classes provided.
         $notificationTypes = [
             \App\Notifications\ApplicationApproved::class,
             \App\Notifications\ApplicationNeedsAction::class,
-            // ... (ensure this list is complete)
-            \App\Notifications\DefaultNotification::class, // Example placeholder
+            \App\Notifications\ApplicationRejected::class,
+            \App\Notifications\ApplicationStatusUpdatedNotification::class,
+            \App\Notifications\ApplicationSubmitted::class,
+            \App\Notifications\DefaultNotification::class,
+            \App\Notifications\DefaultUserNotification::class,
+            \App\Notifications\EmailApplicationReadyForProcessingNotification::class,
+            \App\Notifications\EmailProvisionedNotification::class,
+            \App\Notifications\EquipmentIncidentNotification::class,
+            \App\Notifications\EquipmentIssuedNotification::class,
+            \App\Notifications\EquipmentReturnedNotification::class,
+            \App\Notifications\EquipmentReturnReminderNotification::class,
+            \App\Notifications\LoanApplicationReadyForIssuanceNotification::class,
+            \App\Notifications\OrphanedApplicationRequiresAttentionNotification::class,
+            \App\Notifications\ProvisioningFailedNotification::class,
         ];
         $chosenNotificationType = $this->faker->randomElement($notificationTypes);
-        if (empty($notificationTypes) || $chosenNotificationType === \App\Notifications\DefaultNotification::class && count($notificationTypes) === 1) {
-             // Fallback if list is empty or only contains placeholder
-            $chosenNotificationType = 'App\\Notifications\\GenericAppNotification';
-        }
 
-
+        // Generate a realistic payload with common fields and a wider range of icons.
         $payloadData = [
-            'message' => $this->faker->sentence,
-            'subject' => $this->faker->words(3, true),
-            'action_url' => $this->faker->optional(0.5)->url,
+            'subject' => $msFaker->sentence(6), // Localized subject in Malay.
+            'message' => $msFaker->paragraph(2), // Localized message in Malay.
+            'url' => $this->faker->optional(0.7)->url,
+            'icon' => $this->faker->randomElement([
+                'ti ti-circle-check', // Approve
+                'ti ti-bell-ringing', // Needs action
+                'ti ti-circle-x',     // Reject
+                'ti ti-refresh-alert', // Status update
+                'ti ti-file-invoice', // Loan submit
+                'ti ti-mail-forward', // Email submit
+                'ti ti-user-check',   // Provisioned
+                'ti ti-alert-triangle', // Incident / Orphaned
+                'ti ti-transfer-out', // Issued
+                'ti ti-transfer-in',  // Returned
+                'ti ti-calendar-event', // Reminder
+                'ti ti-alarm-snooze', // Overdue
+                'ti ti-package',      // Ready for issuance
+                'ti ti-alert-octagon', // Provisioning failed
+            ]),
         ];
 
         return [
@@ -48,11 +73,17 @@ class NotificationFactory extends Factory
         ];
     }
 
+    /**
+     * Indicate that the notification is unread.
+     */
     public function unread(): static
     {
         return $this->state(fn (array $attributes) => ['read_at' => null]);
     }
 
+    /**
+     * Indicate that the notification has been read.
+     */
     public function read(): static
     {
         return $this->state(fn (array $attributes) => ['read_at' => now()]);

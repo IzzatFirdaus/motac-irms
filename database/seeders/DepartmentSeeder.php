@@ -23,7 +23,7 @@ class DepartmentSeeder extends Seeder // Changed from DepartmentsSeeder to Depar
         $adminUserForAudit = User::orderBy('id')->first();
         $auditUserId = $adminUserForAudit?->id;
 
-        if (!$auditUserId) {
+        if (! $auditUserId) {
             $adminUserForAudit = User::factory()->create(['name' => 'Audit User (DeptSeeder)']);
             $auditUserId = $adminUserForAudit->id;
             Log::info("Created a fallback audit user with ID {$auditUserId} for DepartmentSeeder.");

@@ -26,19 +26,27 @@ class LoanRequestForm extends Component
     use AuthorizesRequests;
 
     public ?LoanApplication $loanApplication = null;
+
     public bool $isEdit = false;
 
     // Applicant Details (prefilled, some parts might be editable if needed)
     public string $applicant_name = '';
+
     public string $applicant_jawatan_gred = '';
+
     public string $applicant_bahagian_unit = '';
+
     public string $applicant_mobile_number = '';
 
     // Form Fields for Loan Application Details
     public string $purpose = '';
+
     public string $location = '';
+
     public ?string $return_location = null;
+
     public ?string $loan_start_date = null;
+
     public ?string $loan_end_date = null;
 
     public bool $isApplicantResponsible = true;
@@ -46,13 +54,17 @@ class LoanRequestForm extends Component
     public ?int $responsible_officer_id = null;
 
     public ?string $manual_responsible_officer_name = '';
+
     public ?string $manual_responsible_officer_jawatan_gred = '';
+
     public ?string $manual_responsible_officer_mobile = '';
 
     public array $items = [];
+
     public bool $applicant_confirmation = false;
 
     public SupportCollection $equipmentTypeOptions;
+
     public SupportCollection $systemUsersForResponsibleOfficer;
 
     protected LoanApplicationService $loanApplicationService;
@@ -62,44 +74,45 @@ class LoanRequestForm extends Component
         $isFinalSubmission = $this->applicant_confirmation;
 
         $rules = [
-          'applicant_mobile_number' => ['required', 'string', 'regex:/^[0-9\-\+\s\(\)]*$/', 'min:9', 'max:20'],
-          'purpose' => ['required', 'string', 'min:10', 'max:1000'],
-          'location' => ['required', 'string', 'min:5', 'max:255'],
-          'return_location' => ['nullable', 'string', 'max:255'],
-          'loan_start_date' => ['required', 'date_format:Y-m-d\TH:i', 'after_or_equal:today'],
-          'loan_end_date' => ['required', 'date_format:Y-m-d\TH:i', 'after_or_equal:loan_start_date'],
-          'isApplicantResponsible' => ['boolean'],
+            'applicant_mobile_number' => ['required', 'string', 'regex:/^[0-9\-\+\s\(\)]*$/', 'min:9', 'max:20'],
+            'purpose' => ['required', 'string', 'min:10', 'max:1000'],
+            'location' => ['required', 'string', 'min:5', 'max:255'],
+            'return_location' => ['nullable', 'string', 'max:255'],
+            'loan_start_date' => ['required', 'date_format:Y-m-d\TH:i', 'after_or_equal:today'],
+            'loan_end_date' => ['required', 'date_format:Y-m-d\TH:i', 'after_or_equal:loan_start_date'],
+            'isApplicantResponsible' => ['boolean'],
 
-          'responsible_officer_id' => [
-            'nullable', // Now truly optional
-            'exists:users,id',
-            Rule::notIn([Auth::id() ?? 0]),
-            // MODIFIED: Removed: Rule::requiredIf(!$this->isApplicantResponsible && empty($this->manual_responsible_officer_name) && $isFinalSubmission),
-          ],
+            'responsible_officer_id' => [
+                'nullable', // Now truly optional
+                'exists:users,id',
+                Rule::notIn([Auth::id() ?? 0]),
+                // MODIFIED: Removed: Rule::requiredIf(!$this->isApplicantResponsible && empty($this->manual_responsible_officer_name) && $isFinalSubmission),
+            ],
 
-          'manual_responsible_officer_name' => [
-            'nullable', // Now truly optional
-            'string',
-            'max:255',
-            // MODIFIED: Removed: Rule::requiredIf(!$this->isApplicantResponsible && empty($this->responsible_officer_id) && $isFinalSubmission),
-          ],
+            'manual_responsible_officer_name' => [
+                'nullable', // Now truly optional
+                'string',
+                'max:255',
+                // MODIFIED: Removed: Rule::requiredIf(!$this->isApplicantResponsible && empty($this->responsible_officer_id) && $isFinalSubmission),
+            ],
 
-          // These rules remain: if manual_responsible_officer_name IS provided, then these become required.
-          'manual_responsible_officer_jawatan_gred' => [
-            Rule::requiredIf(fn() => !$this->isApplicantResponsible && !empty($this->manual_responsible_officer_name) && $isFinalSubmission),
-            'nullable', 'string', 'max:255'
-          ],
-          'manual_responsible_officer_mobile' => [
-            Rule::requiredIf(fn() => !$this->isApplicantResponsible && !empty($this->manual_responsible_officer_name) && $isFinalSubmission),
-            'nullable', 'string', 'regex:/^[0-9\-\+\s\(\)]*$/', 'min:9', 'max:20'
-          ],
+            // These rules remain: if manual_responsible_officer_name IS provided, then these become required.
+            'manual_responsible_officer_jawatan_gred' => [
+                Rule::requiredIf(fn () => ! $this->isApplicantResponsible && ! empty($this->manual_responsible_officer_name) && $isFinalSubmission),
+                'nullable', 'string', 'max:255',
+            ],
+            'manual_responsible_officer_mobile' => [
+                Rule::requiredIf(fn () => ! $this->isApplicantResponsible && ! empty($this->manual_responsible_officer_name) && $isFinalSubmission),
+                'nullable', 'string', 'regex:/^[0-9\-\+\s\(\)]*$/', 'min:9', 'max:20',
+            ],
 
-          'items' => ['required', 'array', 'min:1'],
-          'items.*.equipment_type' => ['required', Rule::in(array_keys(Equipment::$ASSET_TYPES_LABELS ?? []))],
-          'items.*.quantity_requested' => ['required', 'integer', 'min:1', 'max:100'],
-          'items.*.notes' => ['nullable', 'string', 'max:500'],
-          'applicant_confirmation' => $isFinalSubmission ? ['accepted'] : ['boolean'],
+            'items' => ['required', 'array', 'min:1'],
+            'items.*.equipment_type' => ['required', Rule::in(array_keys(Equipment::$ASSET_TYPES_LABELS ?? []))],
+            'items.*.quantity_requested' => ['required', 'integer', 'min:1', 'max:100'],
+            'items.*.notes' => ['nullable', 'string', 'max:500'],
+            'applicant_confirmation' => $isFinalSubmission ? ['accepted'] : ['boolean'],
         ];
+
         return $rules;
     }
 
@@ -112,19 +125,20 @@ class LoanRequestForm extends Component
     {
         /** @var User $user */
         $user = Auth::user();
-        if (!$user) {
+        if (! $user) {
             session()->flash('error', __('Sila log masuk untuk meneruskan.'));
             $this->redirectRoute('login', navigate: true);
+
             return;
         }
 
         $this->equipmentTypeOptions = collect(['' => __('- Pilih Jenis Peralatan -')] + (Equipment::$ASSET_TYPES_LABELS ?? []));
         $this->systemUsersForResponsibleOfficer = collect(['' => __('- Pilih Pegawai (dari senarai sistem) -')])
-          ->union(User::where('id', '!=', $user->id)->orderBy('name')->pluck('name', 'id'));
+            ->union(User::where('id', '!=', $user->id)->orderBy('name')->pluck('name', 'id'));
 
         if ($loanApplicationId) {
             $loanApplication = LoanApplication::with([
-              'user', 'responsibleOfficer', 'supportingOfficer', 'loanApplicationItems'
+                'user', 'responsibleOfficer', 'supportingOfficer', 'loanApplicationItems',
             ])->findOrFail($loanApplicationId);
             $this->loanApplication = $loanApplication;
             $this->isEdit = true;
@@ -167,8 +181,9 @@ class LoanRequestForm extends Component
     {
         /** @var User $currentUser */
         $currentUser = Auth::user();
-        if (!$currentUser) {
+        if (! $currentUser) {
             session()->flash('error', __('Sila log masuk untuk meneruskan.'));
+
             return $this->redirectRoute('login', navigate: true);
         }
 
@@ -200,7 +215,7 @@ class LoanRequestForm extends Component
                 $this->loanApplication = $this->loanApplicationService->createAndSubmitApplication(
                     $validatedData,
                     $currentUser,
-                    !$isFinalSubmission
+                    ! $isFinalSubmission
                 );
 
                 $message = $isFinalSubmission ? __('Permohonan pinjaman berjaya dihantar.') : __('Draf permohonan pinjaman berjaya disimpan.');
@@ -220,18 +235,21 @@ class LoanRequestForm extends Component
             DB::rollBack();
             Log::warning("LoanRequestForm: Validation failed for User ID: {$currentUser->id}", ['errors' => $e->errors()]);
             $this->dispatch('toastr', type: 'error', message: __('Sila perbetulkan ralat pada borang.'));
+
             return null;
         } catch (AuthorizationException $e) {
             DB::rollBack();
             Log::error("LoanRequestForm: Authorization failed for User ID: {$currentUser->id}", ['message' => $e->getMessage()]);
             session()->flash('error', __('Anda tidak dibenarkan untuk melakukan tindakan ini.'));
             $this->dispatch('toastr', type: 'error', message: __('Anda tidak dibenarkan untuk melakukan tindakan ini.'));
+
             return null;
         } catch (Throwable $e) {
             DB::rollBack();
             Log::error("LoanRequestForm: Error submitting application for User ID: {$currentUser->id}", ['exception' => $e]);
-            session()->flash('error', __('Berlaku ralat sistem semasa memproses permohonan anda: ') . $e->getMessage());
+            session()->flash('error', __('Berlaku ralat sistem semasa memproses permohonan anda: ').$e->getMessage());
             $this->dispatch('toastr', type: 'error', message: __('Ralat sistem. Sila cuba lagi atau hubungi pentadbir.'));
+
             return null;
         }
     }
@@ -242,46 +260,48 @@ class LoanRequestForm extends Component
         $this->applicant_confirmation = false;
         $response = $this->saveApplication(false);
         $this->applicant_confirmation = $originalConfirmation;
+
         return $response;
     }
 
     public function submitForApproval(): ?RedirectResponse
     {
         $this->applicant_confirmation = true;
+
         return $this->saveApplication(true);
     }
 
     public function render(): View
     {
         return view('livewire.loan-request-form')
-          ->title($this->isEdit ? __('Kemaskini Permohonan Pinjaman Peralatan ICT') : __('Borang Permohonan Peminjaman Peralatan ICT'));
+            ->title($this->isEdit ? __('Kemaskini Permohonan Pinjaman Peralatan ICT') : __('Borang Permohonan Peminjaman Peralatan ICT'));
     }
 
     protected function messages(): array
     {
         return [
-          'items.required' => __('Sila tambah sekurang-kurangnya satu item peralatan.'),
-          'items.min' => __('Sila tambah sekurang-kurangnya satu item peralatan.'),
-          'items.*.equipment_type.required' => __('Sila pilih jenis peralatan untuk item #:position.'),
-          'items.*.quantity_requested.required' => __('Sila masukkan kuantiti untuk item #:position.'),
-          'items.*.quantity_requested.min' => __('Kuantiti mesti sekurang-kurangnya :min untuk item #:position.'),
-          'applicant_confirmation.accepted' => __('Anda mesti membuat perakuan pemohon untuk menghantar permohonan.'),
-          'responsible_officer_id.not_in' => __('Pegawai Bertanggungjawab tidak boleh pemohon sendiri.'),
-          'applicant_mobile_number.required' => __('Sila masukkan nombor telefon pemohon.'),
+            'items.required' => __('Sila tambah sekurang-kurangnya satu item peralatan.'),
+            'items.min' => __('Sila tambah sekurang-kurangnya satu item peralatan.'),
+            'items.*.equipment_type.required' => __('Sila pilih jenis peralatan untuk item #:position.'),
+            'items.*.quantity_requested.required' => __('Sila masukkan kuantiti untuk item #:position.'),
+            'items.*.quantity_requested.min' => __('Kuantiti mesti sekurang-kurangnya :min untuk item #:position.'),
+            'applicant_confirmation.accepted' => __('Anda mesti membuat perakuan pemohon untuk menghantar permohonan.'),
+            'responsible_officer_id.not_in' => __('Pegawai Bertanggungjawab tidak boleh pemohon sendiri.'),
+            'applicant_mobile_number.required' => __('Sila masukkan nombor telefon pemohon.'),
         ];
     }
 
     private function prefillApplicantDetails(User $user): void
     {
         $this->applicant_name = $user->full_name ?? $user->name;
-        $this->applicant_jawatan_gred = ($user->position?->name ?? '') . ($user->grade?->name ? ' (Gred ' . $user->grade->name . ')' : '');
+        $this->applicant_jawatan_gred = ($user->position?->name ?? '').($user->grade?->name ? ' (Gred '.$user->grade->name.')' : '');
         $this->applicant_bahagian_unit = $user->department?->name ?? '';
         $this->applicant_mobile_number = $user->mobile_number ?? '';
     }
 
     private function fillFormFromModel(): void
     {
-        if (!$this->loanApplication) {
+        if (! $this->loanApplication) {
             return;
         }
 
@@ -299,20 +319,20 @@ class LoanRequestForm extends Component
         $this->isApplicantResponsible = is_null($this->loanApplication->responsible_officer_id) ||
                                        $this->loanApplication->responsible_officer_id === $this->loanApplication->user_id;
 
-        if (!$this->isApplicantResponsible && $this->loanApplication->responsibleOfficer) {
+        if (! $this->isApplicantResponsible && $this->loanApplication->responsibleOfficer) {
             $this->responsible_officer_id = $this->loanApplication->responsible_officer_id;
         }
 
         $this->items = $this->loanApplication->loanApplicationItems->map(function ($item) {
             return [
-              'id' => $item->id,
-              'equipment_type' => $item->equipment_type,
-              'quantity_requested' => $item->quantity_requested,
-              'notes' => $item->notes,
+                'id' => $item->id,
+                'equipment_type' => $item->equipment_type,
+                'quantity_requested' => $item->quantity_requested,
+                'notes' => $item->notes,
             ];
         })->toArray();
 
-        $this->applicant_confirmation = (bool)$this->loanApplication->applicant_confirmation_timestamp;
+        $this->applicant_confirmation = (bool) $this->loanApplication->applicant_confirmation_timestamp;
     }
 
     private function determineSubmissionStatus(bool $isFinalButtonClicked): string
@@ -322,9 +342,10 @@ class LoanRequestForm extends Component
 
         if ($this->isEdit && $this->loanApplication &&
             $this->loanApplication->status !== LoanApplication::STATUS_DRAFT &&
-            !$currentUser->hasRole('Admin')) {
+            ! $currentUser->hasRole('Admin')) {
             return $this->loanApplication->status;
         }
+
         return $isFinalButtonClicked ? LoanApplication::STATUS_PENDING_SUPPORT : LoanApplication::STATUS_DRAFT;
     }
 }

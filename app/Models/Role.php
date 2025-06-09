@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use Spatie\Permission\Models\Role as SpatieRole;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Guard;
-use Illuminate\Support\Facades\Log; // Added for logging
+use Spatie\Permission\Models\Role as SpatieRole; // Added for logging
 
 class Role extends SpatieRole
 {
@@ -29,7 +29,6 @@ class Role extends SpatieRole
      * Helper method to get the User model class string.
      * This uses Spatie's Guard::getModelForGuard() for robustness.
      *
-     * @return string
      * @throws \Exception if the User model class cannot be determined.
      */
     protected function getUserModelClass(): string
@@ -43,7 +42,7 @@ class Role extends SpatieRole
         $guardNameToUse = $currentRoleGuardNameAttribute ?: $defaultGuardNameForStaticClass;
 
         if (empty($guardNameToUse)) {
-            $errorMessage = 'Guard name could not be determined for Role ID: ' . ($this->id ?? 'N/A') . '. The guard_name attribute is empty/null, and no default guard is configured for the application.';
+            $errorMessage = 'Guard name could not be determined for Role ID: '.($this->id ?? 'N/A').'. The guard_name attribute is empty/null, and no default guard is configured for the application.';
             Log::error($errorMessage, [
                 'role_id' => $this->id ?? 'N/A',
                 'role_attributes' => $this->attributes,
@@ -56,15 +55,15 @@ class Role extends SpatieRole
         $userModelClass = Guard::getModelForGuard((string) $guardNameToUse);
 
         if (is_null($userModelClass)) {
-            $errorMessage = "Could not determine the User model class for guard '{$guardNameToUse}' (Role ID: " . ($this->id ?? 'N/A') . "). Guard::getModelForGuard returned null. Ensure this guard and its provider are correctly configured in config/auth.php with a valid user model.";
+            $errorMessage = "Could not determine the User model class for guard '{$guardNameToUse}' (Role ID: ".($this->id ?? 'N/A').'). Guard::getModelForGuard returned null. Ensure this guard and its provider are correctly configured in config/auth.php with a valid user model.';
             Log::error($errorMessage, [
                 'role_id' => $this->id ?? 'N/A',
                 'role_guard_name_attribute' => $currentRoleGuardNameAttribute,
                 'resolved_guard_name_used' => $guardNameToUse,
                 'auth_config_defaults_guard' => config('auth.defaults.guard'),
-                'auth_config_guard_details' => config('auth.guards.' . $guardNameToUse),
-                'provider_for_guard' => config('auth.guards.' . $guardNameToUse . '.provider'),
-                'model_for_provider' => config('auth.providers.' . (config('auth.guards.' . $guardNameToUse . '.provider')) . '.model'),
+                'auth_config_guard_details' => config('auth.guards.'.$guardNameToUse),
+                'provider_for_guard' => config('auth.guards.'.$guardNameToUse.'.provider'),
+                'model_for_provider' => config('auth.providers.'.(config('auth.guards.'.$guardNameToUse.'.provider')).'.model'),
             ]);
             throw new \Exception($errorMessage);
         }

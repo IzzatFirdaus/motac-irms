@@ -23,12 +23,11 @@ final class ApplicationSubmitted extends Notification implements ShouldQueue
     use Queueable;
 
     public EmailApplication|LoanApplication $application;
+
     public string $applicationTypeDisplay; // Human-readable application type
 
     /**
      * Create a new notification instance.
-     *
-     * @param EmailApplication|LoanApplication $application
      */
     public function __construct(EmailApplication|LoanApplication $application)
     {
@@ -43,13 +42,13 @@ final class ApplicationSubmitted extends Notification implements ShouldQueue
         } else {
             $this->applicationTypeDisplay = __('Permohonan Umum'); // Fallback
         }
-        Log::info('ApplicationSubmitted notification INSTANTIATED for ' . $this->application::class . " ID: {$this->application->id}. Notifying user ID: {$this->application->user_id}");
+        Log::info('ApplicationSubmitted notification INSTANTIATED for '.$this->application::class." ID: {$this->application->id}. Notifying user ID: {$this->application->user_id}");
     }
 
     /**
      * Get the notification's delivery channels.
      *
-     * @param  User  $notifiable The user model instance being notified.
+     * @param  User  $notifiable  The user model instance being notified.
      * @return array<int, string>
      */
     public function via(User $notifiable): array
@@ -61,9 +60,6 @@ final class ApplicationSubmitted extends Notification implements ShouldQueue
     /**
      * Get the mail representation of the notification.
      * Design Language: Email Design Specifics (Official Branding & Tone, Clear Subject, Structured Content)
-     *
-     * @param  User  $notifiable
-     * @return \Illuminate\Notifications\Messages\MailMessage
      */
     public function toMail(User $notifiable): MailMessage
     {
@@ -71,30 +67,30 @@ final class ApplicationSubmitted extends Notification implements ShouldQueue
         $applicationId = $this->application->id ?? 'N/A';
         $subject = __(':appType Anda Telah Dihantar (ID: #:id)', ['appType' => $this->applicationTypeDisplay, 'id' => $applicationId]);
 
-        $mailMessage = (new MailMessage())
+        $mailMessage = (new MailMessage)
             ->subject($subject)
             ->greeting(__('Salam Sejahtera, :name,', ['name' => $applicantName]))
             ->line(__(':appType anda dengan nombor rujukan #:id telah berjaya dihantar dan diterima untuk semakan.', [
                 'appType' => $this->applicationTypeDisplay,
-                'id' => $applicationId
+                'id' => $applicationId,
             ]));
 
         if ($this->application instanceof LoanApplication) {
             /** @var LoanApplication $loanApp */
             $loanApp = $this->application;
             $mailMessage->line(__('Butiran Permohonan Pinjaman:'))
-                        ->line(__('Tujuan: :purpose', ['purpose' => Str::limit($loanApp->purpose, 100) ?? __('Tidak dinyatakan')]))
-                        ->line(__('Tarikh Pinjaman: :startDate hingga :endDate', [
-                            'startDate' => $this->formatDate($loanApp->loan_start_date),
-                            'endDate' => $this->formatDate($loanApp->loan_end_date)
-                        ]));
+                ->line(__('Tujuan: :purpose', ['purpose' => Str::limit($loanApp->purpose, 100) ?? __('Tidak dinyatakan')]))
+                ->line(__('Tarikh Pinjaman: :startDate hingga :endDate', [
+                    'startDate' => $this->formatDate($loanApp->loan_start_date),
+                    'endDate' => $this->formatDate($loanApp->loan_end_date),
+                ]));
 
             if ($loanApp->loanApplicationItems && $loanApp->loanApplicationItems->count() > 0) {
-                $mailMessage->line(" ")->line(__('Senarai Peralatan Dimohon:'));
+                $mailMessage->line(' ')->line(__('Senarai Peralatan Dimohon:'));
                 foreach ($loanApp->loanApplicationItems as $item) {
                     $mailMessage->line(__('- Jenis: :eqType (Kuantiti: :qty)', [
                         'eqType' => $item->equipment_type,
-                        'qty' => $item->quantity_requested
+                        'qty' => $item->quantity_requested,
                     ]));
                 }
             }
@@ -109,10 +105,9 @@ final class ApplicationSubmitted extends Notification implements ShouldQueue
             }
         }
 
-        $mailMessage->line(" ") // Empty line for spacing
-                    ->line(__('Permohonan anda kini sedang dalam proses semakan oleh pegawai yang bertanggungjawab. Anda akan dimaklumkan melalui e-mel dan notifikasi sistem mengenai sebarang perkembangan status permohonan ini.'))
-                    ->line(__('Sila semak status permohonan anda dari semasa ke semasa melalui pautan di bawah atau melalui papan pemuka sistem.'));
-
+        $mailMessage->line(' ') // Empty line for spacing
+            ->line(__('Permohonan anda kini sedang dalam proses semakan oleh pegawai yang bertanggungjawab. Anda akan dimaklumkan melalui e-mel dan notifikasi sistem mengenai sebarang perkembangan status permohonan ini.'))
+            ->line(__('Sila semak status permohonan anda dari semasa ke semasa melalui pautan di bawah atau melalui papan pemuka sistem.'));
 
         // Generate URL to view the application
         $viewUrl = '#'; // Default fallback
@@ -132,7 +127,7 @@ final class ApplicationSubmitted extends Notification implements ShouldQueue
                 try {
                     $viewUrl = route($routeName, $routeParameters);
                 } catch (\Exception $e) {
-                    Log::error("Error generating URL for ApplicationSubmitted mail notification: " . $e->getMessage(), [
+                    Log::error('Error generating URL for ApplicationSubmitted mail notification: '.$e->getMessage(), [
                         'application_id' => $this->application->id,
                         'application_type' => $this->application::class,
                         'route_name' => $routeName,
@@ -150,15 +145,14 @@ final class ApplicationSubmitted extends Notification implements ShouldQueue
         }
 
         return $mailMessage->salutation(__('Sekian, terima kasih.'))
-                           ->line(__('Yang menjalankan amanah,'))
-                           ->line(__(config('variables.templateName', 'Sistem Pengurusan Sumber MOTAC')));
+            ->line(__('Yang menjalankan amanah,'))
+            ->line(__(config('variables.templateName', 'Sistem Pengurusan Sumber MOTAC')));
     }
 
     /**
      * Get the array representation of the notification (for database storage).
      * System Design 9.5 (Notification model stores data for in-app display)
      *
-     * @param  User  $notifiable
      * @return array<string, mixed>
      */
     public function toArray(User $notifiable): array
@@ -185,7 +179,7 @@ final class ApplicationSubmitted extends Notification implements ShouldQueue
                 try {
                     $viewUrl = route($routeName, $routeParameters);
                 } catch (\Exception $e) {
-                    Log::error("Error generating URL for ApplicationSubmitted database notification: " . $e->getMessage(), [
+                    Log::error('Error generating URL for ApplicationSubmitted database notification: '.$e->getMessage(), [
                         'application_id' => $applicationId, 'route_name' => $routeName,
                     ]);
                     $viewUrl = url('/'); // Fallback
@@ -219,6 +213,7 @@ final class ApplicationSubmitted extends Notification implements ShouldQueue
             // Use translatedFormat for month names if needed, or simple format for d/m/Y
             return $date->translatedFormat(config('app.date_format_my_short', 'd M Y'));
         }
+
         return __('Tidak Dinyatakan');
     }
 }

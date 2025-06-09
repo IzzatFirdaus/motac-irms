@@ -20,8 +20,9 @@ class NotificationSeeder extends Seeder
 
         // Assuming your custom Notification model and its table migration exist as per Revision 3
         // The table should have id (UUID), type, notifiable_type, notifiable_id, data, read_at, and blameable/timestamps.
-        if (!Schema::hasTable('notifications')) {
+        if (! Schema::hasTable('notifications')) {
             Log::error('Custom notifications table does not exist. Skipping NotificationSeeder.');
+
             return;
         }
 
@@ -30,19 +31,19 @@ class NotificationSeeder extends Seeder
 
         if (User::count() === 0) {
             Log::error('No Users found. Cannot seed Notifications as they require a notifiable user. Please run UserSeeder first.');
+
             return;
         }
-        Log::info('Found ' . User::count() . ' Users for potential notification assignment.');
+        Log::info('Found '.User::count().' Users for potential notification assignment.');
 
         $adminUserForAudit = User::orderBy('id')->first();
         $auditUserId = $adminUserForAudit?->id;
-        if (!$auditUserId) {
+        if (! $auditUserId) {
             // This case should ideally not be hit if UserSeeder runs first.
             $adminUserForAudit = User::factory()->create(['name' => 'Audit User (NotifSeeder)']);
             $auditUserId = $adminUserForAudit->id;
             Log::info("Created a fallback audit user with ID {$auditUserId} for NotificationSeeder blameable fields.");
         }
-
 
         $totalNotificationsToCreate = 50; // Create fewer for more targeted examples initially
         Log::info("Creating {$totalNotificationsToCreate} random notifications using factory (Revision 3)...");
@@ -54,22 +55,22 @@ class NotificationSeeder extends Seeder
         // - Set 'created_by' and 'updated_by' to $auditUserId (or handle via BlameableObserver).
         if (class_exists(Notification::class) && method_exists(Notification::class, 'factory')) {
             Notification::factory()
-              ->count($totalNotificationsToCreate)
-              ->create([
-                // Override created_by/updated_by if your factory doesn't handle it or if you want specific audit user for all.
-                // 'created_by' => $auditUserId, // The blameable observer should handle this if auth user is set.
-                // 'updated_by' => $auditUserId, // For seeders, it's often fine if these are null or set by factory to a random user.
-                // Revision 3 notification table has these as nullable.
-              ]);
+                ->count($totalNotificationsToCreate)
+                ->create([
+                    // Override created_by/updated_by if your factory doesn't handle it or if you want specific audit user for all.
+                    // 'created_by' => $auditUserId, // The blameable observer should handle this if auth user is set.
+                    // 'updated_by' => $auditUserId, // For seeders, it's often fine if these are null or set by factory to a random user.
+                    // Revision 3 notification table has these as nullable.
+                ]);
             Log::info("Created {$totalNotificationsToCreate} notifications.");
 
             // Mark some as read
             $numReadNotifications = (int) ($totalNotificationsToCreate * 0.3);
             if ($numReadNotifications > 0) {
                 $notificationsToMarkRead = Notification::whereNull('read_at')
-                  ->inRandomOrder()
-                  ->limit($numReadNotifications)
-                  ->get();
+                    ->inRandomOrder()
+                    ->limit($numReadNotifications)
+                    ->get();
 
                 foreach ($notificationsToMarkRead as $notification) {
                     $notification->update(['read_at' => now(), 'updated_by' => $auditUserId]); // Also update 'updated_by'

@@ -10,9 +10,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 /**
  * Loan Transaction Model.
@@ -40,7 +39,6 @@ use Illuminate\Support\Facades\Log;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- *
  * @property-read \App\Models\LoanApplication $loanApplication
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanTransactionItem> $loanTransactionItems
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanTransactionItem> $items Alias for loanTransactionItems
@@ -58,6 +56,7 @@ use Illuminate\Support\Facades\Log;
  * @property-read string $status_label Translated status
  * @property-read string $item_name Representative item name for the transaction (accessor)
  * @property-read int $quantity Total quantity of items in the transaction (accessor)
+ *
  * @method static LoanTransactionFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder|LoanTransaction newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|LoanTransaction newQuery()
@@ -65,6 +64,7 @@ use Illuminate\Support\Facades\Log;
  * @method static \Illuminate\Database\Eloquent\Builder|LoanTransaction query()
  * @method static \Illuminate\Database\Eloquent\Builder|LoanTransaction withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|LoanTransaction withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class LoanTransaction extends Model
@@ -73,21 +73,34 @@ class LoanTransaction extends Model
     use SoftDeletes;
 
     public const TYPE_ISSUE = 'issue';
+
     public const TYPE_RETURN = 'return';
 
     // Statuses for a transaction itself as per System Design (Rev 3)
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_ISSUED = 'issued';
+
     public const STATUS_RETURNED = 'returned'; // Added general returned status
+
     public const STATUS_RETURNED_PENDING_INSPECTION = 'returned_pending_inspection';
+
     public const STATUS_RETURNED_GOOD = 'returned_good';
+
     public const STATUS_RETURNED_DAMAGED = 'returned_damaged';
+
     public const STATUS_ITEMS_REPORTED_LOST = 'items_reported_lost';
+
     public const STATUS_RETURNED_WITH_LOSS = 'returned_with_loss';
+
     public const STATUS_RETURNED_WITH_DAMAGE_AND_LOSS = 'returned_with_damage_and_loss';
+
     public const STATUS_PARTIALLY_RETURNED = 'partially_returned';
+
     public const STATUS_COMPLETED = 'completed';
+
     public const STATUS_CANCELLED = 'cancelled';
+
     public const STATUS_OVERDUE = 'overdue';
 
     public static array $TYPES_LABELS = [
@@ -146,20 +159,60 @@ class LoanTransaction extends Model
     }
 
     // Relationships
-    public function loanApplication(): BelongsTo { return $this->belongsTo(LoanApplication::class, 'loan_application_id'); }
-    public function loanTransactionItems(): HasMany { return $this->hasMany(LoanTransactionItem::class, 'loan_transaction_id'); }
-    public function items(): HasMany { return $this->loanTransactionItems(); }
+    public function loanApplication(): BelongsTo
+    {
+        return $this->belongsTo(LoanApplication::class, 'loan_application_id');
+    }
 
-    public function issuingOfficer(): BelongsTo { return $this->belongsTo(User::class, 'issuing_officer_id'); }
-    public function receivingOfficer(): BelongsTo { return $this->belongsTo(User::class, 'receiving_officer_id'); }
-    public function returningOfficer(): BelongsTo { return $this->belongsTo(User::class, 'returning_officer_id'); }
-    public function returnAcceptingOfficer(): BelongsTo { return $this->belongsTo(User::class, 'return_accepting_officer_id'); }
+    public function loanTransactionItems(): HasMany
+    {
+        return $this->hasMany(LoanTransactionItem::class, 'loan_transaction_id');
+    }
 
-    public function relatedIssueTransaction(): BelongsTo { return $this->belongsTo(LoanTransaction::class, 'related_transaction_id'); }
+    public function items(): HasMany
+    {
+        return $this->loanTransactionItems();
+    }
 
-    public function creator(): BelongsTo { return $this->belongsTo(User::class, 'created_by'); }
-    public function updater(): BelongsTo { return $this->belongsTo(User::class, 'updated_by'); }
-    public function deleter(): BelongsTo { return $this->belongsTo(User::class, 'deleted_by'); }
+    public function issuingOfficer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'issuing_officer_id');
+    }
+
+    public function receivingOfficer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'receiving_officer_id');
+    }
+
+    public function returningOfficer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'returning_officer_id');
+    }
+
+    public function returnAcceptingOfficer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'return_accepting_officer_id');
+    }
+
+    public function relatedIssueTransaction(): BelongsTo
+    {
+        return $this->belongsTo(LoanTransaction::class, 'related_transaction_id');
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function deleter(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deleted_by');
+    }
 
     // Accessors
     public function getTypeLabelAttribute(): string
@@ -185,14 +238,17 @@ class LoanTransaction extends Model
                 // Assuming Equipment model has a 'name' or 'model' attribute
                 return $firstItem->equipment->name ?? $firstItem->equipment->model ?? __('Item Peralatan');
             }
+
             return __('Item Tidak Diketahui');
         } elseif ($this->loanTransactionItems()->exists()) { // Fallback if not eager loaded, but less efficient
             $firstItem = $this->loanTransactionItems()->with('equipment')->first();
             if ($firstItem && $firstItem->equipment) {
                 return $firstItem->equipment->name ?? $firstItem->equipment->model ?? __('Item Peralatan');
             }
-             return __('Item Tidak Diketahui');
+
+            return __('Item Tidak Diketahui');
         }
+
         return __('Tiada Item');
     }
 
@@ -205,24 +261,36 @@ class LoanTransaction extends Model
         if ($this->relationLoaded('loanTransactionItems')) {
             return (int) $this->loanTransactionItems->sum('quantity_transacted');
         }
+
         // Fallback if not eager loaded, less efficient
         return (int) $this->loanTransactionItems()->sum('quantity_transacted');
     }
-
 
     // Static helpers for labels and options
     public static function getTypeLabel(string $typeKey): string
     {
         return __(self::$TYPES_LABELS[$typeKey] ?? Str::title(str_replace('_', ' ', $typeKey)));
     }
+
     public static function getStatusLabel(string $statusKey): string
     {
         return __(self::$STATUSES_LABELS[$statusKey] ?? Str::title(str_replace('_', ' ', $statusKey)));
     }
 
-    public static function getTypesOptions(): array { return self::$TYPES_LABELS; }
-    public static function getStatusOptions(): array { return self::$STATUSES_LABELS; }
-    public static function getStatusesList(): array { return array_keys(self::$STATUSES_LABELS); }
+    public static function getTypesOptions(): array
+    {
+        return self::$TYPES_LABELS;
+    }
+
+    public static function getStatusOptions(): array
+    {
+        return self::$STATUSES_LABELS;
+    }
+
+    public static function getStatusesList(): array
+    {
+        return array_keys(self::$STATUSES_LABELS);
+    }
 
     public function isIssue(): bool
     {
@@ -252,7 +320,7 @@ class LoanTransaction extends Model
     {
         return [
             'loanApplication.user', 'loanTransactionItems.equipment', 'issuingOfficer',
-            'receivingOfficer', 'returningOfficer', 'returnAcceptingOfficer', 'relatedIssueTransaction'
+            'receivingOfficer', 'returningOfficer', 'returnAcceptingOfficer', 'relatedIssueTransaction',
         ];
     }
 
@@ -263,7 +331,7 @@ class LoanTransaction extends Model
             if (method_exists($this->loanApplication, 'updateOverallStatusAfterTransaction')) {
                 $this->loanApplication->updateOverallStatusAfterTransaction();
             } else {
-                Log::warning("Method updateOverallStatusAfterTransaction not found on LoanApplication model.");
+                Log::warning('Method updateOverallStatusAfterTransaction not found on LoanApplication model.');
             }
         }
     }

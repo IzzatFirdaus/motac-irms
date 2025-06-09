@@ -21,7 +21,9 @@ final class EquipmentIssuedNotification extends Notification implements ShouldQu
     use Queueable;
 
     private LoanApplication $loanApplication;
+
     private LoanTransaction $issueTransaction;
+
     private User $issuedByOfficer;
 
     public function __construct(
@@ -45,10 +47,10 @@ final class EquipmentIssuedNotification extends Notification implements ShouldQu
         $applicationId = $this->loanApplication->id ?? 'N/A';
         $transactionId = $this->issueTransaction->id ?? 'N/A';
 
-        $mailMessage = (new MailMessage())
-            ->subject(__("Peralatan Pinjaman ICT Telah Dikeluarkan (Permohonan #:appId)", ['appId' => $applicationId]))
+        $mailMessage = (new MailMessage)
+            ->subject(__('Peralatan Pinjaman ICT Telah Dikeluarkan (Permohonan #:appId)', ['appId' => $applicationId]))
             ->greeting(__('Salam Sejahtera, :name,', ['name' => $applicantName]))
-            ->line(__("Peralatan untuk Permohonan Pinjaman ICT anda **#:appId** telah dikeluarkan (Transaksi Pengeluaran #:txId).", ['appId' => $applicationId, 'txId' => $transactionId]))
+            ->line(__('Peralatan untuk Permohonan Pinjaman ICT anda **#:appId** telah dikeluarkan (Transaksi Pengeluaran #:txId).', ['appId' => $applicationId, 'txId' => $transactionId]))
             ->line(__('Butiran peralatan yang dikeluarkan:'));
 
         if ($this->issueTransaction->loanTransactionItems->isNotEmpty()) {
@@ -58,16 +60,16 @@ final class EquipmentIssuedNotification extends Notification implements ShouldQu
                 if ($equipment instanceof Equipment) {
                     // CHANGED: Use asset_type_label accessor
                     $assetTypeDisplay = $equipment->asset_type_label ?? __('Peralatan'); //
-                    $brandAndModel = trim(($equipment->brand ?? '') . ' ' . ($equipment->model ?? ''));
+                    $brandAndModel = trim(($equipment->brand ?? '').' '.($equipment->model ?? ''));
 
                     $mailMessage->line(
-                        "- **{$assetTypeDisplay}**" . ($brandAndModel ? " ({$brandAndModel})" : "") .
-                        " (ID Tag: ".($equipment->tag_id ?? '-').", No. Siri: ".($equipment->serial_number ?? '-')."). " .
-                        __('Kuantiti').': '.$item->quantity_transacted."." .
-                        ($item->item_notes ? " ".__('Catatan Item').": {$item->item_notes}" : '')
+                        "- **{$assetTypeDisplay}**".($brandAndModel ? " ({$brandAndModel})" : '').
+                        ' (ID Tag: '.($equipment->tag_id ?? '-').', No. Siri: '.($equipment->serial_number ?? '-').'). '.
+                        __('Kuantiti').': '.$item->quantity_transacted.'.'.
+                        ($item->item_notes ? ' '.__('Catatan Item').": {$item->item_notes}" : '')
                     );
                 } else {
-                    $mailMessage->line(__("- Butiran peralatan tidak lengkap untuk item transaksi ID: :id", ['id' => $item->id]));
+                    $mailMessage->line(__('- Butiran peralatan tidak lengkap untuk item transaksi ID: :id', ['id' => $item->id]));
                 }
             }
         } else {
@@ -82,7 +84,7 @@ final class EquipmentIssuedNotification extends Notification implements ShouldQu
             try {
                 $applicationUrl = route($routeName, ['loan_application' => $this->loanApplication->id]);
             } catch (\Exception $e) {
-                Log::error('Error generating URL for EquipmentIssuedNotification mail: ' . $e->getMessage(), ['loan_application_id' => $this->loanApplication->id]);
+                Log::error('Error generating URL for EquipmentIssuedNotification mail: '.$e->getMessage(), ['loan_application_id' => $this->loanApplication->id]);
                 $applicationUrl = '#'; // Fallback
             }
         }
@@ -105,12 +107,14 @@ final class EquipmentIssuedNotification extends Notification implements ShouldQu
         $itemsDetails = $this->issueTransaction->loanTransactionItems->map(function (LoanTransactionItem $item) {
             $equipment = $item->equipment;
             if ($equipment instanceof Equipment) {
-                 // CHANGED: Use asset_type_label accessor
-                 $assetTypeDisplay = $equipment->asset_type_label ?? __('Peralatan'); //
-                 $brandAndModel = trim(($equipment->brand ?? '') . ' ' . ($equipment->model ?? ''));
-                return "{$assetTypeDisplay}" . ($brandAndModel ? " ({$brandAndModel})" : "") . ", Tag: ".($equipment->tag_id ?? '-').", Siri: ".($equipment->serial_number ?? '-')." - Kuantiti: {$item->quantity_transacted}";
+                // CHANGED: Use asset_type_label accessor
+                $assetTypeDisplay = $equipment->asset_type_label ?? __('Peralatan'); //
+                $brandAndModel = trim(($equipment->brand ?? '').' '.($equipment->model ?? ''));
+
+                return "{$assetTypeDisplay}".($brandAndModel ? " ({$brandAndModel})" : '').', Tag: '.($equipment->tag_id ?? '-').', Siri: '.($equipment->serial_number ?? '-')." - Kuantiti: {$item->quantity_transacted}";
             }
-            return __("Item ID: :id - Butiran peralatan tidak lengkap.", ['id' => $item->id]);
+
+            return __('Item ID: :id - Butiran peralatan tidak lengkap.', ['id' => $item->id]);
         })->toArray();
 
         $applicationUrl = '#';
@@ -119,8 +123,8 @@ final class EquipmentIssuedNotification extends Notification implements ShouldQu
             try {
                 $applicationUrl = route($routeName, ['loan_application' => $applicationId]);
             } catch (\Exception $e) {
-                Log::error('Error generating URL for EquipmentIssuedNotification array: ' . $e->getMessage(), ['loan_application_id' => $applicationId]);
-                 $applicationUrl = '#'; // Fallback
+                Log::error('Error generating URL for EquipmentIssuedNotification array: '.$e->getMessage(), ['loan_application_id' => $applicationId]);
+                $applicationUrl = '#'; // Fallback
             }
         }
 
@@ -130,8 +134,8 @@ final class EquipmentIssuedNotification extends Notification implements ShouldQu
             'transaction_id' => $transactionId,
             'issued_by_officer_id' => $this->issuedByOfficer->id,
             'issued_by_officer_name' => $this->issuedByOfficer->name,
-            'subject' => __("Peralatan Dikeluarkan (Permohonan #:appId)", ['appId' => $applicationId ?? 'N/A']),
-            'message' => __("Peralatan untuk permohonan pinjaman anda #:appId oleh :name telah dikeluarkan.", ['appId' => $applicationId ?? 'N/A', 'name' => $applicantName]),
+            'subject' => __('Peralatan Dikeluarkan (Permohonan #:appId)', ['appId' => $applicationId ?? 'N/A']),
+            'message' => __('Peralatan untuk permohonan pinjaman anda #:appId oleh :name telah dikeluarkan.', ['appId' => $applicationId ?? 'N/A', 'name' => $applicantName]),
             'items_summary' => implode('; ', $itemsDetails),
             'url' => ($applicationUrl !== '#' && filter_var($applicationUrl, FILTER_VALIDATE_URL)) ? $applicationUrl : null,
             'icon' => 'ti ti-transfer-out',
