@@ -19,14 +19,19 @@ class ProcessReturn extends Component
     use AuthorizesRequests;
 
     public LoanTransaction $issueTransaction;
+
     public LoanApplication $loanApplication;
 
     public array $returnItems = [];
+
     public $returning_officer_id;
+
     public $transaction_date;
+
     public string $return_notes = '';
 
     public array $conditionOptions = [];
+
     public array $users = [];
 
     protected function rules(): array
@@ -77,7 +82,7 @@ class ProcessReturn extends Component
             $this->returnItems[] = [
                 'is_returning' => true, // Default to being returned
                 'loan_transaction_item_id' => $issuedItem->id,
-                'equipment_name' => $issuedItem->equipment->name . ' (Tag: ' . ($issuedItem->equipment->tag_id ?? 'N/A') . ')',
+                'equipment_name' => $issuedItem->equipment->name.' (Tag: '.($issuedItem->equipment->tag_id ?? 'N/A').')',
                 'condition_on_return' => Equipment::CONDITION_GOOD, // Default to 'Good'
                 'return_item_notes' => '',
             ];
@@ -103,6 +108,7 @@ class ProcessReturn extends Component
 
         if (empty($itemsPayload)) {
             $this->addError('returnItems', __('Tiada item dipilih. Sila tandakan sekurang-kurangnya satu item untuk dipulangkan.'));
+
             return;
         }
 
@@ -122,8 +128,8 @@ class ProcessReturn extends Component
             session()->flash('success', 'Rekod pemulangan peralatan telah berjaya disimpan.');
             $this->redirectRoute('loan-applications.show', ['loan_application' => $this->loanApplication->id], navigate: true);
         } catch (Throwable $e) {
-            Log::error('Error in ProcessReturn@submitReturn: ' . $e->getMessage(), ['exception' => $e]);
-            session()->flash('error', __('Gagal merekodkan pemulangan: ') . $e->getMessage());
+            Log::error('Error in ProcessReturn@submitReturn: '.$e->getMessage(), ['exception' => $e]);
+            session()->flash('error', __('Gagal merekodkan pemulangan: ').$e->getMessage());
         }
     }
 

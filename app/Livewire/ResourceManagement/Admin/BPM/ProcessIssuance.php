@@ -8,12 +8,11 @@ use App\Models\LoanApplicationItem;
 use App\Models\LoanTransaction;
 use App\Models\User;
 use App\Services\LoanTransactionService;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
-use Carbon\Carbon;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Throwable;
 
 class ProcessIssuance extends Component
@@ -21,13 +20,19 @@ class ProcessIssuance extends Component
     use AuthorizesRequests;
 
     public LoanApplication $loanApplication;
+
     public array $allAccessoriesList = [];
+
     public $availableEquipment = [];
+
     public array $users = [];
 
     public array $issueItems = [];
+
     public $receiving_officer_id;
+
     public $transaction_date;
+
     public string $issue_notes = '';
 
     protected function messages(): array
@@ -48,10 +53,10 @@ class ProcessIssuance extends Component
         return [
             'issueItems' => ['required', 'array', 'min:1'],
             'issueItems.*.loan_application_item_id' => [
-                'required', 'integer', Rule::exists('loan_application_items', 'id')->where('loan_application_id', $loanApplicationId)
+                'required', 'integer', Rule::exists('loan_application_items', 'id')->where('loan_application_id', $loanApplicationId),
             ],
             'issueItems.*.equipment_id' => [
-                'required', 'distinct', Rule::exists('equipment', 'id')->where('status', Equipment::STATUS_AVAILABLE)
+                'required', 'distinct', Rule::exists('equipment', 'id')->where('status', Equipment::STATUS_AVAILABLE),
             ],
             'issueItems.*.accessories_checklist' => ['nullable', 'array'],
             'receiving_officer_id' => ['required', 'integer', Rule::exists('users', 'id')],
@@ -91,7 +96,7 @@ class ProcessIssuance extends Component
         $parts = explode('.', $key);
         // Check if the key is for 'loan_application_item_id' inside the issueItems array
         if (count($parts) === 3 && $parts[2] === 'loan_application_item_id') {
-            $index = (int)$parts[1];
+            $index = (int) $parts[1];
             $loanAppItemId = $this->issueItems[$index]['loan_application_item_id'] ?? null;
 
             if ($loanAppItemId) {
@@ -112,6 +117,7 @@ class ProcessIssuance extends Component
 
         if (empty($this->issueItems)) {
             $this->addError('issueItems', __('Tiada baki peralatan untuk dikeluarkan bagi permohonan ini.'));
+
             return;
         }
 
@@ -144,11 +150,12 @@ class ProcessIssuance extends Component
             );
 
             session()->flash('success', __('Rekod pengeluaran peralatan telah berjaya disimpan.'));
+
             return $this->redirectRoute('loan-applications.show', ['loan_application' => $this->loanApplication->id], navigate: true);
 
         } catch (Throwable $e) {
-            Log::error('Error in ProcessIssuance@submitIssue: ' . $e->getMessage(), ['exception' => $e]);
-            session()->flash('error', __('Gagal merekodkan pengeluaran disebabkan ralat sistem: ') . $e->getMessage());
+            Log::error('Error in ProcessIssuance@submitIssue: '.$e->getMessage(), ['exception' => $e]);
+            session()->flash('error', __('Gagal merekodkan pengeluaran disebabkan ralat sistem: ').$e->getMessage());
         }
     }
 
@@ -156,12 +163,18 @@ class ProcessIssuance extends Component
     {
         // Load equipment and users needed for the form dropdowns
         $requestedTypes = collect($this->issueItems)->pluck('equipment_type')->filter()->unique()->toArray();
+
         $this->availableEquipment = Equipment::where('status', Equipment::STATUS_AVAILABLE)
             ->whereIn('asset_type', $requestedTypes)
-            ->orderBy('name')
-            ->get(['id', 'name', 'tag_id', 'asset_type', 'brand', 'model']);
+            ->orderBy('brand')
+            ->orderBy('model')
+            ->get(['id', 'tag_id', 'asset_type', 'brand', 'model']);
 
-        $this->users = User::where('status', User::STATUS_ACTIVE)->orderBy('name')->get(['id', 'name']);
+        // THE FINAL FIX IS APPLIED IN THE FOLLOWING QUERY
+        $this->users = User::where('status', User::STATUS_ACTIVE)
+            ->orderBy('name')
+            ->get(['id', 'name', 'profile_photo_path']) // Added 'profile_photo_path'
+            ->toArray(); // Converted to array
 
         return view('livewire.resource-management.admin.bpm.process-issuance')->title(__('Proses Pengeluaran Peralatan'));
     }

@@ -1,6 +1,5 @@
 <div>
     @php
-        // Construct the full title including the reference number if available and editing
         $pageTitle = $this->generatePageTitle();
         if (
             $this->editing_application_id &&
@@ -9,7 +8,6 @@
         ) {
             $pageTitle .= ' (' . $this->loanApplicationInstance->reference_number . ')';
         }
-        $pageTitle .= ' - ' . config('variables.templateName', __('app.system_name'));
     @endphp
     @section('title', $pageTitle)
 
@@ -25,12 +23,12 @@
         <small class="text-muted">@lang('forms.text_form_ref_no')</small>
     </div>
 
-    @if ($isEditMode && isset($completedSubmissionDate) && $completedSubmissionDate)
+    @if ($isEditMode && $loanApplicationInstance && $loanApplicationInstance->submitted_at)
         <div class="row mb-3">
             <div class="col-md-12">
                 <div class="p-2 border rounded bg-light-subtle">
                     <span class="fw-medium">@lang('forms.date_application_received_label'):</span>
-                    <span>{{ $completedSubmissionDate }}</span>
+                    <span>{{ Carbon\Carbon::parse($loanApplicationInstance->submitted_at)->format('d M Y, h:i A') }}</span>
                 </div>
             </div>
         </div>
@@ -38,41 +36,43 @@
 
     @include('_partials._alerts.alert-general')
 
-    {{-- --- EDITED CODE: START --- --}}
-    {{--
-        The following directives are added to the <form> tag to enable autosave functionality.
-        x-data: Initializes an Alpine.js component to manage the autosave logic.
-        @init: Runs when the component loads. It checks for saved data in the browser's localStorage and calls the Livewire method to restore it.
-        @input.debounce.750ms: Runs 750ms after the user stops typing in any field within the form. It gathers the current
-        form data and saves it to the browser's localStorage.
-    --}}
-    <form wire:submit.prevent="submitLoanApplication"
-        x-data="{
-            autosaveKey: 'loan_application_form_autosave',
+    <form wire:submit.prevent="submitLoanApplication" x-data="{
+        autosaveKey: 'loan_application_form_autosave_{{ $editing_application_id ?? 'new' }}',
+        termsScrolled: @entangle('termsScrolled').live,
+        applicantConfirmation: @entangle('applicant_confirmation').live,
 
-            // This function gathers the current form data into a JS object.
-            getDataForCache() {
-                return {
-                    purpose: this.$wire.purpose,
-                    location: this.$wire.location,
-                    return_location: this.$wire.return_location,
-                    loan_start_date: this.$wire.loan_start_date,
-                    loan_end_date: this.$wire.loan_end_date,
-                };
-            }
-        }"
+        getDataForCache() {
+            return {
+                purpose: this.$wire.purpose,
+                location: this.$wire.location,
+                return_location: this.$wire.return_location,
+                loan_start_date: this.$wire.loan_start_date,
+                loan_end_date: this.$wire.loan_end_date,
+                applicant_phone: this.$wire.applicant_phone,
+                applicant_is_responsible_officer: this.$wire.applicant_is_responsible_officer,
+                responsible_officer_id: this.$wire.responsible_officer_id,
+                supporting_officer_id: this.$wire.supporting_officer_id,
+                loan_application_items: this.$wire.loan_application_items,
+            };
+        },
+        clearCache() {
+            localStorage.removeItem(this.autosaveKey);
+        }
+    }"
         @init="
-            const savedData = localStorage.getItem(autosaveKey);
-            if (savedData) {
-                console.log('Found cached form data. Restoring...');
-                $wire.loadStateFromCache(JSON.parse(savedData));
+            if ({{ !$isEditMode ? 'true' : 'false' }}) {
+                const savedData = localStorage.getItem(autosaveKey);
+                if (savedData) {
+                    console.log('Found cached form data. Restoring...');
+                    $wire.loadStateFromCache(JSON.parse(savedData));
+                }
             }
         "
         @input.debounce.750ms="
-            localStorage.setItem(autosaveKey, JSON.stringify(getDataForCache()))
-        "
-    >
-    {{-- --- EDITED CODE: END --- --}}
+            if ({{ !$isEditMode ? 'true' : 'false' }}) {
+                localStorage.setItem(autosaveKey, JSON.stringify(getDataForCache()))
+            }
+        ">
 
         {{-- BAHAGIAN 1: MAKLUMAT PEMOHON --}}
         <div class="card motac-card mb-4">
@@ -89,12 +89,11 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label fw-medium">@lang('forms.label_full_name')</label>
-                        <p class="form-control-plaintext p-2 border rounded bg-light-subtle mb-0">{{ $applicantName }}
-                        </p>
+                        <p class="form-control-plaintext p-2 border rounded bg-light-subtle mb-0">{{ $applicantName }}</p>
                     </div>
                     <div class="col-md-6">
                         <label for="applicant_phone" class="form-label fw-medium">@lang('forms.label_phone_number')</label>
-                        <input type="text" id="applicant_phone" wire:model="applicant_phone"
+                        <input type="text" id="applicant_phone" wire:model.blur="applicant_phone"
                             class="form-control @error('applicant_phone') is-invalid @enderror"
                             placeholder="@lang('forms.placeholder_phone_number')">
                         @error('applicant_phone')
@@ -103,25 +102,22 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-medium">@lang('forms.label_position_grade')</label>
-                        <p class="form-control-plaintext p-2 border rounded bg-light-subtle mb-0">
-                            {{ $applicantPositionAndGrade }}</p>
+                        <p class="form-control-plaintext p-2 border rounded bg-light-subtle mb-0">{{ $applicantPositionAndGrade }}</p>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-medium">@lang('forms.label_department_unit')</label>
-                        <p class="form-control-plaintext p-2 border rounded bg-light-subtle mb-0">
-                            {{ $applicantDepartment }}</p>
+                        <p class="form-control-plaintext p-2 border rounded bg-light-subtle mb-0">{{ $applicantDepartment }}</p>
                     </div>
                     <div class="col-md-12">
                         <label for="purpose" class="form-label fw-medium">@lang('forms.label_application_purpose')</label>
-                        <textarea id="purpose" wire:model="purpose" rows="3" class="form-control @error('purpose') is-invalid @enderror"
-                            placeholder="@lang('forms.placeholder_purpose')"></textarea>
+                        <textarea id="purpose" wire:model.blur="purpose" rows="3" class="form-control @error('purpose') is-invalid @enderror" placeholder="@lang('forms.placeholder_purpose')"></textarea>
                         @error('purpose')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
                     <div class="col-md-6">
                         <label for="location" class="form-label fw-medium">@lang('forms.label_location_ict')</label>
-                        <input type="text" id="location" wire:model="location"
+                        <input type="text" id="location" wire:model.blur="location"
                             class="form-control @error('location') is-invalid @enderror"
                             placeholder="@lang('forms.placeholder_usage_location')">
                         @error('location')
@@ -130,7 +126,7 @@
                     </div>
                     <div class="col-md-6">
                         <label for="return_location" class="form-label fw-medium">@lang('forms.label_expected_return_location')</label>
-                        <input type="text" id="return_location" wire:model="return_location"
+                        <input type="text" id="return_location" wire:model.blur="return_location"
                             class="form-control @error('return_location') is-invalid @enderror"
                             placeholder="@lang('forms.placeholder_return_location')">
                         @error('return_location')
@@ -139,7 +135,7 @@
                     </div>
                     <div class="col-md-6">
                         <label for="loan_start_date" class="form-label fw-medium">@lang('forms.label_loan_date')</label>
-                        <input type="datetime-local" id="loan_start_date" wire:model="loan_start_date"
+                        <input type="datetime-local" id="loan_start_date" wire:model.blur="loan_start_date"
                             class="form-control @error('loan_start_date') is-invalid @enderror"
                             min="{{ now()->toDateTimeLocalString('minute') }}">
                         @error('loan_start_date')
@@ -148,7 +144,7 @@
                     </div>
                     <div class="col-md-6">
                         <label for="loan_end_date" class="form-label fw-medium">@lang('forms.label_expected_return_date')</label>
-                        <input type="datetime-local" id="loan_end_date" wire:model="loan_end_date"
+                        <input type="datetime-local" id="loan_end_date" wire:model.blur="loan_end_date"
                             class="form-control @error('loan_end_date') is-invalid @enderror">
                         @error('loan_end_date')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -177,19 +173,19 @@
                 @if (!$applicant_is_responsible_officer)
                     <div class="row g-3">
                         <div class="col-md-12">
-                            <label for="responsible_officer_name" class="form-label fw-medium">@lang('forms.label_full_name')<span class="text-danger">*</span></label>
-                            <input type="text" id="responsible_officer_name" wire:model="responsible_officer_name" class="form-control @error('responsible_officer_name') is-invalid @enderror">
-                            @error('responsible_officer_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="col-md-6">
-                            <label for="responsible_officer_position" class="form-label fw-medium">@lang('forms.label_position_grade')<span class="text-danger">*</span></label>
-                            <input type="text" id="responsible_officer_position" wire:model="responsible_officer_position" class="form-control @error('responsible_officer_position') is-invalid @enderror">
-                            @error('responsible_officer_position') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="col-md-6">
-                            <label for="responsible_officer_phone" class="form-label fw-medium">@lang('forms.label_phone_number')<span class="text-danger">*</span></label>
-                            <input type="text" id="responsible_officer_phone" wire:model="responsible_officer_phone" class="form-control @error('responsible_officer_phone') is-invalid @enderror">
-                            @error('responsible_officer_phone') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <label for="responsible_officer_id" class="form-label fw-medium">@lang('forms.label_responsible_officer_name')<span
+                                    class="text-danger">*</span></label>
+                            <div wire:ignore>
+                                <select id="responsible_officer_id" wire:model="responsible_officer_id" class="form-select @error('responsible_officer_id') is-invalid @enderror">
+                                    <option value="">-- @lang('forms.placeholder_select_responsible_officer') --</option>
+                                    @foreach($responsibleOfficerOptions as $id => $name)
+                                        <option value="{{ $id }}">{{ $name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            @error('responsible_officer_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
                 @endif
@@ -241,25 +237,20 @@
                 @forelse ($loan_application_items as $index => $item)
                     <div wire:key="loan_item_{{ $index }}" class="list-group-item mb-3 p-3 border rounded">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h3 class="h6 mb-0 fw-medium text-primary">@lang('forms.title_equipment_item', ['index' => $index + 1])
-                            </h3>
+                            <h3 class="h6 mb-0 fw-medium text-primary">@lang('forms.title_equipment_item', ['index' => $index + 1])</h3>
                             @if (count($loan_application_items) > 1)
-                                <button type="button" wire:click="removeLoanItem({{ $index }})"
-                                    title="@lang('app.button_remove_equipment')" class="btn btn-sm btn-icon btn-text-danger p-0">
+                                <button type="button" wire:click="removeLoanItem({{ $index }})" title="@lang('app.button_remove_equipment')" class="btn btn-sm btn-icon btn-text-danger p-0">
                                     <i class="bi bi-x-circle-fill fs-5"></i>
                                 </button>
                             @endif
                         </div>
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label for="item_{{ $index }}_equipment_type"
-                                    class="form-label">@lang('forms.label_equipment_type')</label>
-                                <select id="item_{{ $index }}_equipment_type"
-                                    wire:model="loan_application_items.{{ $index }}.equipment_type"
-                                    class="form-select @error('loan_application_items.' . $index . '.equipment_type') is-invalid @enderror">
+                                <label for="item_{{ $index }}_equipment_type" class="form-label">@lang('forms.label_equipment_type')</label>
+                                <select id="item_{{ $index }}_equipment_type" wire:model="loan_application_items.{{ $index }}.equipment_type" class="form-select @error('loan_application_items.' . $index . '.equipment_type') is-invalid @enderror">
                                     <option value="">-- @lang('forms.placeholder_select_type') --</option>
                                     @foreach ($equipmentTypeOptions as $key => $label)
-                                        <option value="{{ $key }}">@lang('forms.option_equipment_' . Str::snake($key))</option>
+                                        <option value="{{ $key }}">@lang('forms.option_equipment_' . Illuminate\Support\Str::snake($key))</option>
                                     @endforeach
                                 </select>
                                 @error('loan_application_items.' . $index . '.equipment_type')
@@ -267,23 +258,15 @@
                                 @enderror
                             </div>
                             <div class="col-md-6">
-                                <label for="item_{{ $index }}_quantity_requested"
-                                    class="form-label">@lang('forms.label_quantity')</label>
-                                <input type="number" id="item_{{ $index }}_quantity_requested"
-                                    wire:model="loan_application_items.{{ $index }}.quantity_requested"
-                                    min="1"
-                                    class="form-control @error('loan_application_items.' . $index . '.quantity_requested') is-invalid @enderror">
+                                <label for="item_{{ $index }}_quantity_requested" class="form-label">@lang('forms.label_quantity')</label>
+                                <input type="number" id="item_{{ $index }}_quantity_requested" wire:model="loan_application_items.{{ $index }}.quantity_requested" min="1" class="form-control @error('loan_application_items.' . $index . '.quantity_requested') is-invalid @enderror">
                                 @error('loan_application_items.' . $index . '.quantity_requested')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-12">
-                                <label for="item_{{ $index }}_notes"
-                                    class="form-label">@lang('forms.label_remarks')</label>
-                                <input type="text" id="item_{{ $index }}_notes"
-                                    wire:model="loan_application_items.{{ $index }}.notes"
-                                    class="form-control @error('loan_application_items.' . $index . '.notes') is-invalid @enderror"
-                                    placeholder="@lang('forms.placeholder_equipment_remarks')">
+                                <label for="item_{{ $index }}_notes" class="form-label">@lang('forms.label_remarks')</label>
+                                <input type="text" id="item_{{ $index }}_notes" wire:model="loan_application_items.{{ $index }}.notes" class="form-control @error('loan_application_items.' . $index . '.notes') is-invalid @enderror" placeholder="@lang('forms.placeholder_equipment_remarks')">
                                 @error('loan_application_items.' . $index . '.notes')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -310,14 +293,8 @@
                 </h2>
             </div>
             <div class="card-body p-4 motac-card-body">
-                <div id="termsBox"
-                    style="height: 250px; overflow-y: scroll; border: 1px solid #dee2e6; padding: 15px; background-color: #f8f9fa; border-radius: 0.375rem;"
-                    class="small text-muted motac-terms-box" x-ref="termsBox"
-                    @scroll.debounce.150ms="
-                if ($refs.termsBox.scrollTop + $refs.termsBox.clientHeight >= $refs.termsBox.scrollHeight - 20) {
-                    termsScrolled = true;
-                }
-             ">
+                <div id="termsBox" style="height: 250px; overflow-y: scroll; border: 1px solid #dee2e6; padding: 15px; background-color: #f8f9fa; border-radius: 0.375rem;" class="small text-muted motac-terms-box" x-ref="termsBox"
+                    @scroll.debounce.150ms="if ($refs.termsBox.scrollTop + $refs.termsBox.clientHeight >= $refs.termsBox.scrollHeight - 20) { termsScrolled = true; }">
                     <p class="fw-bold mb-2">@lang('messages.terms_reminder')</p>
                     <ol class="ps-3 mb-0">
                         <li class="mb-2">@lang('messages.terms_item1')</li>
@@ -368,26 +345,24 @@
 
         {{-- Action Buttons --}}
         <div class="d-flex justify-content-end gap-2 pt-3">
-            {{-- --- EDITED CODE: START --- --}}
-            {{--
-                The @click handler clears the localStorage cache before the form action proceeds.
-                This ensures a clean slate for the next application.
-            --}}
             <button type="button" wire:click="saveAsDraft" wire:loading.attr="disabled"
-                @click="localStorage.removeItem(autosaveKey)"
-                class="btn btn-secondary text-uppercase">
-                <span wire:loading.remove wire:target="saveAsDraft"><i class="bi bi-save-fill me-1"></i>
+                @click="clearCache()" class="btn btn-secondary">
+                <span wire:loading.remove wire:target="saveAsDraft"><i class="bi bi-save me-1"></i>
                     @lang('app.button_save_draft')</span>
-                <span wire:loading wire:target="saveAsDraft">@lang('app.text_saving')</span>
+                <span wire:loading wire:target="saveAsDraft" class="d-inline-flex align-items-center"><span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                    @lang('app.text_saving')</span>
             </button>
             <button type="submit" wire:loading.attr="disabled"
-                @click="localStorage.removeItem(autosaveKey)"
-                class="btn btn-primary text-uppercase">
-                <span wire:loading.remove wire:target="submitLoanApplication"><i
-                        class="bi bi-send-check-fill me-1"></i> @lang('app.button_submit_application')</span>
-                <span wire:loading wire:target="submitLoanApplication">@lang('app.text_processing')</span>
+                @click="clearCache()" class="btn btn-primary" x-bind:disabled="!applicantConfirmation || !termsScrolled">
+                <span wire:loading.remove wire:target="submitLoanApplication">
+                    <i class="bi bi-send-check-fill me-1"></i>
+                    {{ $isEditMode && $this->loanApplicationInstance?->status !== \App\Models\LoanApplication::STATUS_DRAFT ? __('forms.button_update_and_resubmit') : __('app.button_submit_application') }}
+                </span>
+                <span wire:loading wire:target="submitLoanApplication" class="d-inline-flex align-items-center">
+                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                    @lang('app.text_processing')
+                </span>
             </button>
-            {{-- --- EDITED CODE: END --- --}}
         </div>
     </form>
 </div>

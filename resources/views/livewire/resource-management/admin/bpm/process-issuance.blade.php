@@ -81,8 +81,9 @@
                                     <option value="">-- @lang('Pilih Peralatan') --</option>
                                     {{-- This filters the available equipment to only show matching types --}}
                                     @foreach ($availableEquipment->where('asset_type', $issueItem['equipment_type']) as $equipment)
+                                        {{-- THE FIX IS APPLIED ON THE NEXT LINE --}}
                                         <option value="{{ $equipment->id }}">
-                                            {{ $equipment->name }} (Tag: {{ $equipment->tag_id ?? 'N/A' }})
+                                            {{ $equipment->brand }} {{ $equipment->model }} (Tag: {{ $equipment->tag_id ?? 'N/A' }})
                                         </option>
                                     @endforeach
                                     @if($availableEquipment->where('asset_type', $issueItem['equipment_type'])->isEmpty())

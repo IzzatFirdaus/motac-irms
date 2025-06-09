@@ -16,10 +16,12 @@ class OutstandingLoans extends Component
     use WithPagination;
 
     public string $searchTerm = '';
+
     protected string $paginationTheme = 'bootstrap';
 
     // Added properties to control sorting
     public string $sortBy = 'updated_at';
+
     public string $sortDirection = 'desc';
 
     public function mount(): void
@@ -40,7 +42,6 @@ class OutstandingLoans extends Component
         $this->resetPage();
     }
 
-
     public function getOutstandingApplicationsProperty()
     {
         $this->authorize('viewAny', LoanApplication::class);
@@ -48,12 +49,12 @@ class OutstandingLoans extends Component
         $query = LoanApplication::query()
             ->with([
                 'user:id,name',
-                'loanApplicationItems'
+                'loanApplicationItems',
             ])
             ->where('status', LoanApplication::STATUS_APPROVED);
 
-        if (!empty($this->searchTerm)) {
-            $searchTerm = '%' . $this->searchTerm . '%';
+        if (! empty($this->searchTerm)) {
+            $searchTerm = '%'.$this->searchTerm.'%';
             $query->where(function ($subQuery) use ($searchTerm) {
                 $subQuery->where('id', 'like', $searchTerm)
                     ->orWhere('purpose', 'like', $searchTerm)

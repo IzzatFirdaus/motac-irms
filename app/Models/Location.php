@@ -62,6 +62,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static Builder<static>|Location whereUpdatedBy($value)
  * @method static Builder<static>|Location withTrashed()
  * @method static Builder<static>|Location withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class Location extends Model
