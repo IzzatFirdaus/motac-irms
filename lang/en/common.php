@@ -16,4 +16,11 @@ return [
   'see_all' => 'See All',
   'applicant' => 'Applicant',
   'apply_date' => 'Apply Date',
+  'cancel' => 'Cancel',
+  'update' => 'Update',
+  'status' => 'Status',
+  'department' => 'Department',
+  'actions' => 'Actions',
+  'delete' => 'Delete',
+  'reset_search' => 'Reset Search',
 ];

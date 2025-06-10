@@ -76,10 +76,10 @@
                                     <td class="px-3 py-2 small text-center">
                                         @if ($grade->is_approver_grade)
                                             <span
-                                                class="badge rounded-pill bg-success-subtle text-success-emphasis">{{ __('Ya') }}</span>
+                                                class="badge rounded-pill text-bg-success">{{ __('Ya') }}</span>
                                         @else
                                             <span
-                                                class="badge rounded-pill bg-danger-subtle text-danger-emphasis">{{ __('Tidak') }}</span>
+                                                class="badge rounded-pill text-bg-secondary">{{ __('Tidak') }}</span>
                                         @endif
                                     </td>
                                     <td class="px-3 py-2 small text-muted">{{ $grade->minApprovalGrade?->name ?? '-' }}

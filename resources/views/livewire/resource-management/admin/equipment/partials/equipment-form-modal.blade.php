@@ -5,12 +5,12 @@
             <div class="modal-content motac-modal-content">
                 <div class="modal-header motac-modal-header">
                     <h5 class="modal-title" id="equipmentFormModalLabel">
-                        {{ $isEditing ? __('Kemaskini Peralatan ICT') : __('Tambah Peralatan ICT Baru') }}
+                        {{-- CORRECTED: Provide a default value for $isEditing --}}
+                        {{ ($isEditing ?? false) ? __('Kemaskini Peralatan ICT') : __('Tambah Peralatan ICT Baru') }}
                     </h5>
                     <button type="button" class="btn-close" wire:click="closeModal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    {{-- Form content is extensive, keeping it as provided --}}
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label for="asset_type" class="form-label fw-medium">{{ __('Jenis Aset') }} <span class="text-danger">*</span></label>
@@ -57,7 +57,8 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" wire:click="closeModal">{{ __('Batal') }}</button>
                     <button type="submit" class="btn btn-primary" wire:loading.attr="disabled">
-                        <span wire:loading.remove>{{ $isEditing ? __('Kemaskini Peralatan') : __('Simpan Peralatan') }}</span>
+                        {{-- CORRECTED: Provide a default value for $isEditing --}}
+                        <span wire:loading.remove>{{ ($isEditing ?? false) ? __('Kemaskini Peralatan') : __('Simpan Peralatan') }}</span>
                         <span wire:loading>{{ __('Menyimpan...') }}</span>
                     </button>
                 </div>

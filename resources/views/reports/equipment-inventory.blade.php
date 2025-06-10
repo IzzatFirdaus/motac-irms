@@ -1,106 +1,113 @@
-{{-- resources/views/reports/equipment-inventory.blade.php --}}
 @extends('layouts.app')
 
-@section('title', __('Laporan Inventori Peralatan ICT'))
+@section('title', __('reports.inventory_report_title'))
 
 @section('content')
     <div class="container-fluid px-lg-4 py-4">
 
         <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
             <h1 class="h2 fw-bold text-dark mb-0 d-flex align-items-center">
-                <i class="bi bi-archive-fill me-2"></i>{{ __('Laporan Inventori Peralatan ICT') }}
+                <i class="bi bi-archive-fill me-2"></i>{{ __('reports.inventory_report_title') }}
             </h1>
-            @if (Route::has('admin.reports.index'))
-                <a href="{{ route('admin.reports.index') }}"
-                   class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center motac-btn-outline">
+            @if (Route::has('reports.index'))
+                <a href="{{ route('reports.index') }}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center">
                     <i class="bi bi-arrow-left me-1"></i>
-                    {{ __('Kembali ke Senarai Laporan') }}
+                    {{ __('reports.back_to_reports') }}
                 </a>
             @endif
         </div>
 
-        @if (session()->has('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{__('Tutup')}}"></button>
-            </div>
-        @endif
-        @if (session()->has('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{__('Tutup')}}"></button>
-            </div>
-        @endif
+        @include('_partials._alerts.alert-general')
 
-        {{-- CORRECTED LINE: Using $equipmentList instead of $equipment --}}
+        {{-- ADDED: Filter and Search Section --}}
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <form action="{{ route('reports.equipment-inventory') }}" method="GET" class="needs-validation">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-3">
+                            <label for="search" class="form-label small">{{ __('Carian Kata Kunci') }}</label>
+                            <input type="text" name="search" id="search" class="form-control form-control-sm"
+                                placeholder="{{ __('reports.search_placeholder') }}" value="{{ $request->input('search') }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="status" class="form-label small">{{ __('reports.op_status') }}</label>
+                            <select name="status" id="status" class="form-select form-select-sm">
+                                <option value="">{{ __('common.all') }}</option>
+                                @foreach ($statuses as $value => $label)
+                                    <option value="{{ $value }}" {{ $request->input('status') == $value ? 'selected' : '' }}>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="asset_type" class="form-label small">{{ __('reports.asset_type') }}</label>
+                            <select name="asset_type" id="asset_type" class="form-select form-select-sm">
+                                <option value="">{{ __('common.all') }}</option>
+                                @foreach ($assetTypes as $value => $label)
+                                    <option value="{{ $value }}" {{ $request->input('asset_type') == $value ? 'selected' : '' }}>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                             <label for="department_id" class="form-label small">{{ __('reports.department') }}</label>
+                             <select name="department_id" id="department_id" class="form-select form-select-sm">
+                                <option value="">{{ __('common.all') }}</option>
+                                @foreach($departments as $id => $name)
+                                    <option value="{{ $id }}" {{ $request->input('department_id') == $id ? 'selected' : '' }}>{{ $name }}</option>
+                                @endforeach
+                             </select>
+                        </div>
+                        <div class="col-md-2 text-end">
+                            <button type="submit" class="btn btn-sm btn-primary w-100">{{ __('Tapis') }}</button>
+                            <a href="{{ route('reports.equipment-inventory') }}" class="btn btn-sm btn-link text-muted w-100">{{ __('common.reset_search') }}</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         @if ($equipmentList->isEmpty())
             <div class="alert alert-info text-center" role="alert">
-                 <i class="bi bi-info-circle-fill me-2"></i>{{ __('Tiada peralatan ICT ditemui untuk laporan ini.') }}
+                 <i class="bi bi-info-circle-fill me-2"></i>{{ __('reports.no_equipment_for_report') }}
             </div>
         @else
-            <div class="card shadow-sm motac-card">
-                 <div class="card-header bg-light py-3 motac-card-header">
-                    <h3 class="h5 card-title fw-semibold mb-0">{{__('Senarai Peralatan')}}</h3>
+            <div class="card shadow-sm">
+                 <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center">
+                    <h3 class="h5 card-title fw-semibold mb-0">{{__('reports.equipment_list')}}</h3>
+                    <small class="text-muted">{{ __('Memaparkan :from-:to daripada :total rekod', ['from' => $equipmentList->firstItem(), 'to' => $equipmentList->lastItem(), 'total' => $equipmentList->total()]) }}</small>
                 </div>
-                <div class="card-body p-0"> {{-- p-0 to make table flush --}}
+                <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-striped table-hover table-bordered mb-0 align-middle">
                             <thead class="table-light">
                                 <tr>
-                                    <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Tag ID Aset') }}</th>
-                                    <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Jenis Aset') }}</th>
-                                    <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Jenama') }}</th>
-                                    <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Model') }}</th>
-                                    <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('No. Siri') }}</th>
-                                    <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Status Operasi') }}</th>
-                                    <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Status Kondisi') }}</th>
-                                    <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Jabatan') }}</th>
-                                    <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Pengguna Semasa') }}</th>
-                                    <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Tarikh Pinjam') }}</th>
+                                    <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('reports.asset_tag_id') }}</th>
+                                    <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('reports.asset_type') }}</th>
+                                    <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('reports.brand') }} & {{ __('reports.model') }}</th>
+                                    <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('reports.op_status') }}</th>
+                                    <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('reports.condition_status') }}</th>
+                                    <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('reports.current_user') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {{-- CORRECTED LINE: Iterating over $equipmentList --}}
                                 @foreach ($equipmentList as $item)
                                     <tr>
-                                        <td class="px-3 py-2 small text-dark fw-medium">{{ optional($item)->tag_id ?? 'N/A' }}</td>
-                                        <td class="px-3 py-2 small">{{ $item->asset_type_translated ?? (optional($item)->asset_type ? __(Str::title(str_replace('_',' ',optional($item)->asset_type))) : 'N/A') }}</td>
-                                        <td class="px-3 py-2 small">{{ optional($item)->brand ?? 'N/A' }}</td>
-                                        <td class="px-3 py-2 small">{{ optional($item)->model ?? 'N/A' }}</td>
-                                        <td class="px-3 py-2 small font-monospace">{{ optional($item)->serial_number ?? 'N/A' }}</td>
+                                        <td class="px-3 py-2 small text-dark fw-medium font-monospace">{{ $item->tag_id ?? __('common.not_available') }}</td>
+                                        <td class="px-3 py-2 small">{{ $item->asset_type_label }}</td>
+                                        <td class="px-3 py-2 small">{{ $item->brand ?? '' }} {{ $item->model ?? '' }}</td>
                                         <td class="px-3 py-2 small">
-                                            <span class="badge rounded-pill {{ App\Helpers\Helpers::getStatusColorClass($item->status ?? '', 'equipment_status') }} fw-normal">
-                                                {{ $item->status_translated ?? (optional($item)->status ? __(Str::title(str_replace('_',' ',optional($item)->status))) : 'N/A') }}
-                                            </span>
+                                            <span class="badge rounded-pill {{ $item->status_color_class }} fw-normal">{{ $item->status_label }}</span>
                                         </td>
                                         <td class="px-3 py-2 small">
-                                            <span class="badge rounded-pill {{ App\Helpers\Helpers::getStatusColorClass($item->condition_status ?? '', 'equipment_condition') }} fw-normal">
-                                                {{ $item->condition_status_translated ?? (optional($item)->condition_status ? __(Str::title(str_replace('_',' ',optional($item)->condition_status))) : 'N/A') }}
-                                            </span>
+                                            <span class="badge rounded-pill {{ $item->condition_color_class }} fw-normal">{{ $item->condition_status_label }}</span>
                                         </td>
-                                        <td class="px-3 py-2 small">{{ optional(optional($item)->department)->name ?? 'N/A' }}</td>
-                                        <td class="px-3 py-2 small">
-                                            @if (optional($item)->activeLoanTransaction && optional(optional($item)->activeLoanTransaction->loanApplication)->user)
-                                                {{ optional(optional($item)->activeLoanTransaction->loanApplication->user)->name ?? 'N/A' }}
-                                            @else
-                                                -
-                                            @endif
-                                        </td>
-                                        <td class="px-3 py-2 small">
-                                            @if (optional($item)->activeLoanTransaction)
-                                                {{ optional(optional($item)->activeLoanTransaction)->issue_timestamp?->translatedFormat('d M Y') ?? 'N/A' }}
-                                            @else
-                                                -
-                                            @endif
-                                        </td>
+                                        <td class="px-3 py-2 small text-muted">{{ $item->activeLoanTransactionItem?->loanTransaction?->loanApplication?->user?->name ?? '-' }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>
                         </table>
                     </div>
                 </div>
-                {{-- CORRECTED LINE: Using $equipmentList for pagination --}}
-                 @if ($equipmentList instanceof \Illuminate\Pagination\LengthAwarePaginator && $equipmentList->hasPages())
+                 @if ($equipmentList->hasPages())
                     <div class="card-footer bg-light border-top d-flex justify-content-center py-2">
                         {{ $equipmentList->links() }}
                     </div>

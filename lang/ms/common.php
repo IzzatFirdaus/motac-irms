@@ -15,4 +15,11 @@ return [
   'see_all' => 'Lihat Semua',
   'applicant' => 'Pemohon',
   'apply_date' => 'Tarikh Mohon',
+  'cancel' => 'Batal',
+  'update' => 'Kemaskini',
+  'status' => 'Status',
+  'department' => 'Jabatan',
+  'actions' => 'Tindakan',
+  'delete' => 'Padam',
+  'reset_search' => 'Set Semula Carian',
 ];

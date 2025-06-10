@@ -1,119 +1,66 @@
-{{-- resources/views/livewire/reports/loan-applications-report.blade.php --}}
-<div>
-    {{-- Ensure .card and .motac-card (if used via x-card) are MOTAC themed --}}
-    <div class="card shadow-sm mb-4 motac-card">
-        <div class="card-header bg-light py-3 motac-card-header"> {{-- Ensure bg-light uses MOTAC theme surface color --}}
-            <div class="d-flex flex-wrap align-items-center justify-content-between">
-                <h3 class="h5 mb-0 fw-semibold text-dark d-flex align-items-center">
-                    <i class="bi bi-file-earmark-text-fill me-2"></i>{{-- Already Bootstrap Icon --}}
-                    {{ __('Laporan Permohonan Pinjaman Peralatan ICT') }}
-                </h3>
-                @if (Route::has('reports.index'))
-                    <a href="{{ route('reports.index') }}"
-                       class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center">
-                        <i class="bi bi-arrow-left me-1"></i> {{-- Already Bootstrap Icon --}}
-                        {{ __('Kembali ke Senarai Laporan') }}
-                    </a>
-                @endif
-            </div>
+@extends('layouts.app')
+
+@section('title', __('reports.loan_apps_title'))
+
+@section('content')
+    <div class="container-fluid px-lg-4 py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+            <h1 class="h2 fw-bold text-dark mb-0 d-flex align-items-center">
+                <i class="bi bi-journal-text me-2"></i>{{ __('reports.loan_apps_title') }}
+            </h1>
+            @if (Route::has('reports.index'))
+                <a href="{{ route('reports.index') }}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center">
+                    <i class="bi bi-arrow-left me-1"></i>{{ __('reports.back_to_reports') }}
+                </a>
+            @endif
         </div>
 
-        <div class="card-body p-3 p-md-4 motac-card-body">
-            <x-alert-bootstrap /> {{-- Ensure this component uses MOTAC themed alerts --}}
+        @include('_partials._alerts.alert-general')
 
-            {{-- Filters --}}
-            <div class="row g-3 mb-4 align-items-end">
-                <div class="col-md-3">
-                    <label for="searchTermLoanApp" class="form-label form-label-sm">{{ __('Carian ID/Pemohon/Tujuan') }}</label>
-                    <input wire:model.live.debounce.300ms="searchTerm" type="search" class="form-control form-control-sm" id="searchTermLoanApp" placeholder="{{ __('Cth: 123, nama, mesyuarat...') }}"> {{-- Ensure form-control is MOTAC themed --}}
-                </div>
-                <div class="col-md-2">
-                    <label for="filterStatusLoan" class="form-label form-label-sm">{{ __('Status Permohonan') }}</label>
-                    <select wire:model.live="filterStatus" class="form-select form-select-sm" id="filterStatusLoan"> {{-- Ensure form-select is MOTAC themed --}}
-                        <option value="">{{ __('Semua Status') }}</option>
-                        @foreach($statusOptions as $key => $label)
-                            <option value="{{ $key }}">{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label for="filterDepartmentIdLoan" class="form-label form-label-sm">{{ __('Jabatan Pemohon') }}</label>
-                    <select wire:model.live="filterDepartmentId" class="form-select form-select-sm" id="filterDepartmentIdLoan">
-                        <option value="">{{ __('Semua Jabatan') }}</option>
-                        @foreach($departmentOptions as $id => $name)
-                            <option value="{{ $id }}">{{ $name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label for="filterDateFromLoan" class="form-label form-label-sm">{{ __('Tarikh Mohon Dari') }}</label>
-                    <input wire:model.live="filterDateFrom" type="date" class="form-control form-control-sm" id="filterDateFromLoan">
-                </div>
-                <div class="col-md-2">
-                    <label for="filterDateToLoan" class="form-label form-label-sm">{{ __('Hingga Tarikh') }}</label>
-                    <input wire:model.live="filterDateTo" type="date" class="form-control form-control-sm" id="filterDateToLoan">
-                </div>
-                 <div class="col-md-1">
-                    <button wire:click="resetFilters" class="btn btn-sm btn-outline-secondary w-100" type="button">{{ __('Reset') }}</button> {{-- Ensure btn-outline-secondary is MOTAC themed --}}
-                </div>
+        <div class="card shadow-sm">
+            <div class="card-header bg-light py-3">
+                <h3 class="h5 card-title fw-semibold mb-0">{{ __('reports.loan_apps_list') }}</h3>
             </div>
-
-            <div class="table-responsive">
-                @if ($reportData->isNotEmpty())
-                    <table class="table table-hover table-striped table-sm mb-0"> {{-- Ensure table is MOTAC themed --}}
-                        <thead class="table-light"> {{-- Ensure table-light uses MOTAC theme header bg --}}
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover mb-0 align-middle">
+                        <thead class="table-light">
                             <tr>
-                                {{-- Ensure x-sort-icon uses Bootstrap Icons (bi-arrow-up/down) --}}
-                                <th class="small text-uppercase text-muted fw-medium px-3 py-2" wire:click="setSortBy('id')" style="cursor: pointer;">{{ __('ID') }} <x-sort-icon field="id" :sortField="$sortBy" :sortDirection="$sortDirection" /></th>
-                                <th class="small text-uppercase text-muted fw-medium px-3 py-2" wire:click="setSortBy('users.name')" style="cursor: pointer;">{{ __('Pemohon') }} <x-sort-icon field="users.name" :sortField="$sortBy" :sortDirection="$sortDirection" /></th>
-                                <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Jabatan') }}</th>
-                                <th class="small text-uppercase text-muted fw-medium px-3 py-2" wire:click="setSortBy('purpose')" style="cursor: pointer;">{{ __('Tujuan') }} <x-sort-icon field="purpose" :sortField="$sortBy" :sortDirection="$sortDirection" /></th>
-                                <th class="small text-uppercase text-muted fw-medium px-3 py-2" wire:click="setSortBy('loan_start_date')" style="cursor: pointer;">{{ __('Tarikh Pinjam') }} <x-sort-icon field="loan_start_date" :sortField="$sortBy" :sortDirection="$sortDirection" /></th>
-                                <th class="small text-uppercase text-muted fw-medium px-3 py-2" wire:click="setSortBy('loan_end_date')" style="cursor: pointer;">{{ __('Tarikh Pulang') }} <x-sort-icon field="loan_end_date" :sortField="$sortBy" :sortDirection="$sortDirection" /></th>
-                                <th class="small text-uppercase text-muted fw-medium px-3 py-2" wire:click="setSortBy('status')" style="cursor: pointer;">{{ __('Status') }} <x-sort-icon field="status" :sortField="$sortBy" :sortDirection="$sortDirection" /></th>
-                                <th class="small text-uppercase text-muted fw-medium px-3 py-2" wire:click="setSortBy('created_at')" style="cursor: pointer;">{{ __('Tarikh Mohon') }} <x-sort-icon field="created_at" :sortField="$sortBy" :sortDirection="$sortDirection" /></th>
+                                <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('ID') }}</th>
+                                <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('reports.applicant') }}</th>
+                                <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('dashboard.subject') }}</th>
+                                <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('reports.loan_dates') }}</th>
+                                <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('common.status') }}</th>
                             </tr>
                         </thead>
                         <tbody>
-                             <tr wire:loading.class.delay="opacity-50">
-                                <td colspan="8" class="p-0">
-                                     <div wire:loading.flex class="progress" style="height: 3px; width: 100%;"> {{-- Ensure progress bar uses MOTAC primary color --}}
-                                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
-                                    </div>
-                                </td>
-                            </tr>
-                            @foreach ($reportData as $application)
-                                <tr wire:key="loan-app-report-{{ $application->id }}">
-                                    <td class="small align-middle">{{ $application->id }}</td>
-                                    <td class="small align-middle">{{ $application->user?->name ?? __('N/A') }}</td>
-                                    <td class="small align-middle">{{ $application->user?->department?->name ?? __('N/A') }}</td>
-                                    <td class="small align-middle" style="max-width: 200px; white-space: normal;">{{ Str::limit($application->purpose, 50) }}</td>
-                                    <td class="small align-middle">{{ $application->loan_start_date?->translatedFormat(config('motac.date_format_my', 'd/m/Y')) }}</td>
-                                    <td class="small align-middle">{{ $application->loan_end_date?->translatedFormat(config('motac.date_format_my', 'd/m/Y')) }}</td>
-                                    <td class="small align-middle">
-                                        {{-- Ensure Helpers::getStatusColorClass provides MOTAC themed badge classes --}}
-                                        <span class="badge rounded-pill {{ App\Helpers\Helpers::getStatusColorClass($application->status, 'bootstrap_badge') }} px-2 py-1">
-                                            {{ $application->status_translated ?? __('N/A') }}
-                                        </span>
+                            @forelse ($loanApplications as $application)
+                                <tr>
+                                    <td class="px-3 py-2 small fw-medium">#{{ $application->id }}</td>
+                                    <td class="px-3 py-2 small">{{ $application->user->name ?? __('common.not_available') }}</td>
+                                    <td class="px-3 py-2 small" style="white-space: normal; min-width: 250px;">{{ Str::limit($application->purpose, 70) }}</td>
+                                    <td class="px-3 py-2 small">{{ $application->loan_start_date?->translatedFormat('d/m/Y') }} - {{ $application->loan_end_date?->translatedFormat('d/m/Y') }}</td>
+                                    <td class="px-3 py-2 small">
+                                        {{-- CORRECTED: Using the model accessor for a high-contrast badge --}}
+                                        <span class="badge rounded-pill {{ $application->status_color_class }}">{{ $application->status_label }}</span>
                                     </td>
-                                    <td class="small align-middle">{{ $application->created_at?->translatedFormat(config('motac.datetime_format_my', 'd/m/Y H:i A')) }}</td>
                                 </tr>
-                            @endforeach
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="text-center p-4">
+                                        {{ __('reports.no_loan_apps_found') }}
+                                    </td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
-
-                    @if ($reportData->hasPages())
-                        <div class="card-footer bg-light border-top-0 d-flex justify-content-center pt-3 pb-2">
-                            {{ $reportData->links() }} {{-- Ensure pagination is Bootstrap 5 styled and MOTAC themed --}}
-                        </div>
-                    @endif
-                @else
-                     <div class="alert alert-warning text-center" role="alert"> {{-- Ensure alert-warning is MOTAC themed --}}
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i> {{-- Already Bootstrap Icon --}}
-                        {{ __('Tiada data permohonan pinjaman ditemui untuk kriteria ini.') }}
-                    </div>
-                @endif
+                </div>
             </div>
+            @if ($loanApplications->hasPages())
+                <div class="card-footer bg-light border-top d-flex justify-content-center py-2">
+                    {{ $loanApplications->links() }}
+                </div>
+            @endif
         </div>
     </div>
-</div>
+@endsection

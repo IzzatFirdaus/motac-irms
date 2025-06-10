@@ -69,8 +69,9 @@
                     <div class="col-md-6 mb-3">
                         <label for="returning_officer_id" class="form-label fw-semibold">@lang('Peralatan Dipulangkan Oleh') <span class="text-danger">*</span></label>
                         <select wire:model="returning_officer_id" id="returning_officer_id" class="form-select @error('returning_officer_id') is-invalid @enderror">
+                             {{-- CORRECTED: Use array syntax to access properties --}}
                              @foreach($users as $user)
-                                <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                <option value="{{ $user['id'] }}">{{ $user['name'] }}</option>
                             @endforeach
                         </select>
                          @error('returning_officer_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
