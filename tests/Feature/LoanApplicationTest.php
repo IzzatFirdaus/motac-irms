@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\Approval;
 use App\Models\Department;
 use App\Models\Equipment;
 use App\Models\Grade;
@@ -24,7 +23,6 @@ class LoanApplicationTest extends TestCase
     {
         parent::setUp();
 
-        // This line is CRUCIAL and must be present to fix 403 Forbidden errors.
         $this->app->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
         Role::findOrCreate('Applicant', 'web');
@@ -109,23 +107,36 @@ class LoanApplicationTest extends TestCase
     public function test_bpm_staff_can_process_equipment_return(): void
     {
         $equipment = Equipment::factory()->create(['status' => Equipment::STATUS_ON_LOAN]);
+        $loanApplication = LoanApplication::factory()->create(['status' => LoanApplication::STATUS_ISSUED]);
 
-        $loanApplication = LoanApplication::factory()->create([
-            'status' => LoanApplication::STATUS_ISSUED,
-            'loan_end_date' => now()->addDays(5),
+        // **FIX 1: Create the original application item**
+        $applicationItem = $loanApplication->loanApplicationItems()->create([
+            'equipment_type' => $equipment->asset_type,
+            'quantity_requested' => 1,
+            'quantity_approved' => 1,
+            'quantity_issued' => 1
         ]);
 
         $issueTransaction = LoanTransaction::factory()->create(['loan_application_id' => $loanApplication->id, 'type' => 'issue']);
-        $issuedItem = $issueTransaction->loanTransactionItems()->create(['equipment_id' => $equipment->id, 'quantity_transacted' => 1]);
 
+        // **FIX 2: Link the issued item to the application item**
+        $issuedItem = $issueTransaction->loanTransactionItems()->create([
+            'equipment_id' => $equipment->id,
+            'quantity_transacted' => 1,
+            'loan_application_item_id' => $applicationItem->id
+        ]);
+
+        // **FIX 3: Correct the structure of the return data payload**
         $returnData = [
             'returning_officer_id' => $this->applicantUser->id,
             'transaction_date' => now()->format('Y-m-d H:i:s'),
             'items' => [
-                $issuedItem->id => [
-                    'loan_application_item_id' => $issuedItem->id,
+                [ // Use a non-associative array
+                    'loan_transaction_item_id' => $issuedItem->id, // Reference the issued item
+                    'equipment_id' => $equipment->id,
                     'quantity_returned' => 1,
-                    'condition_on_return' => 'good'
+                    'condition_on_return' => 'good',
+                    'item_status_on_return' => 'returned_good'
                 ]
             ],
         ];
@@ -133,6 +144,7 @@ class LoanApplicationTest extends TestCase
         $response = $this->actingAs($this->bpmStaffUser)->post(route('loan-transactions.return.store', $issueTransaction->id), $returnData);
 
         $response->assertRedirect()->assertSessionHas('success');
-        $this->assertDatabaseHas('loan_applications', ['id' => $loanApplication->id, 'status' => LoanApplication::STATUS_RETURNED]);
+        $loanApplication->refresh();
+        $this->assertEquals(LoanApplication::STATUS_RETURNED, $loanApplication->status);
     }
 }
