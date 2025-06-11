@@ -30,7 +30,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\User|null $deleter
  * @property-read \App\Models\Grade|null $minApprovalGrade Relationship for min_approval_grade_id
  * @property-read int|null $users_count
- *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade onlyTrashed()
@@ -50,8 +49,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade withoutTrashed()
- *
  * @mixin \Eloquent
+ * @mixin IdeHelperGrade
  */
 class Grade extends Model
 {

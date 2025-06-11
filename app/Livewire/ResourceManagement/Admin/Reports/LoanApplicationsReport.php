@@ -13,8 +13,8 @@ use Livewire\Component;
 use Livewire\WithPagination;
 
 #[Layout('layouts.app')]
-// EDITED: Using translation key for the title
-#[Title(__('reports.loan_apps_title'))]
+// REMOVE the Title attribute from the class
+// #[Title(__('reports.loan_apps_title'))]
 class LoanApplicationsReport extends Component
 {
   use AuthorizesRequests;
@@ -39,6 +39,17 @@ class LoanApplicationsReport extends Component
   protected string $paginationTheme = 'bootstrap';
 
   public int $perPage = 15;
+
+  /**
+   * Sets the page title dynamically using a translation key.
+   * This method is called by Livewire at runtime to get the title.
+   */
+  #[Title]
+  public function pageTitle(): string
+  {
+    return __('reports.loan_apps_title');
+  }
+  // -------------------------
 
   public function mount()
   {
@@ -161,12 +172,12 @@ class LoanApplicationsReport extends Component
     ];
   }
 
-    public function render()
-    {
-        return view('livewire.resource-management.admin.reports.loan-applications-report', [
-            'reportData' => $this->reportData, // Use the computed property
-            'statusOptions' => $this->statusOptions, // Use computed property
-            'departmentOptions' => $this->departmentOptions, // Use computed property
-        ]);
-    }
+  public function render()
+  {
+    return view('livewire.resource-management.admin.reports.loan-applications-report', [
+      'reportData' => $this->reportData, // Use the computed property
+      'statusOptions' => $this->statusOptions, // Use computed property
+      'departmentOptions' => $this->departmentOptions, // Use computed property
+    ]);
+  }
 }

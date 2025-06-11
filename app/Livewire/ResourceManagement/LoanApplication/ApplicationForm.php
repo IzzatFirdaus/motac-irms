@@ -182,8 +182,6 @@ class ApplicationForm extends Component
      */
     public function addLoanItem(): void
     {
-        // ##### FIX APPLIED HERE #####
-        // Removed 'id' => null from the array for new items to prevent MassAssignmentException.
         $this->loan_application_items[] = ['equipment_type' => '', 'quantity_requested' => 1, 'notes' => ''];
     }
 
@@ -290,7 +288,9 @@ class ApplicationForm extends Component
     }
 
     /**
-     * Central logic to process saving or submitting the application.
+     * REFACTORED: Central logic to process saving or submitting the application.
+     * The process for creating a new application is now a single, streamlined service call.
+     * The process for updating and then submitting an existing draft remains two steps, which is logical.
      */
     private function processSave(bool $isDraft): ?RedirectResponse
     {
@@ -308,15 +308,18 @@ class ApplicationForm extends Component
             $application = null;
 
             if ($this->isEditMode && $this->loanApplicationInstance) {
+                // For existing applications, first update the draft.
                 $this->authorize('update', $this->loanApplicationInstance);
                 $application = $service->updateApplication($this->loanApplicationInstance, $serviceData, $user);
+
+                // If submitting this edited draft, we then perform the submission action.
+                if (!$isDraft) {
+                    $application = $service->submitApplicationForApproval($application, $user);
+                }
             } else {
+                // For new applications, the service now handles create and submit in one call.
                 $this->authorize('create', LoanApplication::class);
                 $application = $service->createAndSubmitApplication($serviceData, $user, $isDraft);
-            }
-
-            if (!$isDraft) {
-                $application = $service->submitApplicationForApproval($application, $user);
             }
 
             DB::commit();

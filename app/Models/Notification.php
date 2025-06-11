@@ -31,7 +31,6 @@ use Illuminate\Support\Str; // For UUID generation
  * @property-read \App\Models\User|null $updater
  * @property-read \App\Models\User|null $deleter
  * @property-read \Illuminate\Database\Eloquent\Model $notifiable
- *
  * @method static Builder<static>|Notification byNotifiable(\Illuminate\Database\Eloquent\Model $notifiableModel)
  * @method static Builder<static>|Notification byType(array|string $type)
  * @method static \Database\Factories\NotificationFactory factory($count = null, $state = [])
@@ -55,8 +54,8 @@ use Illuminate\Support\Str; // For UUID generation
  * @method static Builder<static>|Notification whereUpdatedBy($value)
  * @method static Builder<static>|Notification withTrashed()
  * @method static Builder<static>|Notification withoutTrashed()
- *
  * @mixin \Eloquent
+ * @mixin IdeHelperNotification
  */
 final class Notification extends Model
 {

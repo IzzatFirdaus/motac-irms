@@ -9,11 +9,8 @@ use App\Http\Requests\ProcessReturnRequest;
 use App\Models\Equipment;
 use App\Models\LoanApplication;
 use App\Models\LoanTransaction;
-use App\Models\User;
 use App\Services\LoanTransactionService;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
@@ -30,47 +27,12 @@ final class LoanTransactionController extends Controller
     }
 
     /**
-     * Display a listing of loan transactions.
-     */
-    public function index(Request $request): View
-    {
-        $this->authorize('viewAny', LoanTransaction::class);
-
-        $loanTransactions = $this->loanTransactionService->getTransactions(
-            $request->all(),
-            ['loanApplication.user:id,name', 'issuingOfficer:id,name', 'returnAcceptingOfficer:id,name'],
-            10
-        );
-
-        return view('loan-transactions.index', compact('loanTransactions'));
-    }
-
-    /**
-     * Display details of a specific loan transaction.
-     */
-    public function show(LoanTransaction $loanTransaction): View|RedirectResponse
-    {
-        try {
-            $this->authorize('view', $loanTransaction);
-        } catch (AuthorizationException) {
-            return redirect()->route('dashboard')->with('error', __('Anda tidak mempunyai kebenaran untuk melihat transaksi ini.'));
-        }
-
-        $loanTransaction->loadMissing(LoanTransaction::getDefinedDefaultRelationsStatic());
-
-        return view('loan-transactions.show', compact('loanTransaction'));
-    }
-
-    /**
      * Show the form for recording equipment issuance.
+     * Route: GET /loan-applications/{loanApplication}/issue
      */
-    public function showIssueForm(LoanApplication $loanApplication): View|RedirectResponse
+    public function showIssueForm(LoanApplication $loanApplication): View
     {
-        try {
-            $this->authorize('createIssue', [LoanTransaction::class, $loanApplication]);
-        } catch (AuthorizationException) {
-            return redirect()->route('dashboard')->with('error', __('Anda tidak mempunyai kebenaran untuk merekodkan pengeluaran untuk permohonan ini.'));
-        }
+        $this->authorize('processIssuance', $loanApplication);
 
         $availableEquipment = Equipment::where('status', Equipment::STATUS_AVAILABLE)->orderBy('brand')->orderBy('model')->get();
         $loanApplicantAndResponsibleOfficer = collect([$loanApplication->user, $loanApplication->responsibleOfficer])->filter()->unique('id');
@@ -81,93 +43,74 @@ final class LoanTransactionController extends Controller
 
     /**
      * Store the recorded equipment issuance.
+     * Route: POST /loan-applications/{loanApplication}/issue
      */
-    public function storeIssue(
-        IssueEquipmentRequest $request,
-        LoanApplication $loanApplication
-    ): RedirectResponse {
+    public function storeIssue(IssueEquipmentRequest $request, LoanApplication $loanApplication): RedirectResponse
+    {
         $issuingOfficer = Auth::user();
-        $validatedData = $request->validated();
-
-        // EDITED: Prepare transaction details and items payload separately for the service
-        $itemsPayload = $validatedData['items'];
-        $transactionDetails = [
-            'transaction_date' => $validatedData['transaction_date'],
-            'receiving_officer_id' => $validatedData['receiving_officer_id'],
-            'issue_notes' => $validatedData['issue_notes'],
-        ];
+        if (!$issuingOfficer) {
+            return redirect()->back()->with('error', 'Sila log masuk semula.');
+        }
 
         try {
-            // EDITED: Pass the fourth argument ($transactionDetails) to the service method
             $this->loanTransactionService->processNewIssue(
                 $loanApplication,
-                $itemsPayload,
+                $request->validated('items'),
                 $issuingOfficer,
-                $transactionDetails
+                $request->validated() // Pass all validated data for details
             );
 
             return redirect()->route('loan-applications.show', $loanApplication->id)
                 ->with('success', __('Pengeluaran peralatan berjaya direkodkan.'));
         } catch (Throwable $e) {
             Log::error("Error in LoanTransactionController@storeIssue: " . $e->getMessage(), ['exception' => $e]);
-            return redirect()->back()->withInput()->with('error', __('Gagal merekodkan pengeluaran peralatan.'));
+            return redirect()->back()->withInput()->with('error', __('Gagal merekodkan pengeluaran peralatan: ') . $e->getMessage());
         }
     }
 
     /**
      * Show the form for recording equipment return.
+     * Route: GET /loan-transactions/{loanTransaction}/return (expects the original ISSUE transaction)
      */
-    public function returnForm(LoanTransaction $loanTransaction): View|RedirectResponse
+    public function showReturnForm(LoanTransaction $loanTransaction): View|RedirectResponse
     {
-        try {
-            $this->authorize('processReturn', $loanTransaction->loanApplication);
-        } catch (AuthorizationException) {
-            return redirect()->route('dashboard')->with('error', __('Anda tidak mempunyai kebenaran untuk memproses pulangan ini.'));
-        }
-
         if ($loanTransaction->type !== LoanTransaction::TYPE_ISSUE) {
-            return redirect()->back()->with('error', __('Transaksi ini bukan transaksi pengeluaran peralatan yang sah untuk dipulangkan.'));
+            return redirect()->back()->with('error', __('Hanya transaksi pengeluaran boleh diproses untuk pemulangan.'));
         }
 
-        return view('loan-transactions.return-form-page', [
-            'issueTransactionId' => $loanTransaction->id,
-            'loanApplicationId' => $loanTransaction->loanApplication->id,
+        // This authorization call is correct, passing both models to the policy.
+        $this->authorize('processReturn', [$loanTransaction, $loanTransaction->loanApplication]);
+
+        return view('loan-transactions.return', [
+            'issueTransaction' => $loanTransaction,
         ]);
     }
 
     /**
      * Store the recorded equipment return.
+     * Route: POST /loan-transactions/{loanTransaction}/return (expects the original ISSUE transaction)
      */
-    public function storeReturn(
-        ProcessReturnRequest $request,
-        LoanTransaction $loanTransaction
-    ): RedirectResponse {
+    public function storeReturn(ProcessReturnRequest $request, LoanTransaction $loanTransaction): RedirectResponse
+    {
         $returnAcceptingOfficer = Auth::user();
-        $validatedData = $request->validated();
-
-        // EDITED: Prepare transaction details and items payload separately for the service
-        $itemsPayload = $validatedData['returnItems'];
-        $transactionDetails = [
-            'returning_officer_id' => $validatedData['returning_officer_id'],
-            'transaction_date' => $validatedData['transaction_date'],
-            'return_notes' => $validatedData['return_notes'],
-        ];
+        if (!$returnAcceptingOfficer) {
+            return redirect()->back()->with('error', 'Sila log masuk semula.');
+        }
 
         try {
-            // EDITED: Pass the fourth argument ($transactionDetails) to the service method
+            // This call is correct, using ['items'] to get the validated array.
             $this->loanTransactionService->processExistingReturn(
                 $loanTransaction,
-                $itemsPayload,
+                $request->validated()['items'],
                 $returnAcceptingOfficer,
-                $transactionDetails
+                $request->validated() // Pass all validated data for details
             );
 
             return redirect()->route('loan-applications.show', $loanTransaction->loan_application_id)
                 ->with('success', __('Peralatan telah berjaya direkodkan pemulangannya.'));
         } catch (Throwable $e) {
             Log::error("Error in LoanTransactionController@storeReturn: " . $e->getMessage(), ['exception' => $e]);
-            $errorMessage = ($e instanceof \RuntimeException) ? $e->getMessage() : __('Gagal merekodkan pemulangan peralatan disebabkan ralat sistem.');
-            return redirect()->back()->withInput()->with('error', $errorMessage);
+            return redirect()->back()->withInput()->with('error', __('Gagal merekodkan pemulangan: ') . $e->getMessage());
         }
     }
 }

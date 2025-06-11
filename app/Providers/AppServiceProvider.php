@@ -2,24 +2,25 @@
 
 namespace App\Providers;
 
-use App\Helpers\Helpers; // Assuming this helper class exists and provides appClasses()
+use App\Helpers\Helpers;
 use App\Services\ApprovalService;
 use App\Services\EmailApplicationService;
 use App\Services\EmailProvisioningService;
 use App\Services\EquipmentService;
 use App\Services\LoanApplicationService;
-use App\Services\LoanTransactionService; // Standard service import
-use App\Services\NotificationService;    // Standard service import
+use App\Services\LoanTransactionService;
+use App\Services\NotificationService;
 use App\Services\UserService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Carbon;      // Correct facade for app() helper
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\DB; // Ensure DB facade is imported
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\View;
-use Illuminate\Support\ServiceProvider; // <--- ADD THIS LINE
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -44,89 +45,54 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Enforce strict Eloquent mode in non-production environments
-        Model::shouldBeStrict(! $this->app->environment('production'));
+        // EDIT: This debugger is now more specific. It will only stop
+        // on the INSERT query for a 'return' transaction, which is the one that fails.
+        DB::listen(function ($query) {
+            // Check if this is an insert into the correct table
+            if (str_contains($query->sql, 'insert into `loan_transactions`')) {
+                // Find the position of the `type` column in the SQL statement
+                // to reliably check its value in the bindings array.
+                preg_match('/`type`/', $query->sql, $matches, PREG_OFFSET_CAPTURE);
+                if (isset($matches[0])) {
+                    $typePosition = substr_count(substr($query->sql, 0, $matches[0][1]), '`');
+                    // The binding index is one less than the column position
+                    $typeBindingIndex = $typePosition - 1;
 
-        // Configure Laravel Paginator to use Bootstrap 5 <--- ADD THESE LINES
-        Paginator::useBootstrapFive();
-
-        // Register Blade component aliases for convenience
-        // Blade::component('layouts.app', 'app-layout'); // Example: <x-app-layout /> maps to resources/views/layouts/app.blade.php
-        // Blade::component('components.alert', 'alert');     // Example: <x-alert /> maps to resources/views/components/alert.blade.php
-        Blade::component('components.alert-manager', 'alert-manager'); // Your existing alias for alert-manager
-
-        // Custom handler for missing translation keys
-        Lang::handleMissingKeysUsing(function (string $key, array $replacements, string $locale) {
-            $logMessage = "Missing translation key detected: [{$key}] for locale [{$locale}].";
-            Log::warning($logMessage, ['replacements' => $replacements]);
-
-            return $key; // Return the key itself to avoid breaking UI, makes missing keys noticeable
+                    // Only dump and die if this is the 'return' transaction
+                    if (isset($query->bindings[$typeBindingIndex]) && $query->bindings[$typeBindingIndex] === 'return') {
+                        dd($query->sql, $query->bindings);
+                    }
+                }
+            }
         });
 
-        // Set Carbon's locale based on the application's current locale
+        Model::shouldBeStrict(! $this->app->environment('production'));
+        Paginator::useBootstrapFive();
+        Blade::component('components.alert-manager', 'alert-manager');
+
+        Lang::handleMissingKeysUsing(function (string $key, array $replacements, string $locale) {
+            Log::warning("Missing translation key detected: [{$key}] for locale [{$locale}].", ['replacements' => $replacements]);
+            return $key;
+        });
+
         try {
-            $currentAppLocale = App::getLocale(); // Use App facade
-            Carbon::setLocale($currentAppLocale);
+            Carbon::setLocale(App::getLocale());
         } catch (\Exception $e) {
-            Log::error("AppServiceProvider: Failed to set Carbon locale to '".App::getLocale()."'. Error: ".$e->getMessage(), ['exception_class' => get_class($e)]);
-            Carbon::setLocale(config('app.fallback_locale', 'en')); // Fallback to default if error
+            Log::error("AppServiceProvider: Failed to set Carbon locale: ".$e->getMessage());
+            Carbon::setLocale(config('app.fallback_locale', 'en'));
         }
 
-        // Register view composers only in HTTP context (not console)
         if (! $this->app->runningInConsole()) {
-            View::composer('*', function (\Illuminate\View\View $view) { // Type hint $view
-                $configData = [];
+            View::composer('*', function (\Illuminate\View\View $view) {
                 try {
-                    // Attempt to load UI configuration from Helpers class
-                    if (class_exists(Helpers::class) && method_exists(Helpers::class, 'appClasses')) {
-                        $configData = Helpers::appClasses();
-                    } else {
-                        // This will be caught by the catch block if Helpers::appClasses() is unavailable
-                        throw new \Exception('Helpers::appClasses() method not found or Helpers class not loaded.');
-                    }
+                    $configData = class_exists(Helpers::class) ? Helpers::appClasses() : [];
                 } catch (\Exception $e) {
-                    Log::critical('AppServiceProvider View Composer (Helpers::appClasses) error: '.$e->getMessage(), ['exception_class' => get_class($e)]);
-                    // Provide a sensible default configData array if Helpers fails, matching your example
-                    $configData = [
-                        'templateName' => config('variables.templateName', __('Sistem MOTAC')),
-                        'textDirection' => config('variables.textDirection', 'ltr'),
-                        'style' => config('variables.style', 'light'), // theme-default or theme-bordered or theme-semi-dark
-                        'theme' => config('variables.theme', 'theme-motac'), // Example default from your app
-                        'layout' => config('variables.layout', 'vertical'),
-                        'assetsPath' => asset(config('variables.assetsPath', 'assets')).'/',
-                        'baseUrl' => url('/'),
-                        'locale' => App::getLocale(), // Use current app locale
-                        'bsTheme' => config('variables.bsTheme', 'light'), // Bootstrap theme: light or dark
-                        'isMenu' => config('variables.isMenu', true),
-                        'isNavbar' => config('variables.isNavbar', true),
-                        'isFooter' => config('variables.isFooter', true),
-                        'contentNavbar' => config('variables.contentNavbar', true),
-                        'menuFixed' => config('variables.menuFixed', true),
-                        'menuCollapsed' => config('variables.menuCollapsed', false),
-                        'navbarFixed' => config('variables.navbarFixed', true),
-                        'navbarDetached' => config('variables.navbarDetached', true),
-                        'footerFixed' => config('variables.footerFixed', false),
-                        'customizerHidden' => config('variables.customizerHidden', true),
-                        'displayCustomizer' => config('variables.displayCustomizer', false),
-                        'rtlSupport' => config('variables.rtlSupport', (App::getLocale() === 'ar' || App::getLocale() === 'fa')), // Basic RTL detection
-                        'primaryColor' => config('variables.primaryColor', '#0050A0'), // Default MOTAC blue
-                        'isFlex' => config('variables.isFlex', false),
-                        'container' => config('variables.container', 'container-fluid'),
-                        'containerNav' => config('variables.containerNav', 'container-fluid'),
-                        'showMenu' => config('variables.showMenu', true),
-                        'contentLayout' => config('variables.contentLayout', 'wide'),
-                    ];
+                    $configData = [];
                 }
-
-                // Share $configData (and $appClasses if your views specifically use it)
                 $view->with('configData', $configData);
-                $view->with('appClasses', $configData); // If appClasses is just an alias for configData
+                $view->with('appClasses', $configData);
             });
-
-            // Share application name with all views
             View::share('appName', config('variables.templateName', __('Sistem Pengurusan Sumber MOTAC')));
-        } else {
-            Log::info('AppServiceProvider: View composer registration skipped (running in console).');
         }
     }
 }

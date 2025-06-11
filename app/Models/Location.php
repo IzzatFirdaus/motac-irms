@@ -38,7 +38,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Equipment> $equipment
  * @property-read int|null $equipment_count
  * // Removed Device PHPDoc properties
- *
  * @method static Builder<static>|Location active()
  * @method static Builder<static>|Location byCity(string $city)
  * @method static Builder<static>|Location byCountry(string $country)
@@ -59,8 +58,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static Builder<static>|Location whereUpdatedBy($value)
  * @method static Builder<static>|Location withTrashed()
  * @method static Builder<static>|Location withoutTrashed()
- *
  * @mixin \Eloquent
+ * @mixin IdeHelperLocation
  */
 class Location extends Model
 {

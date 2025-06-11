@@ -3,6 +3,7 @@
 @section('title', 'Peralatan Pinjaman Telah Dipulangkan')
 
 @section('content')
+    {{-- This data is now passed directly from the Mailable --}}
     @php
         $loanApplication = $notification->loanApplication;
         $loanTransaction = $notification->returnTransaction;
@@ -23,17 +24,21 @@
                     <thead class="table-light">
                         <tr>
                             <th>Peralatan (Tag ID)</th>
-                            <th>Status Semasa Pulangan</th>
+                            <th>Keadaan Semasa Pulangan</th> {{-- CORRECTED: Changed header from "Status" to "Keadaan" --}}
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($loanTransaction->loanTransactionItems as $item)
                             <tr>
                                 <td>
-                                    {{ $item->equipment->asset_type_name ?? 'N/A' }}
+                                    {{-- CORRECTED: asset_type_label is the correct accessor on the Equipment model --}}
+                                    {{ $item->equipment->asset_type_label ?? 'N/A' }}
                                     ({{ $item->equipment->tag_id ?? 'N/A' }})
                                 </td>
-                                <td>{{ $item->status_on_return_translated ?? 'N/A' }}</td>
+                                <td>
+                                    {{-- CORRECTED: condition_on_return_translated is the correct accessor on the LoanTransactionItem model --}}
+                                    {{ $item->condition_on_return_translated ?? 'N/A' }}
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>

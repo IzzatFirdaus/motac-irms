@@ -126,6 +126,6 @@ class ProcessReturn extends Component
 
     public function render()
     {
-        return view('livewire.resource-management.admin.bpm.process-return')->title(__('Proses Pemulangan Peralatan'));
+        return view('livewire.resource-management.admin.bpm.process-return');
     }
 }

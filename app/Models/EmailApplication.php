@@ -12,6 +12,9 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
+/**
+ * @mixin IdeHelperEmailApplication
+ */
 class EmailApplication extends Model
 {
     use HasFactory;

@@ -34,7 +34,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read int|null $equipment_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\SubCategory> $subCategories
  * @property-read int|null $sub_categories_count
- *
  * @method static Builder<static>|EquipmentCategory active()
  * @method static EquipmentCategoryFactory factory($count = null, $state = [])
  * @method static Builder<static>|EquipmentCategory newModelQuery()
@@ -52,8 +51,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static Builder<static>|EquipmentCategory whereUpdatedBy($value)
  * @method static Builder<static>|EquipmentCategory withTrashed()
  * @method static Builder<static>|EquipmentCategory withoutTrashed()
- *
  * @mixin \Eloquent
+ * @mixin IdeHelperEquipmentCategory
  */
 class EquipmentCategory extends Model
 {

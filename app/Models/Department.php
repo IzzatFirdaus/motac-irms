@@ -11,6 +11,7 @@ use Illuminate\Support\Str; // For Str::title
 
 /**
  * Department Model.
+ * 
  * System Design Reference: MOTAC Integrated Resource Management System (Revision 3) - Section 4.1 (Database Schema for departments implies head_of_department_id)
  * Migration context: 2013_11_01_131800_create_departments_table.php uses head_of_department_id
  *
@@ -34,7 +35,6 @@ use Illuminate\Support\Str; // For Str::title
  * @property-read \App\Models\User|null $updater
  * @property-read \App\Models\User|null $deleter
  * @property-read string $branch_type_label
- *
  * @method static \Database\Factories\DepartmentFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder|Department newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Department newQuery()
@@ -55,8 +55,8 @@ use Illuminate\Support\Str; // For Str::title
  * @method static \Illuminate\Database\Eloquent\Builder|Department whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Department withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|Department withoutTrashed()
- *
  * @mixin \Eloquent
+ * @mixin IdeHelperDepartment
  */
 class Department extends Model
 {

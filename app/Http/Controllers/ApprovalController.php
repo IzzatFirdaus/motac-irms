@@ -179,6 +179,11 @@ class ApprovalController extends Controller
 
             return redirect()->back()->withInput()->with('error', __('Anda tidak mempunyai kebenaran untuk membuat keputusan ini.')); //
         } catch (Throwable $e) { //
+            // EDIT: Temporarily throw the exception during testing to see the real error message.
+            // Remember to change this back to the redirect after debugging.
+            throw $e;
+
+            /*
             Log::error("ApprovalController@recordDecision: Error processing approval for ID {$approval->id}. User ID: {$processingUser->id}.", [ //
                 'error' => $e->getMessage(), //
                 'trace' => substr($e->getTraceAsString(), 0, 500), //
@@ -186,6 +191,7 @@ class ApprovalController extends Controller
             ]);
 
             return redirect()->back()->withInput()->with('error', __('Gagal merekod keputusan disebabkan oleh ralat sistem: ').$e->getMessage()); //
+            */
         }
     }
 }

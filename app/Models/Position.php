@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes; // Import the Blameable trait
 
 /**
  * Position Model (Jawatan).
+ * 
  * System Design Reference: MOTAC Integrated Resource Management System (Revision 3) - Section 4.1, positions table
  *
  * @property int $id
@@ -32,7 +33,6 @@ use Illuminate\Database\Eloquent\SoftDeletes; // Import the Blameable trait
  * @property-read \App\Models\User|null $creator User who created this record.
  * @property-read \App\Models\User|null $updater User who last updated this record.
  * @property-read \App\Models\User|null $deleter User who soft deleted this record.
- *
  * @method static \Database\Factories\PositionFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder|Position newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Position newQuery()
@@ -52,8 +52,8 @@ use Illuminate\Database\Eloquent\SoftDeletes; // Import the Blameable trait
  * @method static \Illuminate\Database\Eloquent\Builder|Position withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|Position withoutTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|Position search(string $term) Scope for searching.
- *
  * @mixin \Eloquent
+ * @mixin IdeHelperPosition
  */
 class Position extends Model
 {

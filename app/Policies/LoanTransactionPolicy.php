@@ -30,8 +30,9 @@ class LoanTransactionPolicy
 
     /**
      * Determine whether the user can view any loan transactions.
+     * EDIT: Made return type hint consistent.
      */
-    public function viewAny(User $user): Response|bool
+    public function viewAny(User $user): Response
     {
         return $user->hasAnyRole(['Admin', 'BPM Staff'])
             ? Response::allow()
@@ -40,8 +41,9 @@ class LoanTransactionPolicy
 
     /**
      * Determine whether the user can view the specific loan transaction.
+     * EDIT: Made return type hint consistent.
      */
-    public function view(User $user, LoanTransaction $loanTransaction): Response|bool
+    public function view(User $user, LoanTransaction $loanTransaction): Response
     {
         if ($user->hasAnyRole(['Admin', 'BPM Staff'])) {
             return Response::allow();
@@ -61,8 +63,9 @@ class LoanTransactionPolicy
 
     /**
      * Determine whether the user can create an issue transaction.
+     * EDIT: Made return type hint consistent.
      */
-    public function createIssue(User $user, LoanApplication $loanApplication): Response|bool
+    public function createIssue(User $user, LoanApplication $loanApplication): Response
     {
         // Design Ref (Rev. 3.5): Section 4.3 (loan_applications.status: 'approved', 'partially_issued')
         // Assumes LoanApplication.php model has a canBeIssued() method.
@@ -88,8 +91,9 @@ class LoanTransactionPolicy
 
     /**
      * Determine whether the user can create a return transaction (legacy method, consider processReturn).
+     * EDIT: Made return type hint consistent.
      */
-    public function createReturn(User $user, LoanTransaction $issueLoanTransaction): Response|bool
+    public function createReturn(User $user, LoanTransaction $issueLoanTransaction): Response
     {
         // Design Ref (Rev. 3.5): Section 4.3 (loan_transactions.type: 'issue'; loan_transactions.status)
         if (! method_exists($issueLoanTransaction, 'isIssue') || ! method_exists($issueLoanTransaction, 'isFullyClosedOrReturned')) {
@@ -114,8 +118,9 @@ class LoanTransactionPolicy
      *
      * @param  \App\Models\LoanTransaction  $issueLoanTransaction  The original ISSUE transaction being returned.
      * @param  \App\Models\LoanApplication  $loanApplication  The related loan application.
+     * EDIT: Made return type hint consistent.
      */
-    public function processReturn(User $user, LoanTransaction $issueLoanTransaction, LoanApplication $loanApplication): Response|bool
+    public function processReturn(User $user, LoanTransaction $issueLoanTransaction, LoanApplication $loanApplication): Response
     {
         // Only BPM Staff can process returns
         if (! $user->hasAnyRole(['Admin', 'BPM Staff'])) {
@@ -133,16 +138,14 @@ class LoanTransactionPolicy
             return Response::deny(__('Transaksi pengeluaran ini telahpun selesai dipulangkan sepenuhnya atau dibatalkan.'));
         }
 
-        // Also ensure the loan application is not in a terminal state that prevents returns
-        // (e.g., cancelled, fully completed without return tracking, etc.)
-        // Assuming LoanApplication has a method like canAcceptReturns() or status checks.
-        // For example, if it's 'approved' or 'partially_issued' or 'issued'
-        if (! in_array($loanApplication->status, [
-            LoanApplication::STATUS_APPROVED,
-            LoanApplication::STATUS_ISSUED,
-            LoanApplication::STATUS_PARTIALLY_ISSUED,
-            LoanApplication::STATUS_PARTIALLY_RETURNED_PENDING_INSPECTION, // If tracking partial returns at application level
-        ])) {
+        // EDITED: This block was changed to use the centralized canBeReturned() method from the LoanApplication model.
+        // This ensures the business logic is consistent and not duplicated. It correctly allows returns for 'issued',
+        // 'partially_issued', and 'overdue' applications.
+        if (! method_exists($loanApplication, 'canBeReturned') || ! $loanApplication->canBeReturned()) {
+            // Defensive check in case the method is removed from the model.
+            if (! method_exists($loanApplication, 'canBeReturned')) {
+                 Log::warning("LoanTransactionPolicy: LoanApplication model ID {$loanApplication->id} is missing canBeReturned() method.");
+            }
             return Response::deny(__('Status permohonan pinjaman tidak membenarkan proses pemulangan.'));
         }
 
@@ -151,8 +154,9 @@ class LoanTransactionPolicy
 
     /**
      * Determine whether the user can update the specific loan transaction.
+     * EDIT: Made return type hint consistent.
      */
-    public function update(User $user, LoanTransaction $loanTransaction): Response|bool
+    public function update(User $user, LoanTransaction $loanTransaction): Response
     {
         // Generally, update on transactions might be restricted, e.g., only Admin for corrections
         return $user->hasRole('Admin')
@@ -162,8 +166,9 @@ class LoanTransactionPolicy
 
     /**
      * Determine whether the user can delete the specific loan transaction (soft delete).
+     * EDIT: Made return type hint consistent.
      */
-    public function delete(User $user, LoanTransaction $loanTransaction): Response|bool
+    public function delete(User $user, LoanTransaction $loanTransaction): Response
     {
         // Only Admin can soft delete
         return $user->hasRole('Admin')
@@ -173,8 +178,9 @@ class LoanTransactionPolicy
 
     /**
      * Determine whether the user can restore a soft-deleted loan transaction.
+     * EDIT: Made return type hint consistent.
      */
-    public function restore(User $user, LoanTransaction $loanTransaction): Response|bool
+    public function restore(User $user, LoanTransaction $loanTransaction): Response
     {
         return $user->hasRole('Admin') || $user->hasPermissionTo('restore_loan_transactions')
             ? Response::allow()
@@ -183,8 +189,9 @@ class LoanTransactionPolicy
 
     /**
      * Determine whether the user can permanently delete the specific loan transaction.
+     * EDIT: Made return type hint consistent.
      */
-    public function forceDelete(User $user, LoanTransaction $loanTransaction): Response|bool
+    public function forceDelete(User $user, LoanTransaction $loanTransaction): Response
     {
         return $user->hasRole('Admin') || $user->hasPermissionTo('force_delete_loan_transactions')
             ? Response::allow()
@@ -193,8 +200,9 @@ class LoanTransactionPolicy
 
     /**
      * Determine whether the user can view any issued loan transactions.
+     * EDIT: Made return type hint consistent.
      */
-    public function viewAnyIssued(User $user): Response|bool
+    public function viewAnyIssued(User $user): Response
     {
         return $user->hasAnyRole(['Admin', 'BPM Staff'])
             ? Response::allow()

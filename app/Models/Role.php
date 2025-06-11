@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Guard;
 use Spatie\Permission\Models\Role as SpatieRole; // Added for logging
 
+/**
+ * @mixin IdeHelperRole
+ */
 class Role extends SpatieRole
 {
     // You can add custom logic or properties to your Role model here if needed.

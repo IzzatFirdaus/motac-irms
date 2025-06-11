@@ -1,7 +1,6 @@
 {{-- resources/views/livewire/resource-management/approval/dashboard.blade.php --}}
 <div>
     @php
-        // $configData = \App\Helpers\Helpers::appClasses(); // Ensure this is available or remove if not used.
         // Page title is now intended to be set via @section('title') in this Blade file
         // as the #[Title] attribute in the component class was commented out.
     @endphp
@@ -10,32 +9,31 @@
         {{ __('Papan Pemuka Kelulusan') . ' - ' . __(config('variables.templateName', 'Sistem Pengurusan Sumber Bersepadu MOTAC')) }}
     @endsection
 
-    @include('_partials._alerts.alert-general') {{-- Ensure this partial uses MOTAC themed alerts --}}
+    @include('_partials._alerts.alert-general')
 
     <div class="d-flex justify-content-between align-items-center mb-4 pt-3">
         <h4 class="fw-bold mb-0 d-flex align-items-center">
-            {{-- Iconography: Design Language 2.4 --}}
             <i class="bi bi-check2-square me-2"></i>
             {{ __('Senarai Tugasan Kelulusan') }}
         </h4>
     </div>
 
-    {{-- Use .motac-card for consistency if defined in your theme --}}
     <div class="card mb-4 motac-card">
         <div class="card-body motac-card-body">
             <form wire:submit.prevent class="row g-3 align-items-end">
                 <div class="col-md-3">
                     <label for="filterTypeApproval" class="form-label form-label-sm">{{ __('Tapis Mengikut Jenis') }}</label>
-                    <select wire:model.live="filterType" id="filterTypeApproval" class="form-select form-select-sm"> {{-- Ensure form-select is MOTAC themed --}}
-                        <option value="all">{{ __('Semua Jenis') }}</option> {{-- Changed value to 'all' to match component's default --}}
-                        <option value="{{ addslashes(App\Models\EmailApplication::class) }}">{{ __('Permohonan E-mel/ID') }}</option>
-                        <option value="{{ addslashes(App\Models\LoanApplication::class) }}">{{ __('Permohonan Pinjaman ICT') }}</option>
+                    {{-- EDITED: Using short keys for filter values --}}
+                    <select wire:model.live="filterType" id="filterTypeApproval" class="form-select form-select-sm">
+                        <option value="all">{{ __('Semua Jenis') }}</option>
+                        <option value="email_application">{{ __('Permohonan E-mel/ID') }}</option>
+                        <option value="loan_application">{{ __('Permohonan Pinjaman ICT') }}</option>
                     </select>
                 </div>
                 <div class="col-md-3">
                     <label for="filterStatusApproval" class="form-label form-label-sm">{{ __('Tapis Mengikut Status') }}</label>
                     <select wire:model.live="filterStatus" id="filterStatusApproval" class="form-select form-select-sm">
-                        <option value="all">{{ __('Semua Status') }}</option>  {{-- Changed value to 'all' to match potential component logic --}}
+                        <option value="all">{{ __('Semua Status') }}</option>
                         <option value="{{ App\Models\Approval::STATUS_PENDING }}">{{ __('Menunggu Tindakan') }}</option>
                         <option value="{{ App\Models\Approval::STATUS_APPROVED }}">{{ __('Diluluskan') }}</option>
                         <option value="{{ App\Models\Approval::STATUS_REJECTED }}">{{ __('Ditolak') }}</option>
@@ -44,17 +42,17 @@
                 <div class="col-md-4">
                     <label for="searchApprovals" class="form-label form-label-sm">{{ __('Carian Terperinci') }}</label>
                     <input wire:model.live.debounce.300ms="search" id="searchApprovals" type="text"
-                           placeholder="{{ __('Cari ID Permohonan, Nama Pemohon...') }}" class="form-control form-control-sm"> {{-- Ensure form-control is MOTAC themed --}}
+                           placeholder="{{ __('Cari ID Permohonan, Nama Pemohon...') }}" class="form-control form-control-sm">
                 </div>
                 <div class="col-md-2">
-                    <button type="button" wire:click="resetFilters" class="btn btn-sm btn-outline-secondary w-100">{{ __('Set Semula') }}</button> {{-- Ensure btn-outline-secondary is MOTAC themed --}}
+                    <button type="button" wire:click="$set('search', '')" class="btn btn-sm btn-outline-secondary w-100">{{ __('Set Semula') }}</button>
                 </div>
             </form>
         </div>
     </div>
 
     <div wire:loading.delay.long class="w-100 text-center py-5">
-        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"> {{-- Ensure text-primary uses MOTAC primary color --}}
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
             <span class="visually-hidden">{{ __('Memuatkan...') }}</span>
         </div>
         <p class="mt-2 fs-5">{{ __('Sedang memuatkan senarai kelulusan...') }}</p>
@@ -62,15 +60,15 @@
 
     <div wire:loading.remove>
         @if ($this->approvalTasks->isEmpty())
-            <x-alert type="info" class="d-flex align-items-center">
+            <div class="alert alert-info d-flex align-items-center">
                  <span class="alert-icon me-2"><i class="bi bi-info-circle-fill fs-4"></i></span>
                 {{ __('Tiada tugasan kelulusan yang sepadan dengan tapisan semasa.') }}
-            </x-alert>
+            </div>
         @else
-            <div class="card motac-card"> {{-- Use .motac-card for consistency --}}
+            <div class="card motac-card">
                 <div class="table-responsive text-nowrap">
-                    <table class="table table-hover"> {{-- Ensure table is MOTAC themed --}}
-                        <thead class="table-light"> {{-- Ensure table-light uses MOTAC theme header bg --}}
+                    <table class="table table-hover">
+                        <thead class="table-light">
                             <tr>
                                 <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('ID Tugasan') }}</th>
                                 <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Jenis & ID Permohonan') }}</th>
@@ -94,9 +92,10 @@
                                         @if ($approvable) - #{{ $approvable->id }} @endif
                                     </td>
                                     <td class="px-3 py-2 small">{{ optional(optional($approvable)->user)->name ?? (optional($approvable)->applicant_name ?? __('N/A')) }}</td>
-                                    <td class="px-3 py-2 small">{{ __(App\Models\Approval::getStageDisplayName($approvalTask->stage)) }}</td>
+                                    <td class="px-3 py-2 small">{{ $approvalTask->stage_translated }}</td>
                                     <td class="px-3 py-2 small">
-                                        <span class="badge {{ \App\Helpers\Helpers::getStatusColorClass($approvalTask->status, 'approval') }}">{{ __(Str::title(str_replace('_', ' ', $approvalTask->status))) }}</span>
+                                        {{-- EDITED: Using model accessor for status badge class and translated text --}}
+                                        <span class="badge {{ $approvalTask->status_color_class }}">{{ $approvalTask->status_translated }}</span>
                                     </td>
                                     <td class="px-3 py-2 small">{{ $approvalTask->created_at->translatedFormat(config('app.date_format_my_short', 'd M Y')) }}</td>
                                     <td class="text-center px-3 py-2">
@@ -107,7 +106,6 @@
                                                     <i class="bi bi-pencil-square me-1"></i>{{ __('Semak & Bertindak') }}
                                                 </button>
                                             @else
-                                                {{-- Link to controller's show view if user can view but not update the task directly via modal --}}
                                                 @can('view', $approvalTask)
                                                 <a href="{{ route('approvals.show', $approvalTask->id) }}" class="btn btn-sm btn-outline-secondary">
                                                     <i class="bi bi-eye-fill me-1"></i>{{ __('Lihat Butiran') }}
@@ -117,13 +115,11 @@
                                                 @endcan
                                             @endcan
                                         @else
-                                             {{-- Assuming getViewApplicationRoute is a method in your Livewire component returning a valid URL --}}
                                              @if(method_exists($this, 'getViewApplicationRoute') && $this->getViewApplicationRoute($approvalTask))
                                                  <a href="{{ $this->getViewApplicationRoute($approvalTask) }}" class="btn btn-sm btn-outline-secondary">
                                                      <i class="bi bi-eye-fill me-1"></i>{{ __('Lihat Butiran') }}
                                                  </a>
                                              @else
-                                                {{-- Fallback if route method doesn't exist or returns null --}}
                                                 <a href="{{ route('approvals.show', $approvalTask->id) }}" class="btn btn-sm btn-outline-secondary">
                                                     <i class="bi bi-eye-fill me-1"></i>{{ __('Lihat Tugasan') }}
                                                 </a>
@@ -156,7 +152,7 @@
                             <h5 class="modal-title d-flex align-items-center" id="approvalActionModalLabel">
                                 <i class="bi bi-clipboard-check-fill me-2"></i>
                                 {{ __('Semak Tugasan Kelulusan') }} #{{ $this->currentApprovalDetails->id }}
-                                <small class="d-block text-muted fw-normal mt-1 ms-2">({{ __(App\Models\Approval::getStageDisplayName($this->currentApprovalDetails->stage)) }})</small>
+                                <small class="d-block text-muted fw-normal mt-1 ms-2">({{ $this->currentApprovalDetails->stage_translated }})</small>
                             </h5>
                             <button type="button" class="btn-close" wire:click="closeApprovalModal" aria-label="{{__('Tutup')}}"></button>
                         </div>
@@ -198,7 +194,6 @@
                                                     @foreach ($this->approvalItems as $index => $approvalItemData)
                                                         <div class="mb-2 p-2 border rounded-1 bg-white">
                                                             @php
-                                                                // Find the original application item to display its details
                                                                 $originalLoanItem = $approvableItemFromDetails->loanApplicationItems->firstWhere('id', $approvalItemData['loan_application_item_id']);
                                                             @endphp
                                                             @if($originalLoanItem)
@@ -225,7 +220,7 @@
                                                 <dd class="col-sm-12">
                                                     <ul class="list-unstyled ps-3 mb-0">
                                                         @foreach ($approvableItemFromDetails->loanApplicationItems as $loanItem)
-                                                            <li>- {{ $loanItem->equipment_type ? (\App\Models\Equipment::ASSET_TYPES_LABELS[$loanItem->equipment_type] ?? Str::title(str_replace('_', ' ', $loanItem->equipment_type))) : 'N/A' }}
+                                                            <li>- {{ $loanItem->equipment_type ? (\App\Models\Equipment::getAssetTypeOptions()[$loanItem->equipment_type] ?? Str::title(str_replace('_', ' ', $loanItem->equipment_type))) : 'N/A' }}
                                                                 ({{ __('Kuantiti Dipohon') }}: {{ $loanItem->quantity_requested }})
                                                             </li>
                                                         @endforeach

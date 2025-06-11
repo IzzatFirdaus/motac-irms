@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Schema;
 
 /**
  * Setting Model.
+ * 
  * Manages application-wide settings, typically as a single row in the database.
  * Assumes a global BlameableObserver handles created_by, updated_by, deleted_by.
  *
@@ -45,8 +46,8 @@ use Illuminate\Support\Facades\Schema;
  * @property-read \App\Models\User|null $creator
  * @property-read \App\Models\User|null $deleter
  * @property-read \App\Models\User|null $updater
- *
  * @method static \Database\Factories\SettingFactory factory($count = null, $state = [])
+ * @mixin IdeHelperSetting
  */
 class Setting extends Model
 {

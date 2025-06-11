@@ -14,6 +14,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
+/**
+ * @mixin IdeHelperEquipment
+ */
 class Equipment extends Model
 {
   use Blameable;

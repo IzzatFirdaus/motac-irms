@@ -11,6 +11,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Route;
 
 class ApplicationNeedsAction extends Notification implements ShouldQueue
 {
@@ -44,20 +45,26 @@ class ApplicationNeedsAction extends Notification implements ShouldQueue
      */
     public function toMail(User $notifiable): MailMessage
     {
-        $itemTypeDisplayName = $this->getItemTypeDisplayName();
-        $applicationId = $this->approvableItem->id;
-
-        $subject = "Tindakan Diperlukan: {$itemTypeDisplayName} #{$applicationId}";
-        $url = route('approvals.dashboard'); // Link to the approver's dashboard
+        // --- EDITED CODE: START ---
+        // The toMail method now uses the ->view() method to render the custom Blade template.
+        $subject = __('Tindakan Diperlukan: :itemType #:id', [
+            'itemType' => $this->getItemTypeDisplayName(),
+            'id' => $this->approvableItem->id
+        ]);
 
         return (new MailMessage)
             ->subject($subject)
-            ->greeting('Salam Sejahtera, '.$notifiable->name.',')
-            ->line("Satu {$itemTypeDisplayName} baru telah diserahkan dan memerlukan tindakan kelulusan daripada anda.")
-            ->line('**Pemohon:** '.$this->approvableItem->user->name)
-            ->line('**Peringkat:** '.Approval::getStageDisplayName($this->approvalTask->stage))
-            ->action('Lihat Tugasan', $url)
-            ->line('Sila log masuk ke dalam sistem untuk menyemak butiran permohonan.');
+            ->view('emails.application-needs-action', ['notification' => $this, 'notifiable' => $notifiable]);
+        // --- EDITED CODE: END ---
+    }
+
+    /**
+     * Get the URL for the notification's action.
+     * This helper is used by the Blade view.
+     */
+    public function getActionUrl(): string
+    {
+        return route('approvals.dashboard');
     }
 
     /**
@@ -68,7 +75,7 @@ class ApplicationNeedsAction extends Notification implements ShouldQueue
         return [
             'title' => 'Tindakan Kelulusan Diperlukan',
             'message' => 'Permohonan #'.$this->approvableItem->id.' oleh '.$this->approvableItem->user->name.' menunggu tindakan anda.',
-            'action_url' => route('approvals.dashboard'),
+            'action_url' => $this->getActionUrl(),
             'related_model' => $this->approvableItem->getMorphClass(),
             'related_id' => $this->approvableItem->id,
         ];
@@ -76,8 +83,9 @@ class ApplicationNeedsAction extends Notification implements ShouldQueue
 
     /**
      * Helper to get a user-friendly name for the application type.
+     * This helper is used by the Blade view.
      */
-    private function getItemTypeDisplayName(): string
+    public function getItemTypeDisplayName(): string
     {
         if ($this->approvableItem instanceof LoanApplication) {
             return __('Permohonan Pinjaman Peralatan ICT');

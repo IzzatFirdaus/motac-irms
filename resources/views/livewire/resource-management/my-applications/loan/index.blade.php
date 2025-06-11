@@ -104,10 +104,17 @@
                                 {{ $application->loan_end_date ? Carbon\Carbon::parse($application->loan_end_date)->translatedFormat(config('app.date_format_my', 'd/m/Y')) : 'N/A' }}
                             </td>
                             <td class="px-3 py-2 align-middle small text-center">
-                                {{-- ======================================================== --}}
-                                {{-- == THE FIX IS APPLIED IN THE LINE BELOW == --}}
-                                {{-- ======================================================== --}}
-                                <span class="badge rounded-pill {{ App\Helpers\Helpers::getStatusColorClass($application->status ?? 'default', 'loan') }}">
+                                {{--
+                                    ==================================================================================
+                                    == FIX: Replaced the call to the global Helper with the model's accessor.
+                                    == REASON: The LoanApplication model has a dedicated accessor 'status_color_class'
+                                    == (via getStatusColorClassAttribute) for this logic. Using the model's
+                                    == accessor directly improves code consistency and encapsulation by keeping
+                                    == model-related display logic within the model itself, making the code
+                                    == cleaner and easier to maintain.
+                                    ==================================================================================
+                                --}}
+                                <span class="badge rounded-pill {{ $application->status_color_class }}">
                                     {{ $application->status_label }}
                                 </span>
                             </td>

@@ -14,6 +14,7 @@ use Illuminate\Support\Str;
 
 /**
  * Approval Model.
+ * 
  * Represents an approval task for various approvable items (e.g., EmailApplication, LoanApplication).
  * System Design Reference: MOTAC Integrated Resource Management System (Revision 3) - Section 4.4
  *
@@ -38,7 +39,7 @@ use Illuminate\Support\Str;
  * @property-read \App\Models\User|null $deleter User who soft-deleted this approval record.
  * @property-read string $statusTranslated Accessor for a human-readable, translated status.
  * @property-read string|null $stageTranslated Accessor for a human-readable, translated stage name.
- *
+ * @property-read string $status_color_class Accessor for the Bootstrap badge color class.
  * @method static ApprovalFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder|Approval newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Approval newQuery()
@@ -60,8 +61,8 @@ use Illuminate\Support\Str;
  * @method static \Illuminate\Database\Eloquent\Builder|Approval whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Approval withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|Approval withoutTrashed()
- *
  * @mixin \Eloquent
+ * @mixin IdeHelperApproval
  */
 class Approval extends Model
 {
@@ -152,6 +153,19 @@ class Approval extends Model
         return array_keys(self::$STATUSES_LABELS);
     }
 
+    /**
+     * Get decision statuses for forms (excluding pending).
+     *
+     * @return array<string, string>
+     */
+    public static function getDecisionStatuses(): array
+    {
+        return [
+            self::STATUS_APPROVED => __('Luluskan'),
+            self::STATUS_REJECTED => __('Tolak'),
+        ];
+    }
+
     public static function getStageOptions(): array // Renamed from getStages for consistency
     {
         return array_map(fn ($label) => __($label), self::$STAGES_LABELS);
@@ -211,6 +225,22 @@ class Approval extends Model
     public function getStageTranslatedAttribute(): ?string
     {
         return $this->stage ? self::getStageDisplayName($this->stage) : null;
+    }
+
+    /**
+     * EDITED: Get the corresponding color class for the status badge.
+     *
+     * @return string
+     */
+    public function getStatusColorClassAttribute(): string
+    {
+        return match ($this->status) {
+            self::STATUS_APPROVED => 'text-bg-success',
+            self::STATUS_REJECTED => 'text-bg-danger',
+            self::STATUS_CANCELED => 'text-bg-dark',
+            self::STATUS_PENDING => 'text-bg-warning',
+            default => 'text-bg-secondary',
+        };
     }
 
     /**

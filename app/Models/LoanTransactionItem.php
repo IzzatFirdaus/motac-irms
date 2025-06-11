@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
 
 /**
  * Loan Transaction Item Model.
+ * 
  * Represents a specific equipment item within a loan transaction (either an issue or a return).
  * System Design Reference: MOTAC Integrated Resource Management System (Revision 3.5) - Section 4.3
  *
@@ -40,6 +41,7 @@ use Illuminate\Support\Str;
  * @property-read \App\Models\User|null $deleter
  * @property-read string $status_translated
  * @property-read string|null $condition_on_return_translated
+ * @mixin IdeHelperLoanTransactionItem
  */
 class LoanTransactionItem extends Model
 {

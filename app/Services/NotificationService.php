@@ -64,7 +64,6 @@ final class NotificationService
         ]);
 
         try {
-            // Call matches the constructor of ApplicationStatusUpdatedNotification.php
             $notification = new ApplicationStatusUpdatedNotification($application, $oldStatus, $newStatus);
             $applicant->notify($notification);
             Log::info(self::LOG_AREA." ApplicationStatusUpdatedNotification sent to Applicant ID {$applicantId}.");
@@ -102,13 +101,12 @@ final class NotificationService
                 ];
             }
 
-            // Call aligns with DefaultUserNotification.php constructor
             $notification = new DefaultUserNotification(
-                $taskTitle,       // $subjectKey
-                $greetingKey,     // $greetingKey
-                [$taskMessage],   // $lines (as array)
+                $taskTitle,
+                $greetingKey,
+                [$taskMessage],
                 $actionUrl,
-                $actionText,      // $actionTextKey
+                $actionText,
                 $additionalData
             );
             $userToNotify->notify($notification);
@@ -157,7 +155,6 @@ final class NotificationService
 
         if ($userCount === 0) {
             Log::warning(self::LOG_AREA."Attempted to send group notification '{$notificationClass}' but no users provided for context: {$context}.");
-
             return;
         }
 
@@ -173,7 +170,6 @@ final class NotificationService
         }
     }
 
-    // Method implementations follow, using class_exists for robustness
     public function notifyApplicantApplicationSubmitted(EmailApplication|LoanApplication $application): void
     {
         if (! $application->user) {
@@ -191,20 +187,16 @@ final class NotificationService
         $officer = $approvalTask->officer;
 
         if (! $officer) {
-            Log::warning(self::LOG_AREA."Cannot send 'ApplicationNeedsAction' notification because no officer is assigned to the approval task.", [
+            Log::warning(self::LOG_AREA."Cannot send 'ApplicationNeedsAction' because no officer is assigned to the approval task.", [
                 'approval_id' => $approvalTask->id,
-                'approvable_type' => $approvalTask->approvable_type,
-                'approvable_id' => $approvalTask->approvable_id,
             ]);
-
             return;
         }
 
         try {
-            // The notification class is now self-contained and only needs the approval task.
             $officer->notify(new ApplicationNeedsAction($approvalTask));
 
-            Log::info(self::LOG_AREA."Successfully dispatched 'ApplicationNeedsAction' notification.", [
+            Log::info(self::LOG_AREA."Successfully dispatched 'ApplicationNeedsAction' notification to officer.", [
                 'approver_id' => $officer->id,
                 'approval_id' => $approvalTask->id,
             ]);
@@ -320,5 +312,45 @@ final class NotificationService
         } else {
             Log::error(self::LOG_AREA.'EquipmentIncidentNotification class not found.');
         }
+    }
+
+    /**
+     * Notifies administrators about an application that is stuck in the workflow
+     * because no subsequent approver could be found.
+     */
+    public function notifyAdminOfOrphanedApplication(LoanApplication|EmailApplication $application): void
+    {
+        $admins = User::role('Admin')->where('status', User::STATUS_ACTIVE)->get();
+        if ($admins->isEmpty()) {
+            Log::error(self::LOG_AREA . "No active 'Admin' users found to notify about orphaned application.", [
+                'application_id' => $application->id,
+                'application_type' => $application->getMorphClass(),
+            ]);
+            return;
+        }
+
+        $appType = $application instanceof LoanApplication ? 'Pinjaman' : 'Emel';
+        $title = "Amaran: Permohonan Terkandas";
+        $message = "Sistem gagal mencari pegawai yang sesuai untuk peringkat kelulusan seterusnya bagi permohonan {$appType} #{$application->id}. Sila semak permohonan tersebut dan konfigurasikan aliran kerja kelulusan secara manual jika perlu.";
+
+        $actionUrl = '#'; // Default URL
+        if ($application instanceof LoanApplication) {
+            $actionUrl = route('loan-applications.show', $application->id);
+        } elseif ($application instanceof EmailApplication) {
+            // Assuming a similar route exists for email applications
+            // $actionUrl = route('email-applications.show', $application->id);
+        }
+
+        $this->notifyGroup(
+            $admins,
+            new DefaultUserNotification(
+                $title,
+                'Salam Sejahtera,',
+                [$message],
+                $actionUrl,
+                'Lihat Permohonan'
+            ),
+            $application
+        );
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Traits\Blameable; // EDITED: Import Blameable trait
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,7 +20,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 /**
  * User Model for MOTAC System.
- *
+ * 
  * System Design Reference: MOTAC Integrated Resource Management System (Revision 3.5) - Section 4.1
  * Migration context: 2013_01_01_000000_create_users_table.php, 2013_11_01_132200_add_motac_columns_to_users_table.php
  *
@@ -68,8 +69,8 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Permission> $permissions
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
- *
  * @mixin \Eloquent
+ * @mixin IdeHelperUser
  */
 class User extends Authenticatable
 {
@@ -80,6 +81,7 @@ class User extends Authenticatable
     use Notifiable;
     use SoftDeletes;
     use TwoFactorAuthenticatable;
+    use Blameable; // EDITED: Added Blameable trait for audit trails
 
     public const STATUS_ACTIVE = 'active';
 

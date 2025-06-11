@@ -5,8 +5,7 @@
     $approvableItem = $approval->approvable; // Variable for easier access
     $itemTypeDisplay = __('Permohonan Tidak Diketahui'); // Default
 
-    // Determine the type string for the resource-status-panel component
-    $resourceStatusPanelType = 'unknown'; // Default for safety
+    $resourceStatusPanelType = 'unknown';
     if ($approvableItem instanceof \App\Models\EmailApplication) {
         $itemTypeDisplay = __('Permohonan Emel/ID Pengguna');
         $resourceStatusPanelType = 'email_application';
@@ -36,16 +35,15 @@
                         </div>
                         <p class="small text-muted mb-0 mt-1">
                             {{ __('Peringkat') }}: <span
-                                class="fw-medium">{{ \App\Models\Approval::getStageDisplayName($approval->stage) }}</span>
+                                class="fw-medium">{{ $approval->stage_translated }}</span>
                             <span class="mx-2 text-muted">|</span>
                             {{ __('Status Semasa Tugasan') }}:
-                            {{-- Ensure x-approval-status-badge component exists --}}
-                            <x-approval-status-badge :status="$approval->status" />
+                            {{-- EDITED: Using the model accessor for a consistent, high-contrast badge --}}
+                            <span class="badge {{ $approval->status_color_class }}">{{ $approval->status_translated }}</span>
                         </p>
                     </div>
 
                     <div class="card-body p-3 p-sm-4">
-                        {{-- Global alerts handled by layouts.app.blade.php --}}
 
                         @if ($errors->any())
                             <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -71,7 +69,7 @@
                                 <dl class="row g-2 small">
                                     <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Pemohon') }}:</dt>
                                     <dd class="col-sm-8 col-lg-9 text-dark">
-                                        {{ optional($approvableItem->user)->name ?? optional($approvableItem->user)->full_name ?? __('Tidak Diketahui') }}
+                                        {{ optional($approvableItem->user)->name ?? __('Tidak Diketahui') }}
                                     </dd>
 
                                     <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Jabatan') }}:</dt>
@@ -91,7 +89,8 @@
                                     <dt class="col-sm-4 col-lg-3 fw-medium text-muted">
                                         {{ __('Status Keseluruhan Permohonan') }}:</dt>
                                     <dd class="col-sm-8 col-lg-9">
-                                        <x-resource-status-panel :resource="$approvableItem" statusAttribute="status" class="badge" :showIcon="true" :type="$resourceStatusPanelType" />
+                                        {{-- This component uses the model accessor internally --}}
+                                        <span class="badge {{ $approvableItem->status_color_class }}">{{ $approvableItem->status_label }}</span>
                                     </dd>
 
                                     @if (property_exists($approvableItem, 'purpose') && !empty($approvableItem->purpose))
@@ -153,14 +152,14 @@
                             <h3 class="h6 fw-semibold text-dark mb-3"><i class="bi bi-person-check me-2"></i>{{ __('Butiran Tugasan Kelulusan Ini') }}</h3>
                             <dl class="row g-2 small">
                                 <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Pegawai Ditugaskan') }}:</dt>
-                                <dd class="col-sm-8 col-lg-9 text-dark">{{ optional($approval->officer)->name ?? optional($approval->officer)->full_name ?? __('Tidak Diketahui') }}</dd>
+                                <dd class="col-sm-8 col-lg-9 text-dark">{{ optional($approval->officer)->name ?? __('Tidak Diketahui') }}</dd>
                                 <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Tugasan Dicipta') }}:</dt>
                                 <dd class="col-sm-8 col-lg-9 text-dark">{{ optional($approval->created_at)->translatedFormat('d M Y, h:i A') ?? '-' }}</dd>
                                 @if ($approval->approval_timestamp)
                                     <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Keputusan Dibuat Pada') }}:</dt>
                                     <dd class="col-sm-8 col-lg-9 text-dark">{{ optional($approval->approval_timestamp)->translatedFormat('d M Y, h:i A') }}</dd>
                                 @endif
-                                @if ($approval->comments) {{-- Displaying existing comments for this approval task --}}
+                                @if ($approval->comments)
                                     <dt class="col-12 fw-medium text-muted mt-2">{{ __('Catatan Anda Sebelum Ini (jika ada)') }}:</dt>
                                     <dd class="col-12">
                                         <div class="p-2 bg-light border rounded" style="white-space: pre-wrap;">{{ e($approval->comments) }}</div>
@@ -189,9 +188,8 @@
                                             @enderror
                                         </div>
 
-                                        {{-- Adjusting Quantities Section --}}
                                         @if ($approvableItem instanceof \App\Models\LoanApplication && $approvableItem->loanApplicationItems->isNotEmpty())
-                                            <div id="quantity_adjustment_section" style="display:none;"> {{-- Initially hidden, shown by JS if 'Luluskan' selected --}}
+                                            <div id="quantity_adjustment_section" style="display:none;">
                                                 <hr>
                                                 <h4 class="h6 fw-semibold text-dark my-3"><i class="bi bi-list-check me-2"></i>{{ __('Penyesuaian Kuantiti Item (Jika Perlu)') }}</h4>
                                                 <p class="small text-muted">{{ __('Masukkan kuantiti yang diluluskan untuk setiap item. Jika tiada perubahan, nilai akan kekal seperti kuantiti dipohon.') }}</p>
@@ -216,7 +214,6 @@
                                                 @endforeach
                                             </div>
                                         @endif
-                                        {{-- End Adjusting Quantities Section --}}
 
                                         <div class="mb-3">
                                             <label for="comments" class="form-label fw-medium">{{ __('Catatan Tambahan (Jika Ada)') }} <span id="comments_required_star" class="text-danger fst-italic" style="display:none;">* {{ __('Wajib diisi jika ditolak') }}</span></label>
@@ -256,7 +253,7 @@
                 const commentsRequiredStar = document.getElementById('comments_required_star');
                 const quantityAdjustmentSection = document.getElementById('quantity_adjustment_section');
 
-                if (decisionSelect) { // Combined checks for decisionSelect related elements
+                if (decisionSelect) {
                     const toggleRequiredElements = () => {
                         if (commentsInput && commentsRequiredStar) {
                              if (decisionSelect.value === '{{ \App\Models\Approval::STATUS_REJECTED }}') {
@@ -277,7 +274,7 @@
                         }
                     };
                     decisionSelect.addEventListener('change', toggleRequiredElements);
-                    toggleRequiredElements(); // Initial check on page load
+                    toggleRequiredElements();
                 }
             });
         </script>

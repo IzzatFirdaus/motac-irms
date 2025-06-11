@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * SubCategory Model.
+ * 
  * Defines sub-categories for ICT equipment, linked to EquipmentCategory.
  * System Design Reference: MOTAC Integrated Resource Management System (Revision 3) - Section 4.3
  * Assumes a global BlameableObserver handles created_by, updated_by, deleted_by.
@@ -38,7 +39,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\User|null $creator User who created this record.
  * @property-read \App\Models\User|null $updater User who last updated this record.
  * @property-read \App\Models\User|null $deleter User who soft-deleted this record.
- *
  * @method static SubCategoryFactory factory($count = null, $state = [])
  * @method static Builder|SubCategory newModelQuery()
  * @method static Builder|SubCategory newQuery()
@@ -47,8 +47,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static Builder|SubCategory active()
  * @method static Builder|SubCategory byCategory(int $categoryId)
  * @method static Builder|SubCategory byName(string $name)
- *
  * @mixin \Eloquent
+ * @mixin IdeHelperSubCategory
  */
 class SubCategory extends Model
 {

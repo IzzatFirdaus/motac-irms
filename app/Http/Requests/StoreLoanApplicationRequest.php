@@ -28,8 +28,16 @@ class StoreLoanApplicationRequest extends FormRequest
             'purpose' => ['required', 'string', 'min:10', 'max:1000'],
             'location' => ['required', 'string', 'max:255'],
             'return_location' => ['nullable', 'string', 'max:255'],
-            'loan_start_date' => ['required', 'date_format:Y-m-d H:i:s', "after_or_equal:$today"],
-            'loan_end_date' => ['required', 'date_format:Y-m-d H:i:s', 'after_or_equal:loan_start_date'],
+
+            // =====================================================================================
+            // == FIX: Changed 'date_format:Y-m-d H:i:s' to 'date'.
+            // == REASON: The 'date_format' rule is too strict for HTML's <input type="datetime-local">,
+            // == which submits data in the 'YYYY-MM-DDTHH:MM' format. Laravel's more flexible 'date'
+            // == validation rule can correctly parse this format, preventing validation errors for
+            // == the traditional (non-Livewire) form submission.
+            // =====================================================================================
+            'loan_start_date' => ['required', 'date', "after_or_equal:$today"],
+            'loan_end_date' => ['required', 'date', 'after_or_equal:loan_start_date'],
 
             'responsible_officer_id' => ['nullable', 'integer', Rule::exists('users', 'id')],
             'supporting_officer_id' => ['required', 'integer', Rule::exists('users', 'id')],
@@ -55,10 +63,10 @@ class StoreLoanApplicationRequest extends FormRequest
             'return_location.max' => __('Lokasi pemulangan tidak boleh melebihi :max aksara.'),
 
             'loan_start_date.required' => __('Tarikh & Masa Pinjaman wajib diisi.'),
-            'loan_start_date.date_format' => __('Format Tarikh & Masa Pinjaman tidak sah (YYYY-MM-DD HH:MM:SS).'),
+            'loan_start_date.date' => __('Format Tarikh & Masa Pinjaman tidak sah.'),
             'loan_start_date.after_or_equal' => __('Tarikh & Masa Pinjaman mestilah pada atau selepas hari/masa semasa.'),
             'loan_end_date.required' => __('Tarikh & Masa Dijangka Pulang wajib diisi.'),
-            'loan_end_date.date_format' => __('Format Tarikh & Masa Dijangka Pulang tidak sah (YYYY-MM-DD HH:MM:SS).'),
+            'loan_end_date.date' => __('Format Tarikh & Masa Dijangka Pulang tidak sah.'),
             'loan_end_date.after_or_equal' => __('Tarikh & Masa Dijangka Pulang mestilah selepas atau sama dengan Tarikh & Masa Pinjaman.'),
 
             'responsible_officer_id.exists' => __('Pegawai Bertanggungjawab yang dipilih tidak sah.'),
