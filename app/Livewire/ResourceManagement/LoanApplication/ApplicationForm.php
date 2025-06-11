@@ -288,55 +288,74 @@ class ApplicationForm extends Component
     }
 
     /**
-     * REFACTORED: Central logic to process saving or submitting the application.
-     * The process for creating a new application is now a single, streamlined service call.
-     * The process for updating and then submitting an existing draft remains two steps, which is logical.
+     * REVISED FOR DIAGNOSTICS: This version includes detailed logging.
+     * Central logic to process saving or submitting the application.
      */
     private function processSave(bool $isDraft): ?RedirectResponse
     {
-        $validatedData = $this->validate($this->rules(!$isDraft), $this->messages());
+        Log::info('--- [DIAGNOSTIC] processSave started. ---', ['isDraft' => $isDraft, 'isEditMode' => $this->isEditMode]);
 
-        $serviceData = Arr::except($validatedData, ['loan_application_items', 'applicant_is_responsible_officer']);
-        $serviceData['items'] = $validatedData['loan_application_items'];
-        $serviceData['is_draft_submission'] = $isDraft;
-
-        DB::beginTransaction();
         try {
+            $validatedData = $this->validate($this->rules(!$isDraft), $this->messages());
+            Log::info('[DIAGNOSTIC] Step 1: Validation successful.');
+
+            $serviceData = Arr::except($validatedData, ['loan_application_items', 'applicant_is_responsible_officer']);
+            $serviceData['items'] = $validatedData['loan_application_items'];
+            $serviceData['is_draft_submission'] = $isDraft;
+
+            DB::beginTransaction();
+            Log::info('[DIAGNOSTIC] Step 2: Database transaction started.');
+
             $service = app(LoanApplicationService::class);
             /** @var \App\Models\User $user */
             $user = Auth::user();
             $application = null;
 
             if ($this->isEditMode && $this->loanApplicationInstance) {
-                // For existing applications, first update the draft.
+                Log::info('[DIAGNOSTIC] Step 3: Processing in Edit Mode for application ID: ' . $this->loanApplicationInstance->id);
                 $this->authorize('update', $this->loanApplicationInstance);
                 $application = $service->updateApplication($this->loanApplicationInstance, $serviceData, $user);
+                Log::info('[DIAGNOSTIC] Step 4: Application updated successfully.');
 
-                // If submitting this edited draft, we then perform the submission action.
                 if (!$isDraft) {
+                    Log::info('[DIAGNOSTIC] Step 5: Submitting the edited draft for approval...');
                     $application = $service->submitApplicationForApproval($application, $user);
+                    Log::info('[DIAGNOSTIC] Step 6: Edited draft submitted successfully.');
                 }
             } else {
-                // For new applications, the service now handles create and submit in one call.
+                Log::info('[DIAGNOSTIC] Step 3: Processing in Create Mode.');
                 $this->authorize('create', LoanApplication::class);
                 $application = $service->createAndSubmitApplication($serviceData, $user, $isDraft);
+                Log::info('[DIAGNOSTIC] Step 4: New application created/submitted successfully.');
             }
 
             DB::commit();
+            Log::info('[DIAGNOSTIC] Step 7: Database transaction committed.');
 
             if ($isDraft) {
+                Log::info('[DIAGNOSTIC] Step 8: Redirecting to DRAFT page for app ID: ' . $application->id);
                 session()->flash('success', 'Draf permohonan anda telah berjaya disimpan.');
                 return redirect()->route('loan-applications.edit', ['loan_application_id' => $application->id]);
             } else {
+                Log::info('[DIAGNOSTIC] Step 8: Redirecting to SUBMITTED page for app ID: ' . $application->id);
                 session()->flash('success', 'Permohonan anda telah berjaya dihantar untuk kelulusan.');
                 return redirect()->route('loan-applications.show', ['loan_application' => $application->id]);
             }
         } catch (ValidationException $e) {
             DB::rollBack();
+            Log::error('--- [DIAGNOSTIC] ERROR: ValidationException in processSave ---', [
+                'message' => $e->getMessage(),
+                'errors' => $e->errors()
+            ]);
             throw $e;
         } catch (Throwable $e) {
             DB::rollBack();
-            Log::error('Error processing loan application: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            Log::error('--- [DIAGNOSTIC] FATAL ERROR in processSave ---', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
             $this->dispatch('swal:error', title: 'Ralat!', message: 'Gagal memproses permohonan: ' . $e->getMessage());
             return null;
         }

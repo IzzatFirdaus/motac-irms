@@ -5,14 +5,16 @@ namespace Database\Seeders;
 use App\Models\Location;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Database\UniqueConstraintViolationException;
 
 class LocationSeeder extends Seeder
 {
     /**
      * Run the database seeds.
+     *
+     * @return void
      */
     public function run(): void
     {
@@ -32,9 +34,9 @@ class LocationSeeder extends Seeder
         if (! $auditUserId) {
             $adminUserForAudit = User::factory()->create(['name' => 'Audit User (LocationSeeder)']);
             $auditUserId = $adminUserForAudit->id;
-            Log::info(sprintf('Created a fallback audit user with ID %d for LocationSeeder.', $auditUserId));
+            Log::info("Created a fallback audit user with ID {$auditUserId} for LocationSeeder.");
         } else {
-            Log::info(sprintf('Using User ID %s for audit columns in LocationSeeder.', $auditUserId));
+            Log::info("Using User ID {$auditUserId} for audit columns in LocationSeeder.");
         }
 
         // A static list of essential locations to ensure they always exist
@@ -102,7 +104,6 @@ class LocationSeeder extends Seeder
                 ])
             );
         }
-
         Log::info('Ensured specific MOTAC locations exist.');
 
         // Define a target for how many total locations you want
@@ -112,7 +113,7 @@ class LocationSeeder extends Seeder
         // If we have fewer than the target, create more using a factory
         if ($currentCount < $targetCount) {
             $needed = $targetCount - $currentCount;
-            Log::info(sprintf('Attempting to create %s additional random locations using a factory...', $needed));
+            Log::info("Attempting to create {$needed} additional random locations using a factory...");
 
             $createdCount = 0;
             // Loop to create the exact number of needed locations
@@ -132,8 +133,7 @@ class LocationSeeder extends Seeder
                     $i--; // Decrement the counter to ensure we still create the target number of locations.
                 }
             }
-
-            Log::info(sprintf('Successfully created %d new random locations.', $createdCount));
+            Log::info("Successfully created {$createdCount} new random locations.");
         }
 
         Log::info('Locations seeding complete (Revision 4 - Patched).');

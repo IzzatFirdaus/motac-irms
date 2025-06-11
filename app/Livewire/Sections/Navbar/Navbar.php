@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Sections\Navbar;
 
+use App\Helpers\Helpers;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
@@ -12,7 +13,6 @@ class Navbar extends Component
 {
     // REVISED: Public properties are now only for data passed from the parent layout.
     public string $containerNav = 'container-fluid';
-
     public string $navbarDetachedClass = '';
 
     /**
@@ -27,6 +27,7 @@ class Navbar extends Component
     /**
      * Prepares the available locales from the config file for the view.
      * This now runs on every render to ensure data is always fresh and stateless.
+     * @return array
      */
     private function getAvailableLocales(): array
     {
@@ -34,10 +35,9 @@ class Navbar extends Component
         $processedLocales = [];
 
         foreach ($configuredLocales as $localeKey => $properties) {
-            if (! is_array($properties)) {
+            if (!is_array($properties)) {
                 continue;
             }
-
             // REVISED: Simplified flag code generation.
             $regional = $properties['regional'] ?? '';
             $parts = explode('_', $regional);
@@ -46,12 +46,13 @@ class Navbar extends Component
             $processedLocales[$localeKey] = $properties;
             $processedLocales[$localeKey]['flag_code'] = $countryCode ?? ($localeKey === 'ms' ? 'my' : 'us');
         }
-
         return $processedLocales;
     }
 
     /**
      * Prepares data for the currently active locale for the view.
+     * @param array $availableLocales
+     * @return array
      */
     private function getCurrentLocaleData(array $availableLocales): array
     {

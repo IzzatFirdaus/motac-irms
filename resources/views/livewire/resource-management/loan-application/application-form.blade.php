@@ -345,21 +345,36 @@
 
         {{-- Action Buttons --}}
         <div class="d-flex justify-content-end gap-2 pt-3">
+            {{-- Save as Draft Button --}}
             <button type="button" wire:click="saveAsDraft" wire:loading.attr="disabled"
                 @click="clearCache()" class="btn btn-secondary">
-                <span wire:loading.remove wire:target="saveAsDraft"><i class="bi bi-save me-1"></i>
-                    @lang('app.button_save_draft')</span>
-                <span wire:loading wire:target="saveAsDraft" class="d-inline-flex align-items-center"><span class="spinner-border spinner-border-sm me-2" role="status"></span>
-                    @lang('app.text_saving')</span>
+
+                {{-- This content shows by default and is hidden when saveAsDraft is running --}}
+                <span wire:loading.remove wire:target="saveAsDraft">
+                    <i class="bi bi-save me-1"></i>
+                    @lang('app.button_save_draft')
+                </span>
+
+                {{-- This content, with the spinner, ONLY shows when saveAsDraft is running --}}
+                <span wire:loading wire:target="saveAsDraft" class="d-inline-flex align-items-center">
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    @lang('app.text_saving')
+                </span>
             </button>
+
+            {{-- Submit Application Button --}}
             <button type="submit" wire:loading.attr="disabled"
                 @click="clearCache()" class="btn btn-primary" x-bind:disabled="!applicantConfirmation || !termsScrolled">
+
+                {{-- This content shows by default and is hidden when submitLoanApplication is running --}}
                 <span wire:loading.remove wire:target="submitLoanApplication">
                     <i class="bi bi-send-check-fill me-1"></i>
                     {{ $isEditMode && $this->loanApplicationInstance?->status !== \App\Models\LoanApplication::STATUS_DRAFT ? __('forms.button_update_and_resubmit') : __('app.button_submit_application') }}
                 </span>
+
+                {{-- This content, with the spinner, ONLY shows when submitLoanApplication is running --}}
                 <span wire:loading wire:target="submitLoanApplication" class="d-inline-flex align-items-center">
-                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                     @lang('app.text_processing')
                 </span>
             </button>

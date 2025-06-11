@@ -8,7 +8,6 @@ use Livewire\Component;
 class NotificationsDropdown extends Component
 {
     public $unreadNotifications;
-
     public $unreadCount = 0;
 
     protected $listeners = ['refresh-notifications' => 'mount'];
@@ -16,7 +15,7 @@ class NotificationsDropdown extends Component
     /**
      * Mount the component and fetch initial data.
      */
-    public function mount(): void
+    public function mount()
     {
         if (Auth::check()) {
             // REVISED: Fetches notifications once to prevent multiple DB queries.
@@ -31,8 +30,9 @@ class NotificationsDropdown extends Component
 
     /**
      * Mark a single notification as read and redirect if a URL exists.
+     * @param string $notificationId
      */
-    public function markAsRead(string $notificationId): void
+    public function markAsRead(string $notificationId)
     {
         $notification = Auth::user()->notifications()->find($notificationId);
         if ($notification) {
@@ -47,7 +47,7 @@ class NotificationsDropdown extends Component
     /**
      * Mark all unread notifications as read.
      */
-    public function markAllAsRead(): void
+    public function markAllAsRead()
     {
         Auth::user()->unreadNotifications->markAsRead();
         $this->mount(); // Refresh the list

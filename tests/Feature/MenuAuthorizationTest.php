@@ -11,13 +11,7 @@ class MenuAuthorizationTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected User $adminUser;
-
-    protected User $bpmStaffUser;
-
-    protected User $itAdminUser;
-
-    protected User $regularUser;
+    protected User $adminUser, $bpmStaffUser, $itAdminUser, $regularUser;
 
     protected function setUp(): void
     {
@@ -37,7 +31,7 @@ class MenuAuthorizationTest extends TestCase
         $this->regularUser = User::factory()->create()->assignRole('User');
     }
 
-    public function test_admin_can_see_settings_and_reports_in_menu(): void
+    public function test_admin_can_see_settings_and_reports_in_menu()
     {
         $response = $this->actingAs($this->adminUser)->get('/dashboard');
 
@@ -48,7 +42,7 @@ class MenuAuthorizationTest extends TestCase
         $response->assertSeeText(__('menu.system_logs'));
     }
 
-    public function test_bpm_staff_can_see_equipment_management_but_not_settings(): void
+    public function test_bpm_staff_can_see_equipment_management_but_not_settings()
     {
         $response = $this->actingAs($this->bpmStaffUser)->get('/dashboard');
 
@@ -62,7 +56,7 @@ class MenuAuthorizationTest extends TestCase
         $response->assertDontSeeText(__('menu.administration.email_applications'));
     }
 
-    public function test_it_admin_can_see_email_processing_but_not_equipment_management(): void
+    public function test_it_admin_can_see_email_processing_but_not_equipment_management()
     {
         $response = $this->actingAs($this->itAdminUser)->get('/dashboard');
 
@@ -75,7 +69,7 @@ class MenuAuthorizationTest extends TestCase
         $response->assertDontSeeText(__('menu.settings.title'));
     }
 
-    public function test_regular_user_sees_basic_menu_only(): void
+    public function test_regular_user_sees_basic_menu_only()
     {
         $response = $this->actingAs($this->regularUser)->get('/dashboard');
 

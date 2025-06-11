@@ -6,19 +6,12 @@ declare(strict_types=1);
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
-|
-| This file defines the web-based routes for the MOTAC Integrated
-| Resource Management System. It adheres to the System Design (Rev. 3.5),
-| utilizing controllers, Livewire components, and appropriate middleware
-| for authentication and authorization.
-|
 */
 
 // General Controllers
 use App\Http\Controllers\Admin\EquipmentController as AdminEquipmentController;
 use App\Http\Controllers\Admin\GradeController as AdminGradeController;
 use App\Http\Controllers\ApprovalController;
-use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmailAccountController;
 use App\Http\Controllers\EmailApplicationController;
 use App\Http\Controllers\EquipmentController;
@@ -30,8 +23,6 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\WebhookController;
 // Livewire Components
 use App\Livewire\ContactUs as ContactUsLW;
-use App\Livewire\ResourceManagement\Admin\BPM\IssuedLoans as BpmIssuedLoansLW;
-use App\Livewire\ResourceManagement\Admin\BPM\OutstandingLoans as BpmOutstandingLoansLW;
 use App\Livewire\ResourceManagement\Admin\Equipment\Index as AdminEquipmentIndexLW;
 use App\Livewire\ResourceManagement\Admin\Reports\UserActivityReport;
 use App\Livewire\ResourceManagement\Approval\Dashboard as ApprovalDashboardLW;
@@ -48,10 +39,13 @@ use App\Livewire\Settings\Users\Edit as SettingsUsersEditLW;
 use App\Livewire\Settings\Users\Index as SettingsUsersIndexLW;
 use App\Livewire\Settings\Users\Show as SettingsUsersShowLW;
 // Models
+use App\Models\Approval;
 use App\Models\EmailApplication;
+use App\Models\Equipment;
 use App\Models\LoanApplication;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use League\CommonMark\GithubFlavoredMarkdownConverter;
 
@@ -60,6 +54,7 @@ use League\CommonMark\GithubFlavoredMarkdownConverter;
 | Public Routes
 |--------------------------------------------------------------------------
 */
+
 Route::get('lang/{locale}', LanguageController::class)->name('language.swap');
 Route::get('/contact-us', ContactUsLW::class)->name('contact-us');
 Route::post('/webhooks/deploy', [WebhookController::class, 'handleDeploy'])
@@ -68,16 +63,14 @@ Route::post('/webhooks/deploy', [WebhookController::class, 'handleDeploy'])
 
 Route::get('/terms-of-service', function () {
     $path = resource_path('markdown/terms.md');
-    if (!File::exists($path)) return view('errors.404');
-    $converter = new GithubFlavoredMarkdownConverter();
-    return view('terms', ['terms' => $converter->convert(File::get($path))->getContent()]);
+    abort_if(! File::exists($path), 404);
+    return view('terms', ['terms' => (new GithubFlavoredMarkdownConverter())->convert(File::get($path))->getContent()]);
 })->name('terms.show');
 
 Route::get('/privacy-policy', function () {
     $path = resource_path('markdown/policy.md');
-    if (!File::exists($path)) return view('errors.404');
-    $converter = new GithubFlavoredMarkdownConverter();
-    return view('policy', ['policy' => $converter->convert(File::get($path))->getContent()]);
+    abort_if(! File::exists($path), 404);
+    return view('policy', ['policy' => (new GithubFlavoredMarkdownConverter())->convert(File::get($path))->getContent()]);
 })->name('policy.show');
 
 
@@ -88,7 +81,47 @@ Route::get('/privacy-policy', function () {
 */
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
     Route::redirect('/', '/dashboard', 301);
-    Route::get('/dashboard', DashboardController::class)->name('dashboard');
+
+    // NOTE: For better maintainability, this complex logic is better suited inside a dedicated DashboardController.
+    Route::get('/dashboard', function () {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        if ($user->hasRole('Admin')) {
+            return view('dashboard.admin', [
+                'users_count' => User::count(),
+                'pending_approvals_count' => Approval::where('status', 'pending')->count(),
+                'equipment_available_count' => Equipment::where('status', 'available')->count(),
+                'equipment_on_loan_count' => Equipment::where('status', 'on_loan')->count(),
+                'email_completed_count' => EmailApplication::where('status', 'completed')->count(),
+                'email_pending_count' => EmailApplication::whereIn('status', ['pending_support', 'pending_admin', 'processing'])->count(),
+                'email_rejected_count' => EmailApplication::where('status', 'rejected')->count(),
+                'loan_issued_count' => LoanApplication::where('status', 'issued')->count(),
+                'loan_approved_pending_issuance_count' => LoanApplication::where('status', 'approved')->count(),
+                'loan_returned_count' => LoanApplication::where('status', 'returned')->count(),
+            ]);
+        } elseif ($user->hasRole('BPM Staff')) {
+            return view('dashboard.bpm', [
+                'availableLaptopsCount' => Equipment::where('asset_type', 'laptop')->where('status', 'available')->count(),
+                'availableProjectorsCount' => Equipment::where('asset_type', 'projector')->where('status', 'available')->count(),
+                'availablePrintersCount' => Equipment::where('asset_type', 'printer')->where('status', 'available')->count(),
+            ]);
+        } elseif ($user->hasRole('IT Admin')) {
+            return view('dashboard.itadmin', [
+                'pending_email_applications_count' => EmailApplication::where('status', 'pending_admin')->count(),
+                'processing_email_applications_count' => EmailApplication::where('status', 'processing')->count(),
+            ]);
+        } elseif (Approval::where('officer_id', $user->id)->where('status', 'pending')->exists()) {
+            return view('dashboard.approver', [
+                'approved_last_30_days' => Approval::where('officer_id', $user->id)->where('status', 'approved')->where('updated_at', '>=', now()->subDays(30))->count(),
+                'rejected_last_30_days' => Approval::where('officer_id', $user->id)->where('status', 'rejected')->where('updated_at', '>=', now()->subDays(30))->count(),
+            ]);
+        } else {
+            // **THE FIX**: Pass the $user object to the view so it can display the welcome message.
+            return view('dashboard.user', ['user' => $user]);
+        }
+    })->name('dashboard');
+
 
     // --- LOAN APPLICATIONS ---
     Route::prefix('loan-applications')->name('loan-applications.')->group(function () {
@@ -102,25 +135,23 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     });
 
     // --- LOAN TRANSACTIONS (Issuance and Returns by BPM Staff) ---
-    // NOTE: These routes are defined here to match the LoanApplicationTest.php expectations.
-    // They are protected by policies within the controller methods.
     Route::post('/loan-applications/{loanApplication}/issue', [LoanTransactionController::class, 'storeIssue'])->name('loan-applications.issue.store');
     Route::post('/loan-transactions/{loanTransaction}/return', [LoanTransactionController::class, 'storeReturn'])->name('loan-transactions.return.store');
     Route::get('/loan-transactions/{loanTransaction}/return-form', [LoanTransactionController::class, 'showReturnForm'])->name('loan-transactions.return.form');
-
 
     // --- EMAIL APPLICATIONS ---
     Route::prefix('email-applications')->name('email-applications.')->group(function () {
         Route::get('/', MyEmailApplicationsIndexLW::class)->name('index');
         Route::get('/create', EmailApplicationFormLW::class)->name('create');
-        Route::get('/{email_application}', [EmailApplicationController::class, 'show'])->name('show');
+        Route::post('/', [EmailApplicationController::class, 'store'])->name('store');
         Route::get('/{email_application}/edit', EmailApplicationFormLW::class)->name('edit');
+        Route::get('/{email_application}', [EmailApplicationController::class, 'show'])->name('show');
         Route::delete('/{email_application}', [EmailApplicationController::class, 'destroy'])->name('destroy');
         Route::post('/{email_application}/submit', [EmailApplicationController::class, 'submitApplication'])->name('submit');
     });
 
     // --- APPROVALS ---
-    Route::prefix('approvals')->name('approvals.')->group(function () {
+    Route::prefix('approvals')->name('approvals.')->middleware('check.gradelevel:9')->group(function () {
         Route::get('/', ApprovalDashboardLW::class)->name('dashboard');
         Route::get('/history', [ApprovalController::class, 'showHistory'])->name('history');
         Route::get('/{approval}', [ApprovalController::class, 'show'])->name('show');
@@ -142,34 +173,33 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     | Admin & Privileged User Routes
     |--------------------------------------------------------------------------
     */
-    Route::middleware(['role:Admin|BPM Staff|IT Admin'])->group(function () {
 
-        // --- EQUIPMENT MANAGEMENT (BPM Staff & Admin) ---
-        Route::prefix('admin/equipment')->name('admin.equipment.')->middleware(['role:Admin|BPM Staff'])->group(function () {
-            Route::get('/', AdminEquipmentIndexLW::class)->name('index');
-            Route::get('/create', [AdminEquipmentController::class, 'create'])->name('create');
-            Route::post('/', [AdminEquipmentController::class, 'store'])->name('store');
-            Route::get('/{equipment}', [AdminEquipmentController::class, 'show'])->name('show');
-            Route::get('/{equipment}/edit', [AdminEquipmentController::class, 'edit'])->name('edit');
-            Route::put('/{equipment}', [AdminEquipmentController::class, 'update'])->name('update');
-            Route::delete('/{equipment}', [AdminEquipmentController::class, 'destroy'])->name('destroy');
-        });
-
-        // --- EMAIL ACCOUNT PROCESSING (IT Admin & Admin) ---
-        Route::prefix('admin/email-processing')->name('admin.email-processing.')->middleware(['role:Admin|IT Admin'])->group(function () {
-            Route::get('/', [EmailAccountController::class, 'indexForAdmin'])->name('index');
-            Route::get('/{email_application}', [EmailAccountController::class, 'showForAdmin'])->name('show');
-            Route::post('/{email_application}/process', [EmailAccountController::class, 'processApplication'])->name('process');
-        });
-
-        // --- REPORTS ---
-        Route::prefix('reports')->name('reports.')->group(function () {
-            Route::get('/', [ReportController::class, 'index'])->name('index');
-            Route::get('/equipment-inventory', [ReportController::class, 'equipmentInventory'])->name('equipment-inventory');
-            Route::get('/loan-applications', [ReportController::class, 'loanApplications'])->name('loan-applications');
-            Route::get('/activity-log', UserActivityReport::class)->name('activity-log');
-        });
+    // --- EQUIPMENT MANAGEMENT (BPM Staff & Admin) ---
+    Route::prefix('admin/equipment')->name('admin.equipment.')->middleware(['can:view-equipment-admin'])->group(function () {
+        Route::get('/', AdminEquipmentIndexLW::class)->name('index');
+        Route::get('/create', [AdminEquipmentController::class, 'create'])->name('create');
+        Route::post('/', [AdminEquipmentController::class, 'store'])->name('store');
+        Route::get('/{equipment}', [AdminEquipmentController::class, 'show'])->name('show');
+        Route::get('/{equipment}/edit', [AdminEquipmentController::class, 'edit'])->name('edit');
+        Route::put('/{equipment}', [AdminEquipmentController::class, 'update'])->name('update');
+        Route::delete('/{equipment}', [AdminEquipmentController::class, 'destroy'])->name('destroy');
     });
+
+    // --- EMAIL ACCOUNT PROCESSING (IT Admin & Admin) ---
+    Route::prefix('admin/email-processing')->name('admin.email-processing.')->middleware(['role:Admin|IT Admin'])->group(function () {
+        Route::get('/', [EmailAccountController::class, 'indexForAdmin'])->name('index');
+        Route::get('/{email_application}', [EmailAccountController::class, 'showForAdmin'])->name('show');
+        Route::post('/{email_application}/process', [EmailAccountController::class, 'processApplication'])->name('process');
+    });
+
+    // --- REPORTS ---
+    Route::prefix('reports')->name('reports.')->middleware(['role:Admin|BPM Staff|IT Admin'])->group(function () {
+        Route::get('/', [ReportController::class, 'index'])->name('index');
+        Route::get('/equipment-inventory', [ReportController::class, 'equipmentInventory'])->name('equipment-inventory');
+        Route::get('/loan-applications', [ReportController::class, 'loanApplications'])->name('loan-applications');
+        Route::get('/activity-log', UserActivityReport::class)->name('activity-log');
+    });
+
 
     /*
     |--------------------------------------------------------------------------
@@ -190,7 +220,6 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::get('/departments', SettingsDepartmentsIndexLW::class)->name('departments.index');
         Route::get('/positions', SettingsPositionsIndexLW::class)->name('positions.index');
 
-        // LOG VIEWER (Admin only, via permission)
         Route::get('/log-viewer/{view?}', [\Opcodes\LogViewer\Http\Controllers\IndexController::class, '__invoke'])
           ->where('view', '(?!api).*')
           ->name('log-viewer.index')

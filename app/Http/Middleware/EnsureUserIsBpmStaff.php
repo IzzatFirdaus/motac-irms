@@ -1,5 +1,4 @@
 <?php
-
 // app/Http/Middleware/EnsureUserIsBpmStaff.php
 
 namespace App\Http\Middleware;
