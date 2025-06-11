@@ -17,7 +17,6 @@ class EquipmentReturnReminderNotification extends Notification implements Should
     use Queueable;
 
     public LoanApplication $loanApplication;
-
     public int $daysUntilReturn;
 
     public function __construct(LoanApplication $loanApplication, int $daysUntilReturn)
@@ -51,12 +50,14 @@ class EquipmentReturnReminderNotification extends Notification implements Should
                 Log::error('Error generating URL for EquipmentReturnReminderNotification: '.$e->getMessage());
             }
         }
-
         return '#';
     }
 
     /**
      * Get the mail representation of the notification.
+     *
+     * @param \App\Models\User $notifiable
+     * @return \App\Mail\EquipmentReturnReminder
      */
     // EDITED: Refactored to return the new Mailable class.
     public function toMail(User $notifiable): EquipmentReturnReminder
@@ -88,7 +89,6 @@ class EquipmentReturnReminderNotification extends Notification implements Should
             $message = __('Peralatan untuk Permohonan #:id telah lewat dipulangkan :days hari. Tarikh pulang jangkaan: :date.', ['id' => $applicationId, 'days' => $daysOverdue, 'date' => $expectedReturnDate]);
             $icon = 'ti ti-alarm-snooze';
         }
-
         $subject .= __(' (#:id)', ['id' => $applicationId]);
 
         $applicationUrl = $this->getActionUrl();

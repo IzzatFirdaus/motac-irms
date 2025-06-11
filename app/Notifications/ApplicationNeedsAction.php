@@ -11,6 +11,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Route;
 
 class ApplicationNeedsAction extends Notification implements ShouldQueue
 {
@@ -48,7 +49,7 @@ class ApplicationNeedsAction extends Notification implements ShouldQueue
         // The toMail method now uses the ->view() method to render the custom Blade template.
         $subject = __('Tindakan Diperlukan: :itemType #:id', [
             'itemType' => $this->getItemTypeDisplayName(),
-            'id' => $this->approvableItem->id,
+            'id' => $this->approvableItem->id
         ]);
 
         return (new MailMessage)
@@ -89,7 +90,6 @@ class ApplicationNeedsAction extends Notification implements ShouldQueue
         if ($this->approvableItem instanceof LoanApplication) {
             return __('Permohonan Pinjaman Peralatan ICT');
         }
-
         if ($this->approvableItem instanceof EmailApplication) {
             return __('Permohonan E-mel/ID Pengguna');
         }

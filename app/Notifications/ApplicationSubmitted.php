@@ -9,15 +9,16 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 
 final class ApplicationSubmitted extends Notification implements ShouldQueue
 {
     use Queueable;
 
     public EmailApplication|LoanApplication $application;
-
     public string $applicationTypeDisplay;
 
     public function __construct(EmailApplication|LoanApplication $application)
@@ -32,8 +33,7 @@ final class ApplicationSubmitted extends Notification implements ShouldQueue
         } else {
             $this->applicationTypeDisplay = __('Permohonan Umum');
         }
-
-        Log::info('ApplicationSubmitted notification INSTANTIATED for '.$this->application::class.sprintf(' ID: %d. Notifying user ID: %d', $this->application->id, $this->application->user_id));
+        Log::info('ApplicationSubmitted notification INSTANTIATED for '.$this->application::class." ID: {$this->application->id}. Notifying user ID: {$this->application->user_id}");
     }
 
     public function via(User $notifiable): array
@@ -84,7 +84,7 @@ final class ApplicationSubmitted extends Notification implements ShouldQueue
                 $routeParameters = ['email_application' => $this->application->id];
             }
 
-            if (Route::has($routeName)) {
+            if (isset($routeName) && Route::has($routeName)) {
                 try {
                     return route($routeName, $routeParameters);
                 } catch (\Exception $e) {
@@ -92,7 +92,6 @@ final class ApplicationSubmitted extends Notification implements ShouldQueue
                 }
             }
         }
-
         return $viewUrl;
     }
 

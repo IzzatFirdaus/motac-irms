@@ -36,7 +36,7 @@ class StoreLoanApplicationRequest extends FormRequest
             // == validation rule can correctly parse this format, preventing validation errors for
             // == the traditional (non-Livewire) form submission.
             // =====================================================================================
-            'loan_start_date' => ['required', 'date', 'after_or_equal:'.$today],
+            'loan_start_date' => ['required', 'date', "after_or_equal:$today"],
             'loan_end_date' => ['required', 'date', 'after_or_equal:loan_start_date'],
 
             'responsible_officer_id' => ['nullable', 'integer', Rule::exists('users', 'id')],

@@ -13,14 +13,7 @@ class EmailApplicationPolicyTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected User $applicantUser;
-
-    protected User $otherUser;
-
-    protected User $itAdminUser;
-
-    protected User $adminUser;
-
+    protected User $applicantUser, $otherUser, $itAdminUser, $adminUser;
     protected EmailApplicationPolicy $policy;
 
     protected function setUp(): void
@@ -31,7 +24,7 @@ class EmailApplicationPolicyTest extends TestCase
         Role::findOrCreate('IT Admin', 'web');
         Role::findOrCreate('Admin', 'web');
 
-        $this->policy = new EmailApplicationPolicy;
+        $this->policy = new EmailApplicationPolicy();
 
         $this->applicantUser = User::factory()->create()->assignRole('Applicant');
         $this->otherUser = User::factory()->create()->assignRole('Applicant');

@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
 /**
- * Represents an application for an Email account or User ID.
+ * @mixin IdeHelperEmailApplication
  */
 class EmailApplication extends Model
 {
@@ -31,20 +31,66 @@ class EmailApplication extends Model
     public const STATUS_COMPLETED = 'completed';
     public const STATUS_CANCELLED = 'cancelled';
 
-    protected $table = 'email_applications';
+    public static array $STATUS_OPTIONS = [
+        self::STATUS_DRAFT => 'Draf',
+        self::STATUS_PENDING_SUPPORT => 'Menunggu Sokongan Pegawai',
+        self::STATUS_PENDING_ADMIN => 'Menunggu Tindakan Pentadbir IT',
+        self::STATUS_APPROVED => 'Diluluskan (Sedia Untuk Penyediaan Akaun)',
+        self::STATUS_REJECTED => 'Ditolak',
+        self::STATUS_PROCESSING => 'Sedang Diproses oleh Pentadbir IT',
+        self::STATUS_PROVISION_FAILED => 'Proses Penyediaan Gagal',
+        self::STATUS_COMPLETED => 'Selesai (Telah Dimaklumkan)',
+        self::STATUS_CANCELLED => 'Dibatalkan',
+    ]; //
+
+    public static array $SERVICE_STATUSES_FOR_DISPLAY = [
+        User::SERVICE_STATUS_TETAP => 'Tetap',
+        User::SERVICE_STATUS_KONTRAK_MYSTEP => 'Lantikan Kontrak / MyStep',
+        User::SERVICE_STATUS_PELAJAR_INDUSTRI => 'Pelajar Latihan Industri (Ibu Pejabat Sahaja)',
+        User::SERVICE_STATUS_OTHER_AGENCY => 'Agensi Lain (Peti E-mel Sedia Ada)',
+    ]; //
+
+    protected $table = 'email_applications'; //
 
     protected $fillable = [
-        'user_id', 'applicant_title', 'applicant_name', 'applicant_identification_number',
-        'applicant_passport_number', 'applicant_jawatan_gred', 'applicant_bahagian_unit',
-        'applicant_level_aras', 'applicant_mobile_number', 'applicant_personal_email',
-        'service_status', 'appointment_type', 'previous_department_name', 'previous_department_email',
-        'service_start_date', 'service_end_date', 'purpose', 'application_reason_notes',
-        'proposed_email', 'group_email', 'group_admin_name', 'group_admin_email',
-        'supporting_officer_id', 'supporting_officer_name', 'supporting_officer_grade', 'supporting_officer_email',
-        'status', 'cert_info_is_true', 'cert_data_usage_agreed', 'cert_email_responsibility_agreed',
-        'certification_timestamp', 'submitted_at', 'rejection_reason', 'final_assigned_email',
-        'final_assigned_user_id', 'processed_by', 'processed_at',
-    ];
+        'user_id',
+        'applicant_title',
+        'applicant_name',
+        'applicant_identification_number',
+        'applicant_passport_number',
+        'applicant_jawatan_gred',
+        'applicant_bahagian_unit',
+        'applicant_level_aras',
+        'applicant_mobile_number',
+        'applicant_personal_email',
+        'service_status',
+        'appointment_type',
+        'previous_department_name',
+        'previous_department_email',
+        'service_start_date',
+        'service_end_date',
+        'purpose',
+        'application_reason_notes',
+        'proposed_email',
+        'group_email',
+        'group_admin_name',
+        'group_admin_email',
+        'supporting_officer_id',
+        'supporting_officer_name',
+        'supporting_officer_grade',
+        'supporting_officer_email',
+        'status',
+        'cert_info_is_true',
+        'cert_data_usage_agreed',
+        'cert_email_responsibility_agreed',
+        'certification_timestamp',
+        'submitted_at',
+        'rejection_reason',
+        'final_assigned_email',
+        'final_assigned_user_id',
+        'processed_by',
+        'processed_at',
+    ]; //
 
     protected $casts = [
         'service_start_date' => 'date:Y-m-d',
@@ -58,142 +104,134 @@ class EmailApplication extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
-    ];
+    ]; //
 
     protected $attributes = [
         'status' => self::STATUS_DRAFT,
         'cert_info_is_true' => false,
         'cert_data_usage_agreed' => false,
         'cert_email_responsibility_agreed' => false,
-    ];
+    ]; //
 
     public static function getStatusOptions(): array
     {
-        $statuses = [
-            self::STATUS_DRAFT, self::STATUS_PENDING_SUPPORT, self::STATUS_PENDING_ADMIN,
-            self::STATUS_APPROVED, self::STATUS_REJECTED, self::STATUS_PROCESSING,
-            self::STATUS_PROVISION_FAILED, self::STATUS_COMPLETED, self::STATUS_CANCELLED,
-        ];
+        return self::$STATUS_OPTIONS;
+    } //
 
-        return collect($statuses)->mapWithKeys(function ($status) {
-            return [$status => __('email_applications.statuses.' . $status)];
-        })->all();
-    }
+    public static function getStatuses(): array
+    {
+        return array_keys(self::$STATUS_OPTIONS);
+    } //
+
+    public static function getServiceStatusDisplayName(string $statusKey): string
+    {
+        if (method_exists(User::class, 'getServiceStatusDisplayName')) {
+            return User::getServiceStatusDisplayName($statusKey);
+        }
+
+        return __(self::$SERVICE_STATUSES_FOR_DISPLAY[$statusKey] ?? Str::title(str_replace('_', ' ', $statusKey)));
+    } //
 
     protected static function newFactory(): EmailApplicationFactory
     {
         return EmailApplicationFactory::new();
-    }
+    } //
 
     // --- RELATIONSHIPS ---
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
-    }
+    } //
 
     public function supportingOfficer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'supporting_officer_id');
-    }
+    } //
 
     public function processor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'processed_by');
-    }
+    } //
 
     public function approvals(): MorphMany
     {
         return $this->morphMany(Approval::class, 'approvable');
-    }
+    } //
 
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
-    }
+    } //
 
     public function updater(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
-    }
+    } //
 
     public function deleter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by');
-    }
+    } //
 
     // --- ACCESSORS ---
-
-    /**
-     * Get the translated status label with a fallback.
-     */
     public function getStatusLabelAttribute(): string
     {
-        $key = 'email_applications.statuses.' . $this->status;
-        $translation = __($key);
-
-        // If the translation returns the key itself, it means it's not found.
-        // Provide a human-readable fallback.
-        if ($translation === $key) {
-            return Str::title(str_replace('_', ' ', (string) $this->status));
-        }
-
-        return $translation;
-    }
+        return __(self::$STATUS_OPTIONS[$this->status] ?? Str::title(str_replace('_', ' ', (string) $this->status)));
+    } //
 
     /**
-     * Get the Bootstrap CSS classes for the application status badge.
+     * Get the Bootstrap color class for the application status badge.
      */
-    public function getStatusColorClassAttribute(): string
+    public function getStatusColorAttribute(): string
     {
         return match ($this->status) {
-            self::STATUS_DRAFT => 'badge bg-secondary-subtle text-secondary-emphasis',
-            self::STATUS_PENDING_SUPPORT, self::STATUS_PENDING_ADMIN => 'badge bg-warning-subtle text-warning-emphasis',
-            self::STATUS_PROCESSING => 'badge bg-primary-subtle text-primary-emphasis',
-            self::STATUS_APPROVED => 'badge bg-info-subtle text-info-emphasis',
-            self::STATUS_COMPLETED => 'badge bg-success-subtle text-success-emphasis',
-            self::STATUS_REJECTED, self::STATUS_PROVISION_FAILED, self::STATUS_CANCELLED => 'badge bg-danger-subtle text-danger-emphasis',
-            default => 'badge bg-dark-subtle text-dark-emphasis',
+            self::STATUS_DRAFT => 'secondary',
+            self::STATUS_PENDING_SUPPORT, self::STATUS_PENDING_ADMIN => 'warning',
+            self::STATUS_APPROVED => 'primary',
+            self::STATUS_PROCESSING => 'info',
+            self::STATUS_COMPLETED => 'success',
+            self::STATUS_REJECTED, self::STATUS_PROVISION_FAILED, self::STATUS_CANCELLED => 'danger',
+            default => 'dark',
         };
-    }
+    } //
 
     /**
-     * Get the user-friendly label for the application type with a fallback.
+     * Get the user-friendly label for the application type.
+     * This accessor fixes the `MissingAttributeException` error.
+     *
+     * @return string
      */
     public function getApplicationTypeLabelAttribute(): string
     {
-        $typeKey = !empty($this->proposed_email) ? 'email' : 'user_id';
-        $translationKey = 'email_applications.types.' . $typeKey;
-        $translation = __($translationKey);
-
-        // If the translation returns the key itself, it means it's not found.
-        // Provide a human-readable fallback.
-        if ($translation === $translationKey) {
-            return Str::title(str_replace('_', ' ', $typeKey) . ' Application');
+        // If 'proposed_email' has a value, it's an Email Application.
+        if (!empty($this->proposed_email)) {
+            return __('Permohonan Emel');
         }
 
-        return $translation;
+        // Otherwise, it's a User ID Application.
+        return __('Permohonan ID Pengguna');
     }
 
     // --- HELPER METHODS ---
     public function isDraft(): bool
     {
         return $this->status === self::STATUS_DRAFT;
-    }
+    } //
 
     public function isRejected(): bool
     {
         return $this->status === self::STATUS_REJECTED;
-    }
+    } //
 
     public function isCompletedOrProvisionFailed(): bool
     {
         return in_array($this->status, [self::STATUS_COMPLETED, self::STATUS_PROVISION_FAILED]);
-    }
+    } //
 
     public function areAllCertificationsComplete(): bool
     {
         return $this->cert_info_is_true &&
-            $this->cert_data_usage_agreed &&
-            $this->cert_email_responsibility_agreed;
-    }
+               $this->cert_data_usage_agreed &&
+               $this->cert_email_responsibility_agreed;
+    } //
 }

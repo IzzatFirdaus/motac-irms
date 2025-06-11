@@ -17,42 +17,43 @@ use Illuminate\Database\Eloquent\SoftDeletes; // Import the Blameable trait
  * System Design Reference: MOTAC Integrated Resource Management System (Revision 3) - Section 4.1, positions table
  *
  * @property int $id
- * @property string $name
+ * @property string $name (e.g., "Pegawai Teknologi Maklumat", "Pembantu Tadbir")
  * @property string|null $description
- * @property bool $is_active
- * @property int|null $grade_id
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
+ * @property int|null $grade_id (FK to grades.id)
+ * @property bool $is_active (default: true)
+ * @property int|null $created_by (FK to users.id)
+ * @property int|null $updated_by (FK to users.id)
+ * @property int|null $deleted_by (FK to users.id)
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \App\Models\User|null $creator
- * @property-read \App\Models\User|null $deleter
- * @property-read \App\Models\Grade|null $grade
- * @property-read \App\Models\User|null $updater
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
+ * @property-read \App\Models\Grade|null $grade The grade associated with this position.
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users Users who hold this position.
  * @property-read int|null $users_count
+ * @property-read \App\Models\User|null $creator User who created this record.
+ * @property-read \App\Models\User|null $updater User who last updated this record.
+ * @property-read \App\Models\User|null $deleter User who soft deleted this record.
  * @method static \Database\Factories\PositionFactory factory($count = null, $state = [])
- * @method static Builder<static>|Position newModelQuery()
- * @method static Builder<static>|Position newQuery()
- * @method static Builder<static>|Position onlyTrashed()
- * @method static Builder<static>|Position query()
- * @method static Builder<static>|Position search(?string $term)
- * @method static Builder<static>|Position whereCreatedAt($value)
- * @method static Builder<static>|Position whereCreatedBy($value)
- * @method static Builder<static>|Position whereDeletedAt($value)
- * @method static Builder<static>|Position whereDeletedBy($value)
- * @method static Builder<static>|Position whereDescription($value)
- * @method static Builder<static>|Position whereGradeId($value)
- * @method static Builder<static>|Position whereId($value)
- * @method static Builder<static>|Position whereIsActive($value)
- * @method static Builder<static>|Position whereName($value)
- * @method static Builder<static>|Position whereUpdatedAt($value)
- * @method static Builder<static>|Position whereUpdatedBy($value)
- * @method static Builder<static>|Position withTrashed()
- * @method static Builder<static>|Position withoutTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Position newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Position newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Position onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Position query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Position whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Position whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Position whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Position whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Position whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Position whereGradeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Position whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Position whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Position whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Position whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Position whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Position withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Position withoutTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Position search(string $term) Scope for searching.
  * @mixin \Eloquent
+ * @mixin IdeHelperPosition
  */
 class Position extends Model
 {
@@ -163,16 +164,16 @@ class Position extends Model
      */
     public function scopeSearch(Builder $query, ?string $term): Builder
     {
-        if ($term === null || $term === '' || $term === '0') {
+        if (empty($term)) {
             return $query;
         }
 
         $searchTerm = '%'.$term.'%';
 
-        return $query->where(function (Builder $subQuery) use ($searchTerm): void {
+        return $query->where(function (Builder $subQuery) use ($searchTerm) {
             $subQuery->where($this->getTable().'.name', 'like', $searchTerm)
                 ->orWhere($this->getTable().'.description', 'like', $searchTerm);
-        })->orWhereHas('grade', function (Builder $gradeQuery) use ($searchTerm): void {
+        })->orWhereHas('grade', function (Builder $gradeQuery) use ($searchTerm) {
             $gradeQuery->where('name', 'like', $searchTerm);
         });
     }

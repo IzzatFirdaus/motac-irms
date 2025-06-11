@@ -33,7 +33,9 @@ class ApplicationStatusUpdatedNotification extends Notification implements Shoul
         $this->application = $application;
         $this->oldStatus = $oldStatus;
         $this->newStatus = $newStatus;
-        $this->application->loadMissing('user');
+        if ($this->application instanceof Model) {
+            $this->application->loadMissing('user');
+        }
     }
 
     public function via(User $notifiable): array
@@ -56,7 +58,7 @@ class ApplicationStatusUpdatedNotification extends Notification implements Shoul
         $introLines = [
             __('Status :appType anda dengan nombor rujukan **#:id** telah dikemaskini dalam sistem.', [
                 'appType' => $applicationTypeDisplay,
-                'id' => $applicationId,
+                'id' => $applicationId
             ]),
             __('Status terdahulu: **:oldStatus**', ['oldStatus' => $oldStatusDisplay]),
             __('Status terkini: **:newStatus**', ['newStatus' => $newStatusDisplay]),
@@ -111,11 +113,9 @@ class ApplicationStatusUpdatedNotification extends Notification implements Shoul
         if ($this->application instanceof EmailApplication) {
             return __('Permohonan Akaun E-mel/ID Pengguna');
         }
-
         if ($this->application instanceof LoanApplication) {
             return __('Permohonan Pinjaman Peralatan ICT');
         }
-
         return 'Permohonan';
     }
 
@@ -137,7 +137,6 @@ class ApplicationStatusUpdatedNotification extends Notification implements Shoul
                 Log::error('Error generating URL for ApplicationStatusUpdatedNotification: '.$e->getMessage());
             }
         }
-
         return '#';
     }
 
@@ -145,10 +144,8 @@ class ApplicationStatusUpdatedNotification extends Notification implements Shoul
     {
         if (method_exists($application, 'getStatusOptions')) {
             $options = $application::getStatusOptions();
-
             return $options[$statusKey] ?? ucfirst(str_replace('_', ' ', $statusKey));
         }
-
         return ucfirst(str_replace('_', ' ', $statusKey));
     }
 }

@@ -17,45 +17,46 @@ use Illuminate\Support\Str; // For Str::title
  *
  * @property int $id
  * @property string $name
+ * @property string $branch_type Enum: 'state', 'headquarters'
+ * @property string|null $code
  * @property string|null $description
- * @property string|null $branch_type Corresponds to MOTAC Negeri/Bahagian distinction
- * @property string|null $code Optional department code
- * @property bool $is_active
- * @property int|null $head_of_department_id
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
+ * @property bool $is_active Default true
+ * @property int|null $head_of_department_id Foreign key for Head of Department User
+ * @property int|null $created_by (Handled by BlameableObserver)
+ * @property int|null $updated_by (Handled by BlameableObserver)
+ * @property int|null $deleted_by (Handled by BlameableObserver)
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \App\Models\User|null $creator
- * @property-read \App\Models\User|null $deleter
- * @property-read string $branch_type_label
- * @property-read \App\Models\User|null $headOfDepartment
- * @property-read \App\Models\User|null $updater
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
  * @property-read int|null $users_count
+ * @property-read \App\Models\User|null $headOfDepartment User relationship for HOD
+ * @property-read \App\Models\User|null $creator
+ * @property-read \App\Models\User|null $updater
+ * @property-read \App\Models\User|null $deleter
+ * @property-read string $branch_type_label
  * @method static \Database\Factories\DepartmentFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Department newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Department newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Department onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Department query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Department whereBranchType($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Department whereCode($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Department whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Department whereCreatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Department whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Department whereDeletedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Department whereDescription($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Department whereHeadOfDepartmentId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Department whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Department whereIsActive($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Department whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Department whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Department whereUpdatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Department withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Department withoutTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Department newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Department newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Department onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Department query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Department whereBranchType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Department whereCode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Department whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Department whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Department whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Department whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Department whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Department whereHeadOfDepartmentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Department whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Department whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Department whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Department whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Department whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Department withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Department withoutTrashed()
  * @mixin \Eloquent
+ * @mixin IdeHelperDepartment
  */
 class Department extends Model
 {

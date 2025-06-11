@@ -19,54 +19,29 @@ use Illuminate\Support\Str;
  *
  * @property int $id
  * @property int $loan_transaction_id
- * @property int $equipment_id
- * @property int|null $loan_application_item_id Link back to the requested item in application
+ * @property int $equipment_id Specific physical equipment item
+ * @property int|null $loan_application_item_id Link to original request line item
  * @property int $quantity_transacted Typically 1 for serialized items
- * @property string $status Status of this item in this transaction
- * @property string|null $condition_on_return
- * @property array<array-key, mixed>|null $accessories_checklist_issue
- * @property array<array-key, mixed>|null $accessories_checklist_return
- * @property string|null $item_notes
+ * @property string $status Status of this item within THIS transaction (e.g., 'issued', 'returned_good')
+ * @property string|null $condition_on_return Physical condition of the equipment upon return
+ * @property array|null $accessories_checklist_issue Item-specific accessories checklist at the point of issue (JSON)
+ * @property array|null $accessories_checklist_return Item-specific accessories checklist at the point of return (JSON)
+ * @property string|null $item_notes Notes specific to this item in this transaction
  * @property int|null $created_by
  * @property int|null $updated_by
  * @property int|null $deleted_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \App\Models\User|null $creator
- * @property-read \App\Models\User|null $deleter
- * @property-read \App\Models\Equipment $equipment
- * @property-read string|null $condition_on_return_translated
- * @property-read string $status_label
- * @property-read string $status_translated
- * @property-read \App\Models\LoanApplicationItem|null $loanApplicationItem
  * @property-read \App\Models\LoanTransaction $loanTransaction
- * @property-read LoanTransactionItem|null $returnRecord
+ * @property-read \App\Models\Equipment $equipment
+ * @property-read \App\Models\LoanApplicationItem|null $loanApplicationItem
+ * @property-read \App\Models\User|null $creator
  * @property-read \App\Models\User|null $updater
- * @method static \Database\Factories\LoanTransactionItemFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereAccessoriesChecklistIssue($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereAccessoriesChecklistReturn($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereConditionOnReturn($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereCreatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereDeletedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereEquipmentId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereItemNotes($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereLoanApplicationItemId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereLoanTransactionId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereQuantityTransacted($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereUpdatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem withoutTrashed()
- * @mixin \Eloquent
+ * @property-read \App\Models\User|null $deleter
+ * @property-read string $status_translated
+ * @property-read string|null $condition_on_return_translated
+ * @mixin IdeHelperLoanTransactionItem
  */
 class LoanTransactionItem extends Model
 {
@@ -89,7 +64,6 @@ class LoanTransactionItem extends Model
     public const STATUS_ITEM_REPORTED_LOST = 'reported_lost';
 
     public const STATUS_ITEM_UNSERVICEABLE_ON_RETURN = 'unserviceable_on_return';
-
     // public const STATUS_ITEM_OVERDUE = 'overdue'; // Overdue is typically an application or loan transaction level status, not item level.
 
     // Labels for status constants for display purposes
@@ -164,12 +138,15 @@ class LoanTransactionItem extends Model
 
     /**
      * The "booted" method of the model.
+     *
+     * @return void
      */
     // protected static function booted(): void // The `boot()` method is generally preferred for model event registration over `booted()`
     // {
     // If you still need $CONDITION_ON_RETURN_LIST, it's better to define it as a static method
     // or ensure Equipment::getConditionStatusOptions() is always available.
     // }
+
     // Relationships
     public function loanTransaction(): BelongsTo
     {
@@ -199,7 +176,7 @@ class LoanTransactionItem extends Model
         // within a 'return' type LoanTransaction for the same LoanApplication.
         // This is a simplified example. A more robust link might be needed.
         return $this->hasOne(LoanTransactionItem::class, 'equipment_id', 'equipment_id')
-            ->whereHas('loanTransaction', function ($query): void {
+            ->whereHas('loanTransaction', function ($query) {
                 $query->where('type', LoanTransaction::TYPE_RETURN)
                     ->where('loan_application_id', $this->loanTransaction?->loan_application_id);
             })
@@ -286,7 +263,7 @@ class LoanTransactionItem extends Model
         parent::boot();
 
         // Listener for when a LoanTransactionItem is saved (created or updated)
-        static::saved(function (self $item): void {
+        static::saved(function (self $item) {
             if ($item->loanApplicationItem) { // Check if the relationship exists
                 $item->loanApplicationItem->recalculateQuantities();
                 // Save if dirty, but recalculateQuantities should ideally handle saving or return a flag
@@ -294,20 +271,18 @@ class LoanTransactionItem extends Model
                     $item->loanApplicationItem->saveQuietly(); // Use saveQuietly to avoid infinite loops if recalculateQuantities also triggers saves
                 }
             }
-
             // Update parent LoanTransaction, which should then update LoanApplication
             $item->loanTransaction?->updateParentLoanApplicationStatus();
         });
 
         // Listener for when a LoanTransactionItem is deleted (soft or hard)
-        static::deleted(function (self $item): void {
+        static::deleted(function (self $item) {
             if ($item->loanApplicationItem) {
                 $item->loanApplicationItem->recalculateQuantities();
                 if ($item->loanApplicationItem->isDirty()) {
                     $item->loanApplicationItem->saveQuietly();
                 }
             }
-
             $item->loanTransaction?->updateParentLoanApplicationStatus();
         });
     }

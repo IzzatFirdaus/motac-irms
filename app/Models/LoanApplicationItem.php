@@ -13,56 +13,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-/**
- *
- *
- * @property int $id
- * @property int $loan_application_id
- * @property int|null $equipment_id
- * @property string $equipment_type e.g., Laptop, Projektor, LCD Monitor
- * @property int $quantity_requested
- * @property int|null $quantity_approved
- * @property int $quantity_issued
- * @property int $quantity_returned Added as per System Design
- * @property string $status Status of this specific requested item
- * @property string|null $notes Specific requirements or remarks by applicant
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \App\Models\Equipment|null $equipment
- * @property-read string $equipment_type_label // Changed from equipment_type_name for Blade compatibility
- * @property-read string $status_label
- * @property-read \App\Models\LoanApplication $loanApplication
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanTransactionItem> $loanTransactionItems
- * @property-read int|null $loan_transaction_items_count
- * @method static \Database\Factories\LoanApplicationItemFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereCreatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereDeletedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereEquipmentId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereEquipmentType($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereLoanApplicationId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereNotes($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereQuantityApproved($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereQuantityIssued($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereQuantityRequested($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereQuantityReturned($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereUpdatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem withoutTrashed()
- * @mixin \Eloquent
- */
 class LoanApplicationItem extends Model
 {
     use HasFactory;
@@ -113,17 +63,16 @@ class LoanApplicationItem extends Model
 
     protected static function booted(): void
     {
-        static::creating(function ($item): void {
+        static::creating(function ($item) {
             if (empty($item->status)) {
                 $item->status = self::STATUS_PENDING_APPROVAL;
             }
-
             $item->quantity_issued = $item->quantity_issued ?? 0;
             $item->quantity_returned = $item->quantity_returned ?? 0;
         });
 
-        static::deleting(function ($loanApplicationItem): void {
-            DB::transaction(function () use ($loanApplicationItem): void {
+        static::deleting(function ($loanApplicationItem) {
+            DB::transaction(function () use ($loanApplicationItem) {
                 $loanApplicationItem->loanTransactionItems()->delete();
             });
         });
@@ -156,21 +105,6 @@ class LoanApplicationItem extends Model
         return self::ITEM_STATUS_LABELS[$this->status] ?? Str::title(str_replace('_', ' ', (string) $this->status));
     }
 
-    /**
-     * This accessor provides the 'equipment_type_label' attribute on the fly.
-     * It looks for a human-readable label from the Equipment model's static options
-     * based on the 'equipment_type' column.
-     * If not found, it creates a nicely formatted name from the 'equipment_type' string itself.
-     *
-     * @return string
-     */
-    public function getEquipmentTypeLabelAttribute(): string // Renamed from getEquipmentTypeNameAttribute
-    {
-        // Ensure that Equipment::getAssetTypeOptions() is correctly defined and returns an array
-        // where keys match the values in your 'equipment_type' column.
-        return Equipment::getAssetTypeOptions()[$this->equipment_type] ?? Str::title(str_replace('_', ' ', (string) $this->equipment_type));
-    }
-
     // Helper Methods
     public function recalculateQuantities(): void
     {
@@ -191,6 +125,8 @@ class LoanApplicationItem extends Model
         $this->quantity_issued = $issuedQty;
         $this->quantity_returned = $returnedQty;
 
+        // **THE FIX**: This block checks if the quantities have changed and, if so,
+        // saves the updated model to the database. This is the crucial final step.
         if ($this->isDirty(['quantity_issued', 'quantity_returned'])) {
             $this->save();
         }

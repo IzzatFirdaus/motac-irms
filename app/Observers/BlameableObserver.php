@@ -7,6 +7,7 @@ namespace App\Observers;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class BlameableObserver
 {
@@ -20,7 +21,6 @@ class BlameableObserver
             if ($this->hasBlameableColumn($model, 'created_by')) {
                 $model->created_by = $userId;
             }
-
             if ($this->hasBlameableColumn($model, 'updated_by')) {
                 $model->updated_by = $userId;
             }
@@ -46,7 +46,6 @@ class BlameableObserver
         if (! in_array(SoftDeletes::class, class_uses_recursive(get_class($model)))) {
             return;
         }
-
         if ($model->isForceDeleting()) {
             return;
         }

@@ -15,93 +15,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 /**
- *
- *
- * @property int $id
- * @property int|null $equipment_category_id
- * @property int|null $sub_category_id
- * @property string|null $item_code Unique internal identifier (from HRMS template)
- * @property string|null $tag_id MOTAC asset tag / No. Aset (from MOTAC Design)
- * @property string|null $serial_number Manufacturer Serial Number
- * @property string $asset_type Specific type of asset (e.g., laptop, projector - from MOTAC Design)
- * @property string|null $brand
- * @property string|null $model
- * @property string|null $description Detailed description of the equipment
- * @property numeric|null $purchase_price
- * @property \Illuminate\Support\Carbon|null $purchase_date
- * @property \Illuminate\Support\Carbon|null $warranty_expiry_date
- * @property string $status Operational status (e.g., available, on_loan - from MOTAC Design)
- * @property string $condition_status Physical condition (e.g., good, fair - from MOTAC Design)
- * @property int|null $location_id
- * @property string|null $current_location Free-text current location details (from MOTAC Design)
- * @property string|null $notes
- * @property string|null $classification Broad classification (from HRMS template)
- * @property string|null $acquisition_type How the equipment was acquired (from HRMS template)
- * @property string|null $funded_by e.g., Project Name, Grant ID (from HRMS template)
- * @property string|null $supplier_name Supplier name (from HRMS template)
- * @property int|null $department_id
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \App\Models\LoanTransactionItem|null $activeLoanTransactionItem
- * @property-read \App\Models\User|null $creator
- * @property-read \App\Models\Location|null $definedLocation
- * @property-read \App\Models\User|null $deleter
- * @property-read \App\Models\Department|null $department
- * @property-read \App\Models\EquipmentCategory|null $equipmentCategory
- * @property-read string $acquisition_type_label
- * @property-read string $asset_type_label
- * @property-read string $brand_model_serial
- * @property-read string $classification_label
- * @property-read string $condition_color_class
- * @property-read string $condition_status_label
- * @property-read string $name
- * @property-read string $status_color_class
- * @property-read string $status_label
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanTransactionItem> $loanTransactionItems
- * @property-read int|null $loan_transaction_items_count
- * @property-read \App\Models\SubCategory|null $subCategory
- * @property-read \App\Models\User|null $updater
- * @method static \Database\Factories\EquipmentFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereAcquisitionType($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereAssetType($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereBrand($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereClassification($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereConditionStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereCreatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereCurrentLocation($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereDeletedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereDepartmentId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereDescription($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereEquipmentCategoryId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereFundedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereItemCode($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereLocationId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereModel($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereNotes($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment wherePurchaseDate($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment wherePurchasePrice($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereSerialNumber($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereSubCategoryId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereSupplierName($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereTagId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereUpdatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereWarrantyExpiryDate($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment withoutTrashed()
- * @mixin \Eloquent
+ * @mixin IdeHelperEquipment
  */
 class Equipment extends Model
 {
@@ -111,61 +25,37 @@ class Equipment extends Model
 
   // --- CONSTANTS ---
   public const ASSET_TYPE_LAPTOP = 'laptop';
-
   public const ASSET_TYPE_PROJECTOR = 'projector';
-
   public const ASSET_TYPE_PRINTER = 'printer';
-
   public const ASSET_TYPE_DESKTOP_PC = 'desktop_pc';
-
   public const ASSET_TYPE_MONITOR = 'monitor';
-
   public const ASSET_TYPE_OTHER_ICT = 'other_ict';
 
   public const STATUS_AVAILABLE = 'available';
-
   public const STATUS_ON_LOAN = 'on_loan';
-
   public const STATUS_UNDER_MAINTENANCE = 'under_maintenance';
-
   public const STATUS_DISPOSED = 'disposed';
-
   public const STATUS_LOST = 'lost';
-
   public const STATUS_DAMAGED_NEEDS_REPAIR = 'damaged_needs_repair';
-
   public const STATUS_RETURNED_PENDING_INSPECTION = 'returned_pending_inspection';
 
   public const CONDITION_NEW = 'new';
-
   public const CONDITION_GOOD = 'good';
-
   public const CONDITION_FAIR = 'fair';
-
   public const CONDITION_MINOR_DAMAGE = 'minor_damage';
-
   public const CONDITION_MAJOR_DAMAGE = 'major_damage';
-
   public const CONDITION_UNSERVICEABLE = 'unserviceable';
-
   public const CONDITION_LOST = 'lost';
 
   public const ACQUISITION_TYPE_PURCHASE = 'purchase';
-
   public const ACQUISITION_TYPE_LEASE = 'lease';
-
   public const ACQUISITION_TYPE_DONATION = 'donation';
-
   public const ACQUISITION_TYPE_TRANSFER = 'transfer';
-
   public const ACQUISITION_TYPE_OTHER = 'other_acquisition';
 
   public const CLASSIFICATION_ASSET = 'asset';
-
   public const CLASSIFICATION_INVENTORY = 'inventory';
-
   public const CLASSIFICATION_CONSUMABLE = 'consumable';
-
   public const CLASSIFICATION_OTHER = 'other_classification';
 
   public static array $ASSET_TYPES_LABELS = [
@@ -213,7 +103,6 @@ class Equipment extends Model
   ];
 
   protected $table = 'equipment';
-
   protected $fillable = [
     'asset_type',
     'brand',
@@ -236,21 +125,19 @@ class Equipment extends Model
     'acquisition_type',
     'classification',
     'funded_by',
-    'supplier_name',
+    'supplier_name'
   ];
-
   protected $casts = [
     'purchase_date' => 'date:Y-m-d',
     'warranty_expiry_date' => 'date:Y-m-d',
     'purchase_price' => 'decimal:2',
     'created_at' => 'datetime',
     'updated_at' => 'datetime',
-    'deleted_at' => 'datetime',
+    'deleted_at' => 'datetime'
   ];
-
   protected $attributes = [
     'status' => self::STATUS_AVAILABLE,
-    'condition_status' => self::CONDITION_GOOD,
+    'condition_status' => self::CONDITION_GOOD
   ];
 
   // --- STATIC GETTERS ---
@@ -258,47 +145,38 @@ class Equipment extends Model
   {
     return self::$ASSET_TYPES_LABELS;
   }
-
   public static function getStatusOptions(): array
   {
     return self::$STATUSES_LABELS;
   }
-
   public static function getConditionStatusOptions(): array
   {
     return self::$CONDITION_STATUSES_LABELS;
   }
-
   public static function getAcquisitionTypeOptions(): array
   {
     return self::$ACQUISITION_TYPES_LABELS;
   }
-
   public static function getClassificationOptions(): array
   {
     return self::$CLASSIFICATION_LABELS;
   }
-
   public static function getAssetTypesList(): array
   {
     return array_keys(self::$ASSET_TYPES_LABELS);
   }
-
   public static function getOperationalStatusesList(): array
   {
     return array_keys(self::$STATUSES_LABELS);
   }
-
   public static function getConditionStatusesList(): array
   {
     return array_keys(self::$CONDITION_STATUSES_LABELS);
   }
-
   public static function getAcquisitionTypesList(): array
   {
     return array_keys(self::$ACQUISITION_TYPES_LABELS);
   }
-
   public static function getClassificationsList(): array
   {
     return array_keys(self::$CLASSIFICATION_LABELS);
@@ -314,27 +192,22 @@ class Equipment extends Model
   {
     return $this->belongsTo(Department::class, 'department_id');
   }
-
   public function equipmentCategory(): BelongsTo
   {
     return $this->belongsTo(EquipmentCategory::class, 'equipment_category_id');
   }
-
   public function subCategory(): BelongsTo
   {
     return $this->belongsTo(SubCategory::class, 'sub_category_id');
   }
-
   public function definedLocation(): BelongsTo
   {
     return $this->belongsTo(Location::class, 'location_id');
   }
-
   public function loanTransactionItems(): HasMany
   {
     return $this->hasMany(LoanTransactionItem::class, 'equipment_id');
   }
-
   public function activeLoanTransactionItem(): \Illuminate\Database\Eloquent\Relations\HasOne
   {
     return $this->hasOne(LoanTransactionItem::class, 'equipment_id')
@@ -347,22 +220,18 @@ class Equipment extends Model
   {
     return __(self::$ASSET_TYPES_LABELS[$this->asset_type] ?? Str::title(str_replace('_', ' ', (string) $this->asset_type)));
   }
-
   public function getStatusLabelAttribute(): string
   {
     return __(self::$STATUSES_LABELS[$this->status] ?? Str::title(str_replace('_', ' ', (string) $this->status)));
   }
-
   public function getConditionStatusLabelAttribute(): string
   {
     return __(self::$CONDITION_STATUSES_LABELS[$this->condition_status] ?? Str::title(str_replace('_', ' ', (string) $this->condition_status)));
   }
-
   public function getAcquisitionTypeLabelAttribute(): string
   {
     return __(self::$ACQUISITION_TYPES_LABELS[$this->acquisition_type] ?? Str::title(str_replace('_', ' ', (string) $this->acquisition_type)));
   }
-
   public function getClassificationLabelAttribute(): string
   {
     return __(self::$CLASSIFICATION_LABELS[$this->classification] ?? Str::title(str_replace('_', ' ', (string) $this->classification)));
@@ -411,48 +280,41 @@ class Equipment extends Model
     if (! empty($this->brand)) {
       $parts[] = $this->brand;
     }
-
     if (! empty($this->model)) {
       $parts[] = $this->model;
     }
-
     $description = implode(' ', $parts);
     if (! empty($this->serial_number)) {
       return $description . ' (S/N: ' . $this->serial_number . ')';
-    }
-    if (! empty($this->tag_id)) {
+    } elseif (! empty($this->tag_id)) {
       return $description . ' (Tag ID: ' . $this->tag_id . ')';
     }
-
-    return $description !== '' && $description !== '0' ? $description : __('Peralatan Tidak Bernama');
+    return $description ?: __('Peralatan Tidak Bernama');
   }
 
   // --- BUSINESS LOGIC METHODS ---
   public function updateOperationalStatus(string $newStatus, ?string $reason = null, ?int $actingUserId = null): bool
   {
     if (! array_key_exists($newStatus, self::$STATUSES_LABELS)) {
-      Log::warning(sprintf("Equipment ID %d: Invalid operational status update to '%s'.", $this->id, $newStatus), ['acting_user_id' => $actingUserId]);
-
+      Log::warning("Equipment ID {$this->id}: Invalid operational status update to '{$newStatus}'.", ['acting_user_id' => $actingUserId]);
       return false;
     }
-
     $oldStatus = $this->status;
     $this->status = $newStatus;
-    $actingUserName = $actingUserId !== null && $actingUserId !== 0 ? (User::find($actingUserId)?->name ?? 'Sistem') : 'Sistem';
+    $actingUserName = $actingUserId ? (User::find($actingUserId)?->name ?? 'Sistem') : 'Sistem';
 
-    if ($reason !== null && $reason !== '' && $reason !== '0') {
-      $this->notes = ($this->notes ? $this->notes . "\n" : '') . sprintf("Status Operasi ditukar dari '%s' kepada '%s' oleh %s pada ", $oldStatus, $newStatus, $actingUserName) . now()->translatedFormat('d/m/Y H:i A') . ('. Sebab: ' . $reason);
+    if ($reason) {
+      $this->notes = ($this->notes ? $this->notes . "\n" : '') . "Status Operasi ditukar dari '{$oldStatus}' kepada '{$newStatus}' oleh {$actingUserName} pada " . now()->translatedFormat('d/m/Y H:i A') . ". Sebab: {$reason}";
     }
-
-    if ($actingUserId !== null && $actingUserId !== 0) {
+    if ($actingUserId) {
       $this->updated_by = $actingUserId;
     }
 
     $saved = $this->save();
     if ($saved) {
-      Log::info(sprintf('Equipment ID %d operational status updated.', $this->id), ['old_status' => $oldStatus, 'new_status' => $newStatus, 'user_id' => $actingUserId]);
+      Log::info("Equipment ID {$this->id} operational status updated.", ['old_status' => $oldStatus, 'new_status' => $newStatus, 'user_id' => $actingUserId]);
     } else {
-      Log::error(sprintf('Equipment ID %d: Failed to save operational status update.', $this->id), ['old_status' => $oldStatus, 'new_status' => $newStatus, 'user_id' => $actingUserId]);
+      Log::error("Equipment ID {$this->id}: Failed to save operational status update.", ['old_status' => $oldStatus, 'new_status' => $newStatus, 'user_id' => $actingUserId]);
     }
 
     return $saved;
@@ -461,61 +323,26 @@ class Equipment extends Model
   public function updatePhysicalConditionStatus(string $newCondition, ?string $reason = null, ?int $actingUserId = null): bool
   {
     if (! array_key_exists($newCondition, self::$CONDITION_STATUSES_LABELS)) {
-      Log::warning(sprintf("Equipment ID %d: Invalid condition status update to '%s'.", $this->id, $newCondition), ['acting_user_id' => $actingUserId]);
-
+      Log::warning("Equipment ID {$this->id}: Invalid condition status update to '{$newCondition}'.", ['acting_user_id' => $actingUserId]);
       return false;
     }
-
     $oldCondition = $this->condition_status;
     $this->condition_status = $newCondition;
-    $actingUserName = $actingUserId !== null && $actingUserId !== 0 ? (User::find($actingUserId)?->name ?? 'Sistem') : 'Sistem';
+    $actingUserName = $actingUserId ? (User::find($actingUserId)?->name ?? 'Sistem') : 'Sistem';
 
-    if ($reason !== null && $reason !== '' && $reason !== '0') {
-      $this->notes = ($this->notes ? $this->notes . "\n" : '') . sprintf("Status Keadaan Fizikal ditukar dari '%s' kepada '%s' oleh %s pada ", $oldCondition, $newCondition, $actingUserName) . now()->translatedFormat('d/m/Y H:i A') . ('. Sebab: ' . $reason);
+    if ($reason) {
+      $this->notes = ($this->notes ? $this->notes . "\n" : '') . "Status Keadaan Fizikal ditukar dari '{$oldCondition}' kepada '{$newCondition}' oleh {$actingUserName} pada " . now()->translatedFormat('d/m/Y H:i A') . ". Sebab: {$reason}";
     }
-
-    if ($actingUserId !== null && $actingUserId !== 0) {
+    if ($actingUserId) {
       $this->updated_by = $actingUserId;
     }
-
     $saved = $this->save();
     if ($saved) {
-      Log::info(sprintf('Equipment ID %d condition status updated.', $this->id), ['old_condition' => $oldCondition, 'new_condition' => $newCondition, 'user_id' => $actingUserId]);
+      Log::info("Equipment ID {$this->id} condition status updated.", ['old_condition' => $oldCondition, 'new_condition' => $newCondition, 'user_id' => $actingUserId]);
     } else {
-      Log::error(sprintf('Equipment ID %d: Failed to save physical condition status update.', $this->id), ['old_condition' => $oldCondition, 'new_condition' => $newCondition, 'user_id' => $actingUserId]);
+      Log::error("Equipment ID {$this->id}: Failed to save physical condition status update.", ['old_condition' => $oldCondition, 'new_condition' => $newCondition, 'user_id' => $actingUserId]);
     }
 
     return $saved;
-  }
-
-  /**
-   * Returns a summary count of equipment grouped by status.
-   *
-   * @return array<string, int>
-   */
-  public static function getStatusSummary(): array
-  {
-    return static::query()
-      ->select('status', \DB::raw('count(*) as total'))
-      ->groupBy('status')
-      ->pluck('total', 'status')
-      ->toArray();
-  }
-
-  /**
-   * Calculates equipment utilization rate (on loan / total) * 100.
-   *
-   * @return float
-   */
-  public static function getUtilizationRate(): float
-  {
-    $total = static::count();
-    $onLoan = static::where('status', self::STATUS_ON_LOAN)->count();
-
-    if ($total === 0) {
-      return 0;
-    }
-
-    return round(($onLoan / $total) * 100, 2);
   }
 }

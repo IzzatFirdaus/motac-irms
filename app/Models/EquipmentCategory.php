@@ -28,14 +28,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \App\Models\User|null $creator
+ * @property-read \App\Models\User|null $updater
  * @property-read \App\Models\User|null $deleter
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Equipment> $equipment
  * @property-read int|null $equipment_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\SubCategory> $subCategories
  * @property-read int|null $sub_categories_count
- * @property-read \App\Models\User|null $updater
  * @method static Builder<static>|EquipmentCategory active()
- * @method static \Database\Factories\EquipmentCategoryFactory factory($count = null, $state = [])
+ * @method static EquipmentCategoryFactory factory($count = null, $state = [])
  * @method static Builder<static>|EquipmentCategory newModelQuery()
  * @method static Builder<static>|EquipmentCategory newQuery()
  * @method static Builder<static>|EquipmentCategory onlyTrashed()
@@ -46,13 +46,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static Builder<static>|EquipmentCategory whereDeletedBy($value)
  * @method static Builder<static>|EquipmentCategory whereDescription($value)
  * @method static Builder<static>|EquipmentCategory whereId($value)
- * @method static Builder<static>|EquipmentCategory whereIsActive($value)
  * @method static Builder<static>|EquipmentCategory whereName($value)
  * @method static Builder<static>|EquipmentCategory whereUpdatedAt($value)
  * @method static Builder<static>|EquipmentCategory whereUpdatedBy($value)
  * @method static Builder<static>|EquipmentCategory withTrashed()
  * @method static Builder<static>|EquipmentCategory withoutTrashed()
  * @mixin \Eloquent
+ * @mixin IdeHelperEquipmentCategory
  */
 class EquipmentCategory extends Model
 {

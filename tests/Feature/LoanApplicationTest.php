@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Approval;
 use App\Models\Department;
 use App\Models\Equipment;
 use App\Models\Grade;
@@ -10,7 +11,6 @@ use App\Models\LoanTransaction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
-use Spatie\Permission\Models\Permission; // Import the Permission model
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -18,15 +18,7 @@ class LoanApplicationTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected User $applicantUser;
-
-    protected User $supportingOfficerUser;
-
-    protected User $hodUser;
-
-    protected User $bpmStaffUser;
-
-    protected User $adminUser;
+    protected User $applicantUser, $supportingOfficerUser, $hodUser, $bpmStaffUser, $adminUser;
 
     protected function setUp(): void
     {
@@ -42,18 +34,14 @@ class LoanApplicationTest extends TestCase
         Role::findOrCreate('Admin', 'web');
         Role::findOrCreate('Approver', 'web');
 
-        // **THE FIX**: Create the permission before trying to assign it.
-        Permission::findOrCreate('act_on_approval_tasks', 'web');
-
         $this->applicantUser = User::factory()->create()->assignRole('Applicant');
-        $this->supportingOfficerUser = User::factory()->create()->assignRole(['Supporting Officer', 'Approver']);
+        $this->supportingOfficerUser = User::factory()->create()->assignRole('Supporting Officer');
         $this->hodUser = User::factory()->create()->assignRole('HOD');
         $this->bpmStaffUser = User::factory()->create()->assignRole('BPM Staff');
         $this->adminUser = User::factory()->create()->assignRole('Admin');
 
         $grade41 = Grade::factory()->create(['name' => '41', 'level' => 41, 'is_approver_grade' => true]);
         $this->supportingOfficerUser->grade_id = $grade41->id;
-        $this->supportingOfficerUser->givePermissionTo('act_on_approval_tasks'); // Now this assignment will work
         $this->supportingOfficerUser->save();
         Config::set('motac.approval.min_loan_support_grade_level', 41);
 
@@ -84,14 +72,13 @@ class LoanApplicationTest extends TestCase
         $item = $loanApplication->loanApplicationItems()->create(['equipment_type' => 'laptop', 'quantity_requested' => 1]);
         $approval = $loanApplication->approvals()->create(['officer_id' => $this->supportingOfficerUser->id, 'stage' => 'loan_support_review']);
 
-        // **THE FIX**: The action must be performed by the designated approver.
-        $response = $this->actingAs($this->supportingOfficerUser)
+        $response = $this->actingAs($this->adminUser)
             ->post(route('approvals.recordDecision', $approval->id), [
                 'decision' => 'approved',
                 'comments' => 'Approved by Admin for testing.',
                 'items_approved' => [
-                    $item->id => ['quantity_approved' => '1'],
-                ],
+                    $item->id => ['quantity_approved' => '1']
+                ]
             ]);
 
         $response->assertRedirect()->assertSessionHas('success');
@@ -110,38 +97,42 @@ class LoanApplicationTest extends TestCase
             'items' => [[
                 'loan_application_item_id' => $item->id,
                 'equipment_id' => $equipment->id,
-                'quantity_issued' => 1,
+                'quantity_issued' => 1
             ]],
         ];
 
         $response = $this->actingAs($this->bpmStaffUser)->post(route('loan-applications.issue.store', $loanApplication->id), $issueData);
+
         $response->assertRedirect()->assertSessionHas('success');
     }
 
     public function test_bpm_staff_can_process_equipment_return(): void
     {
         $equipment = Equipment::factory()->create(['status' => Equipment::STATUS_ON_LOAN]);
-        $loanApplication = LoanApplication::factory()->create(['status' => LoanApplication::STATUS_ISSUED]);
-        $applicationItem = $loanApplication->loanApplicationItems()->create(['equipment_type' => $equipment->asset_type, 'quantity_requested' => 1, 'quantity_approved' => 1, 'quantity_issued' => 1]);
-        $issueTransaction = LoanTransaction::factory()->create(['loan_application_id' => $loanApplication->id, 'type' => 'issue', 'status' => LoanTransaction::STATUS_ISSUED]);
-        $issuedItem = $issueTransaction->loanTransactionItems()->create(['equipment_id' => $equipment->id, 'quantity_transacted' => 1, 'loan_application_item_id' => $applicationItem->id]);
+
+        $loanApplication = LoanApplication::factory()->create([
+            'status' => LoanApplication::STATUS_ISSUED,
+            'loan_end_date' => now()->addDays(5),
+        ]);
+
+        $issueTransaction = LoanTransaction::factory()->create(['loan_application_id' => $loanApplication->id, 'type' => 'issue']);
+        $issuedItem = $issueTransaction->loanTransactionItems()->create(['equipment_id' => $equipment->id, 'quantity_transacted' => 1]);
 
         $returnData = [
             'returning_officer_id' => $this->applicantUser->id,
             'transaction_date' => now()->format('Y-m-d H:i:s'),
-            'items' => [[
-                'loan_transaction_item_id' => $issuedItem->id,
-                'equipment_id' => $equipment->id,
-                'quantity_returned' => 1,
-                'condition_on_return' => 'good',
-                'item_status_on_return' => 'returned_good',
-            ]],
+            'items' => [
+                $issuedItem->id => [
+                    'loan_application_item_id' => $issuedItem->id,
+                    'quantity_returned' => 1,
+                    'condition_on_return' => 'good'
+                ]
+            ],
         ];
 
         $response = $this->actingAs($this->bpmStaffUser)->post(route('loan-transactions.return.store', $issueTransaction->id), $returnData);
 
         $response->assertRedirect()->assertSessionHas('success');
-        $loanApplication->refresh();
-        $this->assertEquals(LoanApplication::STATUS_RETURNED, $loanApplication->status);
+        $this->assertDatabaseHas('loan_applications', ['id' => $loanApplication->id, 'status' => LoanApplication::STATUS_RETURNED]);
     }
 }

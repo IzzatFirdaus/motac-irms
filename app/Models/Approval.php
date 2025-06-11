@@ -19,49 +19,50 @@ use Illuminate\Support\Str;
  * System Design Reference: MOTAC Integrated Resource Management System (Revision 3) - Section 4.4
  *
  * @property int $id
- * @property string $approvable_type
- * @property int $approvable_id
- * @property int $officer_id
- * @property string|null $stage e.g., support_review, admin_review, hod_review
- * @property string $status
- * @property string|null $comments
- * @property \Illuminate\Support\Carbon|null $approval_timestamp
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
+ * @property string $approvable_type Model class name (e.g., EmailApplication::class, LoanApplication::class)
+ * @property int $approvable_id ID of the model instance being approved
+ * @property int $officer_id User ID of the approving/rejecting officer
+ * @property string|null $stage Approval stage identifier (e.g., 'email_support_review', 'loan_approver_review') // Updated example
+ * @property string $status Enum: 'pending', 'approved', 'rejected'
+ * @property string|null $comments Officer's comments regarding the decision
+ * @property \Illuminate\Support\Carbon|null $approval_timestamp Timestamp of when the approval/rejection decision was made
+ * @property int|null $created_by User ID of the creator of this approval record
+ * @property int|null $updated_by User ID of the last updater of this approval record
+ * @property int|null $deleted_by User ID of the deleter (for soft deletes)
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read Model|\Eloquent $approvable
- * @property-read \App\Models\User|null $creator
- * @property-read \App\Models\User|null $deleter
- * @property-read string|null $stage_translated
- * @property-read string $status_color_class
- * @property-read string $status_translated
- * @property-read \App\Models\User $officer
- * @property-read \App\Models\User|null $updater
- * @method static \Database\Factories\ApprovalFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereApprovableId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereApprovableType($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereApprovalTimestamp($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereComments($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereCreatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereDeletedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereOfficerId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereStage($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereUpdatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval withoutTrashed()
+ * @property-read Model|\Eloquent $approvable Polymorphic relation to the item being approved.
+ * @property-read \App\Models\User $officer The User who is assigned to make the approval decision.
+ * @property-read \App\Models\User|null $creator User who created this approval record.
+ * @property-read \App\Models\User|null $updater User who last updated this approval record.
+ * @property-read \App\Models\User|null $deleter User who soft-deleted this approval record.
+ * @property-read string $statusTranslated Accessor for a human-readable, translated status.
+ * @property-read string|null $stageTranslated Accessor for a human-readable, translated stage name.
+ * @property-read string $status_color_class Accessor for the Bootstrap badge color class.
+ * @method static ApprovalFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|Approval newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Approval newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Approval onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Approval query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Approval whereApprovableId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Approval whereApprovableType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Approval whereApprovalTimestamp($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Approval whereComments($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Approval whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Approval whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Approval whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Approval whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Approval whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Approval whereOfficerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Approval whereStage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Approval whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Approval whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Approval whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Approval withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Approval withoutTrashed()
  * @mixin \Eloquent
+ * @mixin IdeHelperApproval
  */
 class Approval extends Model
 {
@@ -228,6 +229,8 @@ class Approval extends Model
 
     /**
      * EDITED: Get the corresponding color class for the status badge.
+     *
+     * @return string
      */
     public function getStatusColorClassAttribute(): string
     {
@@ -248,7 +251,7 @@ class Approval extends Model
     {
         if (! $this->relationLoaded('approvable')) {
             $this->load([
-                'approvable' => function (MorphTo $morphTo): void {
+                'approvable' => function (MorphTo $morphTo) {
                     $morphTo->morphWith([
                         EmailApplication::class => [
                             'user:id,name,department_id,grade_id,position_id', // Select specific fields needed
@@ -268,11 +271,9 @@ class Approval extends Model
                 },
             ]);
         }
-
         if (! $this->relationLoaded('officer')) {
             $this->load('officer:id,name'); // Load only necessary fields
         }
-
         if (method_exists($this, 'creator') && ! $this->relationLoaded('creator')) {
             $this->load('creator:id,name'); // Load only necessary fields
         }

@@ -16,10 +16,9 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB; // Ensure DB facade is imported
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -30,7 +29,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Registering application services as singletons for efficiency.
+        // Registering application services as singletons
         $this->app->singleton(ApprovalService::class);
         $this->app->singleton(EmailApplicationService::class);
         $this->app->singleton(EmailProvisioningService::class);
@@ -46,57 +45,50 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // --- REVISED: Locale setting logic is now handled here. ---
-        // This is more robust than using middleware for this specific case.
-        $sessionLocale = Session::get('locale');
-        $fallbackLocale = Config::get('app.fallback_locale', 'en');
-        $finalLocale = $fallbackLocale; // Default to fallback
+        // EDIT: This debugger is now more specific. It will only stop
+        // on the INSERT query for a 'return' transaction, which is the one that fails.
+        DB::listen(function ($query) {
+            // Check if this is an insert into the correct table
+            if (str_contains($query->sql, 'insert into `loan_transactions`')) {
+                // Find the position of the `type` column in the SQL statement
+                // to reliably check its value in the bindings array.
+                preg_match('/`type`/', $query->sql, $matches, PREG_OFFSET_CAPTURE);
+                if (isset($matches[0])) {
+                    $typePosition = substr_count(substr($query->sql, 0, $matches[0][1]), '`');
+                    // The binding index is one less than the column position
+                    $typeBindingIndex = $typePosition - 1;
 
-        $configuredLocales = Config::get('app.available_locales');
-
-        if (is_array($configuredLocales) && $configuredLocales !== []) {
-            $allowedLocaleKeys = array_keys($configuredLocales);
-            if ($sessionLocale && in_array($sessionLocale, $allowedLocaleKeys, true)) {
-                $finalLocale = $sessionLocale;
+                    // Only dump and die if this is the 'return' transaction
+                    if (isset($query->bindings[$typeBindingIndex]) && $query->bindings[$typeBindingIndex] === 'return') {
+                        dd($query->sql, $query->bindings);
+                    }
+                }
             }
-        }
+        });
 
-        App::setLocale($finalLocale);
-        // --- End of Locale Logic ---
-
-        // Enforce strict model behavior (no lazy loading, etc.) in non-production environments.
         Model::shouldBeStrict(! $this->app->environment('production'));
-
-        // Set pagination to use Bootstrap 5 styles.
         Paginator::useBootstrapFive();
-
-        // Register a custom Blade component alias.
         Blade::component('components.alert-manager', 'alert-manager');
 
-        // Provide a handler to log missing translation keys for easier maintenance.
-        Lang::handleMissingKeysUsing(function (string $key, array $replacements, string $locale): string {
-            Log::warning(sprintf('Missing translation key detected: [%s] for locale [%s].', $key, $locale), ['replacements' => $replacements]);
-
+        Lang::handleMissingKeysUsing(function (string $key, array $replacements, string $locale) {
+            Log::warning("Missing translation key detected: [{$key}] for locale [{$locale}].", ['replacements' => $replacements]);
             return $key;
         });
 
-        // Set the global locale for the Carbon date library.
         try {
             Carbon::setLocale(App::getLocale());
-        } catch (\Exception $exception) {
-            Log::error('AppServiceProvider: Failed to set Carbon locale: '.$exception->getMessage());
+        } catch (\Exception $e) {
+            Log::error("AppServiceProvider: Failed to set Carbon locale: ".$e->getMessage());
             Carbon::setLocale(config('app.fallback_locale', 'en'));
         }
 
-        // Share global variables with all views, but not during console commands.
         if (! $this->app->runningInConsole()) {
-            View::composer('*', function (\Illuminate\View\View $view): void {
+            View::composer('*', function (\Illuminate\View\View $view) {
                 try {
                     $configData = class_exists(Helpers::class) ? Helpers::appClasses() : [];
-                } catch (\Exception $exception) {
+                } catch (\Exception $e) {
                     $configData = [];
                 }
-
                 $view->with('configData', $configData);
                 $view->with('appClasses', $configData);
             });
