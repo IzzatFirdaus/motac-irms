@@ -9,63 +9,56 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Session; // Optional: for logging locale setting actions
+use Illuminate\Support\Facades\Session;
 use Symfony\Component\HttpFoundation\Response;
 
 class LocaleMiddleware
 {
-    /**
-     * Handle an incoming request.
-     * Sets the application locale based on session or fallback.
-     * Referenced in System Design 3.1, "The Big Picture" flow, and Kernel.php.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
-    public function handle(Request $request, Closure $next): Response
-    {
-        $sessionLocale = Session::get('locale');
-        $finalLocale = null;
+  /**
+   * Handle an incoming request.
+   * Sets the application locale based on session or fallback.
+   *
+   * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+   */
+  public function handle(Request $request, Closure $next): Response
+  {
+    //dd('LocaleMiddleware file has been updated and is now running!');
 
-        // Get available locales from config/app.php's 'available_locales'
-        // System Design 3.3, config('app.available_locales') structure.
-        $configuredLocales = Config::get('app.available_locales', []);
-        $allowedLocaleKeys = [];
 
-        if (! empty($configuredLocales) && is_array($configuredLocales)) {
-            if (isset($configuredLocales[0]) && is_string($configuredLocales[0])) {
-                // Handles simple array like ['en', 'my', 'ar'] (though associative is preferred for direction)
-                $allowedLocaleKeys = $configuredLocales;
-            } else {
-                // Assumes associative array like ['en' => [...], 'my' => [...]]
-                $allowedLocaleKeys = array_keys($configuredLocales);
-            }
-        }
+    $sessionLocale = Session::get('locale');
+    $fallbackLocale = Config::get('app.fallback_locale', 'en');
+    $finalLocale = $fallbackLocale; // Default to fallback locale
 
-        // Fallback if allowedLocaleKeys is still empty (e.g., misconfiguration)
-        if (empty($allowedLocaleKeys)) {
-            $fallbackLocale = Config::get('app.fallback_locale', 'en');
-            $allowedLocaleKeys = [$fallbackLocale]; // At least allow the fallback
-            Log::warning('LocaleMiddleware: config(\'app.available_locales\') is empty or misconfigured. Using only fallback.', ['fallback' => $fallbackLocale]);
-        }
+    // --- REVISED: Bulletproof Locale Handling ---
 
-        if ($sessionLocale && in_array($sessionLocale, $allowedLocaleKeys, true)) {
-            $finalLocale = $sessionLocale;
-        } else {
-            // If the locale in session is not in the allowed list, or no locale is in session,
-            // default to the application's configured fallback locale.
-            $finalLocale = Config::get('app.fallback_locale', 'en');
-            if ($sessionLocale) { // If there was a session locale but it was invalid
-                Log::debug("LocaleMiddleware: Invalid session locale '{$sessionLocale}'. Reverting to fallback '{$finalLocale}'.");
-                Session::put('locale', $finalLocale); // Optionally, correct the session to the fallback.
-                // Also update textDirection in session if locale is forcibly changed to fallback
-                $textDirection = $configuredLocales[$finalLocale]['direction'] ?? (($finalLocale === 'ar') ? 'rtl' : 'ltr');
-                Session::put('textDirection', $textDirection);
-            }
-        }
+    $configuredLocales = Config::get('app.available_locales');
+    $allowedLocaleKeys = [];
 
-        App::setLocale($finalLocale);
-        // Log::debug("LocaleMiddleware: Application locale set to '{$finalLocale}'."); // Optional: for debugging
+    // 1. Defensively check if the config value is a valid, non-empty array.
+    if (is_array($configuredLocales) && !empty($configuredLocales)) {
 
-        return $next($request);
+      // 2. Get the allowed keys. This operation is now guaranteed to be safe.
+      $allowedLocaleKeys = array_keys($configuredLocales);
+
+      // 3. Check if the locale stored in the session is valid and in the allowed list.
+      if ($sessionLocale && in_array($sessionLocale, $allowedLocaleKeys, true)) {
+        $finalLocale = $sessionLocale;
+      }
+    } else {
+      // 4. If config is invalid for any reason, log a warning for the developer.
+      // The application will safely continue using the fallback locale.
+      Log::warning('LocaleMiddleware: config(\'app.available_locales\') is either missing, empty, or not an array. Using fallback locale.');
     }
+
+    // If the session had an invalid locale, correct it to the determined final locale.
+    if ($sessionLocale && $sessionLocale !== $finalLocale) {
+      Log::debug("LocaleMiddleware: Invalid or disallowed session locale '{$sessionLocale}'. Reverting to '{$finalLocale}'.");
+      Session::put('locale', $finalLocale);
+    }
+    // --- End of Revision ---
+
+    App::setLocale($finalLocale);
+
+    return $next($request);
+  }
 }

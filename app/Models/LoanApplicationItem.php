@@ -125,8 +125,6 @@ class LoanApplicationItem extends Model
         $this->quantity_issued = $issuedQty;
         $this->quantity_returned = $returnedQty;
 
-        // **THE FIX**: This block checks if the quantities have changed and, if so,
-        // saves the updated model to the database. This is the crucial final step.
         if ($this->isDirty(['quantity_issued', 'quantity_returned'])) {
             $this->save();
         }

@@ -4,13 +4,13 @@
 
 declare(strict_types=1);
 
-namespace App\Livewire\ResourceManagement\Approval; // User: Confirm namespace
+namespace App\Livewire\ResourceManagement\Approval;
 
 use App\Models\Approval;
 use App\Models\EmailApplication;
 use App\Models\LoanApplication;
 use App\Models\User;
-use App\Services\ApprovalService; // For processing approval decisions
+use App\Services\ApprovalService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -22,7 +22,6 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
-// use Livewire\Attributes\Title; // The #[Title] attribute line will be commented out
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -52,25 +51,17 @@ class Dashboard extends Component
 
     // --- Approval Modal State ---
     public bool $showApprovalModal = false;
-
     public ?int $currentApprovalId = null;
-
     public ?string $approvalDecision = null;
-
     public ?string $approvalComments = null;
-
-    public array $approvalItems = []; // For handling LoanApplicationItem quantity_approved adjustments
+    public array $approvalItems = [];
 
     protected string $paginationTheme = 'bootstrap';
-
     protected int $perPage = 10;
 
-    // The #[Title] attribute below is commented out
-    // #[Title]
     public function title(): string
     {
         $appName = __(config('variables.templateName', 'Sistem Pengurusan Sumber Bersepadu MOTAC'));
-
         return __('Papan Pemuka Kelulusan').' - '.$appName;
     }
 
@@ -81,7 +72,6 @@ class Dashboard extends Component
         $user = Auth::user();
         if (! $user) {
             Log::warning('Livewire.Approval.Dashboard: User not authenticated. Cannot fetch approval tasks.');
-
             return new LengthAwarePaginator([], 0, $this->perPage, $this->resolvePage());
         }
 
@@ -91,10 +81,7 @@ class Dashboard extends Component
                 'approvable' => function ($morphTo) {
                     $morphTo->morphWith([
                         EmailApplication::class => ['user:id,name,personal_email,title'],
-                        LoanApplication::class => [
-                            'user:id,name,personal_email,title',
-                            'loanApplicationItems:id,loan_application_id,equipment_type,quantity_requested,quantity_approved', // Include quantity_approved
-                        ],
+                        LoanApplication::class => ['user:id,name,personal_email,title', 'loanApplicationItems:id,loan_application_id,equipment_type,quantity_requested,quantity_approved'],
                     ]);
                 },
             ]);
@@ -151,7 +138,7 @@ class Dashboard extends Component
                 'approvable' => function ($morphTo) {
                     $morphTo->morphWith([
                         EmailApplication::class => ['user:id,name,service_status,title', 'user.department:id,name', 'user.position:id,name', 'user.grade:id,name'],
-                        LoanApplication::class => ['user:id,name,title', 'user.department:id,name', 'user.position:id,name', 'user.grade:id,name', 'loanApplicationItems'], // loanApplicationItems should have all needed fields
+                        LoanApplication::class => ['user:id,name,title', 'user.department:id,name', 'user.position:id,name', 'user.grade:id,name', 'loanApplicationItems'],
                     ]);
                 },
                 'officer:id,name',
@@ -168,13 +155,11 @@ class Dashboard extends Component
             Log::error('Livewire.Approval.Dashboard: Model not found for currentApprovalId: '.$this->currentApprovalId, ['exception' => $e]);
             $this->dispatch('closeApprovalModalEvent');
             session()->flash('error_toast', __('Ralat memuatkan butiran kelulusan. Rekod mungkin tidak wujud.'));
-
             return null;
         } catch (Throwable $e) {
             Log::error('Livewire.Approval.Dashboard: Error fetching current approval details: '.$e->getMessage(), ['exception' => $e]);
             $this->dispatch('closeApprovalModalEvent');
             session()->flash('error_toast', __('Berlaku ralat tidak dijangka semasa memuatkan butiran kelulusan.'));
-
             return null;
         }
     }
@@ -198,15 +183,14 @@ class Dashboard extends Component
         $this->reset(['approvalDecision', 'approvalComments', 'approvalItems']);
         $this->resetValidation();
 
-        // Pre-populate approvalItems if the current approval is for a LoanApplication
-        $currentApproval = $this->currentApprovalDetails; // Use the computed property
+        $currentApproval = $this->currentApprovalDetails;
         if ($currentApproval && $currentApproval->approvable instanceof LoanApplication) {
             $this->approvalItems = $currentApproval->approvable->loanApplicationItems->map(function ($item) {
                 return [
                     'loan_application_item_id' => $item->id,
-                    'equipment_type' => $item->equipment_type, // For display
-                    'quantity_requested' => $item->quantity_requested, // For display & max rule
-                    'quantity_approved' => $item->quantity_approved ?? $item->quantity_requested, // Default for input
+                    'equipment_type' => $item->equipment_type,
+                    'quantity_requested' => $item->quantity_requested,
+                    'quantity_approved' => $item->quantity_approved ?? $item->quantity_requested,
                 ];
             })->toArray();
         }
@@ -222,7 +206,6 @@ class Dashboard extends Component
         if (! $currentApproval) {
             session()->flash('error_toast', __('Tugasan kelulusan tidak lagi tersedia. Sila muat semula.'));
             $this->dispatch('closeApprovalModalEvent');
-
             return;
         }
 
@@ -240,7 +223,6 @@ class Dashboard extends Component
             if ($currentApproval->approvable instanceof LoanApplication &&
                 $validatedData['approvalDecision'] === Approval::STATUS_APPROVED &&
                 isset($validatedData['approvalItems'])) {
-                // Ensure payload matches what service expects: array of ['loan_application_item_id' => id, 'quantity_approved' => qty]
                 $itemQuantitiesPayload = collect($validatedData['approvalItems'])->map(function ($item) {
                     return [
                         'loan_application_item_id' => $item['loan_application_item_id'],
@@ -254,7 +236,7 @@ class Dashboard extends Component
                 $validatedData['approvalDecision'],
                 $user,
                 $validatedData['approvalComments'] ?? null,
-                $itemQuantitiesPayload // Pass the processed item quantities
+                $itemQuantitiesPayload
             );
 
             session()->flash('success', __('Keputusan berjaya direkodkan untuk tugasan #:id.', ['id' => $currentApproval->id]));
@@ -296,23 +278,14 @@ class Dashboard extends Component
             ),
         ];
 
-        if ($this->currentApprovalDetails &&
-            $this->currentApprovalDetails->approvable instanceof LoanApplication &&
-            $this->approvalDecision === Approval::STATUS_APPROVED) {
+        if ($this->currentApprovalDetails && $this->currentApprovalDetails->approvable instanceof LoanApplication && $this->approvalDecision === Approval::STATUS_APPROVED) {
             $rules['approvalItems'] = ['present', 'array'];
             foreach ($this->approvalItems as $index => $itemArray) {
-                $maxQty = $itemArray['quantity_requested'] ?? 0; // Default to 0 if not set
-
+                $maxQty = $itemArray['quantity_requested'] ?? 0;
                 $rules['approvalItems.'.$index.'.loan_application_item_id'] = ['required', 'integer'];
-                $rules['approvalItems.'.$index.'.quantity_approved'] = [
-                    'required',
-                    'integer',
-                    'min:0',
-                    'max:'.$maxQty,
-                ];
+                $rules['approvalItems.'.$index.'.quantity_approved'] = ['required', 'integer', 'min:0', 'max:'.$maxQty];
             }
         }
-
         return $rules;
     }
 
@@ -326,20 +299,16 @@ class Dashboard extends Component
             'approvalItems.array' => __('Data item kelulusan tidak sah.'),
         ];
 
-        if ($this->currentApprovalDetails &&
-            $this->currentApprovalDetails->approvable instanceof LoanApplication &&
-            $this->approvalDecision === Approval::STATUS_APPROVED) {
+        if ($this->currentApprovalDetails && $this->currentApprovalDetails->approvable instanceof LoanApplication && $this->approvalDecision === Approval::STATUS_APPROVED) {
             foreach ($this->approvalItems as $index => $itemArray) {
                 $itemTypeDisplay = $itemArray['equipment_type'] ?? 'Item '.($index + 1);
                 $maxQty = $itemArray['quantity_requested'] ?? 0;
-
                 $messages['approvalItems.'.$index.'.quantity_approved.required'] = __('Kuantiti diluluskan untuk :itemType wajib diisi.', ['itemType' => $itemTypeDisplay]);
                 $messages['approvalItems.'.$index.'.quantity_approved.integer'] = __('Kuantiti diluluskan untuk :itemType mesti nombor bulat.', ['itemType' => $itemTypeDisplay]);
                 $messages['approvalItems.'.$index.'.quantity_approved.min'] = __('Kuantiti diluluskan untuk :itemType tidak boleh kurang dari 0.', ['itemType' => $itemTypeDisplay]);
                 $messages['approvalItems.'.$index.'.quantity_approved.max'] = __('Kuantiti diluluskan untuk :itemType tidak boleh melebihi kuantiti dipohon (:max).', ['itemType' => $itemTypeDisplay, 'max' => $maxQty]);
             }
         }
-
         return $messages;
     }
 
@@ -357,13 +326,13 @@ class Dashboard extends Component
         $routeName = null;
         $routeParams = [];
 
+        // REVISED: The route names have been corrected to match the definitions in web.php.
+        // This resolves the bug that caused incorrect links to be generated.
         if ($approvable instanceof LoanApplication) {
-            $routeName = 'resource-management.my-applications.loan.show'; // User's view
-            // Or an admin view if appropriate: 'admin.loan-applications.show'
+            $routeName = 'loan-applications.show';
             $routeParams = ['loan_application' => $approvable->id];
         } elseif ($approvable instanceof EmailApplication) {
-            $routeName = 'resource-management.my-applications.email.show'; // User's view
-            // Or an admin view: 'admin.email-applications.show'
+            $routeName = 'email-applications.show';
             $routeParams = ['email_application' => $approvable->id];
         }
 
@@ -372,7 +341,6 @@ class Dashboard extends Component
                 return route($routeName, $routeParams);
             } catch (\Exception $e) {
                 Log::error('Error generating getViewApplicationRoute: '.$e->getMessage(), ['routeName' => $routeName, 'params' => $routeParams]);
-
                 return null;
             }
         }

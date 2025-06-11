@@ -68,9 +68,8 @@ return [
     | System Design Reference: LanguageController.php, LocaleMiddleware.php
     */
     'available_locales' => [
-        'ms' => ['name' => 'Bahasa Melayu', 'script' => 'Latn', 'native' => 'Bahasa Melayu', 'regional' => 'ms_MY', 'direction' => 'ltr', 'display' => true], // CORRECTED: Changed key 'my' to 'ms'
+        'ms' => ['name' => 'Bahasa Melayu', 'script' => 'Latn', 'native' => 'Bahasa Melayu', 'regional' => 'ms_MY', 'direction' => 'ltr', 'display' => true],
         'en' => ['name' => 'English',       'script' => 'Latn', 'native' => 'English',       'regional' => 'en_US', 'direction' => 'ltr', 'display' => true],
-        // 'ar' => ['name' => 'العربية',       'script' => 'Arab', 'native' => 'العربية',       'regional' => 'ar_AE', 'direction' => 'rtl', 'display' => true], // Example for Arabic
     ],
 
     /*
@@ -106,30 +105,22 @@ return [
     */
     'providers' => ServiceProvider::defaultProviders()->merge([
         /*
-     * Package Service Providers Below
-     */
-        // Example: Spatie\Permission\PermissionServiceProvider::class,
-
-        // Add Livewire Service Provider here
-        Livewire\LivewireServiceProvider::class, // REVISED: Uncommented as Livewire is core
+         * Package Service Providers Below
+         */
+        Livewire\LivewireServiceProvider::class,
 
         /*
-     * Application Service Providers...
-     */
-        App\Providers\AppServiceProvider::class, // Core application services, view composers
-        App\Providers\AuthServiceProvider::class, // Policies and gates
-        App\Providers\BroadcastServiceProvider::class, // Uncommented as WebSockets are confirmed necessary
-        App\Providers\EventServiceProvider::class, // Model observers like BlameableObserver
-        App\Providers\RouteServiceProvider::class, // Route configuration
-        App\Providers\MenuServiceProvider::class, // Menu data loading
-
-        // Optional providers from design, should be uncommented if used:
-        App\Providers\FortifyServiceProvider::class, // Confirmed usage in Rev 3.5
-        App\Providers\JetstreamServiceProvider::class, // Confirmed usage in Rev 3.5
-
-        // Development/Debugging Providers (usually conditional based on environment)
-        App\Providers\QueryLogServiceProvider::class, // Listed in Rev 3.5 Shared Components
-        // App\Providers\TelescopeServiceProvider::class, // If using Laravel Telescope
+         * Application Service Providers...
+         */
+        App\Providers\AppServiceProvider::class,
+        App\Providers\AuthServiceProvider::class,
+        App\Providers\BroadcastServiceProvider::class,
+        App\Providers\EventServiceProvider::class,
+        App\Providers\RouteServiceProvider::class,
+        App\Providers\MenuServiceProvider::class,
+        App\Providers\FortifyServiceProvider::class,
+        App\Providers\JetstreamServiceProvider::class,
+        App\Providers\QueryLogServiceProvider::class,
     ])->toArray(),
 
     /*
@@ -139,8 +130,7 @@ return [
     | System Design Reference: 9.7 Shared Components (Helper alias).
     */
     'aliases' => Facade::defaultAliases()->merge([
-        'Helper' => App\Helpers\Helpers::class, //
-        // 'Excel' => Maatwebsite\Excel\Facades\Excel::class, // Example if using Laravel Excel
+        'Helper' => App\Helpers\Helpers::class,
     ])->toArray(),
 
     /*

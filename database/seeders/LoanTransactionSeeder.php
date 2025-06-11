@@ -9,7 +9,7 @@ use App\Models\LoanTransactionItem;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Collection; // Eloquent Collection
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Log;
 
@@ -66,6 +66,7 @@ class LoanTransactionSeeder extends Seeder
                 break;
             }
 
+            // `officerIds->random()` will work correctly as it's a non-empty Eloquent\Collection.
             $transaction = LoanTransaction::factory()->issue()->for($application)->create([
                 'issuing_officer_id' => $officerIds->random(),
                 'receiving_officer_id' => $application->user_id,
@@ -86,7 +87,7 @@ class LoanTransactionSeeder extends Seeder
                 }
             }
 
-            $application->updateOverallStatusAfterTransaction(); // Use model logic to update status
+            $application->updateOverallStatusAfterTransaction();
             $issuedTransactions->add($transaction);
 
             if ($issuedTransactions->count() >= 20) break;
@@ -104,7 +105,6 @@ class LoanTransactionSeeder extends Seeder
      */
     private function seedReturnTransactions(Collection $issuedTransactions, Collection $officerIds): void
     {
-        // Eager load relationships to prevent N+1 queries in the loop
         $issuedTransactions->load('loanApplication', 'loanTransactionItems.equipment', 'loanTransactionItems.loanApplicationItem');
 
         $transactionsToReturn = $issuedTransactions->take(ceil($issuedTransactions->count() * 0.7));
@@ -148,26 +148,35 @@ class LoanTransactionSeeder extends Seeder
 
         Log::info("Attempting to mark {$appsToMarkOverdue->count()} applications as overdue...");
         foreach ($appsToMarkOverdue as $app) {
-            $app->transitionToStatus(LoanApplication::STATUS_OVERDUE);
+            $app->update(['status' => LoanApplication::STATUS_OVERDUE]);
         }
         Log::info('Marked relevant applications as overdue.');
     }
 
     /**
      * Retrieves User IDs for BPM/Admin roles, with a fallback to any user.
+     * The return type MUST be an Eloquent Collection to satisfy the type hint.
      *
      * @return Collection
      */
     private function getOfficerIds(): Collection
     {
         $bpmOfficerRoleNames = ['BPM Staff', 'Admin'];
-        $officerIds = User::query()->whereHas('roles', fn (Builder $q) => $q->whereIn('name', $bpmOfficerRoleNames))->pluck('id');
 
-        if ($officerIds->isEmpty()) {
+        // ->pluck() returns a Support\Collection, not an Eloquent\Collection.
+        $pluckedIds = User::query()
+            ->whereHas('roles', fn (Builder $q) => $q->whereIn('name', $bpmOfficerRoleNames))
+            ->pluck('id');
+
+        if ($pluckedIds->isEmpty()) {
             Log::warning('No BPM/Admin officers found. Using any user as fallback.');
-            return User::pluck('id');
+            // Pluck all user IDs as a fallback.
+            $allUserIds = User::pluck('id');
+            // Convert the Support\Collection from pluck() into the required Eloquent\Collection.
+            return new Collection($allUserIds);
         }
 
-        return $officerIds;
+        // Convert the Support\Collection into the required Eloquent\Collection before returning.
+        return new Collection($pluckedIds);
     }
 }

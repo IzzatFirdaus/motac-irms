@@ -5,13 +5,10 @@ namespace App\Policies;
 use App\Models\Approval;
 use App\Models\LoanApplication;
 use App\Models\User;
-use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Auth\Access\Response;
 
 class LoanApplicationPolicy
 {
-    use HandlesAuthorization;
-
     /**
      * Perform pre-authorization checks.
      */
@@ -64,7 +61,6 @@ class LoanApplicationPolicy
      */
     public function update(User $user, LoanApplication $loanApplication): Response|bool
     {
-        // *** CORRECTION APPLIED HERE ***
         $isOwner = $user->id === $loanApplication->user_id;
         $isEditableStatus = $loanApplication->isDraft() || $loanApplication->status === LoanApplication::STATUS_REJECTED;
 
@@ -121,6 +117,11 @@ class LoanApplicationPolicy
      */
     public function recordDecision(User $user, LoanApplication $loanApplication): Response|bool
     {
+        // Add an explicit check for Admin role for clarity, though `before` handles it.
+        if ($user->hasRole('Admin')) {
+            return Response::allow();
+        }
+
         $actionableStatuses = [
             LoanApplication::STATUS_PENDING_SUPPORT,
             LoanApplication::STATUS_PENDING_APPROVER_REVIEW,
@@ -161,7 +162,7 @@ class LoanApplicationPolicy
                     return Response::deny(__('Gred anda (:userGrade) tidak memenuhi syarat minima (Gred :minGrade) untuk menyokong permohonan ini.', ['userGrade' => $user->grade?->name ?? 'N/A', 'minGrade' => $minSupportGradeLevel]));
                 }
             } elseif ($currentStageKey === Approval::STAGE_LOAN_APPROVER_REVIEW) {
-                $minGeneralApproverGradeLevel = (int) config('motac.approval.min_loan_general_approver_grade_level', config('motac.approval.min_loan_support_grade_level', 41));
+                $minGeneralApproverGradeLevel = (int) config('motac.approval.min_loan_general_approver_grade_level', 41);
                 if (! $user->grade || (int) $user->grade->level < $minGeneralApproverGradeLevel) {
                     return Response::deny(__('Gred anda (:userGrade) tidak memenuhi syarat minima (Gred :minGrade) untuk peringkat kelulusan ini.', ['userGrade' => $user->grade?->name ?? 'N/A', 'minGrade' => $minGeneralApproverGradeLevel]));
                 }

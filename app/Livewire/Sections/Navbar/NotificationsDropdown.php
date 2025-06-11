@@ -18,8 +18,10 @@ class NotificationsDropdown extends Component
     public function mount()
     {
         if (Auth::check()) {
-            $this->unreadNotifications = Auth::user()->unreadNotifications()->latest()->take(10)->get();
-            $this->unreadCount = Auth::user()->unreadNotifications()->count();
+            // REVISED: Fetches notifications once to prevent multiple DB queries.
+            $notifications = Auth::user()->unreadNotifications;
+            $this->unreadCount = $notifications->count();
+            $this->unreadNotifications = $notifications->take(10);
         } else {
             $this->unreadNotifications = collect();
             $this->unreadCount = 0;
@@ -28,20 +30,17 @@ class NotificationsDropdown extends Component
 
     /**
      * Mark a single notification as read and redirect if a URL exists.
-     *
-     * @param string $notificationId The ID of the notification to mark as read.
+     * @param string $notificationId
      */
     public function markAsRead(string $notificationId)
     {
-        $notification = Auth::user()->notifications()->findOrFail($notificationId);
-        $notification->markAsRead();
-
-        // Refresh the notifications list
-        $this->mount();
-
-        // Redirect if the notification has a URL
-        if (isset($notification->data['url'])) {
-            return redirect($notification->data['url']);
+        $notification = Auth::user()->notifications()->find($notificationId);
+        if ($notification) {
+            $notification->markAsRead();
+            $this->mount(); // Refresh the list
+            if (isset($notification->data['url'])) {
+                $this->redirect($notification->data['url']);
+            }
         }
     }
 
@@ -51,8 +50,7 @@ class NotificationsDropdown extends Component
     public function markAllAsRead()
     {
         Auth::user()->unreadNotifications->markAsRead();
-        // Refresh the notifications list
-        $this->mount();
+        $this->mount(); // Refresh the list
     }
 
     /**

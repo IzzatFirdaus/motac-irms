@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Approval;
 use App\Models\Department;
 use App\Models\Equipment;
 use App\Models\Grade;
@@ -10,6 +11,7 @@ use App\Models\LoanTransaction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
+use Spatie\Permission\Models\Permission; // Import the Permission model
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -23,6 +25,7 @@ class LoanApplicationTest extends TestCase
     {
         parent::setUp();
 
+        // This line is CRUCIAL and must be present to fix 403 Forbidden errors.
         $this->app->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
         Role::findOrCreate('Applicant', 'web');
@@ -32,14 +35,18 @@ class LoanApplicationTest extends TestCase
         Role::findOrCreate('Admin', 'web');
         Role::findOrCreate('Approver', 'web');
 
+        // **THE FIX**: Create the permission before trying to assign it.
+        Permission::findOrCreate('act_on_approval_tasks', 'web');
+
         $this->applicantUser = User::factory()->create()->assignRole('Applicant');
-        $this->supportingOfficerUser = User::factory()->create()->assignRole('Supporting Officer');
+        $this->supportingOfficerUser = User::factory()->create()->assignRole(['Supporting Officer', 'Approver']);
         $this->hodUser = User::factory()->create()->assignRole('HOD');
         $this->bpmStaffUser = User::factory()->create()->assignRole('BPM Staff');
         $this->adminUser = User::factory()->create()->assignRole('Admin');
 
         $grade41 = Grade::factory()->create(['name' => '41', 'level' => 41, 'is_approver_grade' => true]);
         $this->supportingOfficerUser->grade_id = $grade41->id;
+        $this->supportingOfficerUser->givePermissionTo('act_on_approval_tasks'); // Now this assignment will work
         $this->supportingOfficerUser->save();
         Config::set('motac.approval.min_loan_support_grade_level', 41);
 
@@ -70,7 +77,8 @@ class LoanApplicationTest extends TestCase
         $item = $loanApplication->loanApplicationItems()->create(['equipment_type' => 'laptop', 'quantity_requested' => 1]);
         $approval = $loanApplication->approvals()->create(['officer_id' => $this->supportingOfficerUser->id, 'stage' => 'loan_support_review']);
 
-        $response = $this->actingAs($this->adminUser)
+        // **THE FIX**: The action must be performed by the designated approver.
+        $response = $this->actingAs($this->supportingOfficerUser)
             ->post(route('approvals.recordDecision', $approval->id), [
                 'decision' => 'approved',
                 'comments' => 'Approved by Admin for testing.',
@@ -100,7 +108,6 @@ class LoanApplicationTest extends TestCase
         ];
 
         $response = $this->actingAs($this->bpmStaffUser)->post(route('loan-applications.issue.store', $loanApplication->id), $issueData);
-
         $response->assertRedirect()->assertSessionHas('success');
     }
 
@@ -108,37 +115,20 @@ class LoanApplicationTest extends TestCase
     {
         $equipment = Equipment::factory()->create(['status' => Equipment::STATUS_ON_LOAN]);
         $loanApplication = LoanApplication::factory()->create(['status' => LoanApplication::STATUS_ISSUED]);
+        $applicationItem = $loanApplication->loanApplicationItems()->create(['equipment_type' => $equipment->asset_type, 'quantity_requested' => 1, 'quantity_approved' => 1, 'quantity_issued' => 1]);
+        $issueTransaction = LoanTransaction::factory()->create(['loan_application_id' => $loanApplication->id, 'type' => 'issue', 'status' => LoanTransaction::STATUS_ISSUED]);
+        $issuedItem = $issueTransaction->loanTransactionItems()->create(['equipment_id' => $equipment->id, 'quantity_transacted' => 1, 'loan_application_item_id' => $applicationItem->id]);
 
-        // **FIX 1: Create the original application item**
-        $applicationItem = $loanApplication->loanApplicationItems()->create([
-            'equipment_type' => $equipment->asset_type,
-            'quantity_requested' => 1,
-            'quantity_approved' => 1,
-            'quantity_issued' => 1
-        ]);
-
-        $issueTransaction = LoanTransaction::factory()->create(['loan_application_id' => $loanApplication->id, 'type' => 'issue']);
-
-        // **FIX 2: Link the issued item to the application item**
-        $issuedItem = $issueTransaction->loanTransactionItems()->create([
-            'equipment_id' => $equipment->id,
-            'quantity_transacted' => 1,
-            'loan_application_item_id' => $applicationItem->id
-        ]);
-
-        // **FIX 3: Correct the structure of the return data payload**
         $returnData = [
             'returning_officer_id' => $this->applicantUser->id,
             'transaction_date' => now()->format('Y-m-d H:i:s'),
-            'items' => [
-                [ // Use a non-associative array
-                    'loan_transaction_item_id' => $issuedItem->id, // Reference the issued item
-                    'equipment_id' => $equipment->id,
-                    'quantity_returned' => 1,
-                    'condition_on_return' => 'good',
-                    'item_status_on_return' => 'returned_good'
-                ]
-            ],
+            'items' => [[
+                'loan_transaction_item_id' => $issuedItem->id,
+                'equipment_id' => $equipment->id,
+                'quantity_returned' => 1,
+                'condition_on_return' => 'good',
+                'item_status_on_return' => 'returned_good'
+            ]],
         ];
 
         $response = $this->actingAs($this->bpmStaffUser)->post(route('loan-transactions.return.store', $issueTransaction->id), $returnData);

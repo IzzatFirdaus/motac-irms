@@ -13,68 +13,67 @@ class EquipmentPolicy
 
     /**
      * Perform pre-authorization checks.
+     * This method grants 'Admin' users access to all actions, so we don't
+     * need to check for the 'Admin' role in the other policy methods.
      */
     public function before(User $user, string $ability): ?bool
     {
-        // Standardized to use Spatie's hasRole for consistency if User model uses HasRoles trait
-        if ($user->hasRole('Admin')) { // Role 'Admin'
+        if ($user->hasRole('Admin')) {
             return true;
         }
 
         return null;
     }
 
+    /**
+     * Determine whether the user can view the list of equipment in the admin section.
+     */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_equipment');
+        // This is the key fix: Explicitly check if the user has the required role.
+        return $user->hasRole('BPM Staff');
     }
 
+    /**
+     * Determine whether the user can view a specific equipment's details.
+     */
     public function view(User $user, Equipment $equipment): bool
     {
-        return $user->can('view_equipment_details');
+        // Allows BPM Staff to view details of any equipment.
+        return $user->hasRole('BPM Staff');
     }
 
+    /**
+     * Determine whether the user can create new equipment.
+     */
     public function create(User $user): bool
     {
-        return $user->can('create_equipment');
-    }
-
-    public function update(User $user, Equipment $equipment): Response|bool
-    {
-        // Prevent update if equipment is in a non-editable operational state
-        // Design Ref: Section 4.3 (equipment.status: 'disposed', 'lost')
-        if (in_array($equipment->status, [Equipment::STATUS_DISPOSED, Equipment::STATUS_LOST])) { // Ensure constants exist
-            return Response::deny(__('Tidak boleh mengemaskini peralatan yang telah dilupus atau hilang.'));
-        }
-
-        return $user->can('edit_equipment');
-    }
-
-    public function delete(User $user, Equipment $equipment): Response|bool
-    {
-        // Design Ref: Section 4.3 (equipment.status: 'on_loan')
-        if ($equipment->status === Equipment::STATUS_ON_LOAN) { // Ensure constant exists
-            return Response::deny(__('Tidak boleh memadam peralatan yang sedang dalam pinjaman.'));
-        }
-
-        return $user->can('delete_equipment');
+        return $user->hasRole('BPM Staff');
     }
 
     /**
-     * Determine whether the user can process the issuance of a specific equipment asset.
-     * Policy check for *initiating* an issue process.
+     * Determine whether the user can update the equipment.
      */
-    public function processIssue(User $user, Equipment $equipment): bool
+    public function update(User $user, Equipment $equipment): bool
     {
-        return $user->can('process_loan_issuance');
+        // Prevent updates if the equipment is already disposed of or lost.
+        if (in_array($equipment->status, [Equipment::STATUS_DISPOSED, Equipment::STATUS_LOST])) {
+            return false;
+        }
+
+        return $user->hasRole('BPM Staff');
     }
 
     /**
-     * Determine whether the user can process the return of a specific equipment asset.
-     * Policy check for *accepting* a return.
+     * Determine whether the user can delete the equipment.
      */
-    public function processReturn(User $user, Equipment $equipment): bool
+    public function delete(User $user, Equipment $equipment): bool
     {
-        return $user->can('process_loan_return');
+        // Prevent deletion if the equipment is currently on loan.
+        if ($equipment->status === Equipment::STATUS_ON_LOAN) {
+            return false;
+        }
+
+        return $user->hasRole('BPM Staff');
     }
 }

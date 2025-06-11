@@ -13,12 +13,9 @@ use Illuminate\View\View;
 class DashboardController extends Controller
 {
     /**
-     * Handle the incoming request.
-     *
-     * @param  Request  $request
-     * @return \Illuminate\Contracts\View\View|\Illuminate\Http\Response
+     * Handle the incoming request and route to the correct dashboard based on user role.
      */
-    public function __invoke(Request $request)
+    public function __invoke(Request $request): View
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
@@ -39,12 +36,12 @@ class DashboardController extends Controller
             return $this->showApproverDashboard($user);
         }
 
-        return view('livewire.dashboard.dashboard-wrapper');
+        // **THE FIX**: Call a dedicated method for the user dashboard.
+        return $this->showUserDashboard($user);
     }
 
     /**
      * Gathers data and returns the view for the Admin dashboard.
-     * @return View
      */
     private function showAdminDashboard(): View
     {
@@ -52,7 +49,6 @@ class DashboardController extends Controller
             'users_count' => User::count(),
             'pending_approvals_count' => LoanApplication::whereIn('status', [
                 LoanApplication::STATUS_PENDING_SUPPORT,
-                // CORRECTED: Using the new constant from the LoanApplication model
                 LoanApplication::STATUS_PENDING_APPROVER_REVIEW,
                 LoanApplication::STATUS_PENDING_BPM_REVIEW,
             ])->count(),
@@ -74,7 +70,6 @@ class DashboardController extends Controller
 
     /**
      * Gathers data and returns the view for the BPM Staff dashboard.
-     * @return View
      */
     private function showBpmDashboard(): View
     {
@@ -88,7 +83,6 @@ class DashboardController extends Controller
 
     /**
      * Gathers data and returns the view for the IT Admin dashboard.
-     * @return View
      */
     private function showItAdminDashboard(): View
     {
@@ -101,16 +95,28 @@ class DashboardController extends Controller
 
     /**
      * Gathers data and returns the view for the Approver dashboard.
-     * @param User $user
-     * @return View
      */
     private function showApproverDashboard(User $user): View
     {
-        $thirtyDaysAgo = now()->subDays(30);
         $data = [
             'approved_last_30_days' => 0, // Placeholder
             'rejected_last_30_days' => 0, // Placeholder
         ];
         return view('dashboard.approver', $data);
+    }
+
+    /**
+     * **THE FIX**: New method to gather data and return the view for a general user.
+     */
+    private function showUserDashboard(User $user): View
+    {
+        // This data will be available on the user's dashboard.
+        $data = [
+            'user' => $user,
+            'active_loans_count' => $user->loanApplications()->whereIn('status', [LoanApplication::STATUS_ISSUED, LoanApplication::STATUS_PARTIALLY_ISSUED])->count(),
+            'pending_applications_count' => $user->loanApplications()->where('status', 'like', 'pending_%')->count(),
+        ];
+        // This now returns the correct view asserted in the test.
+        return view('dashboard.user', $data);
     }
 }

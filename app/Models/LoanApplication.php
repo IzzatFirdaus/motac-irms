@@ -68,19 +68,51 @@ class LoanApplication extends Model
     public function user(): BelongsTo { return $this->belongsTo(User::class, 'user_id'); }
     public function responsibleOfficer(): BelongsTo { return $this->belongsTo(User::class, 'responsible_officer_id'); }
     public function supportingOfficer(): BelongsTo { return $this->belongsTo(User::class, 'supporting_officer_id'); }
+    public function currentApprovalOfficer(): BelongsTo { return $this->belongsTo(User::class, 'current_approval_officer_id'); }
+    public function approvedBy(): BelongsTo { return $this->belongsTo(User::class, 'approved_by'); }
+    public function rejectedBy(): BelongsTo { return $this->belongsTo(User::class, 'rejected_by'); }
+    public function cancelledBy(): BelongsTo { return $this->belongsTo(User::class, 'cancelled_by'); }
     public function loanApplicationItems(): HasMany { return $this->hasMany(LoanApplicationItem::class, 'loan_application_id'); }
     public function items(): HasMany { return $this->loanApplicationItems(); }
     public function loanTransactions(): HasMany { return $this->hasMany(LoanTransaction::class, 'loan_application_id'); }
     public function approvals(): MorphMany { return $this->morphMany(Approval::class, 'approvable'); }
 
-    // --- ACCESSORS ---
+    // --- ACCESSORS & STATIC METHODS ---
     public function getStatusLabelAttribute(): string
     {
         return self::$STATUS_OPTIONS[$this->status] ?? Str::title(str_replace('_', ' ', $this->status));
     }
 
+    public static function getStatusOptions(): array
+    {
+        return self::$STATUS_OPTIONS;
+    }
+
+    public function getStatusColorClassAttribute(): string
+    {
+        return match ($this->status) {
+            self::STATUS_DRAFT => 'text-bg-secondary',
+            self::STATUS_PENDING_SUPPORT, self::STATUS_PENDING_APPROVER_REVIEW, self::STATUS_PENDING_BPM_REVIEW => 'text-bg-warning',
+            self::STATUS_APPROVED, self::STATUS_PARTIALLY_ISSUED, self::STATUS_ISSUED => 'text-bg-info',
+            self::STATUS_REJECTED, self::STATUS_CANCELLED, self::STATUS_OVERDUE => 'text-bg-danger',
+            self::STATUS_RETURNED, self::STATUS_COMPLETED => 'text-bg-success',
+            self::STATUS_PARTIALLY_RETURNED_PENDING_INSPECTION => 'text-bg-primary',
+            default => 'text-bg-dark',
+        };
+    }
+
     // --- HELPER METHODS ---
     public function isDraft(): bool { return $this->status === self::STATUS_DRAFT; }
+
+    /**
+     * Check if the application status is rejected.
+     * This method was added to resolve the 'BadMethodCallException'.
+     */
+    public function isRejected(): bool
+    {
+        return $this->status === self::STATUS_REJECTED;
+    }
+
     public function canBeReturned(): bool { return in_array($this->status, [self::STATUS_ISSUED, self::STATUS_PARTIALLY_ISSUED, self::STATUS_OVERDUE]); }
 
     public function isOverdue(): bool {
@@ -95,7 +127,6 @@ class LoanApplication extends Model
 
     public function updateOverallStatusAfterTransaction(): void
     {
-        // ** THE FIX: This logic is refactored for clarity and correctness. **
         $this->load('loanApplicationItems');
 
         $totalApproved = (int) $this->loanApplicationItems->sum('quantity_approved');
@@ -122,13 +153,11 @@ class LoanApplication extends Model
             }
         } else {
             // Logic for when NO items have been issued yet.
-            // Status should reflect approval, not transactional state.
             if ($this->status !== self::STATUS_REJECTED && $this->status !== self::STATUS_CANCELLED) {
                  $newStatus = self::STATUS_APPROVED;
             }
         }
 
-        // The overdue check only runs if the loan is still active.
         if ($newStatus !== self::STATUS_RETURNED && $this->isOverdue()) {
             $newStatus = self::STATUS_OVERDUE;
         }
