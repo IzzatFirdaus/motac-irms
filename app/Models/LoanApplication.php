@@ -80,12 +80,13 @@ class LoanApplication extends Model
     }
 
     // --- HELPER METHODS ---
+    public function isDraft(): bool { return $this->status === self::STATUS_DRAFT; }
+    public function canBeReturned(): bool { return in_array($this->status, [self::STATUS_ISSUED, self::STATUS_PARTIALLY_ISSUED, self::STATUS_OVERDUE]); }
+
     public function isOverdue(): bool {
-        // A loan is only considered overdue if it's currently active (issued).
         if (!in_array($this->status, [self::STATUS_ISSUED, self::STATUS_PARTIALLY_ISSUED])) {
             return false;
         }
-        // If the end date has passed and there are still items not returned.
         if ($this->loan_end_date && $this->loan_end_date->isPast()) {
             return $this->loanApplicationItems()->where('quantity_issued', '>', DB::raw('IFNULL(quantity_returned, 0)'))->exists();
         }
@@ -94,6 +95,7 @@ class LoanApplication extends Model
 
     public function updateOverallStatusAfterTransaction(): void
     {
+        // ** THE FIX: This logic is refactored for clarity and correctness. **
         $this->load('loanApplicationItems');
 
         $totalApproved = (int) $this->loanApplicationItems->sum('quantity_approved');
@@ -103,22 +105,30 @@ class LoanApplication extends Model
         $originalStatus = $this->status;
         $newStatus = $originalStatus;
 
-        if ($totalIssued <= 0) {
-            // No items have been issued yet.
-            $newStatus = self::STATUS_APPROVED;
-        } elseif ($totalReturned >= $totalIssued && $totalIssued > 0) {
-            // All issued items have been returned.
-            $newStatus = self::STATUS_RETURNED;
-        } elseif ($totalReturned > 0 && $totalReturned < $totalIssued) {
-            $newStatus = self::STATUS_PARTIALLY_RETURNED_PENDING_INSPECTION;
-        } elseif ($totalIssued >= $totalApproved && $totalApproved > 0) {
-            $newStatus = self::STATUS_ISSUED;
-        } elseif ($totalIssued > 0 && $totalIssued < $totalApproved) {
-            $newStatus = self::STATUS_PARTIALLY_ISSUED;
+        if ($totalIssued > 0) {
+            // Logic for when items have been issued.
+            if ($totalReturned >= $totalIssued) {
+                // ALL issued items have been returned.
+                $newStatus = self::STATUS_RETURNED;
+            } elseif ($totalReturned > 0) {
+                // SOME, but not all, issued items have been returned.
+                $newStatus = self::STATUS_PARTIALLY_RETURNED_PENDING_INSPECTION;
+            } elseif ($totalIssued >= $totalApproved) {
+                // ALL approved items have been issued.
+                $newStatus = self::STATUS_ISSUED;
+            } else {
+                // SOME, but not all, approved items have been issued.
+                $newStatus = self::STATUS_PARTIALLY_ISSUED;
+            }
+        } else {
+            // Logic for when NO items have been issued yet.
+            // Status should reflect approval, not transactional state.
+            if ($this->status !== self::STATUS_REJECTED && $this->status !== self::STATUS_CANCELLED) {
+                 $newStatus = self::STATUS_APPROVED;
+            }
         }
 
-        // **THE FIX**: This logic ensures a returned loan cannot be marked as overdue.
-        // The overdue check now only runs if the loan is still active.
+        // The overdue check only runs if the loan is still active.
         if ($newStatus !== self::STATUS_RETURNED && $this->isOverdue()) {
             $newStatus = self::STATUS_OVERDUE;
         }

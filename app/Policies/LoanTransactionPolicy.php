@@ -116,12 +116,20 @@ class LoanTransactionPolicy
      * Determine whether the user can process a return (view form and store).
      * This method is used by both the returnForm and storeReturn methods in the controller.
      *
+     * @param  \App\Models\User  $user The authenticated user.
      * @param  \App\Models\LoanTransaction  $issueLoanTransaction  The original ISSUE transaction being returned.
-     * @param  \App\Models\LoanApplication  $loanApplication  The related loan application.
-     * EDIT: Made return type hint consistent.
      */
-    public function processReturn(User $user, LoanTransaction $issueLoanTransaction, LoanApplication $loanApplication): Response
+    public function processReturn(User $user, LoanTransaction $issueLoanTransaction): Response
     {
+        // *** EDITED: The LoanApplication is now derived from the transaction relationship ***
+        $loanApplication = $issueLoanTransaction->loanApplication;
+
+        // Defensive check for data integrity
+        if (! $loanApplication) {
+            Log::error("LoanTransactionPolicy: Could not find parent LoanApplication for LoanTransaction ID {$issueLoanTransaction->id}.");
+            return Response::deny(__('Permohonan pinjaman yang berkaitan dengan transaksi ini tidak ditemui.'));
+        }
+
         // Only BPM Staff can process returns
         if (! $user->hasAnyRole(['Admin', 'BPM Staff'])) {
             return Response::deny(__('Anda tidak mempunyai kebenaran untuk merekodkan pulangan peralatan.'));

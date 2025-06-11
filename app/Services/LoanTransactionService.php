@@ -124,9 +124,10 @@ final class LoanTransactionService
     }
 
     /**
-     * Core private method that handles all transaction database operations.
+     * Core public method that handles all transaction database operations.
+     * *** EDITED: Changed visibility from private to public. ***
      */
-    private function createTransaction(
+    public function createTransaction(
         LoanApplication $loanApplication,
         string $type,
         User $actingOfficer,
@@ -162,27 +163,41 @@ final class LoanTransactionService
      */
     private function createTransactionRecord(LoanApplication $loanApplication, string $type, User $actingOfficer, array $extraDetails): LoanTransaction
     {
-        $transactionDetails = [
+        // Start with details common to ALL transactions
+        $baseDetails = [
             'loan_application_id' => $loanApplication->id,
             'type' => $type,
             'transaction_date' => $extraDetails['transaction_date'] ?? Carbon::now(),
-            'status' => LoanTransaction::STATUS_PENDING,
+            'status' => LoanTransaction::STATUS_PENDING, // Always start as 'pending'
         ];
 
+        $specificDetails = [];
         if ($type === LoanTransaction::TYPE_ISSUE) {
-            $transactionDetails['issuing_officer_id'] = $actingOfficer->id;
-            $transactionDetails['receiving_officer_id'] = $extraDetails['receiving_officer_id'];
-            $transactionDetails['issue_notes'] = $extraDetails['issue_notes'] ?? null;
-            $transactionDetails['issue_timestamp'] = $transactionDetails['transaction_date'];
-        } else { // TYPE_RETURN
-            $transactionDetails['return_accepting_officer_id'] = $actingOfficer->id;
-            $transactionDetails['returning_officer_id'] = $extraDetails['returning_officer_id'];
-            $transactionDetails['return_notes'] = $extraDetails['return_notes'] ?? null;
-            $transactionDetails['return_timestamp'] = $transactionDetails['transaction_date'];
-            $transactionDetails['related_transaction_id'] = $extraDetails['related_transaction_id'] ?? null;
+            // Add details specific to an ISSUE transaction
+            $specificDetails = [
+                'issuing_officer_id' => $actingOfficer->id,
+                'receiving_officer_id' => $extraDetails['receiving_officer_id'] ?? null,
+                'issue_notes' => $extraDetails['issue_notes'] ?? null,
+                'issue_timestamp' => $baseDetails['transaction_date'],
+            ];
+        } elseif ($type === LoanTransaction::TYPE_RETURN) {
+            // Add details specific to a RETURN transaction
+            $specificDetails = [
+                'return_accepting_officer_id' => $actingOfficer->id,
+                'returning_officer_id' => $extraDetails['returning_officer_id'] ?? null,
+                'return_notes' => $extraDetails['return_notes'] ?? null,
+                'return_timestamp' => $baseDetails['transaction_date'],
+                'related_transaction_id' => $extraDetails['related_transaction_id'] ?? null,
+            ];
+        } else {
+            // This is a safeguard against unexpected transaction types.
+            throw new InvalidArgumentException("Invalid transaction type specified: {$type}");
         }
 
-        return LoanTransaction::create($transactionDetails);
+        // Merge the base and specific details to create the final data array
+        $transactionData = array_merge($baseDetails, $specificDetails);
+
+        return LoanTransaction::create($transactionData);
     }
 
     /**
@@ -190,6 +205,7 @@ final class LoanTransactionService
      */
     private function processTransactionItem(LoanTransaction $transaction, string $type, array $item, User $actingOfficer): void
     {
+        /** @var \App\Models\Equipment $equipment */ // *** EDITED: Added PHPDoc block to fix static analysis warning. ***
         $equipment = Equipment::findOrFail($item['equipment_id']);
         $txItemData = [
             'equipment_id' => $equipment->id,

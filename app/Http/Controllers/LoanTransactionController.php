@@ -78,7 +78,6 @@ final class LoanTransactionController extends Controller
             return redirect()->back()->with('error', __('Hanya transaksi pengeluaran boleh diproses untuk pemulangan.'));
         }
 
-        // This authorization call is correct, passing both models to the policy.
         $this->authorize('processReturn', [$loanTransaction, $loanTransaction->loanApplication]);
 
         return view('loan-transactions.return', [
@@ -92,13 +91,14 @@ final class LoanTransactionController extends Controller
      */
     public function storeReturn(ProcessReturnRequest $request, LoanTransaction $loanTransaction): RedirectResponse
     {
+        $this->authorize('processReturn', [$loanTransaction, $loanTransaction->loanApplication]);
+
         $returnAcceptingOfficer = Auth::user();
         if (!$returnAcceptingOfficer) {
             return redirect()->back()->with('error', 'Sila log masuk semula.');
         }
 
         try {
-            // This call is correct, using ['items'] to get the validated array.
             $this->loanTransactionService->processExistingReturn(
                 $loanTransaction,
                 $request->validated()['items'],
