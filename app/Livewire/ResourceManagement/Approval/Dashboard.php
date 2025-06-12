@@ -137,8 +137,10 @@ class Dashboard extends Component
             $approval = Approval::with([
                 'approvable' => function ($morphTo) {
                     $morphTo->morphWith([
-                        EmailApplication::class => ['user:id,name,service_status,title', 'user.department:id,name', 'user.position:id,name', 'user.grade:id,name'],
-                        LoanApplication::class => ['user:id,name,title', 'user.department:id,name', 'user.position:id,name', 'user.grade:id,name', 'loanApplicationItems'],
+                        // FIX: Added department_id, position_id, and grade_id to the user select list for both models.
+                        // This allows the nested relationships (user.department, user.position, user.grade) to be loaded correctly.
+                        EmailApplication::class => ['user:id,name,service_status,title,department_id,position_id,grade_id', 'user.department:id,name', 'user.position:id,name', 'user.grade:id,name'],
+                        LoanApplication::class => ['user:id,name,title,department_id,position_id,grade_id', 'user.department:id,name', 'user.position:id,name', 'user.grade:id,name', 'loanApplicationItems'],
                     ]);
                 },
                 'officer:id,name',

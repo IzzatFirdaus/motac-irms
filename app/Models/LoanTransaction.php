@@ -12,241 +12,269 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Log;
 
-/**
- * Loan Transaction Model.
- * * System Design Reference: MOTAC Integrated Resource Management System (Revision 3.5) - Section 4.3
- *
- * @mixin IdeHelperLoanTransaction
- */
 class LoanTransaction extends Model
 {
-  use HasFactory;
-  use SoftDeletes;
-  use Blameable;
+    use Blameable;
+    use HasFactory;
+    use SoftDeletes;
 
-  // --- CONSTANTS ---
-  public const TYPE_ISSUE = 'issue';
-  public const TYPE_RETURN = 'return';
-  public const STATUS_PENDING = 'pending';
-  public const STATUS_ISSUED = 'issued';
-  public const STATUS_RETURNED = 'returned';
-  public const STATUS_RETURNED_PENDING_INSPECTION = 'returned_pending_inspection';
-  public const STATUS_RETURNED_GOOD = 'returned_good';
-  public const STATUS_RETURNED_DAMAGED = 'returned_damaged';
-  public const STATUS_ITEMS_REPORTED_LOST = 'items_reported_lost';
-  public const STATUS_RETURNED_WITH_LOSS = 'returned_with_loss';
-  public const STATUS_RETURNED_WITH_DAMAGE_AND_LOSS = 'returned_with_damage_and_loss';
-  public const STATUS_PARTIALLY_RETURNED = 'partially_returned';
-  public const STATUS_COMPLETED = 'completed';
-  public const STATUS_CANCELLED = 'cancelled';
-  public const STATUS_OVERDUE = 'overdue';
+    // --- CONSTANTS ---
+    public const TYPE_ISSUE = 'issue';
+    public const TYPE_RETURN = 'return';
 
-  public static array $TYPES_LABELS = [
-    self::TYPE_ISSUE => 'Pengeluaran',
-    self::TYPE_RETURN => 'Pemulangan',
-  ];
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_ISSUED = 'issued';
+    public const STATUS_RETURNED = 'returned';
+    public const STATUS_RETURNED_PENDING_INSPECTION = 'returned_pending_inspection';
+    public const STATUS_RETURNED_GOOD = 'returned_good';
+    public const STATUS_RETURNED_DAMAGED = 'returned_damaged';
+    public const STATUS_ITEMS_REPORTED_LOST = 'items_reported_lost';
+    public const STATUS_RETURNED_WITH_LOSS = 'returned_with_loss';
+    public const STATUS_RETURNED_WITH_DAMAGE_AND_LOSS = 'returned_with_damage_and_loss';
+    public const STATUS_PARTIALLY_RETURNED = 'partially_returned';
+    public const STATUS_COMPLETED = 'completed';
+    public const STATUS_CANCELLED = 'cancelled';
+    public const STATUS_OVERDUE = 'overdue';
 
-  public static array $STATUSES_LABELS = [
-    self::STATUS_PENDING => 'Menunggu Tindakan',
-    self::STATUS_ISSUED => 'Telah Dikeluarkan',
-    self::STATUS_RETURNED => 'Telah Dipulangkan (Umum)',
-    self::STATUS_RETURNED_PENDING_INSPECTION => 'Pemulangan (Menunggu Semakan)',
-    self::STATUS_RETURNED_GOOD => 'Dipulangkan (Keadaan Baik)',
-    self::STATUS_RETURNED_DAMAGED => 'Dipulangkan (Ada Kerosakan)',
-    self::STATUS_ITEMS_REPORTED_LOST => 'Item Dilaporkan Hilang',
-    self::STATUS_RETURNED_WITH_LOSS => 'Dipulangkan (Dengan Kehilangan)',
-    self::STATUS_RETURNED_WITH_DAMAGE_AND_LOSS => 'Dipulangkan (Dengan Kerosakan & Kehilangan)',
-    self::STATUS_PARTIALLY_RETURNED => 'Dipulangkan Sebahagian',
-    self::STATUS_COMPLETED => 'Selesai',
-    self::STATUS_CANCELLED => 'Dibatalkan',
-    self::STATUS_OVERDUE => 'Tertunggak (Transaksi)',
-  ];
+    protected $table = 'loan_transactions';
 
-  protected $table = 'loan_transactions';
-  protected $fillable = ['loan_application_id', 'type', 'transaction_date', 'issuing_officer_id', 'receiving_officer_id', 'accessories_checklist_on_issue', 'issue_notes', 'issue_timestamp', 'returning_officer_id', 'return_accepting_officer_id', 'accessories_checklist_on_return', 'return_notes', 'return_timestamp', 'related_transaction_id', 'status'];
-  protected $casts = ['transaction_date' => 'datetime', 'issue_timestamp' => 'datetime', 'return_timestamp' => 'datetime', 'accessories_checklist_on_issue' => 'array', 'accessories_checklist_on_return' => 'array', 'created_at' => 'datetime', 'updated_at' => 'datetime', 'deleted_at' => 'datetime'];
-  protected $attributes = ['status' => self::STATUS_PENDING];
-
-  protected static function newFactory(): LoanTransactionFactory
-  {
-    return LoanTransactionFactory::new();
-  }
-
-  // --- RELATIONSHIPS ---
-  public function loanApplication(): BelongsTo
-  {
-    return $this->belongsTo(LoanApplication::class, 'loan_application_id');
-  }
-  public function loanTransactionItems(): HasMany
-  {
-    return $this->hasMany(LoanTransactionItem::class, 'loan_transaction_id');
-  }
-  public function items(): HasMany
-  {
-    return $this->loanTransactionItems();
-  }
-  public function issuingOfficer(): BelongsTo
-  {
-    return $this->belongsTo(User::class, 'issuing_officer_id');
-  }
-  public function receivingOfficer(): BelongsTo
-  {
-    return $this->belongsTo(User::class, 'receiving_officer_id');
-  }
-  public function returningOfficer(): BelongsTo
-  {
-    return $this->belongsTo(User::class, 'returning_officer_id');
-  }
-  public function returnAcceptingOfficer(): BelongsTo
-  {
-    return $this->belongsTo(User::class, 'return_accepting_officer_id');
-  }
-  public function relatedIssueTransaction(): BelongsTo
-  {
-    return $this->belongsTo(LoanTransaction::class, 'related_transaction_id');
-  }
-
-  // --- ACCESSORS ---
-  public function getTypeLabelAttribute(): string
-  {
-    return __(self::$TYPES_LABELS[$this->type] ?? Str::title(str_replace('_', ' ', $this->type)));
-  }
-  public function getStatusLabelAttribute(): string
-  {
-    return __(self::$STATUSES_LABELS[$this->status] ?? Str::title(str_replace('_', ' ', (string) $this->status)));
-  }
-
-  public function getTypeColorClassAttribute(): string
-  {
-    return match ($this->type) {
-      self::TYPE_ISSUE => 'text-bg-info',
-      self::TYPE_RETURN => 'text-bg-primary',
-      default => 'text-bg-secondary',
-    };
-  }
-
-  public function getStatusColorClassAttribute(): string
-  {
-    return match ($this->status) {
-      self::STATUS_ISSUED => 'text-bg-info',
-      self::STATUS_RETURNED, self::STATUS_RETURNED_GOOD, self::STATUS_COMPLETED => 'text-bg-success',
-      self::STATUS_RETURNED_PENDING_INSPECTION, self::STATUS_PARTIALLY_RETURNED => 'text-bg-primary',
-      self::STATUS_RETURNED_DAMAGED, self::STATUS_OVERDUE => 'text-bg-warning',
-      self::STATUS_ITEMS_REPORTED_LOST, self::STATUS_CANCELLED => 'text-bg-danger',
-      default => 'text-bg-secondary',
-    };
-  }
-
-  public function getItemNameAttribute(): string
-  {
-    if (!$this->relationLoaded('loanTransactionItems')) {
-      $this->load('loanTransactionItems.equipment:id,brand,model');
-    }
-    if ($this->loanTransactionItems->isNotEmpty()) {
-      $firstItem = $this->loanTransactionItems->first();
-      if ($firstItem?->equipment) {
-        return trim(($firstItem->equipment->brand ?? '') . ' ' . ($firstItem->equipment->model ?? __('Item Peralatan')));
-      }
-      return __('Item Tidak Diketahui');
-    }
-    return __('Tiada Item');
-  }
-
-  public function getQuantityAttribute(): int
-  {
-    if ($this->relationLoaded('loanTransactionItems')) {
-      return (int) $this->loanTransactionItems->sum('quantity_transacted');
-    }
-    return (int) $this->loanTransactionItems()->sum('quantity_transacted');
-  }
-
-  // --- STATIC HELPERS ---
-  public static function getDefinedDefaultRelationsStatic(): array
-  {
-    return [
-      'loanApplication.user:id,name',
-      'loanTransactionItems.equipment:id,brand,model,tag_id',
-      'issuingOfficer:id,name',
-      'receivingOfficer:id,name',
-      'returningOfficer:id,name',
-      'returnAcceptingOfficer:id,name',
-      'relatedIssueTransaction',
+    protected $fillable = [
+        'loan_application_id', 'type', 'transaction_date', 'issuing_officer_id',
+        'receiving_officer_id', 'accessories_checklist_on_issue', 'issue_notes',
+        'issue_timestamp', 'returning_officer_id', 'return_accepting_officer_id',
+        'accessories_checklist_on_return', 'return_notes', 'return_timestamp',
+        'related_transaction_id', 'status'
     ];
-  }
-  public static function getTypesOptions(): array
-  {
-    return self::$TYPES_LABELS;
-  }
-  public static function getStatusOptions(): array
-  {
-    return self::$STATUSES_LABELS;
-  }
 
-  public static function getStatusesList(): array
-  {
-    return [
-      self::STATUS_PENDING,
-      self::STATUS_ISSUED,
-      self::STATUS_RETURNED_PENDING_INSPECTION,
-      self::STATUS_RETURNED_GOOD,
-      self::STATUS_RETURNED_DAMAGED,
-      self::STATUS_ITEMS_REPORTED_LOST,
-      self::STATUS_COMPLETED,
-      self::STATUS_CANCELLED,
+    protected $casts = [
+        'transaction_date' => 'datetime',
+        'issue_timestamp' => 'datetime',
+        'return_timestamp' => 'datetime',
+        'accessories_checklist_on_issue' => 'array',
+        'accessories_checklist_on_return' => 'array',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'deleted_at' => 'datetime'
     ];
-  }
 
-  // --- HELPER METHODS ---
-  public function isIssue(): bool
-  {
-    return $this->type === self::TYPE_ISSUE;
-  }
-  public function isReturn(): bool
-  {
-    return $this->type === self::TYPE_RETURN;
-  }
-  public function updateParentLoanApplicationStatus(): void
-  {
-    if ($this->loanApplication) {
-      if (method_exists($this->loanApplication, 'updateOverallStatusAfterTransaction')) {
-        $this->loanApplication->updateOverallStatusAfterTransaction();
-      }
-    }
-  }
+    protected $attributes = [
+        'status' => self::STATUS_PENDING
+    ];
 
-  /**
-   * EDIT: This method has been completely rewritten for accuracy and clarity.
-   * It is required by LoanTransactionPolicy to check if all items from this 'issue'
-   * transaction have been accounted for in subsequent 'return' transactions.
-   *
-   * @return bool
-   */
-  public function isFullyClosedOrReturned(): bool
-  {
-    // This logic only applies to 'issue' transactions.
-    // A 'return' transaction doesn't need this check in the same way.
-    if (!$this->isIssue()) {
-      return true;
+    protected static function newFactory(): LoanTransactionFactory
+    {
+        return LoanTransactionFactory::new();
     }
 
-    // First, find the total quantity of all items that were issued in this transaction.
-    $totalQuantityIssued = $this->loanTransactionItems()->sum('quantity_transacted');
-
-    if ($totalQuantityIssued <= 0) {
-      return true; // If nothing was issued, it's considered closed.
+    // --- RELATIONSHIPS ---
+    public function loanApplication(): BelongsTo
+    {
+        return $this->belongsTo(LoanApplication::class, 'loan_application_id');
     }
 
-    // Next, find all return transactions that are linked to this issue transaction.
-    $returnTransactionIds = LoanTransaction::where('related_transaction_id', $this->id)
-      ->where('type', self::TYPE_RETURN)
-      ->pluck('id');
+    public function loanTransactionItems(): HasMany
+    {
+        return $this->hasMany(LoanTransactionItem::class, 'loan_transaction_id');
+    }
 
-    // Now, sum the quantities of all items across all those return transactions.
-    $totalQuantityReturned = LoanTransactionItem::whereIn('loan_transaction_id', $returnTransactionIds)->sum('quantity_transacted');
+    public function items(): HasMany
+    {
+        return $this->loanTransactionItems();
+    }
 
-    // The transaction is considered fully closed if the amount returned is equal to or greater than the amount issued.
-    return $totalQuantityReturned >= $totalQuantityIssued;
-  }
+    public function issuingOfficer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'issuing_officer_id');
+    }
+
+    public function receivingOfficer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'receiving_officer_id');
+    }
+
+    public function returningOfficer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'returning_officer_id');
+    }
+
+    public function returnAcceptingOfficer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'return_accepting_officer_id');
+    }
+
+    public function relatedIssueTransaction(): BelongsTo
+    {
+        return $this->belongsTo(LoanTransaction::class, 'related_transaction_id');
+    }
+
+    // --- ACCESSORS ---
+    public function getTypeLabelAttribute(): string
+    {
+        return self::getTypeOptions()[$this->type] ?? Str::title(str_replace('_', ' ', $this->type));
+    }
+
+    public function getStatusLabelAttribute(): string
+    {
+        return self::getStatusOptions()[$this->status] ?? Str::title(str_replace('_', ' ', (string) $this->status));
+    }
+
+    public function getTypeColorClassAttribute(): string
+    {
+        return match ($this->type) {
+            self::TYPE_ISSUE => 'text-bg-info',
+            self::TYPE_RETURN => 'text-bg-primary',
+            default => 'text-bg-secondary',
+        };
+    }
+
+    public function getStatusColorClassAttribute(): string
+    {
+        return match ($this->status) {
+            self::STATUS_ISSUED => 'text-bg-info',
+            self::STATUS_RETURNED, self::STATUS_RETURNED_GOOD, self::STATUS_COMPLETED => 'text-bg-success',
+            self::STATUS_RETURNED_PENDING_INSPECTION, self::STATUS_PARTIALLY_RETURNED => 'text-bg-primary',
+            self::STATUS_RETURNED_DAMAGED, self::STATUS_OVERDUE => 'text-bg-warning',
+            self::STATUS_ITEMS_REPORTED_LOST, self::STATUS_CANCELLED => 'text-bg-danger',
+            default => 'text-bg-secondary',
+        };
+    }
+
+    public function getItemNameAttribute(): string
+    {
+        if (! $this->relationLoaded('loanTransactionItems')) {
+            $this->load('loanTransactionItems.equipment:id,brand,model');
+        }
+
+        if ($this->loanTransactionItems->isNotEmpty()) {
+            $firstItem = $this->loanTransactionItems->first();
+            if ($firstItem?->equipment) {
+                return trim(($firstItem->equipment->brand ?? '') . ' ' . ($firstItem->equipment->model ?? __('Item Peralatan')));
+            }
+            return __('Item Tidak Diketahui');
+        }
+        return __('Tiada Item');
+    }
+
+    public function getQuantityAttribute(): int
+    {
+        if ($this->relationLoaded('loanTransactionItems')) {
+            return (int) $this->loanTransactionItems->sum('quantity_transacted');
+        }
+        return (int) $this->loanTransactionItems()->sum('quantity_transacted');
+    }
+
+    // --- STATIC HELPERS ---
+
+    /**
+     * Returns the allowed transaction types for use in factories/seeders. (RAW values for enum)
+     * Use this in factories/seeder logic where you need the list of allowed 'type' values.
+     */
+    public static function getTypesOptions(): array
+    {
+        return [
+            self::TYPE_ISSUE,
+            self::TYPE_RETURN
+        ];
+    }
+
+    /**
+     * Returns a translatable array of transaction types (for labels in UI).
+     */
+    public static function getTypeOptions(): array
+    {
+        return [
+            self::TYPE_ISSUE => __('reports.filters.type_issue'),
+            self::TYPE_RETURN => __('reports.filters.type_return'),
+        ];
+    }
+
+    /**
+     * Returns a translatable array of transaction statuses (for labels in UI).
+     */
+    public static function getStatusOptions(): array
+    {
+        return [
+            self::STATUS_PENDING => __('common.statuses.pending'),
+            self::STATUS_ISSUED => __('common.statuses.issued'),
+            self::STATUS_RETURNED_PENDING_INSPECTION => __('common.statuses.returned_pending_inspection'),
+            self::STATUS_RETURNED_GOOD => __('common.statuses.returned_good'),
+            self::STATUS_RETURNED_DAMAGED => __('common.statuses.returned_damaged'),
+            self::STATUS_ITEMS_REPORTED_LOST => __('common.statuses.items_reported_lost'),
+            self::STATUS_COMPLETED => __('common.statuses.completed'),
+            self::STATUS_CANCELLED => __('common.statuses.cancelled'),
+            self::STATUS_OVERDUE => __('common.statuses.overdue'),
+        ];
+    }
+
+    public static function getStatusesList(): array
+    {
+        return [
+            self::STATUS_PENDING,
+            self::STATUS_ISSUED,
+            self::STATUS_RETURNED_PENDING_INSPECTION,
+            self::STATUS_RETURNED_GOOD,
+            self::STATUS_RETURNED_DAMAGED,
+            self::STATUS_ITEMS_REPORTED_LOST,
+            self::STATUS_COMPLETED,
+            self::STATUS_CANCELLED,
+        ];
+    }
+
+    /**
+     * Returns the default relations to be loaded for this model.
+     */
+    public static function getDefinedDefaultRelationsStatic(): array
+    {
+        return [
+            'loanApplication.user:id,name',
+            'loanTransactionItems.equipment:id,brand,model,tag_id',
+            'issuingOfficer:id,name',
+            'receivingOfficer:id,name',
+            'returningOfficer:id,name',
+            'returnAcceptingOfficer:id,name',
+            'relatedIssueTransaction',
+        ];
+    }
+
+    // --- HELPER METHODS ---
+    public function isIssue(): bool
+    {
+        return $this->type === self::TYPE_ISSUE;
+    }
+
+    public function isReturn(): bool
+    {
+        return $this->type === self::TYPE_RETURN;
+    }
+
+    public function updateParentLoanApplicationStatus(): void
+    {
+        // Call the update method on the parent loan application if available.
+        if ($this->loanApplication && method_exists($this->loanApplication, 'updateOverallStatusAfterTransaction')) {
+            $this->loanApplication->updateOverallStatusAfterTransaction();
+        }
+    }
+
+    public function isFullyClosedOrReturned(): bool
+    {
+        // Checks if this transaction (issue type) has been fully returned/closed
+        if (!$this->isIssue()) {
+            return true;
+        }
+
+        $totalQuantityIssued = $this->loanTransactionItems()->sum('quantity_transacted');
+
+        if ($totalQuantityIssued <= 0) {
+            return true;
+        }
+
+        $returnTransactionIds = self::where('related_transaction_id', $this->id)
+            ->where('type', self::TYPE_RETURN)
+            ->pluck('id');
+
+        $totalQuantityReturned = LoanTransactionItem::whereIn('loan_transaction_id', $returnTransactionIds)->sum('quantity_transacted');
+
+        return $totalQuantityReturned >= $totalQuantityIssued;
+    }
 }

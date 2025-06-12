@@ -17,7 +17,7 @@ return [
     [
       'name' => 'menu.my_applications.title',
       'icon' => 'folder-check',
-      'routeNamePrefix' => 'email-applications.index,loan-applications.index',
+      'routeNamePrefix' => 'email-applications.index,loan-applications.index', // ADDED: For better active state check
       'role' => ['User', 'Admin', 'BPM Staff', 'IT Admin', 'Approver', 'HOD'],
       'submenu' => [
         [
@@ -37,7 +37,7 @@ return [
     [
       'name' => 'menu.apply_for_resources.title',
       'icon' => 'file-earmark-plus-fill',
-      'routeNamePrefix' => 'email-applications.create,loan-applications.create',
+      'routeNamePrefix' => 'email-applications.create,loan-applications.create', // ADDED: For better active state check
       'role' => ['User', 'Admin', 'BPM Staff', 'IT Admin', 'Approver', 'HOD'],
       'submenu' => [
         [
@@ -55,7 +55,7 @@ return [
       ]
     ],
     [
-      'url' => '/approvals/dashboard', // Corrected from '/approvals'
+      'url' => '/approvals/dashboard',
       'name' => 'menu.approvals_dashboard',
       'icon' => 'person-check-fill',
       'routeName' => 'approvals.dashboard',
@@ -64,35 +64,50 @@ return [
     [
       'name' => 'menu.administration.title',
       'icon' => 'gear-wide-connected',
-      // Corrected prefix to match route groups
-      'routeNamePrefix' => 'admin.',
+      'routeNamePrefix' => 'resource-management',
       'role' => ['Admin', 'BPM Staff', 'IT Admin'],
       'submenu' => [
         [
-            // This is a new sub-menu to group BPM operations
-            'name' => 'menu.administration.bpm_operations.title',
-            'icon' => 'tools',
-            'role' => ['Admin', 'BPM Staff'],
-            'submenu' => [
-                // You would add specific BPM-related admin links here
+          'name' => 'menu.administration.bpm_operations.title',
+          'icon' => 'tools',
+          'routeNamePrefix' => 'resource-management.bpm',
+          'role' => ['Admin', 'BPM Staff'],
+          'submenu' => [
+            [
+              'url' => '/resource-management/bpm/outstanding-loans',
+              'name' => 'menu.administration.bpm_operations.outstanding_loans',
+              'icon' => 'hourglass-split',
+              'routeName' => 'resource-management.bpm.outstanding-loans'
+            ],
+            [
+              'url' => '/resource-management/bpm/issued-loans',
+              'name' => 'menu.administration.bpm_operations.issued_loans',
+              'icon' => 'box-arrow-in-up-right',
+              'routeName' => 'resource-management.bpm.issued-loans'
             ]
+          ]
         ],
         [
-          'url' => '/admin/equipment', // Corrected URL
+          'url' => '/resource-management/equipment-admin',
           'name' => 'menu.administration.equipment_management',
           'icon' => 'pc-display',
-          // Corrected routeName to match web.php
-          'routeName' => 'admin.equipment.index',
+          'routeName' => 'resource-management.equipment-admin.index',
           'role' => ['Admin', 'BPM Staff']
         ],
         [
-          'url' => '/admin/email-processing', // Corrected URL
+          'url' => '/resource-management/email-applications-admin',
           'name' => 'menu.administration.email_applications',
           'icon' => 'envelope-gear-fill',
-          // Corrected routeName to match web.php
-          'routeName' => 'admin.email-processing.index',
+          'routeName' => 'resource-management.email-applications-admin.index',
           'role' => ['Admin', 'IT Admin']
         ],
+        [
+          'url' => '/resource-management/users-admin',
+          'name' => 'menu.administration.users_list',
+          'icon' => 'people-fill',
+          'routeName' => 'resource-management.users-admin.index',
+          'role' => ['Admin']
+        ]
       ]
     ],
     [
@@ -102,7 +117,7 @@ return [
     [
       'name' => 'menu.settings.title',
       'icon' => 'sliders',
-      'routeNamePrefix' => 'settings.', // Corrected prefix
+      'routeNamePrefix' => 'settings',
       'role' => ['Admin'],
       'submenu' => [
         [
@@ -140,7 +155,7 @@ return [
     [
       'name' => 'menu.reports.title',
       'icon' => 'file-earmark-bar-graph-fill',
-      'routeNamePrefix' => 'reports.', // Corrected prefix
+      'routeNamePrefix' => 'reports',
       'role' => ['Admin', 'BPM Staff'],
       'submenu' => [
         [
@@ -148,6 +163,12 @@ return [
           'name' => 'menu.reports.equipment_report',
           'icon' => 'card-list',
           'routeName' => 'reports.equipment-inventory'
+        ],
+        [
+          'url' => '/reports/email-accounts',
+          'name' => 'menu.reports.email_accounts_report',
+          'icon' => 'envelope-check-fill',
+          'routeName' => 'reports.email-accounts'
         ],
         [
           'url' => '/reports/loan-applications',

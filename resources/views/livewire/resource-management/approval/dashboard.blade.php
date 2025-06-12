@@ -1,10 +1,17 @@
 {{-- resources/views/livewire/resource-management/approval/dashboard.blade.php --}}
-<div>
-    @php
-        // Page title is now intended to be set via @section('title') in this Blade file
-        // as the #[Title] attribute in the component class was commented out.
-    @endphp
+@push('page-style')
+    {{-- FIX: Added custom CSS to ensure the approval modal is scrollable on all screen sizes. --}}
+    <style>
+        #approvalActionBootstrapModal .modal-dialog {
+            max-height: 90vh; /* Limit the modal's height to 90% of the viewport height */
+        }
+        #approvalActionBootstrapModal .modal-body {
+            overflow-y: auto; /* Add a vertical scrollbar to the modal body when content overflows */
+        }
+    </style>
+@endpush
 
+<div>
     @section('title')
         {{ __('Papan Pemuka Kelulusan') . ' - ' . __(config('variables.templateName', 'Sistem Pengurusan Sumber Bersepadu MOTAC')) }}
     @endsection

@@ -1,106 +1,78 @@
-{{--
-    resources/views/components/resource-status-panel.blade.php
-    MYDS-compliant component: Resource status badge with icon, semantic color, and accessible label.
-    Adheres to MyGOVEA principles:
-        - Citizen-centric: clear, readable status.
-        - Minimalist, clear UI: uses color, icon, and text for clarity.
-        - Accessibility: ARIA roles, semantic labels, color+icon, tested contrast.
-        - Consistent: uses MYDS tokens/classes for color, radius, spacing.
-        - Structure/hierarchy: status icon, prefix, and label.
---}}
+{{-- ++ ADDED: @props directive to define the component's API and set default values ++ --}}
+@props([
+    'resource',
+    'statusAttribute' => 'status', // Defaults to 'status' if not provided
+    'type' => 'unknown',
+    'showIcon' => false,
+    'statusTextPrefix' => ''
+])
 
 @php
-    // Import Str helper for string operations
-    use Illuminate\Support\Str;
+    // The 'type' prop is already defined with a default value above.
+    $resolvedType = $type;
 
-    // Retrieve the status value in lowercase for consistency
     $statusValue = strtolower($resource->{$statusAttribute} ?? 'unknown');
 
-    // Attempt to get a human-readable status label from accessor or property
-    $statusLabelAccessorMethodName = 'get' . Str::studly($statusAttribute) . 'LabelAttribute'; // NOTE: PHP0413 'unknown class: Illuminate\Support\Str' is a static analyzer limitation; this works in Laravel Blade at runtime.
-    $statusLabelPropertyName = Str::camel($statusAttribute) . 'Label'; // NOTE: PHP0413 'unknown class: Illuminate\Support\Str' is a static analyzer limitation; this works in Laravel Blade at runtime.
+    $statusLabelAccessorMethodName = 'get' . Illuminate\Support\Str::studly($statusAttribute) . 'LabelAttribute';
+    $statusLabelPropertyName = Illuminate\Support\Str::camel($statusAttribute) . 'Label';
 
     if (method_exists($resource, $statusLabelAccessorMethodName)) {
         $formattedStatus = $resource->{$statusLabelAccessorMethodName}();
     } elseif (property_exists($resource, $statusLabelPropertyName) && !is_null($resource->{$statusLabelPropertyName})) {
         $formattedStatus = $resource->{$statusLabelPropertyName};
     } else {
-        $formattedStatus = __(Str::title(str_replace('_', ' ', $statusValue))); // NOTE: PHP0413 'unknown class: Illuminate\Support\Str' is a static analyzer limitation; this works in Laravel Blade at runtime.
+        $formattedStatus = __(Illuminate\Support\Str::title(str_replace('_', ' ', $statusValue)));
     }
 
-    // Get MYDS-compliant status color class
-    // Adjusted to always pass $type (default to $type or $statusValue if unset)
-    $statusClass = \App\Helpers\Helpers::getStatusColorClass($statusValue, $type);
+    $statusClass = \App\Helpers\Helpers::getStatusColorClass($statusValue, $resolvedType);
 
-    // Icon selection (semantic + status clarity, avoid color-only indicator)
     $statusIconClass = '';
-    if ($showIcon === true) {
+    if ($showIcon === true) { // Auto-select icon based on status value
         switch ($statusValue) {
             case 'approved':
             case 'completed':
             case 'active':
             case 'available':
-            case 'returned_good':
-                $statusIconClass = 'bi-check-circle-fill text-success'; // Success status
+            case 'returned_good': // Added for transaction statuses
+                $statusIconClass = 'bi-check-circle-fill';
                 break;
             case 'pending':
             case 'pending_support':
             case 'pending_approval':
             case 'processing':
-                $statusIconClass = 'bi-clock-history text-warning'; // Pending, in-process
+                $statusIconClass = 'bi-clock-history';
                 break;
             case 'rejected':
             case 'cancelled':
             case 'inactive':
-                $statusIconClass = 'bi-x-circle-fill text-danger'; // Failure/cancelled
+                $statusIconClass = 'bi-x-circle-fill';
                 break;
             case 'on_loan':
-            case 'issued':
-                $statusIconClass = 'bi-arrow-up-right-circle-fill text-info'; // Info/issued
+            case 'issued': // Added for transaction statuses
+                $statusIconClass = 'bi-arrow-up-right-circle-fill';
                 break;
-            case 'returned_damaged':
+            case 'returned_damaged': // Added for transaction statuses
             case 'damaged_needs_repair':
             case 'under_maintenance':
-                $statusIconClass = 'bi-tools text-warning'; // Maintenance
+                $statusIconClass = 'bi-tools';
                 break;
-            case 'overdue':
-                $statusIconClass = 'bi-alarm-fill text-danger'; // Overdue
+             case 'overdue': // Added for application status
+                $statusIconClass = 'bi-alarm-fill';
                 break;
             default:
-                $statusIconClass = 'bi-info-circle-fill text-secondary'; // Unknown/default
+                $statusIconClass = 'bi-info-circle-fill';
                 break;
         }
-    } elseif (is_string($showIcon) && Str::startsWith($showIcon, 'bi-')) { // NOTE: PHP0413 'unknown class: Illuminate\Support\Str' is a static analyzer limitation; this works in Laravel Blade at runtime.
+    } elseif (is_string($showIcon) && Str::startsWith($showIcon, 'bi-')) {
         $statusIconClass = $showIcon;
     }
 @endphp
 
-<span
-    {{ $attributes->merge([
-        'class' => "badge rounded-pill {$statusClass} d-inline-flex align-items-center gap-1 px-3 py-1 myds-radius-m",
-        'role' => 'status',
-        'aria-label' => $formattedStatus,
-        'tabindex' => 0, // Keyboard accessibility
-    ]) }}
->
-    {{-- Status Icon (always with color for accessibility) --}}
+{{-- This is the actual HTML output of the component. It should be present in your file. --}}
+{{-- If your file is empty besides the PHP block, you should add this part. --}}
+<span {{ $attributes->merge(['class' => 'badge rounded-pill ' . $statusClass]) }}>
     @if($statusIconClass)
-        <i class="bi {{ $statusIconClass }} me-1" aria-hidden="true"></i>
+        <i class="{{ $statusIconClass }} me-1"></i>
     @endif
-    {{-- Optional prefix for context (e.g., "Status: ") --}}
-    @if($statusTextPrefix)
-        <span class="fw-medium text-muted me-1">{{ $statusTextPrefix }}</span>
-    @endif
-    {{-- Status Text --}}
-    <span class="fw-semibold">{{ $formattedStatus }}</span>
+    {{ $statusTextPrefix }}{{ $formattedStatus }}
 </span>
-
-{{--
-    MYDS/Accessibility documentation:
-    - Badge uses MYDS color tokens for status indication.
-    - Icon is shown for semantic clarity; never rely on color alone.
-    - ARIA role="status" and aria-label for screen readers.
-    - Keyboard accessible via tabindex.
-    - Uses .myds-radius-m for consistent border radius.
-    - Minimalist, clear, and consistent per MyGOVEA and MYDS.
---}}
