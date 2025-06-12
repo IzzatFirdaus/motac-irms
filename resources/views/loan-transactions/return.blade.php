@@ -42,8 +42,8 @@
                 </div>
             </div>
 
-            {{-- Route defined in web.php for storeReturn: resource-management.bpm.loan-transactions.storeReturn --}}
-            <form action="{{ route('resource-management.bpm.loan-transactions.storeReturn', $loanTransaction) }}" method="POST">
+            {{-- THE FIX IS APPLIED ON THE NEXT LINE: The route name has been corrected. --}}
+            <form action="{{ route('loan-transactions.return.store', $loanTransaction) }}" method="POST">
                 @csrf
                 {{-- No need for loan_application_id hidden field, $loanTransaction (issue) has it --}}
 

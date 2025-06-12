@@ -29,23 +29,21 @@ class LoanApplicationReadyForIssuanceNotification extends Notification implement
 
     /**
      * Get the mail representation of the notification.
+     * NOTE: This method points to a custom Blade view. The link inside that view also needs to be updated.
+     * See step 2 below for the change required in the 'emails.loan_application_ready_for_issuance' view.
      */
     public function toMail(User $notifiable): MailMessage
     {
         $loanApplicationId = $this->loanApplication->id ?? 'N/A';
 
-        // --- EDITED CODE: START ---
-        // The MailMessage object now uses the ->view() method to render the custom Blade template.
-        // We pass the $loanApplication object to the view so it has access to all the necessary data.
         return (new MailMessage)
             ->subject(__('Tindakan Diperlukan: Permohonan Pinjaman Sedia Untuk Pengeluaran (#:id)', ['id' => $loanApplicationId]))
             ->view('emails.loan_application_ready_for_issuance', ['loanApplication' => $this->loanApplication]);
-        // --- EDITED CODE: END ---
     }
 
     /**
      * Get the array representation of the notification.
-     * (No changes needed here, the database notification remains the same)
+     * This is sent to the 'database' channel for in-app notifications.
      */
     public function toArray(User $notifiable): array
     {
@@ -56,8 +54,12 @@ class LoanApplicationReadyForIssuanceNotification extends Notification implement
         $applicationUrl = '#';
         if ($loanApplicationId) {
             try {
-                $applicationUrl = route('loan-applications.show', $loanApplicationId);
+                // --- THIS IS THE FIX ---
+                // The route has been changed from 'loan-applications.show' to 'loan-applications.issue.form'.
+                // This ensures the link for the in-app notification takes the user directly to the issuance form.
+                $applicationUrl = route('loan-applications.issue.form', $loanApplicationId);
             } catch (\Exception $e) {
+                // The original error logging is good practice and remains unchanged.
                 Log::error('Error generating URL for LoanApplicationReadyForIssuanceNotification array: '.$e->getMessage(), ['loan_application_id' => $loanApplicationId]);
             }
         }
@@ -66,6 +68,7 @@ class LoanApplicationReadyForIssuanceNotification extends Notification implement
             return "{$item->equipment_type} (Kuantiti: ".($item->quantity_approved ?? $item->quantity_requested).')';
         })->toArray();
 
+        // The returned array now includes the corrected URL.
         return [
             'loan_application_id' => $loanApplicationId,
             'applicant_name' => $applicantName,

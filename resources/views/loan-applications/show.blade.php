@@ -20,7 +20,7 @@
                     <div class="mt-2 mt-md-0">
                         {{-- This component will now render its colors correctly as its parent containers are themed properly. --}}
                         <x-resource-status-panel :resource="$loanApplication" statusAttribute="status" type="loan_application"
-                            [cite_start]class="fs-5 px-3 py-2 shadow-sm" :showIcon="true" />
+                            class="fs-5 px-3 py-2 shadow-sm" :showIcon="true" />
                     </div>
                 </div>
 
@@ -60,7 +60,7 @@
                                 <dt class="col-sm-12 fw-medium text-muted">{{ __('Tujuan Permohonan:') }}</dt>
                                 {{-- FIX: Replaced 'bg-light' with Bootstrap's theme-aware 'bg-body-secondary'. --}}
                                 <dd class="col-sm-12 text-body bg-body-secondary p-2 rounded-2 border"
-                                    [cite_start]style="white-space: pre-wrap;">{{ e($loanApplication->purpose ?? 'N/A') }}</dd>
+                                    style="white-space: pre-wrap;">{{ e($loanApplication->purpose ?? 'N/A') }}</dd>
 
                                 <dt class="col-md-4 col-lg-3 fw-medium text-muted">{{ __('Lokasi Penggunaan Peralatan:') }}
                                 </dt>
@@ -179,7 +179,7 @@
                                         {{ optional($loanApplication->applicant_confirmation_timestamp)->translatedFormat('d M Y, h:i A') }}</span>
                                 @else
                                     <span class="fw-semibold text-warning"><i
-                                            [cite_start]class="bi bi-hourglass-split me-1"></i>{{ __('Belum Disahkan oleh Pemohon') }}</span>
+                                            class="bi bi-hourglass-split me-1"></i>{{ __('Belum Disahkan oleh Pemohon') }}</span>
                                 @endif
                             </div>
                         </section>
@@ -245,12 +245,13 @@
                                                 <div
                                                     class="d-flex flex-wrap justify-content-between align-items-center mb-2">
                                                     <h3 class="h6 card-title mb-0 text-body fw-medium">
+                                                        {{-- THE FIX IS APPLIED ON THE NEXT LINE --}}
                                                         {{ __('Transaksi') }} #{{ $transaction->id }} - <span
-                                                            class="fw-normal">{{ e(__(\App\Models\LoanTransaction::getTypeLabel($transaction->type))) }}</span>
+                                                            class="fw-normal">{{ $transaction->type_label }}</span>
                                                     </h3>
                                                     <x-resource-status-panel :resource="$transaction" statusAttribute="status"
                                                         type="loan_transaction" class="fs-6 px-2 py-1"
-                                                        [cite_start]:showIcon="true" />
+                                                        :showIcon="true" />
                                                 </div>
                                                 <p class="small text-muted mb-2">{{ __('Tarikh Transaksi') }}:
                                                     {{ optional($transaction->transaction_date)->translatedFormat('d M Y, h:i A') }}
@@ -314,7 +315,28 @@
                                 </form>
                             @endcan
 
-                            {{-- Other action buttons follow the same pattern --}}
+                            {{-- --- ADDED: PROCESS RETURN BUTTON --- --}}
+                            @php
+                                // Find the latest 'issue' transaction to link the return to.
+                                $issueTransaction = $loanApplication->loanTransactions()->where('type', 'issue')->latest()->first();
+                            @endphp
+
+                            {{-- Only show the button if an issue transaction exists and the user is authorized --}}
+                            @if ($issueTransaction)
+                                {{--
+                                    Use the 'processReturn' ability from LoanTransactionPolicy.
+                                    This ensures only authorized users (BPM Staff/Admin) see the button
+                                    for transactions that are in a returnable state.
+                                --}}
+                                @can('processReturn', $issueTransaction)
+                                    <a href="{{ route('loan-transactions.return.form', $issueTransaction) }}"
+                                       class="btn btn-success d-inline-flex align-items-center">
+                                       <i class="bi bi-arrow-down-left-circle-fill me-1"></i>
+                                        @lang('Proses Pemulangan Peralatan')
+                                    </a>
+                                @endcan
+                            @endif
+                            {{-- --- END ADDED SECTION --- --}}
 
                         </div>
                     </div>

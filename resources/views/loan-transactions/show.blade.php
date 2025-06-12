@@ -11,7 +11,8 @@
                 <h1 class="h2 fw-bold text-dark mb-0">
                     {{ __('transaction.show_title') }} #{{ $loanTransaction->id }}
                 </h1>
-                <a href="{{ route('resource-management.bpm.loan-transactions.index') }}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center">
+                {{-- FIX #1: Corrected route name --}}
+                <a href="{{ route('loan-transactions.index') }}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center">
                     <i class="bi bi-list-ul me-1"></i> {{__('transaction.back_to_list')}}
                 </a>
             </div>
@@ -43,7 +44,8 @@
                             @foreach ($loanTransaction->loanTransactionItems as $item)
                                 <li class="list-group-item px-0 d-flex justify-content-between align-items-start py-2">
                                     <div>
-                                        <a href="{{ route('resource-management.equipment-admin.show', $item->equipment_id) }}" class="text-decoration-none fw-medium">{{ $item->equipment->name ?? __('Item Tidak Dikenali') }}</a>
+                                        {{-- FIX #2: Corrected route name --}}
+                                        <a href="{{ route('admin.equipment.show', $item->equipment_id) }}" class="text-decoration-none fw-medium">{{ $item->equipment->name ?? __('Item Tidak Dikenali') }}</a>
                                         <small class="d-block text-muted">Tag: {{ $item->equipment->tag_id ?? 'N/A' }}</small>
                                     </div>
                                     <span class="text-muted small">{{ __('transaction.quantity') }}: {{ $item->quantity_transacted }}</span>

@@ -1,11 +1,17 @@
+{{-- ++ ADDED: @props directive to define the component's API and set default values ++ --}}
+@props([
+    'resource',
+    'statusAttribute' => 'status', // Defaults to 'status' if not provided
+    'type' => 'unknown',
+    'showIcon' => false,
+    'statusTextPrefix' => ''
+])
+
 @php
-    // Define a resolved type, defaulting to 'unknown' if $type is not passed or null.
-    // The 'type' prop itself should be null if defined in @props and not passed.
-    // This handles the "Undefined variable" case defensively and also if $type is null.
-    $resolvedType = $type ?? 'unknown';
+    // The 'type' prop is already defined with a default value above.
+    $resolvedType = $type;
 
     $statusValue = strtolower($resource->{$statusAttribute} ?? 'unknown');
-    $statusTextPrefix = $statusTextPrefix ?? '';
 
     $statusLabelAccessorMethodName = 'get' . Illuminate\Support\Str::studly($statusAttribute) . 'LabelAttribute';
     $statusLabelPropertyName = Illuminate\Support\Str::camel($statusAttribute) . 'Label';
@@ -18,7 +24,6 @@
         $formattedStatus = __(Illuminate\Support\Str::title(str_replace('_', ' ', $statusValue)));
     }
 
-    // Use the $resolvedType which now has a fallback value.
     $statusClass = \App\Helpers\Helpers::getStatusColorClass($statusValue, $resolvedType);
 
     $statusIconClass = '';
@@ -28,11 +33,12 @@
             case 'completed':
             case 'active':
             case 'available':
+            case 'returned_good': // Added for transaction statuses
                 $statusIconClass = 'bi-check-circle-fill';
                 break;
             case 'pending':
             case 'pending_support':
-            case 'pending_approval': // Corrected from pending_admin to match typical status values if needed
+            case 'pending_approval':
             case 'processing':
                 $statusIconClass = 'bi-clock-history';
                 break;
@@ -42,18 +48,31 @@
                 $statusIconClass = 'bi-x-circle-fill';
                 break;
             case 'on_loan':
+            case 'issued': // Added for transaction statuses
                 $statusIconClass = 'bi-arrow-up-right-circle-fill';
                 break;
+            case 'returned_damaged': // Added for transaction statuses
             case 'damaged_needs_repair':
             case 'under_maintenance':
                 $statusIconClass = 'bi-tools';
+                break;
+             case 'overdue': // Added for application status
+                $statusIconClass = 'bi-alarm-fill';
                 break;
             default:
                 $statusIconClass = 'bi-info-circle-fill';
                 break;
         }
-    } elseif (is_string($showIcon) && Str::startsWith($showIcon, 'bi-')) { // Allow passing a specific Bootstrap Icon class
+    } elseif (is_string($showIcon) && Str::startsWith($showIcon, 'bi-')) {
         $statusIconClass = $showIcon;
     }
-
 @endphp
+
+{{-- This is the actual HTML output of the component. It should be present in your file. --}}
+{{-- If your file is empty besides the PHP block, you should add this part. --}}
+<span {{ $attributes->merge(['class' => 'badge rounded-pill ' . $statusClass]) }}>
+    @if($statusIconClass)
+        <i class="{{ $statusIconClass }} me-1"></i>
+    @endif
+    {{ $statusTextPrefix }}{{ $formattedStatus }}
+</span>

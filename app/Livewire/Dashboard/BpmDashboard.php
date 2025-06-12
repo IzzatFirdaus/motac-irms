@@ -28,6 +28,7 @@ class BpmDashboard extends Component
 
     public function render()
     {
+        // This view now contains the calls to the self-contained Livewire list components.
         return view('livewire.dashboard.bpm-dashboard');
     }
 }

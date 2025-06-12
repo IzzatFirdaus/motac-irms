@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use Illuminate\Support\Str; // ++ ADDED: Import the Str class for the accessor fallback
 
 class LoanApplicationItem extends Model
 {
@@ -104,6 +104,18 @@ class LoanApplicationItem extends Model
     {
         return self::ITEM_STATUS_LABELS[$this->status] ?? Str::title(str_replace('_', ' ', (string) $this->status));
     }
+
+    /**
+     * ++ ADDED THIS ACCESSOR METHOD TO FIX THE ERROR ++
+     * This method creates the 'equipment_type_name' attribute on the fly.
+     * It looks for a human-readable label in the Equipment model's static options.
+     * If not found, it creates a nicely formatted name from the key itself.
+     */
+    public function getEquipmentTypeNameAttribute(): string
+    {
+        return Equipment::getAssetTypeOptions()[$this->equipment_type] ?? Str::title(str_replace('_', ' ', $this->equipment_type));
+    }
+
 
     // Helper Methods
     public function recalculateQuantities(): void

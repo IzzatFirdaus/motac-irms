@@ -104,13 +104,23 @@ class LoanApplication extends Model
     // --- HELPER METHODS ---
     public function isDraft(): bool { return $this->status === self::STATUS_DRAFT; }
 
-    /**
-     * Check if the application status is rejected.
-     * This method was added to resolve the 'BadMethodCallException'.
-     */
     public function isRejected(): bool
     {
         return $this->status === self::STATUS_REJECTED;
+    }
+
+    /**
+     * ++ ADDED: This method defines what a "closed" status is. ++
+     * A loan is considered closed if it has been fully returned, completed, or cancelled.
+     * The view uses this to determine if the "Process Return" button should be shown.
+     */
+    public function isClosed(): bool
+    {
+        return in_array($this->status, [
+            self::STATUS_RETURNED,
+            self::STATUS_COMPLETED,
+            self::STATUS_CANCELLED,
+        ]);
     }
 
     public function canBeReturned(): bool { return in_array($this->status, [self::STATUS_ISSUED, self::STATUS_PARTIALLY_ISSUED, self::STATUS_OVERDUE]); }

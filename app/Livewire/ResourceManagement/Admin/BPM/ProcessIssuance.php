@@ -9,6 +9,7 @@ use App\Models\LoanTransaction;
 use App\Models\User;
 use App\Services\LoanTransactionService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
@@ -20,19 +21,12 @@ class ProcessIssuance extends Component
     use AuthorizesRequests;
 
     public LoanApplication $loanApplication;
-
     public array $allAccessoriesList = [];
-
     public $availableEquipment = [];
-
-    public array $users = [];
-
+    public Collection $potentialRecipients;
     public array $issueItems = [];
-
     public $receiving_officer_id;
-
     public $transaction_date;
-
     public string $issue_notes = '';
 
     protected function messages(): array
@@ -67,12 +61,25 @@ class ProcessIssuance extends Component
 
     public function mount(int $loanApplicationId): void
     {
-        $this->loanApplication = LoanApplication::with(['loanApplicationItems', 'user'])->findOrFail($loanApplicationId);
+        // Eager load all necessary relationships for the form
+        $this->loanApplication = LoanApplication::with([
+            'loanApplicationItems',
+            'user',
+            'responsibleOfficer' // ++ ADDED: Eager load the responsible officer
+        ])->findOrFail($loanApplicationId);
+
         $this->authorize('processIssuance', $this->loanApplication);
 
         $this->allAccessoriesList = config('motac.loan_accessories_list', []);
-        $this->receiving_officer_id = $this->loanApplication->user_id;
         $this->transaction_date = now()->format('Y-m-d');
+
+        // ++ EDITED: Create a collection of potential recipients for the dropdown ++
+        $this->potentialRecipients = collect([$this->loanApplication->user, $this->loanApplication->responsibleOfficer])
+            ->filter() // Remove any null values (if no responsible officer)
+            ->unique('id'); // Ensure no duplicates if user and officer are the same
+
+        // Default the receiving officer to the original applicant
+        $this->receiving_officer_id = $this->loanApplication->user_id;
 
         // Pre-populate issue items based on the balance to be issued
         foreach ($this->loanApplication->loanApplicationItems as $approvedItem) {
@@ -90,34 +97,12 @@ class ProcessIssuance extends Component
         }
     }
 
-    // Lifecycle hook to update equipment type when an application item is selected
-    public function updatedIssueItems($value, $key): void
-    {
-        $parts = explode('.', $key);
-        // Check if the key is for 'loan_application_item_id' inside the issueItems array
-        if (count($parts) === 3 && $parts[2] === 'loan_application_item_id') {
-            $index = (int) $parts[1];
-            $loanAppItemId = $this->issueItems[$index]['loan_application_item_id'] ?? null;
-
-            if ($loanAppItemId) {
-                $appItem = LoanApplicationItem::find($loanAppItemId);
-                if ($appItem) {
-                    $this->issueItems[$index]['equipment_type'] = $appItem->equipment_type;
-                    $this->issueItems[$index]['equipment_id'] = null; // Reset equipment selection
-                }
-            } else {
-                $this->issueItems[$index]['equipment_type'] = null;
-            }
-        }
-    }
-
     public function submitIssue(LoanTransactionService $loanTransactionService)
     {
         $this->authorize('createIssue', [LoanTransaction::class, $this->loanApplication]);
 
         if (empty($this->issueItems)) {
             $this->addError('issueItems', __('Tiada baki peralatan untuk dikeluarkan bagi permohonan ini.'));
-
             return;
         }
 
@@ -150,7 +135,6 @@ class ProcessIssuance extends Component
             );
 
             session()->flash('success', __('Rekod pengeluaran peralatan telah berjaya disimpan.'));
-
             return $this->redirectRoute('loan-applications.show', ['loan_application' => $this->loanApplication->id], navigate: true);
 
         } catch (Throwable $e) {
@@ -161,7 +145,7 @@ class ProcessIssuance extends Component
 
     public function render()
     {
-        // Load equipment and users needed for the form dropdowns
+        // Load equipment needed for the form dropdowns
         $requestedTypes = collect($this->issueItems)->pluck('equipment_type')->filter()->unique()->toArray();
 
         $this->availableEquipment = Equipment::where('status', Equipment::STATUS_AVAILABLE)
@@ -169,12 +153,6 @@ class ProcessIssuance extends Component
             ->orderBy('brand')
             ->orderBy('model')
             ->get(['id', 'tag_id', 'asset_type', 'brand', 'model']);
-
-        // THE FINAL FIX IS APPLIED IN THE FOLLOWING QUERY
-        $this->users = User::where('status', User::STATUS_ACTIVE)
-            ->orderBy('name')
-            ->get(['id', 'name', 'profile_photo_path']) // Added 'profile_photo_path'
-            ->toArray(); // Converted to array
 
         return view('livewire.resource-management.admin.bpm.process-issuance')->title(__('Proses Pengeluaran Peralatan'));
     }

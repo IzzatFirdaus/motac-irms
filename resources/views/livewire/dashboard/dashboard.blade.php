@@ -1,4 +1,4 @@
-{{-- resources/views/livewire/dashboard.blade.php --}}
+{{-- resources/views/livewire/dashboard/dashboard.blade.php --}}
 <div>
     @php
         $configData = \App\Helpers\Helpers::appClasses();
@@ -162,8 +162,9 @@
                                         @foreach ($upcomingReturns as $returnLoanApp)
                                             @if (Route::has('loan-applications.show'))
                                                 <tr onclick="window.location='{{ route('loan-applications.show', $returnLoanApp->id) }}';">
-                                                    <td>{{ \App\Helpers\Helpers::formatDate($returnLoanApp->expected_return_date ?: $returnLoanApp->loan_end_date, 'date_my', __('common.not_available')) }}</td>
-                                                    <td>{{ Str::limit($returnLoanApp->item_name ?: $returnLoanApp->purpose, 35) }}</td>
+                                                    <td>{{ \App\Helpers\Helpers::formatDate($returnLoanApp->loan_end_date, 'date_my', __('common.not_available')) }}</td>
+                                                    {{-- THE FIX IS APPLIED ON THE NEXT LINE --}}
+                                                    <td>{{ Str::limit($returnLoanApp->purpose, 35) }}</td>
                                                     <td><x-resource-status-panel :resource="$returnLoanApp" statusAttribute="status" type="loan_application" :showIcon="true" /></td>
                                                 </tr>
                                             @endif

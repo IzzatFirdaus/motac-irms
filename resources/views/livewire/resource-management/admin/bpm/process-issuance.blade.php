@@ -62,7 +62,7 @@
     </div>
 
     {{-- Issuance Form --}}
-    <form wire:submit.prevent="recordIssuance">
+    <form wire:submit.prevent="submitIssue">
         <div class="card motac-card">
             <div class="card-header motac-card-header">
                 <h5 class="card-title mb-0">@lang('Rekod Pengeluaran Peralatan Sebenar')</h5>
@@ -77,11 +77,9 @@
 
                             <div class="mb-3">
                                 <label for="issueItems_{{ $index }}_equipment_id" class="form-label">@lang('Pilih Peralatan Spesifik (Tag ID)') <span class="text-danger">*</span></label>
-                                <select wire:model="issueItems.{{ $index }}.equipment_id" id="issueItems_{{ $index }}_equipment_id" class="form-select @error('issueItems.'.$index.'.equipment_id') is-invalid @enderror">
+                                <select wire:model.live="issueItems.{{ $index }}.equipment_id" id="issueItems_{{ $index }}_equipment_id" class="form-select @error('issueItems.'.$index.'.equipment_id') is-invalid @enderror">
                                     <option value="">-- @lang('Pilih Peralatan') --</option>
-                                    {{-- This filters the available equipment to only show matching types --}}
                                     @foreach ($availableEquipment->where('asset_type', $issueItem['equipment_type']) as $equipment)
-                                        {{-- THE FIX IS APPLIED ON THE NEXT LINE --}}
                                         <option value="{{ $equipment->id }}">
                                             {{ $equipment->brand }} {{ $equipment->model }} (Tag: {{ $equipment->tag_id ?? 'N/A' }})
                                         </option>
@@ -117,8 +115,19 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="receiving_officer_id" class="form-label fw-semibold">@lang('Peralatan Diterima Oleh (Pemohon/Wakil)') <span class="text-danger">*</span></label>
+                        {{-- ++ EDITED: The dropdown now dynamically lists potential recipients ++ --}}
                         <select wire:model="receiving_officer_id" id="receiving_officer_id" class="form-select @error('receiving_officer_id') is-invalid @enderror">
-                            <option value="{{ $loanApplication->user_id }}">{{ $loanApplication->user->name }} (@lang('Pemohon'))</option>
+                            <option value="">-- @lang('Sila Pilih Penerima') --</option>
+                            @foreach($potentialRecipients as $recipient)
+                                <option value="{{ $recipient->id }}">
+                                    {{ $recipient->name }}
+                                    @if($recipient->id === $loanApplication->user_id)
+                                        (@lang('Pemohon'))
+                                    @elseif($recipient->id === $loanApplication->responsible_officer_id)
+                                        (@lang('Pegawai Bertanggungjawab'))
+                                    @endif
+                                </option>
+                            @endforeach
                         </select>
                         @error('receiving_officer_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
@@ -140,9 +149,9 @@
                     <i class="bi bi-x-circle me-1"></i>
                     @lang('Batal')
                 </a>
-                <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="recordIssuance">
-                    <span wire:loading wire:target="recordIssuance" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                    <span wire:loading.remove wire:target="recordIssuance"><i class="bi bi-check-lg me-1"></i></span>
+                <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="submitIssue">
+                    <span wire:loading wire:target="submitIssue" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span wire:loading.remove wire:target="submitIssue"><i class="bi bi-check-lg me-1"></i></span>
                     @lang('Rekod Pengeluaran')
                 </button>
             </div>
