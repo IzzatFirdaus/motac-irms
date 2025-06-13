@@ -1,16 +1,16 @@
 {{-- resources/views/components/approval-status-badge.blade.php --}}
-@props(['status'])
+@props(['status', 'class' => ''])
 
 @php
-    $statusValue = strtolower($status ?? 'unknown');
-    // Define the appropriate type for approval statuses
-    $type = 'approval'; //
+    // 1. Get the CSS class from the centralized helper function.
+    $badgeClass = \App\Helpers\Helpers::getStatusColorClass($status ?? '', 'approval');
 
-    // Call the helper with both status and type
-    $statusClass = \App\Helpers\Helpers::getStatusColorClass($statusValue, $type); //
-    $statusText = __(ucfirst(str_replace('_', ' ', $status))); // Translated status text
+    // 2. Get the specific display text from the Approval model's static options.
+    // This uses the $STATUSES_LABELS array you've defined.
+    $statusText = \App\Models\Approval::getStatusOptions()[$status] ?? Str::title(str_replace('_', ' ', $status));
 @endphp
 
-<span {{ $attributes->merge(['class' => 'badge rounded-pill ' . $statusClass]) }}>
-    {{ $statusText }}
+<span class="badge rounded-pill {{ $badgeClass }} {{ $class }}">
+    {{-- The __() helper handles translation --}}
+    {{ __($statusText) }}
 </span>

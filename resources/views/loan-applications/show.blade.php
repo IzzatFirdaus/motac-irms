@@ -296,6 +296,13 @@
                                 <i class="bi bi-arrow-left-circle me-1"></i> {{ __('Kembali ke Senarai') }}
                             </a>
 
+                            {{-- ++ NEWLY ADDED: PRINT BUTTON ++ --}}
+                            <a href="{{ route('loan-applications.print', $loanApplication) }}" target="_blank"
+                                class="btn btn-dark d-inline-flex align-items-center">
+                                <i class="bi bi-printer-fill me-1"></i> {{ __('Cetak Borang') }}
+                            </a>
+                            {{-- ++ END OF ADDED SECTION ++ --}}
+
                             @can('update', $loanApplication)
                                 <a href="{{ route('loan-applications.edit', $loanApplication) }}"
                                     class="btn btn-info d-inline-flex align-items-center">

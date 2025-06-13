@@ -1,1 +1,217 @@
-"use strict";$((function(){var e=$(".read-only-ratings");e&&e.rateYo({rtl:isRtl,rating:4,starWidth:"20px"})})),function(){window.Helpers.initCustomOptionCheck();const e=document.querySelector(".credit-card-mask"),t=document.querySelector(".expiry-date-mask"),o=document.querySelector(".cvv-code-mask");e&&new Cleave(e,{creditCard:!0,onCreditCardTypeChanged:function(e){document.querySelector(".card-type").innerHTML=""!=e&&"unknown"!=e?'<img src="'+assetsPath+"img/icons/payments/"+e+'-cc.png" height="28"/>':""}}),t&&new Cleave(t,{date:!0,delimiter:"/",datePattern:["m","y"]}),o&&new Cleave(o,{numeral:!0,numeralPositiveOnly:!0});const i=document.querySelector("#wizard-checkout");if(void 0!==typeof i&&null!==i){const e=i.querySelector("#wizard-checkout-form"),t=e.querySelector("#checkout-cart"),o=e.querySelector("#checkout-address"),n=e.querySelector("#checkout-payment"),a=e.querySelector("#checkout-confirmation"),r=[].slice.call(e.querySelectorAll(".btn-next")),l=[].slice.call(e.querySelectorAll(".btn-prev"));let u=new Stepper(i,{linear:!1});const c=FormValidation.formValidation(t,{fields:{},plugins:{trigger:new FormValidation.plugins.Trigger,bootstrap5:new FormValidation.plugins.Bootstrap5({eleValidClass:""}),autoFocus:new FormValidation.plugins.AutoFocus,submitButton:new FormValidation.plugins.SubmitButton}}).on("core.form.valid",(function(){u.next()})),s=FormValidation.formValidation(o,{fields:{},plugins:{trigger:new FormValidation.plugins.Trigger,bootstrap5:new FormValidation.plugins.Bootstrap5({eleValidClass:""}),autoFocus:new FormValidation.plugins.AutoFocus,submitButton:new FormValidation.plugins.SubmitButton}}).on("core.form.valid",(function(){u.next()})),d=FormValidation.formValidation(n,{fields:{},plugins:{trigger:new FormValidation.plugins.Trigger,bootstrap5:new FormValidation.plugins.Bootstrap5({eleValidClass:""}),autoFocus:new FormValidation.plugins.AutoFocus,submitButton:new FormValidation.plugins.SubmitButton}}).on("core.form.valid",(function(){u.next()})),m=FormValidation.formValidation(a,{fields:{},plugins:{trigger:new FormValidation.plugins.Trigger,bootstrap5:new FormValidation.plugins.Bootstrap5({eleValidClass:"",rowSelector:".col-md-12"}),autoFocus:new FormValidation.plugins.AutoFocus,submitButton:new FormValidation.plugins.SubmitButton}}).on("core.form.valid",(function(){alert("Submitted..!!")}));r.forEach((e=>{e.addEventListener("click",(e=>{switch(u._currentIndex){case 0:c.validate();break;case 1:s.validate();break;case 2:d.validate();break;case 3:m.validate()}}))})),l.forEach((e=>{e.addEventListener("click",(e=>{switch(u._currentIndex){case 3:case 2:case 1:u.previous()}}))}))}}();
+/**
+ *  Form Wizard
+ */
+
+'use strict';
+
+// rateyo (jquery)
+$(function () {
+  var readOnlyRating = $('.read-only-ratings');
+
+  // Star rating
+  if (readOnlyRating) {
+    readOnlyRating.rateYo({
+      rtl: isRtl,
+      rating: 4,
+      starWidth: '20px'
+    });
+  }
+});
+
+(function () {
+  // Init custom option check
+  window.Helpers.initCustomOptionCheck();
+
+  // libs
+  const creditCardMask = document.querySelector('.credit-card-mask'),
+    expiryDateMask = document.querySelector('.expiry-date-mask'),
+    cvvMask = document.querySelector('.cvv-code-mask');
+
+  // Credit Card
+  if (creditCardMask) {
+    new Cleave(creditCardMask, {
+      creditCard: true,
+      onCreditCardTypeChanged: function (type) {
+        if (type != '' && type != 'unknown') {
+          document.querySelector('.card-type').innerHTML =
+            '<img src="' + assetsPath + 'img/icons/payments/' + type + '-cc.png" height="28"/>';
+        } else {
+          document.querySelector('.card-type').innerHTML = '';
+        }
+      }
+    });
+  }
+  // Expiry Date Mask
+  if (expiryDateMask) {
+    new Cleave(expiryDateMask, {
+      date: true,
+      delimiter: '/',
+      datePattern: ['m', 'y']
+    });
+  }
+
+  // CVV
+  if (cvvMask) {
+    new Cleave(cvvMask, {
+      numeral: true,
+      numeralPositiveOnly: true
+    });
+  }
+
+  // Wizard Checkout
+  // --------------------------------------------------------------------
+
+  const wizardCheckout = document.querySelector('#wizard-checkout');
+  if (typeof wizardCheckout !== undefined && wizardCheckout !== null) {
+    // Wizard form
+    const wizardCheckoutForm = wizardCheckout.querySelector('#wizard-checkout-form');
+    // Wizard steps
+    const wizardCheckoutFormStep1 = wizardCheckoutForm.querySelector('#checkout-cart');
+    const wizardCheckoutFormStep2 = wizardCheckoutForm.querySelector('#checkout-address');
+    const wizardCheckoutFormStep3 = wizardCheckoutForm.querySelector('#checkout-payment');
+    const wizardCheckoutFormStep4 = wizardCheckoutForm.querySelector('#checkout-confirmation');
+    // Wizard next prev button
+    const wizardCheckoutNext = [].slice.call(wizardCheckoutForm.querySelectorAll('.btn-next'));
+    const wizardCheckoutPrev = [].slice.call(wizardCheckoutForm.querySelectorAll('.btn-prev'));
+
+    let validationStepper = new Stepper(wizardCheckout, {
+      linear: false
+    });
+
+    // Cart
+    const FormValidation1 = FormValidation.formValidation(wizardCheckoutFormStep1, {
+      fields: {
+        // * Validate the fields here based on your requirements
+      },
+
+      plugins: {
+        trigger: new FormValidation.plugins.Trigger(),
+        bootstrap5: new FormValidation.plugins.Bootstrap5({
+          // Use this for enabling/changing valid/invalid class
+          // eleInvalidClass: '',
+          eleValidClass: ''
+          // rowSelector: '.col-lg-6'
+        }),
+        autoFocus: new FormValidation.plugins.AutoFocus(),
+        submitButton: new FormValidation.plugins.SubmitButton()
+      }
+    }).on('core.form.valid', function () {
+      // Jump to the next step when all fields in the current step are valid
+      validationStepper.next();
+    });
+
+    // Address
+    const FormValidation2 = FormValidation.formValidation(wizardCheckoutFormStep2, {
+      fields: {
+        // * Validate the fields here based on your requirements
+      },
+      plugins: {
+        trigger: new FormValidation.plugins.Trigger(),
+        bootstrap5: new FormValidation.plugins.Bootstrap5({
+          // Use this for enabling/changing valid/invalid class
+          // eleInvalidClass: '',
+          eleValidClass: ''
+          // rowSelector: '.col-lg-6'
+        }),
+        autoFocus: new FormValidation.plugins.AutoFocus(),
+        submitButton: new FormValidation.plugins.SubmitButton()
+      }
+    }).on('core.form.valid', function () {
+      // Jump to the next step when all fields in the current step are valid
+      validationStepper.next();
+    });
+
+    // Payment
+    const FormValidation3 = FormValidation.formValidation(wizardCheckoutFormStep3, {
+      fields: {
+        // * Validate the fields here based on your requirements
+      },
+      plugins: {
+        trigger: new FormValidation.plugins.Trigger(),
+        bootstrap5: new FormValidation.plugins.Bootstrap5({
+          // Use this for enabling/changing valid/invalid class
+          // eleInvalidClass: '',
+          eleValidClass: ''
+          // rowSelector: '.col-lg-6'
+        }),
+        autoFocus: new FormValidation.plugins.AutoFocus(),
+        submitButton: new FormValidation.plugins.SubmitButton()
+      }
+    }).on('core.form.valid', function () {
+      validationStepper.next();
+    });
+
+    // Confirmation
+    const FormValidation4 = FormValidation.formValidation(wizardCheckoutFormStep4, {
+      fields: {
+        // * Validate the fields here based on your requirements
+      },
+      plugins: {
+        trigger: new FormValidation.plugins.Trigger(),
+        bootstrap5: new FormValidation.plugins.Bootstrap5({
+          // Use this for enabling/changing valid/invalid class
+          // eleInvalidClass: '',
+          eleValidClass: '',
+          rowSelector: '.col-md-12'
+        }),
+        autoFocus: new FormValidation.plugins.AutoFocus(),
+        submitButton: new FormValidation.plugins.SubmitButton()
+      }
+    }).on('core.form.valid', function () {
+      // You can submit the form
+      // wizardCheckoutForm.submit()
+      // or send the form data to server via an Ajax request
+      // To make the demo simple, I just placed an alert
+      alert('Submitted..!!');
+    });
+
+    wizardCheckoutNext.forEach(item => {
+      item.addEventListener('click', event => {
+        // When click the Next button, we will validate the current step
+        switch (validationStepper._currentIndex) {
+          case 0:
+            FormValidation1.validate();
+            break;
+
+          case 1:
+            FormValidation2.validate();
+            break;
+
+          case 2:
+            FormValidation3.validate();
+            break;
+
+          case 3:
+            FormValidation4.validate();
+            break;
+
+          default:
+            break;
+        }
+      });
+    });
+
+    wizardCheckoutPrev.forEach(item => {
+      item.addEventListener('click', event => {
+        switch (validationStepper._currentIndex) {
+          case 3:
+            validationStepper.previous();
+            break;
+
+          case 2:
+            validationStepper.previous();
+            break;
+
+          case 1:
+            validationStepper.previous();
+            break;
+
+          case 0:
+
+          default:
+            break;
+        }
+      });
+    });
+  }
+})();

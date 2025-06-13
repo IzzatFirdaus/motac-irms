@@ -8,9 +8,11 @@ use App\Models\Equipment;
 use App\Models\LoanApplication;
 use App\Models\User;
 use App\Services\LoanApplicationService;
+use Barryvdh\DomPDF\Facade\Pdf; // ++ ADD THIS USE STATEMENT ++
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response; // ++ ADD THIS USE STATEMENT ++
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException as IlluminateValidationException;
@@ -105,48 +107,23 @@ class LoanApplicationController extends Controller
         Log::info('LoanApplicationController@show: User ID '.Auth::id()." viewing LoanApplication ID {$loanApplication->id}.");
 
         $loanApplication->loadMissing([
-            // Applicant User details: explicitly select 'title' and eager load nested relations
-            'user' => function ($query) {
-                $query->select('id', 'name', 'title', 'identification_number', 'mobile_number', 'email', 'motac_email', 'position_id', 'grade_id', 'department_id')
-                    ->with(['position:id,name', 'grade:id,name', 'department:id,name']);
-            },
-            // Responsible Officer details: explicitly select 'title' and eager load nested relations
-            'responsibleOfficer' => function ($query) {
-                $query->select('id', 'name', 'title', 'identification_number', 'mobile_number', 'email', 'motac_email', 'position_id', 'grade_id', 'department_id')
-                    ->with(['position:id,name', 'grade:id,name', 'department:id,name']);
-            },
-            // Supporting Officer details: explicitly select 'title' and eager load nested relations
-            'supportingOfficer' => function ($query) {
-                $query->select('id', 'name', 'title', 'identification_number', 'mobile_number', 'email', 'motac_email', 'position_id', 'grade_id', 'department_id')
-                    ->with(['position:id,name', 'grade:id,name', 'department:id,name']);
-            },
-            // Approval officers: explicitly select 'title'
+            'user' => fn ($q) => $q->with(['position:id,name', 'grade:id,name', 'department:id,name']),
+            'responsibleOfficer' => fn ($q) => $q->with(['position:id,name', 'grade:id,name', 'department:id,name']),
+            'supportingOfficer' => fn ($q) => $q->with(['position:id,name', 'grade:id,name', 'department:id,name']),
             'approvedBy:id,name,title',
             'rejectedBy:id,name,title',
             'cancelledBy:id,name,title',
             'currentApprovalOfficer:id,name,title',
-
-            // Ensure 'loanApplicationItems' relationship is directly eager loaded
-            'loanApplicationItems' => function ($query) {
-                $query->with('equipment:id,brand,model,asset_type,tag_id,serial_number'); // Nested eager load for equipment details
-            },
-
-            // Loan Transactions and related officers: explicitly select 'title' for officers
-            'loanTransactions' => function ($query) {
-                $query->with([
-                    'loanTransactionItems.equipment:id,tag_id,asset_type,brand,model,serial_number',
-                    'issuingOfficer:id,name,title',
-                    'receivingOfficer:id,name,title',
-                    'returningOfficer:id,name,title',
-                    'returnAcceptingOfficer:id,name,title',
-                ])->orderByDesc('transaction_date');
-            },
-            // Approvals and the officer who made the decision: explicitly select 'title'
-            'approvals' => function ($query) {
-                $query->with('officer:id,name,title')
-                    ->orderBy('created_at');
-            },
-            // Audit trail users: explicitly select 'title'
+            'loanApplicationItems.equipment:id,brand,model,asset_type,tag_id,serial_number',
+            'loanTransactions' => fn ($q) => $q->with([
+                'loanTransactionItems.equipment:id,tag_id,asset_type,brand,model,serial_number',
+                'loanTransactionItems.loanApplicationItem',
+                'issuingOfficer:id,name,title',
+                'receivingOfficer:id,name,title',
+                'returningOfficer:id,name,title',
+                'returnAcceptingOfficer:id,name,title',
+            ])->orderByDesc('transaction_date'),
+            'approvals' => fn ($q) => $q->with('officer:id,name,title')->orderBy('created_at'),
             'creator:id,name,title',
             'updater:id,name,title',
         ]);
@@ -154,10 +131,50 @@ class LoanApplicationController extends Controller
         return view('loan-applications.show', compact('loanApplication'));
     }
 
+    /**
+     * ++ ADD THIS NEW METHOD TO GENERATE THE PDF ++
+     *
+     * Generate a PDF printout for the specified loan application.
+     * @param \App\Models\LoanApplication $loanApplication
+     * @return \Illuminate\Http\Response
+     */
+    public function printPdf(LoanApplication $loanApplication): Response
+    {
+        // Authorize the user can view the application
+        $this->authorize('view', $loanApplication);
+        Log::info('LoanApplicationController@printPdf: User ID '.Auth::id()." generating PDF for LoanApplication ID {$loanApplication->id}.");
+
+        // Eager load all data needed for the PDF view to prevent lazy-loading errors.
+        $loanApplication->loadMissing([
+            'user' => fn ($q) => $q->with(['position:id,name', 'grade:id,name', 'department:id,name']),
+            'responsibleOfficer' => fn ($q) => $q->with(['position:id,name', 'grade:id,name']),
+            'approvals.officer',
+            'loanApplicationItems',
+            'loanTransactions' => fn ($q) => $q->with([
+                'issuingOfficer',
+                'receivingOfficer',
+                'returningOfficer',
+                'returnAcceptingOfficer',
+                'loanTransactionItems.equipment',
+                'loanTransactionItems.loanApplicationItem'
+            ])
+        ]);
+
+        // Load the dedicated Blade view for the PDF
+        $pdf = Pdf::loadView('loan-applications.pdf.print-form', [
+            'loanApplication' => $loanApplication
+        ]);
+
+        // Set paper size to A4 portrait to match the official form
+        $pdf->setPaper('A4', 'portrait');
+
+        // Stream the PDF to the browser
+        return $pdf->stream('borang-pinjaman-ict-'.$loanApplication->id.'.pdf');
+    }
+
     public function update(UpdateLoanApplicationRequest $request, LoanApplication $loanApplication): RedirectResponse
     {
-        $this->authorize('update', $loanApplication); // Policy now handles all authorization checks
-        /** @var \App\Models\User $user */
+        $this->authorize('update', $loanApplication);
         $user = $request->user();
         $validatedData = $request->validated();
 
@@ -192,10 +209,7 @@ class LoanApplicationController extends Controller
 
     public function submitApplication(Request $request, LoanApplication $loanApplication): RedirectResponse
     {
-        /** @var \App\Models\User $user */
         $user = $request->user();
-        // Authorization is now handled by middleware in the routes/web.php file.
-
         Log::info("LoanApplicationController@submitApplication: User ID {$user->id} attempting to submit LoanApplication ID {$loanApplication->id} (traditional flow).");
 
         try {
@@ -225,9 +239,8 @@ class LoanApplicationController extends Controller
 
     public function destroy(LoanApplication $loanApplication): RedirectResponse
     {
-        /** @var \App\Models\User $user */
         $user = Auth::user();
-        $this->authorize('delete', $loanApplication); // Policy now handles all authorization checks
+        $this->authorize('delete', $loanApplication);
 
         Log::info("LoanApplicationController@destroy: User ID {$user->id} attempting to soft delete LoanApplication ID {$loanApplication->id} (traditional flow).");
 

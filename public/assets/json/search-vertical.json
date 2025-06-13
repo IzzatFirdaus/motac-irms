@@ -1,0 +1,56 @@
+[
+  {
+    "url": "/dashboard",
+    "icon": "ti-home",
+    "name": "Utama",
+    "category": "Laman Utama"
+  },
+  {
+    "url": "/loan-application/create",
+    "icon": "ti-laptop",
+    "name": "Mohon Pinjaman ICT",
+    "category": "Pengurusan Sumber"
+  },
+  {
+    "url": "/email-application/create",
+    "icon": "ti-mail",
+    "name": "Mohon E-mel / ID Pengguna",
+    "category": "Pengurusan Sumber"
+  },
+  {
+    "url": "/my-applications/loans",
+    "icon": "ti-file-stack",
+    "name": "Permohonan Pinjaman Saya",
+    "category": "Permohonan Saya"
+  },
+  {
+    "url": "/my-applications/emails",
+    "icon": "ti-file-stack",
+    "name": "Permohonan E-mel Saya",
+    "category": "Permohonan Saya"
+  },
+  {
+    "url": "/approvals/dashboard",
+    "icon": "ti-user-check",
+    "name": "Papan Pemuka Kelulusan",
+    "category": "Kelulusan"
+  },
+  {
+    "url": "/admin/reports",
+    "icon": "ti-chart-bar",
+    "name": "Laporan Sistem",
+    "category": "Pentadbiran"
+  },
+  {
+    "url": "/admin/settings/users",
+    "icon": "ti-users",
+    "name": "Pengurusan Pengguna",
+    "category": "Tetapan"
+  },
+  {
+    "url": "/admin/settings/roles",
+    "icon": "ti-lock-access",
+    "name": "Peranan & Kebenaran",
+    "category": "Tetapan"
+  }
+]

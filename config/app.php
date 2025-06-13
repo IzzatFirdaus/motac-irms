@@ -49,7 +49,7 @@ return [
     |--------------------------------------------------------------------------
     | Design Language: Bahasa Melayu as Primary Language
     */
-    'locale' => env('APP_LOCALE', 'ms'), // CORRECTED: Changed 'my' to 'ms' for Bahasa Melayu
+    'locale' => env('APP_LOCALE', 'ms'),
 
     /*
     |--------------------------------------------------------------------------
@@ -62,14 +62,24 @@ return [
     |--------------------------------------------------------------------------
     | Available Locales
     |--------------------------------------------------------------------------
-    | Used by LanguageController and LocaleMiddleware.
-    | 'ms' for Bahasa Melayu, 'en' for English. 'ar' for Arabic (optional).
-    | Added 'display' flag for UI control.
-    | System Design Reference: LanguageController.php, LocaleMiddleware.php
+    | EDITED: Added a 'flag' key to make the component logic simpler.
+    | This is now the single source of truth for locale data.
     */
     'available_locales' => [
-        'ms' => ['name' => 'Bahasa Melayu', 'script' => 'Latn', 'native' => 'Bahasa Melayu', 'regional' => 'ms_MY', 'direction' => 'ltr', 'display' => true],
-        'en' => ['name' => 'English',       'script' => 'Latn', 'native' => 'English',       'regional' => 'en_US', 'direction' => 'ltr', 'display' => true],
+        'ms' => [
+            'name' => 'Bahasa Melayu',
+            'script' => 'Latn',
+            'native' => 'Bahasa Melayu',
+            'regional' => 'ms_MY',
+            'flag' => 'my' // Flag code for Malaysia
+        ],
+        'en' => [
+            'name' => 'English',
+            'script' => 'Latn',
+            'native' => 'English',
+            'regional' => 'en_US',
+            'flag' => 'us' // Flag code for USA
+        ],
     ],
 
     /*
@@ -101,7 +111,6 @@ return [
     |--------------------------------------------------------------------------
     | Autoloaded Service Providers
     |--------------------------------------------------------------------------
-    | System Design Reference: 3.3 Core Providers and Configuration, 9.7 Shared Components
     */
     'providers' => ServiceProvider::defaultProviders()->merge([
         /*
@@ -127,7 +136,6 @@ return [
     |--------------------------------------------------------------------------
     | Class Aliases
     |--------------------------------------------------------------------------
-    | System Design Reference: 9.7 Shared Components (Helper alias).
     */
     'aliases' => Facade::defaultAliases()->merge([
         'Helper' => App\Helpers\Helpers::class,
@@ -137,8 +145,6 @@ return [
     |--------------------------------------------------------------------------
     | Date & Datetime Display Formats (Custom for MOTAC)
     |--------------------------------------------------------------------------
-    | System Design (Section 3.3) for consistent date display.
-    | Use with Carbon's translatedFormat() e.g., $date->translatedFormat(config('app.date_format_my_short'))
     */
     'date_format_my_short' => 'd M Y',           // Example: 28 Mei 2025
     'date_format_my_long' => 'j F Y, l',        // Example: 28 Mei 2025, Rabu
