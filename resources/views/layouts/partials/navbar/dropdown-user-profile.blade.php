@@ -5,7 +5,7 @@
     @endphp
     <li class="nav-item navbar-dropdown dropdown-user dropdown">
         <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown"
-            aria-label="{{ __('Menu Pengguna') }}" aria-expanded="false">
+            aria-label="{{ __('User Menu') }}" aria-expanded="false">
             <div class="avatar avatar-online">
                 <img src="{{ $currentUser->profile_photo_url }}" alt="Avatar of {{ $currentUser->name }}"
                     class="w-px-40 h-auto rounded-circle object-fit-cover">
@@ -24,9 +24,7 @@
                         </div>
                         <div class="flex-grow-1">
                             <span class="fw-semibold d-block">{{ $currentUser->name }}</span>
-                            {{-- REVISED: The user's primary role is displayed here, as per the design document. --}}
-                            <small
-                                class="text-muted">{{ Str::title($currentUser->getRoleNames()->first() ?? __('Pengguna')) }}</small>
+                            <small class="text-muted">{{ Str::title($currentUser->getRoleNames()->first() ?? __('User')) }}</small>
                         </div>
                     </div>
                 </a>
@@ -37,16 +35,15 @@
             <li>
                 <a class="dropdown-item" href="{{ route('profile.show') }}">
                     <i class="bi bi-person-circle me-2 fs-6"></i>
-                    {{ __('Profil Saya') }}
+                    {{ __('My Profile') }}
                 </a>
             </li>
-            {{-- REVISED: 'view_equipment' permission is used as a proxy for admin-level access. --}}
-            {{-- This link now correctly points to the admin equipment index route. --}}
-            @can('view_equipment')
+            {{-- This link correctly points to the admin settings route --}}
+            @can('view_logs')
                 <li>
-                    <a class="dropdown-item" href="{{ route('admin.equipment.index') }}">
+                    <a class="dropdown-item" href="{{ route('settings.users.index') }}">
                         <i class="bi bi-gear-fill me-2 fs-6"></i>
-                        {{ __('Pentadbiran Sistem') }}
+                        {{ __('System Settings') }}
                     </a>
                 </li>
             @endcan
@@ -54,11 +51,11 @@
                 <hr class="dropdown-divider">
             </li>
             <li>
-                {{-- REVISED: This uses a form to safely log out via a POST request. --}}
+                {{-- This uses a form to safely log out via a POST request, as is standard --}}
                 <a class="dropdown-item" href="{{ route('logout') }}"
                     onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                     <i class="bi bi-box-arrow-right me-2 fs-6"></i>
-                    {{ __('Log Keluar') }}
+                    {{ __('Log Out') }}
                 </a>
                 <form id="logout-form" method="POST" action="{{ route('logout') }}" style="display: none;">
                     @csrf

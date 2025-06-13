@@ -89,7 +89,8 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label fw-medium">@lang('forms.label_full_name')</label>
-                        <p class="form-control-plaintext p-2 border rounded bg-light-subtle mb-0">{{ $applicantName }}</p>
+                        <p class="form-control-plaintext p-2 border rounded bg-light-subtle mb-0">{{ $applicantName }}
+                        </p>
                     </div>
                     <div class="col-md-6">
                         <label for="applicant_phone" class="form-label fw-medium">@lang('forms.label_phone_number')</label>
@@ -102,15 +103,18 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-medium">@lang('forms.label_position_grade')</label>
-                        <p class="form-control-plaintext p-2 border rounded bg-light-subtle mb-0">{{ $applicantPositionAndGrade }}</p>
+                        <p class="form-control-plaintext p-2 border rounded bg-light-subtle mb-0">
+                            {{ $applicantPositionAndGrade }}</p>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-medium">@lang('forms.label_department_unit')</label>
-                        <p class="form-control-plaintext p-2 border rounded bg-light-subtle mb-0">{{ $applicantDepartment }}</p>
+                        <p class="form-control-plaintext p-2 border rounded bg-light-subtle mb-0">
+                            {{ $applicantDepartment }}</p>
                     </div>
                     <div class="col-md-12">
                         <label for="purpose" class="form-label fw-medium">@lang('forms.label_application_purpose')</label>
-                        <textarea id="purpose" wire:model.blur="purpose" rows="3" class="form-control @error('purpose') is-invalid @enderror" placeholder="@lang('forms.placeholder_purpose')"></textarea>
+                        <textarea id="purpose" wire:model.blur="purpose" rows="3"
+                            class="form-control @error('purpose') is-invalid @enderror" placeholder="@lang('forms.placeholder_purpose')"></textarea>
                         @error('purpose')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -176,9 +180,10 @@
                             <label for="responsible_officer_id" class="form-label fw-medium">@lang('forms.label_responsible_officer_name')<span
                                     class="text-danger">*</span></label>
                             <div wire:ignore>
-                                <select id="responsible_officer_id" wire:model="responsible_officer_id" class="form-select @error('responsible_officer_id') is-invalid @enderror">
+                                <select id="responsible_officer_id" wire:model="responsible_officer_id"
+                                    class="form-select @error('responsible_officer_id') is-invalid @enderror">
                                     <option value="">-- @lang('forms.placeholder_select_responsible_officer') --</option>
-                                    @foreach($responsibleOfficerOptions as $id => $name)
+                                    @foreach ($responsibleOfficerOptions as $id => $name)
                                         <option value="{{ $id }}">{{ $name }}</option>
                                     @endforeach
                                 </select>
@@ -239,15 +244,19 @@
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h3 class="h6 mb-0 fw-medium text-primary">@lang('forms.title_equipment_item', ['index' => $index + 1])</h3>
                             @if (count($loan_application_items) > 1)
-                                <button type="button" wire:click="removeLoanItem({{ $index }})" title="@lang('app.button_remove_equipment')" class="btn btn-sm btn-icon btn-text-danger p-0">
+                                <button type="button" wire:click="removeLoanItem({{ $index }})"
+                                    title="@lang('app.button_remove_equipment')" class="btn btn-sm btn-icon btn-text-danger p-0">
                                     <i class="bi bi-x-circle-fill fs-5"></i>
                                 </button>
                             @endif
                         </div>
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label for="item_{{ $index }}_equipment_type" class="form-label">@lang('forms.label_equipment_type')</label>
-                                <select id="item_{{ $index }}_equipment_type" wire:model="loan_application_items.{{ $index }}.equipment_type" class="form-select @error('loan_application_items.' . $index . '.equipment_type') is-invalid @enderror">
+                                <label for="item_{{ $index }}_equipment_type"
+                                    class="form-label">@lang('forms.label_equipment_type')</label>
+                                <select id="item_{{ $index }}_equipment_type"
+                                    wire:model="loan_application_items.{{ $index }}.equipment_type"
+                                    class="form-select @error('loan_application_items.' . $index . '.equipment_type') is-invalid @enderror">
                                     <option value="">-- @lang('forms.placeholder_select_type') --</option>
                                     @foreach ($equipmentTypeOptions as $key => $label)
                                         <option value="{{ $key }}">@lang('forms.option_equipment_' . Illuminate\Support\Str::snake($key))</option>
@@ -258,15 +267,23 @@
                                 @enderror
                             </div>
                             <div class="col-md-6">
-                                <label for="item_{{ $index }}_quantity_requested" class="form-label">@lang('forms.label_quantity')</label>
-                                <input type="number" id="item_{{ $index }}_quantity_requested" wire:model="loan_application_items.{{ $index }}.quantity_requested" min="1" class="form-control @error('loan_application_items.' . $index . '.quantity_requested') is-invalid @enderror">
+                                <label for="item_{{ $index }}_quantity_requested"
+                                    class="form-label">@lang('forms.label_quantity')</label>
+                                <input type="number" id="item_{{ $index }}_quantity_requested"
+                                    wire:model="loan_application_items.{{ $index }}.quantity_requested"
+                                    min="1"
+                                    class="form-control @error('loan_application_items.' . $index . '.quantity_requested') is-invalid @enderror">
                                 @error('loan_application_items.' . $index . '.quantity_requested')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-12">
-                                <label for="item_{{ $index }}_notes" class="form-label">@lang('forms.label_remarks')</label>
-                                <input type="text" id="item_{{ $index }}_notes" wire:model="loan_application_items.{{ $index }}.notes" class="form-control @error('loan_application_items.' . $index . '.notes') is-invalid @enderror" placeholder="@lang('forms.placeholder_equipment_remarks')">
+                                <label for="item_{{ $index }}_notes"
+                                    class="form-label">@lang('forms.label_remarks')</label>
+                                <input type="text" id="item_{{ $index }}_notes"
+                                    wire:model="loan_application_items.{{ $index }}.notes"
+                                    class="form-control @error('loan_application_items.' . $index . '.notes') is-invalid @enderror"
+                                    placeholder="@lang('forms.placeholder_equipment_remarks')">
                                 @error('loan_application_items.' . $index . '.notes')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -293,7 +310,9 @@
                 </h2>
             </div>
             <div class="card-body p-4 motac-card-body">
-                <div id="termsBox" style="height: 250px; overflow-y: scroll; border: 1px solid #dee2e6; padding: 15px; background-color: #f8f9fa; border-radius: 0.375rem;" class="small text-muted motac-terms-box" x-ref="termsBox"
+                <div id="termsBox"
+                    style="height: 250px; overflow-y: scroll; border: 1px solid #dee2e6; padding: 15px; background-color: #f8f9fa; border-radius: 0.375rem;"
+                    class="small text-muted motac-terms-box" x-ref="termsBox"
                     @scroll.debounce.150ms="if ($refs.termsBox.scrollTop + $refs.termsBox.clientHeight >= $refs.termsBox.scrollHeight - 20) { termsScrolled = true; }">
                     <p class="fw-bold mb-2">@lang('messages.terms_reminder')</p>
                     <ol class="ps-3 mb-0">
@@ -345,17 +364,26 @@
 
         {{-- Action Buttons --}}
         <div class="d-flex justify-content-end gap-2 pt-3">
-            {{-- Save as Draft Button --}}
-            <button type="button" wire:click="saveAsDraft" wire:loading.attr="disabled"
-                @click="clearCache()" class="btn btn-secondary">
 
-                {{-- This content shows by default and is hidden when saveAsDraft is running --}}
+            {{-- Print Button (from previous request) --}}
+            @if ($isEditMode && $loanApplicationInstance)
+                <a href="{{ route('loan-applications.print', ['loan_application' => $loanApplicationInstance->id]) }}"
+                    target="_blank" class="btn btn-outline-secondary d-inline-flex align-items-center">
+                    <i class="bi bi-printer-fill me-1"></i>
+                    @lang('app.button_print_form')
+                </a>
+            @endif
+
+            {{-- Save as Draft Button --}}
+            {{-- This button is type="button" and specifically calls the "saveAsDraft" action. --}}
+            <button type="button" wire:click="saveAsDraft" wire:loading.attr="disabled" @click="clearCache()"
+                class="btn btn-secondary">
+
+                {{-- The wire:target="saveAsDraft" ensures this content only swaps during the "saveAsDraft" action. --}}
                 <span wire:loading.remove wire:target="saveAsDraft">
                     <i class="bi bi-save me-1"></i>
                     @lang('app.button_save_draft')
                 </span>
-
-                {{-- This content, with the spinner, ONLY shows when saveAsDraft is running --}}
                 <span wire:loading wire:target="saveAsDraft" class="d-inline-flex align-items-center">
                     <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                     @lang('app.text_saving')
@@ -363,16 +391,15 @@
             </button>
 
             {{-- Submit Application Button --}}
-            <button type="submit" wire:loading.attr="disabled"
-                @click="clearCache()" class="btn btn-primary" x-bind:disabled="!applicantConfirmation || !termsScrolled">
+            {{-- This is a type="submit" button that triggers the form's wire:submit.prevent="submitLoanApplication" event. --}}
+            <button type="submit" wire:loading.attr="disabled" @click="clearCache()" class="btn btn-primary"
+                x-bind:disabled="!applicantConfirmation || !termsScrolled">
 
-                {{-- This content shows by default and is hidden when submitLoanApplication is running --}}
+                {{-- The wire:target="submitLoanApplication" ensures this content only swaps during the "submitLoanApplication" action. --}}
                 <span wire:loading.remove wire:target="submitLoanApplication">
                     <i class="bi bi-send-check-fill me-1"></i>
                     {{ $isEditMode && $this->loanApplicationInstance?->status !== \App\Models\LoanApplication::STATUS_DRAFT ? __('forms.button_update_and_resubmit') : __('app.button_submit_application') }}
                 </span>
-
-                {{-- This content, with the spinner, ONLY shows when submitLoanApplication is running --}}
                 <span wire:loading wire:target="submitLoanApplication" class="d-inline-flex align-items-center">
                     <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                     @lang('app.text_processing')

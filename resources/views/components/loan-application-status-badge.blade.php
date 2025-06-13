@@ -1,116 +1,61 @@
-{{--
-    resources/views/components/loan-application-status-badge.blade.php
-
-    Displays loan application status as a MYDS-compliant colored badge.
-    Applies MYDS color tokens, semantic labeling, and accessibility.
-    Updated for MYDS standards and MyGOVEA principles:
-    - Consistent semantic colors (MYDS tokens)
-    - Accessible markup (ARIA, clear status wording)
-    - Minimal, clear, responsive, and citizen-centric UI
-
-    Props:
-    - $status: string - The status value (optional if application provided)
-    - $application: LoanApplication - Model instance with status (optional)
-
-    Usage:
-    <x-loan-application-status-badge :status="'pending_support'" />
-    <x-loan-application-status-badge :application="$loanApplication" />
-
-    Supported Statuses:
-    - draft, pending_*, approved, issued, returned, completed
-    - rejected, cancelled, overdue
-
-    Dependencies: App\Models\LoanApplication, MYDS variables.css
---}}
+{{-- resources/views/components/loan-application-status-badge.blade.php --}}
 @props([
-    'status' => '',
-    'application' => null,
+    'status' => '', // The loan application status key, e.g., 'pending_support'
+    'application' => null, // Pass the entire model to use the accessor
 ])
 
 @php
-    // Import Str helper only if needed (for fallback)
-    if (!function_exists('str_title')) {
-        function str_title($value) {
-            // Simple title case fallback for environments where Illuminate\Support\Str isn't available
-            return ucwords(str_replace('_', ' ', $value));
-        }
-    }
-
-    // Map status to MYDS color tokens and semantic labels
     $badgeClass = '';
     $statusLabel = '';
 
     if ($application) {
-        // Use application model properties if available
+        // Use the accessor from the model if the object is provided
         $badgeClass = $application->status_color_class;
         $statusLabel = $application->status_label;
     } else {
-        // Map status to MYDS color and label
+        // Fallback to switch statement if only status string is provided
         $statusOptions = \App\Models\LoanApplication::getStatusOptions();
-        $statusLabel = $statusOptions[$status] ?? str_title($status);
+        $statusLabel = $statusOptions[$status] ?? Illuminate\Support\Str::title(str_replace('_', ' ', $status));
 
-        // MYDS color token mapping for badge
         switch ($status) {
             case \App\Models\LoanApplication::STATUS_DRAFT:
-                $badgeClass = 'myds-badge myds-badge--secondary';
+                $badgeClass = 'text-bg-secondary';
                 break;
             case \App\Models\LoanApplication::STATUS_PENDING_SUPPORT:
             case \App\Models\LoanApplication::STATUS_PENDING_APPROVER_REVIEW:
             case \App\Models\LoanApplication::STATUS_PENDING_BPM_REVIEW:
-                $badgeClass = 'myds-badge myds-badge--warning';
+                $badgeClass = 'text-bg-warning';
                 break;
             case \App\Models\LoanApplication::STATUS_APPROVED:
             case \App\Models\LoanApplication::STATUS_PARTIALLY_ISSUED:
             case \App\Models\LoanApplication::STATUS_ISSUED:
-                $badgeClass = 'myds-badge myds-badge--info';
+                $badgeClass = 'text-bg-info';
                 break;
             case \App\Models\LoanApplication::STATUS_REJECTED:
             case \App\Models\LoanApplication::STATUS_CANCELLED:
             case \App\Models\LoanApplication::STATUS_OVERDUE:
-                $badgeClass = 'myds-badge myds-badge--danger';
+                $badgeClass = 'text-bg-danger';
                 break;
             case \App\Models\LoanApplication::STATUS_RETURNED:
             case \App\Models\LoanApplication::STATUS_COMPLETED:
-                $badgeClass = 'myds-badge myds-badge--success';
+                $badgeClass = 'text-bg-success';
                 break;
             case \App\Models\LoanApplication::STATUS_PARTIALLY_RETURNED_PENDING_INSPECTION:
-                $badgeClass = 'myds-badge myds-badge--primary';
+                $badgeClass = 'text-bg-primary';
                 break;
             default:
-                $badgeClass = 'myds-badge myds-badge--dark';
+                $badgeClass = 'text-bg-dark';
                 break;
         }
     }
 @endphp
 
 @if ($status || $application)
-    <span
-        {{ $attributes->merge([
-            'class' => $badgeClass . ' badge rounded-pill align-middle',
-            'role' => 'status',
-            'aria-label' => __($statusLabel),
-        ]) }}
-    >
-        {{-- Status text, always visible for accessibility and clarity --}}
+    <span {{ $attributes->merge(['class' => 'badge rounded-pill ' . $badgeClass]) }}>
         {{ __($statusLabel) }}
     </span>
 @else
-    <span
-        {{ $attributes->merge([
-            'class' => 'myds-badge myds-badge--secondary badge rounded-pill align-middle',
-            'role' => 'status',
-            'aria-label' => __('Status Tidak Diketahui'),
-        ]) }}
-    >
+    <span {{ $attributes->merge(['class' => 'badge rounded-pill text-bg-light']) }}>
         {{ __('Status Tidak Diketahui') }}
     </span>
 @endif
-
-{{--
-    === MYDS & MyGOVEA Documentation ===
-    - Uses standardized MYDS badge classes for color and size.
-    - Ensures semantic clarity and accessibility (role="status", aria-label).
-    - Responsive and minimal markup for clear, citizen-centric feedback.
-    - All status values are mapped to MYDS tokens for consistent UI.
-    - Complies with Principle 1 (Citizen-Centric), Principle 5 (Minimal Interface), Principle 7 (Clear Status), Principle 14 (Typography), Principle 17 (Error Prevention).
---}}

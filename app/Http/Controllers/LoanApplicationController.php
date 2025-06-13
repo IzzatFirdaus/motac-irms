@@ -44,7 +44,7 @@ class LoanApplicationController extends Controller
 
         $minSupportGradeLevel = (int) config('motac.approval.min_loan_support_grade_level', 41);
         $supportingOfficers = User::where('status', User::STATUS_ACTIVE)
-            ->whereHas('grade', function ($query) use ($minSupportGradeLevel): void {
+            ->whereHas('grade', function ($query) use ($minSupportGradeLevel) {
                 $query->where('level', '>=', $minSupportGradeLevel);
             })
             ->with(['position:id,name', 'grade:id,name', 'department:id,name'])
@@ -53,7 +53,11 @@ class LoanApplicationController extends Controller
 
         $equipmentAssetTypeOptions = Equipment::getAssetTypeOptions() ?? [];
 
-        return view('loan-applications.create', ['responsibleOfficers' => $responsibleOfficers, 'supportingOfficers' => $supportingOfficers, 'equipmentAssetTypeOptions' => $equipmentAssetTypeOptions]);
+        return view('loan-applications.create', compact(
+            'responsibleOfficers',
+            'supportingOfficers',
+            'equipmentAssetTypeOptions'
+        ));
     }
 
     public function store(StoreLoanApplicationRequest $request): RedirectResponse
@@ -62,7 +66,7 @@ class LoanApplicationController extends Controller
         $user = $request->user();
         $validatedData = $request->validated();
 
-        Log::info(sprintf('LoanApplicationController@store: User ID %d attempting to create and submit new loan application via traditional form.', $user->id), ['data_keys' => array_keys($validatedData)]);
+        Log::info("LoanApplicationController@store: User ID {$user->id} attempting to create and submit new loan application via traditional form.", ['data_keys' => array_keys($validatedData)]);
 
         try {
             $loanApplication = $this->loanApplicationService->createAndSubmitApplication(
@@ -71,18 +75,18 @@ class LoanApplicationController extends Controller
                 false
             );
 
-            Log::info(sprintf('Loan application ID: %d created and submitted successfully by User ID: %d via traditional form.', $loanApplication->id, $user->id));
+            Log::info("Loan application ID: {$loanApplication->id} created and submitted successfully by User ID: {$user->id} via traditional form.");
 
             return redirect()
                 ->route('loan-applications.show', $loanApplication)
                 ->with('success', __('Permohonan pinjaman berjaya dihantar untuk kelulusan.'));
         } catch (IlluminateValidationException $e) {
-            Log::warning(sprintf('LoanApplicationController@store: Validation error for User ID %d (traditional form).', $user->id), ['errors' => $e->errors()]);
+            Log::warning("LoanApplicationController@store: Validation error for User ID {$user->id} (traditional form).", ['errors' => $e->errors()]);
 
             return redirect()->back()->withInput()->withErrors($e->errors())
                 ->with('error', __('Sila semak semula borang permohonan. Terdapat maklumat yang tidak sah.'));
         } catch (Throwable $e) {
-            Log::error(sprintf('Error creating and submitting loan application for User ID: %d (traditional form).', $user->id), [
+            Log::error("Error creating and submitting loan application for User ID: {$user->id} (traditional form).", [
                 'error' => $e->getMessage(),
                 'exception_class' => get_class($e),
                 'file' => $e->getFile(),
@@ -100,7 +104,7 @@ class LoanApplicationController extends Controller
     public function show(LoanApplication $loanApplication): View
     {
         $this->authorize('view', $loanApplication);
-        Log::info('LoanApplicationController@show: User ID '.Auth::id().sprintf(' viewing LoanApplication ID %d.', $loanApplication->id));
+        Log::info('LoanApplicationController@show: User ID '.Auth::id()." viewing LoanApplication ID {$loanApplication->id}.");
 
         $loanApplication->loadMissing([
             'user' => fn ($q) => $q->with(['position:id,name', 'grade:id,name', 'department:id,name']),
@@ -124,19 +128,21 @@ class LoanApplicationController extends Controller
             'updater:id,name,title',
         ]);
 
-        return view('loan-applications.show', ['loanApplication' => $loanApplication]);
+        return view('loan-applications.show', compact('loanApplication'));
     }
 
     /**
      * ++ ADD THIS NEW METHOD TO GENERATE THE PDF ++
      *
      * Generate a PDF printout for the specified loan application.
+     * @param \App\Models\LoanApplication $loanApplication
+     * @return \Illuminate\Http\Response
      */
     public function printPdf(LoanApplication $loanApplication): Response
     {
         // Authorize the user can view the application
         $this->authorize('view', $loanApplication);
-        Log::info('LoanApplicationController@printPdf: User ID '.Auth::id().sprintf(' generating PDF for LoanApplication ID %d.', $loanApplication->id));
+        Log::info('LoanApplicationController@printPdf: User ID '.Auth::id()." generating PDF for LoanApplication ID {$loanApplication->id}.");
 
         // Eager load all data needed for the PDF view to prevent lazy-loading errors.
         $loanApplication->loadMissing([
@@ -150,13 +156,13 @@ class LoanApplicationController extends Controller
                 'returningOfficer',
                 'returnAcceptingOfficer',
                 'loanTransactionItems.equipment',
-                'loanTransactionItems.loanApplicationItem',
-            ]),
+                'loanTransactionItems.loanApplicationItem'
+            ])
         ]);
 
         // Load the dedicated Blade view for the PDF
         $pdf = Pdf::loadView('loan-applications.pdf.print-form', [
-            'loanApplication' => $loanApplication,
+            'loanApplication' => $loanApplication
         ]);
 
         // Set paper size to A4 portrait to match the official form
@@ -172,7 +178,7 @@ class LoanApplicationController extends Controller
         $user = $request->user();
         $validatedData = $request->validated();
 
-        Log::info(sprintf('LoanApplicationController@update: User ID %s attempting to update LoanApplication ID %d via traditional form.', $user->id, $loanApplication->id));
+        Log::info("LoanApplicationController@update: User ID {$user->id} attempting to update LoanApplication ID {$loanApplication->id} via traditional form.");
 
         try {
             $updatedApplication = $this->loanApplicationService->updateApplication(
@@ -180,21 +186,21 @@ class LoanApplicationController extends Controller
                 $validatedData,
                 $user
             );
-            Log::info(sprintf('LoanApplication ID %d updated successfully by User ID %s (traditional form).', $updatedApplication->id, $user->id));
+            Log::info("LoanApplication ID {$updatedApplication->id} updated successfully by User ID {$user->id} (traditional form).");
 
             return redirect()
                 ->route('loan-applications.show', $updatedApplication)
                 ->with('success', __('Permohonan pinjaman berjaya dikemaskini.'));
-        } catch (Throwable $throwable) {
-            Log::error(sprintf('Error updating LoanApplication ID %d by User ID %s (traditional form).', $loanApplication->id, $user->id), [
-                'error' => $throwable->getMessage(),
-                'exception_class' => get_class($throwable),
-                'file' => $throwable->getFile(),
-                'line' => $throwable->getLine(),
+        } catch (Throwable $e) {
+            Log::error("Error updating LoanApplication ID {$loanApplication->id} by User ID {$user->id} (traditional form).", [
+                'error' => $e->getMessage(),
+                'exception_class' => get_class($e),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
                 'request_data' => $request->except(['_token', 'password', 'password_confirmation']),
             ]);
-            $userMessage = ($throwable instanceof \RuntimeException || $throwable instanceof \InvalidArgumentException || $throwable instanceof ModelNotFoundException)
-              ? $throwable->getMessage()
+            $userMessage = ($e instanceof \RuntimeException || $e instanceof \InvalidArgumentException || $e instanceof ModelNotFoundException)
+              ? $e->getMessage()
               : __('Satu ralat berlaku semasa mengemaskini permohonan pinjaman.');
 
             return redirect()->back()->withInput()->with('error', $userMessage);
@@ -204,27 +210,27 @@ class LoanApplicationController extends Controller
     public function submitApplication(Request $request, LoanApplication $loanApplication): RedirectResponse
     {
         $user = $request->user();
-        Log::info(sprintf('LoanApplicationController@submitApplication: User ID %s attempting to submit LoanApplication ID %d (traditional flow).', $user->id, $loanApplication->id));
+        Log::info("LoanApplicationController@submitApplication: User ID {$user->id} attempting to submit LoanApplication ID {$loanApplication->id} (traditional flow).");
 
         try {
             $submittedApplication = $this->loanApplicationService->submitApplicationForApproval(
                 $loanApplication,
                 $user
             );
-            Log::info(sprintf('LoanApplication ID %d submitted successfully by User ID %s. Status: %s (traditional flow).', $submittedApplication->id, $user->id, $submittedApplication->status));
+            Log::info("LoanApplication ID {$submittedApplication->id} submitted successfully by User ID {$user->id}. Status: {$submittedApplication->status} (traditional flow).");
 
             return redirect()
                 ->route('loan-applications.show', $submittedApplication)
                 ->with('success', __('Permohonan pinjaman berjaya dihantar untuk kelulusan.'));
-        } catch (Throwable $throwable) {
-            Log::error(sprintf('Error submitting LoanApplication ID %d by User ID %s (traditional flow).', $loanApplication->id, $user->id), [
-                'error' => $throwable->getMessage(),
-                'exception_class' => get_class($throwable),
-                'file' => $throwable->getFile(),
-                'line' => $throwable->getLine(),
+        } catch (Throwable $e) {
+            Log::error("Error submitting LoanApplication ID {$loanApplication->id} by User ID {$user->id} (traditional flow).", [
+                'error' => $e->getMessage(),
+                'exception_class' => get_class($e),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
             ]);
-            $userMessage = ($throwable instanceof \RuntimeException || $throwable instanceof \InvalidArgumentException)
-              ? $throwable->getMessage()
+            $userMessage = ($e instanceof \RuntimeException || $e instanceof \InvalidArgumentException)
+              ? $e->getMessage()
               : __('Gagal menghantar permohonan pinjaman disebabkan ralat sistem.');
 
             return redirect()->route('loan-applications.show', $loanApplication)->with('error', $userMessage);
@@ -236,22 +242,22 @@ class LoanApplicationController extends Controller
         $user = Auth::user();
         $this->authorize('delete', $loanApplication);
 
-        Log::info(sprintf('LoanApplicationController@destroy: User ID %s attempting to soft delete LoanApplication ID %d (traditional flow).', $user->id, $loanApplication->id));
+        Log::info("LoanApplicationController@destroy: User ID {$user->id} attempting to soft delete LoanApplication ID {$loanApplication->id} (traditional flow).");
 
         try {
             $this->loanApplicationService->deleteApplication($loanApplication, $user);
-            Log::info(sprintf('LoanApplication ID %d (now soft deleted) operation by User ID %s was successful (traditional flow).', $loanApplication->id, $user->id));
+            Log::info("LoanApplication ID {$loanApplication->id} (now soft deleted) operation by User ID {$user->id} was successful (traditional flow).");
 
             return redirect()->route('loan-applications.index')
                 ->with('success', __('Permohonan pinjaman berjaya dibuang.'));
-        } catch (Throwable $throwable) {
-            Log::error(sprintf('Error soft deleting LoanApplication ID %d by User ID %s (traditional flow).', $loanApplication->id, $user->id), [
-                'error' => $throwable->getMessage(),
-                'exception_class' => get_class($throwable),
-                'file' => $throwable->getFile(),
-                'line' => $throwable->getLine(),
+        } catch (Throwable $e) {
+            Log::error("Error soft deleting LoanApplication ID {$loanApplication->id} by User ID {$user->id} (traditional flow).", [
+                'error' => $e->getMessage(),
+                'exception_class' => get_class($e),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
             ]);
-            $userMessage = ($throwable instanceof \RuntimeException) ? $throwable->getMessage() : __('Gagal membuang permohonan pinjaman.');
+            $userMessage = ($e instanceof \RuntimeException) ? $e->getMessage() : __('Gagal membuang permohonan pinjaman.');
 
             return redirect()->back()->with('error', $userMessage);
         }

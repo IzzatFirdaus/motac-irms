@@ -25,11 +25,8 @@ class Index extends Component
     use WithPagination;
 
     public string $searchTerm = '';
-
     public string $filterStatus = '';
-
     protected string $paginationTheme = 'bootstrap';
-
     protected int $perPage = 10;
 
     /**
@@ -52,8 +49,7 @@ class Index extends Component
     public function generatePageTitle(): string
     {
         $appName = __(config('variables.templateName', 'Sistem Pengurusan Sumber Bersepadu MOTAC'));
-
-        return __('Senarai Permohonan E-mel/ID Saya').' - '.$appName;
+        return __('Senarai Permohonan E-mel/ID Saya') . ' - ' . $appName;
     }
 
     /**
@@ -64,9 +60,8 @@ class Index extends Component
         /** @var User|null $user */
         $user = Auth::user();
 
-        if (! $user) {
+        if (!$user) {
             Log::warning('MyApplications\Email\Index: Unauthenticated access attempt.');
-
             return EmailApplication::whereRaw('1 = 0')->paginate($this->perPage);
         }
 
@@ -74,9 +69,9 @@ class Index extends Component
             ->where('user_id', $user->id)
             ->orderBy('updated_at', 'desc');
 
-        if ($this->searchTerm !== '' && $this->searchTerm !== '0') {
-            $search = '%'.$this->searchTerm.'%';
-            $query->where(function ($q) use ($search): void {
+        if (!empty($this->searchTerm)) {
+            $search = '%' . $this->searchTerm . '%';
+            $query->where(function ($q) use ($search) {
                 $q->where('id', 'like', $search)
                     ->orWhere('proposed_email', 'like', 'search')
                     ->orWhere('group_email', 'like', 'search')
@@ -84,7 +79,7 @@ class Index extends Component
             });
         }
 
-        if ($this->filterStatus !== '' && $this->filterStatus !== '0' && $this->filterStatus !== 'all' && $this->filterStatus !== '') {
+        if (!empty($this->filterStatus) && $this->filterStatus !== 'all' && $this->filterStatus !== '') {
             $query->where('status', $this->filterStatus);
         }
 
@@ -97,7 +92,6 @@ class Index extends Component
     public function getStatusOptionsProperty(): array
     {
         $options = EmailApplication::getStatusOptions() ?? [];
-
         return ['' => __('Semua Status')] + $options;
     }
 
