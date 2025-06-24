@@ -48,11 +48,13 @@ class LoanTransactionPolicy
         if ($user->hasAnyRole(['Admin', 'BPM Staff'])) {
             return Response::allow();
         }
+
         // Design Ref (Rev. 3.5): Section 4.3 (loan_applications.user_id, loan_applications.responsible_officer_id)
         if ($loanTransaction->loanApplication) {
             if ((int) $user->id === (int) $loanTransaction->loanApplication->user_id) {
                 return Response::allow();
             }
+
             if ($loanTransaction->loanApplication->responsible_officer_id && (int) $user->id === (int) $loanTransaction->loanApplication->responsible_officer_id) {
                 return Response::allow();
             }
@@ -72,7 +74,7 @@ class LoanTransactionPolicy
         $isReadyForIssuance = method_exists($loanApplication, 'canBeIssued') && $loanApplication->canBeIssued();
 
         if (! method_exists($loanApplication, 'canBeIssued')) {
-            Log::warning("LoanTransactionPolicy: LoanApplication model ID {$loanApplication->id} is missing canBeIssued() method. Falling back to direct status check.");
+            Log::warning(sprintf('LoanTransactionPolicy: LoanApplication model ID %d is missing canBeIssued() method. Falling back to direct status check.', $loanApplication->id));
             // Fallback to direct status check if method doesn't exist for some reason
             $isReadyForIssuance = in_array($loanApplication->status, [
                 LoanApplication::STATUS_APPROVED,
@@ -97,7 +99,7 @@ class LoanTransactionPolicy
     {
         // Design Ref (Rev. 3.5): Section 4.3 (loan_transactions.type: 'issue'; loan_transactions.status)
         if (! method_exists($issueLoanTransaction, 'isIssue') || ! method_exists($issueLoanTransaction, 'isFullyClosedOrReturned')) {
-            Log::error("LoanTransactionPolicy: LoanTransaction model is missing isIssue() or isFullyClosedOrReturned() methods for Tx ID {$issueLoanTransaction->id}. Denying return creation.");
+            Log::error(sprintf('LoanTransactionPolicy: LoanTransaction model is missing isIssue() or isFullyClosedOrReturned() methods for Tx ID %d. Denying return creation.', $issueLoanTransaction->id));
 
             return Response::deny(__('Konfigurasi sistem tidak lengkap untuk memproses pemulangan.'));
         }
@@ -116,7 +118,7 @@ class LoanTransactionPolicy
      * Determine whether the user can process a return (view form and store).
      * This method is used by both the returnForm and storeReturn methods in the controller.
      *
-     * @param  \App\Models\User  $user The authenticated user.
+     * @param  \App\Models\User  $user  The authenticated user.
      * @param  \App\Models\LoanTransaction  $issueLoanTransaction  The original ISSUE transaction being returned.
      */
     public function processReturn(User $user, LoanTransaction $issueLoanTransaction): Response
@@ -126,7 +128,8 @@ class LoanTransactionPolicy
 
         // Defensive check for data integrity
         if (! $loanApplication) {
-            Log::error("LoanTransactionPolicy: Could not find parent LoanApplication for LoanTransaction ID {$issueLoanTransaction->id}.");
+            Log::error(sprintf('LoanTransactionPolicy: Could not find parent LoanApplication for LoanTransaction ID %d.', $issueLoanTransaction->id));
+
             return Response::deny(__('Permohonan pinjaman yang berkaitan dengan transaksi ini tidak ditemui.'));
         }
 
@@ -152,8 +155,9 @@ class LoanTransactionPolicy
         if (! method_exists($loanApplication, 'canBeReturned') || ! $loanApplication->canBeReturned()) {
             // Defensive check in case the method is removed from the model.
             if (! method_exists($loanApplication, 'canBeReturned')) {
-                 Log::warning("LoanTransactionPolicy: LoanApplication model ID {$loanApplication->id} is missing canBeReturned() method.");
+                Log::warning(sprintf('LoanTransactionPolicy: LoanApplication model ID %d is missing canBeReturned() method.', $loanApplication->id));
             }
+
             return Response::deny(__('Status permohonan pinjaman tidak membenarkan proses pemulangan.'));
         }
 

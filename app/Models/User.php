@@ -25,63 +25,123 @@ use Spatie\Permission\Traits\HasRoles;
  * Migration context: 2013_01_01_000000_create_users_table.php, 2013_11_01_132200_add_motac_columns_to_users_table.php
  *
  * @property int $id
- * @property string|null $title (e.g., "Encik", "Puan", "Dr.")
  * @property string $name
- * @property string|null $identification_number (NRIC)
+ * @property string|null $title e.g., Encik, Puan, Dr.
+ * @property string|null $identification_number NRIC
  * @property string|null $passport_number
- * @property string|null $profile_photo_path
- * @property int|null $position_id (FK to positions.id)
- * @property int|null $grade_id (FK to grades.id)
- * @property int|null $department_id (FK to departments.id)
- * @property string|null $level (Aras/Floor)
+ * @property int|null $department_id
+ * @property int|null $position_id
+ * @property int|null $grade_id
+ * @property string|null $level For "Aras" or floor level, as string
  * @property string|null $mobile_number
- * @property string $email (Login email)
- * @property string|null $personal_email (From motac_columns migration)
- * @property string|null $motac_email (Official MOTAC email)
- * @property string|null $user_id_assigned (e.g., network ID)
- * @property string|null $service_status (Enum '1','2','3','4' - CRITICAL: Migration's ENUM definition must match all defined constants)
- * @property string|null $appointment_type (Enum '1','2','3' from migration)
+ * @property string|null $personal_email If distinct from login email
+ * @property string|null $motac_email
+ * @property string|null $user_id_assigned Assigned User ID if different from email
+ * @property string|null $service_status Taraf Perkhidmatan. Keys defined in User model.
+ * @property string|null $appointment_type Pelantikan. Keys defined in User model.
  * @property string|null $previous_department_name
  * @property string|null $previous_department_email
- * @property string $password
- * @property string $status (Enum: 'active', 'inactive', default: 'active')
+ * @property string $status
+ * @property int $is_admin Consider using Spatie roles exclusively.
+ * @property int $is_bpm_staff Consider using Spatie roles exclusively.
+ * @property string|null $profile_photo_path
+ * @property int|null $employee_id
+ * @property string $email
  * @property \Illuminate\Support\Carbon|null $email_verified_at
+ * @property string $password
  * @property string|null $two_factor_secret
  * @property string|null $two_factor_recovery_codes
  * @property \Illuminate\Support\Carbon|null $two_factor_confirmed_at
  * @property string|null $remember_token
- * @property int|null $created_by (Handled by BlameableObserver)
- * @property int|null $updated_by (Handled by BlameableObserver)
- * @property int|null $deleted_by (Handled by BlameableObserver)
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property int|null $created_by
+ * @property int|null $updated_by
+ * @property int|null $deleted_by
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \App\Models\Department|null $department
- * @property-read \App\Models\Grade|null $grade
- * @property-read \App\Models\Position|null $position
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\EmailApplication> $emailApplications
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanApplication> $loanApplicationsAsApplicant
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanApplication> $loanApplicationsAsResponsibleOfficer
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanApplication> $loanApplicationsAsSupportingOfficer
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Approval> $approvalsMade
- * @property-read string $profile_photo_url
+ * @property-read int|null $approvals_made_count
+ * @property-read User|null $creator
+ * @property-read User|null $deleter
+ * @property-read \App\Models\Department|null $department
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\EmailApplication> $emailApplications
+ * @property-read int|null $email_applications_count
+ * @property-read \App\Models\Grade|null $grade
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanApplication> $loanApplicationsAsApplicant
+ * @property-read int|null $loan_applications_as_applicant_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanApplication> $loanApplicationsAsResponsibleOfficer
+ * @property-read int|null $loan_applications_as_responsible_officer_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanApplication> $loanApplicationsAsSupportingOfficer
+ * @property-read int|null $loan_applications_as_supporting_officer_count
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
+ * @property-read int|null $notifications_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Permission> $permissions
+ * @property-read int|null $permissions_count
+ * @property-read \App\Models\Position|null $position
+ * @property-read string $profile_photo_url
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Role> $roles
+ * @property-read int|null $roles_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
+ * @property-read int|null $tokens_count
+ * @property-read User|null $updater
+ * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User permission($permissions, $without = false)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User role($roles, $guard = null, $without = false)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereAppointmentType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereDepartmentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereEmailVerifiedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereEmployeeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereGradeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereIdentificationNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereIsAdmin($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereIsBpmStaff($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereLevel($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereMobileNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereMotacEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePassportNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePassword($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePersonalEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePositionId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePreviousDepartmentEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePreviousDepartmentName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereProfilePhotoPath($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereRememberToken($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereServiceStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereTwoFactorConfirmedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereTwoFactorRecoveryCodes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereTwoFactorSecret($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereUserIdAssigned($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutPermission($permissions)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutRole($roles, $guard = null)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutTrashed()
  * @mixin \Eloquent
- * @mixin IdeHelperUser
  */
 class User extends Authenticatable
 {
+    use Blameable;
     use HasApiTokens;
     use HasFactory;
     use HasProfilePhoto;
     use HasRoles;
     use Notifiable;
     use SoftDeletes;
-    use TwoFactorAuthenticatable;
-    use Blameable; // EDITED: Added Blameable trait for audit trails
+    use TwoFactorAuthenticatable; // EDITED: Added Blameable trait for audit trails
 
     public const STATUS_ACTIVE = 'active';
 

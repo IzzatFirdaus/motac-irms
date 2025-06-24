@@ -49,7 +49,7 @@ final class NotificationService
         $applicationId = $application->id ?? 'N/A_APP_ID';
 
         if (! $applicant instanceof User) {
-            Log::warning(self::LOG_AREA." Cannot notify applicant for {$applicationClass} ID {$applicationId}. Applicant is missing.", [
+            Log::warning(self::LOG_AREA.sprintf(' Cannot notify applicant for %s ID %s. Applicant is missing.', $applicationClass, $applicationId), [
                 'application_type' => $applicationClass,
                 'application_id' => $applicationId,
             ]);
@@ -58,7 +58,7 @@ final class NotificationService
         }
 
         $applicantId = $applicant->id;
-        Log::info(self::LOG_AREA." Preparing ApplicationStatusUpdatedNotification to Applicant ID {$applicantId} for {$applicationClass} ID {$applicationId}. Status: {$oldStatus} -> {$newStatus}.", [
+        Log::info(self::LOG_AREA.sprintf(' Preparing ApplicationStatusUpdatedNotification to Applicant ID %d for %s ID %s. Status: %s -> %s.', $applicantId, $applicationClass, $applicationId, $oldStatus, $newStatus), [
             'applicant_id' => $applicantId,
             'application_id' => $applicationId,
         ]);
@@ -66,10 +66,10 @@ final class NotificationService
         try {
             $notification = new ApplicationStatusUpdatedNotification($application, $oldStatus, $newStatus);
             $applicant->notify($notification);
-            Log::info(self::LOG_AREA." ApplicationStatusUpdatedNotification sent to Applicant ID {$applicantId}.");
-        } catch (Exception $e) {
-            Log::error(self::LOG_AREA." Failed to send ApplicationStatusUpdatedNotification for {$applicationClass} ID {$applicationId}: ".$e->getMessage(), [
-                'exception' => $e,
+            Log::info(self::LOG_AREA.sprintf(' ApplicationStatusUpdatedNotification sent to Applicant ID %d.', $applicantId));
+        } catch (Exception $exception) {
+            Log::error(self::LOG_AREA.sprintf(' Failed to send ApplicationStatusUpdatedNotification for %s ID %s: ', $applicationClass, $applicationId).$exception->getMessage(), [
+                'exception' => $exception,
             ]);
         }
     }
@@ -83,9 +83,9 @@ final class NotificationService
         string $actionText = 'Lihat Butiran'
     ): void {
         $userId = $userToNotify->id ?? 'N/A_USER_ID';
-        $itemInfo = $relatedItem ? ' related to '.($relatedItem::class).' ID '.($relatedItem->id ?? 'N/A') : '';
+        $itemInfo = $relatedItem instanceof \Illuminate\Database\Eloquent\Model ? ' related to '.($relatedItem::class).' ID '.($relatedItem->id ?? 'N/A') : '';
 
-        Log::info(self::LOG_AREA." Preparing DefaultUserNotification to User ID {$userId} for task '{$taskTitle}'{$itemInfo}.", [
+        Log::info(self::LOG_AREA.sprintf(" Preparing DefaultUserNotification to User ID %s for task '%s'%s.", $userId, $taskTitle, $itemInfo), [
             'user_id' => $userId,
             'task_title' => $taskTitle,
         ]);
@@ -93,7 +93,7 @@ final class NotificationService
         try {
             $greetingKey = __('Salam Sejahtera, :name,', ['name' => $userToNotify->name ?? __('Pengguna')]);
             $additionalData = [];
-            if ($relatedItem) {
+            if ($relatedItem instanceof \Illuminate\Database\Eloquent\Model) {
                 $additionalData = [
                     'related_item_type' => $relatedItem->getMorphClass(),
                     'related_item_id' => $relatedItem->id,
@@ -110,10 +110,10 @@ final class NotificationService
                 $additionalData
             );
             $userToNotify->notify($notification);
-            Log::info(self::LOG_AREA." DefaultUserNotification sent to User ID {$userId}.");
-        } catch (Exception $e) {
-            Log::error(self::LOG_AREA." Failed to send DefaultUserNotification to User ID {$userId}: ".$e->getMessage(), [
-                'exception' => $e,
+            Log::info(self::LOG_AREA.sprintf(' DefaultUserNotification sent to User ID %s.', $userId));
+        } catch (Exception $exception) {
+            Log::error(self::LOG_AREA.sprintf(' Failed to send DefaultUserNotification to User ID %s: ', $userId).$exception->getMessage(), [
+                'exception' => $exception,
             ]);
         }
     }
@@ -123,9 +123,11 @@ final class NotificationService
         if ($model instanceof EmailApplication) {
             return 'ti ti-mail';
         }
+
         if ($model instanceof LoanApplication) {
             return 'ti ti-archive';
         }
+
         if ($model instanceof Approval) {
             return 'ti ti-clipboard-check';
         }
@@ -138,34 +140,33 @@ final class NotificationService
         Notification $notificationInstance,
         ?Model $relatedModel = null
     ): void {
-        $context = $relatedModel ? ($relatedModel::class).' ID '.($relatedModel->id ?? 'N/A') : 'general context';
+        $context = $relatedModel instanceof \Illuminate\Database\Eloquent\Model ? ($relatedModel::class).' ID '.($relatedModel->id ?? 'N/A') : 'general context';
         $notificationClass = $notificationInstance::class;
 
         $notifiables = ($users instanceof User) ? [$users] : $users;
         $userCount = 0;
-        if (is_iterable($notifiables)) {
-            if (is_array($notifiables) || $notifiables instanceof SupportCollection || $notifiables instanceof EloquentCollection) {
-                $userCount = count($notifiables);
-            } else {
-                foreach ($notifiables as $_) {
-                    $userCount++;
-                }
+        if (is_array($notifiables) || $notifiables instanceof SupportCollection || $notifiables instanceof EloquentCollection) {
+            $userCount = count($notifiables);
+        } else {
+            foreach ($notifiables as $_) {
+                $userCount++;
             }
         }
 
         if ($userCount === 0) {
-            Log::warning(self::LOG_AREA."Attempted to send group notification '{$notificationClass}' but no users provided for context: {$context}.");
+            Log::warning(self::LOG_AREA.sprintf("Attempted to send group notification '%s' but no users provided for context: %s.", $notificationClass, $context));
+
             return;
         }
 
-        Log::info(self::LOG_AREA.' Preparing to send group notification '.($notificationClass)." for {$context} to {$userCount} user(s).");
+        Log::info(self::LOG_AREA.' Preparing to send group notification '.($notificationClass).sprintf(' for %s to %d user(s).', $context, $userCount));
 
         try {
             NotificationFacade::send($notifiables, $notificationInstance);
-            Log::info(self::LOG_AREA.' Group notification '.($notificationClass)." dispatched to {$userCount} users for {$context}.");
-        } catch (Exception $e) {
-            Log::error(self::LOG_AREA.' Failed group notification dispatch of '.($notificationClass)." for {$context}: ".$e->getMessage(), [
-                'exception' => $e,
+            Log::info(self::LOG_AREA.' Group notification '.($notificationClass).sprintf(' dispatched to %d users for %s.', $userCount, $context));
+        } catch (Exception $exception) {
+            Log::error(self::LOG_AREA.' Failed group notification dispatch of '.($notificationClass).sprintf(' for %s: ', $context).$exception->getMessage(), [
+                'exception' => $exception,
             ]);
         }
     }
@@ -175,6 +176,7 @@ final class NotificationService
         if (! $application->user) {
             return;
         }
+
         if (class_exists(ApplicationSubmitted::class)) {
             $this->notifyGroup($application->user, new ApplicationSubmitted($application), $application);
         } else {
@@ -190,6 +192,7 @@ final class NotificationService
             Log::warning(self::LOG_AREA."Cannot send 'ApplicationNeedsAction' because no officer is assigned to the approval task.", [
                 'approval_id' => $approvalTask->id,
             ]);
+
             return;
         }
 
@@ -200,9 +203,9 @@ final class NotificationService
                 'approver_id' => $officer->id,
                 'approval_id' => $approvalTask->id,
             ]);
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             Log::error(self::LOG_AREA."Failed to send 'ApplicationNeedsAction' notification.", [
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
                 'approver_id' => $officer->id,
                 'approval_id' => $approvalTask->id,
             ]);
@@ -214,6 +217,7 @@ final class NotificationService
         if (! $application->user) {
             return;
         }
+
         if (class_exists(ApplicationApproved::class)) {
             $this->notifyGroup($application->user, new ApplicationApproved($application), $application);
         } else {
@@ -226,6 +230,7 @@ final class NotificationService
         if (! $application->user) {
             return;
         }
+
         if (class_exists(ApplicationRejected::class)) {
             $this->notifyGroup($application->user, new ApplicationRejected($application, $rejecter, $reason), $application);
         } else {
@@ -247,6 +252,7 @@ final class NotificationService
         if (! $application->user) {
             return;
         }
+
         if (class_exists(EmailProvisionedNotification::class)) {
             $this->notifyGroup($application->user, new EmailProvisionedNotification($application), $application);
         } else {
@@ -277,6 +283,7 @@ final class NotificationService
         if (! $application->user) {
             return;
         }
+
         if (class_exists(EquipmentIssuedNotification::class)) {
             $this->notifyGroup($application->user, new EquipmentIssuedNotification($application, $issueTransaction, $issuedByOfficer), $application);
         } else {
@@ -289,6 +296,7 @@ final class NotificationService
         if (! $application->user) {
             return;
         }
+
         if (class_exists(EquipmentReturnedNotification::class)) {
             $this->notifyGroup($application->user, new EquipmentReturnedNotification($application, $returnTransaction, $returnAcceptingOfficer), $application);
         } else {
@@ -322,16 +330,17 @@ final class NotificationService
     {
         $admins = User::role('Admin')->where('status', User::STATUS_ACTIVE)->get();
         if ($admins->isEmpty()) {
-            Log::error(self::LOG_AREA . "No active 'Admin' users found to notify about orphaned application.", [
+            Log::error(self::LOG_AREA."No active 'Admin' users found to notify about orphaned application.", [
                 'application_id' => $application->id,
                 'application_type' => $application->getMorphClass(),
             ]);
+
             return;
         }
 
         $appType = $application instanceof LoanApplication ? 'Pinjaman' : 'Emel';
-        $title = "Amaran: Permohonan Terkandas";
-        $message = "Sistem gagal mencari pegawai yang sesuai untuk peringkat kelulusan seterusnya bagi permohonan {$appType} #{$application->id}. Sila semak permohonan tersebut dan konfigurasikan aliran kerja kelulusan secara manual jika perlu.";
+        $title = 'Amaran: Permohonan Terkandas';
+        $message = sprintf('Sistem gagal mencari pegawai yang sesuai untuk peringkat kelulusan seterusnya bagi permohonan %s #%d. Sila semak permohonan tersebut dan konfigurasikan aliran kerja kelulusan secara manual jika perlu.', $appType, $application->id);
 
         $actionUrl = '#'; // Default URL
         if ($application instanceof LoanApplication) {

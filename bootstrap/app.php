@@ -12,7 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
         channels: __DIR__.'/../routes/channels.php', // Confirmed usage for broadcasting
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware) {
+    ->withMiddleware(function (Middleware $middleware): void {
         // This correctly appends the custom LocaleMiddleware to the 'web' group.
         // This was the source of the previous error.
         $middleware->web(append: [
@@ -34,6 +34,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'check.usergrade' => \App\Http\Middleware\CheckUserGrade::class,
         ]);
     })
-    ->withExceptions(function (Exceptions $exceptions) {
+    ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();

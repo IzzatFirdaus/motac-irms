@@ -13,16 +13,18 @@ use Illuminate\Queue\SerializesModels;
 
 class ApplicationNeedsAction extends Mailable implements ShouldQueue
 {
-    use Queueable, SerializesModels;
+    use Queueable;
+    use SerializesModels;
 
     public Approval $approvalTask;
+
     public User $approver;
 
     /**
      * Create a new message instance.
      *
-     * @param \App\Models\Approval $approvalTask The approval task requiring action.
-     * @param \App\Models\User $approver The officer being notified.
+     * @param  \App\Models\Approval  $approvalTask  The approval task requiring action.
+     * @param  \App\Models\User  $approver  The officer being notified.
      */
     public function __construct(Approval $approvalTask, User $approver)
     {
@@ -39,7 +41,7 @@ class ApplicationNeedsAction extends Mailable implements ShouldQueue
     {
         $application = $this->approvalTask->approvable;
         $itemType = $application instanceof \App\Models\LoanApplication ? 'Pinjaman ICT' : 'E-mel/ID';
-        $subject = "Tindakan Diperlukan: Permohonan {$itemType} #{$application->id}";
+        $subject = sprintf('Tindakan Diperlukan: Permohonan %s #%s', $itemType, $application->id);
 
         return new Envelope(
             subject: $subject,

@@ -12,7 +12,6 @@ use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 
@@ -22,7 +21,9 @@ class EquipmentReturnedNotification extends Notification implements ShouldQueue
 
     // These properties are now public to be accessed by the Mailable
     public LoanApplication $loanApplication;
+
     public LoanTransaction $returnTransaction;
+
     public User $returnAcceptingOfficer;
 
     public function __construct(
@@ -42,9 +43,6 @@ class EquipmentReturnedNotification extends Notification implements ShouldQueue
 
     /**
      * Get the mail representation of the notification.
-     *
-     * @param \App\Models\User $notifiable
-     * @return \App\Mail\EquipmentReturnedNotification
      */
     // EDITED: The entire toMail method is refactored.
     // It no longer builds the message here. Instead, it returns an instance
@@ -56,14 +54,11 @@ class EquipmentReturnedNotification extends Notification implements ShouldQueue
 
     /**
      * Get the array representation of the notification.
-     *
-     * @param \App\Models\User $notifiable
-     * @return array
      */
     // EDITED: Made minor corrections to ensure data consistency.
     public function toArray(User $notifiable): array
     {
-        $itemsDetails = $this->returnTransaction->loanTransactionItems->map(function (LoanTransactionItem $txItem) {
+        $itemsDetails = $this->returnTransaction->loanTransactionItems->map(function (LoanTransactionItem $txItem): array {
             $equipment = $txItem->equipment;
             if ($equipment instanceof Equipment) {
                 return [

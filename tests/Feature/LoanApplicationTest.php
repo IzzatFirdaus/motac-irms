@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\Approval;
 use App\Models\Department;
 use App\Models\Equipment;
 use App\Models\Grade;
@@ -19,7 +18,15 @@ class LoanApplicationTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected User $applicantUser, $supportingOfficerUser, $hodUser, $bpmStaffUser, $adminUser;
+    protected User $applicantUser;
+
+    protected User $supportingOfficerUser;
+
+    protected User $hodUser;
+
+    protected User $bpmStaffUser;
+
+    protected User $adminUser;
 
     protected function setUp(): void
     {
@@ -83,8 +90,8 @@ class LoanApplicationTest extends TestCase
                 'decision' => 'approved',
                 'comments' => 'Approved by Admin for testing.',
                 'items_approved' => [
-                    $item->id => ['quantity_approved' => '1']
-                ]
+                    $item->id => ['quantity_approved' => '1'],
+                ],
             ]);
 
         $response->assertRedirect()->assertSessionHas('success');
@@ -103,7 +110,7 @@ class LoanApplicationTest extends TestCase
             'items' => [[
                 'loan_application_item_id' => $item->id,
                 'equipment_id' => $equipment->id,
-                'quantity_issued' => 1
+                'quantity_issued' => 1,
             ]],
         ];
 
@@ -127,7 +134,7 @@ class LoanApplicationTest extends TestCase
                 'equipment_id' => $equipment->id,
                 'quantity_returned' => 1,
                 'condition_on_return' => 'good',
-                'item_status_on_return' => 'returned_good'
+                'item_status_on_return' => 'returned_good',
             ]],
         ];
 

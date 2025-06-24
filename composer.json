@@ -30,10 +30,11 @@
   "require-dev": {
     "barryvdh/laravel-debugbar": "*",
     "barryvdh/laravel-ide-helper": "^3.5",
+    "driftingly/rector-laravel": "^1.2",
     "fakerphp/faker": "^1.9.1",
     "friendsofphp/php-cs-fixer": "*",
     "imanghafoori/laravel-microscope": "1.0.377",
-    "larastan/larastan": "^2.9",
+    "larastan/larastan": "^2.0",
     "laravel/pint": "^1.22",
     "laravel/sail": "^1.21",
     "mockery/mockery": "^1.4.4",

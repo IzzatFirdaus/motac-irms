@@ -54,15 +54,15 @@ class AppServiceProvider extends ServiceProvider
 
         $configuredLocales = Config::get('app.available_locales');
 
-        if (is_array($configuredLocales) && !empty($configuredLocales)) {
+        if (is_array($configuredLocales) && $configuredLocales !== []) {
             $allowedLocaleKeys = array_keys($configuredLocales);
             if ($sessionLocale && in_array($sessionLocale, $allowedLocaleKeys, true)) {
                 $finalLocale = $sessionLocale;
             }
         }
+
         App::setLocale($finalLocale);
         // --- End of Locale Logic ---
-
 
         // Enforce strict model behavior (no lazy loading, etc.) in non-production environments.
         Model::shouldBeStrict(! $this->app->environment('production'));
@@ -74,27 +74,29 @@ class AppServiceProvider extends ServiceProvider
         Blade::component('components.alert-manager', 'alert-manager');
 
         // Provide a handler to log missing translation keys for easier maintenance.
-        Lang::handleMissingKeysUsing(function (string $key, array $replacements, string $locale) {
-            Log::warning("Missing translation key detected: [{$key}] for locale [{$locale}].", ['replacements' => $replacements]);
+        Lang::handleMissingKeysUsing(function (string $key, array $replacements, string $locale): string {
+            Log::warning(sprintf('Missing translation key detected: [%s] for locale [%s].', $key, $locale), ['replacements' => $replacements]);
+
             return $key;
         });
 
         // Set the global locale for the Carbon date library.
         try {
             Carbon::setLocale(App::getLocale());
-        } catch (\Exception $e) {
-            Log::error("AppServiceProvider: Failed to set Carbon locale: ".$e->getMessage());
+        } catch (\Exception $exception) {
+            Log::error('AppServiceProvider: Failed to set Carbon locale: '.$exception->getMessage());
             Carbon::setLocale(config('app.fallback_locale', 'en'));
         }
 
         // Share global variables with all views, but not during console commands.
         if (! $this->app->runningInConsole()) {
-            View::composer('*', function (\Illuminate\View\View $view) {
+            View::composer('*', function (\Illuminate\View\View $view): void {
                 try {
                     $configData = class_exists(Helpers::class) ? Helpers::appClasses() : [];
-                } catch (\Exception $e) {
+                } catch (\Exception $exception) {
                     $configData = [];
                 }
+
                 $view->with('configData', $configData);
                 $view->with('appClasses', $configData);
             });

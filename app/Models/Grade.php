@@ -12,24 +12,28 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * Grade Model (Gred Perkhidmatan).
  *
  * @property int $id
- * @property string $name (e.g., "F41", "N19", "JUSA C")
- * @property int|null $level Numeric level for comparison/sorting (as per System Design & Livewire component)
- * @property int|null $min_approval_grade_id (FK to grades.id)
- * @property bool $is_approver_grade Can users of this grade approve applications? (System Design default: false)
- * @property string|null $description (Optional, kept from your file)
- * @property string|null $service_scheme (Optional, kept from your file, might be legacy)
- * @property int|null $created_by (FK to users.id, typically handled by BlameableObserver)
- * @property int|null $updated_by (FK to users.id, typically handled by BlameableObserver)
- * @property int|null $deleted_by (FK to users.id, typically handled by BlameableObserver)
+ * @property string $name e.g., "41", "N19", "JUSA C"
+ * @property int|null $level Numeric level for comparison/sorting
+ * @property int|null $position_id
+ * @property int|null $min_approval_grade_id
+ * @property bool $is_approver_grade Can users of this grade approve applications?
+ * @property string|null $description Optional description for the grade
+ * @property string|null $service_scheme Optional service scheme, e.g., Perkhidmatan Tadbir dan Diplomatik
+ * @property int|null $created_by
+ * @property int|null $updated_by
+ * @property int|null $deleted_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
  * @property-read \App\Models\User|null $creator
- * @property-read \App\Models\User|null $updater
  * @property-read \App\Models\User|null $deleter
- * @property-read \App\Models\Grade|null $minApprovalGrade Relationship for min_approval_grade_id
+ * @property-read Grade|null $minApprovalGrade
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Position> $positions
+ * @property-read int|null $positions_count
+ * @property-read \App\Models\User|null $updater
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
  * @property-read int|null $users_count
+ * @method static \Database\Factories\GradeFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade onlyTrashed()
@@ -44,13 +48,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade whereLevel($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade whereMinApprovalGradeId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade wherePositionId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade whereServiceScheme($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade withoutTrashed()
  * @mixin \Eloquent
- * @mixin IdeHelperGrade
  */
 class Grade extends Model
 {

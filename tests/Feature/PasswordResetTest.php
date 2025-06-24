@@ -38,11 +38,7 @@ class PasswordResetTest extends TestCase
 
         $user = User::factory()->create();
 
-<<<<<<< HEAD
         $this->post('/forgot-password', [
-=======
-        $response = $this->post('/forgot-password', [
->>>>>>> 9965d4a (FIRST COMMIT)
             'email' => $user->email,
         ]);
 
@@ -65,11 +61,7 @@ class PasswordResetTest extends TestCase
             'email' => $user->email,
         ]);
 
-<<<<<<< HEAD
         Notification::assertSentTo($user, ResetPassword::class, function (object $notification): true {
-=======
-        Notification::assertSentTo($user, ResetPassword::class, function (object $notification) {
->>>>>>> 9965d4a (FIRST COMMIT)
             $response = $this->get('/reset-password/'.$notification->token);
 
             $response->assertStatus(200);
@@ -94,11 +86,7 @@ class PasswordResetTest extends TestCase
             'email' => $user->email,
         ]);
 
-<<<<<<< HEAD
         Notification::assertSentTo($user, ResetPassword::class, function (object $notification) use ($user): true {
-=======
-        Notification::assertSentTo($user, ResetPassword::class, function (object $notification) use ($user) {
->>>>>>> 9965d4a (FIRST COMMIT)
             $response = $this->post('/reset-password', [
                 'token' => $notification->token,
                 'email' => $user->email,

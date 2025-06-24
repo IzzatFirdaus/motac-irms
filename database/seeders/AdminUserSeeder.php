@@ -31,6 +31,7 @@ class AdminUserSeeder extends Seeder
         foreach ($roles as $roleName) {
             Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
         }
+
         Log::info('AdminUserSeeder: Ensured all core application roles exist.');
 
         // --- 2. Ensure a default Department exists for seeded users ---
@@ -46,7 +47,7 @@ class AdminUserSeeder extends Seeder
         );
 
         // --- 3. Ensure Critical Grades for Approval Workflow Exist ---
-        $minSupportGradeLevel = (int) config('motac.approval.min_loan_support_grade_level', 41);
+        config('motac.approval.min_loan_support_grade_level', 41);
 
         $gradeF41 = Grade::updateOrCreate(
             ['name' => 'F41'],
@@ -118,7 +119,8 @@ class AdminUserSeeder extends Seeder
             if (! $user->hasRole($data['role_name'])) {
                 $user->assignRole($data['role_name']);
             }
-            Log::info("AdminUserSeeder: Processed user '{$user->name}' ({$user->email}). Assigned Role: '{$data['role_name']}'. Assigned Grade Level: {$user->grade?->level}.");
+
+            Log::info(sprintf("AdminUserSeeder: Processed user '%s' (%s). Assigned Role: '%s'. Assigned Grade Level: %s.", $user->name, $user->email, $data['role_name'], $user->grade?->level));
         }
 
         Log::info('AdminUserSeeder: Seeding of critical roles and administrative users has been completed successfully.');

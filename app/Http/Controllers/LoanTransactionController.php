@@ -39,7 +39,7 @@ final class LoanTransactionController extends Controller
             ->latest('transaction_date')
             ->paginate(20);
 
-        return view('loan-transactions.index', compact('transactions'));
+        return view('loan-transactions.index', ['transactions' => $transactions]);
     }
 
     /**
@@ -54,7 +54,7 @@ final class LoanTransactionController extends Controller
         $loanApplicantAndResponsibleOfficer = collect([$loanApplication->user, $loanApplication->responsibleOfficer])->filter()->unique('id');
         $allAccessoriesList = config('motac.loan_accessories_list', []);
 
-        return view('loan-transactions.issue', compact('loanApplication', 'availableEquipment', 'loanApplicantAndResponsibleOfficer', 'allAccessoriesList'));
+        return view('loan-transactions.issue', ['loanApplication' => $loanApplication, 'availableEquipment' => $availableEquipment, 'loanApplicantAndResponsibleOfficer' => $loanApplicantAndResponsibleOfficer, 'allAccessoriesList' => $allAccessoriesList]);
     }
 
     /**
@@ -64,7 +64,7 @@ final class LoanTransactionController extends Controller
     public function storeIssue(IssueEquipmentRequest $request, LoanApplication $loanApplication): RedirectResponse
     {
         $issuingOfficer = Auth::user();
-        if (!$issuingOfficer) {
+        if (! $issuingOfficer) {
             return redirect()->back()->with('error', 'Sila log masuk semula.');
         }
 
@@ -78,9 +78,10 @@ final class LoanTransactionController extends Controller
 
             return redirect()->route('loan-applications.show', $loanApplication->id)
                 ->with('success', __('Pengeluaran peralatan berjaya direkodkan.'));
-        } catch (Throwable $e) {
-            Log::error("Error in LoanTransactionController@storeIssue: " . $e->getMessage(), ['exception' => $e]);
-            return redirect()->back()->withInput()->with('error', __('Gagal merekodkan pengeluaran peralatan: ') . $e->getMessage());
+        } catch (Throwable $throwable) {
+            Log::error('Error in LoanTransactionController@storeIssue: '.$throwable->getMessage(), ['exception' => $throwable]);
+
+            return redirect()->back()->withInput()->with('error', __('Gagal merekodkan pengeluaran peralatan: ').$throwable->getMessage());
         }
     }
 
@@ -98,11 +99,11 @@ final class LoanTransactionController extends Controller
             'loanApplication.user',
             'loanTransactionItems.equipment',
             'issuingOfficer',   // The officer who issued the items
-            'receivingOfficer' // The officer who accepted the return (will be null on issue transactions)
+            'receivingOfficer', // The officer who accepted the return (will be null on issue transactions)
         ]);
 
         // You will need to create this view file
-        return view('loan-transactions.show', compact('loanTransaction'));
+        return view('loan-transactions.show', ['loanTransaction' => $loanTransaction]);
     }
 
     /**
@@ -122,7 +123,7 @@ final class LoanTransactionController extends Controller
         $loanTransaction->load([
             'loanApplication.user',
             'loanApplication.responsibleOfficer',
-            'loanTransactionItems.equipment'
+            'loanTransactionItems.equipment',
         ]);
 
         // 2. Prepare all variables that the view expects.
@@ -152,7 +153,7 @@ final class LoanTransactionController extends Controller
         $this->authorize('processReturn', [$loanTransaction, $loanTransaction->loanApplication]);
 
         $returnAcceptingOfficer = Auth::user();
-        if (!$returnAcceptingOfficer) {
+        if (! $returnAcceptingOfficer) {
             return redirect()->back()->with('error', 'Sila log masuk semula.');
         }
 
@@ -166,9 +167,10 @@ final class LoanTransactionController extends Controller
 
             return redirect()->route('loan-applications.show', $loanTransaction->loan_application_id)
                 ->with('success', __('Peralatan telah berjaya direkodkan pemulangannya.'));
-        } catch (Throwable $e) {
-            Log::error("Error in LoanTransactionController@storeReturn: " . $e->getMessage(), ['exception' => $e]);
-            return redirect()->back()->withInput()->with('error', __('Gagal merekodkan pemulangan: ') . $e->getMessage());
+        } catch (Throwable $throwable) {
+            Log::error('Error in LoanTransactionController@storeReturn: '.$throwable->getMessage(), ['exception' => $throwable]);
+
+            return redirect()->back()->withInput()->with('error', __('Gagal merekodkan pemulangan: ').$throwable->getMessage());
         }
     }
 }

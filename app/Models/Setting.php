@@ -23,23 +23,23 @@ use Illuminate\Support\Facades\Schema;
  * @property int $id
  * @property string $site_name
  * @property string|null $site_logo_path
- * @property string $application_name Name of the application
  * @property string|null $default_notification_email_from
  * @property string|null $default_notification_email_name
- * @property string|null $default_system_email Default email for system (non-notification)
- * @property int $default_loan_period_days
- * @property int $max_loan_items_per_application
- * @property string|null $contact_us_email
- * @property bool $system_maintenance_mode
- * @property string|null $system_maintenance_message
  * @property string|null $sms_api_sender
  * @property string|null $sms_api_username
  * @property string|null $sms_api_password
  * @property string|null $terms_and_conditions_loan
  * @property string|null $terms_and_conditions_email
- * @property int|null $created_by (Handled by BlameableObserver)
- * @property int|null $updated_by (Handled by BlameableObserver)
- * @property int|null $deleted_by (Handled by BlameableObserver)
+ * @property string $application_name Official name of the application
+ * @property string|null $default_system_email Default email for system-originated non-notification emails
+ * @property int $default_loan_period_days Default loan period in days
+ * @property int $max_loan_items_per_application Max items per single loan application
+ * @property string|null $contact_us_email Email for contact us inquiries
+ * @property bool $system_maintenance_mode
+ * @property string|null $system_maintenance_message
+ * @property int|null $created_by
+ * @property int|null $updated_by
+ * @property int|null $deleted_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
@@ -47,7 +47,36 @@ use Illuminate\Support\Facades\Schema;
  * @property-read \App\Models\User|null $deleter
  * @property-read \App\Models\User|null $updater
  * @method static \Database\Factories\SettingFactory factory($count = null, $state = [])
- * @mixin IdeHelperSetting
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereApplicationName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereContactUsEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereDefaultLoanPeriodDays($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereDefaultNotificationEmailFrom($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereDefaultNotificationEmailName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereDefaultSystemEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereMaxLoanItemsPerApplication($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereSiteLogoPath($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereSiteName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereSmsApiPassword($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereSmsApiSender($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereSmsApiUsername($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereSystemMaintenanceMessage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereSystemMaintenanceMode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereTermsAndConditionsEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereTermsAndConditionsLoan($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting withoutTrashed()
+ * @mixin \Eloquent
  */
 class Setting extends Model
 {
@@ -97,7 +126,7 @@ class Setting extends Model
     public static function get(string $key, mixed $default = null): mixed
     {
         $settings = self::getSettingsRecord();
-        if ($settings && (property_exists($settings, $key) || array_key_exists($key, $settings->getAttributes()) || method_exists($settings, $key))) {
+        if ($settings instanceof \App\Models\Setting && (property_exists($settings, $key) || array_key_exists($key, $settings->getAttributes()) || method_exists($settings, $key))) {
             return $settings->{$key} ?? $default;
         }
 
@@ -110,40 +139,42 @@ class Setting extends Model
         try {
             $settings = self::firstOrNew([]);
             if (! in_array($key, $settings->getFillable()) && ! Schema::hasColumn($settings->getTable(), $key)) {
-                Log::error("Attempted to set unknown or non-fillable/non-column setting key: {$key}.");
+                Log::error(sprintf('Attempted to set unknown or non-fillable/non-column setting key: %s.', $key));
                 DB::rollBack();
 
                 return false;
             }
+
             $settings->{$key} = $value;
             $saved = $settings->save();
             DB::commit();
 
             if ($saved) {
                 self::clearCache();
-                Log::info("Setting '{$key}' updated successfully.");
+                Log::info(sprintf("Setting '%s' updated successfully.", $key));
             } else {
-                Log::error("Failed to save setting '{$key}'.");
+                Log::error(sprintf("Failed to save setting '%s'.", $key));
             }
 
             return $saved;
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             DB::rollBack();
-            Log::error("Error setting setting '{$key}': ".$e->getMessage(), ['exception' => $e, 'key' => $key, 'value' => $value]);
-            throw $e;
+            Log::error(sprintf("Error setting setting '%s': ", $key).$throwable->getMessage(), ['exception' => $throwable, 'key' => $key, 'value' => $value]);
+            throw $throwable;
         }
     }
 
     public static function forget(string $key): bool
     {
         $settings = self::getSettingsRecord();
-        if (! $settings) {
-            Log::warning("Attempted to forget setting '{$key}', but no settings record exists.");
+        if (! $settings instanceof \App\Models\Setting) {
+            Log::warning(sprintf("Attempted to forget setting '%s', but no settings record exists.", $key));
 
             return false;
         }
+
         if (! in_array($key, $settings->getFillable()) && ! Schema::hasColumn($settings->getTable(), $key)) {
-            Log::warning("Attempted to forget unknown or non-fillable/non-column setting key: {$key}");
+            Log::warning('Attempted to forget unknown or non-fillable/non-column setting key: '.$key);
 
             return false;
         }
@@ -153,9 +184,9 @@ class Setting extends Model
 
         if ($saved) {
             self::clearCache();
-            Log::info("Setting '{$key}' set to null successfully.");
+            Log::info(sprintf("Setting '%s' set to null successfully.", $key));
         } else {
-            Log::error("Failed to set setting '{$key}' to null.");
+            Log::error(sprintf("Failed to set setting '%s' to null.", $key));
         }
 
         return $saved;

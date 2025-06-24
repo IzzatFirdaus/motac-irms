@@ -15,7 +15,9 @@ class IssuedLoans extends Component
     use WithPagination;
 
     public string $searchTerm = '';
+
     public int $perPage = 10;
+
     protected string $paginationTheme = 'bootstrap';
 
     public function mount(): void
@@ -51,21 +53,21 @@ class IssuedLoans extends Component
                 'loanApplicationItems.loanTransactionItems.equipment:id,tag_id,brand,model,serial_number',
                 'loanApplicationItems.loanTransactionItems.loanTransaction:id,type',
                 // ***** THIS IS THE FIX: Added 'type' to the selected columns *****
-                'loanTransactions' => fn ($q) => $q->where('type', LoanTransaction::TYPE_ISSUE)->select('id', 'loan_application_id', 'transaction_date', 'type')->orderByDesc('transaction_date')
+                'loanTransactions' => fn ($q) => $q->where('type', LoanTransaction::TYPE_ISSUE)->select('id', 'loan_application_id', 'transaction_date', 'type')->orderByDesc('transaction_date'),
             ]);
 
         // Applies the search filter if the search term is not empty.
-        if (! empty($this->searchTerm)) {
+        if ($this->searchTerm !== '' && $this->searchTerm !== '0') {
             $search = '%'.strtolower($this->searchTerm).'%';
-            $query->where(function ($q) use ($search) {
+            $query->where(function ($q) use ($search): void {
                 $q->where('id', 'like', $search) // Search by Application ID
-                    ->orWhereHas('user', function ($sq) use ($search) {
+                    ->orWhereHas('user', function ($sq) use ($search): void {
                         $sq->whereRaw('LOWER(name) LIKE ?', [$search]); // Search by Applicant Name
                     })
-                    ->orWhereHas('loanApplicationItems.loanTransactionItems.equipment', function ($sq) use ($search) {
+                    ->orWhereHas('loanApplicationItems.loanTransactionItems.equipment', function ($sq) use ($search): void {
                         // Search by Equipment Tag ID or Serial Number
                         $sq->whereRaw('LOWER(tag_id) LIKE ?', [$search])
-                           ->orWhereRaw('LOWER(serial_number) LIKE ?', [$search]);
+                            ->orWhereRaw('LOWER(serial_number) LIKE ?', [$search]);
                     });
             });
         }

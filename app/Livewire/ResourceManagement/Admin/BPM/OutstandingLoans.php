@@ -16,7 +16,9 @@ class OutstandingLoans extends Component
     use WithPagination;
 
     public string $searchTerm = '';
+
     public string $sortBy = 'updated_at'; // Default sort
+
     public string $sortDirection = 'desc'; // Default direction
 
     protected string $paginationTheme = 'bootstrap';
@@ -34,6 +36,7 @@ class OutstandingLoans extends Component
         } else {
             $this->sortDirection = in_array($field, ['updated_at', 'loan_end_date']) ? 'desc' : 'asc';
         }
+
         $this->sortBy = $field;
         $this->resetPage();
     }
@@ -47,12 +50,12 @@ class OutstandingLoans extends Component
             ->with(['user:id,name', 'loanApplicationItems'])
             ->where('status', LoanApplication::STATUS_APPROVED); // Fetches applications awaiting issuance
 
-        if (! empty($this->searchTerm)) {
+        if ($this->searchTerm !== '' && $this->searchTerm !== '0') {
             $searchTerm = '%'.$this->searchTerm.'%';
-            $query->where(function ($subQuery) use ($searchTerm) {
+            $query->where(function ($subQuery) use ($searchTerm): void {
                 $subQuery->where('id', 'like', $searchTerm)
                     ->orWhere('purpose', 'like', $searchTerm)
-                    ->orWhereHas('user', function ($userQuery) use ($searchTerm) {
+                    ->orWhereHas('user', function ($userQuery) use ($searchTerm): void {
                         $userQuery->where('name', 'like', $searchTerm);
                     });
             });

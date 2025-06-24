@@ -101,68 +101,63 @@ return new class extends Migration
 
     public function down(): void
     {
-        // Drop foreign keys before dropping columns
         Schema::table('users', function (Blueprint $table): void {
+            // Drop foreign keys first to avoid errors when dropping columns
             $foreignKeysToDrop = [
                 'department_id', 'position_id', 'grade_id',
                 'created_by', 'updated_by', 'deleted_by',
             ];
 
-            // Drop employee_id foreign key if exists
+            // Conditionally drop employee_id foreign key if the column exists
+            // Note: Schema::getColumnType is not standard, hasColumn is better.
+            // To drop foreign key, we need to know its name or the column.
+            // Laravel's default foreign key name is users_employee_id_foreign.
             if (Schema::hasColumn('users', 'employee_id')) {
                 try {
-                    $table->dropForeign(['employee_id']);
+                    // Attempt to drop by conventional name if table was constrained
+                    if (collect(Schema::getConnection()->getDoctrineSchemaManager()->listTableForeignKeys('users'))->pluck('name')->contains('users_employee_id_foreign')) {
+                        $table->dropForeign('users_employee_id_foreign');
+                    }
                 } catch (\Exception $e) {
-                    Log::warning('Could not drop foreign key for employee_id on users table: '.$e->getMessage());
+                    Log::warning('Could not automatically drop foreign key for employee_id on users table: '.$e->getMessage().'. Manual check might be needed if schema differs.');
                 }
             }
 
             foreach ($foreignKeysToDrop as $fkColumn) {
                 if (Schema::hasColumn('users', $fkColumn)) {
                     try {
-                        $table->dropForeign([$fkColumn]);
+                        // Laravel's convention for foreign key names: table_column_foreign
+                        $foreignKeyName = 'users_'.$fkColumn.'_foreign';
+                        if (collect(Schema::getConnection()->getDoctrineSchemaManager()->listTableForeignKeys('users'))->pluck('name')->contains($foreignKeyName)) {
+                            $table->dropForeign($foreignKeyName);
+                        }
                     } catch (\Exception $e) {
                         Log::warning(sprintf('Could not drop foreign key for %s on users table: ', $fkColumn).$e->getMessage());
                     }
                 }
             }
-        });
 
-        // Use raw SQL as a fallback for MySQL stubborn FKs
-        $columnsToDrop = [
-            'title', 'identification_number', 'passport_number',
-            'department_id', 'position_id', 'grade_id', 'level',
-            'mobile_number', 'personal_email', 'motac_email', 'user_id_assigned',
-            'service_status', 'appointment_type',
-            'previous_department_name', 'previous_department_email',
-            'status', 'is_admin', 'is_bpm_staff', 'profile_photo_path', 'employee_id',
-            'created_by', 'updated_by', 'deleted_by',
-        ];
+            $columnsToDrop = [
+                'title', 'identification_number', 'passport_number',
+                'department_id', 'position_id', 'grade_id', 'level',
+                'mobile_number', 'personal_email', 'motac_email', 'user_id_assigned',
+                'service_status', 'appointment_type',
+                'previous_department_name', 'previous_department_email',
+                'status', 'is_admin', 'is_bpm_staff', 'profile_photo_path', 'employee_id',
+                'created_by', 'updated_by', 'deleted_by',
+                // 'deleted_at' will be handled by dropSoftDeletes
+            ];
 
-        foreach ($columnsToDrop as $column) {
-            if (Schema::hasColumn('users', $column)) {
-                try {
-                    Schema::table('users', function (Blueprint $table) use ($column) {
-                        $table->dropColumn($column);
-                    });
-                } catch (\Exception $e) {
-                    // Raw SQL fallback for MySQL "Cannot drop index needed in a foreign key constraint" error
-                    try {
-                        DB::statement("ALTER TABLE `users` DROP FOREIGN KEY `users_{$column}_foreign`");
-                        DB::statement("ALTER TABLE `users` DROP COLUMN `$column`");
-                        Log::warning("Dropped column $column using raw SQL workaround.");
-                    } catch (\Exception $ee) {
-                        Log::error("Failed to drop column $column even with raw SQL: ".$ee->getMessage());
-                    }
+            $existingColumns = Schema::getColumnListing('users');
+            foreach ($columnsToDrop as $column) {
+                if (in_array($column, $existingColumns) && Schema::hasColumn('users', $column)) { // Extra check
+                    $table->dropColumn($column);
                 }
             }
-        }
 
-        // Drop soft deletes if exists
-        if (Schema::hasColumn('users', 'deleted_at')) {
-            Schema::table('users', function (Blueprint $table) {
+            if (in_array('deleted_at', $existingColumns) && Schema::hasColumn('users', 'deleted_at')) { // Extra check
                 $table->dropSoftDeletes();
-            });
-        }
+            }
+        });
     }
 };

@@ -20,7 +20,7 @@ return [
     'instruction_email_supporting_officer_grade' => 'Perhatian: Permohonan hendaklah DISOKONG oleh Pegawai sekurang-kurangnya Gred 9 dan ke atas SAHAJA.',
     'instruction_two_factor_auth_info' => 'Tambah keselamatan tambahan pada akaun anda menggunakan pengesahan dua faktor.',
     'instruction_two_factor_enabled_prompt' => 'Apabila pengesahan dua faktor diaktifkan, anda akan diminta untuk token rawak yang selamat semasa pengesahan. Anda boleh mendapatkan token ini dari aplikasi Google Authenticator telefon anda.',
-    'instruction_two_factor_setup_qr' => "Pengesahan dua faktor kini diaktifkan. Imbas kod QR berikut menggunakan aplikasi pengesah telefon anda.",
+    'instruction_two_factor_setup_qr' => 'Pengesahan dua faktor kini diaktifkan. Imbas kod QR berikut menggunakan aplikasi pengesah telefon anda.',
     'instruction_two_factor_store_recovery_codes' => 'Simpan kod pemulihan ini dalam pengurus kata laluan yang selamat. Ia boleh digunakan untuk memulihkan akses ke akaun anda jika peranti pengesahan dua faktor anda hilang.',
     'instruction_delete_account_warning' => 'Setelah akaun anda dipadamkan, semua sumber dan datanya akan dipadamkan secara kekal. Sebelum memadamkan akaun anda, sila muat turun sebarang data atau maklumat yang ingin anda simpan.',
     'instruction_delete_account_confirmation' => 'Adakah anda pasti ingin memadamkan akaun anda? Setelah akaun anda dipadamkan, semua sumber dan datanya akan dipadamkan secara kekal. Sila masukkan kata laluan anda untuk mengesahkan bahawa anda ingin memadamkan akaun anda secara kekal.',

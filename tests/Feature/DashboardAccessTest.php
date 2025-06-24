@@ -13,7 +13,15 @@ class DashboardAccessTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected User $adminUser, $bpmStaffUser, $itAdminUser, $approverUser, $regularUser;
+    protected User $adminUser;
+
+    protected User $bpmStaffUser;
+
+    protected User $itAdminUser;
+
+    protected User $approverUser;
+
+    protected User $regularUser;
 
     protected function setUp(): void
     {
@@ -35,7 +43,7 @@ class DashboardAccessTest extends TestCase
         $this->approverUser = User::factory()->create()->assignRole('Approver');
     }
 
-    public function test_admin_sees_admin_dashboard()
+    public function test_admin_sees_admin_dashboard(): void
     {
         $response = $this->actingAs($this->adminUser)->get('/dashboard');
         $response->assertOk();
@@ -43,7 +51,7 @@ class DashboardAccessTest extends TestCase
         $response->assertSeeText('Administrator Dashboard');
     }
 
-    public function test_bpm_staff_sees_bpm_dashboard()
+    public function test_bpm_staff_sees_bpm_dashboard(): void
     {
         $response = $this->actingAs($this->bpmStaffUser)->get('/dashboard');
         $response->assertOk();
@@ -51,7 +59,7 @@ class DashboardAccessTest extends TestCase
         $response->assertSeeText('BPM Staff Dashboard (ICT Equipment)');
     }
 
-    public function test_it_admin_sees_it_admin_dashboard()
+    public function test_it_admin_sees_it_admin_dashboard(): void
     {
         $response = $this->actingAs($this->itAdminUser)->get('/dashboard');
         $response->assertOk();
@@ -59,7 +67,7 @@ class DashboardAccessTest extends TestCase
         $response->assertSeeText('IT Administrator Dashboard');
     }
 
-    public function test_approver_sees_approver_dashboard()
+    public function test_approver_sees_approver_dashboard(): void
     {
         $loanApplication = LoanApplication::factory()->create(['status' => 'pending_support']);
         Approval::factory()->create([
@@ -75,27 +83,27 @@ class DashboardAccessTest extends TestCase
         $response->assertSeeText('Your Approval Tasks');
     }
 
-    public function test_regular_user_sees_user_dashboard()
+    public function test_regular_user_sees_user_dashboard(): void
     {
         $response = $this->actingAs($this->regularUser)->get('/dashboard');
         $response->assertOk();
         $response->assertViewIs('dashboard.user');
-        $response->assertSeeText("Welcome, {$this->regularUser->name}!");
+        $response->assertSeeText(sprintf('Welcome, %s!', $this->regularUser->name));
     }
 
-    public function test_regular_user_cannot_access_admin_equipment_page()
+    public function test_regular_user_cannot_access_admin_equipment_page(): void
     {
         $response = $this->actingAs($this->regularUser)->get(route('admin.equipment.index'));
         $response->assertStatus(403);
     }
 
-    public function test_bpm_staff_can_access_admin_equipment_page()
+    public function test_bpm_staff_can_access_admin_equipment_page(): void
     {
         $response = $this->actingAs($this->bpmStaffUser)->get(route('admin.equipment.index'));
         $response->assertOk();
     }
 
-    public function test_regular_user_cannot_access_settings()
+    public function test_regular_user_cannot_access_settings(): void
     {
         $response = $this->actingAs($this->regularUser)->get(route('settings.users.index'));
         $response->assertStatus(403);

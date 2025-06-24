@@ -71,14 +71,14 @@ return [
             'script' => 'Latn',
             'native' => 'Bahasa Melayu',
             'regional' => 'ms_MY',
-            'flag' => 'my' // Flag code for Malaysia
+            'flag' => 'my', // Flag code for Malaysia
         ],
         'en' => [
             'name' => 'English',
             'script' => 'Latn',
             'native' => 'English',
             'regional' => 'en_US',
-            'flag' => 'us' // Flag code for USA
+            'flag' => 'us', // Flag code for USA
         ],
     ],
 

@@ -60,7 +60,7 @@ class ProvisioningFailedNotification extends Notification implements ShouldQueue
             'ProvisioningFailedNotification created for EmailApplication ID: '.
             ($this->application->id ?? 'N/A').
             ('. Error: '.$this->errorMessage).
-            ($this->adminUser instanceof User ? '. Triggered by Admin ID: '.$this->adminUser->id : '')
+            ($this->adminUser instanceof \App\Models\User ? '. Triggered by Admin ID: '.$this->adminUser->id : '')
         );
 
         // The warning for null user is good as is.
@@ -91,7 +91,7 @@ class ProvisioningFailedNotification extends Notification implements ShouldQueue
         /** @phpstan-ignore-next-line nullsafe.neverNull, nullCoalesce.expr */
         $applicantName = $this->application->user?->name ?? __('Tidak Dikenali');
         $applicationId = $this->application->id ?? 'N/A';
-        $triggeredByAdminInfo = $this->adminUser instanceof User ? __(' Proses dicetuskan oleh: :adminName (ID: :adminId).', ['adminName' => $this->adminUser->name, 'adminId' => $this->adminUser->id]) : '';
+        $triggeredByAdminInfo = $this->adminUser instanceof \App\Models\User ? __(' Proses dicetuskan oleh: :adminName (ID: :adminId).', ['adminName' => $this->adminUser->name, 'adminId' => $this->adminUser->id]) : '';
 
         $viewUrl = '#';
         $adminRouteName = 'admin.email-applications.show'; // Prefer admin-specific route
