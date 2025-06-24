@@ -30,7 +30,7 @@ class QueryLogServiceProvider extends ServiceProvider // Corrected class name
 
             $longQueryThreshold = config('database.long_query_threshold', 1000); // Default to 1000ms (1s)
 
-            DB::whenQueryingForLongerThan($longQueryThreshold, function ($connection, QueryExecuted $event) {
+            DB::whenQueryingForLongerThan($longQueryThreshold, function ($connection, QueryExecuted $event): void {
                 $url = 'N/A (Console or no request context)';
                 if (! App::runningInConsole()) {
                     /** @var \Illuminate\Http\Request|null $currentRequest */

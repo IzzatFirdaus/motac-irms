@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('notifications', function (Blueprint $table) {
+        Schema::create('notifications', function (Blueprint $table): void {
             $table->uuid('id')->primary();
             $table->string('type');
             $table->morphs('notifiable'); // notifiable_id, notifiable_type
@@ -44,17 +44,20 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('notifications', function (Blueprint $table) {
+        Schema::table('notifications', function (Blueprint $table): void {
             // Drop custom audit foreign keys if they exist
             if (Schema::hasColumn('notifications', 'created_by')) {
                 $table->dropForeign(['created_by']);
             }
+
             if (Schema::hasColumn('notifications', 'updated_by')) {
                 $table->dropForeign(['updated_by']);
             }
+
             if (Schema::hasColumn('notifications', 'deleted_by')) {
                 $table->dropForeign(['deleted_by']);
             }
+
             // SoftDeletes column `deleted_at` is dropped by dropIfExists
         });
         Schema::dropIfExists('notifications');

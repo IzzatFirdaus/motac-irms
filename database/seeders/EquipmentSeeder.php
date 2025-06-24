@@ -53,9 +53,11 @@ class EquipmentSeeder extends Seeder
                 $adminUserForAudit = User::factory()->create(['name' => 'Audit User (EquipmentSeeder)']);
                 Log::info('Created a default audit user for EquipmentSeeder as no users were found.');
             }
+
             $auditUserId = $adminUserForAudit->id;
         }
-        Log::info("Using User ID {$auditUserId} for created_by/updated_by overrides if needed.");
+
+        Log::info(sprintf('Using User ID %s for created_by/updated_by overrides if needed.', $auditUserId));
 
         // It's good practice to ensure dependent master data seeders are run before this,
         // or that the EquipmentFactory can create them if they don't exist.
@@ -67,7 +69,7 @@ class EquipmentSeeder extends Seeder
         //     SubCategoriesSeeder::class,
         // ]);
 
-        Log::info("Attempting to create {$numberOfEquipment} equipment items using factory (Revision 3)...");
+        Log::info(sprintf('Attempting to create %d equipment items using factory (Revision 3)...', $numberOfEquipment));
 
         Equipment::factory()
             ->count($numberOfEquipment)
@@ -80,6 +82,6 @@ class EquipmentSeeder extends Seeder
                 'updated_by' => $auditUserId,
             ]);
 
-        Log::info("EquipmentSeeder finished. Created/processed {$numberOfEquipment} equipment items (Revision 3).");
+        Log::info(sprintf('EquipmentSeeder finished. Created/processed %d equipment items (Revision 3).', $numberOfEquipment));
     }
 }

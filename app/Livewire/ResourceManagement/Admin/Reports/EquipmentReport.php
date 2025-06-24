@@ -43,7 +43,7 @@ class EquipmentReport extends Component
 
     public int $perPage = 15;
 
-    public function mount()
+    public function mount(): void
     {
         // $this->authorize('viewAny', Equipment::class); // Example policy
         Log::info("Livewire\EquipmentReport: Generating Equipment Report page.", [
@@ -62,9 +62,9 @@ class EquipmentReport extends Component
             'equipmentCategory:id,name', // Assuming relation name
         ]);
 
-        if (! empty($this->searchTerm)) {
+        if ($this->searchTerm !== '' && $this->searchTerm !== '0') {
             $search = '%'.strtolower($this->searchTerm).'%';
-            $query->where(function ($q) use ($search) {
+            $query->where(function ($q) use ($search): void {
                 $q->whereRaw('LOWER(tag_id) LIKE ?', [$search])
                     ->orWhereRaw('LOWER(serial_number) LIKE ?', [$search])
                     ->orWhereRaw('LOWER(model) LIKE ?', [$search])
@@ -72,29 +72,35 @@ class EquipmentReport extends Component
                     ->orWhereRaw('LOWER(item_code) LIKE ?', [$search]); // Added from Revision 3
             });
         }
-        if (! empty($this->filterAssetType)) {
+
+        if ($this->filterAssetType !== null && $this->filterAssetType !== '' && $this->filterAssetType !== '0') {
             $query->where('asset_type', $this->filterAssetType);
         }
-        if (! empty($this->filterStatus)) {
+
+        if ($this->filterStatus !== null && $this->filterStatus !== '' && $this->filterStatus !== '0') {
             $query->where('status', $this->filterStatus);
         }
-        if (! empty($this->filterCondition)) {
+
+        if ($this->filterCondition !== null && $this->filterCondition !== '' && $this->filterCondition !== '0') {
             $query->where('condition_status', $this->filterCondition);
         }
-        if (! empty($this->filterDepartmentId)) {
+
+        if ($this->filterDepartmentId !== null && $this->filterDepartmentId !== 0) {
             $query->where('department_id', $this->filterDepartmentId);
         }
-        if (! empty($this->filterLocationId)) {
+
+        if ($this->filterLocationId !== null && $this->filterLocationId !== 0) {
             $query->where('location_id', $this->filterLocationId); // Added from Revision 3
         }
-        if (! empty($this->filterCategoryId)) {
+
+        if ($this->filterCategoryId !== null && $this->filterCategoryId !== 0) {
             $query->where('equipment_category_id', $this->filterCategoryId); // Added from Revision 3
         }
 
         $query->orderBy($this->sortBy, $this->sortDirection);
 
         $reportData = $query->paginate($this->perPage);
-        Log::info("Livewire\EquipmentReport: Fetched {$reportData->total()} equipment.", ['admin_user_id' => Auth::id()]);
+        Log::info(sprintf('Livewire\EquipmentReport: Fetched %d equipment.', $reportData->total()), ['admin_user_id' => Auth::id()]);
 
         return $reportData;
     }
@@ -150,6 +156,7 @@ class EquipmentReport extends Component
             $this->sortBy = $column;
             $this->sortDirection = 'asc';
         }
+
         $this->resetPage();
     }
 

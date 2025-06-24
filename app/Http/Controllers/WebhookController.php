@@ -58,7 +58,7 @@ class WebhookController extends Controller
                 'expected_ref' => $deploymentBranch,
             ]);
 
-            return response()->json(['message' => "Push to branch '{$data['ref']}' ignored. Monitoring '{$deploymentBranch}'."], 200);
+            return response()->json(['message' => sprintf("Push to branch '%s' ignored. Monitoring '%s'.", $data['ref'], $deploymentBranch)], 200);
         }
 
         try {
@@ -66,11 +66,11 @@ class WebhookController extends Controller
             Log::info('GitHub deployment job dispatched successfully for branch.', ['branch' => $data['ref']]);
 
             return response()->json(['message' => 'Deployment job successfully dispatched.'], 200);
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             Log::critical('Failed to dispatch GitHub deployment job.', [
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
                 'branch' => $data['ref'] ?? 'N/A',
-                'exception_trace_snippet' => substr($e->getTraceAsString(), 0, 500),
+                'exception_trace_snippet' => substr($exception->getTraceAsString(), 0, 500),
             ]);
 
             return response()->json(['message' => 'Server error: Failed to dispatch deployment job.'], 500);

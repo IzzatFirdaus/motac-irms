@@ -11,13 +11,16 @@
         </thead>
         <tbody>
             @forelse ($applications as $application)
+                {{-- Ensure the route exists for IT admin to view application details --}}
                 @if (Route::has('resource-management.email-applications-admin.show'))
                     <tr onclick="window.location='{{ route('resource-management.email-applications-admin.show', $application->id) }}';"
                         style="cursor: pointer;">
+                        {{-- Uses a helper for consistent date formatting, as per system design [cite: 91] --}}
                         <td>{{ \App\Helpers\Helpers::formatDate($application->created_at, 'date_my') }}</td>
                         <td>{{ $application->user->name ?? __('N/A') }}</td>
                         <td>{{ $application->application_type_label }}</td>
                         <td>
+                            {{-- Uses a reusable component for status display [cite: 482] --}}
                             <x-resource-status-panel :resource="$application" statusAttribute="status" type="email_application"
                                 :showIcon="true" />
                         </td>
@@ -32,7 +35,9 @@
         </tbody>
     </table>
 
-    <div class="mt-3 px-3">
-        {{ $applications->links() }}
-    </div>
+    @if($applications->hasPages())
+        <div class="mt-3 px-3">
+            {{ $applications->links() }}
+        </div>
+    @endif
 </div>

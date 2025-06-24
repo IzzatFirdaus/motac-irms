@@ -54,7 +54,7 @@ class Handler extends ExceptionHandler
      */
     public function register(): void
     {
-        $this->reportable(function (Throwable $e) {
+        $this->reportable(function (Throwable $e): void {
             // Example: Send exceptions to an external service like Sentry
             // if (app()->bound('sentry') && $this->shouldReport($e)) {
             //     app('sentry')->captureException($e);

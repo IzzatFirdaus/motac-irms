@@ -34,6 +34,7 @@ class NotificationSeeder extends Seeder
 
             return;
         }
+
         Log::info('Found '.User::count().' Users for potential notification assignment.');
 
         $adminUserForAudit = User::orderBy('id')->first();
@@ -42,11 +43,11 @@ class NotificationSeeder extends Seeder
             // This case should ideally not be hit if UserSeeder runs first.
             $adminUserForAudit = User::factory()->create(['name' => 'Audit User (NotifSeeder)']);
             $auditUserId = $adminUserForAudit->id;
-            Log::info("Created a fallback audit user with ID {$auditUserId} for NotificationSeeder blameable fields.");
+            Log::info(sprintf('Created a fallback audit user with ID %d for NotificationSeeder blameable fields.', $auditUserId));
         }
 
         $totalNotificationsToCreate = 50; // Create fewer for more targeted examples initially
-        Log::info("Creating {$totalNotificationsToCreate} random notifications using factory (Revision 3)...");
+        Log::info(sprintf('Creating %d random notifications using factory (Revision 3)...', $totalNotificationsToCreate));
 
         // The NotificationFactory needs to be robust:
         // - Pick a random existing User as 'notifiable'.
@@ -62,24 +63,23 @@ class NotificationSeeder extends Seeder
                     // 'updated_by' => $auditUserId, // For seeders, it's often fine if these are null or set by factory to a random user.
                     // Revision 3 notification table has these as nullable.
                 ]);
-            Log::info("Created {$totalNotificationsToCreate} notifications.");
+            Log::info(sprintf('Created %d notifications.', $totalNotificationsToCreate));
 
             // Mark some as read
             $numReadNotifications = (int) ($totalNotificationsToCreate * 0.3);
-            if ($numReadNotifications > 0) {
-                $notificationsToMarkRead = Notification::whereNull('read_at')
-                    ->inRandomOrder()
-                    ->limit($numReadNotifications)
-                    ->get();
-
-                foreach ($notificationsToMarkRead as $notification) {
-                    $notification->update(['read_at' => now(), 'updated_by' => $auditUserId]); // Also update 'updated_by'
-                }
-                Log::info("Marked up to {$notificationsToMarkRead->count()} notifications as read.");
+            $notificationsToMarkRead = Notification::whereNull('read_at')
+                ->inRandomOrder()
+                ->limit($numReadNotifications)
+                ->get();
+            foreach ($notificationsToMarkRead as $notification) {
+                $notification->update(['read_at' => now(), 'updated_by' => $auditUserId]); // Also update 'updated_by'
             }
+
+            Log::info(sprintf('Marked up to %s notifications as read.', $notificationsToMarkRead->count()));
         } else {
             Log::error('App\Models\Notification model or its factory not found. Cannot seed notifications.');
         }
+
         Log::info('Notification seeding complete (Revision 3).');
     }
 }

@@ -5,12 +5,10 @@
 
 @section('content')
     <div class="container py-4">
-        {{-- FIX: Replaced 'text-dark' with 'text-body' to allow the theme to control text color.  --}}
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
             <h1 class="h2 fw-bold text-body mb-0 d-flex align-items-center">
                 <i class="bi bi-card-list me-2"></i>{{ __('Senarai Permohonan Pinjaman Saya') }}
             </h1>
-            {{-- The @can directive correctly protects the create button.  --}}
             @can('create', App\Models\LoanApplication::class)
                 <a href="{{ route('loan-applications.create') }}" class="btn btn-primary d-inline-flex align-items-center">
                     <i class="bi bi-plus-circle-fill me-2"></i>
@@ -21,7 +19,6 @@
 
         @include('_partials._alerts.alert-general')
 
-        {{-- FIX: Removed hardcoded 'bg-light' and non-standard classes. The .card and .card-header classes are now styled by theme-motac.css.  --}}
         <div class="card shadow-sm">
             <div class="card-header py-3">
                 <h3 class="h5 card-title fw-semibold mb-0">{{ __('Sejarah Permohonan Pinjaman Anda') }}</h3>
@@ -34,7 +31,6 @@
                 </div>
             @else
                 <div class="table-responsive">
-                    {{-- FIX: Added 'table-dark' to make the striped table dark-mode aware and removed 'table-light' from thead. This allows theme-motac.css to work correctly.  --}}
                     <table class="table table-hover table-striped table-dark mb-0 align-middle">
                         <thead>
                             <tr>
@@ -48,7 +44,6 @@
                         <tbody>
                             @foreach ($applications as $app)
                                 <tr>
-                                    {{-- FIX: Replaced 'text-dark' with 'text-body' to respect the theme.  --}}
                                     <td class="px-3 py-2 small text-body fw-medium">#{{ $app->id }}</td>
                                     <td class="px-3 py-2 small text-body">{{ Str::limit($app->purpose, 50) }}</td>
                                     <td class="px-3 py-2 small text-muted">{{ optional($app->loan_start_date)->translatedFormat('d M Y') ?? 'N/A' }}</td>
@@ -64,13 +59,14 @@
                                                 </a>
                                             @endcan
                                             @can('delete', $app)
-                                                <form action="{{ route('loan-applications.destroy', $app) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('Adakah anda pasti untuk memadam draf permohonan ini?') }}');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-icon btn-outline-danger border-0" title="{{ __('Padam Draf') }}">
-                                                        <i class="bi bi-trash3-fill"></i>
-                                                    </button>
-                                                </form>
+                                                {{-- This button now triggers the modal --}}
+                                                <button type="button" class="btn btn-sm btn-icon btn-outline-danger border-0"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#deleteLoanModal"
+                                                        data-delete-url="{{ route('loan-applications.destroy', $app) }}"
+                                                        title="{{ __('Padam Draf') }}">
+                                                    <i class="bi bi-trash3-fill"></i>
+                                                </button>
                                             @endcan
                                         </div>
                                     </td>
@@ -81,11 +77,55 @@
                 </div>
             @endif
              @if ($applications->hasPages())
-                {{-- FIX: Removed 'bg-light'. The .card-footer class is themed by the CSS.  --}}
                 <div class="card-footer border-top py-3 d-flex justify-content-center">
                     {{ $applications->links() }}
                 </div>
             @endif
         </div>
     </div>
+
+    {{-- MODAL for Delete Confirmation --}}
+    <div class="modal fade" id="deleteLoanModal" tabindex="-1" aria-labelledby="deleteLoanModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteLoanModalLabel">{{ __('Sahkan Padam Permohonan') }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {{ __('Adakah anda pasti untuk memadam draf permohonan ini? Tindakan ini tidak boleh dibatalkan.') }}
+                </div>
+                <div class="modal-footer">
+                    {{-- The form is now inside the modal and its action will be set by JavaScript --}}
+                    <form id="deleteLoanForm" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Batal') }}</button>
+                        <button type="submit" class="btn btn-danger">{{ __('Ya, Padam') }}</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
+
+@push('custom-scripts')
+{{-- JavaScript to dynamically set the form action in the modal --}}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const deleteLoanModal = document.getElementById('deleteLoanModal');
+        if (deleteLoanModal) {
+            deleteLoanModal.addEventListener('show.bs.modal', function (event) {
+                // Button that triggered the modal
+                const button = event.relatedTarget;
+                // Extract URL from data-delete-url attribute
+                const deleteUrl = button.getAttribute('data-delete-url');
+                // Get the form inside the modal
+                const deleteForm = document.getElementById('deleteLoanForm');
+                // Update the form's action attribute
+                deleteForm.setAttribute('action', deleteUrl);
+            });
+        }
+    });
+</script>
+@endpush

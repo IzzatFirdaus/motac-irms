@@ -28,7 +28,7 @@ class PositionSeeder extends Seeder
         $adminUserForAudit = User::orderBy('id')->first();
         $auditUserId = $adminUserForAudit?->id;
         if ($auditUserId) {
-            Log::info("Using User ID {$auditUserId} for audit columns in PositionSeeder.");
+            Log::info(sprintf('Using User ID %s for audit columns in PositionSeeder.', $auditUserId));
         }
 
         // Complete list of 65 positions from the MyMail form specification

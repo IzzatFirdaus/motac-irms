@@ -68,7 +68,7 @@ final class UserService
         ]);
         $preparedData = $this->preparePasswordForUpdate($data);
 
-        if (empty($preparedData)) {
+        if ($preparedData === []) {
             Log::info(self::LOG_AREA.' No updatable data provided for user update (after password preparation).', ['user_id' => $userId]);
 
             return true; // No actual changes needed, operation considered successful.
@@ -76,7 +76,7 @@ final class UserService
 
         $updated = $this->executeInTransaction(
             fn () => $user->update($preparedData),
-            "update user {$userId}",
+            'update user '.$userId,
             ['user_id' => $userId, 'update_data_keys' => array_keys($preparedData)]
         );
 
@@ -110,11 +110,11 @@ final class UserService
      */
     public function getAllUsers(array $with = []): EloquentCollection
     {
-        $logContext = empty($with) ? ['with_relations' => 'none'] : ['with_relations' => implode(', ', $with)];
+        $logContext = $with === [] ? ['with_relations' => 'none'] : ['with_relations' => implode(', ', $with)];
         Log::debug(self::LOG_AREA.' Retrieving all users.', $logContext);
 
         $query = User::query();
-        if (! empty($with)) {
+        if ($with !== []) {
             $query->with($with);
         }
 
@@ -130,6 +130,7 @@ final class UserService
         if ($applicantGradeId === null) {
             return $query;
         }
+
         Log::debug(self::LOG_AREA.' Filtering users by applicant grade ID.', ['applicant_grade_id' => $applicantGradeId]);
 
         return $query->whereHas('grade', function (EloquentBuilder $subQuery) use ($applicantGradeId): void {
@@ -147,7 +148,7 @@ final class UserService
         Log::debug(self::LOG_AREA.' Retrieving active users with role.', ['role_name' => $roleName]);
 
         if (! method_exists(User::class, 'role') && ! method_exists(User::query(), 'role')) {
-            Log::error(self::LOG_AREA." User model or query builder does not have a 'role' scope/method. Cannot get users by role '{$roleName}'. Ensure Spatie/laravel-permission or similar is correctly set up on User model.");
+            Log::error(self::LOG_AREA.sprintf(" User model or query builder does not have a 'role' scope/method. Cannot get users by role '%s'. Ensure Spatie/laravel-permission or similar is correctly set up on User model.", $roleName));
 
             return new EloquentCollection;
         }
@@ -168,7 +169,7 @@ final class UserService
 
         $deleted = $this->executeInTransaction(
             fn () => $user->delete(),
-            "soft delete user {$userId}",
+            'soft delete user '.$userId,
             ['user_id' => $userId]
         );
         $this->logDeletionOutcome($user, $deleted);
@@ -226,14 +227,14 @@ final class UserService
             Log::info(self::LOG_AREA.' Successfully '.$actionDescription.'.', $logContext);
 
             return $result;
-        } catch (Throwable $e) {
+        } catch (Throwable $throwable) {
             DB::rollBack();
             Log::error(self::LOG_AREA.' Failed to '.$actionDescription.'.', array_merge($logContext, [
-                'exception_message' => $e->getMessage(),
-                'exception_class' => get_class($e),
-                'trace_snippet' => substr($e->getTraceAsString(), 0, 500),
+                'exception_message' => $throwable->getMessage(),
+                'exception_class' => get_class($throwable),
+                'trace_snippet' => substr($throwable->getTraceAsString(), 0, 500),
             ]));
-            throw new RuntimeException(__('Gagal untuk ').$actionDescription.': '.$e->getMessage(), (int) $e->getCode(), $e);
+            throw new RuntimeException(__('Gagal untuk ').$actionDescription.': '.$throwable->getMessage(), (int) $throwable->getCode(), $throwable);
         }
     }
 
@@ -259,9 +260,10 @@ final class UserService
             Log::critical(self::LOG_AREA.' User::STATUS_ACTIVE constant is not defined. Critical configuration error.');
             throw new RuntimeException('Konfigurasi status pengguna (aktif) tidak dijumpai.');
         }
+
         $data['status'] = $data['status'] ?? User::STATUS_ACTIVE;
         if (method_exists(User::class, 'getStatusKeys') && ! in_array($data['status'], User::getStatusKeys())) {
-            Log::warning(self::LOG_AREA."Invalid status '{$data['status']}' provided for user creation. Defaulting to active.", ['email' => $data['email'] ?? 'N/A']);
+            Log::warning(self::LOG_AREA.sprintf("Invalid status '%s' provided for user creation. Defaulting to active.", $data['status']), ['email' => $data['email'] ?? 'N/A']);
             $data['status'] = User::STATUS_ACTIVE;
         }
 
@@ -324,7 +326,7 @@ final class UserService
     {
         return $this->executeInTransaction(
             fn () => $user->update(['status' => User::STATUS_INACTIVE]),
-            "deactivate user {$user->id}",
+            'deactivate user '.$user->id,
             ['user_id' => $user->id]
         );
     }

@@ -41,7 +41,7 @@ class LoanTransactionItemFactory extends EloquentFactory
 
         $itemStatuses = LoanTransactionItem::getStatusesList();
         $chosenStatus = $this->faker->randomElement(
-            ! empty($itemStatuses) ? $itemStatuses : [LoanTransactionItem::STATUS_ITEM_ISSUED]
+            $itemStatuses === [] ? [LoanTransactionItem::STATUS_ITEM_ISSUED] : $itemStatuses
         );
         $accessories = config('motac.loan_accessories_list', ['Adapter Kuasa', 'Tetikus', 'Beg Komputer Riba']);
         $conditionOnReturn = null;
@@ -80,7 +80,7 @@ class LoanTransactionItemFactory extends EloquentFactory
     {
         $accessories = config('motac.loan_accessories_list', ['Adapter Kuasa', 'Tetikus', 'Beg Komputer Riba']);
 
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'status' => LoanTransactionItem::STATUS_ITEM_ISSUED,
             'condition_on_return' => null,
             'accessories_checklist_issue' => $this->faker->randomElements($accessories, $this->faker->numberBetween(1, 3)),
@@ -92,7 +92,7 @@ class LoanTransactionItemFactory extends EloquentFactory
     {
         $accessories = config('motac.loan_accessories_list', ['Adapter Kuasa', 'Tetikus', 'Beg Komputer Riba']);
 
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'status' => LoanTransactionItem::STATUS_ITEM_RETURNED_GOOD,
             'condition_on_return' => Equipment::CONDITION_GOOD,
             'accessories_checklist_return' => $attributes['accessories_checklist_issue'] ?? $this->faker->randomElements($accessories, $this->faker->numberBetween(1, 3)),
@@ -109,7 +109,7 @@ class LoanTransactionItemFactory extends EloquentFactory
             LoanTransactionItem::STATUS_ITEM_RETURNED_MAJOR_DAMAGE,
         ];
 
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'status' => Arr::random($itemDamageStatuses),
             'condition_on_return' => Arr::random($damageConditions),
             'item_notes' => $attributes['item_notes'] ?? $msFaker->sentence,

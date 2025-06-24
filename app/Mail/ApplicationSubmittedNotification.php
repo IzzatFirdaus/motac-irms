@@ -44,13 +44,13 @@ final class ApplicationSubmittedNotification extends Mailable implements ShouldQ
      * EDITED: Create a new message instance.
      * The constructor now accepts the approver's User model to pass their name to the view.
      *
-     * @param EmailApplication|LoanApplication $application The submitted application model.
-     * @param User $approver The officer who needs to approve the application.
-     * @param string|null $reviewUrl Optional URL for direct review.
+     * @param  EmailApplication|LoanApplication  $application  The submitted application model.
+     * @param  User  $approver  The officer who needs to approve the application.
+     * @param  string|null  $reviewUrl  Optional URL for direct review.
      */
     public function __construct(EmailApplication|LoanApplication $application, User $approver, ?string $reviewUrl = null)
     {
-        if (! ($application instanceof EmailApplication || $application instanceof LoanApplication)) {
+        if (! $application instanceof EmailApplication && ! $application instanceof LoanApplication) {
             $errorMessage = 'ApplicationSubmittedNotification: Received invalid application type.';
             Log::error($errorMessage, ['type' => is_object($application) ? $application::class : gettype($application)]);
             throw new InvalidArgumentException($errorMessage.' Must be EmailApplication or LoanApplication.');
@@ -76,7 +76,7 @@ final class ApplicationSubmittedNotification extends Mailable implements ShouldQ
           : __('Tindakan Diperlukan: Permohonan Pinjaman Peralatan ICT Baru Dihantar');
 
         return new Envelope(
-            subject: $subject . ' (#'.$this->application->id.')'
+            subject: $subject.' (#'.$this->application->id.')'
         );
     }
 

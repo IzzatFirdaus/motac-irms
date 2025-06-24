@@ -54,12 +54,13 @@ class RecordApprovalDecisionRequest extends FormRequest
 
             // Loop through the submitted items_approved data (which is an associative array keyed by loan_application_item_id)
             if (is_array($this->input('items_approved'))) { //
-                foreach ($this->input('items_approved') as $loanApplicationItemId => $itemData) { //
+                foreach (array_keys($this->input('items_approved')) as $loanApplicationItemId) { //
                     // Find the original loan application item to get its quantity_requested
                     $loanAppItem = null;
-                    if ($approval->approvable && method_exists($approval->approvable, 'loanApplicationItems')) {
+                    if ($approval->approvable instanceof \App\Models\LoanApplication && method_exists($approval->approvable, 'loanApplicationItems')) {
                         $loanAppItem = $approval->approvable->loanApplicationItems()->find($loanApplicationItemId); //
                     }
+
                     $maxQty = $loanAppItem ? $loanAppItem->quantity_requested : 0; //
 
                     // Rule for each item's quantity_approved
@@ -94,16 +95,17 @@ class RecordApprovalDecisionRequest extends FormRequest
         $approval = $this->route('approval'); //
         // Generate dynamic messages for each item's quantity_approved
         if ($approval && $approval->approvable instanceof LoanApplication && is_array($this->input('items_approved'))) { //
-            foreach ($this->input('items_approved') as $loanApplicationItemId => $itemData) { //
+            foreach (array_keys($this->input('items_approved')) as $loanApplicationItemId) { //
                 $loanAppItem = null;
-                if ($approval->approvable && method_exists($approval->approvable, 'loanApplicationItems')) {
+                if ($approval->approvable instanceof \App\Models\LoanApplication && method_exists($approval->approvable, 'loanApplicationItems')) {
                     $loanAppItem = $approval->approvable->loanApplicationItems()->find($loanApplicationItemId); //
                 }
+
                 $itemTypeDisplay = 'Item'; // Default
                 if ($loanAppItem && $loanAppItem->equipment_type) {
                     $itemTypeDisplay = optional(\App\Models\Equipment::getAssetTypeOptions())[$loanAppItem->equipment_type] ?? $loanAppItem->equipment_type; //
-                } elseif ($loanApplicationItemId) {
-                    $itemTypeDisplay = "Item ID {$loanApplicationItemId}"; //
+                } elseif ($loanApplicationItemId !== 0 && ($loanApplicationItemId !== '' && $loanApplicationItemId !== '0')) {
+                    $itemTypeDisplay = 'Item ID '.$loanApplicationItemId; //
                 }
 
                 $maxQty = $loanAppItem ? $loanAppItem->quantity_requested : 0; //

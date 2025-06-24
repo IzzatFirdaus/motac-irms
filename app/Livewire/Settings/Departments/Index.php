@@ -18,25 +18,38 @@ class Index extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $sortField = 'name';
+
     public string $sortDirection = 'asc';
+
     public bool $showModal = false;
+
     public bool $isEditMode = false;
+
     public ?Department $editingDepartment = null;
 
     // Form fields
     public string $name = '';
+
     public string $code = '';
+
     public string $branch_type = '';
+
     public string $description = '';
+
     public bool $is_active = true;
 
     public bool $showDeleteConfirmationModal = false;
+
     public ?int $departmentIdToDelete = null;
+
     public string $departmentNameToDelete = '';
+
     public array $branchTypeOptions = [];
 
     protected array $queryString = ['search', 'sortField', 'sortDirection'];
+
     protected string $paginationTheme = 'bootstrap';
 
     public function mount(): void
@@ -44,7 +57,7 @@ class Index extends Component
         $this->authorize('viewAny', Department::class);
         $this->editingDepartment = new Department;
         $this->branchTypeOptions = Department::getBranchTypeOptions();
-        if (empty($this->branch_type) && !empty($this->branchTypeOptions)) {
+        if (($this->branch_type === '' || $this->branch_type === '0') && $this->branchTypeOptions !== []) {
             $this->branch_type = array_key_first($this->branchTypeOptions);
         }
     }
@@ -56,6 +69,7 @@ class Index extends Component
         } else {
             $this->sortDirection = 'asc';
         }
+
         $this->sortField = $field;
         $this->resetPage();
     }
@@ -65,13 +79,13 @@ class Index extends Component
         $query = Department::query()
             // EDITED: Eager load the relationship to fix the N+1 query issue.
             ->with('headOfDepartment:id,name')
-            ->when($this->search, function ($q) {
-                $q->where('name', 'like', '%' . $this->search . '%')
-                    ->orWhere('code', 'like', '%' . $this->search . '%')
-                    ->orWhere('description', 'like', '%' . $this->search . '%');
+            ->when($this->search, function ($q): void {
+                $q->where('name', 'like', '%'.$this->search.'%')
+                    ->orWhere('code', 'like', '%'.$this->search.'%')
+                    ->orWhere('description', 'like', '%'.$this->search.'%');
             });
 
-        if ($this->sortField) {
+        if ($this->sortField !== '' && $this->sortField !== '0') {
             $query->orderBy($this->sortField, $this->sortDirection);
         } else {
             $query->orderBy('name', 'asc');
@@ -115,13 +129,14 @@ class Index extends Component
             'is_active' => $validatedData['is_active'],
         ];
 
-        if ($this->isEditMode && $this->editingDepartment && $this->editingDepartment->exists) {
+        if ($this->isEditMode && $this->editingDepartment instanceof \App\Models\Department && $this->editingDepartment->exists) {
             $this->editingDepartment->update($data);
             session()->flash('success', __('Jabatan :name berjaya dikemaskini.', ['name' => $this->editingDepartment->name]));
         } else {
             $newDepartment = Department::create($data);
             session()->flash('success', __('Jabatan :name berjaya dicipta.', ['name' => $newDepartment->name]));
         }
+
         $this->closeModal();
     }
 
@@ -139,6 +154,7 @@ class Index extends Component
 
             if ($department->users()->count() > 0) {
                 session()->flash('error', __('Jabatan ":name" tidak boleh dipadam kerana ia telah ditugaskan kepada pengguna.', ['name' => $department->name]));
+
                 return;
             }
 
@@ -152,19 +168,21 @@ class Index extends Component
 
     public function deleteDepartment(): void
     {
-        if ($this->departmentIdToDelete) {
+        if ($this->departmentIdToDelete !== null && $this->departmentIdToDelete !== 0) {
             $department = Department::findOrFail($this->departmentIdToDelete);
             $this->authorize('delete', $department);
 
             if ($department->users()->count() > 0) {
                 session()->flash('error', __('Jabatan ":name" tidak boleh dipadam kerana ia telah ditugaskan kepada pengguna.', ['name' => $department->name]));
                 $this->closeDeleteConfirmationModal();
+
                 return;
             }
 
             $department->delete();
             session()->flash('success', __('Jabatan :name berjaya dipadam.', ['name' => $this->departmentNameToDelete]));
         }
+
         $this->closeDeleteConfirmationModal();
     }
 
@@ -177,7 +195,7 @@ class Index extends Component
 
     protected function rules(): array
     {
-        $departmentIdToIgnore = ($this->isEditMode && $this->editingDepartment && $this->editingDepartment->id)
+        $departmentIdToIgnore = ($this->isEditMode && $this->editingDepartment instanceof \App\Models\Department && $this->editingDepartment->id)
                                 ? $this->editingDepartment->id
                                 : null;
 
@@ -197,11 +215,7 @@ class Index extends Component
         $this->description = '';
         $this->is_active = true;
 
-        if (! empty($this->branchTypeOptions)) {
-            $this->branch_type = array_key_first($this->branchTypeOptions);
-        } else {
-            $this->branch_type = '';
-        }
+        $this->branch_type = $this->branchTypeOptions === [] ? '' : array_key_first($this->branchTypeOptions);
 
         $this->editingDepartment = new Department;
         $this->isEditMode = false;

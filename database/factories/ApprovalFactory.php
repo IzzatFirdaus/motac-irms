@@ -17,14 +17,14 @@ class ApprovalFactory extends Factory
     public function definition(): array
     {
         // Use a Malaysian locale for faker
-        $msFaker = \Faker\Factory::create('ms_MY');
+        \Faker\Factory::create('ms_MY');
 
         $officer = User::inRandomOrder()->first() ?? User::factory()->create(['name' => 'Officer Fallback (ApprovalFactory)']);
         $stageKeys = Approval::getStageKeys();
 
         return [
             'officer_id' => $officer->id,
-            'stage' => empty($stageKeys) ? 'support_review' : $this->faker->randomElement($stageKeys), // Fallback stage
+            'stage' => $stageKeys === [] ? 'support_review' : $this->faker->randomElement($stageKeys), // Fallback stage
             'status' => Approval::STATUS_PENDING,
             'comments' => null,
             'approval_timestamp' => null,
@@ -36,7 +36,7 @@ class ApprovalFactory extends Factory
 
     public function status(string $statusValue): static
     {
-        return $this->state(function (array $attributes) use ($statusValue) {
+        return $this->state(function (array $attributes) use ($statusValue): array {
             // Use a Malaysian locale for faker
             $msFaker = \Faker\Factory::create('ms_MY');
 
@@ -54,7 +54,7 @@ class ApprovalFactory extends Factory
 
     public function approved(): static
     {
-        return $this->status(Approval::STATUS_APPROVED)->state(function (array $attributes) {
+        return $this->status(Approval::STATUS_APPROVED)->state(function (array $attributes): array {
             // Use a Malaysian locale for faker
             $msFaker = \Faker\Factory::create('ms_MY');
 
@@ -66,7 +66,7 @@ class ApprovalFactory extends Factory
 
     public function rejected(): static
     {
-        return $this->status(Approval::STATUS_REJECTED)->state(function (array $attributes) {
+        return $this->status(Approval::STATUS_REJECTED)->state(function (array $attributes): array {
             // Use a Malaysian locale for faker
             $msFaker = \Faker\Factory::create('ms_MY');
 
@@ -79,7 +79,7 @@ class ApprovalFactory extends Factory
 
     public function pending(): static
     {
-        return $this->status(Approval::STATUS_PENDING)->state(fn (array $attributes) => [
+        return $this->status(Approval::STATUS_PENDING)->state(fn (array $attributes): array => [
             'comments' => null,
             'approval_timestamp' => null,
         ]);
@@ -89,23 +89,23 @@ class ApprovalFactory extends Factory
     {
         $validStages = Approval::getStageKeys();
 
-        if (! in_array($stage, $validStages) && ! empty($validStages)) {
+        if (! in_array($stage, $validStages) && $validStages !== []) {
             // Optional: Log a warning for invalid stages.
         }
 
-        return $this->state(fn (array $attributes) => ['stage' => $stage]);
+        return $this->state(fn (array $attributes): array => ['stage' => $stage]);
     }
 
     public function deleted(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'deleted_at' => now(),
         ]);
     }
 
     public function forApprovable(Model $approvable): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'approvable_type' => $approvable->getMorphClass(),
             'approvable_id' => $approvable->id,
         ]);

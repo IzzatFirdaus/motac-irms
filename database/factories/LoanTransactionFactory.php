@@ -22,7 +22,7 @@ class LoanTransactionFactory extends EloquentFactory
         $accessories = ['Adapter Kuasa', 'Beg Komputer Riba', 'Tetikus Wayarles', 'Kabel HDMI'];
 
         $transactionDate = Carbon::parse($this->faker->dateTimeBetween('-6 months', 'now'));
-        $chosenType = $this->faker->randomElement(array_keys($transactionTypes ?: [LoanTransaction::TYPE_ISSUE]));
+        $chosenType = $this->faker->randomElement(array_keys($transactionTypes !== [] ? $transactionTypes : [LoanTransaction::TYPE_ISSUE]));
 
         $dueDate = null;
         if ($chosenType == LoanTransaction::TYPE_ISSUE && $application->loan_end_date) {
@@ -77,13 +77,13 @@ class LoanTransactionFactory extends EloquentFactory
             'return_timestamp' => $returnTimestamp,
             'return_notes' => $returnNotes,
             'related_transaction_id' => $relatedTransactionId,
-            'status' => $this->faker->randomElement(array_keys($transactionStatuses ?: [LoanTransaction::STATUS_COMPLETED])),
+            'status' => $this->faker->randomElement(array_keys($transactionStatuses !== [] ? $transactionStatuses : [LoanTransaction::STATUS_COMPLETED])),
         ];
     }
 
     public function issue(): static
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes): array {
             $msFaker = \Faker\Factory::create('ms_MY');
             $application = $this->getApplicationFromAttributes($attributes);
             $transactionDate = Carbon::parse($attributes['transaction_date'] ?? $this->faker->dateTimeBetween($application->approved_at ?? '-3 months', 'now'));
@@ -102,14 +102,14 @@ class LoanTransactionFactory extends EloquentFactory
                 'issue_notes' => $issueNotes,
                 'loan_application_id' => $application->id,
             ];
-        })->afterCreating(function (LoanTransaction $transaction) {
+        })->afterCreating(function (LoanTransaction $transaction): void {
             // afterCreating logic remains the same
         });
     }
 
     public function return(): static
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes): array {
             $msFaker = \Faker\Factory::create('ms_MY');
             $application = $this->getApplicationFromAttributes($attributes);
             $issueDate = $application->issued_at ?? $application->approved_at ?? $application->created_at ?? '-1 month';
@@ -134,14 +134,14 @@ class LoanTransactionFactory extends EloquentFactory
                 'loan_application_id' => $application->id,
                 'related_transaction_id' => $relatedIssueTx?->id,
             ];
-        })->afterCreating(function (LoanTransaction $transaction) {
+        })->afterCreating(function (LoanTransaction $transaction): void {
             // afterCreating logic remains the same
         });
     }
 
     public function deleted(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'deleted_at' => now(),
         ]);
     }

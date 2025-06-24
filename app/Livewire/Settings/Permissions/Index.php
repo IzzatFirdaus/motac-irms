@@ -79,13 +79,14 @@ class Index extends Component
         // E.g., if ($this->isEditMode) { $this->permissionService->updatePermission($this->editingPermission, $permissionData); }
         // else { $this->permissionService->createPermission($permissionData); }
 
-        if ($this->isEditMode && $this->editingPermission && $this->editingPermission->exists) {
+        if ($this->isEditMode && $this->editingPermission instanceof \Spatie\Permission\Models\Permission && $this->editingPermission->exists) {
             $this->editingPermission->update($permissionData);
             session()->flash('message', __('Kebenaran :name berjaya dikemaskini.', ['name' => $this->editingPermission->name]));
         } else {
             $newPermission = Permission::create($permissionData);
             session()->flash('message', __('Kebenaran :name berjaya dicipta.', ['name' => $newPermission->name]));
         }
+
         $this->closeModal();
     }
 
@@ -106,6 +107,7 @@ class Index extends Component
 
                 return;
             }
+
             $this->permissionIdToDelete = $id;
             $this->permissionNameToDelete = $permission->name;
             $this->showDeleteConfirmationModal = true;
@@ -117,7 +119,7 @@ class Index extends Component
     public function deletePermission(): void
     {
         abort_unless(Auth::user()->can('manage_permissions'), 403, __('Tindakan tidak dibenarkan.'));
-        if ($this->permissionIdToDelete) {
+        if ($this->permissionIdToDelete !== null && $this->permissionIdToDelete !== 0) {
             $permission = Permission::findOrFail($this->permissionIdToDelete); // Use findOrFail to catch if not found
 
             // Consider moving deletion logic (with checks) to a PermissionService
@@ -130,9 +132,11 @@ class Index extends Component
 
                 return;
             }
+
             $permission->delete();
             session()->flash('message', __('Kebenaran :name berjaya dipadam.', ['name' => $this->permissionNameToDelete]));
         }
+
         $this->closeDeleteConfirmationModal();
     }
 
@@ -155,7 +159,7 @@ class Index extends Component
 
     protected function rules(): array
     {
-        $permissionIdToIgnore = ($this->isEditMode && $this->editingPermission && $this->editingPermission->id)
+        $permissionIdToIgnore = ($this->isEditMode && $this->editingPermission instanceof \Spatie\Permission\Models\Permission && $this->editingPermission->id)
                                 ? $this->editingPermission->id
                                 : null;
 

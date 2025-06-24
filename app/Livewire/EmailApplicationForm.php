@@ -124,7 +124,7 @@ final class EmailApplicationForm extends Component
 
     public bool $isPassportInputMode = false;
 
-    protected EmailApplicationService $emailApplicationService;
+    private EmailApplicationService $emailApplicationService;
 
     // Rules, messages, boot, mount, prefill, fillFormFromModel, updated* methods remain the same
     // as provided in your uploaded file.
@@ -136,10 +136,8 @@ final class EmailApplicationForm extends Component
         $user = Auth::user();
         $isFinalApplicantSubmission = false;
 
-        if (! $this->isEdit || ($this->application && $this->application->status === EmailApplication::STATUS_DRAFT)) {
-            if ($this->cert_info_is_true && $this->cert_data_usage_agreed && $this->cert_email_responsibility_agreed) {
-                $isFinalApplicantSubmission = true;
-            }
+        if ((! $this->isEdit || $this->application instanceof \App\Models\EmailApplication && $this->application->status === EmailApplication::STATUS_DRAFT) && ($this->cert_info_is_true && $this->cert_data_usage_agreed && $this->cert_email_responsibility_agreed)) {
+            $isFinalApplicantSubmission = true;
         }
 
         $rules = [
@@ -162,7 +160,7 @@ final class EmailApplicationForm extends Component
             'proposed_email' => [
                 'nullable', 'string', 'max:255',
                 Rule::when(
-                    fn ($input) => ! empty($input->proposed_email),
+                    fn ($input): bool => ! empty($input->proposed_email),
                     [
                         'email:rfc,dns',
                         Rule::unique('email_applications', 'proposed_email')->ignore($this->applicationId),
@@ -181,9 +179,9 @@ final class EmailApplicationForm extends Component
             'group_admin_name' => [Rule::requiredIf($this->is_group_email_request), 'nullable', 'string', 'max:255'],
             'group_admin_email' => [Rule::requiredIf($this->is_group_email_request), 'nullable', 'email:rfc,dns', 'max:255'],
             'supporting_officer_id' => ['nullable', 'exists:users,id'],
-            'manual_supporting_officer_name' => [Rule::requiredIf(empty($this->supporting_officer_id) && $isFinalApplicantSubmission), 'nullable', 'string', 'max:255'],
-            'manual_supporting_officer_grade_key' => [Rule::requiredIf(empty($this->supporting_officer_id) && $isFinalApplicantSubmission), 'nullable', Rule::in(array_keys($this->gradeOptionsForSupportingOfficer->all()))],
-            'manual_supporting_officer_email' => [Rule::requiredIf(empty($this->supporting_officer_id) && $isFinalApplicantSubmission), 'nullable', 'email:rfc,dns', 'max:255'],
+            'manual_supporting_officer_name' => [Rule::requiredIf(($this->supporting_officer_id === null || $this->supporting_officer_id === 0) && $isFinalApplicantSubmission), 'nullable', 'string', 'max:255'],
+            'manual_supporting_officer_grade_key' => [Rule::requiredIf(($this->supporting_officer_id === null || $this->supporting_officer_id === 0) && $isFinalApplicantSubmission), 'nullable', Rule::in(array_keys($this->gradeOptionsForSupportingOfficer->all()))],
+            'manual_supporting_officer_email' => [Rule::requiredIf(($this->supporting_officer_id === null || $this->supporting_officer_id === 0) && $isFinalApplicantSubmission), 'nullable', 'email:rfc,dns', 'max:255'],
             'cert_info_is_true' => $isFinalApplicantSubmission ? ['accepted'] : ['boolean'],
             'cert_data_usage_agreed' => $isFinalApplicantSubmission ? ['accepted'] : ['boolean'],
             'cert_email_responsibility_agreed' => $isFinalApplicantSubmission ? ['accepted'] : ['boolean'],
@@ -238,7 +236,7 @@ final class EmailApplicationForm extends Component
                     ->orderBy('name')->pluck('name', 'id')
             );
 
-        if ($emailApplicationId) {
+        if ($emailApplicationId !== null && $emailApplicationId !== 0) {
             $application = EmailApplication::with(['user.department', 'user.position', 'user.grade', 'supportingOfficer'])
                 ->findOrFail($emailApplicationId);
             $this->application = $application;
@@ -259,7 +257,7 @@ final class EmailApplicationForm extends Component
 
         $this->updatedServiceStatus($this->service_status);
         $this->updatedAppointmentType($this->appointment_type);
-        $this->is_group_email_request = ! empty($this->group_email);
+        $this->is_group_email_request = $this->group_email !== null && $this->group_email !== '' && $this->group_email !== '0';
     }
 
     public function updatedServiceStatus(string $value): void
@@ -281,6 +279,7 @@ final class EmailApplicationForm extends Component
         } else {
             $this->applicant_passport_number = null;
         }
+
         $this->resetValidation($this->isPassportInputMode ? 'applicant_identification_number' : 'applicant_passport_number');
     }
 
@@ -307,16 +306,16 @@ final class EmailApplicationForm extends Component
                 'editable_status_for_admin_key',
             ])->toArray();
 
-            $applicationData['cert_info_is_true'] = (bool) $this->cert_info_is_true;
-            $applicationData['cert_data_usage_agreed'] = (bool) $this->cert_data_usage_agreed;
-            $applicationData['cert_email_responsibility_agreed'] = (bool) $this->cert_email_responsibility_agreed;
+            $applicationData['cert_info_is_true'] = $this->cert_info_is_true;
+            $applicationData['cert_data_usage_agreed'] = $this->cert_data_usage_agreed;
+            $applicationData['cert_email_responsibility_agreed'] = $this->cert_email_responsibility_agreed;
             $applicationData['status'] = $targetStatus;
 
-            if ($isFinalSubmission && (! $this->isEdit || ($this->application && $this->application->status === EmailApplication::STATUS_DRAFT))) {
+            if ($isFinalSubmission && (! $this->isEdit || ($this->application instanceof \App\Models\EmailApplication && $this->application->status === EmailApplication::STATUS_DRAFT))) {
                 $applicationData['certification_timestamp'] = now();
             }
 
-            if ($this->isEdit && $this->application && ($currentUser->isAdmin() || $currentUser->isItAdmin())) {
+            if ($this->isEdit && $this->application instanceof \App\Models\EmailApplication && ($currentUser->isAdmin() || $currentUser->isItAdmin())) {
                 $this->authorize('update', $this->application);
                 $applicationData['rejection_reason'] = $this->rejection_reason;
                 $applicationData['final_assigned_email'] = $this->final_assigned_email;
@@ -324,7 +323,7 @@ final class EmailApplicationForm extends Component
             }
 
             $message = '';
-            if ($this->isEdit && $this->application) {
+            if ($this->isEdit && $this->application instanceof \App\Models\EmailApplication) {
                 $this->emailApplicationService->updateApplication($this->application, $applicationData, $currentUser);
                 $message = __('Permohonan emel/ID berjaya dikemaskini.');
             } else {
@@ -336,6 +335,7 @@ final class EmailApplicationForm extends Component
                         $applicationData[$field] = $validatedData[$field];
                     }
                 }
+
                 $this->application = $this->emailApplicationService->createApplication($applicationData, $currentUser);
                 $this->applicationId = $this->application->id;
                 $this->isEdit = true;
@@ -361,20 +361,20 @@ final class EmailApplicationForm extends Component
 
         } catch (ValidationException $e) {
             DB::rollBack();
-            Log::warning("EmailApplicationForm: Validation failed for User ID: {$currentUser->id}", ['errors' => $e->errors()]);
+            Log::warning('EmailApplicationForm: Validation failed for User ID: '.$currentUser->id, ['errors' => $e->errors()]);
             $this->dispatch('toastr', type: 'error', message: __('Sila perbetulkan ralat pada borang.'));
 
             return null;
         } catch (AuthorizationException $e) {
             DB::rollBack();
-            Log::error("EmailApplicationForm: Authorization failed for User ID: {$currentUser->id}", ['message' => $e->getMessage()]);
+            Log::error('EmailApplicationForm: Authorization failed for User ID: '.$currentUser->id, ['message' => $e->getMessage()]);
             session()->flash('error', __('Anda tidak dibenarkan untuk melakukan tindakan ini.'));
             $this->dispatch('toastr', type: 'error', message: __('Anda tidak dibenarkan untuk melakukan tindakan ini.'));
 
             return null;
         } catch (Throwable $e) {
             DB::rollBack();
-            Log::error("EmailApplicationForm: Error submitting application for User ID: {$currentUser->id}", ['exception' => $e]);
+            Log::error('EmailApplicationForm: Error submitting application for User ID: '.$currentUser->id, ['exception' => $e]);
             session()->flash('error', __('Berlaku ralat tidak dijangka semasa memproses permohonan anda: ').$e->getMessage());
             $this->dispatch('toastr', type: 'error', message: __('Ralat sistem. Sila cuba lagi.'));
 
@@ -405,7 +405,7 @@ final class EmailApplicationForm extends Component
             ->title($this->isEdit ? __('Kemaskini Permohonan Emel/ID') : __('Borang Permohonan Emel/ID Pengguna'));
     }
 
-    protected function messages(): array
+    private function messages(): array
     {
         return [
             'applicant_identification_number.regex' => __('Format No. Kad Pengenalan tidak sah (cth: 800101010001).'),
@@ -437,9 +437,10 @@ final class EmailApplicationForm extends Component
 
     private function fillFormFromModel(): void
     {
-        if (! $this->application) {
+        if (! $this->application instanceof \App\Models\EmailApplication) {
             return;
         }
+
         if ($this->application->user) {
             $this->prefillApplicantDetails($this->application->user);
         }
@@ -478,6 +479,7 @@ final class EmailApplicationForm extends Component
         if ($this->isEdit && ($currentUser->isAdmin() || $currentUser->isItAdmin())) {
             return $this->editable_status_for_admin_key;
         }
+
         if ($isFinalButtonClicked) {
             return EmailApplication::STATUS_PENDING_SUPPORT;
         }

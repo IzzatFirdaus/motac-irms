@@ -48,7 +48,7 @@ class EquipmentForm extends Component
         $this->statusOptions = Equipment::$STATUSES_LABELS; //
         $this->conditionStatusOptions = Equipment::$CONDITION_STATUSES_LABELS; //
 
-        if ($equipmentId) {
+        if ($equipmentId !== null && $equipmentId !== 0) {
             $this->equipmentInstance = Equipment::findOrFail($equipmentId);
             $this->isEditing = true;
             $this->populateFields();
@@ -96,7 +96,7 @@ class EquipmentForm extends Component
 
     protected function populateFields(): void
     {
-        if ($this->equipmentInstance) {
+        if ($this->equipmentInstance instanceof \App\Models\Equipment) {
             $this->asset_type = $this->equipmentInstance->asset_type;
             $this->brand = $this->equipmentInstance->brand ?? '';
             $this->model_name = $this->equipmentInstance->model ?? ''; // Eloquent model's attribute is 'model'
@@ -128,7 +128,7 @@ class EquipmentForm extends Component
         ];
     }
 
-    private function resetForm()
+    private function resetForm(): void
     {
         $this->resetValidation();
         $this->resetExcept('assetTypeOptions', 'statusOptions', 'conditionStatusOptions');

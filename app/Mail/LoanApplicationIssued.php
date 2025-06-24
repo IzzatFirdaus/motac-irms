@@ -38,7 +38,7 @@ final class LoanApplicationIssued extends Mailable implements ShouldQueue
     {
         $this->loanApplication = $loanApplication->loadMissing([
             'user', // For applicant details
-            'transactions' => function ($query) {
+            'transactions' => function ($query): void {
                 $query->where('type', LoanTransaction::TYPE_ISSUE)
                     ->with('loanTransactionItems.equipment'); // Eager load items and their equipment
             },
@@ -76,12 +76,12 @@ final class LoanApplicationIssued extends Mailable implements ShouldQueue
         if ($recipientEmail) {
             $toAddresses[] = new Address($recipientEmail, $applicantName);
             Log::info(
-                "LoanApplicationIssued Mailable: Recipient identified for Loan Application ID: {$applicationId}.",
+                sprintf('LoanApplicationIssued Mailable: Recipient identified for Loan Application ID: %s.', $applicationId),
                 ['recipient_email' => $recipientEmail]
             );
         } else {
             Log::warning(
-                "LoanApplicationIssued Mailable: Recipient email not found for Loan Application ID: {$applicationId}. Notification cannot be sent.",
+                sprintf('LoanApplicationIssued Mailable: Recipient email not found for Loan Application ID: %s. Notification cannot be sent.', $applicationId),
                 [
                     'loan_application_id' => $applicationId,
                     'applicant_user_id' => $this->loanApplication->user_id ?? 'N/A',
@@ -89,12 +89,12 @@ final class LoanApplicationIssued extends Mailable implements ShouldQueue
             );
         }
 
-        $subject = "Notifikasi Peralatan Pinjaman ICT Telah Dikeluarkan (Permohonan #{$applicationId} - {$applicantName})";
+        $subject = sprintf('Notifikasi Peralatan Pinjaman ICT Telah Dikeluarkan (Permohonan #%s - %s)', $applicationId, $applicantName);
 
         Log::info('LoanApplicationIssued Mailable: Preparing envelope.', [
             'loan_application_id' => $applicationId,
             'subject' => $subject,
-            'to_recipients' => count($toAddresses) > 0 ? $toAddresses[0]->address : 'N/A',
+            'to_recipients' => $toAddresses !== [] ? $toAddresses[0]->address : 'N/A',
         ]);
 
         return new Envelope(

@@ -37,7 +37,7 @@ class EmailAccountsReport extends Component
 
     public int $perPage = 15;
 
-    public function mount()
+    public function mount(): void
     {
         // Example authorization, ensure policy exists
         // $this->authorize('viewAny', EmailApplication::class); // Or a specific report permission
@@ -54,38 +54,39 @@ class EmailAccountsReport extends Component
         $query = EmailApplication::with(['user:id,name,service_status,department_id', 'user.department:id,name', 'supportingOfficer:id,name'])
             ->select('email_applications.*');
 
-        if (! empty($this->searchTerm)) {
+        if ($this->searchTerm !== '' && $this->searchTerm !== '0') {
             $search = '%'.strtolower($this->searchTerm).'%';
-            $query->where(function ($q) use ($search) {
+            $query->where(function ($q) use ($search): void {
                 $q->whereRaw('LOWER(proposed_email) LIKE ?', [$search])
                     ->orWhereRaw('LOWER(final_assigned_email) LIKE ?', [$search])
-                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                    ->orWhereHas('user', function ($userQuery) use ($search): void {
                         $userQuery->whereRaw('LOWER(name) LIKE ?', [$search]);
                     });
             });
         }
 
-        if (! empty($this->filterStatus)) {
+        if ($this->filterStatus !== null && $this->filterStatus !== '' && $this->filterStatus !== '0') {
             $query->where('status', $this->filterStatus);
         }
 
-        if (! empty($this->filterServiceStatus)) {
-            $query->whereHas('user', function ($q) {
+        if ($this->filterServiceStatus !== null && $this->filterServiceStatus !== '' && $this->filterServiceStatus !== '0') {
+            $query->whereHas('user', function ($q): void {
                 $q->where('service_status', $this->filterServiceStatus);
             });
         }
 
-        if (! empty($this->filterDateFrom)) {
+        if ($this->filterDateFrom !== null && $this->filterDateFrom !== '' && $this->filterDateFrom !== '0') {
             $query->whereDate('email_applications.created_at', '>=', $this->filterDateFrom);
         }
-        if (! empty($this->filterDateTo)) {
+
+        if ($this->filterDateTo !== null && $this->filterDateTo !== '' && $this->filterDateTo !== '0') {
             $query->whereDate('email_applications.created_at', '<=', $this->filterDateTo);
         }
 
         $query->orderBy($this->sortBy, $this->sortDirection);
 
         $reportData = $query->paginate($this->perPage);
-        Log::info("Livewire\EmailAccountsReport: Fetched {$reportData->total()} email applications.", ['admin_user_id' => Auth::id()]);
+        Log::info(sprintf('Livewire\EmailAccountsReport: Fetched %d email applications.', $reportData->total()), ['admin_user_id' => Auth::id()]);
 
         return $reportData;
     }
@@ -122,6 +123,7 @@ class EmailAccountsReport extends Component
             $this->sortBy = $column;
             $this->sortDirection = 'asc';
         }
+
         $this->resetPage();
     }
 

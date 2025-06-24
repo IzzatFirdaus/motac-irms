@@ -168,12 +168,13 @@ class EmployeeInfo extends Component
             $this->dispatch('closeModal', elementId: '#timelineModal');
             session()->flash('toastr', ['type' => 'success', 'message' => __('Rekod sejarah pekerjaan berjaya ditambah.')]);
             DB::commit();
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             DB::rollBack();
-            Log::error('Error storing timeline: '.$e->getMessage(), ['exception' => $e]);
+            Log::error('Error storing timeline: '.$exception->getMessage(), ['exception' => $exception]);
             session()->flash('toastr', ['type' => 'error', 'message' => __('Gagal menyimpan rekod sejarah pekerjaan.')]);
             // throw $e; // Optionally rethrow or handle more gracefully
         }
+
         $this->reset(['selectedCenter', 'selectedDepartment', 'selectedPosition', 'employeeTimelineInfo']);
     }
 

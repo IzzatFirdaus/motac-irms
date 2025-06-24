@@ -34,7 +34,7 @@ class LanguageController extends Controller
             $textDirection = $configuredLocales[$locale]['direction'] ?? (($locale === 'ar') ? 'rtl' : 'ltr'); // Default LTR if not specified, RTL for 'ar'
             Session::put('textDirection', $textDirection);
 
-            Log::info("Language swapped successfully to '{$locale}' with direction '{$textDirection}'.", [
+            Log::info(sprintf("Language swapped successfully to '%s' with direction '%s'.", $locale, $textDirection), [
                 'user_id' => Auth::id() ?? 'Guest',
                 'ip_address' => $request->ip(),
                 'new_locale' => $locale,
@@ -44,7 +44,7 @@ class LanguageController extends Controller
             return redirect()->to(URL::previous());
         }
 
-        Log::warning("Attempted to set unsupported locale: '{$locale}'.", [
+        Log::warning(sprintf("Attempted to set unsupported locale: '%s'.", $locale), [
             'user_id' => Auth::id() ?? 'Guest',
             'ip_address' => $request->ip(),
             'requested_locale' => $locale,

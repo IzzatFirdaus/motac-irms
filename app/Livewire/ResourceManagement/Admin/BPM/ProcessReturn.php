@@ -19,18 +19,25 @@ class ProcessReturn extends Component
     use AuthorizesRequests;
 
     public LoanTransaction $issueTransaction;
+
     public LoanApplication $loanApplication;
+
     public array $returnItems = [];
+
     public $returning_officer_id;
+
     public $transaction_date;
+
     public string $return_notes = '';
+
     public array $conditionOptions = [];
+
     public array $users = [];
 
     protected function rules(): array
     {
         return [
-            'returnItems' => ['required', 'array', function ($attribute, $value, $fail) {
+            'returnItems' => ['required', 'array', function ($attribute, $value, $fail): void {
                 $selectedCount = collect($value)->where('is_returning', true)->count();
                 if ($selectedCount === 0) {
                     $fail(__('Sila pilih sekurang-kurangnya satu item untuk dipulangkan.'));
@@ -75,7 +82,7 @@ class ProcessReturn extends Component
                 'is_returning' => true,
                 'loan_transaction_item_id' => $issuedItem->id,
                 // EDITED: Use the correct 'brand' and 'model' attributes instead of the non-existent 'name'
-                'equipment_name' => trim(($issuedItem->equipment->brand ?? '') . ' ' . ($issuedItem->equipment->model ?? '')) . ' (Tag: ' . ($issuedItem->equipment->tag_id ?? 'N/A') . ')',
+                'equipment_name' => trim(($issuedItem->equipment->brand ?? '').' '.($issuedItem->equipment->model ?? '')).' (Tag: '.($issuedItem->equipment->tag_id ?? 'N/A').')',
                 'condition_on_return' => Equipment::CONDITION_GOOD,
                 'return_item_notes' => '',
             ];
@@ -90,7 +97,7 @@ class ProcessReturn extends Component
 
         $itemsPayload = collect($validatedData['returnItems'])
             ->where('is_returning', true)
-            ->map(function ($item) {
+            ->map(function (array $item): array {
                 return [
                     'loan_transaction_item_id' => $item['loan_transaction_item_id'],
                     'condition_on_return' => $item['condition_on_return'],
@@ -100,6 +107,7 @@ class ProcessReturn extends Component
 
         if (empty($itemsPayload)) {
             $this->addError('returnItems', __('Tiada item dipilih. Sila tandakan sekurang-kurangnya satu item untuk dipulangkan.'));
+
             return;
         }
 
@@ -118,9 +126,9 @@ class ProcessReturn extends Component
             );
             session()->flash('success', 'Rekod pemulangan peralatan telah berjaya disimpan.');
             $this->redirectRoute('loan-applications.show', ['loan_application' => $this->loanApplication->id], navigate: true);
-        } catch (Throwable $e) {
-            Log::error('Error in ProcessReturn@submitReturn: ' . $e->getMessage(), ['exception' => $e]);
-            session()->flash('error', __('Gagal merekodkan pemulangan: ') . $e->getMessage());
+        } catch (Throwable $throwable) {
+            Log::error('Error in ProcessReturn@submitReturn: '.$throwable->getMessage(), ['exception' => $throwable]);
+            session()->flash('error', __('Gagal merekodkan pemulangan: ').$throwable->getMessage());
         }
     }
 

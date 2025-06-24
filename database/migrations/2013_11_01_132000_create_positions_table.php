@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('positions', function (Blueprint $table) {
+        Schema::create('positions', function (Blueprint $table): void {
             $table->id();
             $table->string('name')->unique(); // As per Revision 3 and existing migration
             $table->text('description')->nullable(); // As per Revision 3 and existing migration
@@ -41,17 +41,20 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('positions', function (Blueprint $table) {
+        Schema::table('positions', function (Blueprint $table): void {
             // Drop foreign keys first
             if (Schema::hasColumn('positions', 'grade_id')) {
                 $table->dropForeign(['grade_id']);
             }
+
             if (Schema::hasColumn('positions', 'created_by')) {
                 $table->dropForeign(['created_by']);
             }
+
             if (Schema::hasColumn('positions', 'updated_by')) {
                 $table->dropForeign(['updated_by']);
             }
+
             if (Schema::hasColumn('positions', 'deleted_by')) {
                 $table->dropForeign(['deleted_by']);
             }

@@ -26,9 +26,9 @@ class DepartmentSeeder extends Seeder // Changed from DepartmentsSeeder to Depar
         if (! $auditUserId) {
             $adminUserForAudit = User::factory()->create(['name' => 'Audit User (DeptSeeder)']);
             $auditUserId = $adminUserForAudit->id;
-            Log::info("Created a fallback audit user with ID {$auditUserId} for DepartmentSeeder.");
+            Log::info(sprintf('Created a fallback audit user with ID %d for DepartmentSeeder.', $auditUserId));
         } else {
-            Log::info("Using User ID {$auditUserId} for audit columns in DepartmentSeeder.");
+            Log::info(sprintf('Using User ID %s for audit columns in DepartmentSeeder.', $auditUserId));
         }
 
         $departments = [
@@ -88,13 +88,14 @@ class DepartmentSeeder extends Seeder // Changed from DepartmentsSeeder to Depar
                 $departmentData
             );
         }
+
         Log::info('Finished creating/updating specific MOTAC departments.');
 
         $targetDepartmentCount = count($departments);
         $currentDepartmentCount = Department::count();
 
         if ($currentDepartmentCount < $targetDepartmentCount) {
-            Log::warning("Current department count {$currentDepartmentCount} is less than defined list count {$targetDepartmentCount}. Some defined departments might not have been created due to issues (e.g. duplicate codes if logic was flawed).");
+            Log::warning(sprintf('Current department count %s is less than defined list count %d. Some defined departments might not have been created due to issues (e.g. duplicate codes if logic was flawed).', $currentDepartmentCount, $targetDepartmentCount));
         }
 
         Log::info('Department seeding complete (Revision 3 - Corrected).');

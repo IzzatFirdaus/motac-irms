@@ -92,13 +92,15 @@ class Create extends Component
         $this->loadDropdownOptions();
 
         // Set default selections
-        if (empty($this->title) && ! empty($this->titleOptions)) {
+        if (($this->title === '' || $this->title === '0') && $this->titleOptions !== []) {
             $this->title = array_key_first($this->titleOptions);
         }
-        if (empty($this->service_status) && ! empty($this->serviceStatusOptions)) {
+
+        if (($this->service_status === '' || $this->service_status === '0') && $this->serviceStatusOptions !== []) {
             $this->service_status = array_key_first($this->serviceStatusOptions);
         }
-        if (empty($this->appointment_type) && ! empty($this->appointmentTypeOptions)) {
+
+        if (($this->appointment_type === '' || $this->appointment_type === '0') && $this->appointmentTypeOptions !== []) {
             $this->appointment_type = array_key_first($this->appointmentTypeOptions);
         }
     }
@@ -204,15 +206,18 @@ class Create extends Component
         ]);
         // Re-apply default selections after reset
         $this->status = User::STATUS_ACTIVE;
-        if (! empty($this->titleOptions)) {
+        if ($this->titleOptions !== []) {
             $this->title = array_key_first($this->titleOptions);
         }
-        if (! empty($this->serviceStatusOptions)) {
+
+        if ($this->serviceStatusOptions !== []) {
             $this->service_status = array_key_first($this->serviceStatusOptions);
         }
-        if (! empty($this->appointmentTypeOptions)) {
+
+        if ($this->appointmentTypeOptions !== []) {
             $this->appointment_type = array_key_first($this->appointmentTypeOptions);
         }
+
         $this->selectedRoles = [];
     }
 }

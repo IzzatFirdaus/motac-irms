@@ -21,11 +21,11 @@ class EmailApplicationFactory extends EloquentFactory
 
         $serviceStatusKeys = method_exists(User::class, 'getServiceStatusOptions') ? array_keys(User::getServiceStatusOptions()) : [];
         $defaultServiceStatus = defined(User::class.'::SERVICE_STATUS_TETAP') ? User::SERVICE_STATUS_TETAP : '1';
-        $selectedServiceStatus = empty($serviceStatusKeys) ? $defaultServiceStatus : $this->faker->randomElement($serviceStatusKeys);
+        $selectedServiceStatus = $serviceStatusKeys === [] ? $defaultServiceStatus : $this->faker->randomElement($serviceStatusKeys);
 
         $appointmentTypeKeys = method_exists(User::class, 'getAppointmentTypeOptions') ? array_keys(User::getAppointmentTypeOptions()) : [];
         $defaultAppointmentType = defined(User::class.'::APPOINTMENT_TYPE_BAHARU') ? User::APPOINTMENT_TYPE_BAHARU : '1';
-        $selectedAppointmentType = empty($appointmentTypeKeys) ? $defaultAppointmentType : $this->faker->randomElement($appointmentTypeKeys);
+        $selectedAppointmentType = $appointmentTypeKeys === [] ? $defaultAppointmentType : $this->faker->randomElement($appointmentTypeKeys);
 
         $isCertified = $this->faker->boolean(80);
 
@@ -79,7 +79,7 @@ class EmailApplicationFactory extends EloquentFactory
 
     public function forGroupEmail(): static
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes): array {
             $msFaker = \Faker\Factory::create('ms_MY');
 
             return [
@@ -95,7 +95,7 @@ class EmailApplicationFactory extends EloquentFactory
 
     public function certified(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'cert_info_is_true' => true,
             'cert_data_usage_agreed' => true,
             'cert_email_responsibility_agreed' => true,
@@ -143,7 +143,7 @@ class EmailApplicationFactory extends EloquentFactory
 
     public function completed(): static
     {
-        return $this->processing()->state(function (array $attributes) {
+        return $this->processing()->state(function (array $attributes): array {
             $applicantUser = User::find($attributes['user_id']);
             $baseUserId = Str::slug($applicantUser?->name ?? ($this->faker->firstName.$this->faker->lastName), '');
 
@@ -168,7 +168,7 @@ class EmailApplicationFactory extends EloquentFactory
 
     public function rejected(): static
     {
-        return $this->pendingSupport()->state(function (array $attributes) {
+        return $this->pendingSupport()->state(function (array $attributes): array {
             $msFaker = \Faker\Factory::create('ms_MY');
 
             return [
@@ -180,7 +180,7 @@ class EmailApplicationFactory extends EloquentFactory
 
     public function provisionFailed(): static
     {
-        return $this->processing()->state(fn (array $attributes) => [
+        return $this->processing()->state(fn (array $attributes): array => [
             'status' => EmailApplication::STATUS_PROVISION_FAILED,
             'rejection_reason' => 'Automated provisioning failed during factory creation.',
         ]);
@@ -188,14 +188,14 @@ class EmailApplicationFactory extends EloquentFactory
 
     public function cancelled(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'status' => EmailApplication::STATUS_CANCELLED,
         ]);
     }
 
     public function deleted(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'deleted_at' => now(),
         ]);
     }

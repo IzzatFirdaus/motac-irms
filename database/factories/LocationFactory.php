@@ -42,19 +42,19 @@ class LocationFactory extends Factory
 
     public function active(): static
     {
-        return $this->state(fn (array $attributes) => ['is_active' => true]);
+        return $this->state(fn (array $attributes): array => ['is_active' => true]);
     }
 
     public function inactive(): static
     {
-        return $this->state(fn (array $attributes) => ['is_active' => false]);
+        return $this->state(fn (array $attributes): array => ['is_active' => false]);
     }
 
     public function deleted(): static
     {
         $deleter = User::orderBy('id')->first() ?? User::factory()->create(['name' => 'Deleter User Fallback (LocFactory)']);
 
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'deleted_at' => now(),
             'deleted_by' => $attributes['deleted_by'] ?? $deleter->id,
         ]);

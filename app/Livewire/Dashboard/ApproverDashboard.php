@@ -14,6 +14,7 @@ use Livewire\Component;
 class ApproverDashboard extends Component
 {
     public int $approved_last_30_days = 0;
+
     public int $rejected_last_30_days = 0;
 
     /**

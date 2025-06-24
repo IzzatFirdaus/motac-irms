@@ -70,7 +70,7 @@ class Index extends Component
         $this->resetInputFields(); // Reset before populating
         $this->editingRole = $role;
         $this->name = $role->name;
-        $this->selectedPermissions = $role->permissions->pluck('id')->map(fn ($id) => (string) $id)->toArray();
+        $this->selectedPermissions = $role->permissions->pluck('id')->map(fn ($id): string => (string) $id)->toArray();
         $this->isEditMode = true;
         $this->showModal = true;
         $this->dispatch('showRoleModal');
@@ -83,13 +83,14 @@ class Index extends Component
         $roleData = ['name' => $validatedData['name'], 'guard_name' => 'web'];
         $roleModelClass = config('permission.models.role');
 
-        if ($this->isEditMode && $this->editingRole && $this->editingRole->exists) {
+        if ($this->isEditMode && $this->editingRole instanceof \Spatie\Permission\Contracts\Role && $this->editingRole->exists) {
             if (in_array($this->editingRole->getOriginal('name'), $this->coreRoles) && $this->name !== $this->editingRole->getOriginal('name')) {
                 session()->flash('error', __('Peranan teras ":roleName" tidak boleh dinamakan semula.', ['roleName' => $this->editingRole->getOriginal('name')]));
                 $this->name = $this->editingRole->getOriginal('name');
 
                 return;
             }
+
             $this->editingRole->update($roleData);
             $this->editingRole->permissions()->sync($this->selectedPermissions);
             session()->flash('message', __('Peranan :name berjaya dikemaskini.', ['name' => $this->editingRole->name]));
@@ -99,6 +100,7 @@ class Index extends Component
             $role->permissions()->sync($this->selectedPermissions);
             session()->flash('message', __('Peranan :name berjaya dicipta.', ['name' => $role->name]));
         }
+
         $this->closeModal();
     }
 
@@ -122,11 +124,13 @@ class Index extends Component
 
                 return;
             }
+
             if ($role->users()->count() > 0) {
                 session()->flash('error', __('Peranan tidak boleh dipadam kerana ia telah ditugaskan kepada pengguna.'));
 
                 return;
             }
+
             $this->roleIdToDelete = $id;
             $this->roleNameToDelete = $role->name;
             $this->showDeleteConfirmationModal = true;
@@ -139,7 +143,7 @@ class Index extends Component
     public function deleteRole(): void
     {
         abort_unless(Auth::user()->can('manage_roles'), 403, __('Tindakan tidak dibenarkan.'));
-        if ($this->roleIdToDelete) {
+        if ($this->roleIdToDelete !== null && $this->roleIdToDelete !== 0) {
             $roleModelClass = config('permission.models.role');
             /** @var \Spatie\Permission\Contracts\Role $role */
             $role = $roleModelClass::findOrFail($this->roleIdToDelete);
@@ -152,9 +156,11 @@ class Index extends Component
 
                 return;
             }
+
             $role->delete();
             session()->flash('message', __('Peranan :name berjaya dipadam.', ['name' => $this->roleNameToDelete]));
         }
+
         $this->closeDeleteConfirmationModal();
     }
 
@@ -185,7 +191,7 @@ class Index extends Component
 
     protected function rules(): array
     {
-        $roleIdToIgnore = ($this->isEditMode && $this->editingRole && $this->editingRole->exists) ? $this->editingRole->id : null;
+        $roleIdToIgnore = ($this->isEditMode && $this->editingRole instanceof \Spatie\Permission\Contracts\Role && $this->editingRole->exists) ? $this->editingRole->id : null;
 
         return [
             'name' => [

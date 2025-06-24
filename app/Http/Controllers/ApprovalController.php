@@ -31,11 +31,11 @@ class ApprovalController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        Log::debug("ApprovalController@index: Fetching 'pending' approval tasks for officer ID {$user->id}."); //
+        Log::debug(sprintf("ApprovalController@index: Fetching 'pending' approval tasks for officer ID %d.", $user->id)); //
         $pendingApprovals = Approval::where('officer_id', $user->id)
             ->where('status', Approval::STATUS_PENDING)
             ->with([ //
-                'approvable' => function ($morphTo) { //
+                'approvable' => function ($morphTo): void { //
                     $morphTo->morphWith([ //
                         EmailApplication::class => ['user:id,name'], //
                         LoanApplication::class => ['user:id,name'], //
@@ -45,7 +45,7 @@ class ApprovalController extends Controller
             ])
             ->orderBy('created_at', 'asc')
             ->paginate(config('pagination.default_size', 15));
-        Log::debug("ApprovalController@index: Fetched {$pendingApprovals->total()} pending approval tasks."); //
+        Log::debug(sprintf('ApprovalController@index: Fetched %s pending approval tasks.', $pendingApprovals->total())); //
 
         return view('approvals.index', ['approvals' => $pendingApprovals]);
     }
@@ -54,11 +54,11 @@ class ApprovalController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        Log::debug("ApprovalController@showHistory: Fetching 'completed' approval tasks for officer ID {$user->id}."); //
+        Log::debug(sprintf("ApprovalController@showHistory: Fetching 'completed' approval tasks for officer ID %d.", $user->id)); //
         $completedApprovals = Approval::where('officer_id', $user->id)
             ->whereIn('status', [Approval::STATUS_APPROVED, Approval::STATUS_REJECTED])
             ->with([ //
-                'approvable' => function ($morphTo) { //
+                'approvable' => function ($morphTo): void { //
                     $morphTo->morphWith([ //
                         EmailApplication::class => ['user:id,name'], //
                         LoanApplication::class => ['user:id,name'], //
@@ -68,7 +68,7 @@ class ApprovalController extends Controller
             ])
             ->orderBy('updated_at', 'desc')
             ->paginate(config('pagination.default_size', 15));
-        Log::debug("ApprovalController@showHistory: Fetched {$completedApprovals->total()} completed approval tasks."); //
+        Log::debug(sprintf('ApprovalController@showHistory: Fetched %s completed approval tasks.', $completedApprovals->total())); //
 
         return view('approvals.history', ['approvals' => $completedApprovals]);
     }
@@ -77,18 +77,19 @@ class ApprovalController extends Controller
     {
         try {
             $this->authorize('view', $approval);
-        } catch (AuthorizationException $e) {
-            Log::warning("ApprovalController@show: Authorization failed for Approval ID {$approval->id}. User ID: ".Auth::id().". Error: {$e->getMessage()}"); //
+        } catch (AuthorizationException $authorizationException) {
+            Log::warning(sprintf('ApprovalController@show: Authorization failed for Approval ID %d. User ID: ', $approval->id).Auth::id().('. Error: '.$authorizationException->getMessage())); //
 
             return redirect()->route('approvals.index')->with('error', __('Anda tidak mempunyai kebenaran untuk melihat tugasan kelulusan ini.'));
         }
-        Log::debug("ApprovalController@show: Loading approval task ID {$approval->id}."); //
+
+        Log::debug(sprintf('ApprovalController@show: Loading approval task ID %d.', $approval->id)); //
 
         // Consolidate and ensure all necessary relations for the 'approvals.show' view are loaded.
         $approval->loadMissing([
             'officer:id,name,grade_id', // Officer assigned this task
             'officer.grade:id,name',    // Grade of the officer
-            'approvable' => function ($morphTo) {
+            'approvable' => function ($morphTo): void {
                 $morphTo->morphWith([
                     EmailApplication::class => [
                         'user:id,name,department_id,grade_id,position_id', // Applicant
@@ -116,7 +117,7 @@ class ApprovalController extends Controller
             },
         ]);
 
-        return view('approvals.show', compact('approval'));
+        return view('approvals.show', ['approval' => $approval]);
     }
 
     public function recordDecision(
@@ -127,7 +128,7 @@ class ApprovalController extends Controller
         $processingUser = $request->user();
         $validatedData = $request->validated();
 
-        Log::info("ApprovalController@recordDecision: User ID {$processingUser->id} recording decision for Approval Task ID {$approval->id}.", //
+        Log::info(sprintf('ApprovalController@recordDecision: User ID %d recording decision for Approval Task ID %d.', $processingUser->id, $approval->id), //
             ['decision' => $validatedData['decision'], 'has_comments' => ! empty($validatedData['comments'])]
         );
 
@@ -150,7 +151,8 @@ class ApprovalController extends Controller
                     ];
                 }
             }
-            Log::info("ApprovalController@recordDecision: Transformed item quantities for LoanApplication ID {$approval->approvable_id}.", ['transformed_quantities_count' => count($itemQuantitiesForService)]); //
+
+            Log::info(sprintf('ApprovalController@recordDecision: Transformed item quantities for LoanApplication ID %d.', $approval->approvable_id), ['transformed_quantities_count' => count($itemQuantitiesForService)]); //
         }
 
         try {
@@ -163,7 +165,7 @@ class ApprovalController extends Controller
             );
             $decisionText = $validatedData['decision'] === Approval::STATUS_APPROVED ? __('DILULUSKAN') : __('DITOLAK'); //
             $message = __('Keputusan untuk tugasan #:taskId telah berjaya direkodkan sebagai :decision.', ['taskId' => $approval->id, 'decision' => $decisionText]); //
-            Log::info("Decision '{$validatedData['decision']}' recorded for Approval ID {$approval->id} by User ID {$processingUser->id}."); //
+            Log::info(sprintf("Decision '%s' recorded for Approval ID %d by User ID %d.", $validatedData['decision'], $approval->id, $processingUser->id)); //
 
             // Redirect to the specific application's show page after decision
             if ($approval->approvable instanceof LoanApplication) { //
@@ -175,14 +177,13 @@ class ApprovalController extends Controller
             return redirect()->route('approvals.dashboard')->with('success', $message); // Fallback redirect
 
         } catch (AuthorizationException $e) { //
-            Log::error("ApprovalController@recordDecision: Authorization error for Approval ID {$approval->id}. User ID: {$processingUser->id}.", ['error' => $e->getMessage()]); //
+            Log::error(sprintf('ApprovalController@recordDecision: Authorization error for Approval ID %d. User ID: %d.', $approval->id, $processingUser->id), ['error' => $e->getMessage()]); //
 
             return redirect()->back()->withInput()->with('error', __('Anda tidak mempunyai kebenaran untuk membuat keputusan ini.')); //
         } catch (Throwable $e) { //
             // EDIT: Temporarily throw the exception during testing to see the real error message.
             // Remember to change this back to the redirect after debugging.
             throw $e;
-
             /*
             Log::error("ApprovalController@recordDecision: Error processing approval for ID {$approval->id}. User ID: {$processingUser->id}.", [ //
                 'error' => $e->getMessage(), //

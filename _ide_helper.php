@@ -1968,13 +1968,12 @@ namespace Illuminate\Support\Facades {
          * Re-route the Symfony command events to their Laravel counterparts.
          *
          * @internal 
-         * @return \App\Console\Kernel 
+         * @return \Illuminate\Foundation\Console\Kernel 
          * @static 
          */
         public static function rerouteSymfonyCommandEvents()
         {
-            //Method inherited from \Illuminate\Foundation\Console\Kernel 
-            /** @var \App\Console\Kernel $instance */
+            /** @var \Illuminate\Foundation\Console\Kernel $instance */
             return $instance->rerouteSymfonyCommandEvents();
         }
 
@@ -1988,8 +1987,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function handle($input, $output = null)
         {
-            //Method inherited from \Illuminate\Foundation\Console\Kernel 
-            /** @var \App\Console\Kernel $instance */
+            /** @var \Illuminate\Foundation\Console\Kernel $instance */
             return $instance->handle($input, $output);
         }
 
@@ -2003,8 +2001,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function terminate($input, $status)
         {
-            //Method inherited from \Illuminate\Foundation\Console\Kernel 
-            /** @var \App\Console\Kernel $instance */
+            /** @var \Illuminate\Foundation\Console\Kernel $instance */
             $instance->terminate($input, $status);
         }
 
@@ -2018,8 +2015,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function whenCommandLifecycleIsLongerThan($threshold, $handler)
         {
-            //Method inherited from \Illuminate\Foundation\Console\Kernel 
-            /** @var \App\Console\Kernel $instance */
+            /** @var \Illuminate\Foundation\Console\Kernel $instance */
             $instance->whenCommandLifecycleIsLongerThan($threshold, $handler);
         }
 
@@ -2031,8 +2027,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function commandStartedAt()
         {
-            //Method inherited from \Illuminate\Foundation\Console\Kernel 
-            /** @var \App\Console\Kernel $instance */
+            /** @var \Illuminate\Foundation\Console\Kernel $instance */
             return $instance->commandStartedAt();
         }
 
@@ -2044,8 +2039,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function resolveConsoleSchedule()
         {
-            //Method inherited from \Illuminate\Foundation\Console\Kernel 
-            /** @var \App\Console\Kernel $instance */
+            /** @var \Illuminate\Foundation\Console\Kernel $instance */
             return $instance->resolveConsoleSchedule();
         }
 
@@ -2059,8 +2053,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function command($signature, $callback)
         {
-            //Method inherited from \Illuminate\Foundation\Console\Kernel 
-            /** @var \App\Console\Kernel $instance */
+            /** @var \Illuminate\Foundation\Console\Kernel $instance */
             return $instance->command($signature, $callback);
         }
 
@@ -2073,8 +2066,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function registerCommand($command)
         {
-            //Method inherited from \Illuminate\Foundation\Console\Kernel 
-            /** @var \App\Console\Kernel $instance */
+            /** @var \Illuminate\Foundation\Console\Kernel $instance */
             $instance->registerCommand($command);
         }
 
@@ -2090,8 +2082,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function call($command, $parameters = [], $outputBuffer = null)
         {
-            //Method inherited from \Illuminate\Foundation\Console\Kernel 
-            /** @var \App\Console\Kernel $instance */
+            /** @var \Illuminate\Foundation\Console\Kernel $instance */
             return $instance->call($command, $parameters, $outputBuffer);
         }
 
@@ -2105,8 +2096,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function queue($command, $parameters = [])
         {
-            //Method inherited from \Illuminate\Foundation\Console\Kernel 
-            /** @var \App\Console\Kernel $instance */
+            /** @var \Illuminate\Foundation\Console\Kernel $instance */
             return $instance->queue($command, $parameters);
         }
 
@@ -2118,8 +2108,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function all()
         {
-            //Method inherited from \Illuminate\Foundation\Console\Kernel 
-            /** @var \App\Console\Kernel $instance */
+            /** @var \Illuminate\Foundation\Console\Kernel $instance */
             return $instance->all();
         }
 
@@ -2131,8 +2120,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function output()
         {
-            //Method inherited from \Illuminate\Foundation\Console\Kernel 
-            /** @var \App\Console\Kernel $instance */
+            /** @var \Illuminate\Foundation\Console\Kernel $instance */
             return $instance->output();
         }
 
@@ -2144,8 +2132,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function bootstrap()
         {
-            //Method inherited from \Illuminate\Foundation\Console\Kernel 
-            /** @var \App\Console\Kernel $instance */
+            /** @var \Illuminate\Foundation\Console\Kernel $instance */
             $instance->bootstrap();
         }
 
@@ -2157,8 +2144,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function bootstrapWithoutBootingProviders()
         {
-            //Method inherited from \Illuminate\Foundation\Console\Kernel 
-            /** @var \App\Console\Kernel $instance */
+            /** @var \Illuminate\Foundation\Console\Kernel $instance */
             $instance->bootstrapWithoutBootingProviders();
         }
 
@@ -2171,8 +2157,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function setArtisan($artisan)
         {
-            //Method inherited from \Illuminate\Foundation\Console\Kernel 
-            /** @var \App\Console\Kernel $instance */
+            /** @var \Illuminate\Foundation\Console\Kernel $instance */
             $instance->setArtisan($artisan);
         }
 
@@ -2180,13 +2165,12 @@ namespace Illuminate\Support\Facades {
          * Set the Artisan commands provided by the application.
          *
          * @param array $commands
-         * @return \App\Console\Kernel 
+         * @return \Illuminate\Foundation\Console\Kernel 
          * @static 
          */
         public static function addCommands($commands)
         {
-            //Method inherited from \Illuminate\Foundation\Console\Kernel 
-            /** @var \App\Console\Kernel $instance */
+            /** @var \Illuminate\Foundation\Console\Kernel $instance */
             return $instance->addCommands($commands);
         }
 
@@ -2194,13 +2178,12 @@ namespace Illuminate\Support\Facades {
          * Set the paths that should have their Artisan commands automatically discovered.
          *
          * @param array $paths
-         * @return \App\Console\Kernel 
+         * @return \Illuminate\Foundation\Console\Kernel 
          * @static 
          */
         public static function addCommandPaths($paths)
         {
-            //Method inherited from \Illuminate\Foundation\Console\Kernel 
-            /** @var \App\Console\Kernel $instance */
+            /** @var \Illuminate\Foundation\Console\Kernel $instance */
             return $instance->addCommandPaths($paths);
         }
 
@@ -2208,13 +2191,12 @@ namespace Illuminate\Support\Facades {
          * Set the paths that should have their Artisan "routes" automatically discovered.
          *
          * @param array $paths
-         * @return \App\Console\Kernel 
+         * @return \Illuminate\Foundation\Console\Kernel 
          * @static 
          */
         public static function addCommandRoutePaths($paths)
         {
-            //Method inherited from \Illuminate\Foundation\Console\Kernel 
-            /** @var \App\Console\Kernel $instance */
+            /** @var \Illuminate\Foundation\Console\Kernel $instance */
             return $instance->addCommandRoutePaths($paths);
         }
 
@@ -12918,89 +12900,6 @@ namespace Illuminate\Support\Facades {
         }
 
         /**
-         * Release a reserved job back onto the queue after (n) seconds.
-         *
-         * @param string $queue
-         * @param \Illuminate\Queue\Jobs\DatabaseJobRecord $job
-         * @param int $delay
-         * @return mixed 
-         * @static 
-         */
-        public static function release($queue, $job, $delay)
-        {
-            /** @var \Illuminate\Queue\DatabaseQueue $instance */
-            return $instance->release($queue, $job, $delay);
-        }
-
-        /**
-         * Delete a reserved job from the queue.
-         *
-         * @param string $queue
-         * @param string $id
-         * @return void 
-         * @throws \Throwable
-         * @static 
-         */
-        public static function deleteReserved($queue, $id)
-        {
-            /** @var \Illuminate\Queue\DatabaseQueue $instance */
-            $instance->deleteReserved($queue, $id);
-        }
-
-        /**
-         * Delete a reserved job from the reserved queue and release it.
-         *
-         * @param string $queue
-         * @param \Illuminate\Queue\Jobs\DatabaseJob $job
-         * @param int $delay
-         * @return void 
-         * @static 
-         */
-        public static function deleteAndRelease($queue, $job, $delay)
-        {
-            /** @var \Illuminate\Queue\DatabaseQueue $instance */
-            $instance->deleteAndRelease($queue, $job, $delay);
-        }
-
-        /**
-         * Delete all of the jobs from the queue.
-         *
-         * @param string $queue
-         * @return int 
-         * @static 
-         */
-        public static function clear($queue)
-        {
-            /** @var \Illuminate\Queue\DatabaseQueue $instance */
-            return $instance->clear($queue);
-        }
-
-        /**
-         * Get the queue or return the default.
-         *
-         * @param string|null $queue
-         * @return string 
-         * @static 
-         */
-        public static function getQueue($queue)
-        {
-            /** @var \Illuminate\Queue\DatabaseQueue $instance */
-            return $instance->getQueue($queue);
-        }
-
-        /**
-         * Get the underlying database instance.
-         *
-         * @return \Illuminate\Database\Connection 
-         * @static 
-         */
-        public static function getDatabase()
-        {
-            /** @var \Illuminate\Queue\DatabaseQueue $instance */
-            return $instance->getDatabase();
-        }
-
-        /**
          * Get the maximum number of attempts for an object-based queue handler.
          *
          * @param mixed $job
@@ -13010,7 +12909,7 @@ namespace Illuminate\Support\Facades {
         public static function getJobTries($job)
         {
             //Method inherited from \Illuminate\Queue\Queue 
-            /** @var \Illuminate\Queue\DatabaseQueue $instance */
+            /** @var \Illuminate\Queue\SyncQueue $instance */
             return $instance->getJobTries($job);
         }
 
@@ -13024,7 +12923,7 @@ namespace Illuminate\Support\Facades {
         public static function getJobBackoff($job)
         {
             //Method inherited from \Illuminate\Queue\Queue 
-            /** @var \Illuminate\Queue\DatabaseQueue $instance */
+            /** @var \Illuminate\Queue\SyncQueue $instance */
             return $instance->getJobBackoff($job);
         }
 
@@ -13038,7 +12937,7 @@ namespace Illuminate\Support\Facades {
         public static function getJobExpiration($job)
         {
             //Method inherited from \Illuminate\Queue\Queue 
-            /** @var \Illuminate\Queue\DatabaseQueue $instance */
+            /** @var \Illuminate\Queue\SyncQueue $instance */
             return $instance->getJobExpiration($job);
         }
 
@@ -13052,7 +12951,7 @@ namespace Illuminate\Support\Facades {
         public static function createPayloadUsing($callback)
         {
             //Method inherited from \Illuminate\Queue\Queue 
-            \Illuminate\Queue\DatabaseQueue::createPayloadUsing($callback);
+            \Illuminate\Queue\SyncQueue::createPayloadUsing($callback);
         }
 
         /**
@@ -13064,7 +12963,7 @@ namespace Illuminate\Support\Facades {
         public static function getContainer()
         {
             //Method inherited from \Illuminate\Queue\Queue 
-            /** @var \Illuminate\Queue\DatabaseQueue $instance */
+            /** @var \Illuminate\Queue\SyncQueue $instance */
             return $instance->getContainer();
         }
 
@@ -13078,7 +12977,7 @@ namespace Illuminate\Support\Facades {
         public static function setContainer($container)
         {
             //Method inherited from \Illuminate\Queue\Queue 
-            /** @var \Illuminate\Queue\DatabaseQueue $instance */
+            /** @var \Illuminate\Queue\SyncQueue $instance */
             $instance->setContainer($container);
         }
 
@@ -23200,6 +23099,385 @@ namespace Barryvdh\Debugbar\Facades {
             }
     }
 
+namespace Barryvdh\DomPDF\Facade {
+    /**
+     * 
+     *
+     * @method static BasePDF setBaseHost(string $baseHost)
+     * @method static BasePDF setBasePath(string $basePath)
+     * @method static BasePDF setCanvas(\Dompdf\Canvas $canvas)
+     * @method static BasePDF setCallbacks(array<string, mixed> $callbacks)
+     * @method static BasePDF setCss(\Dompdf\Css\Stylesheet $css)
+     * @method static BasePDF setDefaultView(string $defaultView, array<string, mixed> $options)
+     * @method static BasePDF setDom(\DOMDocument $dom)
+     * @method static BasePDF setFontMetrics(\Dompdf\FontMetrics $fontMetrics)
+     * @method static BasePDF setHttpContext(resource|array<string, mixed> $httpContext)
+     * @method static BasePDF setPaper(string|float[] $paper, string $orientation = 'portrait')
+     * @method static BasePDF setProtocol(string $protocol)
+     * @method static BasePDF setTree(\Dompdf\Frame\FrameTree $tree)
+     */
+    class Pdf {
+        /**
+         * Get the DomPDF instance
+         *
+         * @static 
+         */
+        public static function getDomPDF()
+        {
+            /** @var \Barryvdh\DomPDF\PDF $instance */
+            return $instance->getDomPDF();
+        }
+
+        /**
+         * Show or hide warnings
+         *
+         * @static 
+         */
+        public static function setWarnings($warnings)
+        {
+            /** @var \Barryvdh\DomPDF\PDF $instance */
+            return $instance->setWarnings($warnings);
+        }
+
+        /**
+         * Load a HTML string
+         *
+         * @param string|null $encoding Not used yet
+         * @static 
+         */
+        public static function loadHTML($string, $encoding = null)
+        {
+            /** @var \Barryvdh\DomPDF\PDF $instance */
+            return $instance->loadHTML($string, $encoding);
+        }
+
+        /**
+         * Load a HTML file
+         *
+         * @static 
+         */
+        public static function loadFile($file)
+        {
+            /** @var \Barryvdh\DomPDF\PDF $instance */
+            return $instance->loadFile($file);
+        }
+
+        /**
+         * Add metadata info
+         *
+         * @param array<string, string> $info
+         * @static 
+         */
+        public static function addInfo($info)
+        {
+            /** @var \Barryvdh\DomPDF\PDF $instance */
+            return $instance->addInfo($info);
+        }
+
+        /**
+         * Load a View and convert to HTML
+         *
+         * @param array<string, mixed> $data
+         * @param array<string, mixed> $mergeData
+         * @param string|null $encoding Not used yet
+         * @static 
+         */
+        public static function loadView($view, $data = [], $mergeData = [], $encoding = null)
+        {
+            /** @var \Barryvdh\DomPDF\PDF $instance */
+            return $instance->loadView($view, $data, $mergeData, $encoding);
+        }
+
+        /**
+         * Set/Change an option (or array of options) in Dompdf
+         *
+         * @param array<string, mixed>|string $attribute
+         * @param null|mixed $value
+         * @static 
+         */
+        public static function setOption($attribute, $value = null)
+        {
+            /** @var \Barryvdh\DomPDF\PDF $instance */
+            return $instance->setOption($attribute, $value);
+        }
+
+        /**
+         * Replace all the Options from DomPDF
+         *
+         * @param array<string, mixed> $options
+         * @static 
+         */
+        public static function setOptions($options, $mergeWithDefaults = false)
+        {
+            /** @var \Barryvdh\DomPDF\PDF $instance */
+            return $instance->setOptions($options, $mergeWithDefaults);
+        }
+
+        /**
+         * Output the PDF as a string.
+         * 
+         * The options parameter controls the output. Accepted options are:
+         * 
+         * 'compress' = > 1 or 0 - apply content stream compression, this is
+         *    on (1) by default
+         *
+         * @param array<string, int> $options
+         * @return string The rendered PDF as string
+         * @static 
+         */
+        public static function output($options = [])
+        {
+            /** @var \Barryvdh\DomPDF\PDF $instance */
+            return $instance->output($options);
+        }
+
+        /**
+         * Save the PDF to a file
+         *
+         * @static 
+         */
+        public static function save($filename, $disk = null)
+        {
+            /** @var \Barryvdh\DomPDF\PDF $instance */
+            return $instance->save($filename, $disk);
+        }
+
+        /**
+         * Make the PDF downloadable by the user
+         *
+         * @static 
+         */
+        public static function download($filename = 'document.pdf')
+        {
+            /** @var \Barryvdh\DomPDF\PDF $instance */
+            return $instance->download($filename);
+        }
+
+        /**
+         * Return a response with the PDF to show in the browser
+         *
+         * @static 
+         */
+        public static function stream($filename = 'document.pdf')
+        {
+            /** @var \Barryvdh\DomPDF\PDF $instance */
+            return $instance->stream($filename);
+        }
+
+        /**
+         * Render the PDF
+         *
+         * @static 
+         */
+        public static function render()
+        {
+            /** @var \Barryvdh\DomPDF\PDF $instance */
+            return $instance->render();
+        }
+
+        /**
+         * 
+         *
+         * @param array<string> $pc
+         * @static 
+         */
+        public static function setEncryption($password, $ownerpassword = '', $pc = [])
+        {
+            /** @var \Barryvdh\DomPDF\PDF $instance */
+            return $instance->setEncryption($password, $ownerpassword, $pc);
+        }
+
+            }
+    /**
+     * 
+     *
+     * @method static BasePDF setBaseHost(string $baseHost)
+     * @method static BasePDF setBasePath(string $basePath)
+     * @method static BasePDF setCanvas(\Dompdf\Canvas $canvas)
+     * @method static BasePDF setCallbacks(array<string, mixed> $callbacks)
+     * @method static BasePDF setCss(\Dompdf\Css\Stylesheet $css)
+     * @method static BasePDF setDefaultView(string $defaultView, array<string, mixed> $options)
+     * @method static BasePDF setDom(\DOMDocument $dom)
+     * @method static BasePDF setFontMetrics(\Dompdf\FontMetrics $fontMetrics)
+     * @method static BasePDF setHttpContext(resource|array<string, mixed> $httpContext)
+     * @method static BasePDF setPaper(string|float[] $paper, string $orientation = 'portrait')
+     * @method static BasePDF setProtocol(string $protocol)
+     * @method static BasePDF setTree(\Dompdf\Frame\FrameTree $tree)
+     */
+    class Pdf {
+        /**
+         * Get the DomPDF instance
+         *
+         * @static 
+         */
+        public static function getDomPDF()
+        {
+            /** @var \Barryvdh\DomPDF\PDF $instance */
+            return $instance->getDomPDF();
+        }
+
+        /**
+         * Show or hide warnings
+         *
+         * @static 
+         */
+        public static function setWarnings($warnings)
+        {
+            /** @var \Barryvdh\DomPDF\PDF $instance */
+            return $instance->setWarnings($warnings);
+        }
+
+        /**
+         * Load a HTML string
+         *
+         * @param string|null $encoding Not used yet
+         * @static 
+         */
+        public static function loadHTML($string, $encoding = null)
+        {
+            /** @var \Barryvdh\DomPDF\PDF $instance */
+            return $instance->loadHTML($string, $encoding);
+        }
+
+        /**
+         * Load a HTML file
+         *
+         * @static 
+         */
+        public static function loadFile($file)
+        {
+            /** @var \Barryvdh\DomPDF\PDF $instance */
+            return $instance->loadFile($file);
+        }
+
+        /**
+         * Add metadata info
+         *
+         * @param array<string, string> $info
+         * @static 
+         */
+        public static function addInfo($info)
+        {
+            /** @var \Barryvdh\DomPDF\PDF $instance */
+            return $instance->addInfo($info);
+        }
+
+        /**
+         * Load a View and convert to HTML
+         *
+         * @param array<string, mixed> $data
+         * @param array<string, mixed> $mergeData
+         * @param string|null $encoding Not used yet
+         * @static 
+         */
+        public static function loadView($view, $data = [], $mergeData = [], $encoding = null)
+        {
+            /** @var \Barryvdh\DomPDF\PDF $instance */
+            return $instance->loadView($view, $data, $mergeData, $encoding);
+        }
+
+        /**
+         * Set/Change an option (or array of options) in Dompdf
+         *
+         * @param array<string, mixed>|string $attribute
+         * @param null|mixed $value
+         * @static 
+         */
+        public static function setOption($attribute, $value = null)
+        {
+            /** @var \Barryvdh\DomPDF\PDF $instance */
+            return $instance->setOption($attribute, $value);
+        }
+
+        /**
+         * Replace all the Options from DomPDF
+         *
+         * @param array<string, mixed> $options
+         * @static 
+         */
+        public static function setOptions($options, $mergeWithDefaults = false)
+        {
+            /** @var \Barryvdh\DomPDF\PDF $instance */
+            return $instance->setOptions($options, $mergeWithDefaults);
+        }
+
+        /**
+         * Output the PDF as a string.
+         * 
+         * The options parameter controls the output. Accepted options are:
+         * 
+         * 'compress' = > 1 or 0 - apply content stream compression, this is
+         *    on (1) by default
+         *
+         * @param array<string, int> $options
+         * @return string The rendered PDF as string
+         * @static 
+         */
+        public static function output($options = [])
+        {
+            /** @var \Barryvdh\DomPDF\PDF $instance */
+            return $instance->output($options);
+        }
+
+        /**
+         * Save the PDF to a file
+         *
+         * @static 
+         */
+        public static function save($filename, $disk = null)
+        {
+            /** @var \Barryvdh\DomPDF\PDF $instance */
+            return $instance->save($filename, $disk);
+        }
+
+        /**
+         * Make the PDF downloadable by the user
+         *
+         * @static 
+         */
+        public static function download($filename = 'document.pdf')
+        {
+            /** @var \Barryvdh\DomPDF\PDF $instance */
+            return $instance->download($filename);
+        }
+
+        /**
+         * Return a response with the PDF to show in the browser
+         *
+         * @static 
+         */
+        public static function stream($filename = 'document.pdf')
+        {
+            /** @var \Barryvdh\DomPDF\PDF $instance */
+            return $instance->stream($filename);
+        }
+
+        /**
+         * Render the PDF
+         *
+         * @static 
+         */
+        public static function render()
+        {
+            /** @var \Barryvdh\DomPDF\PDF $instance */
+            return $instance->render();
+        }
+
+        /**
+         * 
+         *
+         * @param array<string> $pc
+         * @static 
+         */
+        public static function setEncryption($password, $ownerpassword = '', $pc = [])
+        {
+            /** @var \Barryvdh\DomPDF\PDF $instance */
+            return $instance->setEncryption($password, $ownerpassword, $pc);
+        }
+
+            }
+    }
+
 namespace Livewire {
     /**
      * 
@@ -29875,6 +30153,8 @@ namespace  {
     class Vite extends \Illuminate\Support\Facades\Vite {}
     class Helper extends \App\Helpers\Helpers {}
     class Debugbar extends \Barryvdh\Debugbar\Facades\Debugbar {}
+    class PDF extends \Barryvdh\DomPDF\Facade\Pdf {}
+    class Pdf extends \Barryvdh\DomPDF\Facade\Pdf {}
     class Livewire extends \Livewire\Livewire {}
     class Excel extends \Maatwebsite\Excel\Facades\Excel {}
     class LogViewer extends \Opcodes\LogViewer\Facades\LogViewer {}
@@ -29882,11 +30162,6 @@ namespace  {
 }
 
 
-namespace Facades\Livewire\Features\SupportFileUploads {
-    /**
-     * @mixin \Livewire\Features\SupportFileUploads\GenerateSignedUploadUrl     */
-    class GenerateSignedUploadUrl extends \Livewire\Features\SupportFileUploads\GenerateSignedUploadUrl {}
-}
 
 
 

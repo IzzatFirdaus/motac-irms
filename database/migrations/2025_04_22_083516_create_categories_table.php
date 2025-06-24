@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('categories', function (Blueprint $table) {
+        Schema::create('categories', function (Blueprint $table): void {
             $table->id();
             $table->string('name')->unique();
             $table->text('description')->nullable();
@@ -37,13 +37,15 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('categories', function (Blueprint $table) {
+        Schema::table('categories', function (Blueprint $table): void {
             if (Schema::hasColumn('categories', 'created_by')) {
                 $table->dropForeign(['created_by']);
             }
+
             if (Schema::hasColumn('categories', 'updated_by')) {
                 $table->dropForeign(['updated_by']);
             }
+
             if (Schema::hasColumn('categories', 'deleted_by')) {
                 $table->dropForeign(['deleted_by']);
             }

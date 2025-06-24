@@ -10,7 +10,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->string(column: 'title')->nullable()->after('name')->comment('e.g., Encik, Puan, Dr.');
             $table->string('identification_number')->unique()->nullable()->after('title')->comment('NRIC');
             $table->string('passport_number')->unique()->nullable()->after('identification_number');
@@ -29,12 +29,13 @@ return new class extends Migration
                 User::SERVICE_STATUS_PELAJAR_INDUSTRI,
                 User::SERVICE_STATUS_OTHER_AGENCY,
             ];
-            $serviceStatusEnumValues = array_unique(array_filter($serviceStatusEnumValues, fn ($value) => ! is_null($value)));
+            $serviceStatusEnumValues = array_unique(array_filter($serviceStatusEnumValues, fn ($value): bool => ! is_null($value)));
 
-            if (empty($serviceStatusEnumValues)) {
+            if ($serviceStatusEnumValues === []) {
                 Log::error('Service status enum values could not be determined from User model constants. Using hardcoded fallback in migration. PLEASE CHECK User.php CONSTANTS.');
                 $serviceStatusEnumValues = ['1', '2', '3', '4'];
             }
+
             $table->enum('service_status', $serviceStatusEnumValues)->nullable()->after('user_id_assigned')->comment('Taraf Perkhidmatan. Keys defined in User model.');
 
             $appointmentTypeEnumValues = [
@@ -42,11 +43,12 @@ return new class extends Migration
                 User::APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN,
                 User::APPOINTMENT_TYPE_LAIN_LAIN,
             ];
-            $appointmentTypeEnumValues = array_unique(array_filter($appointmentTypeEnumValues, fn ($value) => ! is_null($value)));
-            if (empty($appointmentTypeEnumValues)) {
+            $appointmentTypeEnumValues = array_unique(array_filter($appointmentTypeEnumValues, fn ($value): bool => ! is_null($value)));
+            if ($appointmentTypeEnumValues === []) {
                 Log::error('Appointment type enum values could not be determined from User model constants. Using hardcoded fallback in migration. PLEASE CHECK User.php CONSTANTS.');
                 $appointmentTypeEnumValues = ['1', '2', '3'];
             }
+
             $table->enum('appointment_type', $appointmentTypeEnumValues)->nullable()->after('service_status')->comment('Pelantikan. Keys defined in User model.');
 
             $table->string('previous_department_name')->nullable()->after('appointment_type');
@@ -58,13 +60,14 @@ return new class extends Migration
                 User::STATUS_INACTIVE,
                 User::STATUS_PENDING, // Added the pending status
             ];
-            $statusEnumValues = array_unique(array_filter($statusEnumValues, fn ($value) => ! is_null($value)));
+            $statusEnumValues = array_unique(array_filter($statusEnumValues, fn ($value): bool => ! is_null($value)));
 
-            if (empty($statusEnumValues) || count($statusEnumValues) < 2) { // Ensure at least active/inactive if constants fail
+            if (count($statusEnumValues) < 2) { // Ensure at least active/inactive if constants fail
                 Log::error('Status enum values could not be determined reliably from User model constants. Using hardcoded fallback in migration. PLEASE CHECK User.php CONSTANTS.');
                 // Provide a sensible fallback that includes 'pending'
                 $statusEnumValues = ['active', 'inactive', 'pending'];
             }
+
             // Default status should be one of the defined enum values.
             $defaultUserStatus = defined(User::class.'::STATUS_ACTIVE') ? User::STATUS_ACTIVE : $statusEnumValues[0];
 
@@ -98,7 +101,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             // Drop foreign keys first to avoid errors when dropping columns
             $foreignKeysToDrop = [
                 'department_id', 'position_id', 'grade_id',
@@ -129,7 +132,7 @@ return new class extends Migration
                             $table->dropForeign($foreignKeyName);
                         }
                     } catch (\Exception $e) {
-                        Log::warning("Could not drop foreign key for {$fkColumn} on users table: ".$e->getMessage());
+                        Log::warning(sprintf('Could not drop foreign key for %s on users table: ', $fkColumn).$e->getMessage());
                     }
                 }
             }

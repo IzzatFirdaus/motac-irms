@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use RuntimeException;
-use Throwable;
 
 /**
  * Service class for managing Loan Transactions (issuance and returns of equipment).
@@ -25,6 +24,7 @@ final class LoanTransactionService
     private const LOG_AREA = 'LoanTransactionService: ';
 
     private EquipmentService $equipmentService;
+
     private NotificationService $notificationService;
 
     public function __construct(EquipmentService $equipmentService, NotificationService $notificationService)
@@ -37,11 +37,12 @@ final class LoanTransactionService
      * Processes a new equipment issuance transaction.
      * This is the public entry point for creating an issue transaction.
      *
-     * @param LoanApplication $loanApplication The parent loan application.
-     * @param array $itemsPayload The array of items being issued.
-     * @param User $issuingOfficer The officer performing the issuance.
-     * @param array $transactionDetails Additional details like transaction date and notes.
+     * @param  LoanApplication  $loanApplication  The parent loan application.
+     * @param  array  $itemsPayload  The array of items being issued.
+     * @param  User  $issuingOfficer  The officer performing the issuance.
+     * @param  array  $transactionDetails  Additional details like transaction date and notes.
      * @return LoanTransaction The created loan transaction.
+     *
      * @throws RuntimeException|InvalidArgumentException
      */
     public function processNewIssue(
@@ -50,15 +51,16 @@ final class LoanTransactionService
         User $issuingOfficer,
         array $transactionDetails
     ): LoanTransaction {
-        Log::info(self::LOG_AREA."Processing new issue for LA ID: {$loanApplication->id} by User ID: {$issuingOfficer->id}", [
+        Log::info(self::LOG_AREA.sprintf('Processing new issue for LA ID: %d by User ID: %d', $loanApplication->id, $issuingOfficer->id), [
             'item_count' => count($itemsPayload),
             'details_keys' => array_keys($transactionDetails),
         ]);
 
-        $itemDataForTransaction = array_map(function ($requestedItem) {
+        $itemDataForTransaction = array_map(function ($requestedItem): array {
             if (empty($requestedItem['equipment_id']) || empty($requestedItem['loan_application_item_id'])) {
                 throw new InvalidArgumentException('Butiran item pengeluaran tidak lengkap.');
             }
+
             return [
                 'equipment_id' => (int) $requestedItem['equipment_id'],
                 'loan_application_item_id' => (int) $requestedItem['loan_application_item_id'],
@@ -78,11 +80,12 @@ final class LoanTransactionService
     /**
      * Processes the return of equipment items against an original issue transaction.
      *
-     * @param LoanTransaction $issueTransaction The original transaction where items were issued.
-     * @param array $itemsPayload The array of items being returned.
-     * @param User $returnAcceptingOfficer The officer processing the return.
-     * @param array $transactionDetails Additional details like return date and notes.
+     * @param  LoanTransaction  $issueTransaction  The original transaction where items were issued.
+     * @param  array  $itemsPayload  The array of items being returned.
+     * @param  User  $returnAcceptingOfficer  The officer processing the return.
+     * @param  array  $transactionDetails  Additional details like return date and notes.
      * @return LoanTransaction The created return transaction.
+     *
      * @throws RuntimeException|InvalidArgumentException
      */
     public function processExistingReturn(
@@ -92,16 +95,16 @@ final class LoanTransactionService
         array $transactionDetails
     ): LoanTransaction {
         $loanApplication = $issueTransaction->loanApplication;
-        Log::info(self::LOG_AREA."Processing return for LA ID: {$loanApplication->id} against Issue Tx ID: {$issueTransaction->id}", [
+        Log::info(self::LOG_AREA.sprintf('Processing return for LA ID: %d against Issue Tx ID: %d', $loanApplication->id, $issueTransaction->id), [
             'item_count' => count($itemsPayload),
         ]);
 
-        $itemDataForTransaction = array_map(function ($returnedItem) use ($issueTransaction) {
+        $itemDataForTransaction = array_map(function ($returnedItem) use ($issueTransaction): array {
             $originalIssuedItem = LoanTransactionItem::where('loan_transaction_id', $issueTransaction->id)
                 ->find((int) ($returnedItem['loan_transaction_item_id'] ?? 0));
 
-            if (!$originalIssuedItem) {
-                throw new InvalidArgumentException("Item transaksi asal dengan ID {$returnedItem['loan_transaction_item_id']} tidak sah untuk transaksi ini.");
+            if (! $originalIssuedItem) {
+                throw new InvalidArgumentException(sprintf('Item transaksi asal dengan ID %s tidak sah untuk transaksi ini.', $returnedItem['loan_transaction_item_id']));
             }
 
             return [
@@ -134,11 +137,11 @@ final class LoanTransactionService
         array $itemData,
         array $extraDetails = []
     ): LoanTransaction {
-        if (empty($itemData)) {
+        if ($itemData === []) {
             throw new InvalidArgumentException('Transaction must have at least one item.');
         }
 
-        return DB::transaction(function () use ($loanApplication, $type, $actingOfficer, $itemData, $extraDetails) {
+        return DB::transaction(function () use ($loanApplication, $type, $actingOfficer, $itemData, $extraDetails): \App\Models\LoanTransaction {
             $transaction = $this->createTransactionRecord($loanApplication, $type, $actingOfficer, $extraDetails);
 
             foreach ($itemData as $item) {
@@ -191,7 +194,7 @@ final class LoanTransactionService
             ];
         } else {
             // This is a safeguard against unexpected transaction types.
-            throw new InvalidArgumentException("Invalid transaction type specified: {$type}");
+            throw new InvalidArgumentException('Invalid transaction type specified: '.$type);
         }
 
         // Merge the base and specific details to create the final data array
@@ -216,14 +219,14 @@ final class LoanTransactionService
 
         if ($type === LoanTransaction::TYPE_ISSUE) {
             $txItemData['status'] = LoanTransactionItem::STATUS_ITEM_ISSUED;
-            $this->equipmentService->changeOperationalStatus($equipment, Equipment::STATUS_ON_LOAN, $actingOfficer, "Issued via Tx#{$transaction->id}");
+            $this->equipmentService->changeOperationalStatus($equipment, Equipment::STATUS_ON_LOAN, $actingOfficer, 'Issued via Tx#'.$transaction->id);
         } else { // TYPE_RETURN
             $conditionOnReturn = $item['condition_on_return'];
             $txItemData['status'] = $this->determineItemStatusOnReturn($conditionOnReturn);
             $txItemData['condition_on_return'] = $conditionOnReturn;
 
             $newEquipmentOpStatus = $this->determineEquipmentStatusOnReturn($conditionOnReturn);
-            $this->equipmentService->changeOperationalStatus($equipment, $newEquipmentOpStatus, $actingOfficer, "Returned via Tx#{$transaction->id}");
+            $this->equipmentService->changeOperationalStatus($equipment, $newEquipmentOpStatus, $actingOfficer, 'Returned via Tx#'.$transaction->id);
         }
 
         $transactionItem = $transaction->loanTransactionItems()->create($txItemData);
@@ -284,13 +287,26 @@ final class LoanTransactionService
 
         foreach ($itemData as $item) {
             $condition = $item['condition_on_return'] ?? Equipment::CONDITION_GOOD;
-            if ($condition === Equipment::CONDITION_LOST) $hasLost = true;
-            if (in_array($condition, [Equipment::CONDITION_MINOR_DAMAGE, Equipment::CONDITION_MAJOR_DAMAGE, Equipment::CONDITION_UNSERVICEABLE])) $hasDamage = true;
+            if ($condition === Equipment::CONDITION_LOST) {
+                $hasLost = true;
+            }
+
+            if (in_array($condition, [Equipment::CONDITION_MINOR_DAMAGE, Equipment::CONDITION_MAJOR_DAMAGE, Equipment::CONDITION_UNSERVICEABLE])) {
+                $hasDamage = true;
+            }
         }
 
-        if ($hasLost && $hasDamage) return LoanTransaction::STATUS_RETURNED_WITH_DAMAGE_AND_LOSS;
-        if ($hasLost) return LoanTransaction::STATUS_RETURNED_WITH_LOSS;
-        if ($hasDamage) return LoanTransaction::STATUS_RETURNED_DAMAGED;
+        if ($hasLost && $hasDamage) {
+            return LoanTransaction::STATUS_RETURNED_WITH_DAMAGE_AND_LOSS;
+        }
+
+        if ($hasLost) {
+            return LoanTransaction::STATUS_RETURNED_WITH_LOSS;
+        }
+
+        if ($hasDamage) {
+            return LoanTransaction::STATUS_RETURNED_DAMAGED;
+        }
 
         return LoanTransaction::STATUS_RETURNED_GOOD;
     }

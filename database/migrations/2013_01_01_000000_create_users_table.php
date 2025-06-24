@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('users', function (Blueprint $table): void {
             $table->id();
             $table->string('name'); // Standard Laravel name field (can be username or simple display)
             $table->string('email')->unique();

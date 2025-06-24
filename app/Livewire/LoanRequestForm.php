@@ -73,7 +73,7 @@ class LoanRequestForm extends Component
     {
         $isFinalSubmission = $this->applicant_confirmation;
 
-        $rules = [
+        return [
             'applicant_mobile_number' => ['required', 'string', 'regex:/^[0-9\-\+\s\(\)]*$/', 'min:9', 'max:20'],
             'purpose' => ['required', 'string', 'min:10', 'max:1000'],
             'location' => ['required', 'string', 'min:5', 'max:255'],
@@ -98,11 +98,11 @@ class LoanRequestForm extends Component
 
             // These rules remain: if manual_responsible_officer_name IS provided, then these become required.
             'manual_responsible_officer_jawatan_gred' => [
-                Rule::requiredIf(fn () => ! $this->isApplicantResponsible && ! empty($this->manual_responsible_officer_name) && $isFinalSubmission),
+                Rule::requiredIf(fn (): bool => ! $this->isApplicantResponsible && ($this->manual_responsible_officer_name !== null && $this->manual_responsible_officer_name !== '' && $this->manual_responsible_officer_name !== '0') && $isFinalSubmission),
                 'nullable', 'string', 'max:255',
             ],
             'manual_responsible_officer_mobile' => [
-                Rule::requiredIf(fn () => ! $this->isApplicantResponsible && ! empty($this->manual_responsible_officer_name) && $isFinalSubmission),
+                Rule::requiredIf(fn (): bool => ! $this->isApplicantResponsible && ($this->manual_responsible_officer_name !== null && $this->manual_responsible_officer_name !== '' && $this->manual_responsible_officer_name !== '0') && $isFinalSubmission),
                 'nullable', 'string', 'regex:/^[0-9\-\+\s\(\)]*$/', 'min:9', 'max:20',
             ],
 
@@ -112,8 +112,6 @@ class LoanRequestForm extends Component
             'items.*.notes' => ['nullable', 'string', 'max:500'],
             'applicant_confirmation' => $isFinalSubmission ? ['accepted'] : ['boolean'],
         ];
-
-        return $rules;
     }
 
     public function boot(LoanApplicationService $loanApplicationService): void
@@ -136,7 +134,7 @@ class LoanRequestForm extends Component
         $this->systemUsersForResponsibleOfficer = collect(['' => __('- Pilih Pegawai (dari senarai sistem) -')])
             ->union(User::where('id', '!=', $user->id)->orderBy('name')->pluck('name', 'id'));
 
-        if ($loanApplicationId) {
+        if ($loanApplicationId !== null && $loanApplicationId !== 0) {
             $loanApplication = LoanApplication::with([
                 'user', 'responsibleOfficer', 'supportingOfficer', 'loanApplicationItems',
             ])->findOrFail($loanApplicationId);
@@ -161,6 +159,7 @@ class LoanRequestForm extends Component
             $this->manual_responsible_officer_jawatan_gred = '';
             $this->manual_responsible_officer_mobile = '';
         }
+
         $this->resetValidation(['responsible_officer_id', 'manual_responsible_officer_name', 'manual_responsible_officer_jawatan_gred', 'manual_responsible_officer_mobile']);
     }
 
@@ -196,7 +195,7 @@ class LoanRequestForm extends Component
         DB::beginTransaction();
         try {
             $message = '';
-            if ($this->isEdit && $this->loanApplication && $this->loanApplication->exists) {
+            if ($this->isEdit && $this->loanApplication instanceof \App\Models\LoanApplication && $this->loanApplication->exists) {
                 $this->authorize('update', $this->loanApplication);
                 $this->loanApplication = $this->loanApplicationService->updateApplication(
                     $this->loanApplication,
@@ -233,20 +232,20 @@ class LoanRequestForm extends Component
 
         } catch (ValidationException $e) {
             DB::rollBack();
-            Log::warning("LoanRequestForm: Validation failed for User ID: {$currentUser->id}", ['errors' => $e->errors()]);
+            Log::warning('LoanRequestForm: Validation failed for User ID: '.$currentUser->id, ['errors' => $e->errors()]);
             $this->dispatch('toastr', type: 'error', message: __('Sila perbetulkan ralat pada borang.'));
 
             return null;
         } catch (AuthorizationException $e) {
             DB::rollBack();
-            Log::error("LoanRequestForm: Authorization failed for User ID: {$currentUser->id}", ['message' => $e->getMessage()]);
+            Log::error('LoanRequestForm: Authorization failed for User ID: '.$currentUser->id, ['message' => $e->getMessage()]);
             session()->flash('error', __('Anda tidak dibenarkan untuk melakukan tindakan ini.'));
             $this->dispatch('toastr', type: 'error', message: __('Anda tidak dibenarkan untuk melakukan tindakan ini.'));
 
             return null;
         } catch (Throwable $e) {
             DB::rollBack();
-            Log::error("LoanRequestForm: Error submitting application for User ID: {$currentUser->id}", ['exception' => $e]);
+            Log::error('LoanRequestForm: Error submitting application for User ID: '.$currentUser->id, ['exception' => $e]);
             session()->flash('error', __('Berlaku ralat sistem semasa memproses permohonan anda: ').$e->getMessage());
             $this->dispatch('toastr', type: 'error', message: __('Ralat sistem. Sila cuba lagi atau hubungi pentadbir.'));
 
@@ -301,7 +300,7 @@ class LoanRequestForm extends Component
 
     private function fillFormFromModel(): void
     {
-        if (! $this->loanApplication) {
+        if (! $this->loanApplication instanceof \App\Models\LoanApplication) {
             return;
         }
 
@@ -323,7 +322,7 @@ class LoanRequestForm extends Component
             $this->responsible_officer_id = $this->loanApplication->responsible_officer_id;
         }
 
-        $this->items = $this->loanApplication->loanApplicationItems->map(function ($item) {
+        $this->items = $this->loanApplication->loanApplicationItems->map(function ($item): array {
             return [
                 'id' => $item->id,
                 'equipment_type' => $item->equipment_type,
@@ -340,7 +339,7 @@ class LoanRequestForm extends Component
         /** @var User $currentUser */
         $currentUser = Auth::user();
 
-        if ($this->isEdit && $this->loanApplication &&
+        if ($this->isEdit && $this->loanApplication instanceof \App\Models\LoanApplication &&
             $this->loanApplication->status !== LoanApplication::STATUS_DRAFT &&
             ! $currentUser->hasRole('Admin')) {
             return $this->loanApplication->status;

@@ -25,7 +25,7 @@ final class ApplicationApproved extends Notification implements ShouldQueue
     {
         $this->application = $application;
         $this->application->loadMissing('user');
-        Log::info('ApplicationApproved notification created for '.$application::class." ID: {$application->id}.");
+        Log::info('ApplicationApproved notification created for '.$application::class.sprintf(' ID: %d.', $application->id));
     }
 
     public function getApplication(): EmailApplication|LoanApplication
@@ -48,6 +48,7 @@ final class ApplicationApproved extends Notification implements ShouldQueue
         if ($date instanceof Carbon) {
             return $date->format($defaultFormat);
         }
+
         if (is_string($date)) {
             try {
                 return Carbon::parse($date)->format($defaultFormat);
@@ -168,7 +169,7 @@ final class ApplicationApproved extends Notification implements ShouldQueue
                     ]);
                     $applicationUrl = '#'; // Fallback
                 }
-            } elseif ($routeName) { // Log if route name was set but not found
+            } elseif ($routeName !== '' && $routeName !== '0') { // Log if route name was set but not found
                 Log::warning('Route not found for in-app ApplicationApproved notification.', [
                     'application_id' => $applicationId,
                     'application_type' => $applicationMorphClass,
@@ -176,6 +177,7 @@ final class ApplicationApproved extends Notification implements ShouldQueue
                 ]);
             }
         }
+
         $data['url'] = ($applicationUrl !== '#' && filter_var($applicationUrl, FILTER_VALIDATE_URL)) ? $applicationUrl : null;
 
         return $data;

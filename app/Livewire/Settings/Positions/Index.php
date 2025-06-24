@@ -74,6 +74,7 @@ class Index extends Component
         } else {
             $this->sortDirection = 'asc';
         }
+
         $this->sortField = $field;
     }
 
@@ -83,7 +84,7 @@ class Index extends Component
         $query = Position::with('grade:id,name') // Eager load grade for display
             ->search($this->search); // Assumes a 'search' scope on Position model
 
-        if ($this->sortField) {
+        if ($this->sortField !== '' && $this->sortField !== '0') {
             $query->orderBy($this->sortField, $this->sortDirection);
         } else {
             $query->orderBy('name', 'asc'); // Default sort
@@ -129,13 +130,14 @@ class Index extends Component
         // E.g., if ($this->isEditMode) { $this->positionService->updatePosition($this->editingPosition, $data); }
         // else { $this->positionService->createPosition($data); }
 
-        if ($this->isEditMode && $this->editingPosition && $this->editingPosition->exists) {
+        if ($this->isEditMode && $this->editingPosition instanceof \App\Models\Position && $this->editingPosition->exists) {
             $this->editingPosition->update($data);
             session()->flash('message', __('Jawatan :name berjaya dikemaskini.', ['name' => $this->editingPosition->name]));
         } else {
             $newPosition = Position::create($data);
             session()->flash('message', __('Jawatan :name berjaya dicipta.', ['name' => $newPosition->name]));
         }
+
         $this->closeModal();
     }
 
@@ -158,6 +160,7 @@ class Index extends Component
 
                 return;
             }
+
             $this->positionIdToDelete = $id;
             $this->positionNameToDelete = $position->name;
             $this->showDeleteConfirmationModal = true;
@@ -168,7 +171,7 @@ class Index extends Component
 
     public function deletePosition(): void
     {
-        if ($this->positionIdToDelete) {
+        if ($this->positionIdToDelete !== null && $this->positionIdToDelete !== 0) {
             $position = Position::findOrFail($this->positionIdToDelete);
             $this->authorize('delete', $position);
 
@@ -182,9 +185,11 @@ class Index extends Component
 
                 return;
             }
+
             $position->delete();
             session()->flash('message', __('Jawatan :name berjaya dipadam.', ['name' => $this->positionNameToDelete]));
         }
+
         $this->closeDeleteConfirmationModal();
     }
 
@@ -206,7 +211,7 @@ class Index extends Component
 
     protected function rules(): array
     {
-        $positionIdToIgnore = ($this->isEditMode && $this->editingPosition && $this->editingPosition->id) ? $this->editingPosition->id : null;
+        $positionIdToIgnore = ($this->isEditMode && $this->editingPosition instanceof \App\Models\Position && $this->editingPosition->id) ? $this->editingPosition->id : null;
 
         return [
             'name' => ['required', 'string', 'max:255', ValidationRule::unique('positions', 'name')->ignore($positionIdToIgnore)],

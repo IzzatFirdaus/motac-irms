@@ -71,12 +71,12 @@ final class LoanApplicationReturned extends Mailable implements ShouldQueue
         if ($recipientEmail) {
             $toAddresses[] = new Address($recipientEmail, $applicantName);
             Log::info(
-                "LoanApplicationReturned Mailable: Recipient identified for Loan Application ID: {$applicationId}.",
+                sprintf('LoanApplicationReturned Mailable: Recipient identified for Loan Application ID: %s.', $applicationId),
                 ['recipient_email' => $recipientEmail]
             );
         } else {
             Log::error(
-                "LoanApplicationReturned Mailable: Recipient email not found for Loan Application ID: {$applicationId}. Notification cannot be sent.",
+                sprintf('LoanApplicationReturned Mailable: Recipient email not found for Loan Application ID: %s. Notification cannot be sent.', $applicationId),
                 [
                     'loan_application_id' => $applicationId,
                     'applicant_user_id' => $this->loanApplication->user_id ?? 'N/A',
@@ -84,12 +84,12 @@ final class LoanApplicationReturned extends Mailable implements ShouldQueue
             );
         }
 
-        $subject = "Notifikasi {$equipmentDetailsForSubject} Telah Dipulangkan (Permohonan #{$applicationId} - {$applicantName})";
+        $subject = sprintf('Notifikasi %s Telah Dipulangkan (Permohonan #%s - %s)', $equipmentDetailsForSubject, $applicationId, $applicantName);
 
         Log::info('LoanApplicationReturned Mailable: Preparing email envelope.', [
             'loan_application_id' => $applicationId,
             'subject' => $subject,
-            'to_recipients' => count($toAddresses) > 0 ? $toAddresses[0]->address : 'N/A',
+            'to_recipients' => $toAddresses !== [] ? $toAddresses[0]->address : 'N/A',
         ]);
 
         return new Envelope(

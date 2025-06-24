@@ -78,7 +78,7 @@ class NotificationFactory extends Factory
      */
     public function unread(): static
     {
-        return $this->state(fn (array $attributes) => ['read_at' => null]);
+        return $this->state(fn (array $attributes): array => ['read_at' => null]);
     }
 
     /**
@@ -86,6 +86,6 @@ class NotificationFactory extends Factory
      */
     public function read(): static
     {
-        return $this->state(fn (array $attributes) => ['read_at' => now()]);
+        return $this->state(fn (array $attributes): array => ['read_at' => now()]);
     }
 }

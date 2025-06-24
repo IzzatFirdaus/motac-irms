@@ -43,7 +43,7 @@ class OrphanedApplicationRequiresAttentionNotification extends Notification impl
             $this->applicationTypeDisplay = __('Permohonan Sistem');
         }
 
-        Log::info('OrphanedApplicationRequiresAttentionNotification created for '.get_class($application)." ID: {$application->id}");
+        Log::info('OrphanedApplicationRequiresAttentionNotification created for '.get_class($application).(' ID: '.$application->id));
     }
 
     /**
@@ -71,6 +71,7 @@ class OrphanedApplicationRequiresAttentionNotification extends Notification impl
         if ($this->application instanceof LoanApplication && $this->application->id) {
             $viewUrl = route('loan-applications.show', $this->application->id);
         }
+
         // Add route for other application types if necessary
 
         return (new MailMessage)
@@ -82,7 +83,7 @@ class OrphanedApplicationRequiresAttentionNotification extends Notification impl
                 'applicantName' => $applicantName,
             ]))
             ->line(__('Sebab: :reason', ['reason' => $this->reason]))
-            ->line(__('Status semasa permohonan ialah \':status\'. Sila semak permohonan ini dan tetapkan pegawai pelulus yang bersesuaian dengan kadar segera untuk mengelakkan kelewatan proses.', ['status' => $this->application->status_label ?? $this->application->status]))
+            ->line(__("Status semasa permohonan ialah ':status'. Sila semak permohonan ini dan tetapkan pegawai pelulus yang bersesuaian dengan kadar segera untuk mengelakkan kelewatan proses.", ['status' => $this->application->status_label ?? $this->application->status]))
             ->action(__('Lihat Permohonan'), $viewUrl)
             ->line(__('Ini adalah notifikasi automatik dari Sistem Pengurusan Sumber MOTAC.'))
             ->salutation(__('Terima Kasih.'));
@@ -100,6 +101,7 @@ class OrphanedApplicationRequiresAttentionNotification extends Notification impl
         if ($this->application instanceof LoanApplication && $this->application->id) {
             $viewUrl = route('loan-applications.show', $this->application->id);
         }
+
         // Add route for other application types
 
         return [

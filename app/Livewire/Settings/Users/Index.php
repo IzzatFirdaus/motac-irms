@@ -57,24 +57,24 @@ class Index extends Component
             ->with(['department:id,name', 'roles:id,name'])
             ->orderBy('name', 'asc');
 
-        if (! empty($this->search)) {
-            $query->where(function ($q) {
+        if ($this->search !== '' && $this->search !== '0') {
+            $query->where(function ($q): void {
                 $q->where('name', 'like', '%'.$this->search.'%')
                     ->orWhere('email', 'like', '%'.$this->search.'%')
                     ->orWhere('identification_number', 'like', '%'.$this->search.'%')
-                    ->orWhereHas('department', function ($deptQuery) {
+                    ->orWhereHas('department', function ($deptQuery): void {
                         $deptQuery->where('name', 'like', '%'.$this->search.'%');
                     });
             });
         }
 
-        if (! empty($this->filterRole)) {
-            $query->whereHas('roles', function ($roleQuery) {
+        if ($this->filterRole !== null && $this->filterRole !== '' && $this->filterRole !== '0') {
+            $query->whereHas('roles', function ($roleQuery): void {
                 $roleQuery->where('name', $this->filterRole);
             });
         }
 
-        if (! empty($this->filterStatus)) {
+        if ($this->filterStatus !== null && $this->filterStatus !== '' && $this->filterStatus !== '0') {
             $query->where('status', $this->filterStatus);
         }
 

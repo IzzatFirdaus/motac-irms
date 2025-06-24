@@ -4,7 +4,6 @@ namespace App\Livewire\ResourceManagement\Admin\BPM;
 
 use App\Models\Equipment;
 use App\Models\LoanApplication;
-use App\Models\LoanApplicationItem;
 use App\Models\LoanTransaction;
 use App\Models\User;
 use App\Services\LoanTransactionService;
@@ -21,12 +20,19 @@ class ProcessIssuance extends Component
     use AuthorizesRequests;
 
     public LoanApplication $loanApplication;
+
     public array $allAccessoriesList = [];
+
     public $availableEquipment = [];
+
     public Collection $potentialRecipients;
+
     public array $issueItems = [];
+
     public $receiving_officer_id;
+
     public $transaction_date;
+
     public string $issue_notes = '';
 
     protected function messages(): array
@@ -65,7 +71,7 @@ class ProcessIssuance extends Component
         $this->loanApplication = LoanApplication::with([
             'loanApplicationItems',
             'user',
-            'responsibleOfficer' // ++ ADDED: Eager load the responsible officer
+            'responsibleOfficer', // ++ ADDED: Eager load the responsible officer
         ])->findOrFail($loanApplicationId);
 
         $this->authorize('processIssuance', $this->loanApplication);
@@ -101,9 +107,10 @@ class ProcessIssuance extends Component
     {
         $this->authorize('createIssue', [LoanTransaction::class, $this->loanApplication]);
 
-        if (empty($this->issueItems)) {
+        if ($this->issueItems === []) {
             $this->addError('issueItems', __('Tiada baki peralatan untuk dikeluarkan bagi permohonan ini.'));
-            return;
+
+            return null;
         }
 
         $validatedData = $this->validate();
@@ -111,7 +118,7 @@ class ProcessIssuance extends Component
 
         try {
             // Prepare data payloads for the service
-            $itemsPayload = collect($validatedData['issueItems'])->map(function ($item) {
+            $itemsPayload = collect($validatedData['issueItems'])->map(function ($item): array {
                 return [
                     'equipment_id' => $item['equipment_id'],
                     'loan_application_item_id' => $item['loan_application_item_id'],
@@ -135,12 +142,15 @@ class ProcessIssuance extends Component
             );
 
             session()->flash('success', __('Rekod pengeluaran peralatan telah berjaya disimpan.'));
+
             return $this->redirectRoute('loan-applications.show', ['loan_application' => $this->loanApplication->id], navigate: true);
 
-        } catch (Throwable $e) {
-            Log::error('Error in ProcessIssuance@submitIssue: '.$e->getMessage(), ['exception' => $e]);
-            session()->flash('error', __('Gagal merekodkan pengeluaran disebabkan ralat sistem: ').$e->getMessage());
+        } catch (Throwable $throwable) {
+            Log::error('Error in ProcessIssuance@submitIssue: '.$throwable->getMessage(), ['exception' => $throwable]);
+            session()->flash('error', __('Gagal merekodkan pengeluaran disebabkan ralat sistem: ').$throwable->getMessage());
         }
+
+        return null;
     }
 
     public function render()

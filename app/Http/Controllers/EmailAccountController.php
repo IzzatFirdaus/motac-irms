@@ -52,12 +52,12 @@ class EmailAccountController extends Controller
                 ->orderBy('updated_at', 'desc')
                 ->paginate(config('pagination.default_size', 15));
 
-            return view('admin.email-applications.index', compact('emailApplications'));
-        } catch (Throwable $e) {
-            Log::error('Error fetching email applications for admin: '.$e->getMessage(), [
+            return view('admin.email-applications.index', ['emailApplications' => $emailApplications]);
+        } catch (Throwable $throwable) {
+            Log::error('Error fetching email applications for admin: '.$throwable->getMessage(), [
                 'admin_user_id' => Auth::id(),
-                'exception_class' => get_class($e),
-                'exception_trace_snippet' => substr($e->getTraceAsString(), 0, 500),
+                'exception_class' => get_class($throwable),
+                'exception_trace_snippet' => substr($throwable->getTraceAsString(), 0, 500),
             ]);
 
             return redirect()->route('dashboard')->with('error', __('Gagal memuatkan senarai permohonan e-mel. Sila cuba lagi kemudian.'));
@@ -70,12 +70,12 @@ class EmailAccountController extends Controller
      */
     public function showForAdmin(EmailApplication $emailApplication): View
     {
-        Log::info("EmailAccountController@showForAdmin: Displaying EmailApplication ID {$emailApplication->id} for admin.", ['admin_user_id' => Auth::id()]);
+        Log::info(sprintf('EmailAccountController@showForAdmin: Displaying EmailApplication ID %d for admin.', $emailApplication->id), ['admin_user_id' => Auth::id()]);
 
         // Use the default relations from the service for consistency
         $emailApplication->loadMissing($this->emailApplicationService->getDefaultEmailApplicationRelations());
 
-        return view('admin.email-applications.show', compact('emailApplication'));
+        return view('admin.email-applications.show', ['emailApplication' => $emailApplication]);
     }
 
     /**
@@ -97,7 +97,7 @@ class EmailAccountController extends Controller
         ];
 
         if (! in_array($emailApplication->status, $actionableStatuses)) {
-            Log::warning("Attempted to process EmailApplication ID {$emailApplication->id} not in an actionable status for provisioning.", [
+            Log::warning(sprintf('Attempted to process EmailApplication ID %d not in an actionable status for provisioning.', $emailApplication->id), [
                 'acting_admin_id' => $actingAdmin->id,
                 'current_status' => $emailApplication->status,
                 'allowed_statuses' => $actionableStatuses,
@@ -106,7 +106,7 @@ class EmailAccountController extends Controller
             return redirect()->back()->with('error', __('Permohonan ini tidak dalam status yang membenarkan pemprosesan penyediaan pada masa ini.'));
         }
 
-        Log::info("IT Admin (User ID: {$actingAdmin->id}) initiating provisioning for EmailApplication ID {$emailApplication->id}.", ['validated_data' => $validatedData]);
+        Log::info(sprintf('IT Admin (User ID: %d) initiating provisioning for EmailApplication ID %d.', $actingAdmin->id, $emailApplication->id), ['validated_data' => $validatedData]);
 
         try {
             $updatedApplication = $this->emailApplicationService->processProvisioning(
@@ -114,27 +114,28 @@ class EmailAccountController extends Controller
                 $validatedData,
                 $actingAdmin
             );
-
             if ($updatedApplication->status === EmailApplication::STATUS_COMPLETED) {
                 return redirect()->route('resource-management.email-applications-admin.show', $updatedApplication)
                     ->with('success', __('Permohonan e-mel berjaya diproses dan akaun telah disediakan.'));
-            } elseif ($updatedApplication->status === EmailApplication::STATUS_PROVISION_FAILED) {
+            }
+
+            if ($updatedApplication->status === EmailApplication::STATUS_PROVISION_FAILED) {
                 $errorMessage = $updatedApplication->rejection_reason ?? __('Proses penyediaan akaun gagal. Sila semak log sistem atau nota permohonan.');
 
                 return redirect()->route('resource-management.email-applications-admin.show', $updatedApplication)
                     ->with('error', __('Gagal memproses permohonan e-mel: ').$errorMessage);
             } else {
-                Log::warning("Email provisioning for App ID {$emailApplication->id} by Admin ID {$actingAdmin->id} ended with an unexpected status: {$updatedApplication->status}.");
+                Log::warning(sprintf('Email provisioning for App ID %d by Admin ID %d ended with an unexpected status: %s.', $emailApplication->id, $actingAdmin->id, $updatedApplication->status));
                 $statusMessage = $updatedApplication->status_translated ?? $updatedApplication->status;
 
                 return redirect()->route('resource-management.email-applications-admin.show', $updatedApplication)
                     ->with('warning', __('Proses permohonan selesai dengan status yang tidak dijangka: ').e($statusMessage));
             }
-        } catch (Throwable $e) {
-            Log::error("Exception in EmailAccountController@processApplication for App ID {$emailApplication->id}: ".$e->getMessage(), [
+        } catch (Throwable $throwable) {
+            Log::error(sprintf('Exception in EmailAccountController@processApplication for App ID %d: ', $emailApplication->id).$throwable->getMessage(), [
                 'acting_admin_id' => $actingAdmin->id,
-                'exception_class' => get_class($e),
-                'exception_trace_snippet' => substr($e->getTraceAsString(), 0, 1000),
+                'exception_class' => get_class($throwable),
+                'exception_trace_snippet' => substr($throwable->getTraceAsString(), 0, 1000),
                 'request_data' => $request->except(['_token', 'password', 'password_confirmation']),
             ]);
 

@@ -68,8 +68,9 @@ final class EquipmentIssuedNotification extends Notification implements ShouldQu
                 $assetTypeDisplay = $equipment->asset_type_label ?? __('Peralatan');
                 $brandAndModel = trim(($equipment->brand ?? '').' '.($equipment->model ?? ''));
 
-                return "{$assetTypeDisplay}".($brandAndModel ? " ({$brandAndModel})" : '').', Tag: '.($equipment->tag_id ?? '-').', Siri: '.($equipment->serial_number ?? '-')." - Kuantiti: {$item->quantity_transacted}";
+                return $assetTypeDisplay.($brandAndModel !== '' && $brandAndModel !== '0' ? sprintf(' (%s)', $brandAndModel) : '').', Tag: '.($equipment->tag_id ?? '-').', Siri: '.($equipment->serial_number ?? '-').(' - Kuantiti: '.$item->quantity_transacted);
             }
+
             return __('Item ID: :id - Butiran peralatan tidak lengkap.', ['id' => $item->id]);
         })->toArray();
 

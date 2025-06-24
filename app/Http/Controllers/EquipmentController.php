@@ -39,18 +39,23 @@ class EquipmentController extends Controller
         if ($request->filled('asset_type') && $request->asset_type !== 'all') {
             $filters['asset_type'] = $request->asset_type;
         }
+
         if ($request->filled('status') && $request->status !== 'all') {
             $filters['status'] = $request->status;
         }
+
         if ($request->filled('condition_status') && $request->condition_status !== 'all') {
             $filters['condition_status'] = $request->condition_status;
         }
+
         if ($request->filled('classification') && $request->classification !== 'all') {
             $filters['classification'] = $request->classification;
         }
+
         if ($request->filled('location_id') && $request->location_id !== 'all') {
             $filters['location_id'] = $request->location_id;
         }
+
         if ($request->filled('search')) {
             $filters['search'] = $request->search;
         }
@@ -100,7 +105,7 @@ class EquipmentController extends Controller
     {
         // Authorization handled by authorizeResource in constructor
         Log::info(
-            "EquipmentController@show: Displaying equipment ID {$equipment->id} details.",
+            sprintf('EquipmentController@show: Displaying equipment ID %d details.', $equipment->id),
             ['user_id' => Auth::id()]
         );
 
@@ -115,6 +120,6 @@ class EquipmentController extends Controller
             'loanTransactionItems.loanTransaction.loanApplication.user', // Eager loads transaction, then application, then user.
         ]);
 
-        return view('equipment.show', compact('equipment'));
+        return view('equipment.show', ['equipment' => $equipment]);
     }
 }

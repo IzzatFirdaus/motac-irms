@@ -34,7 +34,7 @@ class RouteServiceProvider extends ServiceProvider
     {
         $this->configureRateLimiting();
 
-        $this->routes(function () {
+        $this->routes(function (): void {
             Route::middleware('api')
                 ->prefix('api')
                 // ->namespace($this->namespace) // Not needed if using FQCN for API controllers

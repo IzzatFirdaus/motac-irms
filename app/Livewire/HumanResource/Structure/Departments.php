@@ -49,7 +49,7 @@ class Departments extends Component
         $nameRule = ValidationRule::unique('departments', 'name');
         $codeRule = ValidationRule::unique('departments', 'code')->whereNull('deleted_at'); // Unique check should also consider soft deletes
 
-        if ($this->isEditMode && $this->departmentInstance) {
+        if ($this->isEditMode && $this->departmentInstance instanceof \App\Models\Department) {
             $nameRule->ignore($this->departmentInstance->id);
             $codeRule->ignore($this->departmentInstance->id);
         }
@@ -86,7 +86,7 @@ class Departments extends Component
             ->title(__('Pengurusan Jabatan')); // Setting page title
     }
 
-    public function submitDepartment()
+    public function submitDepartment(): void
     {
         $this->validate();
 
@@ -99,7 +99,7 @@ class Departments extends Component
             'head_user_id' => $this->head_user_id,
         ];
 
-        if ($this->isEditMode && $this->departmentInstance) {
+        if ($this->isEditMode && $this->departmentInstance instanceof \App\Models\Department) {
             $this->departmentInstance->update($data);
             // Use session flash for toastr as per your original component style
             session()->flash('toastr', ['type' => 'success', 'message' => __('Jabatan berjaya dikemaskini.')]);
@@ -136,7 +136,7 @@ class Departments extends Component
         $this->dispatch('openModal', elementId: '#departmentModal');
     }
 
-    public function confirmDeleteDepartment($id): void
+    public function confirmDeleteDepartment(?int $id): void
     {
         $this->confirmedId = $id;
         // You might dispatch an event here to show a custom confirmation modal in Bootstrap
@@ -170,7 +170,7 @@ class Departments extends Component
         $this->name = '';
         // Set default branch_type using a key from your options, or a specific default if options could be empty
         // Using Department::BRANCH_TYPE_HQ as a fallback default if options are somehow not loaded yet
-        $this->branch_type = (! empty($this->branchTypeOptions) ? array_key_first($this->branchTypeOptions) : Department::BRANCH_TYPE_HQ);
+        $this->branch_type = ($this->branchTypeOptions === [] ? Department::BRANCH_TYPE_HQ : array_key_first($this->branchTypeOptions));
         $this->code = null;
         $this->description = null;
         $this->is_active = true;

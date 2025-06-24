@@ -33,19 +33,21 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \App\Models\User|null $creator
- * @property-read \App\Models\User|null $updater
  * @property-read \App\Models\User|null $deleter
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Equipment> $equipment
  * @property-read int|null $equipment_count
- * // Removed Device PHPDoc properties
+ * @property-read \App\Models\User|null $updater
  * @method static Builder<static>|Location active()
  * @method static Builder<static>|Location byCity(string $city)
  * @method static Builder<static>|Location byCountry(string $country)
- * @method static LocationFactory factory($count = null, $state = [])
+ * @method static \Database\Factories\LocationFactory factory($count = null, $state = [])
  * @method static Builder<static>|Location newModelQuery()
  * @method static Builder<static>|Location newQuery()
  * @method static Builder<static>|Location onlyTrashed()
  * @method static Builder<static>|Location query()
+ * @method static Builder<static>|Location whereAddress($value)
+ * @method static Builder<static>|Location whereCity($value)
+ * @method static Builder<static>|Location whereCountry($value)
  * @method static Builder<static>|Location whereCreatedAt($value)
  * @method static Builder<static>|Location whereCreatedBy($value)
  * @method static Builder<static>|Location whereDeletedAt($value)
@@ -54,12 +56,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static Builder<static>|Location whereId($value)
  * @method static Builder<static>|Location whereIsActive($value)
  * @method static Builder<static>|Location whereName($value)
+ * @method static Builder<static>|Location wherePostalCode($value)
+ * @method static Builder<static>|Location whereState($value)
  * @method static Builder<static>|Location whereUpdatedAt($value)
  * @method static Builder<static>|Location whereUpdatedBy($value)
  * @method static Builder<static>|Location withTrashed()
  * @method static Builder<static>|Location withoutTrashed()
  * @mixin \Eloquent
- * @mixin IdeHelperLocation
  */
 class Location extends Model
 {

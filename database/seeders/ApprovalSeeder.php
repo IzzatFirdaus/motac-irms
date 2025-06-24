@@ -65,7 +65,8 @@ class ApprovalSeeder extends Seeder
         foreach ($emailApplications as $application) {
             if ($officerIds->isEmpty()) {
                 continue;
-            } // Skip if no officers
+            }
+            // Skip if no officers
             $officerId = $officerIds->random();
             $chosenStatus = Arr::random($approvalStatuses);
 
@@ -82,6 +83,7 @@ class ApprovalSeeder extends Seeder
                 if ($officerIds->isEmpty()) {
                     continue;
                 }
+
                 $nextOfficerId = $officerIds->random();
                 $nextChosenStatus = Arr::random($approvalStatuses);
                 Approval::factory()
@@ -93,6 +95,7 @@ class ApprovalSeeder extends Seeder
                     ]);
             }
         }
+
         Log::info('Seeded Approvals for Email Applications.');
 
         Log::info('Seeding Approvals for Loan Applications...');
@@ -100,6 +103,7 @@ class ApprovalSeeder extends Seeder
             if ($officerIds->isEmpty()) {
                 continue;
             }
+
             $officerId = $officerIds->random();
             $chosenStatus = Arr::random($approvalStatuses);
 
@@ -116,6 +120,7 @@ class ApprovalSeeder extends Seeder
                 if ($officerIds->isEmpty()) {
                     continue;
                 }
+
                 $nextOfficerId = $officerIds->random();
                 $nextChosenStatus = Arr::random($approvalStatuses);
                 Approval::factory()
@@ -132,6 +137,7 @@ class ApprovalSeeder extends Seeder
                     if ($officerIds->isEmpty()) {
                         continue;
                     }
+
                     $bpmOfficerId = $officerIds->random();
                     $bpmChosenStatus = Arr::random($approvalStatuses);
                     Approval::factory()
@@ -144,6 +150,7 @@ class ApprovalSeeder extends Seeder
                 }
             }
         }
+
         Log::info('Seeded Approvals for Loan Applications.');
 
         if ($officerIds->isNotEmpty() && ($emailApplications->isNotEmpty() || $loanApplications->isNotEmpty())) {
@@ -170,7 +177,7 @@ class ApprovalSeeder extends Seeder
         // Define roles that typically handle approvals
         $approverRoleNames = ['Admin', 'BPM Staff', 'IT Admin', 'HOD', 'Approver'];
 
-        $query = User::query()->whereHas('roles', function (Builder $q) use ($approverRoleNames) {
+        $query = User::query()->whereHas('roles', function (Builder $q) use ($approverRoleNames): void {
             $q->whereIn('name', $approverRoleNames);
         });
 

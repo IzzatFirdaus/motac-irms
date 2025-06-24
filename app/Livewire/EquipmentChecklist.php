@@ -92,23 +92,24 @@ class EquipmentChecklist extends Component
         $this->allAccessoriesList = Equipment::getDefaultAccessoriesList();
 
         try {
-            if ($this->loanApplicationId) {
+            if ($this->loanApplicationId !== null && $this->loanApplicationId !== 0) {
                 // FIX: Changed findLoanApplication to findLoanApplicationById
                 $this->loanApplication = $this->loanApplicationService->findLoanApplicationById(
                     $this->loanApplicationId,
                     ['user', 'loanApplicationItems.equipment', 'responsibleOfficer', 'loanTransactions.loanTransactionItems.equipment', 'loanTransactions.issuingOfficer', 'loanTransactions.receivingOfficer', 'loanTransactions.returningOfficer', 'loanTransactions.returnAcceptingOfficer'] // FIX: Changed 'applicationItems' to 'loanApplicationItems' here for consistency and correctness
                 );
 
-                if (! $this->loanApplication) {
-                    Log::warning("Loan Application ID {$this->loanApplicationId} not found during mount.");
-                    throw new ModelNotFoundException("Loan Application ID {$this->loanApplicationId} not found.");
+                if (! $this->loanApplication instanceof \App\Models\LoanApplication) {
+                    Log::warning(sprintf('Loan Application ID %s not found during mount.', $this->loanApplicationId));
+                    throw new ModelNotFoundException(sprintf('Loan Application ID %s not found.', $this->loanApplicationId));
                 }
-                Log::debug("Loaded Loan Application ID {$this->loanApplicationId}.");
+
+                Log::debug(sprintf('Loaded Loan Application ID %s.', $this->loanApplicationId));
 
                 if ($this->transactionType === LoanTransaction::TYPE_ISSUE) {
                     // FIX: Changed 'applicationItems' to 'loanApplicationItems' here
                     $this->availableEquipmentOptions = $this->loanApplication->loanApplicationItems
-                        ->filter(function ($item) {
+                        ->filter(function ($item): bool {
                             return ($item->quantity_approved ?? 0) > ($item->quantity_issued ?? 0);
                         })
                         ->mapWithKeys(function ($appItem) {
@@ -116,22 +117,23 @@ class EquipmentChecklist extends Component
                                 ->where('status', Equipment::STATUS_AVAILABLE)
                                 ->get()
                                 ->mapWithKeys(function ($eq) {
-                                    return [$eq->id => "{$eq->brand} {$eq->model} (Tag: {$eq->tag_id}) - Jenis: {$eq->asset_type_label}"];
+                                    return [$eq->id => sprintf('%s %s (Tag: %s) - Jenis: %s', $eq->brand, $eq->model, $eq->tag_id, $eq->asset_type_label)];
                                 });
                         })->flatten()->toArray();
                 }
 
-                if ($loanTransactionId) {
+                if ($loanTransactionId !== null && $loanTransactionId !== 0) {
                     $this->loanTransaction = $this->loanTransactionService->findTransaction(
                         $loanTransactionId,
                         ['loanTransactionItems.equipment']
                     );
 
                     if (! $this->loanTransaction || (int) $this->loanTransaction->loan_application_id !== (int) $this->loanApplicationId) {
-                        Log::warning("Loan Transaction ID {$loanTransactionId} not found or does not belong to Loan Application ID {$this->loanApplicationId}.");
-                        throw new ModelNotFoundException("Loan Transaction ID {$loanTransactionId} not found for this application.");
+                        Log::warning(sprintf('Loan Transaction ID %s not found or does not belong to Loan Application ID %s.', $loanTransactionId, $this->loanApplicationId));
+                        throw new ModelNotFoundException(sprintf('Loan Transaction ID %s not found for this application.', $loanTransactionId));
                     }
-                    Log::debug("Loaded Loan Transaction ID {$loanTransactionId}.");
+
+                    Log::debug(sprintf('Loaded Loan Transaction ID %s.', $loanTransactionId));
 
                     $firstTransactionItem = $this->loanTransaction->loanTransactionItems()->first();
                     if ($firstTransactionItem && $firstTransactionItem->equipment) {
@@ -152,6 +154,7 @@ class EquipmentChecklist extends Component
                     }
                 }
             }
+
             $this->initializeOfficerIds();
         } catch (ModelNotFoundException $e) {
             session()->flash('error', __('Data tidak dijumpai: ').$e->getMessage());
@@ -182,17 +185,17 @@ class EquipmentChecklist extends Component
                 throw new Exception('Pengguna tidak dikenalpasti.');
             }
 
-            if (! $this->loanApplication) {
+            if (! $this->loanApplication instanceof \App\Models\LoanApplication) {
                 // FIX: Changed findLoanApplication to findLoanApplicationById
                 $this->loanApplication = $this->loanApplicationService->findLoanApplicationById($this->loanApplicationId);
-                if (! $this->loanApplication) {
-                    throw new ModelNotFoundException("Permohonan Pinjaman dengan ID {$this->loanApplicationId} tidak ditemui.");
+                if (! $this->loanApplication instanceof \App\Models\LoanApplication) {
+                    throw new ModelNotFoundException(sprintf('Permohonan Pinjaman dengan ID %s tidak ditemui.', $this->loanApplicationId));
                 }
             }
 
             $equipmentToTransact = Equipment::find($this->selectedEquipmentId);
             if (! $equipmentToTransact) {
-                throw new ModelNotFoundException("Peralatan dengan ID {$this->selectedEquipmentId} tidak ditemui.");
+                throw new ModelNotFoundException(sprintf('Peralatan dengan ID %s tidak ditemui.', $this->selectedEquipmentId));
             }
 
             // FIX: Changed 'applicationItems' to 'loanApplicationItems' here
@@ -203,7 +206,7 @@ class EquipmentChecklist extends Component
             if ($this->transactionType === LoanTransaction::TYPE_ISSUE) {
                 $this->authorize('createIssue', [LoanTransaction::class, $this->loanApplication]);
                 if ($equipmentToTransact->status !== Equipment::STATUS_AVAILABLE) {
-                    throw new Exception("Peralatan '{$equipmentToTransact->tag_id}' tidak tersedia untuk pengeluaran. Status semasa: {$equipmentToTransact->status_label}");
+                    throw new Exception(sprintf("Peralatan '%s' tidak tersedia untuk pengeluaran. Status semasa: %s", $equipmentToTransact->tag_id, $equipmentToTransact->status_label));
                 }
 
                 $itemData = [[
@@ -231,7 +234,7 @@ class EquipmentChecklist extends Component
             } elseif ($this->transactionType === LoanTransaction::TYPE_RETURN) {
                 $this->authorize('createReturn', [LoanTransaction::class, $this->loanApplication]);
                 if ($equipmentToTransact->status !== Equipment::STATUS_ON_LOAN) {
-                    throw new Exception("Peralatan '{$equipmentToTransact->tag_id}' tidak dalam status dipinjam. Status semasa: {$equipmentToTransact->status_label}");
+                    throw new Exception(sprintf("Peralatan '%s' tidak dalam status dipinjam. Status semasa: %s", $equipmentToTransact->tag_id, $equipmentToTransact->status_label));
                 }
 
                 $itemData = [[
@@ -263,6 +266,7 @@ class EquipmentChecklist extends Component
 
                 return null;
             }
+
             DB::commit();
             $this->dispatch('toastr', type: 'success', message: session('success'));
 
@@ -321,8 +325,8 @@ class EquipmentChecklist extends Component
     #[Computed]
     public function onLoanEquipment()
     {
-        if ($this->loanApplication && $this->transactionType === LoanTransaction::TYPE_RETURN) {
-            return Equipment::whereHas('loanTransactionItems.loanTransaction', function ($query) {
+        if ($this->loanApplication instanceof \App\Models\LoanApplication && $this->transactionType === LoanTransaction::TYPE_RETURN) {
+            return Equipment::whereHas('loanTransactionItems.loanTransaction', function ($query): void {
                 $query->where('loan_application_id', $this->loanApplication->id)
                     ->where('type', LoanTransaction::TYPE_ISSUE)
                     ->where('status', LoanTransaction::STATUS_ISSUED);
@@ -340,7 +344,7 @@ class EquipmentChecklist extends Component
         $returningOfficerOptions = $this->loanApplication?->user ? [$this->loanApplication->user->id => $this->loanApplication->user->name] : [];
         $conditionStatusOptions = Equipment::getConditionStatusesList();
         $onLoanEquipmentOptions = $this->onLoanEquipment()->mapWithKeys(function ($eq) {
-            return [$eq->id => "{$eq->brand} {$eq->model} (Tag: {$eq->tag_id})"];
+            return [$eq->id => sprintf('%s %s (Tag: %s)', $eq->brand, $eq->model, $eq->tag_id)];
         })->toArray();
 
         return view('livewire.equipment-checklist', [
@@ -359,7 +363,8 @@ class EquipmentChecklist extends Component
                 $this->officerId = $user->id;
                 $this->returnAcceptingOfficerId = $user->id;
             }
-            if ($this->loanApplication && $this->loanApplication->user) {
+
+            if ($this->loanApplication instanceof \App\Models\LoanApplication && $this->loanApplication->user) {
                 $this->receivingOfficerId = $this->loanApplication->user_id;
                 $this->returningOfficerId = $this->loanApplication->user_id;
             }

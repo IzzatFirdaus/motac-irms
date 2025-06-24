@@ -1,0 +1,27 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+    - vendor/nesbot/carbon/extension.neon
+
+parameters:
+    paths:
+        - app/
+    # Level 10 is the highest level
+    level: 5
+    # Keep this commented out unless you want to suppress the "if condition is always true" errors
+    # treatPhpDocTypesAsCertain: false
+
+    ignoreErrors:
+        # Ignore errors related to IdeHelper classes in @mixin PHPDoc tags
+        - '#PHPDoc tag @mixin contains unknown class App\\Models\\IdeHelper(.*?)\.#'
+        # Ignore errors related to the generic 'object' type in the EventServiceProvider's observers property
+        - '#Property App\\Providers\\EventServiceProvider::\$observers has unknown class object as its type\.#'
+        # Ignore Livewire's dynamic Title attribute error
+        - '#^Attribute class Livewire\\Attributes\\Title constructor invoked with 0 parameters, 1 required\.#'
+        # You had '#PHPDoc tag @var#' commented out, which is too broad.
+        # If you have specific, legitimate cases where a @var PHPDoc is misplaced,
+        # you'll need a more specific regex. For now, we'll keep it commented.
+        # - '#PHPDoc tag @var above a method has no effect\.#'
+        # - '#PHPDoc tag @var does not specify variable name\.#'
+
+#    excludePaths: # Keep this commented unless you have specific files to exclude
+#        - ./*/*/FileToBeExcluded.php

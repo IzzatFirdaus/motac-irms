@@ -53,6 +53,7 @@ class EquipmentFactory extends Factory
                         'updated_by' => $auditUserId,
                     ]);
                 }
+
                 $subCategoryId = $subCategory?->id;
             } catch (\Exception $e) {
                 Log::error('EquipmentFactory: Could not create/find fallback SubCategory: '.$e->getMessage());
@@ -83,7 +84,7 @@ class EquipmentFactory extends Factory
         $purchaseDate = $purchaseDateRaw ? Carbon::instance($purchaseDateRaw) : null;
 
         $warrantyExpiryDate = null;
-        if ($purchaseDate) {
+        if ($purchaseDate instanceof \Illuminate\Support\Carbon) {
             $warrantyExpiryDate = $purchaseDate->copy()->addYears($this->faker->numberBetween(1, 3));
         }
 

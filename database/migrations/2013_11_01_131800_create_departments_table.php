@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('departments', function (Blueprint $table) {
+        Schema::create('departments', function (Blueprint $table): void {
             $table->id();
             $table->string('name')->unique();
             $table->text('description')->nullable();
@@ -37,16 +37,19 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('departments', function (Blueprint $table) {
+        Schema::table('departments', function (Blueprint $table): void {
             if (Schema::hasColumn('departments', 'head_of_department_id')) {
                 $table->dropForeign(['head_of_department_id']);
             }
+
             if (Schema::hasColumn('departments', 'created_by')) {
                 $table->dropForeign(['created_by']);
             }
+
             if (Schema::hasColumn('departments', 'updated_by')) {
                 $table->dropForeign(['updated_by']);
             }
+
             if (Schema::hasColumn('departments', 'deleted_by')) {
                 $table->dropForeign(['deleted_by']);
             }

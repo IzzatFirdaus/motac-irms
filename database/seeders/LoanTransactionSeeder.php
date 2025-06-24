@@ -25,6 +25,7 @@ class LoanTransactionSeeder extends Seeder
 
         if (User::count() === 0 || Equipment::count() === 0) {
             Log::error('Seeder requires at least one User and one Equipment record. Aborting LoanTransactionsSeeder.');
+
             return;
         }
 
@@ -32,6 +33,7 @@ class LoanTransactionSeeder extends Seeder
         $officerIds = $this->getOfficerIds();
         if ($officerIds->isEmpty()) {
             Log::error('No users available to act as officers. Aborting.');
+
             return;
         }
 
@@ -45,7 +47,6 @@ class LoanTransactionSeeder extends Seeder
     /**
      * Creates 'issue' transactions for approved loan applications.
      *
-     * @param Collection $officerIds
      * @return Collection The collection of newly created 'issue' transactions.
      */
     private function seedIssueTransactions(Collection $officerIds): Collection
@@ -56,13 +57,13 @@ class LoanTransactionSeeder extends Seeder
         ])->with('loanApplicationItems')->get();
 
         $availableEquipment = Equipment::where('status', Equipment::STATUS_AVAILABLE)->get()->keyBy('id');
-        $issuedTransactions = new Collection();
+        $issuedTransactions = new Collection;
 
-        Log::info("Attempting to seed 'Issued' Loan Transactions for {$approvedApplications->count()} applications...");
+        Log::info(sprintf("Attempting to seed 'Issued' Loan Transactions for %s applications...", $approvedApplications->count()));
 
         foreach ($approvedApplications as $application) {
             if ($availableEquipment->isEmpty() && $application->loanApplicationItems()->exists()) {
-                Log::warning("No more available equipment to issue for application ID: {$application->id}");
+                Log::warning('No more available equipment to issue for application ID: '.$application->id);
                 break;
             }
 
@@ -76,11 +77,14 @@ class LoanTransactionSeeder extends Seeder
                 $quantityToIssue = $appItem->quantity_approved ?? $appItem->quantity_requested;
                 for ($i = 0; $i < $quantityToIssue; $i++) {
                     if ($availableEquipment->isEmpty()) {
-                        Log::warning("Ran out of equipment for application ID: {$application->id}");
+                        Log::warning('Ran out of equipment for application ID: '.$application->id);
                         break 2;
                     }
+
                     $equipmentToIssue = $availableEquipment->pop();
-                    if (!$equipmentToIssue) continue;
+                    if (! $equipmentToIssue) {
+                        continue;
+                    }
 
                     LoanTransactionItem::factory()->for($transaction)->for($equipmentToIssue, 'equipment')->for($appItem, 'loanApplicationItem')->issued()->create(['quantity_transacted' => 1]);
                     $equipmentToIssue->update(['status' => Equipment::STATUS_ON_LOAN]);
@@ -90,18 +94,18 @@ class LoanTransactionSeeder extends Seeder
             $application->updateOverallStatusAfterTransaction();
             $issuedTransactions->add($transaction);
 
-            if ($issuedTransactions->count() >= 20) break;
+            if ($issuedTransactions->count() >= 20) {
+                break;
+            }
         }
 
-        Log::info("Created {$issuedTransactions->count()} 'Issued' Loan Transactions.");
+        Log::info(sprintf("Created %d 'Issued' Loan Transactions.", $issuedTransactions->count()));
+
         return $issuedTransactions;
     }
 
     /**
      * Creates 'return' transactions for a subset of the issued transactions.
-     *
-     * @param Collection $issuedTransactions
-     * @param Collection $officerIds
      */
     private function seedReturnTransactions(Collection $issuedTransactions, Collection $officerIds): void
     {
@@ -109,10 +113,12 @@ class LoanTransactionSeeder extends Seeder
 
         $transactionsToReturn = $issuedTransactions->take(ceil($issuedTransactions->count() * 0.7));
 
-        Log::info("Attempting to seed 'Returned' Loan Transactions for {$transactionsToReturn->count()} issued transactions...");
+        Log::info(sprintf("Attempting to seed 'Returned' Loan Transactions for %d issued transactions...", $transactionsToReturn->count()));
 
         foreach ($transactionsToReturn as $issueTransaction) {
-            if (!$issueTransaction->loanApplication) continue;
+            if (! $issueTransaction->loanApplication) {
+                continue;
+            }
 
             $returnTransaction = LoanTransaction::factory()->return()->for($issueTransaction->loanApplication)->create([
                 'returning_officer_id' => $issueTransaction->loanApplication->user_id,
@@ -121,10 +127,12 @@ class LoanTransactionSeeder extends Seeder
             ]);
 
             foreach ($issueTransaction->loanTransactionItems as $issuedItem) {
-                if (!$issuedItem->equipment) {
-                    Log::warning("Skipping return for item ID {$issuedItem->id} due to missing equipment.");
+                if (! $issuedItem->equipment) {
+                    Log::warning(sprintf('Skipping return for item ID %s due to missing equipment.', $issuedItem->id));
+
                     continue;
                 }
+
                 LoanTransactionItem::factory()->for($returnTransaction)->for($issuedItem->equipment, 'equipment')->for($issuedItem->loanApplicationItem, 'loanApplicationItem')->returnedGood()->create(['quantity_transacted' => $issuedItem->quantity_transacted]);
                 $issuedItem->equipment->update(['status' => Equipment::STATUS_AVAILABLE]);
             }
@@ -133,7 +141,7 @@ class LoanTransactionSeeder extends Seeder
             $issueTransaction->update(['status' => LoanTransaction::STATUS_COMPLETED]);
         }
 
-        Log::info("Created {$transactionsToReturn->count()} 'Returned' Loan Transactions.");
+        Log::info(sprintf("Created %d 'Returned' Loan Transactions.", $transactionsToReturn->count()));
     }
 
     /**
@@ -146,18 +154,17 @@ class LoanTransactionSeeder extends Seeder
             ->limit(5)
             ->get();
 
-        Log::info("Attempting to mark {$appsToMarkOverdue->count()} applications as overdue...");
+        Log::info(sprintf('Attempting to mark %s applications as overdue...', $appsToMarkOverdue->count()));
         foreach ($appsToMarkOverdue as $app) {
             $app->update(['status' => LoanApplication::STATUS_OVERDUE]);
         }
+
         Log::info('Marked relevant applications as overdue.');
     }
 
     /**
      * Retrieves User IDs for BPM/Admin roles, with a fallback to any user.
      * The return type MUST be an Eloquent Collection to satisfy the type hint.
-     *
-     * @return Collection
      */
     private function getOfficerIds(): Collection
     {
@@ -172,6 +179,7 @@ class LoanTransactionSeeder extends Seeder
             Log::warning('No BPM/Admin officers found. Using any user as fallback.');
             // Pluck all user IDs as a fallback.
             $allUserIds = User::pluck('id');
+
             // Convert the Support\Collection from pluck() into the required Eloquent\Collection.
             return new Collection($allUserIds);
         }

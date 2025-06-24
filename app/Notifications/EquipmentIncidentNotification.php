@@ -21,7 +21,9 @@ final class EquipmentIncidentNotification extends Notification implements Should
     use Queueable;
 
     private LoanApplication $loanApplication;
+
     private EloquentCollection $incidentItems;
+
     private string $incidentType;
 
     public function __construct(
@@ -34,7 +36,7 @@ final class EquipmentIncidentNotification extends Notification implements Should
         $this->incidentType = $incidentType; //
 
         if (! in_array($incidentType, ['lost', 'damaged'])) { //
-            throw new \InvalidArgumentException("Invalid incident type: {$incidentType}. Must be 'lost' or 'damaged'."); //
+            throw new \InvalidArgumentException(sprintf("Invalid incident type: %s. Must be 'lost' or 'damaged'.", $incidentType)); //
         }
     }
 
@@ -61,18 +63,20 @@ final class EquipmentIncidentNotification extends Notification implements Should
         }
 
         if ($this->incidentItems->isNotEmpty()) { //
-             $introLines[] = '---'; //
+            $introLines[] = '---'; //
             foreach ($this->incidentItems as $item) { //
                 if ($item->equipment instanceof Equipment) { //
                     // CORRECTED: Changed assetTypeDisplay to the correct accessor 'asset_type_label'
-                    $details = "- **{$item->equipment->asset_type_label}** ({$item->equipment->brand} {$item->equipment->model}) - Tag: {$item->equipment->tag_id}"; //
+                    $details = sprintf('- **%s** (%s %s) - Tag: %s', $item->equipment->asset_type_label, $item->equipment->brand, $item->equipment->model, $item->equipment->tag_id); //
                     if ($item->item_notes) { //
-                        $details .= " | Catatan: *{$item->item_notes}*"; //
+                        $details .= sprintf(' | Catatan: *%s*', $item->item_notes); //
                     }
+
                     $introLines[] = $details; //
                 }
             }
-             $introLines[] = '---'; //
+
+            $introLines[] = '---'; //
         }
 
         return (new MailMessage) //
@@ -90,13 +94,14 @@ final class EquipmentIncidentNotification extends Notification implements Should
 
     public function getActionUrl(): string
     {
-         if ($this->loanApplication->id && Route::has('loan-applications.show')) { //
+        if ($this->loanApplication->id && Route::has('loan-applications.show')) { //
             try {
                 return route('loan-applications.show', ['loan_application' => $this->loanApplication->id]); //
             } catch (\Exception $e) {
-                Log::error("Error generating URL for EquipmentIncidentNotification: ".$e->getMessage()); //
+                Log::error('Error generating URL for EquipmentIncidentNotification: '.$e->getMessage()); //
             }
         }
+
         return '#'; //
     }
 
@@ -104,20 +109,24 @@ final class EquipmentIncidentNotification extends Notification implements Should
     {
         $applicationId = $this->loanApplication->id ?? null; //
         $applicantName = $this->loanApplication->user?->name ?? 'N/A'; //
-        $incidentItemsDetails = $this->incidentItems->map(function (LoanTransactionItem $item) { //
+        $incidentItemsDetails = $this->incidentItems->map(function (LoanTransactionItem $item): array { //
             $equipment = $item->equipment; //
             $details = ['transaction_item_id' => $item->id, 'item_notes' => $item->item_notes]; //
             if ($equipment instanceof Equipment) { //
                 // CORRECTED: Changed assetTypeDisplay to the correct accessor 'asset_type_label'
-                $details = array_merge($details, ['equipment_id' => $equipment->id, 'tag_id' => $equipment->tag_id, 'asset_type' => $equipment->asset_type_label, 'brand_model' => "{$equipment->brand} {$equipment->model}", 'serial_number' => $equipment->serial_number]); //
+                $details = array_merge($details, ['equipment_id' => $equipment->id, 'tag_id' => $equipment->tag_id, 'asset_type' => $equipment->asset_type_label, 'brand_model' => sprintf('%s %s', $equipment->brand, $equipment->model), 'serial_number' => $equipment->serial_number]); //
             }
+
             if ($this->incidentType === 'damaged') { //
                 $details['condition_on_return'] = $item->condition_on_return; //
             }
+
             return $details; //
         })->toArray();
 
-        $subject = ''; $message = ''; $icon = 'ti ti-alert-circle'; //
+        $subject = '';
+        $message = '';
+        $icon = 'ti ti-alert-circle'; //
         if ($this->incidentType === 'lost') { //
             $subject = __('Peralatan Dilaporkan Hilang (Permohonan #:id)', ['id' => $applicationId ?? 'N/A']); //
             $message = __('Beberapa peralatan bagi permohonan #:id telah dilaporkan hilang.', ['id' => $applicationId ?? 'N/A']); //

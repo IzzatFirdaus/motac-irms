@@ -42,7 +42,7 @@ return new class extends Migration
             $defaultType,
             $transactionStatuses,
             $defaultStatus
-        ) {
+        ): void {
             $table->id();
             $table->foreignId('loan_application_id')->constrained('loan_applications')->cascadeOnDelete();
             $table->enum('type', $transactionTypes)->default($defaultType);
@@ -75,14 +75,14 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('loan_transactions', function (Blueprint $table) {
+        Schema::table('loan_transactions', function (Blueprint $table): void {
             $foreignKeys = ['loan_application_id', 'issuing_officer_id', 'receiving_officer_id', 'returning_officer_id', 'return_accepting_officer_id', 'related_transaction_id', 'created_by', 'updated_by', 'deleted_by'];
             foreach ($foreignKeys as $key) {
                 if (Schema::hasColumn('loan_transactions', $key)) { // Check if column exists before trying to drop FK
                     try {
                         $table->dropForeign([$key]);
                     } catch (\Exception $e) {
-                        Log::warning("Failed to drop FK {$key} on loan_transactions: ".$e->getMessage());
+                        Log::warning(sprintf('Failed to drop FK %s on loan_transactions: ', $key).$e->getMessage());
                     }
                 }
             }

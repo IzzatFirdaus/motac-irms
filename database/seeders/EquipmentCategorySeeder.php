@@ -25,9 +25,9 @@ class EquipmentCategorySeeder extends Seeder
         if (! $auditUserId) {
             $adminUserForAudit = User::factory()->create(['name' => 'Audit User (EqCategorySeeder)']);
             $auditUserId = $adminUserForAudit->id;
-            Log::info("Created a fallback audit user with ID {$auditUserId} for EquipmentCategorySeeder.");
+            Log::info(sprintf('Created a fallback audit user with ID %d for EquipmentCategorySeeder.', $auditUserId));
         } else {
-            Log::info("Using User ID {$auditUserId} for audit columns in EquipmentCategorySeeder.");
+            Log::info(sprintf('Using User ID %s for audit columns in EquipmentCategorySeeder.', $auditUserId));
         }
 
         $categories = [
@@ -82,6 +82,7 @@ class EquipmentCategorySeeder extends Seeder
                 ])
             );
         }
+
         Log::info('Created/verified specific equipment categories (Revision 3).');
 
         $targetCount = 10; // Adjust if more variety is needed from factory
@@ -90,6 +91,7 @@ class EquipmentCategorySeeder extends Seeder
 
             return;
         }
+
         $needed = $targetCount - EquipmentCategory::count();
         if ($needed > 0) {
             EquipmentCategory::factory()
@@ -99,7 +101,7 @@ class EquipmentCategorySeeder extends Seeder
                     'updated_by' => $auditUserId,
                     'is_active' => true,
                 ]);
-            Log::info("Created {$needed} additional equipment categories using factory.");
+            Log::info(sprintf('Created %s additional equipment categories using factory.', $needed));
         }
 
         Log::info('EquipmentCategory seeding complete (Revision 3).');

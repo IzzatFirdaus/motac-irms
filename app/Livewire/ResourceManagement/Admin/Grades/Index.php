@@ -54,7 +54,7 @@ class Index extends Component
             ->orderBy('level', 'desc')
             ->orderBy('name', 'asc');
 
-        if (! empty($this->searchTerm)) {
+        if ($this->searchTerm !== '' && $this->searchTerm !== '0') {
             $query->where('name', 'like', '%'.$this->searchTerm.'%')
                 ->orWhere('level', 'like', '%'.$this->searchTerm.'%');
         }
@@ -67,7 +67,7 @@ class Index extends Component
     {
         // Exclude the current editing grade from its own min_approval_grade_id list if applicable
         $query = Grade::orderBy('name');
-        if ($this->editingGrade && $this->editingGrade->exists) {
+        if ($this->editingGrade instanceof \App\Models\Grade && $this->editingGrade->exists) {
             $query->where('id', '!=', $this->editingGrade->id);
         }
 
@@ -105,11 +105,12 @@ class Index extends Component
 
     public function updateGrade(): void
     {
-        if (! $this->editingGrade || ! $this->editingGrade->exists) {
+        if (! $this->editingGrade instanceof \App\Models\Grade || ! $this->editingGrade->exists) {
             $this->dispatch('toastr', type: 'error', message: __('Ralat: Tiada gred dipilih untuk dikemaskini.'));
 
             return;
         }
+
         $this->authorize('update', $this->editingGrade);
         $validated = $this->validate();
 
@@ -134,9 +135,10 @@ class Index extends Component
 
     public function deleteGrade(): void
     {
-        if (! $this->deletingGrade) {
+        if (! $this->deletingGrade instanceof \App\Models\Grade) {
             return;
         }
+
         $this->authorize('delete', $this->deletingGrade);
         try {
             // Check if the grade is being used as a min_approval_grade_id by other grades
@@ -148,15 +150,16 @@ class Index extends Component
                 $this->deletingGrade->delete();
                 $this->dispatch('toastr', type: 'success', message: __('Gred berjaya dipadam.'));
             }
-        } catch (\Illuminate\Database\QueryException $e) {
-            $errorCode = $e->errorInfo[1] ?? null;
-            if ($errorCode == 1451 || str_contains(strtolower($e->getMessage()), 'foreign key constraint') || str_contains($e->getMessage(), 'Cannot delete or update a parent row')) { // MySQL error code for foreign key constraint
+        } catch (\Illuminate\Database\QueryException $queryException) {
+            $errorCode = $queryException->errorInfo[1] ?? null;
+            if ($errorCode == 1451 || str_contains(strtolower($queryException->getMessage()), 'foreign key constraint') || str_contains($queryException->getMessage(), 'Cannot delete or update a parent row')) { // MySQL error code for foreign key constraint
                 $this->dispatch('toastr', type: 'error', message: __('Gred ini tidak boleh dipadam kerana digunakan oleh rekod lain (cth: Pengguna, Jawatan, atau sebagai Gred Kelulusan Minimum).'));
             } else {
                 $this->dispatch('toastr', type: 'error', message: __('Gagal memadam gred: Sila hubungi pentadbir.'));
-                \Illuminate\Support\Facades\Log::error("Error deleting grade: {$e->getMessage()}");
+                \Illuminate\Support\Facades\Log::error('Error deleting grade: '.$queryException->getMessage());
             }
         }
+
         $this->closeModal();
     }
 
@@ -184,7 +187,7 @@ class Index extends Component
 
     protected function rules(): array
     {
-        $gradeIdToIgnore = $this->editingGrade && $this->editingGrade->exists ? $this->editingGrade->id : null;
+        $gradeIdToIgnore = $this->editingGrade instanceof \App\Models\Grade && $this->editingGrade->exists ? $this->editingGrade->id : null;
 
         return [
             'name' => ['required', 'string', 'max:50', ValidationRule::unique('grades', 'name')->ignore($gradeIdToIgnore)],

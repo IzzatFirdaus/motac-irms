@@ -22,7 +22,7 @@ final class CustomSignatureValidator
      */
     public static function isValid(string $gitHubSignatureHeader, string $payload, string $secret): bool
     {
-        if (empty($gitHubSignatureHeader)) {
+        if ($gitHubSignatureHeader === '' || $gitHubSignatureHeader === '0') {
             // \Illuminate\Support\Facades\Log::warning('GitHub webhook signature header is missing.');
             return false;
         }
@@ -53,7 +53,7 @@ final class CustomSignatureValidator
             return false; // Unsupported or unknown algorithm
         }
 
-        if (empty($knownSignature)) {
+        if ($knownSignature === '' || $knownSignature === '0') {
             // \Illuminate\Support\Facades\Log::warning('GitHub webhook signature hash is empty after parsing.', ['header' => $gitHubSignatureHeader]);
             return false; // Hash part is empty
         }

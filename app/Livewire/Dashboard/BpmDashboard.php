@@ -8,10 +8,12 @@ use Livewire\Component;
 class BpmDashboard extends Component
 {
     public int $availableLaptopsCount = 0;
+
     public int $availableProjectorsCount = 0;
+
     public int $availablePrintersCount = 0;
 
-    public function mount()
+    public function mount(): void
     {
         $this->availableLaptopsCount = Equipment::where('status', 'available')
             ->where('asset_type', 'laptop')

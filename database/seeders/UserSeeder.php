@@ -61,15 +61,15 @@ class UserSeeder extends Seeder
 
                 if (method_exists($factory, $stateMethod) && Role::where('name', $roleName)->exists()) {
                     $factory->{$stateMethod}()->create();
-                    Log::info("Created {$countForRole} users with role '{$roleName}'.");
+                    Log::info(sprintf("Created %d users with role '%s'.", $countForRole, $roleName));
                     $totalCreated += $countForRole;
                 } elseif ($roleName === 'User' && Role::where('name', $roleName)->exists()) {
                     // Default factory state should assign 'User' role
                     $factory->create(); // Assumes factory's configure() method assigns 'User' role by default
-                    Log::info("Created {$countForRole} general users (default 'User' role).");
+                    Log::info(sprintf("Created %d general users (default 'User' role).", $countForRole));
                     $totalCreated += $countForRole;
                 } else {
-                    Log::warning("State method '{$stateMethod}' for role '{$roleName}' not found in UserFactory or role does not exist. Skipping these users.");
+                    Log::warning(sprintf("State method '%s' for role '%s' not found in UserFactory or role does not exist. Skipping these users.", $stateMethod, $roleName));
                 }
             }
         }
@@ -78,18 +78,18 @@ class UserSeeder extends Seeder
         if ($numberOfUsers > 0) { // Only if we are creating users
             $deletedUsersCount = max(2, (int) ($numberOfUsers * 0.05)); // Create a small number of deleted users
             User::factory()->count($deletedUsersCount)->deleted()->create();
-            Log::info("Created {$deletedUsersCount} deleted user records.");
+            Log::info(sprintf('Created %d deleted user records.', $deletedUsersCount));
             $totalCreated += $deletedUsersCount; // These are also created users
         }
 
         // Create some pending users for testing pending status functionalities
         $pendingUsersCount = 5; // Example
-        if ($pendingUsersCount > 0 && Role::where('name', 'User')->exists()) { // Assuming pending users get 'User' role
+        if (Role::where('name', 'User')->exists()) { // Assuming pending users get 'User' role
             User::factory()->count($pendingUsersCount)->pending()->create();
-            Log::info("Created {$pendingUsersCount} users with 'pending' status.");
+            Log::info(sprintf("Created %d users with 'pending' status.", $pendingUsersCount));
             $totalCreated += $pendingUsersCount;
         }
 
-        Log::info("General User seeding complete (Revision 3). Aimed for {$numberOfUsers} active users, total records processed: approximately {$totalCreated}.");
+        Log::info(sprintf('General User seeding complete (Revision 3). Aimed for %d active users, total records processed: approximately %d.', $numberOfUsers, $totalCreated));
     }
 }

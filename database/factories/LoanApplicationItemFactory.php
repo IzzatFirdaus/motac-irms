@@ -43,7 +43,7 @@ class LoanApplicationItemFactory extends EloquentFactory
 
         return [
             'loan_application_id' => $loanApplication->id,
-            'equipment_type' => Arr::random($assetTypes ?: ['laptop']),
+            'equipment_type' => Arr::random($assetTypes !== [] ? $assetTypes : ['laptop']),
             'quantity_requested' => $requestedQuantity,
             'quantity_approved' => $approvedQuantity,
             'quantity_issued' => $issuedQuantity,
@@ -56,39 +56,39 @@ class LoanApplicationItemFactory extends EloquentFactory
 
     public function quantityRequested(int $quantity): static
     {
-        return $this->state(fn (array $attributes) => ['quantity_requested' => $quantity]);
+        return $this->state(fn (array $attributes): array => ['quantity_requested' => $quantity]);
     }
 
     public function quantityApproved(?int $quantity): static
     {
-        return $this->state(fn (array $attributes) => ['quantity_approved' => $quantity]);
+        return $this->state(fn (array $attributes): array => ['quantity_approved' => $quantity]);
     }
 
     public function quantityIssued(int $quantity): static
     {
-        return $this->state(fn (array $attributes) => ['quantity_issued' => $quantity]);
+        return $this->state(fn (array $attributes): array => ['quantity_issued' => $quantity]);
     }
 
     public function quantityReturned(int $quantity): static
     {
-        return $this->state(fn (array $attributes) => ['quantity_returned' => $quantity]);
+        return $this->state(fn (array $attributes): array => ['quantity_returned' => $quantity]);
     }
 
     public function type(string $type): static
     {
         $assetTypes = method_exists(Equipment::class, 'getAssetTypesList') ? Equipment::getAssetTypesList() : [];
-        if (! in_array($type, $assetTypes) && ! empty($assetTypes)) {
+        if (! in_array($type, $assetTypes) && $assetTypes !== []) {
             $type = Arr::random($assetTypes);
-        } elseif (empty($assetTypes)) {
+        } elseif ($assetTypes === []) {
             $type = 'laptop';
         }
 
-        return $this->state(fn (array $attributes) => ['equipment_type' => $type]);
+        return $this->state(fn (array $attributes): array => ['equipment_type' => $type]);
     }
 
     public function fullyProcessed(): static
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes): array {
             $requested = $attributes['quantity_requested'] ?? $this->faker->numberBetween(1, 2);
 
             return [

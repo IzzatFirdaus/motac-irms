@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('transitions', function (Blueprint $table) {
+        Schema::create('transitions', function (Blueprint $table): void {
             $table->id();
             // Ensure 'equipment' and 'employees' tables exist for these constraints
             if (Schema::hasTable('equipment')) {
@@ -20,6 +20,7 @@ return new class extends Migration
                 $table->unsignedBigInteger('equipment_id');
                 \Illuminate\Support\Facades\Log::warning('transitions table created without equipment_id FK due to missing equipment table.');
             }
+
             if (Schema::hasTable('employees')) {
                 $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade');
             } else {
@@ -46,19 +47,23 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('transitions', function (Blueprint $table) {
+        Schema::table('transitions', function (Blueprint $table): void {
             if (Schema::hasColumn('transitions', 'equipment_id') && Schema::hasTable('equipment')) {
                 $table->dropForeign(['equipment_id']);
             }
+
             if (Schema::hasColumn('transitions', 'employee_id') && Schema::hasTable('employees')) {
                 $table->dropForeign(['employee_id']);
             }
+
             if (Schema::hasColumn('transitions', 'created_by')) {
                 $table->dropForeign(['created_by']);
             }
+
             if (Schema::hasColumn('transitions', 'updated_by')) {
                 $table->dropForeign(['updated_by']);
             }
+
             if (Schema::hasColumn('transitions', 'deleted_by')) {
                 $table->dropForeign(['deleted_by']);
             }

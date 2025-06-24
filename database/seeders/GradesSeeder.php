@@ -27,7 +27,7 @@ class GradesSeeder extends Seeder
         $adminUserForAudit = User::orderBy('id')->first();
         $auditUserId = $adminUserForAudit?->id;
         if ($auditUserId) {
-            Log::info("Using User ID {$auditUserId} for audit columns in GradesSeeder.");
+            Log::info(sprintf('Using User ID %s for audit columns in GradesSeeder.', $auditUserId));
         }
 
         // Complete list of 282 grades from MyMail form, linking to positions via position_id
@@ -180,7 +180,7 @@ class GradesSeeder extends Seeder
         // MODIFIED: Filter the source data for unique combinations before processing.
         // This programmatically removes the duplicate entry ('8 (40)' for position_id 40)
         // and guards against any other potential duplicates.
-        $uniqueGrades = collect($grades)->unique(function ($item) {
+        $uniqueGrades = collect($grades)->unique(function (array $item): string {
             return $item['name'].'-'.$item['position_id'];
         });
 
@@ -191,7 +191,7 @@ class GradesSeeder extends Seeder
                 'name' => $gradeData['name'],
                 'position_id' => $gradeData['position_id'],
                 'level' => $level,
-                'is_approver_grade' => $level ? ($level >= 9) : false,
+                'is_approver_grade' => $level && $level >= 9,
                 'created_by' => $auditUserId,
                 'updated_by' => $auditUserId,
                 'created_at' => now(),
@@ -216,25 +216,32 @@ class GradesSeeder extends Seeder
         // Premier grades - highest priority
         if (str_contains($name, 'Menteri')) {
             return 90;
-        } // Arbitrary high level for political appointees
+        }
+        // Arbitrary high level for political appointees
         if (str_contains($name, 'Timbalan Menteri')) {
             return 80;
         }
+
         if (str_contains($name, 'TURUS I')) {
             return 76;
         }
+
         if (str_contains($name, 'TURUS II')) {
             return 74;
         }
+
         if (str_contains($name, 'TURUS III')) {
             return 72;
         }
+
         if (str_contains($name, 'JUSA A')) {
             return 70;
         }
+
         if (str_contains($name, 'JUSA B')) {
             return 68;
         }
+
         if (str_contains($name, 'JUSA C')) {
             return 66;
         }

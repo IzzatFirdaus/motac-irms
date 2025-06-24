@@ -26,9 +26,9 @@ class SubCategoriesSeeder extends Seeder
         if (! $auditUserId) {
             $adminUserForAudit = User::factory()->create(['name' => 'Audit User (SubCatSeeder)']);
             $auditUserId = $adminUserForAudit->id;
-            Log::info("Created a fallback audit user with ID {$auditUserId} for SubCategoriesSeeder.");
+            Log::info(sprintf('Created a fallback audit user with ID %d for SubCategoriesSeeder.', $auditUserId));
         } else {
-            Log::info("Using User ID {$auditUserId} for audit columns in SubCategoriesSeeder.");
+            Log::info(sprintf('Using User ID %s for audit columns in SubCategoriesSeeder.', $auditUserId));
         }
 
         $equipmentCategories = EquipmentCategory::all()->keyBy('name');
@@ -45,6 +45,7 @@ class SubCategoriesSeeder extends Seeder
 
                 return;
             }
+
             $equipmentCategories = EquipmentCategory::all()->keyBy('name'); // Re-fetch if seeder was called
         }
 
@@ -85,32 +86,32 @@ class SubCategoriesSeeder extends Seeder
                 );
                 $createdSpecificCount++;
             } else {
-                Log::warning("Parent EquipmentCategory '{$subCategoryDef['equipment_category_name']}' not found for subcategory '{$subCategoryDef['name']}'. Skipping this specific subcategory.");
+                Log::warning(sprintf("Parent EquipmentCategory '%s' not found for subcategory '%s'. Skipping this specific subcategory.", $subCategoryDef['equipment_category_name'], $subCategoryDef['name']));
             }
         }
-        Log::info("Ensured/Created {$createdSpecificCount} specific subcategories.");
+
+        Log::info(sprintf('Ensured/Created %d specific subcategories.', $createdSpecificCount));
 
         // Use the SubCategoryFactory.php to create additional random subcategories
         $targetFactoryCount = 15; // Number of additional random subcategories
 
         if ($equipmentCategories->isNotEmpty() && class_exists(SubCategory::class) && method_exists(SubCategory::class, 'factory')) {
-            $currentSubCategoryCount = SubCategory::count();
-            $needed = $targetFactoryCount - ($currentSubCategoryCount - $createdSpecificCount); // Aim for total, considering already created specifics. More simply, just add a fixed number of factory ones.
-            $needed = max(0, $targetFactoryCount); // Create at least $targetFactoryCount new ones via factory if possible.
-
-            if ($needed > 0) {
-                Log::info("Creating {$needed} additional random subcategories using factory...");
-                SubCategory::factory()
-                    ->count($needed)
-                    // The SubCategoryFactory.php handles linking to a random EquipmentCategory and audit stamps
-                    ->create(); // Factory will handle 'equipment_category_id' and 'created_by', 'updated_by'
-                Log::info("Created {$needed} additional subcategories using factory.");
-            }
+            $currentSubCategoryCount = SubCategory::count(); // Aim for total, considering already created specifics. More simply, just add a fixed number of factory ones.
+            $needed = max(0, $targetFactoryCount);
+            // Create at least $targetFactoryCount new ones via factory if possible.
+            Log::info(sprintf('Creating %d additional random subcategories using factory...', $needed));
+            SubCategory::factory()
+                ->count($needed)
+                // The SubCategoryFactory.php handles linking to a random EquipmentCategory and audit stamps
+                ->create();
+            // Factory will handle 'equipment_category_id' and 'created_by', 'updated_by'
+            Log::info(sprintf('Created %d additional subcategories using factory.', $needed));
         } elseif ($equipmentCategories->isEmpty()) {
             Log::warning('Skipping factory creation of SubCategories as no Equipment Categories exist to link to.');
         } else {
             Log::error('App\Models\SubCategory model or its factory not found. Cannot seed additional subcategories via factory.');
         }
+
         Log::info('SubCategories seeding complete (Revision 3 - Factory based).');
     }
 }

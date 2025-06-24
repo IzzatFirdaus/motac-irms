@@ -70,6 +70,7 @@ class GradePolicy
             if (method_exists($grade, 'users') && $grade->users()->exists()) {
                 return Response::deny('Gred ini tidak boleh dipadam kerana ia sedang digunakan oleh pengguna.');
             }
+
             if (method_exists($grade, 'positions') && $grade->positions()->exists()) {
                 return Response::deny('Gred ini tidak boleh dipadam kerana ia sedang digunakan oleh jawatan.');
             }
@@ -101,6 +102,7 @@ class GradePolicy
             if (method_exists($grade, 'users') && $grade->users()->exists()) {
                 return Response::deny('Gred ini tidak boleh dipadam secara kekal kerana ia sedang digunakan oleh pengguna.');
             }
+
             if (method_exists($grade, 'positions') && $grade->positions()->exists()) {
                 return Response::deny('Gred ini tidak boleh dipadam secara kekal kerana ia sedang digunakan oleh jawatan.');
             }

@@ -27,6 +27,7 @@ class AuthServiceProvider extends ServiceProvider
 {
     /**
      * The model to policy mappings for the application.
+     *
      * @var array<class-string, class-string>
      */
     protected $policies = [
@@ -48,10 +49,11 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        Gate::before(function (User $user, string $ability) {
+        Gate::before(function (User $user, string $ability): ?true {
             if ($user->hasRole('Admin')) {
                 return true;
             }
+
             return null;
         });
 
@@ -59,7 +61,7 @@ class AuthServiceProvider extends ServiceProvider
         // Explicitly define a gate for viewing the equipment admin index.
         // This removes all ambiguity in the test environment. The Gate::before
         // method already handles Admins, so this only needs to check for BPM Staff.
-        Gate::define('view-equipment-admin', function (User $user) {
+        Gate::define('view-equipment-admin', function (User $user): bool {
             return $user->hasRole('BPM Staff');
         });
     }

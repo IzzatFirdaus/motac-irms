@@ -31,7 +31,7 @@ return new class extends Migration
             $itemStatuses,
             $defaultStatus,
             $conditionStatuses
-        ) {
+        ): void {
             $table->id();
             $table->foreignId('loan_transaction_id')->constrained('loan_transactions')->cascadeOnDelete();
             $table->foreignId('equipment_id')->constrained('equipment')->onDelete('cascade');
@@ -57,14 +57,14 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('loan_transaction_items', function (Blueprint $table) {
+        Schema::table('loan_transaction_items', function (Blueprint $table): void {
             $foreignKeys = ['loan_transaction_id', 'equipment_id', 'loan_application_item_id', 'created_by', 'updated_by', 'deleted_by'];
             foreach ($foreignKeys as $key) {
                 if (Schema::hasColumn('loan_transaction_items', $key)) {
                     try {
                         $table->dropForeign([$key]);
                     } catch (\Exception $e) {
-                        Log::warning("Failed to drop FK {$key} on loan_transaction_items: ".$e->getMessage());
+                        Log::warning(sprintf('Failed to drop FK %s on loan_transaction_items: ', $key).$e->getMessage());
                     }
                 }
             }

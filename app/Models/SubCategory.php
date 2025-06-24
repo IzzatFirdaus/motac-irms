@@ -23,32 +23,44 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * Assumes a global BlameableObserver handles created_by, updated_by, deleted_by.
  *
  * @property int $id
- * @property int $equipment_category_id Foreign key to equipment_categories.id
- * @property string $name Name of the sub-category
- * @property string|null $description Optional description
- * @property bool $is_active Whether the sub-category is active (default: true)
- * @property int|null $created_by (Handled by BlameableObserver)
- * @property int|null $updated_by (Handled by BlameableObserver)
- * @property int|null $deleted_by (Handled by BlameableObserver)
+ * @property int $equipment_category_id
+ * @property string $name
+ * @property string|null $description
+ * @property bool $is_active
+ * @property int|null $created_by
+ * @property int|null $updated_by
+ * @property int|null $deleted_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \App\Models\EquipmentCategory $equipmentCategory The parent equipment category.
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Equipment> $equipment Equipment items belonging to this sub-category.
+ * @property-read \App\Models\User|null $creator
+ * @property-read \App\Models\User|null $deleter
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Equipment> $equipment
  * @property-read int|null $equipment_count
- * @property-read \App\Models\User|null $creator User who created this record.
- * @property-read \App\Models\User|null $updater User who last updated this record.
- * @property-read \App\Models\User|null $deleter User who soft-deleted this record.
- * @method static SubCategoryFactory factory($count = null, $state = [])
- * @method static Builder|SubCategory newModelQuery()
- * @method static Builder|SubCategory newQuery()
- * @method static Builder|SubCategory onlyTrashed()
- * @method static Builder|SubCategory query()
- * @method static Builder|SubCategory active()
- * @method static Builder|SubCategory byCategory(int $categoryId)
- * @method static Builder|SubCategory byName(string $name)
+ * @property-read \App\Models\EquipmentCategory $equipmentCategory
+ * @property-read \App\Models\User|null $updater
+ * @method static Builder<static>|SubCategory active()
+ * @method static Builder<static>|SubCategory byCategory(int $categoryId)
+ * @method static Builder<static>|SubCategory byName(string $name)
+ * @method static \Database\Factories\SubCategoryFactory factory($count = null, $state = [])
+ * @method static Builder<static>|SubCategory newModelQuery()
+ * @method static Builder<static>|SubCategory newQuery()
+ * @method static Builder<static>|SubCategory onlyTrashed()
+ * @method static Builder<static>|SubCategory query()
+ * @method static Builder<static>|SubCategory whereCreatedAt($value)
+ * @method static Builder<static>|SubCategory whereCreatedBy($value)
+ * @method static Builder<static>|SubCategory whereDeletedAt($value)
+ * @method static Builder<static>|SubCategory whereDeletedBy($value)
+ * @method static Builder<static>|SubCategory whereDescription($value)
+ * @method static Builder<static>|SubCategory whereEquipmentCategoryId($value)
+ * @method static Builder<static>|SubCategory whereId($value)
+ * @method static Builder<static>|SubCategory whereIsActive($value)
+ * @method static Builder<static>|SubCategory whereName($value)
+ * @method static Builder<static>|SubCategory whereUpdatedAt($value)
+ * @method static Builder<static>|SubCategory whereUpdatedBy($value)
+ * @method static Builder<static>|SubCategory withTrashed()
+ * @method static Builder<static>|SubCategory withoutTrashed()
  * @mixin \Eloquent
- * @mixin IdeHelperSubCategory
  */
 class SubCategory extends Model
 {

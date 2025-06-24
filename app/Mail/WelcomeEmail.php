@@ -62,12 +62,12 @@ final class WelcomeEmail extends Mailable implements ShouldQueue
         if ($recipientEmail) {
             $toAddresses[] = new Address($recipientEmail, $recipientName);
             Log::info(
-                "WelcomeEmail Mailable: Recipient identified for User ID: {$this->user->id}.",
+                sprintf('WelcomeEmail Mailable: Recipient identified for User ID: %d.', $this->user->id),
                 ['recipient_email' => $recipientEmail]
             );
         } else {
             Log::error(
-                "WelcomeEmail Mailable: Recipient email (personal or primary) not found for User ID: {$this->user->id}. Welcome email cannot be sent.",
+                sprintf('WelcomeEmail Mailable: Recipient email (personal or primary) not found for User ID: %d. Welcome email cannot be sent.', $this->user->id),
                 ['user_id' => $this->user->id]
             );
         }
@@ -78,13 +78,13 @@ final class WelcomeEmail extends Mailable implements ShouldQueue
         $metadata = [
             'user_id' => (string) ($this->user->id ?? 'unknown'),
             'motac_email' => $this->motacEmail,
-            'password_included_in_body' => ! empty($this->password) ? 'true' : 'false',
+            'password_included_in_body' => $this->password === '' || $this->password === '0' ? 'false' : 'true',
         ];
 
         Log::info('WelcomeEmail Mailable: Preparing envelope.', [
             'user_id' => $this->user->id,
             'subject' => $subject,
-            'to_recipients' => count($toAddresses) > 0 ? $toAddresses[0]->address : 'N/A',
+            'to_recipients' => $toAddresses !== [] ? $toAddresses[0]->address : 'N/A',
         ]);
 
         return new Envelope(

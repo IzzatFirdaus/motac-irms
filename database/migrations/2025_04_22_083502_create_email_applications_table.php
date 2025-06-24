@@ -31,20 +31,20 @@ return new class extends Migration
         Schema::create('email_applications', function (Blueprint $table) use (
             $applicationStatuses,
             $defaultStatus
-        ) {
+        ): void {
             $table->id();
             $table->foreignId('user_id')->comment('Applicant User ID')->constrained('users')->onDelete('cascade');
 
             // Applicant Snapshot fields (as per your provided migration)
-            $table->string('applicant_title')->nullable()->comment('Snapshot: Applicant\'s title (e.g., Encik, Puan)');
-            $table->string('applicant_name')->nullable()->comment('Snapshot: Applicant\'s full name');
-            $table->string('applicant_identification_number')->nullable()->comment('Snapshot: Applicant\'s NRIC');
-            $table->string('applicant_passport_number')->nullable()->comment('Snapshot: Applicant\'s Passport No');
-            $table->string('applicant_jawatan_gred')->nullable()->comment('Snapshot: Applicant\'s Jawatan & Gred text');
-            $table->string('applicant_bahagian_unit')->nullable()->comment('Snapshot: Applicant\'s Bahagian/Unit text');
-            $table->string('applicant_level_aras')->nullable()->comment('Snapshot: Applicant\'s Aras (Level) text');
-            $table->string('applicant_mobile_number')->nullable()->comment('Snapshot: Applicant\'s mobile number');
-            $table->string('applicant_personal_email')->nullable()->comment('Snapshot: Applicant\'s personal email');
+            $table->string('applicant_title')->nullable()->comment("Snapshot: Applicant's title (e.g., Encik, Puan)");
+            $table->string('applicant_name')->nullable()->comment("Snapshot: Applicant's full name");
+            $table->string('applicant_identification_number')->nullable()->comment("Snapshot: Applicant's NRIC");
+            $table->string('applicant_passport_number')->nullable()->comment("Snapshot: Applicant's Passport No");
+            $table->string('applicant_jawatan_gred')->nullable()->comment("Snapshot: Applicant's Jawatan & Gred text");
+            $table->string('applicant_bahagian_unit')->nullable()->comment("Snapshot: Applicant's Bahagian/Unit text");
+            $table->string('applicant_level_aras')->nullable()->comment("Snapshot: Applicant's Aras (Level) text");
+            $table->string('applicant_mobile_number')->nullable()->comment("Snapshot: Applicant's mobile number");
+            $table->string('applicant_personal_email')->nullable()->comment("Snapshot: Applicant's personal email");
 
             $table->string('service_status')->nullable()->comment('Key for Taraf Perkhidmatan, from User model options');
             $table->string('appointment_type')->nullable()->comment('Key for Pelantikan, from User model options');
@@ -55,7 +55,7 @@ return new class extends Migration
             $table->date('service_end_date')->nullable()->comment('For contract/intern');
 
             $table->text('purpose')->nullable()->comment('Purpose of application / Notes (Tujuan/Catatan)'); // Renamed from application_reason_notes
-            $table->string('proposed_email')->nullable()->comment('Applicant\'s proposed email or user ID'); // Removed unique() here as per your provided migration. Add if needed.
+            $table->string('proposed_email')->nullable()->comment("Applicant's proposed email or user ID"); // Removed unique() here as per your provided migration. Add if needed.
 
             $table->string('group_email')->nullable()->comment('Requested group email address');
             $table->string('group_admin_name')->nullable()->comment('Name of Admin/EO/CC for group email'); // Renamed from contact_person_name
@@ -92,14 +92,14 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('email_applications', function (Blueprint $table) {
+        Schema::table('email_applications', function (Blueprint $table): void {
             $foreignKeysToDrop = ['user_id', 'supporting_officer_id', 'processed_by', 'created_by', 'updated_by', 'deleted_by'];
             foreach ($foreignKeysToDrop as $key) {
                 if (Schema::hasColumn('email_applications', $key)) {
                     try {
                         $table->dropForeign([$key]);
                     } catch (\Exception $e) {
-                        Log::warning("Could not drop foreign key for {$key} on email_applications table: {$e->getMessage()}");
+                        Log::warning(sprintf('Could not drop foreign key for %s on email_applications table: %s', $key, $e->getMessage()));
                     }
                 }
             }

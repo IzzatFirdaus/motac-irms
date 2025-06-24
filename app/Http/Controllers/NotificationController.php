@@ -32,7 +32,7 @@ class NotificationController extends Controller
             ->latest()
             ->paginate(config('pagination.notifications_per_page', 15)); // Using a config for pagination
 
-        return view('notifications.index', compact('notifications')); // View path from SDD
+        return view('notifications.index', ['notifications' => $notifications]); // View path from SDD
     }
 
     /**
@@ -48,14 +48,14 @@ class NotificationController extends Controller
 
         if ((string) $notification->notifiable_id !== (string) $user->id ||
             $notification->notifiable_type !== $user->getMorphClass()) {
-            Log::warning("User {$user->id} attempted to act on notification ID {$notification->id} not belonging to them.");
+            Log::warning(sprintf('User %d attempted to act on notification ID %s not belonging to them.', $user->id, $notification->id));
 
             return redirect()->back()->with('error', __('Anda tidak mempunyai kebenaran untuk mengubah notifikasi ini.'));
         }
 
         if ($notification->unread()) { // Assumes unread() method on CustomDatabaseNotification
             $notification->markAsRead(); // Assumes markAsRead() method on CustomDatabaseNotification
-            Log::info("Notification ID {$notification->id} marked as read by User ID {$user->id}.");
+            Log::info(sprintf('Notification ID %s marked as read by User ID %d.', $notification->id, $user->id));
 
             return redirect()->back()->with('success', __('Notifikasi telah ditanda sebagai dibaca.'));
         }
@@ -75,7 +75,7 @@ class NotificationController extends Controller
 
         if ($unreadNotifications->count() > 0) {
             $unreadNotifications->update(['read_at' => now()]);
-            Log::info("All unread notifications marked as read for User ID {$user->id}.");
+            Log::info(sprintf('All unread notifications marked as read for User ID %d.', $user->id));
 
             return redirect()->back()->with('success', __('Semua notifikasi telah ditanda sebagai dibaca.'));
         }

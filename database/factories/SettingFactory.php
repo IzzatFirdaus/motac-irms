@@ -38,7 +38,7 @@ class SettingFactory extends Factory
     public function defaultRow(): static
     {
         return $this->state(
-            fn (array $attributes) => [
+            fn (array $attributes): array => [
                 'site_name' => 'MOTAC Integrated Resource Management System',
                 'site_logo_path' => '/images/motac_default_logo.png',
                 'application_name' => 'Sistem Pengurusan Sumber Bersepadu MOTAC',

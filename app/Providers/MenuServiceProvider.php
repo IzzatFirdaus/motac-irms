@@ -45,8 +45,8 @@ class MenuServiceProvider extends ServiceProvider
                 Log::error('[MenuServiceProvider] Menu data from config/menu.php is not in the expected array format. Structure type: '.gettype($menuConfigArray).'. Using default empty menu structure.');
                 // $menuDataObject remains default empty menu
             }
-        } catch (\Throwable $e) { // Catch any generic error during config access
-            Log::critical('[MenuServiceProvider] Exception occurred while processing MOTAC menu configuration: '.$e->getMessage(), ['exception' => $e]);
+        } catch (\Throwable $throwable) { // Catch any generic error during config access
+            Log::critical('[MenuServiceProvider] Exception occurred while processing MOTAC menu configuration: '.$throwable->getMessage(), ['exception' => $throwable]);
             // $menuDataObject remains default empty menu
         }
 

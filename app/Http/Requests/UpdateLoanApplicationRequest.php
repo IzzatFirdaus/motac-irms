@@ -31,7 +31,7 @@ class UpdateLoanApplicationRequest extends FormRequest
         return [
             'purpose' => ['nullable', 'string', 'min:10', 'max:1000'],
             'location' => ['nullable', 'string', 'max:255'],
-            'loan_start_date' => ['nullable', 'date_format:Y-m-d H:i:s', "after_or_equal:$today"],
+            'loan_start_date' => ['nullable', 'date_format:Y-m-d H:i:s', 'after_or_equal:'.$today],
             'loan_end_date' => ['nullable', 'date_format:Y-m-d H:i:s', 'after_or_equal:loan_start_date'],
             'return_location' => ['nullable', 'string', 'max:255'],
 
@@ -42,7 +42,7 @@ class UpdateLoanApplicationRequest extends FormRequest
             'items.*.id' => ['nullable', 'integer', Rule::exists('loan_application_items', 'id')
                 ->where('loan_application_id', $loanApplicationFromRoute?->id)],
             'items.*.equipment_type' => [
-                Rule::requiredIf(function () {
+                Rule::requiredIf(function (): bool {
                     foreach ($this->input('items', []) as $item) {
                         if (! empty($item['equipment_type']) || ! empty($item['quantity_requested'])) {
                             return true;
@@ -54,7 +54,7 @@ class UpdateLoanApplicationRequest extends FormRequest
                 'nullable', 'string', 'max:255', Rule::in(array_keys(Equipment::getAssetTypeOptions())), //
             ],
             'items.*.quantity_requested' => [
-                Rule::requiredIf(function () {
+                Rule::requiredIf(function (): bool {
                     foreach ($this->input('items', []) as $item) {
                         if (! empty($item['equipment_type']) || ! empty($item['quantity_requested'])) {
                             return true;
@@ -64,7 +64,7 @@ class UpdateLoanApplicationRequest extends FormRequest
                     return false;
                 }),
                 'nullable', 'integer', 'min:1', 'max:99',
-        ],
+            ],
             'items.*.notes' => ['nullable', 'string', 'max:1000'],
             'items.*._delete' => ['nullable', 'boolean'],
         ];

@@ -132,6 +132,7 @@ final class ApplicationRejected extends Notification implements ShouldQueue
                 }
             }
         }
+
         $data['url'] = ($applicationUrl !== '#' && filter_var($applicationUrl, FILTER_VALIDATE_URL)) ? $applicationUrl : null;
 
         return $data;

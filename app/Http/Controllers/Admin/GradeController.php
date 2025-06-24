@@ -38,7 +38,7 @@ class GradeController extends Controller
             ->orderBy('name', 'asc')
             ->paginate(config('pagination.default_size', 15));
 
-        return view('admin.grades.index', compact('grades'));
+        return view('admin.grades.index', ['grades' => $grades]);
     }
 
     /**
@@ -51,7 +51,7 @@ class GradeController extends Controller
         // Renamed variable to gradesList to match usage in previously reviewed Blade files
         $gradesList = Grade::orderBy('level')->orderBy('name')->get(['id', 'name', 'level']);
 
-        return view('admin.grades.create', compact('gradesList'));
+        return view('admin.grades.create', ['gradesList' => $gradesList]);
     }
 
     /**
@@ -67,10 +67,10 @@ class GradeController extends Controller
 
             return redirect()->route('settings.grades.index')
                 ->with('success', __('Gred berjaya ditambah.'));
-        } catch (\Exception $e) {
-            Log::error('Error storing grade by admin: '.$e->getMessage(), ['exception_class' => get_class($e), 'trace_snippet' => substr($e->getTraceAsString(), 0, 250)]);
+        } catch (\Exception $exception) {
+            Log::error('Error storing grade by admin: '.$exception->getMessage(), ['exception_class' => get_class($exception), 'trace_snippet' => substr($exception->getTraceAsString(), 0, 250)]);
 
-            return back()->with('error', __('Gagal menambah gred: ').$e->getMessage())->withInput();
+            return back()->with('error', __('Gagal menambah gred: ').$exception->getMessage())->withInput();
         }
     }
 
@@ -87,7 +87,7 @@ class GradeController extends Controller
         // For clarity, if you need counts and the relationship:
         // $grade->load('minApprovalGrade')->loadCount(['users', 'positions']);
 
-        return view('admin.grades.show', compact('grade'));
+        return view('admin.grades.show', ['grade' => $grade]);
     }
 
     /**
@@ -100,7 +100,7 @@ class GradeController extends Controller
         // Renamed variable to gradesList to match usage in previously reviewed Blade files
         $gradesList = Grade::orderBy('level')->orderBy('name')->where('id', '!=', $grade->id)->get(['id', 'name', 'level']);
 
-        return view('admin.grades.edit', compact('grade', 'gradesList'));
+        return view('admin.grades.edit', ['grade' => $grade, 'gradesList' => $gradesList]);
     }
 
     /**
@@ -109,17 +109,17 @@ class GradeController extends Controller
      */
     public function update(UpdateGradeRequest $request, Grade $grade): RedirectResponse
     {
-        Log::info("Admin GradeController@update: Attempting to update grade ID: {$grade->id}.", ['admin_user_id' => Auth::id(), 'data' => $request->except(['_token', '_method'])]);
+        Log::info(sprintf('Admin GradeController@update: Attempting to update grade ID: %d.', $grade->id), ['admin_user_id' => Auth::id(), 'data' => $request->except(['_token', '_method'])]);
         try {
             $grade->update($request->validated());
-            Log::info("Admin Grade ID: {$grade->id} updated successfully.", ['admin_user_id' => Auth::id()]);
+            Log::info(sprintf('Admin Grade ID: %d updated successfully.', $grade->id), ['admin_user_id' => Auth::id()]);
 
             return redirect()->route('settings.grades.index')
                 ->with('success', __('Butiran gred berjaya dikemaskini.'));
-        } catch (\Exception $e) {
-            Log::error("Error updating grade ID {$grade->id} by admin: ".$e->getMessage(), ['exception_class' => get_class($e), 'trace_snippet' => substr($e->getTraceAsString(), 0, 250)]);
+        } catch (\Exception $exception) {
+            Log::error(sprintf('Error updating grade ID %d by admin: ', $grade->id).$exception->getMessage(), ['exception_class' => get_class($exception), 'trace_snippet' => substr($exception->getTraceAsString(), 0, 250)]);
 
-            return back()->with('error', __('Gagal mengemaskini gred: ').$e->getMessage())->withInput();
+            return back()->with('error', __('Gagal mengemaskini gred: ').$exception->getMessage())->withInput();
         }
     }
 
@@ -129,21 +129,22 @@ class GradeController extends Controller
      */
     public function destroy(Grade $grade): RedirectResponse
     {
-        Log::info("Admin GradeController@destroy: Attempting to delete grade ID: {$grade->id}.", ['admin_user_id' => Auth::id()]);
+        Log::info(sprintf('Admin GradeController@destroy: Attempting to delete grade ID: %d.', $grade->id), ['admin_user_id' => Auth::id()]);
         try {
             if ($grade->users()->exists() || $grade->positions()->exists()) {
                 return redirect()->route('settings.grades.index')
                     ->with('error', __('Gred tidak boleh dipadam kerana masih digunakan oleh pengguna atau jawatan.'));
             }
+
             $grade->delete();
-            Log::info("Admin Grade ID: {$grade->id} deleted successfully.", ['admin_user_id' => Auth::id()]);
+            Log::info(sprintf('Admin Grade ID: %d deleted successfully.', $grade->id), ['admin_user_id' => Auth::id()]);
 
             return redirect()->route('settings.grades.index')
                 ->with('success', __('Gred berjaya dipadam.'));
-        } catch (\Exception $e) {
-            Log::error("Error deleting grade ID {$grade->id} by admin: ".$e->getMessage(), ['exception_class' => get_class($e), 'trace_snippet' => substr($e->getTraceAsString(), 0, 250)]);
+        } catch (\Exception $exception) {
+            Log::error(sprintf('Error deleting grade ID %d by admin: ', $grade->id).$exception->getMessage(), ['exception_class' => get_class($exception), 'trace_snippet' => substr($exception->getTraceAsString(), 0, 250)]);
 
-            return back()->with('error', __('Gagal memadam gred: ').$e->getMessage());
+            return back()->with('error', __('Gagal memadam gred: ').$exception->getMessage());
         }
     }
 }

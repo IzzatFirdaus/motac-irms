@@ -22,7 +22,7 @@ return new class extends Migration
         ];
         $defaultStatus = 'pending_approval';
 
-        Schema::create('loan_application_items', function (Blueprint $table) use ($itemStatuses, $defaultStatus) {
+        Schema::create('loan_application_items', function (Blueprint $table) use ($itemStatuses, $defaultStatus): void {
             $table->id();
             $table->foreignId('loan_application_id')->constrained('loan_applications')->cascadeOnDelete();
 
@@ -53,7 +53,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('loan_application_items', function (Blueprint $table) {
+        Schema::table('loan_application_items', function (Blueprint $table): void {
             $foreignKeysToDrop = ['loan_application_id', 'equipment_id', 'created_by', 'updated_by', 'deleted_by']; // Added 'equipment_id'
             foreach ($foreignKeysToDrop as $key) {
                 if (Schema::hasColumn('loan_application_items', $key)) {
@@ -65,7 +65,7 @@ return new class extends Migration
                         // For simplicity, we'll assume the default naming or that dropForeign handles non-existent keys gracefully in newer Laravel.
                         $table->dropForeign([$key]);
                     } catch (\Exception $e) {
-                        Log::warning("Could not drop foreign key for {$key} on loan_application_items table: ".$e->getMessage());
+                        Log::warning(sprintf('Could not drop foreign key for %s on loan_application_items table: ', $key).$e->getMessage());
                     }
                 }
             }

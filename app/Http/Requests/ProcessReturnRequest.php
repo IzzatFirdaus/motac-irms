@@ -49,7 +49,7 @@ final class ProcessReturnRequest extends FormRequest
         $issueTransactionFromRoute = $this->route('loanTransaction');
         $issueTransactionId = $issueTransactionFromRoute?->id;
 
-        $rules = [
+        return [
             // Overall transaction details
             // transaction_date is now part of the 'items' structure for more flexibility,
             // or can be a single field. Assuming a single transaction_date for the whole return operation.
@@ -63,7 +63,7 @@ final class ProcessReturnRequest extends FormRequest
             'items.*.loan_transaction_item_id' => [ // This key refers to the original issued LoanTransactionItem ID
                 'required',
                 'integer',
-                Rule::exists('loan_transaction_items', 'id')->where(function ($query) use ($issueTransactionId) {
+                Rule::exists('loan_transaction_items', 'id')->where(function ($query) use ($issueTransactionId): void {
                     if ($issueTransactionId) {
                         // Ensure the item ID belongs to the specific issue transaction being processed
                         $query->where('loan_transaction_id', $issueTransactionId)
@@ -79,12 +79,12 @@ final class ProcessReturnRequest extends FormRequest
                 'integer',
                 'min:1',
                 // Custom rule to check against originally issued quantity and already returned for THAT item
-                function ($attribute, $value, $fail) use ($issueTransactionFromRoute) {
+                function ($attribute, $value, $fail) use ($issueTransactionFromRoute): void {
                     // $attribute is like 'items.123.quantity_returned' where 123 is original_tx_item_id
                     $parts = explode('.', $attribute);
                     $originalIssuedItemId = $parts[1] ?? null; // This is the key of the item in the items array
 
-                    if (! $originalIssuedItemId || ! is_numeric($originalIssuedItemId)) {
+                    if ($originalIssuedItemId === null || $originalIssuedItemId === '' || $originalIssuedItemId === '0' || ! is_numeric($originalIssuedItemId)) {
                         return; // Other rules should catch invalid item ID
                     }
 
@@ -118,8 +118,6 @@ final class ProcessReturnRequest extends FormRequest
             'items.*.accessories_checklist_item' => ['nullable', 'array'],
             'items.*.accessories_checklist_item.*' => ['nullable', 'string', 'max:255'],
         ];
-
-        return $rules;
     }
 
     public function messages(): array
@@ -153,6 +151,7 @@ final class ProcessReturnRequest extends FormRequest
                 'transaction_date' => Carbon::now()->format('Y-m-d H:i:s'),
             ]);
         }
+
         if ($this->input('items') === null && ! $this->has('items')) {
             $this->merge(['items' => []]);
         }

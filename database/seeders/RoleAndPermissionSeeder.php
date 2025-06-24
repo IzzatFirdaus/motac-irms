@@ -89,6 +89,7 @@ class RoleAndPermissionSeeder extends Seeder
                 'create_email_applications', 'view_email_applications', 'edit_email_applications', 'cancel_email_applications', 'submit_email_applications',
             ]);
         }
+
         Log::info('Role and Permission seeding completed successfully.');
     }
 }

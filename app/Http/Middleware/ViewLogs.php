@@ -15,5 +15,7 @@ class ViewLogs
         }
 
         abort(401, 'Unauthorised');
+
+        return null;
     }
 }

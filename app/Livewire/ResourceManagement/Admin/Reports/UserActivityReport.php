@@ -30,7 +30,7 @@ class UserActivityReport extends Component
 
     protected string $paginationTheme = 'bootstrap';
 
-    public function mount()
+    public function mount(): void
     {
         // Ensure correct authorization. Example:
         // abort_unless(auth()->user()->can('view_user_activity_reports'), 403, 'Anda tidak mempunyai kebenaran untuk melihat laporan ini.');
@@ -46,17 +46,19 @@ class UserActivityReport extends Component
             'approvalsMade', // Corrected to match User model's likely relationship name for approvals made by user
         ])->with(['department', 'roles']); // Eager load department and roles
 
-        if (! empty($this->searchTerm)) {
-            $query->where(function ($q) {
+        if ($this->searchTerm !== '' && $this->searchTerm !== '0') {
+            $query->where(function ($q): void {
                 $q->where('name', 'like', '%'.$this->searchTerm.'%')
                     ->orWhere('email', 'like', '%'.$this->searchTerm.'%');
             });
         }
-        if ($this->filterDepartmentId) {
+
+        if ($this->filterDepartmentId !== null && $this->filterDepartmentId !== 0) {
             $query->where('department_id', $this->filterDepartmentId);
         }
-        if ($this->filterRoleName) {
-            $query->whereHas('roles', function ($q) {
+
+        if ($this->filterRoleName !== null && $this->filterRoleName !== '' && $this->filterRoleName !== '0') {
+            $query->whereHas('roles', function ($q): void {
                 $q->where('name', $this->filterRoleName);
             });
         }
@@ -96,6 +98,7 @@ class UserActivityReport extends Component
             $this->sortBy = $column;
             $this->sortDirection = 'asc';
         }
+
         $this->resetPage(); // Reset pagination when sorting changes
     }
 

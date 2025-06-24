@@ -84,7 +84,7 @@ final class LoanApplicationOverdueReminder extends Mailable implements ShouldQue
         }
 
         // Filter the issued items to find those not in the returned list
-        return $issuedItemsCollection->filter(function ($issuedItem) use ($returnedEquipmentIds) {
+        return $issuedItemsCollection->filter(function ($issuedItem) use ($returnedEquipmentIds): bool {
             return $issuedItem->equipment_id && ! $returnedEquipmentIds->contains($issuedItem->equipment_id);
         });
     }
@@ -106,12 +106,12 @@ final class LoanApplicationOverdueReminder extends Mailable implements ShouldQue
         if ($recipientEmail) {
             $toAddresses[] = new Address($recipientEmail, $applicantName);
             Log::info(
-                "LoanApplicationOverdueReminder Mailable: Recipient identified for Loan Application ID: {$applicationId}.",
+                sprintf('LoanApplicationOverdueReminder Mailable: Recipient identified for Loan Application ID: %s.', $applicationId),
                 ['recipient_email' => $recipientEmail]
             );
         } else {
             Log::error(
-                "LoanApplicationOverdueReminder Mailable: Recipient email not found for Loan Application ID: {$applicationId}. Notification cannot be sent.",
+                sprintf('LoanApplicationOverdueReminder Mailable: Recipient email not found for Loan Application ID: %s. Notification cannot be sent.', $applicationId),
                 [
                     'loan_application_id' => $applicationId,
                     'applicant_user_id' => $this->loanApplication->user_id ?? 'N/A',
@@ -119,14 +119,14 @@ final class LoanApplicationOverdueReminder extends Mailable implements ShouldQue
             );
         }
 
-        $subject = "Tindakan Diperlukan: Peringatan Peralatan Pinjaman ICT Lewat Dipulangkan (Permohonan #{$applicationId} - {$applicantName})";
+        $subject = sprintf('Tindakan Diperlukan: Peringatan Peralatan Pinjaman ICT Lewat Dipulangkan (Permohonan #%s - %s)', $applicationId, $applicantName);
 
         Log::info(
             'LoanApplicationOverdueReminder Mailable: Preparing envelope.',
             [
                 'loan_application_id' => $applicationId,
                 'subject' => $subject,
-                'to_recipients' => count($toAddresses) > 0 ? $toAddresses[0]->address : 'N/A',
+                'to_recipients' => $toAddresses !== [] ? $toAddresses[0]->address : 'N/A',
             ]
         );
 

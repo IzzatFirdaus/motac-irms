@@ -44,7 +44,7 @@ class Positions extends Component
     protected function rules(): array
     {
         $nameRule = ValidationRule::unique('positions', 'name');
-        if ($this->isEditMode && $this->positionInstance) {
+        if ($this->isEditMode && $this->positionInstance instanceof \App\Models\Position) {
             $nameRule->ignore($this->positionInstance->id);
         }
 
@@ -66,7 +66,7 @@ class Positions extends Component
         return view('livewire.human-resource.structure.positions');
     }
 
-    public function submitPosition()
+    public function submitPosition(): void
     {
         $this->validate(); // Uses rules() method
 
@@ -78,7 +78,7 @@ class Positions extends Component
             // 'vacancies_count' => $this->vacanciesCount, // Removed
         ];
 
-        if ($this->isEditMode && $this->positionInstance) {
+        if ($this->isEditMode && $this->positionInstance instanceof \App\Models\Position) {
             $this->positionInstance->update($data);
             session()->flash('toastr', ['type' => 'success', 'message' => __('Jawatan berjaya dikemaskini.')]);
         } else {
@@ -113,7 +113,7 @@ class Positions extends Component
         $this->dispatch('openModal', elementId: '#positionModal');
     }
 
-    public function confirmDeletePosition($id): void
+    public function confirmDeletePosition(?int $id): void
     {
         $this->confirmedId = $id;
     }

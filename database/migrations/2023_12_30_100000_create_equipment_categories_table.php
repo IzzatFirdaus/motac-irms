@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('equipment_categories', function (Blueprint $table) {
+        Schema::create('equipment_categories', function (Blueprint $table): void {
             $table->id();
             $table->string('name')->unique();
             $table->text('description')->nullable();
@@ -29,17 +29,20 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('equipment_categories', function (Blueprint $table) {
+        Schema::table('equipment_categories', function (Blueprint $table): void {
             // Drop foreign keys first
             if (Schema::hasColumn('equipment_categories', 'created_by')) {
                 $table->dropForeign(['created_by']);
             }
+
             if (Schema::hasColumn('equipment_categories', 'updated_by')) {
                 $table->dropForeign(['updated_by']);
             }
+
             if (Schema::hasColumn('equipment_categories', 'deleted_by')) {
                 $table->dropForeign(['deleted_by']);
             }
+
             // It's good practice to also drop columns if they were added in `up()`
             // However, the main goal of `down()` is to reverse `up()`.
             // If `is_active` was added, strictly it should be dropped here.

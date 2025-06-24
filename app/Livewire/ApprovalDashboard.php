@@ -62,7 +62,7 @@ class ApprovalDashboard extends Component
         $query = Approval::query()
             ->where('officer_id', $officer->id)
             ->with([
-                'approvable' => function ($morphTo) {
+                'approvable' => function ($morphTo): void {
                     $morphTo->morphWith([
                         EmailApplication::class => ['user:id,name,department_id', 'user.department:id,name'],
                         LoanApplication::class => ['user:id,name,department_id', 'user.department:id,name', 'loanApplicationItems'],
@@ -79,10 +79,10 @@ class ApprovalDashboard extends Component
             $query->where('approvable_type', $this->filterType);
         }
 
-        if (! empty($this->searchTerm)) {
-            $query->where(function ($q) {
-                $q->whereHasMorph('approvable', [LoanApplication::class, EmailApplication::class], function ($qAppro, $type) {
-                    $qAppro->whereHas('user', function ($qUser) {
+        if ($this->searchTerm !== '' && $this->searchTerm !== '0') {
+            $query->where(function ($q): void {
+                $q->whereHasMorph('approvable', [LoanApplication::class, EmailApplication::class], function ($qAppro, $type): void {
+                    $qAppro->whereHas('user', function ($qUser): void {
                         $qUser->where('name', 'like', '%'.$this->searchTerm.'%')
                             ->orWhere('email', 'like', '%'.$this->searchTerm.'%');
                     });
@@ -122,6 +122,7 @@ class ApprovalDashboard extends Component
 
             return;
         }
+
         // $this->authorize('actOn', $this->selectedApproval); // Authorization check
         $this->decision = '';
         $this->comments = $this->selectedApproval->comments ?? '';
@@ -136,7 +137,7 @@ class ApprovalDashboard extends Component
             'comments' => [Rule::requiredIf($this->decision === Approval::STATUS_REJECTED), 'nullable', 'string', 'min:5', 'max:1000'],
         ]);
 
-        if (! $this->selectedApproval) {
+        if (! $this->selectedApproval instanceof \App\Models\Approval) {
             return;
         }
 

@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('settings', function (Blueprint $table) {
+        Schema::create('settings', function (Blueprint $table): void {
             $table->id();
 
             // Original fields
@@ -43,13 +43,15 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('settings', function (Blueprint $table) {
+        Schema::table('settings', function (Blueprint $table): void {
             if (Schema::hasColumn('settings', 'created_by')) {
                 $table->dropForeign(['created_by']);
             }
+
             if (Schema::hasColumn('settings', 'updated_by')) {
                 $table->dropForeign(['updated_by']);
             }
+
             if (Schema::hasColumn('settings', 'deleted_by')) {
                 $table->dropForeign(['deleted_by']);
             }

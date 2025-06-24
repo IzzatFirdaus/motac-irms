@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('grades', function (Blueprint $table) {
+        Schema::table('grades', function (Blueprint $table): void {
             // Now that the 'positions' table exists, we can add the foreign key.
             $table->foreign('position_id')
                 ->references('id')
@@ -28,7 +28,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('grades', function (Blueprint $table) {
+        Schema::table('grades', function (Blueprint $table): void {
             // Drop in reverse order of creation
             $table->dropUnique(['name', 'position_id']);
             $table->dropForeign(['position_id']);

@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Approval;
-use App\Models\User;
-use App\Models\LoanApplication;
 use App\Models\EmailApplication;
 use App\Models\Equipment;
+use App\Models\LoanApplication;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -57,6 +57,7 @@ class DashboardController extends Controller
             'loan_approved_pending_issuance_count' => LoanApplication::where('status', 'approved')->count(),
             'loan_returned_count' => LoanApplication::where('status', 'returned')->count(),
         ];
+
         return view('dashboard.admin', $data);
     }
 
@@ -78,6 +79,7 @@ class DashboardController extends Controller
             'pending_email_applications_count' => EmailApplication::where('status', 'pending_admin')->count(),
             'processing_email_applications_count' => EmailApplication::where('status', 'processing')->count(),
         ];
+
         return view('dashboard.itadmin', $data);
     }
 
@@ -90,6 +92,7 @@ class DashboardController extends Controller
             'approved_last_30_days' => Approval::where('officer_id', $user->id)->where('status', 'approved')->where('updated_at', '>=', now()->subDays(30))->count(),
             'rejected_last_30_days' => Approval::where('officer_id', $user->id)->where('status', 'rejected')->where('updated_at', '>=', now()->subDays(30))->count(),
         ];
+
         return view('dashboard.approver', $data);
     }
 
@@ -104,6 +107,7 @@ class DashboardController extends Controller
             'active_loans_count' => $user->loanApplicationsAsApplicant()->whereIn('status', [LoanApplication::STATUS_ISSUED, LoanApplication::STATUS_PARTIALLY_ISSUED])->count(),
             'pending_applications_count' => $user->loanApplicationsAsApplicant()->where('status', 'like', 'pending_%')->count(),
         ];
+
         return view('dashboard.user', $data);
     }
 }

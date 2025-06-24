@@ -73,12 +73,12 @@ class UserFactory extends Factory
 
     public function canBeLoanApprover(): static
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes): array {
             $minSupportGradeLevel = (int) config('motac.approval.min_loan_support_grade_level', 41);
             $grade = Grade::where('level', '>=', $minSupportGradeLevel)->whereNotNull('level')->inRandomOrder()->first();
 
             if (! $grade) {
-                Log::warning("UserFactory: No grade found with level >= {$minSupportGradeLevel}. Cannot create a loan approver.");
+                Log::warning(sprintf('UserFactory: No grade found with level >= %d. Cannot create a loan approver.', $minSupportGradeLevel));
             }
 
             return ['grade_id' => $grade?->id];
@@ -87,12 +87,12 @@ class UserFactory extends Factory
 
     public function cannotBeLoanApprover(): static
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes): array {
             $minSupportGradeLevel = (int) config('motac.approval.min_loan_support_grade_level', 41);
             $grade = Grade::where('level', '<', $minSupportGradeLevel)->whereNotNull('level')->inRandomOrder()->first();
 
             if (! $grade) {
-                Log::warning("UserFactory: No grade found with level < {$minSupportGradeLevel}. Cannot create a non-approver user reliably.");
+                Log::warning(sprintf('UserFactory: No grade found with level < %d. Cannot create a non-approver user reliably.', $minSupportGradeLevel));
             }
 
             return ['grade_id' => $grade?->id];
@@ -101,18 +101,18 @@ class UserFactory extends Factory
 
     public function unverified(): static
     {
-        return $this->state(fn (array $attributes) => ['email_verified_at' => null]);
+        return $this->state(fn (array $attributes): array => ['email_verified_at' => null]);
     }
 
     public function configure(): static
     {
-        return $this->afterCreating(function (User $user) {
+        return $this->afterCreating(function (User $user): void {
             if (class_exists(\Spatie\Permission\Models\Role::class) && $user->roles->isEmpty()) {
                 $userRole = \Spatie\Permission\Models\Role::where('name', 'User')->first();
                 if ($userRole) {
                     $user->assignRole($userRole);
                 } else {
-                    Log::warning("UserFactory: Default 'User' role not found. User {$user->email} created without this role.");
+                    Log::warning(sprintf("UserFactory: Default 'User' role not found. User %s created without this role.", $user->email));
                 }
             }
         });
@@ -120,7 +120,7 @@ class UserFactory extends Factory
 
     public function pending(): static
     {
-        return $this->state(fn (array $attributes) => ['status' => User::STATUS_PENDING]);
+        return $this->state(fn (array $attributes): array => ['status' => User::STATUS_PENDING]);
     }
 
     public function asAdmin(): static
@@ -145,7 +145,7 @@ class UserFactory extends Factory
 
     public function asHod(): static
     {
-        return $this->afterCreating(function (User $user) {
+        return $this->afterCreating(function (User $user): void {
             $user->assignRole('HOD');
             if (! $user->hasRole('Approver')) {
                 $user->assignRole('Approver');
@@ -155,6 +155,6 @@ class UserFactory extends Factory
 
     public function deleted(): static
     {
-        return $this->state(fn (array $attributes) => ['deleted_at' => now()]);
+        return $this->state(fn (array $attributes): array => ['deleted_at' => now()]);
     }
 }

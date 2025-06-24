@@ -52,9 +52,11 @@ class EmailProvisionedNotification extends Notification implements ShouldQueue
             if ($assignedEmail) {
                 $mailMessage->line(__('Alamat e-mel MOTAC rasmi anda ialah: **:email**', ['email' => $assignedEmail]));
             }
+
             if ($assignedUserId) {
                 $mailMessage->line(__('ID Pengguna anda ialah: **:userId**', ['userId' => $assignedUserId]));
             }
+
             $mailMessage->line(__('Untuk mendapatkan kata laluan awal (jika berkenaan) dan arahan log masuk, sila rujuk maklumat yang mungkin dihantar secara berasingan atau hubungi Bahagian Pengurusan Maklumat (BPM) jika anda mempunyai sebarang pertanyaan.'));
         } else {
             // Fallback if somehow no email or ID is assigned but notification is triggered
@@ -68,7 +70,7 @@ class EmailProvisionedNotification extends Notification implements ShouldQueue
             try {
                 $applicationUrl = route($routeName, ['email_application' => $this->emailApplication->id]);
             } catch (\Throwable $e) {
-                Log::error("Error generating URL for EmailProvisionedNotification mail: {$e->getMessage()}", [
+                Log::error('Error generating URL for EmailProvisionedNotification mail: '.$e->getMessage(), [
                     'application_id' => $this->emailApplication->id,
                     'route_name' => $routeName,
                 ]);
@@ -97,9 +99,11 @@ class EmailProvisionedNotification extends Notification implements ShouldQueue
         if ($assignedEmail) {
             $messageText .= ' '.__('E-mel: :email.', ['email' => $assignedEmail]);
         }
+
         if ($assignedUserId) {
             $messageText .= ' '.__('ID Pengguna: :userId.', ['userId' => $assignedUserId]);
         }
+
         if (! $assignedEmail && ! $assignedUserId) {
             $messageText = __('Proses penyediaan akaun/ID pengguna ICT anda (#:appId) telah selesai.', ['appId' => $applicationId ?? 'N/A']);
         }

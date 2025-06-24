@@ -56,17 +56,7 @@ class EquipmentController extends Controller
         // For 'create' if not dynamic, you might pass all of them.
         $subCategories = SubCategory::where('is_active', true)->orderBy('name')->pluck('name', 'id');
 
-        return view('admin.equipment.create', compact(
-            'assetTypes',
-            'initialStatuses',
-            'conditionStatuses',
-            'acquisitionTypes',
-            'classifications',
-            'locations',
-            'departments',
-            'equipmentCategories',
-            'subCategories'
-        ));
+        return view('admin.equipment.create', ['assetTypes' => $assetTypes, 'initialStatuses' => $initialStatuses, 'conditionStatuses' => $conditionStatuses, 'acquisitionTypes' => $acquisitionTypes, 'classifications' => $classifications, 'locations' => $locations, 'departments' => $departments, 'equipmentCategories' => $equipmentCategories, 'subCategories' => $subCategories]);
     }
 
     /**
@@ -81,10 +71,10 @@ class EquipmentController extends Controller
 
             return redirect()->route('resource-management.equipment-admin.index')
                 ->with('success', __('Peralatan ICT berjaya ditambah.'));
-        } catch (\Exception $e) {
-            Log::error('Error storing equipment by admin: '.$e->getMessage(), ['exception_class' => get_class($e), 'trace_snippet' => substr($e->getTraceAsString(), 0, 500)]);
+        } catch (\Exception $exception) {
+            Log::error('Error storing equipment by admin: '.$exception->getMessage(), ['exception_class' => get_class($exception), 'trace_snippet' => substr($exception->getTraceAsString(), 0, 500)]);
 
-            return back()->with('error', __('Gagal menambah peralatan ICT: ').$e->getMessage())->withInput();
+            return back()->with('error', __('Gagal menambah peralatan ICT: ').$exception->getMessage())->withInput();
         }
     }
 
@@ -93,7 +83,7 @@ class EquipmentController extends Controller
      */
     public function show(Equipment $equipment): View
     {
-        Log::info("Admin\EquipmentController@show: Displaying equipment ID {$equipment->id}.", ['admin_user_id' => Auth::id()]);
+        Log::info(sprintf('Admin\EquipmentController@show: Displaying equipment ID %d.', $equipment->id), ['admin_user_id' => Auth::id()]);
         // Eager load necessary relationships for the show view
         $equipment->loadMissing([
             'department:id,name',
@@ -105,7 +95,7 @@ class EquipmentController extends Controller
             'loanTransactionItems.loanTransaction.loanApplication.user:id,name', // For detailed loan history
         ]);
 
-        return view('admin.equipment.show', compact('equipment'));
+        return view('admin.equipment.show', ['equipment' => $equipment]);
     }
 
     /**
@@ -113,7 +103,7 @@ class EquipmentController extends Controller
      */
     public function edit(Equipment $equipment): View
     {
-        Log::info("Admin\EquipmentController@edit: Displaying edit form for equipment ID {$equipment->id}.", ['admin_user_id' => Auth::id()]);
+        Log::info(sprintf('Admin\EquipmentController@edit: Displaying edit form for equipment ID %d.', $equipment->id), ['admin_user_id' => Auth::id()]);
 
         // Fetch all necessary data for dropdowns
         $assetTypes = Equipment::getAssetTypeOptions();
@@ -129,18 +119,7 @@ class EquipmentController extends Controller
         // or loaded dynamically via JavaScript/Livewire. For a standard dropdown, provide all.
         $subCategories = SubCategory::where('is_active', true)->orderBy('name')->pluck('name', 'id');
 
-        return view('admin.equipment.edit', compact(
-            'equipment',
-            'assetTypes',
-            'statusOptions',
-            'conditionStatusOptions',
-            'acquisitionTypes',
-            'classifications',
-            'locations',
-            'departments',
-            'equipmentCategories',
-            'subCategories'
-        ));
+        return view('admin.equipment.edit', ['equipment' => $equipment, 'assetTypes' => $assetTypes, 'statusOptions' => $statusOptions, 'conditionStatusOptions' => $conditionStatusOptions, 'acquisitionTypes' => $acquisitionTypes, 'classifications' => $classifications, 'locations' => $locations, 'departments' => $departments, 'equipmentCategories' => $equipmentCategories, 'subCategories' => $subCategories]);
     }
 
     /**
@@ -148,17 +127,17 @@ class EquipmentController extends Controller
      */
     public function update(UpdateEquipmentRequest $request, Equipment $equipment): RedirectResponse
     {
-        Log::info("Admin\EquipmentController@update: Attempting to update equipment ID: {$equipment->id}.", ['admin_user_id' => Auth::id(), 'data_keys' => array_keys($request->except(['_token', '_method']))]);
+        Log::info(sprintf('Admin\EquipmentController@update: Attempting to update equipment ID: %d.', $equipment->id), ['admin_user_id' => Auth::id(), 'data_keys' => array_keys($request->except(['_token', '_method']))]);
         try {
             $this->equipmentService->updateEquipment($equipment, $request->validated());
-            Log::info("Admin Equipment ID: {$equipment->id} updated successfully.", ['admin_user_id' => Auth::id()]);
+            Log::info(sprintf('Admin Equipment ID: %d updated successfully.', $equipment->id), ['admin_user_id' => Auth::id()]);
 
             return redirect()->route('resource-management.equipment-admin.index')
                 ->with('success', __('Butiran peralatan ICT berjaya dikemaskini.'));
-        } catch (\Exception $e) {
-            Log::error("Error updating equipment ID {$equipment->id} by admin: ".$e->getMessage(), ['exception_class' => get_class($e), 'trace_snippet' => substr($e->getTraceAsString(), 0, 500)]);
+        } catch (\Exception $exception) {
+            Log::error(sprintf('Error updating equipment ID %d by admin: ', $equipment->id).$exception->getMessage(), ['exception_class' => get_class($exception), 'trace_snippet' => substr($exception->getTraceAsString(), 0, 500)]);
 
-            return back()->with('error', __('Gagal mengemaskini peralatan ICT: ').$e->getMessage())->withInput();
+            return back()->with('error', __('Gagal mengemaskini peralatan ICT: ').$exception->getMessage())->withInput();
         }
     }
 
@@ -167,22 +146,23 @@ class EquipmentController extends Controller
      */
     public function destroy(Equipment $equipment): RedirectResponse
     {
-        Log::info("Admin\EquipmentController@destroy: Attempting to delete equipment ID: {$equipment->id}.", ['admin_user_id' => Auth::id()]);
+        Log::info(sprintf('Admin\EquipmentController@destroy: Attempting to delete equipment ID: %d.', $equipment->id), ['admin_user_id' => Auth::id()]);
         try {
             // Prevent deletion if the equipment is currently on loan
             if (defined(Equipment::class.'::STATUS_ON_LOAN') && $equipment->status === Equipment::STATUS_ON_LOAN) {
                 return redirect()->route('resource-management.equipment-admin.index')
                     ->with('error', __('Peralatan tidak boleh dipadam kerana sedang dalam pinjaman.'));
             }
+
             $this->equipmentService->deleteEquipment($equipment);
-            Log::info("Admin Equipment ID: {$equipment->id} deleted successfully.", ['admin_user_id' => Auth::id()]);
+            Log::info(sprintf('Admin Equipment ID: %d deleted successfully.', $equipment->id), ['admin_user_id' => Auth::id()]);
 
             return redirect()->route('resource-management.equipment-admin.index')
                 ->with('success', __('Peralatan ICT berjaya dipadam.'));
-        } catch (\Exception $e) {
-            Log::error("Error deleting equipment ID {$equipment->id} by admin: ".$e->getMessage(), ['exception_class' => get_class($e), 'trace_snippet' => substr($e->getTraceAsString(), 0, 500)]);
+        } catch (\Exception $exception) {
+            Log::error(sprintf('Error deleting equipment ID %d by admin: ', $equipment->id).$exception->getMessage(), ['exception_class' => get_class($exception), 'trace_snippet' => substr($exception->getTraceAsString(), 0, 500)]);
 
-            return back()->with('error', __('Gagal memadam peralatan ICT: ').$e->getMessage());
+            return back()->with('error', __('Gagal memadam peralatan ICT: ').$exception->getMessage());
         }
     }
 }

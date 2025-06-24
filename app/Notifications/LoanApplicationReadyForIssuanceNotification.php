@@ -64,8 +64,8 @@ class LoanApplicationReadyForIssuanceNotification extends Notification implement
             }
         }
 
-        $itemDetails = $loanApp->loanApplicationItems->map(function ($item) {
-            return "{$item->equipment_type} (Kuantiti: ".($item->quantity_approved ?? $item->quantity_requested).')';
+        $itemDetails = $loanApp->loanApplicationItems->map(function ($item): string {
+            return $item->equipment_type.' (Kuantiti: '.($item->quantity_approved ?? $item->quantity_requested).')';
         })->toArray();
 
         // The returned array now includes the corrected URL.

@@ -50,7 +50,7 @@ final class IssueEquipmentRequest extends FormRequest
             'items.*.loan_application_item_id' => [
                 'required',
                 'integer',
-                Rule::exists('loan_application_items', 'id')->where(function ($query) use ($loanApplicationId) {
+                Rule::exists('loan_application_items', 'id')->where(function ($query) use ($loanApplicationId): void {
                     if ($loanApplicationId) {
                         $query->where('loan_application_id', $loanApplicationId);
                     } else {
@@ -67,13 +67,14 @@ final class IssueEquipmentRequest extends FormRequest
                 'required',
                 'integer',
                 'min:1',
-                function ($attribute, $value, $fail) use ($loanApplicationFromRoute) {
+                function ($attribute, $value, $fail) use ($loanApplicationFromRoute): void {
                     $index = explode('.', $attribute)[1];
-                    $loanAppItemIdInput = $this->input("items.{$index}.loan_application_item_id");
+                    $loanAppItemIdInput = $this->input(sprintf('items.%s.loan_application_item_id', $index));
 
                     if (! ($loanAppItemIdInput && is_numeric($loanAppItemIdInput))) {
                         return;
                     }
+
                     $loanAppItemId = (int) $loanAppItemIdInput;
 
                     /** @var LoanApplicationItem|null $appItem */
@@ -84,7 +85,7 @@ final class IssueEquipmentRequest extends FormRequest
                     }
 
                     $alreadySuccessfullyIssued = (int) LoanTransactionItem::where('loan_application_item_id', $appItem->id)
-                        ->whereHas('loanTransaction', function ($q) {
+                        ->whereHas('loanTransaction', function ($q): void {
                             $q->where('type', LoanTransaction::TYPE_ISSUE)
                                 ->whereIn('status', [
                                     LoanTransaction::STATUS_ISSUED,
@@ -144,6 +145,7 @@ final class IssueEquipmentRequest extends FormRequest
                 'transaction_date' => now()->format('Y-m-d H:i:s'),
             ]);
         }
+
         if ($this->input('items') === null && ! $this->has('items')) {
             $this->merge(['items' => []]);
         }

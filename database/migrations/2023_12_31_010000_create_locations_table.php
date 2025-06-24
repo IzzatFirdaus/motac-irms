@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('locations', function (Blueprint $table) {
+        Schema::create('locations', function (Blueprint $table): void {
             $table->id();
             $table->string('name')->unique();
             $table->text('description')->nullable();
@@ -38,14 +38,16 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('locations', function (Blueprint $table) {
+        Schema::table('locations', function (Blueprint $table): void {
             // Drop foreign keys first
             if (Schema::hasColumn('locations', 'created_by')) { // Check if column exists before trying to drop FK
                 $table->dropForeign(['created_by']);
             }
+
             if (Schema::hasColumn('locations', 'updated_by')) {
                 $table->dropForeign(['updated_by']);
             }
+
             if (Schema::hasColumn('locations', 'deleted_by')) {
                 $table->dropForeign(['deleted_by']);
             }

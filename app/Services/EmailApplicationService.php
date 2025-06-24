@@ -21,9 +21,9 @@ final class EmailApplicationService
 {
     private const LOG_AREA = 'EmailApplicationService: ';
 
-    protected EmailProvisioningService $emailProvisioningService;
+    private EmailProvisioningService $emailProvisioningService;
 
-    protected ApprovalService $approvalService;
+    private ApprovalService $approvalService;
 
     private NotificationService $notificationService;
 
@@ -53,7 +53,7 @@ final class EmailApplicationService
     private function prepareApplicationData(array $inputData, User $applicantOrUpdater, ?EmailApplication $existingApplication = null): array
     {
         $applicationData = $inputData;
-        if (! $existingApplication) {
+        if (! $existingApplication instanceof \App\Models\EmailApplication) {
             $applicationData['user_id'] = $applicantOrUpdater->id;
             $snapshotFields = [
                 'applicant_title', 'applicant_name', 'applicant_identification_number',
@@ -73,10 +73,12 @@ final class EmailApplicationService
             $applicationData['purpose'] = $inputData['application_reason_notes'];
             unset($applicationData['application_reason_notes']);
         }
+
         if (isset($inputData['contact_person_name']) && ! isset($inputData['group_admin_name'])) {
             $applicationData['group_admin_name'] = $inputData['contact_person_name'];
             unset($applicationData['contact_person_name']);
         }
+
         if (isset($inputData['contact_person_email']) && ! isset($inputData['group_admin_email'])) {
             $applicationData['group_admin_email'] = $inputData['contact_person_email'];
             unset($applicationData['contact_person_email']);
@@ -91,9 +93,9 @@ final class EmailApplicationService
         $applicationData['cert_email_responsibility_agreed'] = $certResp;
 
         if ($certInfo && $certUsage && $certResp) {
-            if (! ($existingApplication && $existingApplication->certification_timestamp && $existingApplication->areAllCertificationsComplete())) {
+            if (! ($existingApplication instanceof \App\Models\EmailApplication && $existingApplication->certification_timestamp && $existingApplication->areAllCertificationsComplete())) {
                 $applicationData['certification_timestamp'] = Carbon::now();
-            } elseif ($existingApplication) {
+            } elseif ($existingApplication instanceof \App\Models\EmailApplication) {
                 $applicationData['certification_timestamp'] = $existingApplication->certification_timestamp;
             }
         } else {
@@ -125,6 +127,7 @@ final class EmailApplicationService
             Log::warning(self::LOG_AREA.'Attempt to update non-draft application.', ['id' => $application->id, 'status' => $application->status]);
             throw new RuntimeException(__('Hanya draf permohonan yang boleh dikemaskini.'));
         }
+
         Log::info(self::LOG_AREA.'Updating DRAFT email application.', ['id' => $application->id, 'user_id' => $updater->id]);
 
         return DB::transaction(function () use ($application, $data, $updater) {
@@ -152,8 +155,9 @@ final class EmailApplicationService
             if (! $supportingOfficerModel) {
                 throw new ModelNotFoundException(__('Pegawai Penyokong (dari sistem) yang dipilih tidak ditemui.'));
             }
+
             if (! $supportingOfficerModel->grade || (int) $supportingOfficerModel->grade->level < $minSupportGradeLevel) {
-                $minGradeName = Grade::where('level', $minSupportGradeLevel)->value('name') ?? "Gred {$minSupportGradeLevel}";
+                $minGradeName = Grade::where('level', $minSupportGradeLevel)->value('name') ?? 'Gred '.$minSupportGradeLevel;
                 throw new InvalidArgumentException(__('Pegawai Penyokong (:name) tidak memenuhi syarat gred minima (:minGrade). Gred semasa: :currentGrade', ['name' => $supportingOfficerModel->name, 'minGrade' => $minGradeName, 'currentGrade' => $supportingOfficerModel->grade?->name ?? __('Tidak Ditetapkan')]));
             }
         } elseif (empty($application->supporting_officer_name) || empty($application->supporting_officer_email) || empty($application->supporting_officer_grade)) {
@@ -169,10 +173,10 @@ final class EmailApplicationService
 
         $approvalTask = $this->approvalService->initiateApprovalWorkflow($application, $submitter, Approval::STAGE_EMAIL_SUPPORT_REVIEW, $supportingOfficerModel, $manualOfficerDetails);
         $this->notificationService->notifyApplicantApplicationSubmitted($application);
-        if ($approvalTask && $supportingOfficerModel) {
-            $this->notificationService->notifyApproverApplicationNeedsAction($approvalTask, $application, $supportingOfficerModel);
-        } elseif ($manualOfficerDetails) {
-            Log::info(self::LOG_AREA."Approval for Email App ID: {$application->id} relies on manual officer: {$manualOfficerDetails['officer_email']}. Manual notification may be required.");
+        if ($approvalTask instanceof \App\Models\Approval && $supportingOfficerModel) {
+            $this->notificationService->notifyApproverApplicationNeedsAction($approvalTask);
+        } elseif ($manualOfficerDetails !== null && $manualOfficerDetails !== []) {
+            Log::info(self::LOG_AREA.sprintf('Approval for Email App ID: %d relies on manual officer: %s. Manual notification may be required.', $application->id, $manualOfficerDetails['officer_email']));
         }
 
         Log::info(self::LOG_AREA.'Email application SUBMITTED.', ['id' => $application->id, 'status' => $application->status]);
@@ -187,7 +191,7 @@ final class EmailApplicationService
             throw new InvalidArgumentException(__('Semua tiga perakuan mesti ditandakan untuk menghantar permohonan.'));
         }
 
-        return DB::transaction(function () use ($data, $applicant) {
+        return DB::transaction(function () use ($data, $applicant): \App\Models\EmailApplication {
             $applicationData = $this->prepareApplicationData($data, $applicant);
             $applicationData['status'] = EmailApplication::STATUS_DRAFT;
             /** @var EmailApplication $application */
@@ -204,9 +208,10 @@ final class EmailApplicationService
             Log::warning(self::LOG_AREA.'Attempt to submit non-draft application.', ['id' => $application->id, 'status' => $application->status]);
             throw new RuntimeException(__('Hanya draf permohonan yang boleh dihantar.'));
         }
+
         Log::info(self::LOG_AREA.'Submitting DRAFT email application.', ['id' => $application->id, 'submitter_id' => $submitter->id]);
 
-        return DB::transaction(function () use ($application, $data, $submitter) {
+        return DB::transaction(function () use ($application, $data, $submitter): \App\Models\EmailApplication {
             $updateData = $this->prepareApplicationData($data, $submitter, $application);
             $application->fill($updateData)->save();
 
@@ -221,6 +226,7 @@ final class EmailApplicationService
             $currentStatusLabel = EmailApplication::getStatusOptions()[$application->status] ?? $application->status;
             throw new RuntimeException(__('Permohonan mesti berstatus diluluskan, menunggu tindakan IT, atau gagal sebelum ini untuk tindakan penyediaan. Status semasa: :currentStatus', ['currentStatus' => __($currentStatusLabel)]));
         }
+
         Log::info(self::LOG_AREA.'Processing provisioning for EmailApplication.', ['id' => $application->id, 'admin_id' => $actingAdmin->id]);
 
         return DB::transaction(function () use ($application, $provisioningDetails, $actingAdmin) {
@@ -234,6 +240,7 @@ final class EmailApplicationService
             if (empty($targetEmail) && empty($targetUserId)) {
                 throw new InvalidArgumentException(__('E-mel rasmi atau ID Pengguna yang akan disediakan adalah mandatori.'));
             }
+
             $application->final_assigned_email = $targetEmail;
             $application->final_assigned_user_id = $targetUserId;
 
@@ -249,11 +256,14 @@ final class EmailApplicationService
                     if ($application->final_assigned_email) {
                         $userToUpdate->motac_email = $application->final_assigned_email;
                     }
+
                     if ($application->final_assigned_user_id) {
                         $userToUpdate->user_id_assigned = $application->final_assigned_user_id;
                     }
+
                     $userToUpdate->save();
                 }
+
                 Log::info(self::LOG_AREA.'Provisioning COMPLETED.', ['id' => $application->id, 'assigned_email' => $application->final_assigned_email]);
                 if ($application->user && method_exists($this->notificationService, 'notifyApplicantEmailProvisioned')) {
                     $this->notificationService->notifyApplicantEmailProvisioned($application);
@@ -272,6 +282,7 @@ final class EmailApplicationService
                     }
                 }
             }
+
             $application->save();
 
             return $application->fresh($this->defaultEmailApplicationRelations);
@@ -284,9 +295,10 @@ final class EmailApplicationService
             Log::warning(self::LOG_AREA.'Attempt to delete non-draft application.', ['id' => $application->id, 'status' => $application->status, 'deleter_id' => $deleter->id]);
             throw new RuntimeException(__('Hanya draf permohonan yang boleh dibuang.'));
         }
+
         Log::info(self::LOG_AREA.'Attempting soft delete.', ['id' => $application->id, 'deleter_id' => $deleter->id]);
         try {
-            return DB::transaction(function () use ($application) {
+            return DB::transaction(function () use ($application): bool {
                 $result = $application->delete();
                 if ($result) {
                     Log::info(self::LOG_AREA.'Soft DELETED successfully.', ['id' => $application->id]);
@@ -296,9 +308,9 @@ final class EmailApplicationService
 
                 return (bool) $result;
             });
-        } catch (Throwable $e) {
-            Log::error(self::LOG_AREA.'Error during soft delete.', ['id' => $application->id, 'error' => $e->getMessage()]);
-            throw new RuntimeException(__('Gagal memadamkan permohonan e-mel: ').$e->getMessage(), 0, $e);
+        } catch (Throwable $throwable) {
+            Log::error(self::LOG_AREA.'Error during soft delete.', ['id' => $application->id, 'error' => $throwable->getMessage()]);
+            throw new RuntimeException(__('Gagal memadamkan permohonan e-mel: ').$throwable->getMessage(), 0, $throwable);
         }
     }
 

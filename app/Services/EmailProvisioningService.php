@@ -22,21 +22,19 @@ final class EmailProvisioningService
 
     private const API_CREATE_ACCOUNT_ENDPOINT_PATH = '/create-account'; // Example, make configurable if it changes often
 
-    protected ?string $apiKey;
+    private ?string $apiKey;
 
-    protected ?string $apiBaseUrl;
-
-    protected string $defaultDomain;
+    private ?string $apiBaseUrl;
 
     public function __construct()
     {
         $this->apiKey = Config::get('motac.email_provisioning.api_key');
-        $this->apiBaseUrl = Config::get('motac.email_provisioning.api_endpoint');
-        $this->defaultDomain = Config::get('motac.email_provisioning.default_domain', 'motac.gov.my'); // [cite: 349]
+        $this->apiBaseUrl = Config::get('motac.email_provisioning.api_endpoint'); // [cite: 349]
 
         if (empty($this->apiBaseUrl) && ! app()->environment('testing')) {
             Log::warning(self::LOG_AREA.'API Base URL is not configured. Provisioning will be simulated for relevant environments.');
         }
+
         if (empty($this->apiKey) && ! app()->environment('testing')) {
             Log::warning(self::LOG_AREA.'API Key is not configured. Provisioning will be simulated for relevant environments.');
         }
@@ -72,7 +70,7 @@ final class EmailProvisioningService
         $applicant = $application->user; // Assuming user relationship is loaded or accessible
 
         // Simulation mode if API is not configured or for specific environments
-        if (empty($this->apiBaseUrl) || empty($this->apiKey)) {
+        if ($this->apiBaseUrl === null || $this->apiBaseUrl === '' || $this->apiBaseUrl === '0' || ($this->apiKey === null || $this->apiKey === '' || $this->apiKey === '0')) {
             Log::warning(self::LOG_AREA.'API endpoint or key not configured. Simulating provisioning outcome.', [
                 'application_id' => $application->id,
                 'environment' => app()->environment(),
@@ -137,9 +135,11 @@ final class EmailProvisioningService
                 if (isset($responseBody['message'])) {
                     $errorMessage .= ' - '.$responseBody['message'];
                 }
+
                 if (isset($responseBody['errors'])) {
                     $errorMessage .= ' '.__('Butiran:').' '.json_encode($responseBody['errors']);
                 }
+
                 if (isset($responseBody['error_code'])) {
                     $errorCode = $responseBody['error_code'];
                 }
@@ -161,17 +161,17 @@ final class EmailProvisioningService
                 'error_code' => $errorCode,
             ];
 
-        } catch (Throwable $e) { // Catch any connection exceptions or other Throwables
+        } catch (Throwable $throwable) { // Catch any connection exceptions or other Throwables
             Log::critical(self::LOG_AREA.'Exception during provisioning API call.', [
                 'application_id' => $application->id,
-                'error' => $e->getMessage(),
-                'exception_class' => get_class($e),
-                'trace_snippet' => substr($e->getTraceAsString(), 0, 1000), // Increased trace snippet
+                'error' => $throwable->getMessage(),
+                'exception_class' => get_class($throwable),
+                'trace_snippet' => substr($throwable->getTraceAsString(), 0, 1000), // Increased trace snippet
             ]);
 
             return [
                 'success' => false,
-                'message' => __('Ralat kritikal semasa menghubungi servis penyediaan e-mel: ').$e->getMessage(),
+                'message' => __('Ralat kritikal semasa menghubungi servis penyediaan e-mel: ').$throwable->getMessage(),
                 'assigned_email' => null,
                 'assigned_user_id' => null,
                 'error_code' => 'EXCEPTION_ERROR',

@@ -34,37 +34,37 @@ class EmailApplicationController extends Controller
         $user = $request->user();
         $validatedData = $request->validated();
 
-        Log::info("EmailApplicationController@store: User ID {$user->id} storing new email application draft.");
+        Log::info(sprintf('EmailApplicationController@store: User ID %d storing new email application draft.', $user->id));
 
         try {
             $application = $this->emailApplicationService->createDraftApplication(
                 $validatedData,
                 $user
             );
-            Log::info("Email application draft ID: {$application->id} created successfully by User ID: {$user->id}.");
+            Log::info(sprintf('Email application draft ID: %d created successfully by User ID: %d.', $application->id, $user->id));
 
             return redirect()
                 ->route('email-applications.show', $application)
                 ->with('success', __('Draf permohonan e-mel berjaya dicipta. Anda boleh menyunting atau menghantarnya untuk kelulusan.'));
-        } catch (Throwable $e) {
-            Log::error("Error storing email application draft for User ID: {$user->id}.", [
-                'error' => $e->getMessage(),
-                'exception_trace_snippet' => substr($e->getTraceAsString(), 0, 500),
+        } catch (Throwable $throwable) {
+            Log::error(sprintf('Error storing email application draft for User ID: %d.', $user->id), [
+                'error' => $throwable->getMessage(),
+                'exception_trace_snippet' => substr($throwable->getTraceAsString(), 0, 500),
                 'request_data' => $request->except(['_token', 'password', 'password_confirmation']),
             ]);
 
-            return redirect()->back()->withInput()->with('error', __('Gagal mencipta draf permohonan e-mel: ').$e->getMessage());
+            return redirect()->back()->withInput()->with('error', __('Gagal mencipta draf permohonan e-mel: ').$throwable->getMessage());
         }
     }
 
     public function show(EmailApplication $emailApplication): View
     {
-        Log::info('EmailApplicationController@show: User ID '.Auth::id()." viewing EmailApplication ID {$emailApplication->id}.");
+        Log::info('EmailApplicationController@show: User ID '.Auth::id().sprintf(' viewing EmailApplication ID %d.', $emailApplication->id));
 
         // Use the default relations defined in the service for consistency
         $emailApplication->loadMissing($this->emailApplicationService->getDefaultEmailApplicationRelations());
 
-        return view('email-applications.show', compact('emailApplication'));
+        return view('email-applications.show', ['emailApplication' => $emailApplication]);
     }
 
     public function update(UpdateEmailApplicationRequest $request, EmailApplication $emailApplication): RedirectResponse
@@ -74,7 +74,7 @@ class EmailApplicationController extends Controller
         $validatedData = $request->validated();
 
         if (! $emailApplication->isDraft()) {
-            Log::warning("User ID {$user->id} attempt to update non-draft EmailApplication ID {$emailApplication->id}.", [
+            Log::warning(sprintf('User ID %d attempt to update non-draft EmailApplication ID %d.', $user->id, $emailApplication->id), [
                 'application_status' => $emailApplication->status,
             ]);
 
@@ -83,7 +83,7 @@ class EmailApplicationController extends Controller
                 ->with('error', __('Hanya draf permohonan yang boleh dikemaskini.'));
         }
 
-        Log::info("EmailApplicationController@update: User ID {$user->id} attempting to update EmailApplication ID {$emailApplication->id}.");
+        Log::info(sprintf('EmailApplicationController@update: User ID %d attempting to update EmailApplication ID %d.', $user->id, $emailApplication->id));
 
         try {
             $updatedApplication = $this->emailApplicationService->updateDraftApplication(
@@ -91,19 +91,19 @@ class EmailApplicationController extends Controller
                 $validatedData,
                 $user
             );
-            Log::info("EmailApplication ID {$updatedApplication->id} updated successfully by User ID {$user->id}.");
+            Log::info(sprintf('EmailApplication ID %d updated successfully by User ID %d.', $updatedApplication->id, $user->id));
 
             return redirect()
                 ->route('email-applications.show', $updatedApplication)
                 ->with('success', __('Permohonan e-mel berjaya dikemaskini.'));
-        } catch (Throwable $e) {
-            Log::error("Error updating EmailApplication ID {$emailApplication->id} by User ID {$user->id}.", [
-                'error' => $e->getMessage(),
-                'exception_trace_snippet' => substr($e->getTraceAsString(), 0, 500),
+        } catch (Throwable $throwable) {
+            Log::error(sprintf('Error updating EmailApplication ID %d by User ID %d.', $emailApplication->id, $user->id), [
+                'error' => $throwable->getMessage(),
+                'exception_trace_snippet' => substr($throwable->getTraceAsString(), 0, 500),
                 'request_data' => $request->except(['_token', 'password', 'password_confirmation']),
             ]);
 
-            return redirect()->back()->withInput()->with('error', __('Gagal mengemaskini permohonan e-mel: ').$e->getMessage());
+            return redirect()->back()->withInput()->with('error', __('Gagal mengemaskini permohonan e-mel: ').$throwable->getMessage());
         }
     }
 
@@ -113,7 +113,7 @@ class EmailApplicationController extends Controller
         $user = $request->user();
         $validatedData = $request->validated();
 
-        Log::info("EmailApplicationController@submitApplication: User ID {$user->id} attempting to submit EmailApplication ID {$emailApplication->id}.");
+        Log::info(sprintf('EmailApplicationController@submitApplication: User ID %d attempting to submit EmailApplication ID %d.', $user->id, $emailApplication->id));
 
         try {
             $submittedApplication = $this->emailApplicationService->submitDraftApplication(
@@ -121,19 +121,19 @@ class EmailApplicationController extends Controller
                 $validatedData,
                 $user
             );
-            Log::info("EmailApplication ID {$submittedApplication->id} submitted successfully by User ID {$user->id}. Status: {$submittedApplication->status}");
+            Log::info(sprintf('EmailApplication ID %d submitted successfully by User ID %d. Status: %s', $submittedApplication->id, $user->id, $submittedApplication->status));
 
             return redirect()
                 ->route('email-applications.show', $submittedApplication)
                 ->with('success', __('Permohonan e-mel berjaya dihantar untuk kelulusan.'));
-        } catch (Throwable $e) {
-            Log::error("Error submitting EmailApplication ID {$emailApplication->id} by User ID {$user->id}.", [
-                'error' => $e->getMessage(),
-                'exception_trace_snippet' => substr($e->getTraceAsString(), 0, 500),
+        } catch (Throwable $throwable) {
+            Log::error(sprintf('Error submitting EmailApplication ID %d by User ID %d.', $emailApplication->id, $user->id), [
+                'error' => $throwable->getMessage(),
+                'exception_trace_snippet' => substr($throwable->getTraceAsString(), 0, 500),
                 'request_data' => $request->except(['_token', 'password', 'password_confirmation']),
             ]);
-            $errorMessage = ($e instanceof \RuntimeException || $e instanceof \InvalidArgumentException)
-                ? $e->getMessage()
+            $errorMessage = ($throwable instanceof \RuntimeException || $throwable instanceof \InvalidArgumentException)
+                ? $throwable->getMessage()
                 : __('Gagal menghantar permohonan e-mel disebabkan ralat sistem.');
 
             return redirect()->route('email-applications.show', $emailApplication)->with('error', $errorMessage);
@@ -147,7 +147,7 @@ class EmailApplicationController extends Controller
         $this->authorize('delete', $emailApplication);
 
         if (! $emailApplication->isDraft()) {
-            Log::warning("User ID {$user->id} attempt to delete non-draft EmailApplication ID {$emailApplication->id}.", [
+            Log::warning(sprintf('User ID %d attempt to delete non-draft EmailApplication ID %d.', $user->id, $emailApplication->id), [
                 'application_status' => $emailApplication->status,
             ]);
 
@@ -155,24 +155,25 @@ class EmailApplicationController extends Controller
                 ->route('email-applications.show', $emailApplication)
                 ->with('error', __('Hanya draf permohonan yang boleh dibuang.'));
         }
-        Log::info("EmailApplicationController@destroy: User ID {$user->id} attempting to soft delete EmailApplication ID {$emailApplication->id}.");
+
+        Log::info(sprintf('EmailApplicationController@destroy: User ID %d attempting to soft delete EmailApplication ID %d.', $user->id, $emailApplication->id));
         try {
             $this->emailApplicationService->deleteApplication(
                 $emailApplication,
                 $user
             );
-            Log::info("EmailApplication ID {$emailApplication->id} soft deleted successfully by User ID {$user->id}.");
+            Log::info(sprintf('EmailApplication ID %d soft deleted successfully by User ID %d.', $emailApplication->id, $user->id));
 
             return redirect()->route('email-applications.index')
                 ->with('success', __('Permohonan e-mel berjaya dibuang.'));
-        } catch (Throwable $e) {
-            Log::error("Error soft deleting EmailApplication ID {$emailApplication->id} by User ID {$user->id}.", [
-                'error' => $e->getMessage(),
-                'exception_trace_snippet' => substr($e->getTraceAsString(), 0, 500),
+        } catch (Throwable $throwable) {
+            Log::error(sprintf('Error soft deleting EmailApplication ID %d by User ID %d.', $emailApplication->id, $user->id), [
+                'error' => $throwable->getMessage(),
+                'exception_trace_snippet' => substr($throwable->getTraceAsString(), 0, 500),
             ]);
 
             return redirect()->route('email-applications.show', $emailApplication)
-                ->with('error', __('Gagal membuang permohonan e-mel disebabkan ralat sistem: ').$e->getMessage());
+                ->with('error', __('Gagal membuang permohonan e-mel disebabkan ralat sistem: ').$throwable->getMessage());
         }
     }
 }

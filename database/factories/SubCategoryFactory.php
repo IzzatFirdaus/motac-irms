@@ -40,7 +40,7 @@ class SubCategoryFactory extends Factory
     public function inactive(): static
     {
         return $this->state(
-            fn (array $attributes) => [
+            fn (array $attributes): array => [
                 'is_active' => false,
             ]
         );
@@ -54,7 +54,7 @@ class SubCategoryFactory extends Factory
         }
 
         return $this->state(
-            fn (array $attributes) => [
+            fn (array $attributes): array => [
                 'deleted_at' => Carbon::now(),
                 'deleted_by' => $deleterId,
             ]
@@ -68,7 +68,7 @@ class SubCategoryFactory extends Factory
             : $equipmentCategory;
 
         return $this->state(
-            fn (array $attributes) => [
+            fn (array $attributes): array => [
                 'equipment_category_id' => $equipmentCategoryId,
             ]
         );

@@ -27,9 +27,9 @@ class SettingsSeeder extends Seeder
             // This relies on UserFactory being correctly set up.
             $fallbackUser = User::factory()->create(['name' => 'Audit User (SettingsSeeder)']);
             $auditUserId = $fallbackUser->id;
-            Log::info("Created a fallback audit user with ID {$auditUserId} for SettingsSeeder.");
+            Log::info(sprintf('Created a fallback audit user with ID %d for SettingsSeeder.', $auditUserId));
         } else {
-            Log::info("Using User ID {$auditUserId} for audit columns in SettingsSeeder.");
+            Log::info(sprintf('Using User ID %s for audit columns in SettingsSeeder.', $auditUserId));
         }
 
         // Define overrides for the factory's defaultRow state if needed.

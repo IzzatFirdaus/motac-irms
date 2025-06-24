@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('employees', function (Blueprint $table) {
+        Schema::create('employees', function (Blueprint $table): void {
             $table->id();
             // Removed: $table->foreignId('contract_id')->constrained();
             $table->string('first_name');
@@ -47,7 +47,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('employees', function (Blueprint $table) {
+        Schema::table('employees', function (Blueprint $table): void {
             // Drop foreign keys for blameable fields if they were added
             $foreignKeysToDrop = ['created_by', 'updated_by', 'deleted_by'];
             foreach ($foreignKeysToDrop as $key) {
@@ -60,7 +60,7 @@ return new class extends Migration
                         // For simplicity, direct dropForeign is often used with try-catch.
                         $table->dropForeign([$key]);
                     } catch (\Exception $e) {
-                        Log::warning("Could not drop foreign key for {$key} on employees table: ".$e->getMessage());
+                        Log::warning(sprintf('Could not drop foreign key for %s on employees table: ', $key).$e->getMessage());
                     }
                 }
             }

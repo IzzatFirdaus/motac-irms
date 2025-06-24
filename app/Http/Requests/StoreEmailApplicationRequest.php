@@ -33,7 +33,7 @@ class StoreEmailApplicationRequest extends FormRequest
         $levelOptionsKeys = method_exists(User::class, 'getLevelOptions') ?
             array_keys(User::getLevelOptions()) : [];
 
-        $rules = [
+        return [
             // Applicant snapshot fields. These are sent by the Livewire component based on MyMail form.
             // Validate them here if they are used by the service layer before actual User model creation/update.
             // If the EmailApplication model stores these as a snapshot, ensure its $fillable allows them.
@@ -52,40 +52,40 @@ class StoreEmailApplicationRequest extends FormRequest
             'appointment_type' => ['required', 'string', Rule::in($appointmentTypeKeys)],
 
             'previous_department_name' => [
-                Rule::requiredIf(fn () => $this->input('appointment_type') === User::APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN), // User model constant [cite: 107]
+                Rule::requiredIf(fn (): bool => $this->input('appointment_type') === User::APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN), // User model constant [cite: 107]
                 'nullable', 'string', 'max:255',
             ],
             'previous_department_email' => [
-                Rule::requiredIf(fn () => $this->input('appointment_type') === User::APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN),
+                Rule::requiredIf(fn (): bool => $this->input('appointment_type') === User::APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN),
                 'nullable', 'email:rfc,dns', 'max:255',
             ],
             // Service start/end dates conditional on service_status [cite: 103]
-            'service_start_date' => ['nullable', 'date_format:Y-m-d', Rule::requiredIf(fn () => in_array($this->input('service_status'), [
+            'service_start_date' => ['nullable', 'date_format:Y-m-d', Rule::requiredIf(fn (): bool => in_array($this->input('service_status'), [
                 User::SERVICE_STATUS_KONTRAK_MYSTEP, User::SERVICE_STATUS_PELAJAR_INDUSTRI, // User model constants
             ]))],
-            'service_end_date' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:service_start_date', Rule::requiredIf(fn () => in_array($this->input('service_status'), [
+            'service_end_date' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:service_start_date', Rule::requiredIf(fn (): bool => in_array($this->input('service_status'), [
                 User::SERVICE_STATUS_KONTRAK_MYSTEP, User::SERVICE_STATUS_PELAJAR_INDUSTRI,
             ]))],
 
             'application_reason_notes' => ['required', 'string', 'min:10', 'max:2000'],
             'proposed_email' => [
                 'nullable', 'string', 'max:255',
-                Rule::when(fn ($input) => ! empty($input->proposed_email) && str_contains((string) $input->proposed_email, '@'), [
+                Rule::when(fn ($input): bool => ! empty($input->proposed_email) && str_contains((string) $input->proposed_email, '@'), [
                     'email:rfc,dns',
                     Rule::unique('email_applications', 'proposed_email')->whereNull('deleted_at'),
                     Rule::unique('users', 'email')->whereNull('deleted_at'),
                     Rule::unique('users', 'motac_email')->whereNull('deleted_at'),
                 ]),
-                Rule::when(fn ($input) => ! empty($input->proposed_email) && ! str_contains((string) $input->proposed_email, '@'), [
+                Rule::when(fn ($input): bool => ! empty($input->proposed_email) && ! str_contains((string) $input->proposed_email, '@'), [
                     'regex:/^[a-zA-Z0-9._-]+$/',
                     // For a new application, proposed ID should not clash with any existing final assigned ID or user_id_assigned
                     Rule::unique('email_applications', 'final_assigned_user_id')->whereNull('deleted_at'),
                     Rule::unique('users', 'user_id_assigned')->whereNull('deleted_at'),
                 ]),
             ],
-            'group_email' => [Rule::requiredIf(fn () => $this->input('is_group_email_request') == true), 'nullable', 'email:rfc,dns', 'max:255', Rule::unique('email_applications', 'group_email')->whereNull('deleted_at')],
-            'contact_person_name' => [Rule::requiredIf(fn () => $this->input('is_group_email_request') == true), 'nullable', 'string', 'max:255'],
-            'contact_person_email' => [Rule::requiredIf(fn () => $this->input('is_group_email_request') == true), 'nullable', 'email:rfc,dns', 'max:255'],
+            'group_email' => [Rule::requiredIf(fn (): bool => $this->input('is_group_email_request') == true), 'nullable', 'email:rfc,dns', 'max:255', Rule::unique('email_applications', 'group_email')->whereNull('deleted_at')],
+            'contact_person_name' => [Rule::requiredIf(fn (): bool => $this->input('is_group_email_request') == true), 'nullable', 'string', 'max:255'],
+            'contact_person_email' => [Rule::requiredIf(fn (): bool => $this->input('is_group_email_request') == true), 'nullable', 'email:rfc,dns', 'max:255'],
 
             'supporting_officer_id' => ['nullable', 'integer', Rule::exists('users', 'id')],
             'supporting_officer_name' => [Rule::requiredIf(empty($this->input('supporting_officer_id'))), 'nullable', 'string', 'max:255'],
@@ -96,8 +96,6 @@ class StoreEmailApplicationRequest extends FormRequest
             'cert_data_usage_agreed' => ['required', 'accepted'],
             'cert_email_responsibility_agreed' => ['required', 'accepted'],
         ];
-
-        return $rules;
     }
 
     public function messages(): array

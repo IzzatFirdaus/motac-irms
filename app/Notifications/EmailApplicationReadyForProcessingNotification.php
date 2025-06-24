@@ -52,11 +52,11 @@ final class EmailApplicationReadyForProcessingNotification extends Notification 
         $adminApplicationUrl = '#';
         // Standardized admin route name pattern
         $adminRouteName = 'admin.email-applications.show';
-        if (isset($this->emailApplication->id) && Route::has($adminRouteName)) {
+        if ($this->emailApplication->id !== null && Route::has($adminRouteName)) {
             try {
                 $adminApplicationUrl = route($adminRouteName, ['email_application' => $this->emailApplication->id]);
             } catch (\Throwable $e) {
-                Log::error("Error generating admin URL for EmailApplicationReadyForProcessingNotification: {$e->getMessage()}", [
+                Log::error('Error generating admin URL for EmailApplicationReadyForProcessingNotification: '.$e->getMessage(), [
                     'application_id' => $this->emailApplication->id,
                     'route_name' => $adminRouteName,
                     'exception' => $e,
@@ -87,7 +87,7 @@ final class EmailApplicationReadyForProcessingNotification extends Notification 
                     $adminApplicationUrl = $generatedUrl;
                 }
             } catch (\Throwable $e) {
-                Log::error("Error generating admin URL for EmailApplicationReadyForProcessingNotification (toArray): {$e->getMessage()}", [
+                Log::error('Error generating admin URL for EmailApplicationReadyForProcessingNotification (toArray): '.$e->getMessage(), [
                     'application_id' => $applicationId,
                     'route_name' => $adminRouteName,
                     'exception' => $e,

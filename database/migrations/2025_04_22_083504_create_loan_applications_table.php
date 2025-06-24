@@ -27,7 +27,7 @@ return new class extends Migration
         ];
         $defaultStatus = 'draft';
 
-        Schema::create('loan_applications', function (Blueprint $table) use ($statuses, $defaultStatus) {
+        Schema::create('loan_applications', function (Blueprint $table) use ($statuses, $defaultStatus): void {
             $table->id();
             $table->foreignId('user_id')->comment('Applicant User ID')->constrained('users')->cascadeOnDelete();
             $table->foreignId('responsible_officer_id')->nullable()->comment('User ID of the officer responsible, if not applicant')->constrained('users')->onDelete('set null');
@@ -66,7 +66,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('loan_applications', function (Blueprint $table) {
+        Schema::table('loan_applications', function (Blueprint $table): void {
             // Note: The 'issued_by' and 'returned_by' keys might not exist on loan_applications table directly
             // if they are part of loan_transactions. Ensure this list is accurate for direct FKs on loan_applications.
             $foreignKeys = [
@@ -97,7 +97,7 @@ return new class extends Migration
                         // }
                         $table->dropForeign([$key]); // This attempts to drop by column name convention
                     } catch (\Exception $e) {
-                        Log::warning("Failed to drop FK {$key} on loan_applications during down migration: ".$e->getMessage());
+                        Log::warning(sprintf('Failed to drop FK %s on loan_applications during down migration: ', $key).$e->getMessage());
                     }
                 }
             }

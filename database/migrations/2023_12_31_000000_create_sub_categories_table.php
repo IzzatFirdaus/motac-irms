@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('sub_categories', function (Blueprint $table) {
+        Schema::create('sub_categories', function (Blueprint $table): void {
             $table->id();
             // Ensure 'equipment_categories' table exists for this constraint
             if (Schema::hasTable('equipment_categories')) {
@@ -33,16 +33,19 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('sub_categories', function (Blueprint $table) {
+        Schema::table('sub_categories', function (Blueprint $table): void {
             if (Schema::hasColumn('sub_categories', 'equipment_category_id') && Schema::hasTable('equipment_categories')) {
                 $table->dropForeign(['equipment_category_id']);
             }
+
             if (Schema::hasColumn('sub_categories', 'created_by')) {
                 $table->dropForeign(['created_by']);
             }
+
             if (Schema::hasColumn('sub_categories', 'updated_by')) {
                 $table->dropForeign(['updated_by']);
             }
+
             if (Schema::hasColumn('sub_categories', 'deleted_by')) {
                 $table->dropForeign(['deleted_by']);
             }

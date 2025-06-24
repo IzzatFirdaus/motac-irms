@@ -87,15 +87,14 @@ class EmailProvisioningController extends Controller
                     ],
                     'code' => 'SUCCESS',
                 ], 200);
-            } else {
-                Log::error('API: Email provisioning service reported failure.', ['application_id' => $application->id, 'result' => $result, 'acting_user_id' => $actingUser?->id]);
-
-                return response()->json([
-                    'message' => $result['message'] ?? 'Email provisioning failed.',
-                    'error_code' => $result['error_code'] ?? 'PROVISIONING_FAILED',
-                    'data' => ['application_id' => $application->id],
-                ], isset($result['status_code']) && is_int($result['status_code']) ? $result['status_code'] : 500);
             }
+            Log::error('API: Email provisioning service reported failure.', ['application_id' => $application->id, 'result' => $result, 'acting_user_id' => $actingUser?->id]);
+
+            return response()->json([
+                'message' => $result['message'] ?? 'Email provisioning failed.',
+                'error_code' => $result['error_code'] ?? 'PROVISIONING_FAILED',
+                'data' => ['application_id' => $application->id],
+            ], isset($result['status_code']) && is_int($result['status_code']) ? $result['status_code'] : 500);
         } catch (ModelNotFoundException $e) {
             Log::warning('API: Email application not found.', ['application_id' => $validatedData['application_id'] ?? 'N/A']);
 

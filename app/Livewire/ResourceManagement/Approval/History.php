@@ -73,7 +73,7 @@ class History extends Component
             ->where('officer_id', $user->id)
             ->where('status', '!=', Approval::STATUS_PENDING) // History of actions taken
             ->with([
-                'approvable' => function ($morphTo) {
+                'approvable' => function ($morphTo): void {
                     $morphTo->morphWith([
                         EmailApplication::class => ['user:id,name,title'],
                         LoanApplication::class => ['user:id,name,title', 'loanApplicationItems:id,loan_application_id,equipment_type,quantity_approved'],
@@ -98,14 +98,15 @@ class History extends Component
             $query->where('status', $this->filterDecision);
         }
 
-        if ($this->dateFrom) {
+        if ($this->dateFrom !== null && $this->dateFrom !== '' && $this->dateFrom !== '0') {
             try {
                 $query->whereDate('approval_timestamp', '>=', Carbon::parse($this->dateFrom)->toDateString());
             } catch (\Exception $e) {
                 Log::error('Invalid dateFrom for Approval History: '.$this->dateFrom, ['exception' => $e]);
             }
         }
-        if ($this->dateTo) {
+
+        if ($this->dateTo !== null && $this->dateTo !== '' && $this->dateTo !== '0') {
             try {
                 $query->whereDate('approval_timestamp', '<=', Carbon::parse($this->dateTo)->toDateString());
             } catch (\Exception $e) {
@@ -115,24 +116,25 @@ class History extends Component
 
         if (trim($this->search) !== '') {
             $searchTerm = '%'.trim($this->search).'%';
-            $query->where(function ($q) use ($searchTerm) {
+            $query->where(function ($q) use ($searchTerm): void {
                 $q->where('id', 'like', $searchTerm)
                     ->orWhere('comments', 'like', $searchTerm)
                     ->orWhere('stage', 'like', $searchTerm)
                     ->orWhereHasMorph('approvable', [EmailApplication::class, LoanApplication::class],
-                        function ($morphQ, $type) use ($searchTerm) {
+                        function ($morphQ, $type) use ($searchTerm): void {
                             $morphQ->where('id', 'like', $searchTerm);
                             if ($type === EmailApplication::class) {
                                 $morphQ->orWhere('proposed_email', 'like', $searchTerm);
                             } elseif ($type === LoanApplication::class) {
                                 $morphQ->orWhere('purpose', 'like', $searchTerm);
                             }
-                            $morphQ->orWhereHas('user', function ($userQ) use ($searchTerm) {
+
+                            $morphQ->orWhereHas('user', function ($userQ) use ($searchTerm): void {
                                 $userQ->where('name', 'like', $searchTerm)
                                     ->orWhere('personal_email', 'like', $searchTerm);
                             });
                             if ($type === LoanApplication::class) {
-                                $morphQ->orWhereHas('loanApplicationItems.equipment', function ($itemQ) use ($searchTerm) {
+                                $morphQ->orWhereHas('loanApplicationItems.equipment', function ($itemQ) use ($searchTerm): void {
                                     $itemQ->where('tag_id', 'like', $searchTerm)
                                         ->orWhere('model', 'like', $searchTerm) // Assuming equipment model has 'model'
                                         ->orWhere('brand', 'like', $searchTerm); // Assuming equipment model has 'brand'
@@ -150,7 +152,7 @@ class History extends Component
     {
         if (in_array($propertyName, ['filterType', 'filterDecision', 'dateFrom', 'dateTo', 'search'])) {
             $this->resetPage();
-            Log::debug("Livewire.Approval.History: Filter '{$propertyName}' updated. Pagination reset.");
+            Log::debug(sprintf("Livewire.Approval.History: Filter '%s' updated. Pagination reset.", $propertyName));
         }
     }
 

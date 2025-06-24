@@ -32,7 +32,7 @@ return new class extends Migration
             $defaultCondition = Equipment::CONDITION_GOOD;
         }
 
-        Schema::create('equipment', function (Blueprint $table) use ($defaultAssetType, $defaultStatus, $defaultCondition) {
+        Schema::create('equipment', function (Blueprint $table) use ($defaultAssetType, $defaultStatus, $defaultCondition): void {
             $table->id();
 
             $table->foreignId('equipment_category_id')->nullable()->constrained('equipment_categories')->onDelete('set null');
@@ -93,7 +93,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('equipment', function (Blueprint $table) {
+        Schema::table('equipment', function (Blueprint $table): void {
             $foreignKeysToDropByColumn = [
                 'equipment_category_id', 'sub_category_id', 'location_id', 'department_id',
                 'created_by', 'updated_by', 'deleted_by',
@@ -103,7 +103,7 @@ return new class extends Migration
                     try {
                         $table->dropForeign([$column]);
                     } catch (\Exception $e) {
-                        Log::warning("Could not drop foreign key for column '{$column}' on 'equipment' table during migration rollback (it might not exist or have a non-conventional name): ".$e->getMessage());
+                        Log::warning(sprintf("Could not drop foreign key for column '%s' on 'equipment' table during migration rollback (it might not exist or have a non-conventional name): ", $column).$e->getMessage());
                     }
                 }
             }

@@ -51,7 +51,7 @@ class GradeFactory extends Factory
      */
     public function approverGrade(): static
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes): array {
             $minLevel = Config::get('motac.approval.min_general_view_approval_grade_level', 9);
             // Ensure the generated level is at or above the minimum approval level
             $level = $this->faker->unique()->numberBetween($minLevel, 70);
@@ -68,7 +68,7 @@ class GradeFactory extends Factory
      */
     public function nonApproverGrade(): static
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes): array {
             $minLevel = Config::get('motac.approval.min_general_view_approval_grade_level', 9);
             // Ensure the generated level is below the minimum approval level
             $level = $this->faker->unique()->numberBetween(1, $minLevel - 1);
@@ -85,7 +85,7 @@ class GradeFactory extends Factory
      */
     public function deleted(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'deleted_at' => now(),
         ]);
     }

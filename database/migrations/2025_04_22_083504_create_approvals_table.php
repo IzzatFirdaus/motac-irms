@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('approvals', function (Blueprint $table) {
+        Schema::create('approvals', function (Blueprint $table): void {
             $table->id();
             $table->morphs('approvable'); // approvable_id, approvable_type
 
@@ -35,16 +35,19 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('approvals', function (Blueprint $table) {
+        Schema::table('approvals', function (Blueprint $table): void {
             if (Schema::hasColumn('approvals', 'officer_id')) {
                 $table->dropForeign(['officer_id']);
             }
+
             if (Schema::hasColumn('approvals', 'created_by')) {
                 $table->dropForeign(['created_by']);
             }
+
             if (Schema::hasColumn('approvals', 'updated_by')) {
                 $table->dropForeign(['updated_by']);
             }
+
             if (Schema::hasColumn('approvals', 'deleted_by')) {
                 $table->dropForeign(['deleted_by']);
             }

@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('grades', function (Blueprint $table) {
+        Schema::create('grades', function (Blueprint $table): void {
             $table->id();
             $table->string('name')->comment('e.g., "41", "N19", "JUSA C"');
             $table->integer('level')->nullable()->comment('Numeric level for comparison/sorting');

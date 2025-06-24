@@ -13,10 +13,8 @@ class PositionFactory extends EloquentFactory
 
     /**
      * The official list of MOTAC position names.
-     *
-     * @var array
      */
-    private static $motacPositions = [
+    private static array $motacPositions = [
         'Menteri', 'Timbalan Menteri', 'Ketua Setiausaha', 'Timbalan Ketua Setiausaha', 'Setiausaha Bahagian',
         'Setiausaha Akhbar', 'Setiausaha Sulit Kanan', 'Setiausaha Sulit', 'Pegawai Tugas-Tugas Khas',
         'Timbalan Setiausaha Bahagian', 'Ketua Unit', 'Pegawai Khas', 'Pegawai Media', 'Pengarah', 'Timbalan Pengarah',
@@ -67,23 +65,23 @@ class PositionFactory extends EloquentFactory
             'is_active' => $this->faker->boolean(90),
             'grade_id' => $gradeId,
             'created_at' => Carbon::parse($this->faker->dateTimeBetween('-3 years', 'now')),
-            'updated_at' => fn (array $attributes) => Carbon::parse($this->faker->dateTimeBetween($attributes['created_at'], 'now')),
+            'updated_at' => fn (array $attributes): \Illuminate\Support\Carbon => Carbon::parse($this->faker->dateTimeBetween($attributes['created_at'], 'now')),
         ];
     }
 
     public function active(): static
     {
-        return $this->state(fn (array $attributes) => ['is_active' => true]);
+        return $this->state(fn (array $attributes): array => ['is_active' => true]);
     }
 
     public function inactive(): static
     {
-        return $this->state(fn (array $attributes) => ['is_active' => false]);
+        return $this->state(fn (array $attributes): array => ['is_active' => false]);
     }
 
     public function deleted(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'deleted_at' => now(),
             'is_active' => false,
         ]);

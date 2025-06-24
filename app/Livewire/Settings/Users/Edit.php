@@ -93,13 +93,14 @@ class Edit extends Component
         if (! Auth::user()->can('update', $user)) {
             abort(403, __('Tindakan tidak dibenarkan.'));
         }
+
         $this->user = $user;
 
         // Consider moving option loading to a dedicated method or service
         $this->loadDropdownOptions();
         $this->populateFormFields(); // Populate after options are loaded for defaults
 
-        $this->selectedRoles = $this->user->roles->pluck('id')->map(fn ($id) => (string) $id)->toArray();
+        $this->selectedRoles = $this->user->roles->pluck('id')->map(fn ($id): string => (string) $id)->toArray();
 
         // Dynamically set page title here if using older Livewire 3 versions
         // and you want a dynamic title based on $this->user->name.
@@ -125,7 +126,7 @@ class Edit extends Component
 
     private function populateFormFields(): void
     {
-        $this->title = $this->user->title ?? (! empty($this->titleOptions) ? array_key_first($this->titleOptions) : '');
+        $this->title = $this->user->title ?? ($this->titleOptions === [] ? '' : array_key_first($this->titleOptions));
         $this->name = $this->user->name;
         $this->identification_number = $this->user->identification_number ?? '';
         $this->passport_number = $this->user->passport_number;
@@ -136,8 +137,8 @@ class Edit extends Component
         $this->mobile_number = $this->user->mobile_number ?? '';
         $this->personal_email = $this->user->email; // Main login email
         $this->motac_email = $this->user->motac_email;
-        $this->service_status = $this->user->service_status ?? (! empty($this->serviceStatusOptions) ? array_key_first($this->serviceStatusOptions) : '');
-        $this->appointment_type = $this->user->appointment_type ?? (! empty($this->appointmentTypeOptions) ? array_key_first($this->appointmentTypeOptions) : '');
+        $this->service_status = $this->user->service_status ?? ($this->serviceStatusOptions === [] ? '' : array_key_first($this->serviceStatusOptions));
+        $this->appointment_type = $this->user->appointment_type ?? ($this->appointmentTypeOptions === [] ? '' : array_key_first($this->appointmentTypeOptions));
         $this->previous_department_name = $this->user->previous_department_name;
         $this->previous_department_email = $this->user->previous_department_email;
         $this->status = $this->user->status;

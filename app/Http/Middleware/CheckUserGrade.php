@@ -39,17 +39,15 @@ class CheckUserGrade
         }
 
         // If a specific grade property is required (e.g., is_approver_grade === true)
-        if ($requiredProperty) {
-            if (! isset($user->grade->{$requiredProperty}) || ! $user->grade->{$requiredProperty}) {
-                Log::warning('CheckUserGrade: User grade does not meet required property.', [
-                    'user_id' => $user->id,
-                    'grade_id' => $user->grade->id,
-                    'required_property' => $requiredProperty,
-                    'property_value' => $user->grade->{$requiredProperty} ?? 'not_set',
-                    'route_name' => $request->route()?->getName(),
-                ]);
-                abort(403, "Akses Ditolak. Gred anda tidak memenuhi kriteria yang diperlukan ({$requiredProperty}).");
-            }
+        if ($requiredProperty && (! isset($user->grade->{$requiredProperty}) || ! $user->grade->{$requiredProperty})) {
+            Log::warning('CheckUserGrade: User grade does not meet required property.', [
+                'user_id' => $user->id,
+                'grade_id' => $user->grade->id,
+                'required_property' => $requiredProperty,
+                'property_value' => $user->grade->{$requiredProperty} ?? 'not_set',
+                'route_name' => $request->route()?->getName(),
+            ]);
+            abort(403, sprintf('Akses Ditolak. Gred anda tidak memenuhi kriteria yang diperlukan (%s).', $requiredProperty));
         }
 
         // If the middleware is used just to check if a grade exists,

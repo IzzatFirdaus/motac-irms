@@ -89,18 +89,19 @@ class Index extends Component
             ])
             ->orderBy('updated_at', 'desc');
 
-        if (! empty($this->searchTerm)) {
+        if ($this->searchTerm !== '' && $this->searchTerm !== '0') {
             $search = '%'.$this->searchTerm.'%';
-            $query->where(function ($q) use ($search) {
+            $query->where(function ($q) use ($search): void {
                 if (is_numeric(str_replace('%', '', $search))) {
                     $q->orWhere('id', 'like', $search);
                 }
+
                 $q->orWhere('purpose', 'like', $search)
                     ->orWhere('location', 'like', 'search');
             });
         }
 
-        if (! empty($this->filterStatus) && $this->filterStatus !== 'all' && $this->filterStatus !== '') {
+        if ($this->filterStatus !== '' && $this->filterStatus !== '0' && $this->filterStatus !== 'all' && $this->filterStatus !== '') {
             $query->where('status', $this->filterStatus);
         }
 
@@ -109,7 +110,7 @@ class Index extends Component
         // This `transform` block is the corrected logic. It ensures that we iterate
         // through the collection of applications and pass each individual model
         // to the checkCanActOnApplication method, resolving the warning.
-        $applications->getCollection()->transform(function (LoanApplication $application) {
+        $applications->getCollection()->transform(function (LoanApplication $application): \App\Models\LoanApplication {
             $application->can_act_on = $this->checkCanActOnApplication($application);
 
             return $application;
@@ -143,6 +144,7 @@ class Index extends Component
 
             return;
         }
+
         $this->selectedApplicationId = $application->id;
         $this->approvalActionType = 'approve';
         $this->approvalComments = '';
@@ -159,6 +161,7 @@ class Index extends Component
 
             return;
         }
+
         $this->selectedApplicationId = $application->id;
         $this->approvalActionType = 'reject';
         $this->approvalComments = '';
@@ -233,6 +236,7 @@ class Index extends Component
         } catch (\Exception $e) {
             session()->flash('error', __('Gagal memproses tindakan kelulusan. Ralat: ').$e->getMessage());
         }
+
         $this->closeApprovalActionModal();
     }
 
@@ -247,7 +251,7 @@ class Index extends Component
     }
 
     #[On('deleteLoanApplication')]
-    public function deleteLoanApplication($id)
+    public function deleteLoanApplication(string $id): void
     {
         try {
             $application = LoanApplication::findOrFail($id);
