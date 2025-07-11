@@ -1,4 +1,3 @@
-{{-- resources/views/reports/loan-history.blade.php --}}
 @extends('layouts.app')
 
 @section('title', __('reports.loan_history.title'))
@@ -22,7 +21,7 @@
             </div>
         </div>
 
-        {{-- Filter Form --}}
+        {{-- Filter --}}
         <div class="card-body border-bottom">
             <form action="{{ route('reports.loan-history') }}" method="GET" class="row g-3 align-items-end">
                 <div class="col-md-3">
@@ -57,6 +56,7 @@
             </form>
         </div>
 
+        {{-- Results Table --}}
         <div class="card-body">
             @include('_partials._alerts.alert-general')
 
@@ -65,13 +65,13 @@
                     <table class="table table-striped table-hover align-middle">
                         <thead class="table-light">
                             <tr>
-                                <th scope="col" class="text-uppercase small text-muted fw-medium px-3 py-2">{{ __('reports.loan_history.table.transaction_id') }}</th>
-                                <th scope="col" class="text-uppercase small text-muted fw-medium px-3 py-2">{{ __('reports.loan_history.table.application_id') }}</th>
-                                <th scope="col" class="text-uppercase small text-muted fw-medium px-3 py-2">{{ __('reports.loan_history.table.equipment') }}</th>
-                                <th scope="col" class="text-uppercase small text-muted fw-medium px-3 py-2">{{ __('reports.loan_history.table.user') }}</th>
-                                <th scope="col" class="text-uppercase small text-muted fw-medium px-3 py-2">{{ __('reports.loan_history.table.type') }}</th>
-                                <th scope="col" class="text-uppercase small text-muted fw-medium px-3 py-2">{{ __('reports.loan_history.table.date') }}</th>
-                                <th scope="col" class="text-uppercase small text-muted fw-medium px-3 py-2">{{ __('reports.loan_history.table.officer') }}</th>
+                                <th class="px-3 py-2 small text-uppercase text-muted">{{ __('reports.loan_history.table.transaction_id') }}</th>
+                                <th class="px-3 py-2 small text-uppercase text-muted">{{ __('reports.loan_history.table.application_id') }}</th>
+                                <th class="px-3 py-2 small text-uppercase text-muted">{{ __('reports.loan_history.table.equipment') }}</th>
+                                <th class="px-3 py-2 small text-uppercase text-muted">{{ __('reports.loan_history.table.user') }}</th>
+                                <th class="px-3 py-2 small text-uppercase text-muted">{{ __('reports.loan_history.table.type') }}</th>
+                                <th class="px-3 py-2 small text-uppercase text-muted">{{ __('reports.loan_history.table.date') }}</th>
+                                <th class="px-3 py-2 small text-uppercase text-muted">{{ __('reports.loan_history.table.officer') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -79,18 +79,18 @@
                                 <tr>
                                     <td class="px-3 py-2 small fw-medium text-dark">#{{ $transaction->id }}</td>
                                     <td class="px-3 py-2 small">
-                                        @if($transaction->loanApplication)
-                                            <a href="{{ route('loan-applications.show', $transaction->loanApplication->id) }}">#{{ $transaction->loan_application_id }}</a>
+                                        @if ($transaction->loanApplication)
+                                            <a href="{{ route('loan-applications.show', $transaction->loan_application_id) }}">#{{ $transaction->loan_application_id }}</a>
                                         @else
                                             #{{ $transaction->loan_application_id }}
                                         @endif
                                     </td>
                                     <td class="px-3 py-2 small text-muted">
-                                        {{ $transaction->items->pluck('equipment.item_name')->implode(', ') ?: '-' }}
+                                        {{ $transaction->items->pluck('equipment.tag_id')->implode(', ') ?: '-' }}
                                     </td>
                                     <td class="px-3 py-2 small text-muted">{{ $transaction->loanApplication->user->name ?? __('common.not_available') }}</td>
-                                    <td class="px-3 py-2 small text-muted">
-                                        <span class="badge rounded-pill {{ $transaction->type === \App\Models\LoanTransaction::TYPE_ISSUE ? 'bg-info-subtle text-info-emphasis' : 'bg-primary-subtle text-primary-emphasis' }} fw-normal">
+                                    <td class="px-3 py-2 small">
+                                        <span class="badge rounded-pill {{ $transaction->type === \App\Models\LoanTransaction::TYPE_ISSUE ? 'bg-info-subtle text-info-emphasis' : 'bg-primary-subtle text-primary-emphasis' }}">
                                             {{ $transaction->type_label }}
                                         </span>
                                     </td>
@@ -107,9 +107,8 @@
                         </div>
                     @endif
                 @else
-                    <div class="alert alert-info d-flex align-items-center text-center" role="alert">
-                       <i class="bi bi-info-circle-fill me-2"></i>
-                        <div>{{ __('reports.loan_history.no_results') }}</div>
+                    <div class="alert alert-info text-center" role="alert">
+                        <i class="bi bi-info-circle-fill me-2"></i>{{ __('reports.loan_history.no_results') }}
                     </div>
                 @endif
             </div>
