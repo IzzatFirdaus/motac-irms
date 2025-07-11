@@ -82,6 +82,7 @@ Route::get('/privacy-policy', function () {
 */
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function (): void {
   Route::redirect('/', '/dashboard', 301);
+
   // UPDATED: This route now points to the main Dashboard Livewire component, which handles role-based view logic.
   Route::get('/dashboard', DashboardLW::class)->name('dashboard');
 

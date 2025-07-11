@@ -289,3 +289,4 @@ class ApplicationForm extends Component
         return view('livewire.resource-management.loan-application.application-form');
     }
 }
+
