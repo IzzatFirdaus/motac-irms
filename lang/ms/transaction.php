@@ -2,6 +2,7 @@
 
 // lang/ms/transaction.php
 return [
+    // --- Existing Keys ---
     'show_title' => 'Butiran Transaksi Pinjaman',
     'back_to_list' => 'Senarai Semua Transaksi',
     'basic_info' => 'Maklumat Asas Transaksi',
@@ -25,4 +26,39 @@ return [
     'accessories_returned' => 'Aksesori Dipulangkan:',
     'return_notes' => 'Catatan Pemulangan:',
     'findings_on_return' => 'Status Penemuan Semasa Pulangan',
+
+    // =================================================================
+    // --- NEW KEYS FOR PROCESS ISSUANCE FORM ---
+    // =================================================================
+    'issuance_form' => [
+        'page_title' => 'Proses Pengeluaran Peralatan #:id',
+        'header' => 'Rekod Pengeluaran Peralatan',
+        'for_application' => 'Untuk Permohonan',
+        'related_application_details' => 'Butiran Permohonan Pinjaman Berkaitan',
+        'applicant' => 'Pemohon',
+        'purpose' => 'Tujuan Permohonan',
+        'loan_date' => 'Tarikh Pinjaman',
+        'expected_return_date' => 'Tarikh Dijangka Pulang',
+        'approved_items' => 'Item Peralatan Diluluskan',
+        'equipment_type' => 'Jenis Peralatan',
+        'approved_qty' => 'Qty. Lulus',
+        'balance_to_issue' => 'Baki Untuk Dikeluarkan',
+        'actual_issuance_record' => 'Rekod Pengeluaran Peralatan Sebenar',
+        'no_items_to_issue' => 'Tiada baki peralatan untuk dikeluarkan bagi permohonan ini.',
+        'issue_item_header' => 'Item Pengeluaran #:index',
+        'select_specific_equipment' => 'Pilih Peralatan Spesifik (Tag ID)',
+        'placeholder_select_equipment' => '-- Pilih Peralatan --',
+        'no_equipment_available' => 'Tiada peralatan jenis ini tersedia.',
+        'accessories_checklist' => 'Senarai Semak Aksesori',
+        'no_accessories_configured' => 'Tiada senarai aksesori dikonfigurasi.',
+        'received_by' => 'Peralatan Diterima Oleh (Pemohon/Wakil)',
+        'placeholder_select_receiver' => '-- Sila Pilih Penerima --',
+        'option_applicant' => 'Pemohon',
+        'option_responsible_officer' => 'Pegawai Bertanggungjawab',
+        'issuance_date' => 'Tarikh Pengeluaran',
+        'issuance_notes' => 'Catatan Pengeluaran (Jika Ada)',
+        'placeholder_issuance_notes' => 'cth: Peralatan dalam keadaan baik semasa dikeluarkan.',
+        'button_cancel' => 'Batal',
+        'button_record_issuance' => 'Rekod Pengeluaran',
+    ],
 ];

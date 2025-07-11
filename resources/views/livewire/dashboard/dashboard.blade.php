@@ -29,7 +29,6 @@
         @if ($isNormalUser)
             {{-- Welcome Header --}}
             <div class="d-flex align-items-center mb-4">
-                {{-- FIXED: Used translation helper --}}
                 <h1 class="h3 mb-0 me-auto fw-bold">{{ __('dashboard.welcome') }}, {{ $displayUserName }}!</h1>
                 <div class="ms-auto d-flex flex-column align-items-end">
                     <span id="motacDashboardDate" class="text-muted small"></span>
@@ -114,11 +113,17 @@
                             @else
                                 <div class="table-responsive">
                                     <table class="table table-hover">
-                                        <thead><tr><th>{{ __('dashboard.apply_date') }}</th><th>{{ __('dashboard.subject') }}</th><th>{{ __('dashboard.status') }}</th></tr></thead>
+                                        <thead>
+                                            <tr>
+                                                <th>{{ __('dashboard.apply_date') }}</th>
+                                                <th>{{ __('dashboard.subject') }}</th>
+                                                <th>{{ __('dashboard.status') }}</th>
+                                            </tr>
+                                        </thead>
                                         <tbody>
                                             @foreach($userRecentLoanApplications as $loanApp)
                                             <tr onclick="window.location='{{ route('loan-applications.show', $loanApp->id) }}';">
-                                                <td>{{ \App\Helpers\Helpers::formatDate($loanApp->created_at, 'date_my') }}</td>
+                                                <td>{{ \App\Helpers\Helpers::formatDate($loanApp->created_at, 'date_format_my_short') }}</td>
                                                 <td>{{ Str::limit($loanApp->purpose, 35) }}</td>
                                                 <td><x-resource-status-panel :resource="$loanApp" statusAttribute="status" type="loan_application" /></td>
                                             </tr>
@@ -144,11 +149,17 @@
                             @else
                                 <div class="table-responsive">
                                     <table class="table table-hover">
-                                        <thead><tr><th>{{ __('dashboard.apply_date') }}</th><th>{{ __('dashboard.type') }}</th><th>{{ __('dashboard.status') }}</th></tr></thead>
+                                        <thead>
+                                            <tr>
+                                                <th>{{ __('dashboard.apply_date') }}</th>
+                                                <th>{{ __('dashboard.type') }}</th>
+                                                <th>{{ __('dashboard.status') }}</th>
+                                            </tr>
+                                        </thead>
                                         <tbody>
                                             @foreach($userRecentEmailApplications as $emailApp)
                                             <tr onclick="window.location='{{ route('email-applications.show', $emailApp->id) }}';">
-                                                <td>{{ \App\Helpers\Helpers::formatDate($emailApp->created_at, 'date_my') }}</td>
+                                                <td>{{ \App\Helpers\Helpers::formatDate($emailApp->created_at, 'date_format_my_short') }}</td>
                                                 <td>{{ $emailApp->application_type_label }}</td>
                                                 <td><x-resource-status-panel :resource="$emailApp" statusAttribute="status" type="email_application" /></td>
                                             </tr>
@@ -199,7 +210,7 @@
                                         <tbody>
                                             @foreach($latestLoanTransactions as $transaction)
                                             <tr onclick="window.location='{{ route('loan-transactions.show', $transaction->id) }}';">
-                                                <td>{{ \App\Helpers\Helpers::formatDate($transaction->transaction_date, 'datetime_my') }}</td>
+                                                <td>{{ \App\Helpers\Helpers::formatDate($transaction->transaction_date, 'datetime_format_my') }}</td>
                                                 <td>{{ $transaction->loanApplication->user->name ?? 'N/A' }}</td>
                                                 <td><x-loan-transaction-status-badge :status="$transaction->type" /></td>
                                             </tr>
@@ -235,7 +246,7 @@
                                         <tbody>
                                             @foreach($upcomingReturns as $returnLoanApp)
                                             <tr onclick="window.location='{{ route('loan-applications.show', $returnLoanApp->id) }}';">
-                                                <td>{{ \App\Helpers\Helpers::formatDate($returnLoanApp->loan_end_date, 'date_my') }}</td>
+                                                <td>{{ \App\Helpers\Helpers::formatDate($returnLoanApp->loan_end_date, 'date_format_my_short') }}</td>
                                                 <td>{{ Str::limit($returnLoanApp->purpose, 35) }}</td>
                                                 <td><x-resource-status-panel :resource="$returnLoanApp" statusAttribute="status" type="loan_application" /></td>
                                             </tr>

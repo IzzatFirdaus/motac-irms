@@ -99,7 +99,95 @@
             </div>
         </div>
 
-        {{-- Tables, etc. --}}
+        {{-- Bottom Row: Recent Application Tables --}}
+        <div class="row g-4">
+            {{-- Recent Loan Applications --}}
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">{{ __('dashboard.latest_loan_applications') }}</h5>
+                        <a href="{{ route('loan-applications.index') }}" class="btn btn-primary btn-sm">{{ __('common.see_all') }} <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                    <div class="card-body">
+                        @if($userRecentLoanApplications->isEmpty())
+                            <div class="text-center text-muted py-4">{{ __('dashboard.no_recent_applications') }}</div>
+                        @else
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead><tr><th>{{ __('dashboard.apply_date') }}</th><th>{{ __('dashboard.subject') }}</th><th>{{ __('dashboard.status') }}</th></tr></thead>
+                                    <tbody>
+                                        @foreach($userRecentLoanApplications as $loanApp)
+                                        <tr onclick="window.location='{{ route('loan-applications.show', $loanApp->id) }}';">
+                                            <td>{{ \App\Helpers\Helpers::formatDate($loanApp->created_at, 'date_format_my_short') }}</td>
+                                            <td>{{ Str::limit($loanApp->purpose, 35) }}</td>
+                                            <td><x-resource-status-panel :resource="$loanApp" statusAttribute="status" type="loan_application" /></td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            {{-- Recent Email Applications --}}
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">{{ __('dashboard.latest_email_applications') }}</h5>
+                        <a href="{{ route('email-applications.index') }}" class="btn btn-primary btn-sm">{{ __('common.see_all') }} <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                    <div class="card-body">
+                         @if($userRecentEmailApplications->isEmpty())
+                            <div class="text-center text-muted py-4">{{ __('dashboard.no_recent_applications') }}</div>
+                        @else
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead><tr><th>{{ __('dashboard.apply_date') }}</th><th>{{ __('dashboard.type') }}</th><th>{{ __('dashboard.status') }}</th></tr></thead>
+                                    <tbody>
+                                        @foreach($userRecentEmailApplications as $emailApp)
+                                        <tr onclick="window.location='{{ route('email-applications.show', $emailApp->id) }}';">
+                                            <td>{{ \App\Helpers\Helpers::formatDate($emailApp->created_at, 'date_format_my_short') }}</td>
+                                            <td>{{ $emailApp->application_type_label }}</td>
+                                            <td>
+                                                <span class="badge {{ $emailApp->status_color_class }}">{{ $emailApp->status_label }}</span>
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
-    {{-- Scripts --}}
+
+    @push('page-script')
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                function updateMotacDashboardClock() {
+                    const now = new Date();
+                    const pageLocale = @json(App::getLocale());
+                    const displayLocale = pageLocale === 'ms' ? 'ms-MY' : 'en-GB';
+                    const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                    const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+
+                    const dateEl = document.getElementById('motacDashboardDate');
+                    const timeEl = document.getElementById('motacDashboardTime');
+
+                    if(dateEl) dateEl.textContent = now.toLocaleDateString(displayLocale, dateOptions);
+                    if(timeEl) timeEl.textContent = now.toLocaleTimeString(displayLocale, timeOptions);
+                }
+
+                if (document.getElementById('motacDashboardDate') && document.getElementById('motacDashboardTime')) {
+                    updateMotacDashboardClock();
+                    setInterval(updateMotacDashboardClock, 1000);
+                }
+            });
+        </script>
+    @endpush
 </div>
