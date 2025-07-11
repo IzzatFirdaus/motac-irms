@@ -27,6 +27,13 @@ class Kernel extends ConsoleKernel
             ->withoutOverlapping()
             ->onOneServer(); // Ensures the task runs on only one server in a multi-server setup.
 
+        // Schedule a command to escalate overdue ICT loan returns and notify stakeholders.
+        // System Improvement: Auto-Escalation for Overdue Returns (see NotificationService::sendOverdueReminder)
+        $schedule->command('loan:check-overdue-returns')
+            ->dailyAt('08:00')
+            ->withoutOverlapping()
+            ->onOneServer();
+
         // Example of another potential scheduled task mentioned implicitly by system needs:
         // Pruning old soft-deleted records or logs if not handled by other means.
         // $schedule->command('model:prune', [

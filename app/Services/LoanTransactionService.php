@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use RuntimeException;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
 /**
  * Service class for managing Loan Transactions (issuance and returns of equipment).
@@ -24,7 +25,6 @@ final class LoanTransactionService
     private const LOG_AREA = 'LoanTransactionService: ';
 
     private EquipmentService $equipmentService;
-
     private NotificationService $notificationService;
 
     public function __construct(EquipmentService $equipmentService, NotificationService $notificationService)
@@ -33,18 +33,6 @@ final class LoanTransactionService
         $this->notificationService = $notificationService;
     }
 
-    /**
-     * Processes a new equipment issuance transaction.
-     * This is the public entry point for creating an issue transaction.
-     *
-     * @param  LoanApplication  $loanApplication  The parent loan application.
-     * @param  array  $itemsPayload  The array of items being issued.
-     * @param  User  $issuingOfficer  The officer performing the issuance.
-     * @param  array  $transactionDetails  Additional details like transaction date and notes.
-     * @return LoanTransaction The created loan transaction.
-     *
-     * @throws RuntimeException|InvalidArgumentException
-     */
     public function processNewIssue(
         LoanApplication $loanApplication,
         array $itemsPayload,
@@ -59,6 +47,11 @@ final class LoanTransactionService
         $itemDataForTransaction = array_map(function ($requestedItem): array {
             if (empty($requestedItem['equipment_id']) || empty($requestedItem['loan_application_item_id'])) {
                 throw new InvalidArgumentException('Butiran item pengeluaran tidak lengkap.');
+            }
+
+            $equipment = Equipment::find((int) $requestedItem['equipment_id']);
+            if ($equipment?->status === Equipment::STATUS_ON_LOAN) {
+                throw new RuntimeException("Peralatan dengan ID {$equipment->id} sedang dipinjam dan tidak boleh dikeluarkan.");
             }
 
             return [
@@ -77,17 +70,6 @@ final class LoanTransactionService
         );
     }
 
-    /**
-     * Processes the return of equipment items against an original issue transaction.
-     *
-     * @param  LoanTransaction  $issueTransaction  The original transaction where items were issued.
-     * @param  array  $itemsPayload  The array of items being returned.
-     * @param  User  $returnAcceptingOfficer  The officer processing the return.
-     * @param  array  $transactionDetails  Additional details like return date and notes.
-     * @return LoanTransaction The created return transaction.
-     *
-     * @throws RuntimeException|InvalidArgumentException
-     */
     public function processExistingReturn(
         LoanTransaction $issueTransaction,
         array $itemsPayload,
@@ -126,10 +108,6 @@ final class LoanTransactionService
         );
     }
 
-    /**
-     * Core public method that handles all transaction database operations.
-     * *** EDITED: Changed visibility from private to public. ***
-     */
     public function createTransaction(
         LoanApplication $loanApplication,
         string $type,
@@ -141,7 +119,7 @@ final class LoanTransactionService
             throw new InvalidArgumentException('Transaction must have at least one item.');
         }
 
-        return DB::transaction(function () use ($loanApplication, $type, $actingOfficer, $itemData, $extraDetails): \App\Models\LoanTransaction {
+        return DB::transaction(function () use ($loanApplication, $type, $actingOfficer, $itemData, $extraDetails): LoanTransaction {
             $transaction = $this->createTransactionRecord($loanApplication, $type, $actingOfficer, $extraDetails);
 
             foreach ($itemData as $item) {
@@ -155,28 +133,25 @@ final class LoanTransactionService
 
             $loanApplication->updateOverallStatusAfterTransaction();
 
-            $this->dispatchNotifications($transaction, $type, $actingOfficer);
+            dispatch(function () use ($transaction, $type, $actingOfficer) {
+                $this->dispatchNotifications($transaction, $type, $actingOfficer);
+            })->onQueue('notifications');
 
             return $transaction;
         });
     }
 
-    /**
-     * Helper to create the initial LoanTransaction model instance.
-     */
     private function createTransactionRecord(LoanApplication $loanApplication, string $type, User $actingOfficer, array $extraDetails): LoanTransaction
     {
-        // Start with details common to ALL transactions
         $baseDetails = [
             'loan_application_id' => $loanApplication->id,
             'type' => $type,
             'transaction_date' => $extraDetails['transaction_date'] ?? Carbon::now(),
-            'status' => LoanTransaction::STATUS_PENDING, // Always start as 'pending'
+            'status' => LoanTransaction::STATUS_PENDING,
         ];
 
         $specificDetails = [];
         if ($type === LoanTransaction::TYPE_ISSUE) {
-            // Add details specific to an ISSUE transaction
             $specificDetails = [
                 'issuing_officer_id' => $actingOfficer->id,
                 'receiving_officer_id' => $extraDetails['receiving_officer_id'] ?? null,
@@ -184,7 +159,6 @@ final class LoanTransactionService
                 'issue_timestamp' => $baseDetails['transaction_date'],
             ];
         } elseif ($type === LoanTransaction::TYPE_RETURN) {
-            // Add details specific to a RETURN transaction
             $specificDetails = [
                 'return_accepting_officer_id' => $actingOfficer->id,
                 'returning_officer_id' => $extraDetails['returning_officer_id'] ?? null,
@@ -193,22 +167,14 @@ final class LoanTransactionService
                 'related_transaction_id' => $extraDetails['related_transaction_id'] ?? null,
             ];
         } else {
-            // This is a safeguard against unexpected transaction types.
             throw new InvalidArgumentException('Invalid transaction type specified: '.$type);
         }
 
-        // Merge the base and specific details to create the final data array
-        $transactionData = array_merge($baseDetails, $specificDetails);
-
-        return LoanTransaction::create($transactionData);
+        return LoanTransaction::create(array_merge($baseDetails, $specificDetails));
     }
 
-    /**
-     * Helper to process each item within a transaction.
-     */
     private function processTransactionItem(LoanTransaction $transaction, string $type, array $item, User $actingOfficer): void
     {
-        /** @var \App\Models\Equipment $equipment */ // *** EDITED: Added PHPDoc block to fix static analysis warning. ***
         $equipment = Equipment::findOrFail($item['equipment_id']);
         $txItemData = [
             'equipment_id' => $equipment->id,
@@ -220,7 +186,7 @@ final class LoanTransactionService
         if ($type === LoanTransaction::TYPE_ISSUE) {
             $txItemData['status'] = LoanTransactionItem::STATUS_ITEM_ISSUED;
             $this->equipmentService->changeOperationalStatus($equipment, Equipment::STATUS_ON_LOAN, $actingOfficer, 'Issued via Tx#'.$transaction->id);
-        } else { // TYPE_RETURN
+        } else {
             $conditionOnReturn = $item['condition_on_return'];
             $txItemData['status'] = $this->determineItemStatusOnReturn($conditionOnReturn);
             $txItemData['condition_on_return'] = $conditionOnReturn;
@@ -236,9 +202,6 @@ final class LoanTransactionService
         }
     }
 
-    /**
-     * Helper to dispatch notifications.
-     */
     private function dispatchNotifications(LoanTransaction $transaction, string $type, User $actingOfficer): void
     {
         if ($transaction->loanApplication->user) {
@@ -250,9 +213,6 @@ final class LoanTransactionService
         }
     }
 
-    /**
-     * Determines the final operational status for a piece of equipment upon return.
-     */
     private function determineEquipmentStatusOnReturn(string $conditionOnReturn): string
     {
         return match ($conditionOnReturn) {
@@ -263,9 +223,6 @@ final class LoanTransactionService
         };
     }
 
-    /**
-     * Determines the status for a LoanTransactionItem based on the equipment's condition.
-     */
     private function determineItemStatusOnReturn(string $conditionOnReturn): string
     {
         return match ($conditionOnReturn) {
@@ -277,9 +234,6 @@ final class LoanTransactionService
         };
     }
 
-    /**
-     * Determines the overall status for a RETURN transaction based on its items.
-     */
     private function determineOverallReturnTransactionStatus(array $itemData): string
     {
         $hasDamage = false;

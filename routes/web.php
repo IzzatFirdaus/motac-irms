@@ -44,6 +44,8 @@ use App\Livewire\Settings\Users\Create as SettingsUsersCreateLW;
 use App\Livewire\Settings\Users\Edit as SettingsUsersEditLW;
 use App\Livewire\Settings\Users\Index as SettingsUsersIndexLW;
 use App\Livewire\Settings\Users\Show as SettingsUsersShowLW;
+// --- ISSUED LOANS VIEW (BPM Staff & Admin) ---
+use App\Livewire\ResourceManagement\Admin\BPM\IssuedLoans;
 // Facades
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
@@ -147,45 +149,49 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
   // --- PUBLIC EQUIPMENT CATALOG ---
   Route::resource('equipment', EquipmentController::class)->only(['index', 'show']);
 
-  /*
-    |--------------------------------------------------------------------------
-    | Admin & Privileged User Routes
-    |--------------------------------------------------------------------------
-    */
+/*
+|--------------------------------------------------------------------------
+| Admin & Privileged User Routes
+|--------------------------------------------------------------------------
+*/
 
-  // NEW: Explicit route for the enhanced admin dashboard.
-  Route::get('/admin/dashboard', AdminDashboardLW::class)
-    ->name('admin.dashboard')
-    ->middleware(['role:Admin|IT Admin|BPM Staff']);
+// NEW: Explicit route for the enhanced admin dashboard.
+Route::get('/admin/dashboard', AdminDashboardLW::class)
+  ->name('admin.dashboard')
+  ->middleware(['role:Admin|IT Admin|BPM Staff']);
 
-  // --- EQUIPMENT MANAGEMENT (BPM Staff & Admin) ---
-  Route::prefix('admin/equipment')->name('admin.equipment.')->middleware(['can:view-equipment-admin'])->group(function (): void {
-    Route::get('/', AdminEquipmentIndexLW::class)->name('index');
-    Route::get('/create', [AdminEquipmentController::class, 'create'])->name('create');
-    Route::post('/', [AdminEquipmentController::class, 'store'])->name('store');
-    Route::get('/{equipment}', [AdminEquipmentController::class, 'show'])->name('show');
-    Route::get('/{equipment}/edit', [AdminEquipmentController::class, 'edit'])->name('edit');
-    Route::put('/{equipment}', [AdminEquipmentController::class, 'update'])->name('update');
-    Route::delete('/{equipment}', [AdminEquipmentController::class, 'destroy'])->name('destroy');
-  });
+Route::prefix('admin/bpm')->name('resource-management.bpm.')->middleware(['role:Admin|BPM Staff'])->group(function (): void {
+  Route::get('/issued-loans', IssuedLoans::class)->name('issued-loans');
+});
 
-  // --- EMAIL ACCOUNT PROCESSING (IT Admin & Admin) ---
-  Route::prefix('admin/email-processing')->name('admin.email-processing.')->middleware(['role:Admin|IT Admin'])->group(function (): void {
-    Route::get('/', [EmailAccountController::class, 'indexForAdmin'])->name('index');
-    Route::get('/{email_application}', [EmailAccountController::class, 'showForAdmin'])->name('show');
-    Route::post('/{email_application}/process', [EmailAccountController::class, 'processApplication'])->name('process');
-  });
+// --- EQUIPMENT MANAGEMENT (BPM Staff & Admin) ---
+Route::prefix('admin/equipment')->name('admin.equipment.')->middleware(['can:view-equipment-admin'])->group(function (): void {
+  Route::get('/', AdminEquipmentIndexLW::class)->name('index');
+  Route::get('/create', [AdminEquipmentController::class, 'create'])->name('create');
+  Route::post('/', [AdminEquipmentController::class, 'store'])->name('store');
+  Route::get('/{equipment}', [AdminEquipmentController::class, 'show'])->name('show');
+  Route::get('/{equipment}/edit', [AdminEquipmentController::class, 'edit'])->name('edit');
+  Route::put('/{equipment}', [AdminEquipmentController::class, 'update'])->name('update');
+  Route::delete('/{equipment}', [AdminEquipmentController::class, 'destroy'])->name('destroy');
+});
 
-  // --- REPORTS ---
-  Route::prefix('reports')->name('reports.')->middleware(['role:Admin|BPM Staff|IT Admin'])->group(function (): void {
-    Route::get('/', [ReportController::class, 'index'])->name('index');
-    Route::get('/equipment-inventory', [ReportController::class, 'equipmentInventory'])->name('equipment-inventory');
-    Route::get('/loan-applications', [ReportController::class, 'loanApplications'])->name('loan-applications');
-    Route::get('/activity-log', UserActivityReport::class)->name('activity-log');
-    Route::get('/email-accounts', [ReportController::class, 'emailAccounts'])->name('email-accounts');
-    Route::get('/loan-history', [ReportController::class, 'loanHistory'])->name('loan-history'); // FIXED
+// --- EMAIL ACCOUNT PROCESSING (IT Admin & Admin) ---
+Route::prefix('admin/email-processing')->name('admin.email-processing.')->middleware(['role:Admin|IT Admin'])->group(function (): void {
+  Route::get('/', [EmailAccountController::class, 'indexForAdmin'])->name('index');
+  Route::get('/{email_application}', [EmailAccountController::class, 'showForAdmin'])->name('show');
+  Route::post('/{email_application}/process', [EmailAccountController::class, 'processApplication'])->name('process');
+});
 
-  });
+// --- REPORTS ---
+Route::prefix('reports')->name('reports.')->middleware(['role:Admin|BPM Staff|IT Admin'])->group(function (): void {
+  Route::get('/', [ReportController::class, 'index'])->name('index');
+  Route::get('/equipment-inventory', [ReportController::class, 'equipmentInventory'])->name('equipment-inventory');
+  Route::get('/loan-applications', [ReportController::class, 'loanApplications'])->name('loan-applications');
+  Route::get('/activity-log', UserActivityReport::class)->name('activity-log');
+  Route::get('/email-accounts', [ReportController::class, 'emailAccounts'])->name('email-accounts');
+  Route::get('/loan-history', [ReportController::class, 'loanHistory'])->name('loan-history'); // FIXED
+});
+
 
   /*
     |--------------------------------------------------------------------------
