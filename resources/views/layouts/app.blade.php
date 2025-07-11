@@ -2,7 +2,7 @@
 @php
     $configData = \App\Helpers\Helpers::appClasses();
 
-    // REVISED: Prepare all necessary variables for the layout and its components.
+    // Layout variables
     $container = $configData['container'] ?? 'container-fluid';
     $containerNav = $configData['containerNav'] ?? 'container-fluid';
     $navbarDetached = ($configData['navbarDetached'] ?? false) ? 'navbar-detached' : '';
@@ -14,30 +14,28 @@
     <div class="layout-wrapper layout-content-navbar">
         <div class="layout-container">
 
-            {{-- The Livewire vertical menu component --}}
+            {{-- Sidebar / Menu --}}
             @livewire('sections.menu.vertical-menu')
 
             <div class="layout-page">
-                {{-- REVISED: Pass the required parameters to the Livewire navbar component. --}}
+                {{-- Top Navbar --}}
                 @livewire('sections.navbar.navbar', [
                     'containerNav' => $containerNav,
                     'navbarDetachedClass' => $navbarDetached,
                 ])
 
-                {{-- Main Content Wrapper --}}
+                {{-- Main Page Content --}}
                 <div class="content-wrapper" id="main-content">
                     <div class="{{ $container }} flex-grow-1 container-p-y">
-
-                        {{-- Main content from Blade views or Livewire components is injected here --}}
-                        @if (isset($slot))
+                        {{-- Blade slot or view content --}}
+                        @isset($slot)
                             {{ $slot }}
                         @else
                             @yield('content')
-                        @endif
-
+                        @endisset
                     </div>
 
-                    {{-- The Livewire footer component --}}
+                    {{-- Footer --}}
                     @livewire('sections.footer.footer')
 
                     <div class="content-backdrop fade"></div>
@@ -45,9 +43,8 @@
             </div>
         </div>
 
-        {{-- Overlay for mobile menu --}}
+        {{-- Menu Overlay --}}
         <div class="layout-overlay layout-menu-toggle"></div>
-        {{-- Drag target for mobile menu swipe --}}
         <div class="drag-target"></div>
     </div>
 @endsection

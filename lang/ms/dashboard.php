@@ -3,6 +3,8 @@
 // lang/ms/dashboard.php
 
 return [
+
+    // Titles for dashboards
     'admin_title' => 'Papan Pemuka Pentadbir',
     'approver_title' => 'Papan Pemuka Kelulusan',
     'bpm_title' => 'Papan Pemuka Staf BPM (Pengurusan Peralatan ICT)',
@@ -10,16 +12,83 @@ return [
     'user_title' => 'Papan Pemuka Pengguna',
     'main_dashboard' => 'Papan Pemuka Utama',
 
+    // Welcome messages
     'welcome_back' => 'Selamat Datang Kembali,',
     'welcome_user' => 'Selamat Datang, :userName!',
     'productive_day' => 'Semoga hari anda berjalan lancar dan produktif.',
     'welcome' => 'Selamat Datang',
 
+    // Shortcuts & Quick Actions
     'quick_shortcuts' => 'Pintasan Utama',
     'quick_actions' => 'Tindakan Pantas',
     'ict_loan' => 'Pinjaman ICT',
     'email_application' => 'Permohonan E-mel',
     'notifications' => 'Notifikasi',
+    'view_all_notifications' => 'Lihat Semua Notifikasi',
+    'add_new_equipment' => 'Tambah Peralatan Baharu',
+    'view_full_inventory' => 'Lihat Inventori Penuh',
+    'apply_new_loan' => 'Mohon Pinjaman ICT Baharu',
+    'view_my_loan_apps' => 'Lihat Permohonan Saya',
+
+    // Dashboard Cards / Widgets
+    'total_users' => 'Jumlah Pengguna Sistem',
+    'manage_users' => 'Urus Pengguna',
+    'pending_approvals' => 'Menunggu Kelulusan',
+    'view_all_tasks' => 'Lihat Semua Tugasan',
+    'available_equipment' => 'Peralatan Tersedia',
+    'manage_inventory' => 'Urus Inventori',
+    'loaned_equipment' => 'Peralatan Dipinjam',
+    'view_active_loans' => 'Lihat Pinjaman Aktif',
+    'active_loans' => 'Pinjaman Aktif',
+    'overdue_loans' => 'Pinjaman Lewat',
+    'utilization_rate' => 'Kadar Guna Inventori',
+    'equipment_status_summary' => 'Ringkasan Status Peralatan',
+
+    // Statistics Titles
+    'email_stats_title' => 'Statistik Permohonan E-mel/ID',
+    'loan_stats_title' => 'Statistik Pinjaman Peralatan',
+    'latest_tasks_title' => 'Tugasan Kelulusan Terkini',
+    'admin_dashboard_title' => 'Papan Pemuka Pentadbir',
+    'latest_loan_transactions' => 'Transaksi Pinjaman Terkini',
+    'loan_summary' => 'Ringkasan Pinjaman',
+
+    // Statuses used in charts and badges
+    'status_pending_support' => 'Menunggu Sokongan',
+    'status_approved' => 'Diluluskan',
+    'status_on_loan' => 'Sedang Dipinjam',
+    'status_returned' => 'Dipulangkan',
+    'status_rejected' => 'Ditolak',
+    'status_overdue' => 'Lewat Pulang',
+
+    // Section headings
+    'reports_title' => 'Laporan',
+    'settings_title' => 'Tetapan',
+
+    // Email application statuses
+    'completed' => 'Selesai',
+    'in_process' => 'Dalam Proses',
+    'rejected' => 'Ditolak',
+
+    // Approval stats / guidance
+    'view_my_approval_history' => 'Lihat Sejarah Kelulusan Saya',
+    'apps_awaiting_your_action' => 'Permohonan Menunggu Tindakan Anda',
+    'personal_approval_stats' => 'Statistik Kelulusan Peribadi (30 Hari Terakhir)',
+    'total_approved' => 'Jumlah Diluluskan:',
+    'total_rejected' => 'Jumlah Ditolak:',
+    'approval_guidance_title' => 'Panduan Ringkas Kelulusan',
+    'approval_guidance_text' => 'Sila pastikan semua butiran disemak dengan teliti sebelum membuat keputusan.',
+    'read_full_guidelines' => 'Baca Garis Panduan Penuh',
+
+    // Table headers
+    'date' => 'Tarikh',
+    'subject' => 'Perkara',
+    'status' => 'Status',
+    'return_date' => 'Tarikh Pulang',
+    'apply_date' => 'Tarikh Mohon',
+    'type' => 'Jenis',
+    'applicant' => 'Pemohon',
+
+    // User dashboard-specific
     'ict_loans_in_process' => 'Pinjaman ICT Dalam Proses',
     'email_id_in_process' => 'Emel/ID Dalam Proses',
     'active_ict_loans' => 'Pinjaman ICT Aktif',
@@ -36,59 +105,4 @@ return [
     'no_recent_applications' => 'Tiada permohonan terkini.',
     'latest_loan_applications' => 'Permohonan Pinjaman Terkini',
     'latest_email_applications' => 'Permohonan E-mel Terkini',
-
-    'total_users' => 'Jumlah Pengguna Sistem',
-    'manage_users' => 'Urus Pengguna',
-    'pending_approvals' => 'Menunggu Kelulusan',
-    'view_all_tasks' => 'Lihat Semua Tugasan',
-    'available_equipment' => 'Peralatan Tersedia',
-    'manage_inventory' => 'Urus Inventori',
-    'loaned_equipment' => 'Peralatan Dipinjam',
-    'view_active_loans' => 'Lihat Pinjaman Aktif',
-
-    'email_stats_title' => 'Statistik Permohonan E-mel/ID',
-    'loan_stats_title' => 'Statistik Pinjaman Peralatan',
-    'latest_tasks_title' => 'Tugasan Kelulusan Terkini',
-    'admin_dashboard_title' => 'Papan Pemuka Pentadbir',
-    'latest_loan_transactions' => 'Transaksi Pinjaman Terkini',
-    'loan_summary' => 'Ringkasan Pinjaman',
-
-    // Keys needed for the dashboard
-    'reports_title' => 'Laporan',
-    'settings_title' => 'Tetapan',
-    'completed' => 'Selesai',
-    'in_process' => 'Dalam Proses',
-    'rejected' => 'Ditolak',
-    'on_loan' => 'Sedang Dipinjam',
-    'approved_pending_issuance' => 'Lulus (Tunggu Agihan)',
-    'returned' => 'Dipulangkan',
-    'view_my_approval_history' => 'Lihat Sejarah Kelulusan Saya',
-    'apps_awaiting_your_action' => 'Permohonan Menunggu Tindakan Anda',
-    'personal_approval_stats' => 'Statistik Kelulusan Peribadi (30 Hari Terakhir)',
-    'total_approved' => 'Jumlah Diluluskan:',
-    'total_rejected' => 'Jumlah Ditolak:',
-    'approval_guidance_title' => 'Panduan Ringkas Kelulusan',
-    'approval_guidance_text' => 'Sila pastikan semua butiran disemak dengan teliti sebelum membuat keputusan.',
-    'read_full_guidelines' => 'Baca Garis Panduan Penuh',
-    'add_new_equipment' => 'Tambah Peralatan Baharu',
-    'view_full_inventory' => 'Lihat Inventori Penuh',
-    'apply_new_loan' => 'Mohon Pinjaman ICT Baharu',
-    'view_my_loan_apps' => 'Lihat Permohonan Saya',
-    'view_all_notifications' => 'Lihat Semua Notifikasi',
-
-    // Statuses for charts and detailed views
-    'status_pending_support' => 'Menunggu Sokongan',
-    'status_approved' => 'Diluluskan',
-    'status_on_loan' => 'Sedang Dipinjam',
-    'status_returned' => 'Dipulangkan',
-    'status_rejected' => 'Ditolak',
-
-    // General table headers and labels
-    'date' => 'Tarikh',
-    'subject' => 'Perkara',
-    'status' => 'Status',
-    'return_date' => 'Tarikh Pulang',
-    'apply_date' => 'Tarikh Mohon',
-    'type' => 'Jenis',
-    'applicant' => 'Pemohon',
 ];

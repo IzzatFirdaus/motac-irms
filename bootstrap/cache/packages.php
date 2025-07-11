@@ -1,4 +1,15 @@
 <?php return array (
+  'asantibanez/livewire-charts' => 
+  array (
+    'aliases' => 
+    array (
+      'LivewireCharts' => 'Asantibanez\\LivewireCharts\\LivewireChartsFacade',
+    ),
+    'providers' => 
+    array (
+      0 => 'Asantibanez\\LivewireCharts\\LivewireChartsServiceProvider',
+    ),
+  ),
   'barryvdh/laravel-debugbar' => 
   array (
     'aliases' => 

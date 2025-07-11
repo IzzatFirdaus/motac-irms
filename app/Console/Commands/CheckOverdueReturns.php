@@ -51,7 +51,7 @@ class CheckOverdueReturns extends Command
 
     if ($overdueApplications->isEmpty()) {
       $this->info('No overdue applications found.');
-      return \Symfony\Component\Console\Command\Command::SUCCESS;
+      return Command::SUCCESS;
     }
 
     foreach ($overdueApplications as $application) {
@@ -70,6 +70,6 @@ class CheckOverdueReturns extends Command
     }
 
     $this->info('Overdue applications processed: ' . $overdueApplications->count());
-    return \Symfony\Component\Console\Command\Command::SUCCESS;
+    return Command::SUCCESS;
   }
 }
