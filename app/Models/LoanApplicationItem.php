@@ -11,10 +11,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str; // ++ ADDED: Import the Str class for the accessor fallback
+use Illuminate\Support\Str;
 
 /**
- * 
+ *
  *
  * @property int $id
  * @property int $loan_application_id
@@ -33,7 +33,7 @@ use Illuminate\Support\Str; // ++ ADDED: Import the Str class for the accessor f
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \App\Models\Equipment|null $equipment
- * @property-read string $equipment_type_name
+ * @property-read string $equipment_type_label // Changed from equipment_type_name for Blade compatibility
  * @property-read string $status_label
  * @property-read \App\Models\LoanApplication $loanApplication
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanTransactionItem> $loanTransactionItems
@@ -70,19 +70,12 @@ class LoanApplicationItem extends Model
 
     // Constants based on the ENUM values in the migration
     public const STATUS_PENDING_APPROVAL = 'pending_approval';
-
     public const STATUS_ITEM_APPROVED = 'item_approved';
-
     public const STATUS_ITEM_REJECTED = 'item_rejected';
-
     public const STATUS_AWAITING_ISSUANCE = 'awaiting_issuance';
-
     public const STATUS_FULLY_ISSUED = 'fully_issued';
-
     public const STATUS_PARTIALLY_ISSUED = 'partially_issued';
-
     public const STATUS_FULLY_RETURNED = 'fully_returned';
-
     public const STATUS_ITEM_CANCELLED = 'item_cancelled';
 
     public const ITEM_STATUS_LABELS = [
@@ -164,14 +157,18 @@ class LoanApplicationItem extends Model
     }
 
     /**
-     * ++ ADDED THIS ACCESSOR METHOD TO FIX THE ERROR ++
-     * This method creates the 'equipment_type_name' attribute on the fly.
-     * It looks for a human-readable label in the Equipment model's static options.
-     * If not found, it creates a nicely formatted name from the key itself.
+     * This accessor provides the 'equipment_type_label' attribute on the fly.
+     * It looks for a human-readable label from the Equipment model's static options
+     * based on the 'equipment_type' column.
+     * If not found, it creates a nicely formatted name from the 'equipment_type' string itself.
+     *
+     * @return string
      */
-    public function getEquipmentTypeNameAttribute(): string
+    public function getEquipmentTypeLabelAttribute(): string // Renamed from getEquipmentTypeNameAttribute
     {
-        return Equipment::getAssetTypeOptions()[$this->equipment_type] ?? Str::title(str_replace('_', ' ', $this->equipment_type));
+        // Ensure that Equipment::getAssetTypeOptions() is correctly defined and returns an array
+        // where keys match the values in your 'equipment_type' column.
+        return Equipment::getAssetTypeOptions()[$this->equipment_type] ?? Str::title(str_replace('_', ' ', (string) $this->equipment_type));
     }
 
     // Helper Methods

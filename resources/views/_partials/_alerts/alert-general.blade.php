@@ -35,13 +35,39 @@
             // Default title for generic string message can be set or let x-alert decide
         }
     }
+
+    // IMPORTANT: Ensure $alertMessage is always a string for __() helper
+    // This block handles cases where an array (like the full approvals.php content from debug)
+    // is unexpectedly flashed to the session.
+    if (is_array($alertMessage)) {
+        // Attempt to extract a meaningful string from the array
+        // Prioritize specific messages that were seen in debug context
+        if (isset($alertMessage['no_tasks']) && is_string($alertMessage['no_tasks'])) {
+            $alertMessage = $alertMessage['no_tasks'];
+        } elseif (isset($alertMessage['loading_text']) && is_string($alertMessage['loading_text'])) {
+            $alertMessage = $alertMessage['loading_text'];
+        } elseif (isset($alertMessage['title']) && is_string($alertMessage['title'])) {
+            // Check if it's the 'title' from approvals.php, which is 'Papan Pemuka Kelulusan'
+            // and use it if it seems appropriate as a general message.
+            $alertMessage = $alertMessage['title'];
+        } elseif (isset($alertMessage['notifications']['generic_error']) && is_string($alertMessage['notifications']['generic_error'])) {
+            // A more specific fallback if it's an error notification
+            $alertMessage = $alertMessage['notifications']['generic_error'];
+        } else {
+            // Fallback: Convert the array to a JSON string.
+            // This prevents the TypeError and helps you see what array was passed.
+            $alertMessage = 'An unexpected message format was received: ' . json_encode($alertMessage);
+            // You might also want to log this in your application for further investigation
+            // Log::warning('Alert message received as array', ['message_content' => $alertMessage]);
+        }
+    }
 @endphp
 
 {{-- Display Session-Based Flash Message using x-alert --}}
 @if ($alertMessage)
     <x-alert :type="$alertLevel"
              @if($alertTitle) title="{{ $alertTitle }}" @endif
-             :message="__($alertMessage)"
+             :message="__($alertMessage)" {{-- $alertMessage is now guaranteed to be a string --}}
              dismissible="true" />
 @endif
 

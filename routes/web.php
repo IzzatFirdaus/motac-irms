@@ -30,6 +30,7 @@ use App\Livewire\ContactUs as ContactUsLW;
 use App\Livewire\Dashboard as DashboardLW;
 use App\Livewire\Dashboard\AdminDashboard as AdminDashboardLW;
 use App\Livewire\ResourceManagement\Admin\Equipment\Index as AdminEquipmentIndexLW;
+// CORRECTED: Ensure UserActivityReport Livewire component is imported
 use App\Livewire\ResourceManagement\Admin\Reports\UserActivityReport;
 use App\Livewire\ResourceManagement\Approval\Dashboard as ApprovalDashboardLW;
 use App\Livewire\ResourceManagement\EmailAccount\ApplicationForm as EmailApplicationFormLW;
@@ -149,49 +150,51 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
   // --- PUBLIC EQUIPMENT CATALOG ---
   Route::resource('equipment', EquipmentController::class)->only(['index', 'show']);
 
-/*
+  /*
 |--------------------------------------------------------------------------
 | Admin & Privileged User Routes
 |--------------------------------------------------------------------------
 */
 
-// NEW: Explicit route for the enhanced admin dashboard.
-Route::get('/admin/dashboard', AdminDashboardLW::class)
-  ->name('admin.dashboard')
-  ->middleware(['role:Admin|IT Admin|BPM Staff']);
+  // NEW: Explicit route for the enhanced admin dashboard.
+  Route::get('/admin/dashboard', AdminDashboardLW::class)
+    ->name('admin.dashboard')
+    ->middleware(['role:Admin|IT Admin|BPM Staff']);
 
-Route::prefix('admin/bpm')->name('resource-management.bpm.')->middleware(['role:Admin|BPM Staff'])->group(function (): void {
-  Route::get('/issued-loans', IssuedLoans::class)->name('issued-loans');
-});
+  Route::prefix('admin/bpm')->name('resource-management.bpm.')->middleware(['role:Admin|BPM Staff'])->group(function (): void {
+    Route::get('/issued-loans', IssuedLoans::class)->name('issued-loans');
+  });
 
-// --- EQUIPMENT MANAGEMENT (BPM Staff & Admin) ---
-Route::prefix('admin/equipment')->name('admin.equipment.')->middleware(['can:view-equipment-admin'])->group(function (): void {
-  Route::get('/', AdminEquipmentIndexLW::class)->name('index');
-  Route::get('/create', [AdminEquipmentController::class, 'create'])->name('create');
-  Route::post('/', [AdminEquipmentController::class, 'store'])->name('store');
-  Route::get('/{equipment}', [AdminEquipmentController::class, 'show'])->name('show');
-  Route::get('/{equipment}/edit', [AdminEquipmentController::class, 'edit'])->name('edit');
-  Route::put('/{equipment}', [AdminEquipmentController::class, 'update'])->name('update');
-  Route::delete('/{equipment}', [AdminEquipmentController::class, 'destroy'])->name('destroy');
-});
+  // --- EQUIPMENT MANAGEMENT (BPM Staff & Admin) ---
+  Route::prefix('admin/equipment')->name('admin.equipment.')->middleware(['can:view-equipment-admin'])->group(function (): void {
+    Route::get('/', AdminEquipmentIndexLW::class)->name('index');
+    Route::get('/create', [AdminEquipmentController::class, 'create'])->name('create');
+    Route::post('/', [AdminEquipmentController::class, 'store'])->name('store');
+    Route::get('/{equipment}', [AdminEquipmentController::class, 'show'])->name('show');
+    Route::get('/{equipment}/edit', [AdminEquipmentController::class, 'edit'])->name('edit');
+    Route::put('/{equipment}', [AdminEquipmentController::class, 'update'])->name('update');
+    Route::delete('/{equipment}', [AdminEquipmentController::class, 'destroy'])->name('destroy');
+  });
 
-// --- EMAIL ACCOUNT PROCESSING (IT Admin & Admin) ---
-Route::prefix('admin/email-processing')->name('admin.email-processing.')->middleware(['role:Admin|IT Admin'])->group(function (): void {
-  Route::get('/', [EmailAccountController::class, 'indexForAdmin'])->name('index');
-  Route::get('/{email_application}', [EmailAccountController::class, 'showForAdmin'])->name('show');
-  Route::post('/{email_application}/process', [EmailAccountController::class, 'processApplication'])->name('process');
-});
+  // --- EMAIL ACCOUNT PROCESSING (IT Admin & Admin) ---
+  Route::prefix('admin/email-processing')->name('admin.email-processing.')->middleware(['role:Admin|IT Admin'])->group(function (): void {
+    Route::get('/', [EmailAccountController::class, 'indexForAdmin'])->name('index');
+    Route::get('/{email_application}', [EmailAccountController::class, 'showForAdmin'])->name('show');
+    Route::post('/{email_application}/process', [EmailAccountController::class, 'processApplication'])->name('process');
+  });
 
 // --- REPORTS ---
 Route::prefix('reports')->name('reports.')->middleware(['role:Admin|BPM Staff|IT Admin'])->group(function (): void {
-  Route::get('/', [ReportController::class, 'index'])->name('index');
-  Route::get('/equipment-inventory', [ReportController::class, 'equipmentInventory'])->name('equipment-inventory');
-  Route::get('/loan-applications', [ReportController::class, 'loanApplications'])->name('loan-applications');
-  Route::get('/activity-log', UserActivityReport::class)->name('activity-log');
-  Route::get('/email-accounts', [ReportController::class, 'emailAccounts'])->name('email-accounts');
-  Route::get('/loan-history', [ReportController::class, 'loanHistory'])->name('loan-history'); // FIXED
+    Route::get('/', [ReportController::class, 'index'])->name('index');
+    Route::get('/equipment-inventory', [ReportController::class, 'equipmentInventory'])->name('equipment-inventory');
+    Route::get('/loan-applications', [ReportController::class, 'loanApplications'])->name('loan-applications');
+    // CHANGED: Use the Livewire component directly for user activity log
+    Route::get('/user-activity-log', UserActivityReport::class)->name('activity-log');
+    Route::get('/email-accounts', [ReportController::class, 'emailAccounts'])->name('email-accounts');
+    Route::get('/loan-history', [ReportController::class, 'loanHistory'])->name('loan-history');
+    Route::get('/utilization', [ReportController::class, 'utilizationReport'])->name('utilization-report');
+    Route::get('/loan-status-summary', [ReportController::class, 'loanStatusSummary'])->name('loan-status-summary');
 });
-
 
   /*
     |--------------------------------------------------------------------------

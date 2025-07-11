@@ -1,52 +1,49 @@
 <?php
 
-// lang/en/menu.php
-
 return [
-    'dashboard' => 'Dashboard',
-    'section' => [
-        'resource_management' => 'Resource Management',
-        'system_config' => 'System Configuration',
-    ],
-    'my_applications' => [
-        'title' => 'My Applications',
-        'email' => 'My Email Requests',
-        'loan' => 'My Loan Applications',
-    ],
-    'apply_for_resources' => [
-        'title' => 'Apply For Resources',
-        'email' => 'New Email/ID Request',
-        'loan' => 'New Loan Application',
-    ],
-    'approvals_dashboard' => 'Approvals Dashboard',
-    'administration' => [
-        'title' => 'Administration',
-        'bpm_operations' => [
-            'title' => 'BPM Operations',
-            'outstanding_loans' => 'Outstanding ICT Loans',
-            'issued_loans' => 'Issued ICT Loans',
-        ],
-        'equipment_management' => 'Equipment Management',
-        'email_applications' => 'Email/ID Admin', // For admin section
-        'users_list' => 'User Accounts (Admin)',
-    ],
-    'settings' => [
-        'title' => 'System Settings',
-        'user_management' => 'User Management',
-        'roles_permissions' => 'Roles & Permissions',
-        'grades_management' => 'Grades Management',
-        'departments_management' => 'Departments Management',
-        'positions_management' => 'Positions Management',
-    ],
-    'reports' => [
-        'title' => 'Reports',
-        'equipment_report' => 'Equipment Inventory Report',
-        'email_accounts_report' => 'Email Accounts Report',
-        'loan_applications_report' => 'Loan Applications Report',
-        'user_activity_report' => 'User Activity Log',
-    ],
-    'system_logs' => 'System Logs',
-    // Fallback for the '-' key if it's ever directly translated by __('-')
-    // However, the menu should now use actual keys.
-    // '-' => '-',
+  'dashboard' => 'Dashboard',
+  'section' => [
+    'resource_management' => 'Resource Management',
+    'reports_analytics' => 'Reports & Analytics', // Added
+    'system_settings' => 'System Settings',       // Changed from system_config for consistency
+  ],
+  'my_applications' => [
+    'title' => 'My Applications',
+    'email' => 'My Email Applications',
+    'loan' => 'My Loan Applications',
+  ],
+  'apply_for_resources' => [
+    'title' => 'Apply for New Resources',
+    'email_account' => 'New Email Account / User ID', // Updated for clarity
+    'loan_application' => 'New ICT Equipment Loan',  // Updated for clarity
+  ],
+  'approvals' => [ // Changed from approvals_dashboard for consistency with config/menu.php
+    'title' => 'Approvals',
+    // Add specific approval sub-items if needed, e.g., 'email' => 'Email Approvals', 'loan' => 'Loan Approvals'
+  ],
+  'resource_inventory' => [ // Added for consistency with config/menu.php
+    'title' => 'ICT Resource Inventory', // Updated title
+    'equipment' => 'ICT Equipment Inventory',
+    'loan_transactions' => 'ICT Loan Transactions',
+  ],
+  'reports' => [
+    'title' => 'Reports', // Simplified title for the main menu item
+    'equipment_report' => 'Equipment Inventory Report',
+    'loan_applications_report' => 'Loan Applications Report',
+    'email_applications_report' => 'Email Applications Report', // New entry
+    'user_activity_report' => 'User Activity Report',          // New entry
+    'loan_history_report' => 'Loan History Report',             // New entry
+    'utilization_report' => 'Equipment Utilization Report',     // New entry
+    'loan_status_summary_report' => 'Loan Status Summary Report', // New entry
+  ],
+  'system_settings' => [ // Changed from settings for consistency with config/menu.php
+    'title' => 'System Settings',
+    'users' => 'User Management',
+    'roles' => 'Roles',
+    'permissions' => 'Permissions',
+    'grades' => 'Grades',
+    'departments' => 'Departments',
+    'positions' => 'Positions',
+  ],
+  'system_logs' => 'System Logs', // New entry
 ];

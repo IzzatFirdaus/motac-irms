@@ -57,18 +57,21 @@
                 'value' => $total_active_loans_count,
                 'icon' => 'bi-journal-text',
                 'color' => 'primary',
+                'link' => route('reports.loan-status-summary'), 
             ])
             @include('_partials.stat-card', [
                 'label' => __('dashboard.overdue_loans'),
                 'value' => $overdue_loans_count,
                 'icon' => 'bi-exclamation-triangle-fill',
                 'color' => 'danger',
+                'link' => route('reports.loan-status-summary'),
             ])
             @include('_partials.stat-card', [
                 'label' => __('dashboard.utilization_rate'),
                 'value' => $equipment_utilization_rate . '%',
                 'icon' => 'bi-graph-up',
                 'color' => 'secondary',
+                'link' => route('reports.utilization-report'),
             ])
         </div>
 
@@ -116,11 +119,13 @@
                                     <strong class="text-dark">{{ $loan_issued_count ?? 0 }}</strong>
                                 </p>
                                 <p class="mb-2 d-flex justify-content-between border-bottom pb-2">
-                                    <span><i class="bi bi-patch-check-fill me-2 text-primary"></i>{{ __('dashboard.approved_pending_issuance') }}</span>
+                                    <span><i
+                                            class="bi bi-patch-check-fill me-2 text-primary"></i>{{ __('dashboard.approved_pending_issuance') }}</span>
                                     <strong class="text-dark">{{ $loan_approved_pending_issuance_count ?? 0 }}</strong>
                                 </p>
                                 <p class="mb-0 d-flex justify-content-between">
-                                    <span><i class="bi bi-box-arrow-in-left me-2 text-success"></i>{{ __('dashboard.returned') }}</span>
+                                    <span><i
+                                            class="bi bi-box-arrow-in-left me-2 text-success"></i>{{ __('dashboard.returned') }}</span>
                                     <strong class="text-dark">{{ $loan_returned_count ?? 0 }}</strong>
                                 </p>
                             </div>
@@ -134,13 +139,14 @@
         <div class="row">
             <div class="col-12">
                 <div class="card shadow-sm mb-4 motac-card">
-                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between motac-card-header">
+                    <div
+                        class="card-header py-3 d-flex flex-row align-items-center justify-content-between motac-card-header">
                         <h6 class="m-0 fw-bold text-primary d-flex align-items-center">
                             <i class="bi bi-list-check me-2"></i>{{ __('dashboard.latest_tasks_title') }}
                         </h6>
                         @if (Route::has('approvals.dashboard'))
                             <a href="{{ route('approvals.dashboard') }}"
-                               class="btn btn-sm btn-outline-primary motac-btn-outline">{{ __('dashboard.view_all_tasks') }}</a>
+                                class="btn btn-sm btn-outline-primary motac-btn-outline">{{ __('dashboard.view_all_tasks') }}</a>
                         @endif
                     </div>
                     <div class="card-body motac-card-body p-0">
@@ -154,7 +160,7 @@
     @push('page-script')
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
-            document.addEventListener('DOMContentLoaded', function () {
+            document.addEventListener('DOMContentLoaded', function() {
                 const data = @json($loan_status_chart_data);
                 const ctx = document.getElementById('loanStatusChart');
                 if (ctx && data.labels.length > 0) {
