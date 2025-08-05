@@ -152,11 +152,13 @@ class LoanTransactionSeeder extends Seeder
         $appsToMarkOverdue = LoanApplication::where('status', LoanApplication::STATUS_ISSUED)
             ->whereDate('loan_end_date', '<', Carbon::now()->toDateString())
             ->limit(5)
-            ->get();
+            ->get(); // Ensure this retrieves LoanApplication model instances
 
         Log::info(sprintf('Attempting to mark %s applications as overdue...', $appsToMarkOverdue->count()));
         foreach ($appsToMarkOverdue as $app) {
-            $app->update(['status' => LoanApplication::STATUS_OVERDUE]);
+            if ($app instanceof LoanApplication) {
+                $app->update(['status' => LoanApplication::STATUS_OVERDUE]);
+            }
         }
 
         Log::info('Marked relevant applications as overdue.');
