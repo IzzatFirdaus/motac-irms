@@ -6,6 +6,7 @@ use Rector\Config\RectorConfig;
 //use Rector\Laravel\Set\LaravelSetList;
 use Rector\Set\ValueObject\SetList;
 use Rector\Symfony\Set\SymfonySetList;
+// Ensure the package is installed; otherwise, comment this line
 use Driftingly\RectorLaravel\Set\LaravelSetList;
 
 return static function (RectorConfig $rectorConfig): void {

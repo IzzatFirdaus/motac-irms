@@ -8,15 +8,12 @@
                 margin-bottom: 0.75rem;
                 line-height: 1;
             }
-
             .icon-stat {
                 font-size: 1.5rem;
             }
-
             .table-hover tbody tr {
                 cursor: pointer;
             }
-
             .card-title {
                 font-weight: 600;
             }
@@ -114,7 +111,7 @@
             </div>
         </div>
 
-        {{-- Recent Applications Section (now specifically for Loan Applications) --}}
+        {{-- Recent Applications Section --}}
         <div class="row">
             <div class="col-12">
                 <div class="card shadow-sm mb-4">
@@ -170,7 +167,6 @@
                 </div>
             </div>
         </div>
-
     </div>
 
     @push('page-script')
@@ -178,7 +174,7 @@
             document.addEventListener('DOMContentLoaded', () => {
                 function updateMotacDashboardClock() {
                     const now = new Date();
-                    const pageLocale = @json(App::getLocale());
+                    const pageLocale = @json(app()->getLocale());
                     const displayLocale = pageLocale === 'ms' ? 'ms-MY' : 'en-GB';
                     const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
                     const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };

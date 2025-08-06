@@ -7,13 +7,17 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
 
-
+/**
+ * TicketList
+ *
+ * List of user's own tickets, with filtering.
+ */
 class TicketList extends Component
 {
     use WithPagination;
 
     public $search = '';
-    public $statusFilter = ''; // open, in_progress, resolved, closed
+    public $statusFilter = '';
     public $priorityFilter = '';
     public $categoryFilter = '';
 
@@ -24,30 +28,15 @@ class TicketList extends Component
         'categoryFilter' => ['except' => ''],
     ];
 
-    public function updatingSearch()
-    {
-        $this->resetPage();
-    }
-
-    public function updatingStatusFilter()
-    {
-        $this->resetPage();
-    }
-
-    public function updatingPriorityFilter()
-    {
-        $this->resetPage();
-    }
-
-    public function updatingCategoryFilter()
-    {
-        $this->resetPage();
-    }
+    public function updatingSearch() { $this->resetPage(); }
+    public function updatingStatusFilter() { $this->resetPage(); }
+    public function updatingPriorityFilter() { $this->resetPage(); }
+    public function updatingCategoryFilter() { $this->resetPage(); }
 
     public function render()
     {
         $tickets = HelpdeskTicket::query()
-            ->where('user_id', Auth::id()) // Only show user's own tickets
+            ->where('user_id', Auth::id())
             ->with(['category', 'priority', 'assignedTo'])
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {

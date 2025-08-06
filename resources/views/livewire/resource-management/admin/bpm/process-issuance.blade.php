@@ -1,11 +1,8 @@
 <div>
     @section('title', __('transaction.issuance_form.page_title', ['id' => $loanApplication->id]))
 
-    {{-- UPDATED: Added container-fluid for a full-width layout --}}
     <div class="container-fluid">
-        {{-- UPDATED: New two-column row structure --}}
         <div class="row g-4">
-
             <div class="col-lg-8">
                 <div class="d-flex justify-content-between align-items-center mb-4 pt-3">
                     <h4 class="fw-bold mb-0 d-flex align-items-center">
@@ -17,7 +14,6 @@
 
                 @include('_partials._alerts.alert-general')
 
-                {{-- Issuance Form --}}
                 <form wire:submit.prevent="submitIssue">
                     <div class="card motac-card">
                         <div class="card-header motac-card-header">
@@ -121,7 +117,6 @@
 
             <div class="col-lg-4">
                 <div class="position-sticky top-0">
-                    {{-- Loan Application Details Card --}}
                     <div class="card motac-card">
                         <div class="card-header motac-card-header">
                             <h5 class="card-title mb-0">{{ __('transaction.issuance_form.related_application_details') }}</h5>

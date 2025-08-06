@@ -47,11 +47,16 @@
                                     <ul class="list-unstyled ps-2 mb-0" style="font-size: 0.8rem;">
                                         @foreach ($loanApplication->loanApplicationItems as $item)
                                             @if ($item->quantity_issued > 0)
-                                                <li><i class="bi bi-chevron-right text-secondary me-1" style="font-size: 0.7rem;"></i>{{ $item->equipment_type_name }} ({{ __('Qty:') }} {{ $item->quantity_issued }})
+                                                <li>
+                                                    <i class="bi bi-chevron-right text-secondary me-1" style="font-size: 0.7rem;"></i>
+                                                    {{ $item->equipment_type_name }} ({{ __('Qty:') }} {{ $item->quantity_issued }})
                                                     <ul class="list-unstyled ps-3 text-body-secondary" style="font-size: 0.75rem;">
                                                         @foreach ($item->loanTransactionItems->filter(fn($ti) => $ti->loanTransaction?->type === \App\Models\LoanTransaction::TYPE_ISSUE) as $transactionItem)
                                                             @if ($transactionItem->equipment)
-                                                                <li><i class="bi bi-arrow-right-short text-info me-1" style="font-size: 0.8rem;"></i>{{ $transactionItem->equipment->tag_id ?? 'N/A' }} - {{ $transactionItem->equipment->brand ?? 'N/A' }} {{ $transactionItem->equipment->model ?? '' }}</li>
+                                                                <li>
+                                                                    <i class="bi bi-arrow-right-short text-info me-1" style="font-size: 0.8rem;"></i>
+                                                                    {{ $transactionItem->equipment->tag_id ?? 'N/A' }} - {{ $transactionItem->equipment->brand ?? 'N/A' }} {{ $transactionItem->equipment->model ?? '' }}
+                                                                </li>
                                                             @endif
                                                         @endforeach
                                                     </ul>
@@ -69,15 +74,14 @@
                                         <span class="d-block small fw-bold text-danger mt-1">{{ __('TERTUNGGAK') }}</span>
                                     @endif
                                 </td>
-                                <td class="px-3 py-2 align-middle small"><x-resource-status-panel :resource="$loanApplication" statusAttribute="status" /></td>
+                                <td class="px-3 py-2 align-middle small">
+                                    <x-resource-status-panel :resource="$loanApplication" statusAttribute="status" />
+                                </td>
                                 <td class="px-3 py-2 align-middle text-end">
-                                    {{-- ***** THIS IS THE FIX ***** --}}
+                                    {{-- Action buttons: View issue transaction, process return, or view application --}}
                                     @php
-                                        // Get the latest 'issue' transaction from the already loaded collection.
                                         $latestIssueTransaction = $loanApplication->loanTransactions->first();
                                         if ($latestIssueTransaction) {
-                                            // Manually set the relation to prevent the lazy loading violation in the policy.
-                                            // We can do this because we already have the $loanApplication object.
                                             $latestIssueTransaction->setRelation('loanApplication', $loanApplication);
                                         }
                                     @endphp

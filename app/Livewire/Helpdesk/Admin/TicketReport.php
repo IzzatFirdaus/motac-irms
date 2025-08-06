@@ -6,12 +6,17 @@ use App\Models\HelpdeskTicket;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * TicketReport
+ *
+ * Livewire component for generating helpdesk ticket reports for admin.
+ */
 class TicketReport extends Component
 {
     public string $reportType = 'volume';
     public ?string $startDate = null;
     public ?string $endDate = null;
-    public array $reportData = [];
+    public $reportData = [];
 
     protected array $rules = [
         'startDate' => 'nullable|date',
@@ -23,7 +28,7 @@ class TicketReport extends Component
         $this->startDate = now()->subMonths(3)->format('Y-m-d');
         $this->endDate = now()->format('Y-m-d');
         $this->generateReport();
-        // Ensure you have the HelpdeskTicketPolicy set up and the user has 'viewAny' permission
+        // Policy: user must have 'viewAny' permission for HelpdeskTicket
         $this->authorize('viewAny', HelpdeskTicket::class);
     }
 
@@ -32,6 +37,9 @@ class TicketReport extends Component
         $this->generateReport();
     }
 
+    /**
+     * Generate the report based on selected type and date range.
+     */
     public function generateReport(): void
     {
         $this->validate();
@@ -47,12 +55,8 @@ class TicketReport extends Component
 
         $this->reportData = match ($this->reportType) {
             'volume' => $query->select(
-                DB::raw('DATE_FORMAT(created_at, "%Y-%m") as month, count(*) as total_tickets')
-            )
-                ->groupBy('month')
-                ->orderBy('month')
-                ->get(),
-
+                    DB::raw('DATE_FORMAT(created_at, "%Y-%m") as month, count(*) as total_tickets')
+                )->groupBy('month')->orderBy('month')->get(),
             'resolution_time' => $query->where('status', 'closed')
                 ->select([
                     'category_id',
@@ -61,13 +65,9 @@ class TicketReport extends Component
                 ->with('category')
                 ->groupBy('category_id')
                 ->get(),
-
             'status_distribution' => $query->select(
-                DB::raw('status, count(*) as count')
-            )
-                ->groupBy('status')
-                ->get(),
-
+                    DB::raw('status, count(*) as count')
+                )->groupBy('status')->get(),
             default => [],
         };
     }

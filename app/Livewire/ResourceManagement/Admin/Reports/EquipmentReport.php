@@ -4,18 +4,22 @@ namespace App\Livewire\ResourceManagement\Admin\Reports;
 
 use App\Models\Department;
 use App\Models\Equipment;
-use App\Models\EquipmentCategory; // Added based on Revision 3 for equipment
-use App\Models\Location; // Added based on Revision 3
+use App\Models\EquipmentCategory;
+use App\Models\Location;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title; // Corrected: Added use statement for Title attribute
+use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
 
+/**
+ * EquipmentReport Livewire Component
+ * Generates a report of ICT equipment with filters, sorting, and pagination.
+ */
 #[Layout('layouts.app')]
-#[Title('Laporan Peralatan ICT')] // Added Livewire Title attribute
+#[Title('Laporan Peralatan ICT')]
 class EquipmentReport extends Component
 {
     use AuthorizesRequests;
@@ -23,45 +27,41 @@ class EquipmentReport extends Component
 
     // Filter properties
     public ?string $filterAssetType = '';
-
     public ?string $filterStatus = '';
-
     public ?string $filterCondition = '';
-
     public ?int $filterDepartmentId = null;
-
-    public ?int $filterLocationId = null;       // Added from Revision 3
-
-    public ?int $filterCategoryId = null;       // Added from Revision 3
-
-    public string $searchTerm = ''; // Search by tag, serial, model, brand, item_code
+    public ?int $filterLocationId = null;
+    public ?int $filterCategoryId = null;
+    public string $searchTerm = '';
 
     // Sorting properties
     public string $sortBy = 'tag_id';
-
     public string $sortDirection = 'asc';
 
     protected string $paginationTheme = 'bootstrap';
-
     public int $perPage = 15;
 
+    /**
+     * Mount the component and log the report page view for audit purposes.
+     */
     public function mount(): void
     {
-        // $this->authorize('viewAny', Equipment::class); // Example policy
         Log::info("Livewire\EquipmentReport: Generating Equipment Report page.", [
             'admin_user_id' => Auth::id(),
             'ip_address' => request()->ip(),
         ]);
     }
 
+    /**
+     * Computed property: Get filtered, sorted, and paginated equipment report data.
+     */
     public function getReportDataProperty()
     {
-        // Revision 3 Equipment fields: asset_type, brand, model, serial_number, tag_id, status, condition_status, department_id, location_id, equipment_category_id, item_code
         $query = Equipment::with([
             'department:id,name',
             'creator:id,name',
-            'location:id,name', // Corrected: Assuming 'location' is the relationship name in Equipment model
-            'equipmentCategory:id,name', // Assuming relation name
+            'location:id,name',
+            'category:id,name',
         ]);
 
         if ($this->searchTerm !== '' && $this->searchTerm !== '0') {
@@ -71,32 +71,27 @@ class EquipmentReport extends Component
                     ->orWhereRaw('LOWER(serial_number) LIKE ?', [$search])
                     ->orWhereRaw('LOWER(model) LIKE ?', [$search])
                     ->orWhereRaw('LOWER(brand) LIKE ?', [$search])
-                    ->orWhereRaw('LOWER(item_code) LIKE ?', [$search]); // Added from Revision 3
+                    ->orWhereRaw('LOWER(item_code) LIKE ?', [$search]);
             });
         }
 
-        if ($this->filterAssetType !== null && $this->filterAssetType !== '' && $this->filterAssetType !== '0') {
+        if ($this->filterAssetType) {
             $query->where('asset_type', $this->filterAssetType);
         }
-
-        if ($this->filterStatus !== null && $this->filterStatus !== '' && $this->filterStatus !== '0') {
+        if ($this->filterStatus) {
             $query->where('status', $this->filterStatus);
         }
-
-        if ($this->filterCondition !== null && $this->filterCondition !== '' && $this->filterCondition !== '0') {
+        if ($this->filterCondition) {
             $query->where('condition_status', $this->filterCondition);
         }
-
-        if ($this->filterDepartmentId !== null && $this->filterDepartmentId !== 0) {
+        if ($this->filterDepartmentId) {
             $query->where('department_id', $this->filterDepartmentId);
         }
-
-        if ($this->filterLocationId !== null && $this->filterLocationId !== 0) {
-            $query->where('location_id', $this->filterLocationId); // Added from Revision 3
+        if ($this->filterLocationId) {
+            $query->where('location_id', $this->filterLocationId);
         }
-
-        if ($this->filterCategoryId !== null && $this->filterCategoryId !== 0) {
-            $query->where('equipment_category_id', $this->filterCategoryId); // Added from Revision 3
+        if ($this->filterCategoryId) {
+            $query->where('category_id', $this->filterCategoryId);
         }
 
         $query->orderBy($this->sortBy, $this->sortDirection);
@@ -107,20 +102,20 @@ class EquipmentReport extends Component
         return $reportData;
     }
 
-    // Options for filters
+    // Filter options as computed properties for use in the Blade view
     public function getAssetTypeOptionsProperty(): array
     {
-        return Equipment::getAssetTypeOptions(); // Corrected: Call static method
+        return Equipment::getAssetTypeOptions();
     }
 
     public function getStatusOptionsProperty(): array
     {
-        return Equipment::getStatusOptions(); // Corrected: Call static method
+        return Equipment::getStatusOptions();
     }
 
     public function getConditionStatusOptionsProperty(): array
     {
-        return Equipment::getConditionStatusesList(); // Corrected: Call static method
+        return Equipment::getConditionStatusesList();
     }
 
     public function getDepartmentOptionsProperty(): \Illuminate\Support\Collection
@@ -130,26 +125,31 @@ class EquipmentReport extends Component
 
     public function getLocationOptionsProperty(): \Illuminate\Support\Collection
     {
-        return Location::where('is_active', true)->orderBy('name')->pluck('name', 'id'); // Added from Revision 3
+        return Location::where('is_active', true)->orderBy('name')->pluck('name', 'id');
     }
 
     public function getCategoryOptionsProperty(): \Illuminate\Support\Collection
     {
-        return EquipmentCategory::where('is_active', true)->orderBy('name')->pluck('name', 'id'); // Added from Revision 3
+        return EquipmentCategory::where('is_active', true)->orderBy('name')->pluck('name', 'id');
     }
 
-    public function applyFilters(): void
-    {
-        $this->resetPage();
-    }
-
+    /**
+     * Livewire lifecycle hook for when a public property is updated.
+     * Resets pagination when filters or search are updated.
+     */
     public function updating($property): void
     {
-        if (in_array($property, ['filterAssetType', 'filterStatus', 'filterCondition', 'filterDepartmentId', 'filterLocationId', 'filterCategoryId', 'searchTerm'])) {
+        if (in_array($property, [
+            'filterAssetType', 'filterStatus', 'filterCondition',
+            'filterDepartmentId', 'filterLocationId', 'filterCategoryId', 'searchTerm'
+        ])) {
             $this->resetPage();
         }
     }
 
+    /**
+     * Set the column to sort by and toggle the direction.
+     */
     public function setSortBy(string $column): void
     {
         if ($this->sortBy === $column) {
@@ -162,14 +162,24 @@ class EquipmentReport extends Component
         $this->resetPage();
     }
 
+    /**
+     * Reset all filters and sorting to their default values.
+     */
     public function resetFilters(): void
     {
-        $this->reset(['filterAssetType', 'filterStatus', 'filterCondition', 'filterDepartmentId', 'filterLocationId', 'filterCategoryId', 'searchTerm', 'sortBy', 'sortDirection']);
-        $this->sortBy = 'tag_id'; // Default sort
-        $this->sortDirection = 'asc'; // Default direction
+        $this->reset([
+            'filterAssetType', 'filterStatus', 'filterCondition',
+            'filterDepartmentId', 'filterLocationId', 'filterCategoryId', 'searchTerm',
+            'sortBy', 'sortDirection'
+        ]);
+        $this->sortBy = 'tag_id';
+        $this->sortDirection = 'asc';
         $this->resetPage();
     }
 
+    /**
+     * Render the Blade view for the equipment report.
+     */
     public function render()
     {
         return view('livewire.resource-management.admin.reports.equipment-report', [
@@ -178,8 +188,8 @@ class EquipmentReport extends Component
             'statusOptions' => $this->statusOptionsProperty,
             'conditionStatusOptions' => $this->conditionStatusOptionsProperty,
             'departmentOptions' => $this->departmentOptionsProperty,
-            'locationOptions' => $this->locationOptionsProperty,     // Added
-            'categoryOptions' => $this->categoryOptionsProperty,     // Added
+            'locationOptions' => $this->locationOptionsProperty,
+            'categoryOptions' => $this->categoryOptionsProperty,
         ]);
     }
 }

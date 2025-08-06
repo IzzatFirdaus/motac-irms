@@ -1,18 +1,16 @@
-{{-- resources/views/livewire/resource-management/admin/grades/index.blade.php --}}
+{{-- resources/views/livewire/resource-management/admin/grades/grade-index.blade.php --}}
 <div>
     @section('title', __('Pengurusan Gred Jawatan'))
 
     {{-- Page Header --}}
     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4">
         <h1 class="h2 fw-semibold text-dark mb-2 mb-sm-0 d-flex align-items-center">
-            {{-- Iconography: Design Language 2.4 --}}
             <i class="bi bi-award-fill me-2"></i>
             {{ __('Senarai Gred Jawatan MOTAC') }}
         </h1>
         @can('create', App\Models\Grade::class)
             <button wire:click="openCreateModal" type="button"
                 class="btn btn-primary d-inline-flex align-items-center text-uppercase small fw-semibold mt-2 mt-sm-0 px-3 py-2">
-                {{-- Iconography: Design Language 2.4. Changed from ti-plus --}}
                 <i class="bi bi-plus-lg {{ app()->getLocale() === 'ar' ? 'ms-2' : 'me-2' }}"></i>
                 {{ __('Tambah Gred Baru') }}
             </button>
@@ -40,7 +38,7 @@
                 placeholder="{{ __('Masukkan nama gred atau tahap...') }}"
                 class="form-control form-control-sm">
         </div>
-    </x-card>
+    </div>
 
     {{-- Grades Table --}}
     <div class="card motac-card">
@@ -69,7 +67,6 @@
                             <td class="px-3 py-2 small text-dark fw-medium">{{ $grade->name }}</td>
                             <td class="px-3 py-2 small text-muted">{{ $grade->level ?? '-' }}</td>
                             <td class="px-3 py-2 small">
-                                {{-- Ensure .bg-success-lt & .bg-danger-lt are MOTAC themed --}}
                                 @if($grade->is_approver_grade)
                                     <span class="badge rounded-pill bg-success-lt text-dark">{{ __('Ya') }}</span>
                                 @else
@@ -84,13 +81,11 @@
                             <td class="px-3 py-2 text-end">
                                 @can('update', $grade)
                                 <button wire:click="openEditModal({{ $grade->id }})" type="button" class="btn btn-sm btn-icon btn-outline-primary border-0 me-1" title="{{ __('Kemaskini') }}">
-                                    {{-- Iconography: Design Language 2.4. Changed from ti-pencil --}}
                                     <i class="bi bi-pencil-fill fs-6 lh-1"></i>
                                 </button>
                                 @endcan
                                 @can('delete', $grade)
                                 <button wire:click="openDeleteModal({{ $grade->id }})" type="button" class="btn btn-sm btn-icon btn-outline-danger border-0" title="{{ __('Padam') }}">
-                                    {{-- Iconography: Design Language 2.4. Changed from ti-trash --}}
                                     <i class="bi bi-trash3-fill fs-6 lh-1"></i>
                                 </button>
                                 @endcan
@@ -100,17 +95,14 @@
                         <tr>
                             <td colspan="6" class="px-3 py-5 text-center">
                                 <div class="d-flex flex-column align-items-center text-muted small">
-                                    {{-- Iconography: Design Language 2.4. Changed from ti-mood-empty --}}
                                     <i class="bi bi-table fs-1 mb-2 text-secondary"></i>
-                                    {{-- Design Language 1.4: Formal Tone --}}
                                     <h5 class="mb-1 mx-2">{{ __('Tiada Gred Ditemui') }}</h5>
                                     <p class="mb-3 mx-2 text-muted">
                                       {{ __('Sila tambah gred baharu untuk memulakan.') }}
                                     </p>
                                     @if(empty($searchTerm))
                                      @can('create', App\Models\Grade::class)
-                                        <button wire:click="openCreateModal" type="button" class="btn btn-primary btn-sm"> {{-- Ensure .btn-primary is MOTAC themed --}}
-                                            {{-- Iconography: Design Language 2.4. Changed from ti-plus --}}
+                                        <button wire:click="openCreateModal" type="button" class="btn btn-primary btn-sm">
                                             <i class="bi bi-plus-lg me-1"></i>{{ __('Tambah Gred Baru') }}
                                         </button>
                                      @endcan
@@ -128,7 +120,6 @@
             </div>
         @endif
     </div>
-
 
     {{-- Create/Edit Grade Modal --}}
     <div class="modal fade @if($showCreateModal || $showEditModal) show d-block @endif"
@@ -186,7 +177,6 @@
                         <button type="button" class="btn btn-secondary" wire:click="closeModal" wire:loading.attr="disabled">{{ __('Batal') }}</button>
                         <button type="submit" class="btn btn-primary" wire:loading.attr="disabled">
                             <span wire:loading.remove>
-                                {{-- Iconography: Design Language 2.4. Changed from ti-device-floppy --}}
                                 <i class="bi bi-save-fill me-1"></i> {{ $showEditModal ? __('Kemaskini Gred') : __('Simpan Gred') }}
                             </span>
                             <span wire:loading class="d-inline-flex align-items-center">
@@ -210,7 +200,6 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="deleteGradeModalLabel">
-                        {{-- Iconography: Design Language 2.4. Changed from ti-alert-triangle --}}
                         <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
                         {{ __('Anda Pasti Ingin Memadam Gred Ini?') }}
                     </h5>
@@ -234,7 +223,6 @@
                     <button type="button" class="btn btn-secondary" wire:click="closeModal" wire:loading.attr="disabled">{{ __('Batal') }}</button>
                     <button wire:click="deleteGrade" type="button" class="btn btn-danger" wire:loading.attr="disabled">
                         <span wire:loading.remove>
-                            {{-- Iconography: Design Language 2.4. Changed from ti-trash --}}
                             <i class="bi bi-trash3-fill me-1"></i>{{ __('Ya, Padam Gred Ini') }}
                         </span>
                         <span wire:loading class="d-inline-flex align-items-center">
@@ -247,46 +235,3 @@
         </div>
     </div>
 </div>
-
-@push('custom-scripts')
-<script>
-    document.addEventListener('livewire:initialized', () => {
-        const gradeFormModalEl = document.getElementById('gradeFormModal');
-        const deleteGradeModalEl = document.getElementById('deleteGradeModal');
-        const gradeFormModalInstance = gradeFormModalEl ? new bootstrap.Modal(gradeFormModalEl) : null;
-        const deleteGradeModalInstance = deleteGradeModalEl ? new bootstrap.Modal(deleteGradeModalEl) : null;
-
-        @this.on('show-create-edit-modal', () => {
-            if(gradeFormModalInstance) gradeFormModalInstance.show();
-        });
-
-        @this.on('show-delete-modal', () => {
-            if(deleteGradeModalInstance) deleteGradeModalInstance.show();
-        });
-
-        @this.on('hide-modal', () => {
-            if(gradeFormModalInstance && bootstrap.Modal.getInstance(gradeFormModalEl)?._isShown) {
-                 gradeFormModalInstance.hide();
-            }
-            if(deleteGradeModalInstance && bootstrap.Modal.getInstance(deleteGradeModalEl)?._isShown) {
-                deleteGradeModalInstance.hide();
-            }
-        });
-
-        if (gradeFormModalEl) {
-            gradeFormModalEl.addEventListener('hidden.bs.modal', (event) => {
-                if (@this.get('showCreateModal') || @this.get('showEditModal')) {
-                    @this.call('closeModal');
-                }
-            });
-        }
-        if (deleteGradeModalEl) {
-            deleteGradeModalEl.addEventListener('hidden.bs.modal', (event) => {
-                 if (@this.get('showDeleteModal')) {
-                    @this.call('closeModal');
-                }
-            });
-        }
-    });
-</script>
-@endpush

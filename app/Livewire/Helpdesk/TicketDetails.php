@@ -9,9 +9,9 @@ use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Auth;
 
 /**
- * TicketDetails Livewire component.
+ * TicketDetails
  *
- * Shows details for a specific ticket and allows comments/attachments.
+ * Shows a ticket's details and allows agent to add comments/attachments.
  */
 class TicketDetails extends Component
 {
@@ -20,7 +20,7 @@ class TicketDetails extends Component
     public HelpdeskTicket $ticket;
     public $newComment;
     public $commentAttachments = [];
-    public $isInternalComment = false; // For agents to add internal notes
+    public $isInternalComment = false; // For IT Admin only
 
     protected HelpdeskService $helpdeskService;
 
@@ -29,26 +29,17 @@ class TicketDetails extends Component
         'commentAttachments.*' => 'nullable|file|max:2048|mimes:jpg,png,pdf,docx,txt,xlsx',
     ];
 
-    /**
-     * Mount with the ticket model.
-     */
     public function mount(HelpdeskTicket $ticket)
     {
         $this->ticket = $ticket;
         $this->authorize('view', $this->ticket);
     }
 
-    /**
-     * Inject HelpdeskService for comment actions.
-     */
     public function boot(HelpdeskService $helpdeskService)
     {
         $this->helpdeskService = $helpdeskService;
     }
 
-    /**
-     * Add a comment to the ticket.
-     */
     public function addComment()
     {
         $this->validate();
@@ -59,20 +50,17 @@ class TicketDetails extends Component
                 $this->newComment,
                 Auth::user(),
                 $this->commentAttachments,
-                $this->isInternalComment && Auth::user()->hasRole('IT Admin') // Only allow internal if user is IT Admin
+                $this->isInternalComment && Auth::user()->hasRole('IT Admin')
             );
 
             $this->reset(['newComment', 'commentAttachments', 'isInternalComment']);
-            $this->ticket->refresh(); // Reload ticket to show new comment
+            $this->ticket->refresh();
             session()->flash('message', 'Comment added successfully.');
         } catch (\Exception $e) {
             session()->flash('error', 'Failed to add comment: ' . $e->getMessage());
         }
     }
 
-    /**
-     * Render the ticket details view.
-     */
     public function render()
     {
         $this->ticket->load(['comments.user', 'comments.attachments', 'attachments']);

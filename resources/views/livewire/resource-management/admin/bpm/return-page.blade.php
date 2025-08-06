@@ -1,19 +1,15 @@
-<<<<<<< HEAD
-@extends('layouts.app') {{-- Ensure this layout is MOTAC-themed (Noto Sans, MOTAC Colors, etc.) --}}
+@extends('layouts.app') {{-- Uses the MOTAC main layout with Noto Sans and MOTAC theme colors --}}
 
-@section('title', __('Rekod Pulangan Peralatan')) {{-- Design Language 1.2: Bahasa Melayu First --}}
-
-@section('content')
-    <div class="container-fluid">
-        {{-- The Livewire component 'process-return' will contain specific UI elements to be themed. --}}
-=======
-@extends('layouts.app') {{-- Or your admin layout --}}
-
-@section('title', 'Rekod Pulangan Peralatan')
+{{-- Page title for browser/tab and header --}}
+@section('title', __('Rekod Pulangan Peralatan'))
 
 @section('content')
     <div class="container-fluid">
->>>>>>> 7940bed (feat: Standardize authorization policies, update service provider and models, and refine configuration for consistent role management and grade-based approvals; Refactor: Streamline notification system with generic classes and consolidations)
+        {{--
+            The 'process-return' Livewire component will display the ICT equipment return process UI.
+            It receives the loan application ID as a parameter.
+            Make sure the Livewire component expects 'loanApplicationId' as its public property or mount argument.
+        --}}
         @livewire('resource-management.admin.bpm.process-return', ['loanApplicationId' => $loanApplicationId])
     </div>
 @endsection

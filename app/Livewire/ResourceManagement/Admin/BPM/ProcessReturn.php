@@ -8,33 +8,32 @@ use App\Models\LoanTransaction;
 use App\Models\User;
 use App\Services\LoanTransactionService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Http\RedirectResponse; // Add this line
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Throwable;
 
+/**
+ * Livewire component for processing the return of ICT equipment for a given loan application.
+ */
 class ProcessReturn extends Component
 {
     use AuthorizesRequests;
 
     public LoanTransaction $issueTransaction;
-
     public LoanApplication $loanApplication;
-
     public array $returnItems = [];
-
     public $returning_officer_id;
-
     public $transaction_date;
-
     public string $return_notes = '';
-
     public array $conditionOptions = [];
-
     public array $users = [];
 
+    /**
+     * Validation messages for the return form.
+     */
     protected function messages(): array
     {
         return [
@@ -46,6 +45,9 @@ class ProcessReturn extends Component
         ];
     }
 
+    /**
+     * Validation rules for the return form.
+     */
     protected function rules(): array
     {
         return [
@@ -63,6 +65,9 @@ class ProcessReturn extends Component
         ];
     }
 
+    /**
+     * Mount the component, eager load data and set up form defaults.
+     */
     public function mount(LoanTransaction $issueTransaction): void
     {
         $this->authorize('processReturn', $issueTransaction);
@@ -70,35 +75,34 @@ class ProcessReturn extends Component
         $this->issueTransaction = $issueTransaction->load(['loanApplication', 'loanTransactionItems.equipment']);
         $this->loanApplication = $issueTransaction->loanApplication;
 
-        // Initialize returnItems with data from the issue transaction
+        // Initialize returnItems with issued items
         $this->returnItems = $this->issueTransaction->loanTransactionItems
             ->map(function ($item) {
-                // Ensure the status used here exists as a constant in LoanTransaction
-                // Corrected: STATUS_ITEM_ISSUED to STATUS_ISSUED
-                $isIssued = $item->status === LoanTransaction::STATUS_ISSUED; // Corrected line
-
+                $isIssued = $item->status === LoanTransaction::STATUS_ISSUED;
                 return [
                     'loan_transaction_item_id' => $item->id,
                     'equipment_id' => $item->equipment_id,
                     'tag_id' => $item->equipment->tag_id,
                     'brand' => $item->equipment->brand,
-                    'model_name' => $item->equipment->model, // Assuming model field on Equipment
+                    'model_name' => $item->equipment->model,
                     'initial_condition' => $item->condition_on_transaction,
-                    'is_returning' => $isIssued, // Default to true if it was issued
+                    'is_returning' => $isIssued,
                     'quantity_issued' => $item->quantity_transacted,
-                    'quantity_returned_so_far' => $item->quantity_returned, // Assuming this is tracked
-                    'condition_on_return' => Equipment::CONDITION_GOOD, // Default for form
+                    'quantity_returned_so_far' => $item->quantity_returned,
+                    'condition_on_return' => Equipment::CONDITION_GOOD,
                     'return_item_notes' => null,
                 ];
             })->values()->toArray();
 
-
         $this->conditionOptions = Equipment::getConditionStatusesList();
         $this->users = User::orderBy('name')->pluck('name', 'id')->all();
-        $this->returning_officer_id = Auth::id(); // Default to current user
+        $this->returning_officer_id = Auth::id();
         $this->transaction_date = now()->format('Y-m-d');
     }
 
+    /**
+     * Handle the submission of the return form.
+     */
     public function submitReturn(LoanTransactionService $loanTransactionService): ?RedirectResponse
     {
         $validatedData = $this->validate();
@@ -111,7 +115,7 @@ class ProcessReturn extends Component
                 return [
                     'loan_transaction_item_id' => $item['loan_transaction_item_id'],
                     'equipment_id' => $item['equipment_id'],
-                    'quantity_returned' => 1, // Assuming 1-to-1 return for now
+                    'quantity_returned' => 1,
                     'condition_on_return' => $item['condition_on_return'],
                     'return_item_notes' => $item['return_item_notes'],
                 ];
@@ -119,8 +123,7 @@ class ProcessReturn extends Component
 
         if (empty($itemsPayload)) {
             $this->addError('returnItems', __('Tiada item dipilih. Sila tandakan sekurang-kurangnya satu item untuk dipulangkan.'));
-
-            return null; // Return null if validation fails, instead of RedirectResponse
+            return null;
         }
 
         $transactionDetails = [
@@ -148,6 +151,9 @@ class ProcessReturn extends Component
         return null;
     }
 
+    /**
+     * Render the Blade view for this component.
+     */
     public function render()
     {
         return view('livewire.resource-management.admin.bpm.process-return');

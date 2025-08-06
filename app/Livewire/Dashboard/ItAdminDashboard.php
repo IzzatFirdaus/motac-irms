@@ -2,39 +2,30 @@
 
 namespace App\Livewire\Dashboard;
 
-// use App\Models\EmailApplication; // REMOVED: EmailApplication import
-use App\Models\HelpdeskTicket; // Corrected: Use HelpdeskTicket instead of Ticket
+use App\Models\HelpdeskTicket;
 use Illuminate\View\View;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
+/**
+ * IT Admin Dashboard Livewire Component
+ *
+ * Displays helpdesk ticket statistics for IT Admins.
+ */
 class ItAdminDashboard extends Component
 {
-    // REMOVED: pending_email_applications_count, processing_email_applications_count
-    public int $open_tickets_count = 0; // NEW: Count for open tickets
-    public int $in_progress_tickets_count = 0; // NEW: Count for in-progress tickets
-    public int $pending_user_feedback_tickets_count = 0; // NEW: Count for tickets pending user feedback
+    public int $pending_helpdesk_tickets_count = 0;
+    public int $in_progress_helpdesk_tickets_count = 0;
 
-    /**
-     * Mount the component and initialize the data.
-     * Fetches counts for Helpdesk tickets awaiting IT admin action or currently being processed.
-     */
     public function mount(): void
     {
-        // NEW: Fetch counts for Helpdesk tickets
-        // Use HelpdeskTicket model for counts
-        $this->open_tickets_count = HelpdeskTicket::where('status', 'open')->count();
-        $this->in_progress_tickets_count = HelpdeskTicket::where('status', 'in_progress')->count();
-        $this->pending_user_feedback_tickets_count = HelpdeskTicket::where('status', 'pending_user_feedback')->count();
+        $this->pending_helpdesk_tickets_count = HelpdeskTicket::where('status', 'open')->count();
+        $this->in_progress_helpdesk_tickets_count = HelpdeskTicket::where('status', 'in_progress')->count();
     }
 
-    /**
-     * Render the component.
-     */
-    #[Title('IT Admin Dashboard')] // Sets the browser page title
+    #[Title('IT Admin Dashboard')]
     public function render(): View
     {
         return view('livewire.dashboard.it-admin-dashboard');
-            // ->layout('layouts.app'); // REMOVE THIS LINE
     }
 }

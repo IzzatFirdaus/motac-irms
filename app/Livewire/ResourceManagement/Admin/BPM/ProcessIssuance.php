@@ -15,26 +15,26 @@ use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Throwable;
 
+/**
+ * Livewire component for processing the issuance of ICT equipment for a given loan application.
+ */
 class ProcessIssuance extends Component
 {
     use AuthorizesRequests;
 
     public LoanApplication $loanApplication;
-
     public array $allAccessoriesList = [];
-
     public $availableEquipment = [];
-
     public Collection $potentialRecipients;
-
     public array $issueItems = [];
 
     public $receiving_officer_id;
-
     public $transaction_date;
-
     public string $issue_notes = '';
 
+    /**
+     * Validation messages for form fields.
+     */
     protected function messages(): array
     {
         return [
@@ -46,6 +46,9 @@ class ProcessIssuance extends Component
         ];
     }
 
+    /**
+     * Validation rules for the issuance form.
+     */
     protected function rules(): array
     {
         $loanApplicationId = $this->loanApplication->id;
@@ -65,13 +68,15 @@ class ProcessIssuance extends Component
         ];
     }
 
+    /**
+     * Mount the component, eager load data and set up form defaults.
+     */
     public function mount(int $loanApplicationId): void
     {
-        // Eager load all necessary relationships for the form
         $this->loanApplication = LoanApplication::with([
             'loanApplicationItems',
             'user',
-            'responsibleOfficer', // ++ ADDED: Eager load the responsible officer
+            'responsibleOfficer',
         ])->findOrFail($loanApplicationId);
 
         $this->authorize('processIssuance', $this->loanApplication);
@@ -79,15 +84,15 @@ class ProcessIssuance extends Component
         $this->allAccessoriesList = config('motac.loan_accessories_list', []);
         $this->transaction_date = now()->format('Y-m-d');
 
-        // ++ EDITED: Create a collection of potential recipients for the dropdown ++
+        // List of recipients: applicant + responsible officer
         $this->potentialRecipients = collect([$this->loanApplication->user, $this->loanApplication->responsibleOfficer])
-            ->filter() // Remove any null values (if no responsible officer)
-            ->unique('id'); // Ensure no duplicates if user and officer are the same
+            ->filter()
+            ->unique('id');
 
-        // Default the receiving officer to the original applicant
+        // Default recipient is the applicant
         $this->receiving_officer_id = $this->loanApplication->user_id;
 
-        // Pre-populate issue items based on the balance to be issued
+        // Prepopulate issue items for the form (one per item to be issued)
         foreach ($this->loanApplication->loanApplicationItems as $approvedItem) {
             $balanceToIssue = ($approvedItem->quantity_approved ?? 0) - ($approvedItem->quantity_issued ?? 0);
             if ($balanceToIssue > 0) {
@@ -103,13 +108,15 @@ class ProcessIssuance extends Component
         }
     }
 
+    /**
+     * Handle the submission of the issuance form.
+     */
     public function submitIssue(LoanTransactionService $loanTransactionService)
     {
         $this->authorize('createIssue', [LoanTransaction::class, $this->loanApplication]);
 
         if ($this->issueItems === []) {
             $this->addError('issueItems', __('Tiada baki peralatan untuk dikeluarkan bagi permohonan ini.'));
-
             return null;
         }
 
@@ -117,7 +124,7 @@ class ProcessIssuance extends Component
         $issuingOfficer = Auth::user();
 
         try {
-            // Prepare data payloads for the service
+            // Prepare payload for the service
             $itemsPayload = collect($validatedData['issueItems'])->map(function ($item): array {
                 return [
                     'equipment_id' => $item['equipment_id'],
@@ -133,7 +140,6 @@ class ProcessIssuance extends Component
                 'issue_notes' => $validatedData['issue_notes'] ?? null,
             ];
 
-            // This service method was refactored to accept a clearer set of arguments
             $loanTransactionService->processNewIssue(
                 $this->loanApplication,
                 $itemsPayload,
@@ -142,7 +148,6 @@ class ProcessIssuance extends Component
             );
 
             session()->flash('success', __('Rekod pengeluaran peralatan telah berjaya disimpan.'));
-
             return $this->redirectRoute('loan-applications.show', ['loan_application' => $this->loanApplication->id], navigate: true);
 
         } catch (Throwable $throwable) {
@@ -153,9 +158,11 @@ class ProcessIssuance extends Component
         return null;
     }
 
+    /**
+     * Load available equipment for dropdowns and render the form.
+     */
     public function render()
     {
-        // Load equipment needed for the form dropdowns
         $requestedTypes = collect($this->issueItems)->pluck('equipment_type')->filter()->unique()->toArray();
 
         $this->availableEquipment = Equipment::where('status', Equipment::STATUS_AVAILABLE)
@@ -164,8 +171,6 @@ class ProcessIssuance extends Component
             ->orderBy('model')
             ->get(['id', 'tag_id', 'asset_type', 'brand', 'model']);
 
-        // Removed ->title() as it's not a standard method on Illuminate\Contracts\View\View
-        // You should handle page title in your main Blade layout if not using a specific package.
         return view('livewire.resource-management.admin.bpm.process-issuance');
     }
 }

@@ -11,9 +11,9 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 
 /**
- * CreateTicketForm Livewire component.
+ * CreateTicketForm
  *
- * Allows users to submit a new helpdesk ticket with attachments.
+ * Allows user to submit a new helpdesk ticket with attachments.
  */
 class CreateTicketForm extends Component
 {
@@ -28,7 +28,7 @@ class CreateTicketForm extends Component
     protected HelpdeskService $helpdeskService;
 
     /**
-     * Inject HelpdeskService for ticket creation.
+     * Inject HelpdeskService
      */
     public function boot(HelpdeskService $helpdeskService)
     {
@@ -36,7 +36,7 @@ class CreateTicketForm extends Component
     }
 
     /**
-     * Validation rules for ticket creation.
+     * Validation rules for new ticket.
      */
     protected function rules()
     {
@@ -45,12 +45,12 @@ class CreateTicketForm extends Component
             'description' => 'required|string',
             'category_id' => ['required', 'integer', Rule::exists('helpdesk_categories', 'id')],
             'priority_id' => ['required', 'integer', Rule::exists('helpdesk_priorities', 'id')],
-            'attachments.*' => 'nullable|file|max:2048|mimes:jpg,png,pdf,docx,txt,xlsx', // Max 2MB, allowed types
+            'attachments.*' => 'nullable|file|max:2048|mimes:jpg,png,pdf,docx,txt,xlsx',
         ];
     }
 
     /**
-     * Handle ticket creation.
+     * Handle creation of ticket.
      */
     public function createTicket()
     {
@@ -65,7 +65,7 @@ class CreateTicketForm extends Component
                     'priority_id' => $this->priority_id,
                 ],
                 Auth::user(),
-                $this->attachments // Pass uploaded files
+                $this->attachments
             );
 
             session()->flash('message', 'Ticket created successfully!');
@@ -75,9 +75,6 @@ class CreateTicketForm extends Component
         }
     }
 
-    /**
-     * Render the ticket creation form view.
-     */
     public function render()
     {
         return view('livewire.helpdesk.create-ticket-form', [
