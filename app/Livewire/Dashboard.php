@@ -19,18 +19,17 @@ class Dashboard extends Component
     public string $displayUserName = '';
     public bool $isNormalUser = false;
 
-    // Properties for the User Dashboard view (only Loan applications remain)
+    // For user dashboard
     public int $pendingUserLoanApplicationsCount = 0;
     public EloquentCollection $userRecentLoanApplications;
 
     public function __construct()
     {
-        // Initialize all collections to be safe
         $this->userRecentLoanApplications = new EloquentCollection();
     }
 
     /**
-     * Mount the component and fetch data based on the user's role.
+     * Mount and initialize dashboard data.
      */
     public function mount(): void
     {
@@ -44,20 +43,20 @@ class Dashboard extends Component
         }
 
         $this->displayUserName = $user->name;
-        $this->isNormalUser = $user->hasRole('User'); // Assuming 'User' is the role for normal users
+        $this->isNormalUser = $user->hasRole('User');
 
-        // Stat Card: Loan applications that are in process.
+        // Stat Card: Pending loan applications
         $this->pendingUserLoanApplicationsCount = LoanApplication::where('user_id', $user->id)
             ->whereIn('status', [
                 LoanApplication::STATUS_DRAFT,
                 LoanApplication::STATUS_PENDING_SUPPORT,
-                LoanApplication::STATUS_PENDING_APPROVER_REVIEW, // Replaced STATUS_PENDING_ADMIN
-                LoanApplication::STATUS_PENDING_BPM_REVIEW, // Replaced STATUS_PROCESSING if it implies review before approval
-                LoanApplication::STATUS_APPROVED, // Include approved if still awaiting issuance
+                LoanApplication::STATUS_PENDING_APPROVER_REVIEW,
+                LoanApplication::STATUS_PENDING_BPM_REVIEW,
+                LoanApplication::STATUS_APPROVED,
             ])
             ->count();
 
-        // Table: The user's 5 most recently updated loan applications.
+        // Table: Recent loan applications
         $this->userRecentLoanApplications = LoanApplication::where('user_id', $user->id)
             ->with(['user:id,name'])
             ->latest('updated_at')
@@ -66,16 +65,13 @@ class Dashboard extends Component
     }
 
     /**
-     * Render the correct dashboard view based on the user's role.
+     * Render the dashboard view depending on role.
      */
     public function render(): View
     {
         if ($this->isNormalUser) {
-            // Render the standard user dashboard
             return view('livewire.dashboard.user-dashboard');
         }
-
-        // For Admins and other roles, render the main admin dashboard component
         return view('livewire.dashboard.admin-dashboard-wrapper');
     }
 }

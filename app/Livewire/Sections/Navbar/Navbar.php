@@ -8,11 +8,18 @@ use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Livewire\Component;
 
+/**
+ * Navbar Livewire Component
+ *
+ * Renders the application navbar, including language switcher and theme toggler.
+ * Accepts container and detachment class from the parent layout.
+ */
 class Navbar extends Component
 {
-    // REVISED: Public properties are now only for data passed from the parent layout.
+    // Bootstrap container class for the navbar
     public string $containerNav = 'container-fluid';
 
+    // Additional class for detached navbar styling
     public string $navbarDetachedClass = '';
 
     /**
@@ -25,8 +32,9 @@ class Navbar extends Component
     }
 
     /**
-     * Prepares the available locales from the config file for the view.
-     * This now runs on every render to ensure data is always fresh and stateless.
+     * Get all available locales for the language switcher.
+     *
+     * @return array
      */
     private function getAvailableLocales(): array
     {
@@ -34,11 +42,11 @@ class Navbar extends Component
         $processedLocales = [];
 
         foreach ($configuredLocales as $localeKey => $properties) {
-            if (! is_array($properties)) {
+            if (!is_array($properties)) {
                 continue;
             }
 
-            // REVISED: Simplified flag code generation.
+            // Generate the flag code (e.g., 'my' for ms_MY, 'us' for en_US)
             $regional = $properties['regional'] ?? '';
             $parts = explode('_', $regional);
             $countryCode = count($parts) === 2 ? strtolower($parts[1]) : null;
@@ -51,7 +59,10 @@ class Navbar extends Component
     }
 
     /**
-     * Prepares data for the currently active locale for the view.
+     * Get data for the current/active locale.
+     *
+     * @param array $availableLocales
+     * @return array
      */
     private function getCurrentLocaleData(array $availableLocales): array
     {
@@ -66,7 +77,7 @@ class Navbar extends Component
     }
 
     /**
-     * Render the component's view.
+     * Render the navbar view, passing locale data for the language dropdown.
      */
     public function render(): View
     {
@@ -74,6 +85,8 @@ class Navbar extends Component
         $currentLocaleData = $this->getCurrentLocaleData($availableLocales);
 
         return view('livewire.sections.navbar.navbar', [
+            'containerNav' => $this->containerNav,
+            'navbarDetachedClass' => $this->navbarDetachedClass,
             'availableLocales' => $availableLocales,
             'currentLocaleData' => $currentLocaleData,
         ]);

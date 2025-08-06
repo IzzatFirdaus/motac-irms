@@ -1,7 +1,7 @@
-{{-- resources/views/livewire/settings/departments/index.blade.php --}}
-<div>
-    @section('title', __('Pengurusan Jabatan'))
+{{-- resources/views/livewire/settings/departments/departments-index.blade.php --}}
+@section('title', __('Pengurusan Jabatan'))
 
+<div>
     {{-- Page Header --}}
     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4 pb-2 border-bottom">
         <h1 class="h2 fw-bold text-dark mb-2 mb-sm-0 d-flex align-items-center">
@@ -121,7 +121,7 @@
         </div>
     </div>
 
-    {{-- ADJUSTMENT: Added a self-contained delete confirmation modal using Alpine.js, similar to the users index view. --}}
+    {{-- Delete Confirmation Modal using Alpine.js --}}
     <div x-data="{ show: false, itemId: null, itemDescription: '', deleteMethod: '' }"
          x-show="show"
          x-cloak
@@ -157,5 +157,4 @@
         </div>
     </div>
     <div x-show="show" x-cloak class="modal-backdrop fade show"></div>
-
 </div>

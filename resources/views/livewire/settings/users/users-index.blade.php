@@ -1,4 +1,5 @@
-{{-- resources/views/livewire/settings/users/index.blade.php --}}
+{{-- resources/views/livewire/settings/users/users-index.blade.php --}}
+@include('_partials._alerts.alert-general')
 <div class="container mt-4">
     <div class="row mb-3 align-items-center pb-2 border-bottom">
         <div class="col">
@@ -8,7 +9,6 @@
             </h1>
         </div>
         <div class="col text-end">
-            {{-- ADJUSTMENT: This button is now protected by a permission check. --}}
             @can('create', App\Models\User::class)
                 <button wire:click="redirectToCreateUser" class="btn btn-primary d-inline-flex align-items-center text-uppercase small fw-semibold px-3 py-2 motac-btn-primary">
                     <i class="bi bi-plus-lg me-1"></i> {{ __('Tambah Pengguna') }}
@@ -16,8 +16,6 @@
             @endcan
         </div>
     </div>
-
-    @include('_partials._alerts.alert-general')
 
     <div class="card shadow-sm motac-card">
         <div class="card-header bg-light py-3 motac-card-header d-flex align-items-center">

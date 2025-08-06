@@ -1,4 +1,11 @@
 {{-- resources/views/livewire/sections/navbar/notifications-dropdown.blade.php --}}
+{{--
+    Notifications Dropdown for Navbar
+    Expects:
+      - $unreadNotifications (collection of notifications)
+      - $unreadCount (integer)
+--}}
+
 <div class="nav-item dropdown-notifications navbar-dropdown dropdown me-3 me-xl-1">
     <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown"
         data-bs-auto-close="outside" aria-expanded="false" aria-label="{{ __('Notifications') }}">

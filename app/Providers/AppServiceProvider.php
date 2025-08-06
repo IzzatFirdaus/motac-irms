@@ -22,6 +22,9 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Translation\FileLoader;
+use Illuminate\Translation\Translator;
+use App\Translation\SuffixedTranslator;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -39,6 +42,17 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(NotificationService::class);
         $this->app->singleton(TicketNotificationService::class);
         $this->app->singleton(UserService::class);
+
+        /**
+         * Register the SuffixedTranslator as the default translator.
+         * This enables support for language files like forms_en.php, forms_ms.php, etc.
+         */
+        $this->app->singleton('translator', function ($app) {
+            $loader = $app['translation.loader'];
+            $locale = $app['config']['app.locale'];
+            // Use SuffixedTranslator instead of Laravel's default Translator
+            return new SuffixedTranslator($loader, $locale);
+        });
     }
 
     /**
@@ -46,8 +60,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Ensure that lazy loading is not allowed in production to prevent N+1 issues.
-        // Changed from isProduction() to environment('production')
+        // Prevent N+1 query issues in non-production environments.
         Model::preventLazyLoading(! $this->app->environment('production'));
 
         // Use Bootstrap pagination views.
@@ -56,10 +69,9 @@ class AppServiceProvider extends ServiceProvider
         // Register custom Blade component alias.
         Blade::component('components.alert-manager', 'alert-manager');
 
-        // Provide a handler to log missing translation keys for easier maintenance.
+        // Log missing translation keys for maintenance.
         Lang::handleMissingKeysUsing(function (string $key, array $replacements, string $locale): string {
             Log::warning(sprintf('Missing translation key detected: [%s] for locale [%s].', $key, $locale), ['replacements' => $replacements]);
-
             return $key;
         });
 
@@ -71,7 +83,7 @@ class AppServiceProvider extends ServiceProvider
             Carbon::setLocale(config('app.fallback_locale', 'en'));
         }
 
-        // Share global variables with all views, but not during console commands.
+        // Share global variables with all views, except during console commands.
         if (! $this->app->runningInConsole()) {
             View::composer('*', function (\Illuminate\View\View $view): void {
                 try {

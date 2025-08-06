@@ -1,14 +1,15 @@
-{{-- resources/views/livewire/settings/positions/index.blade.php --}}
-<div>
-    @section('title', __('Pengurusan Jawatan'))
+{{-- resources/views/livewire/settings/positions/positions-index.blade.php --}}
+{{-- Livewire PositionsIndex component view for managing positions --}}
 
+@section('title', __('Pengurusan Jawatan'))
+
+<div>
     {{-- Page Header --}}
     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4 pb-2 border-bottom">
         <h1 class="h2 fw-bold text-dark mb-2 mb-sm-0 d-flex align-items-center">
             <i class="bi bi-person-workspace me-2"></i>
             {{ __('Pengurusan Jawatan') }}
         </h1>
-        {{-- ADJUSTMENT: "Add" button is protected by the 'create' policy method --}}
         @can('create', App\Models\Position::class)
             <button wire:click="create" class="btn btn-primary d-inline-flex align-items-center text-uppercase small fw-semibold mt-2 mt-sm-0 px-3 py-2 motac-btn-primary">
                 <i class="bi bi-plus-lg me-2"></i>
@@ -73,13 +74,11 @@
                                 </td>
                                 <td class="px-3 py-2 text-end">
                                     <div class="d-inline-flex align-items-center gap-1">
-                                        {{-- ADJUSTMENT: "Edit" button is protected by the 'update' policy method --}}
                                         @can('update', $position)
                                             <button wire:click="edit({{ $position->id }})" class="btn btn-sm btn-icon btn-outline-primary border-0" title="{{ __('Kemaskini') }}">
                                                 <i class="bi bi-pencil-fill"></i>
                                             </button>
                                         @endcan
-                                        {{-- ADJUSTMENT: "Delete" button is protected by the 'delete' policy method --}}
                                         @can('delete', $position)
                                             <button wire:click="confirmPositionDeletion({{ $position->id }})" class="btn btn-sm btn-icon btn-outline-danger border-0" title="{{ __('Padam') }}">
                                                 <i class="bi bi-trash3-fill"></i>
@@ -109,52 +108,8 @@
         </div>
     </div>
 
-    {{-- Position Form Modal (Create/Edit) --}}
-    <div x-data="{ show: @entangle('showModal').live }" x-show="show" x-cloak class="modal fade" :class="{'show': show}" style="display: none;" role="dialog" aria-modal="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content motac-modal-content">
-                <div class="modal-header motac-modal-header">
-                    <h5 class="modal-title">{{ $isEditMode ? 'Edit Jawatan' : 'Cipta Jawatan Baru' }}</h5>
-                    <button type="button" class="btn-close" wire:click="closeModal" aria-label="Close"></button>
-                </div>
-                <form wire:submit.prevent="savePosition">
-                    <div class="modal-body">
-                        <div class="form-group mb-3">
-                            <label for="name">Nama Jawatan<span class="text-danger">*</span></label>
-                            <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" placeholder="Contoh: Pegawai Teknologi Maklumat" wire:model.blur="name">
-                            @error('name') <span class="invalid-feedback">{{ $message }}</span> @enderror
-                        </div>
-                        <div class="form-group mb-3">
-                            <label for="grade_id">Gred Berkaitan</label>
-                            <select class="form-select @error('grade_id') is-invalid @enderror" id="grade_id" wire:model.blur="grade_id">
-                                <option value="">- Pilih Gred -</option>
-                                @foreach($gradeOptions as $id => $name)
-                                    <option value="{{ $id }}">{{ $name }}</option>
-                                @endforeach
-                            </select>
-                            @error('grade_id') <span class="invalid-feedback">{{ $message }}</span> @enderror
-                        </div>
-                        <div class="form-group mb-3">
-                            <label for="description">Penerangan (Pilihan)</label>
-                            <textarea class="form-control @error('description') is-invalid @enderror" id="description" rows="3" placeholder="Penerangan tambahan tentang jawatan..." wire:model.blur="description"></textarea>
-                            @error('description') <span class="invalid-feedback">{{ $message }}</span> @enderror
-                        </div>
-                        <div class="form-group form-check mb-3">
-                            <input type="checkbox" class="form-check-input" id="is_active" wire:model.blur="is_active">
-                            <label class="form-check-label" for="is_active">Aktif</label>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" wire:click="closeModal">Batal</button>
-                        <button type="submit" class="btn btn-primary" wire:loading.attr="disabled">
-                            <span wire:loading.remove>{{ $isEditMode ? 'Kemaskini' : 'Cipta' }}</span>
-                            <span wire:loading>{{ __('Menyimpan...') }}</span>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    {{-- Modal for create/edit position (Reusable Partial) --}}
+    @include('livewire.settings.positions.position-form-modal')
 
     {{-- Delete Confirmation Modal --}}
     <div x-data="{ show: @entangle('showDeleteConfirmationModal').live }" x-show="show" x-cloak class="modal fade" :class="{'show': show}" style="display: none;" role="dialog" aria-modal="true">
@@ -168,10 +123,10 @@
                     <button type="button" class="btn-close" wire:click="closeDeleteConfirmationModal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Adakah anda pasti ingin memadam jawatan "<strong>{{ $positionNameToDelete }}</strong>"? Tindakan ini tidak boleh diundur.</p>
+                    <p>{{ __('Adakah anda pasti ingin memadam jawatan') }} "<strong>{{ $positionNameToDelete }}</strong>"? {{ __('Tindakan ini tidak boleh diundur.') }}</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" wire:click="closeDeleteConfirmationModal">Batal</button>
+                    <button type="button" class="btn btn-secondary" wire:click="closeDeleteConfirmationModal">{{ __('Batal') }}</button>
                     <button type="button" class="btn btn-danger" wire:click="deletePosition">{{ __('Ya, Padam') }}</button>
                 </div>
             </div>

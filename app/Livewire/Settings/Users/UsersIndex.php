@@ -11,25 +11,28 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Spatie\Permission\Models\Role;
 
+/**
+ * UsersIndex Livewire Component
+ * Handles listing, searching, filtering, and deleting users.
+ */
 #[Layout('layouts.app')]
 #[Title('Pengurusan Pengguna Sistem')]
-class Index extends Component
+class UsersIndex extends Component
 {
     use AuthorizesRequests;
     use WithPagination;
 
     public string $search = '';
-
     public ?string $filterRole = null;
-
     public ?string $filterStatus = null;
-
     public array $rolesForFilter = [];
-
     public array $statusOptions = [];
 
     protected string $paginationTheme = 'bootstrap';
 
+    /**
+     * On mount, authorize and load filter data.
+     */
     public function mount(): void
     {
         $this->authorize('viewAny', User::class);
@@ -37,23 +40,14 @@ class Index extends Component
         $this->statusOptions = User::getStatusOptions();
     }
 
+    /**
+     * Computed property for paginated, filtered users list.
+     */
     public function getUsersListProperty()
     {
-        // Corrected query chain:
-        // 1. Use an array for User::select([...]) for clarity and robustness.
-        // 2. Removed duplicated ->with() and ->orderBy() calls.
-        // 3. Ensured the method chaining is continuous.
         $query = User::select([
-            'id',
-            'name',
-            'email',
-            'motac_email',
-            'identification_number',
-            'status',
-            'title',
-            'department_id',
-            'profile_photo_path',
-        ])
+                'id', 'name', 'email', 'motac_email', 'identification_number', 'status', 'title', 'department_id', 'profile_photo_path',
+            ])
             ->with(['department:id,name', 'roles:id,name'])
             ->orderBy('name', 'asc');
 
@@ -96,13 +90,18 @@ class Index extends Component
         $this->resetPage();
     }
 
+    /**
+     * Redirect to create user page.
+     */
     public function redirectToCreateUser(): \Illuminate\Http\RedirectResponse
     {
         $this->authorize('create', User::class);
-
         return redirect()->route('settings.users.create');
     }
 
+    /**
+     * Confirm deletion of the user by dispatching the event for modal.
+     */
     public function confirmUserDeletion(int $userId, string $userName): void
     {
         $user = User::findOrFail($userId);
@@ -110,7 +109,6 @@ class Index extends Component
 
         if (Auth::id() === $user->id) {
             $this->dispatch('toastr', type: 'error', message: __('Anda tidak boleh memadam akaun anda sendiri.'));
-
             return;
         }
 
@@ -118,10 +116,13 @@ class Index extends Component
             'id' => $userId,
             'itemDescription' => __('pengguna').' '.$userName,
             'deleteMethod' => 'deleteUser',
-            'modelClass' => User::class, // Note: 'modelClass' is dispatched but not used by your Alpine modal's x-data
+            'modelClass' => User::class,
         ]);
     }
 
+    /**
+     * Actually delete the user.
+     */
     public function deleteUser(int $userId): void
     {
         $user = User::findOrFail($userId);
@@ -129,7 +130,6 @@ class Index extends Component
 
         if (Auth::id() === $user->id) {
             session()->flash('error', __('Anda tidak boleh memadam akaun anda sendiri.'));
-
             return;
         }
 
@@ -139,12 +139,15 @@ class Index extends Component
         session()->flash('message', __('Pengguna :name berjaya dipadam.', ['name' => $userName]));
     }
 
+    /**
+     * Render the users index view.
+     */
     public function render()
     {
-        return view('livewire.settings.users.index', [
+        return view('livewire.settings.users.users-index', [
             'usersList' => $this->usersList,
-            'rolesForFilter' => $this->rolesForFilter, // This was already being passed correctly
-            'statusOptions' => $this->statusOptions,   // This was already being passed correctly
+            'rolesForFilter' => $this->rolesForFilter,
+            'statusOptions' => $this->statusOptions,
         ]);
     }
 }

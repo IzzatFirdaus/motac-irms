@@ -2,24 +2,29 @@
 
 namespace App\Livewire\Shared\Notifications;
 
+use App\Models\Notification;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Models\Notification;
 
 /**
  * NotificationsList Livewire component.
  *
- * Displays a paginated list of notifications for the authenticated user.
+ * Displays a paginated, searchable list of notifications for the authenticated user,
+ * and allows marking notifications as read.
  */
 class NotificationsList extends Component
 {
     use WithPagination;
 
-    public $search = '';
+    // Search text for filtering notifications (searches the 'data' column)
+    public string $search = '';
+
+    // Use Bootstrap for pagination controls
+    protected string $paginationTheme = 'bootstrap';
 
     /**
-     * Reset pagination on search update.
+     * Reset pagination when search changes.
      */
     public function updatingSearch()
     {
@@ -27,7 +32,7 @@ class NotificationsList extends Component
     }
 
     /**
-     * Get paginated notifications for the authenticated user.
+     * Computed property to get paginated notifications for the authenticated user.
      */
     public function getNotificationsProperty()
     {
@@ -43,6 +48,8 @@ class NotificationsList extends Component
 
     /**
      * Mark a notification as read.
+     *
+     * @param int|string $notificationId
      */
     public function markAsRead($notificationId)
     {
@@ -50,9 +57,9 @@ class NotificationsList extends Component
             ->where('notifiable_id', Auth::id())
             ->first();
 
-        if ($notification) {
+        if ($notification && is_null($notification->read_at)) {
             $notification->markAsRead();
-            session()->flash('success', 'Notification marked as read.');
+            session()->flash('success', __('Notifikasi telah ditanda sebagai dibaca.'));
             $this->resetPage();
         }
     }

@@ -1,4 +1,13 @@
 {{-- resources/views/livewire/sections/navbar/navbar.blade.php --}}
+{{--
+    Application Navbar (top navigation bar)
+    Expects:
+      - $containerNav (Bootstrap container class)
+      - $navbarDetachedClass (Extra class for navbar detachment)
+      - $availableLocales (array of locales for language switcher)
+      - $currentLocaleData (array for current locale info)
+--}}
+
 <div>
     <nav class="layout-navbar {{ $containerNav }} navbar navbar-expand-xl {{ $navbarDetachedClass }} align-items-center bg-navbar-theme"
         id="layout-navbar" aria-label="@lang('common.main_title')">
@@ -38,7 +47,6 @@
                                 @endif
                             </span>
                         </a>
-
                         {{-- Language dropdown menu --}}
                         <ul class="dropdown-menu dropdown-menu-end">
                             @foreach ($availableLocales as $localeKey => $localeData)

@@ -1,7 +1,5 @@
 <?php
 
-// File: app/Livewire/ResourceManagement/Approval/Dashboard.php
-
 declare(strict_types=1);
 
 namespace App\Livewire\ResourceManagement\Approval;
@@ -28,12 +26,12 @@ use Livewire\WithPagination;
 use Throwable;
 
 /**
- * Livewire Component for the Approver's Dashboard.
+ * ApprovalDashboard Livewire Component
  * Displays pending approval tasks and allows officers to record decisions.
  * System Design Ref: 6.2 (Approver Dashboard), 9.4 (Approval Workflow Module)
  */
 #[Layout('layouts.app')]
-class Dashboard extends Component
+class ApprovalDashboard extends Component
 {
     use AuthorizesRequests;
     use WithPagination;
@@ -72,8 +70,8 @@ class Dashboard extends Component
 
     public function mount(): void
     {
-        $this->authorize('viewAny', Approval::class); // Assuming a policy for Approvals
-        Log::info('Livewire\Approval\Dashboard: Approval dashboard loaded.', [
+        $this->authorize('viewAny', Approval::class);
+        Log::info('Livewire\Approval\ApprovalDashboard: Approval dashboard loaded.', [
             'user_id' => Auth::id(),
             'ip_address' => request()->ip(),
         ]);
@@ -91,7 +89,7 @@ class Dashboard extends Component
         throw_if(! $approver instanceof User, new \RuntimeException('Authenticated user not found.'));
 
         $query = Approval::where('officer_id', $approver->id)
-            ->with(['approvable', 'approvable.user', 'officer']); // Eager load relationships
+            ->with(['approvable', 'approvable.user', 'officer']);
 
         // Apply filters
         if ($this->filterStatus) {
@@ -102,10 +100,6 @@ class Dashboard extends Component
             if ($this->filterType === 'loan') {
                 $query->whereMorphedTo('approvable', LoanApplication::class);
             }
-            // Removed email filter as per v4.0 refactoring
-            // elseif ($this->filterType === 'email') {
-            //     $query->whereMorphedTo('approvable', EmailApplication::class);
-            // }
         }
 
         if ($this->searchTerm) {
@@ -129,9 +123,9 @@ class Dashboard extends Component
         END")
             ->orderBy('created_at', 'desc');
 
-        $tasks = $query->paginate(10); // Paginate the results
+        $tasks = $query->paginate(10);
 
-        Log::info(sprintf('Livewire\Approval\Dashboard: Fetched %d approval tasks for user %d.', $tasks->total(), $approver->id), [
+        Log::info(sprintf('Livewire\Approval\ApprovalDashboard: Fetched %d approval tasks for user %d.', $tasks->total(), $approver->id), [
             'filterStatus' => $this->filterStatus,
             'filterType' => $this->filterType,
             'searchTerm' => $this->searchTerm,
@@ -140,18 +134,20 @@ class Dashboard extends Component
         return $tasks;
     }
 
+    /**
+     * Open the modal for a specific approval task.
+     */
     public function openApprovalModal(int $approvalId, string $decisionType): void
     {
         try {
-            $approvalTask = Approval::with('approvable.loanApplicationItems')->findOrFail($approvalId); // Eager load loanApplicationItems
-            $this->authorize('performApproval', $approvalTask); // Authorize the action
+            $approvalTask = Approval::with('approvable.loanApplicationItems')->findOrFail($approvalId);
+            $this->authorize('performApproval', $approvalTask);
 
             $this->currentApprovalId = $approvalId;
             $this->currentApprovalTask = $approvalTask;
             $this->approvalDecision = $decisionType;
-            $this->approvalNotes = ''; // Reset notes
+            $this->approvalNotes = '';
 
-            // Initialize approvalItems for LoanApplication based on current state
             $this->approvalItems = [];
             if ($approvalTask->approvable instanceof LoanApplication) {
                 foreach ($approvalTask->approvable->loanApplicationItems as $item) {
@@ -159,30 +155,33 @@ class Dashboard extends Component
                         'id' => $item->id,
                         'equipment_id' => $item->equipment_id,
                         'requested_quantity' => $item->quantity,
-                        'quantity_approved' => ($decisionType === Approval::STATUS_APPROVED) ? $item->quantity : 0, // Set default based on decision
+                        'quantity_approved' => ($decisionType === Approval::STATUS_APPROVED) ? $item->quantity : 0,
                         'equipment_name' => $item->equipment->brand.' '.$item->equipment->model.' ('.$item->equipment->tag_id.')',
                     ];
                 }
             }
 
-            $this->modalTitle = ($decisionType === Approval::STATUS_APPROVED) ? 'Lulus Permohonan' : 'Tolak Permohonan'; // Corrected constants
+            $this->modalTitle = ($decisionType === Approval::STATUS_APPROVED) ? 'Lulus Permohonan' : 'Tolak Permohonan';
             $this->showApprovalModal = true;
 
-            Log::info(sprintf('Livewire\Approval\Dashboard: Opened approval modal for task %d with decision type %s.', $approvalId, $decisionType), [
+            Log::info(sprintf('Livewire\Approval\ApprovalDashboard: Opened approval modal for task %d with decision type %s.', $approvalId, $decisionType), [
                 'user_id' => Auth::id(),
             ]);
         } catch (ModelNotFoundException $e) {
             $this->dispatch('toastr', type: 'error', message: __('Tugas kelulusan tidak ditemui.'));
-            Log::error('Livewire\Approval\Dashboard: Approval task not found.', ['approval_id' => $approvalId, 'error' => $e->getMessage()]);
+            Log::error('Livewire\Approval\ApprovalDashboard: Approval task not found.', ['approval_id' => $approvalId, 'error' => $e->getMessage()]);
         } catch (AuthorizationException $e) {
             $this->dispatch('toastr', type: 'error', message: __('Anda tidak dibenarkan untuk membuat keputusan ke atas tugas ini.'));
-            Log::warning('Livewire\Approval\Dashboard: Authorization failed for approval task.', ['approval_id' => $approvalId, 'user_id' => Auth::id(), 'error' => $e->getMessage()]);
+            Log::warning('Livewire\Approval\ApprovalDashboard: Authorization failed for approval task.', ['approval_id' => $approvalId, 'user_id' => Auth::id(), 'error' => $e->getMessage()]);
         } catch (Throwable $e) {
             $this->dispatch('toastr', type: 'error', message: __('Ralat: Gagal membuka modal kelulusan.'));
-            Log::error('Livewire\Approval\Dashboard: Unexpected error opening approval modal.', ['approval_id' => $approvalId, 'error' => $e->getMessage()]);
+            Log::error('Livewire\Approval\ApprovalDashboard: Unexpected error opening approval modal.', ['approval_id' => $approvalId, 'error' => $e->getMessage()]);
         }
     }
 
+    /**
+     * Process the approval action from the modal.
+     */
     public function processApproval(): void
     {
         try {
@@ -195,41 +194,46 @@ class Dashboard extends Component
             $user = Auth::user();
             throw_if(! $user instanceof User, new \RuntimeException('Authenticated user not found.'));
 
-            // Call the approval service to record the decision
-            $this->approvalService->recordApprovalDecision( // This method needs to be in ApprovalService
+            $this->approvalService->recordApprovalDecision(
                 $this->currentApprovalTask,
                 $this->approvalDecision,
                 $this->approvalNotes,
-                $this->approvalItems // Pass items for loan application processing
+                $this->approvalItems
             );
 
             $this->dispatch('toastr', type: 'success', message: __('Keputusan kelulusan berjaya direkodkan.'));
             $this->closeApprovalModal();
-            $this->resetPage(); // Refresh the list
-            Log::info(sprintf('Livewire\Approval\Dashboard: Approval decision recorded for task %d.', $this->currentApprovalId), [
+            $this->resetPage();
+            Log::info(sprintf('Livewire\Approval\ApprovalDashboard: Approval decision recorded for task %d.', $this->currentApprovalId), [
                 'decision' => $this->approvalDecision,
                 'user_id' => $user->id,
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             $this->dispatch('toastr', type: 'error', message: __('Sila semak semula borang kelulusan anda.'));
-            Log::warning('Livewire\Approval\Dashboard: Validation failed for approval decision.', ['errors' => $e->errors()]);
-            throw $e; // Re-throw to show validation errors in the form
+            Log::warning('Livewire\Approval\ApprovalDashboard: Validation failed for approval decision.', ['errors' => $e->errors()]);
+            throw $e;
         } catch (AuthorizationException $e) {
             $this->dispatch('toastr', type: 'error', message: __('Anda tidak dibenarkan untuk membuat keputusan ini.'));
-            Log::warning('Livewire\Approval\Dashboard: Authorization failed during approval process.', ['user_id' => Auth::id(), 'error' => $e->getMessage()]);
+            Log::warning('Livewire\Approval\ApprovalDashboard: Authorization failed during approval process.', ['user_id' => Auth::id(), 'error' => $e->getMessage()]);
         } catch (Throwable $e) {
             $this->dispatch('toastr', type: 'error', message: sprintf('Ralat semasa merekod keputusan: %s', $e->getMessage()));
-            Log::error('Livewire\Approval\Dashboard: Error processing approval.', ['approval_id' => $this->currentApprovalId, 'error' => $e->getMessage()]);
+            Log::error('Livewire\Approval\ApprovalDashboard: Error processing approval.', ['approval_id' => $this->currentApprovalId, 'error' => $e->getMessage()]);
         }
     }
 
+    /**
+     * Close the approval modal and reset related state.
+     */
     public function closeApprovalModal(): void
     {
         $this->showApprovalModal = false;
         $this->reset(['currentApprovalId', 'currentApprovalTask', 'approvalDecision', 'approvalNotes', 'approvalItems', 'modalTitle']);
-        $this->resetValidation(); // Clear validation errors
+        $this->resetValidation();
     }
 
+    /**
+     * Validate approval form inputs.
+     */
     protected function validateApprovalInputs(): array
     {
         $rules = [
@@ -237,10 +241,9 @@ class Dashboard extends Component
             'approvalItems' => ['array'],
         ];
 
-        // Dynamic rules for quantity approved only if decision is 'approved' and it's a loan application
-        if ($this->approvalDecision === Approval::STATUS_APPROVED && $this->currentApprovalTask?->approvable instanceof LoanApplication) { // Corrected constant
+        if ($this->approvalDecision === Approval::STATUS_APPROVED && $this->currentApprovalTask?->approvable instanceof LoanApplication) {
             foreach ($this->approvalItems as $index => $item) {
-                $maxQty = $item['requested_quantity']; // Max quantity to approve is the requested quantity
+                $maxQty = $item['requested_quantity'];
                 $rules['approvalItems.' . $index . '.quantity_approved'] = [
                     'required',
                     'integer',
@@ -251,11 +254,13 @@ class Dashboard extends Component
         }
 
         $validated = $this->validate($rules, $this->getValidationMessages());
-        Log::debug('Livewire\Approval\Dashboard: Approval inputs validated.', ['validated' => $validated]);
-
+        Log::debug('Livewire\Approval\ApprovalDashboard: Approval inputs validated.', ['validated' => $validated]);
         return $validated;
     }
 
+    /**
+     * Custom messages for approval validation.
+     */
     protected function getValidationMessages(): array
     {
         $messages = [
@@ -263,7 +268,7 @@ class Dashboard extends Component
             'approvalItems.array' => __('approvals.validation.items_array'),
         ];
 
-        if ($this->approvalDecision === Approval::STATUS_APPROVED && $this->currentApprovalTask?->approvable instanceof LoanApplication) { // Corrected constant
+        if ($this->approvalDecision === Approval::STATUS_APPROVED && $this->currentApprovalTask?->approvable instanceof LoanApplication) {
             foreach ($this->approvalItems as $index => $item) {
                 $itemTypeDisplay = $item['equipment_name'] ?? 'Item';
                 $maxQty = $item['requested_quantity'];
@@ -276,6 +281,9 @@ class Dashboard extends Component
         return $messages;
     }
 
+    /**
+     * Get the route to view the related application.
+     */
     public function getViewApplicationRoute(Approval $approvalTask): ?string
     {
         $approvable = $approvalTask->approvable;
@@ -290,7 +298,6 @@ class Dashboard extends Component
             $routeName = 'loan-applications.show';
             $routeParams = ['loan_application' => $approvable->id];
         }
-        // Removed EmailApplication specific route
 
         if ($routeName && Route::has($routeName)) {
             try {
@@ -301,5 +308,13 @@ class Dashboard extends Component
             }
         }
         return null;
+    }
+
+    /**
+     * Render the approval dashboard Blade view.
+     */
+    public function render(): View
+    {
+        return view('livewire.resource-management.approval.approval-dashboard');
     }
 }
