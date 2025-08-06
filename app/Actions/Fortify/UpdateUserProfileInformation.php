@@ -5,6 +5,7 @@ namespace App\Actions\Fortify;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\UpdatesUserProfileInformation;
+use Illuminate\Http\UploadedFile;
 
 class UpdateUserProfileInformation implements UpdatesUserProfileInformation
 {
@@ -38,5 +39,4 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
 
             $user->sendEmailVerificationNotification();
         }
-    }
 }

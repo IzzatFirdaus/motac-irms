@@ -1,9 +1,8 @@
 <div>
-    {{-- This view now acts as the primary container for the approver's dashboard experience --}}
+    {{-- Primary container for the approver's dashboard --}}
     <div class="container-fluid py-4">
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <h1 class="h3 mb-0 text-dark fw-bold">{{ __('Papan Pemuka Pegawai Pelulus') }}</h1>
-            {{-- This link allows easy access to the user's full approval history --}}
             @if (Route::has('approvals.history'))
                 <a href="{{ route('approvals.history') }}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center">
                     <i class="bi bi-clock-history me-1"></i>
@@ -12,7 +11,7 @@
             @endif
         </div>
 
-        {{-- Section for statistical summary --}}
+        {{-- Statistical summary --}}
         <div class="row">
             <div class="col-lg-6 mb-4">
                 <div class="card shadow-sm h-100">
@@ -47,7 +46,7 @@
             </div>
         </div>
 
-        {{-- Section for the main approval task list --}}
+        {{-- Approval task list --}}
         <div class="row">
             <div class="col-12">
                 <div class="card shadow-sm mb-4">
@@ -55,7 +54,6 @@
                         <h6 class="m-0 fw-bold text-primary">{{ __('Permohonan Menunggu Tindakan Anda') }}</h6>
                     </div>
                     <div class="card-body p-0">
-                        {{-- REVISED: Removed the unnecessary key() directive to clear the editor warning. --}}
                         @livewire('resource-management.approval.dashboard', [
                             'filterStatus' => 'pending'
                         ])
@@ -63,6 +61,5 @@
                 </div>
             </div>
         </div>
-
     </div>
 </div>

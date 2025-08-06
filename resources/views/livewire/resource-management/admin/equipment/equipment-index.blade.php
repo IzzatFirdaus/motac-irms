@@ -1,4 +1,4 @@
-{{-- resources/views/livewire/resource-management/admin/equipment/index.blade.php --}}
+{{-- resources/views/livewire/resource-management/admin/equipment/equipment-index.blade.php --}}
 <div>
     @section('title', __('Pengurusan Peralatan ICT'))
 
@@ -10,7 +10,7 @@
                 {{ __('Pengurusan Peralatan ICT') }}
             </h1>
             @can('create', App\Models\Equipment::class)
-                <button wire:click="$dispatch('open-modal', { modalId: 'equipmentFormModal', action: 'create' })"
+                <button wire:click="createEquipment"
                     class="btn btn-primary d-inline-flex align-items-center motac-btn-primary">
                     <i class="bi bi-plus-lg me-1"></i> {{ __('Tambah Peralatan Baharu') }}
                 </button>
@@ -55,7 +55,7 @@
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <button wire:click="resetFilters"
+                        <button wire:click="resetForm"
                             class="btn btn-sm btn-outline-secondary w-100 motac-btn-outline" type="button"
                             title="{{ __('Set Semula Carian & Saringan') }}">
                             <i class="bi bi-arrow-counterclockwise me-1"></i>{{ __('Set Semula') }}
@@ -113,7 +113,7 @@
                                         <div class="d-inline-flex align-items-center gap-1">
                                             @can('view', $item)
                                                 <button
-                                                    wire:click="$dispatch('open-modal', { modalId: 'viewEquipmentModal', action: 'view', equipmentId: {{ $item->id }} })"
+                                                    wire:click="viewEquipment({{ $item->id }})"
                                                     type="button"
                                                     class="btn btn-sm btn-outline-info border-0 p-1 motac-btn-icon"
                                                     title="{{ __('Lihat Butiran') }}"><i
@@ -121,7 +121,7 @@
                                             @endcan
                                             @can('update', $item)
                                                 <button
-                                                    wire:click="$dispatch('open-modal', { modalId: 'equipmentFormModal', action: 'edit', equipmentId: {{ $item->id }} })"
+                                                    wire:click="editEquipment({{ $item->id }})"
                                                     type="button"
                                                     class="btn btn-sm btn-outline-primary border-0 p-1 motac-btn-icon"
                                                     title="{{ __('Kemaskini') }}"><i
@@ -129,7 +129,7 @@
                                             @endcan
                                             @can('delete', $item)
                                                 <button
-                                                    wire:click="$dispatch('open-delete-modal', { id: {{ $item->id }}, itemDescription: '{{ e(addslashes($item->tag_id)) }}', deleteMethod: 'deleteEquipment' })"
+                                                    wire:click="confirmDeleteEquipment({{ $item->id }})"
                                                     type="button"
                                                     class="btn btn-sm btn-outline-danger border-0 p-1 motac-btn-icon"
                                                     title="{{ __('Padam') }}"><i class="bi bi-trash3-fill"></i></button>
@@ -159,7 +159,7 @@
         </div>
     </div>
 
-    {{-- ADJUSTMENT: Include modal partials here --}}
+    {{-- Modal partials --}}
     @include('livewire.resource-management.admin.equipment.partials.equipment-form-modal')
     @include('livewire.resource-management.admin.equipment.partials.view-equipment-modal')
     @include('livewire.resource-management.admin.equipment.partials.delete-confirmation-modal')
@@ -167,6 +167,7 @@
 
 @push('scripts')
     <script>
+        // Modal handling for Livewire events
         document.addEventListener('livewire:initialized', () => {
             const openModal = (modalId) => {
                 let modalElement = document.getElementById(modalId);
@@ -192,7 +193,6 @@
             };
 
             Livewire.on('open-modal', (event) => {
-                // Check if event is an array and use first element if so (new LW3 syntax)
                 let modalId = Array.isArray(event) ? event[0].modalId : event.modalId;
                 if (modalId) openModal(modalId);
             });

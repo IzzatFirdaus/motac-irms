@@ -1,4 +1,4 @@
-{{-- resources/views/livewire/helpdesk/ticket-list.blade.php --}}
+{{-- resources/views/livewire/helpdesk/my-tickets-index.blade.php --}}
 <div>
     <h2 class="font-semibold text-xl text-gray-800 leading-tight">
         {{ __('My Helpdesk Tickets') }}
@@ -12,7 +12,7 @@
                 placeholder="{{ __('Search your tickets...') }}">
         </div>
         <div class="col-md-3 mb-2">
-            <select class="form-select" wire:model="statusFilter">
+            <select class="form-select" wire:model="status">
                 <option value="">{{ __('All Statuses') }}</option>
                 <option value="open">{{ __('Open') }}</option>
                 <option value="in_progress">{{ __('In Progress') }}</option>
@@ -22,7 +22,7 @@
             </select>
         </div>
         <div class="col-md-3 mb-2">
-            <select class="form-select" wire:model="priorityFilter">
+            <select class="form-select" wire:model="priority">
                 <option value="">{{ __('All Priorities') }}</option>
                 @foreach($priorities as $priority)
                     <option value="{{ $priority->id }}">{{ $priority->name }}</option>
@@ -30,7 +30,7 @@
             </select>
         </div>
         <div class="col-md-3 mb-2">
-            <select class="form-select" wire:model="categoryFilter">
+            <select class="form-select" wire:model="category">
                 <option value="">{{ __('All Categories') }}</option>
                 @foreach($categories as $category)
                     <option value="{{ $category->id }}">{{ $category->name }}</option>

@@ -10,7 +10,11 @@ use Livewire\WithFileUploads;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 
-
+/**
+ * TicketForm
+ *
+ * Form for submitting a new helpdesk ticket.
+ */
 class TicketForm extends Component
 {
     use WithFileUploads;
@@ -35,7 +39,7 @@ class TicketForm extends Component
             'description' => 'required|string',
             'category_id' => ['required', 'integer', Rule::exists('helpdesk_categories', 'id')],
             'priority_id' => ['required', 'integer', Rule::exists('helpdesk_priorities', 'id')],
-            'attachments.*' => 'nullable|file|max:2048|mimes:jpg,png,pdf,docx,txt,xlsx', // Max 2MB, allowed types
+            'attachments.*' => 'nullable|file|max:2048|mimes:jpg,png,pdf,docx,txt,xlsx',
         ];
     }
 
@@ -52,7 +56,7 @@ class TicketForm extends Component
                     'priority_id' => $this->priority_id,
                 ],
                 Auth::user(),
-                $this->attachments // Pass uploaded files
+                $this->attachments
             );
 
             session()->flash('message', 'Ticket created successfully!');

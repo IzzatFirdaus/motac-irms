@@ -3,16 +3,19 @@
 namespace App\Livewire\ResourceManagement\Admin\Grades;
 
 use App\Models\Grade;
-// use App\Models\User; // Not directly used for instantiation, but through relationships
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Validation\Rule as ValidationRule;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
-use Livewire\WithPagination; // For unique rule, aliased
+use Livewire\WithPagination;
 
+/**
+ * GradeIndex Livewire component.
+ * Handles listing, searching, creating, editing, and deleting of job grades (gred jawatan).
+ */
 #[Layout('layouts.app')]
-class Index extends Component
+class GradeIndex extends Component
 {
     use AuthorizesRequests;
     use WithPagination;
@@ -20,26 +23,23 @@ class Index extends Component
     public string $searchTerm = '';
 
     public bool $showCreateModal = false;
-
     public bool $showEditModal = false;
-
     public bool $showDeleteModal = false;
 
     public ?Grade $editingGrade = null;
-
     public ?Grade $deletingGrade = null;
 
-    // Form Fields - Livewire\Attributes\Rule not needed here if defined in rules() method
+    // Form Fields
     public string $name = '';
-
     public ?int $level = null;
-
     public ?int $min_approval_grade_id = null;
-
     public bool $is_approver_grade = false;
 
-    protected string $paginationTheme = 'bootstrap'; // Updated to Bootstrap
+    protected string $paginationTheme = 'bootstrap';
 
+    /**
+     * Component mount logic: authorize and set default state.
+     */
     public function mount(): void
     {
         $this->authorize('viewAny', Grade::class);
@@ -47,7 +47,9 @@ class Index extends Component
         $this->is_approver_grade = false; // Default for new grade
     }
 
-    // Using a computed property for grades list
+    /**
+     * Computed property to get filtered and paginated grades.
+     */
     public function getGradesProperty()
     {
         $query = Grade::with(['minApprovalGrade:id,name', 'creator:id,name', 'updater:id,name'])
@@ -55,17 +57,20 @@ class Index extends Component
             ->orderBy('name', 'asc');
 
         if ($this->searchTerm !== '' && $this->searchTerm !== '0') {
-            $query->where('name', 'like', '%'.$this->searchTerm.'%')
-                ->orWhere('level', 'like', '%'.$this->searchTerm.'%');
+            $query->where(function ($q) {
+                $q->where('name', 'like', '%'.$this->searchTerm.'%')
+                  ->orWhere('level', 'like', '%'.$this->searchTerm.'%');
+            });
         }
 
         return $query->paginate(10);
     }
 
-    // Using a computed property for available grades for min_approval_grade_id dropdown
+    /**
+     * Computed property for grades that can be selected as min_approval_grade_id.
+     */
     public function getAvailableGradesForDropdownProperty()
     {
-        // Exclude the current editing grade from its own min_approval_grade_id list if applicable
         $query = Grade::orderBy('name');
         if ($this->editingGrade instanceof Grade && $this->editingGrade->exists) {
             $query->where('id', '!=', $this->editingGrade->id);
@@ -74,14 +79,19 @@ class Index extends Component
         return $query->pluck('name', 'id');
     }
 
+    /**
+     * Open the create modal and reset the form.
+     */
     public function openCreateModal(): void
     {
         $this->authorize('create', Grade::class);
         $this->resetForm();
-        // Defaults are set in resetForm or mount
         $this->showCreateModal = true;
     }
 
+    /**
+     * Validate and create a new grade record.
+     */
     public function createGrade(): void
     {
         $this->authorize('create', Grade::class);
@@ -91,10 +101,13 @@ class Index extends Component
         $this->closeModal();
     }
 
+    /**
+     * Open the edit modal and populate the form with the selected grade.
+     */
     public function openEditModal(Grade $grade): void
     {
         $this->authorize('update', $grade);
-        $this->resetForm(); // Good practice to reset before populating
+        $this->resetForm();
         $this->editingGrade = $grade;
         $this->name = $grade->name;
         $this->level = $grade->level;
@@ -103,11 +116,13 @@ class Index extends Component
         $this->showEditModal = true;
     }
 
+    /**
+     * Validate and update the selected grade record.
+     */
     public function updateGrade(): void
     {
         if (! $this->editingGrade instanceof Grade || ! $this->editingGrade->exists) {
             $this->dispatch('toastr', type: 'error', message: __('Ralat: Tiada gred dipilih untuk dikemaskini.'));
-
             return;
         }
 
@@ -117,7 +132,6 @@ class Index extends Component
         // Prevent a grade from selecting itself as min_approval_grade_id
         if ($this->editingGrade->id == $validated['min_approval_grade_id']) {
             $this->addError('min_approval_grade_id', 'Gred kelulusan minimum tidak boleh sama dengan gred semasa.');
-
             return;
         }
 
@@ -126,6 +140,9 @@ class Index extends Component
         $this->closeModal();
     }
 
+    /**
+     * Open the delete confirmation modal for a grade.
+     */
     public function openDeleteModal(Grade $grade): void
     {
         $this->authorize('delete', $grade);
@@ -133,6 +150,9 @@ class Index extends Component
         $this->showDeleteModal = true;
     }
 
+    /**
+     * Delete the selected grade, if not used as min_approval or by positions/users.
+     */
     public function deleteGrade(): void
     {
         if (! $this->deletingGrade instanceof Grade) {
@@ -141,7 +161,7 @@ class Index extends Component
 
         $this->authorize('delete', $this->deletingGrade);
         try {
-            // Check if the grade is being used as a min_approval_grade_id by other grades
+            // Check if this grade is used as a min_approval_grade_id by others
             if (Grade::where('min_approval_grade_id', $this->deletingGrade->id)->exists()) {
                 $this->dispatch('toastr', type: 'error', message: __('Gred ini tidak boleh dipadam kerana ia ditetapkan sebagai Gred Kelulusan Minimum untuk gred lain.'));
             } elseif ($this->deletingGrade->positions()->exists() || $this->deletingGrade->users()->exists()) {
@@ -152,7 +172,7 @@ class Index extends Component
             }
         } catch (\Illuminate\Database\QueryException $queryException) {
             $errorCode = $queryException->errorInfo[1] ?? null;
-            if ($errorCode == 1451 || str_contains(strtolower($queryException->getMessage()), 'foreign key constraint') || str_contains($queryException->getMessage(), 'Cannot delete or update a parent row')) { // MySQL error code for foreign key constraint
+            if ($errorCode == 1451 || str_contains(strtolower($queryException->getMessage()), 'foreign key constraint') || str_contains($queryException->getMessage(), 'Cannot delete or update a parent row')) {
                 $this->dispatch('toastr', type: 'error', message: __('Gred ini tidak boleh dipadam kerana digunakan oleh rekod lain (cth: Pengguna, Jawatan, atau sebagai Gred Kelulusan Minimum).'));
             } else {
                 $this->dispatch('toastr', type: 'error', message: __('Gagal memadam gred: Sila hubungi pentadbir.'));
@@ -163,28 +183,40 @@ class Index extends Component
         $this->closeModal();
     }
 
+    /**
+     * Close all modals and reset form state.
+     */
     public function closeModal(): void
     {
         $this->showCreateModal = false;
         $this->showEditModal = false;
         $this->showDeleteModal = false;
         $this->resetForm();
-        $this->resetErrorBag(); // Clear validation errors
+        $this->resetErrorBag();
     }
 
+    /**
+     * Reset pagination on search.
+     */
     public function updatingSearchTerm(): void
     {
         $this->resetPage();
     }
 
+    /**
+     * Render the grade index Blade view.
+     */
     public function render(): View
     {
-        return view('livewire.resource-management.admin.grades.index', [
-            'gradesList' => $this->grades, // Accesses the getGradesProperty()
-            'availableGradesForDropdown' => $this->availableGradesForDropdown, // Accesses getAvailableGradesForDropdownProperty
-        ]); // Removed ->title(__('Pengurusan Gred Jawatan'))
+        return view('livewire.resource-management.admin.grades.grade-index', [
+            'gradesList' => $this->grades,
+            'availableGradesForDropdown' => $this->availableGradesForDropdown,
+        ]);
     }
 
+    /**
+     * Validation rules for grade form.
+     */
     protected function rules(): array
     {
         $gradeIdToIgnore = $this->editingGrade instanceof Grade && $this->editingGrade->exists ? $this->editingGrade->id : null;
@@ -197,13 +229,16 @@ class Index extends Component
         ];
     }
 
+    /**
+     * Reset the form fields to default.
+     */
     private function resetForm(): void
     {
         $this->name = '';
         $this->level = null;
         $this->min_approval_grade_id = null;
         $this->is_approver_grade = false;
-        $this->editingGrade = new Grade; // Prepare a fresh model
+        $this->editingGrade = new Grade;
         $this->deletingGrade = null;
     }
 }

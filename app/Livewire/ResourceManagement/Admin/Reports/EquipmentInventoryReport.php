@@ -14,6 +14,10 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
 
+/**
+ * EquipmentInventoryReport Livewire Component
+ * Generates an inventory report for ICT equipment with filters, sorting, and pagination.
+ */
 #[Layout('layouts.app')]
 #[Title('Laporan Inventori Peralatan ICT')]
 class EquipmentInventoryReport extends Component
@@ -21,27 +25,27 @@ class EquipmentInventoryReport extends Component
     use AuthorizesRequests;
     use WithPagination;
 
-    // Filter properties
+    // Filter properties (public for Livewire binding)
     public ?string $filterAssetType = '';
     public ?string $filterStatus = '';
     public ?string $filterCondition = '';
     public ?int $filterDepartmentId = null;
     public ?int $filterLocationId = null;
     public ?int $filterCategoryId = null;
-    public string $searchTerm = ''; // Search by tag, serial, model, brand, item_code
+    public string $searchTerm = '';
 
-    // Sorting properties
+    // Sorting controls
     public string $sortBy = 'tag_id';
     public string $sortDirection = 'asc';
 
     protected string $paginationTheme = 'bootstrap';
-
     public int $perPage = 15;
 
+    /**
+     * Mount the component, logs the report page view for audit purposes.
+     */
     public function mount(): void
     {
-        // Example authorization, ensure policy exists
-        // $this->authorize('viewAny', Equipment::class); // Or a specific report permission
         Log::info("Livewire\EquipmentInventoryReport: Generating Equipment Inventory Report page.", [
             'admin_user_id' => Auth::id(),
             'ip_address' => request()->ip(),
@@ -49,7 +53,7 @@ class EquipmentInventoryReport extends Component
     }
 
     /**
-     * Computed property to get the report data for equipment inventory.
+     * Computed property: Get filtered, sorted, and paginated inventory data.
      */
     public function getReportDataProperty()
     {
@@ -59,15 +63,15 @@ class EquipmentInventoryReport extends Component
             ->when($this->filterStatus, fn ($q) => $q->where('status', $this->filterStatus))
             ->when($this->filterCondition, fn ($q) => $q->where('condition_status', $this->filterCondition))
             ->when($this->filterDepartmentId, fn ($q) => $q->where('department_id', $this->filterDepartmentId))
-            ->when($this->filterLocationId, fn ($q) => $q->where('current_location_id', $this->filterLocationId)) // Assuming current_location_id for Location model
+            ->when($this->filterLocationId, fn ($q) => $q->where('location_id', $this->filterLocationId)) // Corrected field to 'location_id'
             ->when($this->filterCategoryId, fn ($q) => $q->where('category_id', $this->filterCategoryId))
             ->when($this->searchTerm, function ($q) {
                 $q->where(function ($subQuery) {
                     $subQuery->where('tag_id', 'like', '%'.$this->searchTerm.'%')
                         ->orWhere('serial_number', 'like', '%'.$this->searchTerm.'%')
-                        ->orWhere('model', 'like', '%'.$this->searchTerm.'%') // Changed model_name to model
+                        ->orWhere('model', 'like', '%'.$this->searchTerm.'%')
                         ->orWhere('brand', 'like', '%'.$this->searchTerm.'%')
-                        ->orWhere('item_code', 'like', '%'.$this->searchTerm.'%'); // If item_code exists on Equipment
+                        ->orWhere('item_code', 'like', '%'.$this->searchTerm.'%');
                 });
             })
             ->orderBy($this->sortBy, $this->sortDirection);
@@ -75,20 +79,20 @@ class EquipmentInventoryReport extends Component
         return $query->paginate($this->perPage);
     }
 
-    // Computed properties for filter options
+    // Computed options for select filters
     public function getAssetTypeOptionsProperty(): array
     {
-        return Equipment::getAssetTypeOptions(); // Corrected to call the method
+        return Equipment::getAssetTypeOptions();
     }
 
     public function getStatusOptionsProperty(): array
     {
-        return Equipment::getStatusOptions(); // Corrected to call the method
+        return Equipment::getStatusOptions();
     }
 
     public function getConditionStatusOptionsProperty(): array
     {
-        return Equipment::getConditionStatusesList(); // Corrected to call the method
+        return Equipment::getConditionStatusesList();
     }
 
     public function getDepartmentOptionsProperty(): \Illuminate\Support\Collection
@@ -107,17 +111,20 @@ class EquipmentInventoryReport extends Component
     }
 
     /**
-     * Resets pagination when filters or search term are updated.
+     * Reset pagination when filter or search properties are updated.
      */
     public function updating($property): void
     {
-        if (in_array($property, ['filterAssetType', 'filterStatus', 'filterCondition', 'filterDepartmentId', 'filterLocationId', 'filterCategoryId', 'searchTerm'])) {
+        if (in_array($property, [
+            'filterAssetType', 'filterStatus', 'filterCondition',
+            'filterDepartmentId', 'filterLocationId', 'filterCategoryId', 'searchTerm'
+        ])) {
             $this->resetPage();
         }
     }
 
     /**
-     * Sets the column to sort by and toggles direction.
+     * Set the column to sort by and toggle the direction.
      */
     public function setSortBy(string $column): void
     {
@@ -132,16 +139,23 @@ class EquipmentInventoryReport extends Component
     }
 
     /**
-     * Resets all filters and sorting to their default values.
+     * Reset all filters and sorting to their default values.
      */
     public function resetFilters(): void
     {
-        $this->reset(['filterAssetType', 'filterStatus', 'filterCondition', 'filterDepartmentId', 'filterLocationId', 'filterCategoryId', 'searchTerm', 'sortBy', 'sortDirection']);
-        $this->sortBy = 'tag_id'; // Default sort
-        $this->sortDirection = 'asc'; // Default direction
+        $this->reset([
+            'filterAssetType', 'filterStatus', 'filterCondition',
+            'filterDepartmentId', 'filterLocationId', 'filterCategoryId', 'searchTerm',
+            'sortBy', 'sortDirection'
+        ]);
+        $this->sortBy = 'tag_id';
+        $this->sortDirection = 'asc';
         $this->resetPage();
     }
 
+    /**
+     * Render the Blade view for the inventory report.
+     */
     public function render()
     {
         return view('livewire.resource-management.admin.reports.equipment-inventory-report', [

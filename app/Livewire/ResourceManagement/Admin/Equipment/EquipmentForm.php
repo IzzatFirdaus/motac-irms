@@ -3,47 +3,42 @@
 namespace App\Livewire\ResourceManagement\Admin\Equipment;
 
 use App\Models\Department;
-use App\Models\Equipment; // Use the Equipment model
+use App\Models\Equipment;
 use App\Models\Location;
 use Illuminate\Validation\Rule as ValidationRule;
 use Livewire\Component;
 
+/**
+ * EquipmentForm Livewire component.
+ * Handles the creation and updating of ICT equipment records.
+ */
 class EquipmentForm extends Component
 {
     public ?Equipment $equipmentInstance = null;
 
+    // Form fields
     public string $tag_id = '';
-
     public string $asset_type = '';
-
     public string $brand = '';
-
     public string $model = '';
-
     public ?string $serial_number = null;
-
     public ?string $purchase_date = null;
-
     public ?string $warranty_end_date = null;
-
     public string $status = '';
-
     public ?int $location_id = null;
-
     public ?int $department_id = null;
-
     public ?string $notes = null;
-
     public bool $isEditMode = false;
 
+    // Dropdown options
     public array $assetTypeOptions = [];
-
     public array $statusOptions = [];
-
     public array $locationOptions = [];
-
     public array $departmentOptions = [];
 
+    /**
+     * Validation rules for the equipment form.
+     */
     protected function rules(): array
     {
         $tagIdRule = ValidationRule::unique('equipment', 'tag_id');
@@ -66,6 +61,9 @@ class EquipmentForm extends Component
         ];
     }
 
+    /**
+     * Custom validation messages.
+     */
     protected function messages(): array
     {
         return [
@@ -79,6 +77,9 @@ class EquipmentForm extends Component
         ];
     }
 
+    /**
+     * Mount the form, load dropdowns, and fill form if editing.
+     */
     public function mount(?int $equipmentId = null): void
     {
         $this->assetTypeOptions = Equipment::getAssetTypeOptions();
@@ -87,7 +88,6 @@ class EquipmentForm extends Component
         $this->departmentOptions = Department::orderBy('name')->pluck('name', 'id')->all();
 
         if ($equipmentId) {
-            // Simplified: use 'Equipment' instead of '\App\Models\Equipment'
             $this->equipmentInstance = Equipment::findOrFail($equipmentId);
             $this->isEditMode = true;
             $this->fillForm();
@@ -96,6 +96,9 @@ class EquipmentForm extends Component
         }
     }
 
+    /**
+     * Fill the form with existing equipment data (edit mode).
+     */
     public function fillForm(): void
     {
         if ($this->equipmentInstance) {
@@ -113,6 +116,9 @@ class EquipmentForm extends Component
         }
     }
 
+    /**
+     * Save the equipment record (create or update).
+     */
     public function saveEquipment(): void
     {
         $this->validate();
@@ -139,15 +145,18 @@ class EquipmentForm extends Component
             session()->flash('success', __('Peralatan baru berjaya ditambah.'));
         }
 
-        $this->redirectRoute('equipment.index', navigate: true);
+        $this->redirectRoute('resource-management.admin.equipment.equipment-index', navigate: true);
     }
 
+    /**
+     * Reset the form fields to default.
+     */
     public function resetForm(): void
     {
         $this->resetErrorBag();
         $this->resetValidation();
         $this->tag_id = '';
-        $this->asset_type = ''; // Or set a default like Equipment::ASSET_TYPE_LAPTOP
+        $this->asset_type = '';
         $this->brand = '';
         $this->model = '';
         $this->serial_number = null;
@@ -161,6 +170,9 @@ class EquipmentForm extends Component
         $this->isEditMode = false;
     }
 
+    /**
+     * Render the equipment form Blade view.
+     */
     public function render()
     {
         return view('livewire.resource-management.admin.equipment.equipment-form');

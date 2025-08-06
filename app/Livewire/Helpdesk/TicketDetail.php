@@ -2,14 +2,17 @@
 
 namespace App\Livewire\Helpdesk;
 
-use App\Models\HelpdeskComment;
 use App\Models\HelpdeskTicket;
 use App\Services\HelpdeskService;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Auth;
 
-
+/**
+ * TicketDetail
+ *
+ * Displays a single ticket (for user/agent) and allows adding comments.
+ */
 class TicketDetail extends Component
 {
     use WithFileUploads;
@@ -17,7 +20,7 @@ class TicketDetail extends Component
     public HelpdeskTicket $ticket;
     public $newComment;
     public $commentAttachments = [];
-    public $isInternalComment = false; // For agents to add internal notes
+    public $isInternalComment = false; // For IT agents only
 
     protected $rules = [
         'newComment' => 'required|string|min:3',
@@ -47,11 +50,11 @@ class TicketDetail extends Component
                 $this->newComment,
                 Auth::user(),
                 $this->commentAttachments,
-                $this->isInternalComment && Auth::user()->hasRole('IT Admin') // Only allow internal if user is IT Admin
+                $this->isInternalComment && Auth::user()->hasRole('IT Admin')
             );
 
             $this->reset(['newComment', 'commentAttachments', 'isInternalComment']);
-            $this->ticket->refresh(); // Reload ticket to show new comment
+            $this->ticket->refresh();
             session()->flash('message', 'Comment added successfully.');
         } catch (\Exception $e) {
             session()->flash('error', 'Failed to add comment: ' . $e->getMessage());

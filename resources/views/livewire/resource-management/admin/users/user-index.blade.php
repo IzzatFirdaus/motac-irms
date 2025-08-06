@@ -1,8 +1,5 @@
-{{-- resources/views/livewire/resource-management/admin/users/index.blade.php --}}
+{{-- resources/views/livewire/resource-management/admin/users/user-index.blade.php --}}
 <div>
-    {{-- If using event-based title updates from the Livewire component, this @section is not needed for browser title. --}}
-    {{-- @section('title', __('Pengurusan Pentadbir Pengguna')) --}}
-
     {{-- Page Header --}}
     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4">
         <h1 class="h2 fw-semibold text-dark mb-2 mb-sm-0 d-flex align-items-center">
@@ -27,14 +24,13 @@
     @endif
 
     {{-- Filters and Search --}}
-    <x-card class="mb-4 motac-card"> {{-- Assuming x-card is your component and it can take a class --}}
-        <x-slot name="header"> {{-- Assuming x-card has a header slot --}}
+    <x-card class="mb-4 motac-card">
+        <x-slot name="header">
             <h5 class="mb-0 fw-semibold d-flex align-items-center">
                 <i class="bi bi-funnel-fill me-2"></i>{{ __('Carian dan Saringan') }}
             </h5>
         </x-slot>
-
-        <div class="card-body motac-card-body"> {{-- Or directly in x-card if it handles padding --}}
+        <div class="card-body motac-card-body">
             <div class="row g-3">
                 <div class="col-lg-6 col-md-12">
                     <label for="userSearchAdmin" class="form-label form-label-sm">{{ __('Carian (Nama, Emel, No. KP, Jabatan)') }}</label>
@@ -64,9 +60,7 @@
     </x-card>
 
     {{-- Users Table --}}
-    {{-- MODIFIED: Changed from <div class="card motac-card"> to <x-card class="motac-card"> --}}
     <x-card class="motac-card">
-        {{-- If your x-card component has a header slot, use it. Otherwise, structure as needed. --}}
         <x-slot name="header">
              <div class="d-flex flex-wrap justify-content-between align-items-center">
                 <h5 class="mb-0 fw-medium text-dark d-flex align-items-center">
@@ -167,13 +161,10 @@
             </table>
         </div>
 
-        {{-- This @if should ideally wrap the card-footer if it exists --}}
         @if (isset($usersList) && $usersList->hasPages())
             <div class="card-footer bg-light border-top d-flex justify-content-center py-2 motac-card-footer">
                 {{ $usersList->links() }}
             </div>
         @endif
-    </x-card> {{-- MODIFIED: Corresponding closing tag for the Users Table card --}}
-
-    {{-- ... (Delete Confirmation Modal - ensure it's correctly implemented if used) ... --}}
+    </x-card>
 </div>

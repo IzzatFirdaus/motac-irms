@@ -1,4 +1,4 @@
-{{-- resources/views/livewire/helpdesk/ticket-form.blade.php --}}
+{{-- resources/views/livewire/helpdesk/create-ticket-form.blade.php --}}
 <div>
     <h2 class="font-semibold text-xl text-gray-800 leading-tight">
         {{ __('Submit a Helpdesk Ticket') }}

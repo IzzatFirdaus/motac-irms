@@ -3,48 +3,47 @@
 namespace App\Livewire\HumanResource\Structure;
 
 use App\Models\Grade;
-use App\Models\Position; // Use the Position model
+use App\Models\Position;
 use Illuminate\Validation\Rule as ValidationRule;
 use Livewire\Component;
 
+/**
+ * Positions Livewire Component
+ *
+ * Handles CRUD operations for positions in the organizational structure.
+ */
 class Positions extends Component
 {
     public $positions = [];
+    public ?Position $positionInstance = null;
 
-    public ?Position $positionInstance = null; // Explicitly type hinting
-
-    // Form fields based on System Design
-    // #[Rule('required|string|max:255')] // Livewire 3 attribute validation
+    // Form fields
     public string $name = '';
-
-    // #[Rule('nullable|string|max:1000')]
     public ?string $description = null;
-
-    // #[Rule('required|exists:grades,id')]
     public ?int $grade_id = null;
-
-    // #[Rule('boolean')]
     public bool $is_active = true;
 
-    // public $vacanciesCount; // Removed as it's not in MOTAC System Design for positions table
-
     public bool $isEditMode = false;
-
     public ?int $confirmedId = null;
 
-    // Options for dropdowns
+    // Dropdown options
     public array $gradeOptions = [];
 
+    /**
+     * Initialize component state and load initial data.
+     */
     public function mount(): void
     {
         $this->gradeOptions = Grade::orderBy('name')->pluck('name', 'id')->all();
         $this->loadPositions();
     }
 
+    /**
+     * Validation rules for the position form.
+     */
     protected function rules(): array
     {
         $nameRule = ValidationRule::unique('positions', 'name');
-        // Simplified: use 'Position' instead of '\App\Models\Position'
         if ($this->isEditMode && $this->positionInstance instanceof Position) {
             $nameRule->ignore($this->positionInstance->id);
         }
@@ -57,29 +56,36 @@ class Positions extends Component
         ];
     }
 
+    /**
+     * Load all positions with their grade relation.
+     */
     public function loadPositions(): void
     {
         $this->positions = Position::with('grade')->orderBy('name')->get();
     }
 
+    /**
+     * Render the positions Blade view.
+     */
     public function render()
     {
         return view('livewire.human-resource.structure.positions');
     }
 
+    /**
+     * Handle form submission for create/update.
+     */
     public function submitPosition(): void
     {
-        $this->validate(); // Uses rules() method
+        $this->validate();
 
         $data = [
             'name' => $this->name,
             'description' => $this->description,
             'grade_id' => $this->grade_id,
             'is_active' => $this->is_active,
-            // 'vacancies_count' => $this->vacanciesCount, // Removed
         ];
 
-        // Simplified: use 'Position' instead of '\App\Models\Position'
         if ($this->isEditMode && $this->positionInstance instanceof Position) {
             $this->positionInstance->update($data);
             session()->flash('toastr', ['type' => 'success', 'message' => __('Jawatan berjaya dikemaskini.')]);
@@ -93,6 +99,9 @@ class Positions extends Component
         $this->loadPositions();
     }
 
+    /**
+     * Show the modal for creating a new position.
+     */
     public function showNewPositionModal(): void
     {
         $this->resetForm();
@@ -101,6 +110,9 @@ class Positions extends Component
         $this->dispatch('openModal', elementId: '#positionModal');
     }
 
+    /**
+     * Show the modal for editing an existing position.
+     */
     public function showEditPositionModal(Position $position): void
     {
         $this->resetForm();
@@ -111,15 +123,20 @@ class Positions extends Component
         $this->description = $position->description;
         $this->grade_id = $position->grade_id;
         $this->is_active = $position->is_active;
-        // $this->vacanciesCount = $position->vacancies_count; // Removed
         $this->dispatch('openModal', elementId: '#positionModal');
     }
 
+    /**
+     * Confirm deletion of a position.
+     */
     public function confirmDeletePosition(?int $id): void
     {
         $this->confirmedId = $id;
     }
 
+    /**
+     * Actually delete the position after confirmation.
+     */
     public function deletePosition(Position $position): void
     {
         $position->delete();
@@ -128,6 +145,9 @@ class Positions extends Component
         $this->confirmedId = null;
     }
 
+    /**
+     * Reset the position form to default state.
+     */
     public function resetForm(): void
     {
         $this->resetErrorBag();
@@ -136,7 +156,6 @@ class Positions extends Component
         $this->description = null;
         $this->grade_id = null;
         $this->is_active = true;
-        // $this->vacanciesCount = 0; // Removed
         $this->positionInstance = null;
         $this->isEditMode = false;
     }

@@ -1,4 +1,4 @@
-{{-- resources/views/livewire/helpdesk/ticket-detail.blade.php --}}
+{{-- resources/views/livewire/helpdesk/ticket-details.blade.php --}}
 <div>
     <h2 class="font-semibold text-xl text-gray-800 leading-tight">
         {{ __('Ticket Details') }} #{{ $ticket->id }}

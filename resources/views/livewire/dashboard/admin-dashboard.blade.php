@@ -1,17 +1,16 @@
 <div>
     @push('page-style')
-        <style>
-            .motac-quick-link {
-                transition: all 0.2s ease-in-out;
-                background-color: var(--bs-tertiary-bg);
-            }
-
-            .motac-quick-link:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-                background-color: var(--bs-body-bg);
-            }
-        </style>
+    <style>
+        .motac-quick-link {
+            transition: all 0.2s ease-in-out;
+            background-color: var(--bs-tertiary-bg);
+        }
+        .motac-quick-link:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            background-color: var(--bs-body-bg);
+        }
+    </style>
     @endpush
 
     <div class="container-fluid py-4">
@@ -47,7 +46,6 @@
                 'value' => $equipment_on_loan_count,
                 'icon' => 'bi-truck',
                 'color' => 'success',
-                // CORRECTED: The route name was incorrect. Changed to the defined route for issued loans.
                 'link' => route('admin.equipment.issued-loans'),
             ])
         </div>
@@ -94,7 +92,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="col-lg-8 mb-4">
                 <div class="card shadow-sm motac-card h-100">
                     <div class="card-header py-3 motac-card-header d-flex align-items-center">
@@ -120,13 +117,11 @@
                                     <strong class="text-dark">{{ $loan_issued_count ?? 0 }}</strong>
                                 </p>
                                 <p class="mb-2 d-flex justify-content-between border-bottom pb-2">
-                                    <span><i
-                                            class="bi bi-patch-check-fill me-2 text-primary"></i>{{ __('dashboard.approved_pending_issuance') }}</span>
+                                    <span><i class="bi bi-patch-check-fill me-2 text-primary"></i>{{ __('dashboard.approved_pending_issuance') }}</span>
                                     <strong class="text-dark">{{ $loan_approved_pending_issuance_count ?? 0 }}</strong>
                                 </p>
                                 <p class="mb-0 d-flex justify-content-between">
-                                    <span><i
-                                            class="bi bi-box-arrow-in-left me-2 text-success"></i>{{ __('dashboard.returned') }}</span>
+                                    <span><i class="bi bi-box-arrow-in-left me-2 text-success"></i>{{ __('dashboard.returned') }}</span>
                                     <strong class="text-dark">{{ $loan_returned_count ?? 0 }}</strong>
                                 </p>
                             </div>
@@ -140,14 +135,12 @@
         <div class="row">
             <div class="col-12">
                 <div class="card shadow-sm mb-4 motac-card">
-                    <div
-                        class="card-header py-3 d-flex flex-row align-items-center justify-content-between motac-card-header">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between motac-card-header">
                         <h6 class="m-0 fw-bold text-primary d-flex align-items-center">
                             <i class="bi bi-list-check me-2"></i>{{ __('dashboard.latest_tasks_title') }}
                         </h6>
                         @if (Route::has('approvals.dashboard'))
-                            <a href="{{ route('approvals.dashboard') }}"
-                                class="btn btn-sm btn-outline-primary motac-btn-outline">{{ __('dashboard.view_all_tasks') }}</a>
+                            <a href="{{ route('approvals.dashboard') }}" class="btn btn-sm btn-outline-primary motac-btn-outline">{{ __('dashboard.view_all_tasks') }}</a>
                         @endif
                     </div>
                     <div class="card-body motac-card-body p-0">
@@ -159,38 +152,34 @@
     </div>
 
     @push('page-script')
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const data = @json($loan_status_chart_data);
-                const ctx = document.getElementById('loanStatusChart');
-                if (ctx && data.labels.length > 0) {
-                    new Chart(ctx, {
-                        type: 'doughnut',
-                        data: data,
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: {
-                                    position: 'right',
-                                    labels: {
-                                        padding: 15,
-                                        boxWidth: 12,
-                                        font: {
-                                            size: 14
-                                        }
-                                    }
-                                },
-                                title: {
-                                    display: false
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const data = @json($loan_status_chart_data);
+            const ctx = document.getElementById('loanStatusChart');
+            if (ctx && data.labels.length > 0) {
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: data,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    padding: 15,
+                                    boxWidth: 12,
+                                    font: { size: 14 }
                                 }
                             },
-                            cutout: '60%'
-                        }
-                    });
-                }
-            });
-        </script>
+                            title: { display: false }
+                        },
+                        cutout: '60%'
+                    }
+                });
+            }
+        });
+    </script>
     @endpush
 </div>

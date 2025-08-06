@@ -8,9 +8,9 @@ use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
 
 /**
- * MyTicketsIndex Livewire component.
+ * MyTicketsIndex
  *
- * Shows a paginated list of tickets created by the authenticated user.
+ * User's own helpdesk tickets (paginated, filterable).
  */
 class MyTicketsIndex extends Component
 {
@@ -28,16 +28,13 @@ class MyTicketsIndex extends Component
         'category' => ['except' => ''],
     ];
 
-    /**
-     * Reset pagination on filter updates.
-     */
     public function updatingSearch() { $this->resetPage(); }
     public function updatingStatus() { $this->resetPage(); }
     public function updatingPriority() { $this->resetPage(); }
     public function updatingCategory() { $this->resetPage(); }
 
     /**
-     * Get user's own tickets with optional filtering.
+     * Get tickets belonging to the authenticated user.
      */
     public function getTicketsProperty()
     {
@@ -63,9 +60,6 @@ class MyTicketsIndex extends Component
             ->paginate(10);
     }
 
-    /**
-     * Render the user's tickets view.
-     */
     public function render()
     {
         return view('livewire.helpdesk.my-tickets-index', [

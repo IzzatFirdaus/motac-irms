@@ -10,34 +10,34 @@ use App\Services\HelpdeskService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
-use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
+/**
+ * TicketManagement
+ *
+ * Livewire component for managing helpdesk tickets (admin/staff view).
+ */
 class TicketManagement extends Component
 {
     use WithPagination;
 
     protected HelpdeskService $helpdeskService;
 
-    // Properties for filtering and searching
+    // Filtering and searching properties
     #[Url]
     public string $search = '';
-
     #[Url]
     public ?string $status = null;
-
     #[Url]
     public ?int $category_id = null;
-
     #[Url]
     public ?int $priority_id = null;
-
     #[Url]
     public ?int $assigned_to_user_id = null;
 
-    // Properties for modals and selected ticket
+    // Modal and ticket selection properties
     public HelpdeskTicket $selectedTicket;
     public bool $showTicketDetailsModal = false;
     public bool $showAssignTicketModal = false;
@@ -51,22 +51,28 @@ class TicketManagement extends Component
     public bool $isInternalComment = false;
     public ?string $resolutionDetails = null;
 
-    protected $listeners = ['ticketUpdated' => '$refresh']; // Listen for an event to refresh the list
+    protected $listeners = ['ticketUpdated' => '$refresh']; // Refresh list after ticket update
 
+    /**
+     * Inject HelpdeskService
+     */
     public function boot(HelpdeskService $helpdeskService)
     {
         $this->helpdeskService = $helpdeskService;
     }
 
+    /**
+     * Returns paginated tickets with search/filter options.
+     */
     #[Computed()]
     public function tickets()
     {
         return HelpdeskTicket::query()
             ->with(['user', 'category', 'priority', 'assignedTo'])
             ->when($this->search, function (Builder $query) {
-                $query->where('subject', 'like', '%' . $this->search . '%')
-                    ->orWhere('description', 'like', '%' . $this->search . '%')
-                    ->orWhereHas('user', fn($q) => $q->where('name', 'like', '%' . $this->search . '%'));
+                $query->where('title', 'like', '%' . $this->search . '%')
+                      ->orWhere('description', 'like', '%' . $this->search . '%')
+                      ->orWhereHas('user', fn($q) => $q->where('name', 'like', '%' . $this->search . '%'));
             })
             ->when($this->status, fn(Builder $query) => $query->where('status', $this->status))
             ->when($this->category_id, fn(Builder $query) => $query->where('category_id', $this->category_id))
@@ -91,7 +97,7 @@ class TicketManagement extends Component
     #[Computed()]
     public function staffUsers()
     {
-        // Assuming 'staff' role or similar for users who can be assigned tickets
+        // Get all staff users that can be assigned tickets
         return User::role('BPM Staff')->orderBy('name')->get();
     }
 
@@ -104,7 +110,7 @@ class TicketManagement extends Component
     public function openAssignTicketModal(HelpdeskTicket $ticket)
     {
         $this->selectedTicket = $ticket;
-        $this->assigneeId = $ticket->assigned_to_user_id; // Pre-fill if already assigned
+        $this->assigneeId = $ticket->assigned_to_user_id;
         $this->showAssignTicketModal = true;
     }
 
@@ -121,16 +127,15 @@ class TicketManagement extends Component
                 return;
             }
 
-            // Use the updateTicket method from HelpdeskService
             $this->helpdeskService->updateTicket(
                 $this->selectedTicket,
                 ['assigned_to_user_id' => $this->assigneeId],
-                $updater // Pass the updater (authenticated user)
+                $updater
             );
 
             session()->flash('success', 'Ticket assigned successfully.');
             $this->showAssignTicketModal = false;
-            $this->dispatch('ticketUpdated'); // Refresh the list
+            $this->dispatch('ticketUpdated');
         } catch (\Exception $e) {
             session()->flash('error', 'Failed to assign ticket: ' . $e->getMessage());
         }
@@ -139,7 +144,7 @@ class TicketManagement extends Component
     public function openChangeStatusModal(HelpdeskTicket $ticket)
     {
         $this->selectedTicket = $ticket;
-        $this->newStatus = $ticket->status; // Pre-fill with current status
+        $this->newStatus = $ticket->status;
         $this->showChangeStatusModal = true;
     }
 
@@ -156,8 +161,6 @@ class TicketManagement extends Component
                 return;
             }
 
-            // Corrected: Use updateTicket method from HelpdeskService
-            // Pass the selected ticket, an array with the new status, and the updater user
             $this->helpdeskService->updateTicket(
                 $this->selectedTicket,
                 ['status' => $this->newStatus],
@@ -166,7 +169,7 @@ class TicketManagement extends Component
 
             session()->flash('success', 'Ticket status updated successfully.');
             $this->showChangeStatusModal = false;
-            $this->dispatch('ticketUpdated'); // Refresh the list
+            $this->dispatch('ticketUpdated');
         } catch (\Exception $e) {
             session()->flash('error', 'Failed to change ticket status: ' . $e->getMessage());
         }
@@ -175,8 +178,8 @@ class TicketManagement extends Component
     public function openAddCommentModal(HelpdeskTicket $ticket)
     {
         $this->selectedTicket = $ticket;
-        $this->commentText = ''; // Clear previous comment
-        $this->isInternalComment = false; // Reset
+        $this->commentText = '';
+        $this->isInternalComment = false;
         $this->showAddCommentModal = true;
     }
 
@@ -198,13 +201,13 @@ class TicketManagement extends Component
                 $this->selectedTicket,
                 $this->commentText,
                 $commenter,
-                [], // No attachments for now, can be extended
+                [],
                 $this->isInternalComment
             );
 
             session()->flash('success', 'Comment added successfully.');
             $this->showAddCommentModal = false;
-            $this->dispatch('ticketUpdated'); // Refresh the list
+            $this->dispatch('ticketUpdated');
         } catch (\Exception $e) {
             session()->flash('error', 'Failed to add comment: ' . $e->getMessage());
         }
@@ -213,7 +216,7 @@ class TicketManagement extends Component
     public function openCloseTicketModal(HelpdeskTicket $ticket)
     {
         $this->selectedTicket = $ticket;
-        $this->resolutionDetails = $ticket->resolution_details; // Pre-fill if exists
+        $this->resolutionDetails = $ticket->resolution_details;
         $this->showCloseTicketModal = true;
     }
 
@@ -230,7 +233,6 @@ class TicketManagement extends Component
                 return;
             }
 
-            // Use the closeTicket method from HelpdeskService
             $this->helpdeskService->closeTicket(
                 $this->selectedTicket,
                 ['resolution_details' => $this->resolutionDetails],
@@ -239,7 +241,7 @@ class TicketManagement extends Component
 
             session()->flash('success', 'Ticket closed successfully.');
             $this->showCloseTicketModal = false;
-            $this->dispatch('ticketUpdated'); // Refresh the list
+            $this->dispatch('ticketUpdated');
         } catch (\Exception $e) {
             session()->flash('error', 'Failed to close ticket: ' . $e->getMessage());
         }
