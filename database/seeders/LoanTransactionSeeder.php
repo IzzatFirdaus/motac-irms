@@ -67,7 +67,6 @@ class LoanTransactionSeeder extends Seeder
                 break;
             }
 
-            // `officerIds->random()` will work correctly as it's a non-empty Eloquent\Collection.
             $transaction = LoanTransaction::factory()->issue()->for($application)->create([
                 'issuing_officer_id' => $officerIds->random(),
                 'receiving_officer_id' => $application->user_id,
@@ -138,7 +137,11 @@ class LoanTransactionSeeder extends Seeder
             }
 
             $issueTransaction->loanApplication->updateOverallStatusAfterTransaction();
-            $issueTransaction->update(['status' => LoanTransaction::STATUS_COMPLETED]);
+            if (method_exists($issueTransaction, 'update')) {
+                $issueTransaction->update(['status' => LoanTransaction::STATUS_COMPLETED]);
+            } elseif (isset($issueTransaction->id)) {
+                LoanTransaction::where('id', $issueTransaction->id)->update(['status' => LoanTransaction::STATUS_COMPLETED]);
+            }
         }
 
         Log::info(sprintf("Created %d 'Returned' Loan Transactions.", $transactionsToReturn->count()));
@@ -152,12 +155,14 @@ class LoanTransactionSeeder extends Seeder
         $appsToMarkOverdue = LoanApplication::where('status', LoanApplication::STATUS_ISSUED)
             ->whereDate('loan_end_date', '<', Carbon::now()->toDateString())
             ->limit(5)
-            ->get(); // Ensure this retrieves LoanApplication model instances
+            ->get();
 
         Log::info(sprintf('Attempting to mark %s applications as overdue...', $appsToMarkOverdue->count()));
         foreach ($appsToMarkOverdue as $app) {
-            if ($app instanceof LoanApplication) {
+            if (is_object($app) && method_exists($app, 'update')) {
                 $app->update(['status' => LoanApplication::STATUS_OVERDUE]);
+            } elseif (isset($app->id)) {
+                LoanApplication::where('id', $app->id)->update(['status' => LoanApplication::STATUS_OVERDUE]);
             }
         }
 
@@ -172,21 +177,16 @@ class LoanTransactionSeeder extends Seeder
     {
         $bpmOfficerRoleNames = ['BPM Staff', 'Admin'];
 
-        // ->pluck() returns a Support\Collection, not an Eloquent\Collection.
         $pluckedIds = User::query()
             ->whereHas('roles', fn (Builder $q) => $q->whereIn('name', $bpmOfficerRoleNames))
             ->pluck('id');
 
         if ($pluckedIds->isEmpty()) {
             Log::warning('No BPM/Admin officers found. Using any user as fallback.');
-            // Pluck all user IDs as a fallback.
             $allUserIds = User::pluck('id');
-
-            // Convert the Support\Collection from pluck() into the required Eloquent\Collection.
             return new Collection($allUserIds);
         }
 
-        // Convert the Support\Collection into the required Eloquent\Collection before returning.
         return new Collection($pluckedIds);
     }
 }

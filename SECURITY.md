@@ -1,75 +1,43 @@
-# Security Policy & Vulnerability Reporting
+# Security Vulnerability Reporting
 
-The security of the **MOTAC Integrated Resource Management System (MOTAC_IRMS)** is a top priority for the Information Management Division (Bahagian Pengurusan Maklumat, BPM) at the Ministry of Tourism, Arts and Culture (MOTAC), Malaysia. We are dedicated to protecting system integrity, user data, and ensuring a safe environment for all users and stakeholders.
+The security of the **MOTAC Integrated Resource Management System** is a top priority for the Information Management Division (BPM) at the Ministry of Tourism, Arts and Culture (MOTAC), Malaysia. We are committed to protecting system integrity and user data.
 
----
+## How to Report a Vulnerability
 
-## Reporting a Security Vulnerability
-
-If you discover a potential security vulnerability in the MOTAC_IRMS, we urge you to report it responsibly and promptly. We appreciate your efforts to help keep our system—and its users—safe.
+If you discover a potential security vulnerability, please report it responsibly and as soon as possible.
 
 **Contact Email:**  
 security.bpm@motac.gov.my  
-*If this is not the correct contact, please refer to the official MOTAC/BPM channels or internal communication for updates.*
-
----
+*(Note: This email address is a placeholder. Please confirm or update with the official MOTAC/BPM security contact.)*
 
 ### What to Include in Your Report
 
-To help us respond quickly and effectively, please provide as much of the following information as possible:
+To help us effectively investigate and resolve the issue, please include the following:
 
-- **Detailed Description:**  
-  A clear explanation of the vulnerability, including its nature and how it may affect the system.
+- **Detailed Description:** Clearly explain the nature of the vulnerability.
+- **Affected System or Module:** Specify which part of the system is affected (e.g., Email/User ID Provisioning, ICT Equipment Loan, User Management).
+- **Reproduction Steps:** Provide step-by-step instructions to reproduce the vulnerability.
+- **Proof of Concept (PoC):** Include scripts, screenshots, or code demonstrating the issue, if possible.
+- **Potential Impact:** Describe what could happen if the vulnerability were exploited.
+- **Your Contact Information (Optional):** Include if you wish to be notified of the outcome or contacted for clarification.
 
-- **Affected System/Module:**  
-  Specify the part of MOTAC_IRMS involved (e.g., Email/User ID Provisioning, ICT Equipment Loan, User Management, etc.).
+## Our Response Process
 
-- **Reproduction Steps:**  
-  Step-by-step instructions or a proof-of-concept (PoC) demonstrating how the vulnerability can be triggered.
+Upon receiving your report, we will:
 
-- **Potential Impact:**  
-  An assessment of the possible consequences if the vulnerability were to be exploited.
+1. **Acknowledge Receipt:** Respond to confirm we have received your report.
+2. **Investigate:** Thoroughly examine the reported vulnerability.
+3. **Resolution:** If validated, we will prioritize fixing the issue and release a patch or mitigation.
+4. **Communication:** We may reach out for more information during our investigation.
 
-- **Supporting Evidence:**  
-  Screenshots, logs, scripts, or sample code that help illustrate the issue.
-
-- **Your Contact Information (Optional):**  
-  So we may update you on the status or request clarification.
-
----
-
-## Our Security Response Process
-
-When you report a vulnerability to us, we will:
-
-1. **Acknowledge Receipt:**  
-   Confirm that we have received your report, usually within 3 working days.
-
-2. **Investigate:**  
-   Assess and verify the reported issue in detail.
-
-3. **Mitigate & Resolve:**  
-   If the vulnerability is validated, we will prioritize remediation and, where appropriate, release a patch or mitigation.
-
-4. **Follow Up:**  
-   We may reach out for further information or clarification, and will notify you once the issue has been addressed.
-
----
+We kindly ask that you do not publicly disclose details of the vulnerability until we have had reasonable time to resolve it.
 
 ## Responsible Disclosure
 
-- Please **do not publicly disclose** vulnerability details until we have had a reasonable opportunity to investigate and resolve the issue.
-- We value and recognize the contribution of security researchers and community members who follow responsible disclosure practices.
-
----
-
-## Commitment to Security
-
-We are committed to the continuous improvement of MOTAC_IRMS security and appreciate your help in keeping the system and its users safe.
+Your responsible disclosure is greatly appreciated and helps keep the **MOTAC Integrated Resource Management System** secure for all users.
 
 ---
 
 <!--
-This SECURITY.md provides tailored guidelines for reporting vulnerabilities in the MOTAC IRMS project. 
-It ensures a transparent, professional, and effective process for responsible disclosure and security collaboration.
+This SECURITY.md provides guidelines for reporting vulnerabilities in the MOTAC IRMS project. It ensures a clear, professional process for responsible disclosure and encourages collaboration in maintaining system security.
 -->

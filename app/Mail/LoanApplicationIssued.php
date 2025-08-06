@@ -44,50 +44,26 @@ final class LoanApplicationIssued extends Mailable implements ShouldQueue
             },
         ]);
 
-        // Assign the filtered and loaded issue transactions to the public property
-        $this->issueTransactions = $this->loanApplication->transactions
-            ->where('type', LoanTransaction::TYPE_ISSUE);
+        // Filter out only issue transactions if there are multiple transaction types
+        $this->issueTransactions = $this->loanApplication->transactions->where('type', LoanTransaction::TYPE_ISSUE);
 
-        $this->onQueue('emails'); // Specify a queue name
-
-        Log::info(
-            'LoanApplicationIssued Mailable: Instance created.',
-            [
-                'loan_application_id' => $this->loanApplication->id,
-                'issue_transactions_count' => $this->issueTransactions->count(),
-            ]
-        );
+        Log::info('LoanApplicationIssued Mailable: Instance created.', [
+            'loan_application_id' => $this->loanApplication->id,
+            'issue_transactions_count' => $this->issueTransactions->count(),
+        ]);
     }
 
     /**
-     * Get the message envelope definition.
+     * Get the message envelope.
      */
     public function envelope(): Envelope
     {
+        $applicantName = $this->loanApplication->user?->name ?? 'Pemohon Tidak Diketahui';
         $applicationId = $this->loanApplication->id ?? 'N/A';
-        /** @phpstan-ignore-next-line nullsafe.neverNull, nullCoalesce.expr */
-        $applicantName = $this->loanApplication->user?->full_name ??
-                         ($this->loanApplication->user?->name ?? 'Pemohon Tidak Diketahui');
 
-        /** @phpstan-ignore-next-line nullsafe.neverNull */
-        $recipientEmail = $this->loanApplication->user?->email;
-        $toAddresses = [];
-
-        if ($recipientEmail) {
-            $toAddresses[] = new Address($recipientEmail, $applicantName);
-            Log::info(
-                sprintf('LoanApplicationIssued Mailable: Recipient identified for Loan Application ID: %s.', $applicationId),
-                ['recipient_email' => $recipientEmail]
-            );
-        } else {
-            Log::warning(
-                sprintf('LoanApplicationIssued Mailable: Recipient email not found for Loan Application ID: %s. Notification cannot be sent.', $applicationId),
-                [
-                    'loan_application_id' => $applicationId,
-                    'applicant_user_id' => $this->loanApplication->user_id ?? 'N/A',
-                ]
-            );
-        }
+        $toAddresses = [
+            new Address($this->loanApplication->user->email, $applicantName),
+        ];
 
         $subject = sprintf('Notifikasi Peralatan Pinjaman ICT Telah Dikeluarkan (Permohonan #%s - %s)', $applicationId, $applicantName);
 

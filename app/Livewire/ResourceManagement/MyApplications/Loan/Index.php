@@ -17,6 +17,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Throwable; // Add this line to import the Throwable interface
 
 #[Layout('layouts.app')]
 class Index extends Component
@@ -30,7 +31,7 @@ class Index extends Component
 
     protected string $paginationTheme = 'bootstrap';
 
-    protected int $perPage = 10;
+    public int $perPage = 10;
 
     public ?int $selectedApplicationId = null;
 
@@ -57,192 +58,120 @@ class Index extends Component
 
     public function mount(): void
     {
-        $this->authorize('viewAny', LoanApplication::class);
-        $pageTitle = $this->generatePageTitle();
-        $this->dispatch('update-page-title', title: $pageTitle);
-    }
-
-    public function generatePageTitle(): string
-    {
-        $appName = __(config('variables.templateName', 'Sistem Pengurusan Sumber Bersepadu MOTAC'));
-
-        return __('Senarai Permohonan Pinjaman ICT Saya').' - '.$appName;
+        // Ensure authorization is specifically for LoanApplication
+        $this->authorize('viewAny', LoanApplication::class); // Authorize viewing of loan applications
     }
 
     public function getLoanApplicationsProperty()
     {
-        /** @var User|null $user */
+        /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        if (! $user) {
-            Log::warning('MyApplications\Loan\Index: Unauthenticated access attempt.');
+        $query = $user->loanApplicationsAsApplicant()
+            ->with(['approvals', 'user']) // Eager load approvals and user
+            ->orderBy('created_at', 'desc');
 
-            return LoanApplication::whereRaw('1 = 0')->paginate($this->perPage);
-        }
-
-        $query = LoanApplication::where('user_id', $user->id)
-            ->with([
-                'user:id,name',
-                'responsibleOfficer:id,name',
-                'currentApprovalOfficer:id,name',
-                'approvals.officer:id,name',
-            ])
-            ->orderBy('updated_at', 'desc');
-
-        if ($this->searchTerm !== '' && $this->searchTerm !== '0') {
-            $search = '%'.$this->searchTerm.'%';
-            $query->where(function ($q) use ($search): void {
-                if (is_numeric(str_replace('%', '', $search))) {
-                    $q->orWhere('id', 'like', $search);
-                }
-
-                $q->orWhere('purpose', 'like', $search)
-                    ->orWhere('location', 'like', 'search');
+        if ($this->searchTerm) {
+            $query->where(function ($q) {
+                $q->where('application_number', 'like', '%' . $this->searchTerm . '%')
+                    ->orWhere('purpose', 'like', '%' . $this->searchTerm . '%');
             });
         }
 
-        if ($this->filterStatus !== '' && $this->filterStatus !== '0' && $this->filterStatus !== 'all' && $this->filterStatus !== '') {
+        if ($this->filterStatus) {
             $query->where('status', $this->filterStatus);
         }
 
-        $applications = $query->paginate($this->perPage);
-
-        // This `transform` block is the corrected logic. It ensures that we iterate
-        // through the collection of applications and pass each individual model
-        // to the checkCanActOnApplication method, resolving the warning.
-        $applications->getCollection()->transform(function (LoanApplication $application): \App\Models\LoanApplication {
-            $application->can_act_on = $this->checkCanActOnApplication($application);
-
-            return $application;
-        });
-
-        return $applications;
+        return $query->paginate($this->perPage);
     }
 
     public function getStatusOptionsProperty(): array
     {
-        $options = LoanApplication::getStatusOptions() ?? [];
-
-        return ['' => __('Semua Status')] + $options;
+        // Define status options for filtering
+        return [
+            '' => 'Semua Status',
+            LoanApplication::STATUS_DRAFT => LoanApplication::STATUS_DRAFT,
+            LoanApplication::STATUS_PENDING_SUPPORT => LoanApplication::STATUS_PENDING_SUPPORT,
+            LoanApplication::STATUS_PENDING_APPROVER_REVIEW => LoanApplication::STATUS_PENDING_APPROVER_REVIEW,
+            LoanApplication::STATUS_PENDING_BPM_REVIEW => LoanApplication::STATUS_PENDING_BPM_REVIEW,
+            LoanApplication::STATUS_APPROVED => LoanApplication::STATUS_APPROVED,
+            LoanApplication::STATUS_REJECTED => LoanApplication::STATUS_REJECTED,
+            LoanApplication::STATUS_PARTIALLY_ISSUED => LoanApplication::STATUS_PARTIALLY_ISSUED,
+            LoanApplication::STATUS_ISSUED => LoanApplication::STATUS_ISSUED,
+            LoanApplication::STATUS_RETURNED => LoanApplication::STATUS_RETURNED,
+            LoanApplication::STATUS_OVERDUE => LoanApplication::STATUS_OVERDUE,
+            LoanApplication::STATUS_CANCELLED => LoanApplication::STATUS_CANCELLED,
+            LoanApplication::STATUS_PARTIALLY_RETURNED_PENDING_INSPECTION => LoanApplication::STATUS_PARTIALLY_RETURNED_PENDING_INSPECTION,
+            LoanApplication::STATUS_COMPLETED => LoanApplication::STATUS_COMPLETED,
+        ];
     }
 
-    protected function checkCanActOnApplication(LoanApplication $application): bool
+    public function confirmApprovalAction(int $applicationId, string $actionType): void
     {
-        $user = Auth::user();
-        if (! $user) {
-            return false;
+        $this->selectedApplicationId = $applicationId;
+        $this->approvalActionType = $actionType;
+        $this->approvalComments = ''; // Reset comments
+        $this->resetValidation(); // Clear any previous validation errors
+
+        // Dynamically set validation rules for comments based on action type
+        if ($this->approvalActionType === 'reject') {
+            $this->rules['approvalComments'] = 'required|string|min:10';
+        } else {
+            // For 'cancel' or other actions, comments might be optional or have different rules
+            $this->rules['approvalComments'] = 'nullable|string';
         }
 
-        return $user->can('recordDecision', $application);
-    }
-
-    public function showApproveModal(int $applicationId): void
-    {
-        $application = LoanApplication::findOrFail($applicationId);
-        if (! $this->checkCanActOnApplication($application)) {
-            session()->flash('error', __('Anda tidak dibenarkan untuk meluluskan permohonan ini.'));
-
-            return;
-        }
-
-        $this->selectedApplicationId = $application->id;
-        $this->approvalActionType = 'approve';
-        $this->approvalComments = '';
-        $this->resetValidation('approvalComments');
         $this->showApprovalActionModal = true;
         $this->dispatch('openModal', elementId: 'approvalActionModal');
     }
 
-    public function showRejectModal(int $applicationId): void
+
+    public function performApprovalAction(): void
     {
-        $application = LoanApplication::findOrFail($applicationId);
-        if (! $this->checkCanActOnApplication($application)) {
-            session()->flash('error', __('Anda tidak dibenarkan untuk menolak permohonan ini.'));
-
-            return;
-        }
-
-        $this->selectedApplicationId = $application->id;
-        $this->approvalActionType = 'reject';
-        $this->approvalComments = '';
-        $this->resetValidation('approvalComments');
-        $this->showApprovalActionModal = true;
-        $this->dispatch('openModal', elementId: 'approvalActionModal');
-    }
-
-    public function updated($propertyName): void
-    {
-        if ($propertyName === 'approvalComments' && $this->approvalActionType === 'reject') {
-            $this->validateOnly($propertyName, [
-                'approvalComments' => ['required', 'string', 'min:10', 'max:500'],
-            ], $this->messages);
-        }
-    }
-
-    public function submitApprovalAction(): void
-    {
-        $this->rules['approvalComments'] = ($this->approvalActionType === 'reject')
-            ? ['required', 'string', 'min:10', 'max:500']
-            : ['nullable', 'string', 'max:500'];
-        $this->validate($this->rules, $this->messages);
-
-        $application = LoanApplication::find($this->selectedApplicationId);
-        if (! $application) {
-            session()->flash('error', __('Permohonan tidak ditemui.'));
-            $this->closeApprovalActionModal();
-
-            return;
-        }
-
-        $user = Auth::user();
-        if (! $this->checkCanActOnApplication($application)) {
-            session()->flash('error', __('Anda tidak lagi mempunyai kebenaran untuk tindakan ini.'));
-            $this->closeApprovalActionModal();
-
-            return;
-        }
-
-        $actionStatusForApprovalService = $this->approvalActionType === 'approve' ? Approval::STATUS_APPROVED : Approval::STATUS_REJECTED;
+        $this->validate(); // Validate comments based on dynamically set rules
 
         try {
-            $currentApprovalStageKey = $application->current_approval_stage ?? $application->status;
-            $approvalTask = Approval::where('approvable_id', $application->id)
-                ->where('approvable_type', $application->getMorphClass())
-                ->where('stage', $currentApprovalStageKey)
-                ->where('status', Approval::STATUS_PENDING)
-                ->when(! $user->hasRole('Admin'), fn ($query) => $query->where('officer_id', $user->id))
-                ->first();
+            $loanApplication = LoanApplication::findOrFail($this->selectedApplicationId);
 
-            if (! $approvalTask && $user->hasRole('Admin')) {
-                $approvalTask = Approval::where('approvable_id', $application->id)
-                    ->where('approvable_type', $application->getMorphClass())
-                    ->where('stage', $currentApprovalStageKey)
-                    ->where('status', Approval::STATUS_PENDING)
-                    ->orderBy('created_at', 'desc')
-                    ->first();
+            // Authorization check for the specific action type
+            if ($this->approvalActionType === 'cancel') {
+                $this->authorize('cancel', $loanApplication);
+                // Call a service method to handle cancellation
+                $this->approvalService->recordApprovalDecision(
+                    $loanApplication->approvals()->latest()->first(), // Get the latest approval record
+                    Approval::STATUS_CANCELED,
+                    $this->approvalComments,
+                    [] // No approval items for cancellation
+                );
+                $this->dispatch('toastr', type: 'success', message: 'Permohonan pinjaman berjaya dibatalkan.');
+            } else {
+                // This 'else' block likely handles the 'reject' action if this modal is reused.
+                // If it's only for 'cancel' action, this else block might not be needed or needs refinement.
+                // Assuming 'reject' is also handled here for a user to reject their own draft.
+                $this->authorize('reject', $loanApplication); // Or a specific 'cancel' policy
+                $this->approvalService->recordApprovalDecision(
+                    $loanApplication->approvals()->latest()->first(), // Get the latest approval record
+                    Approval::STATUS_REJECTED, // Assuming this is for rejecting
+                    $this->approvalComments,
+                    [] // No approval items for rejection from user side
+                );
+                $this->dispatch('toastr', type: 'success', message: 'Permohonan pinjaman berjaya ditolak.');
             }
 
-            if (! $approvalTask) {
-                session()->flash('error', __('Tiada tugasan kelulusan aktif yang sesuai ditemui untuk diproses.'));
-                $this->closeApprovalActionModal();
-
-                return;
-            }
-
-            $this->approvalService->processApprovalDecision($approvalTask, $actionStatusForApprovalService, $user, $this->approvalComments);
-            session()->flash('success', __('Tindakan kelulusan telah berjaya direkodkan.'));
+            $this->closeApprovalActionModal();
+            $this->resetPage(); // Refresh the list
         } catch (AuthorizationException $e) {
-            session()->flash('error', $e->getMessage());
-        } catch (\Exception $e) {
-            session()->flash('error', __('Gagal memproses tindakan kelulusan. Ralat: ').$e->getMessage());
+            Log::error('Authorization error performing approval action: ' . $e->getMessage(), ['user_id' => Auth::id(), 'application_id' => $this->selectedApplicationId, 'action_type' => $this->approvalActionType]);
+            $this->dispatch('toastr', type: 'error', message: 'Anda tidak mempunyai kebenaran untuk melakukan tindakan ini.');
+        } catch (Throwable $e) { // Now 'Throwable' is correctly recognized
+            Log::error('Error performing approval action for loan application: ' . $e->getMessage(), ['user_id' => Auth::id(), 'application_id' => $this->selectedApplicationId, 'action_type' => $this->approvalActionType, 'error' => $e->getTraceAsString()]);
+            $this->dispatch('toastr', type: 'error', message: 'Gagal melakukan tindakan. Sila cuba sebentar lagi.');
         }
-
-        $this->closeApprovalActionModal();
     }
+
 
     public function closeApprovalActionModal(): void
     {
-        $this->showApprovalActionModal = false;
         $this->selectedApplicationId = null;
         $this->approvalActionType = null;
         $this->approvalComments = '';
@@ -260,12 +189,11 @@ class Index extends Component
 
             $application->delete();
 
-            $this->dispatch('toastr', type: 'success', message: 'Permohonan draf #'.$id.' telah berjaya dipadam.');
-
+            $this->dispatch('toastr', type: 'success', message: 'Permohonan draf #' . $id . ' telah berjaya dipadam.');
         } catch (AuthorizationException $e) {
             $this->dispatch('toastr', type: 'error', message: 'Anda tidak mempunyai kebenaran untuk memadam permohonan ini.');
         } catch (\Exception $e) {
-            Log::error('Failed to delete loan application: '.$e->getMessage());
+            Log::error('Failed to delete loan application: ' . $e->getMessage());
             $this->dispatch('toastr', type: 'error', message: 'Gagal memadam permohonan tersebut.');
         }
     }

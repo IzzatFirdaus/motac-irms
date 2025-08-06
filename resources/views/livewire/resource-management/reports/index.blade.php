@@ -23,9 +23,25 @@
                     <div class="mb-3"><i class="bi bi-archive-fill fs-2 text-primary"></i></div>
                     <h3 class="h5 card-title fw-semibold mb-2">{{ __('Laporan Inventori Peralatan ICT') }}</h3>
                     <p class="card-text small text-muted mb-4">
-                        {{ __('Jana dan lihat laporan terperinci mengenai inventori semasa peralatan ICT.') }}
+                        {{ __('Dapatkan gambaran keseluruhan inventori peralatan ICT yang didaftarkan dalam sistem.') }}
                     </p>
                     <a href="{{ route('reports.equipment-inventory') }}" class="btn btn-primary btn-sm mt-auto d-inline-flex align-items-center motac-btn-primary">
+                        <i class="bi bi-eye-fill me-1"></i>{{ __('Lihat Laporan') }}
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {{-- NEW: Helpdesk Ticket Report Card --}}
+        <div class="col">
+            <div class="card h-100 shadow-sm motac-card">
+                <div class="card-body d-flex flex-column p-4">
+                    <div class="mb-3"><i class="bi bi-headset fs-2 text-primary"></i></div>
+                    <h3 class="h5 card-title fw-semibold mb-2">{{ __('Laporan Tiket Meja Bantuan') }}</h3>
+                    <p class="card-text small text-muted mb-4">
+                        {{ __('Semak laporan status dan sejarah tiket bantuan yang dikemukakan.') }}
+                    </p>
+                    <a href="{{ route('reports.helpdesk-tickets') }}" class="btn btn-primary btn-sm mt-auto d-inline-flex align-items-center motac-btn-primary">
                         <i class="bi bi-eye-fill me-1"></i>{{ __('Lihat Laporan') }}
                     </a>
                 </div>
@@ -35,37 +51,7 @@
         <div class="col">
             <div class="card h-100 shadow-sm motac-card">
                 <div class="card-body d-flex flex-column p-4">
-                     <div class="mb-3"><i class="bi bi-envelope-at-fill fs-2 text-primary"></i></div>
-                    <h3 class="h5 card-title fw-semibold mb-2">{{ __('Laporan Permohonan E-mel') }}</h3>
-                    <p class="card-text small text-muted mb-4">
-                        {{ __('Analisa status dan trend permohonan akaun e-mel dan ID pengguna.') }}
-                    </p>
-                    <a href="{{ route('reports.email-accounts') }}" class="btn btn-primary btn-sm mt-auto d-inline-flex align-items-center motac-btn-primary">
-                         <i class="bi bi-eye-fill me-1"></i>{{ __('Lihat Laporan') }}
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col">
-            <div class="card h-100 shadow-sm motac-card">
-                <div class="card-body d-flex flex-column p-4">
-                    <div class="mb-3"><i class="bi bi-person-check-fill fs-2 text-primary"></i></div>
-                    <h3 class="h5 card-title fw-semibold mb-2">{{ __('Laporan Aktiviti Pengguna') }}</h3>
-                    <p class="card-text small text-muted mb-4">
-                        {{ __('Pantau aktiviti pengguna dalam sistem termasuk jumlah permohonan dan kelulusan.') }}
-                    </p>
-                    <a href="{{ route('reports.activity-log') }}" class="btn btn-primary btn-sm mt-auto d-inline-flex align-items-center motac-btn-primary">
-                         <i class="bi bi-eye-fill me-1"></i>{{ __('Lihat Laporan') }}
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col">
-            <div class="card h-100 shadow-sm motac-card">
-                <div class="card-body d-flex flex-column p-4">
-                    <div class="mb-3"><i class="bi bi-journal-arrow-down fs-2 text-primary"></i></div>
+                    <div class="mb-3"><i class="bi bi-journal-text fs-2 text-primary"></i></div>
                     <h3 class="h5 card-title fw-semibold mb-2">{{ __('Laporan Permohonan Pinjaman') }}</h3>
                     <p class="card-text small text-muted mb-4">
                         {{ __('Semak laporan status dan sejarah permohonan pinjaman peralatan ICT.') }}
@@ -91,6 +77,22 @@
                 </div>
             </div>
         </div>
+
+        <div class="col">
+            <div class="card h-100 shadow-sm motac-card">
+                <div class="card-body d-flex flex-column p-4">
+                    <div class="mb-3"><i class="bi bi-person-check-fill fs-2 text-primary"></i></div>
+                    <h3 class="h5 card-title fw-semibold mb-2">{{ __('Laporan Aktiviti Pengguna') }}</h3>
+                    <p class="card-text small text-muted mb-4">
+                        {{ __('Jana laporan aktiviti pengguna yang berkaitan dengan permohonan pinjaman dan kelulusan.') }}
+                    </p>
+                    <a href="{{ route('reports.user-activity') }}" class="btn btn-primary btn-sm mt-auto d-inline-flex align-items-center motac-btn-primary">
+                        <i class="bi bi-eye-fill me-1"></i>{{ __('Lihat Laporan') }}
+                    </a>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 @endsection

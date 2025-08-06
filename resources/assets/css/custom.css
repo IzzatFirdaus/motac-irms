@@ -1,380 +1,265 @@
 /* custom.css for MOTAC IRMS
-   - Updated for MYDS compliance: grid, typography, color tokens, spacing, accessibility, and responsive design
-   - All variables, components, and styles are aligned with MYDS standards and tokens.
-   - Updated: 2025-08-14 08:13:10 UTC by Copilot Space
+   - Branding, status badges, forms, and responsive design
+   - Optimized for maximum cross-browser compatibility (IE 10+, Samsung Internet 2.0+, Edge, Chrome, Firefox)
+   - Updated: 2025-08-04 05:49:20 UTC by IzzatFirdaus
 */
 
-/* -----------------------------------------------------
-   0. MYDS Colour Tokens
-   - Import/define all MYDS tokens for backgrounds, text, outlines, focus rings
-   - See: MYDS-Colour-Reference.md
------------------------------------------------------ */
-:root {
-    /* Primary Blue, Danger, Success, Warning, Gray scales (Light Mode) */
-    --myds-bg-white: #FFFFFF;
-    --myds-bg-washed: #F4F4F5;
-    --myds-bg-contrast: #FFFFFF;
-    --myds-bg-dialog: #FFFFFF;
-    --myds-bg-gray-50: #FAFAFA;
-
-    --myds-gray-50: #FAFAFA;
-    --myds-gray-100: #F4F4F5;
-    --myds-gray-200: #E4E4E7;
-    --myds-gray-300: #D4D4D8;
-    --myds-gray-400: #A1A1AA;
-    --myds-gray-500: #71717A;
-    --myds-gray-600: #52525B;
-    --myds-gray-700: #3F3F46;
-    --myds-gray-800: #27272A;
-    --myds-gray-850: #1D1D21;
-    --myds-gray-900: #18181B;
-    --myds-gray-930: #161619;
-    --myds-gray-950: #09090B;
-
-    --myds-primary-50: #EFF6FF;
-    --myds-primary-100: #DBEAFE;
-    --myds-primary-200: #C2D5FF;
-    --myds-primary-300: #96B7FF;
-    --myds-primary-400: #6394FF;
-    --myds-primary-500: #3A75F6;
-    --myds-primary-600: #2563EB;
-    --myds-primary-700: #1D4ED8;
-    --myds-primary-800: #1E40AF;
-    --myds-primary-900: #1E3A8A;
-    --myds-primary-950: #172554;
-
-    --myds-danger-50: #FEF2F2;
-    --myds-danger-100: #FEE2E2;
-    --myds-danger-200: #FECACA;
-    --myds-danger-300: #FCA5A5;
-    --myds-danger-400: #F87171;
-    --myds-danger-500: #EF4444;
-    --myds-danger-600: #DC2626;
-    --myds-danger-700: #B91C1C;
-    --myds-danger-800: #991B1B;
-    --myds-danger-900: #7F1D1D;
-    --myds-danger-950: #450A0A;
-
-    --myds-success-50: #F0FDF4;
-    --myds-success-100: #DCFCE7;
-    --myds-success-200: #BBF7D0;
-    --myds-success-300: #83DAA3;
-    --myds-success-400: #4ADE80;
-    --myds-success-500: #22C55E;
-    --myds-success-600: #16A34A;
-    --myds-success-700: #15803D;
-    --myds-success-800: #166534;
-    --myds-success-900: #14532D;
-    --myds-success-950: #052E16;
-
-    --myds-warning-50: #FEFCE8;
-    --myds-warning-100: #FEF9C3;
-    --myds-warning-200: #FEF08A;
-    --myds-warning-300: #FDE047;
-    --myds-warning-400: #FACC15;
-    --myds-warning-500: #EAB308;
-    --myds-warning-600: #CA8A04;
-    --myds-warning-700: #A16207;
-    --myds-warning-800: #854D0E;
-    --myds-warning-900: #713F12;
-    --myds-warning-950: #422006;
-
-    /* Outline, Focus, Disabled, Text tokens (Light Mode) */
-    --myds-otl-divider: #F4F4F5;
-    --myds-otl-gray-200: #E4E4E7;
-    --myds-otl-gray-300: #D4D4D8;
-    --myds-otl-primary-200: #C2D5FF;
-    --myds-otl-primary-300: #96B7FF;
-    --myds-otl-danger-200: #FECACA;
-    --myds-otl-danger-300: #FCA5A5;
-    --myds-otl-success-200: #BBF7D0;
-    --myds-otl-success-300: #83DAA3;
-    --myds-otl-warning-200: #FEF08A;
-    --myds-otl-warning-300: #FDE047;
-
-    --myds-fr-primary: #96B7FF66;
-    --myds-fr-danger: #FCA5A566;
-
-    --myds-txt-white: #FFFFFF;
-    --myds-txt-black-900: #18181B;
-    --myds-txt-black-700: #3F3F46;
-    --myds-txt-black-500: #71717A;
-    --myds-txt-primary: #2563EB;
-    --myds-txt-danger: #DC2626;
-    --myds-txt-success: #15803D;
-    --myds-txt-warning: #A16207;
-
-    /* Custom MOTAC brand tokens for legacy compatibility */
-    --motac-primary-color: var(--myds-primary-600);
-    --motac-secondary-color: var(--myds-warning-400);
-    --motac-text-color: var(--myds-txt-black-900);
-    --motac-font-family: 'Inter', 'Arial', 'Noto Sans', sans-serif;
+/* Flatpickr calendar direction - ensures date picker displays left-to-right */
+.flatpickr-calendar {
+    direction: ltr;
 }
 
-/* -----------------------------------------------------
-   1. MYDS Typography System
-   - Poppins for headings, Inter for body, sizes/weights per MYDS
-   - See: MYDS-Develop-Overview.md
------------------------------------------------------ */
+/* 1. MOTAC Branding Variables - CSS Custom Properties for consistent theming */
+:root {
+    --motac-primary-color: #003366; /* MOTAC Blue - primary brand color */
+    --motac-secondary-color: #FFCC00; /* MOTAC Yellow - secondary brand color */
+    --motac-text-color: #333333; /* Default text color */
+    --motac-font-family: 'Arial', sans-serif; /* Standard font stack */
+    --danger-color: #dc3545; /* Red for errors/rejected status */
+    --success-color: #28a745; /* Green for approved/success status */
+    --warning-color: #ffc107; /* Yellow for pending/warning status */
+}
+
+/* 2. Typography & General Styling - Base styles for consistent appearance */
 body {
     font-family: var(--motac-font-family);
-    color: var(--myds-txt-black-900);
-    background: var(--myds-bg-white);
-    font-size: 16px;
-    line-height: 1.6;
+    color: var(--motac-text-color);
+    line-height: 1.6; /* Improves readability */
 }
 
+/* Heading styles with MOTAC branding */
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Poppins', Arial, sans-serif;
-    color: var(--myds-primary-700);
-    font-weight: 600;
-    margin-bottom: 0.25em;
+    font-family: var(--motac-font-family);
+    color: var(--motac-primary-color);
 }
 
-h1 { font-size: 2.25rem; line-height: 2.75rem; }
-h2 { font-size: 1.875rem; line-height: 2.375rem; }
-h3 { font-size: 1.5rem; line-height: 2rem; }
-h4 { font-size: 1.25rem; line-height: 1.75rem; }
-h5 { font-size: 1rem; line-height: 1.5rem; }
-h6 { font-size: 0.875rem; line-height: 1.25rem; }
-
-p, label, span, li, ul, ol {
-    font-family: 'Inter', 'Noto Sans', Arial, sans-serif;
-}
-
-/* -----------------------------------------------------
-   2. MYDS Grid System (12-8-4 Responsive)
-   - Container, grid classes for desktop, tablet, mobile
-   - See: MYDS-Design-Overview.md
------------------------------------------------------ */
-.myds-container {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 0 24px;
-    box-sizing: border-box;
-}
-@media (max-width: 1023px) {
-    .myds-container {
-        max-width: 100%;
-        padding: 0 24px;
-    }
-}
-@media (max-width: 767px) {
-    .myds-container {
-        max-width: 100%;
-        padding: 0 18px;
-    }
-}
-
-/* MYDS Grid Columns (desktop: 12, tablet: 8, mobile: 4) */
-.myds-row {
-    display: flex;
-    flex-wrap: wrap;
-    margin-left: -12px;
-    margin-right: -12px;
-}
-.myds-col-12, .myds-col-md-9, .myds-col-8, .myds-col-4 {
-    box-sizing: border-box;
-    padding-left: 12px;
-    padding-right: 12px;
-}
-.myds-col-12 { -ms-flex: 0 0 100%; flex: 0 0 100%; max-width: 100%; }
-.myds-col-md-9 { -ms-flex: 0 0 75%; flex: 0 0 75%; max-width: 75%; }
-.myds-col-8 { -ms-flex: 0 0 66.666%; flex: 0 0 66.666%; max-width: 66.666%; }
-.myds-col-4 { -ms-flex: 0 0 33.333%; flex: 0 0 33.333%; max-width: 33.333%; }
-
-@media (max-width: 1023px) {
-    .myds-col-md-9 { flex-basis: 100%; max-width: 100%; }
-    .myds-col-8 { flex-basis: 100%; max-width: 100%; }
-    .myds-col-4 { flex-basis: 100%; max-width: 100%; }
-}
-
-/* -----------------------------------------------------
-   3. Buttons - MYDS Primary, Secondary, Tertiary
------------------------------------------------------ */
+/* 3. Button Styles - Consistent button appearance across the application */
 .btn-primary {
-    background-color: var(--myds-primary-600);
-    color: #fff;
+    background-color: var(--motac-primary-color);
+    color: white;
     border: none;
     padding: 0.5em 1.2em;
-    border-radius: 8px;
-    font-family: 'Inter', Arial, sans-serif;
-    font-weight: 600;
+    border-radius: 0.25em;
     cursor: pointer;
-    transition: background 0.2s ease;
-    box-shadow: 0 1px 3px rgba(25, 99, 235, 0.07);
+    transition: background 0.2s ease; /* Smooth hover transition */
 }
 .btn-primary:hover,
 .btn-primary:focus {
-    background-color: var(--myds-primary-800);
-    outline: 2px solid var(--myds-primary-400);
-    outline-offset: 2px;
+    background-color: #00274d; /* Slightly darker shade for hover state */
 }
 
 .btn-secondary {
-    background-color: var(--myds-warning-400);
-    color: var(--myds-txt-black-900);
+    background-color: var(--motac-secondary-color);
+    color: var(--motac-text-color);
     border: none;
     padding: 0.5em 1.2em;
-    border-radius: 8px;
-    font-family: 'Inter', Arial, sans-serif;
-    font-weight: 600;
+    border-radius: 0.25em;
     cursor: pointer;
     transition: background 0.2s ease;
 }
 .btn-secondary:hover,
 .btn-secondary:focus {
-    background-color: var(--myds-warning-600);
-    color: var(--myds-txt-black-900);
-    outline: 2px solid var(--myds-warning-700);
-    outline-offset: 2px;
+    background-color: #e6b800; /* Slightly darker yellow for hover state */
 }
 
-.btn-tertiary {
-    background: none;
-    color: var(--myds-primary-600);
-    border: 1px solid var(--myds-primary-200);
-    padding: 0.5em 1.2em;
-    border-radius: 8px;
-    font-family: 'Inter', Arial, sans-serif;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s, color 0.2s;
-}
-.btn-tertiary:hover,
-.btn-tertiary:focus {
-    background-color: var(--myds-primary-50);
-    color: var(--myds-primary-700);
-    outline: 2px solid var(--myds-primary-200);
-    outline-offset: 2px;
-}
-
-/* -----------------------------------------------------
-   4. Status Badges/Labels (MYDS colours)
------------------------------------------------------ */
+/* 4. Status Badges/Labels - Visual indicators for application and equipment status */
 .status-badge {
     display: inline-block;
-    padding: .25em .5em;
-    font-size: 0.85em;
-    font-weight: 600;
+    padding: .25em .4em;
+    font-size: 75%;
+    font-weight: 700;
     line-height: 1;
-    white-space: nowrap;
-    border-radius: 6px;
-    color: #fff;
-    letter-spacing: 0.02em;
+    white-space: nowrap; /* Prevents text wrapping */
+    vertical-align: baseline;
+    border-radius: .25rem;
+    color: white;
 }
 
-.status-approved    { background-color: var(--myds-success-500); }
-.status-pending     { background-color: var(--myds-warning-400); color: #333; }
-.status-rejected    { background-color: var(--myds-danger-500); }
-.status-completed   { background-color: var(--myds-primary-600); }
-.status-issued      { background-color: var(--myds-primary-400); }
-.status-on_loan     { background-color: var(--myds-primary-300); }
-.status-draft       { background-color: var(--myds-gray-400); }
-.status-returned    { background-color: var(--myds-primary-500); }
-.status-overdue     { background-color: var(--myds-danger-700); }
-.status-cancelled   { background-color: var(--myds-gray-600); }
+/* Status badge container - for centering badges without using unsupported properties */
+.status-badge-container {
+    /* Using standard positioning instead of text-align for better compatibility */
+    position: relative;
+}
+.status-badge-container .status-badge {
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    width: fit-content; /* Modern browsers */
+    width: -moz-fit-content; /* Firefox */
+    width: -webkit-fit-content; /* Webkit browsers */
+}
 
+/* Flexbox container for centering - with comprehensive browser support */
 .status-badge-flex-container {
+    /* Modern flexbox */
     display: flex;
-    -ms-flex-direction: row;
     flex-direction: row;
     justify-content: center;
-    align-items: center;
+
+    /* IE 10+ flexbox support */
+    display: -ms-flexbox;
+    -ms-flex-direction: row;
+    -ms-flex-pack: center;
+
+    /* Webkit flexbox (older Safari) */
+    display: -webkit-flex;
+    -webkit-flex-direction: row;
+    -webkit-justify-content: center;
 }
 
-/* -----------------------------------------------------
-   5. Forms (MYDS compliant)
------------------------------------------------------ */
+/* IE-specific flexbox fallback using conditional comments alternative */
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+    .status-badge-flex-container {
+        display: -ms-flexbox;
+        -ms-flex-pack: center;
+        -ms-flex-direction: row;
+    }
+}
+
+/* Status-specific badge colors - matches application workflow states */
+.status-approved {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.status-pending_support,
+.status-pending_hod_review,
+.status-pending_bpm_review,
+.status-pending {
+    background-color: var(--warning-color);
+    color: #333; /* Dark text for better contrast on yellow background */
+}
+
+.status-rejected {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.status-issued,
+.status-completed {
+    background-color: var(--motac-primary-color);
+    color: white;
+}
+
+.status-on_loan {
+    background-color: #17a2b8; /* Bootstrap info color */
+    color: white;
+}
+
+/* Additional status states for comprehensive coverage */
+.status-draft {
+    background-color: #6c757d; /* Muted gray for draft status */
+    color: white;
+}
+
+.status-returned {
+    background-color: #007bff; /* Blue for returned equipment */
+    color: white;
+}
+
+.status-overdue {
+    background-color: #dc3545; /* Red for overdue items */
+    color: white;
+}
+
+.status-cancelled {
+    background-color: #6c757d; /* Gray for cancelled applications */
+    color: white;
+}
+
+/* 5. Form Styling - Enhanced form appearance and usability */
 .form-group label.required::after {
     content: ' *';
-    color: var(--myds-danger-500);
+    color: var(--danger-color);
     font-weight: bold;
 }
 
+/* Consistent input field styling */
 .form-control {
     padding: 0.5em;
-    border: 1px solid var(--myds-otl-gray-300);
-    border-radius: 8px;
+    border: 1px solid #ccc;
+    border-radius: 0.25em;
     transition: border-color 0.2s ease;
-    font-family: 'Inter', Arial, sans-serif;
+    font-family: var(--motac-font-family);
     font-size: 1em;
-    width: 100%;
-    box-sizing: border-box;
-    background: var(--myds-bg-white);
-    color: var(--myds-txt-black-900);
-}
-.form-control:focus {
-    border-color: var(--myds-primary-400);
-    outline: none;
-    box-shadow: 0 0 0 2px var(--myds-fr-primary);
+    width: 100%; /* Ensures full width in container */
+    box-sizing: border-box; /* Includes padding in width calculation */
 }
 
-/* Conditional fields section (MYDS animation) */
-.conditional-field-section {
-    display: none;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+.form-control:focus {
+    border-color: var(--motac-primary-color);
+    outline: none; /* Removes default browser outline */
+    box-shadow: 0 0 0 2px rgba(0, 51, 102, 0.2); /* Custom focus indicator */
 }
+
+/* Dynamic form sections - controlled via JavaScript for conditional fields */
+.conditional-field-section {
+    display: none; /* Hidden by default */
+    transition: opacity 0.3s ease; /* Smooth show/hide transition */
+}
+
 .conditional-field-section.active {
     display: block;
     opacity: 1;
 }
 
-/* -----------------------------------------------------
-   6. Responsive Design (MYDS grid & mobile touch targets)
------------------------------------------------------ */
+/* 6. Responsive Design - Mobile-first approach for better user experience */
 @media (max-width: 768px) {
-    .myds-row {
-        -ms-flex-direction: column;
+    /* Stack flex items vertically on small screens */
+    .flex-container {
+        display: flex;
+        /* Support for all browsers including IE 10+ and Samsung Internet 2.0+ */
+        display: -ms-flexbox;
+        display: -webkit-flex;
+
+        /* Flex direction with vendor prefixes */
         flex-direction: column;
-        margin-left: 0;
-        margin-right: 0;
+        -ms-flex-direction: column;
+        -webkit-flex-direction: column;
     }
+
+    /* Slightly larger badges for mobile readability */
     .status-badge {
-        font-size: 1em;
-        padding: .3em .7em;
+        font-size: 85%;
+        padding: .3em .5em; /* Larger touch targets */
     }
-    .btn-primary, .btn-secondary, .btn-tertiary {
-        width: 100%;
+
+    /* Improved button sizing for mobile */
+    .btn-primary,
+    .btn-secondary {
+        padding: 0.75em 1.5em;
         font-size: 1em;
-        margin-bottom: 0.6em;
+        width: 100%; /* Full width buttons on mobile */
+        margin-bottom: 0.5em;
     }
+
+    /* Enhanced form controls for mobile */
     .form-control {
         padding: 0.75em;
-        font-size: 16px;
+        font-size: 16px; /* Prevents zoom on iOS */
     }
 }
 
-/* -----------------------------------------------------
-   7. Accessibility (WCAG, Skip Link, High Contrast)
------------------------------------------------------ */
-/* Skip Link for accessibility - appears on focus only */
-.myds-skip-link {
-    position: absolute;
-    left: 8px;
-    top: 8px;
-    z-index: 9999;
-    background: var(--myds-primary-400);
-    color: #fff;
-    padding: 8px 16px;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(25,99,235,0.10);
-    text-decoration: none;
-    font-size: 1em;
-    font-weight: 600;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s;
-}
-.myds-skip-link:focus {
-    opacity: 1;
-    pointer-events: auto;
-    outline: 2px solid var(--myds-primary-600);
-    outline-offset: 2px;
+/* 7. Print Styles - Optimized appearance for printed forms */
+@media print {
+    .status-badge {
+        background-color: transparent !important;
+        color: black !important;
+        border: 1px solid black;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        display: none; /* Hide interactive elements in print */
+    }
+
+    /* Ensure proper page breaks */
+    .page-break {
+        page-break-before: always;
+    }
 }
 
-/* Screen reader only utility */
+/* 8. Accessibility Enhancements - Improved experience for screen readers and keyboard navigation */
 .sr-only {
     position: absolute;
     width: 1px;
@@ -387,207 +272,48 @@ p, label, span, li, ul, ol {
     border: 0;
 }
 
+/* Focus indicators for keyboard navigation */
+.btn-primary:focus,
+.btn-secondary:focus,
+.form-control:focus {
+    outline: 2px solid var(--motac-primary-color);
+    outline-offset: 2px;
+}
+
 /* High contrast mode support */
 @media (prefers-contrast: high) {
     .status-badge {
         border: 2px solid currentColor;
     }
-    .btn-primary, .btn-secondary, .btn-tertiary {
-        border: 2px solid currentColor;
-    }
 }
 
-/* Focus ring for interactive elements */
-.btn-primary:focus,
-.btn-secondary:focus,
-.btn-tertiary:focus,
-.form-control:focus {
-    outline: 2px solid var(--myds-primary-400);
-    outline-offset: 2px;
-}
-
-/* -----------------------------------------------------
-   8. Animation Classes (MYDS motion tokens)
------------------------------------------------------ */
+/* 9. Animation Classes - Smooth transitions for dynamic content */
 .fade-in {
-    animation: fadeIn 0.3s cubic-bezier(0.4, 1.4, 0.2, 1);
+    animation: fadeIn 0.3s ease-in;
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px);}
-    to { opacity: 1; transform: translateY(0);}
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-/* Loading spinner for async actions (MYDS colors) */
+/* Loading spinner for async operations */
 .spinner {
-    border: 2px solid var(--myds-gray-100);
-    border-top: 2px solid var(--myds-primary-400);
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid var(--motac-primary-color);
     border-radius: 50%;
     width: 20px;
     height: 20px;
     animation: spin 1s linear infinite;
 }
+
 @keyframes spin {
-    0% { transform: rotate(0deg);}
-    100% { transform: rotate(360deg);}
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
-
-/* -----------------------------------------------------
-   9. Navbar & Footer (MYDS compliant)
------------------------------------------------------ */
-/* Navbar uses MYDS colors, spacing, shadow */
-.myds-navbar {
-    width: 100%;
-    background: var(--myds-bg-white);
-    border-bottom: 3px solid var(--myds-primary-600);
-    box-shadow: 0 2px 10px rgba(25,99,235,0.07);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 64px;
-    padding: 0 24px;
-    position: relative;
-    z-index: 11;
-}
-.myds-navbar-logo img {
-    width: 38px;
-    height: 38px;
-    background: #fff;
-    border: 2.5px solid var(--myds-primary-600);
-    border-radius: 8px;
-    box-shadow: 0 1px 6px rgba(25,99,235,0.07);
-}
-.myds-navbar-brand {
-    font-weight: 700;
-    font-size: 1.22em;
-    color: var(--myds-primary-800);
-    letter-spacing: 0.04em;
-    margin-left: 8px;
-}
-.myds-navbar-link {
-    color: var(--myds-primary-700);
-    text-decoration: none;
-    font-weight: 500;
-    padding: 8px 10px;
-    border-radius: 5px;
-    transition: background 0.18s, color 0.18s;
-}
-.myds-navbar-link:hover,
-.myds-navbar-link:focus {
-    background: var(--myds-primary-100);
-    color: var(--myds-primary-800);
-    outline: none;
-}
-
-/* Responsive navbar for mobile */
-@media (max-width: 900px) {
-    .myds-navbar {
-        flex-direction: column;
-        align-items: stretch;
-        padding: 0 8px;
-        min-height: 52px;
-    }
-    .myds-navbar-logo img {
-        width: 32px;
-        height: 32px;
-    }
-}
-
-/* Footer: MYDS colors, grid, spacing */
-.myds-footer {
-    background: var(--myds-primary-900);
-    color: var(--myds-gray-100);
-    border-top: 4px solid var(--myds-primary-400);
-    box-shadow: 0 -2px 8px rgba(0,0,0,0.06);
-    padding: 24px 16px 16px 16px;
-}
-.myds-footer-container {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    justify-content: space-between;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-.myds-footer-logo img {
-    width: 32px;
-    height: 32px;
-    background: #fff;
-    border-radius: 4px;
-    box-shadow: 0 1px 4px rgba(25,99,235,0.20);
-}
-.myds-footer-brand-text {
-    font-weight: 700;
-    color: var(--myds-gray-100);
-    font-size: 1.1em;
-    letter-spacing: 0.03em;
-}
-.myds-footer-link {
-    color: var(--myds-primary-300);
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.2s;
-    display: inline-block;
-    padding: 2px 0;
-}
-.myds-footer-link:hover, .myds-footer-link:focus {
-    color: #fff;
-    text-decoration: underline;
-    outline: none;
-}
-.myds-footer-meta {
-    min-width: 170px;
-    font-size: 0.97em;
-    text-align: right;
-    color: var(--myds-gray-400);
-}
-@media (max-width: 900px) {
-    .myds-footer-container {
-        flex-direction: column;
-        justify-content: flex-start;
-    }
-    .myds-footer-meta {
-        text-align: left;
-    }
-}
-@media (max-width: 600px) {
-    .myds-footer {
-        padding: 20px 8px 10px 8px;
-    }
-    .myds-footer-brand-text {
-        font-size: 1em;
-    }
-    .myds-footer-meta {
-        min-width: 0;
-    }
-}
-
-/* -----------------------------------------------------
-   10. Print Styles - Optimized for forms/reports
------------------------------------------------------ */
-@media print {
-    .status-badge {
-        background-color: transparent !important;
-        color: black !important;
-        border: 1px solid black;
-    }
-    .btn-primary, .btn-secondary, .btn-tertiary {
-        display: none; /* Hide interactive elements */
-    }
-    .page-break {
-        page-break-before: always;
-    }
-}
-
-/* -----------------------------------------------------
-   11. Misc: Flatpickr calendar direction
------------------------------------------------------ */
-.flatpickr-calendar {
-    direction: ltr;
-}
-
-/*
-    === End MYDS-compliant custom.css ===
-    - All styles use official tokens and grid, typography, accessibility, responsive, and motion standards.
-    - Refer to MYDS documentation for component anatomy and advanced usage.
-*/

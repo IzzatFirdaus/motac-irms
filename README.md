@@ -5,154 +5,168 @@
 [![MIT License][license-shield]][license-url]
 
 <p align="center">
-  <a href="https://github.com/IzzatFirdaus/motac-irms">
-    <h1 align="center">MOTAC IRMS</h1>
+  <a href="https://github.com/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS">
+    <h1 align="center">MOTAC ICT LOAN</h1>
   </a>
-  <h2 align="center">Sistem Pengurusan Sumber Terintegrasi MOTAC</h2>
+  <h2 align="center">MOTAC Integrated Resource Management System</h2>
   <p align="center">
-    Sistem berpusat untuk mengurus Pinjaman Peralatan ICT dan Sistem Helpdesk/Tiket di Kementerian Pelancongan, Seni dan Budaya Malaysia.<br />
-    Berdasarkan struktur templat amralsaleeh/HRMS dan ditambah baik untuk keperluan operasi MOTAC.<br /><br />
-    <a href="https://github.com/IzzatFirdaus/motac-irms/issues">Lapor Isu</a>
+    A system for managing Email/User ID Provisioning and ICT Equipment Loans at the Ministry of Tourism, Arts and Culture, Malaysia.<br />
+    Built upon the amralsaleeh/HRMS template structure.<br /><br />
+    <a href="https://github.com/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS/issues">Report Bug</a>
     ·
-    <a href="https://github.com/IzzatFirdaus/motac-irms/issues">Mohon Penambahbaikan</a>
+    <a href="https://github.com/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS/issues">Request Feature</a>
   </p>
 </p>
 <br />
 
 ---
 
-## Pengenalan
+## Overview
 
-**Sistem Pengurusan Sumber Terintegrasi MOTAC (MOTAC IRMS)** ialah aplikasi web berasaskan Laravel yang direka untuk memusatkan, mengautomasikan, dan memperkemas proses operasi utama untuk Kementerian Pelancongan, Seni dan Budaya Malaysia.
+**MOTAC Integrated Resource Management System** is a Laravel-based web application designed to centralize and streamline two core functions for the Ministry of Tourism, Arts and Culture (MOTAC), Malaysia:
+- **Email/User ID Provisioning**
+- **ICT Equipment Loan Management**
 
-Versi 4.0 memberi fokus kepada dua modul utama:
-- **Pengurusan Pinjaman Peralatan ICT**
-- **Pengurusan Helpdesk & Sokongan ICT**
-
-MOTAC IRMS menyediakan peraturan perniagaan yang mantap, aliran kerja bersatu, serta pengalaman pengguna moden untuk meningkatkan kecekapan, keselamatan dan akauntabiliti.
+It provides unified workflows, robust business rules, and a consistent user experience, enhancing operational efficiency, security, and accountability.
 
 ---
 
-## Ciri-ciri
+## Features
 
-- **Pengurusan Pinjaman Peralatan ICT** Mengurus permohonan, kelulusan, pengeluaran, penjejakan dan pemulangan peralatan ICT (laptop, projektor, dsb.) untuk kegunaan rasmi.
+- **Email/User ID Provisioning Management**  
+  Automates the application, certification, approval, and provisioning process for official MOTAC email accounts and user IDs, mirroring MyMail application workflows.
 
-- **Sistem Helpdesk & Tiket** Mengurus tiket sokongan IT dari penciptaan dan penugasan hingga penyelesaian dan pelaporan, mempercepat proses sokongan untuk semua isu berkaitan ICT.
+- **ICT Equipment Loan Management**  
+  Facilitates requests, approvals, issuance, tracking, and return of ICT equipment (laptops, projectors, etc.) for official use.
 
-- **Pengurusan Data Bersatu** Menggabungkan data pengguna, permohonan, tiket sokongan, kelulusan, inventori peralatan dan notifikasi dalam satu pangkalan data selamat.
+- **Unified Data Management**  
+  Consolidates users, applications, approvals, equipment inventory, and notifications in a single MySQL database.
 
-- **Aliran Kerja Automatik & Standard** Memperkemas proses permohonan/kelulusan, meminimumkan langkah manual dan beban pentadbiran untuk pinjaman serta tiket sokongan.
+- **Streamlined Workflows & Process Automation**  
+  Standardizes and automates application and approval processes, reducing administrative burdens.
 
-- **Kawalan Akses Berdasarkan Peranan (RBAC) & Keselamatan** Kebenaran terperinci untuk pengguna, penyokong, staf BPM dan pentadbir IT. Termasuk logik kelulusan berasaskan gred dan peranan standard.
+- **Role-Based Access Control (RBAC) & Security**  
+  Robust access management for users, approvers, BPM staff, and IT Admins, including grade-based approval logic and standardized role names.
 
-- **Borang Dinamik dengan Livewire** Menyokong borang kompleks dan bersyarat untuk permohonan pinjaman serta tiket helpdesk.
+- **User and Organizational Data Management**  
+  Centralized records for system users, department, position, and grade—vital for workflow and approvals.
 
-- **Laporan & Notifikasi Masa Nyata** Menyediakan maklumat penggunaan sumber, status pinjaman, prestasi helpdesk serta menghantar notifikasi e-mel dan dalam aplikasi untuk kejadian penting.
+- **Dynamic Forms**  
+  Utilizes Livewire for complex, dynamic forms (e.g., conditional fields as in MyMail application).
 
-- **Pengurusan Inventori Peralatan ICT** Menyimpan inventori terperinci dengan kategori, subkategori, lokasi fizikal dan status (sedia, sedang dipinjam, dalam penyelenggaraan).
+- **Real-Time Reporting & Notifications**  
+  Insights into resource utilization and application statuses. Users notified of critical events via email and in-app notifications.
 
-- **Jejak Audit & Akauntabiliti** Merekod tindakan utama (created_by, updated_by) untuk ketelusan dan pematuhan di semua modul.
+- **ICT Equipment Inventory Management**  
+  Tracks detailed inventory of ICT equipment, including categories, sub-categories, locations, and status.
 
-- **Penyetempatan & Sokongan Bahasa Melayu** Antara muka utama dalam Bahasa Melayu, dengan sokongan penukaran bahasa dan tarikh tempatan.
+- **Audit Trails**  
+  Automatic logging of key user actions (created_by, updated_by) for accountability.
+
+- **Localization Support**  
+  Primary UI language is Bahasa Melayu, with support for language switching and localized date formats.
 
 ---
 
-## Dibangunkan Dengan
+## Built With
 
-- [Laravel](https://laravel.com) - Rangka kerja PHP moden
-- [Livewire](https://livewire.laravel.com) - Antara muka dinamik untuk Laravel
-- [Jetstream](https://jetstream.laravel.com/) - Autentikasi & pengurusan pasukan
-- [Vuexy](https://pixinvent.com/demo/vuexy-laravel-admin-dashboard-template/landing/) - Templat dashboard pentadbir (integrasi melalui Jetstream)
-- [Spatie Activitylog & Permissions](https://spatie.be/open-source) - Logging dan RBAC
-- [Maatwebsite Excel](https://laravel-excel.com/) - Import/eksport data
-- [Dompdf](https://github.com/barryvdh/laravel-dompdf) - Penjanaan PDF
-- [Log Viewer](https://github.com/opcodesio/log-viewer) - Pengurusan log
-- Dan banyak lagi (rujuk `composer.json`)
+- [Laravel](https://laravel.com)
+- [Livewire](https://livewire.laravel.com)
 
 ---
 
-## Cara Memulakan
+## Getting Started
 
-### Keperluan
+### Requirements
 
-- PHP 8.2 ke atas
+- PHP 8.1 or later
 - Composer
 - MySQL
 
-### Pemasangan
+### Installation
 
-1. **Klon repositori:**
+1. **Clone the repository:**
     ```bash
-    git clone https://github.com/IzzatFirdaus/motac-irms
+    git clone https://github.com/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS
     ```
-2. **Masuk ke folder projek:**
+2. **Navigate to the project folder:**
     ```bash
-    cd motac-irms
+    cd MOTAC_ICT_LOAN_HRMS
     ```
-3. **Pasang kebergantungan:**
+3. **Install dependencies:**
     ```bash
     composer install
     ```
-4. **Konfigurasi persekitaran:**
-    - Salin `.env.example` ke `.env`
-    - Edit `.env` untuk tetapkan:
-        - Pangkalan data (`DB_CONNECTION=mysql`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`)
-        - `APP_URL` (URL aplikasi anda)
+4. **Environment setup:**
+    - Copy `.env.example` to `.env`
+    - Edit `.env` to set:
+        - Database (`DB_CONNECTION=mysql`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`)
+        - `APP_URL` (your application's URL)
         - `APP_TIMEZONE` (`Asia/Kuala_Lumpur`)
-        - Tetapan e-mel (`MAIL_MAILER`, dsb. mengikut `config/mail.php`)
-5. **Jana kunci aplikasi:**
+        - Mail settings (`MAIL_MAILER`, etc. per `config/mail.php`)
+5. **Generate application key:**
     ```bash
     php artisan key:generate
     ```
-6. **Pautan storan:**
+6. **Link storage:**
     ```bash
     php artisan storage:link
     ```
-7. **Jalankan migrasi dan (opsyenal) semai data khusus MOTAC:**
+7. **Run migrations and (optionally) seed MOTAC-specific data:**
     ```bash
     php artisan migrate --seed
     ```
-    *Gunakan `--seed` jika anda mempunyai seeder khusus MOTAC untuk jabatan, gred, peranan, dsb.*
-8. **Mulakan pelayan pembangunan:**
+    *Use `--seed` if you have MOTAC-specific seeders for departments, grades, roles, etc.*
+8. **Start the development server:**
     ```bash
     php artisan serve
     ```
-9. **Akses aplikasi:**
-    - Layari `http://localhost:8000` atau `APP_URL` yang telah dikonfigurasi
+9. **Access the application:**
+    - Visit `http://localhost:8000` or your configured `APP_URL`
 
-### Akaun Pentadbir Asas (Contoh Pembangunan)
+### Default Admin Usage (Development Example)
 
-Pengguna pentadbir awal boleh dicipta melalui seeder atau pendaftaran khas.  
-Jika menggunakan templat asas HRMS, kelayakan demo pembangunan mungkin:
+Initial admin users should be created via seeding or designated registration. If using the base HRMS template, default credentials for development may be:
 ```text
 email: admin@demo.com
 password: admin
 ```
+*Change these for production use. Actual admin credentials should be securely established and managed.*
 
-*Ubah untuk penggunaan produksi! Kelayakan pentadbir sebenar harus diurus dengan selamat.*
+---
 
------
+## Contribution
 
-## Sumbangan
+Contributions are welcome from authorized MOTAC developers and users.  
+- Use the [issue tracker](https://github.com/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS/issues) for feature requests and bug reports.
+- For security vulnerabilities, refer to `SECURITY.md`.
 
-Sumbangan dialu-alukan daripada pembangun dan pengguna MOTAC yang sah.
+---
 
-  - Gunakan [penjejak isu](https://github.com/IzzatFirdaus/motac-irms/issues) untuk permintaan ciri dan laporan pepijat.
-  - Untuk kerentanan keselamatan, rujuk [`SECURITY.md`](SECURITY.md).
+## Contact
 
------
+**Information Management Division (BPM)**  
+Ministry of Tourism, Arts and Culture (MOTAC), Malaysia  
+Project Link: [https://github.com/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS]  
+*Official contact email to be provided by MOTAC/BPM.*
 
-## Hubungi
+---
 
-**Bahagian Pengurusan Maklumat (BPM)**  
-Kementerian Pelancongan, Seni dan Budaya Malaysia  
-Pautan Projek: [https://github.com/IzzatFirdaus/motac-irms]  
-*E-mel rasmi akan disediakan oleh MOTAC/BPM.*
+## License
 
------
+This project uses the MIT License if adopted from the base template.  
+See [`LICENSE.md`](https://github.com/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS/blob/master/LICENSE.md) for details.  
+MOTAC reserves the right to define specific licensing terms.
 
-## Lesen
+---
 
-Projek ini menggunakan Lesen MIT jika diadopsi daripada templat asas.  
-Lihat [`LICENSE.md`](https://github.com/IzzatFirdaus/motac-irms/blob/master/LICENSE.md) untuk maklumat lanjut.  
-MOTAC berhak menetapkan terma lesen khusus.
+[contributors-shield]: https://img.shields.io/github/contributors/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS.svg?style=flat-square
+[contributors-url]: https://github.com/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS.svg?style=flat-square
+[forks-url]: https://github.com/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS/network/members
+[stars-shield]: https://img.shields.io/github/stars/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS.svg?style=flat-square
+[stars-url]: https://github.com/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS/stargazers
+[issues-shield]: https://img.shields.io/github/issues/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS.svg?style=flat-square
+[issues-url]: https://github.com/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS/issues
+[license-shield]: https://img.shields.io/github/license/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS.svg?style=flat-square
+[license-url]: https://github.com/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS/blob/master/LICENSE.md

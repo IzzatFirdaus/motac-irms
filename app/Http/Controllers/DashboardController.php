@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Approval;
-use App\Models\EmailApplication;
+// use App\Models\EmailApplication; // REMOVED: EmailApplication is being removed
 use App\Models\Equipment;
 use App\Models\LoanApplication;
 use App\Models\User;
@@ -49,13 +49,8 @@ class DashboardController extends Controller
             'users_count' => User::count(),
             'pending_approvals_count' => Approval::where('status', 'pending')->count(),
             'equipment_available_count' => Equipment::where('status', 'available')->count(),
-            'equipment_on_loan_count' => Equipment::where('status', 'on_loan')->count(),
-            'email_completed_count' => EmailApplication::where('status', 'completed')->count(),
-            'email_pending_count' => EmailApplication::whereIn('status', ['pending_support', 'pending_admin', 'processing'])->count(),
-            'email_rejected_count' => EmailApplication::where('status', 'rejected')->count(),
-            'loan_issued_count' => LoanApplication::where('status', 'issued')->count(),
-            'loan_approved_pending_issuance_count' => LoanApplication::where('status', 'approved')->count(),
-            'loan_returned_count' => LoanApplication::where('status', 'returned')->count(),
+            // REMOVED: 'pending_email_applications_count' => EmailApplication::where('status', 'pending_admin')->count(),
+            // REMOVED: 'processing_email_applications_count' => EmailApplication::where('status', 'processing')->count(),
         ];
 
         return view('dashboard.admin', $data);
@@ -63,11 +58,20 @@ class DashboardController extends Controller
 
     /**
      * Gathers data and returns the view for the BPM Staff dashboard.
-     * This now returns the Livewire component view which handles its own data.
      */
     private function showBpmDashboard(): View
     {
-        return view('dashboard.bpm');
+        $data = [
+            'pending_loan_applications_count' => LoanApplication::where('status', 'pending_approval')->count(),
+            'pending_equipment_issuance_count' => LoanApplication::where('status', 'approved')->count(),
+            'loan_applications_due_today_count' => LoanApplication::whereHas('loanTransaction', function ($query) {
+                $query->whereDate('due_date', today());
+            })->count(),
+            // REMOVED: 'pending_email_applications_count' => EmailApplication::where('status', 'pending_admin')->count(),
+            // REMOVED: 'processing_email_applications_count' => EmailApplication::where('status', 'processing')->count(),
+        ];
+
+        return view('dashboard.bpm', $data);
     }
 
     /**
@@ -76,8 +80,11 @@ class DashboardController extends Controller
     private function showItAdminDashboard(): View
     {
         $data = [
-            'pending_email_applications_count' => EmailApplication::where('status', 'pending_admin')->count(),
-            'processing_email_applications_count' => EmailApplication::where('status', 'processing')->count(),
+            'total_equipment_count' => Equipment::count(),
+            'equipment_in_repair_count' => Equipment::where('status', 'in_repair')->count(),
+            'equipment_disposed_count' => Equipment::where('status', 'disposed')->count(),
+            // REMOVED: 'pending_email_applications_count' => EmailApplication::where('status', 'pending_admin')->count(),
+            // REMOVED: 'processing_email_applications_count' => EmailApplication::where('status', 'processing')->count(),
         ];
 
         return view('dashboard.itadmin', $data);
@@ -106,6 +113,7 @@ class DashboardController extends Controller
             // FIX: Changed loanApplications() to the correct relationship name: loanApplicationsAsApplicant()
             'active_loans_count' => $user->loanApplicationsAsApplicant()->whereIn('status', [LoanApplication::STATUS_ISSUED, LoanApplication::STATUS_PARTIALLY_ISSUED])->count(),
             'pending_applications_count' => $user->loanApplicationsAsApplicant()->where('status', 'like', 'pending_%')->count(),
+            // REMOVED: 'pending_email_applications_count' => $user->emailApplications()->where('status', 'like', 'pending_%')->count(),
         ];
 
         return view('dashboard.user', $data);

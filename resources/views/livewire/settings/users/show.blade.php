@@ -27,87 +27,80 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        {{-- Profile Photo --}}
                         <div class="col-md-3 text-center mb-4">
                             <img src="{{ $userToShow->profile_photo_url }}" alt="{{ $userToShow->name }}" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
                             <h5 class="mb-1">{{ $userToShow->name }}</h5>
                             <p class="text-muted small">{{ $userToShow->email }}</p>
-                            @if ($userToShow->motac_email)
-                                <p class="text-muted small mb-0">{{ $userToShow->motac_email }} (MOTAC)</p>
-                            @endif
-                            <span class="badge rounded-pill {{ \App\Helpers\Helpers::getStatusColorClass($userToShow->status ?? '', 'user_status') }} fw-normal mt-2">
-                                {{ \App\Models\User::getStatusOptions()[$userToShow->status] ?? $userToShow->status }}
-                            </span>
-                            <hr class="d-md-none">
+                            {{-- Removed: @if ($userToShow->motac_email) <p class="text-muted small mb-0">{{ $userToShow->motac_email }} (MOTAC)</p> @endif --}}
+                            <span class="badge rounded-pill {{ \App\Models\User::getRoleBadgeClass($userToShow->roles->first()->name ?? '') }}">{{ $userToShow->roles->first()->name ?? __('Tiada Peranan') }}</span>
                         </div>
-
-                        {{-- User Details --}}
                         <div class="col-md-9">
-                            <h6 class="border-bottom pb-2 mb-3 text-primary fw-bold">{{ __('Maklumat Peribadi') }}</h6>
-                            <dl class="row mb-4">
-                                <dt class="col-sm-4 col-lg-3 text-muted">{{ __('Gelaran') }}:</dt>
-                                <dd class="col-sm-8 col-lg-9">{{ \App\Models\User::getTitleOptions()[$userToShow->title] ?? $userToShow->title }}</dd>
-
-                                <dt class="col-sm-4 col-lg-3 text-muted">{{ __('No. Kad Pengenalan') }}:</dt>
-                                <dd class="col-sm-8 col-lg-9">{{ $userToShow->identification_number ?? 'N/A' }}</dd>
-
-                                <dt class="col-sm-4 col-lg-3 text-muted">{{ __('No. Passport') }}:</dt>
-                                <dd class="col-sm-8 col-lg-9">{{ $userToShow->passport_number ?? 'N/A' }}</dd>
-
-                                <dt class="col-sm-4 col-lg-3 text-muted">{{ __('No. Telefon Bimbit') }}:</dt>
-                                <dd class="col-sm-8 col-lg-9">{{ $userToShow->mobile_number ?? 'N/A' }}</dd>
-                            </dl>
-
-                            <h6 class="border-bottom pb-2 mb-3 text-primary fw-bold">{{ __('Maklumat Organisasi') }}</h6>
-                            <dl class="row mb-4">
-                                <dt class="col-sm-4 col-lg-3 text-muted">{{ __('Taraf Perkhidmatan') }}:</dt>
-                                <dd class="col-sm-8 col-lg-9">{{ \App\Models\User::getServiceStatusOptions()[$userToShow->service_status] ?? $userToShow->service_status }}</dd>
-
-                                <dt class="col-sm-4 col-lg-3 text-muted">{{ __('Pelantikan') }}:</dt>
-                                <dd class="col-sm-8 col-lg-9">{{ \App\Models\User::getAppointmentTypeOptions()[$userToShow->appointment_type] ?? $userToShow->appointment_type }}</dd>
-
-                                <dt class="col-sm-4 col-lg-3 text-muted">{{ __('Jabatan') }}:</dt>
-                                <dd class="col-sm-8 col-lg-9">{{ optional($userToShow->department)->name ?? 'N/A' }}</dd>
-
-                                <dt class="col-sm-4 col-lg-3 text-muted">{{ __('Jawatan') }}:</dt>
-                                <dd class="col-sm-8 col-lg-9">{{ optional($userToShow->position)->name ?? 'N/A' }}</dd>
-
-                                <dt class="col-sm-4 col-lg-3 text-muted">{{ __('Gred') }}:</dt>
-                                <dd class="col-sm-8 col-lg-9">{{ optional($userToShow->grade)->name ?? 'N/A' }}</dd>
-
-                                <dt class="col-sm-4 col-lg-3 text-muted">{{ __('Aras') }}:</dt>
-                                <dd class="col-sm-8 col-lg-9">{{ $userToShow->level ?? 'N/A' }}</dd>
-
-                                <dt class="col-sm-4 col-lg-3 text-muted">{{ __('Jabatan Terdahulu') }}:</dt>
-                                <dd class="col-sm-8 col-lg-9">{{ $userToShow->previous_department_name ?? 'N/A' }}</dd>
-
-                                <dt class="col-sm-4 col-lg-3 text-muted">{{ __('E-mel Jabatan Terdahulu') }}:</dt>
-                                <dd class="col-sm-8 col-lg-9">{{ $userToShow->previous_department_email ?? 'N/A' }}</dd>
-                            </dl>
-
-                            <h6 class="border-bottom pb-2 mb-3 text-primary fw-bold">{{ __('Peranan Pengguna') }}</h6>
-                            <div class="mb-4">
-                                @forelse ($userToShow->roles as $role)
-                                    <span class="badge bg-primary-subtle text-primary fw-normal me-2 mb-1">{{ $role->name }}</span>
-                                @empty
-                                    <span class="badge bg-warning-subtle text-warning fw-normal">{{ __('Tiada Peranan Ditugaskan') }}</span>
-                                @endforelse
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-sm motac-table-show mb-4">
+                                    <tbody>
+                                        <tr>
+                                            <th>{{ __('Tajuk') }}</th>
+                                            <td>{{ $userToShow->title }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>{{ __('Nama Penuh') }}</th>
+                                            <td>{{ $userToShow->name }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>{{ __('No. Kad Pengenalan') }}</th>
+                                            <td>{{ $userToShow->identification_number }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>{{ __('Emel Peribadi') }}</th>
+                                            <td>{{ $userToShow->email }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>{{ __('No. Telefon') }}</th>
+                                            <td>{{ $userToShow->phone_number }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>{{ __('Jabatan') }}</th>
+                                            <td>{{ $userToShow->department->name ?? __('Tiada Jabatan') }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>{{ __('Jawatan') }}</th>
+                                            <td>{{ $userToShow->position->name ?? __('Tiada Jawatan') }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>{{ __('ID Kakitangan') }}</th>
+                                            <td>{{ $userToShow->staff_id ?? __('Tidak Ditetapkan') }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>{{ __('Status') }}</th>
+                                            <td>
+                                                <span class="badge {{ $userToShow->status == 'active' ? 'bg-success' : 'bg-danger' }}">
+                                                    {{ $userToShow->status == 'active' ? __('Aktif') : __('Tidak Aktif') }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>{{ __('Dicipta Pada') }}</th>
+                                            <td>{{ $userToShow->created_at->format('d/m/Y h:i A') }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>{{ __('Dikemaskini Pada') }}</th>
+                                            <td>{{ $userToShow->updated_at->format('d/m/Y h:i A') }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>{{ __('Peranan') }}</th>
+                                            <td>
+                                                @forelse ($userToShow->roles as $role)
+                                                    <span class="badge rounded-pill {{ \App\Models\User::getRoleBadgeClass($role->name) }} me-1">
+                                                        {{ $role->name }}
+                                                    </span>
+                                                @empty
+                                                    <span class="text-muted">{{ __('Tiada Peranan Ditetapkan') }}</span>
+                                                @endforelse
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
-
-                            <h6 class="border-bottom pb-2 mb-3 text-primary fw-bold">{{ __('Log Audit') }}</h6>
-                            <dl class="row mb-0 small text-muted">
-                                <dt class="col-sm-4 col-lg-3">{{ __('Dicipta Oleh') }}:</dt>
-                                <dd class="col-sm-8 col-lg-9">{{ optional($userToShow->creator)->name ?? 'Sistem' }} pada {{ optional($userToShow->created_at)->translatedFormat('d M Y, h:i A') }}</dd>
-
-                                <dt class="col-sm-4 col-lg-3">{{ __('Dikemaskini Oleh') }}:</dt>
-                                <dd class="col-sm-8 col-lg-9">{{ optional($userToShow->updater)->name ?? 'Sistem' }} pada {{ optional($userToShow->updated_at)->translatedFormat('d M Y, h:i A') }}</dd>
-
-                                @if ($userToShow->deleted_at)
-                                    <dt class="col-sm-4 col-lg-3">{{ __('Dipadam Oleh') }}:</dt>
-                                    <dd class="col-sm-8 col-lg-9">{{ optional($userToShow->deleter)->name ?? 'Sistem' }} pada {{ optional($userToShow->deleted_at)->translatedFormat('d M Y, h:i A') }}</dd>
-                                @endif
-                            </dl>
-
                             <div class="d-flex justify-content-end mt-4">
                                 @can('update', $userToShow)
                                     <a href="{{ route('settings.users.edit', $userToShow->id) }}" wire:navigate class="btn btn-primary me-2">

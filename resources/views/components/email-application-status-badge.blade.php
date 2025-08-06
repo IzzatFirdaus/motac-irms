@@ -1,7 +1,7 @@
 {{-- resources/views/components/email-application-status-badge.blade.php --}}
 @props([
-    'status' => '', // The email application status key
-    'application' => null, // Pass the model to use the accessor
+    'status' => '',
+    'application' => null,
 ])
 
 @php
@@ -14,7 +14,7 @@
     } else {
         $statusOptions = \App\Models\EmailApplication::getStatusOptions();
         $statusLabel = $statusOptions[$status] ?? Illuminate\Support\Str::title(str_replace('_', ' ', $status));
-        $color = 'dark'; // default color
+        $color = 'dark';
 
         switch ($status) {
             case \App\Models\EmailApplication::STATUS_DRAFT:

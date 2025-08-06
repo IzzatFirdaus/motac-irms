@@ -3,9 +3,9 @@
 namespace App\Livewire\HumanResource\Structure;
 
 use App\Models\Grade;
-use App\Models\Position; // For Grade selection
+use App\Models\Position; // Use the Position model
 use Illuminate\Validation\Rule as ValidationRule;
-use Livewire\Component; // Alias for Laravel's Rule
+use Livewire\Component;
 
 class Positions extends Component
 {
@@ -44,7 +44,8 @@ class Positions extends Component
     protected function rules(): array
     {
         $nameRule = ValidationRule::unique('positions', 'name');
-        if ($this->isEditMode && $this->positionInstance instanceof \App\Models\Position) {
+        // Simplified: use 'Position' instead of '\App\Models\Position'
+        if ($this->isEditMode && $this->positionInstance instanceof Position) {
             $nameRule->ignore($this->positionInstance->id);
         }
 
@@ -78,7 +79,8 @@ class Positions extends Component
             // 'vacancies_count' => $this->vacanciesCount, // Removed
         ];
 
-        if ($this->isEditMode && $this->positionInstance instanceof \App\Models\Position) {
+        // Simplified: use 'Position' instead of '\App\Models\Position'
+        if ($this->isEditMode && $this->positionInstance instanceof Position) {
             $this->positionInstance->update($data);
             session()->flash('toastr', ['type' => 'success', 'message' => __('Jawatan berjaya dikemaskini.')]);
         } else {

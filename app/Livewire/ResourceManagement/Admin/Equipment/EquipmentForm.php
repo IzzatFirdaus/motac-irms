@@ -2,139 +2,167 @@
 
 namespace App\Livewire\ResourceManagement\Admin\Equipment;
 
-use App\Models\Equipment;
-use Illuminate\Validation\Rule;
+use App\Models\Department;
+use App\Models\Equipment; // Use the Equipment model
+use App\Models\Location;
+use Illuminate\Validation\Rule as ValidationRule;
 use Livewire\Component;
-
-// Assuming created_by/updated_by are handled by observer
 
 class EquipmentForm extends Component
 {
     public ?Equipment $equipmentInstance = null;
 
+    public string $tag_id = '';
+
     public string $asset_type = '';
 
     public string $brand = '';
 
-    public string $model_name = ''; // Using model_name to avoid conflict with Eloquent's internal $model
+    public string $model = '';
 
-    public string $serial_number = '';
-
-    public string $tag_id = '';
+    public ?string $serial_number = null;
 
     public ?string $purchase_date = null;
 
-    public ?string $warranty_expiry_date = null;
+    public ?string $warranty_end_date = null;
 
     public string $status = '';
 
-    public string $current_location = '';
+    public ?int $location_id = null;
 
-    public string $notes = '';
+    public ?int $department_id = null;
 
-    public string $condition_status = '';
+    public ?string $notes = null;
 
-    public bool $isEditing = false;
+    public bool $isEditMode = false;
 
     public array $assetTypeOptions = [];
 
     public array $statusOptions = [];
 
-    public array $conditionStatusOptions = [];
+    public array $locationOptions = [];
+
+    public array $departmentOptions = [];
+
+    protected function rules(): array
+    {
+        $tagIdRule = ValidationRule::unique('equipment', 'tag_id');
+        if ($this->isEditMode && $this->equipmentInstance instanceof Equipment) {
+            $tagIdRule->ignore($this->equipmentInstance->id);
+        }
+
+        return [
+            'tag_id' => ['required', 'string', 'max:255', $tagIdRule],
+            'asset_type' => ['required', 'string', ValidationRule::in(array_keys(Equipment::getAssetTypeOptions()))],
+            'brand' => ['required', 'string', 'max:255'],
+            'model' => ['required', 'string', 'max:255'],
+            'serial_number' => ['nullable', 'string', 'max:255'],
+            'purchase_date' => ['nullable', 'date'],
+            'warranty_end_date' => ['nullable', 'date', 'after_or_equal:purchase_date'],
+            'status' => ['required', 'string', ValidationRule::in(array_keys(Equipment::getStatusOptions()))],
+            'location_id' => ['nullable', 'integer', 'exists:locations,id'],
+            'department_id' => ['nullable', 'integer', 'exists:departments,id'],
+            'notes' => ['nullable', 'string', 'max:2000'],
+        ];
+    }
+
+    protected function messages(): array
+    {
+        return [
+            'tag_id.required' => __('ID Tag diperlukan.'),
+            'tag_id.unique' => __('ID Tag ini telah wujud.'),
+            'asset_type.required' => __('Jenis Aset diperlukan.'),
+            'brand.required' => __('Jenama diperlukan.'),
+            'model.required' => __('Model diperlukan.'),
+            'status.required' => __('Status diperlukan.'),
+            'warranty_end_date.after_or_equal' => __('Tarikh tamat waranti mesti selepas atau sama dengan tarikh pembelian.'),
+        ];
+    }
 
     public function mount(?int $equipmentId = null): void
     {
-        $this->assetTypeOptions = Equipment::$ASSET_TYPES_LABELS; //
-        $this->statusOptions = Equipment::$STATUSES_LABELS; //
-        $this->conditionStatusOptions = Equipment::$CONDITION_STATUSES_LABELS; //
+        $this->assetTypeOptions = Equipment::getAssetTypeOptions();
+        $this->statusOptions = Equipment::getStatusOptions();
+        $this->locationOptions = Location::orderBy('name')->pluck('name', 'id')->all();
+        $this->departmentOptions = Department::orderBy('name')->pluck('name', 'id')->all();
 
-        if ($equipmentId !== null && $equipmentId !== 0) {
+        if ($equipmentId) {
+            // Simplified: use 'Equipment' instead of '\App\Models\Equipment'
             $this->equipmentInstance = Equipment::findOrFail($equipmentId);
-            $this->isEditing = true;
-            $this->populateFields();
+            $this->isEditMode = true;
+            $this->fillForm();
         } else {
-            $this->equipmentInstance = new Equipment;
-            // Set default values from Equipment model attributes or manually
-            $this->status = $this->equipmentInstance->getAttributes()['status'] ?? Equipment::STATUS_AVAILABLE; //
-            $this->condition_status = $this->equipmentInstance->getAttributes()['condition_status'] ?? Equipment::CONDITION_NEW; //
+            $this->resetForm();
         }
     }
 
-    public function updated($propertyName): void
+    public function fillForm(): void
     {
-        $this->validateOnly($propertyName);
+        if ($this->equipmentInstance) {
+            $this->tag_id = $this->equipmentInstance->tag_id;
+            $this->asset_type = $this->equipmentInstance->asset_type;
+            $this->brand = $this->equipmentInstance->brand;
+            $this->model = $this->equipmentInstance->model;
+            $this->serial_number = $this->equipmentInstance->serial_number;
+            $this->purchase_date = $this->equipmentInstance->purchase_date?->format('Y-m-d');
+            $this->warranty_end_date = $this->equipmentInstance->warranty_end_date?->format('Y-m-d');
+            $this->status = $this->equipmentInstance->status;
+            $this->location_id = $this->equipmentInstance->location_id;
+            $this->department_id = $this->equipmentInstance->department_id;
+            $this->notes = $this->equipmentInstance->notes;
+        }
     }
 
     public function saveEquipment(): void
     {
-        $validatedData = $this->validate();
+        $this->validate();
 
-        // Map model_name back to model for database saving
-        $dbData = $validatedData;
-        $dbData['model'] = $validatedData['model_name'];
-        unset($dbData['model_name']);
+        $data = [
+            'tag_id' => $this->tag_id,
+            'asset_type' => $this->asset_type,
+            'brand' => $this->brand,
+            'model' => $this->model,
+            'serial_number' => $this->serial_number,
+            'purchase_date' => $this->purchase_date,
+            'warranty_end_date' => $this->warranty_end_date,
+            'status' => $this->status,
+            'location_id' => $this->location_id,
+            'department_id' => $this->department_id,
+            'notes' => $this->notes,
+        ];
 
-        if ($this->isEditing && $this->equipmentInstance->exists) {
-            $this->equipmentInstance->update($dbData);
-            session()->flash('success', 'Peralatan berjaya dikemaskini.');
+        if ($this->isEditMode && $this->equipmentInstance) {
+            $this->equipmentInstance->update($data);
+            session()->flash('success', __('Peralatan berjaya dikemaskini.'));
         } else {
-            Equipment::create($dbData); // Assumes BlameableObserver handles created_by
-            session()->flash('success', 'Peralatan baru berjaya ditambah.');
-            $this->resetForm();
+            Equipment::create($data);
+            session()->flash('success', __('Peralatan baru berjaya ditambah.'));
         }
 
-        $this->dispatch('equipmentSaved'); // For refreshing lists or other components
-        // Consider redirecting based on your application flow. The web.php routes might use a controller to show this component.
-        // If this component is full-page, redirect here. Otherwise, the parent page might handle redirection or modal closing.
-        $this->redirectRoute('resource-management.admin.equipment-admin.index'); //
+        $this->redirectRoute('equipment.index', navigate: true);
+    }
+
+    public function resetForm(): void
+    {
+        $this->resetErrorBag();
+        $this->resetValidation();
+        $this->tag_id = '';
+        $this->asset_type = ''; // Or set a default like Equipment::ASSET_TYPE_LAPTOP
+        $this->brand = '';
+        $this->model = '';
+        $this->serial_number = null;
+        $this->purchase_date = null;
+        $this->warranty_end_date = null;
+        $this->status = Equipment::STATUS_AVAILABLE;
+        $this->location_id = null;
+        $this->department_id = null;
+        $this->notes = null;
+        $this->equipmentInstance = null;
+        $this->isEditMode = false;
     }
 
     public function render()
     {
         return view('livewire.resource-management.admin.equipment.equipment-form');
-    }
-
-    protected function populateFields(): void
-    {
-        if ($this->equipmentInstance instanceof \App\Models\Equipment) {
-            $this->asset_type = $this->equipmentInstance->asset_type;
-            $this->brand = $this->equipmentInstance->brand ?? '';
-            $this->model_name = $this->equipmentInstance->model ?? ''; // Eloquent model's attribute is 'model'
-            $this->serial_number = $this->equipmentInstance->serial_number ?? '';
-            $this->tag_id = $this->equipmentInstance->tag_id ?? '';
-            $this->purchase_date = $this->equipmentInstance->purchase_date ? $this->equipmentInstance->purchase_date->format('Y-m-d') : null;
-            $this->warranty_expiry_date = $this->equipmentInstance->warranty_expiry_date ? $this->equipmentInstance->warranty_expiry_date->format('Y-m-d') : null;
-            $this->status = $this->equipmentInstance->status;
-            $this->current_location = $this->equipmentInstance->current_location ?? '';
-            $this->notes = $this->equipmentInstance->notes ?? '';
-            $this->condition_status = $this->equipmentInstance->condition_status ?? '';
-        }
-    }
-
-    protected function rules(): array
-    {
-        return [
-            'asset_type' => ['required', 'string', Rule::in(array_keys(Equipment::$ASSET_TYPES_LABELS))], //
-            'brand' => ['required', 'string', 'max:255'],
-            'model_name' => ['required', 'string', 'max:255'],
-            'serial_number' => ['required', 'string', 'max:255', Rule::unique('equipment', 'serial_number')->ignore($this->equipmentInstance?->id)],
-            'tag_id' => ['required', 'string', 'max:255', Rule::unique('equipment', 'tag_id')->ignore($this->equipmentInstance?->id)],
-            'purchase_date' => ['nullable', 'date_format:Y-m-d'],
-            'warranty_expiry_date' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:purchase_date'],
-            'status' => ['required', 'string', Rule::in(array_keys(Equipment::$STATUSES_LABELS))], //
-            'current_location' => ['nullable', 'string', 'max:255'],
-            'notes' => ['nullable', 'string'],
-            'condition_status' => ['required', 'string', Rule::in(array_keys(Equipment::$CONDITION_STATUSES_LABELS))], //
-        ];
-    }
-
-    private function resetForm(): void
-    {
-        $this->resetValidation();
-        $this->resetExcept('assetTypeOptions', 'statusOptions', 'conditionStatusOptions');
-        $this->isEditing = false;
-        $this->equipmentInstance = new Equipment;
-        $this->status = $this->equipmentInstance->getAttributes()['status'] ?? Equipment::STATUS_AVAILABLE; //
-        $this->condition_status = $this->equipmentInstance->getAttributes()['condition_status'] ?? Equipment::CONDITION_NEW; //
     }
 }

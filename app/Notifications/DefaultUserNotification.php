@@ -15,23 +15,28 @@ final class DefaultUserNotification extends BaseNotification implements ShouldQu
     use Queueable;
 
     private string $subject;
-
     private string $greeting;
-
-    private array $lines; // Changed from single 'line' to 'lines' array for more flexibility
-
+    private array $lines;
     private ?string $actionUrl;
-
     private string $actionText;
-
     private array $additionalData;
 
+    /**
+     * Create a new notification instance.
+     *
+     * @param string $subject The subject of the notification (for email, and display)
+     * @param string $greeting The greeting message (for email)
+     * @param array $lines An array of text lines to display in the notification body
+     * @param string|null $actionUrl An optional URL for the call to action button
+     * @param string $actionText The text for the call to action button
+     * @param array $additionalData Any extra data to store with the notification (e.g., icon, custom type)
+     */
     public function __construct(
-        string $subject = 'Notifikasi Baru',
-        string $greeting = 'Salam Sejahtera!',
-        array $lines = ['Anda mempunyai notifikasi baru.'], // Changed to array
+        string $subject = 'New Notification',
+        string $greeting = 'Hello!',
+        array $lines = ['You have a new notification.'],
         ?string $actionUrl = null,
-        string $actionText = 'Lihat Butiran',
+        string $actionText = 'View Details',
         array $additionalData = []
     ) {
         $this->subject = $subject;
@@ -42,52 +47,68 @@ final class DefaultUserNotification extends BaseNotification implements ShouldQu
         $this->additionalData = $additionalData;
     }
 
+    /**
+     * Get the notification's delivery channels.
+     *
+     * @param  User  $notifiable The user receiving the notification
+     * @return array<int, string>
+     */
     public function via(User $notifiable): array
     {
         $channels = ['database'];
-        // Send email only if user has an email and email notifications are enabled for this type (example)
-        if (! empty($notifiable->email) && ($this->additionalData['send_email'] ?? true)) {
+        // You might decide based on a user preference, or if email is always desired for this type
+        if (!empty($notifiable->email) && ($this->additionalData['send_email'] ?? true)) {
             $channels[] = 'mail';
         }
-
         return $channels;
     }
 
+    /**
+     * Get the mail representation of the notification.
+     *
+     * @param  User  $notifiable The user receiving the notification
+     * @return MailMessage
+     */
     public function toMail(User $notifiable): MailMessage
     {
         $mailMessage = (new MailMessage)
-            ->subject(__($this->subject)) // Assuming subject can be a translatable key or plain string
+            ->subject(__($this->subject)) // Support translation for subject
             ->greeting(__($this->greeting, ['name' => $notifiable->name])); // Personalize greeting
 
         foreach ($this->lines as $line) {
-            $mailMessage->line(__($line)); // Translate each line
+            $mailMessage->line(__($line)); // Add each line, supporting translation
         }
 
         if ($this->actionUrl && filter_var($this->actionUrl, FILTER_VALIDATE_URL)) {
-            $mailMessage->action(__($this->actionText), $this->actionUrl); // Translate action text
+            $mailMessage->action(__($this->actionText), $this->actionUrl); // Add action button, supporting translation
         }
 
-        $mailMessage->line(__('Terima kasih kerana menggunakan aplikasi kami!'));
+        $mailMessage->line(__('Thank you for using our application!')); // Generic closing line
 
         return $mailMessage;
     }
 
+    /**
+     * Get the array representation of the notification (for database storage).
+     *
+     * @param  User  $notifiable The user receiving the notification
+     * @return array<string, mixed>
+     */
     public function toArray(User $notifiable): array
     {
-        // Translate lines for database message
+        // Translate lines for the database message as well, so UI can display translated text
         $translatedLines = array_map(fn ($line) => __($line), $this->lines);
 
         return array_merge([
             'subject' => __($this->subject),
-            // 'greeting' => __($this->greeting), // Greeting usually part of the overall message
-            'message' => implode("\n", $translatedLines), // Main message content
+            'message' => implode("\n", $translatedLines), // Combine lines for a single message field in database
             'action_url' => ($this->actionUrl && filter_var($this->actionUrl, FILTER_VALIDATE_URL)) ? $this->actionUrl : null,
             'action_text' => __($this->actionText),
-            'icon' => $this->additionalData['icon'] ?? 'ti ti-bell',
-            'notification_type' => $this->additionalData['type'] ?? 'user_specific',
-            // Adding these for better context in UI if listing notifications
-            'user_id' => $notifiable->id,
-            'user_name' => $notifiable->name,
+            'icon' => $this->additionalData['icon'] ?? 'ti ti-bell', // Default icon
+            'notification_type' => $this->additionalData['type'] ?? 'user_general', // A general type identifier
+            'user_id' => $notifiable->id, // Add recipient user ID for easy retrieval
+            'user_name' => $notifiable->name, // Add recipient user name
+            'created_at' => now()->toDateTimeString(), // Add timestamp for context
         ], $this->additionalData);
     }
 }

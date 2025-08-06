@@ -5,14 +5,14 @@ namespace App\Livewire\Settings\Roles;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule as ValidationRule;
 use Livewire\Attributes\Layout;
-// use Livewire\Attributes\Title; // Title is set in Blade view using @section
+use Livewire\Attributes\Title; // Added Title attribute
 use Livewire\Component;
 use Livewire\WithPagination;
 use Spatie\Permission\Models\Permission;
-
-// use Spatie\Permission\Models\Role; // We will use the configured model string
+use Spatie\Permission\Models\Role; // Changed alias from RoleContract to use the concrete Role model
 
 #[Layout('layouts.app')]
+#[Title('Pengurusan Peranan')] // Set the title for the page
 class Index extends Component
 {
     use WithPagination;
@@ -21,7 +21,9 @@ class Index extends Component
 
     public bool $isEditMode = false;
 
-    public ?\Spatie\Permission\Contracts\Role $editingRole = null; // Use contract for broader compatibility
+    public ?Role $editingRole = null; // Changed type hint to concrete Role model
+
+    public ?Role $deletingRole = null; // Declared missing property
 
     public string $name = '';
 
@@ -48,120 +50,159 @@ class Index extends Component
         $roleModelClass = config('permission.models.role');
         $this->editingRole = new $roleModelClass;
 
-        $this->allPermissionsForView = Permission::orderBy('name')->pluck('name', 'id')->all();
+        $this->loadAllPermissions(); // Load permissions when component mounts
     }
 
-    public function create(): void
+    // Using a computed property for roles list
+    public function getRolesProperty()
     {
-        abort_unless(Auth::user()->can('manage_roles'), 403, __('Tindakan tidak dibenarkan.'));
+        $roleModelClass = config('permission.models.role');
+
+        return $roleModelClass::query()
+            ->withCount([
+                'permissions',
+                'users as users_count', // Assumes your Role model has a 'users' relationship
+            ])
+            ->orderBy('name')
+            ->paginate(10);
+    }
+
+    // Computed property for all permissions, cached
+    public function getAllPermissionsForDropdownProperty(): array
+    {
+        return Permission::orderBy('name')->pluck('name', 'id')->all();
+    }
+
+    protected function loadAllPermissions(): void
+    {
+        $this->allPermissionsForView = $this->getAllPermissionsForDropdownProperty();
+    }
+
+    public function createRole(): void
+    {
+        $this->authorize('create', config('permission.models.role')); // Authorize create action for roles
         $this->resetInputFields();
         $this->isEditMode = false;
         $this->showModal = true;
-        $this->dispatch('showRoleModal');
     }
 
-    public function edit(int $roleId): void
+    public function storeRole(): void
     {
-        abort_unless(Auth::user()->can('manage_roles'), 403, __('Tindakan tidak dibenarkan.'));
+        $this->authorize('create', config('permission.models.role')); // Authorize create action for roles
+        $this->validate();
+
         $roleModelClass = config('permission.models.role');
-        /** @var \Spatie\Permission\Contracts\Role $role */
-        $role = $roleModelClass::findOrFail($roleId);
+        $role = $roleModelClass::create(['name' => $this->name, 'guard_name' => 'web']);
+        $role->syncPermissions($this->selectedPermissions);
 
-        $this->resetInputFields(); // Reset before populating
-        $this->editingRole = $role;
-        $this->name = $role->name;
-        $this->selectedPermissions = $role->permissions->pluck('id')->map(fn ($id): string => (string) $id)->toArray();
-        $this->isEditMode = true;
-        $this->showModal = true;
-        $this->dispatch('showRoleModal');
-    }
-
-    public function saveRole(): void
-    {
-        abort_unless(Auth::user()->can('manage_roles'), 403, __('Tindakan tidak dibenarkan.'));
-        $validatedData = $this->validate();
-        $roleData = ['name' => $validatedData['name'], 'guard_name' => 'web'];
-        $roleModelClass = config('permission.models.role');
-
-        if ($this->isEditMode && $this->editingRole instanceof \Spatie\Permission\Contracts\Role && $this->editingRole->exists) {
-            if (in_array($this->editingRole->getOriginal('name'), $this->coreRoles) && $this->name !== $this->editingRole->getOriginal('name')) {
-                session()->flash('error', __('Peranan teras ":roleName" tidak boleh dinamakan semula.', ['roleName' => $this->editingRole->getOriginal('name')]));
-                $this->name = $this->editingRole->getOriginal('name');
-
-                return;
-            }
-
-            $this->editingRole->update($roleData);
-            $this->editingRole->permissions()->sync($this->selectedPermissions);
-            session()->flash('message', __('Peranan :name berjaya dikemaskini.', ['name' => $this->editingRole->name]));
-        } else {
-            /** @var \Spatie\Permission\Contracts\Role $role */
-            $role = $roleModelClass::create($roleData);
-            $role->permissions()->sync($this->selectedPermissions);
-            session()->flash('message', __('Peranan :name berjaya dicipta.', ['name' => $role->name]));
-        }
-
+        $this->dispatch('toastr', type: 'success', message: __('Peranan berjaya dicipta!'));
         $this->closeModal();
     }
 
-    public function closeModal(): void
+    public function editRole(int $roleId): void
     {
-        $this->resetInputFields();
-        $this->showModal = false;
-        $this->dispatch('hideRoleModal');
-    }
+        $this->authorize('update', config('permission.models.role')); // Authorize update action for roles
 
-    public function confirmRoleDeletion(int $id): void
-    {
-        abort_unless(Auth::user()->can('manage_roles'), 403, __('Tindakan tidak dibenarkan.'));
         $roleModelClass = config('permission.models.role');
-        /** @var \Spatie\Permission\Contracts\Role $role */
-        $role = $roleModelClass::find($id);
+        $this->editingRole = $roleModelClass::findById($roleId, 'web');
 
-        if ($role) {
-            if (in_array($role->name, $this->coreRoles) || ($role->name === config('permission.super_admin_name', 'Super Admin') && config('permission.protect_super_admin_role', true))) {
-                session()->flash('error', __('Peranan teras atau Super Admin ":roleName" tidak boleh dipadam.', ['roleName' => $role->name]));
+        // Prevent editing core roles or roles with users
+        if (in_array($this->editingRole->name, $this->coreRoles, true) || $this->editingRole->users()->exists()) { // Corrected access to users and core roles check
+            $this->dispatch('toastr', type: 'error', message: 'Tidak boleh mengedit peranan sistem atau peranan yang mempunyai pengguna bersekutu.');
+            $this->closeModal();
 
-                return;
-            }
-
-            if ($role->users()->count() > 0) {
-                session()->flash('error', __('Peranan tidak boleh dipadam kerana ia telah ditugaskan kepada pengguna.'));
-
-                return;
-            }
-
-            $this->roleIdToDelete = $id;
-            $this->roleNameToDelete = $role->name;
-            $this->showDeleteConfirmationModal = true;
-            $this->dispatch('showDeleteRoleConfirmationModal');
-        } else {
-            session()->flash('error', __('Peranan tidak ditemui.'));
+            return;
         }
+
+        $this->name = $this->editingRole->name;
+        $this->selectedPermissions = $this->editingRole->permissions()->pluck('id')->toArray();
+        $this->isEditMode = true;
+        $this->showModal = true;
     }
+
+
+    public function updateRole(): void
+    {
+        $this->authorize('update', config('permission.models.role')); // Authorize update action for roles
+        $this->validate();
+
+        // Prevent updating core roles or roles with users
+        if (in_array($this->editingRole->name, $this->coreRoles, true) || $this->editingRole->users()->exists()) { // Corrected access to users and core roles check
+            $this->dispatch('toastr', type: 'error', message: 'Tidak boleh mengemaskini peranan sistem atau peranan yang mempunyai pengguna bersekutu.');
+            $this->closeModal();
+
+            return;
+        }
+
+        $this->editingRole->name = $this->name; // Assign the new name
+        $this->editingRole->save(); // Save the changes to the role name
+        $this->editingRole->syncPermissions($this->selectedPermissions);
+
+        $this->dispatch('toastr', type: 'success', message: __('Peranan berjaya dikemaskini!'));
+        $this->closeModal();
+    }
+
+    public function confirmDelete(int $roleId): void
+    {
+        $this->authorize('delete', config('permission.models.role')); // Authorize delete action for roles
+
+        $roleModelClass = config('permission.models.role');
+        $this->deletingRole = $roleModelClass::findById($roleId, 'web');
+
+        if (! $this->deletingRole) {
+            $this->dispatch('toastr', type: 'error', message: __('Peranan tidak ditemui.'));
+            $this->closeDeleteConfirmationModal();
+
+            return;
+        }
+
+        // Prevent deleting core roles or roles with associated users
+        if ($this->deletingRole->users()->exists() || in_array($this->deletingRole->name, $this->coreRoles, true)) { // Corrected access to users
+            $this->dispatch('toastr', type: 'error', message: __('Tidak boleh memadam peranan sistem atau peranan yang mempunyai pengguna bersekutu.'));
+            $this->closeDeleteConfirmationModal();
+
+            return;
+        }
+
+        $this->roleIdToDelete = $roleId;
+        $this->roleNameToDelete = $this->deletingRole->name;
+        $this->showDeleteConfirmationModal = true;
+        $this->dispatch('openModal', elementId: 'deleteConfirmationModal');
+    }
+
 
     public function deleteRole(): void
     {
-        abort_unless(Auth::user()->can('manage_roles'), 403, __('Tindakan tidak dibenarkan.'));
-        if ($this->roleIdToDelete !== null && $this->roleIdToDelete !== 0) {
+        $this->authorize('delete', config('permission.models.role')); // Authorize delete action for roles
+
+        if ($this->roleIdToDelete) {
             $roleModelClass = config('permission.models.role');
-            /** @var \Spatie\Permission\Contracts\Role $role */
-            $role = $roleModelClass::findOrFail($this->roleIdToDelete);
+            $role = $roleModelClass::findById($this->roleIdToDelete, 'web');
 
-            if (in_array($role->name, $this->coreRoles) ||
-                ($role->name === config('permission.super_admin_name', 'Super Admin') && config('permission.protect_super_admin_role', true)) ||
-                $role->users()->count() > 0) {
-                session()->flash('error', __('Pemadaman peranan :roleName tidak dibenarkan atau peranan masih mempunyai pengguna.', ['roleName' => $role->name]));
-                $this->closeDeleteConfirmationModal();
-
-                return;
+            if ($role) {
+                // Double-check conditions before final delete
+                if ($role->users()->exists() || in_array($role->name, $this->coreRoles, true)) {
+                    $this->dispatch('toastr', type: 'error', message: __('Tidak boleh memadam peranan sistem atau peranan yang mempunyai pengguna bersekutu.'));
+                } else {
+                    $role->delete();
+                    $this->dispatch('toastr', type: 'success', message: __('Peranan berjaya dipadam!'));
+                }
+            } else {
+                $this->dispatch('toastr', type: 'error', message: __('Peranan tidak ditemui.'));
             }
-
-            $role->delete();
-            session()->flash('message', __('Peranan :name berjaya dipadam.', ['name' => $this->roleNameToDelete]));
         }
 
         $this->closeDeleteConfirmationModal();
+        $this->resetPage(); // Refresh the list after deletion
+    }
+
+
+    public function closeModal(): void
+    {
+        $this->showModal = false;
+        $this->showDeleteConfirmationModal = false;
+        $this->resetInputFields();
+        $this->resetErrorBag(); // Clear validation errors
     }
 
     public function closeDeleteConfirmationModal(): void
@@ -169,29 +210,20 @@ class Index extends Component
         $this->showDeleteConfirmationModal = false;
         $this->roleIdToDelete = null;
         $this->roleNameToDelete = '';
-        $this->dispatch('hideDeleteRoleConfirmationModal');
+        $this->resetErrorBag();
     }
 
-    public function render()
+    public function render(): \Illuminate\View\View
     {
-        $roleModelClass = config('permission.models.role');
-
-        $roles = $roleModelClass::withCount([
-            'permissions',
-            'users as users_count', // Assumes your Role model has a 'users' relationship
-        ])
-            ->orderBy('name')
-            ->paginate(10);
-
         return view('livewire.settings.roles.index', [
-            'roles' => $roles,
+            'roles' => $this->roles,
             'allPermissionsForView' => $this->allPermissionsForView,
         ]);
     }
 
     protected function rules(): array
     {
-        $roleIdToIgnore = ($this->isEditMode && $this->editingRole instanceof \Spatie\Permission\Contracts\Role && $this->editingRole->exists) ? $this->editingRole->id : null;
+        $roleIdToIgnore = ($this->isEditMode && $this->editingRole instanceof Role && $this->editingRole->exists) ? $this->editingRole->id : null;
 
         return [
             'name' => [
@@ -211,6 +243,5 @@ class Index extends Component
         $this->editingRole = new $roleModelClass;
         $this->isEditMode = false;
         $this->resetErrorBag();
-        $this->resetValidation();
     }
 }

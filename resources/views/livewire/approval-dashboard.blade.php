@@ -92,8 +92,8 @@
                                 <td class="px-3 py-2 small">{{ $approval->approvable?->created_at?->translatedFormat(config('app.datetime_format_my_short', 'd M Y, H:i')) ?? 'N/A' }}</td>
                                 <td class="px-3 py-2 small">{{ $approval->stage_translated ?? __(Str::title(str_replace('_', ' ', $approval->stage))) }}</td>
                                 <td class="px-3 py-2 small">
-                                    {{-- Assuming Helpers::getStatusColorClass aligns with Design Doc Section 3.3 status colors for badges --}}
-                                    <span class="badge {{ App\Helpers\Helpers::getStatusColorClass($approval->status, 'bootstrap_badge') }} rounded-pill">
+                                    {{-- Get status badge color using 1 argument: only the status --}}
+                                    <span class="badge {{ App\Helpers\Helpers::getStatusColorClass($approval->status) }} rounded-pill">
                                         {{ $approval->status_translated ?? __(Str::title(str_replace('_', ' ', $approval->status))) }}
                                     </span>
                                 </td>
@@ -237,6 +237,7 @@
 
     @push('page-script')
     <script>
+        // Handles the modal open/close with Livewire events and Bootstrap
         document.addEventListener('livewire:initialized', () => {
             const approvalModalElement = document.getElementById('approvalActionModal');
             let approvalModalInstance = null;

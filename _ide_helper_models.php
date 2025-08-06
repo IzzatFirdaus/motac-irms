@@ -123,119 +123,6 @@ namespace App\Models{
  * 
  *
  * @property int $id
- * @property int $user_id Applicant User ID
- * @property string|null $applicant_title Snapshot: Applicant's title (e.g., Encik, Puan)
- * @property string|null $applicant_name Snapshot: Applicant's full name
- * @property string|null $applicant_identification_number Snapshot: Applicant's NRIC
- * @property string|null $applicant_passport_number Snapshot: Applicant's Passport No
- * @property string|null $applicant_jawatan_gred Snapshot: Applicant's Jawatan & Gred text
- * @property string|null $applicant_bahagian_unit Snapshot: Applicant's Bahagian/Unit text
- * @property string|null $applicant_level_aras Snapshot: Applicant's Aras (Level) text
- * @property string|null $applicant_mobile_number Snapshot: Applicant's mobile number
- * @property string|null $applicant_personal_email Snapshot: Applicant's personal email
- * @property string|null $service_status Key for Taraf Perkhidmatan, from User model options
- * @property string|null $appointment_type Key for Pelantikan, from User model options
- * @property string|null $previous_department_name For Kenaikan Pangkat/Pertukaran
- * @property string|null $previous_department_email For Kenaikan Pangkat/Pertukaran
- * @property \Illuminate\Support\Carbon|null $service_start_date For contract/intern
- * @property \Illuminate\Support\Carbon|null $service_end_date For contract/intern
- * @property string|null $purpose Purpose of application / Notes (Tujuan/Catatan)
- * @property string|null $proposed_email Applicant's proposed email or user ID
- * @property string|null $group_email Requested group email address
- * @property string|null $group_admin_name Name of Admin/EO/CC for group email
- * @property string|null $group_admin_email Email of Admin/EO/CC for group email
- * @property int|null $supporting_officer_id FK to users table if system user
- * @property string|null $supporting_officer_name Manually entered supporting officer name
- * @property string|null $supporting_officer_grade Manually entered supporting officer grade
- * @property string|null $supporting_officer_email Manually entered supporting officer email
- * @property string $status
- * @property bool $cert_info_is_true Semua maklumat adalah BENAR
- * @property bool $cert_data_usage_agreed BERSETUJU maklumat diguna pakai oleh BPM
- * @property bool $cert_email_responsibility_agreed BERSETUJU bertanggungjawab ke atas e-mel
- * @property \Illuminate\Support\Carbon|null $certification_timestamp
- * @property \Illuminate\Support\Carbon|null $submitted_at
- * @property string|null $rejection_reason
- * @property string|null $final_assigned_email
- * @property string|null $final_assigned_user_id
- * @property int|null $processed_by FK to users, IT Admin who processed
- * @property \Illuminate\Support\Carbon|null $processed_at
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Approval> $approvals
- * @property-read int|null $approvals_count
- * @property-read \App\Models\User|null $creator
- * @property-read \App\Models\User|null $deleter
- * @property-read string $application_type_label
- * @property-read string $status_color
- * @property-read string $status_label
- * @property-read \App\Models\User|null $processor
- * @property-read \App\Models\User|null $supportingOfficer
- * @property-read \App\Models\User|null $updater
- * @property-read \App\Models\User $user
- * @method static \Database\Factories\EmailApplicationFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereApplicantBahagianUnit($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereApplicantIdentificationNumber($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereApplicantJawatanGred($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereApplicantLevelAras($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereApplicantMobileNumber($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereApplicantName($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereApplicantPassportNumber($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereApplicantPersonalEmail($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereApplicantTitle($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereAppointmentType($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereCertDataUsageAgreed($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereCertEmailResponsibilityAgreed($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereCertInfoIsTrue($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereCertificationTimestamp($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereCreatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereDeletedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereFinalAssignedEmail($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereFinalAssignedUserId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereGroupAdminEmail($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereGroupAdminName($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereGroupEmail($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication wherePreviousDepartmentEmail($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication wherePreviousDepartmentName($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereProcessedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereProcessedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereProposedEmail($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication wherePurpose($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereRejectionReason($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereServiceEndDate($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereServiceStartDate($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereServiceStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereSubmittedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereSupportingOfficerEmail($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereSupportingOfficerGrade($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereSupportingOfficerId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereSupportingOfficerName($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereUpdatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication whereUserId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication withoutTrashed()
- * @mixin \Eloquent
- */
-	class EmailApplication extends \Eloquent {}
-}
-
-namespace App\Models{
-/**
- * 
- *
- * @property int $id
  * @property int|null $equipment_category_id
  * @property int|null $sub_category_id
  * @property string|null $item_code Unique internal identifier (from HRMS template)
@@ -424,6 +311,81 @@ namespace App\Models{
 /**
  * 
  *
+ * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $attachable
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment query()
+ */
+	class HelpdeskAttachment extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * 
+ *
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\HelpdeskTicket> $tickets
+ * @property-read int|null $tickets_count
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskCategory newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskCategory newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskCategory query()
+ */
+	class HelpdeskCategory extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * 
+ *
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\HelpdeskAttachment> $attachments
+ * @property-read int|null $attachments_count
+ * @property-read \App\Models\HelpdeskTicket|null $ticket
+ * @property-read \App\Models\User|null $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment query()
+ */
+	class HelpdeskComment extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * 
+ *
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\HelpdeskTicket> $tickets
+ * @property-read int|null $tickets_count
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskPriority newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskPriority newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskPriority query()
+ */
+	class HelpdeskPriority extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * 
+ *
+ * @property-read \App\Models\User|null $applicant
+ * @property-read \App\Models\User|null $assignedTo
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\HelpdeskAttachment> $attachments
+ * @property-read int|null $attachments_count
+ * @property-read \App\Models\HelpdeskCategory|null $category
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\HelpdeskComment> $comments
+ * @property-read int|null $comments_count
+ * @property-read bool $is_overdue
+ * @property-read string $priority_color
+ * @property-read string $status_color
+ * @property-read \App\Models\HelpdeskPriority|null $priority
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket query()
+ */
+	class HelpdeskTicket extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * 
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Import newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Import newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Import onlyTrashed()
@@ -474,6 +436,8 @@ namespace App\Models{
  * @property-read \App\Models\User|null $creator
  * @property-read \App\Models\User|null $currentApprovalOfficer
  * @property-read \App\Models\User|null $deleter
+ * @property-read string|null $effective_return_location
+ * @property-read \App\Models\LoanTransaction|null $latest_issue_transaction
  * @property-read string $status_color_class
  * @property-read string $status_label
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanApplicationItem> $items
@@ -487,10 +451,13 @@ namespace App\Models{
  * @property-read \App\Models\User|null $supportingOfficer
  * @property-read \App\Models\User|null $updater
  * @property-read \App\Models\User $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication active()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication dueInDays(int $days)
  * @method static \Database\Factories\LoanApplicationFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication overdue()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereAdminNotes($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereApplicantConfirmationTimestamp($value)
@@ -522,7 +489,6 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereUserId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication withoutTrashed()
- * @mixin \Eloquent
  */
 	class LoanApplication extends \Eloquent {}
 }
@@ -548,7 +514,7 @@ namespace App\Models{
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \App\Models\Equipment|null $equipment
- * @property-read string $equipment_type_name
+ * @property-read string $equipment_type_label // Changed from equipment_type_name for Blade compatibility
  * @property-read string $status_label
  * @property-read \App\Models\LoanApplication $loanApplication
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanTransactionItem> $loanTransactionItems
@@ -583,9 +549,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * Loan Transaction Model.
  * 
- * * System Design Reference: MOTAC Integrated Resource Management System (Revision 3.5) - Section 4.3
  *
  * @property int $id
  * @property int $loan_application_id
@@ -659,7 +623,6 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction withoutTrashed()
- * @mixin \Eloquent
  */
 	class LoanTransaction extends \Eloquent {}
 }
@@ -1036,6 +999,46 @@ namespace App\Models{
  * @property int|null $department_id
  * @property int|null $position_id
  * @property int|null $grade_id
+ * @property string|null $email
+ * @property \Illuminate\Support\Carbon|null $email_verified_at
+ * @property string|null $password
+ * @property string|null $two_factor_secret
+ * @property string|null $two_factor_recovery_codes
+ * @property string|null $two_factor_confirmed_at
+ * @property string|null $remember_token
+ * @property int|null $current_team_id
+ * @property string|null $profile_photo_path
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property int|null $created_by
+ * @property int|null $updated_by
+ * @property int|null $deleted_by
+ * @property-read \App\Models\Department|null $department
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanApplication> $loanApplicationsAsApplicant
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanApplication> $loanApplicationsAsResponsibleOfficer
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanApplication> $loanApplicationsAsSupportingOfficer
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Approval> $approvalsMade
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Permission> $permissions
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
+ * @property-read string|null $profile_photo_url
+ * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
+ * @property-read int|null $notifications_count
+ * @property-read \App\Models\Position|null $position
+ * @property-read \App\Models\Grade|null $grade
+ * @property-read \App\Models\User|null $creator
+ * @property-read \App\Models\User|null $updater
+ * @property-read \App\Models\User|null $deleter
+ * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|User newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|User newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|User onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|User permission($permissions)
+ * @method static \Illuminate\Database\Eloquent\Builder|User query()
+ * @method static \Illuminate\Database\Eloquent\Builder|User role($roles, $guard = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|User withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|User withoutTrashed()
+ * @mixin \Eloquent
  * @property string|null $level For "Aras" or floor level, as string
  * @property string|null $mobile_number
  * @property string|null $personal_email If distinct from login email
@@ -1048,53 +1051,16 @@ namespace App\Models{
  * @property string $status
  * @property int $is_admin Consider using Spatie roles exclusively.
  * @property int $is_bpm_staff Consider using Spatie roles exclusively.
- * @property string|null $profile_photo_path
  * @property int|null $employee_id
- * @property string $email
- * @property \Illuminate\Support\Carbon|null $email_verified_at
- * @property string $password
- * @property string|null $two_factor_secret
- * @property string|null $two_factor_recovery_codes
- * @property \Illuminate\Support\Carbon|null $two_factor_confirmed_at
- * @property string|null $remember_token
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Approval> $approvalsMade
  * @property-read int|null $approvals_made_count
- * @property-read User|null $creator
- * @property-read User|null $deleter
- * @property-read \App\Models\Department|null $department
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\EmailApplication> $emailApplications
- * @property-read int|null $email_applications_count
- * @property-read \App\Models\Grade|null $grade
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanApplication> $loanApplicationsAsApplicant
+ * @property-read string $full_name
  * @property-read int|null $loan_applications_as_applicant_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanApplication> $loanApplicationsAsResponsibleOfficer
  * @property-read int|null $loan_applications_as_responsible_officer_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanApplication> $loanApplicationsAsSupportingOfficer
  * @property-read int|null $loan_applications_as_supporting_officer_count
- * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
- * @property-read int|null $notifications_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Permission> $permissions
  * @property-read int|null $permissions_count
- * @property-read \App\Models\Position|null $position
- * @property-read string $profile_photo_url
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Role> $roles
  * @property-read int|null $roles_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
  * @property-read int|null $tokens_count
- * @property-read User|null $updater
- * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User permission($permissions, $without = false)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User role($roles, $guard = null, $without = false)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereAppointmentType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereCreatedBy($value)
@@ -1130,11 +1096,8 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereUserIdAssigned($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutPermission($permissions)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutRole($roles, $guard = null)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutTrashed()
- * @mixin \Eloquent
  */
 	class User extends \Eloquent {}
 }

@@ -1,17 +1,25 @@
 /**
- * Page User List
+ * MOTAC IRMS - User Management JS
+ * Optimized for clarity, maintainability, and documentation.
+ * Handles user datatable, AJAX CRUD, form validation, and UI interactivity.
  */
 
 'use strict';
 
-// Datatable (jquery)
 $(function () {
-  // Variable declaration for table
+  // ---------------------------------------------
+  // Variable Declarations
+  // ---------------------------------------------
+  // Main user table using DataTables plugin
   var dt_user_table = $('.datatables-users'),
-    select2 = $('.select2'),
+    select2 = $('.select2'), // Enhanced select boxes
     userView = baseUrl + 'app/user/view/account',
-    offCanvasForm = $('#offcanvasAddUser');
+    offCanvasForm = $('#offcanvasAddUser'); // Offcanvas form for add/edit user
 
+  // ---------------------------------------------
+  // Initialize Select2
+  // ---------------------------------------------
+  // Wrap select2 for proper dropdown positioning and initialize it
   if (select2.length) {
     var $this = select2;
     $this.wrap('<div class="position-relative"></div>').select2({
@@ -20,14 +28,19 @@ $(function () {
     });
   }
 
-  // ajax setup
+  // ---------------------------------------------
+  // Setup AJAX CSRF Token for all requests
+  // ---------------------------------------------
+  // Ensures all outgoing AJAX requests include CSRF token for Laravel
   $.ajaxSetup({
     headers: {
       'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
     }
   });
 
-  // Users datatable
+  // ---------------------------------------------
+  // Initialize DataTable for Users
+  // ---------------------------------------------
   if (dt_user_table.length) {
     var dt_user = dt_user_table.DataTable({
       processing: true,
@@ -36,7 +49,7 @@ $(function () {
         url: baseUrl + 'user-list'
       },
       columns: [
-        // columns according to JSON
+        // DataTables expects column data keys matching server response keys
         { data: '' },
         { data: 'id' },
         { data: 'name' },
@@ -46,7 +59,7 @@ $(function () {
       ],
       columnDefs: [
         {
-          // For Responsive
+          // For Responsive: control column (expander)
           className: 'control',
           searchable: false,
           orderable: false,
@@ -57,6 +70,7 @@ $(function () {
           }
         },
         {
+          // Custom ID display (could use fake_id as per server)
           searchable: false,
           orderable: false,
           targets: 1,
@@ -65,23 +79,21 @@ $(function () {
           }
         },
         {
-          // User full name
+          // User full name and avatar badge
           targets: 2,
           responsivePriority: 4,
           render: function (data, type, full, meta) {
             var $name = full['name'];
 
-            // For Avatar badge
+            // Generate random avatar color and initials
             var stateNum = Math.floor(Math.random() * 6);
             var states = ['success', 'danger', 'warning', 'info', 'dark', 'primary', 'secondary'];
             var $state = states[stateNum],
-              $name = full['name'],
-              $initials = $name.match(/\b\w/g) || [],
-              $output;
-            $initials = (($initials.shift() || '') + ($initials.pop() || '')).toUpperCase();
-            $output = '<span class="avatar-initial rounded-circle bg-label-' + $state + '">' + $initials + '</span>';
+              $initialsArr = $name.match(/\b\w/g) || [],
+              $initials = (($initialsArr.shift() || '') + ($initialsArr.pop() || '')).toUpperCase(),
+              $output = '<span class="avatar-initial rounded-circle bg-label-' + $state + '">' + $initials + '</span>';
 
-            // Creates full output for row
+            // Row output includes avatar and name
             var $row_output =
               '<div class="d-flex justify-content-start align-items-center user-name">' +
               '<div class="avatar-wrapper">' +
@@ -105,12 +117,11 @@ $(function () {
           targets: 3,
           render: function (data, type, full, meta) {
             var $email = full['email'];
-
             return '<span class="user-email">' + $email + '</span>';
           }
         },
         {
-          // email verify
+          // Email verified status icon
           targets: 4,
           className: 'text-center',
           render: function (data, type, full, meta) {
@@ -123,7 +134,7 @@ $(function () {
           }
         },
         {
-          // Actions
+          // Actions column with edit/delete/view/suspend
           targets: -1,
           title: 'Actions',
           searchable: false,
@@ -145,7 +156,7 @@ $(function () {
           }
         }
       ],
-      order: [[2, 'desc']],
+      order: [[2, 'desc']], // Default order by name descending
       dom:
         '<"row mx-2"' +
         '<"col-md-2"<"me-3"l>>' +
@@ -160,7 +171,7 @@ $(function () {
         search: '',
         searchPlaceholder: 'Search..'
       },
-      // Buttons with Dropdown
+      // Buttons for data export and add user
       buttons: [
         {
           extend: 'collection',
@@ -174,7 +185,7 @@ $(function () {
               className: 'dropdown-item',
               exportOptions: {
                 columns: [2, 3],
-                // prevent avatar to be print
+                // Remove avatar from export and show only name
                 format: {
                   body: function (inner, coldex, rowdex) {
                     if (inner.length <= 0) return inner;
@@ -190,7 +201,7 @@ $(function () {
                 }
               },
               customize: function (win) {
-                //customize print view for dark
+                // Print view customization for dark mode
                 $(win.document.body)
                   .css('color', config.colors.headingColor)
                   .css('border-color', config.colors.borderColor)
@@ -210,7 +221,6 @@ $(function () {
               className: 'dropdown-item',
               exportOptions: {
                 columns: [2, 3],
-                // prevent avatar to be print
                 format: {
                   body: function (inner, coldex, rowdex) {
                     if (inner.length <= 0) return inner;
@@ -233,7 +243,6 @@ $(function () {
               className: 'dropdown-item',
               exportOptions: {
                 columns: [2, 3],
-                // prevent avatar to be display
                 format: {
                   body: function (inner, coldex, rowdex) {
                     if (inner.length <= 0) return inner;
@@ -256,7 +265,6 @@ $(function () {
               className: 'dropdown-item',
               exportOptions: {
                 columns: [2, 3],
-                // prevent avatar to be display
                 format: {
                   body: function (inner, coldex, rowdex) {
                     if (inner.length <= 0) return inner;
@@ -279,7 +287,6 @@ $(function () {
               className: 'dropdown-item',
               exportOptions: {
                 columns: [2, 3],
-                // prevent avatar to be copy
                 format: {
                   body: function (inner, coldex, rowdex) {
                     if (inner.length <= 0) return inner;
@@ -306,7 +313,7 @@ $(function () {
           }
         }
       ],
-      // For responsive popup
+      // Responsive modal popup for small screens
       responsive: {
         details: {
           display: $.fn.dataTable.Responsive.display.modal({
@@ -318,7 +325,7 @@ $(function () {
           type: 'column',
           renderer: function (api, rowIdx, columns) {
             var data = $.map(columns, function (col, i) {
-              return col.title !== '' // ? Do not show row in modal popup if title is blank (for check box)
+              return col.title !== ''
                 ? '<tr data-dt-row="' +
                     col.rowIndex +
                     '" data-dt-column="' +
@@ -334,7 +341,6 @@ $(function () {
                     '</tr>'
                 : '';
             }).join('');
-
             return data ? $('<table class="table"/><tbody />').append(data) : false;
           }
         }
@@ -342,17 +348,20 @@ $(function () {
     });
   }
 
-  // Delete Record
+  // ---------------------------------------------
+  // Delete Record Handler
+  // ---------------------------------------------
+  // Handles user deletion with confirmation dialog
   $(document).on('click', '.delete-record', function () {
     var user_id = $(this).data('id'),
       dtrModal = $('.dtr-bs-modal.show');
 
-    // hide responsive modal in small screen
+    // Hide responsive modal if open (mobile/small screens)
     if (dtrModal.length) {
       dtrModal.modal('hide');
     }
 
-    // sweetalert for confirmation of delete
+    // Sweetalert confirmation dialog
     Swal.fire({
       title: 'Are you sure?',
       text: "You won't be able to revert this!",
@@ -366,7 +375,7 @@ $(function () {
       buttonsStyling: false
     }).then(function (result) {
       if (result.value) {
-        // delete the data
+        // AJAX DELETE request to server
         $.ajax({
           type: 'DELETE',
           url: `${baseUrl}user-list/${user_id}`,
@@ -378,7 +387,7 @@ $(function () {
           }
         });
 
-        // success sweetalert
+        // Success alert
         Swal.fire({
           icon: 'success',
           title: 'Deleted!',
@@ -400,20 +409,23 @@ $(function () {
     });
   });
 
-  // edit record
+  // ---------------------------------------------
+  // Edit Record Handler
+  // ---------------------------------------------
+  // Handles user edit button to open offcanvas and populate form
   $(document).on('click', '.edit-record', function () {
     var user_id = $(this).data('id'),
       dtrModal = $('.dtr-bs-modal.show');
 
-    // hide responsive modal in small screen
+    // Hide responsive modal if open
     if (dtrModal.length) {
       dtrModal.modal('hide');
     }
 
-    // changing the title of offcanvas
+    // Change offcanvas title for edit
     $('#offcanvasAddUserLabel').html('Edit User');
 
-    // get data
+    // AJAX GET user data and populate form
     $.get(`${baseUrl}user-list\/${user_id}\/edit`, function (data) {
       $('#user_id').val(data.id);
       $('#add-user-fullname').val(data.name);
@@ -421,23 +433,30 @@ $(function () {
     });
   });
 
-  // changing the title
+  // ---------------------------------------------
+  // Add New User Button Handler - Reset Form
+  // ---------------------------------------------
   $('.add-new').on('click', function () {
-    $('#user_id').val(''); //reseting input field
+    $('#user_id').val(''); // Reset user_id field for new user
     $('#offcanvasAddUserLabel').html('Add User');
   });
 
-  // Filter form control to default size
-  // ? setTimeout used for multilingual table initialization
+  // ---------------------------------------------
+  // UI Tweaks for Filters (removes small input style)
+  // ---------------------------------------------
+  // Remove small styles from DataTables filter and length controls for consistency
   setTimeout(() => {
     $('.dataTables_filter .form-control').removeClass('form-control-sm');
     $('.dataTables_length .form-select').removeClass('form-select-sm');
   }, 300);
 
-  // validating form and updating user's data
+  // ---------------------------------------------
+  // Form Validation and Submission (using FormValidation plugin)
+  // ---------------------------------------------
+  // Handles validation for add/edit user form using FormValidation plugin
   const addNewUserForm = document.getElementById('addNewUserForm');
 
-  // user form validation
+  // Initialize FormValidation for add/edit user form
   const fv = FormValidation.formValidation(addNewUserForm, {
     fields: {
       name: {
@@ -488,7 +507,7 @@ $(function () {
       autoFocus: new FormValidation.plugins.AutoFocus()
     }
   }).on('core.form.valid', function () {
-    // adding or updating user when form successfully validate
+    // AJAX POST to add/update user when form validates
     $.ajax({
       data: $('#addNewUserForm').serialize(),
       url: `${baseUrl}user-list`,
@@ -497,7 +516,7 @@ $(function () {
         dt_user.draw();
         offCanvasForm.offcanvas('hide');
 
-        // sweetalert
+        // Sweetalert success notification
         Swal.fire({
           icon: 'success',
           title: `Successfully ${status}!`,
@@ -521,14 +540,21 @@ $(function () {
     });
   });
 
-  // clearing form data when offcanvas hidden
+  // ---------------------------------------------
+  // Clear Form Fields on Offcanvas Hide
+  // ---------------------------------------------
+  // Resets the add/edit user form when offcanvas is closed
   offCanvasForm.on('hidden.bs.offcanvas', function () {
     fv.resetForm(true);
   });
 
+  // ---------------------------------------------
+  // Phone Number Input Mask (using Cleave.js)
+  // ---------------------------------------------
+  // Applies phone number mask to inputs with .phone-mask class
   const phoneMaskList = document.querySelectorAll('.phone-mask');
 
-  // Phone Number
+  // Phone Number masking for US format
   if (phoneMaskList) {
     phoneMaskList.forEach(function (phoneMask) {
       new Cleave(phoneMask, {

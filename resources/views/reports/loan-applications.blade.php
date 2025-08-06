@@ -1,4 +1,4 @@
-resources\views\reports\loan-applications.blade.php
+{{--resources\views\reports\loan-applications.blade.php --}}
 @extends('layouts.app')
 
 @section('title', __('reports.loan_applications.title'))
@@ -106,7 +106,7 @@ resources\views\reports\loan-applications.blade.php
                                 <td>{{ $item->loan_end_date?->translatedFormat('d M Y') ?? '-' }}</td>
                                 <td>
                                     <span
-                                        class="badge {{ App\Helpers\Helpers::getStatusColorClass($item->status, 'loan_application') }}">
+                                        class="badge {{ App\Helpers\Helpers::getStatusColorClass($item->status) }}">
                                         {{ $statusOptions[$item->status] ?? $item->status }}
                                     </span>
                                 </td>

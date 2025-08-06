@@ -1,20 +1,15 @@
 <?php
 
-// File: database/seeders/ApprovalSeeder.php
-
 namespace Database\Seeders;
 
 use App\Models\Approval;
-use App\Models\EmailApplication;
-// Removed: use App\Models\Grade; // Not directly used in getOfficerIds anymore
 use App\Models\LoanApplication;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Builder; // Keep for type hinting if complex queries remain
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection as EloquentCollection;
 use Illuminate\Support\Facades\Log;
-use Spatie\Permission\Models\Role; // Import Role model
+use Spatie\Permission\Models\Role;
 
 class ApprovalSeeder extends Seeder
 {
@@ -31,139 +26,86 @@ class ApprovalSeeder extends Seeder
             $officerIds = new EloquentCollection([$fallbackOfficer->id]);
         }
 
-        $emailApplications = EmailApplication::query()->inRandomOrder()->limit(10)->get();
-        if ($emailApplications->isEmpty() && EmailApplication::count() > 0) {
-            $emailApplications = EmailApplication::take(5)->get();
-        } elseif (EmailApplication::count() === 0) {
-            Log::info('No EmailApplications found. Creating some for ApprovalSeeder.');
-            EmailApplication::factory(5)->create([
-                'user_id' => $auditUser->id,
-                'supporting_officer_id' => $officerIds->isNotEmpty() ? $officerIds->random() : null,
-            ]);
-            $emailApplications = EmailApplication::all();
-        }
-
-        $loanApplications = LoanApplication::query()->inRandomOrder()->limit(15)->get();
+        $loanApplications = LoanApplication::query()->inRandomOrder()->limit(10)->get();
         if ($loanApplications->isEmpty() && LoanApplication::count() > 0) {
-            $loanApplications = LoanApplication::take(5)->get();
-        } elseif (LoanApplication::count() === 0) {
-            Log::info('No LoanApplications found. Creating some for ApprovalSeeder.');
-            LoanApplication::factory(5)->create([
-                'user_id' => $auditUser->id,
-                'responsible_officer_id' => $officerIds->isNotEmpty() ? $officerIds->random() : null,
-            ]);
-            $loanApplications = LoanApplication::all();
+            $loanApplications = LoanApplication::inRandomOrder()->limit(10)->get();
         }
 
-        if ($emailApplications->isEmpty() && $loanApplications->isEmpty()) {
-            Log::warning('Still no Email or Loan Applications found. Skipping Approval seeding for applications.');
+        // Ensure there are some applications to approve
+        if ($loanApplications->isEmpty()) {
+            Log::warning('No loan applications found to seed approvals for. Skipping approval seeding for Loan Applications.');
+            return;
         }
 
-        $approvalStatuses = [Approval::STATUS_APPROVED, Approval::STATUS_REJECTED, Approval::STATUS_PENDING];
-
-        Log::info('Seeding Approvals for Email Applications...');
-        foreach ($emailApplications as $application) {
-            if ($officerIds->isEmpty()) {
-                continue;
-            }
-            // Skip if no officers
-            $officerId = $officerIds->random();
-            $chosenStatus = Arr::random($approvalStatuses);
-
-            Approval::factory()
-                ->forApprovable($application)
-                ->stage(Approval::STAGE_EMAIL_SUPPORT_REVIEW)
-                ->status($chosenStatus)
-                ->create([
-                    'officer_id' => $officerId,
-                ]);
-
-            $firstApproval = $application->approvals()->where('stage', Approval::STAGE_EMAIL_SUPPORT_REVIEW)->latest()->first();
-            if ($firstApproval && $firstApproval->status === Approval::STATUS_APPROVED) {
-                if ($officerIds->isEmpty()) {
-                    continue;
-                }
-
-                $nextOfficerId = $officerIds->random();
-                $nextChosenStatus = Arr::random($approvalStatuses);
-                Approval::factory()
-                    ->forApprovable($application)
-                    ->stage(Approval::STAGE_EMAIL_ADMIN_REVIEW)
-                    ->status($nextChosenStatus)
-                    ->create([
-                        'officer_id' => $nextOfficerId,
-                    ]);
-            }
-        }
-
-        Log::info('Seeded Approvals for Email Applications.');
-
-        Log::info('Seeding Approvals for Loan Applications...');
+        // Seed pending approvals
         foreach ($loanApplications as $application) {
-            if ($officerIds->isEmpty()) {
-                continue;
-            }
-
-            $officerId = $officerIds->random();
-            $chosenStatus = Arr::random($approvalStatuses);
-
-            Approval::factory()
-                ->forApprovable($application)
-                ->stage(Approval::STAGE_LOAN_SUPPORT_REVIEW)
-                ->status($chosenStatus)
-                ->create([
-                    'officer_id' => $officerId,
-                ]);
-
-            $firstApproval = $application->approvals()->where('stage', Approval::STAGE_LOAN_SUPPORT_REVIEW)->latest()->first();
-            if ($firstApproval && $firstApproval->status === Approval::STATUS_APPROVED) {
-                if ($officerIds->isEmpty()) {
-                    continue;
-                }
-
-                $nextOfficerId = $officerIds->random();
-                $nextChosenStatus = Arr::random($approvalStatuses);
+            if ($application instanceof \Illuminate\Database\Eloquent\Model) {
                 Approval::factory()
+                    ->pending()
                     ->forApprovable($application)
-                    ->stage(Approval::STAGE_LOAN_APPROVER_REVIEW) // MODIFIED from STAGE_LOAN_HOD_REVIEW
-                    ->status($nextChosenStatus)
+                    ->stage(Approval::STAGE_PENDING_HOD_REVIEW)
                     ->create([
-                        'officer_id' => $nextOfficerId,
+                        'officer_id' => $officerIds->random(),
+                        'created_by' => $auditUser->id,
+                        'updated_by' => $auditUser->id,
                     ]);
-
-                // Optionally add BPM review stage if HOD (now Approver) approved
-                $approverReviewApproval = $application->approvals()->where('stage', Approval::STAGE_LOAN_APPROVER_REVIEW)->latest()->first(); // MODIFIED variable name and stage
-                if ($approverReviewApproval && $approverReviewApproval->status === Approval::STATUS_APPROVED) { // MODIFIED variable name
-                    if ($officerIds->isEmpty()) {
-                        continue;
-                    }
-
-                    $bpmOfficerId = $officerIds->random();
-                    $bpmChosenStatus = Arr::random($approvalStatuses);
-                    Approval::factory()
-                        ->forApprovable($application)
-                        ->stage(Approval::STAGE_LOAN_BPM_REVIEW)
-                        ->status($bpmChosenStatus)
-                        ->create([
-                            'officer_id' => $bpmOfficerId,
-                        ]);
-                }
             }
         }
+        Log::info(sprintf('Created %d pending loan application approvals.', $loanApplications->count()));
 
-        Log::info('Seeded Approvals for Loan Applications.');
+        // Seed some approved/rejected approvals for existing applications
+        $appsForApprovedRejected = $loanApplications->merge($loanApplications)->shuffle()->filter(function ($item) {
+            return $item instanceof \Illuminate\Database\Eloquent\Model;
+        })->values();
+        $countApproved = 0;
+        $countRejected = 0;
 
-        if ($officerIds->isNotEmpty() && ($emailApplications->isNotEmpty() || $loanApplications->isNotEmpty())) {
-            $randomApprovable = $emailApplications->isNotEmpty() ? $emailApplications->random() : $loanApplications->random();
-            Approval::factory()
-                ->count(3)
-                ->forApprovable($randomApprovable)
-                ->stage(Approval::STAGE_GENERAL_REVIEW)
-                ->deleted()
-                ->create([
-                    'officer_id' => $officerIds->random(),
-                ]);
-            Log::info('Created 3 soft-deleted approvals.');
+        foreach ($appsForApprovedRejected->take(8) as $application) { // Approve up to 8
+            if ($application instanceof \Illuminate\Database\Eloquent\Model) {
+                Approval::factory()
+                    ->approved()
+                    ->forApprovable($application)
+                    ->stage(Approval::STAGE_FINAL_APPROVAL)
+                    ->create([
+                        'officer_id' => $officerIds->random(),
+                        'created_by' => $auditUser->id,
+                        'updated_by' => $auditUser->id,
+                    ]);
+                $countApproved++;
+            }
+        }
+        Log::info(sprintf('Created %d approved loan application approvals.', $countApproved));
+
+        foreach ($appsForApprovedRejected->skip(8)->take(5) as $application) { // Reject up to 5
+            if ($application instanceof \Illuminate\Database\Eloquent\Model) {
+                Approval::factory()
+                    ->rejected()
+                    ->forApprovable($application)
+                    ->stage(Approval::STAGE_FINAL_APPROVAL)
+                    ->create([
+                        'officer_id' => $officerIds->random(),
+                        'created_by' => $auditUser->id,
+                        'updated_by' => $auditUser->id,
+                    ]);
+                $countRejected++;
+            }
+        }
+        Log::info(sprintf('Created %d rejected loan application approvals.', $countRejected));
+
+        // Seed some soft-deleted approvals if there are any approvables left
+        if ($loanApplications->isNotEmpty()) {
+            $randomApprovable = $loanApplications->random();
+            if ($randomApprovable instanceof \Illuminate\Database\Eloquent\Model) {
+                Approval::factory()
+                    ->count(3)
+                    ->forApprovable($randomApprovable)
+                    ->stage(Approval::STAGE_GENERAL_REVIEW)
+                    ->deleted()
+                    ->create([
+                        'officer_id' => $officerIds->random(),
+                    ]);
+                Log::info('Created 3 soft-deleted approvals.');
+            }
         }
 
         Log::info('Approval seeding complete.');
@@ -174,7 +116,6 @@ class ApprovalSeeder extends Seeder
      */
     protected function getPotentialOfficerIds(?int $excludeUserId = null): EloquentCollection
     {
-        // Define roles that typically handle approvals
         $approverRoleNames = ['Admin', 'BPM Staff', 'IT Admin', 'HOD', 'Approver'];
 
         $query = User::query()->whereHas('roles', function (Builder $q) use ($approverRoleNames): void {
@@ -189,7 +130,6 @@ class ApprovalSeeder extends Seeder
 
         if ($userIds->isEmpty()) {
             Log::warning('No specific officers found by roles, returning up to 5 random user IDs as fallback for seeder.');
-
             return User::inRandomOrder()->limit(5)->pluck('id');
         }
 

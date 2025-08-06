@@ -98,20 +98,10 @@
 
     {{-- Row for Application Statistics --}}
     <div class="row">
-        <div class="col-lg-6 mb-4">
-            <div class="card shadow-sm motac-card h-100">
-                <div class="card-header py-3 motac-card-header d-flex align-items-center">
-                    <i class="bi bi-envelope-paper-fill me-2 text-primary"></i>
-                    <h6 class="m-0 fw-bold text-primary">{{ __('dashboard.email_stats_title') }}</h6>
-                </div>
-                <div class="card-body motac-card-body">
-                    <p class="mb-2 d-flex justify-content-between"><span><i class="bi bi-check-circle-fill me-2 text-success"></i>{{ __('common.completed') }}</span> <strong class="text-dark">{{ $email_completed_count ?? 0 }}</strong></p>
-                    <p class="mb-2 d-flex justify-content-between"><span><i class="bi bi-hourglass-top me-2 text-warning"></i>{{ __('common.in_process') }}</span> <strong class="text-dark">{{ $email_pending_count ?? 0 }}</strong></p>
-                    <p class="mb-0 d-flex justify-content-between"><span><i class="bi bi-x-circle-fill me-2 text-danger"></i>{{ __('common.rejected') }}</span> <strong class="text-dark">{{ $email_rejected_count ?? 0 }}</strong></p>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6 mb-4">
+        {{-- REMOVED Email Statistics Card --}}
+
+        {{-- UPDATED Loan Statistics Card to be full width --}}
+        <div class="col-lg-12 mb-4">
             <div class="card shadow-sm motac-card h-100">
                 <div class="card-header py-3 motac-card-header d-flex align-items-center">
                     <i class="bi bi-laptop-fill me-2 text-primary"></i>

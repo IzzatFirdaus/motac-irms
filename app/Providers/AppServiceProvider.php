@@ -4,12 +4,12 @@ namespace App\Providers;
 
 use App\Helpers\Helpers;
 use App\Services\ApprovalService;
-use App\Services\EmailApplicationService;
-use App\Services\EmailProvisioningService;
 use App\Services\EquipmentService;
+use App\Services\HelpdeskService;
 use App\Services\LoanApplicationService;
 use App\Services\LoanTransactionService;
 use App\Services\NotificationService;
+use App\Services\TicketNotificationService;
 use App\Services\UserService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\Paginator;
@@ -32,12 +32,12 @@ class AppServiceProvider extends ServiceProvider
     {
         // Registering application services as singletons for efficiency.
         $this->app->singleton(ApprovalService::class);
-        $this->app->singleton(EmailApplicationService::class);
-        $this->app->singleton(EmailProvisioningService::class);
         $this->app->singleton(EquipmentService::class);
+        $this->app->singleton(HelpdeskService::class);
         $this->app->singleton(LoanApplicationService::class);
         $this->app->singleton(LoanTransactionService::class);
         $this->app->singleton(NotificationService::class);
+        $this->app->singleton(TicketNotificationService::class);
         $this->app->singleton(UserService::class);
     }
 
@@ -46,31 +46,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // --- REVISED: Locale setting logic is now handled here. ---
-        // This is more robust than using middleware for this specific case.
-        $sessionLocale = Session::get('locale');
-        $fallbackLocale = Config::get('app.fallback_locale', 'en');
-        $finalLocale = $fallbackLocale; // Default to fallback
+        // Ensure that lazy loading is not allowed in production to prevent N+1 issues.
+        // Changed from isProduction() to environment('production')
+        Model::preventLazyLoading(! $this->app->environment('production'));
 
-        $configuredLocales = Config::get('app.available_locales');
+        // Use Bootstrap pagination views.
+        Paginator::useBootstrapFour();
 
-        if (is_array($configuredLocales) && $configuredLocales !== []) {
-            $allowedLocaleKeys = array_keys($configuredLocales);
-            if ($sessionLocale && in_array($sessionLocale, $allowedLocaleKeys, true)) {
-                $finalLocale = $sessionLocale;
-            }
-        }
-
-        App::setLocale($finalLocale);
-        // --- End of Locale Logic ---
-
-        // Enforce strict model behavior (no lazy loading, etc.) in non-production environments.
-        Model::shouldBeStrict(! $this->app->environment('production'));
-
-        // Set pagination to use Bootstrap 5 styles.
-        Paginator::useBootstrapFive();
-
-        // Register a custom Blade component alias.
+        // Register custom Blade component alias.
         Blade::component('components.alert-manager', 'alert-manager');
 
         // Provide a handler to log missing translation keys for easier maintenance.

@@ -1,76 +1,13 @@
-{{--
-    resources/views/components/action-section.blade.php
-    MYDS-compliant card section for key actions.
-
-    Applies MYDS grid, color tokens, spacing, and typography.
-    - Uses MYDS shadow, radius, and spacing for visual hierarchy.
-    - Accessible: semantic roles, ARIA labels, heading.
-    - Follows MyGOVEA principles: hierarchy, clarity, minimalism, accessibility, and consistent anatomy.
-    - See MYDS-Design-Overview.md, prinsip-reka-bentuk-mygovea.md
-
-    Props:
-    - $title: string - Section title (required)
-    - $description: string - Optional description
-    - $content: slot - Main content area
-
-    Usage:
-    <x-action-section title="User Settings">
-        <x-slot name="description">
-            Configure your account preferences here.
-        </x-slot>
-        <x-slot name="content">
-            <!-- Your form or content here -->
-        </x-slot>
-    </x-action-section>
---}}
-
-@props(['title', 'description' => null, 'content' => null])
-
-{{--
-    Helper function to slugify the title for aria-labelledby.
-    This replaces Str::slug to avoid needing Illuminate\Support\Str in Blade.
---}}
-@php
-    // Slugify: lowercase, replace spaces/special chars with '-', remove unwanted chars
-    $slug = strtolower(preg_replace('/[^A-Za-z0-9-]+/', '-', $title));
-@endphp
-
-<section
-    {{ $attributes->merge(['class' => 'myds-card myds-section shadow-card radius-l mb-4']) }}
-    role="region"
-    aria-labelledby="{{ $slug }}-title"
->
-    <header>
-        <h2 id="{{ $slug }}-title"
-            class="myds-card-title mb-0 fw-semibold"
-            style="font-family: 'Poppins', Arial, sans-serif; font-size:1.25rem; color:var(--myds-primary-700); line-height:1.75rem;">
-            {{ $title }}
-        </h2>
-    </header>
-
-    {{-- MYDS Card Body --}}
-    <div class="myds-card-body py-4 px-4" style="font-family: 'Inter', Arial, sans-serif;">
-        @if (!empty($description))
-            <p class="myds-section-desc text-muted small mb-3" style="font-size:0.95em;">
-                {{ $description }}
-            </p>
-        @endif
-
-        {{-- Content Slot --}}
-        <div class="myds-section-content">
-            {{ $content }}
-        </div>
+{{-- resources/views/components/action-section.blade.php --}}
+{{-- Card component styled according to MOTAC design language --}}
+<div {{ $attributes->merge(['class' => 'card shadow-sm mb-4']) }}>
+    <div class="card-header bg-light py-3">
+        <h5 class="card-title mb-0 fw-semibold">{{ $title }}</h5>
     </div>
-</section>
-
-{{--
-    === MYDS & MyGOVEA Compliance Notes ===
-    - Uses MYDS card anatomy and grid: card, header, body, spacing
-    - Title uses MYDS heading typography (Poppins, semibold)
-    - Body uses Inter, correct vertical rhythm
-    - Section is semantic <section> for accessibility/structure (MyGOVEA Principle 12, 13)
-    - ARIA attributes for region and heading
-    - Visual separation via MYDS card shadow and radius
-    - Description is visually de-emphasized (Principle 5, 9)
-    - Consistent spacing and color tokens (MYDS, Principle 6)
---}}
+    <div class="card-body">
+        @if (isset($description))
+            <p class="card-text text-muted small mb-3">{{ $description }}</p>
+        @endif
+        {{ $content }}
+    </div>
+</div>

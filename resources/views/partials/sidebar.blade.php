@@ -7,13 +7,17 @@
     $canViewDashboard = $sidebarData['canViewDashboard'] ?? ($user ? true : false);
 
     // My Applications (User-specific)
-    $canViewMyEmailApplications = $sidebarData['canViewMyEmailApplications'] ?? ($user ? $user->can('viewAny', \App\Models\EmailApplication::class) : false);
+    // $canViewMyEmailApplications = $sidebarData['canViewMyEmailApplications'] ?? ($user ? $user->can('viewAny', \App\Models\EmailApplication::class) : false); // REMOVED
     $canViewMyLoanApplications = $sidebarData['canViewMyLoanApplications'] ?? ($user ? $user->can('viewAny', \App\Models\LoanApplication::class) : false);
 
     // Approvals
     $canViewApprovalDashboard = $sidebarData['canViewApprovalDashboard'] ?? ($user ? $user->can('view_approval_tasks') : false); // Custom permission
     $canViewApprovalHistory = $sidebarData['canViewApprovalHistory'] ?? ($user ? $user->can('view_approval_history') : false); // Custom permission
     $totalPendingApprovalTasks = $sidebarData['totalPendingApprovalTasks'] ?? 0;
+
+    // Helpdesk (NEW)
+    $canViewMyHelpdeskTickets = $sidebarData['canViewMyHelpdeskTickets'] ?? ($user ? $user->can('viewAny', \App\Models\HelpdeskTicket::class) : false);
+    $canViewAdminHelpdeskTickets = $sidebarData['canViewAdminHelpdeskTickets'] ?? ($user ? $user->can('manage_helpdesk_tickets') : false); // Custom permission for agents/admins
 
     // Admin - Settings
     $canViewSettingsUsers = $sidebarData['canViewSettingsUsers'] ?? ($user ? $user->can('viewAny', \App\Models\User::class) : false);
@@ -32,8 +36,7 @@
     $canViewBpmOutstandingLoans = $sidebarData['canViewBpmOutstandingLoans'] ?? ($user ? $user->hasAnyRole(['Admin', 'BPM Staff']) : false);
     $canViewBpmIssuedLoans = $sidebarData['canViewBpmIssuedLoans'] ?? ($user ? $user->hasAnyRole(['Admin', 'BPM Staff']) : false);
 
-    // IT Admin Specific Views
-    $canViewEmailApplicationsAdmin = $sidebarData['canViewEmailApplicationsAdmin'] ?? ($user ? $user->can('viewAnyAdmin', \App\Models\EmailApplication::class) : false);
+    // IT Admin Specific Views (REMOVED: $canViewEmailApplicationsAdmin)
 
     // Reports
     $canViewReports = $sidebarData['canViewReports'] ?? ($user ? $user->hasAnyRole(['Admin', 'BPM Staff']) : false);
@@ -78,8 +81,9 @@
                 @endif
 
                 {{-- USER SECTION (My Applications) --}}
-                @if ($canViewMyEmailApplications || $canViewMyLoanApplications)
+                @if ($canViewMyLoanApplications) {{-- Condition updated --}}
                     <li class="nav-header">{{ __('PERMOHONAN SAYA') }}</li>
+                    {{-- REMOVED: Email Application Link
                     @if ($canViewMyEmailApplications)
                         <li class="nav-item">
                             <a href="{{ route('email-applications.index') }}"
@@ -89,12 +93,36 @@
                             </a>
                         </li>
                     @endif
+                    --}}
                     @if ($canViewMyLoanApplications)
                         <li class="nav-item">
                             <a href="{{ route('loan-applications.index') }}"
                                class="nav-link {{ request()->routeIs('loan-applications.*') ? 'active' : '' }}">
                                 <i class="nav-icon bi bi-laptop"></i>
                                 <p>{{ __('Pinjaman Peralatan ICT') }}</p>
+                            </a>
+                        </li>
+                    @endif
+                @endif
+
+                {{-- HELPDESK SECTION (NEW) --}}
+                @if($canViewMyHelpdeskTickets || $canViewAdminHelpdeskTickets)
+                    <li class="nav-header">{{ __('SISTEM MEJA BANTUAN') }}</li>
+                    @if ($canViewMyHelpdeskTickets)
+                        <li class="nav-item">
+                            <a href="{{ route('helpdesk.index') }}"
+                               class="nav-link {{ request()->routeIs('helpdesk.index') || request()->routeIs('helpdesk.show') || request()->routeIs('helpdesk.create') ? 'active' : '' }}">
+                                <i class="nav-icon bi bi-life-preserver"></i>
+                                <p>{{ __('Tiket Saya') }}</p>
+                            </a>
+                        </li>
+                    @endif
+                    @if ($canViewAdminHelpdeskTickets)
+                        <li class="nav-item">
+                            <a href="{{ route('helpdesk.admin.index') }}"
+                               class="nav-link {{ request()->routeIs('helpdesk.admin.*') ? 'active' : '' }}">
+                                <i class="nav-icon bi bi-ticket-detailed-fill"></i>
+                                <p>{{ __('Pengurusan Tiket') }}</p>
                             </a>
                         </li>
                     @endif
@@ -129,7 +157,8 @@
                 @endif
 
                 {{-- BPM STAFF & IT ADMIN SECTION --}}
-                @if($user && $user->hasAnyRole(['Admin', 'BPM Staff', 'IT Admin']))
+                {{-- IT Admin role will now primarily focus on Helpdesk, but still part of 'PENGURUSAN SUMBER ICT' for general admin oversight --}}
+                @if($user && ($user->hasAnyRole(['Admin', 'BPM Staff']) || $user->hasRole('IT Admin'))) {{-- Adjusted condition --}}
                     <li class="nav-header">{{ __('PENGURUSAN SUMBER ICT') }}</li>
 
                     {{-- Equipment & Loan Management (Admin/BPM) --}}
@@ -174,7 +203,8 @@
                         </li>
                     @endif
 
-                    {{-- Email Application Admin (Admin/IT Admin) --}}
+                    {{-- REMOVED: Email Application Admin (Admin/IT Admin) --}}
+                    {{--
                     @if($canViewEmailApplicationsAdmin)
                         <li class="nav-item">
                              <a href="{{ route('resource-management.email-applications-admin.index') }}" class="nav-link {{ request()->routeIs('resource-management.email-applications-admin.*') ? 'active' : '' }}">
@@ -183,6 +213,7 @@
                             </a>
                         </li>
                     @endif
+                    --}}
                 @endif
 
 

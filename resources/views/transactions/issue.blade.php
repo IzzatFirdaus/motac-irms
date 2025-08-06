@@ -18,11 +18,12 @@
                 <div class="row g-3 small">
                     <div class="col-md-6">
                         <span class="fw-bold">{{ __('Pemohon:') }}</span>
-                        <span>{{ $loanApplication->user->name ?? 'N/A' }}</span>
+                        {{-- Use optional helper or null-safe operator to prevent error if user relationship is not loaded --}}
+                        <span>{{ optional($loanApplication->user)->name ?? __('N/A') }}</span>
                     </div>
                     <div class="col-md-6">
                         <span class="fw-bold">{{ __('Jabatan:') }}</span>
-                        <span>{{ optional($loanApplication->user->department)->name ?? 'N/A' }}</span>
+                        <span>{{ optional($loanApplication->user?->department)->name ?? 'N/A' }}</span>
                     </div>
                     <div class="col-md-12">
                         <span class="fw-bold">{{ __('Tujuan:') }}</span>
@@ -286,12 +287,13 @@
                             <select class="form-select" id="receiving_officer_id" name="receiving_officer_id" required
                                 x-model="transactionDetails.receiving_officer_id">
                                 <option value="">-- {{ __('Pilih Pegawai Penerima') }} --</option>
-                                <option value="{{ $loanApplication->user_id }}">{{ $loanApplication->user->name }}
+                                {{-- Safely access user properties to prevent errors --}}
+                                <option value="{{ optional($loanApplication->user)->id }}">{{ optional($loanApplication->user)->name }}
                                     ({{ __('Pemohon') }})
                                 </option>
                                 {{-- Controller MUST pass $allUsers collection --}}
                                 @foreach ($allUsers ?? [] as $user)
-                                    @if ($user->id !== $loanApplication->user_id)
+                                    @if (optional($user)->id !== optional($loanApplication->user)->id)
                                         {{-- Avoid duplicate listing of applicant --}}
                                         <option value="{{ $user->id }}">{{ $user->name }}</option>
                                     @endif
@@ -311,7 +313,8 @@
                             @enderror
                         </div>
                         <p class="form-text">
-                            {{ __('Pegawai Pengeluar') }}: {{ Auth::user()->name }}.
+                            {{-- Safely display the issuing officer's name, with a fallback --}}
+                            {{ __('Pegawai Pengeluar') }}: {{ Auth::user()?->name ?? __('Tidak Diketahui') }}.
                             {{ __('Tarikh/Masa pengeluaran akan direkodkan semasa penghantaran borang.') }}
                         </p>
                     </div>

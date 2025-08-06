@@ -28,10 +28,10 @@
                                     <th>{{ __('ID') }}</th>
                                     <th>{{ __('Name') }}</th>
                                     <th>{{ __('Email') }}</th>
-                                    <th class="text-center">{{ __('Email Apps') }}</th>
-                                    <th class="text-center">{{ __('Loan Apps') }}</th>
-                                    <th class="text-center">{{ __('Approvals') }}</th>
-                                    <th>{{ __('Registered') }}</th>
+                                    {{-- Removed Email Applications column --}}
+                                    <th class="text-center">{{ __('reports.loan_applications.table.count') }}</th>
+                                    <th class="text-center">{{ __('reports.approvals.table.count') }}</th>
+                                    <th>{{ __('Created At') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -40,7 +40,7 @@
                                         <td class="fw-medium">{{ $user->id }}</td>
                                         <td>{{ $user->full_name ?? $user->name }}</td>
                                         <td>{{ $user->email }}</td>
-                                        <td class="text-center">{{ $user->email_applications_count ?? 0 }}</td>
+                                        {{-- Removed Email Applications count --}}
                                         <td class="text-center">{{ $user->loan_applications_as_applicant_count ?? 0 }}</td>
                                         <td class="text-center">{{ $user->approvals_made_count ?? 0 }}</td>
                                         <td>{{ $user->created_at?->format('Y-m-d H:i') }}</td>

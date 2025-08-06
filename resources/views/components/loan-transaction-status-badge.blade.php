@@ -2,10 +2,7 @@
 @props(['status', 'class' => ''])
 
 @php
-    // Get the CSS class from the centralized helper function
-    $badgeClass = \App\Helpers\Helpers::getStatusColorClass($status ?? '', 'loan_transaction');
-
-    // Get the display text from the model's static array for consistency and translation
+    $badgeClass = \App\Helpers\Helpers::getStatusColorClass($status ?? '');
     $statusText = \App\Models\LoanTransaction::getStatusOptions()[$status] ?? Str::title(str_replace('_', ' ', $status));
 @endphp
 

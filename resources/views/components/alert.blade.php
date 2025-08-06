@@ -5,7 +5,7 @@
     'title' => null,
     'dismissible' => null,
     'icon' => null,
-    'errors' => null // Crucial: This must be present
+    'errors' => null
 ])
 
 @php
@@ -51,7 +51,7 @@
     $alertTitle = $title ?? $defaultTitle;
     $currentIconClass = $iconClassProvided ?? $defaultIconClass;
 
-    $hasContent = $message || !$slot->isEmpty() || ($errors && $errors->any()); // Crucial: This must check $errors
+    $hasContent = $message || !$slot->isEmpty() || ($errors && $errors->any());
 @endphp
 
 @if ($hasContent)
@@ -71,7 +71,6 @@
                     <div @class(['small', 'mb-2' => ($errors && $errors->any()) || !$slot->isEmpty()])>{{ $message }}</div>
                 @endif
 
-                {{-- This block is crucial for displaying validation errors --}}
                 @if ($errors && $errors->any())
                     <ul class="mb-0 ps-3">
                         @foreach ($errors->all() as $error)

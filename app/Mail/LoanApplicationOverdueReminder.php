@@ -44,49 +44,37 @@ final class LoanApplicationOverdueReminder extends Mailable implements ShouldQue
 
         $this->overdueItems = $this->calculateOverdueItems();
 
-        Log::info(
-            'LoanApplicationOverdueReminder Mailable: Instance created.',
-            [
-                'loan_application_id' => $this->loanApplication->id,
-                'overdue_items_count' => $this->overdueItems->count(),
-            ]
-        );
+        Log::info('LoanApplicationOverdueReminder Mailable: Instance created.', [
+            'loan_application_id' => $this->loanApplication->id,
+            'overdue_items_count' => $this->overdueItems->count(),
+        ]);
     }
 
     /**
-     * Calculate the items that are currently issued but not yet returned for this loan application.
+     * Determine which items are overdue.
      */
     private function calculateOverdueItems(): Collection
     {
-        $issuedItemsCollection = new EloquentCollection; // Will hold LoanTransactionItem models from issue transactions
-        $returnedEquipmentIds = collect(); // Will hold equipment_ids that have been returned
-
-        if ($this->loanApplication->relationLoaded('transactions')) {
-            foreach ($this->loanApplication->transactions as $transaction) {
-                if ($transaction->type === LoanTransaction::TYPE_ISSUE) {
-                    if ($transaction->relationLoaded('loanTransactionItems')) {
-                        foreach ($transaction->loanTransactionItems as $item) {
-                            // Ensure equipment relationship on item is loaded if not already
-                            $item->loadMissing('equipment');
-                            $issuedItemsCollection->add($item);
-                        }
-                    }
-                } elseif ($transaction->type === LoanTransaction::TYPE_RETURN) {
-                    if ($transaction->relationLoaded('loanTransactionItems')) {
-                        foreach ($transaction->loanTransactionItems as $item) {
-                            if ($item->equipment_id) {
-                                $returnedEquipmentIds->push($item->equipment_id);
-                            }
-                        }
+        $overdue = new Collection();
+        foreach ($this->loanApplication->transactions as $transaction) {
+            // Only consider 'issue' transactions for overdue checks
+            if ($transaction->type === LoanTransaction::TYPE_ISSUE) {
+                foreach ($transaction->loanTransactionItems as $item) {
+                    // An item is overdue if it was issued, has a due date,
+                    // and has not been returned (no return transaction item linked)
+                    // and its due date is in the past.
+                    if (
+                        ! $item->is_returned &&
+                        $item->due_date &&
+                        $item->due_date->isPast()
+                    ) {
+                        $overdue->push($item);
                     }
                 }
             }
         }
 
-        // Filter the issued items to find those not in the returned list
-        return $issuedItemsCollection->filter(function ($issuedItem) use ($returnedEquipmentIds): bool {
-            return $issuedItem->equipment_id && ! $returnedEquipmentIds->contains($issuedItem->equipment_id);
-        });
+        return $overdue;
     }
 
     /**
@@ -94,32 +82,15 @@ final class LoanApplicationOverdueReminder extends Mailable implements ShouldQue
      */
     public function envelope(): Envelope
     {
+        $applicantName = $this->loanApplication->user?->name ?? 'Pemohon Tidak Diketahui';
         $applicationId = $this->loanApplication->id ?? 'N/A';
-        /** @phpstan-ignore-next-line nullCoalesce.expr, nullsafe.neverNull */
-        $applicantName = $this->loanApplication->user?->full_name ??
-                         ($this->loanApplication->user?->name ?? 'Pemohon');
 
-        /** @phpstan-ignore-next-line nullsafe.neverNull */
-        $recipientEmail = $this->loanApplication->user?->email;
-        $toAddresses = [];
+        $toAddresses = [
+            new Address($this->loanApplication->user->email, $applicantName),
+        ];
 
-        if ($recipientEmail) {
-            $toAddresses[] = new Address($recipientEmail, $applicantName);
-            Log::info(
-                sprintf('LoanApplicationOverdueReminder Mailable: Recipient identified for Loan Application ID: %s.', $applicationId),
-                ['recipient_email' => $recipientEmail]
-            );
-        } else {
-            Log::error(
-                sprintf('LoanApplicationOverdueReminder Mailable: Recipient email not found for Loan Application ID: %s. Notification cannot be sent.', $applicationId),
-                [
-                    'loan_application_id' => $applicationId,
-                    'applicant_user_id' => $this->loanApplication->user_id ?? 'N/A',
-                ]
-            );
-        }
-
-        $subject = sprintf('Tindakan Diperlukan: Peringatan Peralatan Pinjaman ICT Lewat Dipulangkan (Permohonan #%s - %s)', $applicationId, $applicantName);
+        // Subject will indicate if there are overdue items and for which application
+        $subject = __('Peringatan: Peralatan Pinjaman ICT Telah Lewat Dipulangkan (Permohonan #:id)', ['id' => $applicationId]);
 
         Log::info(
             'LoanApplicationOverdueReminder Mailable: Preparing envelope.',

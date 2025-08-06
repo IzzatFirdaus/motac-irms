@@ -41,215 +41,129 @@
                 {{-- Quick Actions Card --}}
                 <div class="col-lg-7">
                     <div class="card h-100">
-                        <div class="card-header"><h5 class="card-title mb-0">{{ __('dashboard.quick_shortcuts') }}</h5></div>
+                        <div class="card-header">
+                            <h5 class="card-title">{{ __('dashboard.quick_actions') }}</h5>
+                        </div>
                         <div class="card-body">
                             <div class="row text-center">
-                                <div class="col-sm-4 col-6 mb-3">
-                                    <a href="{{ route('loan-applications.create') }}" class="d-block text-decoration-none">
-                                        <i class="bi bi-card-checklist text-primary quick-action-bs-icon"></i>
-                                        <p class="text-muted mb-0 small">{{ __('dashboard.ict_loan') }}</p>
-                                    </a>
-                                </div>
-                                <div class="col-sm-4 col-6 mb-3">
-                                    <a href="{{ route('email-applications.create') }}" class="d-block text-decoration-none">
-                                        <i class="bi bi-envelope-plus-fill text-info quick-action-bs-icon"></i>
-                                        <p class="text-muted mb-0 small">{{ __('dashboard.email_application') }}</p>
-                                    </a>
-                                </div>
-                                <div class="col-sm-4 col-6 mb-3">
-                                    <a href="{{ route('notifications.index') }}" class="d-block text-decoration-none">
-                                        <i class="bi bi-bell-fill text-warning quick-action-bs-icon"></i>
-                                        <p class="text-muted mb-0 small">{{ __('dashboard.notifications') }}</p>
-                                    </a>
-                                </div>
+                                {{-- Quick action for ICT Equipment Loan Application --}}
+                                @if (Route::has('loan.applications.create'))
+                                    <div class="col-4 mb-3">
+                                        <a href="{{ route('loan.applications.create') }}" class="d-block text-decoration-none text-dark">
+                                            <i class="bi bi-laptop quick-action-bs-icon text-primary"></i>
+                                            <span class="d-block">{{ __('dashboard.apply_for_loan') }}</span>
+                                        </a>
+                                    </div>
+                                @endif
+                                {{-- Quick action for viewing My Loan Applications --}}
+                                @if (Route::has('loan.applications.index'))
+                                    <div class="col-4 mb-3">
+                                        <a href="{{ route('loan.applications.index') }}" class="d-block text-decoration-none text-dark">
+                                            <i class="bi bi-clipboard-check quick-action-bs-icon text-success"></i>
+                                            <span class="d-block">{{ __('dashboard.my_loan_applications') }}</span>
+                                        </a>
+                                    </div>
+                                @endif
+                                {{-- NEW: Quick action for submitting a Helpdesk Ticket --}}
+                                @if (Route::has('helpdesk.create'))
+                                    <div class="col-4 mb-3">
+                                        <a href="{{ route('helpdesk.create') }}" class="d-block text-decoration-none text-dark">
+                                            <i class="bi bi-life-preserver quick-action-bs-icon text-info"></i>
+                                            <span class="d-block">{{ __('dashboard.submit_helpdesk_ticket') }}</span>
+                                        </a>
+                                    </div>
+                                @endif
+                                {{-- NEW: Quick action for viewing My Helpdesk Tickets --}}
+                                @if (Route::has('helpdesk.index'))
+                                    <div class="col-4 mb-3">
+                                        <a href="{{ route('helpdesk.index') }}" class="d-block text-decoration-none text-dark">
+                                            <i class="bi bi-ticket-detailed quick-action-bs-icon text-secondary"></i>
+                                            <span class="d-block">{{ __('dashboard.my_helpdesk_tickets') }}</span>
+                                        </a>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {{-- Stats Cards --}}
+                {{-- Statistics Card (Loan Stats) --}}
                 <div class="col-lg-5">
-                    <div class="row g-4">
-                        <div class="col-md-6 col-sm-6">
-                            <div class="card h-100">
-                                <div class="card-body text-center">
-                                    <div class="d-flex justify-content-center align-items-center mb-3">
-                                        <i class="bi bi-laptop icon-stat text-primary me-2"></i>
-                                        <h6 class="mb-0 small">{{ __('dashboard.ict_loans_in_process') }}</h6>
-                                    </div>
-                                    <h3 class="mb-2 text-primary">{{ $pendingUserLoanApplicationsCount }}</h3>
-                                    <a href="{{ route('loan-applications.index', ['status_filter_key' => 'pending_all']) }}" class="btn btn-sm btn-outline-primary mt-3">{{ __('common.view') }}</a>
-                                </div>
-                            </div>
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="card-title">{{ __('dashboard.my_loan_stats') }}</h5>
                         </div>
-                        <div class="col-md-6 col-sm-6">
-                            <div class="card h-100">
-                                <div class="card-body text-center">
-                                    <div class="d-flex justify-content-center align-items-center mb-3">
-                                        <i class="bi bi-envelope icon-stat text-info me-2"></i>
-                                        <h6 class="mb-0 small">{{ __('dashboard.email_id_in_process') }}</h6>
-                                    </div>
-                                    <h3 class="mb-2 text-info">{{ $pendingUserEmailApplicationsCount }}</h3>
-                                     <a href="{{ route('email-applications.index', ['status_filter_key' => 'pending_all']) }}" class="btn btn-sm btn-outline-info mt-3">{{ __('common.view') }}</a>
-                                </div>
-                            </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ __('dashboard.pending_loans') }}
+                                    <span class="badge bg-warning icon-stat">{{ $pending_loans_count }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ __('dashboard.approved_loans') }}
+                                    <span class="badge bg-success icon-stat">{{ $approved_loans_count }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ __('dashboard.rejected_loans') }}
+                                    <span class="badge bg-danger icon-stat">{{ $rejected_loans_count }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ __('dashboard.total_loans') }}
+                                    <span class="badge bg-primary icon-stat">{{ $total_loans_count }}</span>
+                                </li>
+                            </ul>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {{-- Bottom Row: Recent Application Tables --}}
-            <div class="row g-4">
-                {{-- Recent Loan Applications --}}
-                <div class="col-lg-6">
-                    <div class="card h-100">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="card-title mb-0">{{ __('dashboard.latest_loan_applications') }}</h5>
-                            <a href="{{ route('loan-applications.index') }}" class="btn btn-primary btn-sm">{{ __('common.see_all') }} <i class="bi bi-arrow-right"></i></a>
-                        </div>
-                        <div class="card-body">
-                            @if($userRecentLoanApplications->isEmpty())
-                                <div class="text-center text-muted py-4">{{ __('dashboard.no_recent_applications') }}</div>
-                            @else
-                                <div class="table-responsive">
-                                    <table class="table table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>{{ __('dashboard.apply_date') }}</th>
-                                                <th>{{ __('dashboard.subject') }}</th>
-                                                <th>{{ __('dashboard.status') }}</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach($userRecentLoanApplications as $loanApp)
-                                            <tr onclick="window.location='{{ route('loan-applications.show', $loanApp->id) }}';">
-                                                <td>{{ \App\Helpers\Helpers::formatDate($loanApp->created_at, 'date_format_my_short') }}</td>
-                                                <td>{{ Str::limit($loanApp->purpose, 35) }}</td>
-                                                <td><x-resource-status-panel :resource="$loanApp" statusAttribute="status" type="loan_application" /></td>
-                                            </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
+            {{-- Recent Applications Section (now specifically for Loan Applications) --}}
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 fw-bold text-primary">{{ __('dashboard.recent_loan_applications') }}</h6>
+                            @if (Route::has('loan.applications.index'))
+                                <a href="{{ route('loan.applications.index') }}" class="btn btn-sm btn-outline-primary">{{ __('dashboard.view_all_loan_applications') }}</a>
                             @endif
                         </div>
-                    </div>
-                </div>
-
-                {{-- Recent Email Applications --}}
-                <div class="col-lg-6">
-                    <div class="card h-100">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="card-title mb-0">{{ __('dashboard.latest_email_applications') }}</h5>
-                            <a href="{{ route('email-applications.index') }}" class="btn btn-primary btn-sm">{{ __('common.see_all') }} <i class="bi bi-arrow-right"></i></a>
-                        </div>
-                        <div class="card-body">
-                             @if($userRecentEmailApplications->isEmpty())
-                                <div class="text-center text-muted py-4">{{ __('dashboard.no_recent_applications') }}</div>
+                        <div class="card-body p-0">
+                            @if ($recent_applications->isEmpty())
+                                <div class="alert alert-info text-center m-3">{{ __('dashboard.no_recent_loan_applications') }}</div>
                             @else
                                 <div class="table-responsive">
-                                    <table class="table table-hover">
+                                    <table class="table table-hover mb-0">
                                         <thead>
                                             <tr>
-                                                <th>{{ __('dashboard.apply_date') }}</th>
-                                                <th>{{ __('dashboard.type') }}</th>
-                                                <th>{{ __('dashboard.status') }}</th>
+                                                <th>{{ __('common.application_no') }}</th>
+                                                <th>{{ __('common.item_name') }}</th>
+                                                <th>{{ __('common.loan_purpose') }}</th>
+                                                <th>{{ __('common.status') }}</th>
+                                                <th>{{ __('common.applied_on') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @foreach($userRecentEmailApplications as $emailApp)
-                                            <tr onclick="window.location='{{ route('email-applications.show', $emailApp->id) }}';">
-                                                <td>{{ \App\Helpers\Helpers::formatDate($emailApp->created_at, 'date_format_my_short') }}</td>
-                                                <td>{{ $emailApp->application_type_label }}</td>
-                                                <td><x-resource-status-panel :resource="$emailApp" statusAttribute="status" type="email_application" /></td>
-                                            </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        {{-- ================================================================= --}}
-        {{--                  ADMIN / PRIVILEGED USER DASHBOARD                  --}}
-        {{-- ================================================================= --}}
-        @else
-            {{-- Welcome Header for Admin --}}
-            <div class="d-flex align-items-center mb-4">
-                <h1 class="h3 mb-0 me-auto fw-bold">{{ __('dashboard.admin_dashboard_title') }}</h1>
-                <div class="ms-auto d-flex flex-column align-items-end">
-                    <span class="text-muted small">{{ __('dashboard.welcome') }}, {{ $displayUserName }}!</span>
-                </div>
-            </div>
-
-            {{-- Admin-specific widgets --}}
-            <div class="row g-4">
-                {{-- Recent System-Wide Transactions --}}
-                <div class="col-lg-6">
-                    <div class="card h-100">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="card-title mb-0">{{ __('dashboard.latest_loan_transactions') }}</h5>
-                            <a href="#" class="btn btn-primary btn-sm">{{ __('common.see_all') }} <i class="bi bi-arrow-right"></i></a>
-                        </div>
-                        <div class="card-body">
-                            @if($latestLoanTransactions->isEmpty())
-                                <div class="text-center text-muted py-4">{{ __('dashboard.no_recent_transactions') }}</div>
-                            @else
-                                <div class="table-responsive">
-                                    <table class="table table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>{{ __('dashboard.date') }}</th>
-                                                <th>{{ __('dashboard.applicant') }}</th>
-                                                <th>{{ __('dashboard.type') }}</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach($latestLoanTransactions as $transaction)
-                                            <tr onclick="window.location='{{ route('loan-transactions.show', $transaction->id) }}';">
-                                                <td>{{ \App\Helpers\Helpers::formatDate($transaction->transaction_date, 'datetime_format_my') }}</td>
-                                                <td>{{ $transaction->loanApplication->user->name ?? 'N/A' }}</td>
-                                                <td><x-loan-transaction-status-badge :status="$transaction->type" /></td>
-                                            </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-
-                {{-- All Upcoming System Returns --}}
-                <div class="col-lg-6">
-                    <div class="card h-100">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="card-title mb-0">{{ __('dashboard.upcoming_returns') }}</h5>
-                             <a href="{{ route('loan-applications.index', ['filter' => 'upcoming_returns']) }}" class="btn btn-primary btn-sm">{{ __('common.see_all') }} <i class="bi bi-arrow-right"></i></a>
-                        </div>
-                        <div class="card-body">
-                            @if($upcomingReturns->isEmpty())
-                                <div class="text-center text-muted py-4">{{ __('dashboard.no_upcoming_returns') }}</div>
-                            @else
-                                <div class="table-responsive">
-                                    <table class="table table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>{{ __('dashboard.return_date') }}</th>
-                                                <th>{{ __('dashboard.subject') }}</th>
-                                                <th>{{ __('dashboard.status') }}</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach($upcomingReturns as $returnLoanApp)
-                                            <tr onclick="window.location='{{ route('loan-applications.show', $returnLoanApp->id) }}';">
-                                                <td>{{ \App\Helpers\Helpers::formatDate($returnLoanApp->loan_end_date, 'date_format_my_short') }}</td>
-                                                <td>{{ Str::limit($returnLoanApp->purpose, 35) }}</td>
-                                                <td><x-resource-status-panel :resource="$returnLoanApp" statusAttribute="status" type="loan_application" /></td>
-                                            </tr>
+                                            @foreach ($recent_applications as $application)
+                                                <tr onclick="window.location='{{ route('loan.applications.show', $application->id) }}'">
+                                                    <td>{{ $application->application_number }}</td>
+                                                    <td>{{ $application->equipment->name ?? 'N/A' }}</td>
+                                                    <td>{{ $application->purpose }}</td>
+                                                    <td>
+                                                        @php
+                                                            $badgeClass = '';
+                                                            switch ($application->status) {
+                                                                case 'pending': $badgeClass = 'bg-warning'; break;
+                                                                case 'approved': $badgeClass = 'bg-success'; break;
+                                                                case 'rejected': $badgeClass = 'bg-danger'; break;
+                                                                case 'issued': $badgeClass = 'bg-info'; break;
+                                                                case 'returned': $badgeClass = 'bg-primary'; break;
+                                                                default: $badgeClass = 'bg-secondary'; break;
+                                                            }
+                                                        @endphp
+                                                        <span class="badge {{ $badgeClass }}">{{ ucfirst($application->status) }}</span>
+                                                    </td>
+                                                    <td>{{ $application->created_at->format('d M Y') }}</td>
+                                                </tr>
                                             @endforeach
                                         </tbody>
                                     </table>

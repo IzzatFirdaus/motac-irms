@@ -14,16 +14,12 @@ use Illuminate\Support\Facades\Log;
 class CheckOverdueReturns extends Command
 {
   /**
-   * The name and signature of the console command.
-   *
-   * @var string
+   * The name and signature of the console command.\n   *\n   * @var string
    */
   protected $signature = 'loan:check-overdue-returns';
 
   /**
-   * The console command description.
-   *
-   * @var string
+   * The console command description.\n   *\n   * @var string
    */
   protected $description = 'Check for overdue loan applications and escalate via notification.';
 
@@ -36,8 +32,7 @@ class CheckOverdueReturns extends Command
   }
 
   /**
-   * Execute the console command.
-   */
+   * Execute the console command.\n   */
   public function handle(): int
   {
     $now = Carbon::now();
@@ -56,14 +51,35 @@ class CheckOverdueReturns extends Command
 
     foreach ($overdueApplications as $application) {
       $user = $application->user;
+      $latestIssueTransaction = $application->latestIssueTransaction; // Get the latest issue transaction
+
+      if (!$user) {
+          Log::warning('Overdue loan application (ID: ' . $application->id . ') has no associated user. Skipping notification.', [
+              'loan_application_id' => $application->id,
+          ]);
+          continue;
+      }
+
+      if (!$latestIssueTransaction) {
+          Log::warning('Overdue loan application (ID: ' . $application->id . ') has no issue transaction. Skipping notification.', [
+              'loan_application_id' => $application->id,
+              'user_id' => $user->id,
+          ]);
+          continue;
+      }
+
+      // Cast to int to match the expected type in notifyEquipmentOverdue
+      $overdueDays = (int) $now->diffInDays($application->loan_end_date);
+
       Log::warning('Overdue loan application detected', [
         'loan_application_id' => $application->id,
-        'user_id' => $user?->id,
+        'user_id' => $user->id,
         'due_date' => $application->loan_end_date,
+        'overdue_days' => $overdueDays,
       ]);
 
-      // Notify applicant
-      $this->notificationService->sendOverdueReminder($application);
+      // Notify applicant using the correct method and parameters
+      $this->notificationService->notifyEquipmentOverdue($user, $latestIssueTransaction, $overdueDays);
 
       // Optionally, notify supervisor or department head if required
       // $this->notificationService->notifySupervisorOfOverdue($application);

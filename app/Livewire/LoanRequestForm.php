@@ -17,6 +17,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException; // Added for catch block
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 use Throwable;
 
@@ -28,6 +29,9 @@ class LoanRequestForm extends Component
     public ?LoanApplication $loanApplication = null;
 
     public bool $isEdit = false;
+
+    // Public property for dynamic title
+    public string $title = 'Permohonan Pinjaman Baru';
 
     // Applicant Details (prefilled, some parts might be editable if needed)
     public string $applicant_name = '';
@@ -69,6 +73,61 @@ class LoanRequestForm extends Component
 
     protected LoanApplicationService $loanApplicationService;
 
+    public function boot(LoanApplicationService $loanApplicationService): void
+    {
+        $this->loanApplicationService = $loanApplicationService;
+        $this->equipmentTypeOptions = collect(Equipment::$ASSET_TYPES_LABELS);
+        $this->systemUsersForResponsibleOfficer = User::whereHas('roles', function ($query) {
+            $query->whereIn('name', ['Admin', 'Support']);
+        })->get(['id', 'name', 'jawatan_gred']);
+
+        Log::debug('LoanRequestForm component booted with services.');
+    }
+
+    public function mount(int $loanApplicationId = 0): void
+    {
+        Log::info('LoanRequestForm component mounting.', ['loanApplicationId' => $loanApplicationId]);
+
+        if ($loanApplicationId > 0) {
+            $this->isEdit = true;
+            $this->title = 'Kemaskini Permohonan Pinjaman'; // Set dynamic title
+            try {
+                $this->loanApplication = $this->loanApplicationService->findLoanApplicationById(
+                    $loanApplicationId,
+                    ['user', 'responsibleOfficer', 'loanApplicationItems']
+                );
+
+                $this->authorize('update', $this->loanApplication); // Authorize the action
+
+                $this->fillFormWithLoanApplicationData();
+            } catch (AuthorizationException $e) {
+                Log::warning('User not authorized to view this loan application.', ['user_id' => Auth::id(), 'loan_application_id' => $loanApplicationId]);
+                $this->dispatch('swal:error', ['message' => 'You are not authorized to view this loan application.']);
+                $this->redirect(route('loan-applications.index'), navigate: true);
+                return;
+            } catch (Throwable $e) {
+                Log::error('Error loading loan application for edit: ' . $e->getMessage(), ['loanApplicationId' => $loanApplicationId, 'exception' => $e]);
+                $this->dispatch('swal:error', ['message' => 'Failed to load loan application for editing.']);
+                $this->redirect(route('loan-applications.index'), navigate: true);
+                return;
+            }
+        } else {
+            // New Application - Prefill applicant details
+            /** @var User $currentUser */
+            $currentUser = Auth::user();
+            $this->applicant_name = $currentUser->name ?? '';
+            $this->applicant_jawatan_gred = $currentUser->jawatan_gred ?? '';
+            $this->applicant_bahagian_unit = $currentUser->bahagian_unit ?? '';
+            $this->applicant_mobile_number = $currentUser->mobile_number ?? '';
+
+            $this->items[] = [ // Start with one empty item
+                'equipment_type' => '',
+                'quantity_requested' => 1,
+                'notes' => '',
+            ];
+        }
+    }
+
     public function rules(): array
     {
         $isFinalSubmission = $this->applicant_confirmation;
@@ -105,7 +164,6 @@ class LoanRequestForm extends Component
                 Rule::requiredIf(fn (): bool => ! $this->isApplicantResponsible && ($this->manual_responsible_officer_name !== null && $this->manual_responsible_officer_name !== '' && $this->manual_responsible_officer_name !== '0') && $isFinalSubmission),
                 'nullable', 'string', 'regex:/^[0-9\-\+\s\(\)]*$/', 'min:9', 'max:20',
             ],
-
             'items' => ['required', 'array', 'min:1'],
             'items.*.equipment_type' => ['required', Rule::in(array_keys(Equipment::$ASSET_TYPES_LABELS ?? []))],
             'items.*.quantity_requested' => ['required', 'integer', 'min:1', 'max:100'],
@@ -114,201 +172,118 @@ class LoanRequestForm extends Component
         ];
     }
 
-    public function boot(LoanApplicationService $loanApplicationService): void
+    public function render(): View
     {
-        $this->loanApplicationService = $loanApplicationService;
-    }
-
-    public function mount(?int $loanApplicationId = null): void
-    {
-        /** @var User $user */
-        $user = Auth::user();
-        if (! $user) {
-            session()->flash('error', __('Sila log masuk untuk meneruskan.'));
-            $this->redirectRoute('login', navigate: true);
-
-            return;
-        }
-
-        $this->equipmentTypeOptions = collect(['' => __('- Pilih Jenis Peralatan -')] + (Equipment::$ASSET_TYPES_LABELS ?? []));
-        $this->systemUsersForResponsibleOfficer = collect(['' => __('- Pilih Pegawai (dari senarai sistem) -')])
-            ->union(User::where('id', '!=', $user->id)->orderBy('name')->pluck('name', 'id'));
-
-        if ($loanApplicationId !== null && $loanApplicationId !== 0) {
-            $loanApplication = LoanApplication::with([
-                'user', 'responsibleOfficer', 'supportingOfficer', 'loanApplicationItems',
-            ])->findOrFail($loanApplicationId);
-            $this->loanApplication = $loanApplication;
-            $this->isEdit = true;
-            $this->authorize('update', $this->loanApplication);
-            $this->fillFormFromModel();
-        } else {
-            $this->loanApplication = new LoanApplication(['user_id' => $user->id]);
-            $this->authorize('create', LoanApplication::class);
-            $this->isEdit = false;
-            $this->prefillApplicantDetails($user);
-            $this->addItem();
-        }
-    }
-
-    public function updatedIsApplicantResponsible(bool $value): void
-    {
-        if ($value) {
-            $this->responsible_officer_id = null;
-            $this->manual_responsible_officer_name = '';
-            $this->manual_responsible_officer_jawatan_gred = '';
-            $this->manual_responsible_officer_mobile = '';
-        }
-
-        $this->resetValidation(['responsible_officer_id', 'manual_responsible_officer_name', 'manual_responsible_officer_jawatan_gred', 'manual_responsible_officer_mobile']);
+        return view('livewire.loan-application.form', [
+            'loanApplication' => $this->loanApplication,
+        ]);
     }
 
     public function addItem(): void
     {
-        $this->items[] = ['equipment_type' => '', 'quantity_requested' => 1, 'notes' => ''];
+        $this->items[] = [
+            'equipment_type' => '',
+            'quantity_requested' => 1,
+            'notes' => '',
+        ];
     }
 
     public function removeItem(int $index): void
     {
-        if (isset($this->items[$index])) {
-            unset($this->items[$index]);
-            $this->items = array_values($this->items);
-        }
+        unset($this->items[$index]);
+        $this->items = array_values($this->items); // Re-index the array
     }
 
-    public function saveApplication(bool $isFinalSubmission = false): ?RedirectResponse
+    public function submitForm(bool $isFinalButtonClicked = false): RedirectResponse
     {
-        /** @var User $currentUser */
-        $currentUser = Auth::user();
-        if (! $currentUser) {
-            session()->flash('error', __('Sila log masuk untuk meneruskan.'));
+        Log::info('Attempting to submit Loan Request Form.', ['isFinalButtonClicked' => $isFinalButtonClicked, 'isEditMode' => $this->isEdit, 'loanApplicationId' => $this->loanApplication?->id]);
 
-            return $this->redirectRoute('login', navigate: true);
-        }
-
-        if ($isFinalSubmission) {
-            $this->validateOnly('applicant_confirmation', ['applicant_confirmation' => 'accepted']);
-        }
-
-        $validatedData = $this->validate();
-
-        DB::beginTransaction();
         try {
-            $message = '';
-            if ($this->isEdit && $this->loanApplication instanceof \App\Models\LoanApplication && $this->loanApplication->exists) {
-                $this->authorize('update', $this->loanApplication);
-                $this->loanApplication = $this->loanApplicationService->updateApplication(
-                    $this->loanApplication,
-                    $validatedData,
-                    $currentUser
-                );
-                $message = __('Permohonan pinjaman berjaya dikemaskini.');
-
-                if ($isFinalSubmission && in_array($this->loanApplication->status, [LoanApplication::STATUS_DRAFT, LoanApplication::STATUS_REJECTED])) {
-                    $this->loanApplication = $this->loanApplicationService->submitApplicationForApproval($this->loanApplication, $currentUser);
-                    $message = __('Permohonan pinjaman berjaya dikemaskini dan dihantar untuk kelulusan.');
-                }
-
+            // Dynamically adjust rules for final submission
+            if ($isFinalButtonClicked) {
+                // Ensure applicant_confirmation is checked only for final submission
+                $this->rules()['applicant_confirmation'] = ['accepted'];
+                $this->resetErrorBag('applicant_confirmation'); // Clear any previous errors
             } else {
-                $this->authorize('create', LoanApplication::class);
-                $this->loanApplication = $this->loanApplicationService->createAndSubmitApplication(
-                    $validatedData,
-                    $currentUser,
-                    ! $isFinalSubmission
-                );
-
-                $message = $isFinalSubmission ? __('Permohonan pinjaman berjaya dihantar.') : __('Draf permohonan pinjaman berjaya disimpan.');
-
-                if ($isFinalSubmission && $this->loanApplication->status === LoanApplication::STATUS_DRAFT) {
-                    $this->loanApplication = $this->loanApplicationService->submitApplicationForApproval($this->loanApplication, $currentUser);
-                }
+                // If not final submission, applicant_confirmation is just a boolean
+                $this->rules()['applicant_confirmation'] = ['boolean'];
             }
 
-            DB::commit();
-            session()->flash('success', $message);
-            $this->dispatch('toastr', type: 'success', message: $message);
+            // Manually validate to apply dynamic rules
+            $this->validate($this->rules());
 
-            return $this->redirectRoute('loan-applications.index', navigate: true); // Assuming 'loan-applications.index' is correct
+            DB::transaction(function () use ($isFinalButtonClicked): void {
+                $status = $this->determineSubmissionStatus($isFinalButtonClicked);
 
+                $data = [
+                    'user_id' => Auth::id(),
+                    'purpose' => $this->purpose,
+                    'location' => $this->location,
+                    'return_location' => $this->return_location,
+                    'loan_start_date' => $this->loan_start_date ? \Carbon\Carbon::parse($this->loan_start_date) : null,
+                    'loan_end_date' => $this->loan_end_date ? \Carbon\Carbon::parse($this->loan_end_date) : null,
+                    'status' => $status,
+                    'applicant_mobile_number' => $this->applicant_mobile_number,
+                    'applicant_confirmation_timestamp' => $isFinalButtonClicked ? now() : null,
+                    'responsible_officer_id' => null,
+                    'manual_responsible_officer_name' => null,
+                    'manual_responsible_officer_jawatan_gred' => null,
+                    'manual_responsible_officer_mobile' => null,
+                ];
+
+                if (! $this->isApplicantResponsible) {
+                    $data['responsible_officer_id'] = $this->responsible_officer_id;
+                    if ($this->manual_responsible_officer_name) {
+                        $data['manual_responsible_officer_name'] = $this->manual_responsible_officer_name;
+                        $data['manual_responsible_officer_jawatan_gred'] = $this->manual_responsible_officer_jawatan_gred;
+                        $data['manual_responsible_officer_mobile'] = $this->manual_responsible_officer_mobile;
+                    }
+                }
+
+                if ($this->isEdit && $this->loanApplication) {
+                    $this->authorize('update', $this->loanApplication);
+                    $this->loanApplicationService->updateLoanApplication(
+                        $this->loanApplication,
+                        $data,
+                        $this->items,
+                        $isFinalButtonClicked
+                    );
+                    $message = 'Permohonan pinjaman berjaya dikemaskini!';
+                } else {
+                    $this->loanApplication = $this->loanApplicationService->createLoanApplication(
+                        $data,
+                        $this->items,
+                        $isFinalButtonClicked
+                    );
+                    $message = 'Permohonan pinjaman berjaya dihantar!';
+                }
+
+                $this->dispatch('swal:success', ['message' => $message]);
+                $this->redirect(route('loan-applications.index'), navigate: true);
+            });
         } catch (ValidationException $e) {
-            DB::rollBack();
-            Log::warning('LoanRequestForm: Validation failed for User ID: '.$currentUser->id, ['errors' => $e->errors()]);
-            $this->dispatch('toastr', type: 'error', message: __('Sila perbetulkan ralat pada borang.'));
-
-            return null;
-        } catch (AuthorizationException $e) {
-            DB::rollBack();
-            Log::error('LoanRequestForm: Authorization failed for User ID: '.$currentUser->id, ['message' => $e->getMessage()]);
-            session()->flash('error', __('Anda tidak dibenarkan untuk melakukan tindakan ini.'));
-            $this->dispatch('toastr', type: 'error', message: __('Anda tidak dibenarkan untuk melakukan tindakan ini.'));
-
-            return null;
+            Log::warning('Loan Request Form validation failed.', ['errors' => $e->errors()]);
+            $this->dispatch('swal:error', ['message' => 'Sila semak semula borang.']);
+            // Re-throw to show validation errors on the form
+            throw $e;
         } catch (Throwable $e) {
-            DB::rollBack();
-            Log::error('LoanRequestForm: Error submitting application for User ID: '.$currentUser->id, ['exception' => $e]);
-            session()->flash('error', __('Berlaku ralat sistem semasa memproses permohonan anda: ').$e->getMessage());
-            $this->dispatch('toastr', type: 'error', message: __('Ralat sistem. Sila cuba lagi atau hubungi pentadbir.'));
-
-            return null;
+            Log::error('Error submitting Loan Request Form: ' . $e->getMessage(), ['exception' => $e]);
+            $this->dispatch('swal:error', ['message' => 'Gagal menghantar permohonan pinjaman: ' . $e->getMessage()]);
         }
+
+        return redirect()->route('loan-applications.index');
     }
 
-    public function saveAsDraft(): ?RedirectResponse
+    private function fillFormWithLoanApplicationData(): void
     {
-        $originalConfirmation = $this->applicant_confirmation;
-        $this->applicant_confirmation = false;
-        $response = $this->saveApplication(false);
-        $this->applicant_confirmation = $originalConfirmation;
-
-        return $response;
-    }
-
-    public function submitForApproval(): ?RedirectResponse
-    {
-        $this->applicant_confirmation = true;
-
-        return $this->saveApplication(true);
-    }
-
-    public function render(): View
-    {
-        return view('livewire.loan-request-form')
-            ->title($this->isEdit ? __('Kemaskini Permohonan Pinjaman Peralatan ICT') : __('Borang Permohonan Peminjaman Peralatan ICT'));
-    }
-
-    protected function messages(): array
-    {
-        return [
-            'items.required' => __('Sila tambah sekurang-kurangnya satu item peralatan.'),
-            'items.min' => __('Sila tambah sekurang-kurangnya satu item peralatan.'),
-            'items.*.equipment_type.required' => __('Sila pilih jenis peralatan untuk item #:position.'),
-            'items.*.quantity_requested.required' => __('Sila masukkan kuantiti untuk item #:position.'),
-            'items.*.quantity_requested.min' => __('Kuantiti mesti sekurang-kurangnya :min untuk item #:position.'),
-            'applicant_confirmation.accepted' => __('Anda mesti membuat perakuan pemohon untuk menghantar permohonan.'),
-            'responsible_officer_id.not_in' => __('Pegawai Bertanggungjawab tidak boleh pemohon sendiri.'),
-            'applicant_mobile_number.required' => __('Sila masukkan nombor telefon pemohon.'),
-        ];
-    }
-
-    private function prefillApplicantDetails(User $user): void
-    {
-        $this->applicant_name = $user->full_name ?? $user->name;
-        $this->applicant_jawatan_gred = ($user->position?->name ?? '').($user->grade?->name ? ' (Gred '.$user->grade->name.')' : '');
-        $this->applicant_bahagian_unit = $user->department?->name ?? '';
-        $this->applicant_mobile_number = $user->mobile_number ?? '';
-    }
-
-    private function fillFormFromModel(): void
-    {
-        if (! $this->loanApplication instanceof \App\Models\LoanApplication) {
+        if (! $this->loanApplication) {
             return;
         }
 
-        $applicantUser = $this->loanApplication->user ?? Auth::user();
-        if ($applicantUser) {
-            $this->prefillApplicantDetails($applicantUser);
-        }
-
+        $this->applicant_name = $this->loanApplication->user->name ?? '';
+        $this->applicant_jawatan_gred = $this->loanApplication->user->jawatan_gred ?? '';
+        $this->applicant_bahagian_unit = $this->loanApplication->user->bahagian_unit ?? '';
+        $this->applicant_mobile_number = $this->loanApplication->applicant_mobile_number ?? ($this->loanApplication->user->mobile_number ?? '');
         $this->purpose = $this->loanApplication->purpose;
         $this->location = $this->loanApplication->location;
         $this->return_location = $this->loanApplication->return_location;
@@ -339,7 +314,7 @@ class LoanRequestForm extends Component
         /** @var User $currentUser */
         $currentUser = Auth::user();
 
-        if ($this->isEdit && $this->loanApplication instanceof \App\Models\LoanApplication &&
+        if ($this->isEdit && $this->loanApplication instanceof LoanApplication && // Simplified namespace
             $this->loanApplication->status !== LoanApplication::STATUS_DRAFT &&
             ! $currentUser->hasRole('Admin')) {
             return $this->loanApplication->status;

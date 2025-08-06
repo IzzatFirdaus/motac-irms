@@ -1,5 +1,4 @@
-{{-- resources/views/_partials/_modals/modal-department.blade.php --}}
-
+{{-- Department modal for create/edit department --}}
 @pushOnce('custom-css')
 <link rel="stylesheet" href="{{asset('assets/vendor/libs/select2/select2.css')}}"/>
 @endPushOnce
@@ -15,9 +14,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{__('Tutup')}}"></button>
       </div>
       <div class="modal-body p-3 p-md-4">
-        {{-- Linter warnings about unassigned $message (PHP1412) within @error blocks are false positives. --}}
         <form wire:submit.prevent="submitDepartment" id="departmentFormModal" class="row g-3">
-
           <div class="col-md-6">
             <label for="departmentNameModal" class="form-label w-100">{{ __('Nama Jabatan') }} <span class="text-danger">*</span></label>
             <input wire:model.defer='departmentName' id="departmentNameModal" class="form-control @error('departmentName') is-invalid @enderror" type="text" placeholder="{{__('Cth: Bahagian Kewangan')}}"/>
@@ -34,7 +31,7 @@
             <label for="departmentBranchTypeModal" class="form-label w-100">{{ __('Jenis Cawangan') }} <span class="text-danger">*</span></label>
             <select wire:model.defer='departmentBranchType' id="departmentBranchTypeModal" class="form-select @error('departmentBranchType') is-invalid @enderror">
               <option value="">{{ __('-- Pilih Jenis Cawangan --') }}</option>
-              @foreach(\App\Models\Department::getBranchTypeOptions() as $value => $label) {{-- Assumes method returns value => translated_label --}}
+              @foreach(\App\Models\Department::getBranchTypeOptions() as $value => $label)
                 <option value="{{ $value }}">{{ e($label) }}</option>
               @endforeach
             </select>
@@ -45,7 +42,6 @@
             <label for="select2DepartmentHeadIdModal" class="form-label w-100">{{ __('Ketua Jabatan (Pilihan)') }}</label>
             <select wire:model.defer='departmentHeadId' id="select2DepartmentHeadIdModal" class="select2-department-head form-select @error('departmentHeadId') is-invalid @enderror" data-placeholder="{{ __('Pilih Ketua Jabatan') }}">
               <option value="">{{ __('Pilih Ketua Jabatan (Pilihan)') }}</option>
-              {{-- $usersForHodSelection should be passed from the parent Livewire component --}}
               @foreach($usersForHodSelection ?? [] as $user)
                 @if(is_object($user))
                     <option value="{{ $user->id }}">{{ e($user->name) }} ({{ e($user->email) }})</option>
@@ -91,6 +87,7 @@
 <script src="{{asset('assets/vendor/libs/select2/select2.js')}}"></script>
 <script src="{{asset('assets/vendor/libs/select2/i18n/ms.js')}}"></script>
 <script>
+  // Initializes Select2 for Ketua Jabatan selection in the modal
   document.addEventListener('livewire:initialized', function () {
     if (typeof jQuery !== 'undefined' && typeof $.fn.select2 === 'function') {
         const departmentModalElement = document.getElementById('departmentModal');

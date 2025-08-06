@@ -8,10 +8,8 @@
         $rejecter = $notification->rejecter;
         $reason = $notification->rejectionReason;
         $applicantName = $application->user?->name ?? $notifiable->name ?? 'Pemohon';
-        $isLoanApp = $application instanceof \App\Models\LoanApplication;
-        $applicationTypeDisplay = $isLoanApp
-            ? 'Permohonan Pinjaman Peralatan ICT'
-            : 'Permohonan Akaun E-mel/ID Pengguna';
+        // Removed $isLoanApp check as it will always be a LoanApplication
+        $applicationTypeDisplay = 'Permohonan Pinjaman Peralatan ICT'; // Explicitly set for Loan Applications
         $applicationId = $application->id ?? 'N/A';
         $actionUrl = $notification->getActionUrl();
     @endphp
@@ -46,5 +44,5 @@
         </div>
     @endif
 
-    <p class="mt-4"><strong>Sekian, harap maklum.</strong></p>
+    <p class="mt-4">Sekian, terima kasih.</p>
 @endsection

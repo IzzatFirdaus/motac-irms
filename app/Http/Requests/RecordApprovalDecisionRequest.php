@@ -44,35 +44,28 @@ class RecordApprovalDecisionRequest extends FormRequest
         if ($approval && //
             $approval->approvable instanceof LoanApplication && //
             // Only require quantity adjustments if the stage is relevant (e.g., support review)
-            // and decision is approved. Adjust stage check as per your workflow.
-            $approval->stage === Approval::STAGE_LOAN_SUPPORT_REVIEW && // Example stage check
+            // and decision is approved. Adjust sta
             $this->input('decision') === Approval::STATUS_APPROVED) { //
+            $rules['items_approved'] = ['required', 'array', 'min:1']; //
+            $rules['items_approved.*.loan_application_item_id'] = [ //
+                'required', 'integer',
+                Rule::exists('loan_application_items', 'id')->where(function ($query) use ($approval) { //
+                    $query->where('loan_application_id', $approval->approvable_id); //
+                }),
+            ];
+            $rules['items_approved.*.quantity_approved'] = [ //
+                'required', 'integer', 'min:0',
+                function ($attribute, $value, $fail) use ($approval) { //
+                    $index = explode('.', $attribute)[1]; // Get the array index
+                    $loanApplicationItemId = $this->input("items_approved.{$index}.loan_application_item_id"); //
+                    $loanAppItem = $approval->approvable->loanApplicationItems->find($loanApplicationItemId); //
 
-            // 'items_approved' itself should be an array, and can be empty if no items are being approved with specific quantities.
-            // 'present' means the key must exist in the input, even if its value is an empty array.
-            $rules['items_approved'] = ['present', 'array']; // Key that holds all item quantity data
-
-            // Loop through the submitted items_approved data (which is an associative array keyed by loan_application_item_id)
-            if (is_array($this->input('items_approved'))) { //
-                foreach (array_keys($this->input('items_approved')) as $loanApplicationItemId) { //
-                    // Find the original loan application item to get its quantity_requested
-                    $loanAppItem = null;
-                    if ($approval->approvable instanceof \App\Models\LoanApplication && method_exists($approval->approvable, 'loanApplicationItems')) {
-                        $loanAppItem = $approval->approvable->loanApplicationItems()->find($loanApplicationItemId); //
+                    if ($loanAppItem && $value > $loanAppItem->quantity_requested) { //
+                        $fail(__('Kuantiti diluluskan tidak boleh melebihi kuantiti dipohon.')); //
                     }
-
-                    $maxQty = $loanAppItem ? $loanAppItem->quantity_requested : 0; //
-
-                    // Rule for each item's quantity_approved
-                    // The key is items_approved.ITEM_ID.quantity_approved
-                    $rules['items_approved.'.$loanApplicationItemId.'.quantity_approved'] = [ //
-                        'required', // Make it required if the parent array key items_approved[ITEM_ID] exists
-                        'integer', //
-                        'min:0', //
-                        'max:'.$maxQty, //
-                    ];
-                }
-            }
+                },
+            ];
+            $rules['items_approved.*.approval_item_notes'] = ['nullable', 'string', 'max:500']; //
         }
 
         return $rules; //
@@ -80,25 +73,31 @@ class RecordApprovalDecisionRequest extends FormRequest
 
     public function messages(): array
     {
-        $messages = [ //
-            'decision.required' => __('Sila pilih keputusan (Diluluskan/Ditolak).'), //
-            'decision.in' => __('Pilihan keputusan tidak sah. Sila pilih daripada pilihan yang diberikan.'), //
-            'comments.required' => __('Sila berikan justifikasi atau komen untuk penolakan.'), //
-            'comments.string' => __('Komen atau justifikasi mesti dalam format teks.'), //
-            'comments.min' => __('Komen atau justifikasi penolakan mesti sekurang-kurangnya :min aksara.'), //
-            'comments.max' => __('Komen atau justifikasi tidak boleh melebihi :max aksara.'), //
-            'items_approved.array' => __('Format data item yang diluluskan tidak sah.'), //
-            'items_approved.present' => __('Data kuantiti item yang diluluskan mesti dihantar.'),
+        $messages = [
+            'decision.required' => __('Sila pilih keputusan (Lulus/Tolak).'),
+            'decision.in' => __('Keputusan yang dipilih tidak sah.'),
+            'comments.required' => __('Ruangan ulasan wajib diisi apabila menolak permohonan.'),
+            'comments.min' => __('Ulasan hendaklah sekurang-kurangnya :min aksara.'),
+            'comments.max' => __('Ulasan tidak boleh melebihi :max aksara.'),
+
+            'items_approved.required' => __('Sila nyatakan kuantiti diluluskan untuk setiap item.'),
+            'items_approved.array' => __('Format kuantiti diluluskan tidak sah.'),
+            'items_approved.min' => __('Sila nyatakan kuantiti diluluskan untuk sekurang-kurangnya satu item.'),
+            'items_approved.*.loan_application_item_id.required' => __('ID item permohonan asal wajib ada.'),
+            'items_approved.*.loan_application_item_id.exists' => __('Item permohonan asal tidak sah untuk permohonan ini.'),
+            'items_approved.*.quantity_approved.min' => __('Kuantiti diluluskan tidak boleh kurang dari 0.'),
+            'items_approved.*.approval_item_notes.max' => __('Catatan item kelulusan tidak boleh melebihi :max aksara.'),
         ];
 
         /** @var Approval|null $approval */
-        $approval = $this->route('approval'); //
-        // Generate dynamic messages for each item's quantity_approved
-        if ($approval && $approval->approvable instanceof LoanApplication && is_array($this->input('items_approved'))) { //
-            foreach (array_keys($this->input('items_approved')) as $loanApplicationItemId) { //
+        $approval = $this->route('approval');
+
+        if ($approval && $approval->approvable instanceof LoanApplication) {
+            foreach ($this->input('items_approved', []) as $index => $item) {
+                $loanApplicationItemId = $item['loan_application_item_id'] ?? null;
                 $loanAppItem = null;
-                if ($approval->approvable instanceof \App\Models\LoanApplication && method_exists($approval->approvable, 'loanApplicationItems')) {
-                    $loanAppItem = $approval->approvable->loanApplicationItems()->find($loanApplicationItemId); //
+                if ($loanApplicationItemId) {
+                    $loanAppItem = $approval->approvable->loanApplicationItems->find($loanApplicationItemId);
                 }
 
                 $itemTypeDisplay = 'Item'; // Default
@@ -116,6 +115,13 @@ class RecordApprovalDecisionRequest extends FormRequest
                 $messages['items_approved.'.$loanApplicationItemId.'.quantity_approved.max'] = __('Kuantiti diluluskan untuk :itemType tidak boleh melebihi kuantiti dipohon (:max).', ['itemType' => $itemTypeDisplay, 'max' => $maxQty]); //
             }
         }
+        // Removed the conditional block for EmailApplication as per the refactoring plan.
+        /*
+        // Original code snippet from your file (to be removed)
+        } elseif ($approval && $approval->approvable instanceof EmailApplication) { //
+            // No item-specific messages needed for EmailApplication as it doesn't have quantity.
+            // Any specific messages for EmailApplication would go here if needed.
+        */
 
         return $messages; //
     }

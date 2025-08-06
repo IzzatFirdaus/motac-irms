@@ -18,3 +18,4 @@ package-lock.json
 /.idea
 /_ide_helper.php
 remove_comments.py
+/backup

@@ -5,11 +5,14 @@ namespace App\Livewire\ResourceManagement\Admin\Users;
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title; // Add this line
+
 use Livewire\Component;
 use Livewire\WithPagination;
 use Spatie\Permission\Models\Role;
 
 #[Layout('layouts.app')]
+#[Title('Pengurusan Pentadbir Pengguna')] // Add this line
 class Index extends Component
 {
     use AuthorizesRequests;
@@ -97,8 +100,8 @@ class Index extends Component
     public function render()
     {
         return view('livewire.resource-management.admin.users.index', [
-            'usersList' => $this->users, // Accesses getUsersProperty
+            'usersList' => $this->users,
             'rolesForFilter' => $this->roleOptions,
-        ])->title(__('Pengurusan Pentadbir Pengguna'));
+        ]); // Remove ->title(...)
     }
 }

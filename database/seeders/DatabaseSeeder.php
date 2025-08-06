@@ -7,7 +7,10 @@ use App\Models\User as AppUser;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Seeder;
 // Import all required seeders
-
+// REMOVED: use Database\Seeders\EmailApplicationSeeder; // No longer needed
+use Database\Seeders\HelpdeskCategorySeeder; // NEW
+use Database\Seeders\HelpdeskPrioritySeeder; // NEW
+use Database\Seeders\HelpdeskTicketSeeder;   // NEW
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -17,7 +20,7 @@ class DatabaseSeeder extends Seeder
      * Seed the application's database.
      *
      * The order of execution is critical to satisfy foreign key constraints.
-     * 1. Master/lookup data (Roles, Departments, Positions, Grades) is seeded first.
+     * 1. Master/lookup data (Roles, Departments, Positions, Grades, Helpdesk Categories/Priorities) is seeded first.
      * 2. Users that depend on this master data are seeded next.
      * 3. Transactional data that depends on users and equipment is seeded last.
      */
@@ -38,41 +41,46 @@ class DatabaseSeeder extends Seeder
         // These must run first as all other data depends on them.
         Log::channel($logChannel)->info('SECTION 1: Seeding Core Master Data...');
         $this->call([
-            RoleAndPermissionSeeder::class, // Creates Roles (e.g., 'Admin', 'Approver')
-            DepartmentSeeder::class,         // Creates Departments
-            // MODIFIED: Corrected the order. Positions must exist before Grades can reference them.
-            PositionSeeder::class,           // Creates Positions
-            GradesSeeder::class,             // Creates Grades (e.g., 'F44', 'N19') which depend on Positions
+            RoleAndPermissionSeeder::class,
+            DepartmentSeeder::class,
+            PositionSeeder::class,
+            GradesSeeder::class,
             LocationSeeder::class,
+            EquipmentCategorySeeder::class,
+            SubCategoriesSeeder::class,
+            // NEW: Helpdesk Master Data
+            HelpdeskCategorySeeder::class,
+            HelpdeskPrioritySeeder::class,
         ]);
         Log::channel($logChannel)->info('✅ Core Master Data has been seeded.');
 
-        // SECTION 2: USERS (Administrative and General)
-        // This runs after master data is available to ensure correct assignment of roles, grades, etc.
+
+        // SECTION 2: USERS (Dependent on roles, departments, positions, grades)
         Log::channel($logChannel)->info('SECTION 2: Seeding Users...');
         $this->call([
-            AdminUserSeeder::class, // Creates key users with specific roles and high-level grades.
-            UserSeeder::class,      // Creates general, randomized users for testing.
+            AdminUserSeeder::class, // Creates primary admin and core users
+            UserSeeder::class,      // Creates additional general users
         ]);
-        Log::channel($logChannel)->info('✅ Administrative and General Users have been seeded.');
+        Log::channel($logChannel)->info('✅ Users have been seeded.');
 
-        // SECTION 3: ICT EQUIPMENT MASTER DATA & ASSETS
-        Log::channel($logChannel)->info('SECTION 3: Seeding ICT Equipment Data...');
+        // SECTION 3: CORE ASSETS & HR STRUCTURES (Dependent on locations, categories, users)
+        Log::channel($logChannel)->info('SECTION 3: Seeding Core Assets & HR Structures...');
         $this->call([
-            EquipmentCategorySeeder::class,
-            SubCategoriesSeeder::class,
             EquipmentSeeder::class,
         ]);
-        Log::channel($logChannel)->info('✅ ICT Equipment Data has been seeded.');
+        Log::channel($logChannel)->info('✅ Core Assets & HR Structures have been seeded.');
 
-        // SECTION 4: SAMPLE TRANSACTIONAL DATA (Optional, for testing workflows)
+
+        // SECTION 4: Seeding Sample Transactional Data (Loan Applications, Loan Transactions, Approvals, and NEW Helpdesk Tickets)
         Log::channel($logChannel)->info('SECTION 4: Seeding Sample Transactional Data...');
         if (AppUser::count() > 0 && AppEquipment::count() > 0) {
             $this->call([
-                EmailApplicationSeeder::class,
+                // REMOVED: EmailApplicationSeeder::class,
                 LoanApplicationSeeder::class,
                 LoanTransactionSeeder::class,
                 ApprovalSeeder::class,
+                // NEW: Helpdesk Tickets
+                HelpdeskTicketSeeder::class,
             ]);
             Log::channel($logChannel)->info('✅ Sample Transactional Data has been seeded.');
         } else {

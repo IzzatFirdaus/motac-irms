@@ -2,19 +2,19 @@
 
 namespace App\Notifications;
 
-use App\Models\LoanApplication; // Assuming it's for LoanApplication, can be made more generic
+use App\Models\LoanApplication;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Log; // <--- ADD THIS LINE
+use Illuminate\Support\Facades\Log;
 
 class OrphanedApplicationRequiresAttentionNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public Model $application; // Using generic Model type
+    public Model $application;
 
     public string $applicationTypeDisplay;
 
@@ -26,7 +26,7 @@ class OrphanedApplicationRequiresAttentionNotification extends Notification impl
      * @param  Model  $application  The orphaned application instance (e.g., LoanApplication)
      * @param  string  $reason  A brief reason why it's orphaned (e.g., "No approver found")
      */
-    public function __construct(Model $application, string $reason = 'No suitable approver could be automatically assigned.') //
+    public function __construct(Model $application, string $reason = 'No suitable approver could be automatically assigned.')
     {
         $this->application = $application;
         $this->reason = $reason;
@@ -34,16 +34,10 @@ class OrphanedApplicationRequiresAttentionNotification extends Notification impl
         if ($this->application instanceof LoanApplication) {
             $this->applicationTypeDisplay = __('Permohonan Pinjaman ICT');
         }
-        // Add other application types if needed
-        // elseif ($this->application instanceof EmailApplication) {
-        //     $this->applicationTypeDisplay = __('Permohonan E-mel/ID Pengguna');
-        // }
         else {
-            // Fallback for any other model type if this notification is used more broadly
-            $this->applicationTypeDisplay = __('Permohonan Sistem');
+            $this->applicationTypeDisplay = __('Permohonan Tidak Diketahui');
+            Log::warning('OrphanedApplicationRequiresAttentionNotification: Unknown application type encountered.', ['application_class' => get_class($application)]);
         }
-
-        Log::info('OrphanedApplicationRequiresAttentionNotification created for '.get_class($application).(' ID: '.$application->id));
     }
 
     /**
@@ -53,7 +47,7 @@ class OrphanedApplicationRequiresAttentionNotification extends Notification impl
      */
     public function via($notifiable): array
     {
-        return ['mail', 'database']; // Send via email and store in DB for admin dashboard
+        return ['mail', 'database'];
     }
 
     /**
@@ -63,30 +57,20 @@ class OrphanedApplicationRequiresAttentionNotification extends Notification impl
      */
     public function toMail($notifiable): MailMessage
     {
-        $applicantName = $this->application->user?->name ?? __('Tidak diketahui');
         $applicationId = $this->application->id ?? 'N/A';
-        $subject = __('[TINDAKAN DIPERLUKAN] :appType ID #:id Memerlukan Penetapan Pelulus Segera', ['appType' => $this->applicationTypeDisplay, 'id' => $applicationId]);
-
         $viewUrl = '#';
+
         if ($this->application instanceof LoanApplication && $this->application->id) {
             $viewUrl = route('loan-applications.show', $this->application->id);
         }
 
-        // Add route for other application types if necessary
-
         return (new MailMessage)
-            ->subject($subject)
-            ->greeting(__('Amaran Sistem Pentadbiran,'))
-            ->line(__(':appType dengan ID #:id yang dimohon oleh :applicantName memerlukan perhatian segera.', [
-                'appType' => $this->applicationTypeDisplay,
-                'id' => $applicationId,
-                'applicantName' => $applicantName,
-            ]))
-            ->line(__('Sebab: :reason', ['reason' => $this->reason]))
-            ->line(__("Status semasa permohonan ialah ':status'. Sila semak permohonan ini dan tetapkan pegawai pelulus yang bersesuaian dengan kadar segera untuk mengelakkan kelewatan proses.", ['status' => $this->application->status_label ?? $this->application->status]))
-            ->action(__('Lihat Permohonan'), $viewUrl)
-            ->line(__('Ini adalah notifikasi automatik dari Sistem Pengurusan Sumber MOTAC.'))
-            ->salutation(__('Terima Kasih.'));
+            ->subject(__('Tindakan Diperlukan: :appType ID #:id Memerlukan Penetapan Pelulus', ['appType' => $this->applicationTypeDisplay, 'id' => $applicationId]))
+            ->greeting(__('Salam Sejahtera,'))
+            ->line(__('Sistem tidak dapat menetapkan pelulus secara automatik untuk :appType ID #:id. Alasan: :reason. Sila ambil tindakan.', ['appType' => $this->applicationTypeDisplay, 'id' => $applicationId, 'reason' => $this->reason]))
+            ->action(__('Lihat Permohonan', ['appType' => $this->applicationTypeDisplay]), $viewUrl !== '#' ? $viewUrl : url('/'))
+            ->line(__('Terima Kasih.'))
+            ->salutation(__('Kementerian Pelancongan, Seni dan Budaya (MOTAC).'));
     }
 
     /**
@@ -114,7 +98,7 @@ class OrphanedApplicationRequiresAttentionNotification extends Notification impl
             'message' => __('Sistem tidak dapat menetapkan pelulus secara automatik untuk :appType ID #:id. Alasan: :reason. Sila ambil tindakan.', ['appType' => $this->applicationTypeDisplay, 'id' => $applicationId, 'reason' => $this->reason]),
             'icon' => 'ti ti-alert-triangle', // Alert icon
             'url' => $viewUrl,
-            'notification_type' => 'system_alert', // For categorizing
+            'notification_type' => 'system_attention',
         ];
     }
 }

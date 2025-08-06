@@ -47,7 +47,8 @@
                 'value' => $equipment_on_loan_count,
                 'icon' => 'bi-truck',
                 'color' => 'success',
-                'link' => route('resource-management.bpm.issued-loans'),
+                // CORRECTED: The route name was incorrect. Changed to the defined route for issued loans.
+                'link' => route('admin.equipment.issued-loans'),
             ])
         </div>
 
@@ -57,7 +58,7 @@
                 'value' => $total_active_loans_count,
                 'icon' => 'bi-journal-text',
                 'color' => 'primary',
-                'link' => route('reports.loan-status-summary'), 
+                'link' => route('reports.loan-status-summary'),
             ])
             @include('_partials.stat-card', [
                 'label' => __('dashboard.overdue_loans'),
