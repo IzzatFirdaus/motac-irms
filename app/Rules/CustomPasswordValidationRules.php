@@ -4,10 +4,14 @@ namespace App\Rules;
 
 use Illuminate\Validation\Rules\Password as IlluminatePasswordRule;
 
+/**
+ * Provides standardized password validation rules for user creation and update.
+ * Compatible with v4.0 (no references to email or legacy modules).
+ */
 class CustomPasswordValidationRules
 {
     /**
-     * Get the validation rules used to validate passwords for creation or mandatory changes.
+     * Get the validation rules for new passwords (creation/mandatory change).
      *
      * @return array<int, \Illuminate\Contracts\Validation\Rule|string>
      */
@@ -16,32 +20,31 @@ class CustomPasswordValidationRules
         return [
             'required',
             'string',
-            IlluminatePasswordRule::min(8) // Default minimum length from Laravel
-                ->letters() // Require at least one letter
-                ->mixedCase() // Require at least one uppercase and one lowercase letter
-                ->numbers() // Require at least one number
-                ->symbols() // Require at least one symbol
-                ->uncompromised(), // Check against haveibeenpwned.com database
-            'confirmed', // Requires a 'password_confirmation' field
+            IlluminatePasswordRule::min(8) // Minimum 8 chars, mixed case, symbol, number, uncompromised
+                ->letters()
+                ->mixedCase()
+                ->numbers()
+                ->symbols()
+                ->uncompromised(),
+            'confirmed', // Must match password_confirmation
         ];
     }
 
     /**
-     * Get the validation rules used to validate passwords during an update
-     * where changing the password might be optional.
+     * Get the validation rules for password updates (optional).
      *
      * @return array<int, \Illuminate\Contracts\Validation\Rule|string>
      */
     public static function updateRules(): array
     {
         return [
-            'nullable', // Allows password to be optional during updates
+            'nullable', // Optional for update
             'string',
             IlluminatePasswordRule::min(8)
-                ->letters() // Require at least one letter
-                ->mixedCase() // Require at least one uppercase and one lowercase letter
-                ->numbers() // Require at least one number
-                ->symbols() // Require at least one symbol
+                ->letters()
+                ->mixedCase()
+                ->numbers()
+                ->symbols()
                 ->uncompromised(),
             'confirmed',
         ];

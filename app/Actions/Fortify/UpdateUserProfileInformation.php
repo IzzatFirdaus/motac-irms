@@ -3,8 +3,6 @@
 namespace App\Actions\Fortify;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Http\Request;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\UpdatesUserProfileInformation;
 
@@ -37,14 +35,6 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
             'email' => $input['email'],
             // Add other fields as needed
         ])->save();
-
-        // If using email verification, handle re-verification if email changed
-        if (
-            $input['email'] !== $user->email &&
-            $user instanceof MustVerifyEmail
-        ) {
-            $user->email_verified_at = null;
-            $user->save();
 
             $user->sendEmailVerificationNotification();
         }

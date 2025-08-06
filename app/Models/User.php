@@ -21,6 +21,10 @@ use Spatie\Permission\Traits\HasRoles;
 
 /**
  * User Model for MOTAC System.
+ * Refactored for v4.0:
+ * - All Email/User ID Provisioning related constants, fields, and relationships are removed.
+ * - Helpdesk relationships are retained.
+ * - Added back enums required for legacy migrations.
  */
 class User extends Authenticatable
 {
@@ -65,13 +69,13 @@ class User extends Authenticatable
     public const STATUS_SUSPENDED = 'suspended';
     public const STATUS_PENDING = 'pending';
 
-    // --- SERVICE STATUS CONSTANTS ---
+    // --- SERVICE STATUS ENUM (RESTORED for Migration Compatibility) ---
     public const SERVICE_STATUS_TETAP = 'tetap';
     public const SERVICE_STATUS_KONTRAK_MYSTEP = 'kontrak_mystep';
     public const SERVICE_STATUS_PELAJAR_INDUSTRI = 'pelajar_industri';
     public const SERVICE_STATUS_OTHER_AGENCY = 'other_agency';
 
-    // --- APPOINTMENT TYPE CONSTANTS ---
+    // --- APPOINTMENT TYPE ENUM (RESTORED for Migration Compatibility) ---
     public const APPOINTMENT_TYPE_BAHARU = 'baharu';
     public const APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN = 'kenaikan_pangkat_pertukaran';
     public const APPOINTMENT_TYPE_LAIN_LAIN = 'lain_lain';
@@ -93,6 +97,7 @@ class User extends Authenticatable
         'grade_id',
         'phone_number',
         'status',
+        // Add any additional fillable attributes as required by migration
     ];
 
     /**
@@ -158,7 +163,7 @@ class User extends Authenticatable
         return $this->hasMany(LoanApplication::class, 'responsible_officer_id');
     }
 
-    // --- NEW: Helpdesk Relationships ---
+    // --- Helpdesk Relationships ---
 
     /**
      * Get the helpdesk tickets created by the user.
@@ -223,6 +228,9 @@ class User extends Authenticatable
         return $this->hasRole('HOD');
     }
 
+    /**
+     * Check if the user has at least the required grade level.
+     */
     public function hasGradeLevel(int $requiredGradeLevel): bool
     {
         if (! $this->grade) {
@@ -231,6 +239,9 @@ class User extends Authenticatable
         return $this->grade->level >= $requiredGradeLevel;
     }
 
+    /**
+     * Accessor for full name (with title).
+     */
     public function getFullNameAttribute(): string
     {
         return ($this->title ? $this->title . ' ' : '') . $this->name;

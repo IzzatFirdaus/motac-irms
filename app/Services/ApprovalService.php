@@ -6,7 +6,6 @@ namespace App\Services;
 
 use App\Models\Approval;
 use App\Models\LoanApplication;
-use App\Models\LoanTransaction;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -47,6 +46,45 @@ class ApprovalService
             Log::info(sprintf('Approval record created for Loan Application ID %d, Level %s, Approver ID %d.', $loanApplication->id, $level, $approver->id));
 
             return $approval;
+        });
+    }
+
+    /**
+     * Record a decision for an approval task.
+     *
+     * @param Approval $approval The approval model instance.
+     * @param string $decision The decision made (e.g., 'approved', 'rejected').
+     * @param string|null $notes Optional notes for the decision.
+     * @param array $approvalItems Additional approval items (if any, for loan applications).
+     * @return void
+     */
+    public function recordApprovalDecision(Approval $approval, string $decision, ?string $notes = null, array $approvalItems = []): void
+    {
+        DB::transaction(function () use ($approval, $decision, $notes, $approvalItems) {
+            // Set status and timestamps based on decision
+            $approval->status = $decision;
+            $approval->notes = $notes;
+
+            if ($decision === Approval::STATUS_APPROVED) {
+                $approval->approved_at = now();
+            } elseif ($decision === Approval::STATUS_REJECTED) {
+                $approval->rejected_at = now();
+            } elseif ($decision === Approval::STATUS_CANCELED) {
+                $approval->canceled_at = now();
+            }
+
+            $approval->save();
+
+            // If there are approvalItems, you can process them for child records (e.g., for loan applications)
+            // This is left as a placeholder for extensibility
+            // foreach ($approvalItems as $itemId => $itemDecision) { ... }
+
+            Log::info('Approval decision recorded.', [
+                'approval_id' => $approval->id,
+                'decision' => $decision,
+                'notes' => $notes,
+                'approval_items' => $approvalItems,
+            ]);
         });
     }
 
@@ -93,7 +131,6 @@ class ApprovalService
                 // (e.g., support officers or inventory managers)
                 $issuingOfficers = User::whereHasRole('issuing_officer')->get(); // Example: Fetch users with 'issuing_officer' role
                 foreach ($issuingOfficers as $officer) {
-                    // Fix: Call the correct method on NotificationService
                     $this->notificationService->notifyLoanApplicationReadyForIssuance($officer, $loanApplication);
                 }
             }

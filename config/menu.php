@@ -2,6 +2,9 @@
 
 // config/menu.php
 
+// MOTAC IRMS v4.0: EmailApplication/email provisioning menu entries removed.
+// Helpdesk menu items added as per v4.0 checklist and verticalMenu.json structure.
+
 return [
   'menu' => [
     [
@@ -18,39 +21,39 @@ return [
     [
       'name' => 'menu.my_applications.title',
       'icon' => 'folder-check',
-      'routeNamePrefix' => 'email-applications.index,loan-applications.index', // Keep as is for prefix matching
+      'routeNamePrefix' => 'loan-applications.index,helpdesk-tickets.index',
       'role' => ['User', 'Admin', 'BPM Staff', 'IT Admin', 'Approver', 'HOD'],
       'submenu' => [
-        [
-          'url' => '/email-applications',
-          'name' => 'menu.my_applications.email',
-          'icon' => 'envelope-paper-fill',
-          'routeName' => 'email-applications.index',
-        ],
         [
           'url' => '/loan-applications',
           'name' => 'menu.my_applications.loan',
           'icon' => 'laptop-fill',
           'routeName' => 'loan-applications.index',
         ],
+        [
+          'url' => '/helpdesk-tickets',
+          'name' => 'menu.my_applications.helpdesk',
+          'icon' => 'life-preserver',
+          'routeName' => 'helpdesk-tickets.index',
+        ],
       ],
     ],
     [
       'name' => 'menu.apply_for_resources.title',
-      'icon' => 'file-earmark-plus',
+      'icon' => 'file-earmark-plus-fill',
       'role' => ['User'],
       'submenu' => [
         [
-          'url' => '/apply/email-account',
-          'name' => 'menu.apply_for_resources.email_account',
-          'icon' => 'envelope-plus-fill',
-          'routeName' => 'email-applications.create',
+          'url' => '/loan-applications/create',
+          'name' => 'menu.apply_for_resources.loan',
+          'icon' => 'box-arrow-up-right',
+          'routeName' => 'loan-applications.create',
         ],
         [
-          'url' => '/apply/loan-application',
-          'name' => 'menu.apply_for_resources.loan_application',
-          'icon' => 'laptop-fill',
-          'routeName' => 'loan-applications.create',
+          'url' => '/helpdesk-tickets/create',
+          'name' => 'menu.apply_for_resources.helpdesk_ticket',
+          'icon' => 'ticket-fill',
+          'routeName' => 'helpdesk-tickets.create',
         ],
       ],
     ],
@@ -60,13 +63,13 @@ return [
       'routeName' => 'approvals.dashboard',
       'role' => ['Admin', 'Approver', 'HOD'],
       'submenu' => [
-        // Add specific approval sub-items if needed, e.g., 'email-approvals.index', 'loan-approvals.index'
+        // Add specific approval sub-items if needed, e.g., 'loan-approvals.index'
       ],
     ],
     [
       'name' => 'menu.resource_inventory.title',
       'icon' => 'boxes',
-      'routeNamePrefix' => 'equipment.index,equipment.show,equipment.create,equipment.edit,loan-transactions.index,loan-transactions.show', // Keep as is for prefix matching
+      'routeNamePrefix' => 'equipment.index,equipment.show,equipment.create,equipment.edit,loan-transactions.index,loan-transactions.show',
       'role' => ['Admin', 'BPM Staff', 'IT Admin'],
       'submenu' => [
         [
@@ -83,7 +86,6 @@ return [
         ],
       ],
     ],
-
     // Reports & Analytics Section
     [
       'menuHeader' => 'menu.section.reports_analytics',
@@ -108,44 +110,39 @@ return [
           'routeName' => 'reports.loan-applications',
         ],
         [
-          'url' => '/reports/email-accounts', // Assuming this route exists and matches email_applications
-          'name' => 'menu.reports.email_applications_report',
-          'icon' => 'envelope-paper-fill',
-          'routeName' => 'reports.email-accounts',
-          'role' => ['Admin', 'IT Admin'], // Restrict to Admin and IT Admin based on common usage
+          // Helpdesk ticket report
+          'url' => '/reports/helpdesk-tickets',
+          'name' => 'menu.reports.helpdesk_report',
+          'icon' => 'life-preserver',
+          'routeName' => 'reports.helpdesk-tickets',
         ],
         [
-          // This is the specific update for the User Activity Log
+          // User Activity Log
           'url' => '/reports/activity-log',
           'name' => 'menu.reports.user_activity_report',
-          'icon' => 'person-check-fill', // Updated icon to bi bi-person-check-fill
-          'routeName' => 'reports.activity-log', // <--- IMPORTANT: Matches the Livewire route
-          'role' => ['Admin', 'BPM Staff', 'IT Admin'],
+          'icon' => 'person-check-fill',
+          'routeName' => 'reports.activity-log',
         ],
         [
           'url' => '/reports/loan-history',
           'name' => 'menu.reports.loan_history_report',
           'icon' => 'clock-history',
           'routeName' => 'reports.loan-history',
-          'role' => ['Admin', 'BPM Staff'],
         ],
         [
           'url' => '/reports/utilization-report',
           'name' => 'menu.reports.utilization_report',
           'icon' => 'graph-up',
           'routeName' => 'reports.utilization-report',
-          'role' => ['Admin', 'BPM Staff', 'IT Admin'],
         ],
         [
           'url' => '/reports/loan-status-summary',
           'name' => 'menu.reports.loan_status_summary_report',
           'icon' => 'pie-chart-fill',
           'routeName' => 'reports.loan-status-summary',
-          'role' => ['Admin', 'BPM Staff'],
         ],
       ],
     ],
-
     // System Settings Section (Admin Only)
     [
       'menuHeader' => 'menu.section.system_settings',

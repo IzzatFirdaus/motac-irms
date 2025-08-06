@@ -14,6 +14,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
+/**
+ * Service class to handle logic related to loan transactions (issue, return, etc.)
+ * for ICT equipment.
+ */
 final class LoanTransactionService
 {
     private const LOG_AREA = 'LoanTransactionService: ';
@@ -27,13 +31,22 @@ final class LoanTransactionService
         $this->notificationService = $notificationService;
     }
 
+    /**
+     * Process a new equipment issue transaction for a loan application.
+     *
+     * @param LoanApplication $loanApplication
+     * @param array $itemsPayload
+     * @param User $issuingOfficer
+     * @param array $transactionDetails
+     * @return LoanTransaction
+     */
     public function processNewIssue(
         LoanApplication $loanApplication,
         array $itemsPayload,
         User $issuingOfficer,
         array $transactionDetails
     ): LoanTransaction {
-        Log::info(self::LOG_AREA.sprintf('Processing new issue for LA ID: %d by User ID: %d', $loanApplication->id, $issuingOfficer->id), [
+        Log::info(self::LOG_AREA . sprintf('Processing new issue for LA ID: %d by User ID: %d', $loanApplication->id, $issuingOfficer->id), [
             'item_count' => count($itemsPayload),
             'details_keys' => array_keys($transactionDetails),
         ]);
@@ -49,6 +62,7 @@ final class LoanTransactionService
         }, $itemsPayload);
 
         return DB::transaction(function () use ($loanApplication, $itemDataForTransaction, $issuingOfficer, $transactionDetails) {
+            // Create the loan transaction of type "issue"
             $transaction = $loanApplication->loanTransactions()->create([
                 'type' => LoanTransaction::TYPE_ISSUE,
                 'transaction_date' => Carbon::now(),
@@ -58,6 +72,7 @@ final class LoanTransactionService
                 'accessories_checklist_on_issue' => json_encode($transactionDetails['accessories'] ?? []),
             ]);
 
+            // For each equipment item, create transaction item and update equipment status
             foreach ($itemDataForTransaction as $itemData) {
                 $transactionItem = $transaction->loanTransactionItems()->create($itemData);
 
@@ -66,30 +81,40 @@ final class LoanTransactionService
                     $equipment->status = Equipment::STATUS_ON_LOAN;
                     $equipment->current_loan_id = $transaction->id;
                     $equipment->save();
-                    Log::info(self::LOG_AREA.sprintf('Equipment ID %d status set to ON_LOAN for transaction ID %d.', $equipment->id, $transaction->id));
+                    Log::info(self::LOG_AREA . sprintf('Equipment ID %d status set to ON_LOAN for transaction ID %d.', $equipment->id, $transaction->id));
                 } else {
-                    Log::error(self::LOG_AREA.sprintf('Equipment ID %d not found for transaction item creation.', $itemData['equipment_id']));
+                    Log::error(self::LOG_AREA . sprintf('Equipment ID %d not found for transaction item creation.', $itemData['equipment_id']));
                     throw new RuntimeException('Equipment not found for transaction item.');
                 }
             }
 
+            // Update loan application status and issued_at timestamp
             $loanApplication->status = LoanApplication::STATUS_ISSUED;
             $loanApplication->issued_at = Carbon::now();
             $loanApplication->save();
 
-            // Fix: Call the correct method on NotificationService
+            // Notify user/applicant of issue
             $this->notificationService->notifyLoanIssued(
                 $loanApplication->user,
                 $loanApplication,
                 $transaction
             );
 
-            Log::info(self::LOG_AREA.sprintf('Loan Application ID %d successfully issued via transaction ID %d.', $loanApplication->id, $transaction->id));
+            Log::info(self::LOG_AREA . sprintf('Loan Application ID %d successfully issued via transaction ID %d.', $loanApplication->id, $transaction->id));
 
             return $transaction;
         });
     }
 
+    /**
+     * Update an existing loan transaction as issued (when confirming issuance).
+     *
+     * @param LoanTransaction $transaction
+     * @param array $loanApplicationItems
+     * @param array $accessories
+     * @param string|null $notes
+     * @return void
+     */
     public function issueLoanTransaction(
         LoanTransaction $transaction,
         array $loanApplicationItems,
@@ -102,13 +127,13 @@ final class LoanTransactionService
             $transaction->status = LoanTransaction::STATUS_ISSUED;
             $transaction->transaction_date = Carbon::now();
             $transaction->save();
-            Log::info(self::LOG_AREA.sprintf('Loan Transaction ID %d updated and marked as ISSUED.', $transaction->id));
+            Log::info(self::LOG_AREA . sprintf('Loan Transaction ID %d updated and marked as ISSUED.', $transaction->id));
 
             foreach ($loanApplicationItems as $itemData) {
                 $transactionItem = LoanTransactionItem::find($itemData['id']);
 
                 if (!$transactionItem) {
-                    Log::error(self::LOG_AREA.sprintf('Loan Transaction Item ID %d not found during issueLoanTransaction.', $itemData['id']));
+                    Log::error(self::LOG_AREA . sprintf('Loan Transaction Item ID %d not found during issueLoanTransaction.', $itemData['id']));
                     throw new RuntimeException('Loan Transaction Item not found.');
                 }
 
@@ -121,16 +146,16 @@ final class LoanTransactionService
                     $equipment->status = Equipment::STATUS_ON_LOAN;
                     $equipment->current_loan_id = $transaction->id;
                     $equipment->save();
-                    Log::info(self::LOG_AREA.sprintf('Equipment ID %d status set to ON_LOAN during issue transaction.', $equipment->id));
+                    Log::info(self::LOG_AREA . sprintf('Equipment ID %d status set to ON_LOAN during issue transaction.', $equipment->id));
                 } else {
-                    Log::error(self::LOG_AREA.sprintf('Equipment not found for Loan Transaction Item ID %d during issue.', $transactionItem->id));
+                    Log::error(self::LOG_AREA . sprintf('Equipment not found for Loan Transaction Item ID %d during issue.', $transactionItem->id));
                     throw new RuntimeException('Equipment not found for transaction item.');
                 }
             }
 
             $transaction->loanApplication->updateOverallStatusAfterTransaction();
 
-            // Fix: Call the correct method on NotificationService
+            // Notify applicant of issue
             $this->notificationService->notifyLoanIssued(
                 $transaction->loanApplication->user,
                 $transaction->loanApplication,
@@ -139,6 +164,15 @@ final class LoanTransactionService
         });
     }
 
+    /**
+     * Update a loan transaction as returned, update equipment and notify applicant.
+     *
+     * @param LoanTransaction $transaction
+     * @param array $loanTransactionItemsData
+     * @param array $accessories
+     * @param string|null $notes
+     * @return void
+     */
     public function returnLoanTransaction(
         LoanTransaction $transaction,
         array $loanTransactionItemsData,
@@ -151,13 +185,13 @@ final class LoanTransactionService
             $transaction->transaction_date = Carbon::now();
             $transaction->status = $this->determineOverallReturnTransactionStatus($loanTransactionItemsData);
             $transaction->save();
-            Log::info(self::LOG_AREA.sprintf('Loan Transaction ID %d updated and marked as %s.', $transaction->id, $transaction->status));
+            Log::info(self::LOG_AREA . sprintf('Loan Transaction ID %d updated and marked as %s.', $transaction->id, $transaction->status));
 
             foreach ($loanTransactionItemsData as $itemData) {
                 $transactionItem = LoanTransactionItem::find($itemData['id']);
 
                 if (!$transactionItem) {
-                    Log::error(self::LOG_AREA.sprintf('Loan Transaction Item ID %d not found during returnLoanTransaction.', $itemData['id']));
+                    Log::error(self::LOG_AREA . sprintf('Loan Transaction Item ID %d not found during returnLoanTransaction.', $itemData['id']));
                     throw new RuntimeException('Loan Transaction Item not found.');
                 }
 
@@ -188,16 +222,16 @@ final class LoanTransactionService
                     }
                     $equipment->current_loan_id = null;
                     $equipment->save();
-                    Log::info(self::LOG_AREA.sprintf('Equipment ID %d status set to %s during return transaction.', $equipment->id, $equipment->status));
+                    Log::info(self::LOG_AREA . sprintf('Equipment ID %d status set to %s during return transaction.', $equipment->id, $equipment->status));
                 } else {
-                    Log::error(self::LOG_AREA.sprintf('Equipment not found for Loan Transaction Item ID %d during return.', $transactionItem->id));
+                    Log::error(self::LOG_AREA . sprintf('Equipment not found for Loan Transaction Item ID %d during return.', $transactionItem->id));
                     throw new RuntimeException('Equipment not found for transaction item.');
                 }
             }
 
             $transaction->loanApplication->updateOverallStatusAfterTransaction();
 
-            // Fix: Call the correct method on NotificationService
+            // Notify applicant of return
             $this->notificationService->notifyLoanReturned(
                 $transaction->loanApplication->user,
                 $transaction->loanApplication,
@@ -206,6 +240,103 @@ final class LoanTransactionService
         });
     }
 
+    /**
+     * Process the return of equipment for an existing loan transaction (called from controller).
+     *
+     * @param LoanTransaction $loanTransaction The original issue transaction.
+     * @param array $items An array of items being returned (expected structure: quantity, equipment_id, etc.).
+     * @param User $returnAcceptingOfficer The user accepting the returned items.
+     * @param array $details Additional request details, e.g., accessories or notes.
+     * @return void
+     */
+    public function processExistingReturn(
+        LoanTransaction $loanTransaction,
+        array $items,
+        User $returnAcceptingOfficer,
+        array $details = []
+    ): void {
+        DB::transaction(function () use ($loanTransaction, $items, $returnAcceptingOfficer, $details) {
+            // Create a new LoanTransaction of type 'return'
+            $returnTransaction = $loanTransaction->replicate();
+            $returnTransaction->type = LoanTransaction::TYPE_RETURN;
+            $returnTransaction->issuing_officer_id = null;
+            $returnTransaction->receiving_officer_id = null;
+            $returnTransaction->returning_officer_id = $returnAcceptingOfficer->id;
+            $returnTransaction->return_accepting_officer_id = $returnAcceptingOfficer->id;
+            $returnTransaction->transaction_date = now();
+            $returnTransaction->status = LoanTransaction::STATUS_RETURNED;
+            $returnTransaction->related_transaction_id = $loanTransaction->id;
+            if (isset($details['return_notes'])) {
+                $returnTransaction->return_notes = $details['return_notes'];
+            }
+            $returnTransaction->save();
+
+            // Save returned items and update equipment status
+            foreach ($items as $item) {
+                $returnTransaction->loanTransactionItems()->create([
+                    'equipment_id' => $item['equipment_id'],
+                    'quantity_transacted' => $item['quantity_transacted'],
+                    'status' => $item['status'] ?? LoanTransactionItem::STATUS_ITEM_RETURNED,
+                    'condition_on_return' => $item['condition_on_return'] ?? Equipment::CONDITION_GOOD,
+                    'item_notes' => $item['item_notes'] ?? null,
+                ]);
+
+                $equipment = Equipment::find($item['equipment_id']);
+                if ($equipment) {
+                    // Set equipment status based on return condition
+                    switch ($item['condition_on_return'] ?? Equipment::CONDITION_GOOD) {
+                        case Equipment::CONDITION_GOOD:
+                            $equipment->status = Equipment::STATUS_AVAILABLE;
+                            break;
+                        case Equipment::CONDITION_MINOR_DAMAGE:
+                        case Equipment::CONDITION_MAJOR_DAMAGE:
+                        case Equipment::CONDITION_UNSERVICEABLE:
+                            $equipment->status = Equipment::STATUS_DAMAGED;
+                            break;
+                        case Equipment::CONDITION_LOST:
+                            $equipment->status = Equipment::STATUS_LOST;
+                            break;
+                        default:
+                            $equipment->status = Equipment::STATUS_AVAILABLE;
+                            break;
+                    }
+                    $equipment->current_loan_id = null;
+                    $equipment->save();
+                    Log::info(self::LOG_AREA . sprintf('Equipment ID %d status updated during existing return.', $equipment->id));
+                }
+            }
+
+            // Optionally update the original transaction status
+            $loanTransaction->status = LoanTransaction::STATUS_RETURNED;
+            $loanTransaction->save();
+
+            // Update the parent loan application status
+            if ($loanTransaction->loanApplication) {
+                $loanTransaction->loanApplication->updateOverallStatusAfterTransaction();
+            }
+
+            // Notify user/applicant about return
+            $this->notificationService->notifyLoanReturned(
+                $loanTransaction->loanApplication->user,
+                $loanTransaction->loanApplication,
+                $returnTransaction
+            );
+
+            Log::info(self::LOG_AREA . sprintf(
+                'Processed return for original transaction ID %d (return transaction ID %d) by user ID %d.',
+                $loanTransaction->id,
+                $returnTransaction->id,
+                $returnAcceptingOfficer->id
+            ));
+        });
+    }
+
+    /**
+     * Determines the item return status based on the condition on return.
+     *
+     * @param string $conditionOnReturn
+     * @return string
+     */
     private function determineItemReturnStatus(string $conditionOnReturn): string
     {
         return match ($conditionOnReturn) {
@@ -217,6 +348,12 @@ final class LoanTransactionService
         };
     }
 
+    /**
+     * Determines the overall transaction return status by inspecting all items' conditions.
+     *
+     * @param array $itemData
+     * @return string
+     */
     private function determineOverallReturnTransactionStatus(array $itemData): string
     {
         $hasDamage = false;
@@ -229,7 +366,6 @@ final class LoanTransactionService
                 $hasLost = true;
                 $allReturnedGood = false;
             }
-
             if (in_array($condition, [Equipment::CONDITION_MINOR_DAMAGE, Equipment::CONDITION_MAJOR_DAMAGE, Equipment::CONDITION_UNSERVICEABLE])) {
                 $hasDamage = true;
                 $allReturnedGood = false;
