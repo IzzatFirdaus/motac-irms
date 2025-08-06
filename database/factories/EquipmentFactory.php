@@ -84,7 +84,7 @@ class EquipmentFactory extends Factory
         $purchaseDate = $purchaseDateRaw ? Carbon::instance($purchaseDateRaw) : null;
 
         $warrantyExpiryDate = null;
-        if ($purchaseDate instanceof \Illuminate\Support\Carbon) {
+        if ($purchaseDate instanceof Carbon) {
             $warrantyExpiryDate = $purchaseDate->copy()->addYears($this->faker->numberBetween(1, 3));
         }
 

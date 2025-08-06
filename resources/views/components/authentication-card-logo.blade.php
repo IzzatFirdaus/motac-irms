@@ -1,19 +1,9 @@
 {{-- resources/views/components/authentication-card-logo.blade.php --}}
-{{-- This component is well-implemented for a themeable logo on auth cards. --}}
-<a class="d-flex justify-content-center mb-4 app-brand-link" href="{{ url('/') }}"> {{-- Added app-brand-link for consistency if needed --}}
+<a class="d-flex justify-content-center mb-4 app-brand-link" href="{{ url('/') }}">
     <span class="app-brand-logo demo">
-        {{-- The SVG below uses "currentColor" for its main path, which is good for theming via CSS.
-         The gradients are part of its design and may remain fixed or be adapted if the SVG source changes.
-         The height is set to 40px as per Design Doc 7.1 (Header logo).
-    --}}
         <svg viewBox="0 0 148 80" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-            style="height: 40px; width: auto; color: var(--bs-primary); {{-- Example: Setting color to Bootstrap primary --}}">
+            style="height: 40px; width: auto; color: var(--bs-primary);">
             <defs>
-                {{-- Renamed IDs to be unique if this component is used multiple times on a page, or ensure they are scoped if that's an issue.
-            For inline SVGs, unique IDs are generally good practice.
-            However, for simple display, browser might handle duplicate gradient IDs if they are self-contained.
-            For robustness, added a suffix.
-        --}}
                 <linearGradient id="authCardLogo_a1" x1="46.49" x2="62.46" y1="53.39" y2="48.2"
                     gradientUnits="userSpaceOnUse">
                     <stop stop-opacity=".25" offset="0"></stop>

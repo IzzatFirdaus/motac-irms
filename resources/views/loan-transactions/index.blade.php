@@ -10,9 +10,11 @@
             <h1 class="h2 fw-bold text-dark mb-0">{{ __('Senarai Semua Transaksi Pinjaman ICT') }}</h1>
         </div>
 
+        {{-- General alert for system messages --}}
         @include('_partials._alerts.alert-general') {{-- CORRECTED INCLUDE PATH --}}
 
         @isset($loanTransactions)
+            {{-- If there are no transactions, show info alert --}}
             @if ($loanTransactions->isEmpty())
                 <div class="alert alert-info text-center shadow-sm rounded-3" role="alert">
                     <i class="bi bi-info-circle-fill fs-3 me-2 align-middle"></i>
@@ -72,9 +74,11 @@
                         </div>
                     </div>
                 </div>
-                @if ($loanTransactions instanceof \Illuminate\Contracts\Pagination\LengthAwarePaginator && $loanTransactions->hasPages())
+                {{-- Pagination: Only show if $loanTransactions is paginated --}}
+                @if(method_exists($loanTransactions, 'links') && $loanTransactions->hasPages())
                     <div class="mt-4 d-flex justify-content-center">
-                        {{ $loanTransactions->links() }}
+                        {{-- Use the default pagination view or specify a custom view if needed --}}
+                        {!! $loanTransactions->links() !!}
                     </div>
                 @endif
             @endif

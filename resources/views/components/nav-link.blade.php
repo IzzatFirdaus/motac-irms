@@ -1,9 +1,9 @@
 {{-- resources/views/components/nav-link.blade.php --}}
-@props(['active' => false, 'icon' => null]) {{-- Added optional icon prop --}}
+@props(['active' => false, 'icon' => null])
 
 @php
 $classes = ($active ?? false)
-            ? 'nav-link active fw-semibold d-flex align-items-center' /* Changed to fw-semibold for stronger active state */
+            ? 'nav-link active fw-semibold d-flex align-items-center'
             : 'nav-link d-flex align-items-center';
 @endphp
 

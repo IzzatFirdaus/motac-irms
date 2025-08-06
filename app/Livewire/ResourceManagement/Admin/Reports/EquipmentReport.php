@@ -10,10 +10,12 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title; // Corrected: Added use statement for Title attribute
 use Livewire\Component;
 use Livewire\WithPagination;
 
 #[Layout('layouts.app')]
+#[Title('Laporan Peralatan ICT')] // Added Livewire Title attribute
 class EquipmentReport extends Component
 {
     use AuthorizesRequests;
@@ -58,7 +60,7 @@ class EquipmentReport extends Component
         $query = Equipment::with([
             'department:id,name',
             'creator:id,name',
-            'definedLocation:id,name', // Assuming relation name in Equipment model for location_id
+            'location:id,name', // Corrected: Assuming 'location' is the relationship name in Equipment model
             'equipmentCategory:id,name', // Assuming relation name
         ]);
 
@@ -108,17 +110,17 @@ class EquipmentReport extends Component
     // Options for filters
     public function getAssetTypeOptionsProperty(): array
     {
-        return Equipment::$ASSET_TYPES_LABELS ?? (defined(Equipment::class.'::ASSET_TYPE_LAPTOP') ? Equipment::getAssetTypeOptions() : []);
+        return Equipment::getAssetTypeOptions(); // Corrected: Call static method
     }
 
     public function getStatusOptionsProperty(): array
     {
-        return Equipment::$STATUSES_LABELS ?? (defined(Equipment::class.'::STATUS_AVAILABLE') ? Equipment::getStatusOptions() : []);
+        return Equipment::getStatusOptions(); // Corrected: Call static method
     }
 
     public function getConditionStatusOptionsProperty(): array
     {
-        return Equipment::$CONDITION_STATUSES_LABELS ?? (defined(Equipment::class.'::CONDITION_NEW') ? Equipment::getConditionStatusOptions() : []);
+        return Equipment::getConditionStatusesList(); // Corrected: Call static method
     }
 
     public function getDepartmentOptionsProperty(): \Illuminate\Support\Collection
@@ -178,6 +180,6 @@ class EquipmentReport extends Component
             'departmentOptions' => $this->departmentOptionsProperty,
             'locationOptions' => $this->locationOptionsProperty,     // Added
             'categoryOptions' => $this->categoryOptionsProperty,     // Added
-        ])->title(__('Laporan Peralatan ICT'));
+        ]);
     }
 }

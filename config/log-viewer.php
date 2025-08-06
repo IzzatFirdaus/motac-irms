@@ -69,10 +69,9 @@ return [
 
     'middleware' => [
         'web',
-        'view_logs',
-        \Opcodes\LogViewer\Http\Middleware\AuthorizeLogViewer::class,
         'auth:sanctum', // Ensure user is authenticated
-
+        \App\Http\Middleware\ViewLogs::class, // Replaces string alias to avoid binding error
+        \Opcodes\LogViewer\Http\Middleware\AuthorizeLogViewer::class,
     ],
 
     /*

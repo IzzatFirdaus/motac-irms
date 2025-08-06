@@ -12,8 +12,7 @@ return [
         'min_loan_support_grade_level' => env('MOTAC_MIN_LOAN_SUPPORT_GRADE_LEVEL', 41),
 
         // Specific minimum grade level (numeric representation) for a supporting officer for Email/ID applications
-        // As per MyMail Form and system design (Section 7.2) & EmailApplicationService
-        'min_email_supporting_officer_grade_level' => env('MOTAC_MIN_EMAIL_SUPPORTING_OFFICER_GRADE_LEVEL', 9),
+        // 'min_email_supporting_officer_grade_level' => env('MOTAC_MIN_EMAIL_SUPPORTING_OFFICER_GRADE_LEVEL', 9), // REMOVED as per transformation plan
 
         // General minimum grade level for viewing any approval records, if not specifically overridden.
         // Used by ApprovalPolicy::viewAny as a general rule.
@@ -23,56 +22,40 @@ return [
         'min_loan_general_approver_grade_level' => env('MOTAC_MIN_LOAN_GENERAL_APPROVER_GRADE_LEVEL', 44), // Example: Grade 44 or higher
     ],
 
-    'email_provisioning' => [
-        'api_endpoint' => env('MOTAC_EMAIL_PROVISIONING_API_ENDPOINT'),
-        'api_key' => env('MOTAC_EMAIL_PROVISIONING_API_KEY'),
-        'default_domain' => env('MOTAC_EMAIL_DEFAULT_DOMAIN', 'motac.gov.my'), //
-    ],
+    // 'email_provisioning' => [ // REMOVED entire section as per transformation plan
+    //     'api_base_url' => env('EMAIL_PROVISIONING_API_BASE_URL', 'http://127.0.0.1:8001/api'),
+    //     'api_token' => env('EMAIL_PROVISIONING_API_TOKEN', 'your-secret-token'),
+    //     'default_domain' => env('EMAIL_PROVISIONING_DEFAULT_DOMAIN', 'motac.gov.my'),
+    //     'default_password_length' => env('EMAIL_PROVISIONING_DEFAULT_PASSWORD_LENGTH', 12),
+    // ],
 
-    'ict_equipment_loan' => [
-        'default_loan_duration_days' => env('MOTAC_DEFAULT_LOAN_DURATION_DAYS', 7),
-        'bpm_notification_recipient_email' => env('MOTAC_BPM_NOTIFICATION_RECIPIENT_EMAIL', 'bpm.ict@motac.gov.my'), // Example email
-        'max_items_per_loan' => env('MOTAC_MAX_ITEMS_PER_LOAN', 5), // Example value
-        'processing_time_working_days' => env('MOTAC_LOAN_PROCESSING_TIME_DAYS', 3), // As per System Design (Section 7.3)
-    ],
-
-    'mymail_form_options' => [ // REVISED: Corrected structure
-        // For EmailApplicationForm, mapping to users.appointment_type enum
-        //  Dropdown Menu Options for MyMail Integration" (Section 2. Pelantikan)
-        'appointment_types' => [
-            '' => '- Pilih Pelantikan -', // Default unselected option
-            'baharu' => 'Baharu', // "Value "1": Baharu" in Supplementary Document
-            'kenaikan_pangkat_pertukaran' => 'Kenaikan Pangkat/Pertukaran', // "Value "2": Kenaikan Pangkat/Pertukaran" in Supplementary Document
-            'lain_lain' => 'Lain-lain', // "Value "3": Lain-lain"
-        ], // REVISED: Closing bracket for appointment_types was moved
-
-        // For EmailApplicationForm, mapping to users.level
-        //  Dropdown Menu Options for MyMail Integration" (Section 6. Aras)
-        'aras_options' => [ // REVISED: Moved to be a direct child of mymail_form_options
-            '' => '- Pilih Aras -', // Default unselected option
-            '1' => '1',
-            '2' => '2',
-            '3' => '3',
-            '4' => '4',
-            '5' => '5',
-            '6' => '6',
-            '7' => '7',
-            '8' => '8',
-            '9' => '9',
-            '10' => '10',
-            '11' => '11',
-            '12' => '12',
-            '13' => '13',
-            '14' => '14',
-            '15' => '15',
-            '16' => '16',
-            '17' => '17',
-            '18' => '18',
+    'mymail_form_options' => [
+        'unit_options' => [ // Options for the 'Unit' field on MyMail form_options
+            '' => '- Pilih Unit -', // Default unselected option
+            '1' => 'Bahagian Pembangunan Sumber Manusia (BPSM)',
+            '2' => 'Bahagian Kewangan',
+            '3' => 'Bahagian Audit Dalam',
+            '4' => 'Bahagian Pengurusan Maklumat (BPM)',
+            '5' => 'Unit Komunikasi Korporat (UKK)',
+            '6' => 'Unit Integriti',
+            '7' => 'Unit Undang-Undang',
+            '8' => 'Unit Naziran',
+            '9' => 'Unit Khidmat Pengurusan',
+            '10' => 'Unit Perolehan',
+            '11' => 'Unit Akaun',
+            '12' => 'Unit Pembangunan',
+            '13' => 'Unit Pelancongan',
+            '14' => 'Unit Kebudayaan',
+            '15' => 'Unit Kesenian',
+            '16' => 'Unit Warisan',
+            '17' => 'Unit Sukan',
+            '18' => 'Unit Antarabangsa',
+            '19' => 'Unit Penyelidikan & Pembangunan',
+            '20' => 'Unit Perhubungan Awam',
+            '21' => 'Perundangan',
+            '25' => 'Sekretariat Visit Malaysia',
         ],
-
-        // For EmailApplicationForm, for the "Gred Penyokong" dropdown.
-        //  Dropdown Menu Options for MyMail Integration" (Section 7. Gred Penyokong)
-        'supporting_officer_grades' => [ // REVISED: Moved to be a direct child of mymail_form_options
+        'grade_options' => [ // Grade options from MyMail form_options
             '' => '- Pilih Gred -', // Default unselected option
             'Turus III' => 'Turus III',
             'Jusa A' => 'Jusa A',
@@ -100,17 +83,27 @@ return [
         // Add other common accessories as needed
     ],
 
+    // Notification settings
     'notifications' => [
-        'admin_email_recipient' => env('MOTAC_ADMIN_EMAIL_RECIPIENT', 'sysadmin@motac.gov.my'), // Example email
-        // Add other notification-related configs if needed
+        'admin_email_recipient' => env('MOTAC_ADMIN_EMAIL_RECIPIENT', 'sysadmin@motac.gov.my'),
+        // Add more notification configs as needed
+    ],
+
+    // Helpdesk system configuration section
+    'helpdesk' => [
+        'default_category' => env('HELPDESK_DEFAULT_CATEGORY', 'General'),
+        'default_priority' => env('HELPDESK_DEFAULT_PRIORITY', 'Medium'),
+        'support_email' => env('HELPDESK_SUPPORT_EMAIL', 'helpdesk@motac.gov.my'),
+        // SLA settings (example: hours until escalation for high priority)
+        'sla_hours_high_priority' => env('HELPDESK_SLA_HOURS_HIGH', 8),
+        'sla_hours_medium_priority' => env('HELPDESK_SLA_HOURS_MEDIUM', 24),
+        'sla_hours_low_priority' => env('HELPDESK_SLA_HOURS_LOW', 72),
     ],
 
     // Application-wide date formats (can also be in config/app.php, but placing here for module-specifics if any)
     'date_formats' => [
-        'date_my' => 'd/m/Y', // Example: 29/05/2025
-        'datetime_my' => 'd/m/Y H:i A', // Example: 29/05/2025 10:40 PM
+        'date_format_my_short' => 'd M Y',           // Example: 28 Mei 2025
+        'date_format_my_long' => 'j F Y, l',        // Example: 28 Mei 2025, Rabu
+        'datetime_format_my' => 'd M Y, h:i A',     // Example: 28 Mei 2025, 10:30 PG
     ],
-
-    // Other application-specific settings
-    'session_lifetime' => env('SESSION_LIFETIME', 120), // In minutes, aligns with system design note on session
 ];

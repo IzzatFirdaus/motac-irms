@@ -40,117 +40,79 @@
                     </div>
                 @endif
 
+
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-light py-3">
-                        <h3 class="h5 card-title fw-semibold mb-0"><i
-                                class="bi bi-key-fill me-2"></i>{{ __('Maklumat Akaun Pengguna') }}</h3>
+                        <h2 class="h5 card-title mb-0 fw-semibold">{{ __('Maklumat Asas Pengguna') }}</h2>
                     </div>
-                    <div class="card-body p-3 p-md-4">
-                        <dl class="row g-2 small">
-                            <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Nama Paparan:') }}</dt>
-                            <dd class="col-sm-8 col-lg-9 text-dark">{{ $user->name ?? 'N/A' }}</dd>
+                    <div class="card-body p-4">
+                        <dl class="row g-3 small">
+                            <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Nama Penuh:') }}</dt>
+                            <dd class="col-sm-8 col-lg-9 text-dark">{{ $user->full_name ?? '-' }}</dd>
 
-                            <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Emel (Login):') }}</dt>
-                            <dd class="col-sm-8 col-lg-9 text-dark">{{ $user->email ?? 'N/A' }}</dd>
+                            <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Nama Pengguna (Login):') }}</dt>
+                            <dd class="col-sm-8 col-lg-9 text-dark">{{ $user->name ?? '-' }}</dd>
 
-                            <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Peranan:') }}</dt>
+                            <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('E-mel:') }}</dt>
+                            <dd class="col-sm-8 col-lg-9 text-dark">{{ $user->email ?? '-' }}</dd>
+
+                            <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('No. Telefon:') }}</dt>
+                            <dd class="col-sm-8 col-lg-9 text-dark">{{ $user->phone_number ?? '-' }}</dd>
+
+                            <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Jawatan:') }}</dt>
                             <dd class="col-sm-8 col-lg-9 text-dark">
-                                @forelse ($user->getRoleNames() as $roleName)
-                                    <span
-                                        class="badge bg-secondary-subtle text-secondary-emphasis fw-normal me-1">{{ $roleName }}</span>
+                                @if ($user->position)
+                                    {{ $user->position->name }}
+                                @else
+                                    -
+                                @endif
+                            </dd>
+
+                            <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Gred Jawatan:') }}</dt>
+                            <dd class="col-sm-8 col-lg-9 text-dark">
+                                @if ($user->grade)
+                                    {{ $user->grade->name }} ({{ $user->grade->level }})
+                                @else
+                                    -
+                                @endif
+                            </dd>
+
+                            <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Jabatan:') }}</dt>
+                            <dd class="col-sm-8 col-lg-9 text-dark">
+                                @if ($user->department)
+                                    {{ $user->department->name }}
+                                @else
+                                    -
+                                @endif
+                            </dd>
+
+                            <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Peranan Sistem:') }}</dt>
+                            <dd class="col-sm-8 col-lg-9 text-dark">
+                                @forelse ($user->roles as $role)
+                                    <span class="badge bg-primary me-1">{{ $role->name }}</span>
                                 @empty
-                                    {{ __('Tiada Peranan') }}
+                                    -
                                 @endforelse
                             </dd>
 
-                            <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Status Akaun:') }}</dt>
-                            <dd class="col-sm-8 col-lg-9">
-                                <span
-                                    class="badge rounded-pill {{ $user->status === 'active' ? 'bg-success-subtle text-success-emphasis' : 'bg-danger-subtle text-danger-emphasis' }}">
-                                    {{ __(Str::title($user->status ?? 'N/A')) }}
-                                </span>
+                            <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Status Pengguna:') }}</dt>
+                            <dd class="col-sm-8 col-lg-9 text-dark">
+                                @if ($user->is_active)
+                                    <span class="badge bg-success">{{ __('Aktif') }}</span>
+                                @else
+                                    <span class="badge bg-danger">{{ __('Tidak Aktif') }}</span>
+                                @endif
                             </dd>
-
-                            @if ($user->email_verified_at)
-                                <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Emel Disahkan Pada:') }}</dt>
+                            @if ($user->created_at)
+                                <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Dicipta Pada:') }}</dt>
                                 <dd class="col-sm-8 col-lg-9 text-dark">
-                                    {{ $user->email_verified_at?->translatedFormat('d M Y, H:i A') ?? '-' }}</dd>
+                                    {{ $user->created_at?->translatedFormat('d M Y, h:i A') ?? '-' }}</dd>
                             @endif
-
-                            <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Dicipta Pada:') }}</dt>
-                            <dd class="col-sm-8 col-lg-9 text-dark">
-                                {{ $user->created_at?->translatedFormat('d M Y, H:i A') ?? '-' }}</dd>
-
-                            <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Dikemaskini Pada:') }}</dt>
-                            <dd class="col-sm-8 col-lg-9 text-dark">
-                                {{ $user->updated_at?->translatedFormat('d M Y, H:i A') ?? '-' }}</dd>
-                        </dl>
-                    </div>
-                </div>
-
-                <div class="card shadow-sm">
-                    <div class="card-header bg-light py-3">
-                        <h3 class="h5 card-title fw-semibold mb-0"><i
-                                class="bi bi-person-lines-fill me-2"></i>{{ __('Butiran Tambahan MOTAC') }}</h3>
-                    </div>
-                    <div class="card-body p-3 p-md-4">
-                        <dl class="row g-2 small">
-                            <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Gelaran:') }}</dt>
-                            <dd class="col-sm-8 col-lg-9 text-dark">{{ $user->title ?? '-' }}</dd>
-
-                            <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Nama Penuh (IC/Passport):') }}</dt>
-                            <dd class="col-sm-8 col-lg-9 text-dark">{{ $user->full_name ?? ($user->name ?? 'N/A') }}</dd>
-                            {{-- Fallback to name if full_name is null --}}
-
-                            {{-- Employee ID from Employee model if linked, not directly on User model as per design --}}
-                            @if ($user->employee)
-                                <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('ID Pekerja (HRMS):') }}</dt>
+                            @if ($user->updated_at)
+                                <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Dikemaskini Pada') }}</dt>
                                 <dd class="col-sm-8 col-lg-9 text-dark">
-                                    <a href="{{ route('resource-management.admin.employees.show_profile', $user->employee) }}"
-                                        class="text-decoration-none">
-                                        {{ $user->employee->employee_id ?? 'N/A' }} <i
-                                            class="bi bi-box-arrow-up-right small"></i>
-                                    </a>
-                                </dd>
+                                    {{ $user->updated_at?->translatedFormat('d M Y, h:i A') ?? '-' }}</dd>
                             @endif
-
-                            <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('No. Kad Pengenalan (NRIC):') }}</dt>
-                            <dd class="col-sm-8 col-lg-9 text-dark">
-                                {{ $user->identification_number ?? ($user->nric ?? '-') }}</dd> {{-- Prioritize identification_number as per design --}}
-
-                            <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('No. Passport:') }}</dt>
-                            <dd class="col-sm-8 col-lg-9 text-dark">{{ $user->passport_number ?? '-' }}</dd>
-
-                            <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('No. Telefon Bimbit:') }}</dt>
-                            <dd class="col-sm-8 col-lg-9 text-dark">{{ $user->mobile_number ?? '-' }}</dd>
-
-                            <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Emel Peribadi:') }}</dt>
-                            <dd class="col-sm-8 col-lg-9 text-dark">{{ $user->personal_email ?? '-' }}</dd>
-
-                            <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Emel Rasmi MOTAC:') }}</dt>
-                            <dd class="col-sm-8 col-lg-9 text-dark">{{ $user->motac_email ?? '-' }}</dd>
-
-                            <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('ID Pengguna Rangkaian:') }}</dt>
-                            <dd class="col-sm-8 col-lg-9 text-dark">{{ $user->user_id_assigned ?? '-' }}</dd>
-
-                            <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Jabatan/Unit:') }}</dt>
-                            <dd class="col-sm-8 col-lg-9 text-dark">{{ $user->department->name ?? '-' }}</dd>
-
-                            <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Jawatan:') }}</dt>
-                            <dd class="col-sm-8 col-lg-9 text-dark">{{ $user->position->name ?? '-' }}</dd>
-
-                            <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Gred:') }}</dt>
-                            <dd class="col-sm-8 col-lg-9 text-dark">{{ $user->grade->name ?? '-' }}</dd>
-
-                            <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Taraf Perkhidmatan:') }}</dt>
-                            <dd class="col-sm-8 col-lg-9 text-dark">
-                                {{ $user->service_status_label ?? ($user->service_status ? __(Str::title(str_replace('_', ' ', $user->service_status))) : '-') }}
-                            </dd>
-
-                            <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Jenis Pelantikan:') }}</dt>
-                            <dd class="col-sm-8 col-lg-9 text-dark">
-                                {{ $user->appointment_type_label ?? ($user->appointment_type ? __(Str::title(str_replace('_', ' ', $user->appointment_type))) : '-') }}
-                            </dd>
                         </dl>
                     </div>
                     @can('delete', $user)

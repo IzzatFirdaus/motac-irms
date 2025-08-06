@@ -1,66 +1,133 @@
+/* custom.css for MOTAC IRMS
+   - Branding, status badges, forms, and responsive design
+   - Optimized for maximum cross-browser compatibility (IE 10+, Samsung Internet 2.0+, Edge, Chrome, Firefox)
+   - Updated: 2025-08-04 05:49:20 UTC by IzzatFirdaus
+*/
+
+/* Flatpickr calendar direction - ensures date picker displays left-to-right */
 .flatpickr-calendar {
-  direction: ltr;
+    direction: ltr;
 }
 
-/* resources/css/custom.css or imported into resources/css/app.css */
-
-/* 1. MOTAC Branding Variables (if not using a framework's variable system like Tailwind's) */
+/* 1. MOTAC Branding Variables - CSS Custom Properties for consistent theming */
 :root {
-    --motac-primary-color: #003366; /* Example MOTAC Blue */
-    --motac-secondary-color: #FFCC00; /* Example MOTAC Yellow */
-    --motac-text-color: #333333;
-    --motac-font-family: 'Arial', sans-serif; /* Example font */
-    --danger-color: #dc3545; /* For rejected status, errors */
-    --success-color: #28a745; /* For approved status, success messages */
-    --warning-color: #ffc107; /* For pending status, warnings */
+    --motac-primary-color: #003366; /* MOTAC Blue - primary brand color */
+    --motac-secondary-color: #FFCC00; /* MOTAC Yellow - secondary brand color */
+    --motac-text-color: #333333; /* Default text color */
+    --motac-font-family: 'Arial', sans-serif; /* Standard font stack */
+    --danger-color: #dc3545; /* Red for errors/rejected status */
+    --success-color: #28a745; /* Green for approved/success status */
+    --warning-color: #ffc107; /* Yellow for pending/warning status */
 }
 
-/* Body and General Typography */
+/* 2. Typography & General Styling - Base styles for consistent appearance */
 body {
     font-family: var(--motac-font-family);
     color: var(--motac-text-color);
-    line-height: 1.6;
+    line-height: 1.6; /* Improves readability */
 }
 
+/* Heading styles with MOTAC branding */
 h1, h2, h3, h4, h5, h6 {
-    font-family: var(--motac-font-family); /* Or a specific heading font */
+    font-family: var(--motac-font-family);
     color: var(--motac-primary-color);
 }
 
-/* Buttons */
+/* 3. Button Styles - Consistent button appearance across the application */
 .btn-primary {
     background-color: var(--motac-primary-color);
     color: white;
-    /* Add other button styles: padding, border, hover effects */
+    border: none;
+    padding: 0.5em 1.2em;
+    border-radius: 0.25em;
+    cursor: pointer;
+    transition: background 0.2s ease; /* Smooth hover transition */
+}
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: #00274d; /* Slightly darker shade for hover state */
 }
 
 .btn-secondary {
     background-color: var(--motac-secondary-color);
-    color: var(--motac-primary-color);
-    /* Add other button styles */
+    color: var(--motac-text-color);
+    border: none;
+    padding: 0.5em 1.2em;
+    border-radius: 0.25em;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+.btn-secondary:hover,
+.btn-secondary:focus {
+    background-color: #e6b800; /* Slightly darker yellow for hover state */
 }
 
-/* 2. Styling for Status Badges (from Helpers::getStatusColorClass()) */
+/* 4. Status Badges/Labels - Visual indicators for application and equipment status */
 .status-badge {
-    padding: 0.25em 0.6em;
-    border-radius: 0.25rem;
-    font-size: 0.875em;
-    font-weight: bold;
-    text-transform: uppercase;
+    display: inline-block;
+    padding: .25em .4em;
+    font-size: 75%;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap; /* Prevents text wrapping */
+    vertical-align: baseline;
+    border-radius: .25rem;
+    color: white;
 }
 
-.status-approved { /* Assuming Helpers::getStatusColorClass() returns 'status-approved' */
+/* Status badge container - for centering badges without using unsupported properties */
+.status-badge-container {
+    /* Using standard positioning instead of text-align for better compatibility */
+    position: relative;
+}
+.status-badge-container .status-badge {
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    width: fit-content; /* Modern browsers */
+    width: -moz-fit-content; /* Firefox */
+    width: -webkit-fit-content; /* Webkit browsers */
+}
+
+/* Flexbox container for centering - with comprehensive browser support */
+.status-badge-flex-container {
+    /* Modern flexbox */
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+
+    /* IE 10+ flexbox support */
+    display: -ms-flexbox;
+    -ms-flex-direction: row;
+    -ms-flex-pack: center;
+
+    /* Webkit flexbox (older Safari) */
+    display: -webkit-flex;
+    -webkit-flex-direction: row;
+    -webkit-justify-content: center;
+}
+
+/* IE-specific flexbox fallback using conditional comments alternative */
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+    .status-badge-flex-container {
+        display: -ms-flexbox;
+        -ms-flex-pack: center;
+        -ms-flex-direction: row;
+    }
+}
+
+/* Status-specific badge colors - matches application workflow states */
+.status-approved {
     background-color: var(--success-color);
     color: white;
 }
 
 .status-pending_support,
-.status-pending_admin,
 .status-pending_hod_review,
 .status-pending_bpm_review,
-.status-pending { /* Consolidated pending statuses */
+.status-pending {
     background-color: var(--warning-color);
-    color: #333;
+    color: #333; /* Dark text for better contrast on yellow background */
 }
 
 .status-rejected {
@@ -74,37 +141,179 @@ h1, h2, h3, h4, h5, h6 {
     color: white;
 }
 
-/* Add more status styles as needed: e.g., 'on_loan', 'draft', 'returned' */
 .status-on_loan {
-    background-color: #17a2b8; /* Example: Info color */
+    background-color: #17a2b8; /* Bootstrap info color */
     color: white;
 }
 
-/* 3. Form Styling */
+/* Additional status states for comprehensive coverage */
+.status-draft {
+    background-color: #6c757d; /* Muted gray for draft status */
+    color: white;
+}
+
+.status-returned {
+    background-color: #007bff; /* Blue for returned equipment */
+    color: white;
+}
+
+.status-overdue {
+    background-color: #dc3545; /* Red for overdue items */
+    color: white;
+}
+
+.status-cancelled {
+    background-color: #6c757d; /* Gray for cancelled applications */
+    color: white;
+}
+
+/* 5. Form Styling - Enhanced form appearance and usability */
 .form-group label.required::after {
     content: ' *';
     color: var(--danger-color);
     font-weight: bold;
 }
 
-/* Input field styling for consistency */
-/*.form-control {
-    /* Define consistent padding, borders, focus states etc. */
-/*}*/
-
-/* Styling for dynamic sections in forms, e.g., based on service_type_id */
-/*.conditional-field-section {*/
-    /* Styles for sections that show/hide */
-/*}
-
-/* 4. Responsive Design Example */
-@media (max-width: 768px) {
-    /* Adjustments for smaller screens */
-    .main-content {
-        padding: 10px;
-    }
-    /* Potentially hide some elements or stack them differently */
+/* Consistent input field styling */
+.form-control {
+    padding: 0.5em;
+    border: 1px solid #ccc;
+    border-radius: 0.25em;
+    transition: border-color 0.2s ease;
+    font-family: var(--motac-font-family);
+    font-size: 1em;
+    width: 100%; /* Ensures full width in container */
+    box-sizing: border-box; /* Includes padding in width calculation */
 }
 
-/* Add any styles for classes generated by Helpers::appClasses() */
-/* .some-dynamic-layout-class { ... } */
+.form-control:focus {
+    border-color: var(--motac-primary-color);
+    outline: none; /* Removes default browser outline */
+    box-shadow: 0 0 0 2px rgba(0, 51, 102, 0.2); /* Custom focus indicator */
+}
+
+/* Dynamic form sections - controlled via JavaScript for conditional fields */
+.conditional-field-section {
+    display: none; /* Hidden by default */
+    transition: opacity 0.3s ease; /* Smooth show/hide transition */
+}
+
+.conditional-field-section.active {
+    display: block;
+    opacity: 1;
+}
+
+/* 6. Responsive Design - Mobile-first approach for better user experience */
+@media (max-width: 768px) {
+    /* Stack flex items vertically on small screens */
+    .flex-container {
+        display: flex;
+        /* Support for all browsers including IE 10+ and Samsung Internet 2.0+ */
+        display: -ms-flexbox;
+        display: -webkit-flex;
+
+        /* Flex direction with vendor prefixes */
+        flex-direction: column;
+        -ms-flex-direction: column;
+        -webkit-flex-direction: column;
+    }
+
+    /* Slightly larger badges for mobile readability */
+    .status-badge {
+        font-size: 85%;
+        padding: .3em .5em; /* Larger touch targets */
+    }
+
+    /* Improved button sizing for mobile */
+    .btn-primary,
+    .btn-secondary {
+        padding: 0.75em 1.5em;
+        font-size: 1em;
+        width: 100%; /* Full width buttons on mobile */
+        margin-bottom: 0.5em;
+    }
+
+    /* Enhanced form controls for mobile */
+    .form-control {
+        padding: 0.75em;
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+}
+
+/* 7. Print Styles - Optimized appearance for printed forms */
+@media print {
+    .status-badge {
+        background-color: transparent !important;
+        color: black !important;
+        border: 1px solid black;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        display: none; /* Hide interactive elements in print */
+    }
+
+    /* Ensure proper page breaks */
+    .page-break {
+        page-break-before: always;
+    }
+}
+
+/* 8. Accessibility Enhancements - Improved experience for screen readers and keyboard navigation */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Focus indicators for keyboard navigation */
+.btn-primary:focus,
+.btn-secondary:focus,
+.form-control:focus {
+    outline: 2px solid var(--motac-primary-color);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .status-badge {
+        border: 2px solid currentColor;
+    }
+}
+
+/* 9. Animation Classes - Smooth transitions for dynamic content */
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Loading spinner for async operations */
+.spinner {
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid var(--motac-primary-color);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

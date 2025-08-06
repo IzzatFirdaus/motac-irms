@@ -24,7 +24,8 @@ class Departments extends Component
 
     public bool $is_active = true;
 
-    public ?int $head_user_id = null;
+    // Corrected to match the database column name and Department model relationship
+    public ?int $head_of_department_id = null;
 
     public bool $isEditMode = false;
 
@@ -49,7 +50,7 @@ class Departments extends Component
         $nameRule = ValidationRule::unique('departments', 'name');
         $codeRule = ValidationRule::unique('departments', 'code')->whereNull('deleted_at'); // Unique check should also consider soft deletes
 
-        if ($this->isEditMode && $this->departmentInstance instanceof \App\Models\Department) {
+        if ($this->isEditMode && $this->departmentInstance instanceof Department) { // Simplified
             $nameRule->ignore($this->departmentInstance->id);
             $codeRule->ignore($this->departmentInstance->id);
         }
@@ -60,7 +61,8 @@ class Departments extends Component
             'code' => ['nullable', 'string', 'max:50', $codeRule],
             'description' => ['nullable', 'string', 'max:1000'],
             'is_active' => ['boolean'],
-            'head_user_id' => ['nullable', 'integer', 'exists:users,id'],
+            // Corrected to match the property name
+            'head_of_department_id' => ['nullable', 'integer', 'exists:users,id'],
         ];
     }
 
@@ -71,19 +73,22 @@ class Departments extends Component
             'name.unique' => __('Nama jabatan ini telah wujud.'),
             'branch_type.required' => __('Jenis cawangan diperlukan.'),
             'code.unique' => __('Kod jabatan ini telah wujud.'),
-            'head_user_id.exists' => __('Ketua jabatan yang dipilih tidak sah.'),
+            // Corrected to match the property name
+            'head_of_department_id.exists' => __('Ketua jabatan yang dipilih tidak sah.'),
         ];
     }
 
     public function loadDepartments(): void
     {
-        $this->departments = Department::with('headUser')->orderBy('name')->get();
+        // Changed to headOfDepartment to match relationship name in Department model
+        $this->departments = Department::with('headOfDepartment')->orderBy('name')->get();
     }
 
     public function render()
     {
-        return view('livewire.human-resource.structure.departments')
-            ->title(__('Pengurusan Jabatan')); // Setting page title
+        // Removed ->title() as it's not a standard method on Illuminate\Contracts\View\View
+        // You should handle page title in your main Blade layout if not using a specific package.
+        return view('livewire.human-resource.structure.departments');
     }
 
     public function submitDepartment(): void
@@ -96,10 +101,11 @@ class Departments extends Component
             'code' => $this->code,
             'description' => $this->description,
             'is_active' => $this->is_active,
-            'head_user_id' => $this->head_user_id,
+            // Corrected to match the database column name and Department model
+            'head_of_department_id' => $this->head_of_department_id,
         ];
 
-        if ($this->isEditMode && $this->departmentInstance instanceof \App\Models\Department) {
+        if ($this->isEditMode && $this->departmentInstance instanceof Department) { // Simplified
             $this->departmentInstance->update($data);
             // Use session flash for toastr as per your original component style
             session()->flash('toastr', ['type' => 'success', 'message' => __('Jabatan berjaya dikemaskini.')]);
@@ -132,7 +138,8 @@ class Departments extends Component
         $this->code = $department->code;
         $this->description = $department->description;
         $this->is_active = $department->is_active;
-        $this->head_user_id = $department->head_user_id;
+        // Corrected to match the database column name and Department model
+        $this->head_of_department_id = $department->head_of_department_id;
         $this->dispatch('openModal', elementId: '#departmentModal');
     }
 
@@ -174,7 +181,8 @@ class Departments extends Component
         $this->code = null;
         $this->description = null;
         $this->is_active = true;
-        $this->head_user_id = null;
+        // Corrected to match the database column name and Department model
+        $this->head_of_department_id = null;
 
         $this->departmentInstance = null;
         $this->isEditMode = false;
@@ -188,9 +196,9 @@ class Departments extends Component
     {
         // Assuming Timeline model exists and is correctly namespaced
         // return \App\Models\Timeline::where('department_id', $department_id)
-        //     ->whereNull('end_date')
-        //     ->distinct('employee_id') // Assuming 'employee_id' is the correct column
-        //     ->count();
+        // ->whereNull('end_date')
+        // ->distinct('employee_id') // Assuming 'employee_id' is the correct column
+        // ->count();
     }
     */
 }

@@ -67,7 +67,7 @@ class Index extends Component
     {
         // Exclude the current editing grade from its own min_approval_grade_id list if applicable
         $query = Grade::orderBy('name');
-        if ($this->editingGrade instanceof \App\Models\Grade && $this->editingGrade->exists) {
+        if ($this->editingGrade instanceof Grade && $this->editingGrade->exists) {
             $query->where('id', '!=', $this->editingGrade->id);
         }
 
@@ -105,7 +105,7 @@ class Index extends Component
 
     public function updateGrade(): void
     {
-        if (! $this->editingGrade instanceof \App\Models\Grade || ! $this->editingGrade->exists) {
+        if (! $this->editingGrade instanceof Grade || ! $this->editingGrade->exists) {
             $this->dispatch('toastr', type: 'error', message: __('Ralat: Tiada gred dipilih untuk dikemaskini.'));
 
             return;
@@ -135,7 +135,7 @@ class Index extends Component
 
     public function deleteGrade(): void
     {
-        if (! $this->deletingGrade instanceof \App\Models\Grade) {
+        if (! $this->deletingGrade instanceof Grade) {
             return;
         }
 
@@ -182,12 +182,12 @@ class Index extends Component
         return view('livewire.resource-management.admin.grades.index', [
             'gradesList' => $this->grades, // Accesses the getGradesProperty()
             'availableGradesForDropdown' => $this->availableGradesForDropdown, // Accesses getAvailableGradesForDropdownProperty
-        ])->title(__('Pengurusan Gred Jawatan'));
+        ]); // Removed ->title(__('Pengurusan Gred Jawatan'))
     }
 
     protected function rules(): array
     {
-        $gradeIdToIgnore = $this->editingGrade instanceof \App\Models\Grade && $this->editingGrade->exists ? $this->editingGrade->id : null;
+        $gradeIdToIgnore = $this->editingGrade instanceof Grade && $this->editingGrade->exists ? $this->editingGrade->id : null;
 
         return [
             'name' => ['required', 'string', 'max:50', ValidationRule::unique('grades', 'name')->ignore($gradeIdToIgnore)],

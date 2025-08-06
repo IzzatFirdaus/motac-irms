@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes; // Import the Blameable trait
 
 /**
  * Position Model (Jawatan).
- * 
+ *
  * System Design Reference: MOTAC Integrated Resource Management System (Revision 3) - Section 4.1, positions table
  *
  * @property int $id

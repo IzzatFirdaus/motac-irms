@@ -11,9 +11,7 @@ use Illuminate\View\Component;
 class EquipmentStatusBadge extends Component
 {
     public string $statusKey;
-
     public string $statusLabel;
-
     public string $badgeClass;
 
     /**
@@ -43,6 +41,12 @@ class EquipmentStatusBadge extends Component
                 break;
             case Equipment::STATUS_DAMAGED_NEEDS_REPAIR:
                 $this->badgeClass = 'text-bg-orange'; // Example custom class or use text-bg-warning
+                break;
+            case Equipment::STATUS_DAMAGED:
+                $this->badgeClass = 'text-bg-danger';
+                break;
+            case Equipment::STATUS_RETIRED:
+                $this->badgeClass = 'text-bg-secondary';
                 break;
             default:
                 $this->badgeClass = 'text-bg-secondary';

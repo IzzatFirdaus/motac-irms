@@ -24,54 +24,63 @@
                 <div class="card-body text-center text-muted p-5">
                     <i class="bi bi-collection fs-1 text-secondary mb-2"></i>
                     <h5 class="mb-1">{{ __('Tiada Sejarah Ditemui') }}</h5>
-                    <p class="small">{{ __('Anda belum membuat sebarang keputusan kelulusan.') }}</p>
+                    <p class="small">{{ __('Anda belum mempunyai sejarah kelulusan.') }}</p>
                 </div>
             @else
                 <div class="table-responsive">
-                    <table class="table table-hover table-striped mb-0 align-middle">
+                    <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">ID</th>
-                                <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Permohonan') }}</th>
-                                <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Pemohon') }}</th>
-                                <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Tarikh Keputusan') }}</th>
-                                <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Status') }}</th>
-                                <th scope="col" class="small text-uppercase text-muted fw-medium px-3 py-2 text-end">{{ __('Tindakan') }}</th>
+                                <th scope="col" class="ps-3">{{ __('ID Kelulusan') }}</th>
+                                <th scope="col">{{ __('Jenis Permohonan') }}</th>
+                                <th scope="col">{{ __('Pemohon') }}</th>
+                                <th scope="col">{{ __('Tarikh Permohonan') }}</th>
+                                <th scope="col">{{ __('Status') }}</th>
+                                <th scope="col" class="text-center">{{ __('Tindakan') }}</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($approvals as $approval)
-                                @php $approvableItem = $approval->approvable; @endphp
+                            @foreach ($approvals as $approvalTask)
                                 <tr>
-                                    <td class="px-3 py-2 small text-dark">#{{ $approval->id ?? 'N/A' }}</td>
-                                    <td class="px-3 py-2 small text-muted">
-                                        @if ($approvableItem)
-                                            <i class="bi {{ $approvableItem instanceof \App\Models\EmailApplication ? 'bi-envelope-at text-info' : 'bi-laptop text-success' }} me-1"></i>
-                                            {{ $approvableItem instanceof \App\Models\EmailApplication ? __('Permohonan Emel') : __('Pinjaman ICT') }}
-                                            (#{{ $approvableItem->id }})
-                                        @else
-                                            <i class="bi bi-question-circle me-1 text-secondary"></i>{{ __('Jenis Tidak Diketahui') }}
-                                        @endif
+                                    <td class="ps-3">{{ $approvalTask->id }}</td>
+                                    <td>
+                                        @php
+                                            $itemTypeDisplay = __('Tidak Diketahui');
+                                            if ($approvalTask->approvable instanceof \App\Models\LoanApplication) {
+                                                $itemTypeDisplay = __('Pinjaman Peralatan');
+                                            } elseif ($approvalTask->approvable instanceof \App\Models\HelpdeskTicket) {
+                                                $itemTypeDisplay = __('Tiket Meja Bantuan');
+                                            }
+                                        @endphp
+                                        <span class="badge bg-secondary">{{ $itemTypeDisplay }}</span>
                                     </td>
-                                    <td class="px-3 py-2 small text-muted">{{ optional($approvableItem->user)->name ?? __('Tidak Diketahui') }}</td>
-                                    <td class="px-3 py-2 small text-muted">{{ optional($approval->approval_timestamp)->translatedFormat('d M Y, H:i A') ?? 'N/A' }}</td>
-                                    <td class="px-3 py-2 small"><x-approval-status-badge :status="$approval->status" /></td>
-                                    <td class="px-3 py-2 text-end">
-                                        <div class="d-inline-flex align-items-center gap-1">
-                                            @can('view', $approval)
-                                                <a href="{{ route('approvals.show', $approval) }}" class="btn btn-sm btn-icon btn-outline-secondary motac-btn-icon" title="{{ __('Lihat Butiran Kelulusan') }}">
-                                                    <i class="bi bi-search"></i>
-                                                </a>
-                                            @endcan
-                                            {{-- ADJUSTMENT: Added @can directive to secure this link --}}
-                                            @if ($approvableItem)
-                                                @can('view', $approvableItem)
+                                    <td>{{ $approvalTask->approvable->user->name ?? '-' }}</td>
+                                    <td>{{ $approvalTask->approvable->created_at->translatedFormat('d M Y') ?? '-' }}</td>
+                                    <td>
+                                        @include('approvals._partials.status-badge', ['status' => $approvalTask->status])
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="d-inline-flex gap-1">
+                                            <a href="{{ route('approvals.show', $approvalTask->id) }}"
+                                                class="btn btn-sm btn-icon btn-outline-secondary motac-btn-icon"
+                                                title="{{ __('Lihat Butiran Kelulusan') }}">
+                                                <i class="bi bi-eye-fill"></i>
+                                            </a>
+                                            @if ($approvalTask->approvable)
+                                                @can('view', $approvalTask->approvable)
                                                     @php
-                                                        $route = $approvableItem instanceof \App\Models\EmailApplication ? 'email-applications.show' : 'loan-applications.show';
+                                                        $route = '';
+                                                        if ($approvalTask->approvable instanceof \App\Models\LoanApplication) {
+                                                            $route = 'loan-applications.show';
+                                                        } elseif ($approvalTask->approvable instanceof \App\Models\HelpdeskTicket) {
+                                                            $route = 'helpdesk.view';
+                                                        }
                                                     @endphp
-                                                    <a href="{{ route($route, $approvableItem->id) }}" class="btn btn-sm btn-icon btn-outline-primary motac-btn-icon" title="{{ __('Lihat Permohonan Asal') }}">
-                                                        <i class="bi bi-file-earmark-text-fill"></i>
-                                                    </a>
+                                                    @if ($route)
+                                                        <a href="{{ route($route, $approvalTask->approvable->id) }}" class="btn btn-sm btn-icon btn-outline-primary motac-btn-icon" title="{{ __('Lihat Permohonan Asal') }}">
+                                                            <i class="bi bi-file-earmark-text-fill"></i>
+                                                        </a>
+                                                    @endif
                                                 @endcan
                                             @endif
                                         </div>

@@ -58,6 +58,7 @@
     54 => 'App\\Providers\\FortifyServiceProvider',
     55 => 'App\\Providers\\JetstreamServiceProvider',
     56 => 'App\\Providers\\QueryLogServiceProvider',
+    57 => 'App\\Providers\\TranslationServiceProvider',
   ),
   'eager' => 
   array (
@@ -102,6 +103,7 @@
     38 => 'App\\Providers\\FortifyServiceProvider',
     39 => 'App\\Providers\\JetstreamServiceProvider',
     40 => 'App\\Providers\\QueryLogServiceProvider',
+    41 => 'App\\Providers\\TranslationServiceProvider',
   ),
   'deferred' => 
   array (

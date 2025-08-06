@@ -4,18 +4,18 @@ namespace App\Providers;
 
 use App\Models\Approval;
 use App\Models\Department;
-use App\Models\EmailApplication;
 use App\Models\Equipment;
 use App\Models\Grade;
+use App\Models\HelpdeskTicket; // Add this line
 use App\Models\LoanApplication;
 use App\Models\LoanTransaction;
 use App\Models\Position;
 use App\Models\User;
 use App\Policies\ApprovalPolicy;
 use App\Policies\DepartmentPolicy;
-use App\Policies\EmailApplicationPolicy;
 use App\Policies\EquipmentPolicy;
 use App\Policies\GradePolicy;
+use App\Policies\HelpdeskTicketPolicy; // Add this line
 use App\Policies\LoanApplicationPolicy;
 use App\Policies\LoanTransactionPolicy;
 use App\Policies\PositionPolicy;
@@ -32,7 +32,6 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         Approval::class => ApprovalPolicy::class,
-        EmailApplication::class => EmailApplicationPolicy::class,
         Equipment::class => EquipmentPolicy::class,
         Grade::class => GradePolicy::class,
         LoanApplication::class => LoanApplicationPolicy::class,
@@ -40,6 +39,7 @@ class AuthServiceProvider extends ServiceProvider
         User::class => UserPolicy::class,
         Department::class => DepartmentPolicy::class,
         Position::class => PositionPolicy::class,
+        HelpdeskTicket::class => HelpdeskTicketPolicy::class, // Add this line
     ];
 
     /**

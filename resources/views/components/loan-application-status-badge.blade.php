@@ -1,7 +1,7 @@
 {{-- resources/views/components/loan-application-status-badge.blade.php --}}
 @props([
-    'status' => '', // The loan application status key, e.g., 'pending_support'
-    'application' => null, // Pass the entire model to use the accessor
+    'status' => '',
+    'application' => null,
 ])
 
 @php
@@ -9,11 +9,9 @@
     $statusLabel = '';
 
     if ($application) {
-        // Use the accessor from the model if the object is provided
         $badgeClass = $application->status_color_class;
         $statusLabel = $application->status_label;
     } else {
-        // Fallback to switch statement if only status string is provided
         $statusOptions = \App\Models\LoanApplication::getStatusOptions();
         $statusLabel = $statusOptions[$status] ?? Illuminate\Support\Str::title(str_replace('_', ' ', $status));
 

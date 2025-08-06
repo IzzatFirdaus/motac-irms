@@ -87,8 +87,8 @@
             <div class="card h-100 shadow-sm motac-card">
                 <div class="card-body d-flex flex-column p-4">
                     <div class="mb-2"><i class="bi bi-bar-chart-line-fill fs-2 text-primary"></i></div>
-                    <h3 class="h5 card-title fw-semibold mb-2">{{ __('Utilization Summary') }}</h3>
-                    <p class="card-text small text-muted mb-4">{{ __('Generate insights on equipment utilization rates by department or asset type.') }}</p>
+                    <h3 class="h5 card-title fw-semibold mb-2">{{ __('reports.utilization.title') }}</h3>
+                    <p class="card-text small text-muted mb-4">{{ __('reports.utilization.description') }}</p>
                     <a href="{{ route('reports.utilization-report') }}" class="btn btn-primary btn-sm mt-auto d-inline-flex align-items-center motac-btn-primary">
                         <i class="bi bi-eye-fill me-1"></i>{{ __('reports.view_report') }}
                     </a>
@@ -101,8 +101,8 @@
             <div class="card h-100 shadow-sm motac-card">
                 <div class="card-body d-flex flex-column p-4">
                     <div class="mb-2"><i class="bi bi-pie-chart-fill fs-2 text-primary"></i></div>
-                    <h3 class="h5 card-title fw-semibold mb-2">{{ __('Loan Status Summary') }}</h3>
-                    <p class="card-text small text-muted mb-4">{{ __('Overview of active, pending, and returned loans across the system.') }}</p>
+                    <h3 class="h5 card-title fw-semibold mb-2">{{ __('reports.loan_status_summary.title') }}</h3>
+                    <p class="card-text small text-muted mb-4">{{ __('reports.loan_status_summary.description') }}</p>
                     <a href="{{ route('reports.loan-status-summary') }}" class="btn btn-primary btn-sm mt-auto d-inline-flex align-items-center motac-btn-primary">
                         <i class="bi bi-eye-fill me-1"></i>{{ __('reports.view_report') }}
                     </a>

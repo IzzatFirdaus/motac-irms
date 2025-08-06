@@ -1,4 +1,5 @@
 <?php
+// routes/web.php
 
 declare(strict_types=1);
 
@@ -6,18 +7,23 @@ declare(strict_types=1);
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
+| This file defines all web routes for the MOTAC Integrated Resource Management System.
+| Includes controller and Livewire routes for both public and authenticated users.
 |
-| This file defines all the web routes for the application. It is organized
-| into public, authenticated, and administrative sections.
-|
+| IMPORTANT: This application uses a custom SuffixedTranslator that automatically
+| loads language files with locale suffixes (e.g., forms_en.php, forms_ms.php)
+| based on the current application locale.
+|--------------------------------------------------------------------------
 */
 
-// General Controllers
+// --------------------------------------------------
+// Route Imports
+// --------------------------------------------------
+
+// Controllers
 use App\Http\Controllers\Admin\EquipmentController as AdminEquipmentController;
 use App\Http\Controllers\Admin\GradeController as AdminGradeController;
 use App\Http\Controllers\ApprovalController;
-use App\Http\Controllers\EmailAccountController;
-use App\Http\Controllers\EmailApplicationController;
 use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\language\LanguageController;
 use App\Http\Controllers\LoanApplicationController;
@@ -25,17 +31,15 @@ use App\Http\Controllers\LoanTransactionController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\WebhookController;
+
 // Livewire Components
 use App\Livewire\ContactUs as ContactUsLW;
 use App\Livewire\Dashboard as DashboardLW;
 use App\Livewire\Dashboard\AdminDashboard as AdminDashboardLW;
+use App\Livewire\ResourceManagement\Admin\BPM\IssuedLoans;
 use App\Livewire\ResourceManagement\Admin\Equipment\Index as AdminEquipmentIndexLW;
-// CORRECTED: Ensure UserActivityReport Livewire component is imported
-use App\Livewire\ResourceManagement\Admin\Reports\UserActivityReport;
 use App\Livewire\ResourceManagement\Approval\Dashboard as ApprovalDashboardLW;
-use App\Livewire\ResourceManagement\EmailAccount\ApplicationForm as EmailApplicationFormLW;
 use App\Livewire\ResourceManagement\LoanApplication\ApplicationForm as LoanApplicationFormLW;
-use App\Livewire\ResourceManagement\MyApplications\Email\Index as MyEmailApplicationsIndexLW;
 use App\Livewire\ResourceManagement\MyApplications\Loan\Index as MyLoanApplicationsIndexLW;
 use App\Livewire\Settings\Departments\Index as SettingsDepartmentsIndexLW;
 use App\Livewire\Settings\Permissions\Index as SettingsPermissionsIndexLW;
@@ -45,185 +49,148 @@ use App\Livewire\Settings\Users\Create as SettingsUsersCreateLW;
 use App\Livewire\Settings\Users\Edit as SettingsUsersEditLW;
 use App\Livewire\Settings\Users\Index as SettingsUsersIndexLW;
 use App\Livewire\Settings\Users\Show as SettingsUsersShowLW;
-// --- ISSUED LOANS VIEW (BPM Staff & Admin) ---
-use App\Livewire\ResourceManagement\Admin\BPM\IssuedLoans;
-// Facades
-use Illuminate\Support\Facades\File;
+
+// Helpdesk Livewire Components
+use App\Livewire\Shared\Notifications\NotificationsList;
+use App\Livewire\Helpdesk\CreateTicketForm;
+use App\Livewire\Helpdesk\MyTicketsIndex;
+use App\Livewire\Helpdesk\TicketDetails;
+use App\Livewire\Helpdesk\Admin\TicketManagement as AdminTicketManagementLW;
+
 use Illuminate\Support\Facades\Route;
-use League\CommonMark\GithubFlavoredMarkdownConverter;
 
-/*
-|--------------------------------------------------------------------------
-| Public Routes
-|--------------------------------------------------------------------------
-*/
+// --------------------------------------------------
+// Public Routes (accessible without authentication)
+// --------------------------------------------------
 
-Route::get('lang/{locale}', LanguageController::class)->name('language.swap');
+Route::get('/', function () {
+    return view('welcome');
+})->name('home');
+
+// Static policy and terms pages
+Route::view('/privacy-policy', 'policy')->name('policy');
+Route::view('/terms-of-service', 'terms')->name('terms');
+
+// Contact Us page via Livewire
 Route::get('/contact-us', ContactUsLW::class)->name('contact-us');
-Route::post('/webhooks/deploy', [WebhookController::class, 'handleDeploy'])
-  ->name('webhooks.deploy')
-  ->middleware('validate.webhook.signature');
 
-Route::get('/terms-of-service', function () {
-  $path = resource_path('markdown/terms.md');
-  abort_if(! File::exists($path), 404);
+// --------------------------------------------------
+// Language Switching Route (accessible to all users)
+// --------------------------------------------------
+// This route allows users to switch between 'en' and 'ms' locales.
+// The LanguageController handles session and user preference updates.
+Route::get('lang/{lang}', [LanguageController::class, 'swap'])
+    ->where('lang', 'en|ms')
+    ->name('language.swap');
 
-  return view('terms', ['terms' => (new GithubFlavoredMarkdownConverter)->convert(File::get($path))->getContent()]);
-})->name('terms.show');
+// --------------------------------------------------
+// Authenticated Routes (protected by Jetstream/Sanctum/verified middleware)
+// --------------------------------------------------
+Route::middleware([
+    'auth:sanctum',
+    config('jetstream.auth_session'),
+    'verified',
+])->group(function () {
 
-Route::get('/privacy-policy', function () {
-  $path = resource_path('markdown/policy.md');
-  abort_if(! File::exists($path), 404);
+    // Main user dashboard
+    Route::get('/dashboard', DashboardLW::class)->name('dashboard');
 
-  return view('policy', ['policy' => (new GithubFlavoredMarkdownConverter)->convert(File::get($path))->getContent()]);
-})->name('policy.show');
+    // Admin dashboard (restricted to Admin and IT Admin roles)
+    Route::get('/dashboard/admin', AdminDashboardLW::class)
+        ->name('admin.dashboard')
+        ->middleware(['role:Admin|IT Admin']);
 
-/*
-|--------------------------------------------------------------------------
-| Authenticated User Routes
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function (): void {
-  Route::redirect('/', '/dashboard', 301);
+    // Notifications
+    Route::get('/notifications', NotificationsList::class)->name('notifications.index');
+    Route::patch('/notifications/{notification}/mark-as-read', [NotificationController::class, 'markAsRead'])->name('notifications.mark-as-read');
 
-  // UPDATED: This route now points to the main Dashboard Livewire component, which handles role-based view logic.
-  Route::get('/dashboard', DashboardLW::class)->name('dashboard');
+    // User Profile (Jetstream)
+    Route::get('/user/profile', function () {
+        return view('profile.show');
+    })->name('profile.show');
 
-  // --- LOAN APPLICATIONS ---
-  Route::prefix('loan-applications')->name('loan-applications.')->group(function (): void {
-    Route::get('/', MyLoanApplicationsIndexLW::class)->name('index');
-    Route::get('/create', LoanApplicationFormLW::class)->name('create');
-    Route::post('/', [LoanApplicationController::class, 'store'])->name('store');
-    Route::get('/{loan_application}/edit', LoanApplicationFormLW::class)->name('edit');
-    Route::get('/{loan_application}/print', [LoanApplicationController::class, 'printPdf'])->name('print');
-    Route::get('/{loan_application}', [LoanApplicationController::class, 'show'])->name('show');
-    Route::delete('/{loan_application}', [LoanApplicationController::class, 'destroy'])->name('destroy');
-    Route::post('/{loan_application}/submit', [LoanApplicationController::class, 'submitApplication'])->name('submit');
-  });
+    // ICT Equipment Loan Application Routes
+    Route::prefix('loan-applications')->name('loan-applications.')->group(function () {
+        Route::get('/create', LoanApplicationFormLW::class)->name('create');
+        Route::get('/my-applications', MyLoanApplicationsIndexLW::class)->name('my-applications.index');
+        Route::get('/{loanApplication}/issue', [LoanTransactionController::class, 'createIssue'])
+            ->name('issue')
+            ->middleware('can:issue,loanApplication');
+        Route::post('/{loanApplication}/issue', [LoanTransactionController::class, 'storeIssue'])
+            ->name('issue.store')
+            ->middleware('can:issue,loanApplication');
+        Route::get('/transactions/{loanTransaction}/return', [LoanTransactionController::class, 'createReturn'])
+            ->name('return')
+            ->middleware('can:return,loanTransaction');
+        Route::post('/transactions/{loanTransaction}/return', [LoanTransactionController::class, 'storeReturn'])
+            ->name('return.store')
+            ->middleware('can:return,loanTransaction');
+    });
 
-  // --- LOAN TRANSACTIONS (Issuance and Returns by BPM Staff) ---
-  Route::get('/loan-transactions', [LoanTransactionController::class, 'index'])->name('loan-transactions.index');
-  Route::get('/loan-transactions/{loanTransaction}', [LoanTransactionController::class, 'show'])->name('loan-transactions.show');
-  Route::get('/loan-applications/{loanApplication}/issue-form', [LoanTransactionController::class, 'showIssueForm'])->name('loan-applications.issue.form');
-  Route::post('/loan-applications/{loanApplication}/issue', [LoanTransactionController::class, 'storeIssue'])->name('loan-applications.issue.store');
-  Route::post('/loan-transactions/{loanTransaction}/return', [LoanTransactionController::class, 'storeReturn'])->name('loan-transactions.return.store');
-  Route::get('/loan-transactions/{loanTransaction}/return-form', [LoanTransactionController::class, 'showReturnForm'])->name('loan-transactions.return.form');
+    // Equipment management (view only for authenticated users)
+    Route::resource('equipment', EquipmentController::class)->only(['index', 'show']);
 
-  // --- EMAIL APPLICATIONS ---
-  Route::prefix('email-applications')->name('email-applications.')->group(function (): void {
-    Route::get('/', MyEmailApplicationsIndexLW::class)->name('index');
-    Route::get('/create', EmailApplicationFormLW::class)->name('create');
-    Route::post('/', [EmailApplicationController::class, 'store'])->name('store');
-    Route::get('/{email_application}/edit', EmailApplicationFormLW::class)->name('edit');
-    Route::get('/{email_application}', [EmailApplicationController::class, 'show'])->name('show');
-    Route::delete('/{email_application}', [EmailApplicationController::class, 'destroy'])->name('destroy');
-    Route::post('/{email_application}/submit', [EmailApplicationController::class, 'submitApplication'])->name('submit');
-  });
+    // Approval workflow (dashboard and history)
+    Route::prefix('approvals')->name('approvals.')->group(function () {
+        Route::get('/', ApprovalDashboardLW::class)
+            ->name('dashboard')
+            ->middleware(['view_approval_tasks']);
+        Route::get('/history', [ApprovalController::class, 'history'])
+            ->name('history')
+            ->middleware(['view_approval_history']);
+    });
 
-  // ==============================================================================
-  // --- APPROVALS (FIX APPLIED HERE) ---
-  // ==============================================================================
-  Route::prefix('approvals')->name('approvals.')->middleware('check.gradelevel:9')->group(function (): void {
-    // ADDED: Redirect from the old base URL to the new, explicit dashboard URL.
-    Route::redirect('/', '/approvals/dashboard', 301);
+    // Admin Resource Management
+    Route::prefix('admin')->name('admin.')->middleware(['role:Admin|IT Admin'])->group(function () {
+        Route::resource('equipment', AdminEquipmentController::class)->except(['show']);
+        Route::get('equipment/issued-loans', IssuedLoans::class)->name('equipment.issued-loans');
+        Route::get('equipment-items', AdminEquipmentIndexLW::class)->name('equipment-items.index');
+    });
 
-    // CHANGED: The dashboard is now explicitly at the /dashboard path. This fixes the 404 error.
-    Route::get('/dashboard', ApprovalDashboardLW::class)->name('dashboard');
+    // Reports Module
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('/', [ReportController::class, 'index'])->name('index');
+        Route::get('/equipment-inventory', [ReportController::class, 'equipmentInventory'])->name('equipment-inventory');
+        Route::get('/loan-applications', [ReportController::class, 'loanApplications'])->name('loan-applications');
+        Route::get('/loan-history', [ReportController::class, 'loanHistory'])->name('loan-history');
+        Route::get('/loan-status-summary', [ReportController::class, 'loanStatusSummary'])->name('loan-status-summary');
+        Route::get('/utilization-report', [ReportController::class, 'utilizationReport'])->name('utilization-report');
+        Route::get('/user-activity-log', [ReportController::class, 'userActivityLog'])->name('user-activity-log');
+    });
 
-    // UNCHANGED: Specific history route.
-    Route::get('/history', [ApprovalController::class, 'showHistory'])->name('history');
+    // Helpdesk Module
+    Route::prefix('helpdesk')->name('helpdesk.')->group(function () {
+        Route::get('/', MyTicketsIndex::class)->name('index');
+        Route::get('/create', CreateTicketForm::class)->name('create');
+        Route::get('/{ticket}', TicketDetails::class)->name('show');
+        Route::middleware(['role:Admin|IT Admin|Helpdesk Agent'])->group(function () {
+            Route::get('/admin/tickets', AdminTicketManagementLW::class)->name('admin.index');
+            // Additional admin-specific helpdesk routes as needed
+        });
+    });
 
-    // UNCHANGED: Wildcard route for specific approval records. Must come after specific routes.
-    Route::get('/{approval}', [ApprovalController::class, 'show'])->name('show');
-
-    // UNCHANGED: Action route for a specific approval.
-    Route::post('/{approval}/record-decision', [ApprovalController::class, 'recordDecision'])->name('recordDecision');
-  });
-
-  // --- NOTIFICATIONS ---
-  Route::prefix('notifications')->name('notifications.')->group(function (): void {
-    Route::get('/', [NotificationController::class, 'index'])->name('index');
-    Route::post('/{notification}/mark-as-read', [NotificationController::class, 'markAsRead'])->name('markAsRead');
-    Route::post('/mark-all-as-read', [NotificationController::class, 'markAllAsRead'])->name('markAllAsRead');
-  });
-
-  // --- PUBLIC EQUIPMENT CATALOG ---
-  Route::resource('equipment', EquipmentController::class)->only(['index', 'show']);
-
-  /*
-|--------------------------------------------------------------------------
-| Admin & Privileged User Routes
-|--------------------------------------------------------------------------
-*/
-
-  // NEW: Explicit route for the enhanced admin dashboard.
-  Route::get('/admin/dashboard', AdminDashboardLW::class)
-    ->name('admin.dashboard')
-    ->middleware(['role:Admin|IT Admin|BPM Staff']);
-
-  Route::prefix('admin/bpm')->name('resource-management.bpm.')->middleware(['role:Admin|BPM Staff'])->group(function (): void {
-    Route::get('/issued-loans', IssuedLoans::class)->name('issued-loans');
-  });
-
-  // --- EQUIPMENT MANAGEMENT (BPM Staff & Admin) ---
-  Route::prefix('admin/equipment')->name('admin.equipment.')->middleware(['can:view-equipment-admin'])->group(function (): void {
-    Route::get('/', AdminEquipmentIndexLW::class)->name('index');
-    Route::get('/create', [AdminEquipmentController::class, 'create'])->name('create');
-    Route::post('/', [AdminEquipmentController::class, 'store'])->name('store');
-    Route::get('/{equipment}', [AdminEquipmentController::class, 'show'])->name('show');
-    Route::get('/{equipment}/edit', [AdminEquipmentController::class, 'edit'])->name('edit');
-    Route::put('/{equipment}', [AdminEquipmentController::class, 'update'])->name('update');
-    Route::delete('/{equipment}', [AdminEquipmentController::class, 'destroy'])->name('destroy');
-  });
-
-  // --- EMAIL ACCOUNT PROCESSING (IT Admin & Admin) ---
-  Route::prefix('admin/email-processing')->name('admin.email-processing.')->middleware(['role:Admin|IT Admin'])->group(function (): void {
-    Route::get('/', [EmailAccountController::class, 'indexForAdmin'])->name('index');
-    Route::get('/{email_application}', [EmailAccountController::class, 'showForAdmin'])->name('show');
-    Route::post('/{email_application}/process', [EmailAccountController::class, 'processApplication'])->name('process');
-  });
-
-// --- REPORTS ---
-Route::prefix('reports')->name('reports.')->middleware(['role:Admin|BPM Staff|IT Admin'])->group(function (): void {
-    Route::get('/', [ReportController::class, 'index'])->name('index');
-    Route::get('/equipment-inventory', [ReportController::class, 'equipmentInventory'])->name('equipment-inventory');
-    Route::get('/loan-applications', [ReportController::class, 'loanApplications'])->name('loan-applications');
-    // CHANGED: Use the Livewire component directly for user activity log
-    Route::get('/user-activity-log', UserActivityReport::class)->name('activity-log');
-    Route::get('/email-accounts', [ReportController::class, 'emailAccounts'])->name('email-accounts');
-    Route::get('/loan-history', [ReportController::class, 'loanHistory'])->name('loan-history');
-    Route::get('/utilization', [ReportController::class, 'utilizationReport'])->name('utilization-report');
-    Route::get('/loan-status-summary', [ReportController::class, 'loanStatusSummary'])->name('loan-status-summary');
+    // Admin - Settings Panel (Accessible only by Admin role)
+    Route::prefix('settings')->name('settings.')->middleware(['role:Admin'])->group(function () {
+        Route::get('/', SettingsUsersIndexLW::class)->name('index');
+        Route::get('/users', SettingsUsersIndexLW::class)->name('users.index');
+        Route::get('/users/create', SettingsUsersCreateLW::class)->name('users.create');
+        Route::get('/users/{user}', SettingsUsersShowLW::class)->name('users.show');
+        Route::get('/users/{user}/edit', SettingsUsersEditLW::class)->name('users.edit');
+        Route::get('/roles', SettingsRolesIndexLW::class)->name('roles.index');
+        Route::get('/permissions', SettingsPermissionsIndexLW::class)->name('permissions.index');
+        Route::resource('grades', AdminGradeController::class)->parameters(['grades' => 'grade']);
+        Route::get('/departments', SettingsDepartmentsIndexLW::class)->name('departments.index');
+        Route::get('/positions', SettingsPositionsIndexLW::class)->name('positions.index');
+        Route::get('/log-viewer/{view?}', [\Opcodes\LogViewer\Http\Controllers\IndexController::class, '__invoke'])
+            ->where('view', '(?!api).*')
+            ->name('log-viewer.index')
+            ->middleware(['view_logs']);
+    });
 });
 
-  /*
-    |--------------------------------------------------------------------------
-    | System Settings (Admin Only)
-    |--------------------------------------------------------------------------
-    */
-  Route::prefix('settings')->name('settings.')->middleware(['role:Admin'])->group(function (): void {
-    Route::get('/', SettingsUsersIndexLW::class)->name('index'); // Default settings page is users list
-    Route::get('/users', SettingsUsersIndexLW::class)->name('users.index');
-    Route::get('/users/create', SettingsUsersCreateLW::class)->name('users.create');
-    Route::get('/users/{user}', SettingsUsersShowLW::class)->name('users.show');
-    Route::get('/users/{user}/edit', SettingsUsersEditLW::class)->name('users.edit');
-
-    Route::get('/roles', SettingsRolesIndexLW::class)->name('roles.index');
-    Route::get('/permissions', SettingsPermissionsIndexLW::class)->name('permissions.index');
-
-    Route::resource('grades', AdminGradeController::class)->parameters(['grades' => 'grade']);
-
-    Route::get('/departments', SettingsDepartmentsIndexLW::class)->name('departments.index');
-    Route::get('/positions', SettingsPositionsIndexLW::class)->name('positions.index');
-
-    Route::get('/log-viewer/{view?}', [\Opcodes\LogViewer\Http\Controllers\IndexController::class, '__invoke'])
-      ->where('view', '(?!api).*')
-      ->name('log-viewer.index')
-      ->middleware('permission:view_logs');
-  });
-});
-
-// Fallback Route for 404 Not Found errors
+// --------------------------------------------------
+// Fallback Route - Handles 404 errors for undefined routes
+// --------------------------------------------------
 Route::fallback(function () {
-  return response()->view('errors.404', [], 404);
+    return response()->view('errors.404', [], 404);
 });

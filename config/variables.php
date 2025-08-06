@@ -2,30 +2,38 @@
 
 // config/variables.php
 // Defines global variables accessible via config('variables.keyName')
-// Used by Helpers.php, commonMaster.blade.php, etc.
-// Design Language: Prominent MOTAC Branding, Bahasa Melayu as Primary Language.
+// Used by Helpers.php, Blade templates, etc.
+// Updated for Helpdesk integration and removal of Email/User ID Provisioning
 
 return [
     // Application Specific Variables for MOTAC
     'templateName' => env('APP_NAME', 'Sistem Pengurusan Sumber MOTAC'),
-    'templateDescription' => 'Sistem Dalaman Bahagian Pengurusan Maklumat, Kementerian Pelancongan, Seni dan Budaya Malaysia untuk pengurusan sumber bersepadu.',
-    'templateKeyword' => 'motac, bpm, sistem dalaman, pengurusan sumber, pinjaman ict, permohonan emel, kementerian pelancongan seni dan budaya',
+    'templateDescription' => 'Sistem Dalaman Bahagian Pengurusan Maklumat, Kementerian Pelancongan, Seni dan Budaya Malaysia untuk pengurusan sumber bersepadu, pinjaman ICT, dan sistem meja bantuan.',
+    'templateKeyword' => 'motac, bpm, sistem dalaman, pengurusan sumber, pinjaman ict, sistem meja bantuan, kementerian pelancongan seni dan budaya',
 
     // URLs
-    'productPage' => rtrim(env('APP_URL', 'http://localhost'), '/').'/dashboard', // Main landing page after login
-    'documentation' => '#', // Link to user manual or SOP if available
+    'productPage' => rtrim(env('APP_URL', 'http://localhost'), '/').'/dashboard',
+    'documentation' => '#',
     'repositoryUrl' => 'https://github.com/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS',
 
-    // Social media or contact links (MOTAC specific, if any to be shown in footer or elsewhere)
-    // These are examples, update with actual MOTAC links if needed, or remove if not used.
+    // Social media or contact links (MOTAC specific)
     'facebookUrl' => 'https://www.facebook.com/MyMOTAC/',
     'twitterUrl' => 'https://twitter.com/MyMOTAC',
     'instagramUrl' => 'https://www.instagram.com/MyMOTAC',
-    'githubUrl' => '#', // If MOTAC has a public GitHub for certain projects
+    'githubUrl' => '#',
 
-    // Original template variables (can be kept if your theme structure uses them, or removed if simplified)
-    // 'creatorName' => 'Pixinvent',
-    // 'creatorUrl' => 'https://pixinvent.com',
-    // 'support' => 'https://github.com/pixinvent/vuexy-html-admin-template/issues',
-    // 'buyNow' => 'https://themeforest.net/item/vuexy-vuejs-html-laravel-admin-dashboard-template/23328599',
+    // Branding and theme variables for UI
+    'branding' => [
+        'primary_color' => '#0047AB',
+        'secondary_color' => '#FFD700',
+        'accent_color' => '#28a745',
+        'theme' => env('APP_THEME', 'theme-motac'),
+        'logo_url' => env('APP_LOGO_URL', '/assets/img/motac-logo.png'),
+        'favicon_url' => env('APP_FAVICON_URL', '/assets/img/favicon.ico'),
+    ],
+
+    // Helpdesk System variables
+    'helpdesk_support_email' => env('HELPDESK_SUPPORT_EMAIL', 'helpdesk@motac.gov.my'),
+    'helpdesk_default_category' => env('HELPDESK_DEFAULT_CATEGORY', 'General'),
+    'helpdesk_default_priority' => env('HELPDESK_DEFAULT_PRIORITY', 'Medium'),
 ];

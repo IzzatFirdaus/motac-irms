@@ -39,66 +39,30 @@ class UserFactory extends Factory
             'title' => $this->faker->randomElement(array_keys(User::$TITLE_OPTIONS ?? [User::TITLE_ENCIK => 'Encik'])),
             'identification_number' => $msFaker->unique()->myKadNumber(),
             'passport_number' => $this->faker->optional(0.1)->passthrough(
-                $this->faker->unique()->bothify('?#########')
+                $msFaker->unique()->bothify('?#########')
             ),
             'department_id' => $departmentId,
             'position_id' => $positionId,
             'grade_id' => $gradeId,
-            'level' => (string) $this->faker->numberBetween(1, 18),
-            'mobile_number' => $msFaker->mobileNumber(false, true),
-            'personal_email' => $this->faker->optional(0.3)->passthrough(
-                $this->faker->unique()->safeEmail()
-            ),
-            'motac_email' => $this->faker->optional(0.5)->passthrough(
-                Str::slug($name, '.').'@motac.gov.my'
-            ),
-            'user_id_assigned' => $this->faker->optional(0.2)->passthrough(
-                $this->faker->unique()->bothify('MOTAC####')
-            ),
-            'service_status' => $this->faker->randomElement([
-                User::SERVICE_STATUS_TETAP ?? '1',
-                User::SERVICE_STATUS_KONTRAK_MYSTEP ?? '2',
-                User::SERVICE_STATUS_PELAJAR_INDUSTRI ?? '3',
-            ]),
-            'appointment_type' => $this->faker->randomElement([
-                User::APPOINTMENT_TYPE_BAHARU ?? '1',
-                User::APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN ?? '2',
-                User::APPOINTMENT_TYPE_LAIN_LAIN ?? '3',
-            ]),
-            'previous_department_name' => null,
-            'previous_department_email' => null,
-            'status' => User::STATUS_ACTIVE ?? 'active',
+            'mobile_number' => $msFaker->unique()->phoneNumber(),
+            'office_number' => $msFaker->optional(0.7)->unique()->phoneNumber(),
+            'address' => $msFaker->address(),
+            'city' => $msFaker->city(),
+            'state' => $msFaker->state(),
+            'postcode' => $msFaker->postcode(),
+            'country' => 'Malaysia',
+            'status' => $this->faker->randomElement([User::STATUS_ACTIVE, User::STATUS_INACTIVE, User::STATUS_PENDING]),
+            'last_login_at' => $this->faker->optional(0.8)->dateTimeThisYear(),
+            'last_login_ip' => $this->faker->optional(0.8)->ipv4(),
+            'remarks' => $this->faker->optional(0.3)->sentence(),
+            'created_at' => $this->faker->dateTimeThisYear(),
+            'updated_at' => $this->faker->dateTimeThisYear(),
         ];
     }
 
-    public function canBeLoanApprover(): static
-    {
-        return $this->state(function (array $attributes): array {
-            $minSupportGradeLevel = (int) config('motac.approval.min_loan_support_grade_level', 41);
-            $grade = Grade::where('level', '>=', $minSupportGradeLevel)->whereNotNull('level')->inRandomOrder()->first();
-
-            if (! $grade) {
-                Log::warning(sprintf('UserFactory: No grade found with level >= %d. Cannot create a loan approver.', $minSupportGradeLevel));
-            }
-
-            return ['grade_id' => $grade?->id];
-        });
-    }
-
-    public function cannotBeLoanApprover(): static
-    {
-        return $this->state(function (array $attributes): array {
-            $minSupportGradeLevel = (int) config('motac.approval.min_loan_support_grade_level', 41);
-            $grade = Grade::where('level', '<', $minSupportGradeLevel)->whereNotNull('level')->inRandomOrder()->first();
-
-            if (! $grade) {
-                Log::warning(sprintf('UserFactory: No grade found with level < %d. Cannot create a non-approver user reliably.', $minSupportGradeLevel));
-            }
-
-            return ['grade_id' => $grade?->id];
-        });
-    }
-
+    /**
+     * Indicate that the model's email address should be unverified.
+     */
     public function unverified(): static
     {
         return $this->state(fn (array $attributes): array => ['email_verified_at' => null]);
@@ -155,6 +119,10 @@ class UserFactory extends Factory
 
     public function deleted(): static
     {
-        return $this->state(fn (array $attributes): array => ['deleted_at' => now()]);
+        return $this->state(fn (array $attributes): array => [
+            'deleted_at' => now(),
+            'email' => 'deleted-'.$attributes['email'], // Mark email as deleted
+            'identification_number' => 'deleted-'.$attributes['identification_number'], // Mark IC as deleted
+        ]);
     }
 }

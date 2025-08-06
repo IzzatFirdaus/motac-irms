@@ -5,7 +5,7 @@ namespace App\Livewire\Charts;
 use Asantibanez\LivewireCharts\Models\PieChartModel;
 use Livewire\Component;
 use App\Models\LoanApplication;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\DB; // Ensure DB facade is imported
 
 class LoanSummaryChart extends Component
 {
@@ -14,7 +14,7 @@ class LoanSummaryChart extends Component
   public function mount()
   {
     $stats = LoanApplication::query()
-      ->select('status', DB::raw('count(*) as total'))
+      ->select(['status', DB::raw('count(*) as total')]) // Corrected line 1
       ->groupBy('status')
       ->pluck('total', 'status')
       ->toArray();
@@ -54,7 +54,7 @@ class LoanSummaryChart extends Component
   public function getChartModelProperty()
   {
     $stats = LoanApplication::query()
-      ->select('status', DB::raw('count(*) as total'))
+      ->select(DB::raw('status, count(*) as total')) // Corrected line 2
       ->groupBy('status')
       ->pluck('total', 'status')
       ->toArray();
@@ -87,13 +87,5 @@ class LoanSummaryChart extends Component
         );
       }
     }
-
-    return $pie;
-  }
-
-
-  public function render()
-  {
-    return view('livewire.charts.loan-summary-chart');
   }
 }

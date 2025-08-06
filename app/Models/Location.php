@@ -104,23 +104,26 @@ class Location extends Model
         return LocationFactory::new();
     }
 
-    /** @return HasMany<Equipment> */
+    /** @return HasMany<\App\Models\Equipment, self> */
     public function equipment(): HasMany
     {
         return $this->hasMany(Equipment::class, 'location_id');
     }
 
     // Blameable relationships
+    /** @return BelongsTo<\App\Models\User, self> */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    /** @return BelongsTo<\App\Models\User, self> */
     public function updater(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
 
+    /** @return BelongsTo<\App\Models\User, self> */
     public function deleter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by');

@@ -6,7 +6,7 @@
     @php
         $approvableItem = $notification->approvableItem;
         $approvalTask = $notification->approvalTask;
-        $itemTypeDisplayName = $notification->getItemTypeDisplayName();
+        $itemTypeDisplayName = $notification->getItemTypeDisplayName(); // This should now only return 'Permohonan Pinjaman Peralatan ICT'
         $applicationId = $approvableItem->id ?? 'N/A';
         $stageName = \App\Models\Approval::getStageDisplayName($approvalTask->stage);
         $applicantName = $approvableItem->user?->name ?? 'Pemohon Tidak Dikenali';
@@ -30,9 +30,7 @@
             <li class="list-group-item"><strong>Pemohon:</strong> {{ $applicantName }}</li>
             @if ($approvableItem instanceof \App\Models\LoanApplication && $approvableItem->purpose)
                 <li class="list-group-item"><strong>Tujuan:</strong> {{ $approvableItem->purpose }}</li>
-            @elseif($approvableItem instanceof \App\Models\EmailApplication && $approvableItem->application_reason_notes)
-                <li class="list-group-item"><strong>Tujuan/Catatan:</strong> {{ $approvableItem->application_reason_notes }}
-                </li>
+            {{-- Removed elseif for EmailApplication as per plan --}}
             @endif
         </ul>
     </div>

@@ -1,14 +1,23 @@
-{{-- resources/views/components/validation-errors.blade.php --}}
+{{--
+    resources/views/components/validation-errors.blade.php
+
+    Component to display validation errors in a standardized way.
+    Props:
+    - $errors: (optional) Illuminate\Support\MessageBag or array of errors. Defaults to $errors global.
+--}}
+
+@props(['errors' => $errors])
+
 @if ($errors->any())
-    <div {!! $attributes->merge(['class' => 'alert alert-danger small my-3']) !!} role="alert"> {{-- Added my-3 for spacing --}}
-        <div class="d-flex align-items-center mb-1">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i> {{-- Bootstrap Icon --}}
-            <span class="fw-bold">{{ __('Amaran! Sila perbetulkan ralat berikut:') }}</span>
-        </div>
-        <ul class="mb-0 ps-4"> {{-- Adjusted padding start --}}
+    <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+        <h6 class="alert-heading mb-1 d-flex align-items-center">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ __('Ralat Pengesahan') }}
+        </h6>
+        <ul class="mb-0">
             @foreach ($errors->all() as $error)
                 <li>{{ $error }}</li>
             @endforeach
         </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('Tutup') }}"></button>
     </div>
 @endif

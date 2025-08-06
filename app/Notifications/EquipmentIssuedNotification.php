@@ -20,17 +20,17 @@ final class EquipmentIssuedNotification extends Notification implements ShouldQu
 
     private LoanApplication $loanApplication;
 
-    private LoanTransaction $issueTransaction;
+    private ?LoanTransaction $issueTransaction; // Made nullable
 
-    private User $issuedByOfficer;
+    private ?User $issuedByOfficer; // Made nullable
 
     public function __construct(
         LoanApplication $loanApplication,
-        LoanTransaction $issueTransaction,
-        User $issuedByOfficer
+        ?LoanTransaction $issueTransaction = null, // Added default null
+        ?User $issuedByOfficer = null // Added default null
     ) {
         $this->loanApplication = $loanApplication->loadMissing(['user']);
-        $this->issueTransaction = $issueTransaction->loadMissing(['loanTransactionItems.equipment']);
+        $this->issueTransaction = $issueTransaction?->loadMissing(['loanTransactionItems.equipment']);
         $this->issuedByOfficer = $issuedByOfficer;
     }
 
@@ -41,8 +41,6 @@ final class EquipmentIssuedNotification extends Notification implements ShouldQu
 
     public function toMail(User $notifiable): MailMessage
     {
-        // --- EDITED CODE: START ---
-        // The toMail method now uses the ->view() method to render the custom Blade template.
         $applicationId = $this->loanApplication->id ?? 'N/A';
         $subject = __('Peralatan Pinjaman ICT Telah Dikeluarkan (Permohonan #:appId)', ['appId' => $applicationId]);
 
@@ -51,9 +49,8 @@ final class EquipmentIssuedNotification extends Notification implements ShouldQu
             ->view('emails.loan-application-issued', [
                 'loanApplication' => $this->loanApplication,
                 // The view expects a collection of transactions, so we wrap our single transaction.
-                'issueTransactions' => collect([$this->issueTransaction]),
+                'issueTransactions' => $this->issueTransaction ? collect([$this->issueTransaction]) : collect([]), // Handle nullable
             ]);
-        // --- EDITED CODE: END ---
     }
 
     public function toArray(User $notifiable): array
@@ -62,7 +59,7 @@ final class EquipmentIssuedNotification extends Notification implements ShouldQu
         $applicantName = $this->loanApplication->user?->name ?? __('Pemohon');
         $transactionId = $this->issueTransaction->id ?? null;
 
-        $itemsDetails = $this->issueTransaction->loanTransactionItems->map(function ($item) {
+        $itemsDetails = $this->issueTransaction?->loanTransactionItems->map(function ($item) { // Handle nullable
             $equipment = $item->equipment;
             if ($equipment) {
                 $assetTypeDisplay = $equipment->asset_type_label ?? __('Peralatan');
@@ -72,7 +69,7 @@ final class EquipmentIssuedNotification extends Notification implements ShouldQu
             }
 
             return __('Item ID: :id - Butiran peralatan tidak lengkap.', ['id' => $item->id]);
-        })->toArray();
+        })->toArray() ?? []; // Handle nullable
 
         $applicationUrl = '#';
         $routeName = 'resource-management.my-applications.loan.show';
@@ -89,8 +86,8 @@ final class EquipmentIssuedNotification extends Notification implements ShouldQu
             'loan_application_id' => $applicationId,
             'applicant_name' => $applicantName,
             'transaction_id' => $transactionId,
-            'issued_by_officer_id' => $this->issuedByOfficer->id,
-            'issued_by_officer_name' => $this->issuedByOfficer->name,
+            'issued_by_officer_id' => $this->issuedByOfficer->id ?? null, // Handle nullable
+            'issued_by_officer_name' => $this->issuedByOfficer->name ?? __('Tidak diketahui'), // Handle nullable
             'subject' => __('Peralatan Dikeluarkan (Permohonan #:appId)', ['appId' => $applicationId ?? 'N/A']),
             'message' => __('Peralatan untuk permohonan pinjaman anda #:appId oleh :name telah dikeluarkan.', ['appId' => $applicationId ?? 'N/A', 'name' => $applicantName]),
             'items_summary' => implode('; ', $itemsDetails),

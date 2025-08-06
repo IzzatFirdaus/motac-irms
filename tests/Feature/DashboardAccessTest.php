@@ -48,27 +48,28 @@ class DashboardAccessTest extends TestCase
         $response = $this->actingAs($this->adminUser)->get('/dashboard');
         $response->assertOk();
         $response->assertViewIs('dashboard.admin');
-        $response->assertSeeText('Administrator Dashboard');
+        $response->assertSeeText('Admin Dashboard');
     }
 
     public function test_bpm_staff_sees_bpm_dashboard(): void
     {
         $response = $this->actingAs($this->bpmStaffUser)->get('/dashboard');
         $response->assertOk();
-        $response->assertViewIs('dashboard.bpm');
-        $response->assertSeeText('BPM Staff Dashboard (ICT Equipment)');
+        $response->assertViewIs('dashboard.bpm-staff');
+        $response->assertSeeText('BPM Staff Dashboard');
     }
 
     public function test_it_admin_sees_it_admin_dashboard(): void
     {
         $response = $this->actingAs($this->itAdminUser)->get('/dashboard');
         $response->assertOk();
-        $response->assertViewIs('dashboard.itadmin');
-        $response->assertSeeText('IT Administrator Dashboard');
+        $response->assertViewIs('dashboard.it-admin');
+        $response->assertSeeText('IT Admin Dashboard');
     }
 
     public function test_approver_sees_approver_dashboard(): void
     {
+        // Create a pending loan application for the approver to see
         $loanApplication = LoanApplication::factory()->create(['status' => 'pending_support']);
         Approval::factory()->create([
             'approvable_id' => $loanApplication->id,
@@ -105,7 +106,7 @@ class DashboardAccessTest extends TestCase
 
     public function test_regular_user_cannot_access_settings(): void
     {
-        $response = $this->actingAs($this->regularUser)->get(route('settings.users.index'));
+        $response = $this->actingAs($this->regularUser)->get(route('settings.index'));
         $response->assertStatus(403);
     }
 }

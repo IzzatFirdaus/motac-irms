@@ -1,10 +1,6 @@
 @php
-    // $configData and Helper::appClasses() are from the original template.
-    // Their usage for 'myStyle' for background shapes might be removed if MOTAC uses a simpler background.
-    // $configData = Helper::appClasses(); // This line can remain commented if $configData is globally available.
-
-    // Corrected to use 'myStyle' and ensure $configData is set before accessing its keys.
-    // The error "Undefined array key 'style'" implies $configData itself is set.
+    // The $illustrationStyleSuffix helps in dynamically loading light/dark mode illustrations.
+    // Ensure that your MOTAC-themed blank layout and assets are correctly configured for this.
     $illustrationStyleSuffix = isset($configData['myStyle']) ? '-' . $configData['myStyle'] : '';
 @endphp
 
@@ -29,16 +25,6 @@
         .misc-wrapper .error-title {
             /* Class for the "Halaman Tidak Ditemui!" title */
             color: var(--bs-primary);
-            /* Example: Using MOTAC Blue for title */
-        }
-
-        .motac-standalone-icon {
-            font-size: 6rem;
-            /* Adjust size as needed, display-1 might be too large here */
-            margin-bottom: 1.5rem;
-            /* Space below the icon */
-            color: var(--bs-warning);
-            /* Example: Using MOTAC warning color */
         }
     </style>
 @endsection
@@ -46,30 +32,15 @@
 @section('content')
     <div class="container-xxl container-p-y">
         <div class="misc-wrapper text-center">
-
-            {{-- Large Standalone Bootstrap Icon replacing the illustration --}}
-            <div class="mt-4 mb-4">
-                <i class="bi bi-compass-fill motac-standalone-icon"></i>
-                {{--
-          Icon Choice: bi-compass-fill suggests "lost" or "cannot find direction".
-          Alternatives:
-          - bi-question-circle-fill (General query/unknown)
-          - bi-search-heart-break (Search failed, more illustrative)
-          - bi-signpost-split-fill (Wrong turn)
-          - bi-binoculars-fill (Looking but not finding)
-      --}}
-            </div>
-
-            <h1 class="mb-2 mx-2 error-code">404</h1>
-            <h2 class="mb-2 display-5 fw-bold error-title">
-                {{-- Icon removed from here as we have a large standalone one now --}}
-                {{ __('Halaman Tidak Ditemui!') }}
+            <h1 class="mb-2 mx-2 display-1 fw-bolder error-code">404</h1>
+            <h2 class="mb-2 mt-4 display-5 fw-bold error-title">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ __('Halaman Tidak Ditemui!') }}
             </h2>
             <p class="mb-4 mx-auto col-md-8 col-lg-6 text-muted">
                 {{ __('Harap maaf, halaman yang anda cuba akses tidak wujud atau telah dipindahkan. Sila semak URL atau kembali ke halaman utama.') }}
             </p>
             <a href="{{ url('/') }}" class="btn btn-primary d-inline-flex align-items-center">
-                <i class="bi bi-house-door-fill me-2"></i>{{ __('Kembali ke Halaman Utama') }}
+                <i class="bi bi-house-door-fill me-2"></i>{{ __('Kembali ke Laman Utama') }}
             </a>
             {{-- Original illustration image block removed --}}
             {{--

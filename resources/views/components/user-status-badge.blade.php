@@ -1,35 +1,25 @@
-{{-- resources/views/components/user-status-badge.blade.php --}}
-@props([
-    'status' => '', // The user status key, e.g., 'active', 'inactive'
-])
+{{--
+    resources/views/components/user-status-badge.blade.php
+
+    Badge to show user status (active/inactive/suspended/etc).
+    Props:
+    - $status: string representing user status, e.g. "active", "inactive", "suspended"
+--}}
+
+@props(['status'])
 
 @php
-    $statusOptions = \App\Models\User::getStatusOptions();
-    $statusLabel = $statusOptions[$status] ?? Illuminate\Support\Str::title(str_replace('_', ' ', $status));
-    $badgeClass = '';
-
-    switch ($status) {
-        case \App\Models\User::STATUS_ACTIVE:
-            $badgeClass = 'text-bg-success';
-            break;
-        case \App\Models\User::STATUS_INACTIVE:
-            $badgeClass = 'text-bg-danger';
-            break;
-        case \App\Models\User::STATUS_PENDING:
-            $badgeClass = 'text-bg-warning';
-            break;
-        default:
-            $badgeClass = 'text-bg-secondary';
-            break;
-    }
+    // Map status to Bootstrap badge classes and labels
+    $statusMap = [
+        'active' => ['class' => 'success', 'label' => __('Aktif')],
+        'inactive' => ['class' => 'secondary', 'label' => __('Tidak Aktif')],
+        'suspended' => ['class' => 'warning', 'label' => __('Digantung')],
+        'pending' => ['class' => 'info', 'label' => __('Menunggu')],
+    ];
+    $badge = $statusMap[$status] ?? ['class' => 'dark', 'label' => ucfirst($status)];
 @endphp
 
-@if ($status)
-    <span {{ $attributes->merge(['class' => 'badge rounded-pill ' . $badgeClass]) }}>
-        {{ __($statusLabel) }}
-    </span>
-@else
-    <span {{ $attributes->merge(['class' => 'badge rounded-pill text-bg-light']) }}>
-        {{ __('Status Tidak Diketahui') }}
-    </span>
-@endif
+<span class="badge bg-{{ $badge['class'] }} px-3 py-1 rounded-pill align-middle">
+    <i class="bi bi-circle-fill me-1" style="font-size: .8em;"></i>
+    {{ $badge['label'] }}
+</span>

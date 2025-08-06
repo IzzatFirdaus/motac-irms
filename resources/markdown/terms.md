@@ -1,79 +1,88 @@
-# Terms of Service
-
 # Terms and Conditions for the MOTAC Integrated Resource Management System
 
 **Last Updated:** May 29, 2025
 
 ## 1. Acceptance of Terms
 
-Welcome to the MOTAC Integrated Resource Management System ("System"). This System is operated by the Information Management Division (Bahagian Pengurusan Maklumat - BPM) at the Ministry of Tourism, Arts and Culture (MOTAC), Malaysia ("MOTAC", "we", "us", or "our").
+Welcome to the MOTAC Integrated Resource Management System ("System"), operated by the Information Management Division (Bahagian Pengurusan Maklumat - BPM) at the Ministry of Tourism, Arts and Culture (MOTAC), Malaysia ("MOTAC", "we", "us", or "our").
 
-By accessing or using this System, you agree to be bound by these Terms and Conditions ("Terms"). If you disagree with any part of the terms, then you may not access the System. This System is intended for managing Email/User ID Provisioning and ICT Equipment Loans for official MOTAC purposes.
+By accessing or using this System, you agree to be bound by these Terms and Conditions ("Terms"). If you do not agree with any part of these Terms, you may not access or use the System. The System is designed for official MOTAC purposes, specifically for managing Email/User ID Provisioning and ICT Equipment Loans.
 
 ## 2. User Accounts and Responsibilities
 
-* **Account Security:** You are responsible for maintaining the confidentiality of your System login credentials (username and password) and for all activities that occur under your account. You agree to notify BPM immediately of any unauthorized use of your account or any other breach of security.
-* **Accurate Information:** You agree to provide true, accurate, current, and complete information about yourself as prompted by the System's forms. For Email/User ID applications, you must certify that all information provided is true.
-* **Authorized Use:** You agree to use the System only for lawful purposes and in accordance with these Terms, MOTAC policies, and applicable Malaysian laws.
+- **Account Security:** You are responsible for keeping your System login credentials (username and password) confidential. You are accountable for all activities under your account. Notify BPM immediately of any unauthorized use or security breach.
+- **Accurate Information:** You must provide true, accurate, current, and complete information as prompted by System forms. For Email/User ID applications, you must certify the accuracy of the provided information.
+- **Authorized Use:** You agree to use the System only for lawful purposes and in accordance with these Terms, MOTAC policies, and applicable Malaysian laws.
 
 ## 3. System Usage
 
-* The System is for official MOTAC business related to requesting and managing official MOTAC email accounts/user IDs and ICT equipment loans[cite: 1, 2].
-* You shall not use the System in any manner that could damage, disable, overburden, or impair the System or interfere with any other party's use and enjoyment of the System.
-* You may not attempt to gain unauthorized access to any parts of the System, other accounts, computer systems, or networks connected to the System, through hacking, password mining, or any other means.
+- The System is for official MOTAC business related to requesting and managing official MOTAC email accounts/user IDs and ICT equipment loans.
+- Do not use the System in any way that could damage, disable, overburden, or impair it, or interfere with other users' enjoyment of the System.
+- Do not attempt unauthorized access to any part of the System, other accounts, or connected systems/networks, via hacking, password mining, or other means.
 
 ## 4. Email/User ID Application Terms
 
-* **Eligibility:**
-    * Full MOTAC email accounts are generally eligible for Permanent Staff (Kakitangan Tetap), Contract Hires (Lantikan Kontrak), and MySTEP Personnel.
-    * User IDs (without a new MOTAC mailbox) may be provided to Industrial Training Students (Pelajar Latihan Industri - MOTAC Headquarters only) or for staff using existing primary agency mailboxes requiring communication via the motac.gov.my domain.
-* **Certification:** By submitting an Email/User ID application, you explicitly agree and certify that:
-    1.  All information provided in the application is TRUE[cite: 108, 111].
-    2.  You agree for the Information Management Division (BPM) to use the provided information to process your application.
-    3.  You agree to be fully responsible for every email sent and received through your official MOTAC email account.
-* **Supporting Officer:** Applications require review by a supporting officer who meets the minimum grade requirement (e.g., Grade 9 or above for email applications).
+- **Eligibility:**
+  - Full MOTAC email accounts are generally available to Permanent Staff, Contract Hires, and MySTEP Personnel.
+  - User IDs (without a new MOTAC mailbox) may be provided to Industrial Training Students (MOTAC HQ only) or to staff using existing agency mailboxes who require motac.gov.my domain communications.
+- **Certification:** By submitting an Email/User ID application, you agree and certify that:
+  1. All information provided is TRUE.
+  2. Information Management Division (BPM) may use the information for processing.
+  3. You are fully responsible for every email sent and received via your official MOTAC email account.
+- **Supporting Officer:** Applications require review by a supporting officer meeting minimum grade requirements (e.g., Grade 9 or above for email applications).
 
 ## 5. ICT Equipment Loan Terms
 
-* **Eligibility:** Only approved and active MOTAC staff are eligible to request ICT equipment loans.
-* **Availability:** Equipment allocation is subject to availability and follows a "first-come, first-serve" policy.
-* **Application Processing Time:** Complete applications for ICT loans should be processed by BPM within three (3) working days from the date of receipt. BPM is not responsible for equipment availability if this period is not adhered to by the applicant due to incomplete or delayed submission from the applicant's side.
-* **Liability:** The applicant or the designated responsible officer is fully accountable for any loss or damage to the borrowed ICT equipment during the loan period.
-* **Confirmation:** By submitting an ICT Equipment Loan application, you confirm your agreement to the terms and conditions associated with the loan.
-* **Supporting Officer:** Loan applications require review and approval by a supporting officer who meets the minimum grade requirement (e.g., Grade 41 or above).
+- **Eligibility:** Only approved and active MOTAC staff may request ICT equipment loans.
+- **Availability:** Equipment allocation is subject to availability and follows a first-come, first-serve basis.
+- **Processing Time:** Complete ICT loan applications should be processed by BPM within three (3) working days from receipt. BPM is not responsible for equipment availability if applicants delay or submit incomplete applications.
+- **Liability:** The applicant or designated responsible officer is fully accountable for any loss or damage to borrowed equipment during the loan period.
+- **Confirmation:** By submitting an ICT Equipment Loan application, you confirm your agreement to the loan terms and conditions.
+- **Supporting Officer:** Applications require review and approval by a supporting officer meeting minimum grade requirements (e.g., Grade 41 or above).
 
 ## 6. Intellectual Property
 
-The System and all its original content, features, and functionality are and will remain the exclusive property of MOTAC. This includes, but is not limited to, text, graphics, logos, icons, images, and software.
+The System and its original content, features, and functionality are the exclusive property of MOTAC. This includes, but is not limited to, text, graphics, logos, icons, images, and software.
 
 ## 7. Disclaimers
 
-The System is provided on an "AS IS" and "AS AVAILABLE" basis. MOTAC makes no representations or warranties of any kind, express or implied, as to the operation of the System or the information, content, or materials included therein. You expressly agree that your use of the System is at your sole risk.
+The System is provided "AS IS" and "AS AVAILABLE". MOTAC makes no warranties, express or implied, regarding System operation or its content. You use the System at your sole risk.
 
-MOTAC does not warrant that the System, its servers, or e-mail sent from the System are free of viruses or other harmful components.
+MOTAC does not warrant that the System, its servers, or emails sent from it are free of viruses or harmful components.
 
 ## 8. Limitation of Liability
 
-In no event shall MOTAC, nor its officers, employees, or agents, be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from (i) your access to or use of or inability to access or use the System; (ii) any conduct or content of any third party on the System; (iii) any content obtained from the System; and (iv) unauthorized access, use or alteration of your transmissions or content, whether based on warranty, contract, tort (including negligence) or any other legal theory, whether or not we have been informed of the possibility of such damage.
+MOTAC, its officers, employees, and agents are not liable for indirect, incidental, special, consequential, or punitive damages (including loss of profits, data, use, goodwill, or intangible losses) resulting from:
+- Your access to or use of, or inability to use, the System;
+- Conduct or content of any third party on the System;
+- Content obtained from the System;
+- Unauthorized access, use, or alteration of your transmissions or content,
+whether based on warranty, contract, tort, or any other legal theory, even if MOTAC has been advised of the possibility of such damages.
 
 ## 9. Termination of Access
 
-MOTAC reserves the right, in its sole discretion, to suspend or terminate your access to all or any part of the System at any time, with or without notice, for any reason, including, without limitation, breach of these Terms.
+MOTAC reserves the right to suspend or terminate your access to all or any part of the System at any time, with or without notice, for any reason, including breach of these Terms.
 
 ## 10. Governing Law
 
-These Terms shall be governed and construed in accordance with the laws of Malaysia, without regard to its conflict of law provisions.
+These Terms are governed by and construed in accordance with the laws of Malaysia, without regard to conflict of law provisions.
 
 ## 11. Changes to Terms
 
-MOTAC reserves the right, at our sole discretion, to modify or replace these Terms at any time. If a revision is material, we will provide notice within the System prior to any new terms taking effect. What constitutes a material change will be determined at our sole discretion. By continuing to access or use our System after any revisions become effective, you agree to be bound by the revised terms.
+MOTAC may modify or replace these Terms at any time at its sole discretion. Material changes will be announced within the System before taking effect. By continuing to use the System after revisions become effective, you agree to be bound by the revised Terms.
 
 ## 12. Contact Us
 
-If you have any questions about these Terms and Conditions, please contact:
+Questions about these Terms should be addressed to:
 
-Bahagian Pengurusan Maklumat (BPM)
-Kementerian Pelancongan, Seni dan Budaya Malaysia
-Aras 18, No. 2, Menara PNB, Persiaran Perdana,
-Presint 4, 62100 Putrajaya, Malaysia.
+Bahagian Pengurusan Maklumat (BPM)  
+Kementerian Pelancongan, Seni dan Budaya Malaysia  
+Aras 18, No. 2, Menara PNB, Persiaran Perdana,  
+Presint 4, 62100 Putrajaya, Malaysia.  
 (Contact details to be inserted by MOTAC)
+
+---
+
+<!-- 
+This Terms of Service document defines the rules, responsibilities, and limitations for use of the MOTAC Integrated Resource Management System. It supports compliance, accountability, and user awareness.
+-->

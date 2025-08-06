@@ -12,11 +12,10 @@ $confirmableId = md5($attributes->wire('then')->value());
 </span>
 
 @once
-  {{-- Ensure x-dialog-modal and its child x-components are styled to match MOTAC Bootstrap 5 theme --}}
   <x-dialog-modal wire:model.live="confirmingPassword">
     <x-slot name="title">
       <div class="d-flex align-items-center">
-        <i class="bi bi-shield-lock-fill me-2 fs-5"></i> {{-- Bootstrap Icon --}}
+        <i class="bi bi-shield-lock-fill me-2 fs-5"></i>
         {{ $title }}
       </div>
     </x-slot>
@@ -26,25 +25,20 @@ $confirmableId = md5($attributes->wire('then')->value());
 
       <div class="mt-3" x-data="{}"
         x-on:confirming-password.window="setTimeout(() => $refs.confirmable_password.focus(), 250)">
-        {{-- x-input should render a .form-control. Adding classes for guidance. --}}
         <x-input type="password" class="form-control form-control-sm {{ $errors->has('confirmable_password') ? 'is-invalid' : '' }}"
           placeholder="{{ __('Kata Laluan') }}" x-ref="confirmable_password" wire:model="confirmablePassword"
           wire:keydown.enter="confirmPassword" />
 
-        {{-- x-input-error should render as .invalid-feedback --}}
         <x-input-error for="confirmable_password" class="mt-2 small text-danger" />
       </div>
     </x-slot>
 
     <x-slot name="footer">
-      {{-- x-secondary-button should render as .btn .btn-outline-secondary (MOTAC Themed) --}}
       <x-secondary-button wire:click="stopConfirmingPassword" wire:loading.attr="disabled">
         {{ __('Batal') }}
       </x-secondary-button>
-
-      {{-- x-button should render as .btn .btn-primary (MOTAC Blue) --}}
       <x-button class="ms-2" dusk="confirm-password-button" wire:click="confirmPassword" wire:loading.attr="disabled">
-        <i class="bi bi-check-lg me-1"></i>{{-- Bootstrap Icon --}}
+        <i class="bi bi-check-lg me-1"></i>
         {{ $button }}
       </x-button>
     </x-slot>

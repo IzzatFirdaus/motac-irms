@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
-use App\Models\EmailApplication;
 use App\Models\LoanApplication;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
@@ -20,17 +19,14 @@ class Dashboard extends Component
     public string $displayUserName = '';
     public bool $isNormalUser = false;
 
-    // Properties for the User Dashboard view
+    // Properties for the User Dashboard view (only Loan applications remain)
     public int $pendingUserLoanApplicationsCount = 0;
-    public int $pendingUserEmailApplicationsCount = 0;
     public EloquentCollection $userRecentLoanApplications;
-    public EloquentCollection $userRecentEmailApplications;
 
     public function __construct()
     {
         // Initialize all collections to be safe
         $this->userRecentLoanApplications = new EloquentCollection();
-        $this->userRecentEmailApplications = new EloquentCollection();
     }
 
     /**
@@ -48,50 +44,21 @@ class Dashboard extends Component
         }
 
         $this->displayUserName = $user->name;
-        $this->isNormalUser = $user->hasRole('User');
+        $this->isNormalUser = $user->hasRole('User'); // Assuming 'User' is the role for normal users
 
-        // Fetch data only if the user is a normal user.
-        // Admin data will be handled by the dedicated AdminDashboard component.
-        if ($this->isNormalUser) {
-            $this->fetchUserData($user);
-        }
-    }
-
-    /**
-     * Fetch data scoped to the currently logged-in normal user.
-     */
-    protected function fetchUserData(User $user): void
-    {
-        // Stat Card: ICT loan applications that are currently in process.
+        // Stat Card: Loan applications that are in process.
         $this->pendingUserLoanApplicationsCount = LoanApplication::where('user_id', $user->id)
             ->whereIn('status', [
                 LoanApplication::STATUS_DRAFT,
                 LoanApplication::STATUS_PENDING_SUPPORT,
-                LoanApplication::STATUS_PENDING_APPROVER_REVIEW,
-                LoanApplication::STATUS_PENDING_BPM_REVIEW,
-                LoanApplication::STATUS_APPROVED,
-            ])
-            ->count();
-
-        // Stat Card: Email/ID applications that are in process.
-        $this->pendingUserEmailApplicationsCount = EmailApplication::where('user_id', $user->id)
-            ->whereIn('status', [
-                EmailApplication::STATUS_DRAFT,
-                EmailApplication::STATUS_PENDING_SUPPORT,
-                EmailApplication::STATUS_PENDING_ADMIN,
-                EmailApplication::STATUS_PROCESSING,
+                LoanApplication::STATUS_PENDING_APPROVER_REVIEW, // Replaced STATUS_PENDING_ADMIN
+                LoanApplication::STATUS_PENDING_BPM_REVIEW, // Replaced STATUS_PROCESSING if it implies review before approval
+                LoanApplication::STATUS_APPROVED, // Include approved if still awaiting issuance
             ])
             ->count();
 
         // Table: The user's 5 most recently updated loan applications.
         $this->userRecentLoanApplications = LoanApplication::where('user_id', $user->id)
-            ->with(['user:id,name'])
-            ->latest('updated_at')
-            ->limit(5)
-            ->get();
-
-        // Table: The user's 5 most recently updated email applications.
-        $this->userRecentEmailApplications = EmailApplication::where('user_id', $user->id)
             ->with(['user:id,name'])
             ->latest('updated_at')
             ->limit(5)

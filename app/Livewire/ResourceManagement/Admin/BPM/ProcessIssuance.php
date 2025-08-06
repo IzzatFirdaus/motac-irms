@@ -164,6 +164,8 @@ class ProcessIssuance extends Component
             ->orderBy('model')
             ->get(['id', 'tag_id', 'asset_type', 'brand', 'model']);
 
-        return view('livewire.resource-management.admin.bpm.process-issuance')->title(__('Proses Pengeluaran Peralatan'));
+        // Removed ->title() as it's not a standard method on Illuminate\Contracts\View\View
+        // You should handle page title in your main Blade layout if not using a specific package.
+        return view('livewire.resource-management.admin.bpm.process-issuance');
     }
 }

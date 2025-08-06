@@ -26,10 +26,10 @@
                                 <th class="text-uppercase small">ID</th>
                                 <th class="text-uppercase small">{{ __('Name') }}</th>
                                 <th class="text-uppercase small">{{ __('Email') }}</th>
-                                <th class="text-uppercase small text-center">{{ __('reports.email_applications.table.status') }}</th>
-                                <th class="text-uppercase small text-center">{{ __('reports.loan_applications.table.status') }}</th>
-                                <th class="text-uppercase small text-center">{{ __('Approvals') }}</th>
-                                <th class="text-uppercase small">{{ __('Registered') }}</th>
+                                {{-- Removed Email Applications column --}}
+                                <th class="text-uppercase small text-center">{{ __('reports.loan_applications.table.count') }}</th>
+                                <th class="text-uppercase small text-center">{{ __('reports.approvals.table.count') }}</th>
+                                <th class="text-uppercase small">{{ __('Created At') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -38,7 +38,7 @@
                                     <td>{{ $user->id }}</td>
                                     <td>{{ $user->full_name ?? $user->name }}</td>
                                     <td>{{ $user->email }}</td>
-                                    <td class="text-center">{{ $user->email_applications_count ?? 0 }}</td>
+                                    {{-- Removed Email Applications count --}}
                                     <td class="text-center">{{ $user->loan_applications_count ?? 0 }}</td>
                                     <td class="text-center">{{ $user->approvals_count ?? 0 }}</td>
                                     <td>{{ $user->created_at?->format('Y-m-d H:i') }}</td>

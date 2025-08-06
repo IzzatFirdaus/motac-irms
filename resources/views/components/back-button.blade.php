@@ -2,11 +2,10 @@
 @props([
     'route',
     'text' => __('Kembali'),
-    'icon' => 'bi-arrow-left' // Changed default to Bootstrap Icon
+    'icon' => 'bi-arrow-left'
 ])
 
-<a href="{{ $route }}" {{ $attributes->merge(['class' => 'btn btn-outline-secondary d-inline-flex align-items-center']) }}> {{-- Suggesting btn-outline-secondary for a common "back" style --}}
-    {{-- Using Bootstrap Icon class --}}
+<a href="{{ $route }}" {{ $attributes->merge(['class' => 'btn btn-outline-secondary d-inline-flex align-items-center']) }}>
     <i class="bi {{ $icon }} @if($text) me-1 @endif"></i>
     @if($text)
         <span>{{ $text }}</span>

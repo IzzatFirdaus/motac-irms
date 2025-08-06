@@ -1,80 +1,56 @@
-{{-- resources/views/components/user-info-card.blade.php --}}
-@props([
-    'user',
-    'title' => '',
-    'cardClass' => 'card shadow-sm motac-card mb-4', // Default card classes
-    'headerClass' => 'card-header bg-light py-3 motac-card-header',
-    'bodyClass' => 'card-body p-3 p-md-4 motac-card-body',
-])
+{{--
+    resources/views/components/user-info-card.blade.php
 
-@if ($user)
-    <div class="{{ $cardClass }}">
-        @if (!empty($title))
-            <div class="{{ $headerClass }}">
-                <h4 class="h5 card-title mb-0 fw-semibold d-flex align-items-center">
-                    <i class="bi bi-person-lines-fill me-2 fs-5"></i>{{ $title }}
-                </h4>
+    A reusable component to display a user's information in a card format.
+    Props:
+    - $user: User object containing profile information.
+    - $showActions: (optional) Boolean to show action buttons (edit, etc.)
+--}}
+
+@props(['user', 'showActions' => false])
+
+<div class="card shadow-sm mb-3">
+    <div class="card-body d-flex align-items-center">
+        <div class="me-3">
+            {{-- User avatar, fallback to default if not available --}}
+            <img src="{{ $user->profile_photo_url ?? asset('assets/img/avatars/default-avatar.png') }}"
+                 alt="{{ $user->name }} avatar"
+                 class="rounded-circle shadow"
+                 style="width: 64px; height: 64px; object-fit: cover;">
+        </div>
+        <div class="flex-grow-1">
+            <h5 class="mb-1 fw-bold">{{ $user->name }}</h5>
+            <div class="mb-1">
+                @if($user->email)
+                    <i class="bi bi-envelope me-1"></i>
+                    <span class="text-muted">{{ $user->email }}</span>
+                @endif
             </div>
-        @endif
-        <div class="{{ $bodyClass }}">
-            <div class="row g-3">
-                {{-- Column 1 --}}
-                <div class="col-md-6">
-                    <div class="mb-2">
-                        <label class="fw-medium text-muted d-block small"><i
-                                class="bi bi-person-badge me-1"></i>{{ __('Nama Penuh') }}:</label>
-                        <span
-                            class="fw-semibold">{{ ($user->title ? $user->title . ' ' : '') . ($user->full_name ?? $user->name) }}</span>
-                    </div>
-
-                    <div class="mb-2">
-                        <label class="fw-medium text-muted d-block small"><i
-                                class="bi bi-card-heading me-1"></i>{{ __('No. Kad Pengenalan') }}:</label>
-                        <span>{{ $user->identification_number ?? __('N/A') }}</span>
-                    </div>
-
-                    <div class="mb-2">
-                        <label class="fw-medium text-muted d-block small"><i
-                                class="bi bi-person-workspace me-1"></i>{{ __('Jawatan') }}:</label>
-                        <span>{{ optional($user->position)->name ?? __('N/A') }}</span>
-                    </div>
-
-                    <div class="mb-0"> {{-- Removed mb-2 for last item in col --}}
-                        <label class="fw-medium text-muted d-block small"><i
-                                class="bi bi-bar-chart-steps me-1"></i>{{ __('Gred') }}:</label>
-                        <span>{{ optional($user->grade)->name ?? __('N/A') }}</span>
-                    </div>
-                </div>
-
-                {{-- Column 2 --}}
-                <div class="col-md-6">
-                    <div class="mb-2">
-                        <label class="fw-medium text-muted d-block small"><i
-                                class="bi bi-building me-1"></i>{{ __('Bahagian / Unit') }}:</label>
-                        <span>{{ optional($user->department)->name ?? __('N/A') }}</span>
-                    </div>
-
-                    <div class="mb-2">
-                        <label class="fw-medium text-muted d-block small"><i
-                                class="bi bi-envelope-at-fill me-1"></i>{{ __('E-mel Rasmi (MOTAC)') }}:</label>
-                        <span class="text-primary">{{ $user->motac_email ?? __('N/A') }}</span>
-                    </div>
-
-                    <div class="mb-2">
-                        <label class="fw-medium text-muted d-block small"><i
-                                class="bi bi-envelope-fill me-1"></i>{{ __('E-mel Peribadi (Login)') }}:</label>
-                        <span>{{ $user->email ?? __('N/A') }}</span>
-                    </div>
-
-                    <div class="mb-0"> {{-- Removed mb-2 for last item in col --}}
-                        <label class="fw-medium text-muted d-block small"><i
-                                class="bi bi-telephone-fill me-1"></i>{{ __('No. Telefon Bimbit') }}:</label>
-                        <span>{{ $user->mobile_number ?? __('N/A') }}</span>
-                    </div>
-                </div>
+            <div class="mb-1">
+                @if($user->department)
+                    <i class="bi bi-building me-1"></i>
+                    <span>{{ $user->department->name }}</span>
+                @endif
+            </div>
+            <div class="mb-1">
+                @if($user->position)
+                    <i class="bi bi-person-badge me-1"></i>
+                    <span>{{ $user->position->name }}{{ $user->grade ? ' ('.$user->grade->name.')' : '' }}</span>
+                @endif
+            </div>
+            <div>
+                {{-- Include user status badge component --}}
+                <x-user-status-badge :status="$user->status" />
             </div>
         </div>
+        @if($showActions)
+            <div class="ms-3 d-flex flex-column">
+                {{-- Example edit button, can be customized for your system --}}
+                <a href="{{ route('settings.users.edit', ['user' => $user->id]) }}" class="btn btn-outline-primary btn-sm mb-2">
+                    <i class="bi bi-pencil-square me-1"></i>{{ __('Edit') }}
+                </a>
+                {{-- Other actions can go here --}}
+            </div>
+        @endif
     </div>
-@else
-    <x-alert type="warning" :message="__('Maklumat pengguna tidak tersedia.')" icon="bi-exclamation-triangle-fill" />
-@endif
+</div>

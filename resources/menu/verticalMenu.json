@@ -16,20 +16,20 @@
       "slug": "my-applications",
       "submenu": [
         {
-          "url": "/email-applications",
-          "name": "menu.my_applications.email",
-          "icon": "envelope-paper-fill",
-          "slug": "email-applications.index",
-          "routeName": "email-applications.index",
-          "permission": "view_email_applications"
-        },
-        {
           "url": "/loan-applications",
           "name": "menu.my_applications.loan",
           "icon": "laptop-fill",
           "slug": "loan-applications.index",
           "routeName": "loan-applications.index",
           "permission": "view_loan_applications"
+        },
+        {
+          "url": "/helpdesk-tickets",
+          "name": "menu.my_applications.helpdesk",
+          "icon": "life-preserver",
+          "slug": "helpdesk-tickets.index",
+          "routeName": "helpdesk-tickets.index",
+          "permission": "view_helpdesk_tickets"
         }
       ]
     },
@@ -39,20 +39,20 @@
       "slug": "application-forms",
       "submenu": [
         {
-          "url": "/email-applications/create",
-          "name": "menu.apply_for_resources.email",
-          "icon": "envelope-plus-fill",
-          "slug": "email-applications.create",
-          "routeName": "email-applications.create",
-          "permission": "create_email_applications"
-        },
-        {
           "url": "/loan-applications/create",
           "name": "menu.apply_for_resources.loan",
           "icon": "box-arrow-up-right",
           "slug": "loan-applications.create",
           "routeName": "loan-applications.create",
           "permission": "create_loan_applications"
+        },
+        {
+          "url": "/helpdesk-tickets/create",
+          "name": "menu.apply_for_resources.helpdesk_ticket",
+          "icon": "ticket-fill",
+          "slug": "helpdesk-tickets.create",
+          "routeName": "helpdesk-tickets.create",
+          "permission": "create_helpdesk_tickets"
         }
       ]
     },
@@ -62,118 +62,23 @@
       "icon": "person-check-fill",
       "slug": "approvals.dashboard",
       "routeName": "approvals.dashboard",
-      "permission": "view_approval_tasks"
+      "permission": "view_approval_dashboard"
     },
     {
-      "name": "menu.administration.title",
-      "icon": "gear-wide-connected",
-      "slug": "resource-management",
-      "routeNamePrefix": "resource-management",
-      "permission": "view_equipment",
-      "submenu": [
-        {
-          "name": "menu.administration.bpm_operations.title",
-          "icon": "tools",
-          "slug": "resource-management.bpm",
-          "routeNamePrefix": "resource-management.bpm",
-          "permission": "process_loan_issuance",
-          "submenu": [
-            {
-              "url": "/resource-management/bpm/outstanding-loans",
-              "name": "menu.administration.bpm_operations.outstanding_loans",
-              "icon": "hourglass-split",
-              "slug": "resource-management.bpm.outstanding-loans",
-              "routeName": "resource-management.bpm.outstanding-loans",
-              "permission": "process_loan_issuance"
-            },
-            {
-              "url": "/resource-management/bpm/issued-loans",
-              "name": "menu.administration.bpm_operations.issued_loans",
-              "icon": "box-arrow-in-up-right",
-              "slug": "resource-management.bpm.issued-loans",
-              "routeName": "resource-management.bpm.issued-loans",
-              "permission": "process_loan_issuance"
-            }
-          ]
-        },
-        {
-          "url": "/resource-management/equipment-admin",
-          "name": "menu.administration.equipment_management",
-          "icon": "pc-display",
-          "slug": "resource-management.equipment-admin.index",
-          "routeName": "resource-management.equipment-admin.index",
-          "permission": "view_equipment"
-        },
-        {
-          "url": "/resource-management/email-applications-admin",
-          "name": "menu.administration.email_applications",
-          "icon": "envelope-gear-fill",
-          "slug": "resource-management.email-applications-admin.index",
-          "routeName": "resource-management.email-applications-admin.index",
-          "permission": "view_any_admin_email_applications"
-        },
-        {
-          "url": "/resource-management/users-admin",
-          "name": "menu.administration.users_list",
-          "icon": "people-fill",
-          "slug": "resource-management.users-admin.index",
-          "routeName": "resource-management.users-admin.index",
-          "permission": "view_users"
-        }
-      ]
+      "url": "/resource-inventory/equipment",
+      "name": "menu.resource_inventory.equipment",
+      "icon": "pc-display",
+      "slug": "equipment.index",
+      "routeName": "equipment.index",
+      "permission": "manage_equipment_inventory"
     },
     {
-      "menuHeader": "menu.section.system_config",
-      "permission": "manage_settings"
-    },
-    {
-      "name": "menu.settings.title",
-      "icon": "sliders",
-      "slug": "settings",
-      "routeNamePrefix": "settings",
-      "permission": "manage_settings",
-      "submenu": [
-        {
-          "url": "/settings/users",
-          "name": "menu.settings.user_management",
-          "icon": "person-lines-fill",
-          "slug": "settings.users.index",
-          "routeName": "settings.users.index",
-          "permission": "view_users"
-        },
-        {
-          "url": "/settings/roles",
-          "name": "menu.settings.roles_permissions",
-          "icon": "person-badge-fill",
-          "slug": "settings.roles.index",
-          "routeName": "settings.roles.index",
-          "permission": "manage_roles"
-        },
-        {
-          "url": "/settings/grades",
-          "name": "menu.settings.grades_management",
-          "icon": "bar-chart-steps",
-          "slug": "settings.grades.index",
-          "routeName": "settings.grades.index",
-          "permission": "manage_grades"
-        },
-        {
-          "url": "/settings/departments",
-          "name": "menu.settings.departments_management",
-          "icon": "building-fill",
-          "slug": "settings.departments.index",
-          "routeName": "settings.departments.index",
-          "permission": "manage_departments"
-        },
-        {
-          "url": "/settings/positions",
-          "name": "menu.settings.positions_management",
-          "icon": "person-workspace",
-          "slug": "settings.positions.index",
-          "routeName": "settings.positions.index",
-          "permission": "manage_positions"
-        }
-      ]
+      "url": "/resource-inventory/loan-transactions",
+      "name": "menu.resource_inventory.loan_transactions",
+      "icon": "arrow-left-right",
+      "slug": "loan-transactions.index",
+      "routeName": "loan-transactions.index",
+      "permission": "view_loan_transactions"
     },
     {
       "name": "menu.reports.title",
@@ -191,14 +96,6 @@
           "permission": "view_equipment_reports"
         },
         {
-          "url": "/reports/email-accounts",
-          "name": "menu.reports.email_accounts_report",
-          "icon": "envelope-check-fill",
-          "slug": "reports.email-accounts",
-          "routeName": "reports.email-accounts",
-          "permission": "view_email_reports"
-        },
-        {
           "url": "/reports/loan-applications",
           "name": "menu.reports.loan_applications_report",
           "icon": "journal-text",
@@ -213,6 +110,14 @@
           "slug": "reports.activity-log",
           "routeName": "reports.activity-log",
           "permission": "view_user_activity_reports"
+        },
+        {
+          "url": "/reports/helpdesk-tickets",
+          "name": "menu.reports.helpdesk_report",
+          "icon": "life-preserver",
+          "slug": "reports.helpdesk-tickets",
+          "routeName": "reports.helpdesk-tickets",
+          "permission": "view_helpdesk_reports"
         }
       ]
     },
@@ -220,10 +125,66 @@
       "url": "/log-viewer",
       "name": "menu.system_logs",
       "icon": "file-text-fill",
-      "slug": "log-viewer.index",
-      "routeName": "log-viewer.index",
-      "target": "_blank",
+      "slug": "system-logs",
+      "routeName": "system-logs",
       "permission": "view_system_logs"
+    },
+    {
+      "name": "menu.system_settings.title",
+      "icon": "gear-fill",
+      "slug": "settings",
+      "routeNamePrefix": "settings",
+      "permission": "manage_users",
+      "submenu": [
+        {
+          "url": "/settings/users",
+          "name": "menu.system_settings.users",
+          "icon": "person-gear",
+          "slug": "settings.users.index",
+          "routeName": "settings.users.index",
+          "permission": "manage_users"
+        },
+        {
+          "url": "/settings/roles",
+          "name": "menu.system_settings.roles",
+          "icon": "person-vcard",
+          "slug": "settings.roles.index",
+          "routeName": "settings.roles.index",
+          "permission": "manage_roles"
+        },
+        {
+          "url": "/settings/permissions",
+          "name": "menu.system_settings.permissions",
+          "icon": "key-fill",
+          "slug": "settings.permissions.index",
+          "routeName": "settings.permissions.index",
+          "permission": "manage_permissions"
+        },
+        {
+          "url": "/settings/departments",
+          "name": "menu.system_settings.departments",
+          "icon": "buildings-fill",
+          "slug": "settings.departments.index",
+          "routeName": "settings.departments.index",
+          "permission": "manage_departments"
+        },
+        {
+          "url": "/settings/grades",
+          "name": "menu.system_settings.grades",
+          "icon": "mortarboard-fill",
+          "slug": "settings.grades.index",
+          "routeName": "settings.grades.index",
+          "permission": "manage_grades"
+        },
+        {
+          "url": "/settings/positions",
+          "name": "menu.system_settings.positions",
+          "icon": "briefcase-fill",
+          "slug": "settings.positions.index",
+          "routeName": "settings.positions.index",
+          "permission": "manage_positions"
+        }
+      ]
     }
   ]
 }

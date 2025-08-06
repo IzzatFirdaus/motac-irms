@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Mail;
 
-use App\Models\EmailApplication;
 use App\Models\LoanApplication;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
@@ -14,7 +13,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use InvalidArgumentException;
+// use InvalidArgumentException; // No longer needed as we're removing the dual-type check
 
 /**
  * Mailable notification sent when a new application is submitted.
@@ -26,12 +25,12 @@ final class ApplicationSubmittedNotification extends Mailable implements ShouldQ
     use SerializesModels;
 
     /**
-     * The application instance (EmailApplication or LoanApplication) that was submitted.
+     * The application instance (LoanApplication) that was submitted.
      */
-    public EmailApplication|LoanApplication $application;
+    public LoanApplication $application; // Changed from EmailApplication|LoanApplication
 
     /**
-     * EDITED: The User model instance for the approver receiving the email.
+     * The User model instance for the approver receiving the email.
      */
     public User $approver;
 
@@ -41,21 +40,17 @@ final class ApplicationSubmittedNotification extends Mailable implements ShouldQ
     public ?string $reviewUrl;
 
     /**
-     * EDITED: Create a new message instance.
+     * Create a new message instance.
      * The constructor now accepts the approver's User model to pass their name to the view.
      *
-     * @param  EmailApplication|LoanApplication  $application  The submitted application model.
+     * @param  LoanApplication  $application  The submitted loan application model.
      * @param  User  $approver  The officer who needs to approve the application.
      * @param  string|null  $reviewUrl  Optional URL for direct review.
      */
-    public function __construct(EmailApplication|LoanApplication $application, User $approver, ?string $reviewUrl = null)
+    public function __construct(LoanApplication $application, User $approver, ?string $reviewUrl = null) // Changed type hint
     {
-        if (! $application instanceof EmailApplication && ! $application instanceof LoanApplication) {
-            $errorMessage = 'ApplicationSubmittedNotification: Received invalid application type.';
-            Log::error($errorMessage, ['type' => is_object($application) ? $application::class : gettype($application)]);
-            throw new InvalidArgumentException($errorMessage.' Must be EmailApplication or LoanApplication.');
-        }
-
+        // Removed the InvalidArgumentException check for EmailApplication
+        // as this mailable will now strictly handle LoanApplication
         $this->application = $application->loadMissing('user');
         $this->approver = $approver;
         $this->reviewUrl = $reviewUrl;
@@ -71,9 +66,8 @@ final class ApplicationSubmittedNotification extends Mailable implements ShouldQ
      */
     public function envelope(): Envelope
     {
-        $subject = $this->application instanceof EmailApplication
-          ? __('Tindakan Diperlukan: Permohonan E-mel ICT Baru Dihantar')
-          : __('Tindakan Diperlukan: Permohonan Pinjaman Peralatan ICT Baru Dihantar');
+        // Simplified subject as it only handles LoanApplication now
+        $subject = __('Tindakan Diperlukan: Permohonan Pinjaman Peralatan ICT Baru Dihantar');
 
         return new Envelope(
             subject: $subject.' (#'.$this->application->id.')'
@@ -81,7 +75,7 @@ final class ApplicationSubmittedNotification extends Mailable implements ShouldQ
     }
 
     /**
-     * EDITED: Get the message content definition.
+     * Get the message content definition.
      * It now correctly passes the approver's name to the view.
      */
     public function content(): Content

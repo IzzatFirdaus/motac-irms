@@ -40,8 +40,7 @@ final class LoanApplicationReturned extends Mailable implements ShouldQueue
         // Eager load relationships needed for the email content
         $this->loanTransaction = $loanTransaction->loadMissing([
             'loanTransactionItems.equipment', // For equipment details
-            'returnAcceptingOfficer', // For who accepted the return
-            'issuingOfficer', // Fallback if accepting officer not present
+            'returnAcceptingOfficer', // If you have a relationship for the officer who accepted the return
         ]);
 
         Log::info('LoanApplicationReturned Mailable: Instance created.', [
@@ -55,38 +54,17 @@ final class LoanApplicationReturned extends Mailable implements ShouldQueue
      */
     public function envelope(): Envelope
     {
+        $applicantName = $this->loanApplication->user?->name ?? 'Pemohon Tidak Diketahui';
         $applicationId = $this->loanApplication->id ?? 'N/A';
-        /** @phpstan-ignore-next-line nullCoalesce.expr, nullsafe.neverNull */
-        $applicantName = $this->loanApplication->user?->full_name ??
-                         ($this->loanApplication->user?->name ?? 'Pemohon');
+        $transactionId = $this->loanTransaction->id ?? 'N/A';
 
-        // Attempt to get primary equipment details for the subject from the first item if available
-        $firstItemEquipment = $this->loanTransaction->loanTransactionItems->first()?->equipment;
-        $equipmentDetailsForSubject = $firstItemEquipment?->model ?? ($firstItemEquipment?->tag_id ?? 'Peralatan ICT');
+        $toAddresses = [
+            new Address($this->loanApplication->user->email, $applicantName),
+        ];
 
-        /** @phpstan-ignore-next-line nullsafe.neverNull */
-        $recipientEmail = $this->loanApplication->user?->email;
-        $toAddresses = [];
+        $subject = sprintf('Notifikasi Peralatan Pinjaman ICT Telah Dipulangkan (Permohonan #%s - Transaksi #%s)', $applicationId, $transactionId);
 
-        if ($recipientEmail) {
-            $toAddresses[] = new Address($recipientEmail, $applicantName);
-            Log::info(
-                sprintf('LoanApplicationReturned Mailable: Recipient identified for Loan Application ID: %s.', $applicationId),
-                ['recipient_email' => $recipientEmail]
-            );
-        } else {
-            Log::error(
-                sprintf('LoanApplicationReturned Mailable: Recipient email not found for Loan Application ID: %s. Notification cannot be sent.', $applicationId),
-                [
-                    'loan_application_id' => $applicationId,
-                    'applicant_user_id' => $this->loanApplication->user_id ?? 'N/A',
-                ]
-            );
-        }
-
-        $subject = sprintf('Notifikasi %s Telah Dipulangkan (Permohonan #%s - %s)', $equipmentDetailsForSubject, $applicationId, $applicantName);
-
-        Log::info('LoanApplicationReturned Mailable: Preparing email envelope.', [
+        Log::info('LoanApplicationReturned Mailable: Preparing envelope.', [
             'loan_application_id' => $applicationId,
             'subject' => $subject,
             'to_recipients' => $toAddresses !== [] ? $toAddresses[0]->address : 'N/A',

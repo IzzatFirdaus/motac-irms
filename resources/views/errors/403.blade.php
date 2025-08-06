@@ -1,8 +1,6 @@
 @php
-    // Ensure Helper is imported or fully qualified if needed, though usually available in views
-    // due to a global helper or AppServiceProvider.
-    $configData = Helper::appClasses();
-    // Change from $configData['style'] to $configData['myStyle']
+    // The $illustrationStyleSuffix helps in dynamically loading light/dark mode illustrations.
+    // Ensure that your MOTAC-themed blank layout and assets are correctly configured for this.
     $illustrationStyleSuffix = isset($configData['myStyle']) ? '-' . $configData['myStyle'] : '';
 @endphp
 
@@ -38,9 +36,9 @@
             </a>
             <div class="mt-4">
                 {{-- ACTION REQUIRED: Replace with MOTAC-appropriate "Forbidden" illustration --}}
-                <img src="{{ asset('assets/img/illustrations/motac-error-403' . $illustrationStyleSuffix . '.png') }}"
-                    {{-- Placeholder path --}} alt="{{ __('Ilustrasi Akses Dihalang') }}" width="200"
-                    class="img-fluid motac-error-illustration">
+                {{-- <img src="{{ asset('assets/img/illustrations/motac-error-403' . $illustrationStyleSuffix . '.png') }}" --}}
+                {{-- Placeholder path --}} {{-- alt="{{ __('Ilustrasi Akses Dihalang') }}" width="200" --}}
+                {{-- class="img-fluid motac-error-illustration"> --}}
             </div>
         </div>
     </div>

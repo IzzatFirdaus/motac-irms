@@ -6,11 +6,13 @@ use App\Models\Department; // Example model
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title; //
 use Livewire\Component;
 use Livewire\WithPagination;
 use Spatie\Permission\Models\Role; // Make sure this is imported
 
 #[Layout('layouts.app')]
+#[Title('Laporan Aktiviti Pengguna')] //
 class UserActivityReport extends Component
 {
     use AuthorizesRequests;
@@ -41,31 +43,28 @@ class UserActivityReport extends Component
     public function getReportDataProperty()
     {
         $query = User::withCount([
-            'emailApplications',
+            // 'emailApplications', // Removed as per v4.0 refactoring
             'loanApplicationsAsApplicant', // Corrected to match User model's likely relationship name for loans initiated by user
-            'approvalsMade', // Corrected to match User model's likely relationship name for approvals made by user
-        ])->with(['department', 'roles']); // Eager load department and roles
+            'approvalsMade', // Corrected to match User model's likely relationship name for approvals made
+        ])
+            ->with(['department', 'roles']) // Eager load relationships for display
+            ->when($this->searchTerm, function ($q) {
+                $q->where(function ($subQuery) {
+                    $subQuery->where('name', 'like', '%'.$this->searchTerm.'%')
+                        ->orWhere('email', 'like', '%'.$this->searchTerm.'%');
+                });
+            })
+            ->when($this->filterDepartmentId, function ($q) {
+                $q->where('department_id', $this->filterDepartmentId);
+            })
+            ->when($this->filterRoleName, function ($q) {
+                $q->whereHas('roles', function ($subQuery) {
+                    $subQuery->where('name', $this->filterRoleName);
+                });
+            })
+            ->orderBy($this->sortBy, $this->sortDirection);
 
-        if ($this->searchTerm !== '' && $this->searchTerm !== '0') {
-            $query->where(function ($q): void {
-                $q->where('name', 'like', '%'.$this->searchTerm.'%')
-                    ->orWhere('email', 'like', '%'.$this->searchTerm.'%');
-            });
-        }
-
-        if ($this->filterDepartmentId !== null && $this->filterDepartmentId !== 0) {
-            $query->where('department_id', $this->filterDepartmentId);
-        }
-
-        if ($this->filterRoleName !== null && $this->filterRoleName !== '' && $this->filterRoleName !== '0') {
-            $query->whereHas('roles', function ($q): void {
-                $q->where('name', $this->filterRoleName);
-            });
-        }
-
-        $query->orderBy($this->sortBy, $this->sortDirection);
-
-        return $query->paginate(15); // Or your preferred pagination number
+        return $query->paginate($this->perPage); // Use the preferred pagination number
     }
 
     // Options for filters
@@ -109,6 +108,6 @@ class UserActivityReport extends Component
             'reportData' => $this->reportData,
             'departmentOptions' => $this->departmentOptions,
             'roleOptions' => $this->roleOptions,
-        ])->title(__('Laporan Aktiviti Pengguna'));
+        ]); //
     }
 }

@@ -65,7 +65,7 @@ class PositionFactory extends EloquentFactory
             'is_active' => $this->faker->boolean(90),
             'grade_id' => $gradeId,
             'created_at' => Carbon::parse($this->faker->dateTimeBetween('-3 years', 'now')),
-            'updated_at' => fn (array $attributes): \Illuminate\Support\Carbon => Carbon::parse($this->faker->dateTimeBetween($attributes['created_at'], 'now')),
+            'updated_at' => fn (array $attributes): Carbon => Carbon::parse($this->faker->dateTimeBetween($attributes['created_at'], 'now')),
         ];
     }
 

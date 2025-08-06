@@ -1,10 +1,6 @@
 @php
-    // $configData and Helper::appClasses() are from the original template.
-    // Their usage for 'myStyle' for background shapes might be removed if MOTAC uses a simpler background.
-    // $configData = Helper::appClasses(); // This line can remain commented if $configData is globally available.
-
-    // Corrected to use 'myStyle' and ensure $configData is set before accessing its keys.
-    // The error "Undefined array key 'style'" implies $configData itself is set.
+    // The $illustrationStyleSuffix helps in dynamically loading light/dark mode illustrations.
+    // Ensure that your MOTAC-themed blank layout and assets are correctly configured for this.
     $illustrationStyleSuffix = isset($configData['myStyle']) ? '-' . $configData['myStyle'] : '';
 @endphp
 
@@ -32,9 +28,9 @@
 @section('content')
     <div class="container-xxl container-p-y">
         <div class="misc-wrapper text-center">
-            <h1 class="mb-2 mx-2 display-1 fw-bolder">401</h1> {{-- Prominent Error Code --}}
+            <h1 class="mb-2 mx-2 display-1 fw-bolder">401</h1>
             <h2 class="mb-2 mt-4 display-5 fw-bold">
-                <i class="bi bi-slash-circle-fill me-2"></i>{{ __('Tidak Dibenarkan!') }}
+                <i class="bi bi-person-fill-lock me-2"></i>{{ __('Akses Tidak Sah!') }}
             </h2>
             <p class="mb-4 mx-auto col-md-8 col-lg-6 text-muted">
                 {{ __('Anda tidak mempunyai kebenaran yang sah untuk mengakses halaman ini. Sila pastikan anda telah log masuk dengan akaun yang betul atau hubungi pentadbir sistem jika anda percaya ini adalah satu kesilapan.') }}
@@ -44,9 +40,9 @@
             </a>
             <div class="mt-4">
                 {{-- ACTION REQUIRED: Replace with MOTAC-appropriate "Unauthorized" illustration --}}
-                <img src="{{ asset('assets/img/illustrations/motac-error-401' . $illustrationStyleSuffix . '.png') }}"
-                    {{-- Placeholder path --}} alt="{{ __('Ilustrasi Akses Tidak Dibenarkan') }}" width="200"
-                    class="img-fluid motac-error-illustration">
+                {{-- <img src="{{ asset('assets/img/illustrations/motac-error-401' . $illustrationStyleSuffix . '.png') }}" --}}
+                {{-- Placeholder path --}} {{-- alt="{{ __('Ilustrasi Akses Tidak Dibenarkan') }}" width="200" --}}
+                {{-- class="img-fluid motac-error-illustration"> --}}
             </div>
         </div>
     </div>
@@ -58,6 +54,5 @@
        alt="{{ __('Corak Latar Belakang Hiasan') }}"
        data-app-light-img="illustrations/bg-shape-image-light.png"
        data-app-dark-img="illustrations/bg-shape-image-dark.png">
-</div>
---}}
+</div> --}}
 @endsection

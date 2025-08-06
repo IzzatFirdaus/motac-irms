@@ -1,12 +1,12 @@
 {{-- resources/views/components/card.blade.php --}}
 @props([
     'title' => null,
-    'headerClass' => 'bg-light py-3', // Default Bootstrap-like header style
+    'headerClass' => 'bg-light py-3',
     'titleTag' => 'h5',
-    'titleClass' => 'card-title mb-0 fw-semibold', // Default Bootstrap card title styling
+    'titleClass' => 'card-title mb-0 fw-semibold',
     'bodyClass' => '',
     'footer' => null,
-    'footerClass' => 'bg-light py-3 text-end', // Default Bootstrap-like footer style
+    'footerClass' => 'bg-light py-3 text-end',
 ])
 
 <div {{ $attributes->merge(['class' => 'card shadow-sm mb-3']) }}>

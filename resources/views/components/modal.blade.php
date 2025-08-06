@@ -3,10 +3,10 @@
     'id',
     'maxWidth' => null,
     'title' => null,
-    'icon' => null, // Optional Bootstrap Icon class for the title
-    'headerClass' => 'modal-header', // Allow overriding header class
-    'bodyClass' => 'modal-body',     // Allow overriding body class
-    'footerClass' => 'modal-footer', // Allow overriding footer class
+    'icon' => null,
+    'headerClass' => 'modal-header',
+    'bodyClass' => 'modal-body',
+    'footerClass' => 'modal-footer',
 ])
 
 @php
@@ -17,13 +17,11 @@ switch ($maxWidth ?? '') {
     case 'sm': $modalSizeClass = ' modal-sm'; break;
     case 'lg': $modalSizeClass = ' modal-lg'; break;
     case 'xl': $modalSizeClass = ' modal-xl'; break;
-    case 'fullscreen': $modalSizeClass = ' modal-fullscreen'; break; // Added fullscreen option
-    // Add other Bootstrap modal fullscreen options if needed: modal-fullscreen-sm-down, etc.
+    case 'fullscreen': $modalSizeClass = ' modal-fullscreen'; break;
     default: $modalSizeClass = ''; break;
 }
 @endphp
 
-{{-- The x-data and x-init for controlling the Bootstrap modal via Alpine is a good pattern. --}}
 <div
     x-data="{ show: @entangle($attributes->wire('model')).defer }"
     x-init="() => {
@@ -32,12 +30,11 @@ switch ($maxWidth ?? '') {
             console.error('Modal element #{{ $id }} not found.');
             return;
         }
-        // Ensure modal instance is created only once or retrieved if exists
         let bootstrapModal = bootstrap.Modal.getInstance(modalElement);
         if (!bootstrapModal) {
             bootstrapModal = new bootstrap.Modal(modalElement, {
-                backdrop: 'static', // Default to static backdrop
-                keyboard: false     // Default to not closable with ESC
+                backdrop: 'static',
+                keyboard: false
             });
         }
 
@@ -50,7 +47,7 @@ switch ($maxWidth ?? '') {
         });
 
         modalElement.addEventListener('hidden.bs.modal', () => {
-            show = false; // Sync Alpine state when Bootstrap modal is hidden (e.g., by ESC if keyboard:true)
+            show = false;
         });
     }"
     wire:ignore.self
@@ -78,7 +75,7 @@ switch ($maxWidth ?? '') {
       @endif
 
       <div class="{{ $bodyClass }}">
-        {{ $slot }} {{-- Main modal content --}}
+        {{ $slot }}
       </div>
 
       @if (isset($footer))
@@ -88,4 +85,4 @@ switch ($maxWidth ?? '') {
       @endif
     </div>
   </div>
-</div>
+</div> 

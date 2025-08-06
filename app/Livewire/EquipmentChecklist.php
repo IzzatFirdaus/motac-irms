@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Livewire;
 
 use App\Models\Equipment;
 use App\Models\LoanApplication;
 use App\Models\LoanTransaction;
-use App\Models\User;
+use App\Models\LoanTransactionItem;
 use App\Services\LoanApplicationService;
 use App\Services\LoanTransactionService;
 use Exception;
@@ -21,6 +23,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Throwable;
 
 #[Layout('layouts.app')]
 #[Title('Equipment Checklist')]
@@ -99,7 +102,7 @@ class EquipmentChecklist extends Component
                     ['user', 'loanApplicationItems.equipment', 'responsibleOfficer', 'loanTransactions.loanTransactionItems.equipment', 'loanTransactions.issuingOfficer', 'loanTransactions.receivingOfficer', 'loanTransactions.returningOfficer', 'loanTransactions.returnAcceptingOfficer'] // FIX: Changed 'applicationItems' to 'loanApplicationItems' here for consistency and correctness
                 );
 
-                if (! $this->loanApplication instanceof \App\Models\LoanApplication) {
+                if (! $this->loanApplication instanceof LoanApplication) { // Simplified namespace
                     Log::warning(sprintf('Loan Application ID %s not found during mount.', $this->loanApplicationId));
                     throw new ModelNotFoundException(sprintf('Loan Application ID %s not found.', $this->loanApplicationId));
                 }
@@ -123,10 +126,8 @@ class EquipmentChecklist extends Component
                 }
 
                 if ($loanTransactionId !== null && $loanTransactionId !== 0) {
-                    $this->loanTransaction = $this->loanTransactionService->findTransaction(
-                        $loanTransactionId,
-                        ['loanTransactionItems.equipment']
-                    );
+                    // FIX: Changed to direct model find instead of service method
+                    $this->loanTransaction = LoanTransaction::find($loanTransactionId);
 
                     if (! $this->loanTransaction || (int) $this->loanTransaction->loan_application_id !== (int) $this->loanApplicationId) {
                         Log::warning(sprintf('Loan Transaction ID %s not found or does not belong to Loan Application ID %s.', $loanTransactionId, $this->loanApplicationId));
@@ -139,268 +140,178 @@ class EquipmentChecklist extends Component
                     if ($firstTransactionItem && $firstTransactionItem->equipment) {
                         $this->selectedEquipmentId = $firstTransactionItem->equipment_id;
                         $this->equipment = $firstTransactionItem->equipment;
-
                         // Assuming 'isEdit' is a property or logic you might add for editing scenarios
                         $isEdit = false; // Placeholder for edit logic determination
-
                         if ($this->transactionType === LoanTransaction::TYPE_RETURN) {
                             $this->equipmentConditionOnReturn = $firstTransactionItem->condition_on_return ?? ($this->equipment->condition_status ?? '');
                             $this->returnNotes = $this->loanTransaction->return_notes ?? $firstTransactionItem->item_notes ?? '';
                             $this->accessories = json_decode($firstTransactionItem->accessories_checklist_on_return ?? '[]', true);
-                        } elseif ($this->transactionType === LoanTransaction::TYPE_ISSUE && $isEdit) {
+                        } elseif ($this->transactionType === LoanTransaction::TYPE_ISSUE) {
                             $this->notes = $this->loanTransaction->issue_notes ?? $firstTransactionItem->item_notes ?? '';
                             $this->accessories = json_decode($firstTransactionItem->accessories_checklist_on_issue ?? '[]', true);
                         }
                     }
                 }
             }
-
-            $this->initializeOfficerIds();
-        } catch (ModelNotFoundException $e) {
-            session()->flash('error', __('Data tidak dijumpai: ').$e->getMessage());
-            Log::error('EquipmentChecklist: Model not found during mount: '.$e->getMessage(), ['exception' => $e]);
-
-            return;
-        } catch (Exception $e) {
-            session()->flash('error', __('Ralat berlaku semasa memuatkan senarai semak: ').$e->getMessage());
-            Log::error('EquipmentChecklist: Error during mount: '.$e->getMessage(), ['exception' => $e]);
-
-            return;
+        } catch (Throwable $e) {
+            Log::error('Error in EquipmentChecklist mount: ' . $e->getMessage(), ['exception' => $e]);
+            $this->dispatch('swal:error', ['message' => 'An error occurred while loading data.']);
         }
     }
 
-    public function processTransaction(): ?RedirectResponse
+    public function render(): \Illuminate\View\View
     {
-        Log::info('Attempting to process transaction.', [
-            'loanApplicationId' => $this->loanApplicationId,
-            'selectedEquipmentId' => $this->selectedEquipmentId,
-            'transactionType' => $this->transactionType,
-        ]);
-        $this->validate($this->getValidationRulesForTransactionType());
+        return view('livewire.equipment-checklist');
+    }
 
-        DB::beginTransaction();
+    public function updateQuantity(int $index, int $quantity): void
+    {
+        if (isset($this->loanApplicationItems[$index])) {
+            $this->loanApplicationItems[$index]['quantity_transacted'] = max(0, $quantity); // Ensure non-negative
+        }
+    }
+
+    public function removeAccessory(string $accessory): void
+    {
+        $this->accessories = array_values(array_filter($this->accessories, fn ($item) => $item !== $accessory));
+    }
+
+    public function addAccessory(): void
+    {
+        $this->accessories[] = ''; // Add an empty input for a new accessory
+    }
+
+    public function updateAccessory(int $index, string $value): void
+    {
+        if (isset($this->accessories[$index])) {
+            $this->accessories[$index] = $value;
+        }
+    }
+
+    public function saveChecklist(): void
+    {
+        $this->validate([
+            'loanApplicationItems.*.quantity_transacted' => 'required|integer|min:0',
+            'accessories.*' => 'nullable|string',
+            'notes' => 'nullable|string',
+        ]);
+
         try {
-            $currentUser = Auth::user();
-            if (! $currentUser) {
-                throw new Exception('Pengguna tidak dikenalpasti.');
-            }
+            DB::transaction(function () {
+                /** @var LoanTransaction $transaction */
+                $transaction = LoanTransaction::find($this->loanTransactionId); // Corrected to direct model find
 
-            if (! $this->loanApplication instanceof \App\Models\LoanApplication) {
-                // FIX: Changed findLoanApplication to findLoanApplicationById
-                $this->loanApplication = $this->loanApplicationService->findLoanApplicationById($this->loanApplicationId);
-                if (! $this->loanApplication instanceof \App\Models\LoanApplication) {
-                    throw new ModelNotFoundException(sprintf('Permohonan Pinjaman dengan ID %s tidak ditemui.', $this->loanApplicationId));
-                }
-            }
-
-            $equipmentToTransact = Equipment::find($this->selectedEquipmentId);
-            if (! $equipmentToTransact) {
-                throw new ModelNotFoundException(sprintf('Peralatan dengan ID %s tidak ditemui.', $this->selectedEquipmentId));
-            }
-
-            // FIX: Changed 'applicationItems' to 'loanApplicationItems' here
-            $applicationItem = $this->loanApplication->loanApplicationItems()
-                ->where('equipment_type', $equipmentToTransact->asset_type)
-                ->first();
-
-            if ($this->transactionType === LoanTransaction::TYPE_ISSUE) {
-                $this->authorize('createIssue', [LoanTransaction::class, $this->loanApplication]);
-                if ($equipmentToTransact->status !== Equipment::STATUS_AVAILABLE) {
-                    throw new Exception(sprintf("Peralatan '%s' tidak tersedia untuk pengeluaran. Status semasa: %s", $equipmentToTransact->tag_id, $equipmentToTransact->status_label));
+                if (! $transaction) {
+                    throw new Exception('Loan Transaction not found.');
                 }
 
-                $itemData = [[
-                    'equipment_id' => $this->selectedEquipmentId,
-                    'quantity_transacted' => 1,
-                    'accessories_checklist_issue' => json_encode($this->accessories),
-                    'item_notes' => $this->notes,
-                    'loan_application_item_id' => $applicationItem?->id,
-                ]];
-                $extraDetails = [
-                    'issuing_officer_id' => $this->officerId,
-                    'receiving_officer_id' => $this->receivingOfficerId,
-                    'issue_notes' => $this->notes,
-                    'status' => LoanTransaction::STATUS_ISSUED,
-                ];
-                $transaction = $this->loanTransactionService->createTransaction(
-                    $this->loanApplication,
-                    LoanTransaction::TYPE_ISSUE,
-                    $currentUser,
-                    $itemData,
-                    $extraDetails
-                );
-                session()->flash('success', 'Peralatan berjaya dikeluarkan.');
+                $transaction->issue_notes = $this->notes;
+                $transaction->accessories_checklist_on_issue = array_values(array_filter($this->accessories)); // Clean empty accessories
+                $transaction->save();
 
-            } elseif ($this->transactionType === LoanTransaction::TYPE_RETURN) {
-                $this->authorize('createReturn', [LoanTransaction::class, $this->loanApplication]);
-                if ($equipmentToTransact->status !== Equipment::STATUS_ON_LOAN) {
-                    throw new Exception(sprintf("Peralatan '%s' tidak dalam status dipinjam. Status semasa: %s", $equipmentToTransact->tag_id, $equipmentToTransact->status_label));
+                foreach ($this->loanApplicationItems as $itemData) {
+                    /** @var LoanTransactionItem $transactionItem */
+                    $transactionItem = LoanTransactionItem::find($itemData['id']);
+
+                    if ($transactionItem) {
+                        $transactionItem->quantity_transacted = $itemData['quantity_transacted'];
+                        $transactionItem->notes = $itemData['notes']; // Assuming notes field exists in LoanTransactionItem
+                        $transactionItem->save();
+
+                        // Update equipment status based on transaction type
+                        if ($transaction->isIssue()) {
+                            $transactionItem->equipment->status = Equipment::STATUS_ON_LOAN;
+                            $transactionItem->equipment->current_loan_id = $transaction->id;
+                            $transactionItem->equipment->save();
+                        } elseif ($transaction->isReturn()) {
+                            // Logic for return, mark equipment as available or other status
+                            $transactionItem->equipment->status = Equipment::STATUS_AVAILABLE;
+                            $transactionItem->equipment->current_loan_id = null;
+                            $transactionItem->equipment->save();
+                        }
+                    }
                 }
 
-                $itemData = [[
-                    'equipment_id' => $this->selectedEquipmentId,
-                    'quantity_transacted' => 1,
-                    'condition_on_return' => $this->equipmentConditionOnReturn,
-                    'accessories_checklist_on_return' => json_encode($this->accessories),
-                    'item_notes' => $this->returnNotes,
-                    'loan_application_item_id' => $applicationItem?->id,
-                ]];
-                $extraDetails = [
-                    'returning_officer_id' => $this->returningOfficerId,
-                    'return_accepting_officer_id' => $this->returnAcceptingOfficerId,
-                    'return_notes' => $this->returnNotes,
-                    'status' => LoanTransaction::STATUS_RETURNED_GOOD,
-                    'related_transaction_id' => $this->loanTransaction?->id,
-                ];
-                $transaction = $this->loanTransactionService->createTransaction(
-                    $this->loanApplication,
-                    LoanTransaction::TYPE_RETURN,
-                    $currentUser,
-                    $itemData,
-                    $extraDetails
-                );
-                session()->flash('success', 'Peralatan berjaya dipulangkan.');
-            } else {
-                session()->flash('error', 'Jenis transaksi tidak sah.');
-                DB::rollBack();
-
-                return null;
-            }
-
-            DB::commit();
-            $this->dispatch('toastr', type: 'success', message: session('success'));
-
-            return redirect()->route('resource-management.my-applications.loan-applications.show', $this->loanApplicationId);
-
-        } catch (ValidationException $e) {
-            DB::rollBack();
-            $this->dispatch('toastr', type: 'error', message: __('Sila perbetulkan ralat pada borang.'));
-            throw $e;
-        } catch (ModelNotFoundException $e) {
-            DB::rollBack();
-            session()->flash('error', __('Data tidak ditemui: ').$e->getMessage());
-            $this->dispatch('toastr', type: 'error', message: __('Data tidak ditemui: ').$e->getMessage());
-        } catch (AuthorizationException $e) { // FIX: This now refers to Illuminate\Auth\Access\AuthorizationException
-            DB::rollBack();
-            session()->flash('error', __('Anda tidak dibenarkan untuk tindakan ini: ').$e->getMessage());
-            $this->dispatch('toastr', type: 'error', message: __('Anda tidak dibenarkan untuk tindakan ini.'));
-        } catch (Exception $e) {
-            DB::rollBack();
-            session()->flash('error', __('Ralat sistem semasa memproses transaksi: ').$e->getMessage());
-            Log::error('Error processing transaction: '.$e->getMessage(), ['exception' => $e]);
-            $this->dispatch('toastr', type: 'error', message: __('Ralat sistem. Sila cuba lagi.'));
+                $this->dispatch('swal:success', ['message' => 'Checklist saved successfully!']);
+                $this->dispatch('transaction-updated'); // Notify parent or other components
+            });
+        } catch (Throwable $e) {
+            Log::error('Error saving checklist: ' . $e->getMessage(), ['exception' => $e]);
+            $this->dispatch('swal:error', ['message' => 'Failed to save checklist: ' . $e->getMessage()]);
         }
-
-        return null;
     }
 
-    public function resetForm(): void
+    public function markAsIssued(): void
     {
-        $this->reset([
-            'selectedEquipmentId', 'accessories', 'notes',
-            'equipmentConditionOnReturn', 'returnNotes',
+        $this->validate([
+            'loanApplicationItems.*.quantity_transacted' => 'required|integer|min:0',
         ]);
-        $this->accessories = [];
-        Log::debug('Form properties reset.');
-    }
 
-    #[Computed]
-    public function isIssue(): bool
-    {
-        return $this->transactionType === LoanTransaction::TYPE_ISSUE;
-    }
+        try {
+            DB::transaction(function () {
+                /** @var LoanTransaction $transaction */
+                $transaction = LoanTransaction::find($this->loanTransactionId); // Corrected to direct model find
 
-    #[Computed]
-    public function isReturn(): bool
-    {
-        return $this->transactionType === LoanTransaction::TYPE_RETURN;
-    }
+                if (! $transaction) {
+                    throw new Exception('Loan Transaction not found.');
+                }
 
-    #[Computed]
-    public function isViewingOnly(): bool
-    {
-        return $this->transactionType === 'view' || (! $this->isIssue() && ! $this->isReturn());
-    }
+                $this->loanTransactionService->issueLoanTransaction(
+                    $transaction,
+                    $this->loanApplicationItems,
+                    array_values(array_filter($this->accessories)),
+                    $this->notes
+                );
 
-    #[Computed]
-    public function onLoanEquipment()
-    {
-        if ($this->loanApplication instanceof \App\Models\LoanApplication && $this->transactionType === LoanTransaction::TYPE_RETURN) {
-            return Equipment::whereHas('loanTransactionItems.loanTransaction', function ($query): void {
-                $query->where('loan_application_id', $this->loanApplication->id)
-                    ->where('type', LoanTransaction::TYPE_ISSUE)
-                    ->where('status', LoanTransaction::STATUS_ISSUED);
-            })
-                ->where('status', Equipment::STATUS_ON_LOAN)
-                ->get();
+                // Update equipment status for all items in this transaction
+                foreach ($transaction->loanTransactionItems as $item) {
+                    if ($item->equipment) {
+                        $item->equipment->status = Equipment::STATUS_ON_LOAN;
+                        $item->equipment->current_loan_id = $transaction->id;
+                        $item->equipment->save();
+                    }
+                }
+
+                $this->dispatch('swal:success', ['message' => 'Loan successfully issued!']);
+                $this->dispatch('transaction-completed'); // Notify parent for redirect or refresh
+            });
+        } catch (Throwable $e) {
+            Log::error('Error marking as issued: ' . $e->getMessage(), ['exception' => $e]);
+            $this->dispatch('swal:error', ['message' => 'Failed to mark as issued: ' . $e->getMessage()]);
         }
-
-        return collect();
     }
 
-    public function render()
+    public function markAsReturned(): void
     {
-        $officerOptions = User::role(['Admin', 'BPM Staff', 'IT Admin'])->orderBy('name')->pluck('name', 'id')->toArray();
-        $returningOfficerOptions = $this->loanApplication?->user ? [$this->loanApplication->user->id => $this->loanApplication->user->name] : [];
-        $conditionStatusOptions = Equipment::getConditionStatusesList();
-        $onLoanEquipmentOptions = $this->onLoanEquipment()->mapWithKeys(function ($eq) {
-            return [$eq->id => sprintf('%s %s (Tag: %s)', $eq->brand, $eq->model, $eq->tag_id)];
-        })->toArray();
-
-        return view('livewire.equipment-checklist', [
-            'officerOptions' => $officerOptions,
-            'returningOfficerOptions' => $returningOfficerOptions,
-            'conditionStatusOptions' => $conditionStatusOptions,
-            'onLoanEquipmentOptions' => $onLoanEquipmentOptions,
+        $this->validate([
+            'loanApplicationItems.*.quantity_transacted' => 'required|integer|min:0',
         ]);
-    }
 
-    protected function initializeOfficerIds(): void
-    {
-        $user = Auth::user();
-        if ($user) {
-            if ($user->hasAnyRole(['Admin', 'BPM Staff', 'IT Admin'])) {
-                $this->officerId = $user->id;
-                $this->returnAcceptingOfficerId = $user->id;
-            }
+        try {
+            DB::transaction(function () {
+                /** @var LoanTransaction $transaction */
+                $transaction = LoanTransaction::find($this->loanTransactionId); // Corrected to direct model find
 
-            if ($this->loanApplication instanceof \App\Models\LoanApplication && $this->loanApplication->user) {
-                $this->receivingOfficerId = $this->loanApplication->user_id;
-                $this->returningOfficerId = $this->loanApplication->user_id;
-            }
-        }
-    }
+                if (! $transaction) {
+                    throw new Exception('Loan Transaction not found.');
+                }
 
-    protected function getValidationRulesForTransactionType(): array
-    {
-        switch ($this->transactionType) {
-            case LoanTransaction::TYPE_ISSUE:
-                return [
-                    'loanApplicationId' => 'required|exists:loan_applications,id',
-                    'selectedEquipmentId' => 'required|exists:equipment,id',
-                    'officerId' => 'required|exists:users,id',
-                    'receivingOfficerId' => 'required|exists:users,id',
-                    'accessories' => 'nullable|array',
-                    'accessories.*' => 'string',
-                    'notes' => 'nullable|string|max:1000',
-                ];
-            case LoanTransaction::TYPE_RETURN:
-                return [
-                    'loanApplicationId' => 'required|exists:loan_applications,id',
-                    'selectedEquipmentId' => 'required|exists:equipment,id',
-                    'returningOfficerId' => 'required|exists:users,id',
-                    'returnAcceptingOfficerId' => 'required|exists:users,id',
-                    'equipmentConditionOnReturn' => ['required', 'string', Rule::in(array_keys(Equipment::getConditionStatusesList()))],
-                    'returnNotes' => 'nullable|string|max:1000',
-                    'accessories' => 'nullable|array',
-                    'accessories.*' => 'string',
-                ];
-            case 'view':
-                return [];
-            default:
-                Log::warning('EquipmentChecklist: Invalid transaction type for validation.', ['type' => $this->transactionType]);
+                $this->loanTransactionService->returnLoanTransaction(
+                    $transaction,
+                    $this->loanApplicationItems,
+                    array_values(array_filter($this->accessories)),
+                    $this->notes
+                );
 
-                return [];
+                // No direct equipment status update here, as the returnLoanTransaction service method should handle it
+                // based on inspection outcomes (e.g., returned_good, returned_damaged, etc.).
+
+                $this->dispatch('swal:success', ['message' => 'Loan successfully returned!']);
+                $this->dispatch('transaction-completed'); // Notify parent for redirect or refresh
+            });
+        } catch (Throwable $e) {
+            Log::error('Error marking as returned: ' . $e->getMessage(), ['exception' => $e]);
+            $this->dispatch('swal:error', ['message' => 'Failed to mark as returned: ' . $e->getMessage()]);
         }
     }
 }
