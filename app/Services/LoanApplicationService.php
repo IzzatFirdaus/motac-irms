@@ -261,4 +261,31 @@ final class LoanApplicationService
 
         Log::info(self::LOG_AREA.sprintf('Loan Application ID %d status set to %s and support notified.', $loanApplication->id, $loanApplication->status));
     }
+
+    /**
+     * Soft-deletes a loan application and its related items.
+     *
+     * @param LoanApplication $loanApplication
+     * @param User $actingUser The user performing the delete action.
+     * @return void
+     */
+    public function deleteApplication(LoanApplication $loanApplication, User $actingUser): void
+    {
+        DB::transaction(function () use ($loanApplication, $actingUser) {
+            // Soft-delete related items if needed (LoanApplicationItem, Approval, LoanTransaction, etc.)
+            $loanApplication->loanApplicationItems()->delete();
+            $loanApplication->approvals()->delete();
+            $loanApplication->loanTransactions()->delete();
+
+            // Optionally, log the deletion for audit purposes
+            Log::info(self::LOG_AREA . sprintf(
+                'Loan application ID %d and its related records soft-deleted by User ID %d.',
+                $loanApplication->id,
+                $actingUser->id
+            ));
+
+            // Soft-delete the loan application itself
+            $loanApplication->delete();
+        });
+    }
 }

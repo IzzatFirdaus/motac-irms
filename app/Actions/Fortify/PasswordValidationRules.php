@@ -2,17 +2,17 @@
 
 namespace App\Actions\Fortify;
 
-use Laravel\Fortify\Rules\Password;
-
+/**
+ * Legacy trait for password rules.
+ * Kept for backward compatibility but no longer used by Fortify actions.
+ */
 trait PasswordValidationRules
 {
     /**
-     * Get the validation rules used to validate passwords.
-     *
-     * @return array<int, \Illuminate\Contracts\Validation\Rule|array|string>
+     * @deprecated Use \App\Rules\CustomPasswordValidationRules::rules() instead.
      */
     protected function passwordRules(): array
     {
-        return ['required', 'string', new Password, 'confirmed'];
+        return \App\Rules\CustomPasswordValidationRules::rules();
     }
 }

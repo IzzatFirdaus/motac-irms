@@ -29,7 +29,6 @@
 
     // The $menuData variable is expected to be globally available from MenuServiceProvider
     $currentUserRole = Auth::check() ? Auth::user()?->getRoleNames()->first() : null;
-
 @endphp
 
 {{-- The `class` and `data-bs-theme` attributes are set here by the server to prevent a "flash of unstyled content" --}}
@@ -85,6 +84,10 @@
     <div class="layout-wrapper layout-content-navbar {{ $isNavbar ? '' : 'layout-without-navbar' }}">
         <div class="layout-container">
             @if ($isMenu)
+                {{-- The vertical-menu Livewire component renders the sidebar navigation.
+                     It dynamically loads menu items including Helpdesk and ICT Loan modules.
+                     EmailApplication (legacy) menu items are removed in v4.0.
+                --}}
                 @livewire('sections.menu.vertical-menu', [
                     'menuData' => $menuData ?? null,
                     'role' => $currentUserRole,
@@ -94,7 +97,7 @@
 
             <div class="layout-page">
                 @if ($isNavbar)
-                    {{-- The initial activeTheme is passed here to the navbar component --}}
+                    {{-- The top navbar Livewire component supports system navigation, theme toggle, language switcher, Helpdesk quick links, etc. --}}
                     @livewire('sections.navbar.navbar', [
                         'containerNav' => $configData['containerNav'] ?? 'container-fluid',
                         'navbarDetachedClass' => $navbarDetached,
@@ -110,8 +113,10 @@
                         <div class="{{ $container }} flex-grow-1 container-p-y">
                     @endif
 
+                        {{-- General system alerts --}}
                         @include('_partials._alerts.alert-general')
 
+                        {{-- Main content slot or yield --}}
                         @if (isset($slot))
                             {{ $slot }}
                         @else
@@ -120,6 +125,7 @@
                     </div>
 
                     @if ($isFooter)
+                        {{-- Footer with system copyright, version, etc. --}}
                         @livewire('sections.footer.footer')
                     @endif
                     <div class="content-backdrop fade"></div>
@@ -128,6 +134,7 @@
         </div>
 
         @if ($isMenu)
+            {{-- Mobile/overlay menu toggle --}}
             <div class="layout-overlay layout-menu-toggle"></div>
         @endif
         <div class="drag-target"></div>
@@ -141,6 +148,7 @@
     <script>
         /**
          * MOTAC IRMS - Unified Theme Switcher Logic
+         * Allows user to toggle between light/dark theme and notifies Livewire navbar
          */
         (function () {
           'use strict';

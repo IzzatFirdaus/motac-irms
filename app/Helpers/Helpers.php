@@ -273,4 +273,18 @@ final class Helpers
 
     return '';
   }
+
+  /**
+   * Updates the page configuration.
+   *
+   * @param array $pageConfigs
+   * @return void
+   */
+  public static function updatePageConfig(array $pageConfigs): void
+  {
+    // Merge the provided configs into the current config for the request
+    foreach ($pageConfigs as $key => $value) {
+      Config::set('custom.custom.' . $key, $value);
+    }
+  }
 }
