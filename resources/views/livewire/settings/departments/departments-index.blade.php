@@ -1,8 +1,7 @@
-<<<<<<< HEAD
-{{-- resources/views/livewire/settings/departments/index.blade.php --}}
-<div>
-    @section('title', __('Pengurusan Jabatan'))
+{{-- resources/views/livewire/settings/departments/departments-index.blade.php --}}
+@section('title', __('Pengurusan Jabatan'))
 
+<div>
     {{-- Page Header --}}
     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4 pb-2 border-bottom">
         <h1 class="h2 fw-bold text-dark mb-2 mb-sm-0 d-flex align-items-center">
@@ -122,7 +121,7 @@
         </div>
     </div>
 
-    {{-- ADJUSTMENT: Added a self-contained delete confirmation modal using Alpine.js, similar to the users index view. --}}
+    {{-- Delete Confirmation Modal using Alpine.js --}}
     <div x-data="{ show: false, itemId: null, itemDescription: '', deleteMethod: '' }"
          x-show="show"
          x-cloak
@@ -158,88 +157,4 @@
         </div>
     </div>
     <div x-show="show" x-cloak class="modal-backdrop fade show"></div>
-
-=======
-<div>
-    <div class="container py-4">
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <h2 class="h2 fw-bold text-dark mb-0">{{ __('Pengurusan Jabatan') }}</h2>
-            </div>
-            <div class="col-md-6">
-                <input wire:model.debounce.300ms="search" type="text" class="form-control" placeholder="{{ __('Cari jabatan (nama, kod)...') }}">
-            </div>
-        </div>
-
-        {{-- You can add a button here to create a new department if needed --}}
-        {{-- Example: <a href="{{ route('settings.departments.create') }}" class="btn btn-primary mb-3">{{ __('Tambah Jabatan Baru') }}</a> --}}
-
-        <div class="card shadow-sm">
-            <div class="card-body">
-                @if($departments->isNotEmpty())
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th wire:click="sortBy('name')" style="cursor: pointer;">
-                                    {{ __('Nama Jabatan') }}
-                                    @if($sortField === 'name')
-                                        <i class="bi bi-arrow-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
-                                    @endif
-                                </th>
-                                <th wire:click="sortBy('code')" style="cursor: pointer;">
-                                    {{ __('Kod') }}
-                                    @if($sortField === 'code')
-                                        <i class="bi bi-arrow-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
-                                    @endif
-                                </th>
-                                <th wire:click="sortBy('branch_type')" style="cursor: pointer;">
-                                    {{ __('Jenis Cawangan') }}
-                                    @if($sortField === 'branch_type')
-                                        <i class="bi bi-arrow-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
-                                    @endif
-                                </th>
-                                <th wire:click="sortBy('is_active')" style="cursor: pointer;">
-                                    {{ __('Status') }}
-                                    @if($sortField === 'is_active')
-                                        <i class="bi bi-arrow-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
-                                    @endif
-                                </th>
-                                <th>{{ __('Tindakan') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($departments as $department)
-                            <tr>
-                                <td>{{ $department->name }}</td>
-                                <td>{{ $department->code ?? '-' }}</td>
-                                <td>{{ $department->branch_type_label ?? $department->branch_type }}</td> {{-- Assuming you have a branch_type_label accessor or use constants --}}
-                                <td>
-                                    @if($department->is_active)
-                                        <span class="badge bg-success">{{ __('Aktif') }}</span>
-                                    @else
-                                        <span class="badge bg-secondary">{{ __('Tidak Aktif') }}</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    {{-- Add action buttons (e.g., Edit, View) here --}}
-                                    {{-- Example: <a href="{{ route('settings.departments.edit', $department) }}" class="btn btn-sm btn-outline-primary">{{ __('Edit') }}</a> --}}
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-                <div class="mt-3">
-                    {{ $departments->links() }}
-                </div>
-                @else
-                <div class="alert alert-info">
-                    {{ __('Tiada jabatan ditemui.') }}
-                </div>
-                @endif
-            </div>
-        </div>
-    </div>
->>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
 </div>

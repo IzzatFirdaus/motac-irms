@@ -1,4 +1,4 @@
-{{-- resources/views/livewire/resource-management/my-applications/loan/index.blade.php --}}
+{{-- resources/views/livewire/resource-management/my-applications/loan/loan-applications-index.blade.php --}}
 <div>
     @section('title', __('Status Permohonan Pinjaman Saya'))
 
@@ -8,7 +8,7 @@
             <i class="bi bi-card-checklist me-2"></i>
             {{ __('Senarai Permohonan Pinjaman Saya') }}
         </h1>
-        <div class="d-flex flex-wrap gap-2 mt-2 mt-sm-0"> {{-- Added a div to wrap buttons for better spacing --}}
+        <div class="d-flex flex-wrap gap-2 mt-2 mt-sm-0">
             @can('create', App\Models\LoanApplication::class)
                 <a href="{{ route('loan-applications.create') }}"
                     class="btn btn-primary d-inline-flex align-items-center text-uppercase small fw-semibold px-3 py-2 motac-btn-primary">
@@ -16,7 +16,6 @@
                     {{ __('Mohon Pinjaman Baru') }}
                 </a>
             @endcan
-            {{-- NEW: Button to navigate to Helpdesk Create Ticket page --}}
             <a href="{{ route('helpdesk.create') }}"
                 class="btn btn-info d-inline-flex align-items-center text-uppercase small fw-semibold px-3 py-2">
                 <i class="bi bi-headset {{ app()->getLocale() === 'ar' ? 'ms-2' : 'me-2' }}"></i>
@@ -108,7 +107,7 @@
                                     {{ __('Lihat') }}
                                 </a>
                                 @if($application->isPending())
-                                    <button wire:click="confirmCancel({{ $application->id }})"
+                                    <button wire:click="confirmApprovalAction({{ $application->id }}, 'cancel')"
                                             class="btn btn-sm btn-danger d-inline-flex align-items-center ms-2"
                                             title="{{ __('Batal Permohonan') }}">
                                         <i class="bi bi-x-circle-fill me-1"></i>
@@ -141,28 +140,49 @@
         @endif
     </div>
 
-    {{-- Cancel Confirmation Modal --}}
-    @if ($showCancelModal)
-        <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-labelledby="cancelConfirmationModalLabel" aria-hidden="true" style="background-color: rgba(0,0,0,0.5);">
+    {{-- Cancel/Approval Confirmation Modal --}}
+    @if ($showApprovalActionModal)
+        <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-labelledby="approvalActionModalLabel" aria-hidden="true" style="background-color: rgba(0,0,0,0.5);">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-header bg-warning text-dark">
-                        <h5 class="modal-title" id="cancelConfirmationModalLabel">{{ __('Sahkan Pembatalan') }}</h5>
-                        <button type="button" class="btn-close" wire:click="closeCancelModal" aria-label="Close"></button>
+                        <h5 class="modal-title" id="approvalActionModalLabel">
+                            {{ $approvalActionType === 'cancel' ? __('Sahkan Pembatalan') : __('Sahkan Tindakan') }}
+                        </h5>
+                        <button type="button" class="btn-close" wire:click="closeApprovalActionModal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <p>{{ __('Adakah anda pasti ingin membatalkan permohonan pinjaman ini? Tindakan ini tidak boleh diundur.') }}</p>
+                        <p>
+                            @if ($approvalActionType === 'cancel')
+                                {{ __('Adakah anda pasti ingin membatalkan permohonan pinjaman ini? Tindakan ini tidak boleh diundur.') }}
+                            @else
+                                {{ __('Adakah anda pasti ingin meneruskan tindakan ini?') }}
+                            @endif
+                        </p>
+                        {{-- Show comments field only if required --}}
+                        @if ($approvalActionType === 'reject')
+                            <div class="mb-3">
+                                <label for="approvalComments" class="form-label">{{ __('Sebab Penolakan') }}</label>
+                                <textarea wire:model="approvalComments" id="approvalComments" rows="3"
+                                    class="form-control @error('approvalComments') is-invalid @enderror"></textarea>
+                                @error('approvalComments')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        @endif
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" wire:click="closeCancelModal">{{ __('Tutup') }}</button>
-                        <button type="button" class="btn btn-danger" wire:click="cancelApplication" wire:loading.attr="disabled" wire:target="cancelApplication">
-                            <span wire:loading wire:target="cancelApplication" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                            <span wire:loading.remove wire:target="cancelApplication">{{ __('Ya, Batalkan') }}</span>
+                        <button type="button" class="btn btn-secondary" wire:click="closeApprovalActionModal">{{ __('Tutup') }}</button>
+                        <button type="button" class="btn btn-danger" wire:click="performApprovalAction" wire:loading.attr="disabled" wire:target="performApprovalAction">
+                            <span wire:loading wire:target="performApprovalAction" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span wire:loading.remove wire:target="performApprovalAction">
+                                {{ $approvalActionType === 'cancel' ? __('Ya, Batalkan') : __('Sahkan') }}
+                            </span>
                         </button>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="modal-backdrop fade show" wire:ignore.self style="{{ $showCancelModal ? '' : 'display:none;' }}"></div>
+        <div class="modal-backdrop fade show" wire:ignore.self style="{{ $showApprovalActionModal ? '' : 'display:none;' }}"></div>
     @endif
 </div>

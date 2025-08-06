@@ -3,20 +3,16 @@
 namespace App\Livewire;
 
 use Illuminate\Contracts\View\View;
-use Livewire\Component; // Added for return type hint consistency
+use Livewire\Component;
 
-// This is a simple Livewire component to render the contact us view.
-// It currently doesn't contain form handling logic.
-
+// ContactUs component - renders the contact-us page view
 class ContactUs extends Component
 {
     /**
-     * Render the component's view.
+     * Render the contact us page.
      */
-    public function render(): View // Added return type hint
+    public function render(): View
     {
-        // This method simply returns the Blade view for the contact us page.
-        // The contact form UI and logic would typically be within the Blade file.
         return view('livewire.contact-us');
     }
 }

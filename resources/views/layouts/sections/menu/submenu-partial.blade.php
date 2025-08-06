@@ -1,75 +1,45 @@
-{{-- resources/views/layouts/sections/menu/submenu-partial.blade.php --}}
-@php \Illuminate\Support\Facades\Log::info('Rendering submenu-partial.blade.php'); @endphp
+{{-- Recursive partial for menu/submenus. Expects: $menuItems, $role, $configData, $currentRouteName --}}
 @foreach ($menuItems as $menu)
     @php
+        // Convert to object for property access
         $menu = (object) $menu;
-        \Illuminate\Support\Facades\Log::debug('Processing menu item: ' . ($menu->name ?? 'Header: ' . ($menu->menuHeader ?? 'Untitled')));
-
-        // 1. Role-Based Check: Check if the user has the required role.
-        //    - Admins see everything.
-        //    - If no 'role' is specified, the item is visible to any authenticated user.
-        //    - Otherwise, the user must have at least one of the specified roles.
+        // 1. Role-Based Check: Admin sees all, else check roles
         $canView = false;
         if (Auth::check()) {
-            \Illuminate\Support\Facades\Log::debug('User is authenticated. User roles: ' . json_encode(Auth::user()->getRoleNames())); // Assuming spatie/laravel-permission
-
-            if (Auth::user()->hasRole('Admin')) {
+            if ($role === 'Admin' || (isset($menu->role) && in_array($role, (array) $menu->role)) || !isset($menu->role)) {
                 $canView = true;
-                \Illuminate\Support\Facades\Log::debug('User is Admin. canView set to true for: ' . ($menu->name ?? $menu->menuHeader ?? ''));
-            } elseif (!isset($menu->role)) {
-                $canView = true; // No roles defined, visible to all logged-in users.
-                \Illuminate\Support\Facades\Log::debug('No specific role defined. canView set to true for: ' . ($menu->name ?? $menu->menuHeader ?? ''));
-            } else {
-                $requiredRoles = (array) $menu->role;
-                $canView = Auth::user()->hasAnyRole($requiredRoles);
-                \Illuminate\Support\Facades\Log::debug('Checking roles for menu item "' . ($menu->name ?? $menu->menuHeader ?? '') . '". Required: ' . json_encode($requiredRoles) . '. Can view: ' . ($canView ? 'true' : 'false'));
             }
-        } else {
-            \Illuminate\Support\Facades\Log::debug('User is not authenticated for menu item: ' . ($menu->name ?? $menu->menuHeader ?? ''));
+        }
+        // Guest users never see menu items except if explicitly allowed (rare)
+        // 2. Check for submenu existence
+        $hasSubmenu = isset($menu->submenu) && is_array($menu->submenu) && count($menu->submenu) > 0;
+        // 3. Active state determination
+        $isActive = false;
+        if (isset($menu->routeName) && $currentRouteName === $menu->routeName) {
+            $isActive = true;
+        } elseif (isset($menu->routeNamePrefix)) {
+            foreach (explode(',', $menu->routeNamePrefix) as $prefix) {
+                if (str_starts_with($currentRouteName, trim($prefix))) {
+                    $isActive = true;
+                    break;
+                }
+            }
+        }
+        // 4. Menu href
+        $menuHref = $menu->url ?? (isset($menu->routeName) && Route::has($menu->routeName) ? route($menu->routeName) : 'javascript:void(0);');
+        if ($hasSubmenu) {
+            $menuHref = '#';
         }
     @endphp
 
     @if ($canView)
-        {{-- Log if menu item is viewable --}}
-        @php \Illuminate\Support\Facades\Log::debug('Menu item is viewable: ' . ($menu->name ?? $menu->menuHeader ?? '')); @endphp
-
-        {{-- A. RENDER A MENU HEADER --}}
+        {{-- A. Render menu header --}}
         @if (isset($menu->menuHeader))
             <li class="menu-header small text-uppercase text-muted fw-bold">
                 <span class="menu-header-text">{{ __($menu->menuHeader) }}</span>
             </li>
-            {{-- Log for menu header --}}
-            @php \Illuminate\Support\Facades\Log::debug('Rendered menu header: ' . $menu->menuHeader); @endphp
-
-        {{-- B. RENDER A MENU ITEM --}}
+        {{-- B. Render menu item --}}
         @else
-            @php
-                $hasSubmenu = isset($menu->submenu) && !empty($menu->submenu);
-                $currentRouteName = Route::currentRouteName();
-                $isActive = false;
-
-                // Check for active state (current route matches the item's routeName)
-                if (isset($menu->routeName) && $menu->routeName === $currentRouteName) {
-                    $isActive = true;
-                }
-                // Check for active state (current route starts with the item's routeNamePrefix)
-                elseif (isset($menu->routeNamePrefix)) {
-                    $prefixes = explode(',', $menu->routeNamePrefix);
-                    foreach ($prefixes as $prefix) {
-                        if (str_starts_with((string)$currentRouteName, trim($prefix))) {
-                            $isActive = true;
-                            break;
-                        }
-                    }
-                }
-                \Illuminate\Support\Facades\Log::debug('Menu item "' . $menu->name . '" active check. currentRouteName: ' . $currentRouteName . ', routeName: ' . ($menu->routeName ?? 'N/A') . ', routeNamePrefix: ' . ($menu->routeNamePrefix ?? 'N/A') . '. isActive: ' . ($isActive ? 'true' : 'false'));
-
-                $menuHref = $menu->url ?? (isset($menu->routeName) && Route::has($menu->routeName) ? route($menu->routeName) : 'javascript:void(0);');
-                if ($hasSubmenu) {
-                    $menuHref = '#';
-                }
-            @endphp
-
             <li class="menu-item {{ $isActive ? 'active open' : '' }}">
                 <a href="{{ $menuHref }}"
                     class="{{ $hasSubmenu ? 'menu-link menu-toggle' : 'menu-link' }}"
@@ -79,20 +49,17 @@
                     @endisset
                     <div>{{ __($menu->name ?? '-') }}</div>
                 </a>
-
-                {{-- RECURSION: If there is a submenu, include this same file again --}}
                 @if ($hasSubmenu)
-                    {{-- Log before recursive call --}}
-                    @php \Illuminate\Support\Facades\Log::debug('Found submenu for "' . $menu->name . '". Recursively including submenu-partial.'); @endphp
                     <ul class="menu-sub">
-                        @include('layouts.sections.menu.submenu-partial', ['menuItems' => $menu->submenu])
+                        @include('layouts.sections.menu.submenu-partial', [
+                            'menuItems' => $menu->submenu,
+                            'role' => $role,
+                            'configData' => $configData,
+                            'currentRouteName' => $currentRouteName,
+                        ])
                     </ul>
                 @endif
             </li>
         @endif
-    @else
-        {{-- Log if menu item is NOT viewable --}}
-        @php \Illuminate\Support\Facades\Log::debug('Menu item is NOT viewable (due to role or no auth): ' . ($menu->name ?? $menu->menuHeader ?? '')); @endphp
     @endif
 @endforeach
-@php \Illuminate\Support\Facades\Log::info('Finished rendering submenu-partial.blade.php'); @endphp

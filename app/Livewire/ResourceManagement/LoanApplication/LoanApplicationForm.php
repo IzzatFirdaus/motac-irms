@@ -11,7 +11,6 @@ use App\Services\LoanApplicationService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -22,8 +21,12 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Throwable;
 
+/**
+ * Livewire Component for ICT Loan Application Form.
+ * Allows users to submit or edit loan applications, handles validation, draft, and submission.
+ */
 #[Layout('layouts.app')]
-class ApplicationForm extends Component
+class LoanApplicationForm extends Component
 {
     use AuthorizesRequests;
 
@@ -77,7 +80,6 @@ class ApplicationForm extends Component
      */
     public function generatePageTitle(): string
     {
-        // 'forms.title_edit_application_ict' and 'forms.title_new_application_ict' are language keys in forms_en.php / forms_ms.php
         return $this->isEditMode
             ? __('forms.title_edit_application_ict')
             : __('forms.title_new_application_ict');
@@ -111,7 +113,6 @@ class ApplicationForm extends Component
         $this->authorize('create', LoanApplication::class);
         $user = Auth::user();
         $this->applicantName = $user->name;
-        // Use language keys for N/A if needed
         $this->applicantPositionAndGrade = ($user->position?->name ?? __('common.not_available')) . ' (' . ($user->grade?->name ?? __('common.not_available')) . ')';
         $this->applicantDepartment = $user->department?->name ?? __('common.not_available');
         $this->applicant_phone = $user->mobile_number ?? '';
@@ -150,44 +151,55 @@ class ApplicationForm extends Component
             }
         } catch (Throwable $e) {
             Log::error('Error loading existing loan application: ' . $e->getMessage());
-            session()->flash('error', __('messages.system_error')); // Use language key for error
+            session()->flash('error', __('messages.system_error'));
             $this->redirectRoute('dashboard', navigate: true);
         }
     }
 
     /**
      * Loads select options for equipment types and officer lists.
-     * Uses language keys for labels if needed.
      */
     private function loadSelectOptions(): void
     {
-        $this->equipmentTypeOptions = Equipment::getAssetTypeOptions(); // These should be keys from language file
+        $this->equipmentTypeOptions = Equipment::getAssetTypeOptions();
         $officerList = User::where('status', 'active')->where('id', '!=', Auth::id())->orderBy('name')->get(['id', 'name']);
         $this->supportingOfficerOptions = $officerList->pluck('name', 'id')->toArray();
         $this->responsibleOfficerOptions = $officerList->pluck('name', 'id')->toArray();
     }
 
+    /**
+     * Add a new equipment loan item row to the form.
+     */
     public function addLoanItem(): void
     {
         $this->loan_application_items[] = ['equipment_type' => '', 'quantity_requested' => 1, 'notes' => ''];
     }
 
+    /**
+     * Remove a loan item row by index, but always keep at least one row.
+     */
     public function removeLoanItem(int $index): void
     {
         if (count($this->loan_application_items) > 1) {
             unset($this->loan_application_items[$index]);
             $this->loan_application_items = array_values($this->loan_application_items);
         } else {
-            // Use language key for this info message
             $this->dispatch('swal:info', title: __('common.no_permission'), message: __('forms.text_no_equipment_added'));
         }
     }
 
+    /**
+     * Reset responsible officer selection if applicant is responsible.
+     */
     public function updatedApplicantIsResponsibleOfficer(bool $value): void
     {
         if ($value) $this->responsible_officer_id = null;
     }
 
+    /**
+     * Validation rules for the form.
+     * If $forSubmission is true, stricter rules for submission.
+     */
     public function rules(bool $forSubmission = false): array
     {
         $rules = [
@@ -231,7 +243,6 @@ class ApplicationForm extends Component
         ];
         foreach (array_keys($this->loan_application_items) as $index) {
             $itemNumber = $index + 1;
-            // Item-specific validation messages, using keys if available
             $messages[sprintf('loan_application_items.%s.equipment_type.required', $index)] = sprintf(__('forms.validation_equipment_type_required'), $itemNumber);
             $messages[sprintf('loan_application_items.%s.quantity_requested.required', $index)] = sprintf(__('forms.validation_quantity_required'), $itemNumber);
         }
@@ -240,9 +251,6 @@ class ApplicationForm extends Component
 
     /**
      * Saves the current application form as a draft.
-     *
-     * @param LoanApplicationService $service
-     * @return RedirectResponse|null
      */
     public function saveAsDraft(LoanApplicationService $service): ?RedirectResponse
     {
@@ -251,7 +259,6 @@ class ApplicationForm extends Component
             DB::beginTransaction();
             $user = Auth::user();
 
-            // Use the unified service method to handle creation or update for drafts
             $application = $service->createAndSubmitApplication($validatedData, $user, true, $this->loanApplicationInstance);
 
             DB::commit();
@@ -269,9 +276,6 @@ class ApplicationForm extends Component
 
     /**
      * Submits the loan application for approval.
-     *
-     * @param LoanApplicationService $service
-     * @return RedirectResponse|null
      */
     public function submitLoanApplication(LoanApplicationService $service): ?RedirectResponse
     {
@@ -280,7 +284,6 @@ class ApplicationForm extends Component
             DB::beginTransaction();
             $user = Auth::user();
 
-            // Use the unified service method to handle creation or update for final submission
             $application = $service->createAndSubmitApplication($validatedData, $user, false, $this->loanApplicationInstance);
 
             DB::commit();
@@ -296,14 +299,20 @@ class ApplicationForm extends Component
         }
     }
 
+    /**
+     * Helper for formatting a date to HTML input format.
+     */
     private function formatDateForInput($date): ?string
     {
         return $date ? Carbon::parse($date)->format('Y-m-d\TH:i') : null;
     }
 
+    /**
+     * Render the Blade view for the loan application form.
+     */
     public function render(): View
     {
         // Blade view will use @lang for keys in suffixed language files
-        return view('livewire.resource-management.loan-application.application-form');
+        return view('livewire.resource-management.loan-application.loan-application-form');
     }
 }

@@ -10,48 +10,50 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
 
+/**
+ * DepartmentsIndex Livewire Component
+ *
+ * Handles all department management logic for Settings > Departments, including
+ * listing, search, sort, create, update, delete, and modal management.
+ */
 #[Layout('layouts.app')]
 #[Title('Pengurusan Jabatan')]
-class Index extends Component
+class DepartmentsIndex extends Component
 {
     use AuthorizesRequests;
     use WithPagination;
 
     public string $search = '';
-
     public string $sortField = 'name';
-
     public string $sortDirection = 'asc';
 
     public bool $showModal = false;
-
     public bool $isEditMode = false;
-
     public ?Department $editingDepartment = null;
 
     // Form fields
     public string $name = '';
-
     public string $code = '';
-
     public string $branch_type = '';
-
     public string $description = '';
-
     public bool $is_active = true;
 
+    // Deletion confirmation modal
     public bool $showDeleteConfirmationModal = false;
-
     public ?int $departmentIdToDelete = null;
-
     public string $departmentNameToDelete = '';
 
+    // Branch type dropdown options
     public array $branchTypeOptions = [];
 
+    // Persist query string for search & sort
     protected array $queryString = ['search', 'sortField', 'sortDirection'];
 
     protected string $paginationTheme = 'bootstrap';
 
+    /**
+     * Mount the component and initialize properties.
+     */
     public function mount(): void
     {
         $this->authorize('viewAny', Department::class);
@@ -62,6 +64,9 @@ class Index extends Component
         }
     }
 
+    /**
+     * Sort the departments table by a field.
+     */
     public function sortBy(string $field): void
     {
         if ($this->sortField === $field) {
@@ -74,10 +79,12 @@ class Index extends Component
         $this->resetPage();
     }
 
+    /**
+     * Computed property: get paginated departments list.
+     */
     public function getDepartmentsProperty()
     {
         $query = Department::query()
-            // EDITED: Eager load the relationship to fix the N+1 query issue.
             ->with('headOfDepartment:id,name')
             ->when($this->search, function ($q): void {
                 $q->where('name', 'like', '%'.$this->search.'%')
@@ -94,6 +101,9 @@ class Index extends Component
         return $query->paginate(10);
     }
 
+    /**
+     * Open modal to create a new department.
+     */
     public function create(): void
     {
         $this->authorize('create', Department::class);
@@ -102,6 +112,9 @@ class Index extends Component
         $this->showModal = true;
     }
 
+    /**
+     * Open modal to edit an existing department.
+     */
     public function edit(Department $department): void
     {
         $this->authorize('update', $department);
@@ -116,9 +129,14 @@ class Index extends Component
         $this->showModal = true;
     }
 
+    /**
+     * Save a new or edited department.
+     */
     public function saveDepartment(): void
     {
-        $this->isEditMode ? $this->authorize('update', $this->editingDepartment) : $this->authorize('create', Department::class);
+        $this->isEditMode
+            ? $this->authorize('update', $this->editingDepartment)
+            : $this->authorize('create', Department::class);
 
         $validatedData = $this->validate();
         $data = [
@@ -129,7 +147,7 @@ class Index extends Component
             'is_active' => $validatedData['is_active'],
         ];
 
-        if ($this->isEditMode && $this->editingDepartment instanceof \App\Models\Department && $this->editingDepartment->exists) {
+        if ($this->isEditMode && $this->editingDepartment instanceof Department && $this->editingDepartment->exists) {
             $this->editingDepartment->update($data);
             session()->flash('success', __('Jabatan :name berjaya dikemaskini.', ['name' => $this->editingDepartment->name]));
         } else {
@@ -140,12 +158,18 @@ class Index extends Component
         $this->closeModal();
     }
 
+    /**
+     * Close the department form modal and reset fields.
+     */
     public function closeModal(): void
     {
         $this->resetInputFields();
         $this->showModal = false;
     }
 
+    /**
+     * Prompt delete confirmation modal for a department.
+     */
     public function confirmDepartmentDeletion(int $id): void
     {
         $department = Department::find($id);
@@ -154,7 +178,6 @@ class Index extends Component
 
             if ($department->users()->count() > 0) {
                 session()->flash('error', __('Jabatan ":name" tidak boleh dipadam kerana ia telah ditugaskan kepada pengguna.', ['name' => $department->name]));
-
                 return;
             }
 
@@ -166,6 +189,9 @@ class Index extends Component
         }
     }
 
+    /**
+     * Delete the selected department.
+     */
     public function deleteDepartment(): void
     {
         if ($this->departmentIdToDelete !== null && $this->departmentIdToDelete !== 0) {
@@ -175,7 +201,6 @@ class Index extends Component
             if ($department->users()->count() > 0) {
                 session()->flash('error', __('Jabatan ":name" tidak boleh dipadam kerana ia telah ditugaskan kepada pengguna.', ['name' => $department->name]));
                 $this->closeDeleteConfirmationModal();
-
                 return;
             }
 
@@ -186,6 +211,9 @@ class Index extends Component
         $this->closeDeleteConfirmationModal();
     }
 
+    /**
+     * Close the delete confirmation modal.
+     */
     public function closeDeleteConfirmationModal(): void
     {
         $this->showDeleteConfirmationModal = false;
@@ -193,9 +221,12 @@ class Index extends Component
         $this->departmentNameToDelete = '';
     }
 
+    /**
+     * Validation rules for the department form.
+     */
     protected function rules(): array
     {
-        $departmentIdToIgnore = ($this->isEditMode && $this->editingDepartment instanceof \App\Models\Department && $this->editingDepartment->id)
+        $departmentIdToIgnore = ($this->isEditMode && $this->editingDepartment instanceof Department && $this->editingDepartment->id)
                                 ? $this->editingDepartment->id
                                 : null;
 
@@ -208,13 +239,15 @@ class Index extends Component
         ];
     }
 
+    /**
+     * Reset all input fields and editing states.
+     */
     private function resetInputFields(): void
     {
         $this->name = '';
         $this->code = '';
         $this->description = '';
         $this->is_active = true;
-
         $this->branch_type = $this->branchTypeOptions === [] ? '' : array_key_first($this->branchTypeOptions);
 
         $this->editingDepartment = new Department;
@@ -223,9 +256,12 @@ class Index extends Component
         $this->resetValidation();
     }
 
+    /**
+     * Render the component's view.
+     */
     public function render()
     {
-        return view('livewire.settings.departments.index', [
+        return view('livewire.settings.departments.departments-index', [
             'departments' => $this->departments,
             'branchTypeOptions' => $this->branchTypeOptions,
         ]);

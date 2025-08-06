@@ -1,13 +1,10 @@
 @extends('layouts.app')
 
-@section('title', __('Maklumat Pengguna')) {{-- Static title, as per recent fix in Livewire component --}}
+@section('title', __('Maklumat Pengguna'))
 
 @section('content')
-    {{-- !!! IMPORTANT: This is the ONLY root HTML element for Livewire component [settings.users.show] !!! --}}
     <div>
         <div class="container-fluid px-lg-4 py-4">
-
-            {{-- Page Header and Back Button --}}
             <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
                 <h1 class="h2 fw-bold text-dark mb-0 d-flex align-items-center">
                     <i class="fas fa-user-circle me-2"></i>{{ __('Maklumat Pengguna') }}
@@ -20,7 +17,6 @@
                     {{ __('Kembali ke Senarai Pengguna') }}
                 </a>
             </div>
-
             <div class="card shadow-sm motac-card">
                 <div class="card-header bg-light py-3 motac-card-header">
                     <h3 class="h5 card-title fw-semibold mb-0">{{ __('Butiran Pengguna') }}</h3>
@@ -31,7 +27,6 @@
                             <img src="{{ $userToShow->profile_photo_url }}" alt="{{ $userToShow->name }}" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
                             <h5 class="mb-1">{{ $userToShow->name }}</h5>
                             <p class="text-muted small">{{ $userToShow->email }}</p>
-                            {{-- Removed: @if ($userToShow->motac_email) <p class="text-muted small mb-0">{{ $userToShow->motac_email }} (MOTAC)</p> @endif --}}
                             <span class="badge rounded-pill {{ \App\Models\User::getRoleBadgeClass($userToShow->roles->first()->name ?? '') }}">{{ $userToShow->roles->first()->name ?? __('Tiada Peranan') }}</span>
                         </div>
                         <div class="col-md-9">
@@ -108,8 +103,7 @@
                                     </a>
                                 @endcan
                                 @can('delete', $userToShow)
-                                    @if (Auth::user()->id !== $userToShow->id) {{-- Prevent deleting self --}}
-                                        {{-- Dispatch to open a global delete modal. The actual deletion method is on the Index component. --}}
+                                    @if (Auth::user()->id !== $userToShow->id)
                                         <button wire:click="$dispatch('open-delete-modal', { id: {{ $userToShow->id }}, itemDescription: '{{ __('pengguna') }} {{ $userToShow->name }}', deleteMethod: 'deleteUser' })" class="btn btn-danger">
                                             <i class="fas fa-trash-alt me-1"></i> {{ __('Padam Pengguna') }}
                                         </button>
@@ -121,6 +115,6 @@
                 </div>
             </div>
         </div>
-        {{-- The delete modal itself will be in index.blade.php or your main layout, listening for the 'open-delete-modal' event --}}
     </div>
+
 @endsection

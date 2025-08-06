@@ -1,4 +1,10 @@
 {{-- resources/views/livewire/sections/footer/footer.blade.php --}}
+{{--
+    Application Footer
+    Expects:
+      - $containerNav (Bootstrap container class, e.g., 'container-fluid' or 'container-xxl')
+--}}
+
 <div>
   <footer class="content-footer footer motac-footer">
     @php
