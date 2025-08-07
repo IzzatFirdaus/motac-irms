@@ -4,8 +4,11 @@
     Badge to show user status (active/inactive/suspended/etc).
     Props:
     - $status: string representing user status, e.g. "active", "inactive", "suspended"
---}}
 
+    Usage:
+    <x-user-status-badge status="active" />
+    <x-user-status-badge :status="$user->status" />
+--}}
 @props(['status'])
 
 @php

@@ -1,4 +1,17 @@
-{{-- resources/views/components/sort-icon.blade.php --}}
+{{--
+    resources/views/components/sort-icon.blade.php
+
+    Shows the current sort direction for a column, or a neutral filter icon if unsorted.
+
+    Props:
+    - $field: string - The field/column this icon is for
+    - $sortField: string - The currently sorted field
+    - $sortDirection: string - 'asc' or 'desc'
+
+    Usage:
+    <x-sort-icon field="name" :sortField="$sortField" :sortDirection="$sortDirection" />
+--}}
+
 @props(['field', 'sortField', 'sortDirection'])
 
 @if ($sortField === $field)

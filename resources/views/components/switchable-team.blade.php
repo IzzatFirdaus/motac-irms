@@ -1,4 +1,16 @@
-{{-- resources/views/components/switchable-team.blade.php --}}
+{{--
+    resources/views/components/switchable-team.blade.php
+
+    Render a switchable team item, typically for a dropdown menu to change teams.
+    Currently disabled, shows an alert when clicked.
+
+    Props:
+    - $team: Team model instance
+    - $component: string - Which component to use for the dropdown link (default: 'dropdown-link')
+
+    Usage:
+    <x-switchable-team :team="$team" />
+--}}
 @props(['team', 'component' => 'dropdown-link'])
 
 <form method="POST" action="{{-- route('current-team.update') --}}" id="switch-team-form-{{ $team->id }}">

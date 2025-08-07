@@ -5,8 +5,11 @@
     Props:
     - $user: User object containing profile information.
     - $showActions: (optional) Boolean to show action buttons (edit, etc.)
---}}
 
+    Usage:
+    <x-user-info-card :user="$user" />
+    <x-user-info-card :user="$user" :showActions="true" />
+--}}
 @props(['user', 'showActions' => false])
 
 <div class="card shadow-sm mb-3">

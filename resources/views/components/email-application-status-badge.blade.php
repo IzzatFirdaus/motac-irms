@@ -1,4 +1,23 @@
-{{-- resources/views/components/email-application-status-badge.blade.php --}}
+{{--
+    resources/views/components/email-application-status-badge.blade.php
+
+    Displays email application status as a colored badge.
+    Supports both direct status values and EmailApplication model instances.
+
+    Props:
+    - $status: string - The status value (optional if application provided)
+    - $application: EmailApplication - Model instance with status (optional)
+
+    Usage:
+    <x-email-application-status-badge :status="'pending_support'" />
+    <x-email-application-status-badge :application="$emailApplication" />
+
+    Supported Statuses:
+    - draft, pending_support, pending_admin, approved, processing, completed
+    - rejected, provision_failed, cancelled
+
+    Dependencies: App\Models\EmailApplication
+--}}
 @props([
     'status' => '',
     'application' => null,
@@ -9,12 +28,14 @@
     $statusLabel = '';
 
     if ($application) {
+        // Use application model properties if available
         $badgeClass = 'text-bg-' . $application->status_color;
         $statusLabel = $application->status_label;
     } else {
+        // Map status to color and label
         $statusOptions = \App\Models\EmailApplication::getStatusOptions();
         $statusLabel = $statusOptions[$status] ?? Illuminate\Support\Str::title(str_replace('_', ' ', $status));
-        $color = 'dark';
+        $color = 'dark'; // Default color
 
         switch ($status) {
             case \App\Models\EmailApplication::STATUS_DRAFT:

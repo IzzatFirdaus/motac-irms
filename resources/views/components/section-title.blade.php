@@ -1,4 +1,20 @@
-{{-- resources/views/components/section-title.blade.php --}}
+{{--
+    resources/views/components/section-title.blade.php
+
+    Section title with optional description, aside (actions), and icon.
+    Used at the top of major page sections for clear labeling.
+
+    Props:
+    - $title: string - The section title (required)
+    - $description: string - Optional description text
+    - $aside: mixed - Optional aside content (e.g. action button)
+    - $icon: string|null - Bootstrap icon class for section
+
+    Usage:
+    <x-section-title title="User Management" description="Manage all users here." aside="<a ...>Add User</a>" icon="bi-person" />
+
+    <x-section-title :title="__('Settings')" :aside="view('partials.settings-help-link')" />
+--}}
 @props(['title', 'description', 'aside' => null, 'icon' => null])
 
 <div
@@ -17,7 +33,7 @@
 
     @if ($aside)
         <div class="ms-md-3 mt-2 mt-md-0">
-            {{ $aside }}
+            {!! $aside !!}
         </div>
     @endif
 </div>

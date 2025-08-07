@@ -1,4 +1,5 @@
 {{-- resources/views/_partials/_modals/modal-sub-category.blade.php --}}
+{{-- Modal for creating/editing sub-categories, with Select2 parent category selection --}}
 
 @pushOnce('custom-css')
 <!-- Select2 CSS for enhanced dropdowns -->
@@ -20,6 +21,7 @@
         {{-- Sub-category entry form --}}
         <form wire:submit.prevent="submitSubCategory" id="subCategoryFormModal" class="row g-3">
 
+          {{-- Parent Category Selection (Required) --}}
           <div class="col-md-12">
             <label for="select2SubCategoryEquipmentCategoryIdModal" class="form-label w-100">
               {{ __('Kategori Induk Peralatan') }} <span class="text-danger">*</span>
@@ -38,6 +40,7 @@
             @error('subCategoryEquipmentCategoryId') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
           </div>
 
+          {{-- Subcategory Name --}}
           <div class="col-md-12">
             <label for="subCategoryNameModalInput" class="form-label w-100">
               {{ __('Nama Subkategori') }} <span class="text-danger">*</span>
@@ -46,6 +49,7 @@
             @error('subCategoryName') <div class="invalid-feedback">{{ $message }}</div> @enderror
           </div>
 
+          {{-- Description (Optional) --}}
           <div class="col-12">
             <label for="subCategoryDescriptionModalInput" class="form-label w-100">
               {{ __('Deskripsi (Pilihan)') }}
@@ -54,6 +58,7 @@
             @error('subCategoryDescription') <div class="invalid-feedback">{{ $message }}</div> @enderror
           </div>
 
+          {{-- Active Switch --}}
           <div class="col-12">
             <div class="form-check form-switch">
               <input wire:model.defer='subCategoryIsActive' class="form-check-input" type="checkbox" id="subCategoryIsActiveModal" />
