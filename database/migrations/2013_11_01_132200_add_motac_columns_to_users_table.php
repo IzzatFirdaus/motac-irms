@@ -4,14 +4,18 @@ use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Schema; // Import User model to access constants
+use Illuminate\Support\Facades\Schema;
 
+/**
+ * Adds MOTAC-specific columns to the users table, including personal, organizational, and employment details.
+ */
 return new class extends Migration
 {
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table): void {
-            $table->string(column: 'title')->nullable()->after('name')->comment('e.g., Encik, Puan, Dr.');
+            // Personal and organizational details
+            $table->string('title')->nullable()->after('name')->comment('e.g., Encik, Puan, Dr.');
             $table->string('identification_number')->unique()->nullable()->after('title')->comment('NRIC');
             $table->string('passport_number')->unique()->nullable()->after('identification_number');
             $table->foreignId('department_id')->nullable()->after('passport_number')->constrained('departments')->onDelete('set null')->comment('Refers to MOTAC Negeri/Bahagian/Unit');
@@ -23,6 +27,7 @@ return new class extends Migration
             $table->string('motac_email')->unique()->nullable()->after('personal_email');
             $table->string('user_id_assigned')->unique()->nullable()->after('motac_email')->comment('Assigned User ID if different from email');
 
+            // Employment status enums (service_status, appointment_type)
             $serviceStatusEnumValues = [
                 User::SERVICE_STATUS_TETAP,
                 User::SERVICE_STATUS_KONTRAK_MYSTEP,
@@ -30,12 +35,10 @@ return new class extends Migration
                 User::SERVICE_STATUS_OTHER_AGENCY,
             ];
             $serviceStatusEnumValues = array_unique(array_filter($serviceStatusEnumValues, fn ($value): bool => ! is_null($value)));
-
             if ($serviceStatusEnumValues === []) {
                 Log::error('Service status enum values could not be determined from User model constants. Using hardcoded fallback in migration. PLEASE CHECK User.php CONSTANTS.');
                 $serviceStatusEnumValues = ['1', '2', '3', '4'];
             }
-
             $table->enum('service_status', $serviceStatusEnumValues)->nullable()->after('user_id_assigned')->comment('Taraf Perkhidmatan. Keys defined in User model.');
 
             $appointmentTypeEnumValues = [
@@ -48,50 +51,40 @@ return new class extends Migration
                 Log::error('Appointment type enum values could not be determined from User model constants. Using hardcoded fallback in migration. PLEASE CHECK User.php CONSTANTS.');
                 $appointmentTypeEnumValues = ['1', '2', '3'];
             }
-
             $table->enum('appointment_type', $appointmentTypeEnumValues)->nullable()->after('service_status')->comment('Pelantikan. Keys defined in User model.');
 
+            // Previous department details
             $table->string('previous_department_name')->nullable()->after('appointment_type');
             $table->string('previous_department_email')->nullable()->after('previous_department_name');
 
-            // MODIFIED: Include User::STATUS_PENDING
+            // User status
             $statusEnumValues = [
                 User::STATUS_ACTIVE,
                 User::STATUS_INACTIVE,
-                User::STATUS_PENDING, // Added the pending status
+                User::STATUS_PENDING,
             ];
             $statusEnumValues = array_unique(array_filter($statusEnumValues, fn ($value): bool => ! is_null($value)));
-
-            if (count($statusEnumValues) < 2) { // Ensure at least active/inactive if constants fail
+            if (count($statusEnumValues) < 2) {
                 Log::error('Status enum values could not be determined reliably from User model constants. Using hardcoded fallback in migration. PLEASE CHECK User.php CONSTANTS.');
-                // Provide a sensible fallback that includes 'pending'
                 $statusEnumValues = ['active', 'inactive', 'pending'];
             }
-
-            // Default status should be one of the defined enum values.
             $defaultUserStatus = defined(User::class.'::STATUS_ACTIVE') ? User::STATUS_ACTIVE : $statusEnumValues[0];
-
             $table->enum('status', $statusEnumValues)->default($defaultUserStatus)->after('previous_department_email');
 
-            // These boolean flags might be better managed by Spatie roles/permissions.
-            // If keeping, ensure they are not redundant with roles.
+            // Boolean flags (prefer Spatie roles, but included for legacy)
             $table->boolean('is_admin')->default(false)->after('status')->comment('Consider using Spatie roles exclusively.');
             $table->boolean('is_bpm_staff')->default(false)->after('is_admin')->comment('Consider using Spatie roles exclusively.');
 
             $table->string('profile_photo_path', 2048)->nullable()->after('is_bpm_staff');
 
-            // Using a more robust check for 'employees' table existence for the foreign key.
+            // Optional foreign key to employees table
             if (Schema::hasTable('employees')) {
-                // Only add constraint if employees table exists at the time of migration.
-                // Note: With migrate:fresh, table creation order is defined by migration filenames.
-                // Ensure create_employees_table migration runs before this if 'employees' is a hard dependency.
                 $table->foreignId('employee_id')->nullable()->after('profile_photo_path')->constrained('employees')->onDelete('set null');
             } else {
-                // If employees table might not exist, add the column without the constraint.
-                // You might need a separate, later migration to add the constraint if table order is an issue.
-                $table->unsignedBigInteger('employee_id')->nullable()->after('profile_photo_path')->comment('Link to employees table (constraint might be added later if table does not exist yet)');
+                $table->unsignedBigInteger('employee_id')->nullable()->after('profile_photo_path')->comment('Link to employees table (constraint might be added later)');
             }
 
+            // Blameable fields
             $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('deleted_by')->nullable()->constrained('users')->onDelete('set null');
@@ -101,68 +94,55 @@ return new class extends Migration
 
     public function down(): void
     {
-        // Drop foreign keys before dropping columns
         Schema::table('users', function (Blueprint $table): void {
             $foreignKeysToDrop = [
                 'department_id', 'position_id', 'grade_id',
                 'created_by', 'updated_by', 'deleted_by',
             ];
 
-            // Drop employee_id foreign key if exists
             if (Schema::hasColumn('users', 'employee_id')) {
                 try {
-                    $table->dropForeign(['employee_id']);
+                    if (collect(Schema::getConnection()->getDoctrineSchemaManager()->listTableForeignKeys('users'))->pluck('name')->contains('users_employee_id_foreign')) {
+                        $table->dropForeign('users_employee_id_foreign');
+                    }
                 } catch (\Exception $e) {
-                    Log::warning('Could not drop foreign key for employee_id on users table: '.$e->getMessage());
+                    Log::warning('Could not automatically drop foreign key for employee_id on users table: '.$e->getMessage().'. Manual check might be needed if schema differs.');
                 }
             }
 
             foreach ($foreignKeysToDrop as $fkColumn) {
                 if (Schema::hasColumn('users', $fkColumn)) {
                     try {
-                        $table->dropForeign([$fkColumn]);
+                        $foreignKeyName = 'users_'.$fkColumn.'_foreign';
+                        if (collect(Schema::getConnection()->getDoctrineSchemaManager()->listTableForeignKeys('users'))->pluck('name')->contains($foreignKeyName)) {
+                            $table->dropForeign($foreignKeyName);
+                        }
                     } catch (\Exception $e) {
                         Log::warning(sprintf('Could not drop foreign key for %s on users table: ', $fkColumn).$e->getMessage());
                     }
                 }
             }
-        });
 
-        // Use raw SQL as a fallback for MySQL stubborn FKs
-        $columnsToDrop = [
-            'title', 'identification_number', 'passport_number',
-            'department_id', 'position_id', 'grade_id', 'level',
-            'mobile_number', 'personal_email', 'motac_email', 'user_id_assigned',
-            'service_status', 'appointment_type',
-            'previous_department_name', 'previous_department_email',
-            'status', 'is_admin', 'is_bpm_staff', 'profile_photo_path', 'employee_id',
-            'created_by', 'updated_by', 'deleted_by',
-        ];
+            $columnsToDrop = [
+                'title', 'identification_number', 'passport_number',
+                'department_id', 'position_id', 'grade_id', 'level',
+                'mobile_number', 'personal_email', 'motac_email', 'user_id_assigned',
+                'service_status', 'appointment_type',
+                'previous_department_name', 'previous_department_email',
+                'status', 'is_admin', 'is_bpm_staff', 'profile_photo_path', 'employee_id',
+                'created_by', 'updated_by', 'deleted_by',
+            ];
 
-        foreach ($columnsToDrop as $column) {
-            if (Schema::hasColumn('users', $column)) {
-                try {
-                    Schema::table('users', function (Blueprint $table) use ($column) {
-                        $table->dropColumn($column);
-                    });
-                } catch (\Exception $e) {
-                    // Raw SQL fallback for MySQL "Cannot drop index needed in a foreign key constraint" error
-                    try {
-                        DB::statement("ALTER TABLE `users` DROP FOREIGN KEY `users_{$column}_foreign`");
-                        DB::statement("ALTER TABLE `users` DROP COLUMN `$column`");
-                        Log::warning("Dropped column $column using raw SQL workaround.");
-                    } catch (\Exception $ee) {
-                        Log::error("Failed to drop column $column even with raw SQL: ".$ee->getMessage());
-                    }
+            $existingColumns = Schema::getColumnListing('users');
+            foreach ($columnsToDrop as $column) {
+                if (in_array($column, $existingColumns) && Schema::hasColumn('users', $column)) {
+                    $table->dropColumn($column);
                 }
             }
-        }
 
-        // Drop soft deletes if exists
-        if (Schema::hasColumn('users', 'deleted_at')) {
-            Schema::table('users', function (Blueprint $table) {
+            if (in_array('deleted_at', $existingColumns) && Schema::hasColumn('users', 'deleted_at')) {
                 $table->dropSoftDeletes();
-            });
-        }
+            }
+        });
     }
 };

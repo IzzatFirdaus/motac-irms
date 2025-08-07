@@ -1,5 +1,4 @@
 <?php
-// User.php
 
 declare(strict_types=1);
 
@@ -13,7 +12,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
@@ -21,21 +19,36 @@ use Spatie\Permission\Traits\HasRoles;
 
 /**
  * User Model for MOTAC System.
- * Refactored for v4.0:
- * - All Email/User ID Provisioning related constants, fields, and relationships are removed.
- * - Helpdesk relationships are retained.
- * - Added back enums required for legacy migrations.
+ *
+ * @property int $id
+ * @property string $name
+ * @property string $email
+ * @property string|null $title
+ * @property string|null $identification_number
+ * @property string|null $passport_number
+ * @property int|null $department_id
+ * @property int|null $position_id
+ * @property int|null $grade_id
+ * @property string|null $phone_number
+ * @property string $status
+ * @property \Illuminate\Support\Carbon|null $email_verified_at
+ * @property string $password
+ * @property string|null $remember_token
+ * @property string|null $two_factor_secret
+ * @property string|null $two_factor_recovery_codes
+ * @property \Illuminate\Support\Carbon|null $deactivated_at
+ * @property int|null $created_by
+ * @property int|null $updated_by
+ * @property int|null $deleted_by
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read string $profile_photo_url
+ * @property-read string $full_name
  */
 class User extends Authenticatable
 {
-    use Blameable;
-    use HasFactory;
-    use Notifiable;
-    use HasProfilePhoto;
-    use HasApiTokens;
-    use TwoFactorAuthenticatable;
-    use HasRoles;
-    use SoftDeletes;
+    use Blameable, HasFactory, Notifiable, HasProfilePhoto, HasApiTokens, TwoFactorAuthenticatable, HasRoles, SoftDeletes;
 
     // --- TITLE CONSTANTS ---
     public const TITLE_ENCIK = 'encik';
@@ -49,7 +62,6 @@ class User extends Authenticatable
     public const TITLE_DATIN = 'datin';
     public const TITLE_NONE = '';
 
-    // Options for titles
     public static array $TITLE_OPTIONS = [
         self::TITLE_ENCIK => 'Encik',
         self::TITLE_PUAN => 'Puan',
@@ -63,28 +75,21 @@ class User extends Authenticatable
         self::TITLE_NONE => '',
     ];
 
-    // --- STATUS CONSTANTS ---
     public const STATUS_ACTIVE = 'active';
     public const STATUS_INACTIVE = 'inactive';
     public const STATUS_SUSPENDED = 'suspended';
     public const STATUS_PENDING = 'pending';
 
-    // --- SERVICE STATUS ENUM (RESTORED for Migration Compatibility) ---
+    // Service and appointment enums
     public const SERVICE_STATUS_TETAP = 'tetap';
     public const SERVICE_STATUS_KONTRAK_MYSTEP = 'kontrak_mystep';
     public const SERVICE_STATUS_PELAJAR_INDUSTRI = 'pelajar_industri';
     public const SERVICE_STATUS_OTHER_AGENCY = 'other_agency';
 
-    // --- APPOINTMENT TYPE ENUM (RESTORED for Migration Compatibility) ---
     public const APPOINTMENT_TYPE_BAHARU = 'baharu';
     public const APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN = 'kenaikan_pangkat_pertukaran';
     public const APPOINTMENT_TYPE_LAIN_LAIN = 'lain_lain';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'name',
         'email',
@@ -97,14 +102,8 @@ class User extends Authenticatable
         'grade_id',
         'phone_number',
         'status',
-        // Add any additional fillable attributes as required by migration
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
@@ -112,21 +111,11 @@ class User extends Authenticatable
         'two_factor_recovery_codes',
     ];
 
-    /**
-     * The accessors to append to the model's array form.
-     *
-     * @var array<int, string>
-     */
     protected $appends = [
         'profile_photo_url',
         'full_name',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -136,7 +125,7 @@ class User extends Authenticatable
         ];
     }
 
-    // --- RELATIONSHIPS ---
+    // Relationships
 
     public function department(): BelongsTo
     {
@@ -163,19 +152,11 @@ class User extends Authenticatable
         return $this->hasMany(LoanApplication::class, 'responsible_officer_id');
     }
 
-    // --- Helpdesk Relationships ---
-
-    /**
-     * Get the helpdesk tickets created by the user.
-     */
     public function tickets(): HasMany
     {
         return $this->hasMany(HelpdeskTicket::class, 'user_id');
     }
 
-    /**
-     * Get the helpdesk tickets assigned to the user (as an agent).
-     */
     public function assignedTickets(): HasMany
     {
         return $this->hasMany(HelpdeskTicket::class, 'assigned_to_user_id');
@@ -186,23 +167,21 @@ class User extends Authenticatable
         return $this->hasMany(Approval::class, 'approver_id');
     }
 
-    // Blameable relationships
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
-
     public function updater(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
-
     public function deleter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by');
     }
 
     // Helper methods for roles
+
     public function isAdmin(): bool
     {
         return $this->hasRole('Admin');
@@ -233,7 +212,7 @@ class User extends Authenticatable
      */
     public function hasGradeLevel(int $requiredGradeLevel): bool
     {
-        if (! $this->grade) {
+        if (!$this->grade) {
             return false;
         }
         return $this->grade->level >= $requiredGradeLevel;

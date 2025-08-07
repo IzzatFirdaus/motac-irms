@@ -5,17 +5,16 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Database\Factories\LocationFactory;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-// No 'use App\Models\Device;'
-
 /**
  * Location Model.
+ *
+ * Represents a physical location or branch for assets/equipment.
  *
  * @property int $id
  * @property string $name
@@ -32,42 +31,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \App\Models\User|null $creator
- * @property-read \App\Models\User|null $deleter
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Equipment> $equipment
- * @property-read int|null $equipment_count
- * @property-read \App\Models\User|null $updater
- * @method static Builder<static>|Location active()
- * @method static Builder<static>|Location byCity(string $city)
- * @method static Builder<static>|Location byCountry(string $country)
- * @method static \Database\Factories\LocationFactory factory($count = null, $state = [])
- * @method static Builder<static>|Location newModelQuery()
- * @method static Builder<static>|Location newQuery()
- * @method static Builder<static>|Location onlyTrashed()
- * @method static Builder<static>|Location query()
- * @method static Builder<static>|Location whereAddress($value)
- * @method static Builder<static>|Location whereCity($value)
- * @method static Builder<static>|Location whereCountry($value)
- * @method static Builder<static>|Location whereCreatedAt($value)
- * @method static Builder<static>|Location whereCreatedBy($value)
- * @method static Builder<static>|Location whereDeletedAt($value)
- * @method static Builder<static>|Location whereDeletedBy($value)
- * @method static Builder<static>|Location whereDescription($value)
- * @method static Builder<static>|Location whereId($value)
- * @method static Builder<static>|Location whereIsActive($value)
- * @method static Builder<static>|Location whereName($value)
- * @method static Builder<static>|Location wherePostalCode($value)
- * @method static Builder<static>|Location whereState($value)
- * @method static Builder<static>|Location whereUpdatedAt($value)
- * @method static Builder<static>|Location whereUpdatedBy($value)
- * @method static Builder<static>|Location withTrashed()
- * @method static Builder<static>|Location withoutTrashed()
- * @mixin \Eloquent
  */
 class Location extends Model
 {
-    use HasFactory;
-    use SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'locations';
 
@@ -75,7 +42,6 @@ class Location extends Model
         'name', 'description',
         'address', 'city', 'state', 'country', 'postal_code',
         'is_active',
-        // 'created_by', 'updated_by', // Assumed handled by BlameableObserver
     ];
 
     protected $casts = [
@@ -89,41 +55,24 @@ class Location extends Model
         'is_active' => true,
     ];
 
-    // Commented out boot method assuming BlameableObserver handles audit fields.
-    // If local boot for blameable is needed, it can be reinstated.
-    /*
-    protected static function boot(): void
-    {
-        parent::boot();
-        // ... (Blameable logic if not using global observer) ...
-    }
-    */
-
     protected static function newFactory(): LocationFactory
     {
         return LocationFactory::new();
     }
 
-    /** @return HasMany<\App\Models\Equipment, self> */
     public function equipment(): HasMany
     {
         return $this->hasMany(Equipment::class, 'location_id');
     }
 
-    // Blameable relationships
-    /** @return BelongsTo<\App\Models\User, self> */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
-
-    /** @return BelongsTo<\App\Models\User, self> */
     public function updater(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
-
-    /** @return BelongsTo<\App\Models\User, self> */
     public function deleter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by');
@@ -134,20 +83,17 @@ class Location extends Model
         return $this->is_active === true;
     }
 
-    /** @param Builder<Location> $query */
-    public function scopeActive(Builder $query): Builder
+    public function scopeActive($query)
     {
         return $query->where('is_active', true);
     }
 
-    /** @param Builder<Location> $query */
-    public function scopeByCity(Builder $query, string $city): Builder
+    public function scopeByCity($query, string $city)
     {
         return $query->where('city', $city);
     }
 
-    /** @param Builder<Location> $query */
-    public function scopeByCountry(Builder $query, string $country): Builder
+    public function scopeByCountry($query, string $country)
     {
         return $query->where('country', $country);
     }

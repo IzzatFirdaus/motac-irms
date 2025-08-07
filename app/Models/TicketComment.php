@@ -11,6 +11,18 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * TicketComment model for Helpdesk system.
  * Stores comments and agent notes for tickets.
+ *
+ * @property int $id
+ * @property int $ticket_id
+ * @property int $user_id
+ * @property string $comment
+ * @property bool $is_internal
+ * @property int|null $created_by
+ * @property int|null $updated_by
+ * @property int|null $deleted_by
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
  */
 class TicketComment extends Model
 {
@@ -30,25 +42,16 @@ class TicketComment extends Model
         'is_internal' => 'boolean',
     ];
 
-    /**
-     * Ticket this comment belongs to
-     */
     public function ticket(): BelongsTo
     {
         return $this->belongsTo(Ticket::class, 'ticket_id');
     }
 
-    /**
-     * The user (applicant or agent) who made this comment
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    /**
-     * Attachments for this comment (polymorphic)
-     */
     public function attachments(): MorphMany
     {
         return $this->morphMany(TicketAttachment::class, 'attachable');

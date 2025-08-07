@@ -13,11 +13,6 @@ use Illuminate\View\View;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
-/**
- * Dashboard Livewire Component
- *
- * Shows the user/admin dashboard with summary and recent activity.
- */
 #[Title('Papan Pemuka')]
 class Dashboard extends Component
 {
@@ -74,6 +69,9 @@ class Dashboard extends Component
      */
     public function render(): View
     {
-        return view('livewire.dashboard');
+        if ($this->isNormalUser) {
+            return view('livewire.dashboard.user-dashboard');
+        }
+        return view('livewire.dashboard.admin-dashboard-wrapper');
     }
 }

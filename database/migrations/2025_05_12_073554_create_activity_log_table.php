@@ -4,6 +4,10 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Migration for activity_log table.
+ * Used by the spatie/laravel-activitylog package for auditing changes/events.
+ */
 class CreateActivityLogTable extends Migration
 {
     public function up(): void

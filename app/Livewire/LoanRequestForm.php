@@ -72,8 +72,8 @@ class LoanRequestForm extends Component
         $this->loanApplicationService = $loanApplicationService;
         $this->equipmentTypeOptions = collect(Equipment::$ASSET_TYPES_LABELS);
         $this->systemUsersForResponsibleOfficer = User::whereHas('roles', function ($query) {
-            $query->whereIn('name', ['Admin', 'BPM Staff', 'IT Admin', 'Approver', 'HOD']);
-        })->get(['id', 'name', 'position_id', 'grade_id']);
+            $query->whereIn('name', ['Admin', 'Support']);
+        })->get(['id', 'name', 'jawatan_gred']);
     }
 
     /**
@@ -106,12 +106,8 @@ class LoanRequestForm extends Component
             /** @var User $currentUser */
             $currentUser = Auth::user();
             $this->applicant_name = $currentUser->name ?? '';
-            // Attempt to get jawatan/gred/department from relationships if available
-            $this->applicant_jawatan_gred = trim(
-                ($currentUser->position->name ?? '') .
-                ($currentUser->grade ? ' (' . $currentUser->grade->name . ')' : '')
-            );
-            $this->applicant_bahagian_unit = $currentUser->department->name ?? '';
+            $this->applicant_jawatan_gred = $currentUser->jawatan_gred ?? '';
+            $this->applicant_bahagian_unit = $currentUser->bahagian_unit ?? '';
             $this->applicant_mobile_number = $currentUser->mobile_number ?? '';
             $this->items[] = [
                 'equipment_type' => '',
@@ -176,8 +172,6 @@ class LoanRequestForm extends Component
     {
         return view('livewire.loan-application.form', [
             'loanApplication' => $this->loanApplication,
-            'equipmentTypeOptions' => $this->equipmentTypeOptions,
-            'systemUsersForResponsibleOfficer' => $this->systemUsersForResponsibleOfficer,
         ]);
     }
 
@@ -274,14 +268,10 @@ class LoanRequestForm extends Component
     {
         if (!$this->loanApplication) return;
 
-        $user = $this->loanApplication->user;
-        $this->applicant_name = $user->name ?? '';
-        $this->applicant_jawatan_gred = trim(
-            ($user->position->name ?? '') .
-            ($user->grade ? ' (' . $user->grade->name . ')' : '')
-        );
-        $this->applicant_bahagian_unit = $user->department->name ?? '';
-        $this->applicant_mobile_number = $this->loanApplication->applicant_mobile_number ?? ($user->mobile_number ?? '');
+        $this->applicant_name = $this->loanApplication->user->name ?? '';
+        $this->applicant_jawatan_gred = $this->loanApplication->user->jawatan_gred ?? '';
+        $this->applicant_bahagian_unit = $this->loanApplication->user->bahagian_unit ?? '';
+        $this->applicant_mobile_number = $this->loanApplication->applicant_mobile_number ?? ($this->loanApplication->user->mobile_number ?? '');
         $this->purpose = $this->loanApplication->purpose;
         $this->location = $this->loanApplication->location;
         $this->return_location = $this->loanApplication->return_location;
@@ -305,5 +295,23 @@ class LoanRequestForm extends Component
         })->toArray();
 
         $this->applicant_confirmation = (bool)$this->loanApplication->applicant_confirmation_timestamp;
+    }
+
+    /**
+     * Helper to determine submission status, not used directly anymore as status handled in service.
+     * Left here for possible future use.
+     */
+    private function determineSubmissionStatus(bool $isFinalButtonClicked): string
+    {
+        $currentUser = Auth::user();
+        if (
+            $this->isEdit &&
+            $this->loanApplication instanceof LoanApplication &&
+            $this->loanApplication->status !== LoanApplication::STATUS_DRAFT &&
+            !$currentUser->hasRole('Admin')
+        ) {
+            return $this->loanApplication->status;
+        }
+        return $isFinalButtonClicked ? LoanApplication::STATUS_PENDING_SUPPORT : LoanApplication::STATUS_DRAFT;
     }
 }

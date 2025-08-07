@@ -1,52 +1,49 @@
 @extends('layouts.email')
 
-@section('title', 'Permohonan Diluluskan')
+@section('title', __('Permohonan Diluluskan'))
 
 @section('content')
     @php
-        $application = $notification->getApplication();
+        $application = $application ?? $notification->getApplication();
         $applicantName = $application->user?->name ?? 'Pemohon';
-        // Removed $isLoanApp check as it will always be a LoanApplication
-        $applicationTypeDisplay = 'Permohonan Pinjaman Peralatan ICT'; // Explicitly set for Loan Applications
+        $applicationTypeDisplay = __('Permohonan Pinjaman Peralatan ICT');
         $applicationId = $application->id ?? 'N/A';
-        $actionUrl = $notification->getActionUrl();
+        $actionUrl = $actionUrl ?? ($notification->getActionUrl() ?? route('loan-applications.show', $applicationId));
     @endphp
 
-    <h4 class="mb-3">Salam Sejahtera, {{ $applicantName }},</h4>
+    <h4 class="mb-3">{{ __('Salam Sejahtera, :name,', ['name' => $applicantName]) }}</h4>
 
     <p>
-        Berita baik! {{ $applicationTypeDisplay }} anda dengan nombor rujukan
-        <strong>#:{{ $applicationId }}</strong> telah <strong>DILULUSKAN</strong>.
+        {{ __('Berita baik! :type anda dengan nombor rujukan :id telah DILULUSKAN.', [
+            'type' => $applicationTypeDisplay,
+            'id' => "#$applicationId"
+        ]) }}
     </p>
 
     <div class="card mt-4">
         <div class="card-header">
-            Butiran Permohonan
+            {{ __('Butiran Permohonan') }}
         </div>
         <div class="card-body">
-            {{-- Now always treat as LoanApplication --}}
-            @php $loanApp = $application; @endphp
-            @if ($loanApp->purpose)
-                <p><strong>Tujuan:</strong><br>{{ $loanApp->purpose }}</p>
+            @if ($application->purpose)
+                <p><strong>{{ __('Tujuan') }}:</strong><br>{{ $application->purpose }}</p>
             @endif
             <p>
-                <strong>Tempoh Pinjaman:</strong><br>
-                Dari {{ $notification->formatDate($loanApp->loan_start_date) }} hingga
-                {{ $notification->formatDate($loanApp->loan_end_date) }}
+                <strong>{{ __('Tempoh Pinjaman') }}:</strong><br>
+                {{ __('Dari') }} {{ $application->loan_start_date?->format('d/m/Y') }} {{ __('hingga') }} {{ $application->loan_end_date?->format('d/m/Y') }}
             </p>
             <hr>
             <p class="mt-3">
-                Sila berhubung dengan pegawai berkaitan di Bahagian Pengurusan Maklumat (BPM) untuk urusan pengambilan
-                peralatan.
+                {{ __('Sila berhubung dengan pegawai berkaitan di Bahagian Pengurusan Maklumat (BPM) untuk urusan pengambilan peralatan.') }}
             </p>
         </div>
     </div>
 
-    @if ($actionUrl !== '#')
+    @if ($actionUrl && $actionUrl !== '#')
         <div class="text-center mt-4">
-            <a href="{{ $actionUrl }}" class="btn btn-primary">Lihat Permohonan</a>
+            <a href="{{ $actionUrl }}" class="btn btn-primary">{{ __('Lihat Permohonan') }}</a>
         </div>
     @endif
 
-    <p class="mt-4">Sekian, terima kasih.</p>
+    <p class="mt-4">{{ __('Sekian, terima kasih.') }}</p>
 @endsection

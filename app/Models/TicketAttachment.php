@@ -10,6 +10,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * TicketAttachment model for Helpdesk system.
  * Stores files attached to tickets or comments (polymorphic).
+ *
+ * @property int $id
+ * @property string $attachable_type
+ * @property int $attachable_id
+ * @property string $file_path
+ * @property string $file_name
+ * @property int $file_size
+ * @property string $file_type
+ * @property \Illuminate\Support\Carbon|null $deleted_at
  */
 class TicketAttachment extends Model
 {
@@ -32,7 +41,7 @@ class TicketAttachment extends Model
     ];
 
     /**
-     * Get the parent attachable model (ticket or comment)
+     * Polymorphic parent relation: ticket or comment.
      */
     public function attachable(): MorphTo
     {

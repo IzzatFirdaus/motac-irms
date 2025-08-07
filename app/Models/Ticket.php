@@ -10,9 +10,23 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * Ticket model for new Helpdesk system (v4.0).
- * This is the generic ticket model for the Helpdesk module,
- * distinct from the MOTAC-specific HelpdeskTicket (if both exist).
+ * Ticket model for Helpdesk system (v4.0).
+ * Represents a generic helpdesk ticket.
+ *
+ * @property int $id
+ * @property string $subject
+ * @property string $description
+ * @property int $user_id
+ * @property int|null $assigned_to_user_id
+ * @property int $category_id
+ * @property int $priority_id
+ * @property string $status
+ * @property \Illuminate\Support\Carbon|null $due_date
+ * @property string|null $resolution_notes
+ * @property \Illuminate\Support\Carbon|null $closed_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
  */
 class Ticket extends Model
 {
@@ -39,49 +53,31 @@ class Ticket extends Model
         'closed_at' => 'datetime',
     ];
 
-    /**
-     * Belongs to the applicant (user who submitted the ticket)
-     */
     public function applicant(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    /**
-     * The agent assigned to this ticket
-     */
     public function assignedTo(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_to_user_id');
     }
 
-    /**
-     * Ticket's category (e.g., Hardware, Software)
-     */
     public function category(): BelongsTo
     {
         return $this->belongsTo(TicketCategory::class, 'category_id');
     }
 
-    /**
-     * Ticket's priority (e.g., Low, High)
-     */
     public function priority(): BelongsTo
     {
         return $this->belongsTo(TicketPriority::class, 'priority_id');
     }
 
-    /**
-     * Comments on this ticket
-     */
     public function comments(): HasMany
     {
         return $this->hasMany(TicketComment::class, 'ticket_id');
     }
 
-    /**
-     * Attachments for this ticket (polymorphic)
-     */
     public function attachments(): MorphMany
     {
         return $this->morphMany(TicketAttachment::class, 'attachable');

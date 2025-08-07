@@ -1,116 +1,37 @@
 {{-- resources/views/emails/loan-application-issued.blade.php --}}
 <!DOCTYPE html>
 <html>
-<<<<<<< HEAD
-
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ __('Peralatan Pinjaman ICT Telah Dikeluarkan') }}</title>
     <style>
-        body {
-            font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
-            line-height: 1.6;
-            color: #212529;
-            background-color: #f8f9fa;
-            margin: 0;
-            padding: 20px;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        .email-container {
-            max-width: 600px;
-            margin: 20px auto;
-            background-color: #ffffff;
-            padding: 25px 35px;
-            border-radius: 0.375rem;
-            border: 1px solid #dee2e6;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-        }
-
-        h1 {
-            color: #1A202C;
-            margin-top: 0;
-            margin-bottom: 0.75rem;
-            font-size: 22px;
-        }
-
-        p {
-            margin-bottom: 1rem;
-        }
-
-        .footer {
-            margin-top: 25px;
-            font-size: 0.875em;
-            color: #6c757d;
-            border-top: 1px solid #dee2e6;
-            padding-top: 15px;
-            text-align: center;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-            margin-bottom: 15px;
-            font-size: 0.9em;
-        }
-
-        th,
-        td {
-            padding: 0.5rem 0.5rem;
-            text-align: left;
-            border-bottom: 1px solid #dee2e6;
-        }
-
-        th {
-            background-color: #e9ecef;
-            font-weight: bold;
-            color: #495057;
-        }
-
-        .alert-details {
-            margin-top: 20px;
-            padding: 1rem;
-            border: 1px solid transparent;
-            border-radius: 0.375rem;
-            margin-bottom: 1rem;
-        }
-
-        .alert-info {
-            color: #004085;
-            background-color: #cfe2ff;
-            border-color: #b6d4fe;
-        }
-
-        .alert-info p {
-            margin-bottom: 0.5rem;
-        }
-
-        .alert-info strong {
-            display: inline-block;
-            min-width: 150px;
-        }
+        body { font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; line-height: 1.6; color: #212529; background-color: #f8f9fa; margin: 0; padding: 20px; }
+        .email-container { max-width: 600px; margin: 20px auto; background-color: #ffffff; padding: 25px 35px; border-radius: 0.375rem; border: 1px solid #dee2e6; box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);}
+        h1 { color: #1A202C; margin-top: 0; margin-bottom: 0.75rem; font-size: 22px; }
+        .footer { margin-top: 25px; font-size: 0.875em; color: #6c757d; border-top: 1px solid #dee2e6; padding-top: 15px; text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; margin-bottom: 15px; font-size: 0.9em;}
+        th, td { padding: 0.5rem 0.5rem; text-align: left; border-bottom: 1px solid #dee2e6;}
+        th { background-color: #e9ecef; font-weight: bold; color: #495057;}
+        .alert-details { margin-top: 20px; padding: 1rem; border: 1px solid transparent; border-radius: 0.375rem; margin-bottom: 1rem; }
+        .alert-info { color: #004085; background-color: #cfe2ff; border-color: #b6d4fe; }
+        .alert-info p { margin-bottom: 0.5rem; }
+        .alert-info strong { display: inline-block; min-width: 150px; }
     </style>
 </head>
-
 <body>
     <div class="email-container">
         @include('emails._partials.email-header', [
             'logoUrl' => secure_asset('assets/img/logo/motac_logo_email.png'),
         ])
-
         <h1>{{ __('Notifikasi Pengeluaran Peralatan Pinjaman ICT') }}</h1>
         <p>{{ __('Salam sejahtera') }} {{ $loanApplication->user->name ?? __('Pemohon') }},</p>
         <p>{{ __('Merujuk kepada permohonan Pinjaman Peralatan ICT anda dengan nombor rujukan') }}
             <strong>#{{ $loanApplication->id }}</strong>.</p>
         <p>{{ __('Sukacita dimaklumkan bahawa peralatan yang diluluskan untuk permohonan anda telah') }}
             <strong>{{ __('Dikeluarkan') }}</strong>.</p>
-
         <div class="alert-details alert-info">
             <p style="margin-top:0;"><strong>{{ __('Butiran Peralatan yang Dikeluarkan') }}:</strong></p>
-            {{-- Use the $issueTransactions variable passed from the Mailable --}}
             @if (isset($issueTransactions) && $issueTransactions->isNotEmpty())
                 <table>
                     <thead>
@@ -123,7 +44,6 @@
                     <tbody>
                         @foreach ($issueTransactions as $transaction)
                             @foreach ($transaction->loanTransactionItems as $loanItem)
-                                {{-- Iterate through items in each transaction --}}
                                 <tr>
                                     <td>
                                         {{ $loanItem->equipment->asset_type_name ?? 'N/A' }} -
@@ -133,77 +53,19 @@
                                     </td>
                                     <td>
                                         @php
-                                            $accessories =
-                                                json_decode($transaction->accessories_checklist_on_issue, true) ?? [];
+                                            $accessories = json_decode($transaction->accessories_checklist_on_issue, true) ?? [];
                                             echo !empty($accessories)
                                                 ? implode(', ', array_keys(array_filter($accessories)))
                                                 : '-';
                                         @endphp
                                     </td>
-                                    <td>{{ $transaction->transaction_date?->translatedFormat(config('app.datetime_format_my', 'd/m/Y H:i A')) ?? 'N/A' }}
-                                    </td>
+                                    <td>{{ $transaction->transaction_date?->translatedFormat(config('app.datetime_format_my', 'd/m/Y H:i A')) ?? 'N/A' }}</td>
                                 </tr>
                             @endforeach
-=======
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Peralatan Pinjaman ICT Telah Dikeluarkan</title>
-    <style>
-        body { font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; line-height: 1.6; color: #212529; background-color: #f8f9fa; margin: 0; padding: 20px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-        .email-container { max-width: 600px; margin: 20px auto; background-color: #ffffff; padding: 25px 35px; border-radius: 0.375rem; border: 1px solid #dee2e6; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); }
-        h1 { color: #1A202C; margin-top: 0; margin-bottom: 0.75rem; font-size: 24px; }
-        p { margin-bottom: 1rem; }
-        .footer { margin-top: 25px; font-size: 0.875em; color: #6c757d; border-top: 1px solid #dee2e6; padding-top: 15px; text-align: center; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; margin-bottom: 15px; }
-        th, td { padding: 0.5rem 0.5rem; text-align: left; border-bottom: 1px solid #dee2e6; }
-        th { background-color: #f8f9fa; font-weight: bold; color: #495057; }
-        .alert-details { margin-top: 20px; padding: 1rem; border: 1px solid transparent; border-radius: 0.375rem; margin-bottom: 1rem; }
-        .alert-info { color: #055160; background-color: #cff4fc; border-color: #9eeaf9; }
-        /* Optional: Add button styles if you plan to include a button later */
-    </style>
-</head>
-<body>
-    <div class="email-container">
-        <h1>Notifikasi Pengeluaran Peralatan Pinjaman ICT</h1>
-        <p>Salam sejahtera {{ $loanApplication->user->name ?? 'Pemohon' }},</p>
-        <p>Merujuk kepada permohonan Pinjaman Peralatan ICT anda dengan nombor rujukan <strong>#{{ $loanApplication->id }}</strong>.</p>
-        <p>Sukacita dimaklumkan bahawa peralatan yang diluluskan untuk permohonan anda telah <strong>Dikeluarkan</strong>.</p>
-
-        <div class="alert-details alert-info">
-            <p style="margin-top:0;"><strong>Butiran Peralatan yang Dikeluarkan:</strong></p>
-            @if ($loanApplication->transactions->where('type', \App\Models\LoanTransaction::TYPE_ISSUE)->isNotEmpty())
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Peralatan (Tag ID)</th>
-                            <th>Aksesori Dikeluarkan</th>
-                            <th>Tarikh Dikeluarkan</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($loanApplication->transactions->where('type', \App\Models\LoanTransaction::TYPE_ISSUE) as $transaction)
-                            <tr>
-                                <td>
-                                    {{ $transaction->loanTransactionItems->first()->equipment->asset_type_name ?? 'N/A' }} -
-                                    {{ $transaction->loanTransactionItems->first()->equipment->brand ?? 'N/A' }}
-                                    {{ $transaction->loanTransactionItems->first()->equipment->model ?? 'N/A' }}
-                                    (Tag: {{ $transaction->loanTransactionItems->first()->equipment->tag_id ?? 'N/A' }})
-                                </td>
-                                <td>
-                                    @php
-                                        $accessories = json_decode($transaction->accessories_checklist_on_issue, true) ?? [];
-                                        echo !empty($accessories) ? implode(', ', array_keys(array_filter($accessories))) : '-';
-                                    @endphp
-                                </td>
-                                <td>{{ $transaction->transaction_date?->format(config('app.datetime_format_my','d/m/Y H:i A')) ?? 'N/A' }}</td>
-                            </tr>
->>>>>>> b3ca845 (code additions and edits)
                         @endforeach
                     </tbody>
                 </table>
             @else
-<<<<<<< HEAD
                 <p>{{ __('Tiada butiran peralatan dikeluarkan direkodkan untuk permohonan ini.') }}</p>
             @endif
             <p style="margin-top: 1rem; margin-bottom:0;">
@@ -211,38 +73,16 @@
                 <strong>{{ $loanApplication->loan_end_date?->translatedFormat(config('app.date_format_my', 'd/m/Y')) ?? 'N/A' }}</strong>.
             </p>
         </div>
-
-        <p>{{ __('Jika anda mempunyai sebarang pertanyaan mengenai peralatan yang dikeluarkan, sila hubungi Bahagian Pengurusan Maklumat (BPM).') }}
-        </p>
+        <p>{{ __('Jika anda mempunyai sebarang pertanyaan mengenai peralatan yang dikeluarkan, sila hubungi Bahagian Pengurusan Maklumat (BPM).') }}</p>
         <p>{{ __('Sekian, terima kasih.') }}</p>
         <p>{{ __('Yang menjalankan amanah,') }}<br>
             {{ __('Pasukan Pentadbir Sistem') }}<br>
             {{ __('Bahagian Pengurusan Maklumat (BPM)') }}<br>
             {{ __('Kementerian Pelancongan, Seni dan Budaya Malaysia') }}</p>
-
         <div class="footer">
             <p>{{ __('Ini adalah e-mel janaan komputer. Sila jangan balas e-mel ini.') }}</p>
-            <p>&copy; {{ date('Y') }} {{ __('Kementerian Pelancongan, Seni dan Budaya Malaysia') }}.
-                {{ __('Hak Cipta Terpelihara.') }}</p>
+            <p>&copy; {{ date('Y') }} {{ __('Kementerian Pelancongan, Seni dan Budaya Malaysia') }}. {{ __('Hak Cipta Terpelihara.') }}</p>
         </div>
     </div>
 </body>
-
-=======
-                <p>Tiada butiran peralatan dikeluarkan direkodkan untuk permohonan ini.</p>
-            @endif
-            <p style="margin-top: 1rem; margin-bottom:0;">Sila pastikan peralatan dipulangkan pada atau sebelum tarikh jangkaan pulangan: <strong>{{ $loanApplication->loan_end_date?->format(config('app.date_format_my','d/m/Y')) ?? 'N/A' }}</strong>.</p>
-        </div>
-
-        <p>Jika anda mempunyai sebarang pertanyaan mengenai peralatan yang dikeluarkan, sila hubungi bahagian BPM ICT.</p>
-        <p>Terima kasih atas kerjasama anda.</p>
-        <p>Yang benar,</p>
-        <p>Pasukan BPM ICT MOTAC</p>
-        <div class="footer">
-            <p>Ini adalah e-mel automatik, sila jangan balas.</p>
-            <p>&copy; {{ date('Y') }} MOTAC. Hak Cipta Terpelihara.</p>
-        </div>
-    </div>
-</body>
->>>>>>> b3ca845 (code additions and edits)
 </html>

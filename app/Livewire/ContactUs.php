@@ -5,12 +5,7 @@ namespace App\Livewire;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
-/**
- * ContactUs Livewire Component
- *
- * Renders the "Hubungi Kami" (Contact Us) page view.
- * In the future, could be extended to handle direct message/contact forms.
- */
+// ContactUs component - renders the contact-us page view
 class ContactUs extends Component
 {
     /**

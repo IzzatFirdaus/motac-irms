@@ -4,27 +4,25 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Creates the 'users' table for authentication.
+ * Standard Laravel structure, extended by other migrations for custom columns.
+ */
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table): void {
             $table->id();
-            $table->string('name'); // Standard Laravel name field (can be username or simple display)
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->rememberToken();
-            $table->timestamps();
+            $table->string('name')->comment('Display name or username');
+            $table->string('email')->unique()->comment('User login email');
+            $table->timestamp('email_verified_at')->nullable()->comment('When the email was verified');
+            $table->string('password')->comment('Hashed password');
+            $table->rememberToken()->comment('Token for "remember me" functionality');
+            $table->timestamps(); // created_at, updated_at
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('users');

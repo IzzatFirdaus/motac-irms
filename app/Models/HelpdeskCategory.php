@@ -10,6 +10,16 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * HelpdeskCategory Model.
+ *
+ * Represents categories for helpdesk tickets, such as Hardware, Software, etc.
+ *
+ * @property int $id
+ * @property string $name
+ * @property string|null $description
+ * @property bool $is_active
+ */
 class HelpdeskCategory extends Model
 {
     use HasFactory, CreatedUpdatedDeletedBy, SoftDeletes;
@@ -17,14 +27,9 @@ class HelpdeskCategory extends Model
     protected $fillable = [
         'name',
         'description',
-        'is_active', // Added as per the plan
+        'is_active',
     ];
 
-    /**
-     * Set default attributes for the model.
-     * Ensure 'is_active' is true by default if not set.
-     * You might also consider setting this in a migration or factory.
-     */
     protected $attributes = [
         'is_active' => true,
     ];

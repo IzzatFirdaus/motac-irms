@@ -8,22 +8,34 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Carbon;
 
+/**
+ * HelpdeskTicket Model.
+ *
+ * Main ticket model for the Helpdesk module.
+ *
+ * @property int $id
+ * @property string $title
+ * @property string $description
+ * @property int $category_id
+ * @property string $status
+ * @property int $priority_id
+ * @property int $user_id
+ * @property int|null $assigned_to_user_id
+ * @property \Illuminate\Support\Carbon|null $closed_at
+ * @property string|null $resolution_notes
+ * @property \Illuminate\Support\Carbon|null $sla_due_at
+ */
 class HelpdeskTicket extends Model
 {
     use HasFactory, CreatedUpdatedDeletedBy, SoftDeletes;
 
-    // Define status constants
     public const STATUS_OPEN = 'open';
     public const STATUS_IN_PROGRESS = 'in_progress';
     public const STATUS_RESOLVED = 'resolved';
     public const STATUS_CLOSED = 'closed';
-    // Add other statuses as needed based on your system design
 
-    // Status options for use in factories and UI
     public const STATUS_OPTIONS = [
         self::STATUS_OPEN => 'Open',
         self::STATUS_IN_PROGRESS => 'In Progress',

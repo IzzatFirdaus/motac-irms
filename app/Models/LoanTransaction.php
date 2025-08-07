@@ -13,16 +13,40 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
+/**
+ * LoanTransaction Model.
+ *
+ * Represents an equipment issue or return record for a loan application.
+ *
+ * @property int $id
+ * @property int $loan_application_id
+ * @property string $type
+ * @property \Illuminate\Support\Carbon|null $transaction_date
+ * @property int|null $issuing_officer_id
+ * @property int|null $receiving_officer_id
+ * @property array|null $accessories_checklist_on_issue
+ * @property string|null $issue_notes
+ * @property \Illuminate\Support\Carbon|null $issue_timestamp
+ * @property int|null $returning_officer_id
+ * @property int|null $return_accepting_officer_id
+ * @property array|null $accessories_checklist_on_return
+ * @property string|null $return_notes
+ * @property \Illuminate\Support\Carbon|null $return_timestamp
+ * @property int|null $related_transaction_id
+ * @property string $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ */
 class LoanTransaction extends Model
 {
-    use Blameable;
-    use HasFactory;
-    use SoftDeletes;
+    use Blameable, HasFactory, SoftDeletes;
 
-    // --- CONSTANTS ---
+    // Transaction types
     public const TYPE_ISSUE = 'issue';
     public const TYPE_RETURN = 'return';
 
+    // Status constants
     public const STATUS_PENDING = 'pending';
     public const STATUS_ISSUED = 'issued';
     public const STATUS_RETURNED = 'returned';
@@ -67,7 +91,8 @@ class LoanTransaction extends Model
         return LoanTransactionFactory::new();
     }
 
-    // --- RELATIONSHIPS ---
+    // Relationships
+
     public function loanApplication(): BelongsTo
     {
         return $this->belongsTo(LoanApplication::class, 'loan_application_id');
@@ -108,7 +133,8 @@ class LoanTransaction extends Model
         return $this->belongsTo(LoanTransaction::class, 'related_transaction_id');
     }
 
-    // --- ACCESSORS ---
+    // Accessors
+
     public function getTypeLabelAttribute(): string
     {
         return self::getTypeOptions()[$this->type] ?? Str::title(str_replace('_', ' ', $this->type));
@@ -145,7 +171,6 @@ class LoanTransaction extends Model
         if (! $this->relationLoaded('loanTransactionItems')) {
             $this->load('loanTransactionItems.equipment:id,brand,model');
         }
-
         if ($this->loanTransactionItems->isNotEmpty()) {
             $firstItem = $this->loanTransactionItems->first();
             if ($firstItem?->equipment) {
@@ -164,22 +189,10 @@ class LoanTransaction extends Model
         return (int) $this->loanTransactionItems()->sum('quantity_transacted');
     }
 
-    // --- STATIC HELPERS ---
+    // Static helper methods
 
     /**
-     * Returns the allowed transaction types for use in factories/seeders. (RAW values for enum)
-     * Use this in factories/seeder logic where you need the list of allowed 'type' values.
-     */
-    public static function getTypesOptions(): array
-    {
-        return [
-            self::TYPE_ISSUE,
-            self::TYPE_RETURN
-        ];
-    }
-
-    /**
-     * Returns a translatable array of transaction types (for labels in UI).
+     * Transaction type options for dropdowns.
      */
     public static function getTypeOptions(): array
     {
@@ -190,7 +203,7 @@ class LoanTransaction extends Model
     }
 
     /**
-     * Returns a translatable array of transaction statuses (for labels in UI).
+     * Transaction status options for dropdowns.
      */
     public static function getStatusOptions(): array
     {
@@ -207,6 +220,9 @@ class LoanTransaction extends Model
         ];
     }
 
+    /**
+     * List of all valid statuses.
+     */
     public static function getStatusesList(): array
     {
         return [
@@ -221,23 +237,8 @@ class LoanTransaction extends Model
         ];
     }
 
-    /**
-     * Returns the default relations to be loaded for this model.
-     */
-    public static function getDefinedDefaultRelationsStatic(): array
-    {
-        return [
-            'loanApplication.user:id,name',
-            'loanTransactionItems.equipment:id,brand,model,tag_id',
-            'issuingOfficer:id,name',
-            'receivingOfficer:id,name',
-            'returningOfficer:id,name',
-            'returnAcceptingOfficer:id,name',
-            'relatedIssueTransaction',
-        ];
-    }
+    // Helper methods
 
-    // --- HELPER METHODS ---
     public function isIssue(): bool
     {
         return $this->type === self::TYPE_ISSUE;
@@ -248,23 +249,26 @@ class LoanTransaction extends Model
         return $this->type === self::TYPE_RETURN;
     }
 
+    /**
+     * Update parent LoanApplication status after this transaction.
+     */
     public function updateParentLoanApplicationStatus(): void
     {
-        // Call the update method on the parent loan application if available.
         if ($this->loanApplication && method_exists($this->loanApplication, 'updateOverallStatusAfterTransaction')) {
             $this->loanApplication->updateOverallStatusAfterTransaction();
         }
     }
 
+    /**
+     * Returns true if this transaction is fully closed/returned.
+     */
     public function isFullyClosedOrReturned(): bool
     {
-        // Checks if this transaction (issue type) has been fully returned/closed
         if (!$this->isIssue()) {
             return true;
         }
 
         $totalQuantityIssued = $this->loanTransactionItems()->sum('quantity_transacted');
-
         if ($totalQuantityIssued <= 0) {
             return true;
         }
@@ -274,7 +278,6 @@ class LoanTransaction extends Model
             ->pluck('id');
 
         $totalQuantityReturned = LoanTransactionItem::whereIn('loan_transaction_id', $returnTransactionIds)->sum('quantity_transacted');
-
         return $totalQuantityReturned >= $totalQuantityIssued;
     }
 }
