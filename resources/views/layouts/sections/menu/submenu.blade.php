@@ -1,5 +1,6 @@
 {{-- resources/views/layouts/sections/menu/submenu.blade.php --}}
 {{-- This partial expects $menu (the array of submenu items), $role (current user's role), $configData, and $currentRouteName to be passed to it --}}
+
 <ul class="menu-sub" role="menu">
     @if (isset($menu) && is_array($menu))
         @foreach ($menu as $submenuItem)
@@ -11,31 +12,31 @@
                 $canViewSubmenuItem = false;
                 if ($role === 'Admin') {
                     // $role is the current user's role passed from the parent
-    $canViewSubmenuItem = true;
-} elseif (isset($submenuItem->role)) {
-    $canViewSubmenuItem = in_array($role, (array) $submenuItem->role);
-} else {
-    // Default visibility for submenu items without a specific role: visible if user is authenticated
-    $canViewSubmenuItem = Auth::check();
-}
+                    $canViewSubmenuItem = true;
+                } elseif (isset($submenuItem->role)) {
+                    $canViewSubmenuItem = in_array($role, (array) $submenuItem->role);
+                } else {
+                    // Default visibility for submenu items without a specific role: visible if user is authenticated
+                    $canViewSubmenuItem = Auth::check();
+                }
 
-// Active state determination
-$subActiveCheck = false;
-if (
-    isset($currentRouteName) &&
-    isset($submenuItem->routeName) &&
-    $currentRouteName === $submenuItem->routeName
-) {
-    $subActiveCheck = true;
-} elseif (
-    isset($currentRouteName) &&
-    isset($submenuItem->routeNamePrefix) &&
-    str_starts_with($currentRouteName, $submenuItem->routeNamePrefix)
-) {
-    $subActiveCheck = true;
-}
+                // Active state determination for submenu
+                $subActiveCheck = false;
+                if (
+                    isset($currentRouteName) &&
+                    isset($submenuItem->routeName) &&
+                    $currentRouteName === $submenuItem->routeName
+                ) {
+                    $subActiveCheck = true;
+                } elseif (
+                    isset($currentRouteName) &&
+                    isset($submenuItem->routeNamePrefix) &&
+                    str_starts_with($currentRouteName, $submenuItem->routeNamePrefix)
+                ) {
+                    $subActiveCheck = true;
+                }
 
-// Check if there's a nested submenu
+                // Check if there's a nested submenu
                 $subHasSubmenu =
                     isset($submenuItem->submenu) && is_array($submenuItem->submenu) && count($submenuItem->submenu) > 0;
             @endphp
@@ -47,7 +48,7 @@ if (
                         @if ($subHasSubmenu) data-bs-toggle="collapse" role="button" aria-expanded="{{ $subActiveCheck ? 'true' : 'false' }}" @endif>
 
                         @isset($submenuItem->icon)
-                            {{-- Assuming Bootstrap icons, where $submenuItem->icon is just the name like 'envelope-paper-fill' --}}
+                            {{-- Bootstrap icons, where $submenuItem->icon is just the name like 'envelope-paper-fill' --}}
                             <i class="menu-icon bi bi-{{ $submenuItem->icon }}"></i>
                         @endisset
 

@@ -1,4 +1,8 @@
-{{-- Recursive partial for menu/submenus. Expects: $menuItems, $role, $configData, $currentRouteName --}}
+{{-- resources/views/layouts/sections/menu/submenu-partial.blade.php --}}
+{{-- Recursive partial for menu and submenus.
+    Expects: $menuItems, $role, $configData, $currentRouteName.
+--}}
+
 @foreach ($menuItems as $menu)
     @php
         // Convert to object for property access

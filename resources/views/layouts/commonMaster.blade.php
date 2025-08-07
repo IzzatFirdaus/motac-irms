@@ -1,4 +1,8 @@
 {{-- resources/views/layouts/commonMaster.blade.php --}}
+{{-- This is the root master layout for all MOTAC system pages. It sets up the HTML, head, and body, and includes theme styles, scripts, and accessibility features.
+    No filename update as per convention; code updated with extra documentation comments.
+--}}
+
 <!DOCTYPE html>
 
 @php
@@ -42,7 +46,6 @@
     {{-- == END: UNIFIED THEME MANAGEMENT SCRIPT == --}}
     {{-- =================================================================================== --}}
 
-
     {{-- Include all common stylesheets --}}
     @include('layouts.sections.styles')
 
@@ -51,7 +54,7 @@
 </head>
 
 <body>
-    {{-- Accessibility skip link --}}
+    {{-- Accessibility skip link for screen readers/keyboard navigation --}}
     <a href="#main-content" class="visually-hidden-focusable">{{ __('Langkau ke Kandungan Utama') }}</a>
 
     {{-- The layout-specific content will be injected here --}}

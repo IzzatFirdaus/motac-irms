@@ -1,10 +1,9 @@
 @php
-    // The $illustrationStyleSuffix helps in dynamically loading light/dark mode illustrations.
-    // Ensure that your MOTAC-themed blank layout and assets are correctly configured for this.
+    // The $illustrationStyleSuffix is used for dark/light mode illustrations.
     $illustrationStyleSuffix = isset($configData['myStyle']) ? '-' . $configData['myStyle'] : '';
 @endphp
 
-@extends('layouts/blankLayout') {{-- MOTAC-themed blank layout --}}
+@extends('layouts.layout-blank') {{-- MOTAC-themed blank layout; filename updated for consistency --}}
 
 @section('title', __('503 - Laman Dalam Selenggaraan'))
 
@@ -12,10 +11,8 @@
     <link rel="stylesheet" href="{{ asset('assets/vendor/css/pages/page-misc.css') }}">
     <style>
         .misc-wrapper .display-5 {
-            color: var(--bs-info);
+            color: var(--bs-info); /* Info color for maintenance title */
         }
-
-        /* Example: Info color for maintenance title */
         .motac-error-illustration {
             max-width: 350px;
         }
@@ -33,6 +30,7 @@
                 {{ __('Harap maaf, sistem kami sedang dalam selenggaraan buat sementara waktu. Kami akan kembali secepat mungkin. Terima kasih atas kesabaran anda!') }}
             </p>
             <div>
+                {{-- Show logout button if user is authenticated --}}
                 @auth
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
@@ -42,23 +40,22 @@
                     </form>
                 @endauth
             </div>
-
             <div class="mt-4 pt-2">
-                {{-- ACTION REQUIRED: Replace with MOTAC-appropriate "Maintenance" illustration --}}
-                {{-- <img src="{{ asset('assets/img/illustrations/motac-maintenance' . $illustrationStyleSuffix . '.png') }}" --}}
-                {{-- Placeholder path --}} {{-- alt="{{ __('Ilustrasi Laman Dalam Selenggaraan') }}" width="300" --}}
-                {{-- class="img-fluid motac-error-illustration"> --}}
+                {{-- Add your own MOTAC-branded "Maintenance" illustration if available --}}
+                {{-- <img src="{{ asset('assets/img/illustrations/motac-maintenance' . $illustrationStyleSuffix . '.png') }}"
+                    alt="{{ __('Ilustrasi Laman Dalam Selenggaraan') }}" width="300"
+                    class="img-fluid motac-error-illustration"> --}}
             </div>
         </div>
     </div>
     {{--
-<div class="container-fluid misc-bg-wrapper misc-under-maintenance-bg-wrapper">
-  <img src="{{ asset('assets/img/illustrations/bg-shape-image' . $illustrationStyleSuffix . '.png') }}"
-       alt="{{ __('Corak Latar Belakang Hiasan') }}"
-       data-app-light-img="illustrations/bg-shape-image-light.png"
-       data-app-dark-img="illustrations/bg-shape-image-dark.png">
-</div>
---}}
+    <div class="container-fluid misc-bg-wrapper misc-under-maintenance-bg-wrapper">
+      <img src="{{ asset('assets/img/illustrations/bg-shape-image' . $illustrationStyleSuffix . '.png') }}"
+           alt="{{ __('Corak Latar Belakang Hiasan') }}"
+           data-app-light-img="illustrations/bg-shape-image-light.png"
+           data-app-dark-img="illustrations/bg-shape-image-dark.png">
+    </div>
+    --}}
 @endsection
 
 {{--
@@ -67,6 +64,6 @@
     // Countdown timer script can be kept if specific maintenance window is communicated.
     // Otherwise, a static message is usually sufficient.
     // If using, ensure totalMilliseconds is correctly set.
-</script>
+  </script>
 @endpush
 --}}
