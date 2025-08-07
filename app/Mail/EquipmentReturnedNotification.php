@@ -12,64 +12,44 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
 
+/**
+ * Mailable for notifying the applicant when equipment is returned and recorded.
+ */
 class EquipmentReturnedNotification extends Mailable
 {
-    use Queueable;
-    use SerializesModels;
+    use Queueable, SerializesModels;
 
     public LoanApplication $loanApplication;
-
     public LoanTransaction $returnTransaction;
-
     public User $notifiable;
 
-    /**
-     * Create a new message instance.
-     */
     public function __construct(LoanApplication $loanApplication, LoanTransaction $returnTransaction, User $notifiable)
     {
         $this->loanApplication = $loanApplication->loadMissing('user');
-        $this->returnTransaction = $returnTransaction->loadMissing(['loanTransactionItems.equipment']);
+        $this->returnTransaction = $returnTransaction->loadMissing(['loanTransactionItems.equipment', 'returnAcceptingOfficer']);
         $this->notifiable = $notifiable;
     }
 
-    /**
-     * Get the message envelope.
-     */
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: __('Peralatan Pinjaman Dipulangkan (Permohonan #:id)', ['id' => $this->loanApplication->id ?? 'N/A'])
+            subject: __('Peralatan Pinjaman Dipulangkan (Permohonan #:id)', ['id' => $this->loanApplication->id ?? 'N/A']),
+            to: [$this->notifiable->email]
         );
     }
 
-    /**
-     * Get the message content definition.
-     */
     public function content(): Content
     {
-        // We will create this Blade view next
         return new Content(
             view: 'emails.equipment-returned',
             with: [
-                'applicantName' => $this->loanApplication->user?->name ?? $this->notifiable->name,
-                'applicationId' => $this->loanApplication->id ?? 'N/A',
-                'transactionDate' => $this->returnTransaction->transaction_date instanceof Carbon
-                  ? $this->returnTransaction->transaction_date->format(config('app.datetime_format_my', 'd/m/Y H:i A'))
-                  : __('tarikh tidak direkodkan'),
-                'returnedItems' => $this->returnTransaction->loanTransactionItems,
-                'returnNotes' => $this->returnTransaction->return_notes,
-                'applicationStatus' => $this->loanApplication->status,
-                'applicationUrl' => route('resource-management.my-applications.loan.show', ['loan_application' => $this->loanApplication->id]),
+                'loanApplication' => $this->loanApplication,
+                'returnTransaction' => $this->returnTransaction,
+                'actionUrl' => route('loan-applications.show', $this->loanApplication->id),
             ]
         );
     }
 
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
     public function attachments(): array
     {
         return [];

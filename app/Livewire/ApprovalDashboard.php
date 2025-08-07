@@ -30,7 +30,7 @@ class ApprovalDashboard extends Component
 
     public string $filterType = 'all';
     public string $searchTerm = '';
-    public string $filterStatus = 'pending';
+    public string $filterStatus = Approval::STATUS_PENDING;
     public bool $showApprovalActionModal = false;
     public ?Approval $selectedApproval = null;
     public string $decision = '';
@@ -40,17 +40,13 @@ class ApprovalDashboard extends Component
 
     protected ApprovalService $approvalService;
 
-    /**
-     * Dependency injection for ApprovalService
-     */
+    // Inject ApprovalService
     public function boot(ApprovalService $approvalService): void
     {
         $this->approvalService = $approvalService;
     }
 
-    /**
-     * Validation rules for modal
-     */
+    // Validation rules for the approval action modal
     protected function rules(): array
     {
         return [
@@ -74,11 +70,14 @@ class ApprovalDashboard extends Component
         'comments.max' => 'Komen tidak boleh melebihi 1000 aksara.',
     ];
 
+    /**
+     * Computed property to get approval tasks for the current user.
+     */
     #[Computed]
     public function getApprovalTasksProperty(): LengthAwarePaginator
     {
         $user = Auth::user();
-        if (!$user || !$user->can('view_approval_tasks')) {
+        if (!$user || !$user->can('view_approvals')) {
             return new LengthAwarePaginator([], 0, 10);
         }
 
@@ -91,23 +90,29 @@ class ApprovalDashboard extends Component
                 },
             ]);
 
+        // Filter by status
         if ($this->filterStatus !== 'all') {
             $query->where('status', $this->filterStatus);
         }
+
+        // Filter by application type
         if ($this->filterType !== 'all') {
             $query->where('approvable_type', $this->filterType);
         }
+
+        // Search
         if ($this->searchTerm !== '') {
             $searchTerm = '%' . trim($this->searchTerm) . '%';
             $query->where(function (Builder $q) use ($searchTerm): void {
                 $q->whereHasMorph('approvable', [LoanApplication::class], function (Builder $morphQuery) use ($searchTerm): void {
-                    $morphQuery->where('id', 'like', $searchTerm)
+                    $morphQuery->where('application_no', 'like', $searchTerm)
                         ->orWhereHas('user', function (Builder $userQuery) use ($searchTerm): void {
                             $userQuery->where('name', 'like', $searchTerm);
                         });
                 });
             });
         }
+
         $query->orderBy('created_at', 'desc');
         return $query->paginate(10);
     }
@@ -132,6 +137,9 @@ class ApprovalDashboard extends Component
         ];
     }
 
+    /**
+     * Show the modal for approval action.
+     */
     public function openApprovalActionModal(int $approvalId): void
     {
         try {
@@ -150,23 +158,19 @@ class ApprovalDashboard extends Component
             $this->showApprovalActionModal = true;
             $this->dispatch('openApprovalActionModalEvent');
         } catch (AuthorizationException $e) {
-            Log::warning('ApprovalDashboard: Authorization failed for openApprovalActionModal.', [
-                'approval_id' => $approvalId,
-                'user_id' => Auth::id(),
-                'error' => $e->getMessage()
-            ]);
+            Log::warning('ApprovalDashboard: Authorization failed for openApprovalActionModal.', ['approval_id' => $approvalId, 'user_id' => Auth::id(), 'error' => $e->getMessage()]);
             $this->dispatch('toastr', type: 'error', message: __('Anda tidak dibenarkan untuk melihat butiran kelulusan ini.'));
             $this->closeModal();
         } catch (\Exception $e) {
-            Log::error('ApprovalDashboard: Error showing action modal.', [
-                'approval_id' => $approvalId,
-                'error' => $e->getMessage()
-            ]);
+            Log::error('ApprovalDashboard: Error showing action modal.', ['approval_id' => $approvalId, 'error' => $e->getMessage()]);
             $this->dispatch('toastr', type: 'error', message: __('Gagal memaparkan modal keputusan.'));
             $this->closeModal();
         }
     }
 
+    /**
+     * Handles the submit action from the approval modal.
+     */
     public function submitDecision(): void
     {
         $this->validate();
@@ -223,13 +227,6 @@ class ApprovalDashboard extends Component
     public function refreshDataEvent(): void
     {
         unset($this->approvalTasks);
-    }
-
-    public function resetFilters(): void
-    {
-        $this->filterType = 'all';
-        $this->filterStatus = 'pending';
-        $this->searchTerm = '';
     }
 
     /**

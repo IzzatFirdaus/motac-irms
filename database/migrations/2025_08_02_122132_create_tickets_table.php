@@ -4,19 +4,19 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Creates the 'tickets' table for generic helpdesk/ticketing.
+ */
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('tickets', function (Blueprint $table) {
+        Schema::create('tickets', function (Blueprint $table): void {
             $table->id();
             $table->string('subject');
             $table->text('description');
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade')->comment('The user who reported/created the ticket');
-            $table->foreignId('assigned_to_user_id')->nullable()->constrained('users')->onDelete('set null')->comment('The agent assigned to the ticket');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade')->comment('User reporting/creating ticket');
+            $table->foreignId('assigned_to_user_id')->nullable()->constrained('users')->onDelete('set null')->comment('Assigned agent');
             $table->foreignId('category_id')->constrained('ticket_categories')->onDelete('restrict');
             $table->foreignId('priority_id')->constrained('ticket_priorities')->onDelete('restrict');
             $table->enum('status', ['open', 'in_progress', 'pending_user_feedback', 'resolved', 'closed', 'reopened'])->default('open');
@@ -31,9 +31,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('tickets');

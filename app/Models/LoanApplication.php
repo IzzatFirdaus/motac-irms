@@ -15,13 +15,42 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
+/**
+ * LoanApplication Model.
+ *
+ * Represents a loan application for ICT equipment.
+ *
+ * @property int $id
+ * @property int $user_id
+ * @property int|null $responsible_officer_id
+ * @property int|null $supporting_officer_id
+ * @property string $purpose
+ * @property string|null $location
+ * @property string|null $return_location
+ * @property \Illuminate\Support\Carbon|null $loan_start_date
+ * @property \Illuminate\Support\Carbon|null $loan_end_date
+ * @property string $status
+ * @property string|null $rejection_reason
+ * @property \Illuminate\Support\Carbon|null $applicant_confirmation_timestamp
+ * @property \Illuminate\Support\Carbon|null $submitted_at
+ * @property int|null $approved_by
+ * @property \Illuminate\Support\Carbon|null $approved_at
+ * @property int|null $rejected_by
+ * @property \Illuminate\Support\Carbon|null $rejected_at
+ * @property int|null $cancelled_by
+ * @property \Illuminate\Support\Carbon|null $cancelled_at
+ * @property string|null $admin_notes
+ * @property int|null $current_approval_officer_id
+ * @property string|null $current_approval_stage
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ */
 class LoanApplication extends Model
 {
-    use Blameable;
-    use \Illuminate\Database\Eloquent\Factories\HasFactory;
-    use SoftDeletes;
+    use Blameable, \Illuminate\Database\Eloquent\Factories\HasFactory, SoftDeletes;
 
-    // Added missing STATUS_PROCESSING constant
+    // Loan application status constants for workflow
     public const STATUS_PROCESSING = 'processing';
     public const STATUS_DRAFT = 'draft';
     public const STATUS_PENDING_SUPPORT = 'pending_support';
@@ -70,7 +99,7 @@ class LoanApplication extends Model
         'submitted_at' => 'datetime',
         'approved_at' => 'datetime',
         'rejected_at' => 'datetime',
-        'cancelled_at' => 'datetime'
+        'cancelled_at' => 'datetime',
     ];
 
     protected $attributes = ['status' => self::STATUS_DRAFT];
@@ -79,6 +108,8 @@ class LoanApplication extends Model
     {
         return LoanApplicationFactory::new();
     }
+
+    // Relationships
 
     public function user(): BelongsTo
     {
@@ -135,6 +166,8 @@ class LoanApplication extends Model
         return $this->morphMany(Approval::class, 'approvable');
     }
 
+    // Accessors
+
     public function getStatusLabelAttribute(): string
     {
         return self::getStatusOptions()[$this->status] ?? Str::title(str_replace('_', ' ', $this->status));
@@ -156,7 +189,6 @@ class LoanApplication extends Model
             self::STATUS_CANCELLED => __('loan-applications.statuses.cancelled'),
             self::STATUS_PARTIALLY_RETURNED_PENDING_INSPECTION => __('loan-applications.statuses.partially_returned_pending_inspection'),
             self::STATUS_COMPLETED => __('loan-applications.statuses.completed'),
-            // Added status processing
             self::STATUS_PROCESSING => __('loan-applications.statuses.processing'),
         ];
     }
@@ -167,13 +199,14 @@ class LoanApplication extends Model
             self::STATUS_DRAFT => 'badge bg-secondary-subtle text-secondary-emphasis',
             self::STATUS_PENDING_SUPPORT, self::STATUS_PENDING_APPROVER_REVIEW, self::STATUS_PENDING_BPM_REVIEW => 'badge bg-warning-subtle text-warning-emphasis',
             self::STATUS_APPROVED => 'badge bg-info-subtle text-info-emphasis',
-            self::STATUS_PARTIALLY_ISSUED, self::STATUS_ISSUED => 'badge bg-primary-subtle text-primary-emphasis',
-            self::STATUS_PARTIALLY_RETURNED_PENDING_INSPECTION => 'badge bg-primary-subtle text-primary-emphasis',
+            self::STATUS_PARTIALLY_ISSUED, self::STATUS_ISSUED, self::STATUS_PARTIALLY_RETURNED_PENDING_INSPECTION => 'badge bg-primary-subtle text-primary-emphasis',
             self::STATUS_RETURNED, self::STATUS_COMPLETED => 'badge bg-success-subtle text-success-emphasis',
             self::STATUS_REJECTED, self::STATUS_CANCELLED, self::STATUS_OVERDUE => 'badge bg-danger-subtle text-danger-emphasis',
             default => 'badge bg-dark-subtle text-dark-emphasis',
         };
     }
+
+    // Helper methods
 
     public function isDraft(): bool
     {
@@ -211,6 +244,9 @@ class LoanApplication extends Model
         return false;
     }
 
+    /**
+     * Update overall application status after a transaction (issue/return).
+     */
     public function updateOverallStatusAfterTransaction(): void
     {
         $this->load('loanApplicationItems');
@@ -244,15 +280,23 @@ class LoanApplication extends Model
         }
     }
 
+    /**
+     * Return location to use for returns (fallback to original location).
+     */
     public function getEffectiveReturnLocationAttribute(): ?string
     {
         return $this->return_location ?? $this->location;
     }
 
+    /**
+     * Latest issue transaction (if any).
+     */
     public function getLatestIssueTransactionAttribute(): ?LoanTransaction
     {
         return $this->loanTransactions()->where('type', 'issue')->latest('transaction_date')->first();
     }
+
+    // Scopes
 
     public function scopeActive($query)
     {

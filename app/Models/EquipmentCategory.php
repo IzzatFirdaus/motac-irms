@@ -5,17 +5,16 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Database\Factories\EquipmentCategoryFactory;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-// use Illuminate\Support\Facades\Auth; // Only needed if inline blameable in boot() is used
-
 /**
- * Equipment Category Model.
+ * EquipmentCategory Model.
+ *
+ * Represents a type/category of ICT equipment. Used for organizing equipment and subcategories.
  *
  * @property int $id
  * @property string $name
@@ -27,43 +26,22 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \App\Models\User|null $creator
- * @property-read \App\Models\User|null $deleter
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Equipment> $equipment
  * @property-read int|null $equipment_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\SubCategory> $subCategories
  * @property-read int|null $sub_categories_count
+ * @property-read \App\Models\User|null $creator
  * @property-read \App\Models\User|null $updater
- * @method static Builder<static>|EquipmentCategory active()
- * @method static \Database\Factories\EquipmentCategoryFactory factory($count = null, $state = [])
- * @method static Builder<static>|EquipmentCategory newModelQuery()
- * @method static Builder<static>|EquipmentCategory newQuery()
- * @method static Builder<static>|EquipmentCategory onlyTrashed()
- * @method static Builder<static>|EquipmentCategory query()
- * @method static Builder<static>|EquipmentCategory whereCreatedAt($value)
- * @method static Builder<static>|EquipmentCategory whereCreatedBy($value)
- * @method static Builder<static>|EquipmentCategory whereDeletedAt($value)
- * @method static Builder<static>|EquipmentCategory whereDeletedBy($value)
- * @method static Builder<static>|EquipmentCategory whereDescription($value)
- * @method static Builder<static>|EquipmentCategory whereId($value)
- * @method static Builder<static>|EquipmentCategory whereIsActive($value)
- * @method static Builder<static>|EquipmentCategory whereName($value)
- * @method static Builder<static>|EquipmentCategory whereUpdatedAt($value)
- * @method static Builder<static>|EquipmentCategory whereUpdatedBy($value)
- * @method static Builder<static>|EquipmentCategory withTrashed()
- * @method static Builder<static>|EquipmentCategory withoutTrashed()
- * @mixin \Eloquent
+ * @property-read \App\Models\User|null $deleter
  */
 class EquipmentCategory extends Model
 {
-    use HasFactory;
-    use SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'equipment_categories';
 
     protected $fillable = [
         'name', 'description', 'is_active',
-        // 'created_by', 'updated_by', // Typically handled by BlameableObserver
     ];
 
     protected $casts = [
@@ -77,65 +55,19 @@ class EquipmentCategory extends Model
         'is_active' => true,
     ];
 
-    /*
-    // Commented out assuming global BlameableObserver handles created_by, updated_by, deleted_by.
-    // If not, or for specific override, this can be enabled.
-    protected static function boot(): void
-    {
-        parent::boot();
-        static::creating(function (self $model): void {
-            if (Auth::check()) {
-                $currentUser = Auth::user();
-                if (is_null($model->created_by) && property_exists($model, 'created_by')) {
-                    $model->created_by = $currentUser->id;
-                }
-                if (is_null($model->updated_by) && property_exists($model, 'updated_by')) {
-                    $model->updated_by = $currentUser->id;
-                }
-            }
-        });
-        static::updating(function (self $model): void {
-            if (Auth::check() && property_exists($model, 'updated_by') && !$model->isDirty('updated_by')) {
-                $currentUser = Auth::user();
-                $model->updated_by = $currentUser->id;
-            }
-        });
-        if (in_array(SoftDeletes::class, class_uses_recursive(static::class))) {
-            static::deleting(function (self $model): void {
-                if (Auth::check() && property_exists($model, 'deleted_by') && !$model->isDirty('deleted_by')) {
-                    $currentUser = Auth::user();
-                    $model->deleted_by = $currentUser->id;
-                    $model->saveQuietly();
-                }
-            });
-            static::restoring(function (self $model): void {
-                if (property_exists($model, 'deleted_by')) {
-                    $model->deleted_by = null;
-                }
-                if (Auth::check() && property_exists($model, 'updated_by') && !$model->isDirty('updated_by')) {
-                    $currentUser = Auth::user();
-                    $model->updated_by = $currentUser->id;
-                }
-            });
-        }
-    }
-    */
-
-    protected static function newFactory(): EquipmentCategoryFactory
-    {
-        return EquipmentCategoryFactory::new();
-    }
-
-    /** @return HasMany<Equipment> */
+    /**
+     * Equipment belonging to this category.
+     */
     public function equipment(): HasMany
     {
         return $this->hasMany(Equipment::class, 'equipment_category_id');
     }
 
-    /** @return HasMany<SubCategory> */
+    /**
+     * Subcategories under this equipment category.
+     */
     public function subCategories(): HasMany
     {
-        // Assuming SubCategory model exists and has 'equipment_category_id'
         return $this->hasMany(SubCategory::class, 'equipment_category_id');
     }
 
@@ -154,13 +86,10 @@ class EquipmentCategory extends Model
         return $this->belongsTo(User::class, 'deleted_by');
     }
 
-    public function isActive(): bool
-    {
-        return $this->is_active === true;
-    }
-
-    /** @param Builder<EquipmentCategory> $query */
-    public function scopeActive(Builder $query): Builder
+    /**
+     * Scope: Only active categories.
+     */
+    public function scopeActive($query)
     {
         return $query->where('is_active', true);
     }

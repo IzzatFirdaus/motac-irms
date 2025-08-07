@@ -4,6 +4,9 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Adds the 'event' column to activity_log table for event type tracking.
+ */
 class AddEventColumnToActivityLogTable extends Migration
 {
     public function up(): void

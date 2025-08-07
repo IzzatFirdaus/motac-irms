@@ -3,13 +3,16 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Schema; // For logging
+use Illuminate\Support\Facades\Schema;
 
+/**
+ * Migration for loan_application_items table.
+ * Stores requested/approved/issued/returned quantities for each equipment type in a loan application.
+ */
 return new class extends Migration
 {
     public function up(): void
     {
-        // Define ENUM values for status directly in the migration
         $itemStatuses = [
             'pending_approval',
             'item_approved',
@@ -25,27 +28,17 @@ return new class extends Migration
         Schema::create('loan_application_items', function (Blueprint $table) use ($itemStatuses, $defaultStatus): void {
             $table->id();
             $table->foreignId('loan_application_id')->constrained('loan_applications')->cascadeOnDelete();
-
-            $table->foreignId('equipment_id')
-                ->nullable()
-                ->constrained('equipment')
-                ->nullOnDelete()
-                ->comment('Links to the equipment catalog');
-
+            $table->foreignId('equipment_id')->nullable()->constrained('equipment')->nullOnDelete()->comment('Links to the equipment catalog');
             $table->string('equipment_type')->comment('e.g., Laptop, Projektor, LCD Monitor');
             $table->unsignedInteger('quantity_requested');
             $table->unsignedInteger('quantity_approved')->nullable();
             $table->unsignedInteger('quantity_issued')->default(0);
-            // Revised line: Removed ->after('quantity_issued')
-            $table->unsignedInteger('quantity_returned')->default(0)->comment('Added as per System Design');
-
-            $table->enum('status', $itemStatuses)->default($defaultStatus)->comment('Status of this specific requested item');
+            $table->unsignedInteger('quantity_returned')->default(0)->comment('Returned quantity');
+            $table->enum('status', $itemStatuses)->default($defaultStatus)->comment('Status of this requested item');
             $table->text('notes')->nullable()->comment('Specific requirements or remarks by applicant');
-
             $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('deleted_by')->nullable()->constrained('users')->onDelete('set null');
-
             $table->timestamps();
             $table->softDeletes();
         });
@@ -54,15 +47,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('loan_application_items', function (Blueprint $table): void {
-            $foreignKeysToDrop = ['loan_application_id', 'equipment_id', 'created_by', 'updated_by', 'deleted_by']; // Added 'equipment_id'
+            $foreignKeysToDrop = ['loan_application_id', 'equipment_id', 'created_by', 'updated_by', 'deleted_by'];
             foreach ($foreignKeysToDrop as $key) {
                 if (Schema::hasColumn('loan_application_items', $key)) {
                     try {
-                        // Check if the foreign key exists before trying to drop it
-                        // Note: Laravel's default foreign key naming convention is table_column_foreign
-                        // However, constrained() might use a different one if the column name is complex.
-                        // A more robust check might involve inspecting the schema manager for existing foreign keys.
-                        // For simplicity, we'll assume the default naming or that dropForeign handles non-existent keys gracefully in newer Laravel.
                         $table->dropForeign([$key]);
                     } catch (\Exception $e) {
                         Log::warning(sprintf('Could not drop foreign key for %s on loan_application_items table: ', $key).$e->getMessage());

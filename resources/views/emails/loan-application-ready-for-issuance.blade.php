@@ -1,3 +1,4 @@
+{{-- resources/views/emails/loan-application-ready-for-issuance.blade.php --}}
 <!DOCTYPE html>
 <html lang="ms">
 <head>
@@ -6,7 +7,6 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>@lang('Tindakan Diperlukan: Permohonan Pinjaman Sedia Untuk Pengeluaran')</title>
     <style>
-        /* Basic responsive styles */
         @media screen and (max-width: 600px) {
             .container-table {
                 width: 100% !important;
@@ -71,9 +71,6 @@
                         <hr style="border: 0; border-top: 1px solid #dee2e6; margin: 25px 0;">
 
                         <div style="text-align: center;">
-                            {{-- --- THIS IS THE FIX --- --}}
-                            {{-- The route name in the href has been changed from 'loan-applications.show' to 'loan-applications.issue.form' --}}
-                            {{-- The button text has also been updated for clarity. --}}
                             <a href="{{ route('loan-applications.issue.form', $loanApplication) }}" style="display: inline-block; background-color: #0d6efd; color: #ffffff; padding: 12px 25px; font-size: 16px; font-weight: bold; text-decoration: none; border-radius: 5px;" target="_blank">
                                 @lang('Proses Pengeluaran Peralatan')
                             </a>
@@ -90,6 +87,5 @@
             </td>
         </tr>
     </table>
-
 </body>
 </html>

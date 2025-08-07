@@ -15,6 +15,29 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
+/**
+ * Equipment model for ICT inventory.
+ *
+ * @property int $id
+ * @property string $tag_id
+ * @property string $asset_type
+ * @property string $brand
+ * @property string $model
+ * @property string|null $serial_number
+ * @property \Illuminate\Support\Carbon|null $purchase_date
+ * @property \Illuminate\Support\Carbon|null $warranty_end_date
+ * @property string $status
+ * @property string|null $condition_status
+ * @property int|null $location_id
+ * @property int|null $department_id
+ * @property string|null $notes
+ * @property int|null $created_by
+ * @property int|null $updated_by
+ * @property int|null $deleted_by
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ */
 #[ObservedBy(BlameableObserver::class)]
 class Equipment extends Model
 {
@@ -29,6 +52,7 @@ class Equipment extends Model
         'purchase_date',
         'warranty_end_date',
         'status',
+        'condition_status',
         'location_id',
         'department_id',
         'notes',
@@ -43,10 +67,9 @@ class Equipment extends Model
         'is_active' => 'boolean',
     ];
 
-    // --- ASSET TYPE CONSTANTS ---
+    // Asset type constants and labels
     public const ASSET_TYPE_LAPTOP = 'laptop';
     public const ASSET_TYPE_DESKTOP = 'desktop';
-    public const ASSET_TYPE_DESKTOP_PC = 'desktop_pc';
     public const ASSET_TYPE_MONITOR = 'monitor';
     public const ASSET_TYPE_PRINTER = 'printer';
     public const ASSET_TYPE_PROJECTOR = 'projector';
@@ -58,11 +81,9 @@ class Equipment extends Model
     public const ASSET_TYPE_OTHER = 'other';
     public const ASSET_TYPE_OTHER_ICT = 'other_ict';
 
-    // Define the ASSET_TYPES_LABELS for display purposes
     public static array $ASSET_TYPES_LABELS = [
         self::ASSET_TYPE_LAPTOP => 'Laptop',
         self::ASSET_TYPE_DESKTOP => 'Desktop',
-        self::ASSET_TYPE_DESKTOP_PC => 'Desktop PC',
         self::ASSET_TYPE_MONITOR => 'Monitor',
         self::ASSET_TYPE_PRINTER => 'Pencetak',
         self::ASSET_TYPE_PROJECTOR => 'Projektor',
@@ -75,7 +96,7 @@ class Equipment extends Model
         self::ASSET_TYPE_OTHER_ICT => 'Lain-lain ICT',
     ];
 
-    // --- STATUS CONSTANTS ---
+    // Status constants
     public const STATUS_AVAILABLE = 'available';
     public const STATUS_ON_LOAN = 'on_loan';
     public const STATUS_UNDER_MAINTENANCE = 'under_maintenance';
@@ -85,7 +106,7 @@ class Equipment extends Model
     public const STATUS_DISPOSED = 'disposed';
     public const STATUS_DAMAGED_NEEDS_REPAIR = 'damaged_needs_repair';
 
-    // --- CONDITION STATUS CONSTANTS ---
+    // Condition status constants
     public const CONDITION_NEW = 'new';
     public const CONDITION_GOOD = 'good';
     public const CONDITION_FAIR = 'fair';
@@ -93,19 +114,6 @@ class Equipment extends Model
     public const CONDITION_MAJOR_DAMAGE = 'major_damage';
     public const CONDITION_UNSERVICEABLE = 'unserviceable';
     public const CONDITION_LOST = 'lost';
-
-    // --- ACQUISITION TYPE CONSTANTS ---
-    public const ACQUISITION_TYPE_PURCHASE = 'purchase';
-    public const ACQUISITION_TYPE_LEASE = 'lease';
-    public const ACQUISITION_TYPE_DONATION = 'donation';
-    public const ACQUISITION_TYPE_TRANSFER = 'transfer';
-    public const ACQUISITION_TYPE_OTHER = 'other';
-
-    // --- CLASSIFICATION CONSTANTS ---
-    public const CLASSIFICATION_ASSET = 'asset';
-    public const CLASSIFICATION_INVENTORY = 'inventory';
-    public const CLASSIFICATION_CONSUMABLE = 'consumable';
-    public const CLASSIFICATION_OTHER = 'other';
 
     // Relationships
     public function location(): BelongsTo
@@ -139,19 +147,17 @@ class Equipment extends Model
         return self::getConditionStatusesList()[$this->condition_status] ?? Str::title(str_replace('_', ' ', (string) $this->condition_status));
     }
 
-    // Helper methods
-
     /**
-     * Returns the asset type labels for use in form select options.
-     * This method resolves the "getAssetTypeOptions" error.
-     *
-     * @return array
+     * Asset type options for dropdowns.
      */
     public static function getAssetTypeOptions(): array
     {
         return self::$ASSET_TYPES_LABELS;
     }
 
+    /**
+     * Status options for dropdowns.
+     */
     public static function getStatusOptions(): array
     {
         return [
@@ -166,6 +172,9 @@ class Equipment extends Model
         ];
     }
 
+    /**
+     * Condition status options for dropdowns.
+     */
     public static function getConditionStatusesList(): array
     {
         return [
@@ -179,6 +188,9 @@ class Equipment extends Model
         ];
     }
 
+    /**
+     * Default list of accessories for ICT equipment.
+     */
     public static function getDefaultAccessoriesList(): array
     {
         return [
@@ -194,6 +206,9 @@ class Equipment extends Model
         ];
     }
 
+    /**
+     * Update the physical condition of equipment.
+     */
     public function updatePhysicalCondition(string $newCondition, ?int $actingUserId = null): bool
     {
         $oldCondition = $this->condition_status;
@@ -204,14 +219,11 @@ class Equipment extends Model
         } else {
             Log::error(sprintf('Equipment ID %d: Failed to save physical condition status update.', $this->id), ['old_condition' => $oldCondition, 'new_condition' => $newCondition, 'user_id' => $actingUserId]);
         }
-
         return $saved;
     }
 
     /**
      * Returns a summary count of equipment grouped by status.
-     *
-     * @return array<string, int>
      */
     public static function getStatusSummary(): array
     {
@@ -223,9 +235,7 @@ class Equipment extends Model
     }
 
     /**
-     * Calculates equipment utilization rate (on loan / total) * 100.
-     *
-     * @return float
+     * Calculates utilization rate (on loan / total) * 100.
      */
     public static function getUtilizationRate(): float
     {
@@ -234,7 +244,6 @@ class Equipment extends Model
             $query->where('status', self::STATUS_ON_LOAN)
                 ->orWhere('status', self::STATUS_UNDER_MAINTENANCE);
         })->count();
-
         return $totalEquipment > 0 ? ($onLoanEquipment / $totalEquipment) * 100 : 0.0;
     }
 }

@@ -12,6 +12,50 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
+/**
+ * Approval Model.
+ *
+ * Represents an approval task for a polymorphic "approvable" (e.g., LoanApplication).
+ *
+ * @property int $id
+ * @property string $approvable_type
+ * @property int $approvable_id
+ * @property string $stage
+ * @property int $officer_id
+ * @property string $status
+ * @property string|null $notes
+ * @property \Illuminate\Support\Carbon|null $approved_at
+ * @property \Illuminate\Support\Carbon|null $rejected_at
+ * @property \Illuminate\Support\Carbon|null $canceled_at
+ * @property \Illuminate\Support\Carbon|null $resubmitted_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \App\Models\User|null $officer
+ * @property-read \Illuminate\Database\Eloquent\Model $approvable
+ * @method static \Database\Factories\ApprovalFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<Approval> newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<Approval> newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<Approval> onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<Approval> query()
+ * @method static \Illuminate\Database\Eloquent\Builder<Approval> whereApprovedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<Approval> whereApprovableId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<Approval> whereApprovableType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<Approval> whereCanceledAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<Approval> whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<Approval> whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<Approval> whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<Approval> whereNotes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<Approval> whereOfficerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<Approval> whereRejectedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<Approval> whereResubmittedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<Approval> whereStage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<Approval> whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<Approval> whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<Approval> withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<Approval> withoutTrashed()
+ * @mixin \Eloquent
+ */
 class Approval extends Model
 {
     use HasFactory;
@@ -21,8 +65,6 @@ class Approval extends Model
     public const STATUS_APPROVED = 'approved';
     public const STATUS_REJECTED = 'rejected';
     public const STATUS_CANCELED = 'canceled';
-
-    // --- Added missing forwarded status constant ---
     public const STATUS_FORWARDED = 'forwarded'; // Used when an approval is forwarded to another officer
 
     // Approval stages
@@ -39,7 +81,7 @@ class Approval extends Model
         self::STATUS_APPROVED => 'Diluluskan',
         self::STATUS_REJECTED => 'Ditolak',
         self::STATUS_CANCELED => 'Dibatalkan',
-        self::STATUS_FORWARDED => 'Dimajukan', // Added label for forwarded status
+        self::STATUS_FORWARDED => 'Dimajukan',
     ];
 
     public static array $STAGES_LABELS = [
@@ -73,7 +115,7 @@ class Approval extends Model
     ];
 
     /**
-     * Polymorphic relationship to the approvable item.
+     * Polymorphic relationship to the approvable item (e.g., LoanApplication).
      */
     public function approvable(): MorphTo
     {
@@ -114,13 +156,13 @@ class Approval extends Model
             self::STATUS_REJECTED => 'text-bg-danger',
             self::STATUS_CANCELED => 'text-bg-dark',
             self::STATUS_PENDING => 'text-bg-warning',
-            self::STATUS_FORWARDED => 'text-bg-info', // Added color for forwarded status
+            self::STATUS_FORWARDED => 'text-bg-info',
             default => 'text-bg-secondary',
         };
     }
 
     /**
-     * Load default relationships for display.
+     * Eager-load default relationships for display (approvable and officer).
      */
     public function loadDefaultRelationships(): self
     {
@@ -144,6 +186,7 @@ class Approval extends Model
             $this->load('officer:id,name');
         }
 
+        // Optionally load creator if relevant
         if (method_exists($this, 'creator') && ! $this->relationLoaded('creator')) {
             $this->load('creator:id,name');
         }

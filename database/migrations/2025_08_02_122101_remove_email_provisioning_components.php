@@ -4,27 +4,24 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log; // Added for potential logging in down() method
+use Illuminate\Support\Facades\Log;
 
+/**
+ * Removes deprecated email provisioning components/tables and related user columns.
+ */
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        // First, clean up approvals related to EmailApplication
-        // This is important before dropping the email_applications table
+        // Clean up approvals related to EmailApplication (polymorphic)
         DB::table('approvals')->where('approvable_type', 'App\\Models\\EmailApplication')->delete();
 
-        // Drop the email_applications table
+        // Drop the deprecated email_applications table
         Schema::dropIfExists('email_applications');
 
-        // Remove specific columns from users table
+        // Remove specific columns from users table if they exist
         Schema::table('users', function (Blueprint $table) {
             if (Schema::hasColumn('users', 'motac_email')) {
-                // Drop unique constraint first, if it exists and is explicitly named
-                // Laravel typically names unique constraints as tablename_columnname_unique
                 try {
                     $sm = Schema::getConnection()->getDoctrineSchemaManager();
                     $indexes = $sm->listTableIndexes('users');
@@ -36,7 +33,6 @@ return new class extends Migration
                 }
                 $table->dropColumn('motac_email');
             }
-
             if (Schema::hasColumn('users', 'user_id_assigned')) {
                 try {
                     $sm = Schema::getConnection()->getDoctrineSchemaManager();
@@ -49,7 +45,6 @@ return new class extends Migration
                 }
                 $table->dropColumn('user_id_assigned');
             }
-
             if (Schema::hasColumn('users', 'previous_department_name')) {
                 $table->dropColumn('previous_department_name');
             }
@@ -65,15 +60,11 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        // Recreate the email_applications table
+        // Recreate the email_applications table (basic rollback, may need adjustment if structure changes)
         Schema::create('email_applications', function (Blueprint $table) {
             $table->id();
-            // Assuming basic fields for rollback, adjust if needed
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('application_type'); // e.g., 'new_email', 'reset_password'
             $table->string('email_address')->nullable()->unique();
@@ -88,8 +79,6 @@ return new class extends Migration
 
         // Add back columns to users table
         Schema::table('users', function (Blueprint $table) {
-            // These should match the types and constraints they had previously
-            // Refer to your 2013_11_01_132200_add_motac_columns_to_users_table.php for exact definitions
             $table->string('motac_email')->unique()->nullable()->after('email');
             $table->string('user_id_assigned')->unique()->nullable()->after('motac_email');
             $table->string('previous_department_name')->nullable()->after('user_id_assigned');
@@ -98,10 +87,6 @@ return new class extends Migration
             $table->string('appointment_type')->nullable()->after('service_status');
         });
 
-        // Revert approvals table data is generally not feasible or recommended in a down() method,
-        // as it's hard to distinguish which records belonged to EmailApplication before deletion.
-        // If strict data integrity on rollback for approvals is crucial, a manual database restore
-        // or a more complex data archival/restoration strategy would be needed.
-        // For this automated rollback, we assume a full backup is available if historical approval data needs to be fully restored.
+        // Note: Restoration of deleted approvals is not feasible automatically.
     }
 };
