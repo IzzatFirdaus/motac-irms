@@ -1,17 +1,12 @@
 {{-- resources/views/livewire/approval-dashboard.blade.php --}}
 <div>
-    {{-- Title is typically set using #[Title('...')] in the Livewire component class --}}
-    {{-- @section('title', __('Papan Pemuka Kelulusan')) --}}
-
-    <x-alert-manager /> {{-- Assuming a global or Livewire-handled alert component --}}
+    <x-alert-manager />
 
     <div class="card shadow-sm mb-4">
         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-            {{-- Icon: ti-list-check changed to bi-list-check --}}
             <h6 class="m-0 fw-semibold text-primary"><i class="bi bi-list-check me-2"></i>{{ __('Tugasan Kelulusan Anda') }}</h6>
             <div>
                 <button wire:click="refreshDataEvent" class="btn btn-sm btn-outline-secondary">
-                    {{-- Icon: ti-refresh changed to bi-arrow-clockwise --}}
                     <i class="bi bi-arrow-clockwise me-1"></i> {{ __('Muat Semula') }}
                 </button>
             </div>
@@ -31,7 +26,6 @@
                     <label for="filterType" class="form-label">{{ __('Jenis Permohonan') }}</label>
                     <select wire:model.live="filterType" id="filterType" class="form-select form-select-sm">
                         <option value="all">{{ __('Semua Jenis') }}</option>
-                        <option value="{{ \App\Models\EmailApplication::class }}">{{ __('Permohonan Emel/ID') }}</option>
                         <option value="{{ \App\Models\LoanApplication::class }}">{{ __('Permohonan Pinjaman ICT') }}</option>
                     </select>
                 </div>
@@ -40,8 +34,7 @@
                     <input wire:model.live.debounce.300ms="searchTerm" type="text" id="searchTerm" class="form-control form-control-sm" placeholder="{{ __('Cari ID Permohonan, Nama Pemohon...') }}">
                 </div>
                 <div class="col-md-2">
-                     {{-- Icon: ti-rotate-clockwise-2 changed to bi-arrow-counterclockwise --}}
-                     <button type="button" wire:click="resetFilters" class="btn btn-sm btn-outline-secondary w-100"><i class="bi bi-arrow-counterclockwise me-1"></i>{{ __('Set Semula') }}</button>
+                    <button type="button" wire:click="resetFilters" class="btn btn-sm btn-outline-secondary w-100"><i class="bi bi-arrow-counterclockwise me-1"></i>{{ __('Set Semula') }}</button>
                 </div>
             </div>
 
@@ -71,20 +64,14 @@
                             <tr wire:key="approval-list-item-{{ $approval->id }}">
                                 <td class="px-3 py-2 small">#{{ $approval->id }}</td>
                                 <td class="px-3 py-2 small">
-                                    @if($approval->approvable_type === \App\Models\EmailApplication::class)
-                                        <a href="{{ route('email-applications.show', $approval->approvable_id) }}" wire:navigate>#{{ $approval->approvable_id }}</a>
-                                    @elseif($approval->approvable_type === \App\Models\LoanApplication::class)
+                                    @if($approval->approvable_type === \App\Models\LoanApplication::class)
                                         <a href="{{ route('loan-applications.show', $approval->approvable_id) }}" wire:navigate>#{{ $approval->approvable_id }}</a>
                                     @else
                                         #{{ $approval->approvable_id }}
                                     @endif
                                 </td>
                                 <td class="px-3 py-2 small">
-                                    @if($approval->approvable_type === \App\Models\EmailApplication::class)
-                                        {{-- Icon: ti-mail changed to bi-envelope --}}
-                                        <i class="bi bi-envelope text-info me-1"></i>{{ __('Emel/ID') }}
-                                    @elseif($approval->approvable_type === \App\Models\LoanApplication::class)
-                                        {{-- Icon: ti-device-laptop changed to bi-laptop --}}
+                                    @if($approval->approvable_type === \App\Models\LoanApplication::class)
                                         <i class="bi bi-laptop text-primary me-1"></i>{{ __('Pinjaman ICT') }}
                                     @endif
                                 </td>
@@ -92,15 +79,13 @@
                                 <td class="px-3 py-2 small">{{ $approval->approvable?->created_at?->translatedFormat(config('app.datetime_format_my_short', 'd M Y, H:i')) ?? 'N/A' }}</td>
                                 <td class="px-3 py-2 small">{{ $approval->stage_translated ?? __(Str::title(str_replace('_', ' ', $approval->stage))) }}</td>
                                 <td class="px-3 py-2 small">
-                                    {{-- Get status badge color using 1 argument: only the status --}}
                                     <span class="badge {{ App\Helpers\Helpers::getStatusColorClass($approval->status) }} rounded-pill">
                                         {{ $approval->status_translated ?? __(Str::title(str_replace('_', ' ', $approval->status))) }}
                                     </span>
                                 </td>
                                 <td class="text-center px-3 py-2">
                                     @if($approval->status === \App\Models\Approval::STATUS_PENDING)
-                                        @can('update', $approval) {{-- Policy Check --}}
-                                            {{-- Icon: ti-edit-circle, ti-xs changed to bi-pencil-square --}}
+                                        @can('update', $approval)
                                             <button wire:click="openApprovalActionModal({{ $approval->id }})" class="btn btn-xs btn-primary">
                                                 <i class="bi bi-pencil-square me-1"></i> {{ __('Tindakan') }}
                                             </button>
@@ -108,7 +93,6 @@
                                              <span class="text-muted small"><em>{{__('Tiada kebenaran')}}</em></span>
                                         @endcan
                                     @else
-                                    {{-- Icon: ti-checks, ti-xs changed to bi-check2-all --}}
                                     <button class="btn btn-xs btn-secondary" disabled>
                                         <i class="bi bi-check2-all me-1"></i> {{ __('Selesai') }}
                                     </button>
@@ -118,7 +102,6 @@
                         @empty
                             <tr>
                                 <td colspan="8" class="text-center py-4">
-                                    {{-- Icon: ti-mood-empty, ti-lg changed to bi-emoji-frown --}}
                                     <i class="bi bi-emoji-frown fs-2 text-muted mb-2 d-block"></i>
                                     {{ __('Tiada tugasan kelulusan ditemui.') }}
                                 </td>
@@ -158,19 +141,11 @@
 
                                     <dt class="col-sm-4">{{ __('Jenis Permohonan:') }}</dt>
                                     <dd class="col-sm-8">
-                                        {{-- Icon: ti-mail changed to bi-envelope --}}
-                                        @if($approvableItem instanceof \App\Models\EmailApplication) <i class="bi bi-envelope text-info me-1"></i>{{ __('Permohonan Emel/ID') }}
-                                        {{-- Icon: ti-device-laptop changed to bi-laptop --}}
-                                        @elseif($approvableItem instanceof \App\Models\LoanApplication) <i class="bi bi-laptop text-primary me-1"></i>{{ __('Permohonan Pinjaman ICT') }}
+                                        @if($approvableItem instanceof \App\Models\LoanApplication) <i class="bi bi-laptop text-primary me-1"></i>{{ __('Permohonan Pinjaman ICT') }}
                                         @endif
                                     </dd>
 
-                                    @if($approvableItem instanceof \App\Models\EmailApplication)
-                                        <dt class="col-sm-4">{{ __('Cadangan Emel:') }}</dt>
-                                        <dd class="col-sm-8">{{ $approvableItem->proposed_email ?: ($approvableItem->application_reason_notes ?: 'N/A') }}</dd>
-                                        <dt class="col-sm-4">{{ __('Tujuan:') }}</dt>
-                                        <dd class="col-sm-8" style="white-space: pre-wrap;">{{ $approvableItem->application_reason_notes ?: 'N/A' }}</dd>
-                                    @elseif($approvableItem instanceof \App\Models\LoanApplication)
+                                    @if($approvableItem instanceof \App\Models\LoanApplication)
                                         <dt class="col-sm-4">{{ __('Tujuan Pinjaman:') }}</dt>
                                         <dd class="col-sm-8" style="white-space: pre-wrap;">{{ $approvableItem->purpose ?? 'N/A' }}</dd>
                                         <dt class="col-sm-4">{{ __('Lokasi Penggunaan:') }}</dt>
@@ -194,7 +169,6 @@
                                      <dd class="col-sm-8 mt-2">{{ $approvableItem->created_at?->translatedFormat(config('app.datetime_format_my')) ?? 'N/A' }}</dd>
                                 </dl>
                                 @if($this->getViewApplicationRouteForSelected())
-                                {{-- Icon: ti-external-link, ti-xs changed to bi-box-arrow-up-right --}}
                                 <a href="{{ $this->getViewApplicationRouteForSelected() }}" target="_blank" class="btn btn-sm btn-outline-info mt-2">
                                     <i class="bi bi-box-arrow-up-right me-1" style="font-size: .75em;"></i>{{ __('Lihat Permohonan Penuh') }}
                                 </a>
@@ -224,7 +198,6 @@
                         <button type="button" wire:click="closeModal" class="btn btn-secondary">{{ __('Batal') }}</button>
                         <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="submitDecision">
                             <span wire:loading wire:target="submitDecision" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                            {{-- Icon: ti-check changed to bi-check-lg --}}
                             <span wire:loading.remove wire:target="submitDecision"><i class="bi bi-check-lg me-1"></i></span>
                             {{ __('Hantar Keputusan') }}
                         </button>
