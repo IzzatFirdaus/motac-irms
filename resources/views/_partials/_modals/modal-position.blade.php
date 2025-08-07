@@ -17,7 +17,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('Tutup') }}"></button>
       </div>
       <div class="modal-body p-md-4">
-        {{-- Position entry form --}}
+        {{-- Position Form --}}
         <form wire:submit.prevent="submitPosition" id="positionFormModal" class="row g-3">
           <div class="col-md-6">
             <label for="positionNameModal" class="form-label w-100">

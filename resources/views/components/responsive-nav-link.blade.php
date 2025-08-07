@@ -1,4 +1,18 @@
-{{-- resources/views/components/responsive-nav-link.blade.php --}}
+{{--
+    resources/views/components/responsive-nav-link.blade.php
+
+    Renders a responsive navigation link for mobile/side navigation.
+    Highlights active link with color and border.
+
+    Props:
+    - $active: bool - Whether the link is active (default: false)
+    - $icon: string|null - Optional Bootstrap icon class
+
+    Usage:
+    <x-responsive-nav-link :active="request()->routeIs('profile')" href="{{ route('profile') }}" icon="bi-person">
+        Profile
+    </x-responsive-nav-link>
+--}}
 @props(['active' => false, 'icon' => null])
 
 @php

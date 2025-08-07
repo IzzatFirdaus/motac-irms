@@ -1,22 +1,30 @@
-{{-- Component: resources/views/components/resource-status-panel.blade.php --}}
-{{-- Displays a Bootstrap badge for a resource's status, with optional icon and prefix. --}}
+{{--
+    resources/views/components/resource-status-panel.blade.php
 
+    Displays a Bootstrap badge for a resource's status, with optional icon and prefix.
+
+    Props:
+    - $resource: The model instance for which to show the status
+    - $statusAttribute: string (default: 'status') - The attribute to use for status
+    - $type: string (for extensibility, not used for color)
+    - $showIcon: bool|string - True to auto-select icon, or a string for a custom icon
+    - $statusTextPrefix: string - Optional prefix before status text
+
+    Usage:
+    <x-resource-status-panel :resource="$equipment" statusAttribute="status" showIcon="bi-check-circle-fill" />
+--}}
 @props([
     'resource',
-    'statusAttribute' => 'status', // Defaults to 'status' if not provided
+    'statusAttribute' => 'status',
     'type' => 'unknown',
     'showIcon' => false,
     'statusTextPrefix' => ''
 ])
 
 @php
-    // Resolve the type (not used in status color class anymore, but kept for future extensibility)
-    $resolvedType = $type;
-
-    // Extract status value from the resource
+    // Determine status value and label
     $statusValue = strtolower($resource->{$statusAttribute} ?? 'unknown');
 
-    // Try to get the formatted status label from accessor or property
     $statusLabelAccessorMethodName = 'get' . Illuminate\Support\Str::studly($statusAttribute) . 'LabelAttribute';
     $statusLabelPropertyName = Illuminate\Support\Str::camel($statusAttribute) . 'Label';
 
@@ -28,12 +36,10 @@
         $formattedStatus = __(Illuminate\Support\Str::title(str_replace('_', ' ', $statusValue)));
     }
 
-    // Only pass one argument to getStatusColorClass, as defined in Helpers.php
     $statusClass = \App\Helpers\Helpers::getStatusColorClass($statusValue);
-
-    // Determine icon class based on status value or showIcon override
+    // Icon auto-selection logic
     $statusIconClass = '';
-    if ($showIcon === true) { // Auto-select icon based on status value
+    if ($showIcon === true) {
         switch ($statusValue) {
             case 'approved':
             case 'completed':
@@ -74,7 +80,6 @@
     }
 @endphp
 
-{{-- Output: Bootstrap badge, with optional icon and prefix --}}
 <span {{ $attributes->merge(['class' => 'badge rounded-pill ' . $statusClass]) }}>
     @if($statusIconClass)
         <i class="{{ $statusIconClass }} me-1"></i>

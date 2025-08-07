@@ -1,10 +1,13 @@
+{{-- resources/views/_partials/_modals/modal-category.blade.php --}}
+{{-- Modal for creating/editing equipment categories --}}
+
 @push('custom-css')
     {{-- No custom CSS needed for this basic modal if using global MOTAC theme --}}
 @endpush
 
 <div wire:ignore.self class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel"
     aria-hidden="true">
-    {{-- Use standard Bootstrap modal sizing or custom MOTAC theme --}}
+    {{-- Use standard Bootstrap modal sizing with MOTAC theme --}}
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content p-0"> {{-- Reduced default padding, specific padding in header/body/footer --}}
             <div class="modal-header"> {{-- Modal header for structure --}}
@@ -16,13 +19,14 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                     aria-label="{{ __('Tutup') }}"></button>
             </div>
-            <div class="modal-body p-3 p-md-4"> {{-- Modal body with padding --}}
+            <div class="modal-body p-3 p-md-4"> {{-- Modal body with responsive padding --}}
                 <form wire:submit.prevent="submitCategory" class="row g-3">
                     <div class="col-12 mb-3">
                         <label for="categoryNameInput" class="form-label w-100">{{ __('Nama Kategori') }} <span
                                 class="text-danger">*</span></label>
                         <input wire:model='categoryName' id="categoryNameInput"
-                            class="form-control @error('categoryName') is-invalid @enderror" type="text" />
+                            class="form-control @error('categoryName') is-invalid @enderror" type="text"
+                            placeholder="{{ __('Cth: Komputer & Laptop') }}" />
                         @error('categoryName')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror

@@ -62,13 +62,13 @@ use App\Livewire\ResourceManagement\Reports\EquipmentReport as EquipmentReportLW
 use App\Livewire\ResourceManagement\Reports\LoanApplicationsReport as LoanApplicationsReportLW;
 use App\Livewire\ResourceManagement\Reports\UserActivityReport as UserActivityReportLW;
 
-// Settings - User Management (FIXED: Use correct class names for Livewire components)
+// Settings - User Management (correct class names for Livewire components)
 use App\Livewire\Settings\Users\UsersCreate as SettingsUsersCreateLW;
 use App\Livewire\Settings\Users\UsersEdit as SettingsUsersEditLW;
 use App\Livewire\Settings\Users\UsersIndex as SettingsUsersIndexLW;
 use App\Livewire\Settings\Users\UsersShow as SettingsUsersShowLW;
 
-// Settings - Roles, Permissions, Departments, Positions (FIXED: Use correct class names)
+// Settings - Roles, Permissions, Departments, Positions (correct class names)
 use App\Livewire\Settings\Roles\RolesIndex as SettingsRolesIndexLW;
 use App\Livewire\Settings\Permissions\PermissionsIndex as SettingsPermissionsIndexLW;
 use App\Livewire\Settings\Departments\DepartmentsIndex as SettingsDepartmentsIndexLW;
@@ -276,6 +276,7 @@ Route::middleware([
 // --------------------------------------------------
 // Fallback Route - Handles 404 errors for undefined routes
 // --------------------------------------------------
+// This will return a custom 404 error view if no other route matches.
 Route::fallback(function () {
     return response()->view('errors.404', [], 404);
 });

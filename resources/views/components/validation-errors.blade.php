@@ -4,8 +4,11 @@
     Component to display validation errors in a standardized way.
     Props:
     - $errors: (optional) Illuminate\Support\MessageBag or array of errors. Defaults to $errors global.
---}}
 
+    Usage:
+    <x-validation-errors />
+    <x-validation-errors :errors="$errors" />
+--}}
 @props(['errors' => $errors])
 
 @if ($errors->any())
