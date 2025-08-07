@@ -1,5 +1,6 @@
 {{-- resources/views/policy.blade.php --}}
 @php
+    use Illuminate\Support\Str;
     $customizerHidden = 'customizer-hide'; // Theme-specific variable to optionally hide customizer UI
 @endphp
 
@@ -15,7 +16,6 @@
             color: var(--bs-body-color);
             line-height: 1.6;
         }
-
         .card-body-markdown h1,
         .card-body-markdown h2,
         .card-body-markdown h3,
@@ -28,46 +28,16 @@
             margin-bottom: 0.5em;
             font-weight: 600;
         }
-
-        .card-body-markdown h1 {
-            font-size: 1.75rem;
-        }
-
-        .card-body-markdown h2 {
-            font-size: 1.5rem;
-        }
-
-        .card-body-markdown h3 {
-            font-size: 1.25rem;
-        }
-
-        .card-body-markdown p {
-            margin-bottom: 1em;
-        }
-
+        .card-body-markdown h1 { font-size: 1.75rem; }
+        .card-body-markdown h2 { font-size: 1.5rem; }
+        .card-body-markdown h3 { font-size: 1.25rem; }
+        .card-body-markdown p { margin-bottom: 1em; }
         .card-body-markdown ul,
-        .card-body-markdown ol {
-            padding-left: 2em;
-            margin-bottom: 1em;
-        }
-
-        .card-body-markdown a {
-            color: var(--bs-primary);
-            text-decoration: underline;
-        }
-
-        .card-body-markdown a:hover {
-            filter: brightness(90%);
-        }
-
-        .card-body-markdown strong {
-            font-weight: 600;
-        }
-
-        .app-brand-text {
-            /* Ensure consistent app brand text styling if needed */
-            color: var(--bs-body-color) !important;
-        }
+        .card-body-markdown ol { padding-left: 2em; margin-bottom: 1em; }
+        .card-body-markdown a { color: var(--bs-primary); text-decoration: underline; }
+        .card-body-markdown a:hover { filter: brightness(90%); }
+        .card-body-markdown strong { font-weight: 600; }
+        .app-brand-text { color: var(--bs-body-color) !important; }
     </style>
 @endsection
 
@@ -83,8 +53,7 @@
                             <img src="{{ asset('assets/img/logo/motac-logo.svg') }}" alt="{{ __('Logo MOTAC IRMS') }}"
                                 style="height: 32px; width: auto;">
                         </span>
-                        <span
-                            class="app-brand-text demo text-body fw-bold fs-4 ms-1 app-brand-text">{{ __('motac-irms') }}</span>
+                        <span class="app-brand-text demo text-body fw-bold fs-4 ms-1 app-brand-text">{{ __('motac-irms') }}</span>
                     </a>
                 </div>
 
@@ -96,7 +65,8 @@
                         </h4>
                     </div>
                     <div class="card-body p-4 card-body-markdown">
-                        {!! $policy !!} {{-- Renders HTML content from Markdown. Ensure $policy is sanitized/escaped at controller level. --}}
+                        {{-- Output the rendered/sanitized markdown as HTML --}}
+                        {!! Str::markdown(__('policy_en.content')) !!}
                     </div>
                 </div>
 
