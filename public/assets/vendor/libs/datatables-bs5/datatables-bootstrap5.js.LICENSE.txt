@@ -33,7 +33,7 @@
  * ©2016 SpryMedia Ltd - datatables.net/license
  */
 
-/*! DataTables 2.3.2
+/*! DataTables 2.3.1
  * © SpryMedia Ltd - datatables.net/license
  */
 
@@ -49,11 +49,11 @@
  * © SpryMedia Ltd - datatables.net/license
  */
 
-/*! FixedHeader 4.0.3
+/*! FixedHeader 4.0.2
  * © SpryMedia Ltd - datatables.net/license
  */
 
-/*! RowGroup 1.5.2
+/*! RowGroup 1.5.1
  * © SpryMedia Ltd - datatables.net/license
  */
 

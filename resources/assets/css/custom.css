@@ -77,25 +77,20 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Status badge container - for centering badges without using unsupported properties */
 .status-badge-container {
-    /* Using standard positioning instead of text-align for better compatibility */
     position: relative;
 }
 .status-badge-container .status-badge {
     margin-left: auto;
     margin-right: auto;
     display: block;
-    width: fit-content; /* Modern browsers */
-    width: -moz-fit-content; /* Firefox */
     width: -webkit-fit-content; /* Webkit browsers */
+    width: fit-content;         /* Modern browsers */
+    width: -moz-fit-content;    /* Firefox */
+    /* Order: -webkit, fit-content, -moz for best compatibility */
 }
 
 /* Flexbox container for centering - with comprehensive browser support */
 .status-badge-flex-container {
-    /* Modern flexbox */
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-
     /* IE 10+ flexbox support */
     display: -ms-flexbox;
     -ms-flex-direction: row;
@@ -105,6 +100,11 @@ h1, h2, h3, h4, h5, h6 {
     display: -webkit-flex;
     -webkit-flex-direction: row;
     -webkit-justify-content: center;
+
+    /* Modern flexbox */
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
 }
 
 /* IE-specific flexbox fallback using conditional comments alternative */
@@ -113,6 +113,7 @@ h1, h2, h3, h4, h5, h6 {
         display: -ms-flexbox;
         -ms-flex-pack: center;
         -ms-flex-direction: row;
+        flex-direction: row;
     }
 }
 
@@ -207,15 +208,12 @@ h1, h2, h3, h4, h5, h6 {
 @media (max-width: 768px) {
     /* Stack flex items vertically on small screens */
     .flex-container {
-        display: flex;
-        /* Support for all browsers including IE 10+ and Samsung Internet 2.0+ */
         display: -ms-flexbox;
         display: -webkit-flex;
-
-        /* Flex direction with vendor prefixes */
-        flex-direction: column;
+        display: flex;
         -ms-flex-direction: column;
         -webkit-flex-direction: column;
+        flex-direction: column;
     }
 
     /* Slightly larger badges for mobile readability */
@@ -277,6 +275,7 @@ h1, h2, h3, h4, h5, h6 {
 .btn-secondary:focus,
 .form-control:focus {
     outline: 2px solid var(--motac-primary-color);
+    /* Note: outline-offset is not supported by IE and Edge < 15, but safe to use for newer browsers */
     outline-offset: 2px;
 }
 

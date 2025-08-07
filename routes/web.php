@@ -31,6 +31,7 @@ use App\Http\Controllers\LoanTransactionController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\WebhookController;
+use App\Http\Controllers\LegalController; // Added for policy/terms hybrid localization
 
 // Livewire Components (renamed for clarity and consistency)
 use App\Livewire\ContactUs as ContactUsLW;
@@ -94,9 +95,10 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-// Static policy and terms pages
-Route::view('/privacy-policy', 'policy')->name('policy');
-Route::view('/terms-of-service', 'terms')->name('terms');
+// Static policy and terms pages (updated for hybrid localization and markdown rendering)
+// These will use LegalController to render policy/terms with multilingual support
+Route::get('/privacy-policy', [LegalController::class, 'policy'])->name('policy');
+Route::get('/terms-of-service', [LegalController::class, 'terms'])->name('terms');
 
 // Contact Us page via Livewire
 Route::get('/contact-us', ContactUsLW::class)->name('contact-us');

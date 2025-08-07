@@ -60,6 +60,9 @@ Holds all HTTP controller classes responsible for handling requests, business lo
 - Admin/LocationController.php
 - Admin/SettingsController.php
 
+**Checked:**  
+- LegalController.php (created and checked for hybrid markdown localization of policy/terms)
+
 ---
 
 #### /app/Services  
@@ -266,6 +269,8 @@ Blade template files for the system's user interface, including all page layouts
   - ~~approval-status-badge.blade.php~~
   - ~~user-info-card.blade.php~~
   - [Other reusable components]
+- policy.blade.php (checked/created for hybrid markdown localization)
+- terms.blade.php (checked/created for hybrid markdown localization)
 
 > **Status:**  
 > All files in `/resources/views` (including emails) have now been checked or discussed.
@@ -278,8 +283,12 @@ Language translation files for English and Bahasa Melayu (ms).
 
 **Files:**  
 - en/
+  - policy_en.php (checked/created, hybrid markdown)
+  - terms_en.php (checked/created, hybrid markdown)
 - ms/
-  - [Translation files for Bahasa Melayu and English]
+  - policy_ms.php (checked/created, hybrid markdown)
+  - terms_ms.php (checked/created, hybrid markdown)
+  - [Other translation files for Bahasa Melayu and English]
 
 ---
 
@@ -337,3 +346,42 @@ GitHub-specific configuration for issues, workflows, and CI/CD.
 Some files/directories (like config, routes) have already been checked and/or updated. If you want to check any of the above directories in detail (for example, to remove legacy EmailApplication code or add Helpdesk features), please specify which directory or files you want to review or update next.
 
 ---
+
+---
+
+## ✅ Explicitly Checked/Discussed/Updated
+
+- `/app/Models` (all files)
+- `/database/migrations` (all files)
+- `/resources/views` (core UI, emails, components, policy/terms markdown hybrid)
+- `/resources/lang/en/policy_en.php`
+- `/resources/lang/en/terms_en.php`
+- `/resources/lang/ms/policy_ms.php`
+- `/resources/lang/ms/terms_ms.php`
+- `/routes/web.php` (policy/terms route hybrid update)
+- `/app/Http/Controllers/LegalController.php` (for markdown hybrid)
+- `/resources/menu/verticalMenu.json`
+
+---
+
+## ☐ Still To Be Checked
+
+- `/app/Http/Controllers` (except LegalController)
+- `/app/Services`
+- `/app/Policies`
+- `/app/Observers`
+- `/app/Livewire`
+- `/app/Notifications`
+- `/app/Helpers`
+- `/database/seeders`
+- `/database/factories`
+- `/resources/lang/en` (other than policy_en.php, terms_en.php)
+- `/resources/lang/ms` (other than policy_ms.php, terms_ms.php)
+- `/docs`
+- `/public`
+- `/storage`
+- `/.github`
+
+---
+
+**This checklist will be updated as more directories and files are explicitly reviewed, modified, or discussed.**

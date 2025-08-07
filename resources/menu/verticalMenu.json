@@ -1,7 +1,7 @@
 {
-  "_comment": "This file is auto-generated from config/menu.php. Do not edit manually. Source of truth is config/menu.php. Last updated: 2025-08-06T12:19:04Z",
-  "version": "2025-08-06",
-  "last_updated": "2025-08-06T12:19:04Z",
+  "_comment": "This file is auto-generated from config/menu.php. Do not edit manually. Source of truth is config/menu.php. Last updated: 2025-08-07T16:06:19Z",
+  "version": "2025-08-07",
+  "last_updated": "2025-08-07T16:06:19Z",
   "menu": [
     {
       "url": "/dashboard",
