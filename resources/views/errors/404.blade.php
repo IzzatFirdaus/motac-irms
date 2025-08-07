@@ -1,29 +1,23 @@
 @php
-    // The $illustrationStyleSuffix helps in dynamically loading light/dark mode illustrations.
-    // Ensure that your MOTAC-themed blank layout and assets are correctly configured for this.
+    // The $illustrationStyleSuffix is used to load the right illustration for light/dark mode.
     $illustrationStyleSuffix = isset($configData['myStyle']) ? '-' . $configData['myStyle'] : '';
 @endphp
 
-@extends('layouts.blankLayout') {{-- This MUST be your MOTAC-themed blank layout --}}
+@extends('layouts.layout-blank') {{-- Use the MOTAC-themed blank layout; filename updated --}}
 
 @section('title', __('404 - Halaman Tidak Ditemui'))
 
 @section('page-style')
-    {{-- Review page-misc.css: Ensure styles align with MOTAC theme or override as needed. --}}
+    {{-- Custom error and vendor styling --}}
     <link rel="stylesheet" href="{{ asset('assets/vendor/css/pages/page-misc.css') }}">
     <style>
-        /* MOTAC Specific Overrides for Error Pages if page-misc.css is too generic */
+        /* MOTAC Specific: Large error code, themed color for title */
         .misc-wrapper .error-code {
-            /* Class for the 404 number */
             font-size: 6rem;
-            /* Example size */
             font-weight: bold;
             color: var(--bs-secondary);
-            /* Example: Using Bootstrap secondary, themed by MOTAC */
         }
-
         .misc-wrapper .error-title {
-            /* Class for the "Halaman Tidak Ditemui!" title */
             color: var(--bs-primary);
         }
     </style>
@@ -42,27 +36,24 @@
             <a href="{{ url('/') }}" class="btn btn-primary d-inline-flex align-items-center">
                 <i class="bi bi-house-door-fill me-2"></i>{{ __('Kembali ke Laman Utama') }}
             </a>
-            {{-- Original illustration image block removed --}}
+            {{-- Illustration image block can be enabled here if desired --}}
             {{--
-    <div class="mt-4">
-      <img src="{{ asset('assets/img/illustrations/motac-error-404' . $illustrationStyleSuffix . '.png') }}"
-           alt="{{ __('Ilustrasi Halaman Tidak Ditemui') }}"
-           width="250" class="img-fluid motac-error-illustration">
-    </div>
-    --}}
+            <div class="mt-4">
+              <img src="{{ asset('assets/img/illustrations/motac-error-404' . $illustrationStyleSuffix . '.png') }}"
+                   alt="{{ __('Ilustrasi Halaman Tidak Ditemui') }}"
+                   width="250" class="img-fluid motac-error-illustration">
+            </div>
+            --}}
         </div>
     </div>
 
-    {{-- Background shape image: Evaluate if this fits MOTAC's simpler/professional aesthetic.
-     If a large standalone icon is used, this decorative background might be distracting or unnecessary.
-     Consider removing it for a cleaner look focused on the message and the icon.
---}}
+    {{-- Optional background decorative shape (disabled for clean look) --}}
     {{--
-<div class="container-fluid misc-bg-wrapper">
-  <img src="{{ asset('assets/img/illustrations/bg-shape-image' . $illustrationStyleSuffix . '.png') }}"
-       alt="{{ __('Corak Latar Belakang Hiasan') }}"
-       data-app-light-img="illustrations/bg-shape-image-light.png"
-       data-app-dark-img="illustrations/bg-shape-image-dark.png">
-</div>
---}}
+    <div class="container-fluid misc-bg-wrapper">
+      <img src="{{ asset('assets/img/illustrations/bg-shape-image' . $illustrationStyleSuffix . '.png') }}"
+           alt="{{ __('Corak Latar Belakang Hiasan') }}"
+           data-app-light-img="illustrations/bg-shape-image-light.png"
+           data-app-dark-img="illustrations/bg-shape-image-dark.png">
+    </div>
+    --}}
 @endsection

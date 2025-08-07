@@ -1,26 +1,23 @@
 @php
-    // The $illustrationStyleSuffix helps in dynamically loading light/dark mode illustrations.
-    // Ensure that your MOTAC-themed blank layout and assets are correctly configured for this.
+    // The $illustrationStyleSuffix is used to load the right illustration for light/dark mode.
+    // Make sure your MOTAC-themed blank layout and assets support this.
     $illustrationStyleSuffix = isset($configData['myStyle']) ? '-' . $configData['myStyle'] : '';
 @endphp
 
-@extends('layouts.blankLayout') {{-- This MUST be your MOTAC-themed blank layout --}}
+@extends('layouts.layout-blank') {{-- Use the MOTAC-themed blank layout; filename updated for consistency --}}
 
 @section('title', __('401 - Tidak Dibenarkan'))
 
 @section('page-style')
-    {{-- Review page-misc.css: Ensure styles align with MOTAC theme or override as needed. --}}
+    {{-- MOTAC custom or vendor error page styles --}}
     <link rel="stylesheet" href="{{ asset('assets/vendor/css/pages/page-misc.css') }}">
     <style>
-        /* MOTAC Specific Overrides for Error Pages if page-misc.css is too generic */
+        /* MOTAC Specific: Highlight the error code/title in red (danger) */
         .misc-wrapper .display-5 {
             color: var(--bs-danger);
-            /* Example: Using Bootstrap danger color for error code/title */
         }
-
         .motac-error-illustration {
             max-width: 250px;
-            /* Control illustration size */
         }
     </style>
 @endsection
@@ -39,20 +36,20 @@
                 <i class="bi bi-house-door-fill me-2"></i>{{ __('Kembali ke Laman Utama') }}
             </a>
             <div class="mt-4">
-                {{-- ACTION REQUIRED: Replace with MOTAC-appropriate "Unauthorized" illustration --}}
-                {{-- <img src="{{ asset('assets/img/illustrations/motac-error-401' . $illustrationStyleSuffix . '.png') }}" --}}
-                {{-- Placeholder path --}} {{-- alt="{{ __('Ilustrasi Akses Tidak Dibenarkan') }}" width="200" --}}
-                {{-- class="img-fluid motac-error-illustration"> --}}
+                {{-- Illustration (add your own MOTAC-branded illustration for unauthorized access) --}}
+                {{-- <img src="{{ asset('assets/img/illustrations/motac-error-401' . $illustrationStyleSuffix . '.png') }}"
+                    alt="{{ __('Ilustrasi Akses Tidak Dibenarkan') }}" width="200"
+                    class="img-fluid motac-error-illustration"> --}}
             </div>
         </div>
     </div>
-
-    {{-- Background shape image: Evaluate if this fits MOTAC's simpler/professional aesthetic.
-     If kept, ensure path is correct and image is MOTAC-branded.
-<div class="container-fluid misc-bg-wrapper">
-  <img src="{{ asset('assets/img/illustrations/bg-shape-image' . $illustrationStyleSuffix . '.png') }}"
-       alt="{{ __('Corak Latar Belakang Hiasan') }}"
-       data-app-light-img="illustrations/bg-shape-image-light.png"
-       data-app-dark-img="illustrations/bg-shape-image-dark.png">
-</div> --}}
+    {{-- Optionally, a background decoration (disabled by default for a clean look) --}}
+    {{--
+    <div class="container-fluid misc-bg-wrapper">
+      <img src="{{ asset('assets/img/illustrations/bg-shape-image' . $illustrationStyleSuffix . '.png') }}"
+           alt="{{ __('Corak Latar Belakang Hiasan') }}"
+           data-app-light-img="illustrations/bg-shape-image-light.png"
+           data-app-dark-img="illustrations/bg-shape-image-dark.png">
+    </div>
+    --}}
 @endsection

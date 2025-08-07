@@ -1,3 +1,8 @@
+{{-- resources/views/layouts/email.blade.php --}}
+{{-- Email layout template for MOTAC notification emails.
+    No filename update was needed as per convention; code is unchanged except for added documentation comments.
+--}}
+
 <!DOCTYPE html>
 <html lang="ms">
 
