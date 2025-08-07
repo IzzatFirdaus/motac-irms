@@ -1,4 +1,6 @@
-{{--resources\views\reports\loan-applications.blade.php --}}
+{{-- resources/views/reports/loan-applications-report.blade.php --}}
+{{-- Loan Applications Report Page --}}
+
 @extends('layouts.app')
 
 @section('title', __('reports.loan_applications.title'))
@@ -96,7 +98,6 @@
                                     {{-- Applied the new class 'list-square-bullet' here --}}
                                     <ul class="list-unstyled mb-0 list-square-bullet">
                                         @foreach ($item->loanApplicationItems as $appItem)
-                                            {{-- Removed the literal '•' here as CSS will handle the bullet --}}
                                             <li>{{ $appItem->equipment_type_label ?? 'N/A' }} ({{ __('Qty') }}:
                                                 {{ $appItem->quantity_requested }})</li>
                                         @endforeach

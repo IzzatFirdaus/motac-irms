@@ -1,13 +1,14 @@
+{{-- resources/views/reports/user-activity-log-report.blade.php --}}
+{{-- User Activity Log Report (with variable $pageTitle) --}}
+
 @extends('layouts.app')
 
-{{-- Use the passed $pageTitle variable for the section title, with a fallback --}}
 @section('title', $pageTitle ?? __('reports.user_activity.title'))
 
 @section('content')
     <div class="container-fluid py-4">
         <div class="card shadow-sm mb-4 motac-card">
             <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center">
-                {{-- Use the passed $pageTitle variable for the header, with a fallback --}}
                 <h3 class="h5 mb-0 fw-semibold d-flex align-items-center">
                     <i class="bi bi-person-check-fill me-2"></i>{{ $pageTitle ?? __('reports.user_activity.title') }}
                 </h3>

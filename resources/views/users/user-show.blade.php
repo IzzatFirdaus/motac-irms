@@ -1,4 +1,5 @@
-{{-- resources/views/users/show.blade.php --}}
+{{-- resources/views/users/user-show.blade.php --}}
+{{-- User Show Page: Displays details for a specific user --}}
 @extends('layouts.app')
 
 @section('title', __('Butiran Pengguna') . ': ' . ($user->full_name ?? $user->name ?? __('Tidak Diketahui')))
@@ -12,8 +13,8 @@
                     <h1 class="h2 fw-bold text-dark mb-2 mb-sm-0">
                         {{ __('Profil Pengguna') }}
                     </h1>
-                    {{-- Back button --}}
-                    <a href="{{ url()->previous(route('users.index')) }}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center">
+                    {{-- Back button to user index --}}
+                    <a href="{{ url()->previous(route('users.user-index')) }}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center">
                         <i class="bi bi-arrow-left me-1"></i> {{ __('Kembali ke Senarai Pengguna') }}
                     </a>
                 </div>
@@ -23,7 +24,7 @@
                 <div class="card shadow-lg rounded-4 overflow-hidden">
                     <div class="card-header bg-primary bg-gradient text-white p-4">
                         <div class="d-flex align-items-center">
-                            {{-- Assuming profile_photo_path is available, or a default avatar logic --}}
+                            {{-- Display user's profile photo or a default avatar --}}
                             <img src="{{ $user->profile_photo_url ?? asset('images/default-avatar.png') }}" alt="{{ __('Foto Profil') }} {{ $user->full_name ?? $user->name }}" class="rounded-circle me-3" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid rgba(255,255,255,0.5);">
                             <div>
                                 <h2 class="h4 fw-bold mb-0">{{ $user->full_name ?? $user->name ?? __('Tidak Diketahui') }}</h2>
@@ -65,7 +66,7 @@
 
                             <dt class="col-sm-4 text-muted fw-medium">{{ __('Taraf Perkhidmatan') }}</dt>
                             <dd class="col-sm-8 text-dark text-capitalize">
-                                {{-- Assuming a helper or accessor on User model for display name --}}
+                                {{-- Use accessor for label if available, fallback to raw value --}}
                                 {{ $user->service_status_label ?? str_replace('_', ' ', $user->service_status ?? '-') }}
                             </dd>
 
@@ -94,7 +95,7 @@
                 </div>
 
                 <div class="text-center mt-4">
-                    {{-- Edit User button typically available in admin context (Settings panel) --}}
+                    {{-- Edit User button typically available in admin context --}}
                     {{-- @can('update', $user)
                     <a href="{{ route('settings.users.edit', $user->id) }}" class="btn btn-primary d-inline-flex align-items-center">
                         <i class="bi bi-pencil-square me-1"></i>

@@ -1,3 +1,6 @@
+{{-- resources/views/reports/activity-log-report.blade.php --}}
+{{-- User Activity Log Report Page --}}
+
 <x-app-layout>
     <div class="card shadow-sm mb-4">
         <div class="card-header">

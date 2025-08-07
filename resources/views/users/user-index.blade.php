@@ -1,4 +1,5 @@
-{{-- resources/views/users/index.blade.php --}}
+{{-- resources/views/users/user-index.blade.php --}}
+{{-- User Index Page: Displays a list of all registered users in the system --}}
 @extends('layouts.app')
 
 @section('title', __('Senarai Pengguna Sistem'))
@@ -17,7 +18,7 @@
             @endcan --}}
         </div>
 
-        @include('partials.session-messages') {{-- Assuming a partial for session messages --}}
+        @include('partials.session-messages') {{-- Includes flash/session messages --}}
 
         <div class="card shadow-sm">
             <div class="card-header bg-light py-3">
@@ -46,7 +47,7 @@
                                 <tr>
                                     <td class="py-2 px-3 small text-dark">
                                         {{ $user->full_name ?? $user->name }}
-                                        @if ($user->hasRole('Admin')) {{-- Example check --}}
+                                        @if ($user->hasRole('Admin')) {{-- Show Admin badge if user has Admin role --}}
                                             <span class="badge bg-primary rounded-pill ms-1 align-middle" style="font-size: 0.7em;">{{__('Admin')}}</span>
                                         @endif
                                     </td>
@@ -54,14 +55,13 @@
                                     <td class="py-2 px-3 small text-muted">{{ optional($user->department)->name ?? '-' }}</td>
                                     <td class="py-2 px-3 small text-muted">{{ optional($user->grade)->name ?? '-' }}</td>
                                     <td class="text-end py-2 px-3">
-                                        {{-- Assuming 'users.show' is a general user profile view route --}}
+                                        {{-- View Profile button --}}
                                         <a href="{{ route('users.show', $user->id) }}"
                                             class="btn btn-sm btn-outline-primary d-inline-flex align-items-center"
                                             title="{{__('Lihat Profil')}}">
                                             <i class="bi bi-eye-fill"></i>
-                                            {{-- <span class="ms-1 d-none d-sm-inline">{{ __('Lihat') }}</span> --}}
                                         </a>
-                                        {{-- Edit/Delete buttons are typically part of admin user management (Settings panel) --}}
+                                        {{-- Edit/Delete only in admin/settings context --}}
                                         {{-- @can('update', $user)
                                         <a href="{{ route('settings.users.edit', $user->id) }}" class="btn btn-sm btn-outline-secondary ms-1" title="{{__('Edit Pengguna (Admin)')}}">
                                             <i class="bi bi-pencil-fill"></i>
@@ -69,7 +69,7 @@
                                         @endcan
                                         @can('delete', $user)
                                             <button type="button" class="btn btn-sm btn-outline-danger ms-1" title="{{__('Padam Pengguna (Admin)')}}"
-                                                onclick="confirmDelete('{{ route('settings.users.destroy', $user->id) }}')"> {{-- Assuming a JS confirmDelete function --}}
+                                                onclick="confirmDelete('{{ route('settings.users.destroy', $user->id) }}')">
                                                 <i class="bi bi-trash3-fill"></i>
                                             </button>
                                         @endcan --}}
@@ -84,17 +84,18 @@
 
         @if ($users->hasPages())
             <div class="mt-4 d-flex justify-content-center">
-                {{ $users->links() }} {{-- Ensure pagination is Bootstrap 5 styled --}}
+                {{ $users->links() }} {{-- Use Bootstrap 5 pagination styling --}}
             </div>
         @endif
     </div>
 @endsection
 
-{{-- @push('scripts')
+{{--
+@push('scripts')
 <script>
     function confirmDelete(deleteUrl) {
         if (confirm("{{ __('Adakah anda pasti untuk memadam pengguna ini? Tindakan ini tidak boleh diundur.') }}")) {
-            // Create a form and submit it for DELETE request
+            // Create and submit a form for the delete action
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = deleteUrl;
@@ -114,4 +115,5 @@
         }
     }
 </script>
-@endpush --}}
+@endpush
+--}}

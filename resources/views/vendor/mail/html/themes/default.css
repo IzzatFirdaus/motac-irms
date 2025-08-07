@@ -1,43 +1,56 @@
-@import url('https://fonts.googleapis.com/css?family=Noto+Sans:400,700&display=swap'); /* Optional: Attempt to load Noto Sans, email client support varies */
-/*-- resources/views/vendor/mail/html/themes/default.css --}}*/
+@import url('https://fonts.googleapis.com/css?family=Noto+Sans:400,700&display=swap'); /* MOTAC v4.0: Use Noto Sans as primary font (email client support may vary) */
+/* -- resources/views/vendor/mail/html/themes/default.css -- */
 
-/* Global styles for Markdown emails, aligning with MOTAC where possible */
-body {
-    font-family: 'Noto Sans', Arial, 'Helvetica Neue', Helvetica, sans-serif; /* Noto Sans first, then fallbacks */
-    color: #212529; /* MOTAC Text Color from Design Doc (Light Mode) */
-}
-
-a {
-    color: #0055A4; /* MOTAC Primary Blue for links */
-}
-
-/* MOTAC Themed Primary Button for Markdown Emails */
-.button-motac_primary {
-    background-color: #0055A4; /* MOTAC Primary Blue from Design Doc 2.1 */
-    border: none; /* Remove default borders if any, rely on background */
-    color: #ffffff; /* Ensure text is white for contrast */
-    /* Padding is usually handled by the mail::button component, but can be adjusted here if needed */
-    /* e.g., padding: 10px 18px; */
-    /* text-decoration: none; (usually handled by mail::button) */
-}
-
-/* Optional: Add styles for other button colors if you plan to use them */
 /*
+|--------------------------------------------------------------------------
+| MOTAC IRMS v4.0 Email Theme
+|--------------------------------------------------------------------------
+| This stylesheet provides global styles for all Markdown emails
+| sent from the MOTAC Integrated Resource Management System (IRMS) v4.0.
+| Applies to notifications for both ICT Loan and Helpdesk modules.
+| Updated for v4.0: Reflect new branding and remove legacy references.
+*/
+
+/* Body text settings: Use Noto Sans (if available), with standard fallbacks */
+body {
+    font-family: 'Noto Sans', Arial, 'Helvetica Neue', Helvetica, sans-serif;
+    color: #212529; /* MOTAC Body Text Color (Light Mode) */
+}
+
+/* Link color: MOTAC Primary Blue */
+a {
+    color: #0055A4;
+}
+
+/* MOTAC Themed Primary Button for all Markdown Emails (Loan, Helpdesk, etc.) */
+.button-motac_primary {
+    background-color: #0055A4; /* Primary blue */
+    border: none;
+    color: #ffffff; /* White text for contrast */
+    /* Padding and font handled by mail::button, but may be adjusted here */
+}
+
+/* Optional: Helpdesk-specific button (if needed for Helpdesk emails) */
+.button-motac_helpdesk {
+    background-color: #198754; /* Bootstrap success green, or choose Helpdesk accent */
+    color: #ffffff;
+}
+
+/* Optional: Success and Danger buttons for various notification types */
 .button-motac_success {
-    background-color: #28A745; // MOTAC Success Green
+    background-color: #28A745; /* MOTAC Success Green */
     color: #ffffff;
 }
 
 .button-motac_danger {
-    background-color: #DC3545; // MOTAC Critical Red
+    background-color: #DC3545; /* MOTAC Critical Red */
     color: #ffffff;
 }
-*/
 
-/* You can also style other Markdown components here, like panels, tables, etc. */
-/*
+/* Panels, tables, etc. */
 .panel {
-    border-left: 5px solid #0055A4; // MOTAC Primary Blue for panel accent
-    background-color: #f8f9fa; // MOTAC Background (Light Mode)
+    border-left: 5px solid #0055A4; /* MOTAC Primary Blue for panel accent */
+    background-color: #f8f9fa;
 }
-*/
+
+/* Add further component overrides/styles as needed for v4.0 modules */

@@ -1,3 +1,6 @@
+{{-- resources/views/reports/loan-history-report.blade.php --}}
+{{-- Loan History Report Page --}}
+
 @extends('layouts.app')
 
 @section('title', __('reports.loan_history.title'))

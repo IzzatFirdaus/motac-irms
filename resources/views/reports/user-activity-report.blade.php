@@ -1,4 +1,6 @@
-{{-- resources/views/livewire/reports/user-activity-report.blade.php --}}
+{{-- resources/views/reports/user-activity-report.blade.php --}}
+{{-- Livewire User Activity Report Component View --}}
+
 <div>
     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4">
         <h1 class="h2 fw-semibold text-dark mb-2 mb-sm-0 d-flex align-items-center">

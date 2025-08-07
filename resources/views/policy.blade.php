@@ -1,14 +1,14 @@
 {{-- resources/views/policy.blade.php --}}
 @php
-    $customizerHidden = 'customizer-hide'; // Theme-specific variable
+    $customizerHidden = 'customizer-hide'; // Theme-specific variable to optionally hide customizer UI
 @endphp
 
-@extends('layouts.blankLayout') {{-- Uses the MOTAC-themed blank layout --}}
+@extends('layouts.blankLayout') {{-- Uses the MOTAC-themed blank layout for static/legal pages --}}
 
-@section('title', __('Dasar Privasi')) {{-- Translatable page title --}}
+@section('title', __('Dasar Privasi')) {{-- Set the page title, translatable --}}
 
 @section('page-style')
-    {{-- Removed page-auth.css, relying on simpler structure --}}
+    {{-- Inline style for Markdown content in the card --}}
     <style>
         .card-body-markdown {
             font-family: 'Noto Sans', sans-serif !important;
@@ -96,7 +96,7 @@
                         </h4>
                     </div>
                     <div class="card-body p-4 card-body-markdown">
-                        {!! $policy !!} {{-- Renders HTML content from Markdown --}}
+                        {!! $policy !!} {{-- Renders HTML content from Markdown. Ensure $policy is sanitized/escaped at controller level. --}}
                     </div>
                 </div>
 

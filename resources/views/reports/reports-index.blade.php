@@ -1,3 +1,6 @@
+{{-- resources/views/reports/reports-index.blade.php --}}
+{{-- Main Reports Index Page --}}
+
 @extends('layouts.app')
 
 @section('title', __('reports.page_title'))

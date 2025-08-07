@@ -1,3 +1,6 @@
+{{-- resources/views/reports/equipment-inventory-report.blade.php --}}
+{{-- Equipment Inventory Report Page --}}
+
 @extends('layouts.app')
 
 @section('title', __('reports.equipment_inventory.title'))

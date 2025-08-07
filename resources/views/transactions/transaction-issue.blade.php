@@ -1,11 +1,11 @@
-{{-- resources/views/transactions/issue.blade.php --}}
-@extends('layouts.app') {{-- Or your main admin layout --}}
+{{-- resources/views/transactions/transaction-issue.blade.php --}}
+@extends('layouts.app') {{-- Use main admin layout --}}
 
 @section('title', __('Keluarkan Peralatan untuk Pinjaman #:app_id', ['app_id' => $loanApplication->id]))
 
 @section('content')
     <div class="container py-4">
-        {{-- Initialize Alpine.js component for this form --}}
+        {{-- Alpine.js component for equipment issue form --}}
         <div x-data="issueForm()" x-init="init()">
             <h1 class="fw-bold mb-4">
                 {{ __('Keluarkan Peralatan untuk Permohonan Pinjaman #:app_id', ['app_id' => $loanApplication->id]) }}
@@ -18,7 +18,6 @@
                 <div class="row g-3 small">
                     <div class="col-md-6">
                         <span class="fw-bold">{{ __('Pemohon:') }}</span>
-                        {{-- Use optional helper or null-safe operator to prevent error if user relationship is not loaded --}}
                         <span>{{ optional($loanApplication->user)->name ?? __('N/A') }}</span>
                     </div>
                     <div class="col-md-6">
@@ -38,7 +37,7 @@
                 </div>
             </div>
 
-            {{-- Issue Form --}}
+            {{-- Equipment Issue Form --}}
             <div class="card shadow-sm rounded p-4">
                 <h3 class="card-title fw-semibold mb-4">
                     {{ __('Peralatan untuk Dikeluarkan') }}</h3>
@@ -52,9 +51,10 @@
                             <div class="border rounded p-3 mb-3 bg-light position-relative">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                     <h4 class="h5 fw-semibold mb-0" x-text="'{{ __('Item Baris') }} #' + (index + 1)"></h4>
-                                    <template x-if="itemsToIssue.length > 1"> {{-- Show remove button if more than one item --}}
+                                    <template x-if="itemsToIssue.length > 1">
                                         <button type="button" @click="removeItem(index)"
                                             class="btn btn-sm btn-outline-danger" title="{{ __('Buang Item Baris Ini') }}">
+                                            {{-- Trash icon --}}
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                 viewBox="0 0 20 20" fill="currentColor">
                                                 <path fill-rule="evenodd"
@@ -66,6 +66,7 @@
                                 </div>
 
                                 <div class="row g-3">
+                                    {{-- Select original application item --}}
                                     <div class="col-md-6">
                                         <label :for="'loan_app_item_id_' + index"
                                             class="form-label">{{ __('Rujuk Item Permohonan Asal') }} <span
@@ -92,6 +93,7 @@
                                         @enderror
                                     </div>
 
+                                    {{-- Select specific equipment to issue --}}
                                     <div class="col-md-6">
                                         <label :for="'equipment_id_' + index"
                                             class="form-label">{{ __('Peralatan Spesifik') }} <span
@@ -123,6 +125,7 @@
                                     </div>
                                 </div>
 
+                                {{-- Quantity issued --}}
                                 <div class="mt-3">
                                     <label :for="'quantity_issued_' + index"
                                         class="form-label">{{ __('Kuantiti Dikeluarkan Kali Ini') }} <span
@@ -146,6 +149,7 @@
                                     @enderror
                                 </div>
 
+                                {{-- Accessories checklist --}}
                                 <div class="mt-3">
                                     <label
                                         class="form-label">{{ __('Aksesori Dikeluarkan (Tandakan yang berkaitan)') }}</label>
@@ -157,7 +161,7 @@
                                             'Kabel USB',
                                             'Kabel HDMI/VGA',
                                             'Alat Kawalan Jauh',
-                                        ]); // [cite: 64]
+                                        ]); // MOTAC standard accessories list
                                     @endphp
                                     <div class="row row-cols-2 row-cols-sm-3 g-2 mt-1">
                                         @foreach ($standardAccessories as $accessory)
@@ -185,6 +189,7 @@
                                     @enderror
                                 </div>
 
+                                {{-- Notes for this item --}}
                                 <div class="mt-3">
                                     <label :for="'item_notes_' + index"
                                         class="form-label">{{ __('Nota untuk Item Baris Ini (Pilihan)') }}</label>
@@ -198,6 +203,7 @@
                         </template>
                     </div>
 
+                    {{-- Add item row button --}}
                     <button type="button" @click="addItem()"
                         class="btn btn-outline-primary btn-sm text-uppercase mt-3 d-inline-flex align-items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
@@ -207,6 +213,7 @@
                         {{ __('Tambah Baris Peralatan') }}
                     </button>
 
+                    {{-- Transaction details --}}
                     <div class="mt-4 pt-4 border-top">
                         <div class="mb-3">
                             <label for="receiving_officer_id"
@@ -215,15 +222,12 @@
                             <select class="form-select" id="receiving_officer_id" name="receiving_officer_id" required
                                 x-model="transactionDetails.receiving_officer_id">
                                 <option value="">-- {{ __('Pilih Pegawai Penerima') }} --</option>
-                                {{-- Safely access user properties to prevent errors --}}
                                 <option value="{{ optional($loanApplication->user)->id }}">{{ optional($loanApplication->user)->name }}
                                     ({{ __('Pemohon') }})
                                 </option>
-                                {{-- Controller MUST pass $allUsers collection --}}
                                 @foreach ($allUsers ?? [] as $user)
                                     @if (optional($user)->id !== optional($loanApplication->user)->id)
-                                        {{-- Avoid duplicate listing of applicant --}}
-                                        <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                        <option value="{{ optional($user)->id }}">{{ optional($user)->name }}</option>
                                     @endif
                                 @endforeach
                             </select>
@@ -241,12 +245,12 @@
                             @enderror
                         </div>
                         <p class="form-text">
-                            {{-- Safely display the issuing officer's name, with a fallback --}}
                             {{ __('Pegawai Pengeluar') }}: {{ Auth::user()?->name ?? __('Tidak Diketahui') }}.
                             {{ __('Tarikh/Masa pengeluaran akan direkodkan semasa penghantaran borang.') }}
                         </p>
                     </div>
 
+                    {{-- Submit/cancel buttons --}}
                     <div class="mt-4 d-flex justify-content-end">
                         <a href="{{ route('resource-management.loan-applications.show', $loanApplication) }}"
                             class="btn btn-secondary me-2">
@@ -271,6 +275,7 @@
         );
     @endphp
     <script>
+    // Alpine.js for managing dynamic issuance form
     document.addEventListener('alpine:init', () => {
         Alpine.data('issueForm', () => ({
             allAvailableEquipmentGroupedByType: JSON.parse('{!! $jsonAvailableEquipmentGroupedByType !!}'),
@@ -295,7 +300,6 @@
                         quantity_already_issued_for_item: 0
                     }));
                     this.itemsToIssue.forEach((_, index) => {
-                        // Use $nextTick to ensure DOM elements are available for dataset reading
                         this.$nextTick(() => {
                             this.updateAvailableEquipmentAndMaxQty(index);
                         });
@@ -332,10 +336,7 @@
                 if (this.itemsToIssue.length > 1) {
                     this.itemsToIssue.splice(index, 1);
                 } else {
-                    console.warn("Cannot remove the last item. Clear fields if needed.");
                     // Optionally clear the first item's fields
-                    // this.itemsToIssue[0] = this.createEmptyItem();
-                    // this.$nextTick(() => { this.updateAvailableEquipmentAndMaxQty(0); });
                 }
             },
 
@@ -345,7 +346,6 @@
 
                 const selectElement = document.getElementById('loan_app_item_id_' + itemIndex);
                 if (!selectElement) {
-                    // console.warn(`Element with ID 'loan_app_item_id_${itemIndex}' not found.`);
                     return;
                 }
 
@@ -362,8 +362,6 @@
                     item.quantity_already_issued_for_item = qtyAlreadyIssued;
                     item.max_qty_to_issue = Math.max(0, qtyApproved - qtyAlreadyIssued);
 
-                    // Reset equipment_id if the main item changes or if max_qty_to_issue is 0
-                    // to ensure user re-selects from potentially new list or if nothing can be issued
                     if (item.equipment_id && (this.getAvailableEquipmentForSelectedType(itemIndex).findIndex(e => String(e.id) === String(item.equipment_id)) === -1 || item.max_qty_to_issue <= 0) ) {
                         item.equipment_id = '';
                     }
@@ -376,7 +374,7 @@
                     }
                     if (item.max_qty_to_issue <= 0) {
                         item.quantity_issued = 0;
-                        item.equipment_id = ''; // Clear equipment if none can be issued
+                        item.equipment_id = '';
                     }
 
                 } else {
@@ -425,7 +423,7 @@
                 return this.itemsToIssue.some(item =>
                     !item.loan_application_item_id ||
                     !item.equipment_id ||
-                    item.max_qty_to_issue <= 0 || // Cannot issue if approved qty already met/exceeded for the line item
+                    item.max_qty_to_issue <= 0 ||
                     item.quantity_issued === null ||
                     item.quantity_issued < 1 ||
                     item.quantity_issued > item.max_qty_to_issue

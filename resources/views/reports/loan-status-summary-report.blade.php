@@ -1,3 +1,6 @@
+{{-- resources/views/reports/loan-status-summary-report.blade.php --}}
+{{-- Loan Status Summary Report Page --}}
+
 @extends('layouts.app')
 
 @section('title', __('reports.loan_status_summary.title'))
@@ -14,7 +17,6 @@
                 {{ __('Export PDF') }}
             </a>
         </div>
-
 
         <p class="mb-4 text-muted">{{ __('reports.loan_status_summary.description') }}</p>
 
