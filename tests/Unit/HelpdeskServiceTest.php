@@ -7,20 +7,19 @@ use App\Models\HelpdeskComment;
 use App\Models\HelpdeskPriority;
 use App\Models\HelpdeskTicket;
 use App\Models\User;
-use App\Notifications\TicketAssignedNotification;
-use App\Notifications\TicketCommentAddedNotification;
-use App\Notifications\TicketCreatedNotification;
-use App\Notifications\TicketStatusUpdatedNotification;
 use App\Services\HelpdeskService;
-use App\Services\TicketNotificationService;
+use App\Services\NotificationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
-use Spatie\Permission\Models\Role;
-use Tests\TestCase;
 use Mockery;
+use Tests\TestCase;
 
+/**
+ * Unit tests for HelpdeskService.
+ * Ensures business logic for ticket creation, updating, commenting, closing, and attachments works as expected,
+ * and verifies NotificationService integration.
+ */
 class HelpdeskServiceTest extends TestCase
 {
     use RefreshDatabase;
@@ -33,87 +32,99 @@ class HelpdeskServiceTest extends TestCase
         parent::setUp();
         Storage::fake('public');
 
-        // Mock the TicketNotificationService
-        $this->notificationServiceMock = Mockery::mock(TicketNotificationService::class);
-        $this->app->instance(TicketNotificationService::class, $this->notificationServiceMock);
+        // Mock NotificationService and bind it in the container.
+        $this->notificationServiceMock = Mockery::mock([NotificationService::class]);
+        $this->app->instance(NotificationService::class, $this->notificationServiceMock);
 
         $this->helpdeskService = $this->app->make(HelpdeskService::class);
 
-        // Create roles
-        Role::firstOrCreate(['name' => 'Admin']);
-        Role::firstOrCreate(['name' => 'IT Admin']);
-        Role::firstOrCreate(['name' => 'User']);
-
-        // Create base data
+        // Seed base categories and priorities
         HelpdeskCategory::factory()->create(['name' => 'General']);
         HelpdeskPriority::factory()->create(['name' => 'Low', 'level' => 1]);
         HelpdeskPriority::factory()->create(['name' => 'High', 'level' => 3]);
     }
 
     /** @test */
-    public function it_can_create_a_ticket()
+    public function it_can_create_a_ticket_and_send_notification()
     {
         $user = User::factory()->create();
         $category = HelpdeskCategory::first();
         $priority = HelpdeskPriority::first();
 
         $data = [
-            'title' => 'Test Ticket Title',
-            'description' => 'Test ticket description.',
+            'title' => 'Printer not working',
+            'description' => 'Cannot print from any application.',
             'category_id' => $category->id,
             'priority_id' => $priority->id,
         ];
+        $attachments = [
+            UploadedFile::fake()->create('error.txt', 10, 'text/plain'),
+        ];
 
-        // Expect notification service to be called
-        $this->notificationServiceMock->shouldReceive('notifyTicketCreated')->once();
+        // NotificationService should be called for ticket creation (to applicant)
+        $this->notificationServiceMock
+            ->shouldReceive('notifyTicketCreated')
+            ->with($user, Mockery::type(HelpdeskTicket::class), 'applicant')
+            ->once();
 
-        $ticket = $this->helpdeskService->createTicket($data, $user);
+        $ticket = $this->helpdeskService->createTicket($data, $user, $attachments);
 
         $this->assertInstanceOf(HelpdeskTicket::class, $ticket);
         $this->assertDatabaseHas('helpdesk_tickets', [
             'id' => $ticket->id,
-            'title' => 'Test Ticket Title',
+            'title' => $data['title'],
             'user_id' => $user->id,
-            'status' => 'open',
+            'status' => HelpdeskTicket::STATUS_OPEN,
         ]);
         $this->assertNotNull($ticket->sla_due_at);
+        $this->assertCount(1, $ticket->attachments);
+        Storage::disk('public')->assertExists($ticket->attachments->first()->file_path);
     }
 
     /** @test */
-    public function it_can_add_a_comment_to_a_ticket()
+    public function it_can_add_a_comment_and_send_notifications()
     {
         $user = User::factory()->create();
         $ticket = HelpdeskTicket::factory()->create(['user_id' => $user->id]);
+        $commentText = 'Here is a screenshot.';
+        $attachments = [
+            UploadedFile::fake()->image('screenshot.png'),
+        ];
 
-        $commentText = 'This is a test comment.';
+        // Notification to applicant (ticket owner)
+        $this->notificationServiceMock
+            ->shouldReceive('notifyTicketCommentAdded')
+            ->with($ticket->user, Mockery::type(HelpdeskComment::class), $user, 'applicant')
+            ->once();
 
-        // Expect notification service to be called
-        $this->notificationServiceMock->shouldReceive('notifyTicketCommentAdded')->once();
+        // No assignee, so no second notification
 
-        $comment = $this->helpdeskService->addComment($ticket, $commentText, $user);
+        $comment = $this->helpdeskService->addComment($ticket, $commentText, $user, $attachments);
 
         $this->assertInstanceOf(HelpdeskComment::class, $comment);
         $this->assertDatabaseHas('helpdesk_comments', [
             'ticket_id' => $ticket->id,
             'user_id' => $user->id,
             'comment' => $commentText,
+            'is_internal' => false,
         ]);
-        $this->assertFalse($comment->is_internal);
+        $this->assertCount(1, $comment->attachments);
+        Storage::disk('public')->assertExists($comment->attachments->first()->file_path);
     }
 
     /** @test */
-    public function it_can_add_an_internal_comment_to_a_ticket_by_it_admin()
+    public function it_can_add_an_internal_comment_and_send_notifications()
     {
-        $itAdmin = User::factory()->create();
-        $itAdmin->assignRole('IT Admin');
-        $ticket = HelpdeskTicket::factory()->create(['user_id' => User::factory()->create()->id]);
+        $user = User::factory()->create();
+        $ticket = HelpdeskTicket::factory()->create(['user_id' => $user->id]);
+        $commentText = 'Internal note.';
 
-        $commentText = 'This is an internal note.';
+        $this->notificationServiceMock
+            ->shouldReceive('notifyTicketCommentAdded')
+            ->with($ticket->user, Mockery::type(HelpdeskComment::class), $user, 'applicant')
+            ->once();
 
-        // Expect notification service to be called
-        $this->notificationServiceMock->shouldReceive('notifyTicketCommentAdded')->once();
-
-        $comment = $this->helpdeskService->addComment($ticket, $commentText, $itAdmin, [], true);
+        $comment = $this->helpdeskService->addComment($ticket, $commentText, $user, [], true);
 
         $this->assertTrue($comment->is_internal);
         $this->assertDatabaseHas('helpdesk_comments', [
@@ -122,89 +133,134 @@ class HelpdeskServiceTest extends TestCase
         ]);
     }
 
-
     /** @test */
-    public function it_can_update_ticket_status()
+    public function it_can_update_a_ticket_and_send_notifications_on_status_and_assignment_change()
     {
         $user = User::factory()->create();
-        $itAdmin = User::factory()->create();
-        $itAdmin->assignRole('IT Admin');
-        $ticket = HelpdeskTicket::factory()->create(['user_id' => $user->id, 'status' => 'open']);
+        $assignee = User::factory()->create();
+        $ticket = HelpdeskTicket::factory()->create([
+            'user_id' => $user->id,
+            'assigned_to_user_id' => null,
+            'status' => HelpdeskTicket::STATUS_OPEN,
+        ]);
+        $data = [
+            'status' => HelpdeskTicket::STATUS_IN_PROGRESS,
+            'assigned_to_user_id' => $assignee->id,
+            'title' => 'Updated title',
+        ];
 
-        // Expect notification service to be called
-        $this->notificationServiceMock->shouldReceive('notifyTicketStatusUpdated')->once();
+        // Should notify status update to applicant and assignee, and assignment to assignee
+        $this->notificationServiceMock
+            ->shouldReceive('notifyTicketStatusUpdated')
+            ->with($user, Mockery::type(HelpdeskTicket::class), $assignee, 'applicant')
+            ->once();
+        $this->notificationServiceMock
+            ->shouldReceive('notifyTicketStatusUpdated')
+            ->with($assignee, Mockery::type(HelpdeskTicket::class), $assignee, 'assignee')
+            ->once();
+        $this->notificationServiceMock
+            ->shouldReceive('notifyTicketAssigned')
+            ->with($assignee, Mockery::type(HelpdeskTicket::class), $assignee)
+            ->once();
 
-        $updatedTicket = $this->helpdeskService->updateTicketStatus($ticket, 'in_progress', null, null, $itAdmin);
+        $updated = $this->helpdeskService->updateTicket($ticket, $data, $assignee);
 
-        $this->assertEquals('in_progress', $updatedTicket->status);
+        $this->assertEquals(HelpdeskTicket::STATUS_IN_PROGRESS, $updated->status);
+        $this->assertEquals($assignee->id, $updated->assigned_to_user_id);
         $this->assertDatabaseHas('helpdesk_tickets', [
             'id' => $ticket->id,
-            'status' => 'in_progress',
+            'status' => HelpdeskTicket::STATUS_IN_PROGRESS,
+            'assigned_to_user_id' => $assignee->id,
+            'title' => 'Updated title',
         ]);
     }
 
     /** @test */
-    public function it_can_assign_a_ticket()
+    public function it_sets_closed_at_when_status_becomes_closed_and_notifies()
     {
         $user = User::factory()->create();
-        $itAdmin = User::factory()->create();
-        $itAdmin->assignRole('IT Admin');
-        $agent = User::factory()->create();
-        $agent->assignRole('IT Admin');
-
-        $ticket = HelpdeskTicket::factory()->create(['user_id' => $user->id, 'assigned_to_user_id' => null]);
-
-        // Expect notification service to be called for status update and assignment
-        $this->notificationServiceMock->shouldReceive('notifyTicketStatusUpdated')->once();
-        $this->notificationServiceMock->shouldReceive('notifyTicketAssigned')->once();
-
-
-        $updatedTicket = $this->helpdeskService->updateTicketStatus($ticket, 'open', $agent->id, null, $itAdmin);
-
-        $this->assertEquals($agent->id, $updatedTicket->assigned_to_user_id);
-        $this->assertDatabaseHas('helpdesk_tickets', [
-            'id' => $ticket->id,
-            'assigned_to_user_id' => $agent->id,
-        ]);
-    }
-
-    /** @test */
-    public function it_sets_closed_at_when_status_becomes_closed()
-    {
-        $user = User::factory()->create();
-        $itAdmin = User::factory()->create();
-        $itAdmin->assignRole('IT Admin');
-        $ticket = HelpdeskTicket::factory()->create(['user_id' => $user->id, 'status' => 'open', 'closed_at' => null]);
-
-        $this->notificationServiceMock->shouldReceive('notifyTicketStatusUpdated')->once();
-
-        $updatedTicket = $this->helpdeskService->updateTicketStatus($ticket, 'closed', null, 'Issue resolved.', $itAdmin);
-
-        $this->assertNotNull($updatedTicket->closed_at);
-        $this->assertDatabaseHas('helpdesk_tickets', [
-            'id' => $ticket->id,
-            'status' => 'closed',
-            'resolution_notes' => 'Issue resolved.',
-        ]);
-    }
-
-    /** @test */
-    public function it_nullifies_closed_at_when_status_changes_from_closed()
-    {
-        $user = User::factory()->create();
-        $itAdmin = User::factory()->create();
-        $itAdmin->assignRole('IT Admin');
-        $ticket = HelpdeskTicket::factory()->create(['user_id' => $user->id, 'status' => 'closed', 'closed_at' => now()]);
-
-        $this->notificationServiceMock->shouldReceive('notifyTicketStatusUpdated')->once();
-
-        $updatedTicket = $this->helpdeskService->updateTicketStatus($ticket, 'open', null, null, $itAdmin);
-
-        $this->assertNull($updatedTicket->closed_at);
-        $this->assertDatabaseHas('helpdesk_tickets', [
-            'id' => $ticket->id,
-            'status' => 'open',
+        $ticket = HelpdeskTicket::factory()->create([
+            'user_id' => $user->id,
+            'status' => HelpdeskTicket::STATUS_OPEN,
             'closed_at' => null,
         ]);
+        $closer = User::factory()->create();
+
+        $data = [
+            'status' => HelpdeskTicket::STATUS_CLOSED,
+            'resolution_notes' => 'Fixed!',
+        ];
+
+        $this->notificationServiceMock
+            ->shouldReceive('notifyTicketStatusUpdated')
+            ->with($user, Mockery::type(HelpdeskTicket::class), $closer, 'applicant')
+            ->once();
+
+        $updated = $this->helpdeskService->updateTicket($ticket, $data, $closer);
+
+        $this->assertEquals(HelpdeskTicket::STATUS_CLOSED, $updated->status);
+        $this->assertNotNull($updated->closed_at);
+        $this->assertEquals('Fixed!', $updated->resolution_notes);
+    }
+
+    /** @test */
+    public function it_nullifies_closed_at_when_status_changes_from_closed_and_notifies()
+    {
+        $user = User::factory()->create();
+        $ticket = HelpdeskTicket::factory()->create([
+            'user_id' => $user->id,
+            'status' => HelpdeskTicket::STATUS_CLOSED,
+            'closed_at' => now(),
+        ]);
+        $updater = User::factory()->create();
+
+        $data = [
+            'status' => HelpdeskTicket::STATUS_OPEN,
+        ];
+
+        $this->notificationServiceMock
+            ->shouldReceive('notifyTicketStatusUpdated')
+            ->with($user, Mockery::type(HelpdeskTicket::class), $updater, 'applicant')
+            ->once();
+
+        $updated = $this->helpdeskService->updateTicket($ticket, $data, $updater);
+
+        $this->assertEquals(HelpdeskTicket::STATUS_OPEN, $updated->status);
+        $this->assertNull($updated->closed_at);
+    }
+
+    /** @test */
+    public function it_can_close_a_ticket_and_send_notification()
+    {
+        $user = User::factory()->create();
+        $ticket = HelpdeskTicket::factory()->create([
+            'user_id' => $user->id,
+            'status' => HelpdeskTicket::STATUS_IN_PROGRESS,
+            'closed_at' => null,
+            'resolution_notes' => null,
+        ]);
+        $closer = User::factory()->create();
+
+        $this->notificationServiceMock
+            ->shouldReceive('notifyTicketStatusUpdated')
+            ->with($user, Mockery::type(HelpdeskTicket::class), $closer, 'applicant')
+            ->once();
+
+        $data = [
+            'resolution_notes' => 'Replaced the cable.',
+        ];
+
+        $closedTicket = $this->helpdeskService->closeTicket($ticket, $data, $closer);
+
+        $this->assertEquals(HelpdeskTicket::STATUS_CLOSED, $closedTicket->status);
+        $this->assertNotNull($closedTicket->closed_at);
+        $this->assertEquals('Replaced the cable.', $closedTicket->resolution_notes);
+        $this->assertEquals($closer->id, $closedTicket->closed_by_id);
+    }
+
+    protected function tearDown(): void
+    {
+        Mockery::close();
+        parent::tearDown();
     }
 }

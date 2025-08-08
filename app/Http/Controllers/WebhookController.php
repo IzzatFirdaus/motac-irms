@@ -4,76 +4,55 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Jobs\SyncAppWithGithub;
-use App\Validator\CustomSignatureValidator; // As per system design [cite: 2]
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Generic Webhook Controller for handling incoming webhook calls.
+ *
+ * NOTE: This controller is now simplified to store the webhook call into the `webhook_calls` table,
+ * as per the migration in 2024_05_27_100007_create_webhook_calls_table.php.
+ * Signature validation, event-specific logic, and downstream processing should be handled via jobs or listeners.
+ */
 class WebhookController extends Controller
 {
     /**
-     * Handle incoming GitHub webhook for deployment.
-     * SDD Ref: 3.1
+     * Handle incoming webhook call and persist it.
      */
-    public function __invoke(Request $request): JsonResponse // Renamed from handleDeploy to __invoke for single action controller
+    public function __invoke(Request $request): JsonResponse
     {
-        $githubSignature = $request->header('X-Hub-Signature-256');
-        $payload = $request->getContent();
-        $secret = Config::get('services.github.webhook_secret');
+        // Basic info about the incoming webhook
+        $name = $request->input('name') ?? 'generic'; // Optionally set by the sender/client
+        $url = $request->fullUrl();
+        $headers = $request->headers->all();
+        $payload = $request->all();
 
-        if (empty($secret)) {
-            Log::error('GitHub webhook secret is not configured in services.github.webhook_secret.');
-
-            return response()->json(['message' => 'Webhook secret not configured on server.'], 500);
-        }
-
-        if (empty($githubSignature)) {
-            Log::warning('GitHub webhook received without X-Hub-Signature-256 header.');
-
-            return response()->json(['message' => 'Signature missing.'], 400);
-        }
-
-        // Assumes CustomSignatureValidator::isValid method exists [cite: 2]
-        if (! CustomSignatureValidator::isValid($githubSignature, $payload, $secret)) {
-            Log::warning('Invalid GitHub webhook signature received.', ['ip_address' => $request->ip()]);
-
-            return response()->json(['message' => 'Invalid signature.'], 403);
-        }
-
-        $githubEvent = $request->header('X-GitHub-Event');
-        if ($githubEvent !== 'push') {
-            Log::info('GitHub webhook received for a non-push event, ignoring.', ['event' => $githubEvent]);
-
-            return response()->json(['message' => 'Event ignored. Only push events are processed.'], 200);
-        }
-
-        $data = $request->json()->all();
-        $deploymentBranch = Config::get('services.github.deployment_branch', 'refs/heads/main');
-
-        if (($data['ref'] ?? null) !== $deploymentBranch) {
-            Log::info('GitHub push event for a non-deployment branch received, ignoring.', [
-                'received_ref' => $data['ref'] ?? 'N/A',
-                'expected_ref' => $deploymentBranch,
-            ]);
-
-            return response()->json(['message' => sprintf("Push to branch '%s' ignored. Monitoring '%s'.", $data['ref'], $deploymentBranch)], 200);
-        }
-
+        // Attempt to persist the call to the database (webhook_calls table)
         try {
-            SyncAppWithGithub::dispatch()->onQueue('deployments'); // Job from SDD [cite: 2]
-            Log::info('GitHub deployment job dispatched successfully for branch.', ['branch' => $data['ref']]);
-
-            return response()->json(['message' => 'Deployment job successfully dispatched.'], 200);
-        } catch (\Exception $exception) {
-            Log::critical('Failed to dispatch GitHub deployment job.', [
-                'error' => $exception->getMessage(),
-                'branch' => $data['ref'] ?? 'N/A',
-                'exception_trace_snippet' => substr($exception->getTraceAsString(), 0, 500),
+            $callId = \DB::table('webhook_calls')->insertGetId([
+                'name' => $name,
+                'url' => $url,
+                'headers' => json_encode($headers), // Store all headers as JSON
+                'payload' => json_encode($payload), // Store the payload as JSON
+                'exception' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
-
-            return response()->json(['message' => 'Server error: Failed to dispatch deployment job.'], 500);
+            Log::info('Webhook call stored in webhook_calls table.', [
+                'webhook_call_id' => $callId,
+                'name' => $name,
+                'url' => $url,
+            ]);
+            return response()->json(['message' => 'Webhook call stored.', 'id' => $callId], 201);
+        } catch (\Throwable $e) {
+            Log::error('Failed to store webhook call.', [
+                'error' => $e->getMessage(),
+                'trace' => substr($e->getTraceAsString(), 0, 500),
+                'payload' => $payload,
+            ]);
+            return response()->json(['message' => 'Failed to store webhook call.'], 500);
         }
     }
 }

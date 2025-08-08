@@ -17,255 +17,237 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Response;
 use App\Helpers\Helpers;
 
+/**
+ * Controller for legacy (non-Livewire) reports.
+ * Most main reports are now handled by Livewire components, but
+ * PDF export and some legacy routes remain here.
+ */
 class ReportController extends Controller
 {
-  public function __construct()
-  {
-    $this->middleware('auth');
-  }
-
-  public function index(Request $request): View
-  {
-    Log::info('ReportController@index: Displaying main reports page.', ['user_id' => Auth::id()]);
-    return view('reports.index');
-  }
-
-  /**
-   * This method is no longer directly used for the user activity log route
-   * as it is now handled by a Livewire component (UserActivityReport).
-   * You can remove this method if it's not used elsewhere.
-   */
-  // public function activityLog(Request $request): View
-  // {
-  //   $query = User::withCount([
-  //     'emailApplications',
-  //     'loanApplicationsAsApplicant',
-  //     'approvalsMade',
-  //   ])->with(['department:id,name', 'roles:id,name']);
-
-  //   if ($request->filled('search')) {
-  //     $searchTerm = $request->input('search');
-  // }
-
-  public function equipmentInventory(Request $request): View | Response
-  {
-    $this->authorize('viewLoanReports', Equipment::class);
-
-    $query = Equipment::query();
-
-    if ($request->filled('search')) {
-      $searchTerm = $request->input('search');
-      $query->where(function ($q) use ($searchTerm) {
-        $q->where('name', 'like', "%{$searchTerm}%")
-          ->orWhere('tag_id', 'like', "%{$searchTerm}%");
-      });
+    public function __construct()
+    {
+        $this->middleware('auth');
     }
 
-    if ($request->filled('type')) {
-      $query->where('type', $request->input('type'));
+    /**
+     * Main reports index page (still used).
+     */
+    public function index(Request $request): View
+    {
+        Log::info('ReportController@index: Displaying main reports page.', ['user_id' => Auth::id()]);
+        return view('reports.reports-index');
     }
 
-    if ($request->filled('status')) {
-      $query->where('status', $request->input('status'));
+    /**
+     * Equipment Inventory Report (legacy controller, for PDF export or direct view fallback).
+     * Now primary interface is Livewire, but PDF/export uses this controller.
+     */
+    public function equipmentInventory(Request $request): View|Response
+    {
+        $this->authorize('viewLoanReports', Equipment::class);
+
+        // Filtering logic for export - must mirror Livewire component if used for PDF.
+        $query = Equipment::with(['department']);
+
+        // Filters
+        if ($request->filled('search')) {
+            $searchTerm = $request->input('search');
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('tag_id', 'like', "%{$searchTerm}%")
+                  ->orWhere('brand', 'like', "%{$searchTerm}%")
+                  ->orWhere('model', 'like', "%{$searchTerm}%");
+            });
+        }
+        if ($request->filled('status') && $request->input('status') !== '') {
+            $query->where('status', $request->input('status'));
+        }
+        if ($request->filled('asset_type') && $request->input('asset_type') !== '') {
+            $query->where('asset_type', $request->input('asset_type'));
+        }
+        if ($request->filled('department_id') && $request->input('department_id') !== '') {
+            $query->where('department_id', $request->input('department_id'));
+        }
+
+        // Pagination or export
+        $equipmentList = $query->orderBy('tag_id')->paginate(20);
+
+        // For filter dropdowns
+        $assetTypes = Equipment::getAssetTypeOptions();
+        $statuses = Equipment::getStatusOptions();
+        $departments = Department::orderBy('name')->pluck('name', 'id')->toArray();
+
+        if ($request->filled('export') && $request->input('export') === 'pdf') {
+            $pdf = Pdf::loadView('reports.equipment-inventory-report', compact('equipmentList', 'assetTypes', 'statuses', 'departments'));
+            return $pdf->download('equipment-inventory.pdf');
+        }
+
+        return view('reports.equipment-inventory-report', compact('equipmentList', 'assetTypes', 'statuses', 'departments'));
     }
 
-    $equipment = $query->paginate(10);
-    $equipmentTypes = Equipment::getEquipmentTypes();
-    $equipmentStatuses = Equipment::getEquipmentStatuses();
+    /**
+     * Loan Applications Report (legacy controller, for PDF export or direct view fallback).
+     * Main UI is Livewire, but PDF/export handled here.
+     */
+    public function loanApplications(Request $request): View|Response
+    {
+        $this->authorize('viewLoanReports', LoanApplication::class);
 
-    if ($request->filled('export') && $request->input('export') === 'pdf') {
-      $pdf = Pdf::loadView('reports.equipment-inventory-pdf', compact('equipment', 'equipmentTypes', 'equipmentStatuses'));
-      return $pdf->download('equipment-inventory.pdf');
+        $query = LoanApplication::with(['user.department', 'loanApplicationItems']);
+
+        // Filters
+        if ($request->filled('search')) {
+            $searchTerm = $request->input('search');
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('id', 'like', "%{$searchTerm}%")
+                  ->orWhere('purpose', 'like', "%{$searchTerm}%");
+            });
+        }
+        if ($request->filled('status') && $request->input('status') !== '') {
+            $query->where('status', $request->input('status'));
+        }
+        if ($request->filled('department_id') && $request->input('department_id') !== '') {
+            $query->whereHas('user.department', function ($q) use ($request) {
+                $q->where('id', $request->input('department_id'));
+            });
+        }
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->input('date_from'));
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->input('date_to'));
+        }
+
+        $loanApplications = $query->orderByDesc('created_at')->paginate(20);
+
+        // For filter dropdowns
+        $statusOptions = LoanApplication::getStatusOptions();
+        $departmentOptions = Department::orderBy('name')->pluck('name', 'id')->toArray();
+
+        if ($request->filled('export') && $request->input('export') === 'pdf') {
+            $pdf = Pdf::loadView('reports.loan-applications-report', compact('loanApplications', 'statusOptions', 'departmentOptions'));
+            return $pdf->download('loan-applications.pdf');
+        }
+
+        return view('reports.loan-applications-report', compact('loanApplications', 'statusOptions', 'departmentOptions'));
     }
 
-    return view(
-      'reports.equipment-inventory',
-      compact('equipment', 'equipmentTypes', 'equipmentStatuses')
-    );
-  }
+    /**
+     * Loan History Report (legacy controller, for PDF export or direct view fallback).
+     */
+    public function loanHistory(Request $request): View|Response
+    {
+        $this->authorize('viewLoanReports', LoanTransaction::class);
 
-  public function loanApplications(Request $request): View | Response
-  {
-    $this->authorize('viewLoanReports', LoanApplication::class);
+        $query = LoanTransaction::with([
+            'loanApplication.user.department',
+            'items.equipment'
+        ]);
 
-    $query = LoanApplication::query()->with(['applicant.department', 'approvals']);
+        // Filters
+        if ($request->filled('user_id') && $request->input('user_id') !== '') {
+            $query->whereHas('loanApplication.user', function ($q) use ($request) {
+                $q->where('id', $request->input('user_id'));
+            });
+        }
+        if ($request->filled('type') && $request->input('type') !== '') {
+            $query->where('type', $request->input('type'));
+        }
+        if ($request->filled('date_from')) {
+            $query->whereDate('transaction_date', '>=', $request->input('date_from'));
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('transaction_date', '<=', $request->input('date_to'));
+        }
 
-    if ($request->filled('status') && $request->input('status') !== 'all') {
-      $query->where('status', $request->input('status'));
+        $loanTransactions = $query->orderByDesc('transaction_date')->paginate(20);
+
+        // Users filter for dropdown
+        $usersFilter = User::orderBy('name')->pluck('name', 'id')->toArray();
+        $transactionTypes = [
+            'issue' => __('Pengeluaran'),
+            'return' => __('Pemulangan'),
+        ];
+
+        if ($request->filled('export') && $request->input('export') === 'pdf') {
+            $pdf = Pdf::loadView('reports.loan-history-report', compact('loanTransactions', 'usersFilter', 'transactionTypes', 'request'));
+            return $pdf->download('loan-history.pdf');
+        }
+
+        return view('reports.loan-history-report', compact('loanTransactions', 'usersFilter', 'transactionTypes', 'request'));
     }
 
-    if ($request->filled('start_date')) {
-      $query->whereDate('created_at', '>=', $request->input('start_date'));
+    /**
+     * Loan Status Summary Report (for pie/bar chart and summary).
+     */
+    public function loanStatusSummary(Request $request): View|Response
+    {
+        $this->authorize('viewLoanReports', LoanApplication::class);
+
+        $data = LoanApplication::select(['status', DB::raw('count(*) as count')])
+            ->groupBy('status')
+            ->pluck('count', 'status')
+            ->mapWithKeys(fn ($count, $status) => [
+                $status => [
+                    'label' => LoanApplication::getStatusOptions()[$status] ?? ucfirst(str_replace('_', ' ', $status)),
+                    'count' => $count,
+                ]
+            ])
+            ->toArray();
+
+        if ($request->filled('export') && $request->input('export') === 'pdf') {
+            $pdf = Pdf::loadView('reports.loan-status-summary-report', ['data' => $data]);
+            return $pdf->download('loan-status-summary.pdf');
+        }
+
+        return view('reports.loan-status-summary-report', ['data' => $data]);
     }
 
-    if ($request->filled('end_date')) {
-      $query->whereDate('created_at', '<=', $request->input('end_date'));
+    /**
+     * Utilization Report (equipment utilization rate and summary).
+     */
+    public function utilizationReport(Request $request): View|Response
+    {
+        $this->authorize('viewLoanReports', Equipment::class);
+
+        $summary = Equipment::getStatusSummary();
+        $utilizationRate = Equipment::getUtilizationRate();
+
+        if ($request->filled('export') && $request->input('export') === 'pdf') {
+            $pdf = Pdf::loadView('reports.utilization-report', compact('summary', 'utilizationRate'));
+            return $pdf->download('utilization-report.pdf');
+        }
+
+        return view('reports.utilization-report', compact('summary', 'utilizationRate'));
     }
 
-    if ($request->filled('department_id') && $request->input('department_id') !== 'all') {
-      $query->whereHas('applicant', function ($q) use ($request) {
-        $q->where('department_id', $request->input('department_id'));
-      });
+    /**
+     * User Activity Report (legacy, fallback only).
+     * Main UI is Livewire.
+     */
+    public function userActivityLog(Request $request): View
+    {
+        // Kept as a fallback for direct blade view, Livewire is primary.
+        $users = User::with(['department'])
+            ->withCount(['loanApplicationsAsApplicant', 'approvalsAsApprover'])
+            ->orderByDesc('loan_applications_as_applicant_count')
+            ->paginate(20);
+
+        $pageTitle = __('reports.user_activity.title');
+        return view('reports.user-activity-log-report', compact('users', 'pageTitle'));
     }
 
-    $loanApplications = $query->orderBy('created_at', 'desc')->paginate(10);
-    $statuses = LoanApplication::getStatusOptions();
-    $departments = Department::orderBy('name')->get();
-
-    if ($request->filled('export') && $request->input('export') === 'pdf') {
-      $pdf = Pdf::loadView('reports.loan-applications-pdf', compact('loanApplications', 'statuses', 'departments'));
-      return $pdf->download('loan-applications.pdf');
+    /**
+     * NEW: Helpdesk-specific reports (stub).
+     */
+    public function helpdeskTicketVolume(Request $request): View|Response
+    {
+        // Logic to be implemented for helpdesk module
+        return view('reports.helpdesk-ticket-volume');
     }
 
-    return view(
-      'reports.loan-applications',
-      compact('loanApplications', 'statuses', 'departments')
-    );
-  }
-
-  // REMOVED: emailAccounts method as per transformation plan
-  // public function emailAccounts(Request $request): View | Response
-  // {
-  //   $this->authorize('viewEmailReports', EmailApplication::class);
-
-  //   $query = EmailApplication::query()->with(['user.department', 'approvals']);
-
-  //   if ($request->filled('status')) {
-  //     $query->where('status', $request->input('status'));
-  //   }
-
-  //   if ($request->filled('start_date')) {
-  //     $query->whereDate('created_at', '>=', $request->input('start_date'));
-  //   }
-
-  //   if ($request->filled('end_date')) {
-  //     $query->whereDate('created_at', '<=', $request->input('end_date'));
-  //   }
-
-  //   if ($request->filled('department_id')) {
-  //     $query->whereHas('user', function ($q) use ($request) {
-  //       $q->where('department_id', $request->input('department_id'));
-  //     });
-  //   }
-
-  //   $emailApplications = $query->orderBy('created_at', 'desc')->paginate(10);
-  //   $statuses = EmailApplication::getStatusOptions();
-  //   $departments = Department::orderBy('name')->get();
-
-  //   if ($request->filled('export') && $request->input('export') === 'pdf') {
-  //     $pdf = Pdf::loadView('reports.email-accounts-pdf', compact('emailApplications', 'statuses', 'departments'));
-  //     return $pdf->download('email-accounts.pdf');
-  //   }
-
-  //   return view(
-  //     'reports.email-accounts',
-  //     compact('emailApplications', 'statuses', 'departments')
-  //   );
-  // }
-
-  public function loanHistory(Request $request): View | Response
-  {
-    $this->authorize('viewLoanReports', LoanTransaction::class);
-
-    $query = LoanTransaction::query()->with(['equipment', 'loanApplication.applicant']);
-
-    if ($request->filled('user_id')) {
-      $query->whereHas('loanApplication', function ($q) use ($request) {
-        $q->where('applicant_id', $request->input('user_id'));
-      });
+    public function helpdeskResolutionTimes(Request $request): View|Response
+    {
+        // Logic to be implemented for helpdesk module
+        return view('reports.helpdesk-resolution-times');
     }
-
-    if ($request->filled('transaction_type')) {
-      if ($request->input('transaction_type') === 'issue') {
-        $query->whereNotNull('issued_at');
-      } elseif ($request->input('transaction_type') === 'return') {
-        $query->whereNotNull('returned_at');
-      }
-    }
-
-    if ($request->filled('start_date')) {
-      $query->where(function ($q) use ($request) {
-        $q->whereDate('issued_at', '>=', $request->input('start_date'))
-          ->orWhereDate('returned_at', '>=', $request->input('start_date'));
-      });
-    }
-
-    if ($request->filled('end_date')) {
-      $query->where(function ($q) use ($request) {
-        $q->whereDate('issued_at', '<=', $request->input('end_date'))
-          ->orWhereDate('returned_at', '<=', $request->input('end_date'));
-      });
-    }
-
-    $loanTransactions = $query->orderBy('created_at', 'desc')->paginate(10);
-    $usersFilter = User::orderBy('name')->get(['id', 'name']);
-    $transactionTypes = [
-      'issue' => 'Issue',
-      'return' => 'Return',
-    ];
-
-    if ($request->filled('export') && $request->input('export') === 'pdf') {
-      $pdf = Pdf::loadView('reports.loan-history-pdf', compact('loanTransactions', 'usersFilter', 'transactionTypes', 'request'));
-      return $pdf->download('loan-history.pdf');
-    }
-
-    return view(
-      'reports.loan-history',
-      compact('loanTransactions', 'usersFilter', 'transactionTypes', 'request')
-    );
-  }
-
-  public function loanStatusSummary(Request $request): View | Response
-  {
-    $this->authorize('viewLoanReports', LoanApplication::class);
-
-    $data = LoanApplication::query()
-      ->select(['status', DB::raw('count(*) as count')])
-      ->groupBy('status')
-      ->pluck('count', 'status')
-      ->mapWithKeys(fn ($count, $status) => [
-        $status => [
-          'label' => LoanApplication::getStatusOptions()[$status] ?? ucfirst(str_replace('_', ' ', $status)),
-          'count' => $count,
-        ]
-      ])
-      ->toArray();
-
-    if ($request->filled('export') && $request->input('export') === 'pdf') {
-      $pdf = Pdf::loadView('reports.loan-status-summary', ['data' => $data]);
-      return $pdf->download('loan-status-summary.pdf');
-    }
-
-    return view('reports.loan-status-summary', ['data' => $data]);
-  }
-
-  public function utilizationReport(Request $request): View | Response
-  {
-    $this->authorize('viewLoanReports', Equipment::class);
-
-    $summary = Equipment::getStatusSummary();
-    $utilizationRate = Equipment::getUtilizationRate();
-
-    if ($request->filled('export') && $request->input('export') === 'pdf') {
-      $pdf = Pdf::loadView('reports.utilization-report', compact('summary', 'utilizationRate'));
-      return $pdf->download('utilization-report.pdf');
-    }
-
-    return view('reports.utilization-report', compact('summary', 'utilizationRate'));
-  }
-
-  // NEW: Helpdesk-specific reports
-  public function helpdeskTicketVolume(Request $request): View | Response
-  {
-      // This method will display a report on ticket volume
-      // Authorization and actual logic for fetching data will be added during Helpdesk module implementation
-      return view('reports.helpdesk-ticket-volume');
-  }
-
-  public function helpdeskResolutionTimes(Request $request): View | Response
-  {
-      // This method will display a report on helpdesk ticket resolution times
-      // Authorization and actual logic for fetching data will be added during Helpdesk module implementation
-      return view('reports.helpdesk-resolution-times');
-  }
 }

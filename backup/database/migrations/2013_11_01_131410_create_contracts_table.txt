@@ -11,12 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('helpdesk_priorities', function (Blueprint $table) {
+        Schema::create('contracts', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
-            $table->integer('level')->default(0); // For sorting purposes (e.g., 1 for Low, 5 for Critical)
-            $table->string('color_code')->nullable(); // e.g., #FF0000 for Critical
+            $table->string('name');
+            $table->integer('work_rate')->length(3);
+            $table->longText('notes')->nullable();
+            $table->string('created_by');
+            $table->string('updated_by');
+            $table->string('deleted_by')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -25,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('helpdesk_priorities');
+        Schema::dropIfExists('contracts');
     }
 };

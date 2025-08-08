@@ -21,7 +21,7 @@ final class EquipmentOverdueNotification extends Notification implements ShouldQ
     private LoanApplication $loanApplication;
     private int $daysOverdue;
 
-    public function __construct(LoanApplication $loanApplication, int $daysOverdue) // Modified constructor
+    public function __construct(LoanApplication $loanApplication, int $daysOverdue)
     {
         $this->loanApplication = $loanApplication->loadMissing(['user', 'responsibleOfficer']);
         $this->daysOverdue = $daysOverdue;

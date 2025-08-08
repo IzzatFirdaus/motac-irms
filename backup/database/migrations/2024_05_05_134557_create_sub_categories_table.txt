@@ -11,11 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('helpdesk_categories', function (Blueprint $table) {
+        Schema::create('sub_categories', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique(); // This ensures uniqueness as per good practice for categories
-            $table->text('description')->nullable();
+            $table->foreignId('category_id')->constrained();
+            $table->string('name');
+            $table->string('created_by');
+            $table->string('updated_by');
+            $table->string('deleted_by')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -24,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('helpdesk_categories');
+        Schema::dropIfExists('sub_categories');
     }
 };

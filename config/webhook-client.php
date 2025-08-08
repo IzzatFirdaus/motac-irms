@@ -1,76 +1,50 @@
 <?php
 
 return [
-    'configs' => [
-        [
-            /*
-             * This package supports multiple webhook receiving endpoints. If you only have
-             * one endpoint receiving webhooks, you can use 'default'.
-             */
-            'name' => 'default',
-
-            /*
-             * We expect that every webhook call will be signed using a secret. This secret
-             * is used to verify that the payload has not been tampered with.
-             */
-            'signing_secret' => env('WEBHOOK_CLIENT_SECRET'),
-
-            /*
-             * The name of the header containing the signature.
-             */
-            'signature_header_name' => 'X-Hub-Signature',
-
-            /*
-             *  This class will verify that the content of the signature header is valid.
-             *
-             * It should implement \Spatie\WebhookClient\SignatureValidator\SignatureValidator
-             */
-            'signature_validator' => App\Validator\customSignatureValidator::class,
-
-            /*
-             * This class determines if the webhook call should be stored and processed.
-             */
-            'webhook_profile' => \Spatie\WebhookClient\WebhookProfile\ProcessEverythingWebhookProfile::class,
-
-            /*
-             * This class determines the response on a valid webhook call.
-             */
-            'webhook_response' => \Spatie\WebhookClient\WebhookResponse\DefaultRespondsTo::class,
-
-            /*
-             * The class name of the model to be used to store webhook calls. The class should
-             * be equal or extend Spatie\WebhookClient\Models\WebhookCall.
-             */
-            'webhook_model' => \Spatie\WebhookClient\Models\WebhookCall::class,
-
-            /*
-             * In this array, you can pass the headers that should be stored on
-             * the webhook call model when a webhook comes in.
-             *
-             * To store all headers, set this value to `*`.
-             */
-            'store_headers' => [
-
-            ],
-
-            /*
-             * The class name of the job that will process the webhook request.
-             *
-             * This should be set to a class that extends \Spatie\WebhookClient\Jobs\ProcessWebhookJob.
-             */
-            'process_webhook_job' => App\Jobs\syncAppWithGithub::class,
-        ],
-    ],
+    /*
+     * Configuration for storing and processing webhook calls.
+     * This config is designed to match the database structure defined in
+     * 2024_05_27_100007_create_webhook_calls_table.php and can be adapted
+     * for custom logic or used with a package such as Spatie Webhook Client.
+     */
+    'storage_table' => 'webhook_calls',
 
     /*
-     * The integer amount of days after which models should be deleted.
-     *
-     * It deletes all records after 1 week. Set to null if no models should be deleted.
+     * The amount of days after which records should be deleted (retention policy).
+     * Set to null for no automatic deletion.
      */
     'delete_after_days' => 30,
 
     /*
-     * Should a unique token be added to the route name
+     * If you want to validate incoming webhooks, specify a secret here.
+     * Example: 'signing_secret' => env('WEBHOOK_SIGNING_SECRET')
+     */
+    'signing_secret' => env('WEBHOOK_SIGNING_SECRET'),
+
+    /*
+     * The name of the header containing the signature, if used.
+     */
+    'signature_header_name' => 'X-Hub-Signature',
+
+    /*
+     * Class responsible for validating the signature, if required.
+     * This should implement a method: static function isValid($signature, $payload, $secret): bool
+     */
+    'signature_validator' => \App\Validator\CustomSignatureValidator::class,
+
+    /*
+     * Which headers to store. Use '*' to store all.
+     */
+    'store_headers' => '*',
+
+    /*
+     * The job or event to dispatch for further processing.
+     * Set to null if not used.
+     */
+    'process_webhook_job' => null,
+
+    /*
+     * Add unique token to the route for additional security (optional).
      */
     'add_unique_token_to_route_name' => false,
 ];
