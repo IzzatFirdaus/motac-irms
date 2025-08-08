@@ -1,16 +1,23 @@
 {
+  "_comment": [
+    "Prettier configuration for MOTAC IRMS (Integrated Resource Management System)",
+    "This config enforces consistent code formatting for JavaScript, TypeScript, Vue, and JSON files.",
+    "It aligns with MOTAC IRMS coding standards and works well with Laravel Mix, Vue, and modern frontend tooling.",
+    "To use: run `npx prettier --write .` or configure with your editor/plugin."
+  ],
   "arrowParens": "avoid",
   "bracketSpacing": true,
   "htmlWhitespaceSensitivity": "css",
   "insertPragma": false,
   "jsxSingleQuote": true,
-  "printWidth": 120,
-  "proseWrap": "preserve",
+  "printWidth": 100,
+  "proseWrap": "always",
   "quoteProps": "as-needed",
   "requirePragma": false,
   "semi": true,
   "singleQuote": true,
   "tabWidth": 2,
-  "trailingComma": "none",
-  "useTabs": false
+  "trailingComma": "es5",
+  "useTabs": false,
+  "endOfLine": "lf"
 }

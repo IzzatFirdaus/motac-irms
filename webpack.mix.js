@@ -1,48 +1,52 @@
-const { EnvironmentPlugin, IgnorePlugin } = require('webpack');
+// -----------------------------------------------------------------------------
+// MOTAC IRMS (Integrated Resource Management System) - Laravel Mix Configuration
+// -----------------------------------------------------------------------------
+// This config is tailored for MOTAC/Malaysia local development.
+// It handles assets, vendor libraries, custom UI theme, and is locale-aware.
+// -----------------------------------------------------------------------------
+// Usage: npm run dev / npm run prod / npm run watch
+// Most commands will pick up .env settings (e.g. ASSET_URL for publicPath).
+// -----------------------------------------------------------------------------
+
 const mix = require('laravel-mix');
+const { EnvironmentPlugin, IgnorePlugin } = require('webpack');
 const glob = require('glob');
 const path = require('path');
 
-/*
- |--------------------------------------------------------------------------
- | Configure mix
- |--------------------------------------------------------------------------
- */
-
+// -----------------------------------------------------------------------------
+// Mix Options
+// -----------------------------------------------------------------------------
 mix.options({
-  resourceRoot: process.env.ASSET_URL || undefined,
-  processCssUrls: false,
+  resourceRoot: process.env.ASSET_URL || '/', // Base for assets; use CDN/base if needed
+  processCssUrls: false,                      // Don't process/replace css url()s
   postCss: [require('autoprefixer')]
 });
 
-/*
- |--------------------------------------------------------------------------
- | Configure Webpack
- |--------------------------------------------------------------------------
- */
-
+// -----------------------------------------------------------------------------
+// Webpack Configuration
+// -----------------------------------------------------------------------------
 mix.webpackConfig({
   output: {
-    publicPath: process.env.ASSET_URL || undefined,
+    publicPath: process.env.ASSET_URL ? `${process.env.ASSET_URL}/` : '/', // For correct asset loading
     libraryTarget: 'umd'
   },
-
   plugins: [
+    // Ignore premium or non-npm vendor plugins
     new IgnorePlugin({
       checkResource(resource, context) {
         return [
           path.join(__dirname, 'resources/assets/vendor/libs/@form-validation')
-          // Add more paths to ignore as needed
         ].some(pathToIgnore => resource.startsWith(pathToIgnore));
       }
     }),
+    // Inject BASE_URL into frontend scripts
     new EnvironmentPlugin({
-      // Application's public url
       BASE_URL: process.env.ASSET_URL ? `${process.env.ASSET_URL}/` : '/'
     })
   ],
   module: {
     rules: [
+      // Use Babel for modern JS compatibility
       {
         test: /\.es6$|\.js$/,
         include: [
@@ -63,6 +67,7 @@ mix.webpackConfig({
       }
     ]
   },
+  // Some vendor libraries are expected globally (no need to bundle again)
   externals: {
     jquery: 'jQuery',
     moment: 'moment',
@@ -72,20 +77,15 @@ mix.webpackConfig({
     pace: '"pace-progress"',
     chartist: 'Chartist',
     'popper.js': 'Popper',
-
-    // blueimp-gallery plugin
     './blueimp-helper': 'jQuery',
     './blueimp-gallery': 'blueimpGallery',
     './blueimp-gallery-video': 'blueimpGallery'
   }
 });
 
-/*
- |--------------------------------------------------------------------------
- | Vendor assets
- |--------------------------------------------------------------------------
- */
-
+// -----------------------------------------------------------------------------
+// Helper for Globbing Vendor and App Asset Directories
+// -----------------------------------------------------------------------------
 function mixAssetsDir(query, cb) {
   (glob.sync('resources/assets/' + query) || []).forEach(f => {
     f = f.replace(/[\\\/]+/g, '/');
@@ -93,66 +93,75 @@ function mixAssetsDir(query, cb) {
   });
 }
 
-/*
- |--------------------------------------------------------------------------
- | Configure sass
- |--------------------------------------------------------------------------
- */
-
+// -----------------------------------------------------------------------------
+// SASS Compilation Options (for MOTAC theme precision)
+// -----------------------------------------------------------------------------
 const sassOptions = {
   precision: 5
 };
 
-// Core stylesheets
+// -----------------------------------------------------------------------------
+// VENDOR ASSETS: Compile/copy all vendor theme assets (SCSS, JS, fonts, images)
+// -----------------------------------------------------------------------------
+
+// Core theme SCSS to CSS
 mixAssetsDir('vendor/scss/**/!(_)*.scss', (src, dest) =>
   mix.sass(src, dest.replace(/(\\|\/)scss(\\|\/)/, '$1css$2').replace(/\.scss$/, '.css'), { sassOptions })
 );
 
-// Core JavaScripts
+// Core theme JS (ES6 or plain)
 mixAssetsDir('vendor/js/**/*.js', (src, dest) => mix.js(src, dest));
 
-// Libs
+// Vendor libraries JS and SCSS
 mixAssetsDir('vendor/libs/**/*.js', (src, dest) => mix.js(src, dest));
 mixAssetsDir('vendor/libs/**/!(_)*.scss', (src, dest) =>
   mix.sass(src, dest.replace(/\.scss$/, '.css'), { sassOptions })
 );
 mixAssetsDir('vendor/libs/**/*.{png,jpg,jpeg,gif}', (src, dest) => mix.copy(src, dest));
-// Copy task for form validation plugin as premium plugin don't have npm package
+
+// Copy full directory for premium form validation plugin (not in npm)
 mixAssetsDir('vendor/libs/@form-validation/umd', (src, dest) => mix.copyDirectory(src, dest));
 
-// Fonts
+// Fonts (custom and vendor)
 mixAssetsDir('vendor/fonts/*/*', (src, dest) => mix.copy(src, dest));
 mixAssetsDir('vendor/fonts/!(_)*.scss', (src, dest) =>
   mix.sass(src, dest.replace(/(\\|\/)scss(\\|\/)/, '$1css$2').replace(/\.scss$/, '.css'), { sassOptions })
 );
 
-/*
- |--------------------------------------------------------------------------
- | Application assets
- |--------------------------------------------------------------------------
- */
+// -----------------------------------------------------------------------------
+// APPLICATION ASSETS: Compile app-specific JS, copy CSS
+// -----------------------------------------------------------------------------
 
+// Application JS (combine all app scripts in js/ to single bundle)
 mixAssetsDir('js/**/*.js', (src, dest) => mix.scripts(src, dest));
 mixAssetsDir('css/**/*.css', (src, dest) => mix.copy(src, dest));
-// laravel working crud app related js
+
+// Laravel user management module (compiled as a separate app bundle)
 mix.js('resources/js/laravel-user-management.js', 'public/js/');
 
+// -----------------------------------------------------------------------------
+// Copy vendor icons/fonts for UI (flag icons, FontAwesome, KaTeX for Quill)
+// -----------------------------------------------------------------------------
 mix.copy('node_modules/flag-icons/flags/1x1/*', 'public/assets/vendor/fonts/flags/1x1');
 mix.copy('node_modules/flag-icons/flags/4x3/*', 'public/assets/vendor/fonts/flags/4x3');
 mix.copy('node_modules/@fortawesome/fontawesome-free/webfonts/*', 'public/assets/vendor/fonts/fontawesome');
 mix.copy('node_modules/katex/dist/fonts/*', 'public/assets/vendor/libs/quill/fonts');
 
+// -----------------------------------------------------------------------------
+// Versioning: For cache-busting in dev and production
+// -----------------------------------------------------------------------------
 mix.version();
 
-/*
- |--------------------------------------------------------------------------
- | Browsersync Reloading
- |--------------------------------------------------------------------------
- |
- | BrowserSync can automatically monitor your files for changes, and inject your changes into the browser without requiring a manual refresh.
- | You may enable support for this by calling the mix.browserSync() method:
- | Make Sure to run `php artisan serve` and `yarn watch` command to run Browser Sync functionality
- | Refer official documentation for more information: https://laravel.com/docs/10.x/mix#browsersync-reloading
- */
-
+// -----------------------------------------------------------------------------
+// Browsersync: Auto reload for local dev (http://localhost:8000)
+// -----------------------------------------------------------------------------
 mix.browserSync('http://127.0.0.1:8000/');
+
+// -----------------------------------------------------------------------------
+// Documentation:
+//  - To run dev build:    npm run dev
+//  - For production:      npm run prod
+//  - To watch changes:    npm run watch
+//  - For Browsersync:     php artisan serve & npm run watch
+//  - See .env for ASSET_URL or APP_URL/asset root override
+// -----------------------------------------------------------------------------

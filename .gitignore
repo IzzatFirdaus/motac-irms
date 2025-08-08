@@ -1,20 +1,81 @@
+# MOTAC IRMS - .gitignore
+# ------------------------
+# This file specifies intentionally untracked files to ignore for the
+# MOTAC Integrated Resource Management System (MOTAC_IRMS).
+# Adjust as needed for your environment or team preferences.
+
+# Node and frontend dependencies
 /node_modules
+
+# Laravel Mix or Vite build outputs
 /public/build
+/public/css
+/public/js
 /public/hot
-/public/storage
+
+# Storage (user uploads, app-generated, symlinked)
+public/storage
 /storage/*.key
+
+# Composer dependencies
 /vendor
+
+# Environment files
 .env
-.env.backup
-.env.production
+.env.*
+!.env.example    # Allow .env.example to be tracked
+
+# PHPUnit and test artifacts
 .phpunit.result.cache
+/coverage
+/build
+
+# Docker and Homestead
 docker-compose.override.yml
 Homestead.json
 Homestead.yaml
+
+# IDE and editor files
+/.idea
+/.vscode
+/_ide_helper.php
+
+# NPM/Yarn/Pnpm logs and lockfiles (lockfiles can be tracked if project policy allows)
 npm-debug.log
 yarn-error.log
 yarn.lock
 package-lock.json
-/.idea
-/_ide_helper.php
+pnpm-lock.yaml
+
+# Custom/utility scripts or outputs not meant for tracking
 remove_comments.py
+
+# Stylelint/Prettier/ESLint config cache
+.stylelintcache
+
+# Miscellaneous
+.DS_Store
+Thumbs.db
+
+# Ignore backup or temp files
+*.bak
+*.tmp
+*.swp
+*.swo
+
+# Ignore log files
+*.log
+
+# Ignore test snapshots (if using Jest or similar)
+__snapshots__/
+
+# Ignore coverage and docs output (for JS/TS projects)
+/docs/dist
+
+# Ignore PHP built-in server files
+.phpserver
+
+# Ignore artisan cache
+artisan.cache
+
+# Add any additional MOTAC IRMS-specific ignores below

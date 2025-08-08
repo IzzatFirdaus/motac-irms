@@ -2,66 +2,73 @@
 
 declare(strict_types=1);
 
+/**
+ * MOTAC IRMS - Rector Configuration
+ * ---------------------------------
+ * This Rector config is tailored for the MOTAC Integrated Resource Management System (MOTAC_IRMS).
+ * It enforces consistent code quality, modern PHP practices, and Laravel upgrade rules.
+ * Adjust paths, sets, and skips as your system evolves.
+ */
+
 use Rector\Config\RectorConfig;
-//use Rector\Laravel\Set\LaravelSetList;
 use Rector\Set\ValueObject\SetList;
-use Rector\Symfony\Set\SymfonySetList;
-// Ensure the package is installed; otherwise, comment this line
-use Driftingly\RectorLaravel\Set\LaravelSetList;
+// If you use Rector Laravel sets, require and use the correct package and class.
+// Example: use Rector\Laravel\Set\LaravelSetList;
+// You can use Symfony sets if you use Symfony components
+// use Rector\Symfony\Set\SymfonySetList;
 
 return static function (RectorConfig $rectorConfig): void {
-    // Define paths to refactor
+    // Specify the project directories to refactor
     $rectorConfig->paths([
-        __DIR__.'/app',
-        __DIR__.'/bootstrap',
-        __DIR__.'/config',
-        __DIR__.'/database',
-        __DIR__.'/public',
-        __DIR__.'/resources',
-        __DIR__.'/routes',
-        // __DIR__ . '/src', // Keep this commented unless you actually have a 'src' directory
-        __DIR__.'/tests',
+        __DIR__ . '/app',
+        __DIR__ . '/bootstrap',
+        __DIR__ . '/config',
+        __DIR__ . '/database',
+        __DIR__ . '/public',
+        __DIR__ . '/resources',
+        __DIR__ . '/routes',
+        // __DIR__ . '/src', // Uncomment if you have a 'src' directory
+        __DIR__ . '/tests',
     ]);
 
-    // Apply sets of rules
+    // Apply relevant Rector rule sets for MOTAC IRMS
     $rectorConfig->sets([
-        // PHP upgrades - keep these active
-        SetList::PHP_82, // Your composer.json requires ^8.2
-        SetList::CODE_QUALITY,
-        SetList::DEAD_CODE,
-        SetList::TYPE_DECLARATION,
-        SetList::PRIVATIZATION,
-        SetList::EARLY_RETURN,
-        SetList::STRICT_BOOLEANS,
-        SetList::INSTANCEOF,
-        SetList::CODING_STYLE,
+        // PHP upgrades for compatibility with PHP 8.2+
+        SetList::PHP_82,
+        SetList::CODE_QUALITY,         // Improve overall code quality
+        SetList::DEAD_CODE,            // Remove unused code
+        SetList::TYPE_DECLARATION,     // Add or improve type declarations
+        SetList::PRIVATIZATION,        // Make things private where possible
+        SetList::EARLY_RETURN,         // Use early return where beneficial
+        SetList::STRICT_BOOLEANS,      // Use strict boolean checks
+        SetList::INSTANCEOF,           // Modernize instanceof usage
+        SetList::CODING_STYLE,         // Enforce consistent coding style
 
-        // Laravel upgrades: UNCOMMENT THIS LINE for Laravel 11
-        Driftingly\RectorLaravel\Set\LaravelSetList::LARAVEL_11, // Adjust this as needed for your Laravel version
+        // Laravel upgrade and modernization rules
+        // Add Laravel Rector sets here if you have the correct package installed.
+        // Example: LaravelSetList::LARAVEL_110,
 
-        // If you are using Symfony components, you can include their sets too
+        // If you use Symfony, you may enable these:
         // SymfonySetList::SYMFONY_60,
         // SymfonySetList::SYMFONY_Casts_ATTRIBUTES,
         // SymfonySetList::SYMFONY_CODE_QUALITY,
     ]);
 
-    // Optional: Exclude specific files or directories
+    // Exclude files/directories that should not be refactored
     $rectorConfig->skip([
-        // Paths that Rector should not touch
-        __DIR__.'/vendor', // Always exclude vendor!
-        __DIR__.'/storage', // Typically exclude storage
-        __DIR__.'/bootstrap/cache', // Exclude cached files
-        __DIR__.'/public/build', // Exclude build assets
+        __DIR__ . '/vendor',            // Always exclude vendor!
+        __DIR__ . '/storage',           // Exclude storage (runtime data)
+        __DIR__ . '/bootstrap/cache',   // Exclude cached files
+        __DIR__ . '/public/build',      // Exclude frontend build output
 
-        // !!! IMPORTANT: Try to re-enable this file.
-        // Comment out this line to allow Rector to process it again,
-        // especially after clearing Rector's cache.
-        // __DIR__.'/app/Livewire/ResourceManagement/EmailAccount/ApplicationForm.php',
+        // If you want to temporarily exclude a file from Rector, add it here.
+        // Example:
+        // __DIR__ . '/app/Livewire/ResourceManagement/EmailAccount/ApplicationForm.php',
     ]);
 
-    // Optional: Configure caching for faster subsequent runs
-    $rectorConfig->cacheDirectory(__DIR__.'/.rector_cache');
+    // Use a local cache directory for faster repeated runs
+    $rectorConfig->cacheDirectory(__DIR__ . '/.rector_cache');
 
-    // Optional: Turn off reporting rule names for less verbose output
+    // Optionally, reduce output verbosity by showing only short rule names
     // $rectorConfig->withShortName();
 };

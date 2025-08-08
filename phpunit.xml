@@ -1,27 +1,96 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="./vendor/phpunit/phpunit/phpunit.xsd" bootstrap="vendor/autoload.php" colors="true">
-  <testsuites>
-    <testsuite name="Unit">
-      <directory suffix="Test.php">./tests/Unit</directory>
-    </testsuite>
-    <testsuite name="Feature">
-      <directory suffix="Test.php">./tests/Feature</directory>
-    </testsuite>
-  </testsuites>
-  <php>
-    <env name="APP_ENV" value="testing"/>
-    <env name="BCRYPT_ROUNDS" value="4"/>
-    <env name="CACHE_DRIVER" value="array"/>
-    <!-- <env name="DB_CONNECTION" value="sqlite"/> -->
-    <!-- <env name="DB_DATABASE" value=":memory:"/> -->
-    <env name="MAIL_MAILER" value="array"/>
-    <env name="QUEUE_CONNECTION" value="sync"/>
-    <env name="SESSION_DRIVER" value="array"/>
-    <env name="TELESCOPE_ENABLED" value="false"/>
-  </php>
-  <source>
-    <include>
-      <directory suffix=".php">./app</directory>
-    </include>
-  </source>
+<!--
+  MOTAC IRMS (Integrated Resource Management System)
+  PHPUnit configuration tailored for MOTAC Malaysia locale, timezone, and conventions.
+  This file is for development/testing. Adjust DB, mail, and other settings before using in production.
+-->
+
+<phpunit
+    bootstrap="vendor/autoload.php"
+    colors="true"
+    verbose="true"
+    stopOnFailure="false"
+    failOnRisky="true"
+    failOnWarning="true"
+    executionOrder="default"
+    testdox="false"
+>
+    <!--
+      Environment variables for test environment.
+      These override .env values during testing.
+    -->
+    <php>
+        <env name="APP_ENV" value="testing"/>
+        <env name="APP_DEBUG" value="true"/>
+        <env name="APP_KEY" value="base64:ps45u9S+Gc2PvZZCgt5EIDlRXHRWZwG/BazRRV3P2pU="/>
+        <env name="APP_URL" value="http://localhost:8000"/>
+        <env name="APP_TIMEZONE" value="Asia/Kuala_Lumpur"/>
+        <env name="CACHE_DRIVER" value="array"/>
+        <env name="SESSION_DRIVER" value="array"/>
+        <env name="QUEUE_CONNECTION" value="sync"/>
+        <env name="DB_CONNECTION" value="mysql"/>
+        <env name="DB_DATABASE" value="motac_irms_test"/>
+        <env name="DB_HOST" value="127.0.0.1"/>
+        <env name="DB_PORT" value="3306"/>
+        <env name="DB_USERNAME" value="root"/>
+        <env name="DB_PASSWORD" value=""/>
+        <!-- Use log mailer to disable sending real emails during tests -->
+        <env name="MAIL_MAILER" value="log"/>
+        <env name="MAIL_FROM_ADDRESS" value="noreply@motac.gov.my"/>
+        <env name="MAIL_FROM_NAME" value="motac-irms"/>
+        <env name="BROADCAST_DRIVER" value="log"/>
+        <env name="FILESYSTEM_DISK" value="local"/>
+        <env name="THEME_LAYOUT" value="vertical"/>
+        <env name="THEME_SKIN" value="theme-motac"/>
+        <env name="THEME_STYLE" value="light"/>
+        <env name="THEME_PRIMARY_COLOR_MOTAC" value="#0055A4"/>
+        <env name="LOCALE" value="ms"/>
+        <!-- Add any other system-specific env overrides here -->
+    </php>
+
+    <!--
+      Directories containing test cases.
+      By default, tests should be placed in tests/Feature and tests/Unit.
+    -->
+    <testsuites>
+        <testsuite name="Feature">
+            <directory suffix="Test.php">./tests/Feature</directory>
+        </testsuite>
+        <testsuite name="Unit">
+            <directory suffix="Test.php">./tests/Unit</directory>
+        </testsuite>
+    </testsuites>
+
+    <!--
+      Exclude certain directories from code coverage.
+      Adjust as needed if using code coverage analysis.
+    -->
+    <coverage processUncoveredFiles="true">
+        <include>
+            <directory suffix=".php">./app</directory>
+        </include>
+        <exclude>
+            <directory suffix=".php">./app/Console</directory>
+            <directory suffix=".php">./app/Exceptions</directory>
+            <directory suffix=".php">./app/Providers</directory>
+            <directory>./tests</directory>
+            <directory>./database</directory>
+        </exclude>
+        <report>
+            <clover outputFile="build/logs/clover.xml"/>
+            <html outputDirectory="build/coverage"/>
+            <text outputFile="build/logs/coverage.txt"/>
+        </report>
+    </coverage>
+
+    <!--
+      Logging and test result output.
+      These files are useful for CI/CD and debugging.
+    -->
+    <logging>
+        <log type="junit" target="build/logs/junit.xml"/>
+        <log type="teamcity" target="build/logs/teamcity.txt"/>
+        <log type="testdox-html" target="build/logs/testdox.html"/>
+        <log type="testdox-text" target="build/logs/testdox.txt"/>
+    </logging>
 </phpunit>

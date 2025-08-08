@@ -1,3 +1,45 @@
+# MOTAC IRMS - Prettier Ignore Configuration
+# ------------------------------------------
+# This file tells Prettier which files and directories to ignore
+# when formatting code in the MOTAC Integrated Resource Management System.
+# Adjust as the system evolves or as frontend tooling changes.
+
+# Ignore build output and dependencies
 dist
 node_modules
+
+# Ignore vendor assets (third-party, managed outside project)
 assets/vendor
+
+# Ignore public storage, compiled, or hot reload artifacts
+public/storage
+public/hot
+
+# Ignore compiled CSS/JS outputs (set by Laravel Mix or Vite)
+public/css
+public/js
+
+# Ignore environment and config files
+.env
+.env.*
+
+# Ignore lock files and package manager artifacts
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Ignore IDE/editor folders
+.vscode
+.idea
+
+# Ignore coverage and test result folders
+coverage
+build
+
+# Ignore PHP vendor folder (managed by Composer, not JS)
+vendor
+
+# Ignore documentation output
+docs/dist
+
+# Add more as needed for MOTAC IRMS frontend or backend workflows
