@@ -1,185 +1,112 @@
 #--------------------------------------------------------------------------
-# MOTAC Integrated Resource Management System .env Configuration
+# MOTAC Integrated Resource Management System - Testing Environment
 #--------------------------------------------------------------------------
-# This file contains environment-specific configuration for the application.
-# Values in this file override values set in the config/*.php files when
-# env() helper is used within those config files.
-#
-# !! IMPORTANT !!
-# 1. This file should NOT be committed to your public source code repository
-#    with production or sensitive credentials filled in. Use a .env.example.
-# 2. After making changes to this file in a production environment,
-#    run `php artisan config:cache` to apply changes. For local development,
-#    this is usually not needed unless you are specifically testing caching.
-
-# REVIEW: Check and update these settings for EACH deployment environment (staging, production).
-# Ensure correct values for APP_URL, APP_ENV, APP_DEBUG, Database, Mail, and Service credentials.
+# Use for automated tests or isolated development.
+# Mirrors .env, but uses a separate DB and disables mail.
 
 #--------------------------------------------------------------------------
 # Application Configuration
 #--------------------------------------------------------------------------
+APP_NAME="motac-irms"
+APP_NICKNAME="MOTAC IRMS"
+APP_VERSION="1.0.0"
+APP_ENV=testing
+APP_KEY=base64:ps45u9S+Gc2PvZZCgt5EIDlRXHRWZwG/BazRRV3P2pU=
+APP_DEBUG=true
+APP_URL=http://localhost:8000
+APP_TIMEZONE=Asia/Kuala_Lumpur
 
-APP_NAME="motac-irms" # Refactored: Shorter name for consistency with JS templateName, used for display.
-APP_NICKNAME="MOTAC IRMS" # Shorter version or acronym, can be used where brevity is needed.
-APP_VERSION="1.0.0" # System version.
-APP_ENV=testing # Options: local, development, staging, production.
-APP_KEY=base64:ps45u9S+Gc2PvZZCgt5EIDlRXHRWZwG/BazRRV3P2pU= # !!! IMPORTANT: Generate with `php artisan key:generate`. KEEP THIS SECRET!
-APP_DEBUG=true # !!! SECURITY: Set to 'false' for staging and production environments.
-APP_URL=http://localhost:8000 # IMPORTANT: Set to the correct public URL for each environment.
-APP_TIMEZONE='Asia/Kuala_Lumpur' # Default application timezone.
-
-# Enable/Disable Laravel Debugbar (Useful for local development)
-DEBUGBAR_ENABLED=true # Set to 'false' or remove for staging and production.
+DEBUGBAR_ENABLED=false
 
 #--------------------------------------------------------------------------
 # Logging Configuration
 #--------------------------------------------------------------------------
-
-LOG_CHANNEL=stack # Default channel. Options defined in config/logging.php.
-LOG_DEPRECATIONS_CHANNEL=null # Set to 'single' or 'daily' to log deprecations separately.
-LOG_LEVEL=debug # 'debug' for local; 'info', 'warning', or 'error' for staging/production.
-# LOG_SLACK_WEBHOOK_URL= # Optional: For sending critical logs to a Slack channel.
-
-# TODO: Implement access restriction to any log viewer for administrators only.
+LOG_CHANNEL=stack
+LOG_LEVEL=debug
+LOG_DEPRECATIONS_CHANNEL=null
 
 #--------------------------------------------------------------------------
 # Database Configuration
 #--------------------------------------------------------------------------
-
-DB_CONNECTION=mysql # System uses MySQL.
-DB_HOST=127.0.0.1 # Database host. Update for staging/production (e.g., private IP or service endpoint).
-DB_PORT=3306 # Standard MySQL port.
-DB_DATABASE=hrms_database_test # Suggested MOTAC-specific database name. Update as needed. [Derived from System Design Source 1, 3, 10]
-DB_USERNAME=root # Local development username. Use dedicated, less-privileged user for staging/production.
-DB_PASSWORD= # Local development password (can be empty for root on some setups). MUST be set with a strong password for staging/production.
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=motac_irms_test              # Separate DB for tests
+DB_USERNAME=root
+DB_PASSWORD=
 
 #--------------------------------------------------------------------------
 # Broadcasting, Cache, Filesystem, Queue, Session Configuration
 #--------------------------------------------------------------------------
-
-# WebSockets are confirmed necessary. For production, use 'pusher' or 'redis' with Laravel Echo Server.
-BROADCAST_DRIVER=log # Options: log, null, pusher, redis. 'log' for local dev if not testing WebSockets.
-CACHE_DRIVER=file # array instead of file # Options: file, redis, memcached, database. For production, 'redis' or 'memcached' is recommended.
-FILESYSTEM_DISK=local # Options: local, public, s3. For production, 's3' is common for scalability.
-
-# Queue for background tasks like sending emails and notifications.
-QUEUE_CONNECTION=database # Options: sync (local dev only), database, redis, sqs. 'database' or 'redis' recommended for production.
-# Remember to run `php artisan queue:work`.
-SESSION_DRIVER=database # Using database for sessions as per System Design.
-SESSION_LIFETIME=120 # Session lifetime in minutes.
-SESSION_ENCRYPT=false # !!! SECURITY: Set to 'true' for staging and production environments to encrypt session data.
-SESSION_SECURE_COOKIE= # Set to 'true' in production if served over HTTPS (recommended). Defaults based on HTTPS scheme.
+BROADCAST_DRIVER=log
+CACHE_DRIVER=array                       # Use array cache for speed in tests
+FILESYSTEM_DISK=local
+QUEUE_CONNECTION=sync                    # Run jobs immediately in tests
+SESSION_DRIVER=array
+SESSION_LIFETIME=30
+SESSION_ENCRYPT=false
+SESSION_SECURE_COOKIE=
 
 #--------------------------------------------------------------------------
-# Cache and Queue Server Details (if using Redis / Memcached)
-#--------------------------------------------------------------------------
-
-REDIS_CLIENT=predis # Or 'phpredis' (requires PHP extension)
-REDIS_HOST=127.0.0.1 # Update for staging/production.
-REDIS_PASSWORD=null # Set if your Redis instance requires a password.
+# Redis (Optional for integration tests)
+REDIS_CLIENT=predis
+REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null
 REDIS_PORT=6379
 
-# MEMCACHED_HOST=127.0.0.1
+#--------------------------------------------------------------------------
+# Mail Configuration (Disable real mail in tests)
+MAIL_MAILER=log
+MAIL_HOST=localhost
+MAIL_PORT=1025
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_ENCRYPTION=null
+MAIL_FROM_ADDRESS="noreply@motac.gov.my"
+MAIL_FROM_NAME="${APP_NICKNAME}"
 
 #--------------------------------------------------------------------------
-# Mail Configuration
-#--------------------------------------------------------------------------
-# System Design specifies Mailtrap for local development.
-# Production settings MUST use MOTAC's actual mail server or a transactional email service.
-
-# --- Local Development (using Mailtrap) ---
-MAIL_MAILER=smtp
-MAIL_HOST=sandbox.smtp.mailtrap.io
-MAIL_PORT=2525 # Common Mailtrap ports: 25, 465, 587, 2525
-MAIL_USERNAME=236247a461ba7f # !!! Replace with your actual Mailtrap username
-MAIL_PASSWORD=cd5976802e278c # !!! Replace with your actual Mailtrap password
-MAIL_ENCRYPTION=tls # 'tls' is common for Mailtrap on port 2525.
-
-# --- Staging/Production (Example using generic SMTP - REPLACE with MOTAC's actual settings) ---
-# MAIL_MAILER=smtp
-# MAIL_HOST=smtp.motac.gov.my # !!! Replace with MOTAC's production mail host
-# MAIL_PORT=587 # !!! Replace with MOTAC's production mail port (e.g., 587 for TLS, 465 for SSL)
-# MAIL_USERNAME= # !!! Replace with MOTAC's production mail username
-# MAIL_PASSWORD= # !!! Replace with MOTAC's production mail password (use app-specific password if possible)
-# MAIL_ENCRYPTION=tls # !!! Or 'ssl', check server requirements.
-
-MAIL_FROM_ADDRESS="noreply@motac.gov.my" # Official "From" address for system emails.
-MAIL_FROM_NAME="${APP_NAME}" # Uses the APP_NAME for sender name.
+# Webhook for test
+WEBHOOK_CLIENT_SECRET=
 
 #--------------------------------------------------------------------------
-# External Email Provisioning API Credentials (If applicable)
-#--------------------------------------------------------------------------
-# For integration with external email creation services, as potentially
-# suggested by EmailProvisioningController.
-
-# EXT_EMAIL_API_KEY=
-# EXT_EMAIL_API_SECRET=
-# EXT_EMAIL_API_BASE_URL=
-
-#--------------------------------------------------------------------------
-# AWS Configuration (If using S3 for FILESYSTEM_DISK='s3', etc.)
-#--------------------------------------------------------------------------
-
+# AWS S3 (Not used in tests)
 AWS_ACCESS_KEY_ID=
 AWS_SECRET_ACCESS_KEY=
-AWS_DEFAULT_REGION=ap-southeast-1 # Example: Singapore. Choose a region suitable for MOTAC.
-AWS_BUCKET= # Your S3 bucket name.
+AWS_DEFAULT_REGION=ap-southeast-1
+AWS_BUCKET=
 AWS_USE_PATH_STYLE_ENDPOINT=false
 
 #--------------------------------------------------------------------------
-# Pusher Configuration (If BROADCAST_DRIVER is 'pusher' for WebSockets)
-#--------------------------------------------------------------------------
-# WebSockets are necessary for the system.
-
+# Pusher (Websockets, not used in tests)
 PUSHER_APP_ID=
 PUSHER_APP_KEY=
 PUSHER_APP_SECRET=
-PUSHER_APP_CLUSTER=mt1 # Example: 'ap1' (Asia Pacific), 'mt1' (default). Ensure this matches your Pusher app settings.
-# For standard Pusher setup, PUSHER_HOST and PUSHER_PORT are often not needed
-# as they are derived from cluster and scheme (https). Set them if using a self-hosted solution or custom endpoint.
+PUSHER_APP_CLUSTER=mt1
 PUSHER_HOST=
-PUSHER_PORT=443 # Default for HTTPS
-PUSHER_SCHEME=https # Default
-PUSHER_USE_TLS=true # Should be true for https scheme
-
-# These are automatically picked up by Laravel Echo in JavaScript.
+PUSHER_PORT=443
+PUSHER_SCHEME=https
+PUSHER_USE_TLS=true
 MIX_PUSHER_APP_KEY="${PUSHER_APP_KEY}"
 MIX_PUSHER_APP_CLUSTER="${PUSHER_APP_CLUSTER}"
-MIX_PUSHER_USE_TLS="${PUSHER_USE_TLS}" # Pass TLS usage to frontend
+MIX_PUSHER_USE_TLS="${PUSHER_USE_TLS}"
 
 #--------------------------------------------------------------------------
-# Webhook Configuration
-#--------------------------------------------------------------------------
-# Secret for verifying incoming webhooks (e.g., GitHub for CI/CD deployments)
-# As per System Design.
-
-WEBHOOK_CLIENT_SECRET= # !!! Set a strong, unique secret for validating webhook signatures.
-
-#--------------------------------------------------------------------------
-# MOTAC Theme & Layout Configuration (Defaults for config/custom.php)
-#--------------------------------------------------------------------------
-# These variables drive the settings in config/custom.php, allowing environment-specific theme control.
-# See config/custom.php for detailed options and their impact.
-
-THEME_LAYOUT=vertical # Default: 'vertical'. Options: 'vertical', 'horizontal'.
-THEME_SKIN=theme-motac # Default: 'theme-motac'. This should be your MOTAC-specific theme name.
-THEME_STYLE=light # Default: 'light'. Options: 'light', 'dark'.
-THEME_RTL_ASSETS_SUPPORT=true # Default: true. Set to false if your theme doesn't have separate LTR/RTL assets.
-THEME_DEFAULT_RTL_MODE=false # Default: false. MOTAC is primarily LTR (Bahasa Melayu).
-
-THEME_HAS_CUSTOMIZER_JS=true # MODIFIED: Set to 'true' to load template-customizer.js.
-THEME_DISPLAY_CUSTOMIZER_UI=false # Default: false. Show theme customizer UI panel? (Disable for production).
-
-THEME_MENU_FIXED=true # Default: true. Fixed sidebar.
-THEME_MENU_COLLAPSED=false # Default: false. Sidebar expanded by default.
-THEME_NAVBAR_FIXED=true # Default: true. Fixed top navbar.
-THEME_NAVBAR_DETACHED=false # Default: false. Full-width, integrated navbar.
-THEME_FOOTER_FIXED=false # Default: false. Static footer.
-
-THEME_HORIZONTAL_MENU_HOVER=true # For horizontal layout: show dropdowns on hover.
-THEME_SHOW_DROPDOWN_ON_HOVER=true # NEW: Explicitly enable dropdown on hover for vertical menu.
-
-THEME_CONTENT_CONTAINER=container-fluid # Default: 'container-fluid'. Options: 'container-fluid', 'container-xxl'.
-THEME_NAVBAR_CONTAINER=container-fluid # Default: 'container-fluid'.
-
-THEME_PRIMARY_COLOR_MOTAC="#0055A4" # MOTAC Blue (Design Language 2.1).
+# MOTAC Theme & Layout Configuration
+THEME_LAYOUT=vertical
+THEME_SKIN=theme-motac
+THEME_STYLE=light
+THEME_RTL_ASSETS_SUPPORT=true
+THEME_DEFAULT_RTL_MODE=false
+THEME_HAS_CUSTOMIZER_JS=true
+THEME_DISPLAY_CUSTOMIZER_UI=false
+THEME_MENU_FIXED=true
+THEME_MENU_COLLAPSED=false
+THEME_NAVBAR_FIXED=true
+THEME_NAVBAR_DETACHED=false
+THEME_FOOTER_FIXED=false
+THEME_HORIZONTAL_MENU_HOVER=true
+THEME_SHOW_DROPDOWN_ON_HOVER=true
+THEME_CONTENT_CONTAINER=container-fluid
+THEME_NAVBAR_CONTAINER=container-fluid
+THEME_PRIMARY_COLOR_MOTAC="#0055A4"

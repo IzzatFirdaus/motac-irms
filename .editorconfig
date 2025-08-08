@@ -1,18 +1,49 @@
+# MOTAC IRMS - .editorconfig
+# This file enforces consistent coding styles for the MOTAC Integrated Resource Management System (MOTAC_IRMS)
+# Supports PHP, JS, CSS, Vue, Markdown, YAML, and Docker Compose files
+# Adjust sections as the system evolves or as required by the team
+
 root = true
 
+# Global settings for all files
 [*]
-charset = utf-8
-end_of_line = lf
-indent_size = 2
-indent_style = space
-insert_final_newline = true
-trim_trailing_whitespace = true
+charset = utf-8                # Use UTF-8 character encoding
+end_of_line = lf               # Enforce LF line endings for consistency across OSes
+indent_size = 2                # Use 2 spaces for indentation (matches JS, Vue, CSS, YAML and most frontend tooling)
+indent_style = space           # Always use spaces, not tabs
+insert_final_newline = true    # Add newline at end of every file
+trim_trailing_whitespace = true # Remove trailing whitespace on save
 
+# Markdown files - do not trim trailing whitespace (some Markdown uses spaces for formatting)
 [*.md]
 trim_trailing_whitespace = false
 
+# YAML files - use 2 spaces for indentation (standard for YAML, matches Laravel, CI/CD, Docker Compose)
 [*.{yml,yaml}]
 indent_size = 2
 
+# Docker Compose file - use 4 spaces for top-level alignment and clarity
 [docker-compose.yml]
 indent_size = 4
+
+# PHP files - explicit section for clarity (inherits global, but can add per-project overrides here)
+[*.php]
+indent_size = 2
+indent_style = space
+
+# Blade templates - follow frontend indentation
+[*.blade.php]
+indent_size = 2
+indent_style = space
+
+# JSON files - use 2 spaces (matches Prettier, most editors, and frontend code)
+[*.json]
+indent_size = 2
+indent_style = space
+
+# Vue single-file components
+[*.vue]
+indent_size = 2
+indent_style = space
+
+# Add additional filetype sections as needed for MOTAC IRMS

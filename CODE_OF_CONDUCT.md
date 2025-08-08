@@ -2,9 +2,9 @@
 
 ## Our Pledge
 
-We, as members, contributors, and leaders, pledge to make participation in our community a harassment-free experience for everyone, regardless of age, body size, disability (visible or invisible), ethnicity, sex characteristics, gender identity and expression, experience level, education, socio-economic status, nationality, personal appearance, race, religion, or sexual orientation.
+We, as members, contributors, and leaders of the MOTAC Integrated Resource Management System (MOTAC_IRMS), pledge to make participation in our community a harassment-free experience for everyone, regardless of age, body size, disability (visible or invisible), ethnicity, sex characteristics, gender identity and expression, experience level, education, socio-economic status, nationality, personal appearance, race, religion, or sexual orientation.
 
-We pledge to act and interact in ways that contribute to an open, welcoming, diverse, inclusive, and healthy community.
+We pledge to act and interact in ways that contribute to an open, welcoming, diverse, inclusive, and healthy community for all contributors, users, and collaborators of MOTAC IRMS.
 
 ## Our Standards
 
@@ -15,6 +15,7 @@ We pledge to act and interact in ways that contribute to an open, welcoming, div
 - Give and gracefully accept constructive feedback
 - Accept responsibility and apologize for mistakes, learning from the experience
 - Focus on what is best for the community as a whole
+- Uphold the integrity and professionalism expected from a project under Kementerian Pelancongan, Seni dan Budaya Malaysia (MOTAC)
 
 ### Unacceptable Behavior Examples
 
@@ -22,21 +23,21 @@ We pledge to act and interact in ways that contribute to an open, welcoming, div
 - Trolling, insulting, or derogatory comments; personal or political attacks
 - Public or private harassment
 - Publishing others' private information (e.g., physical or email address) without explicit permission
-- Any other conduct reasonably considered inappropriate in a professional setting
+- Any other conduct reasonably considered inappropriate in a professional or governmental setting
 
 ## Enforcement Responsibilities
 
-Community leaders are responsible for clarifying and enforcing our standards of acceptable behavior. They will take appropriate and fair corrective action in response to any behavior they deem inappropriate, threatening, offensive, or harmful.
+Community leaders and maintainers are responsible for clarifying and enforcing our standards of acceptable behavior. They will take appropriate and fair corrective action in response to any behavior they deem inappropriate, threatening, offensive, or harmful.
 
 Leaders have the right and responsibility to remove, edit, or reject comments, commits, code, wiki edits, issues, and other contributions not aligned with this Code of Conduct. Reasons for moderation decisions will be communicated when appropriate.
 
 ## Scope
 
-This Code of Conduct applies to all community spaces and when an individual is representing the community in public spaces. Examples include using an official email address, posting via an official social media account, or acting as a community representative at events.
+This Code of Conduct applies within all MOTAC IRMS project spaces and also applies when an individual is officially representing the project or its community in public spaces. Examples include using an official email address, posting via an official social media account, or acting as a representative at an event.
 
 ## Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the enforcement team at [amralsaleeh@outlook.com](mailto:amralsaleeh@outlook.com). All complaints will be reviewed and investigated promptly and fairly. The privacy and security of the reporter will be respected.
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the enforcement team at [izzatfirdaus@motac.gov.my](mailto:izzatfirdaus@motac.gov.my) or [amralsaleeh@outlook.com](mailto:amralsaleeh@outlook.com). All complaints will be reviewed and investigated promptly and fairly. The privacy and security of the reporter will be respected.
 
 ## Enforcement Guidelines
 
@@ -77,5 +78,5 @@ For answers to common questions, see the [Contributor Covenant FAQ](https://www.
 ---
 
 <!-- 
-This Code of Conduct sets expectations for participant behavior to foster a positive, inclusive, and professional environment for all contributors to the MOTAC ICT Loan HRMS project.
+This Code of Conduct sets expectations for participant behavior to foster a positive, inclusive, and professional environment for all contributors to the MOTAC IRMS project. Please help us build a welcoming and safe space for all.
 -->

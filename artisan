@@ -1,6 +1,19 @@
 #!/usr/bin/env php
 <?php
 
+/**
+ * MOTAC IRMS - Artisan Console Entrypoint
+ * ---------------------------------------
+ * This script boots the Laravel framework and runs the command-line kernel.
+ * It is tailored for the MOTAC Integrated Resource Management System (Malaysia).
+ *
+ * Usage:
+ *   php artisan <command>
+ *
+ * Laravel's Artisan console provides system management, asset automation,
+ * helpdesk utilities, scheduling, and more for MOTAC IRMS.
+ */
+
 define('LARAVEL_START', microtime(true));
 
 /*
@@ -9,27 +22,34 @@ define('LARAVEL_START', microtime(true));
 |--------------------------------------------------------------------------
 |
 | Composer provides a convenient, automatically generated class loader
-| for our application. We just need to utilize it! We'll require it
-| into the script here so that we do not have to worry about the
-| loading of any of our classes manually. It's great to relax.
+| for our application. Here, we require it so that all classes,
+| including MOTAC IRMS custom commands, are auto-loaded.
 |
 */
+require __DIR__ . '/vendor/autoload.php';
 
-require __DIR__.'/vendor/autoload.php';
-
-$app = require_once __DIR__.'/bootstrap/app.php';
+/*
+|--------------------------------------------------------------------------
+| Bootstrap The Application
+|--------------------------------------------------------------------------
+|
+| This loads the Laravel application instance and prepares it for CLI usage.
+| The bootstrap process attaches environment variables, config, service
+| providers, and all custom behavior required by MOTAC IRMS.
+|
+*/
+$app = require_once __DIR__ . '/bootstrap/app.php';
 
 /*
 |--------------------------------------------------------------------------
 | Run The Artisan Application
 |--------------------------------------------------------------------------
 |
-| When we run the console application, the current CLI command will be
-| executed in this console and the response sent back to a terminal
-| or another output device for the developers. Here goes nothing!
+| Here, we resolve the Console Kernel and run the incoming command.
+| This is the main entry point for all Artisan commands, including
+| MOTAC IRMS-specific CLI operations (asset, loan, helpdesk, etc).
 |
 */
-
 $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
 
 $status = $kernel->handle(
@@ -42,12 +62,11 @@ $status = $kernel->handle(
 | Shutdown The Application
 |--------------------------------------------------------------------------
 |
-| Once Artisan has finished running, we will fire off the shutdown events
-| so that any final work may be done by the application before we shut
-| down the process. This is the last thing to happen to the request.
+| Once Artisan has finished running, we fire shutdown events so that
+| MOTAC IRMS cleanup or logging can occur before the process ends.
 |
 */
-
 $kernel->terminate($input, $status);
 
+// Exit with the appropriate code for the shell/CI/CD pipeline.
 exit($status);
