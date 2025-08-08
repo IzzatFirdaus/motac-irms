@@ -104,7 +104,7 @@ class GradeController extends Controller
     }
 
     /**
-     * Update the specified grade in storage.
+     * Store an updated grade in storage.
      * Route: settings.grades.update
      */
     public function update(UpdateGradeRequest $request, Grade $grade): RedirectResponse

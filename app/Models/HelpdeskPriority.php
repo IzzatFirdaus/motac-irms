@@ -28,8 +28,31 @@ class HelpdeskPriority extends Model
         'color_code',
     ];
 
+    protected $casts = [
+        'level' => 'integer',
+    ];
+
+    /**
+     * Tickets assigned with this priority.
+     */
     public function tickets(): HasMany
     {
         return $this->hasMany(HelpdeskTicket::class, 'priority_id');
+    }
+
+    /**
+     * Get the color code for display, fallback to a default color.
+     */
+    public function getDisplayColorCodeAttribute(): string
+    {
+        return $this->color_code ?: '#007bff';
+    }
+
+    /**
+     * Get a human-readable label for this priority.
+     */
+    public function getLabelAttribute(): string
+    {
+        return sprintf('%s (Level %d)', $this->name, $this->level);
     }
 }

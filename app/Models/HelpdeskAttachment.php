@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
 use App\Traits\CreatedUpdatedDeletedBy;
@@ -41,8 +39,41 @@ class HelpdeskAttachment extends Model
         'deleted_at' => 'datetime',
     ];
 
+    /**
+     * Get the parent attachable model (ticket or comment).
+     */
     public function attachable(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    /**
+     * Get the file URL for user downloads (public disk).
+     */
+    public function getFileUrlAttribute(): string
+    {
+        return \Storage::url($this->file_path);
+    }
+
+    /**
+     * Get the file size in human-readable format.
+     */
+    public function getReadableFileSizeAttribute(): string
+    {
+        $bytes = $this->file_size;
+        if ($bytes >= 1073741824) {
+            $bytes = number_format($bytes / 1073741824, 2) . ' GB';
+        } elseif ($bytes >= 1048576) {
+            $bytes = number_format($bytes / 1048576, 2) . ' MB';
+        } elseif ($bytes >= 1024) {
+            $bytes = number_format($bytes / 1024, 2) . ' KB';
+        } elseif ($bytes > 1) {
+            $bytes = $bytes . ' bytes';
+        } elseif ($bytes == 1) {
+            $bytes = $bytes . ' byte';
+        } else {
+            $bytes = '0 bytes';
+        }
+        return $bytes;
     }
 }

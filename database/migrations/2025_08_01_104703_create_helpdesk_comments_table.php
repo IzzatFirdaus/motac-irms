@@ -18,7 +18,11 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->text('comment');
             $table->boolean('is_internal')->default(false)->comment('True if only visible to agents/staff');
+            $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('deleted_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
