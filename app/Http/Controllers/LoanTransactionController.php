@@ -9,6 +9,7 @@ use App\Http\Requests\ProcessReturnRequest;
 use App\Models\Equipment;
 use App\Models\LoanApplication;
 use App\Models\LoanTransaction;
+use App\Models\LoanTransactionItem;
 use App\Services\LoanTransactionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +17,10 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Throwable;
 
+/**
+ * Handles the issuance and return of equipment for loan applications,
+ * as well as listing and displaying loan transactions.
+ */
 final class LoanTransactionController extends Controller
 {
     private LoanTransactionService $loanTransactionService;
@@ -27,44 +32,59 @@ final class LoanTransactionController extends Controller
     }
 
     /**
-     * ++ ADDED THIS METHOD TO LIST ALL TRANSACTIONS ++
-     * Display a listing of the resource.
+     * Display a paginated listing of all loan transactions.
      * Route: GET /loan-transactions
      */
     public function index(): View
     {
         $this->authorize('viewAny', LoanTransaction::class);
 
-        $transactions = LoanTransaction::with('loanApplication.user')
+        $transactions = LoanTransaction::with([
+                'loanApplication.user',
+                'issuingOfficer',
+                'receivingOfficer',
+                'returningOfficer',
+                'returnAcceptingOfficer'
+            ])
             ->latest('transaction_date')
             ->paginate(20);
 
+        // Passes transactions with eager loaded relationships and accessors for status/type labels
         return view('loan-transactions.index', ['transactions' => $transactions]);
     }
 
     /**
-     * Show the form for recording equipment issuance.
+     * Show the form for recording equipment issuance for a loan application.
      * Route: GET /loan-applications/{loanApplication}/issue
      */
     public function showIssueForm(LoanApplication $loanApplication): View
     {
         $this->authorize('processIssuance', $loanApplication);
 
-        $availableEquipment = Equipment::where('status', Equipment::STATUS_AVAILABLE)->orderBy('brand')->orderBy('model')->get();
-        $loanApplicantAndResponsibleOfficer = collect([$loanApplication->user, $loanApplication->responsibleOfficer])->filter()->unique('id');
+        $availableEquipment = Equipment::where('status', Equipment::STATUS_AVAILABLE)
+            ->orderBy('brand')->orderBy('model')->get();
+
+        $loanApplicantAndResponsibleOfficer = collect([$loanApplication->user, $loanApplication->responsibleOfficer])
+            ->filter()->unique('id');
+
         $allAccessoriesList = config('motac.loan_accessories_list', []);
 
-        return view('loan-transactions.issue', ['loanApplication' => $loanApplication, 'availableEquipment' => $availableEquipment, 'loanApplicantAndResponsibleOfficer' => $loanApplicantAndResponsibleOfficer, 'allAccessoriesList' => $allAccessoriesList]);
+        return view('loan-transactions.issue', [
+            'loanApplication' => $loanApplication,
+            'availableEquipment' => $availableEquipment,
+            'loanApplicantAndResponsibleOfficer' => $loanApplicantAndResponsibleOfficer,
+            'allAccessoriesList' => $allAccessoriesList,
+        ]);
     }
 
     /**
-     * Store the recorded equipment issuance.
+     * Store the recorded equipment issuance for a loan application.
      * Route: POST /loan-applications/{loanApplication}/issue
      */
     public function storeIssue(IssueEquipmentRequest $request, LoanApplication $loanApplication): RedirectResponse
     {
         $issuingOfficer = Auth::user();
-        if (! $issuingOfficer) {
+        if (!$issuingOfficer) {
             return redirect()->back()->with('error', 'Sila log masuk semula.');
         }
 
@@ -73,7 +93,7 @@ final class LoanTransactionController extends Controller
                 $loanApplication,
                 $request->validated('items'),
                 $issuingOfficer,
-                $request->validated() // Pass all validated data for details
+                $request->validated() // All validated data for notes, checklists, etc.
             );
 
             return redirect()->route('loan-applications.show', $loanApplication->id)
@@ -86,57 +106,63 @@ final class LoanTransactionController extends Controller
     }
 
     /**
-     * Display the specified loan transaction details.
+     * Display the details of a specific loan transaction.
      * Route: GET /loan-transactions/{loanTransaction}
      */
     public function show(LoanTransaction $loanTransaction): View
     {
-        // Assuming you have a policy to view a transaction
         $this->authorize('view', $loanTransaction);
 
-        // Eager load all necessary relationships for the detailed view
+        // Eager load relationships for display; includes user, officers, transaction items, and equipment
         $loanTransaction->load([
             'loanApplication.user',
+            'loanApplication.responsibleOfficer',
             'loanTransactionItems.equipment',
-            'issuingOfficer',   // The officer who issued the items
-            'receivingOfficer', // The officer who accepted the return (will be null on issue transactions)
+            'loanTransactionItems.loanApplicationItem',
+            'issuingOfficer',
+            'receivingOfficer',
+            'returningOfficer',
+            'returnAcceptingOfficer',
+            'relatedIssueTransaction'
         ]);
 
-        // You will need to create this view file
+        // For each item, access status/condition for display (no assignment needed for accessors)
+        // Accessors like condition_on_return_translated are available directly for use in the view.
+
+        // Passes transaction details, ready for view rendering with all accessors available
         return view('loan-transactions.show', ['loanTransaction' => $loanTransaction]);
     }
 
     /**
-     * Show the form for recording equipment return.
-     * Route: GET /loan-transactions/{loanTransaction}/return (expects the original ISSUE transaction)
+     * Show the form for recording equipment return for an ISSUE transaction.
+     * Route: GET /loan-transactions/{loanTransaction}/return
      */
     public function showReturnForm(LoanTransaction $loanTransaction): View|RedirectResponse
     {
-        // THE FIX IS APPLIED IN THIS METHOD
+        // Only allow returns for transactions of type 'issue'
         if ($loanTransaction->type !== LoanTransaction::TYPE_ISSUE) {
             return redirect()->back()->with('error', __('Hanya transaksi pengeluaran boleh diproses untuk pemulangan.'));
         }
 
         $this->authorize('processReturn', [$loanTransaction, $loanTransaction->loanApplication]);
 
-        // 1. Eager load all necessary relationships from the start.
+        // Eager load all necessary relationships for the return form
         $loanTransaction->load([
             'loanApplication.user',
             'loanApplication.responsibleOfficer',
             'loanTransactionItems.equipment',
+            'loanTransactionItems.loanApplicationItem'
         ]);
 
-        // 2. Prepare all variables that the view expects.
         $loanApplication = $loanTransaction->loanApplication;
         $issuedItemsForThisTransaction = $loanTransaction->loanTransactionItems;
         $allAccessoriesList = config('motac.loan_accessories_list', []);
+        $loanApplicantAndResponsibleOfficer = collect([$loanApplication->user, $loanApplication->responsibleOfficer])
+            ->filter()->unique('id');
 
-        // This logic is copied from your view to ensure the variable is available.
-        $loanApplicantAndResponsibleOfficer = collect([$loanApplication->user, $loanApplication->responsibleOfficer])->filter()->unique('id');
-
-        // 3. Pass all variables to the view with the correct keys.
+        // Pass all data required for the return form view
         return view('loan-transactions.return', [
-            'loanTransaction' => $loanTransaction, // Changed from 'issueTransaction' to match the view
+            'loanTransaction' => $loanTransaction,
             'loanApplication' => $loanApplication,
             'issuedItemsForThisTransaction' => $issuedItemsForThisTransaction,
             'allAccessoriesList' => $allAccessoriesList,
@@ -145,15 +171,15 @@ final class LoanTransactionController extends Controller
     }
 
     /**
-     * Store the recorded equipment return.
-     * Route: POST /loan-transactions/{loanTransaction}/return (expects the original ISSUE transaction)
+     * Store the recorded equipment return for an ISSUE transaction.
+     * Route: POST /loan-transactions/{loanTransaction}/return
      */
     public function storeReturn(ProcessReturnRequest $request, LoanTransaction $loanTransaction): RedirectResponse
     {
         $this->authorize('processReturn', [$loanTransaction, $loanTransaction->loanApplication]);
 
         $returnAcceptingOfficer = Auth::user();
-        if (! $returnAcceptingOfficer) {
+        if (!$returnAcceptingOfficer) {
             return redirect()->back()->with('error', 'Sila log masuk semula.');
         }
 
@@ -162,7 +188,7 @@ final class LoanTransactionController extends Controller
                 $loanTransaction,
                 $request->validated()['items'],
                 $returnAcceptingOfficer,
-                $request->validated() // Pass all validated data for details
+                $request->validated() // All validated data for notes, checklists, etc.
             );
 
             return redirect()->route('loan-applications.show', $loanTransaction->loan_application_id)

@@ -6,19 +6,24 @@ use App\Http\Requests\StoreLoanApplicationRequest;
 use App\Http\Requests\UpdateLoanApplicationRequest;
 use App\Models\Equipment;
 use App\Models\LoanApplication;
+use App\Models\LoanApplicationItem;
 use App\Models\User;
 use App\Services\LoanApplicationService;
-use Barryvdh\DomPDF\Facade\Pdf; // ++ ADD THIS USE STATEMENT ++
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response; // ++ ADD THIS USE STATEMENT ++
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException as IlluminateValidationException;
 use Illuminate\View\View;
 use Throwable;
 
+/**
+ * Controller for managing Loan Applications.
+ * Handles creation, update, submission, PDF generation, display, and deletion of loan applications.
+ */
 class LoanApplicationController extends Controller
 {
     protected LoanApplicationService $loanApplicationService;
@@ -28,20 +33,26 @@ class LoanApplicationController extends Controller
         $this->loanApplicationService = $loanApplicationService;
         $this->middleware('auth');
 
+        // Authorization handled for all except index, create, edit, createTraditionalForm
         $this->authorizeResource(LoanApplication::class, 'loan_application', [
             'except' => ['index', 'create', 'edit', 'createTraditionalForm'],
         ]);
     }
 
+    /**
+     * Show the loan application creation form (traditional).
+     */
     public function createTraditionalForm(): View
     {
         $this->authorize('create', LoanApplication::class);
 
+        // Get responsible officers (active users)
         $responsibleOfficers = User::where('status', User::STATUS_ACTIVE)
             ->orderBy('name')
             ->with(['position:id,name', 'grade:id,name', 'department:id,name'])
             ->get(['id', 'name', 'title', 'position_id', 'grade_id', 'department_id']);
 
+        // Get supporting officers (filtered by grade level)
         $minSupportGradeLevel = (int) config('motac.approval.min_loan_support_grade_level', 41);
         $supportingOfficers = User::where('status', User::STATUS_ACTIVE)
             ->whereHas('grade', function ($query) use ($minSupportGradeLevel): void {
@@ -51,14 +62,22 @@ class LoanApplicationController extends Controller
             ->orderBy('name')
             ->get(['id', 'name', 'title', 'position_id', 'grade_id', 'department_id']);
 
+        // Equipment asset type options for dropdowns
         $equipmentAssetTypeOptions = Equipment::getAssetTypeOptions() ?? [];
 
-        return view('loan-applications.create', ['responsibleOfficers' => $responsibleOfficers, 'supportingOfficers' => $supportingOfficers, 'equipmentAssetTypeOptions' => $equipmentAssetTypeOptions]);
+        return view('loan-applications.create', [
+            'responsibleOfficers' => $responsibleOfficers,
+            'supportingOfficers' => $supportingOfficers,
+            'equipmentAssetTypeOptions' => $equipmentAssetTypeOptions
+        ]);
     }
 
+    /**
+     * Store a new loan application from the traditional form.
+     */
     public function store(StoreLoanApplicationRequest $request): RedirectResponse
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = $request->user();
         $validatedData = $request->validated();
 
@@ -68,7 +87,7 @@ class LoanApplicationController extends Controller
             $loanApplication = $this->loanApplicationService->createAndSubmitApplication(
                 $validatedData,
                 $user,
-                false
+                false // not API
             );
 
             Log::info(sprintf('Loan application ID: %d created and submitted successfully by User ID: %d via traditional form.', $loanApplication->id, $user->id));
@@ -90,18 +109,22 @@ class LoanApplicationController extends Controller
                 'request_data' => $request->except(['_token', 'password', 'password_confirmation']),
             ]);
             $userMessage = ($e instanceof \RuntimeException || $e instanceof \InvalidArgumentException || $e instanceof ModelNotFoundException)
-              ? $e->getMessage()
-              : __('Satu ralat berlaku semasa menghantar permohonan pinjaman.');
+                ? $e->getMessage()
+                : __('Satu ralat berlaku semasa menghantar permohonan pinjaman.');
 
             return redirect()->back()->withInput()->with('error', $userMessage);
         }
     }
 
+    /**
+     * Show the details of a loan application.
+     */
     public function show(LoanApplication $loanApplication): View
     {
         $this->authorize('view', $loanApplication);
         Log::info('LoanApplicationController@show: User ID '.Auth::id().sprintf(' viewing LoanApplication ID %d.', $loanApplication->id));
 
+        // Eager load all relationships needed for display
         $loanApplication->loadMissing([
             'user' => fn ($q) => $q->with(['position:id,name', 'grade:id,name', 'department:id,name']),
             'responsibleOfficer' => fn ($q) => $q->with(['position:id,name', 'grade:id,name', 'department:id,name']),
@@ -124,21 +147,32 @@ class LoanApplicationController extends Controller
             'updater:id,name,title',
         ]);
 
-        return view('loan-applications.show', ['loanApplication' => $loanApplication]);
+        // Attach status label and color class for UI
+        $statusLabel = $loanApplication->status_label;
+        $statusColorClass = $loanApplication->status_color_class;
+
+        // Load item status labels and equipment type labels for each item
+        foreach ($loanApplication->loanApplicationItems as $item) {
+            // Accessors from LoanApplicationItem will be called automatically when accessed in the view
+            // No assignment needed for equipment_type_label accessor
+        }
+
+        return view('loan-applications.show', [
+            'loanApplication' => $loanApplication,
+            'statusLabel' => $statusLabel,
+            'statusColorClass' => $statusColorClass,
+        ]);
     }
 
     /**
-     * ++ ADD THIS NEW METHOD TO GENERATE THE PDF ++
-     *
      * Generate a PDF printout for the specified loan application.
      */
     public function printPdf(LoanApplication $loanApplication): Response
     {
-        // Authorize the user can view the application
         $this->authorize('view', $loanApplication);
         Log::info('LoanApplicationController@printPdf: User ID '.Auth::id().sprintf(' generating PDF for LoanApplication ID %d.', $loanApplication->id));
 
-        // Eager load all data needed for the PDF view to prevent lazy-loading errors.
+        // Eager load all necessary relations for PDF generation
         $loanApplication->loadMissing([
             'user' => fn ($q) => $q->with(['position:id,name', 'grade:id,name', 'department:id,name']),
             'responsibleOfficer' => fn ($q) => $q->with(['position:id,name', 'grade:id,name']),
@@ -154,18 +188,18 @@ class LoanApplicationController extends Controller
             ]),
         ]);
 
-        // Load the dedicated Blade view for the PDF
         $pdf = Pdf::loadView('loan-applications.pdf.print-form', [
             'loanApplication' => $loanApplication,
         ]);
 
-        // Set paper size to A4 portrait to match the official form
         $pdf->setPaper('A4', 'portrait');
 
-        // Stream the PDF to the browser
         return $pdf->stream('borang-pinjaman-ict-'.$loanApplication->id.'.pdf');
     }
 
+    /**
+     * Update an existing loan application.
+     */
     public function update(UpdateLoanApplicationRequest $request, LoanApplication $loanApplication): RedirectResponse
     {
         $this->authorize('update', $loanApplication);
@@ -194,13 +228,16 @@ class LoanApplicationController extends Controller
                 'request_data' => $request->except(['_token', 'password', 'password_confirmation']),
             ]);
             $userMessage = ($throwable instanceof \RuntimeException || $throwable instanceof \InvalidArgumentException || $throwable instanceof ModelNotFoundException)
-              ? $throwable->getMessage()
-              : __('Satu ralat berlaku semasa mengemaskini permohonan pinjaman.');
+                ? $throwable->getMessage()
+                : __('Satu ralat berlaku semasa mengemaskini permohonan pinjaman.');
 
             return redirect()->back()->withInput()->with('error', $userMessage);
         }
     }
 
+    /**
+     * Submit a loan application for approval.
+     */
     public function submitApplication(Request $request, LoanApplication $loanApplication): RedirectResponse
     {
         $user = $request->user();
@@ -224,13 +261,16 @@ class LoanApplicationController extends Controller
                 'line' => $throwable->getLine(),
             ]);
             $userMessage = ($throwable instanceof \RuntimeException || $throwable instanceof \InvalidArgumentException)
-              ? $throwable->getMessage()
-              : __('Gagal menghantar permohonan pinjaman disebabkan ralat sistem.');
+                ? $throwable->getMessage()
+                : __('Gagal menghantar permohonan pinjaman disebabkan ralat sistem.');
 
             return redirect()->route('loan-applications.show', $loanApplication)->with('error', $userMessage);
         }
     }
 
+    /**
+     * Soft delete a loan application.
+     */
     public function destroy(LoanApplication $loanApplication): RedirectResponse
     {
         $user = Auth::user();

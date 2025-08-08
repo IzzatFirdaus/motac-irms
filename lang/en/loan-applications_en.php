@@ -1,17 +1,24 @@
 <?php
 // English translations for ICT Loan Application details, history, and statuses
+// This file is structured to mirror the Malay version (loan-applications_ms.php) for consistency and maintainability.
 
 return [
+    // ==============================================================================
+    // --- MAIN TITLE & PRIMARY ACTIONS ---
+    // ==============================================================================
     'title' => 'ICT Loan Application Details',
     'title_with_id' => 'ICT Loan Application Details #:id',
     'print_form' => 'Print Form',
     'update_draft' => 'Update Draft',
     'submit_application' => 'Submit Application',
-    'resubmit_application' => 'Resubmit Application',
+    'resubmit_application' => 'Resubmit',
     'submit_confirm_message' => 'Are you sure you want to submit this application?',
     'process_return' => 'Process Equipment Return',
     'back_to_list' => 'Back to List',
 
+    // ==============================================================================
+    // --- FORM SECTIONS IN THE APPLICATION ---
+    // ==============================================================================
     'sections' => [
         'applicant' => 'PART 1 | APPLICANT INFORMATION',
         'application_details' => 'LOAN APPLICATION DETAILS',
@@ -22,36 +29,18 @@ return [
         'transaction_history' => 'LOAN TRANSACTION HISTORY',
     ],
 
+    // ==============================================================================
+    // --- LABELS / TABLE & FORM FIELD LABELS ---
+    // ==============================================================================
     'labels' => [
         'application_id' => 'Application ID',
-        'applicant_is_responsible' => 'The applicant is the officer in charge.',
-        'no_supporting_officer' => 'No supporting officer was assigned for this application.',
-        'no_equipment_requested' => 'No equipment items were requested for this application.',
-        'no_approval_history' => 'No approval history for this application.',
-        'no_transaction_history' => 'No transaction history for this application.',
-        'nric' => 'IC Number',
-        'position' => 'Position',
-        'grade' => 'Grade',
-        'department' => 'Division / Unit',
-        'motac_email' => 'Official Email (MOTAC)',
-        'personal_email' => 'Personal Email (Login)',
-        'phone_number' => 'Mobile Phone No.',
-        'purpose' => 'Purpose of Loan:',
-        'usage_location' => 'Equipment Usage Location:',
-        'return_location' => 'Return Location:',
-        'loan_datetime' => 'Loan Date & Time:',
-        'return_datetime' => 'Expected Return Date & Time:',
-        'submitted_date' => 'Application Submission Date:',
-        'equipment_type' => 'Equipment Type',
-        'requested_qty' => 'Requested',
-        'approved_qty' => 'Approved',
-        'issued_qty' => 'Issued',
-        'applicant_notes' => 'Applicant Notes',
-        'confirmed_by_applicant' => 'Confirmed by Applicant',
+        'applicant_is_responsible' => 'Applicant is the Responsible Officer',
+        // The following keys below mirror those in the Malay version and are designed for table/field labels and system messages
         'not_confirmed' => 'Not yet confirmed by applicant',
         'on_date' => 'on',
         'stage' => 'Stage',
         'officer' => 'Officer',
+        'status' => 'Status',
         'action_date' => 'Action Date',
         'comments' => 'Comments',
         'pending_decision' => 'Pending Decision',
@@ -64,19 +53,51 @@ return [
         'rejection_reason' => 'Reason for Rejection',
     ],
 
+    // ==============================================================================
+    // --- APPLICATION STATUSES ---
+    // ==============================================================================
     'statuses' => [
         'draft' => 'Draft',
         'pending_support' => 'Pending Officer Support',
         'pending_approver_review' => 'Pending Approval',
         'pending_bpm_review' => 'Pending BPM Review',
-        'approved' => 'Approved',
-        'rejected' => 'Rejected',
-        'partially_issued' => 'Partially Issued',
-        'issued' => 'Issued',
+        'approved_pending_issuance' => 'Approved (Pending Issuance)',
+        'on_loan' => 'On Loan',
+        'pending_return' => 'Pending Return',
         'returned' => 'Returned',
-        'overdue' => 'Overdue',
+        'rejected' => 'Rejected',
         'cancelled' => 'Cancelled',
-        'partially_returned_pending_inspection' => 'Partially Returned',
-        'completed' => 'Completed',
+        'returned_for_amendment' => 'Returned for Amendment',
+    ],
+
+    // ==============================================================================
+    // --- SYSTEM MESSAGES & NOTIFICATIONS ---
+    // ==============================================================================
+    'messages' => [
+        'update_draft_success' => 'Draft application updated successfully.',
+        'submit_success' => 'Loan application submitted successfully.',
+        'resubmit_success' => 'Loan application resubmitted successfully.',
+        'process_return_success' => 'Equipment return processed successfully.',
+        'not_found' => 'Loan application not found.',
+        'unauthorized' => 'You are not authorized to access this application.',
+        'already_submitted' => 'This application has already been submitted.',
+        'already_processed' => 'This application has already been processed.',
+        'return_success_with_issues' => 'Equipment returned with some issues.',
+    ],
+
+    // ==============================================================================
+    // --- VALIDATION & FORM ERROR MESSAGES ---
+    // ==============================================================================
+    'fields' => [
+        'required_quantity' => 'Quantity is required for :item.',
+        'invalid_quantity' => 'Invalid quantity for :item.',
+        'missing_equipment_details' => 'Please enter the details of the equipment requested.',
+        'loan_dates_invalid' => 'Invalid loan start and end dates.',
+        'loan_period_exceeded' => 'Loan period exceeds the allowed limit.',
     ],
 ];
+
+// Notes:
+// - All keys and structure are designed to match the Malay version (loan-applications_ms.php).
+// - Sections are separated and commented for clarity and maintainability.
+// - Update this file in tandem with the Malay version for consistent bilingual support.

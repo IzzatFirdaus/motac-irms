@@ -7,15 +7,22 @@ return [
     // --- GENERAL & SHARED LABELS ---
     // ==============================================================================
     'label_required_field' => '* Required field', // Indicates a required form field
-    'text_processing' => 'Processing...',
+    'text_processing' => 'Processing...', // Displayed during form submission/processing
     'button_save_draft' => 'Save Draft Application',
     'button_update_draft' => 'Update Draft',
     'button_update_and_resubmit' => 'Update & Resubmit',
+    'button_submit' => 'Submit Application',
+    'button_cancel' => 'Cancel',
+    'button_close' => 'Close',
+    'button_back' => 'Back',
+    'button_next' => 'Next',
+    'button_print' => 'Print',
 
     // --- Shared Applicant/Officer Info Labels ---
     'label_full_name' => 'Full Name & Title',
     'label_nric_no' => 'NRIC No.',
     'label_personal_email_login' => 'Personal Email (For Login)',
+    'label_motac_email' => 'Official MOTAC Email',
     'label_position_grade' => 'Position & Grade',
     'label_department_unit' => 'Division/Unit',
     'label_phone_number' => 'Mobile Phone No.',
@@ -28,11 +35,14 @@ return [
     // ==============================================================================
     'title_new_application_ict' => 'New ICT Equipment Loan Application',
     'title_edit_application_ict' => 'Edit ICT Equipment Loan Application',
+    'title_view_application_ict' => 'View ICT Equipment Loan Application',
     'ict_loan_form_title' => 'ICT EQUIPMENT LOAN APPLICATION FORM FOR OFFICIAL USE',
     'bpm_office_display' => 'Information Management Division',
     'date_application_received_label' => 'DATE COMPLETE APPLICATION FORM RECEIVED',
     'text_form_ref_no' => 'Form Reference No: PK.(S).MOTAC.07.(L3)',
+    'text_application_id' => 'Application ID:',
 
+    // PART 1 - Applicant Information
     'section_applicant_info_ict' => 'PART 1 | APPLICANT INFORMATION',
     'label_application_purpose' => 'Purpose of Application*',
     'label_location_ict' => 'Location (Usage)*',
@@ -40,32 +50,44 @@ return [
     'label_expected_return_date' => 'Expected Return Date*',
     'label_expected_return_location' => 'Expected Return Location',
 
+    // PART 2 - Responsible Officer Information
     'section_responsible_officer_info' => 'PART 2 | RESPONSIBLE OFFICER INFORMATION',
     'instruction_responsible_officer_is_applicant' => 'Please tick if Applicant is the Responsible Officer.',
     'instruction_responsible_officer_different' => 'This section only needs to be filled if the Responsible Officer is not the Applicant.',
     'label_responsible_officer_name' => 'Full Name of Responsible Officer',
     'placeholder_select_responsible_officer' => 'Select Responsible Officer',
+    'checkbox_applicant_is_responsible' => 'Applicant is the Responsible Officer',
 
+    // PART 3 - Equipment Information
     'section_equipment_details_ict' => 'PART 3 | EQUIPMENT INFORMATION',
     'table_header_bil' => 'No.',
     'table_header_equipment_type' => 'Type of Equipment',
     'table_header_quantity' => 'Quantity',
     'table_header_remarks' => 'Remarks',
-    'title_equipment_item' => 'Equipment #:index',
+    'title_equipment_item' => 'Equipment #:index', // :index is a placeholder for the item number
     'label_equipment_type' => 'Type of Equipment',
     'placeholder_select_type' => 'Select Type',
     'label_quantity' => 'Quantity',
     'label_remarks' => 'Remarks',
     'placeholder_equipment_remarks' => 'e.g. Specific model, special software, etc.',
     'text_no_equipment_added' => 'Please add at least one equipment item.',
+    'button_add_equipment' => 'Add Equipment Item',
+    'button_remove_equipment' => 'Remove Item',
 
+    // PART 4 - Applicant Confirmation
     'section_applicant_confirmation_ict' => 'PART 4 | APPLICANT CONFIRMATION (RESPONSIBLE OFFICER)',
     'text_applicant_declaration_ict' => 'I hereby confirm and acknowledge that all borrowed equipment is for official use and will be under my responsibility and supervision throughout the said period;',
+    'checkbox_applicant_confirmation' => 'I confirm that the information provided is accurate and I accept the terms and conditions of the ICT equipment loan.',
 
+    // PART 5 - Division/Unit Endorsement
     'section_section_unit_endorsement' => 'PART 5 | DIVISION / UNIT / SECTION ENDORSEMENT',
     'instruction_support_grade_ict' => 'The completed application by the applicant must be SUPPORTED BY AN OFFICER OF AT LEAST GRADE 41 AND ABOVE.',
     'label_application_status_endorsement' => 'This application is: * SUPPORTED / NOT SUPPORTED',
+    'label_endorsement_comments' => 'Comments (if any):',
+    'label_endorsement_by' => 'Endorsed by:',
+    'label_endorsement_date' => 'Date:',
 
+    // PART 6-8 - BPM Division Use Only
     'section_bpm_use_only' => 'FOR INFORMATION MANAGEMENT DIVISION USE ONLY',
     'section_during_loan_ict' => 'PART 6 | DURING LOAN',
     'label_issuing_officer' => 'ISSUING OFFICER',
@@ -93,7 +115,9 @@ return [
     // ==============================================================================
     'helpdesk_title_create_ticket' => 'Create New Helpdesk Ticket',
     'helpdesk_title_view_ticket' => 'View Helpdesk Ticket',
+    'helpdesk_title_edit_ticket' => 'Edit Helpdesk Ticket',
     'helpdesk_title_manage_tickets' => 'Manage Helpdesk Tickets',
+    'helpdesk_title_my_tickets' => 'My Helpdesk Tickets',
     'helpdesk_label_ticket_id' => 'Ticket ID',
     'helpdesk_label_title' => 'Title',
     'helpdesk_placeholder_title' => 'Enter a brief title for your issue',
@@ -116,6 +140,12 @@ return [
     'helpdesk_label_is_internal_comment' => 'Internal Comment (Visible to IT Staff Only)',
     'helpdesk_label_attachments' => 'Attachments',
     'helpdesk_button_add_attachment' => 'Add Attachment',
+    'helpdesk_button_submit_ticket' => 'Submit Ticket',
+    'helpdesk_button_update_ticket' => 'Update Ticket',
+    'helpdesk_button_add_comment' => 'Add Comment',
+    'helpdesk_button_close_ticket' => 'Close Ticket',
+    'helpdesk_button_reopen_ticket' => 'Reopen Ticket',
+    'helpdesk_button_assign_ticket' => 'Assign Ticket',
     'helpdesk_label_sla_due_at' => 'SLA Due Date',
     'helpdesk_label_search_tickets' => 'Search Tickets',
     'helpdesk_placeholder_search_tickets' => 'Search by Ticket ID, title, applicant...',
@@ -123,7 +153,7 @@ return [
     'helpdesk_text_file_upload_limit' => 'Max file size: 2MB. Allowed types: JPG, PNG, PDF, DOCX, TXT, XLSX.',
 
     // ==============================================================================
-    // --- DROPDOWN OPTIONS (Updated from Supplementary Document) ---
+    // --- DROPDOWN OPTIONS ---
     // ==============================================================================
     // Service status options for staff selection
     'service_status_options' => [
@@ -132,13 +162,16 @@ return [
         '2' => 'Contract / MyStep Appointment',
         '3' => 'Industrial Trainee (Headquarters Only)',
     ],
+
+    // Appointment type options
     'appointment_type_options' => [
         '' => '- Select Appointment -',
         '1' => 'New',
         '2' => 'Promotion/Transfer',
         '3' => 'Others',
     ],
-    // Position options for staff selection
+
+    // Position options for staff selection - shortened for readability
     'position_options' => [
         '' => '- Select Position -',
         '1' => 'Minister',
@@ -207,6 +240,7 @@ return [
         '64' => 'Industrial Trainee',
         '65' => 'Immigration Officer',
     ],
+
     // Grade selection options
     'grade_options' => [
     '' => '- Select Grade -',
@@ -492,7 +526,8 @@ return [
     '280' => '2 (22)',
     '281' => '3 (26)',
     '282' => '4 (28)',
-  ],
+    ],
+
     // Department selection options
     'department_options' => [
         '' => '- Select MOTAC State/Division/Unit -',
@@ -500,32 +535,14 @@ return [
         '2' => 'Internal Audit',
         '3' => 'Culture Policy',
         '4' => 'Tourism Policy and International Relations',
-        '22' => 'International Relations (Culture)',
         '5' => 'Integrity',
         '6' => 'Finance',
         '7' => 'Corporate Communications',
-        '23' => 'KPI',
-        '33' => 'MOTAC Johor',
-        '27' => 'MOTAC Kedah',
-        '34' => 'MOTAC Kelantan',
-        '31' => 'MOTAC Melaka',
-        '32' => 'MOTAC N. Sembilan',
-        '36' => 'MOTAC Pahang',
-        '29' => 'MOTAC Perak',
-        '26' => 'MOTAC Perlis',
-        '28' => 'MOTAC Pulau Pinang',
-        '38' => 'MOTAC Sabah',
-        '37' => 'MOTAC Sarawak',
-        '30' => 'MOTAC Selangor',
-        '35' => 'MOTAC Terengganu',
-        '39' => 'MOTAC WP Kuala Lumpur / Putrajaya',
-        '40' => 'MOTAC WP Labuan',
-        '24' => 'OSC MM2H',
         '8' => 'Office of the Secretary-General (KSU)',
         '9' => 'Minister\'s Office',
+        '10' => 'Office of the Deputy Secretary-General (Management)',
         '11' => 'Office of the Deputy Secretary-General (Culture)',
         '12' => 'Office of the Deputy Secretary-General (Tourism)',
-        '10' => 'Office of the Deputy Secretary-General (Management)',
         '13' => 'Deputy Minister\'s Office',
         '14' => 'Tourism Licensing and Enforcement',
         '15' => 'Industry Development',
@@ -535,8 +552,27 @@ return [
         '19' => 'Human Resource Management',
         '20' => 'Administration',
         '21' => 'Legal',
+        '22' => 'International Relations (Culture)',
+        '23' => 'KPI',
+        '24' => 'OSC MM2H',
         '25' => 'Visit Malaysia Secretariat',
+        '26' => 'MOTAC Perlis',
+        '27' => 'MOTAC Kedah',
+        '28' => 'MOTAC Pulau Pinang',
+        '29' => 'MOTAC Perak',
+        '30' => 'MOTAC Selangor',
+        '31' => 'MOTAC Melaka',
+        '32' => 'MOTAC N. Sembilan',
+        '33' => 'MOTAC Johor',
+        '34' => 'MOTAC Kelantan',
+        '35' => 'MOTAC Terengganu',
+        '36' => 'MOTAC Pahang',
+        '37' => 'MOTAC Sarawak',
+        '38' => 'MOTAC Sabah',
+        '39' => 'MOTAC WP Kuala Lumpur / Putrajaya',
+        '40' => 'MOTAC WP Labuan',
     ],
+
     // Level selection for staff/rooms/floors
     'level_options' => [
         '' => '- Select Level -',
@@ -557,8 +593,9 @@ return [
         '15' => '15',
         '16' => '16',
         '17' => '17',
-        '18' => '181', // As per supplementary doc
+        '18' => '18',
     ],
+
     // Supporting officer grade options
     'supporting_officer_grade_options' => [
         '' => '- Select Grade -',
@@ -572,6 +609,7 @@ return [
         '10' => '10',
         '9' => '9',
     ],
+
     // Equipment types for loan application
     'equipment_type_options' => [
         '' => 'Select Equipment Type',
@@ -580,8 +618,12 @@ return [
         'printer' => 'Printer',
         'desktop_pc' => 'Desktop PC',
         'monitor' => 'Monitor',
+        'scanner' => 'Scanner',
+        'external_hard_drive' => 'External Hard Drive',
+        'projector_screen' => 'Projector Screen',
         'other_ict' => 'Other ICT Equipment',
     ],
+
     // Helpdesk ticket categories
     'helpdesk_category_options' => [
         '' => '- Select Category -',
@@ -598,6 +640,7 @@ return [
         'general_inquiry' => 'General IT Inquiry',
         'other' => 'Other',
     ],
+
     // Helpdesk ticket priorities
     'helpdesk_priority_options' => [
         '' => '- Select Priority -',
@@ -606,6 +649,7 @@ return [
         'high' => 'High',
         'critical' => 'Critical',
     ],
+
     // Helpdesk ticket statuses
     'helpdesk_status_options' => [
         '' => '- Select Status -',
@@ -617,10 +661,29 @@ return [
         'pending_user_response' => 'Pending User Response',
     ],
 
+    // Equipment condition statuses
+    'equipment_condition_options' => [
+        '' => '- Select Condition -',
+        'excellent' => 'Excellent',
+        'good' => 'Good',
+        'fair' => 'Fair',
+        'poor' => 'Poor',
+        'damaged' => 'Damaged',
+    ],
+
+    // Equipment operational statuses
+    'equipment_operational_status_options' => [
+        '' => '- Select Operational Status -',
+        'operational' => 'Operational',
+        'under_maintenance' => 'Under Maintenance',
+        'non_operational' => 'Non-Operational',
+        'pending_disposal' => 'Pending Disposal',
+    ],
+
     // ==============================================================================
     // --- MISC PLACEHOLDERS & TEXT ---
     // ==============================================================================
-    'placeholder_select_dot' => 'Select..',
+    'placeholder_select_dot' => 'Select...',
     'search_placeholder' => 'Search...',
     'search_enter_keywords' => 'Enter keywords...',
     'search_by_id_purpose_applicant' => 'Search by ID, purpose, applicant...',
@@ -633,4 +696,6 @@ return [
     'text_supporter_grade_requirement' => 'The supporter must be at least Grade :grade or higher.',
     'text_document_no' => 'Document No:',
     'text_effective_date' => 'Effective Date:',
+    'text_terms_and_conditions' => 'Terms and Conditions',
+    'text_i_agree_to_terms' => 'I agree to the terms and conditions',
 ];
