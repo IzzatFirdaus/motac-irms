@@ -21,10 +21,15 @@ return new class extends Migration
             $table->foreignId('priority_id')->constrained('helpdesk_priorities')->onDelete('restrict');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade')->comment('Applicant user');
             $table->foreignId('assigned_to_user_id')->nullable()->constrained('users')->onDelete('set null')->comment('Assigned agent');
+            $table->foreignId('closed_by_id')->nullable()->constrained('users')->onDelete('set null')->comment('User who closed ticket');
             $table->timestamp('closed_at')->nullable();
             $table->text('resolution_notes')->nullable();
             $table->timestamp('sla_due_at')->nullable()->comment('SLA due date');
+            $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('deleted_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

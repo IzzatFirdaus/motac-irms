@@ -17,7 +17,11 @@ return new class extends Migration
             $table->string('name')->unique()->comment('Priority name (Low, High, etc.)');
             $table->integer('level')->default(0)->comment('Sorting level, e.g., 1=Low, 5=Critical');
             $table->string('color_code')->nullable()->comment('Hex color for UI (optional)');
+            $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('deleted_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

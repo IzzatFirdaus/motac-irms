@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-// use App\Http\Requests\Api\CloseHelpdeskTicketRequest;
-// use App\Http\Requests\Api\UpdateHelpdeskTicketRequest;
+use App\Http\Requests\Api\CloseHelpdeskTicketRequest;
+use App\Http\Requests\Api\UpdateHelpdeskTicketRequest;
 use App\Models\HelpdeskTicket;
 use App\Services\HelpdeskService;
 use Illuminate\Http\JsonResponse;
@@ -27,7 +27,7 @@ class HelpdeskApiController extends Controller
     public function __construct(HelpdeskService $helpdeskService)
     {
         $this->helpdeskService = $helpdeskService;
-        // $this->middleware('auth:sanctum'); // Uncomment for API auth protection
+        $this->middleware('auth:sanctum'); // Ensure API authentication using Sanctum
     }
 
     /**
@@ -70,36 +70,24 @@ class HelpdeskApiController extends Controller
      * Update an existing ticket via API.
      * Validates input, ensures authenticated user, and returns JSON response.
      */
-    public function update(Request $request, HelpdeskTicket $ticket): JsonResponse
+    public function update(UpdateHelpdeskTicketRequest $request, HelpdeskTicket $ticket): JsonResponse
     {
         try {
-            // $this->authorize('update', $ticket); // Uncomment if using policies
-
-            $validatedData = $request->validate([
-                'category_id' => 'sometimes|required|exists:helpdesk_categories,id',
-                'priority_id' => 'sometimes|required|exists:helpdesk_priorities,id',
-                'subject' => 'sometimes|required|string|max:255',
-                'description' => 'sometimes|required|string',
-                'status' => 'sometimes|required|string|in:open,in_progress,on_hold,resolved,closed,reopened',
-                'assigned_to_user_id' => 'nullable|exists:users,id',
-                'resolution_details' => 'nullable|string',
-                'attachments.*' => 'nullable|file|max:5120',
-            ]);
-
             $updater = Auth::user();
             if (!$updater) {
                 return response()->json(['message' => 'Unauthenticated user.', 'error' => 'Authentication required.'], 401);
             }
 
-            $this->helpdeskService->updateTicket($ticket, $validatedData, $updater, $request->file('attachments', []));
+            $this->helpdeskService->updateTicket($ticket, $request->validated(), $updater, $request->file('attachments', []));
+
+            Log::info(sprintf('API Ticket Update Success: Ticket ID %d updated by User ID %d.', $ticket->id, $updater->id));
 
             return response()->json(['message' => 'Ticket updated successfully', 'ticket_id' => $ticket->id]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::warning(sprintf('API Ticket Update Validation Error for ID %d: ', $ticket->id) . $e->getMessage(), ['errors' => $e->errors(), 'request' => $request->all()]);
-
-            return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);
         } catch (\Exception $e) {
-            Log::error(sprintf('API Ticket Update Error for ID %d: ', $ticket->id) . $e->getMessage(), ['request' => $request->all()]);
+            Log::error(sprintf('API Ticket Update Error for Ticket ID %d: ', $ticket->id) . $e->getMessage(), [
+                'exception_class' => get_class($e),
+                'request' => $request->all(),
+            ]);
 
             return response()->json(['message' => 'Failed to update ticket', 'error' => $e->getMessage()], 500);
         }
@@ -107,32 +95,26 @@ class HelpdeskApiController extends Controller
 
     /**
      * Close the specified ticket via API.
-     * Validates input, ensures authenticated user, and returns JSON response.
+     * Validates input, ensures authenticated user, and updates ticket status.
      */
-    public function close(Request $request, HelpdeskTicket $ticket): JsonResponse
+    public function close(CloseHelpdeskTicketRequest $request, HelpdeskTicket $ticket): JsonResponse
     {
         try {
-            // $this->authorize('close', $ticket);
-
-            $validatedData = $request->validate([
-                'resolution_details' => 'required|string',
-                'status' => 'required|string|in:closed',
-            ]);
-
             $closer = Auth::user();
             if (!$closer) {
                 return response()->json(['message' => 'Unauthenticated user.', 'error' => 'Authentication required.'], 401);
             }
 
-            $this->helpdeskService->closeTicket($ticket, $validatedData, $closer);
+            $this->helpdeskService->closeTicket($ticket, $request->validated(), $closer);
+
+            Log::info(sprintf('API Ticket Closure Success: Ticket ID %d closed by User ID %d.', $ticket->id, $closer->id));
 
             return response()->json(['message' => 'Ticket closed successfully', 'ticket_id' => $ticket->id]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::warning(sprintf('API Ticket Close Validation Error for ID %d: ', $ticket->id) . $e->getMessage(), ['errors' => $e->errors(), 'request' => $request->all()]);
-
-            return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);
         } catch (\Exception $e) {
-            Log::error(sprintf('API Ticket Close Error for ID %d: ', $ticket->id) . $e->getMessage(), ['request' => $request->all()]);
+            Log::error(sprintf('API Ticket Closure Error for Ticket ID %d: ', $ticket->id) . $e->getMessage(), [
+                'exception_class' => get_class($e),
+                'request' => $request->all(),
+            ]);
 
             return response()->json(['message' => 'Failed to close ticket', 'error' => $e->getMessage()], 500);
         }

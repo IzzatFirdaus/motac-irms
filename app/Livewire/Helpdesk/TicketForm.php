@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Auth;
 /**
  * TicketForm
  *
- * Form for submitting a new helpdesk ticket.
+ * Livewire component for submitting a new helpdesk ticket.
  */
 class TicketForm extends Component
 {
@@ -27,22 +27,32 @@ class TicketForm extends Component
 
     protected HelpdeskService $helpdeskService;
 
+    /**
+     * Called on component boot; inject HelpdeskService for ticket creation.
+     */
     public function boot(HelpdeskService $helpdeskService)
     {
         $this->helpdeskService = $helpdeskService;
     }
 
+    /**
+     * Define validation rules for ticket creation.
+     */
     protected function rules()
     {
         return [
             'title' => 'required|string|max:255',
-            'description' => 'required|string',
+            'description' => 'required|string|max:5000',
             'category_id' => ['required', 'integer', Rule::exists('helpdesk_categories', 'id')],
             'priority_id' => ['required', 'integer', Rule::exists('helpdesk_priorities', 'id')],
-            'attachments.*' => 'nullable|file|max:2048|mimes:jpg,png,pdf,docx,txt,xlsx',
+            'attachments' => 'nullable|array',
+            'attachments.*' => 'nullable|file|max:5120|mimes:jpg,jpeg,png,pdf,doc,docx,txt,xlsx',
         ];
     }
 
+    /**
+     * Handles the submission of the ticket creation form.
+     */
     public function createTicket()
     {
         $this->validate();
@@ -50,8 +60,8 @@ class TicketForm extends Component
         try {
             $ticket = $this->helpdeskService->createTicket(
                 [
-                    'title' => $this->title,
-                    'description' => $this->description,
+                    'title' => trim($this->title),
+                    'description' => trim($this->description),
                     'category_id' => $this->category_id,
                     'priority_id' => $this->priority_id,
                 ],
@@ -59,17 +69,21 @@ class TicketForm extends Component
                 $this->attachments
             );
 
-            session()->flash('message', 'Ticket created successfully!');
-            return redirect()->route('helpdesk.view', $ticket->id);
+            session()->flash('message', __('Tiket berjaya dihantar!'));
+            // Redirect to the ticket's show page (route name according to convention)
+            return redirect()->route('helpdesk.tickets.show', $ticket->id);
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to create ticket: ' . $e->getMessage());
+            session()->flash('error', __('Gagal menghantar tiket: ') . $e->getMessage());
         }
     }
 
+    /**
+     * Render the ticket form with active categories and all priorities.
+     */
     public function render()
     {
         return view('livewire.helpdesk.ticket-form', [
-            'categories' => HelpdeskCategory::all(),
+            'categories' => HelpdeskCategory::active()->get(),
             'priorities' => HelpdeskPriority::all(),
         ]);
     }

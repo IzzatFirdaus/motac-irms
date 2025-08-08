@@ -30,4 +30,7 @@ class PositionController extends Controller
     //     // $this->authorize('export', Position::class); // Example authorization
     //     // Logic for exporting positions
     // }
+
+    // ---- Checked status: This controller is intentionally minimal and
+    // will only be used for non-standard Position actions not handled by Livewire. ----
 }

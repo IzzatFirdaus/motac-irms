@@ -12,39 +12,64 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Log; // Added Log for debugging/info
+use Illuminate\Support\Facades\Log;
 
+/**
+ * HelpdeskService
+ *
+ * Handles core business logic for helpdesk tickets, including creation, updates,
+ * closing, commenting, and attachment management.
+ */
 class HelpdeskService
 {
-    protected NotificationService $notificationService; // Changed from TicketNotificationService
+    protected NotificationService $notificationService;
 
-    public function __construct(NotificationService $notificationService) // Changed from TicketNotificationService
+    public function __construct(NotificationService $notificationService)
     {
         $this->notificationService = $notificationService;
     }
 
+    /**
+     * Create a new helpdesk ticket and handle file attachments.
+     *
+     * @param array $data Ticket data (validated fields).
+     * @param User $applicant User creating the ticket.
+     * @param array $attachments Optional file attachments.
+     * @return HelpdeskTicket
+     */
     public function createTicket(array $data, User $applicant, array $attachments = []): HelpdeskTicket
     {
         return DB::transaction(function () use ($data, $applicant, $attachments) {
             $ticket = new HelpdeskTicket();
             $ticket->fill($data);
             $ticket->user_id = $applicant->id;
-            $ticket->status = 'open';
+            $ticket->status = HelpdeskTicket::STATUS_OPEN;
 
+            // Set SLA due date (default 48h unless config override)
             $slaHours = config('motac.helpdesk.default_sla_hours', 48);
             $ticket->sla_due_at = Carbon::now()->addHours($slaHours);
 
             $ticket->save();
 
             $this->handleAttachments($ticket, $attachments);
-            // Assuming notifyTicketCreated expects (User $recipient, HelpdeskTicket $ticket, string $recipientType)
-            // For ticket creation, the recipient is the applicant, and recipientType is 'applicant'
+
+            // Notify applicant about ticket creation
             $this->notificationService->notifyTicketCreated($applicant, $ticket, 'applicant');
 
             return $ticket;
         });
     }
 
+    /**
+     * Add a comment to a helpdesk ticket.
+     *
+     * @param HelpdeskTicket $ticket
+     * @param string $commentText
+     * @param User $user
+     * @param array $attachments
+     * @param bool $isInternal
+     * @return HelpdeskComment
+     */
     public function addComment(HelpdeskTicket $ticket, string $commentText, User $user, array $attachments = [], bool $isInternal = false): HelpdeskComment
     {
         return DB::transaction(function () use ($ticket, $commentText, $user, $attachments, $isInternal) {
@@ -56,11 +81,11 @@ class HelpdeskService
             $comment->save();
 
             $this->handleAttachments($comment, $attachments);
-            // Notify involved parties about the new comment
-            // Assuming notifyTicketCommentAdded expects (User $recipient, HelpdeskComment $comment, User $commenter, string $recipientType)
-            $this->notificationService->notifyTicketCommentAdded($ticket->user, $comment, $user, 'applicant'); // Notify applicant
+
+            // Notify applicant and assignee of new comment
+            $this->notificationService->notifyTicketCommentAdded($ticket->user, $comment, $user, 'applicant');
             if ($ticket->assignedTo && $ticket->assignedTo->id !== $user->id) {
-                $this->notificationService->notifyTicketCommentAdded($ticket->assignedTo, $comment, $user, 'assignee'); // Notify assignee
+                $this->notificationService->notifyTicketCommentAdded($ticket->assignedTo, $comment, $user, 'assignee');
             }
 
             return $comment;
@@ -68,12 +93,12 @@ class HelpdeskService
     }
 
     /**
-     * Update an existing helpdesk ticket.
+     * Update an existing helpdesk ticket (web or API).
      *
-     * @param HelpdeskTicket $ticket The ticket to update.
-     * @param array $data The data to update the ticket with.
-     * @param User $updater The user performing the update.
-     * @param array $attachments Optional array of uploaded files for attachments.
+     * @param HelpdeskTicket $ticket
+     * @param array $data Validated update data
+     * @param User $updater
+     * @param array $attachments
      * @return HelpdeskTicket
      */
     public function updateTicket(HelpdeskTicket $ticket, array $data, User $updater, array $attachments = []): HelpdeskTicket
@@ -82,46 +107,53 @@ class HelpdeskService
             $oldStatus = $ticket->status;
             $oldAssignedToUserId = $ticket->assigned_to_user_id;
 
-            // Fill the ticket with validated data, excluding attachments.
-            // Ensure only fillable attributes are passed to fill to prevent mass assignment issues.
+            // Exclude attachments from fillable data
             $fillableData = $data;
-            unset($fillableData['attachments']); // Attachments are handled separately
+            unset($fillableData['attachments']);
+
+            // Map legacy/alternate fields for compatibility
+            if (isset($fillableData['subject']) && !isset($fillableData['title'])) {
+                $fillableData['title'] = $fillableData['subject'];
+                unset($fillableData['subject']);
+            }
+            if (isset($fillableData['resolution_details']) && !isset($fillableData['resolution_notes'])) {
+                $fillableData['resolution_notes'] = $fillableData['resolution_details'];
+                unset($fillableData['resolution_details']);
+            }
 
             $ticket->fill($fillableData);
 
-            // Handle status changes, especially for 'closed' status
+            // Handle status transitions, especially for closing or reopening
             if (isset($data['status'])) {
-                if ($data['status'] === 'closed' && is_null($ticket->closed_at)) {
+                if ($data['status'] === HelpdeskTicket::STATUS_CLOSED && is_null($ticket->closed_at)) {
                     $ticket->closed_at = Carbon::now();
-                } elseif ($data['status'] !== 'closed' && !is_null($ticket->closed_at)) {
+                } elseif ($data['status'] !== HelpdeskTicket::STATUS_CLOSED && !is_null($ticket->closed_at)) {
                     $ticket->closed_at = null; // Re-open the ticket if status changes from closed
                 }
             }
 
             $ticket->save();
 
-            // Handle new attachments
             $this->handleAttachments($ticket, $attachments);
 
-            // Send notifications based on changes
+            // Notify about status changes
             if ($oldStatus !== $ticket->status) {
-                // Notify applicant and assigned staff about status change
                 $this->notificationService->notifyTicketStatusUpdated($ticket->user, $ticket, $updater, 'applicant');
                 if ($ticket->assignedTo) {
                     $this->notificationService->notifyTicketStatusUpdated($ticket->assignedTo, $ticket, $updater, 'assignee');
                 }
             }
 
-            if ($oldAssignedToUserId !== $ticket->assigned_to_user_id) {
-                // Notify the newly assigned person
-                if ($ticket->assignedTo) {
-                    $this->notificationService->notifyTicketAssigned($ticket->assignedTo, $ticket, $updater);
-                }
-                // Optionally, notify the previously assigned person that they are no longer assigned
-                // This would require fetching the old assigned user and checking if they are different from the new one.
+            // Notify about assignment change
+            if ($oldAssignedToUserId !== $ticket->assigned_to_user_id && $ticket->assignedTo) {
+                $this->notificationService->notifyTicketAssigned($ticket->assignedTo, $ticket, $updater);
             }
 
-            Log::info(sprintf('Helpdesk Ticket ID %d updated by User ID %d.', $ticket->id, $updater->id), ['ticket_id' => $ticket->id, 'updated_by' => $updater->id, 'changes' => $ticket->getChanges()]);
+            Log::info(sprintf('Helpdesk Ticket ID %d updated by User ID %d.', $ticket->id, $updater->id), [
+                'ticket_id' => $ticket->id,
+                'updated_by' => $updater->id,
+                'changes' => $ticket->getChanges()
+            ]);
 
             return $ticket;
         });
@@ -130,9 +162,9 @@ class HelpdeskService
     /**
      * Close a helpdesk ticket.
      *
-     * @param HelpdeskTicket $ticket The ticket to close.
-     * @param array $data Contains resolution_details and closed_by_id.
-     * @param User $closer The user performing the close action.
+     * @param HelpdeskTicket $ticket
+     * @param array $data ['resolution_notes' => ..., ...]
+     * @param User $closer
      * @return HelpdeskTicket
      */
     public function closeTicket(HelpdeskTicket $ticket, array $data, User $closer): HelpdeskTicket
@@ -140,26 +172,37 @@ class HelpdeskService
         return DB::transaction(function () use ($ticket, $data, $closer) {
             $oldStatus = $ticket->status;
 
-            $ticket->status = 'closed';
-            $ticket->resolution_details = $data['resolution_details'] ?? null;
+            $ticket->status = HelpdeskTicket::STATUS_CLOSED;
+            // Use 'resolution_notes' as canonical; fallback to 'resolution_details' for legacy/compat.
+            $ticket->resolution_notes = $data['resolution_notes'] ?? ($data['resolution_details'] ?? null);
             $ticket->closed_by_id = $closer->id;
             $ticket->closed_at = Carbon::now();
             $ticket->save();
 
-            // Notify relevant parties about the closure
-            if ($oldStatus !== $ticket->status) {
+            // Notify parties only if status actually changed to closed
+            if ($oldStatus !== HelpdeskTicket::STATUS_CLOSED) {
                 $this->notificationService->notifyTicketStatusUpdated($ticket->user, $ticket, $closer, 'applicant');
                 if ($ticket->assignedTo) {
                     $this->notificationService->notifyTicketStatusUpdated($ticket->assignedTo, $ticket, $closer, 'assignee');
                 }
             }
 
-            Log::info(sprintf('Helpdesk Ticket ID %d closed by User ID %d.', $ticket->id, $closer->id), ['ticket_id' => $ticket->id, 'closed_by' => $closer->id]);
+            Log::info(sprintf('Helpdesk Ticket ID %d closed by User ID %d.', $ticket->id, $closer->id), [
+                'ticket_id' => $ticket->id,
+                'closed_by' => $closer->id
+            ]);
 
             return $ticket;
         });
     }
 
+    /**
+     * Handles file attachments for tickets or comments.
+     *
+     * @param Model $attachable
+     * @param array $attachments
+     * @return void
+     */
     protected function handleAttachments(Model $attachable, array $attachments): void
     {
         foreach ($attachments as $attachment) {

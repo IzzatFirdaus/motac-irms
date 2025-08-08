@@ -17,9 +17,13 @@ return new class extends Migration
             $table->morphs('attachable'); // attachable_type, attachable_id
             $table->string('file_path');
             $table->string('file_name');
-            $table->string('file_size'); // Store as string for flexibility
+            $table->integer('file_size'); // Store as integer (bytes)
             $table->string('file_type'); // MIME type
+            $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('deleted_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

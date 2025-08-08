@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
 use App\Traits\CreatedUpdatedDeletedBy;
@@ -13,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * HelpdeskCategory Model.
  *
- * Represents categories for helpdesk tickets, such as Hardware, Software, etc.
+ * Represents categories for helpdesk tickets.
  *
  * @property int $id
  * @property string $name
@@ -34,8 +32,31 @@ class HelpdeskCategory extends Model
         'is_active' => true,
     ];
 
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
+
+    /**
+     * Tickets under this category.
+     */
     public function tickets(): HasMany
     {
         return $this->hasMany(HelpdeskTicket::class, 'category_id');
+    }
+
+    /**
+     * Scope for active categories only.
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    /**
+     * Check if this category is currently active.
+     */
+    public function isActive(): bool
+    {
+        return (bool) $this->is_active;
     }
 }

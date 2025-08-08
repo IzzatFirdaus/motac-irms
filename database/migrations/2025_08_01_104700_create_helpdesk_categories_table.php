@@ -16,7 +16,12 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique()->comment('Category name, e.g., Hardware, Software');
             $table->text('description')->nullable()->comment('Category description');
+            $table->boolean('is_active')->default(true);
+            $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('deleted_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
