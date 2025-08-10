@@ -10,6 +10,10 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Seeds the helpdesk_tickets table with sample tickets for testing and development purposes.
+ * Ensures correct relationships and fields based on the current schema and model.
+ */
 class HelpdeskTicketSeeder extends Seeder
 {
     /**
@@ -19,11 +23,13 @@ class HelpdeskTicketSeeder extends Seeder
     {
         Log::info('Starting HelpdeskTicket seeding...');
 
+        // Ensure prerequisite data exists
         if (User::count() === 0 || HelpdeskCategory::count() === 0 || HelpdeskPriority::count() === 0) {
             Log::error('HelpdeskTicketSeeder requires at least one User, one HelpdeskCategory, and one HelpdeskPriority record. Aborting.');
             return;
         }
 
+        // Truncate for a clean slate
         DB::statement('SET FOREIGN_KEY_CHECKS = 0;');
         DB::table('helpdesk_tickets')->truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1;');
@@ -33,6 +39,7 @@ class HelpdeskTicketSeeder extends Seeder
         $auditUserId = $auditUser?->id;
 
         if (! $auditUserId) {
+            // Create a fallback audit user if none exists
             $auditUser = User::factory()->create(['name' => 'Audit User (HelpdeskTicketSeeder)']);
             $auditUserId = $auditUser->id;
             Log::info(sprintf('Created a fallback audit user with ID %d for HelpdeskTicketSeeder.', $auditUserId));
@@ -40,67 +47,68 @@ class HelpdeskTicketSeeder extends Seeder
             Log::info(sprintf('Using existing audit user with ID %d for HelpdeskTicketSeeder.', $auditUserId));
         }
 
+        // Gather IDs for foreign keys
         $userIds = User::pluck('id');
         $categoryIds = HelpdeskCategory::pluck('id');
         $priorityIds = HelpdeskPriority::pluck('id');
-        $assignedToUserIds = User::whereHas('roles', fn ($q) => $q->where('name', 'Helpdesk Support'))->pluck('id');
+        // Find users who could be helpdesk agents (could be filtered by role if needed)
+        $assignedToUserIds = User::pluck('id');
 
-        if ($assignedToUserIds->isEmpty()) {
-            Log::warning('No "Helpdesk Support" users found. Creating one for seeding purposes.');
-            $supportUser = User::factory()->create(['name' => 'Helpdesk Support (Seeder)']);
-            // Attach a role if your application uses a roles system, e.g., $supportUser->assignRole('Helpdesk Support');
-            $assignedToUserIds = collect([$supportUser->id]);
-        }
+        // Helper to get a random value from a collection
+        $randomFrom = function($collection) {
+            return $collection->random();
+        };
 
-        // Open Tickets
+        // Create Open Tickets
         HelpdeskTicket::factory()->count(10)->create([
-            'user_id' => $userIds->random(),
-            'category_id' => $categoryIds->random(),
-            'priority_id' => $priorityIds->random(),
-            'status' => HelpdeskTicket::STATUS_OPEN, // Changed
+            'user_id' => $randomFrom($userIds),
+            'category_id' => $randomFrom($categoryIds),
+            'priority_id' => $randomFrom($priorityIds),
+            'status' => HelpdeskTicket::STATUS_OPEN,
             'created_by' => $auditUserId,
             'updated_by' => $auditUserId,
         ]);
-        Log::info('Created 10 "Open" tickets.');
+        Log::info('Created 10 "Open" helpdesk tickets.');
 
-        // In Progress
+        // Create In Progress Tickets
         HelpdeskTicket::factory()->count(5)->create([
-            'user_id' => $userIds->random(),
-            'assigned_to_user_id' => $assignedToUserIds->random(),
-            'category_id' => $categoryIds->random(),
-            'priority_id' => $priorityIds->random(),
-            'status' => HelpdeskTicket::STATUS_IN_PROGRESS, // Changed
+            'user_id' => $randomFrom($userIds),
+            'assigned_to_user_id' => $randomFrom($assignedToUserIds),
+            'category_id' => $randomFrom($categoryIds),
+            'priority_id' => $randomFrom($priorityIds),
+            'status' => HelpdeskTicket::STATUS_IN_PROGRESS,
             'created_by' => $auditUserId,
             'updated_by' => $auditUserId,
         ]);
-        Log::info('Created 5 "In Progress" tickets.');
+        Log::info('Created 5 "In Progress" helpdesk tickets.');
 
-        // Resolved
+        // Create Resolved Tickets
         HelpdeskTicket::factory()->count(3)->create([
-            'user_id' => $userIds->random(),
-            'assigned_to_user_id' => $assignedToUserIds->random(),
-            'category_id' => $categoryIds->random(),
-            'priority_id' => $priorityIds->random(),
-            'status' => HelpdeskTicket::STATUS_RESOLVED, // Changed
+            'user_id' => $randomFrom($userIds),
+            'assigned_to_user_id' => $randomFrom($assignedToUserIds),
+            'category_id' => $randomFrom($categoryIds),
+            'priority_id' => $randomFrom($priorityIds),
+            'status' => HelpdeskTicket::STATUS_RESOLVED,
             'resolution_notes' => 'Issue resolved by technical support.',
             'created_by' => $auditUserId,
             'updated_by' => $auditUserId,
         ]);
-        Log::info('Created 3 "Resolved" tickets.');
+        Log::info('Created 3 "Resolved" helpdesk tickets.');
 
-        // Closed
+        // Create Closed Tickets
         HelpdeskTicket::factory()->count(2)->create([
-            'user_id' => $userIds->random(),
-            'assigned_to_user_id' => $assignedToUserIds->random(),
-            'category_id' => $categoryIds->random(),
-            'priority_id' => $priorityIds->random(),
-            'status' => HelpdeskTicket::STATUS_CLOSED, // Changed
+            'user_id' => $randomFrom($userIds),
+            'assigned_to_user_id' => $randomFrom($assignedToUserIds),
+            'category_id' => $randomFrom($categoryIds),
+            'priority_id' => $randomFrom($priorityIds),
+            'status' => HelpdeskTicket::STATUS_CLOSED,
             'resolution_notes' => 'User confirmed resolution and ticket was closed.',
             'closed_at' => now(),
+            'closed_by_id' => $randomFrom($assignedToUserIds),
             'created_by' => $auditUserId,
             'updated_by' => $auditUserId,
         ]);
-        Log::info('Created 2 "Closed" tickets.');
+        Log::info('Created 2 "Closed" helpdesk tickets.');
 
         Log::info('HelpdeskTicket seeding completed.');
     }

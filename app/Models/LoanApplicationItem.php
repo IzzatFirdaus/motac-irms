@@ -17,6 +17,8 @@ use Illuminate\Support\Str;
  * LoanApplicationItem Model.
  *
  * Represents a requested equipment type/quantity in a loan application.
+ * Each item records the type of equipment, amount requested/approved/issued/returned,
+ * and status within the application's approval and issuance workflow.
  *
  * @property int $id
  * @property int $loan_application_id
@@ -36,7 +38,7 @@ class LoanApplicationItem extends Model
 {
     use HasFactory, SoftDeletes;
 
-    // Item status constants
+    // Status constants for item approval and issuance/return workflow
     public const STATUS_PENDING_APPROVAL = 'pending_approval';
     public const STATUS_ITEM_APPROVED = 'item_approved';
     public const STATUS_ITEM_REJECTED = 'item_rejected';
@@ -46,6 +48,7 @@ class LoanApplicationItem extends Model
     public const STATUS_FULLY_RETURNED = 'fully_returned';
     public const STATUS_ITEM_CANCELLED = 'item_cancelled';
 
+    // Labels for each status (used for UI/presentation)
     public const ITEM_STATUS_LABELS = [
         self::STATUS_PENDING_APPROVAL => 'Menunggu Kelulusan (Item)',
         self::STATUS_ITEM_APPROVED => 'Diluluskan (Item)',
@@ -57,6 +60,9 @@ class LoanApplicationItem extends Model
         self::STATUS_ITEM_CANCELLED => 'Dibatalkan (Item)',
     ];
 
+    /**
+     * Mass-assignable fields, must match migration and factory.
+     */
     protected $fillable = [
         'loan_application_id',
         'equipment_id',
@@ -69,6 +75,9 @@ class LoanApplicationItem extends Model
         'notes',
     ];
 
+    /**
+     * Attribute casts for correct data types.
+     */
     protected $casts = [
         'quantity_requested' => 'integer',
         'quantity_approved' => 'integer',
@@ -79,6 +88,11 @@ class LoanApplicationItem extends Model
         'deleted_at' => 'datetime',
     ];
 
+    /**
+     * Booted model hook.
+     * - Sets default status and quantity values on creation.
+     * - Cascade deletes related loan transaction items when deleted.
+     */
     protected static function booted(): void
     {
         static::creating(function ($item): void {
@@ -96,37 +110,56 @@ class LoanApplicationItem extends Model
         });
     }
 
+    /**
+     * Factory definition for this model.
+     */
     protected static function newFactory(): LoanApplicationItemFactory
     {
         return LoanApplicationItemFactory::new();
     }
 
+    // ---------------------
     // Relationships
+    // ---------------------
 
+    /**
+     * The parent LoanApplication.
+     */
     public function loanApplication(): BelongsTo
     {
         return $this->belongsTo(LoanApplication::class);
     }
 
+    /**
+     * Related LoanTransactionItems (issue/return records for this request).
+     */
     public function loanTransactionItems(): HasMany
     {
         return $this->hasMany(LoanTransactionItem::class, 'loan_application_item_id');
     }
 
+    /**
+     * Optionally, the specific Equipment assigned to this request (may be null).
+     */
     public function equipment(): BelongsTo
     {
         return $this->belongsTo(Equipment::class, 'equipment_id');
     }
 
-    // Accessors
+    // ---------------------
+    // Accessors & Helpers
+    // ---------------------
 
+    /**
+     * Get a human-readable label for the status.
+     */
     public function getStatusLabelAttribute(): string
     {
         return self::ITEM_STATUS_LABELS[$this->status] ?? Str::title(str_replace('_', ' ', (string) $this->status));
     }
 
     /**
-     * Human-readable equipment type label.
+     * Get a human-readable label for the equipment type.
      */
     public function getEquipmentTypeLabelAttribute(): string
     {
@@ -134,19 +167,20 @@ class LoanApplicationItem extends Model
     }
 
     /**
-     * Recalculate quantity_issued and quantity_returned based on related transaction items.
+     * Recalculate the issued and returned quantities based on related transaction items.
+     * This ensures that the summary fields remain in sync with the actual transactions.
      */
     public function recalculateQuantities(): void
     {
         $this->loadMissing('loanTransactionItems.loanTransaction');
 
-        // Sum quantities for 'issue' transactions
+        // Sum quantities for 'issue' transactions with "issued" status
         $issuedQty = $this->loanTransactionItems
             ->where('loanTransaction.type', LoanTransaction::TYPE_ISSUE)
             ->where('status', LoanTransactionItem::STATUS_ITEM_ISSUED)
             ->sum('quantity_transacted');
 
-        // Sum quantities for 'return' transactions, excluding 'lost' items
+        // Sum quantities for 'return' transactions, excluding those marked as lost
         $returnedQty = $this->loanTransactionItems
             ->where('loanTransaction.type', LoanTransaction::TYPE_RETURN)
             ->whereNotIn('status', [LoanTransactionItem::STATUS_ITEM_REPORTED_LOST])
