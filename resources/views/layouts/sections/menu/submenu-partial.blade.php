@@ -1,24 +1,19 @@
-{{-- resources/views/layouts/sections/menu/submenu-partial.blade.php --}}
-{{-- Recursive partial for menu and submenus.
-    Expects: $menuItems, $role, $configData, $currentRouteName.
+{{--
+    Canonical recursive partial for main menu and submenus.
+    Handles menu headers, items, and submenus.
+    All role/permission and guest logic is handled in the Livewire component before reaching this view.
+    Only visible/allowed menu items are rendered here.
+
+    NOTE: All classes and structure are scoped for .motac-vertical-menu for style encapsulation.
 --}}
 
 @foreach ($menuItems as $menu)
     @php
-        // Convert to object for property access
         $menu = (object) $menu;
-        // 1. Role-Based Check: Admin sees all, else check roles
-        $canView = false;
-        if (Auth::check()) {
-            if ($role === 'Admin' || (isset($menu->role) && in_array($role, (array) $menu->role)) || !isset($menu->role)) {
-                $canView = true;
-            }
-        }
-        // Guest users never see menu items except if explicitly allowed (rare)
-        // 2. Check for submenu existence
         $hasSubmenu = isset($menu->submenu) && is_array($menu->submenu) && count($menu->submenu) > 0;
-        // 3. Active state determination
         $isActive = false;
+
+        // Mark item active if current route matches, or prefix matches
         if (isset($menu->routeName) && $currentRouteName === $menu->routeName) {
             $isActive = true;
         } elseif (isset($menu->routeNamePrefix)) {
@@ -29,41 +24,44 @@
                 }
             }
         }
-        // 4. Menu href
+
+        // Determine the menu link (href)
         $menuHref = $menu->url ?? (isset($menu->routeName) && Route::has($menu->routeName) ? route($menu->routeName) : 'javascript:void(0);');
         if ($hasSubmenu) {
             $menuHref = '#';
         }
     @endphp
 
-    @if ($canView)
-        {{-- A. Render menu header --}}
-        @if (isset($menu->menuHeader))
-            <li class="menu-header small text-uppercase text-muted fw-bold">
-                <span class="menu-header-text">{{ __($menu->menuHeader) }}</span>
-            </li>
-        {{-- B. Render menu item --}}
-        @else
-            <li class="menu-item {{ $isActive ? 'active open' : '' }}">
-                <a href="{{ $menuHref }}"
-                    class="{{ $hasSubmenu ? 'menu-link menu-toggle' : 'menu-link' }}"
-                    @if (isset($menu->target)) target="{{ $menu->target }}" rel="noopener noreferrer" @endif>
-                    @isset($menu->icon)
-                        <i class="menu-icon tf-icons bi bi-{{ $menu->icon }}"></i>
-                    @endisset
-                    <div>{{ __($menu->name ?? '-') }}</div>
-                </a>
+    {{-- Menu Header (section label) --}}
+    @if (isset($menu->menuHeader))
+        <li class="menu-header small text-uppercase text-muted fw-bold">
+            <span class="menu-header-text">{{ __($menu->menuHeader) }}</span>
+        </li>
+    @else
+        {{-- Menu Item --}}
+        <li class="menu-item{{ $isActive ? ' active' : '' }}{{ $hasSubmenu ? ' has-submenu' : '' }}">
+            <a href="{{ $menuHref }}"
+                class="menu-link{{ $hasSubmenu ? ' menu-toggle' : '' }}"
+                @if ($hasSubmenu) aria-haspopup="true" aria-expanded="{{ $isActive ? 'true' : 'false' }}" tabindex="0" @endif>
+                @isset($menu->icon)
+                    <i class="menu-icon bi bi-{{ $menu->icon }}"></i>
+                @endisset
+                <div>{{ __($menu->name ?? '-') }}</div>
                 @if ($hasSubmenu)
-                    <ul class="menu-sub">
-                        @include('layouts.sections.menu.submenu-partial', [
-                            'menuItems' => $menu->submenu,
-                            'role' => $role,
-                            'configData' => $configData,
-                            'currentRouteName' => $currentRouteName,
-                        ])
-                    </ul>
+                    <span class="menu-arrow bi bi-chevron-right"></span>
                 @endif
-            </li>
-        @endif
+            </a>
+            {{-- Recursive rendering for submenus --}}
+            @if ($hasSubmenu)
+                <ul class="menu-sub">
+                    @include('layouts.sections.menu.submenu-partial', [
+                        'menuItems' => $menu->submenu,
+                        'role' => $role,
+                        'configData' => $configData,
+                        'currentRouteName' => $currentRouteName,
+                    ])
+                </ul>
+            @endif
+        </li>
     @endif
 @endforeach

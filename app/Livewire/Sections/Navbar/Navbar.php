@@ -13,6 +13,7 @@ use Livewire\Component;
  *
  * Renders the application navbar, including language switcher and theme toggler.
  * Accepts container and detachment class from the parent layout.
+ * Now with more robust prop defaults and locale handling.
  */
 class Navbar extends Component
 {
@@ -24,8 +25,9 @@ class Navbar extends Component
 
     /**
      * Mount the component with configuration from the layout.
+     * Now with default values for robustness if props are not passed.
      */
-    public function mount(string $containerNav, string $navbarDetachedClass): void
+    public function mount(string $containerNav = 'container-fluid', string $navbarDetachedClass = ''): void
     {
         $this->containerNav = $containerNav;
         $this->navbarDetachedClass = $navbarDetachedClass;
@@ -33,6 +35,7 @@ class Navbar extends Component
 
     /**
      * Get all available locales for the language switcher.
+     * Ensures each locale has a flag_code.
      *
      * @return array
      */
@@ -52,7 +55,7 @@ class Navbar extends Component
             $countryCode = count($parts) === 2 ? strtolower($parts[1]) : null;
 
             $processedLocales[$localeKey] = $properties;
-            $processedLocales[$localeKey]['flag_code'] = $countryCode ?? ($localeKey === 'ms' ? 'my' : 'us');
+            $processedLocales[$localeKey]['flag_code'] = $properties['flag_code'] ?? ($countryCode ?? ($localeKey === 'ms' ? 'my' : 'us'));
         }
 
         return $processedLocales;

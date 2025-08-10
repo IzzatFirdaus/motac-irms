@@ -3,90 +3,122 @@
 namespace Database\Factories;
 
 use App\Models\Grade;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Carbon;
 
+/**
+ * Factory for Grade (Gred Perkhidmatan).
+ *
+ * Generates realistic job grades for the HR system.
+ * Ensures unique level/name combinations and sets audit fields if available.
+ * This follows the migration (2013_11_01_131900_create_grades_table.php),
+ * and is compatible with the seeder logic and model structure.
+ */
 class GradeFactory extends Factory
 {
     protected $model = Grade::class;
 
     public function definition(): array
     {
-        // We use unique() to ensure each factory run produces a grade with a unique level
-        $level = $this->faker->unique()->numberBetween(1, 70);
-        $name = 'Gred Ujian '.$level; // Default name, refined below
+        // Use a Malaysian locale for more relevant names
+        $msFaker = \Faker\Factory::create('ms_MY');
 
-        // Detailed name generation logic based on level for more realistic test data
-        if ($level >= 68) {
-            $name = $level >= 70 ? 'Menteri (Ujian)' : 'Timbalan Menteri (Ujian)';
-        } elseif ($level >= 62) { // TURUS
-            $turusMap = [62 => 'TURUS III', 64 => 'TURUS II', 66 => 'TURUS I'];
-            $name = ($turusMap[$level] ?? 'TURUS Ujian').' ('.$level.')';
-        } elseif ($level >= 56) { // JUSA
-            $jusaMap = [56 => 'JUSA C', 58 => 'JUSA B', 60 => 'JUSA A'];
-            $name = ($jusaMap[$level] ?? 'JUSA Ujian').' ('.$level.')';
-        } elseif ($level >= 41) { // Management & Professional (P&P)
+        // Generate a unique numeric level (1-70 typical for Malaysian civil service)
+        $level = $this->faker->unique()->numberBetween(1, 70);
+
+        // Name generation based on level, similar to seeder logic
+        if ($level >= 70) {
+            $name = 'Menteri (Ujian)';
+        } elseif ($level >= 68) {
+            $name = 'Timbalan Menteri (Ujian)';
+        } elseif ($level >= 66) {
+            $name = 'TURUS I ('.$level.')';
+        } elseif ($level >= 64) {
+            $name = 'TURUS II ('.$level.')';
+        } elseif ($level >= 62) {
+            $name = 'TURUS III ('.$level.')';
+        } elseif ($level >= 60) {
+            $name = 'JUSA A ('.$level.')';
+        } elseif ($level >= 58) {
+            $name = 'JUSA B ('.$level.')';
+        } elseif ($level >= 56) {
+            $name = 'JUSA C ('.$level.')';
+        } elseif ($level >= 41) {
+            // P&P grades like N41, F41, etc.
             $prefix = $this->faker->randomElement(['N', 'F', 'M', 'E', 'W', 'S', 'J', 'DG']);
-            $name = $prefix.$level;
-        } else { // Support Group
+            $name = $prefix . $level;
+        } else {
+            // Support staff grades like N19, FT19, etc.
             $prefix = $this->faker->randomElement(['N', 'FT', 'W', 'H', 'KP', 'U', 'C']);
-            $name = $prefix.$level;
+            $name = $prefix . $level;
         }
 
-        // Get the minimum approval level from the config file, with a default fallback
-        $minApprovalLevel = Config::get('motac.approval.min_general_view_approval_grade_level', 9);
+        // Randomly assign a user for audit columns if available
+        $auditUserId = User::inRandomOrder()->first()?->id;
+
+        $createdAt = Carbon::parse($this->faker->dateTimeBetween('-5 years', 'now'));
+        $updatedAt = Carbon::parse($this->faker->dateTimeBetween($createdAt, 'now'));
+        $isDeleted = $this->faker->boolean(2); // ~2% soft-deleted for tests
+        $deletedAt = $isDeleted ? Carbon::parse($this->faker->dateTimeBetween($updatedAt, 'now')) : null;
 
         return [
             'name' => $name,
             'level' => $level,
-            'is_approver_grade' => ($level >= $minApprovalLevel),
-            'min_approval_grade_id' => null, // This is handled by application logic/policies
-            'description' => 'Gred janaan kilang untuk tujuan ujian.',
-            'deleted_at' => null,
+            'min_approval_grade_id' => null, // Set via policy/seeder logic
+            'is_approver_grade' => $level >= 41, // Typical threshold for approval (P&P and above)
+            'description' => $msFaker->optional(0.5)->sentence(),
+            'service_scheme' => $this->faker->optional(0.5)->randomElement(['Perkhidmatan Awam', 'Perkhidmatan Pendidikan', 'Perkhidmatan Sokongan']),
+            'created_by' => $auditUserId,
+            'updated_by' => $auditUserId,
+            'deleted_by' => $isDeleted ? $auditUserId : null,
+            'created_at' => $createdAt,
+            'updated_at' => $updatedAt,
+            'deleted_at' => $deletedAt,
         ];
     }
 
     /**
-     * Indicate that the grade should be an approver grade.
+     * State for grades that are approver grades (level >= 41).
      */
     public function approverGrade(): static
     {
         return $this->state(function (array $attributes): array {
-            $minLevel = Config::get('motac.approval.min_general_view_approval_grade_level', 9);
-            // Ensure the generated level is at or above the minimum approval level
-            $level = $this->faker->unique()->numberBetween($minLevel, 70);
-
+            $level = $this->faker->unique()->numberBetween(41, 70);
+            $prefix = $this->faker->randomElement(['N', 'F', 'M', 'E', 'W', 'S', 'J', 'DG']);
             return [
                 'level' => $level,
+                'name' => $prefix . $level,
                 'is_approver_grade' => true,
             ];
         });
     }
 
     /**
-     * Indicate that the grade should be a non-approver grade.
+     * State for grades that are NOT approver grades (level < 41).
      */
     public function nonApproverGrade(): static
     {
         return $this->state(function (array $attributes): array {
-            $minLevel = Config::get('motac.approval.min_general_view_approval_grade_level', 9);
-            // Ensure the generated level is below the minimum approval level
-            $level = $this->faker->unique()->numberBetween(1, $minLevel - 1);
-
+            $level = $this->faker->unique()->numberBetween(1, 40);
+            $prefix = $this->faker->randomElement(['N', 'FT', 'W', 'H', 'KP', 'U', 'C']);
             return [
                 'level' => $level,
+                'name' => $prefix . $level,
                 'is_approver_grade' => false,
             ];
         });
     }
 
     /**
-     * Indicate that the grade is soft deleted.
+     * State for soft-deleted grade.
      */
     public function deleted(): static
     {
+        $auditUserId = User::inRandomOrder()->first()?->id;
         return $this->state(fn (array $attributes): array => [
             'deleted_at' => now(),
+            'deleted_by' => $auditUserId,
         ]);
     }
 }

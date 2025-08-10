@@ -7,15 +7,22 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
+/**
+ * Factory for EquipmentCategory.
+ *
+ * Generates fake categories for ICT equipment, ensuring all required fields
+ * (including blameable/audit fields) are present and values are valid according to migration/model.
+ */
 class EquipmentCategoryFactory extends Factory
 {
     protected $model = EquipmentCategory::class;
 
     public function definition(): array
     {
-        // Use a Malaysian locale for faker
+        // Use Malaysian locale for more realistic data
         $msFaker = \Faker\Factory::create('ms_MY');
 
+        // Find or create an audit user for created_by/updated_by fields
         $auditUser = User::orderBy('id')->first() ?? User::factory()->create(['name' => 'Default Audit User (EqCatFactory)']);
         $auditUserId = $auditUser->id;
 
@@ -23,8 +30,8 @@ class EquipmentCategoryFactory extends Factory
         $updatedAt = Carbon::parse($this->faker->dateTimeBetween($createdAt, 'now'));
 
         return [
-            // Generate category name in Malay
-            'name' => $msFaker->unique()->words(mt_rand(2, 4), true).' Kumpulan Kategori',
+            // Category name in Malay, 2-4 words with suffix
+            'name' => $msFaker->unique()->words(mt_rand(2, 4), true).' Kategori',
             'description' => $msFaker->optional(0.8)->sentence,
             'is_active' => $this->faker->boolean(90),
             'created_by' => $auditUserId,
@@ -36,21 +43,25 @@ class EquipmentCategoryFactory extends Factory
         ];
     }
 
+    /**
+     * Mark the category as active.
+     */
     public function active(): static
     {
         return $this->state(fn (array $attributes): array => ['is_active' => true]);
     }
 
+    /**
+     * Mark the category as inactive.
+     */
     public function inactive(): static
     {
         return $this->state(fn (array $attributes): array => ['is_active' => false]);
     }
 
-    public function noDescription(): static
-    {
-        return $this->state(fn (array $attributes): array => ['description' => null]);
-    }
-
+    /**
+     * Mark the category as soft deleted.
+     */
     public function deleted(): static
     {
         $deleter = User::orderBy('id')->first() ?? User::factory()->create(['name' => 'Deleter User Fallback (EqCatFactory)']);

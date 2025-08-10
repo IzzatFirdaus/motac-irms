@@ -22,7 +22,7 @@
     $navbarFixed = !empty($configData['navbarFixed']) ? 'layout-navbar-fixed' : '';
     $footerFixed = !empty($configData['footerFixed']) ? 'layout-footer-fixed' : '';
     $menuHover = !empty($configData['showDropdownOnHover']) ? 'layout-menu-hover' : '';
-    $templateName = \Illuminate\Support\Str::slug(config('variables.templateName', 'Sistem MOTAC'), '-');
+    $templateName = \Illuminate\Support\Str::slug(config('variables.templateName', 'MOTAC IRMS'), '-');
 
     // Theme style for initial load (light/dark)
     $currentThemeStyle = $configData['myStyle'] ?? 'light';
@@ -51,7 +51,7 @@
         content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
     {{-- Dynamic page title and SEO meta --}}
-    <title>@yield('title', __('Halaman Utama')) | {{ config('variables.templateName', 'Sistem MOTAC') }}</title>
+    <title>@yield('title', __('Halaman Utama')) | {{ config('variables.templateName', 'MOTAC IRMS') }}</title>
     <meta name="description" content="@yield('description', config('variables.templateDescription', 'Sistem Pengurusan Sumber Bersepadu MOTAC'))" />
     <meta name="keywords" content="@yield('keywords', config('variables.templateKeyword', 'motac, bpm, sistem dalaman'))" />
     <link rel="icon" type="image/x-icon" href="{{ asset('assets/img/favicon/favicon-motac.ico') }}" />
@@ -81,7 +81,8 @@
 
     {{-- Helpers.js for layout/theme utilities --}}
     <script src="{{ asset('assets/vendor/js/helpers.js') }}"></script>
-    @include('layouts.sections.scriptsIncludes')
+    {{-- Updated include with new naming convention --}}
+    @include('layouts.sections.layout-scripts-includes')
 
     {{-- Livewire styles --}}
     @livewireStyles
@@ -95,7 +96,7 @@
     <div class="layout-wrapper layout-content-navbar {{ $isNavbar ? '' : 'layout-without-navbar' }}">
         <div class="layout-container">
             @if ($isMenu)
-                {{-- Sidebar Menu (Vertical) --}}
+                {{-- Sidebar Menu (Vertical) - now using the renamed Livewire component --}}
                 @livewire('sections.menu.vertical-menu', [
                     'menuData' => $menuData ?? null,
                     'role' => $currentUserRole,
@@ -105,8 +106,8 @@
 
             <div class="layout-page">
                 @if ($isNavbar)
-                    {{-- Top Navbar --}}
-                    @livewire('sections.navbar.navbar', [
+                    {{-- Top Navbar - Use the Blade partial, not a Livewire component, as per file list --}}
+                    @include('layouts.partials.navbar.navbar-user-profile', [
                         'containerNav' => $configData['containerNav'] ?? 'container-fluid',
                         'navbarDetachedClass' => $navbarDetached,
                         'navbarFull' => $configData['navbarFull'] ?? true,
@@ -135,8 +136,8 @@
                     </div>
 
                     @if ($isFooter)
-                        {{-- Footer section --}}
-                        @livewire('sections.footer.footer')
+                        {{-- Footer section - now using the correct Blade partial --}}
+                        @include('layouts.sections.footer.footer-section')
                     @endif
                     <div class="content-backdrop fade"></div>
                 </div>
@@ -151,7 +152,7 @@
     </div>
 
     {{-- Scripts: includes all vendor, core, and page-level scripts --}}
-    @include('layouts.sections.scripts')
+    @include('layouts.sections.layout-scripts')
 
     {{-- Livewire scripts --}}
     @livewireScripts

@@ -3,6 +3,16 @@
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\ServiceProvider;
 
+/*
+|--------------------------------------------------------------------------
+| Application Configuration for MOTAC IRMS
+|--------------------------------------------------------------------------
+| This file contains all application-wide settings, including
+| branding, locale, timezone, service providers, and custom options.
+| It has been reviewed for translation support best practices.
+|--------------------------------------------------------------------------
+*/
+
 return [
     /*
     |--------------------------------------------------------------------------
@@ -44,6 +54,8 @@ return [
     |--------------------------------------------------------------------------
     | Application Locale Configuration
     |--------------------------------------------------------------------------
+    | Defines the default and fallback locales used by Laravel.
+    | The 'available_locales' array is used for language switching UI.
     */
     'locale' => env('APP_LOCALE', 'ms'),
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
@@ -105,20 +117,29 @@ return [
     |--------------------------------------------------------------------------
     | Autoloaded Service Providers
     |--------------------------------------------------------------------------
+    | Registers all service providers, including the custom translation provider.
+    |
+    | IMPORTANT: Removes Laravel's default TranslationServiceProvider to
+    | ensure our custom translation provider takes precedence and is used by Laravel.
+    | This is required for custom suffixed translation files to work.
     */
-    'providers' => ServiceProvider::defaultProviders()->merge([
-        Livewire\LivewireServiceProvider::class,
-        App\Providers\AppServiceProvider::class,
-        App\Providers\AuthServiceProvider::class,
-        App\Providers\BroadcastServiceProvider::class,
-        App\Providers\EventServiceProvider::class,
-        App\Providers\RouteServiceProvider::class,
-        App\Providers\MenuServiceProvider::class,
-        App\Providers\FortifyServiceProvider::class,
-        App\Providers\JetstreamServiceProvider::class,
-        App\Providers\QueryLogServiceProvider::class,
-        App\Providers\TranslationServiceProvider::class,
-    ])->toArray(),
+    'providers' => collect(ServiceProvider::defaultProviders()->toArray())
+        // Remove the default Laravel translation provider so our custom provider works.
+        ->reject(fn ($provider) => $provider === Illuminate\Translation\TranslationServiceProvider::class)
+        ->merge([
+            Livewire\LivewireServiceProvider::class,
+            App\Providers\AppServiceProvider::class,
+            App\Providers\AuthServiceProvider::class,
+            App\Providers\BroadcastServiceProvider::class,
+            App\Providers\EventServiceProvider::class,
+            App\Providers\RouteServiceProvider::class,
+            App\Providers\MenuServiceProvider::class,
+            App\Providers\FortifyServiceProvider::class,
+            App\Providers\JetstreamServiceProvider::class,
+            App\Providers\QueryLogServiceProvider::class,
+            App\Providers\TranslationServiceProvider::class, // <-- Ensures custom translation is registered!
+        ])
+        ->toArray(),
 
     /*
     |--------------------------------------------------------------------------
@@ -133,6 +154,7 @@ return [
     |--------------------------------------------------------------------------
     | Date & Datetime Display Formats
     |--------------------------------------------------------------------------
+    | Used for consistent display of dates and times across the application.
     */
     'date_formats' => [
         'date_format_my_short' => 'd M Y',
@@ -147,6 +169,7 @@ return [
     |--------------------------------------------------------------------------
     | Custom Application Settings (MOTAC IRMS Specific)
     |--------------------------------------------------------------------------
+    | Contains branding, contact, and system-specific configuration.
     */
     'custom_settings' => [
         'organization_name' => 'Kementerian Pelancongan, Seni dan Budaya Malaysia',
@@ -190,9 +213,10 @@ return [
     |--------------------------------------------------------------------------
     | Translation System Configuration
     |--------------------------------------------------------------------------
+    | Custom settings for the suffixed translation system.
     */
     'translation' => [
-        'use_suffixed_files' => true,
+        'use_suffixed_files' => true, // Use app_en.php, dashboard_en.php, etc.
         'cache_translations' => env('CACHE_TRANSLATIONS', true),
         'fallback_behavior' => 'graceful',
         'log_missing_keys' => env('LOG_MISSING_TRANSLATIONS', true),

@@ -8,7 +8,7 @@ use Livewire\Component;
 /**
  * Livewire VerticalMenu component
  * Loads the menu structure from config/menu.php and exposes it for the Blade view.
- * Handles role-based visibility and supports recursive submenus.
+ * Handles role-based visibility, guest-only items, and recursive submenus.
  */
 class VerticalMenu extends Component
 {
@@ -17,7 +17,6 @@ class VerticalMenu extends Component
 
     /**
      * Mount the component and initialize its properties.
-     * Loads global app config and menu data.
      */
     public function mount(): void
     {
@@ -28,15 +27,14 @@ class VerticalMenu extends Component
         $menuConfig = config('menu');
         $this->menuData = (object) $menuConfig;
 
-        // Ensure menuData->menu is always array
+        // Ensure menuData->menu is always an array
         if (!isset($this->menuData->menu) || !is_array($this->menuData->menu)) {
             $this->menuData->menu = [];
         }
     }
 
     /**
-     * Exposes the user's primary role for use in Blade.
-     * If multiple roles, returns the first.
+     * Returns the first role of the authenticated user or null if guest.
      */
     public function getUserRoleProperty()
     {
@@ -47,11 +45,72 @@ class VerticalMenu extends Component
     }
 
     /**
-     * Exposes the current route name for active checks in Blade.
+     * Returns the current route name for active checks in Blade.
      */
     public function getCurrentRouteNameProperty()
     {
         return \Route::currentRouteName();
+    }
+
+    /**
+     * Filters the menu based on guest/authenticated status and role.
+     * - Guests only see items with 'guestOnly' => true.
+     * - Authenticated users only see items with their role in 'role' and NOT guestOnly.
+     * - Submenus and headers are recursively filtered.
+     */
+    public function getFilteredMenuDataProperty()
+    {
+        $role = $this->userRole;
+        $menu = $this->menuData->menu ?? [];
+
+        $filterMenu = function ($items) use (&$filterMenu, $role) {
+            $filtered = [];
+
+            foreach ($items as $item) {
+                $item = (object)$item;
+
+                // Show guestOnly items ONLY to guests
+                if (!Auth::check()) {
+                    if (isset($item->guestOnly) && $item->guestOnly) {
+                        // Recursively filter submenu for guests (if any)
+                        if (isset($item->submenu) && is_array($item->submenu)) {
+                            $item->submenu = $filterMenu($item->submenu);
+                        }
+                        $filtered[] = $item;
+                    }
+                    continue;
+                }
+
+                // Hide guestOnly items from authenticated users
+                if (isset($item->guestOnly) && $item->guestOnly) {
+                    continue;
+                }
+
+                // Authenticated users: Admin sees all, others according to role
+                $canView = false;
+                if (
+                    $role === 'Admin' ||
+                    (isset($item->role) && in_array($role, (array)$item->role))
+                ) {
+                    $canView = true;
+                }
+                // If item has no role and no guestOnly, allow for all authenticated users
+                elseif (!isset($item->role) && !isset($item->guestOnly)) {
+                    $canView = true;
+                }
+
+                if (!$canView) continue;
+
+                // Recursively filter submenu if present
+                if (isset($item->submenu) && is_array($item->submenu)) {
+                    $item->submenu = $filterMenu($item->submenu);
+                }
+                $filtered[] = $item;
+            }
+            return $filtered;
+        };
+
+        return $filterMenu($menu);
     }
 
     /**
@@ -60,7 +119,7 @@ class VerticalMenu extends Component
     public function render()
     {
         return view('livewire.sections.menu.vertical-menu', [
-            'menuData' => $this->menuData,
+            'menuData' => (object)['menu' => $this->filteredMenuData],
             'configData' => $this->configData,
             'role' => $this->userRole,
             'currentRouteName' => $this->currentRouteName,

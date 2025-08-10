@@ -2,37 +2,47 @@
 
 namespace Database\Seeders;
 
-use App\Models\Department; // Ensure this matches your Department model namespace and name
+use App\Models\Department;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-// Corrected class name to match typical PSR-4 autoloading with a singular filename
-class DepartmentSeeder extends Seeder // Changed from DepartmentsSeeder to DepartmentSeeder
+/**
+ * Seeds the departments table with MOTAC HQ and State branches.
+ * Ensures there is always an audit user for blameable columns, even after truncate.
+ * All department data is seeded with proper audit columns.
+ */
+class DepartmentSeeder extends Seeder
 {
     public function run(): void
     {
-        Log::info('Starting Department seeding (Revision 3 - Corrected)...');
+        Log::info('Starting Department seeding (Revision 3 - Adjusted)...');
 
+        // Disable foreign key checks and truncate the table for a clean slate
         DB::statement('SET FOREIGN_KEY_CHECKS = 0;');
         DB::table('departments')->truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1;');
         Log::info('Truncated departments table.');
 
-        $adminUserForAudit = User::orderBy('id')->first();
-        $auditUserId = $adminUserForAudit?->id;
-
-        if (! $auditUserId) {
-            $adminUserForAudit = User::factory()->create(['name' => 'Audit User (DeptSeeder)']);
-            $auditUserId = $adminUserForAudit->id;
-            Log::info(sprintf('Created a fallback audit user with ID %d for DepartmentSeeder.', $auditUserId));
+        // Ensure there is always an audit user, even after truncate
+        $auditUser = User::orderBy('id')->first();
+        if (!$auditUser) {
+            // Create a minimal audit user with unique email/IC to avoid constraint errors
+            $auditUser = User::factory()->create([
+                'name' => 'Audit User (DeptSeeder)',
+                'email' => 'audit-deptseeder@motac.local',
+                'identification_number' => '999999999999',
+            ]);
+            Log::info(sprintf('Created a fallback audit user with ID %d for DepartmentSeeder.', $auditUser->id));
         } else {
-            Log::info(sprintf('Using User ID %s for audit columns in DepartmentSeeder.', $auditUserId));
+            Log::info(sprintf('Using User ID %s for audit columns in DepartmentSeeder.', $auditUser->id));
         }
+        $auditUserId = $auditUser->id;
 
+        // The list of departments (HQ and State branches)
         $departments = [
-            // Headquarters (Ibu Pejabat) - Using Department::BRANCH_TYPE_HQ from your model
+            // Headquarters (Ibu Pejabat)
             ['name' => 'Akaun', 'branch_type' => Department::BRANCH_TYPE_HQ, 'code' => 'AKN', 'description' => 'Bahagian Akaun.', 'is_active' => true],
             ['name' => 'Audit Dalam', 'branch_type' => Department::BRANCH_TYPE_HQ, 'code' => 'AUDIT', 'description' => 'Unit Audit Dalam.', 'is_active' => true],
             ['name' => 'Dasar Kebudayaan', 'branch_type' => Department::BRANCH_TYPE_HQ, 'code' => 'DSK', 'description' => 'Bahagian Dasar Kebudayaan.', 'is_active' => true],
@@ -59,7 +69,7 @@ class DepartmentSeeder extends Seeder // Changed from DepartmentsSeeder to Depar
             ['name' => 'Perundangan', 'branch_type' => Department::BRANCH_TYPE_HQ, 'code' => 'UU', 'description' => 'Unit Perundangan.', 'is_active' => true],
             ['name' => 'Sekretariat Visit Malaysia', 'branch_type' => Department::BRANCH_TYPE_HQ, 'code' => 'SVM', 'description' => 'Sekretariat Visit Malaysia.', 'is_active' => true],
 
-            // State Offices (Pejabat Negeri) - Using Department::BRANCH_TYPE_STATE from your model
+            // State Offices (Pejabat Negeri)
             ['name' => 'MOTAC Johor', 'branch_type' => Department::BRANCH_TYPE_STATE, 'code' => 'JHR', 'description' => 'Pejabat MOTAC Negeri Johor.', 'is_active' => true],
             ['name' => 'MOTAC Kedah', 'branch_type' => Department::BRANCH_TYPE_STATE, 'code' => 'KDH', 'description' => 'Pejabat MOTAC Negeri Kedah.', 'is_active' => true],
             ['name' => 'MOTAC Kelantan', 'branch_type' => Department::BRANCH_TYPE_STATE, 'code' => 'KTN', 'description' => 'Pejabat MOTAC Negeri Kelantan.', 'is_active' => true],
@@ -77,7 +87,7 @@ class DepartmentSeeder extends Seeder // Changed from DepartmentsSeeder to Depar
             ['name' => 'MOTAC WP Labuan', 'branch_type' => Department::BRANCH_TYPE_STATE, 'code' => 'LBN', 'description' => 'Pejabat MOTAC WP Labuan.', 'is_active' => true],
         ];
 
-        Log::info('Creating/updating specific MOTAC departments from the defined list (Revision 3 - Corrected)...');
+        Log::info('Creating/updating specific MOTAC departments from the defined list...');
         foreach ($departments as $departmentData) {
             $departmentData['created_by'] = $auditUserId;
             $departmentData['updated_by'] = $auditUserId;
@@ -98,6 +108,6 @@ class DepartmentSeeder extends Seeder // Changed from DepartmentsSeeder to Depar
             Log::warning(sprintf('Current department count %s is less than defined list count %d. Some defined departments might not have been created due to issues (e.g. duplicate codes if logic was flawed).', $currentDepartmentCount, $targetDepartmentCount));
         }
 
-        Log::info('Department seeding complete (Revision 3 - Corrected).');
+        Log::info('Department seeding complete (Revision 3 - Adjusted).');
     }
 }

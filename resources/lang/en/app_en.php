@@ -13,6 +13,20 @@ return [
     'app_name' => 'motac-irms',
     'motac_full' => 'Ministry of Tourism, Arts and Culture Malaysia',
     'motac_short' => 'MOTAC',
+    'motac-irms' => 'MOTAC IRMS System', // Short system name for app branding
+    'Logo MOTAC IRMS' => 'MOTAC IRMS Logo', // For logo alt/title
+    // System public name and description for legal/landing pages
+    'Sistem Pengurusan Sumber Bersepadu MOTAC' => 'MOTAC Integrated Resource Management System',
+    'Sistem Dalaman Bersepadu untuk Kementerian Pelancongan, Seni dan Budaya Malaysia (MOTAC) bagi pengurusan permohonan emel dan pinjaman peralatan ICT.'
+        => 'Integrated Internal System for the Ministry of Tourism, Arts and Culture Malaysia (MOTAC) for managing email applications and ICT equipment loans.',
+
+    // === Session Timeout / 419 Error Page ===
+    // These keys are for session/CSRF timeout error pages and modals
+    '419 - Sesi Telah Tamat' => '419 - Session Expired',
+    'Sesi Telah Tamat!' => 'Session Expired!',
+    'Sesi anda telah tamat atau permintaan tidak sah. Sila muat semula halaman atau log masuk semula untuk meneruskan.'
+        => 'Your session has expired or the request is invalid. Please refresh the page or log in again to continue.',
+    'Log Masuk Semula' => 'Log In Again',
 
     // === Language Switch ===
     'language_switched_en' => 'System language switched to English.',
@@ -81,7 +95,7 @@ return [
     // Login
     'login_title' => 'System Login',
     'login_welcome' => 'Welcome!',
-    'login_prompt' => 'Please login to your account.',
+    'login_prompt' => 'Please log in to your account.',
     'login_email_label' => 'Email / User ID',
     'login_email_placeholder' => 'e.g. user@motac.gov.my',
     'login_password_label' => 'Password',
@@ -408,9 +422,20 @@ return [
     'not_specified' => 'Not Specified',
     'optional' => 'Optional',
     'required' => 'Required',
-];
 
-// Notes:
-// - This file is meant to be kept in sync with lang/ms/app_ms.php.
-// - All keys and structure should match for consistency and ease of translation work.
-// - If you add, remove, or update a key in the Malay file, do the same here.
+    // --- Auth / Login / Welcome Screens (Redundant aliases for completeness) ---
+    'Log Masuk Sistem' => 'System Login',
+    'Selamat Datang!' => 'Welcome!',
+    'Sila log masuk ke akaun anda.' => 'Please log in to your account.',
+    'E-mel / ID Pengguna' => 'Email / User ID',
+    'contoh: pengguna@motac.gov.my' => 'e.g. user@motac.gov.my',
+    'Kata Laluan' => 'Password',
+    'Ingat Saya' => 'Remember Me',
+    'Lupa Kata Laluan?' => 'Forgot Password?',
+    'Log Masuk' => 'Login',
+    'Pengguna baru?' => 'New user?',
+    'Cipta akaun di sini' => 'Create an account here',
+
+    // --- Accessibility & Navigation ---
+    'Langkau ke Kandungan Utama' => 'Skip to Main Content',
+];

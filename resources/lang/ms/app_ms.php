@@ -1,5 +1,5 @@
 <?php
-// Bahasa Melayu translations for MOTAC IRMS system-wide texts and buttons
+// Bahasa Melayu translations for MOTAC IRMS system-wide texts, buttons, and authentication screens
 
 return [
     // === System Branding/Identity ===
@@ -12,6 +12,20 @@ return [
     'app_name' => 'motac-irms',
     'motac_full' => 'Kementerian Pelancongan, Seni dan Budaya Malaysia',
     'motac_short' => 'MOTAC',
+    'motac-irms' => 'Sistem MOTAC IRMS', // Short system name for app branding
+    'Logo MOTAC IRMS' => 'Logo MOTAC IRMS', // For logo alt/title
+    // System public name and description for legal/landing pages
+    'Sistem Pengurusan Sumber Bersepadu MOTAC' => 'Sistem Pengurusan Sumber Bersepadu MOTAC',
+    'Sistem Dalaman Bersepadu untuk Kementerian Pelancongan, Seni dan Budaya Malaysia (MOTAC) bagi pengurusan permohonan emel dan pinjaman peralatan ICT.'
+        => 'Sistem Dalaman Bersepadu untuk Kementerian Pelancongan, Seni dan Budaya Malaysia (MOTAC) bagi pengurusan permohonan emel dan pinjaman peralatan ICT.',
+
+    // === Session Timeout / 419 Error Page ===
+    // These keys are for session/CSRF timeout error pages and modals
+    '419 - Sesi Telah Tamat' => '419 - Sesi Telah Tamat',
+    'Sesi Telah Tamat!' => 'Sesi Telah Tamat!',
+    'Sesi anda telah tamat atau permintaan tidak sah. Sila muat semula halaman atau log masuk semula untuk meneruskan.'
+        => 'Sesi anda telah tamat atau permintaan tidak sah. Sila muat semula halaman atau log masuk semula untuk meneruskan.',
+    'Log Masuk Semula' => 'Log Masuk Semula',
 
     // === Language Switch ===
     'language_switched_en' => 'Bahasa sistem ditukar ke English.',
@@ -25,6 +39,7 @@ return [
     'alert_validation_title' => 'Amaran! Sila semak ralat input berikut:',
 
     // === Buttons and Actions ===
+    // Common buttons and form actions
     'button_continue' => 'Teruskan',
     'button_back' => 'Kembali',
     'button_reset' => 'Set Semula',
@@ -77,7 +92,7 @@ return [
     'button_remove_equipment' => 'Buang Peralatan',
 
     // === Auth Pages ===
-    // Login
+    // Login, Register, Password, and Verification screens
     'login_title' => 'Log Masuk Sistem',
     'login_welcome' => 'Selamat Datang!',
     'login_prompt' => 'Sila log masuk ke akaun anda.',
@@ -118,7 +133,7 @@ return [
     'forgot_submit' => 'Hantar Pautan Tetapan Semula',
     'forgot_back_login' => 'Kembali ke Log Masuk',
 
-    // Reset Password
+    // --- Reset Password ---
     'reset_title' => 'Tetapkan Semula Kata Laluan',
     'reset_prompt' => 'Sila masukkan kata laluan baharu anda di bawah.',
     'reset_email_label' => 'Alamat E-mel',
@@ -407,4 +422,20 @@ return [
     'not_specified' => 'Tidak Dinyatakan',
     'optional' => 'Pilihan',
     'required' => 'Wajib',
+
+    // --- Auth / Login / Welcome Screens (Redundant aliases for completeness) ---
+    'Log Masuk Sistem' => 'Log Masuk Sistem',
+    'Selamat Datang!' => 'Selamat Datang!',
+    'Sila log masuk ke akaun anda.' => 'Sila log masuk ke akaun anda.',
+    'E-mel / ID Pengguna' => 'E-mel / ID Pengguna',
+    'contoh: pengguna@motac.gov.my' => 'contoh: pengguna@motac.gov.my',
+    'Kata Laluan' => 'Kata Laluan',
+    'Ingat Saya' => 'Ingat Saya',
+    'Lupa Kata Laluan?' => 'Lupa Kata Laluan?',
+    'Log Masuk' => 'Log Masuk',
+    'Pengguna baru?' => 'Pengguna baru?',
+    'Cipta akaun di sini' => 'Cipta akaun di sini',
+
+    // --- Accessibility & Navigation ---
+    'Langkau ke Kandungan Utama' => 'Langkau ke Kandungan Utama',
 ];

@@ -170,15 +170,33 @@ return [
     // === Language Switcher and Navbar keys ===
     'language_selector'    => 'Language Selector',
     'toggle_theme'         => 'Toggle Theme',
-    'toggle_sidebar'       => 'Toggle Navigation Menu',
+    'toggle_sidebar'       => 'Toggle Navigation',
     'bahasa_melayu'        => 'Bahasa Melayu',
     'english'              => 'English',
     'login'                => 'Login',
     'language_switched_en' => 'Language has been switched to English.',
     'language_switched_ms' => 'Language has been switched to Bahasa Melayu.',
-];
 
-// Notes:
-// - This file is intended to be kept in sync with common_ms.php (Bahasa Melayu version).
-// - All keys and structure should match for easy bilingual support and translation management.
-// - Update/add/remove keys here if the Malay version is updated for system consistency.
+    // === Accessibility & Navigation ===
+    'skip_to_main_content' => 'Skip to Main Content', // Added for accessibility parity with ms
+
+    // === Footer, Policy, and Legal Links (parity with ms) ===
+    'footer_copyright' => 'Copyright',
+    'footer_all_rights_reserved' => 'All Rights Reserved.',
+    'footer_links' => 'Important Links',
+    'footer_terms_of_service' => 'Terms of Service',
+    'footer_privacy_policy'   => 'Privacy Policy',
+    'footer_contact_ict'      => 'Contact ICT',
+    'footer_system_version'   => 'System Version',
+    'footer_last_updated'     => 'Last Updated',
+    'footer_motac_full'       => 'Ministry of Tourism, Arts and Culture Malaysia (MOTAC)',
+
+    // === Logo & Branding Alt Texts ===
+    'logo_motac'         => 'MOTAC Logo',
+    'logo_motac_irms'    => 'MOTAC IRMS Logo',
+    'logo_application'   => 'Application Logo',
+
+    // === Miscellaneous/Extra translations for UI parity ===
+    'system_public_name'        => 'MOTAC Integrated Resource Management System',
+    'system_public_description' => 'Internal Integrated Resource Management System for the Information Management Division, Ministry of Tourism, Arts and Culture Malaysia.',
+];

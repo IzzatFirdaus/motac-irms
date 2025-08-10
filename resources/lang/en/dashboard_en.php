@@ -3,6 +3,9 @@
 // Mirrors lang/ms/dashboard_ms.php for synchronized bilingual support
 
 return [
+    // === Main Dashboard Key (for button and nav) ===
+    'dashboard' => 'Dashboard',
+
     // === Dashboard Titles ===
     'admin_title'      => 'Administrator Dashboard',
     'approver_title'   => 'Approval Dashboard',
@@ -142,15 +145,18 @@ return [
     // === General messages & others ===
     'no_data_found'                => 'No data to display.',
     'no_permission'                => 'No Permission',
-    'notifications_title'          => 'Notifications',
+    'notifications_title'          => 'Useful Resources', // Used in welcome.blade for resources section
     'notifications_text'           => 'View all your system notifications.',
     'your_recent_activity_summary' => 'Your Recent Activity Summary',
     'your_recent_activity_text'    => 'There is no recent activity to display.',
-    'apply_ict_loan_title'         => 'Apply for ICT Loan',
-    'apply_ict_loan_text'          => 'Need ICT equipment for official duties? Apply for equipment loan here.',
-    'view_my_loan_applications_title' => 'View My Loan Applications',
+    'apply_ict_loan_title'         => 'ICT Equipment Loan', // For welcome.blade main feature
+    'apply_ict_loan_text'          => 'Need ICT equipment for official duties? Check availability and submit your loan application here.',
+    'view_my_loan_applications_title' => 'System User Guide', // As in welcome.blade
     'view_my_loan_applications_text'  => 'Review the status and details of your ICT equipment loan applications.',
-    'view_my_loan_applications'       => 'View My Loan Applications',
+    'view_my_loan_applications'       => 'View My Loan Applications', // Button/text
+    'contact_us'                 => 'Contact BPM Helpdesk', // For resource/contact link
+
+    // --- Add any additional keys from ms version if needed for future parity ---
 ];
 
 // Notes:

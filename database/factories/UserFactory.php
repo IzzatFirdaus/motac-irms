@@ -8,11 +8,16 @@ use App\Models\Position;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
+ * Factory for the User model.
+ *
+ * - Aligned with all user-related migrations, including MOTAC columns.
+ * - Foreign keys are always set to existing records, falling back to factory creation with unique values if empty.
+ * - Only includes columns that exist in the DB schema/model (see migrations and User.php).
+ * - Handles soft deletes and role assignment for seeder compatibility.
+ * - Uses ms_MY for localized names and phone numbers.
  */
 class UserFactory extends Factory
 {
@@ -20,93 +25,135 @@ class UserFactory extends Factory
 
     public function definition(): array
     {
-        // Use a Malaysian locale for faker
+        // Use English faker for optional/unique chains to avoid null
+        $faker = $this->faker ?? \Faker\Factory::create('en_US');
+        // Use Malaysian locale for names and phone
         $msFaker = \Faker\Factory::create('ms_MY');
 
-        $departmentId = Department::inRandomOrder()->value('id');
-        $positionId = Position::inRandomOrder()->value('id');
-        $gradeId = Grade::inRandomOrder()->value('id');
+        // Ensure referenced records exist, or create with unique fallback
+        $department = Department::inRandomOrder()->first();
+        if (!$department) {
+            $department = Department::factory()->create([
+                'name' => 'Dept Autogen (UserFactory)',
+                'code' => 'AUTO' . $faker->unique()->bothify('###'),
+            ]);
+        }
+        $position = Position::inRandomOrder()->first();
+        if (!$position) {
+            $position = Position::factory()->create([
+                'name' => 'Pos Autogen (UserFactory)',
+            ]);
+        }
+        $grade = Grade::inRandomOrder()->first();
+        if (!$grade) {
+            $grade = Grade::factory()->create([
+                'name' => 'Grade Autogen (UserFactory)',
+            ]);
+        }
 
+        // Generate user data
         $name = $msFaker->name();
+        $identificationNumber = $faker->unique()->numerify('############');
+        $passportNumber = $faker->optional(0.15)->unique()->bothify('??########');
+        $titleKey = $faker->randomElement(array_keys(User::$TITLE_OPTIONS ?? [User::TITLE_ENCIK => 'Encik']));
 
         return [
+            // Core authentication columns
             'name' => $name,
-            'email' => $this->faker->unique()->safeEmail(),
+            'email' => $faker->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'password' => Hash::make('password'),
+            'password' => Hash::make('password'), // Default for all seed users
             'remember_token' => Str::random(10),
-            'profile_photo_path' => null,
-            'title' => $this->faker->randomElement(array_keys(User::$TITLE_OPTIONS ?? [User::TITLE_ENCIK => 'Encik'])),
-            'identification_number' => $msFaker->unique()->myKadNumber(),
-            'passport_number' => $this->faker->optional(0.1)->passthrough(
-                $msFaker->unique()->bothify('?#########')
-            ),
-            'department_id' => $departmentId,
-            'position_id' => $positionId,
-            'grade_id' => $gradeId,
-            'mobile_number' => $msFaker->unique()->phoneNumber(),
-            'office_number' => $msFaker->optional(0.7)->unique()->phoneNumber(),
-            'address' => $msFaker->address(),
-            'city' => $msFaker->city(),
-            'state' => $msFaker->state(),
-            'postcode' => $msFaker->postcode(),
-            'country' => 'Malaysia',
-            'status' => $this->faker->randomElement([User::STATUS_ACTIVE, User::STATUS_INACTIVE, User::STATUS_PENDING]),
-            'last_login_at' => $this->faker->optional(0.8)->dateTimeThisYear(),
-            'last_login_ip' => $this->faker->optional(0.8)->ipv4(),
-            'remarks' => $this->faker->optional(0.3)->sentence(),
-            'created_at' => $this->faker->dateTimeThisYear(),
-            'updated_at' => $this->faker->dateTimeThisYear(),
+
+            // MOTAC/MOTAC-added domain fields
+            'title' => $titleKey,
+            'identification_number' => $identificationNumber,
+            'passport_number' => $passportNumber,
+            'department_id' => $department->id,
+            'position_id' => $position->id,
+            'grade_id' => $grade->id,
+            'phone_number' => $msFaker->phoneNumber(), // Malaysian format
+            'status' => $faker->randomElement([
+                User::STATUS_ACTIVE,
+                User::STATUS_INACTIVE,
+                User::STATUS_SUSPENDED,
+                User::STATUS_PENDING,
+            ]),
         ];
     }
 
     /**
-     * Indicate that the model's email address should be unverified.
+     * State: Mark email as unverified.
      */
     public function unverified(): static
     {
-        return $this->state(fn (array $attributes): array => ['email_verified_at' => null]);
+        return $this->state(fn (array $attributes): array => [
+            'email_verified_at' => null,
+        ]);
     }
 
+    /**
+     * After-creation: Assign default 'User' role if not already assigned.
+     */
     public function configure(): static
     {
         return $this->afterCreating(function (User $user): void {
-            if (class_exists(\Spatie\Permission\Models\Role::class) && $user->roles->isEmpty()) {
-                $userRole = \Spatie\Permission\Models\Role::where('name', 'User')->first();
-                if ($userRole) {
-                    $user->assignRole($userRole);
-                } else {
-                    Log::warning(sprintf("UserFactory: Default 'User' role not found. User %s created without this role.", $user->email));
+            if (class_exists(\Spatie\Permission\Models\Role::class) && method_exists($user, 'assignRole')) {
+                if ($user->roles->isEmpty()) {
+                    $userRole = \Spatie\Permission\Models\Role::where('name', 'User')->first();
+                    if ($userRole) {
+                        $user->assignRole($userRole);
+                    }
                 }
             }
         });
     }
 
+    /**
+     * State: Set user as pending (for UserSeeder).
+     */
     public function pending(): static
     {
-        return $this->state(fn (array $attributes): array => ['status' => User::STATUS_PENDING]);
+        return $this->state(fn (array $attributes): array => [
+            'status' => User::STATUS_PENDING,
+        ]);
     }
 
+    /**
+     * State: Assign user as Admin.
+     */
     public function asAdmin(): static
     {
         return $this->afterCreating(fn (User $user) => $user->assignRole('Admin'));
     }
 
+    /**
+     * State: Assign user as BPM Staff.
+     */
     public function asBpmStaff(): static
     {
         return $this->afterCreating(fn (User $user) => $user->assignRole('BPM Staff'));
     }
 
+    /**
+     * State: Assign user as IT Admin.
+     */
     public function asItAdmin(): static
     {
         return $this->afterCreating(fn (User $user) => $user->assignRole('IT Admin'));
     }
 
+    /**
+     * State: Assign user as Approver.
+     */
     public function asApprover(): static
     {
         return $this->afterCreating(fn (User $user) => $user->assignRole('Approver'));
     }
 
+    /**
+     * State: Assign user as HOD and ensure Approver role.
+     */
     public function asHod(): static
     {
         return $this->afterCreating(function (User $user): void {
@@ -117,12 +164,16 @@ class UserFactory extends Factory
         });
     }
 
+    /**
+     * State: Mark user as soft-deleted for testing.
+     * Also prefixes email and IC to maintain uniqueness.
+     */
     public function deleted(): static
     {
         return $this->state(fn (array $attributes): array => [
             'deleted_at' => now(),
-            'email' => 'deleted-'.$attributes['email'], // Mark email as deleted
-            'identification_number' => 'deleted-'.$attributes['identification_number'], // Mark IC as deleted
+            'email' => 'deleted-' . ($attributes['email'] ?? Str::uuid().'@deleted.local'),
+            'identification_number' => 'deleted-' . ($attributes['identification_number'] ?? Str::random(12)),
         ]);
     }
 }

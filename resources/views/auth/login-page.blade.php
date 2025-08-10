@@ -82,7 +82,7 @@
                                         class="form-control @error('password') is-invalid @enderror" name="password"
                                         placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
                                         aria-describedby="loginPasswordHelp" required autocomplete="current-password" />
-                                    <span class="input-group-text cursor-pointer toggle-password">
+                                    <span class="input-group-text cursor-pointer toggle-password" tabindex="0">
                                         <i class="bi bi-eye-slash-fill"></i>
                                     </span>
                                 </div>
@@ -139,13 +139,14 @@
 
 @push('custom-scripts')
     <script>
-        // Password visibility toggle
+        // Password visibility toggle logic (supports click and keyboard navigation)
         document.addEventListener('DOMContentLoaded', function() {
-            const passwordToggles = document.querySelectorAll('.toggle-password');
-            passwordToggles.forEach(toggle => {
-                toggle.addEventListener('click', function() {
+            document.querySelectorAll('.toggle-password').forEach(function(toggle) {
+                toggle.addEventListener('click', function(e) {
+                    e.preventDefault();
                     const input = this.closest('.input-group').querySelector('input');
                     const icon = this.querySelector('i');
+                    if (!input) return;
                     if (input.type === "password") {
                         input.type = "text";
                         icon.classList.remove('bi-eye-slash-fill');
@@ -154,6 +155,14 @@
                         input.type = "password";
                         icon.classList.remove('bi-eye-fill');
                         icon.classList.add('bi-eye-slash-fill');
+                    }
+                });
+
+                // Keyboard accessibility: toggle on Enter/Space
+                toggle.addEventListener('keydown', function(e) {
+                    if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        this.click();
                     }
                 });
             });

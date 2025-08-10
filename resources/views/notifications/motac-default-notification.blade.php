@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ __($subject ?? __('Notifikasi Sistem MOTAC')) }}</title>
+    <title>{{ __($subject ?? __('Notifikasi MOTAC IRMS')) }}</title>
     <style>
         body { font-family: 'Arial', sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; color: #333333; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;}
         .email-wrapper { padding: 20px 0; }
@@ -32,7 +32,7 @@
                 @else
                     <img src="{{ secure_asset('assets/img/logo/motac_logo_email.png') }}" alt="{{ __('Logo MOTAC') }}">
                 @endif
-                <h1>{{ __($emailTitleString ?? ($subject ?? __('Notifikasi Sistem MOTAC'))) }}</h1>
+                <h1>{{ __($emailTitleString ?? ($subject ?? __('Notifikasi MOTAC IRMS'))) }}</h1>
             </div>
             {{-- Main body of the email --}}
             <div class="email-body">

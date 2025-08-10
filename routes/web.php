@@ -100,8 +100,14 @@ Route::get('/', function () {
 Route::get('/privacy-policy', [LegalController::class, 'policy'])->name('policy');
 Route::get('/terms-of-service', [LegalController::class, 'terms'])->name('terms');
 
-// Contact Us page via Livewire
-Route::get('/contact-us', ContactUsLW::class)->name('contact-us');
+// --- UPDATED Contact Us Route ---
+// Contact Us page via Blade wrapper that embeds Livewire and ensures layout/navbar
+Route::get('/contact-us', function () {
+    return view('pages.contact-us');
+})->name('contact-us');
+
+// Redundant non-Livewire Contact Us page (for testing/fallback/documentation purposes)
+Route::view('/contact-us-blade', 'contact-us-blade')->name('contact-us.blade');
 
 // --------------------------------------------------
 // Language Switching Route (accessible to all users)
@@ -109,6 +115,31 @@ Route::get('/contact-us', ContactUsLW::class)->name('contact-us');
 Route::get('lang/{lang}', [LanguageController::class, 'swap'])
     ->where('lang', 'en|ms')
     ->name('language.swap');
+
+// --------------------------------------------------
+// === TEST ROUTE FOR TRANSLATION LOADING ===
+// --------------------------------------------------
+// This route is for debugging the translation system. It will attempt to load
+// specific translation keys for the current locale and return them as JSON.
+// Used to verify that the SuffixedFileLoader and SuffixedTranslator are working
+// and that translation files are being found correctly.
+//
+// To use: Visit /test-lang in your browser.
+Route::get('/test-lang', function () {
+    return [
+        // Checks if the file exists (for Malay locale)
+        'loaded_file_ms' => file_exists(resource_path('lang/ms/app_ms.php')),
+        // Checks if the file exists (for English locale)
+        'loaded_file_en' => file_exists(resource_path('lang/en/app_en.php')),
+        // Will output the current app locale (should be 'en' or 'ms')
+        'current_locale' => app()->getLocale(),
+        // Test translation keys for app, dashboard, common
+        'system_name' => __('app.system_name'),
+        'motac_full_name' => __('app.motac_full_name'),
+        'dashboard_apply' => __('dashboard.apply_ict_loan_title'),
+        'common_login' => __('common.login'),
+    ];
+});
 
 // --------------------------------------------------
 // Authenticated Routes (protected by Jetstream/Sanctum/verified middleware)
@@ -285,3 +316,24 @@ Route::fallback(function () {
 Route::get('/error/{statusCode}', [MiscErrorController::class, 'show'])
     ->whereNumber('statusCode')
     ->name('misc.error');
+
+/*
+|--------------------------------------------------------------------------
+| Vertical Menu Component Usage (Livewire)
+|--------------------------------------------------------------------------
+| NOTE: The vertical menu is now standardized to use the Livewire component
+| at resources/views/livewire/sections/menu/vertical-menu.blade.php.
+|
+| All layouts should include the menu as:
+|     @livewire('sections.menu.vertical-menu')
+| and remove any legacy includes such as:
+|     @include('layouts.sections.menu.vertical-menu')
+|     @include('partials.sidebar-partial')
+|
+| The menu is dynamically rendered based on config/menu.php and user role.
+| No routes are required for sidebar/vertical menu rendering as it is
+| handled by the Livewire component and the main layout.
+|
+| See documentation in the component and Blade files for details.
+|--------------------------------------------------------------------------
+*/

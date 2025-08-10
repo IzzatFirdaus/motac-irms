@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Cache;
 
 /**
  * Custom Translator for MOTAC IRMS Suffixed Language Files.
- * Adds support for suffixed translation keys and fallback, plus caching and logging.
+ * Adds support for suffixed translation files, caching, and logging.
  */
 class SuffixedTranslator extends Translator
 {
@@ -18,7 +18,7 @@ class SuffixedTranslator extends Translator
     protected array $metrics = [
         'total_requests' => 0,
         'cache_hits' => 0,
-        'suffixed_hits' => 0,
+        'suffixed_hits' => 0, // For parity with old metrics
         'fallback_hits' => 0,
         'missing_keys' => 0,
     ];
@@ -40,7 +40,8 @@ class SuffixedTranslator extends Translator
             }
         }
 
-        $translation = $this->getSuffixedTranslation($key, $replace, $locale, $fallback);
+        // Fetch the key as-is, because the loader already loads the correct file (app_ms.php), so just ask for 'system_name'
+        $translation = parent::get($key, $replace, $locale, $fallback);
 
         if ($this->shouldUseCache() && $translation !== null) {
             Cache::put($cacheKey, $translation, self::CACHE_DURATION);
@@ -51,31 +52,6 @@ class SuffixedTranslator extends Translator
         }
 
         return $translation;
-    }
-
-    /**
-     * Try to get translation from a suffixed file, fallback to regular key.
-     */
-    protected function getSuffixedTranslation($key, array $replace, $locale, $fallback)
-    {
-        $suffix = '_' . $locale;
-        $keyWithSuffix = $key . $suffix;
-        $translation = parent::get($keyWithSuffix, $replace, $locale, false);
-
-        if ($translation !== null && $translation !== $keyWithSuffix) {
-            $this->metrics['suffixed_hits']++;
-            return $translation;
-        }
-
-        $fallbackTranslation = parent::get($key, $replace, $locale, $fallback);
-
-        if ($fallbackTranslation !== null && $fallbackTranslation !== $key) {
-            $this->metrics['fallback_hits']++;
-            return $fallbackTranslation;
-        }
-
-        $this->metrics['missing_keys']++;
-        return $fallbackTranslation;
     }
 
     /**
@@ -90,7 +66,6 @@ class SuffixedTranslator extends Translator
                 Log::warning("Missing translation key detected", [
                     'key' => $key,
                     'locale' => $locale,
-                    'suffix_attempted' => $key . '_' . $locale,
                     'request_url' => request()->url() ?? 'N/A',
                     'user_agent' => request()->userAgent() ?? 'N/A',
                 ]);

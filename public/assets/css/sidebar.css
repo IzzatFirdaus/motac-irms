@@ -1,0 +1,302 @@
+/* MOTAC IRMS Vertical Sidebar Styles - Scoped for Sidebar Only */
+/*
+   - All variables and selectors are scoped to .motac-vertical-menu to avoid style collision with custom.css or other global styles.
+   - Adapts to user's system preference (prefers-color-scheme) for light/dark mode.
+   - Includes legacy browser support (IE10+) with vendor prefixes.
+   - Comments explain structure and compatibility where relevant.
+*/
+
+/* ==== Sidebar-Scoped Variables (Light Mode) ==== */
+.motac-vertical-menu {
+  --sidebar-bg: #ffffff;
+  --sidebar-accent: #1976d2;
+  --sidebar-hover: #f6faff;
+  --sidebar-active: #e3f0ff;
+  --sidebar-text: #22304a;
+  --sidebar-text-muted: #94a3b8;
+  --sidebar-header-bg: #f1f6fa;
+  --sidebar-width: 260px;
+  --sidebar-collapsed-width: 72px;
+  --sidebar-transition: 0.25s cubic-bezier(.4,0,.2,1);
+  --sidebar-border: #e3eaf2;
+  --sidebar-shadow: 0 3px 24px 0 rgba(40,64,110,.07);
+  --sidebar-menu-arrow: #1976d2;
+  --sidebar-badge-bg: #dc3545;
+  --sidebar-badge-text: #fff;
+}
+
+/* ==== Dark Mode Sidebar Variables ==== */
+@media (prefers-color-scheme: dark) {
+  .motac-vertical-menu {
+    --sidebar-bg: #0e1826;
+    --sidebar-accent: #64b5f6;
+    --sidebar-hover: #18243a;
+    --sidebar-active: #22304a;
+    --sidebar-text: #e3f0ff;
+    --sidebar-text-muted: #607195;
+    --sidebar-header-bg: #16213a;
+    --sidebar-border: #23304b;
+    --sidebar-shadow: 0 3px 24px 0 rgba(20,30,60,.18);
+    --sidebar-menu-arrow: #64b5f6;
+    --sidebar-badge-bg: #f44336;
+    --sidebar-badge-text: #fff;
+  }
+}
+
+/* ==== Sidebar Main Container ==== */
+.motac-vertical-menu {
+  width: var(--sidebar-width);
+  min-height: 100vh;
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  box-shadow: var(--sidebar-shadow);
+  transition: width var(--sidebar-transition), background var(--sidebar-transition), color var(--sidebar-transition);
+  position: relative;
+  display: flex;
+  display: -ms-flexbox;           /* IE10+ */
+  flex-direction: column;
+  -ms-flex-direction: column;     /* IE10+ */
+  border-right: 1px solid var(--sidebar-border);
+  font-family: inherit; /* inherit from body, not global override */
+}
+
+/* ==== Sidebar Header ==== */
+.motac-vertical-menu .sidebar-header {
+  background: var(--sidebar-header-bg);
+  padding: 1.2em 1.3em 1em 1.3em;
+  display: flex;
+  display: -ms-flexbox;
+  align-items: center;
+  -ms-flex-align: center;
+  gap: 12px;
+  border-bottom: 2px solid var(--sidebar-accent);
+  transition: background var(--sidebar-transition), border-color var(--sidebar-transition);
+}
+
+/* ==== Sidebar Logo ==== */
+.motac-vertical-menu .sidebar-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #fff;
+  display: flex;
+  display: -ms-flexbox;
+  align-items: center;
+  -ms-flex-align: center;
+  justify-content: center;
+  -ms-flex-pack: center;
+  box-shadow: 0 1px 3px rgba(25, 118, 210, 0.10);
+  transition: box-shadow .18s;
+}
+@media (prefers-color-scheme: dark) {
+  .motac-vertical-menu .sidebar-logo {
+    background: #22304a;
+    box-shadow: 0 1px 6px 0 rgba(50,70,120,0.08);
+  }
+}
+.motac-vertical-menu .sidebar-logo img {
+  width: 28px;
+  height: auto;
+  display: block;
+}
+.motac-vertical-menu .sidebar-title {
+  font-weight: 700;
+  font-size: 1.15em;
+  color: var(--sidebar-accent);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  transition: color var(--sidebar-transition);
+}
+
+/* ==== Menu List ==== */
+.motac-vertical-menu .sidebar-menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1 1 auto;
+  -ms-flex: 1 1 auto;
+  overflow-y: auto;
+  background: none;
+}
+
+/* ==== Menu Header ==== */
+.motac-vertical-menu .sidebar-menu .menu-header {
+  font-size: 0.85em;
+  color: var(--sidebar-text-muted);
+  padding: 1.2em 1.3em 0.5em 1.5em;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: none;
+}
+
+/* ==== Menu Item ==== */
+.motac-vertical-menu .sidebar-menu .menu-item {
+  position: relative;
+}
+
+/* ==== Menu Link ==== */
+.motac-vertical-menu .sidebar-menu .menu-link {
+  display: flex;
+  display: -ms-flexbox;
+  align-items: center;
+  -ms-flex-align: center;
+  gap: 16px;
+  text-decoration: none;
+  color: var(--sidebar-text);
+  padding: 0.85em 1.6em 0.85em 1.5em;
+  font-weight: 500;
+  border-left: 3px solid transparent;
+  background: none;
+  transition: background 0.20s, color 0.18s, border-color 0.15s;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none; /* Chrome/Safari */
+  -moz-user-select: none;    /* Firefox */
+  -ms-user-select: none;     /* IE10+ */
+  outline: none;
+  border-radius: 0 20px 20px 0;
+}
+.motac-vertical-menu .sidebar-menu .menu-link:hover,
+.motac-vertical-menu .sidebar-menu .menu-link:focus,
+.motac-vertical-menu .sidebar-menu .menu-link.focus {
+  background: var(--sidebar-hover);
+  color: var(--sidebar-accent);
+  outline: none;
+}
+
+/* ==== Active and Open States ==== */
+.motac-vertical-menu .sidebar-menu .menu-item.active > .menu-link,
+.motac-vertical-menu .sidebar-menu .menu-item.open > .menu-link {
+  background: var(--sidebar-active);
+  color: var(--sidebar-accent);
+  border-left: 3px solid var(--sidebar-accent);
+  font-weight: 600;
+  box-shadow: 0 2px 8px 0 rgba(25,118,210,0.03);
+}
+
+/* ==== Menu Icon ==== */
+.motac-vertical-menu .sidebar-menu .menu-icon {
+  font-size: 1.22em;
+  min-width: 24px;
+  text-align: center;
+  color: inherit;
+  opacity: 0.95;
+  transition: color 0.18s;
+}
+
+/* ==== Menu Arrow ==== */
+.motac-vertical-menu .sidebar-menu .menu-arrow {
+  margin-left: auto;
+  transition: transform 0.2s, color 0.18s;
+  color: var(--sidebar-menu-arrow);
+  font-size: 1.12em;
+}
+.motac-vertical-menu .sidebar-menu .menu-item.open > .menu-link .menu-arrow {
+  transform: rotate(90deg);
+}
+
+/* ==== Submenu ==== */
+.motac-vertical-menu .sidebar-menu .menu-sub {
+  display: none;
+  background: none;
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+  border-left: 2px solid var(--sidebar-accent);
+}
+.motac-vertical-menu .sidebar-menu .menu-item.open > .menu-sub {
+  display: block;
+  animation: fadeInMenu 0.23s;
+}
+@keyframes fadeInMenu {
+  from {opacity: 0; transform: translateY(-7px);}
+  to {opacity: 1; transform: translateY(0);}
+}
+.motac-vertical-menu .sidebar-menu .menu-sub .menu-link {
+  padding-left: 2.9em;
+  font-size: 0.97em;
+  background: none;
+  border: none;
+  color: var(--sidebar-text-muted);
+  border-radius: 0 16px 16px 0;
+}
+.motac-vertical-menu .sidebar-menu .menu-sub .menu-item.active > .menu-link {
+  color: var(--sidebar-accent);
+  font-weight: 600;
+  background: var(--sidebar-active);
+  border-left: 3px solid var(--sidebar-accent);
+}
+.motac-vertical-menu .sidebar-menu .menu-sub .menu-link:hover,
+.motac-vertical-menu .sidebar-menu .menu-sub .menu-link:focus {
+  color: var(--sidebar-accent);
+  background: var(--sidebar-hover);
+}
+
+/* ==== Sidebar Badge Styling ==== */
+.motac-vertical-menu .badge {
+  display: inline-block;
+  min-width: 18px;
+  padding: 0 6px;
+  font-size: 0.75em;
+  font-weight: 700;
+  color: var(--sidebar-badge-text);
+  background-color: var(--sidebar-badge-bg);
+  border-radius: 10px;
+  margin-left: 0.5em;
+}
+
+/* ==== Responsive Adjustments ==== */
+@media (max-width: 900px) {
+  .motac-vertical-menu {
+    width: var(--sidebar-collapsed-width);
+    min-width: var(--sidebar-collapsed-width);
+  }
+  .motac-vertical-menu .sidebar-title { display: none; }
+  .motac-vertical-menu .sidebar-menu .menu-link > div:not(.menu-icon) { display: none; }
+  .motac-vertical-menu .sidebar-menu .menu-header { display: none; }
+}
+@media (max-width: 600px) {
+  .motac-vertical-menu {
+    position: fixed;
+    z-index: 120;
+    height: 100vh;
+    left: 0; top: 0;
+    width: 88vw;
+    min-width: 0;
+    max-width: 350px;
+    transition: width var(--sidebar-transition);
+  }
+}
+
+/* ==== Misc Utility Classes ==== */
+.motac-vertical-menu .mt-auto { margin-top: auto; }
+
+/* ==== IE10+ and Flexbox Fallbacks ==== */
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  .motac-vertical-menu,
+  .motac-vertical-menu .sidebar-header,
+  .motac-vertical-menu .sidebar-logo {
+    display: -ms-flexbox !important;
+  }
+  .motac-vertical-menu { -ms-flex-direction: column; }
+  .motac-vertical-menu .sidebar-header { -ms-flex-align: center; }
+  .motac-vertical-menu .sidebar-logo { -ms-flex-align: center; -ms-flex-pack: center; }
+  .motac-vertical-menu .sidebar-menu { -ms-flex: 1 1 auto; }
+}
+
+/* ==== Custom Scrollbars for Modern Browsers (optional) ==== */
+.motac-vertical-menu .sidebar-menu {
+  scrollbar-width: thin;
+  scrollbar-color: var(--sidebar-accent) var(--sidebar-bg);
+}
+.motac-vertical-menu .sidebar-menu::-webkit-scrollbar {
+  width: 7px;
+}
+.motac-vertical-menu .sidebar-menu::-webkit-scrollbar-thumb {
+  background: var(--sidebar-accent);
+  border-radius: 3px;
+}
+.motac-vertical-menu .sidebar-menu::-webkit-scrollbar-track {
+  background: var(--sidebar-bg);
+}

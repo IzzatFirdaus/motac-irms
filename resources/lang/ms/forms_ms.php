@@ -16,6 +16,8 @@ return [
     'label_signature_stamp'      => 'Tandatangan & Cop (jika ada):',
     'text_document_no'           => 'No. Dokumen:',
     'text_effective_date'        => 'Tarikh Kuatkuasa:',
+    'button_submit'              => 'Hantar Permohonan',
+    'helpdesk_button_submit_ticket' => 'Hantar Tiket',
 
     // ==============================================================================
     // --- LABEL MAKLUMAT PEMOHON/PEGAWAI ---

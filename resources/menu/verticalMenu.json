@@ -1,18 +1,40 @@
 {
-  "_comment": "This file is auto-generated from config/menu.php. Do not edit manually. Source of truth is config/menu.php. Last updated: 2025-08-07T16:06:19Z",
-  "version": "2025-08-07",
-  "last_updated": "2025-08-07T16:06:19Z",
+  "version": "2025-08-06",
+  "last_updated": "2025-08-06T12:19:04Z",
   "menu": [
+    {
+      "url": "/",
+      "name": "menu.home",
+      "icon": "house",
+      "guestOnly": true,
+      "meta": { "info": "Visible to guests only (not logged in)" }
+    },
+    {
+      "url": "/contact-us",
+      "name": "menu.contact_us",
+      "icon": "envelope",
+      "guestOnly": true,
+      "meta": { "info": "Visible to guests only (not logged in)" }
+    },
+    {
+      "url": "/login",
+      "name": "menu.login",
+      "icon": "box-arrow-in-right",
+      "guestOnly": true,
+      "meta": { "info": "Visible to guests only (not logged in)" }
+    },
     {
       "url": "/dashboard",
       "name": "menu.dashboard",
       "icon": "house-door-fill",
       "routeName": "dashboard",
-      "role": ["Admin", "BPM Staff", "IT Admin", "User", "Approver", "HOD"]
+      "role": ["Admin", "BPM Staff", "IT Admin", "User", "Approver", "HOD"],
+      "meta": { "info": "Authenticated users only" }
     },
     {
       "menuHeader": "menu.section.resource_management",
-      "role": ["Admin", "BPM Staff", "IT Admin", "User", "Approver", "HOD"]
+      "role": ["Admin", "BPM Staff", "IT Admin", "User", "Approver", "HOD"],
+      "meta": { "info": "Section header for authenticated users" }
     },
     {
       "name": "menu.my_applications.title",
@@ -32,7 +54,8 @@
           "icon": "life-preserver",
           "routeName": "helpdesk-tickets.index"
         }
-      ]
+      ],
+      "meta": { "info": "Authenticated users only" }
     },
     {
       "name": "menu.apply_for_resources.title",
@@ -51,14 +74,16 @@
           "icon": "ticket-fill",
           "routeName": "helpdesk-tickets.create"
         }
-      ]
+      ],
+      "meta": { "info": "Authenticated users only" }
     },
     {
       "name": "menu.approvals.title",
       "icon": "clipboard-check-fill",
       "routeName": "approvals.dashboard",
       "role": ["Admin", "Approver", "HOD"],
-      "submenu": []
+      "submenu": [],
+      "meta": { "info": "Authenticated users only" }
     },
     {
       "name": "menu.resource_inventory.title",
@@ -78,11 +103,13 @@
           "icon": "exchange",
           "routeName": "loan-transactions.index"
         }
-      ]
+      ],
+      "meta": { "info": "Authenticated users only" }
     },
     {
       "menuHeader": "menu.section.reports_analytics",
-      "role": ["Admin", "BPM Staff", "IT Admin"]
+      "role": ["Admin", "BPM Staff", "IT Admin"],
+      "meta": { "info": "Section header for authenticated users" }
     },
     {
       "name": "menu.reports.title",
@@ -132,11 +159,13 @@
           "icon": "pie-chart-fill",
           "routeName": "reports.loan-status-summary"
         }
-      ]
+      ],
+      "meta": { "info": "Authenticated users only" }
     },
     {
       "menuHeader": "menu.section.system_settings",
-      "role": ["Admin"]
+      "role": ["Admin"],
+      "meta": { "info": "Section header for Admin only" }
     },
     {
       "name": "menu.system_settings.title",
@@ -180,7 +209,8 @@
           "icon": "briefcase-fill",
           "routeName": "settings.positions.index"
         }
-      ]
+      ],
+      "meta": { "info": "Admin only" }
     },
     {
       "url": "/log-viewer",
@@ -188,7 +218,8 @@
       "icon": "file-text-fill",
       "routeName": "log-viewer.index",
       "target": "_blank",
-      "role": ["Admin"]
+      "role": ["Admin"],
+      "meta": { "info": "Admin only" }
     }
   ]
 }

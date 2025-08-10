@@ -1,7 +1,12 @@
 <?php
 // Bahasa Melayu translations for Dashboard module and related panels
+// Disusun supaya setiap key SELARI dengan dashboard_en.php untuk bilingual parity
+// Tambahan: 'dashboard' key untuk digunakan pada welcome.blade.php, dsb.
 
 return [
+    // === Key for Dashboard Menu/Button ===
+    'dashboard' => 'Papan Pemuka',
+
     // === Tajuk Papan Pemuka Utama & Peranan ===
     'admin_title'      => 'Papan Pemuka Pentadbir',
     'approver_title'   => 'Papan Pemuka Kelulusan',
@@ -150,4 +155,7 @@ return [
     'view_my_loan_applications_title' => 'Lihat Permohonan Pinjaman Saya',
     'view_my_loan_applications_text'  => 'Semak status dan butiran permohonan pinjaman peralatan ICT anda.',
     'view_my_loan_applications'       => 'Lihat Permohonan Pinjaman Saya',
+    'contact_us'                 => 'Hubungi Kami', // Untuk link sumber/pautan bantuan
+
+    // --- Penambahan kunci baru perlu dicerminkan di dashboard_en.php untuk pariti bilingual ---
 ];
