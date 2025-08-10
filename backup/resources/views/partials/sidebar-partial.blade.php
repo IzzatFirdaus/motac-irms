@@ -44,7 +44,7 @@
     <a href="{{ url('/') }}" class="brand-link text-decoration-none">
         {{-- Application logo --}}
         <x-application-mark class="brand-image img-circle elevation-3" style="opacity: .8; height: 33px; width: auto; color: #ffffff;" />
-        <span class="brand-text fw-light">{{ config('app.name', __('Sistem MOTAC')) }}</span>
+        <span class="brand-text fw-light">{{ config('app.name', __('MOTAC IRMS')) }}</span>
     </a>
 
     <div class="sidebar">

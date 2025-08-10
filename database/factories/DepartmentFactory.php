@@ -5,8 +5,8 @@ namespace Database\Factories;
 use App\Models\Department;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
 
 class DepartmentFactory extends Factory
 {
@@ -17,20 +17,16 @@ class DepartmentFactory extends Factory
         // Use a Malaysian locale for faker
         $msFaker = \Faker\Factory::create('ms_MY');
 
-        $auditUserId = null;
-        if (User::count() > 0) {
-            $auditUserId = User::inRandomOrder()->first()?->id;
-        }
+        $auditUserId = User::inRandomOrder()->first()?->id;
 
-        // Generate a more realistic Malaysian government department name
         $name = $this->faker->randomElement(['Jabatan', 'Bahagian', 'Unit']).' '.$this->faker->unique()->word();
         $code = Str::upper($this->faker->unique()->bothify('???###'));
 
         $createdAt = Carbon::parse($this->faker->dateTimeBetween('-5 years', 'now'));
-        $updatedAt = Carbon::parse($this->faker->dateTimeBetween($createdAt->toDateTimeString(), 'now'));
+        $updatedAt = Carbon::parse($this->faker->dateTimeBetween($createdAt, 'now'));
 
         $isDeleted = $this->faker->boolean(1);
-        $deletedAt = $isDeleted ? Carbon::parse($this->faker->dateTimeBetween($updatedAt->toDateTimeString(), 'now')) : null;
+        $deletedAt = $isDeleted ? Carbon::parse($this->faker->dateTimeBetween($updatedAt, 'now')) : null;
 
         return [
             'name' => $name,
@@ -42,6 +38,9 @@ class DepartmentFactory extends Factory
             'code' => $code,
             'is_active' => $this->faker->boolean(95),
             'head_of_department_id' => $this->faker->optional(0.3)->passthrough(User::inRandomOrder()->first()?->id),
+            'created_by' => $auditUserId,
+            'updated_by' => $auditUserId,
+            'deleted_by' => null,
             'created_at' => $createdAt,
             'updated_at' => $updatedAt,
             'deleted_at' => $deletedAt,

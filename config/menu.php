@@ -11,14 +11,45 @@
  * - icon: Bootstrap icon class (without 'bi-')
  * - routeName: Named route for Laravel route() helper
  * - routeNamePrefix: For menu highlighting of subroutes
- * - role: Array of roles allowed to view the menu item
+ * - role: Array of roles allowed to view the menu item (authenticated only)
+ * - guestOnly: If true, only visible to guests (not logged in); never shown to authenticated users
  * - submenu: Array of child menu items
  * - menuHeader: Translation key for header sections
  * - target: Link target (_blank, etc.)
+ *
+ * NOTES:
+ * - 'role' key restricts visibility to authenticated users with that role.
+ * - 'guestOnly' => true restricts visibility to guests only.
+ * - If neither 'role' nor 'guestOnly' is set, the item is visible to all (not recommended for internal systems).
  */
 
 return [
     'menu' => [
+        // Guest-only section (shown only to users who are NOT logged in)
+        [
+            'menuHeader' => 'menu.section.public',
+            'guestOnly' => true,
+        ],
+        [
+            'url' => '/',
+            'name' => 'menu.home',
+            'icon' => 'house',
+            'guestOnly' => true,
+        ],
+        [
+            'url' => '/contact-us',
+            'name' => 'menu.contact_us',
+            'icon' => 'envelope',
+            'guestOnly' => true,
+        ],
+        [
+            'url' => '/login',
+            'name' => 'menu.login',
+            'icon' => 'box-arrow-in-right',
+            'guestOnly' => true,
+        ],
+
+        // Authenticated user section
         [
             'url' => '/dashboard',
             'name' => 'menu.dashboard',
@@ -75,7 +106,7 @@ return [
             'routeName' => 'approvals.dashboard',
             'role' => ['Admin', 'Approver', 'HOD'],
             'submenu' => [
-                // Add specific approval sub-items if needed, e.g., 'loan-approvals.index'
+                // Add specific approval sub-items if needed
             ],
         ],
         [
@@ -98,6 +129,7 @@ return [
                 ],
             ],
         ],
+
         // Reports & Analytics Section
         [
             'menuHeader' => 'menu.section.reports_analytics',
@@ -153,6 +185,7 @@ return [
                 ],
             ],
         ],
+
         // System Settings Section (Admin Only)
         [
             'menuHeader' => 'menu.section.system_settings',

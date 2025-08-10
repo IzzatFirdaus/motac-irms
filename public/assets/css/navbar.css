@@ -1,0 +1,291 @@
+:root {
+  --motac-navbar-bg: #fff;
+  --motac-navbar-border: #003366;
+  --motac-navbar-accent: #1976d2;
+  --motac-navbar-accent-bg: #e3f0ff;
+  --motac-navbar-text: #003366;
+  --motac-navbar-hover: #f1f6fb;
+  --motac-navbar-link-hover: #1976d2;
+  --motac-navbar-shadow: 0 2px 10px rgba(25, 118, 210, 0.07);
+}
+
+/* Main navbar container */
+.motac-navbar-alt {
+  width: 100%;
+  background: var(--motac-navbar-bg);
+  border-bottom: 3px solid var(--motac-navbar-border);
+  box-shadow: var(--motac-navbar-shadow);
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-align: center;
+  align-items: center;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  min-height: 64px;
+  padding: 0 18px;
+  position: relative;
+  z-index: 11;
+}
+
+/* Left section (logo, hamburger) */
+.motac-navbar-alt .navbar-left {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-align: center;
+  align-items: center;
+  /* Fallback for gap */
+  margin-right: 12px;
+  gap: 12px;
+}
+
+/* Brand/Logo */
+.motac-navbar-alt .navbar-brand {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-align: center;
+  align-items: center;
+  /* Fallback for gap */
+  margin-right: 12px;
+  gap: 12px;
+  text-decoration: none;
+  color: var(--motac-navbar-text);
+  font-weight: 700;
+  font-size: 1.22em;
+  letter-spacing: 0.04em;
+}
+
+.motac-navbar-alt .navbar-logo {
+  width: 38px;
+  height: 38px;
+  background: #fff;
+  border: 2.5px solid var(--motac-navbar-border);
+  border-radius: 8px;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-align: center;
+  align-items: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  box-shadow: 0 1px 6px rgba(25, 118, 210, 0.07);
+}
+
+.motac-navbar-alt .navbar-logo img {
+  width: 30px;
+  height: auto;
+  display: block;
+}
+
+.motac-navbar-alt .navbar-ministry {
+  color: var(--motac-navbar-accent);
+  font-size: 0.97em;
+  margin-left: 6px;
+  font-weight: 600;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+
+/* Center nav links */
+.motac-navbar-alt .navbar-links {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-align: center;
+  align-items: center;
+  /* Fallback for gap */
+  margin-right: 18px;
+  gap: 18px;
+  margin: 0 10px;
+}
+
+.motac-navbar-alt .navbar-link {
+  color: var(--motac-navbar-text);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 8px 10px;
+  border-radius: 5px;
+  transition: background 0.18s, color 0.18s;
+}
+
+.motac-navbar-alt .navbar-link:hover,
+.motac-navbar-alt .navbar-link:focus {
+  background: var(--motac-navbar-accent-bg);
+  color: var(--motac-navbar-link-hover);
+  outline: none;
+}
+
+/* Right section (user, lang, etc) */
+.motac-navbar-alt .navbar-right {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-align: center;
+  align-items: center;
+  /* Fallback for gap */
+  margin-right: 14px;
+  gap: 14px;
+}
+
+.motac-navbar-alt .navbar-action {
+  position: relative;
+}
+
+.motac-navbar-alt .navbar-action > a,
+.motac-navbar-alt .navbar-action > button {
+  color: var(--motac-navbar-text);
+  background: none;
+  border: none;
+  font-size: 1.21em;
+  padding: 7px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.13s, color 0.13s;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.motac-navbar-alt .navbar-action > a:hover,
+.motac-navbar-alt .navbar-action > button:hover,
+.motac-navbar-alt .navbar-action > a:focus,
+.motac-navbar-alt .navbar-action > button:focus {
+  background: var(--motac-navbar-hover);
+  color: var(--motac-navbar-link-hover);
+  outline: none;
+}
+
+/* Dropdown menu */
+.motac-navbar-alt .navbar-dropdown {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 120%;
+  min-width: 200px;
+  background: #fff;
+  color: #222;
+  border-radius: 7px;
+  box-shadow: 0 5px 18px rgba(25, 118, 210, 0.06);
+  border: 1px solid #e6e6e6;
+  z-index: 100;
+  padding: 10px 0;
+  font-size: 1em;
+}
+
+.motac-navbar-alt .navbar-action.show .navbar-dropdown {
+  display: block;
+}
+
+.motac-navbar-alt .navbar-dropdown a,
+.motac-navbar-alt .navbar-dropdown button {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-align: center;
+  align-items: center;
+  /* Fallback for gap */
+  margin-right: 9px;
+  gap: 9px;
+  width: 100%;
+  color: #222;
+  background: none;
+  border: none;
+  padding: 9px 22px;
+  text-decoration: none;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.motac-navbar-alt .navbar-dropdown a:hover,
+.motac-navbar-alt .navbar-dropdown button:hover {
+  background: #f6f7fa;
+  color: var(--motac-navbar-accent);
+}
+
+/* User avatar */
+.motac-navbar-alt .navbar-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  /* Fallback for object-fit for older browsers */
+  -o-object-fit: cover;
+     object-fit: cover;
+  border: 2px solid var(--motac-navbar-accent);
+  background: #e3f0ff;
+}
+
+/* Notification badge */
+.navbar-badge {
+  background: #dc3545;
+  color: #fff;
+  font-size: 0.78em;
+  font-weight: bold;
+  padding: 2px 8px;
+  border-radius: 999px;
+  position: absolute;
+  top: 1px;
+  right: 4px;
+  z-index: 2;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+}
+
+/* Hamburger icon for small screens */
+.motac-navbar-alt .navbar-hamburger {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 2.1em;
+  color: var(--motac-navbar-text);
+  margin-right: 6px;
+  margin-left: -5px;
+}
+
+/* Responsive and legacy browser fallbacks */
+
+/* Hide ministry at medium screens */
+@media (max-width: 1100px) {
+  .motac-navbar-alt .navbar-ministry {
+    display: none;
+  }
+}
+
+/* Hide links and show hamburger on small screens */
+@media (max-width: 900px) {
+  .motac-navbar-alt .navbar-links {
+    display: none;
+  }
+  .motac-navbar-alt .navbar-hamburger {
+    display: inline-block;
+  }
+}
+
+/* Column layout and smaller avatar/logo for very small screens */
+@media (max-width: 600px) {
+  .motac-navbar-alt {
+    /* IE10+ fallback for flex-direction */
+    -ms-flex-direction: column;
+    flex-direction: column;
+    /* IE10+ fallback for align-items */
+    -ms-flex-align: stretch;
+    align-items: stretch;
+    padding: 0 4px;
+    min-height: 52px;
+  }
+  .motac-navbar-alt .navbar-brand {
+    font-size: 1em;
+    gap: 6px;
+  }
+  .motac-navbar-alt .navbar-logo {
+    width: 30px;
+    height: 30px;
+  }
+  .motac-navbar-alt .navbar-avatar {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* Documentation:
+   - Fallbacks for IE10+ are included (using -ms- prefixes).
+   - The 'gap' property is ignored by IE and old browsers, but layouts remain usable.
+   - 'object-fit: cover' for avatars is not supported in IE, but will gracefully degrade.
+   - MOTAC navbar is intended for modern browsers (Edge 16+/Chrome 57+/FF 52+/Safari 10.1+).
+*/

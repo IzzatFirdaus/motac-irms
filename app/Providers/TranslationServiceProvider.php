@@ -3,9 +3,8 @@
 namespace App\Providers;
 
 use App\Translation\SuffixedTranslator;
+use App\Translation\SuffixedFileLoader;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Translation\FileLoader;
-use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -13,6 +12,7 @@ use Illuminate\Support\Facades\Log;
  *
  * This service provider replaces Laravel's default translation system with a custom
  * implementation that supports suffixed language files (e.g., forms_en.php, app_ms.php).
+ * It also uses a custom FileLoader to load suffixed translation files.
  *
  * Features:
  * - Automatic locale suffix appending to translation keys
@@ -36,7 +36,7 @@ class TranslationServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        // Register the translation file loader
+        // Register the custom translation file loader that supports suffixed files
         $this->registerTranslationLoader();
 
         // Register the custom suffixed translator
@@ -44,10 +44,10 @@ class TranslationServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register the translation file loader.
+     * Register the custom translation file loader.
      *
-     * The FileLoader is responsible for loading translation files from the
-     * resources/lang directory. It handles both suffixed and non-suffixed files.
+     * This FileLoader will attempt to load files using the suffixed convention (e.g. app_en.php)
+     * and gracefully fallback to the standard convention (e.g. app.php) if the suffixed file is not found.
      *
      * @return void
      */
@@ -55,7 +55,8 @@ class TranslationServiceProvider extends ServiceProvider
     {
         $this->app->singleton('translation.loader', function ($app) {
             try {
-                return new FileLoader($app['files'], $app['path.lang']);
+                // Use our custom loader which supports suffixed files
+                return new SuffixedFileLoader($app['files'], $app['path.lang']);
             } catch (\Exception $e) {
                 // Log error and provide fallback
                 Log::error('Failed to initialize translation loader: ' . $e->getMessage());

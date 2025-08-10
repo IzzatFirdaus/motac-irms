@@ -11,9 +11,13 @@ return [
     | by the framework. The "local" disk, as well as a variety of cloud
     | based disks are available to your application. Just store away!
     |
+    | By default, we use the value from the FILESYSTEM_DISK environment variable,
+    | falling back to 'local' if it's not set.
+    |
     */
 
-    'default' => env('FILESYSTEM_DISK', 'local'),
+    'default' => env('FILESYSTEM_DISK', env('FILESYSTEM_DRIVER', 'local')),
+    // This allows compatibility with both FILESYSTEM_DISK (Laravel 9+) and FILESYSTEM_DRIVER (older versions)
 
     /*
     |--------------------------------------------------------------------------
