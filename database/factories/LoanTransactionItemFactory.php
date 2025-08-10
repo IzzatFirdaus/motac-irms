@@ -13,9 +13,8 @@ use Illuminate\Support\Arr;
 /**
  * Factory for the LoanTransactionItem model.
  *
- * Generates records that represent the linkage of a specific equipment
- * to a loan transaction (issue or return). Handles all foreign keys,
- * audit fields, and soft-delete fields as per migration and model.
+ * Generates transaction items representing a specific equipment's participation in a loan transaction.
+ * Handles all relationships, audit fields, and soft-deletes based on the schema and model.
  */
 class LoanTransactionItemFactory extends Factory
 {
@@ -23,17 +22,17 @@ class LoanTransactionItemFactory extends Factory
 
     public function definition(): array
     {
-        // Use Malaysian locale for sample data
+        // Malaysian locale for realistic notes
         $msFaker = \Faker\Factory::create('ms_MY');
 
-        // Find or create a transaction
+        // Find or create a transaction (issue/return)
         $loanTransaction = LoanTransaction::inRandomOrder()->first() ?? LoanTransaction::factory()->create();
 
         // Find or create a suitable equipment (preferably available)
         $equipment = Equipment::where('status', Equipment::STATUS_AVAILABLE)
             ->inRandomOrder()->first() ?? Equipment::factory()->available()->create();
 
-        // Find or create a loan application item linked to this transaction/equipment if possible
+        // Find or create a related loan application item if possible
         $loanApplicationItemId = null;
         if ($loanTransaction->loanApplication) {
             $appItem = $loanTransaction->loanApplication
@@ -48,7 +47,7 @@ class LoanTransactionItemFactory extends Factory
             }
         }
 
-        // Get all possible statuses from the model, or sensible defaults
+        // Get all possible statuses from the model
         $itemStatuses = method_exists(LoanTransactionItem::class, 'getStatusesList')
             ? LoanTransactionItem::getStatusesList()
             : [
@@ -90,7 +89,7 @@ class LoanTransactionItemFactory extends Factory
             }
         }
 
-        // Find or create a user for blameable columns
+        // For blameable columns
         $auditUserId = User::inRandomOrder()->value('id') ?? User::factory()->create(['name' => 'Audit User (LoanTransactionItemFactory)'])->id;
 
         return [
@@ -113,7 +112,7 @@ class LoanTransactionItemFactory extends Factory
     }
 
     /**
-     * State for items marked as issued.
+     * State for items marked as issued (for issue transactions).
      */
     public function issued(): static
     {
@@ -127,7 +126,7 @@ class LoanTransactionItemFactory extends Factory
     }
 
     /**
-     * State for items returned in good condition.
+     * State for items returned in good condition (for return transactions).
      */
     public function returnedGood(): static
     {
@@ -142,7 +141,7 @@ class LoanTransactionItemFactory extends Factory
     }
 
     /**
-     * State for items returned with damage.
+     * State for items returned with damage (for return transactions).
      */
     public function returnedDamaged(): static
     {

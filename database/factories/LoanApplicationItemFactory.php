@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  *
  * Generates records representing individual equipment requests within a loan application.
  * Handles all relationships, audit fields, and soft-delete columns as per migration/model.
+ *
+ * NOTE: Uses 'notes' field, matching the model and migration schema.
  */
 class LoanApplicationItemFactory extends Factory
 {
@@ -50,7 +52,12 @@ class LoanApplicationItemFactory extends Factory
             'equipment_type'      => $equipmentType,
             'quantity_requested'  => $quantityRequested,
             'quantity_approved'   => $quantityApproved,
-            'item_notes'          => $msFaker->optional(0.15)->sentence(8),
+            // Use 'notes' field, not 'item_notes'
+            'notes'               => $msFaker->optional(0.15)->sentence(8),
+            'status'              => LoanApplicationItem::STATUS_PENDING_APPROVAL,
+            'quantity_issued'     => 0,
+            'quantity_returned'   => 0,
+            // Blameable columns
             'created_by'          => $auditUserId,
             'updated_by'          => $auditUserId,
             'deleted_by'          => $isDeleted ? $auditUserId : null,

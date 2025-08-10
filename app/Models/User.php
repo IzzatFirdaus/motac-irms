@@ -75,17 +75,19 @@ class User extends Authenticatable
         self::TITLE_NONE => '',
     ];
 
+    // --- STATUS CONSTANTS ---
     public const STATUS_ACTIVE = 'active';
     public const STATUS_INACTIVE = 'inactive';
     public const STATUS_SUSPENDED = 'suspended';
     public const STATUS_PENDING = 'pending';
 
-    // Service and appointment enums
+    // --- SERVICE STATUS CONSTANTS ---
     public const SERVICE_STATUS_TETAP = 'tetap';
     public const SERVICE_STATUS_KONTRAK_MYSTEP = 'kontrak_mystep';
     public const SERVICE_STATUS_PELAJAR_INDUSTRI = 'pelajar_industri';
     public const SERVICE_STATUS_OTHER_AGENCY = 'other_agency';
 
+    // --- APPOINTMENT TYPE CONSTANTS ---
     public const APPOINTMENT_TYPE_BAHARU = 'baharu';
     public const APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN = 'kenaikan_pangkat_pertukaran';
     public const APPOINTMENT_TYPE_LAIN_LAIN = 'lain_lain';
@@ -116,6 +118,9 @@ class User extends Authenticatable
         'full_name',
     ];
 
+    /**
+     * Casts for model properties.
+     */
     protected function casts(): array
     {
         return [
@@ -125,83 +130,132 @@ class User extends Authenticatable
         ];
     }
 
-    // Relationships
+    // --- RELATIONSHIPS ---
 
+    /**
+     * Department to which the user belongs.
+     */
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
     }
 
+    /**
+     * Position (jawatan) of the user.
+     */
     public function position(): BelongsTo
     {
         return $this->belongsTo(Position::class);
     }
 
+    /**
+     * Grade (gred) of the user.
+     */
     public function grade(): BelongsTo
     {
         return $this->belongsTo(Grade::class);
     }
 
+    /**
+     * Loans created by the user.
+     */
     public function createdLoans(): HasMany
     {
         return $this->hasMany(LoanApplication::class, 'created_by');
     }
 
+    /**
+     * Loans where the user is responsible officer.
+     */
     public function responsibleForLoans(): HasMany
     {
         return $this->hasMany(LoanApplication::class, 'responsible_officer_id');
     }
 
+    /**
+     * Helpdesk tickets submitted by this user (as applicant).
+     */
     public function tickets(): HasMany
     {
         return $this->hasMany(HelpdeskTicket::class, 'user_id');
     }
 
+    /**
+     * Helpdesk tickets assigned to this user (as agent/staff).
+     */
     public function assignedTickets(): HasMany
     {
         return $this->hasMany(HelpdeskTicket::class, 'assigned_to_user_id');
     }
 
-    public function approvals(): HasMany
+    /**
+     * Approvals assigned to the user (as officer).
+     */
+    public function approvalsAssigned(): HasMany
     {
-        return $this->hasMany(Approval::class, 'approver_id');
+        // Approval model uses officer_id as the FK
+        return $this->hasMany(Approval::class, 'officer_id');
     }
 
+    /**
+     * Creator user (for blameable/audit).
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+    /**
+     * Updater user (for blameable/audit).
+     */
     public function updater(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
+    /**
+     * Deleter user (for blameable/audit).
+     */
     public function deleter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by');
     }
 
-    // Helper methods for roles
+    // --- ROLE CONVENIENCE HELPERS ---
 
+    /**
+     * Returns true if the user has the Admin role.
+     */
     public function isAdmin(): bool
     {
         return $this->hasRole('Admin');
     }
 
+    /**
+     * Returns true if the user has the BPM Staff role.
+     */
     public function isBpmStaff(): bool
     {
         return $this->hasRole('BPM Staff');
     }
 
+    /**
+     * Returns true if the user has the IT Admin role.
+     */
     public function isItAdmin(): bool
     {
         return $this->hasRole('IT Admin');
     }
 
+    /**
+     * Returns true if the user has the Approver role.
+     */
     public function isApprover(): bool
     {
         return $this->hasRole('Approver');
     }
 
+    /**
+     * Returns true if the user has the HOD (Head of Department) role.
+     */
     public function isHod(): bool
     {
         return $this->hasRole('HOD');
@@ -218,11 +272,22 @@ class User extends Authenticatable
         return $this->grade->level >= $requiredGradeLevel;
     }
 
+    // --- ACCESSORS ---
+
     /**
-     * Accessor for full name (with title).
+     * Accessor for full name, including title if set.
      */
     public function getFullNameAttribute(): string
     {
-        return ($this->title ? $this->title . ' ' : '') . $this->name;
+        // If title is set, format as "Title Name", else just Name
+        return ($this->title ? (self::$TITLE_OPTIONS[$this->title] ?? $this->title) . ' ' : '') . $this->name;
+    }
+
+    /**
+     * Accessor for user's profile photo URL (provided by Jetstream).
+     */
+    public function getProfilePhotoUrlAttribute(): string
+    {
+        return $this->profile_photo_url ?? '';
     }
 }

@@ -191,4 +191,56 @@ class LoanApplicationFactory extends Factory
             'responsible_officer_id' => $officer instanceof User ? $officer->id : $officer,
         ]);
     }
+
+    /**
+     * State: Certified application.
+     * Sets applicant confirmation timestamp and submitted_at to simulate "certified" (if business logic uses it).
+     */
+    public function certified(): static
+    {
+        $now = now();
+        return $this->state([
+            'applicant_confirmation_timestamp' => $now,
+            'submitted_at' => $now,
+        ]);
+    }
+
+    /**
+     * State: Pending support.
+     */
+    public function pendingSupport(): static
+    {
+        return $this->state([
+            'status' => LoanApplication::STATUS_PENDING_SUPPORT ?? 'pending_support',
+        ]);
+    }
+
+    /**
+     * State: Cancelled application.
+     */
+    public function cancelled(): static
+    {
+        return $this->state([
+            'status' => LoanApplication::STATUS_CANCELLED ?? 'cancelled',
+            'cancelled_at' => now(),
+            'cancelled_by' => null,
+        ]);
+    }
+
+    /**
+     * After-creation: Attach N items to this application.
+     * Usage: ->withItems(2)
+     */
+    public function withItems(int $count = 1): static
+    {
+        return $this->afterCreating(function (LoanApplication $application) use ($count) {
+            \App\Models\LoanApplicationItem::factory()
+                ->count($count)
+                ->forLoanApplication($application)
+                ->create([
+                    'created_by' => $application->created_by,
+                    'updated_by' => $application->updated_by,
+                ]);
+        });
+    }
 }

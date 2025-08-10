@@ -5,7 +5,8 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Creates the 'approvals' table for workflow approvals (e.g., loan, etc.).
+ * Updates and creates the 'approvals' table for workflow approvals (e.g., loan, etc.).
+ * This version supports a richer workflow with multiple status values and action timestamps.
  * Uses polymorphic 'approvable' relationship for reusability.
  */
 return new class extends Migration
@@ -14,17 +15,37 @@ return new class extends Migration
     {
         Schema::create('approvals', function (Blueprint $table): void {
             $table->id();
-            $table->morphs('approvable'); // approvable_type, approvable_id (polymorphic)
-            $table->foreignId('officer_id')->constrained('users')->onDelete('cascade')->comment('Officer responsible for this approval');
+
+            // Polymorphic relation to approvable model (e.g., LoanApplication)
+            $table->morphs('approvable'); // approvable_type, approvable_id
+
+            // Officer responsible for this approval
+            $table->foreignId('officer_id')->constrained('users')->onDelete('cascade')->comment('Officer responsible for this approval task');
+
+            // Approval stage and status
             $table->string('stage')->nullable()->index()->comment('Approval stage: e.g., support_review, hod_review');
-            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending')->index();
-            $table->text('comments')->nullable();
-            $table->timestamp('approval_timestamp')->nullable()->comment('Timestamp when approval was made');
+            // Changed from enum to string for flexibility, but with a check constraint for allowed values
+            $table->string('status')->default('pending')->index()->comment('Approval status: pending, approved, rejected, canceled, forwarded');
+
+            // Notes and decision timestamps
+            $table->text('notes')->nullable()->comment('Notes or comments from officer');
+            // Each status can have its own timestamp, to support workflow tracking
+            $table->timestamp('approved_at')->nullable()->comment('Timestamp when approved');
+            $table->timestamp('rejected_at')->nullable()->comment('Timestamp when rejected');
+            $table->timestamp('canceled_at')->nullable()->comment('Timestamp when canceled');
+            $table->timestamp('resubmitted_at')->nullable()->comment('Timestamp when resubmitted/forwarded');
+
+            // Standard blameable/audit columns
             $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('deleted_by')->nullable()->constrained('users')->onDelete('set null');
+
             $table->timestamps();
             $table->softDeletes();
+
+            // (Optional) Check Constraint for status values (MySQL 8+ and supported DBs)
+            // You may comment this out if your DB does not support check constraints
+            $table->check("status IN ('pending','approved','rejected','canceled','forwarded')");
         });
     }
 

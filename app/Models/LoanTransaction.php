@@ -34,6 +34,7 @@ use Illuminate\Support\Str;
  * @property \Illuminate\Support\Carbon|null $return_timestamp
  * @property int|null $related_transaction_id
  * @property string $status
+ * @property \Illuminate\Support\Carbon|null $due_date
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
@@ -46,35 +47,47 @@ class LoanTransaction extends Model
     public const TYPE_ISSUE = 'issue';
     public const TYPE_RETURN = 'return';
 
-    // Status constants
+    // Status constants (must match migration enum)
     public const STATUS_PENDING = 'pending';
     public const STATUS_ISSUED = 'issued';
-    public const STATUS_RETURNED = 'returned';
     public const STATUS_RETURNED_PENDING_INSPECTION = 'returned_pending_inspection';
     public const STATUS_RETURNED_GOOD = 'returned_good';
     public const STATUS_RETURNED_DAMAGED = 'returned_damaged';
     public const STATUS_ITEMS_REPORTED_LOST = 'items_reported_lost';
-    public const STATUS_RETURNED_WITH_LOSS = 'returned_with_loss';
-    public const STATUS_RETURNED_WITH_DAMAGE_AND_LOSS = 'returned_with_damage_and_loss';
-    public const STATUS_PARTIALLY_RETURNED = 'partially_returned';
     public const STATUS_COMPLETED = 'completed';
     public const STATUS_CANCELLED = 'cancelled';
     public const STATUS_OVERDUE = 'overdue';
+    public const STATUS_RETURNED = 'returned';
+    public const STATUS_PARTIALLY_RETURNED = 'partially_returned';
+    public const STATUS_RETURNED_WITH_LOSS = 'returned_with_loss';
+    public const STATUS_RETURNED_WITH_DAMAGE_AND_LOSS = 'returned_with_damage_and_loss';
 
     protected $table = 'loan_transactions';
 
     protected $fillable = [
-        'loan_application_id', 'type', 'transaction_date', 'issuing_officer_id',
-        'receiving_officer_id', 'accessories_checklist_on_issue', 'issue_notes',
-        'issue_timestamp', 'returning_officer_id', 'return_accepting_officer_id',
-        'accessories_checklist_on_return', 'return_notes', 'return_timestamp',
-        'related_transaction_id', 'status'
+        'loan_application_id',
+        'type',
+        'transaction_date',
+        'issuing_officer_id',
+        'receiving_officer_id',
+        'accessories_checklist_on_issue',
+        'issue_notes',
+        'issue_timestamp',
+        'returning_officer_id',
+        'return_accepting_officer_id',
+        'accessories_checklist_on_return',
+        'return_notes',
+        'return_timestamp',
+        'related_transaction_id',
+        'due_date',
+        'status'
     ];
 
     protected $casts = [
         'transaction_date' => 'datetime',
         'issue_timestamp' => 'datetime',
         'return_timestamp' => 'datetime',
+        'due_date' => 'date',
         'accessories_checklist_on_issue' => 'array',
         'accessories_checklist_on_return' => 'array',
         'created_at' => 'datetime',
@@ -93,41 +106,65 @@ class LoanTransaction extends Model
 
     // Relationships
 
+    /**
+     * The parent loan application for this transaction.
+     */
     public function loanApplication(): BelongsTo
     {
         return $this->belongsTo(LoanApplication::class, 'loan_application_id');
     }
 
+    /**
+     * The items (equipment) transacted in this transaction.
+     */
     public function loanTransactionItems(): HasMany
     {
         return $this->hasMany(LoanTransactionItem::class, 'loan_transaction_id');
     }
 
+    /**
+     * Alias for loanTransactionItems relationship.
+     */
     public function items(): HasMany
     {
         return $this->loanTransactionItems();
     }
 
+    /**
+     * The officer who issued the equipment (if applicable).
+     */
     public function issuingOfficer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'issuing_officer_id');
     }
 
+    /**
+     * The officer (user) who received the equipment (applicant).
+     */
     public function receivingOfficer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'receiving_officer_id');
     }
 
+    /**
+     * The officer who returned the equipment (applicant).
+     */
     public function returningOfficer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'returning_officer_id');
     }
 
+    /**
+     * The officer who accepted the returned equipment.
+     */
     public function returnAcceptingOfficer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'return_accepting_officer_id');
     }
 
+    /**
+     * The related issue transaction for which this is a return.
+     */
     public function relatedIssueTransaction(): BelongsTo
     {
         return $this->belongsTo(LoanTransaction::class, 'related_transaction_id');
@@ -135,16 +172,25 @@ class LoanTransaction extends Model
 
     // Accessors
 
+    /**
+     * Get a human-readable label for the transaction type.
+     */
     public function getTypeLabelAttribute(): string
     {
         return self::getTypeOptions()[$this->type] ?? Str::title(str_replace('_', ' ', $this->type));
     }
 
+    /**
+     * Get a human-readable label for the transaction status.
+     */
     public function getStatusLabelAttribute(): string
     {
         return self::getStatusOptions()[$this->status] ?? Str::title(str_replace('_', ' ', (string) $this->status));
     }
 
+    /**
+     * Get a Bootstrap color class for the transaction type (for badge display).
+     */
     public function getTypeColorClassAttribute(): string
     {
         return match ($this->type) {
@@ -154,6 +200,9 @@ class LoanTransaction extends Model
         };
     }
 
+    /**
+     * Get a Bootstrap color class for the transaction status (for badge display).
+     */
     public function getStatusColorClassAttribute(): string
     {
         return match ($this->status) {
@@ -162,10 +211,14 @@ class LoanTransaction extends Model
             self::STATUS_RETURNED_PENDING_INSPECTION, self::STATUS_PARTIALLY_RETURNED => 'text-bg-primary',
             self::STATUS_RETURNED_DAMAGED, self::STATUS_OVERDUE => 'text-bg-warning',
             self::STATUS_ITEMS_REPORTED_LOST, self::STATUS_CANCELLED => 'text-bg-danger',
+            self::STATUS_RETURNED_WITH_LOSS, self::STATUS_RETURNED_WITH_DAMAGE_AND_LOSS => 'text-bg-danger',
             default => 'text-bg-secondary',
         };
     }
 
+    /**
+     * Get the primary item name for this transaction (for display purposes).
+     */
     public function getItemNameAttribute(): string
     {
         if (! $this->relationLoaded('loanTransactionItems')) {
@@ -181,6 +234,9 @@ class LoanTransaction extends Model
         return __('Tiada Item');
     }
 
+    /**
+     * Get total quantity transacted in this transaction.
+     */
     public function getQuantityAttribute(): int
     {
         if ($this->relationLoaded('loanTransactionItems')) {
@@ -204,6 +260,7 @@ class LoanTransaction extends Model
 
     /**
      * Transaction status options for dropdowns.
+     * This covers all statuses from the migration's enum.
      */
     public static function getStatusOptions(): array
     {
@@ -217,11 +274,15 @@ class LoanTransaction extends Model
             self::STATUS_COMPLETED => __('common.statuses.completed'),
             self::STATUS_CANCELLED => __('common.statuses.cancelled'),
             self::STATUS_OVERDUE => __('common.statuses.overdue'),
+            self::STATUS_RETURNED => __('common.statuses.returned'),
+            self::STATUS_PARTIALLY_RETURNED => __('common.statuses.partially_returned'),
+            self::STATUS_RETURNED_WITH_LOSS => __('common.statuses.returned_with_loss'),
+            self::STATUS_RETURNED_WITH_DAMAGE_AND_LOSS => __('common.statuses.returned_with_damage_and_loss'),
         ];
     }
 
     /**
-     * List of all valid statuses.
+     * List of all valid statuses as per migration enum (for validation/filtering).
      */
     public static function getStatusesList(): array
     {
@@ -234,23 +295,35 @@ class LoanTransaction extends Model
             self::STATUS_ITEMS_REPORTED_LOST,
             self::STATUS_COMPLETED,
             self::STATUS_CANCELLED,
+            self::STATUS_OVERDUE,
+            self::STATUS_RETURNED,
+            self::STATUS_PARTIALLY_RETURNED,
+            self::STATUS_RETURNED_WITH_LOSS,
+            self::STATUS_RETURNED_WITH_DAMAGE_AND_LOSS,
         ];
     }
 
     // Helper methods
 
+    /**
+     * Returns true if this transaction is an issue transaction.
+     */
     public function isIssue(): bool
     {
         return $this->type === self::TYPE_ISSUE;
     }
 
+    /**
+     * Returns true if this transaction is a return transaction.
+     */
     public function isReturn(): bool
     {
         return $this->type === self::TYPE_RETURN;
     }
 
     /**
-     * Update parent LoanApplication status after this transaction.
+     * Updates the parent LoanApplication's status after this transaction.
+     * Used to keep application status in sync with transactions.
      */
     public function updateParentLoanApplicationStatus(): void
     {
@@ -261,6 +334,7 @@ class LoanTransaction extends Model
 
     /**
      * Returns true if this transaction is fully closed/returned.
+     * Used for reporting and workflow checks.
      */
     public function isFullyClosedOrReturned(): bool
     {
