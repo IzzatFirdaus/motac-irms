@@ -6,14 +6,21 @@ use App\Models\Approval;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 
 /**
- * Factory for Approval model.
+ * Optimized Factory for Approval model.
  *
- * Generates approval tasks for a polymorphic approvable (e.g., LoanApplication).
- * Ensures officer assignment and valid stage/status, with audit fields.
- * Aligned with the updated migration and model: supports all workflow statuses and decision timestamps.
+ * - Uses static caches for related User IDs to reduce repeated DB queries.
+ * - Never creates related models in definition(); assumes required records exist.
+ * - Accepts officer_id and other foreign keys via state for batch seeding efficiency.
+ * - Uses static cached Faker for performance and realistic Malay data.
+ * - All date fields, status, and stage are assigned with correct logic.
+ *
+ * Usage:
+ *   - Ensure at least one User exists before using this factory.
+ *   - Use state() to provide approvable_type/id and officer_id for best batch performance.
  */
 class ApprovalFactory extends Factory
 {
@@ -21,29 +28,37 @@ class ApprovalFactory extends Factory
 
     public function definition(): array
     {
-        // Use Malaysian locale for more realistic values
-        $msFaker = \Faker\Factory::create('ms_MY');
+        // Static cache for User IDs to avoid repeated DB queries
+        static $userIds;
+        if (!isset($userIds)) {
+            $userIds = User::pluck('id')->all();
+        }
+        $officerId = !empty($userIds) ? Arr::random($userIds) : null;
 
-        // Find or create an officer for FK
-        $officer = User::inRandomOrder()->first() ?? User::factory()->create(['name' => 'Officer Fallback (ApprovalFactory)']);
+        // Static faker for Malay locale
+        static $msFaker;
+        if (!$msFaker) {
+            $msFaker = \Faker\Factory::create('ms_MY');
+        }
 
-        // Get valid stages from Approval model; fallback if empty
+        // Get valid stage and status keys
         $stageKeys = method_exists(Approval::class, 'getStageKeys')
             ? Approval::getStageKeys()
             : array_keys(Approval::$STAGES_LABELS ?? [Approval::STAGE_SUPPORT_REVIEW => 'Support Review']);
         $stage = $this->faker->randomElement($stageKeys ?: [Approval::STAGE_SUPPORT_REVIEW]);
 
-        // Get valid statuses from Approval model; fallback if empty
-        $statusKeys = array_keys(Approval::$STATUSES_LABELS ?? [
-            Approval::STATUS_PENDING => 'Pending',
-            Approval::STATUS_APPROVED => 'Approved',
-            Approval::STATUS_REJECTED => 'Rejected',
-            Approval::STATUS_CANCELED => 'Canceled',
-            Approval::STATUS_FORWARDED => 'Forwarded',
-        ]);
+        $statusKeys = method_exists(Approval::class, 'getStatusKeys')
+            ? Approval::getStatusKeys()
+            : array_keys(Approval::$STATUSES_LABELS ?? [
+                Approval::STATUS_PENDING => 'Pending',
+                Approval::STATUS_APPROVED => 'Approved',
+                Approval::STATUS_REJECTED => 'Rejected',
+                Approval::STATUS_CANCELED => 'Canceled',
+                Approval::STATUS_FORWARDED => 'Forwarded',
+            ]);
         $status = $this->faker->randomElement($statusKeys);
 
-        // Set created/updated timestamps
+        // Generate relevant timestamps
         $createdAt = Carbon::parse($this->faker->dateTimeBetween('-1 year', 'now'));
         $updatedAt = Carbon::parse($this->faker->dateTimeBetween($createdAt, 'now'));
 
@@ -54,34 +69,36 @@ class ApprovalFactory extends Factory
         $resubmittedAt = $status === Approval::STATUS_FORWARDED ? Carbon::parse($this->faker->dateTimeBetween($createdAt, $updatedAt)) : null;
 
         return [
-            'approvable_type' => null, // To be set with forApprovable() or after creation
-            'approvable_id' => null,   // To be set with forApprovable() or after creation
-            'officer_id' => $officer->id,
-            'stage' => $stage,
-            'status' => $status,
-            'notes' => $msFaker->optional()->sentence(),
-            'approved_at' => $approvedAt,
-            'rejected_at' => $rejectedAt,
-            'canceled_at' => $canceledAt,
-            'resubmitted_at' => $resubmittedAt,
-            'created_by' => $officer->id,
-            'updated_by' => $officer->id,
-            'deleted_by' => null,
-            'created_at' => $createdAt,
-            'updated_at' => $updatedAt,
-            'deleted_at' => null,
+            'approvable_type' => null,
+            'approvable_id'   => null,
+            'officer_id'      => $officerId,
+            'stage'           => $stage,
+            'status'          => $status,
+            'notes'           => $msFaker->optional()->sentence(),
+            'approved_at'     => $approvedAt,
+            'rejected_at'     => $rejectedAt,
+            'canceled_at'     => $canceledAt,
+            'resubmitted_at'  => $resubmittedAt,
+            'created_by'      => $officerId,
+            'updated_by'      => $officerId,
+            'deleted_by'      => null,
+            'created_at'      => $createdAt,
+            'updated_at'      => $updatedAt,
+            'deleted_at'      => null,
         ];
     }
 
     /**
-     * Set a specific status for this approval.
-     * Optionally set approval/rejected/canceled/resubmitted timestamps if status is final.
+     * Assign a specific status and related timestamps/notes.
      */
     public function status(string $statusValue): static
     {
         return $this->state(function (array $attributes) use ($statusValue): array {
             $now = now();
-            $msFaker = \Faker\Factory::create('ms_MY');
+            static $msFaker;
+            if (!$msFaker) {
+                $msFaker = \Faker\Factory::create('ms_MY');
+            }
             $data = [
                 'status' => $statusValue,
             ];
@@ -150,11 +167,10 @@ class ApprovalFactory extends Factory
     }
 
     /**
-     * Set the approval stage.
+     * State: Set the approval stage.
      */
     public function stage(string $stage): static
     {
-        // Only set if stage is valid
         $validStages = method_exists(Approval::class, 'getStageKeys')
             ? Approval::getStageKeys()
             : array_keys(Approval::$STAGES_LABELS ?? []);
@@ -165,17 +181,23 @@ class ApprovalFactory extends Factory
     }
 
     /**
-     * Mark the approval as soft deleted.
+     * State: Mark the approval as soft deleted.
      */
     public function deleted(): static
     {
+        static $userIds;
+        if (!isset($userIds)) {
+            $userIds = User::pluck('id')->all();
+        }
+        $deleterId = !empty($userIds) ? Arr::random($userIds) : null;
         return $this->state([
             'deleted_at' => now(),
+            'deleted_by' => $deleterId,
         ]);
     }
 
     /**
-     * Assign this approval to a specific polymorphic approvable.
+     * State: Assign this approval to a specific polymorphic approvable.
      */
     public function forApprovable(Model $approvable): static
     {

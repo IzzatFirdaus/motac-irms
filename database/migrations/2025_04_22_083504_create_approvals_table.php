@@ -24,12 +24,10 @@ return new class extends Migration
 
             // Approval stage and status
             $table->string('stage')->nullable()->index()->comment('Approval stage: e.g., support_review, hod_review');
-            // Changed from enum to string for flexibility, but with a check constraint for allowed values
             $table->string('status')->default('pending')->index()->comment('Approval status: pending, approved, rejected, canceled, forwarded');
 
             // Notes and decision timestamps
             $table->text('notes')->nullable()->comment('Notes or comments from officer');
-            // Each status can have its own timestamp, to support workflow tracking
             $table->timestamp('approved_at')->nullable()->comment('Timestamp when approved');
             $table->timestamp('rejected_at')->nullable()->comment('Timestamp when rejected');
             $table->timestamp('canceled_at')->nullable()->comment('Timestamp when canceled');
@@ -43,9 +41,8 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            // (Optional) Check Constraint for status values (MySQL 8+ and supported DBs)
-            // You may comment this out if your DB does not support check constraints
-            $table->check("status IN ('pending','approved','rejected','canceled','forwarded')");
+            // The following line was removed due to lack of native support in Laravel:
+            // $table->check("status IN ('pending','approved','rejected','canceled','forwarded')");
         });
     }
 

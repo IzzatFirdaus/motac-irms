@@ -6,18 +6,16 @@ use App\Models\Grade;
 use App\Models\Position;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 
 /**
- * Factory for the Position model (Jawatan).
+ * Optimized Factory for the Position model (Jawatan).
  *
- * Generates realistic positions for MOTAC, matching the official list used in the seeder.
- * Links to valid grades if possible. Sets all audit (blameable) columns.
- * Fully aligned with the migration (2013_11_01_132000_create_positions_table.php),
- * seeder, and Position model structure.
- *
- * NOTE: The use of unique() with a static list is REMOVED to prevent OverflowException.
- *       This factory allows duplicate position names if more than the unique list is needed.
+ * - Uses static caches for related Grade and User IDs to avoid repeated DB hits.
+ * - Does NOT create related models (Grade/User) inside definition().
+ * - All foreign keys (grade_id, created_by, updated_by) can be set from the seeder/state, otherwise chosen randomly from existing records.
+ * - Use with seeders that ensure grades and users exist before creating positions.
  */
 class PositionFactory extends Factory
 {
@@ -49,30 +47,30 @@ class PositionFactory extends Factory
 
     public function definition(): array
     {
-        $msFaker = \Faker\Factory::create('ms_MY');
+        // Static caches for Grade IDs and User IDs (for audit fields)
+        static $gradeIds, $userIds, $msFaker;
 
-        // Pick a position name from the official list; duplicates allowed if factory exceeds unique count.
-        $positionName = $this->faker->randomElement(self::$motacPositions);
-
-        // Try to find a Grade that is linked to this position via position_id.
-        $seededPosition = Position::where('name', $positionName)->first();
-        $gradeId = null;
-        if ($seededPosition) {
-            $grade = Grade::where('position_id', $seededPosition->id)->inRandomOrder()->first();
-            $gradeId = $grade?->id;
+        if (!isset($gradeIds)) {
+            $gradeIds = Grade::pluck('id')->all();
         }
-        // Fallback: pick any grade if none was found for this position
-        if (!$gradeId) {
-            $gradeId = Grade::inRandomOrder()->value('id');
+        if (!isset($userIds)) {
+            $userIds = User::pluck('id')->all();
+        }
+        if (!isset($msFaker)) {
+            $msFaker = \Faker\Factory::create('ms_MY');
         }
 
-        // Set blameable/audit columns (created_by, updated_by, etc.)
-        $auditUserId = User::inRandomOrder()->value('id') ?? User::factory()->create(['name' => 'Audit User (PositionFactory)'])->id;
+        // Pick random grade/user IDs if available
+        $gradeId = !empty($gradeIds) ? Arr::random($gradeIds) : null;
+        $auditUserId = !empty($userIds) ? Arr::random($userIds) : null;
 
         $createdAt = Carbon::parse($this->faker->dateTimeBetween('-3 years', 'now'));
         $updatedAt = Carbon::parse($this->faker->dateTimeBetween($createdAt, 'now'));
         $isDeleted = $this->faker->boolean(2); // ~2% soft deleted
         $deletedAt = $isDeleted ? Carbon::parse($this->faker->dateTimeBetween($updatedAt, 'now')) : null;
+
+        // Pick a position name from the official list. Duplicates allowed if factory exceeds unique count.
+        $positionName = $this->faker->randomElement(self::$motacPositions);
 
         return [
             'name' => $positionName,
@@ -89,7 +87,7 @@ class PositionFactory extends Factory
     }
 
     /**
-     * State for active position.
+     * State: Active position.
      */
     public function active(): static
     {
@@ -97,7 +95,7 @@ class PositionFactory extends Factory
     }
 
     /**
-     * State for inactive position.
+     * State: Inactive position.
      */
     public function inactive(): static
     {
@@ -105,15 +103,20 @@ class PositionFactory extends Factory
     }
 
     /**
-     * State for soft deleted position.
+     * State: Soft deleted position.
      */
     public function deleted(): static
     {
-        $auditUserId = User::inRandomOrder()->value('id') ?? User::factory()->create(['name' => 'Deleter User (PositionFactory)'])->id;
+        static $userIds;
+        if (!isset($userIds)) {
+            $userIds = User::pluck('id')->all();
+        }
+        $deleterId = !empty($userIds) ? Arr::random($userIds) : null;
+
         return $this->state([
             'deleted_at' => now(),
             'is_active' => false,
-            'deleted_by' => $auditUserId,
+            'deleted_by' => $deleterId,
         ]);
     }
 
@@ -122,8 +125,9 @@ class PositionFactory extends Factory
      */
     public function forGrade(Grade|int $grade): static
     {
+        $gradeId = $grade instanceof Grade ? $grade->id : $grade;
         return $this->state([
-            'grade_id' => $grade instanceof Grade ? $grade->id : $grade,
+            'grade_id' => $gradeId,
         ]);
     }
 }
