@@ -9,10 +9,12 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 
 /**
- * Factory for the LoanApplication model.
+ * Optimized Factory for LoanApplication model.
  *
- * Generates records for equipment loan applications, handling all relationships,
- * audit columns, and soft-delete fields as per migration/model/seeder.
+ * - Uses static caches for related User IDs to minimize repeated DB queries.
+ * - Does NOT create related models in definition() (ensures performant batch seeding).
+ * - All foreign keys can be passed via state; otherwise, chosen randomly from existing records.
+ * - Use with seeder that ensures users exist before creating loan applications.
  */
 class LoanApplicationFactory extends Factory
 {
@@ -20,42 +22,47 @@ class LoanApplicationFactory extends Factory
 
     public function definition(): array
     {
-        // Use Malaysian locale for more realistic data
-        $msFaker = \Faker\Factory::create('ms_MY');
+        // Static cache for User IDs (applicants and officers)
+        static $userIds;
+        if (!isset($userIds)) {
+            $userIds = User::pluck('id')->all();
+        }
+        $userId = !empty($userIds) ? Arr::random($userIds) : null;
+        $officerId = !empty($userIds) ? Arr::random($userIds) : null;
 
-        // Find or create users for applicant and responsible officer
-        $applicant = User::inRandomOrder()->first() ?? User::factory()->create(['name' => 'Applicant (LoanApplicationFactory)']);
-        $responsibleOfficer = User::inRandomOrder()->first() ?? User::factory()->create(['name' => 'Officer (LoanApplicationFactory)']);
+        // Use a static Malaysian faker for realism and speed
+        static $msFaker;
+        if (!$msFaker) {
+            $msFaker = \Faker\Factory::create('ms_MY');
+        }
 
-        // Date logic: application, loan period, and approval
+        // Date logic
         $applicationDate = Carbon::parse($this->faker->dateTimeBetween('-6 months', 'now'));
         $loanStartDate = (clone $applicationDate)->addDays($this->faker->numberBetween(1, 10));
         $loanEndDate = (clone $loanStartDate)->addDays($this->faker->numberBetween(3, 14));
         $approvalDate = (clone $applicationDate)->addDays($this->faker->numberBetween(0, 5));
 
-        // Application status - pick from model constants
-        $statuses = method_exists(LoanApplication::class, 'getStatusOptions')
-            ? array_keys(LoanApplication::getStatusOptions())
-            : [
-                LoanApplication::STATUS_DRAFT ?? 'draft',
-                LoanApplication::STATUS_PROCESSING ?? 'processing',
-                LoanApplication::STATUS_PENDING_SUPPORT ?? 'pending_support',
-                LoanApplication::STATUS_PENDING_APPROVER_REVIEW ?? 'pending_approver_review',
-                LoanApplication::STATUS_PENDING_BPM_REVIEW ?? 'pending_bpm_review',
-                LoanApplication::STATUS_APPROVED ?? 'approved',
-                LoanApplication::STATUS_REJECTED ?? 'rejected',
-                LoanApplication::STATUS_PARTIALLY_ISSUED ?? 'partially_issued',
-                LoanApplication::STATUS_ISSUED ?? 'issued',
-                LoanApplication::STATUS_RETURNED ?? 'returned',
-                LoanApplication::STATUS_OVERDUE ?? 'overdue',
-                LoanApplication::STATUS_CANCELLED ?? 'cancelled',
-                LoanApplication::STATUS_PARTIALLY_RETURNED_PENDING_INSPECTION ?? 'partially_returned_pending_inspection',
-                LoanApplication::STATUS_COMPLETED ?? 'completed',
-            ];
+        // Status options (fallback to string if constants missing)
+        $statuses = [
+            LoanApplication::STATUS_DRAFT ?? 'draft',
+            LoanApplication::STATUS_PROCESSING ?? 'processing',
+            LoanApplication::STATUS_PENDING_SUPPORT ?? 'pending_support',
+            LoanApplication::STATUS_PENDING_APPROVER_REVIEW ?? 'pending_approver_review',
+            LoanApplication::STATUS_PENDING_BPM_REVIEW ?? 'pending_bpm_review',
+            LoanApplication::STATUS_APPROVED ?? 'approved',
+            LoanApplication::STATUS_REJECTED ?? 'rejected',
+            LoanApplication::STATUS_PARTIALLY_ISSUED ?? 'partially_issued',
+            LoanApplication::STATUS_ISSUED ?? 'issued',
+            LoanApplication::STATUS_RETURNED ?? 'returned',
+            LoanApplication::STATUS_OVERDUE ?? 'overdue',
+            LoanApplication::STATUS_CANCELLED ?? 'cancelled',
+            LoanApplication::STATUS_PARTIALLY_RETURNED_PENDING_INSPECTION ?? 'partially_returned_pending_inspection',
+            LoanApplication::STATUS_COMPLETED ?? 'completed',
+        ];
         $status = $this->faker->randomElement($statuses);
 
         // For audit columns (created_by, updated_by, etc.)
-        $auditUserId = $applicant->id;
+        $auditUserId = $userId;
         $isDeleted = $this->faker->boolean(2); // ~2% soft deleted
         $deletedAt = $isDeleted ? Carbon::parse($this->faker->dateTimeBetween($loanEndDate, 'now')) : null;
 
@@ -68,8 +75,8 @@ class LoanApplicationFactory extends Factory
         ]);
 
         return [
-            'user_id'                => $applicant->id,
-            'responsible_officer_id' => $responsibleOfficer->id,
+            'user_id'                => $userId,
+            'responsible_officer_id' => $officerId,
             'supporting_officer_id'  => null, // Optional, can be filled if needed
             'purpose'                => $msFaker->sentence(8), // Reason for application
             'location'               => $msFaker->city,
@@ -234,6 +241,7 @@ class LoanApplicationFactory extends Factory
     public function withItems(int $count = 1): static
     {
         return $this->afterCreating(function (LoanApplication $application) use ($count) {
+            // Ensure related LoanApplicationItemFactory is optimized for bulk if needed
             \App\Models\LoanApplicationItem::factory()
                 ->count($count)
                 ->forLoanApplication($application)

@@ -11,10 +11,12 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Arr;
 
 /**
- * Factory for the LoanTransactionItem model.
+ * Optimized Factory for LoanTransactionItem model.
  *
- * Generates transaction items representing a specific equipment's participation in a loan transaction.
- * Handles all relationships, audit fields, and soft-deletes based on the schema and model.
+ * - Uses static caches for related model IDs to minimize repeated DB queries.
+ * - Does NOT create related models in definition() (assumes dependencies seeded first).
+ * - Foreign keys can be passed via state; otherwise, chosen randomly from existing records.
+ * - Use with seeders that ensure all referenced models exist before creating transaction items.
  */
 class LoanTransactionItemFactory extends Factory
 {
@@ -22,92 +24,81 @@ class LoanTransactionItemFactory extends Factory
 
     public function definition(): array
     {
-        // Malaysian locale for realistic notes
-        $msFaker = \Faker\Factory::create('ms_MY');
+        // Static caches for related model IDs to reduce DB queries
+        static $transactionIds, $equipmentIds, $loanAppItemIds, $userIds;
 
-        // Find or create a transaction (issue/return)
-        $loanTransaction = LoanTransaction::inRandomOrder()->first() ?? LoanTransaction::factory()->create();
-
-        // Find or create a suitable equipment (preferably available)
-        $equipment = Equipment::where('status', Equipment::STATUS_AVAILABLE)
-            ->inRandomOrder()->first() ?? Equipment::factory()->available()->create();
-
-        // Find or create a related loan application item if possible
-        $loanApplicationItemId = null;
-        if ($loanTransaction->loanApplication) {
-            $appItem = $loanTransaction->loanApplication
-                ->loanApplicationItems()
-                ->where('equipment_type', $equipment->asset_type)
-                ->inRandomOrder()
-                ->first();
-            $loanApplicationItemId = $appItem?->id;
-
-            if (!$loanApplicationItemId && $loanTransaction->loanApplication->loanApplicationItems()->count() > 0) {
-                $loanApplicationItemId = $loanTransaction->loanApplication->loanApplicationItems()->inRandomOrder()->first()?->id;
-            }
+        if (!isset($transactionIds)) {
+            $transactionIds = LoanTransaction::pluck('id')->all();
+        }
+        if (!isset($equipmentIds)) {
+            $equipmentIds = Equipment::pluck('id')->all();
+        }
+        if (!isset($loanAppItemIds)) {
+            $loanAppItemIds = LoanApplicationItem::pluck('id')->all();
+        }
+        if (!isset($userIds)) {
+            $userIds = User::pluck('id')->all();
         }
 
-        // Get all possible statuses from the model
-        $itemStatuses = method_exists(LoanTransactionItem::class, 'getStatusesList')
-            ? LoanTransactionItem::getStatusesList()
-            : [
-                LoanTransactionItem::STATUS_ITEM_ISSUED,
-                LoanTransactionItem::STATUS_ITEM_RETURNED_GOOD,
-                LoanTransactionItem::STATUS_ITEM_RETURNED_MINOR_DAMAGE,
-                LoanTransactionItem::STATUS_ITEM_RETURNED_MAJOR_DAMAGE,
-            ];
+        // Pick random related IDs or null if none exist
+        $loanTransactionId = !empty($transactionIds) ? Arr::random($transactionIds) : null;
+        $equipmentId = !empty($equipmentIds) ? Arr::random($equipmentIds) : null;
+        $loanAppItemId = !empty($loanAppItemIds) ? Arr::random($loanAppItemIds) : null;
+        $auditUserId = !empty($userIds) ? Arr::random($userIds) : null;
+
+        // Status options from model constants (fallback if not defined)
+        $itemStatuses = [
+            LoanTransactionItem::STATUS_ITEM_ISSUED ?? 'issued',
+            LoanTransactionItem::STATUS_ITEM_RETURNED_GOOD ?? 'returned_good',
+            LoanTransactionItem::STATUS_ITEM_RETURNED_MINOR_DAMAGE ?? 'returned_minor_damage',
+            LoanTransactionItem::STATUS_ITEM_RETURNED_MAJOR_DAMAGE ?? 'returned_major_damage',
+            LoanTransactionItem::STATUS_ITEM_UNSERVICEABLE_ON_RETURN ?? 'unserviceable_on_return',
+        ];
         $chosenStatus = $this->faker->randomElement($itemStatuses);
 
-        // Accessories for issue/return
+        // Accessories config (can be set via config or fallback)
         $accessories = config('motac.loan_accessories_list', ['Adapter Kuasa', 'Tetikus', 'Beg Komputer Riba']);
-        $conditionOnReturn = null;
-        $accessoriesIssue = null;
-        $accessoriesReturn = null;
 
-        // Set fields depending on transaction type (issue or return)
-        if ($loanTransaction->type === LoanTransaction::TYPE_ISSUE) {
-            $chosenStatus = LoanTransactionItem::STATUS_ITEM_ISSUED;
-            $accessoriesIssue = $this->faker->randomElements($accessories, $this->faker->numberBetween(0, 3));
-        } elseif ($loanTransaction->type === LoanTransaction::TYPE_RETURN) {
-            $accessoriesReturn = $this->faker->randomElements($accessories, $this->faker->numberBetween(0, 3));
-            // Set a reasonable return condition if status indicates a return
-            switch ($chosenStatus) {
-                case LoanTransactionItem::STATUS_ITEM_RETURNED_GOOD:
-                    $conditionOnReturn = Equipment::CONDITION_GOOD;
-                    break;
-                case LoanTransactionItem::STATUS_ITEM_RETURNED_MINOR_DAMAGE:
-                    $conditionOnReturn = Equipment::CONDITION_MINOR_DAMAGE;
-                    break;
-                case LoanTransactionItem::STATUS_ITEM_RETURNED_MAJOR_DAMAGE:
-                    $conditionOnReturn = Equipment::CONDITION_MAJOR_DAMAGE;
-                    break;
-                case LoanTransactionItem::STATUS_ITEM_UNSERVICEABLE_ON_RETURN:
-                    $conditionOnReturn = Equipment::CONDITION_UNSERVICEABLE;
-                    break;
-                default:
-                    $conditionOnReturn = null;
-            }
+        // Determine condition on return if status is a return-type
+        $conditionOnReturn = null;
+        if ($chosenStatus === LoanTransactionItem::STATUS_ITEM_RETURNED_GOOD ?? 'returned_good') {
+            $conditionOnReturn = Equipment::CONDITION_GOOD ?? 'good';
+        } elseif ($chosenStatus === LoanTransactionItem::STATUS_ITEM_RETURNED_MINOR_DAMAGE ?? 'returned_minor_damage') {
+            $conditionOnReturn = Equipment::CONDITION_MINOR_DAMAGE ?? 'minor_damage';
+        } elseif ($chosenStatus === LoanTransactionItem::STATUS_ITEM_RETURNED_MAJOR_DAMAGE ?? 'returned_major_damage') {
+            $conditionOnReturn = Equipment::CONDITION_MAJOR_DAMAGE ?? 'major_damage';
+        } elseif ($chosenStatus === LoanTransactionItem::STATUS_ITEM_UNSERVICEABLE_ON_RETURN ?? 'unserviceable_on_return') {
+            $conditionOnReturn = Equipment::CONDITION_UNSERVICEABLE ?? 'unserviceable';
         }
 
-        // For blameable columns
-        $auditUserId = User::inRandomOrder()->value('id') ?? User::factory()->create(['name' => 'Audit User (LoanTransactionItemFactory)'])->id;
+        // Use Malaysian faker for notes
+        static $msFaker;
+        if (!$msFaker) {
+            $msFaker = \Faker\Factory::create('ms_MY');
+        }
+
+        // Timestamps
+        $createdAt = $this->faker->dateTimeBetween('-1 year', 'now');
+        $updatedAt = $this->faker->dateTimeBetween($createdAt, 'now');
+        $isDeleted = $this->faker->boolean(2); // ~2% soft deleted
+        $deletedAt = $isDeleted ? $this->faker->dateTimeBetween($updatedAt, 'now') : null;
 
         return [
-            'loan_transaction_id'         => $loanTransaction->id,
-            'equipment_id'                => $equipment->id,
-            'loan_application_item_id'    => $loanApplicationItemId,
+            'loan_transaction_id'         => $loanTransactionId,
+            'equipment_id'                => $equipmentId,
+            'loan_application_item_id'    => $loanAppItemId,
             'quantity_transacted'         => 1,
             'status'                      => $chosenStatus,
             'condition_on_return'         => $conditionOnReturn,
-            'accessories_checklist_issue' => $accessoriesIssue,
-            'accessories_checklist_return'=> $accessoriesReturn,
+            'accessories_checklist_issue' => $this->faker->randomElements($accessories, $this->faker->numberBetween(1, 3)),
+            'accessories_checklist_return'=> $this->faker->randomElements($accessories, $this->faker->numberBetween(0, 3)),
             'item_notes'                  => $msFaker->optional(0.2)->sentence,
             'created_by'                  => $auditUserId,
             'updated_by'                  => $auditUserId,
-            'deleted_by'                  => null,
-            'created_at'                  => now(),
-            'updated_at'                  => now(),
-            'deleted_at'                  => null,
+            'deleted_by'                  => $isDeleted ? $auditUserId : null,
+            'created_at'                  => $createdAt,
+            'updated_at'                  => $updatedAt,
+            'deleted_at'                  => $deletedAt,
         ];
     }
 
@@ -118,7 +109,7 @@ class LoanTransactionItemFactory extends Factory
     {
         $accessories = config('motac.loan_accessories_list', ['Adapter Kuasa', 'Tetikus', 'Beg Komputer Riba']);
         return $this->state([
-            'status' => LoanTransactionItem::STATUS_ITEM_ISSUED,
+            'status' => LoanTransactionItem::STATUS_ITEM_ISSUED ?? 'issued',
             'condition_on_return' => null,
             'accessories_checklist_issue' => $this->faker->randomElements($accessories, $this->faker->numberBetween(1, 3)),
             'accessories_checklist_return' => null,
@@ -133,8 +124,8 @@ class LoanTransactionItemFactory extends Factory
         $accessories = config('motac.loan_accessories_list', ['Adapter Kuasa', 'Tetikus', 'Beg Komputer Riba']);
         return $this->state(function (array $attributes) use ($accessories) {
             return [
-                'status' => LoanTransactionItem::STATUS_ITEM_RETURNED_GOOD,
-                'condition_on_return' => Equipment::CONDITION_GOOD,
+                'status' => LoanTransactionItem::STATUS_ITEM_RETURNED_GOOD ?? 'returned_good',
+                'condition_on_return' => Equipment::CONDITION_GOOD ?? 'good',
                 'accessories_checklist_return' => $attributes['accessories_checklist_issue'] ?? $this->faker->randomElements($accessories, $this->faker->numberBetween(1, 3)),
             ];
         });
@@ -145,17 +136,24 @@ class LoanTransactionItemFactory extends Factory
      */
     public function returnedDamaged(): static
     {
-        $msFaker = \Faker\Factory::create('ms_MY');
         $accessories = config('motac.loan_accessories_list', ['Adapter Kuasa', 'Tetikus', 'Beg Komputer Riba']);
-        $damageConditions = [Equipment::CONDITION_MINOR_DAMAGE, Equipment::CONDITION_MAJOR_DAMAGE];
-        $itemDamageStatuses = [
-            LoanTransactionItem::STATUS_ITEM_RETURNED_MINOR_DAMAGE,
-            LoanTransactionItem::STATUS_ITEM_RETURNED_MAJOR_DAMAGE,
-            LoanTransactionItem::STATUS_ITEM_UNSERVICEABLE_ON_RETURN,
+        $damageStatuses = [
+            LoanTransactionItem::STATUS_ITEM_RETURNED_MINOR_DAMAGE ?? 'returned_minor_damage',
+            LoanTransactionItem::STATUS_ITEM_RETURNED_MAJOR_DAMAGE ?? 'returned_major_damage',
+            LoanTransactionItem::STATUS_ITEM_UNSERVICEABLE_ON_RETURN ?? 'unserviceable_on_return',
         ];
-        return $this->state(function (array $attributes) use ($msFaker, $accessories, $damageConditions, $itemDamageStatuses) {
+        $damageConditions = [
+            Equipment::CONDITION_MINOR_DAMAGE ?? 'minor_damage',
+            Equipment::CONDITION_MAJOR_DAMAGE ?? 'major_damage',
+            Equipment::CONDITION_UNSERVICEABLE ?? 'unserviceable',
+        ];
+        static $msFaker;
+        if (!$msFaker) {
+            $msFaker = \Faker\Factory::create('ms_MY');
+        }
+        return $this->state(function (array $attributes) use ($msFaker, $accessories, $damageStatuses, $damageConditions) {
             return [
-                'status' => Arr::random($itemDamageStatuses),
+                'status' => Arr::random($damageStatuses),
                 'condition_on_return' => Arr::random($damageConditions),
                 'item_notes' => $attributes['item_notes'] ?? $msFaker->sentence,
                 'accessories_checklist_return' => $this->faker->randomElements($accessories, $this->faker->numberBetween(0, 2)),
@@ -198,7 +196,11 @@ class LoanTransactionItemFactory extends Factory
      */
     public function deleted(): static
     {
-        $deleterId = User::inRandomOrder()->value('id') ?? User::factory()->create(['name' => 'Deleter User (LoanTransactionItemFactory)'])->id;
+        static $userIds;
+        if (!isset($userIds)) {
+            $userIds = User::pluck('id')->all();
+        }
+        $deleterId = !empty($userIds) ? Arr::random($userIds) : null;
         return $this->state([
             'deleted_at' => now(),
             'deleted_by' => $deleterId,

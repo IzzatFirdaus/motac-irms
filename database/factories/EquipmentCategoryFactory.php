@@ -5,13 +5,16 @@ namespace Database\Factories;
 use App\Models\EquipmentCategory;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 
 /**
- * Factory for EquipmentCategory.
+ * Optimized Factory for EquipmentCategory.
  *
- * Generates fake categories for ICT equipment, ensuring all required fields
- * (including blameable/audit fields) are present and values are valid according to migration/model.
+ * - Uses static caches for related User IDs to reduce repeated DB queries.
+ * - Does NOT create related models in definition() (ensures performant batch seeding).
+ * - All foreign keys can be passed via state; otherwise, chosen randomly from existing records.
+ * - Use with seeder that ensures users exist before creating equipment categories.
  */
 class EquipmentCategoryFactory extends Factory
 {
@@ -19,32 +22,47 @@ class EquipmentCategoryFactory extends Factory
 
     public function definition(): array
     {
-        // Use Malaysian locale for more realistic data
-        $msFaker = \Faker\Factory::create('ms_MY');
+        // Static cache for User IDs (for blameable columns)
+        static $userIds;
+        if (!isset($userIds)) {
+            $userIds = User::pluck('id')->all();
+        }
 
-        // Find or create an audit user for created_by/updated_by fields
-        $auditUser = User::orderBy('id')->first() ?? User::factory()->create(['name' => 'Default Audit User (EqCatFactory)']);
-        $auditUserId = $auditUser->id;
+        // Pick random user IDs or null if none exist
+        $auditUserId = !empty($userIds) ? Arr::random($userIds) : null;
+
+        // Use a static Malaysian faker for realism and speed
+        static $msFaker;
+        if (!$msFaker) {
+            $msFaker = \Faker\Factory::create('ms_MY');
+        }
 
         $createdAt = Carbon::parse($this->faker->dateTimeBetween('-2 years', 'now'));
         $updatedAt = Carbon::parse($this->faker->dateTimeBetween($createdAt, 'now'));
+        $isDeleted = $this->faker->boolean(2); // ~2% soft deleted for variety
+        $deletedAt = $isDeleted ? Carbon::parse($this->faker->dateTimeBetween($updatedAt, 'now')) : null;
+
+        // Use a pool of common ICT equipment category names for realism
+        $categoryNames = [
+            'Komputer Riba', 'Projektor LCD', 'Pencetak', 'Peralatan Rangkaian',
+            'Peranti Input/Output', 'Storan Mudah Alih', 'Komputer Meja', 'Peralatan ICT Lain'
+        ];
 
         return [
-            // Category name in Malay, 2-4 words with suffix
-            'name' => $msFaker->unique()->words(mt_rand(2, 4), true).' Kategori',
-            'description' => $msFaker->optional(0.8)->sentence,
+            'name' => $this->faker->unique()->randomElement($categoryNames) . ' ' . $this->faker->unique()->word(),
+            'description' => $msFaker->optional(0.8)->sentence(),
             'is_active' => $this->faker->boolean(90),
             'created_by' => $auditUserId,
             'updated_by' => $auditUserId,
-            'deleted_by' => null,
+            'deleted_by' => $isDeleted ? $auditUserId : null,
             'created_at' => $createdAt,
             'updated_at' => $updatedAt,
-            'deleted_at' => null,
+            'deleted_at' => $deletedAt,
         ];
     }
 
     /**
-     * Mark the category as active.
+     * State: Mark the category as active.
      */
     public function active(): static
     {
@@ -52,7 +70,7 @@ class EquipmentCategoryFactory extends Factory
     }
 
     /**
-     * Mark the category as inactive.
+     * State: Mark the category as inactive.
      */
     public function inactive(): static
     {
@@ -60,15 +78,18 @@ class EquipmentCategoryFactory extends Factory
     }
 
     /**
-     * Mark the category as soft deleted.
+     * State: Mark the category as soft deleted.
      */
     public function deleted(): static
     {
-        $deleter = User::orderBy('id')->first() ?? User::factory()->create(['name' => 'Deleter User Fallback (EqCatFactory)']);
-
-        return $this->state(fn (array $attributes): array => [
+        static $userIds;
+        if (!isset($userIds)) {
+            $userIds = User::pluck('id')->all();
+        }
+        $deleterId = !empty($userIds) ? Arr::random($userIds) : null;
+        return $this->state([
             'deleted_at' => now(),
-            'deleted_by' => $attributes['deleted_by'] ?? $deleter->id,
+            'deleted_by' => $deleterId,
         ]);
     }
 }

@@ -5,15 +5,16 @@ namespace Database\Factories;
 use App\Models\Grade;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 
 /**
- * Factory for Grade (Gred Perkhidmatan).
+ * Optimized Factory for Grade (Gred Perkhidmatan).
  *
- * Generates realistic job grades for the HR system.
- * Ensures unique level/name combinations and sets audit fields if available.
- * This follows the migration (2013_11_01_131900_create_grades_table.php),
- * and is compatible with the seeder logic and model structure.
+ * - Uses static cache for User IDs to minimize repeated queries.
+ * - Does NOT create related models in definition().
+ * - All foreign keys should be provided via state or will be randomly selected from existing records.
+ * - Suitable for batch seeding with minimal DB overhead.
  */
 class GradeFactory extends Factory
 {
@@ -21,8 +22,18 @@ class GradeFactory extends Factory
 
     public function definition(): array
     {
-        // Use a Malaysian locale for more relevant names
-        $msFaker = \Faker\Factory::create('ms_MY');
+        // Static cache for User IDs (for blameable columns)
+        static $userIds;
+        if (!isset($userIds)) {
+            $userIds = User::pluck('id')->all();
+        }
+        $auditUserId = !empty($userIds) ? Arr::random($userIds) : null;
+
+        // Static Malaysian faker for realism and speed
+        static $msFaker;
+        if (!$msFaker) {
+            $msFaker = \Faker\Factory::create('ms_MY');
+        }
 
         // Generate a unique numeric level (1-70 typical for Malaysian civil service)
         $level = $this->faker->unique()->numberBetween(1, 70);
@@ -33,17 +44,17 @@ class GradeFactory extends Factory
         } elseif ($level >= 68) {
             $name = 'Timbalan Menteri (Ujian)';
         } elseif ($level >= 66) {
-            $name = 'TURUS I ('.$level.')';
+            $name = 'TURUS I (' . $level . ')';
         } elseif ($level >= 64) {
-            $name = 'TURUS II ('.$level.')';
+            $name = 'TURUS II (' . $level . ')';
         } elseif ($level >= 62) {
-            $name = 'TURUS III ('.$level.')';
+            $name = 'TURUS III (' . $level . ')';
         } elseif ($level >= 60) {
-            $name = 'JUSA A ('.$level.')';
+            $name = 'JUSA A (' . $level . ')';
         } elseif ($level >= 58) {
-            $name = 'JUSA B ('.$level.')';
+            $name = 'JUSA B (' . $level . ')';
         } elseif ($level >= 56) {
-            $name = 'JUSA C ('.$level.')';
+            $name = 'JUSA C (' . $level . ')';
         } elseif ($level >= 41) {
             // P&P grades like N41, F41, etc.
             $prefix = $this->faker->randomElement(['N', 'F', 'M', 'E', 'W', 'S', 'J', 'DG']);
@@ -54,9 +65,6 @@ class GradeFactory extends Factory
             $name = $prefix . $level;
         }
 
-        // Randomly assign a user for audit columns if available
-        $auditUserId = User::inRandomOrder()->first()?->id;
-
         $createdAt = Carbon::parse($this->faker->dateTimeBetween('-5 years', 'now'));
         $updatedAt = Carbon::parse($this->faker->dateTimeBetween($createdAt, 'now'));
         $isDeleted = $this->faker->boolean(2); // ~2% soft-deleted for tests
@@ -65,7 +73,7 @@ class GradeFactory extends Factory
         return [
             'name' => $name,
             'level' => $level,
-            'min_approval_grade_id' => null, // Set via policy/seeder logic
+            'min_approval_grade_id' => null, // Set via policy/seeder logic if needed
             'is_approver_grade' => $level >= 41, // Typical threshold for approval (P&P and above)
             'description' => $msFaker->optional(0.5)->sentence(),
             'service_scheme' => $this->faker->optional(0.5)->randomElement(['Perkhidmatan Awam', 'Perkhidmatan Pendidikan', 'Perkhidmatan Sokongan']),
@@ -115,10 +123,14 @@ class GradeFactory extends Factory
      */
     public function deleted(): static
     {
-        $auditUserId = User::inRandomOrder()->first()?->id;
-        return $this->state(fn (array $attributes): array => [
+        static $userIds;
+        if (!isset($userIds)) {
+            $userIds = User::pluck('id')->all();
+        }
+        $deleterId = !empty($userIds) ? Arr::random($userIds) : null;
+        return $this->state(fn(array $attributes): array => [
             'deleted_at' => now(),
-            'deleted_by' => $auditUserId,
+            'deleted_by' => $deleterId,
         ]);
     }
 }

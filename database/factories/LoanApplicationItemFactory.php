@@ -7,14 +7,16 @@ use App\Models\LoanApplication;
 use App\Models\LoanApplicationItem;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 
 /**
- * Factory for the LoanApplicationItem model.
+ * Optimized Factory for LoanApplicationItem model.
  *
- * Generates records representing individual equipment requests within a loan application.
- * Handles all relationships, audit fields, and soft-delete columns as per migration/model.
- *
- * NOTE: Uses 'notes' field, matching the model and migration schema.
+ * - Uses static caches for related IDs to reduce DB queries on batch seeding.
+ * - NEVER creates related models in definition().
+ * - All foreign keys can be passed via state; otherwise, chosen randomly from existing records.
+ * - Use with a seeder that ensures all referenced models exist before creating items.
  */
 class LoanApplicationItemFactory extends Factory
 {
@@ -22,42 +24,54 @@ class LoanApplicationItemFactory extends Factory
 
     public function definition(): array
     {
-        // Use Malaysian locale for more realistic values
-        $msFaker = \Faker\Factory::create('ms_MY');
+        // Static cache for LoanApplication IDs
+        static $loanApplicationIds;
+        if (!isset($loanApplicationIds)) {
+            $loanApplicationIds = LoanApplication::pluck('id')->all();
+        }
+        $loanApplicationId = $loanApplicationIds ? Arr::random($loanApplicationIds) : null;
 
-        // Find or create a loan application for this item
-        $loanApplicationId = LoanApplication::inRandomOrder()->value('id') ?? LoanApplication::factory()->create()->id;
+        // Static cache for User IDs for audit fields
+        static $userIds;
+        if (!isset($userIds)) {
+            $userIds = User::pluck('id')->all();
+        }
+        $auditUserId = $userIds ? Arr::random($userIds) : null;
 
-        // Pick a unique asset type from available equipment, or use a fallback
-        $assetTypes = Equipment::query()->distinct()->pluck('asset_type')->all();
+        // Static cache for available equipment types (asset_type column)
+        static $assetTypes;
+        if (!isset($assetTypes)) {
+            $assetTypes = Equipment::query()->distinct()->pluck('asset_type')->all();
+        }
         $equipmentType = !empty($assetTypes)
-            ? $this->faker->randomElement($assetTypes)
+            ? Arr::random($assetTypes)
             : $this->faker->randomElement(['laptop', 'projector', 'printer', 'monitor', 'tablet', 'desktop']);
 
-        // Quantity requested and approved
+        // Quantity logic
         $quantityRequested = $this->faker->numberBetween(1, 5);
         $quantityApproved = $this->faker->numberBetween(0, $quantityRequested); // Sometimes not fully approved
 
-        // For audit columns (created_by, updated_by, etc.)
-        $auditUserId = User::inRandomOrder()->value('id') ?? User::factory()->create(['name' => 'Audit User (LoanApplicationItemFactory)'])->id;
-
-        // Timestamps for creation/update/soft-delete
-        $createdAt = $this->faker->dateTimeBetween('-1 year', 'now');
-        $updatedAt = $this->faker->dateTimeBetween($createdAt, 'now');
+        // Timestamp logic
+        $createdAt = Carbon::parse($this->faker->dateTimeBetween('-1 year', 'now'));
+        $updatedAt = Carbon::parse($this->faker->dateTimeBetween($createdAt, 'now'));
         $isDeleted = $this->faker->boolean(2); // ~2% soft deleted
-        $deletedAt = $isDeleted ? $this->faker->dateTimeBetween($updatedAt, 'now') : null;
+        $deletedAt = $isDeleted ? Carbon::parse($this->faker->dateTimeBetween($updatedAt, 'now')) : null;
+
+        // Use a static Malaysian faker for notes
+        static $msFaker;
+        if (!$msFaker) {
+            $msFaker = \Faker\Factory::create('ms_MY');
+        }
 
         return [
             'loan_application_id' => $loanApplicationId,
             'equipment_type'      => $equipmentType,
             'quantity_requested'  => $quantityRequested,
             'quantity_approved'   => $quantityApproved,
-            // Use 'notes' field, not 'item_notes'
             'notes'               => $msFaker->optional(0.15)->sentence(8),
             'status'              => LoanApplicationItem::STATUS_PENDING_APPROVAL,
             'quantity_issued'     => 0,
             'quantity_returned'   => 0,
-            // Blameable columns
             'created_by'          => $auditUserId,
             'updated_by'          => $auditUserId,
             'deleted_by'          => $isDeleted ? $auditUserId : null,
@@ -104,7 +118,12 @@ class LoanApplicationItemFactory extends Factory
      */
     public function deleted(): static
     {
-        $deleterId = User::inRandomOrder()->value('id') ?? User::factory()->create(['name' => 'Deleter User (LoanApplicationItemFactory)'])->id;
+        static $userIds;
+        if (!isset($userIds)) {
+            $userIds = User::pluck('id')->all();
+        }
+        $deleterId = $userIds ? Arr::random($userIds) : null;
+
         return $this->state([
             'deleted_at' => now(),
             'deleted_by' => $deleterId,

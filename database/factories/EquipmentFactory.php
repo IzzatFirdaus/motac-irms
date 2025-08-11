@@ -9,15 +9,17 @@ use App\Models\Location;
 use App\Models\SubCategory;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 /**
- * Factory for Equipment model.
+ * Optimized Factory for Equipment model.
  *
- * Generates fake ICT asset records, linking to valid categories, subcategories,
- * departments, and locations. Ensures all required fields and foreign keys are set,
- * matching the migration and model structure.
+ * - Uses static caches for related model IDs (User, Department, EquipmentCategory, SubCategory, Location).
+ * - Does NOT create related models in definition() (ensures performant batch seeding).
+ * - All foreign keys can be passed via state; otherwise, chosen randomly from existing records.
+ * - Use with seeder that ensures all referenced data exists before seeding equipment.
  */
 class EquipmentFactory extends Factory
 {
@@ -25,46 +27,51 @@ class EquipmentFactory extends Factory
 
     public function definition(): array
     {
-        // Use Malaysian locale for more realistic data
-        $msFaker = \Faker\Factory::create('ms_MY');
-
-        // Find or create users for blameable fields
-        $auditUserId = User::inRandomOrder()->value('id') ?? User::factory()->create(['name' => 'Audit User (EquipmentFactory)'])->id;
-
-        // Get or create related equipment category
-        $equipmentCategoryId = EquipmentCategory::inRandomOrder()->value('id')
-            ?? EquipmentCategory::factory()->create(['created_by' => $auditUserId, 'updated_by' => $auditUserId])->id;
-
-        // Get or create related subcategory for the chosen category
-        $subCategoryId = SubCategory::where('equipment_category_id', $equipmentCategoryId)->inRandomOrder()->value('id');
-        if (!$subCategoryId) {
-            $subCategoryId = SubCategory::factory()->create([
-                'equipment_category_id' => $equipmentCategoryId,
-                'created_by' => $auditUserId,
-                'updated_by' => $auditUserId,
-            ])->id;
+        // Cache related IDs for performance (static array persists across calls)
+        static $userIds, $departmentIds, $equipmentCategoryIds, $subCategoryIdsByCat, $locationIds;
+        if (!isset($userIds)) {
+            $userIds = User::pluck('id')->all();
+        }
+        if (!isset($departmentIds)) {
+            $departmentIds = Department::pluck('id')->all();
+        }
+        if (!isset($equipmentCategoryIds)) {
+            $equipmentCategoryIds = EquipmentCategory::pluck('id')->all();
+        }
+        if (!isset($locationIds)) {
+            $locationIds = Location::pluck('id')->all();
+        }
+        if (!isset($subCategoryIdsByCat)) {
+            // Map EquipmentCategory ID => array of SubCategory IDs
+            $subCategoryIdsByCat = [];
+            foreach (SubCategory::all() as $subCat) {
+                $subCategoryIdsByCat[$subCat->equipment_category_id][] = $subCat->id;
+            }
         }
 
-        // Get or create location
-        $locationId = Location::inRandomOrder()->value('id')
-            ?? Location::factory()->create([
-                'created_by' => $auditUserId,
-                'updated_by' => $auditUserId,
-            ])->id;
+        // Choose random IDs from cached arrays (or null if not available)
+        $auditUserId = !empty($userIds) ? Arr::random($userIds) : null;
+        $departmentId = !empty($departmentIds) ? Arr::random($departmentIds) : null;
+        $equipmentCategoryId = !empty($equipmentCategoryIds) ? Arr::random($equipmentCategoryIds) : null;
+        $locationId = !empty($locationIds) ? Arr::random($locationIds) : null;
 
-        // Get or create department
-        $departmentId = Department::inRandomOrder()->value('id')
-            ?? Department::factory()->create([
-                'created_by' => $auditUserId,
-                'updated_by' => $auditUserId,
-            ])->id;
+        // Pick a subcategory belonging to the selected equipment category
+        $subCategoryId = null;
+        if ($equipmentCategoryId && !empty($subCategoryIdsByCat[$equipmentCategoryId])) {
+            $subCategoryId = Arr::random($subCategoryIdsByCat[$equipmentCategoryId]);
+        }
 
-        // Generate purchase date and warranty expiry
+        // Use static Faker for ms_MY locale
+        static $msFaker;
+        if (!$msFaker) {
+            $msFaker = \Faker\Factory::create('ms_MY');
+        }
+
+        // Generate dates
         $purchaseDateRaw = $this->faker->optional(0.8)->dateTimeBetween('-5 years', '-3 months');
         $purchaseDate = $purchaseDateRaw ? Carbon::instance($purchaseDateRaw) : null;
         $warrantyExpiryDate = $purchaseDate ? $purchaseDate->copy()->addYears($this->faker->numberBetween(1, 3)) : null;
 
-        // Generate created/updated timestamps
         $createdAt = $purchaseDate ?? Carbon::parse($this->faker->dateTimeThisDecade('-2 years'));
         $updatedAt = Carbon::parse($this->faker->dateTimeBetween($createdAt->toDateTimeString(), 'now'));
 
@@ -102,7 +109,7 @@ class EquipmentFactory extends Factory
             Equipment::CONDITION_LOST,
         ]);
 
-        // Generate acquisition and classification type (as string, not enum constants for now)
+        // Acquisition type and classification (as string, not enum constants here)
         $acquisitionType = $this->faker->optional(0.8)->randomElement([
             'purchase', 'lease', 'donation', 'transfer', 'other'
         ]);
@@ -243,9 +250,15 @@ class EquipmentFactory extends Factory
      */
     public function deleted(): static
     {
+        static $userIds;
+        if (!isset($userIds)) {
+            $userIds = User::pluck('id')->all();
+        }
+        $deleterId = !empty($userIds) ? Arr::random($userIds) : null;
         return $this->state([
             'deleted_at' => now(),
             'status' => Equipment::STATUS_DISPOSED,
+            'deleted_by' => $deleterId,
         ]);
     }
 }

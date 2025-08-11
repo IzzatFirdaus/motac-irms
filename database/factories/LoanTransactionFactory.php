@@ -6,14 +6,16 @@ use App\Models\LoanApplication;
 use App\Models\LoanTransaction;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 
 /**
- * Factory for the LoanTransaction model.
+ * Optimized Factory for the LoanTransaction model.
  *
- * Generates loan transaction records (either 'issue' or 'return'),
- * with correct relationships to applications and officers,
- * and with all audit and soft-delete fields as per migration/model.
+ * - Uses static caches for related model IDs to minimize repeated DB queries.
+ * - Does NOT create related models in definition() (ensures performant batch seeding).
+ * - All foreign keys can be passed via state; otherwise, chosen randomly from existing records.
+ * - Use this factory with a seeder that ensures users and loan applications exist before creating loan transactions.
  */
 class LoanTransactionFactory extends Factory
 {
@@ -21,61 +23,61 @@ class LoanTransactionFactory extends Factory
 
     public function definition(): array
     {
-        // Use Malaysian locale for more realistic notes
-        $msFaker = \Faker\Factory::create('ms_MY');
+        // Static caches to minimize DB queries for related IDs
+        static $loanApplicationIds;
+        static $userIds;
+        if (!isset($loanApplicationIds)) {
+            $loanApplicationIds = LoanApplication::pluck('id')->all();
+        }
+        if (!isset($userIds)) {
+            $userIds = User::pluck('id')->all();
+        }
 
-        // Find or create a loan application to associate with this transaction
-        $loanApplicationId = LoanApplication::inRandomOrder()->value('id') ?? LoanApplication::factory()->create()->id;
+        // Pick related IDs or null if none exist (should be ensured by seeder)
+        $loanApplicationId = !empty($loanApplicationIds) ? Arr::random($loanApplicationIds) : null;
+        $officerId = !empty($userIds) ? Arr::random($userIds) : null;
+        $otherOfficerId = !empty($userIds) ? Arr::random($userIds) : null;
 
-        // Officer for audit and transaction responsibility
-        $officerId = User::inRandomOrder()->value('id') ?? User::factory()->create(['name' => 'Officer (LoanTransactionFactory)'])->id;
+        // Use a static Malaysian faker for speed and realism
+        static $msFaker;
+        if (!$msFaker) {
+            $msFaker = \Faker\Factory::create('ms_MY');
+        }
 
-        // Transaction type: either 'issue' or 'return'
+        // Transaction type and relevant fields
         $type = $this->faker->randomElement([
             LoanTransaction::TYPE_ISSUE,
             LoanTransaction::TYPE_RETURN,
         ]);
 
-        // Transaction date: issued sometime in the past year
         $transactionDate = Carbon::parse($this->faker->dateTimeBetween('-1 year', 'now'));
 
-        // Issue/Return specific fields
-        $issueNotes = null;
-        $returnNotes = null;
+        // Fields for issue or return
         $issuingOfficerId = null;
         $receivingOfficerId = null;
+        $issueNotes = null;
         $issueTimestamp = null;
         $returningOfficerId = null;
         $returnAcceptingOfficerId = null;
+        $returnNotes = null;
         $returnTimestamp = null;
-
-        // Accessories arrays for issue/return
         $accessoriesList = config('motac.loan_accessories_list', ['Adapter Kuasa', 'Tetikus', 'Beg Komputer Riba']);
         $accessoriesChecklistOnIssue = null;
         $accessoriesChecklistOnReturn = null;
 
         if ($type === LoanTransaction::TYPE_ISSUE) {
-            // Issue transaction
             $issuingOfficerId = $officerId;
-            $receivingOfficerId = User::inRandomOrder()->value('id') ?? User::factory()->create()->id;
+            $receivingOfficerId = $otherOfficerId;
             $issueNotes = $msFaker->optional(0.3)->sentence(10);
             $issueTimestamp = $transactionDate->copy()->addMinutes($this->faker->numberBetween(0, 120));
             $accessoriesChecklistOnIssue = $this->faker->randomElements($accessoriesList, $this->faker->numberBetween(0, count($accessoriesList)));
         } else {
-            // Return transaction
             $returningOfficerId = $officerId;
-            $returnAcceptingOfficerId = User::inRandomOrder()->value('id') ?? User::factory()->create()->id;
+            $returnAcceptingOfficerId = $otherOfficerId;
             $returnNotes = $msFaker->optional(0.3)->sentence(10);
             $returnTimestamp = $transactionDate->copy()->addMinutes($this->faker->numberBetween(0, 120));
             $accessoriesChecklistOnReturn = $this->faker->randomElements($accessoriesList, $this->faker->numberBetween(0, count($accessoriesList)));
         }
-
-        // Timestamps for creation/update and soft deletes
-        $createdAt = $transactionDate->copy();
-        $updatedAt = Carbon::parse($this->faker->dateTimeBetween($createdAt, 'now'));
-        $isDeleted = $this->faker->boolean(2); // ~2% soft deleted
-        $deletedAt = $isDeleted ? Carbon::parse($this->faker->dateTimeBetween($updatedAt, 'now')) : null;
-        $deletedBy = $isDeleted ? $officerId : null;
 
         // Choose a valid status from migration/model
         $statusOptions = [
@@ -91,9 +93,16 @@ class LoanTransactionFactory extends Factory
             LoanTransaction::STATUS_RETURNED_WITH_LOSS,
             LoanTransaction::STATUS_RETURNED_WITH_DAMAGE_AND_LOSS,
             LoanTransaction::STATUS_PARTIALLY_RETURNED,
-            LoanTransaction::STATUS_RETURNED, // migration has 'returned'
+            LoanTransaction::STATUS_RETURNED,
         ];
         $status = $this->faker->randomElement($statusOptions);
+
+        // Timestamps for creation/update and soft deletes
+        $createdAt = $transactionDate->copy();
+        $updatedAt = Carbon::parse($this->faker->dateTimeBetween($createdAt, 'now'));
+        $isDeleted = $this->faker->boolean(2); // ~2% soft deleted
+        $deletedAt = $isDeleted ? Carbon::parse($this->faker->dateTimeBetween($updatedAt, 'now')) : null;
+        $deletedBy = $isDeleted ? $officerId : null;
 
         return [
             'loan_application_id' => $loanApplicationId,
@@ -109,7 +118,7 @@ class LoanTransactionFactory extends Factory
             'accessories_checklist_on_return' => $accessoriesChecklistOnReturn,
             'return_notes' => $returnNotes,
             'return_timestamp' => $returnTimestamp,
-            'related_transaction_id' => null, // can be set via state
+            'related_transaction_id' => null, // Can be set via state
             'due_date' => $type === LoanTransaction::TYPE_ISSUE ? $transactionDate->copy()->addDays($this->faker->numberBetween(3, 14))->toDateString() : null,
             'status' => $status,
             'created_by' => $officerId,
@@ -123,12 +132,15 @@ class LoanTransactionFactory extends Factory
 
     /**
      * State for an issue transaction.
-     *
-     * Ensures only issue-related fields are set.
      */
     public function asIssue(): static
     {
-        $officerId = User::inRandomOrder()->value('id') ?? User::factory()->create()->id;
+        // Use state to ensure proper type and fields for issue transaction
+        static $userIds;
+        if (!isset($userIds)) {
+            $userIds = User::pluck('id')->all();
+        }
+        $officerId = !empty($userIds) ? Arr::random($userIds) : null;
         $accessoriesList = config('motac.loan_accessories_list', ['Adapter Kuasa', 'Tetikus', 'Beg Komputer Riba']);
 
         return $this->state(function (array $attributes) use ($officerId, $accessoriesList) {
@@ -136,7 +148,7 @@ class LoanTransactionFactory extends Factory
             return [
                 'type' => LoanTransaction::TYPE_ISSUE,
                 'issuing_officer_id' => $officerId,
-                'receiving_officer_id' => User::inRandomOrder()->value('id') ?? User::factory()->create()->id,
+                'receiving_officer_id' => $officerId,
                 'issue_notes' => \Faker\Factory::create('ms_MY')->optional(0.3)->sentence(10),
                 'issue_timestamp' => $transactionDate instanceof Carbon ? $transactionDate->copy()->addMinutes(random_int(0, 120)) : now(),
                 'returning_officer_id' => null,
@@ -153,12 +165,14 @@ class LoanTransactionFactory extends Factory
 
     /**
      * State for a return transaction.
-     *
-     * Ensures only return-related fields are set.
      */
     public function asReturn(): static
     {
-        $officerId = User::inRandomOrder()->value('id') ?? User::factory()->create()->id;
+        static $userIds;
+        if (!isset($userIds)) {
+            $userIds = User::pluck('id')->all();
+        }
+        $officerId = !empty($userIds) ? Arr::random($userIds) : null;
         $accessoriesList = config('motac.loan_accessories_list', ['Adapter Kuasa', 'Tetikus', 'Beg Komputer Riba']);
 
         return $this->state(function (array $attributes) use ($officerId, $accessoriesList) {
@@ -170,7 +184,7 @@ class LoanTransactionFactory extends Factory
                 'issue_notes' => null,
                 'issue_timestamp' => null,
                 'returning_officer_id' => $officerId,
-                'return_accepting_officer_id' => User::inRandomOrder()->value('id') ?? User::factory()->create()->id,
+                'return_accepting_officer_id' => $officerId,
                 'return_notes' => \Faker\Factory::create('ms_MY')->optional(0.3)->sentence(10),
                 'return_timestamp' => $transactionDate instanceof Carbon ? $transactionDate->copy()->addMinutes(random_int(0, 120)) : now(),
                 'accessories_checklist_on_issue' => null,
@@ -186,7 +200,11 @@ class LoanTransactionFactory extends Factory
      */
     public function deleted(): static
     {
-        $officerId = User::inRandomOrder()->value('id') ?? User::factory()->create()->id;
+        static $userIds;
+        if (!isset($userIds)) {
+            $userIds = User::pluck('id')->all();
+        }
+        $officerId = !empty($userIds) ? Arr::random($userIds) : null;
         return $this->state([
             'deleted_at' => now(),
             'deleted_by' => $officerId,

@@ -5,14 +5,16 @@ namespace Database\Factories;
 use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
 /**
- * Factory for Notification model.
+ * Optimized Factory for Notification model.
  *
- * Generates fake notification records for various notification types
- * used in the application, matching the fields in the migration,
- * model, and typical payloads from the app\Notifications directory.
+ * - Uses static cache for User IDs to avoid repeated DB queries for notifiable_id.
+ * - Never creates related models in definition() (ensures batch seeding is fast).
+ * - Type and notifiable_id can be set via state; otherwise, random from existing.
+ * - Use in a seeder only after users exist.
  */
 class NotificationFactory extends Factory
 {
@@ -20,14 +22,23 @@ class NotificationFactory extends Factory
 
     public function definition(): array
     {
-        // Use Malaysian locale for more realistic sample data
-        $msFaker = \Faker\Factory::create('ms_MY');
+        // Static cache for user IDs
+        static $userIds;
+        if (!isset($userIds)) {
+            $userIds = User::pluck('id')->all();
+        }
 
-        // Pick a random user as the notifiable entity (required for notifiable_type/id)
-        $notifiableUser = User::inRandomOrder()->first() ?? User::factory()->create();
+        // Pick a random user as notifiable (or null if none exist)
+        $notifiableUserId = !empty($userIds) ? Arr::random($userIds) : null;
 
-        // All supported notification classes (see app\Notifications)
-        $notificationTypes = [
+        // Use a static Malaysian faker for realism and speed
+        static $msFaker;
+        if (!$msFaker) {
+            $msFaker = \Faker\Factory::create('ms_MY');
+        }
+
+        // Supported notification types (update as needed to match app/Notifications/)
+        static $notificationTypes = [
             \App\Notifications\ApplicationApproved::class,
             \App\Notifications\ApplicationNeedsAction::class,
             \App\Notifications\ApplicationRejected::class,
@@ -47,10 +58,9 @@ class NotificationFactory extends Factory
             \App\Notifications\TicketCreatedNotification::class,
             \App\Notifications\TicketStatusUpdatedNotification::class,
         ];
-        $chosenType = $this->faker->randomElement($notificationTypes);
 
-        // A variety of icons as used in the notification payloads
-        $icons = [
+        // Supported icons for notification payloads
+        static $icons = [
             'ti ti-circle-check',        // Approved
             'ti ti-bell-ringing',        // Needs action
             'ti ti-circle-x',            // Rejected
@@ -67,36 +77,36 @@ class NotificationFactory extends Factory
             'ti ti-alert-octagon',       // Provisioning failed
             'ti ti-info-circle',         // Generic info
             'ti ti-alert-circle',        // Incident
-            'ti ti-mood-empty'           // Lost
+            'ti ti-mood-empty',          // Lost
         ];
-        $chosenIcon = $this->faker->randomElement($icons);
 
-        // Generate the notification data payload, mimicking the structure from app\Notifications
+        // Notification data payload
         $payloadData = [
             'subject'   => $msFaker->sentence(6),
             'message'   => $msFaker->paragraph(2),
             'url'       => $this->faker->optional(0.7)->url,
-            'icon'      => $chosenIcon,
-            // Additional fields for certain notification types (optional, for realism)
-            'status'    => $this->faker->optional(0.6)->randomElement(['pending', 'approved', 'rejected', 'issued', 'returned', 'overdue']),
+            'icon'      => Arr::random(self::$icons ?? $icons),
+            'status'    => $this->faker->optional(0.6)->randomElement([
+                'pending', 'approved', 'rejected', 'issued', 'returned', 'overdue'
+            ]),
             'action_required' => $this->faker->optional(0.2)->boolean(),
             'created_at' => now()->toDateTimeString(),
         ];
 
-        // Set read_at randomly (some notifications are read, some are unread)
+        // Read at: 30% chance to be read
         $readAt = $this->faker->optional(0.3)->dateTimeThisYear();
 
-        // Audit fields (nullable, as handled by observers in the model)
-        $createdBy   = $notifiableUser->id;
-        $updatedBy   = $notifiableUser->id;
+        // Audit fields (nullable)
+        $createdBy   = $notifiableUserId;
+        $updatedBy   = $notifiableUserId;
         $deletedBy   = null;
 
         return [
-            'id'              => Str::uuid()->toString(),
-            'type'            => $chosenType,
+            'id'              => (string) Str::uuid(),
+            'type'            => Arr::random(self::$notificationTypes ?? $notificationTypes),
             'notifiable_type' => User::class,
-            'notifiable_id'   => $notifiableUser->id,
-            'data'            => $payloadData, // Model will cast this to/from array
+            'notifiable_id'   => $notifiableUserId,
+            'data'            => $payloadData, // Model will cast to/from array
             'read_at'         => $readAt,
             'created_by'      => $createdBy,
             'updated_by'      => $updatedBy,
@@ -108,7 +118,7 @@ class NotificationFactory extends Factory
     }
 
     /**
-     * Indicate that the notification is unread.
+     * State: Mark notification as unread.
      */
     public function unread(): static
     {
@@ -118,7 +128,7 @@ class NotificationFactory extends Factory
     }
 
     /**
-     * Indicate that the notification has been read.
+     * State: Mark notification as read.
      */
     public function read(): static
     {
@@ -128,11 +138,15 @@ class NotificationFactory extends Factory
     }
 
     /**
-     * Mark the notification as soft deleted.
+     * State: Mark notification as soft deleted.
      */
     public function deleted(): static
     {
-        $deleterId = User::inRandomOrder()->value('id') ?? User::factory()->create()->id;
+        static $userIds;
+        if (!isset($userIds)) {
+            $userIds = User::pluck('id')->all();
+        }
+        $deleterId = !empty($userIds) ? Arr::random($userIds) : null;
         return $this->state([
             'deleted_at' => now(),
             'deleted_by' => $deleterId,

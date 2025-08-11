@@ -7,18 +7,16 @@ use App\Models\HelpdeskCategory;
 use App\Models\HelpdeskPriority;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 
 /**
- * Factory for the HelpdeskTicket model.
+ * Optimized Factory for the HelpdeskTicket model.
  *
- * Generates helpdesk tickets for testing and seeding,
- * including all required fields, blameable/audit columns, and soft-delete columns.
- *
- * This version is updated to match the schema and model:
- * - Field names now align with migration and model: user_id, assigned_to_user_id, closed_by_id, etc.
- * - Drops reference_number, applicant_id, assigned_to_id (uses correct columns)
- * - Handles closed_at, status, and resolution_notes according to model/migration.
+ * - Uses static caches for all related model IDs to minimize database queries and maximize performance.
+ * - Never creates related records in definition(); expects related records to exist.
+ * - All foreign keys (user_id, assigned_to_user_id, category_id, priority_id, etc.) are randomly assigned from cached IDs.
+ * - Includes states for setting status and related fields.
  */
 class HelpdeskTicketFactory extends Factory
 {
@@ -26,16 +24,34 @@ class HelpdeskTicketFactory extends Factory
 
     public function definition(): array
     {
-        // Use Malaysian locale for more realistic content
-        $msFaker = \Faker\Factory::create('ms_MY');
+        // --- Static caches for related IDs ---
+        static $userIds, $categoryIds, $priorityIds;
+        // Cache User IDs
+        if (!isset($userIds)) {
+            $userIds = User::pluck('id')->all();
+        }
+        // Cache Category IDs
+        if (!isset($categoryIds)) {
+            $categoryIds = HelpdeskCategory::pluck('id')->all();
+        }
+        // Cache Priority IDs
+        if (!isset($priorityIds)) {
+            $priorityIds = HelpdeskPriority::pluck('id')->all();
+        }
 
-        // Foreign key dependencies (create if missing)
-        $userId = User::inRandomOrder()->value('id') ?? User::factory()->create(['name' => 'Applicant (HelpdeskTicketFactory)'])->id;
-        $assignedToUserId = User::inRandomOrder()->value('id') ?? User::factory()->create(['name' => 'Agent (HelpdeskTicketFactory)'])->id;
-        $categoryId = HelpdeskCategory::inRandomOrder()->value('id') ?? HelpdeskCategory::factory()->create()->id;
-        $priorityId = HelpdeskPriority::inRandomOrder()->value('id') ?? HelpdeskPriority::factory()->create()->id;
+        // Pick random user/category/priority IDs or null if none exist
+        $userId = !empty($userIds) ? Arr::random($userIds) : null;
+        $assignedToUserId = !empty($userIds) ? Arr::random($userIds) : null;
+        $categoryId = !empty($categoryIds) ? Arr::random($categoryIds) : null;
+        $priorityId = !empty($priorityIds) ? Arr::random($priorityIds) : null;
 
-        // Status options based on model constants
+        // Use a static Malaysian faker for performance and realism
+        static $msFaker;
+        if (!$msFaker) {
+            $msFaker = \Faker\Factory::create('ms_MY');
+        }
+
+        // Choose a status from model constants (default is open)
         $statuses = [
             HelpdeskTicket::STATUS_OPEN,
             HelpdeskTicket::STATUS_IN_PROGRESS,
@@ -44,11 +60,11 @@ class HelpdeskTicketFactory extends Factory
         ];
         $status = $this->faker->randomElement($statuses);
 
-        // Set dates
+        // Set up timestamps
         $createdAt = Carbon::parse($this->faker->dateTimeBetween('-6 months', 'now'));
         $updatedAt = Carbon::parse($this->faker->dateTimeBetween($createdAt, 'now'));
 
-        // Closed fields
+        // Closed fields only set if status is closed
         $closedById = null;
         $closedAt = null;
         if ($status === HelpdeskTicket::STATUS_CLOSED) {
@@ -56,16 +72,20 @@ class HelpdeskTicketFactory extends Factory
             $closedAt = Carbon::parse($this->faker->dateTimeBetween($updatedAt, 'now'));
         }
 
-        // Some tickets may be resolved (not closed)
+        // Resolution notes if resolved or closed
         $resolutionNotes = in_array($status, [HelpdeskTicket::STATUS_RESOLVED, HelpdeskTicket::STATUS_CLOSED])
             ? $msFaker->sentence(8)
             : null;
 
-        // Mark as soft deleted (rare)
+        // SLA due (optional)
+        $slaDueAt = $this->faker->optional(0.4)->dateTimeBetween($createdAt, '+2 weeks');
+
+        // Soft delete fields
         $isDeleted = $this->faker->boolean(2); // ~2% soft deleted
         $deletedAt = $isDeleted ? Carbon::parse($this->faker->dateTimeBetween($updatedAt, 'now')) : null;
         $deletedBy = $isDeleted ? $userId : null;
 
+        // Returned attributes
         return [
             'title'              => $msFaker->sentence(6),
             'description'        => $msFaker->paragraph(3),
@@ -77,7 +97,7 @@ class HelpdeskTicketFactory extends Factory
             'closed_by_id'       => $closedById,
             'closed_at'          => $closedAt,
             'resolution_notes'   => $resolutionNotes,
-            'sla_due_at'         => $this->faker->optional(0.4)->dateTimeBetween($createdAt, '+2 weeks'),
+            'sla_due_at'         => $slaDueAt,
             'created_by'         => $userId,
             'updated_by'         => $userId,
             'deleted_by'         => $deletedBy,
@@ -109,6 +129,7 @@ class HelpdeskTicketFactory extends Factory
             'status' => HelpdeskTicket::STATUS_IN_PROGRESS,
             'closed_by_id' => null,
             'closed_at' => null,
+            'resolution_notes' => null,
         ]);
     }
 
@@ -117,7 +138,10 @@ class HelpdeskTicketFactory extends Factory
      */
     public function resolved(): static
     {
-        $msFaker = \Faker\Factory::create('ms_MY');
+        static $msFaker;
+        if (!$msFaker) {
+            $msFaker = \Faker\Factory::create('ms_MY');
+        }
         return $this->state([
             'status' => HelpdeskTicket::STATUS_RESOLVED,
             'resolution_notes' => $msFaker->sentence(8),
@@ -131,8 +155,15 @@ class HelpdeskTicketFactory extends Factory
      */
     public function closed(): static
     {
-        $userId = User::inRandomOrder()->value('id') ?? User::factory()->create()->id;
-        $msFaker = \Faker\Factory::create('ms_MY');
+        static $userIds;
+        if (!isset($userIds)) {
+            $userIds = User::pluck('id')->all();
+        }
+        $userId = !empty($userIds) ? Arr::random($userIds) : null;
+        static $msFaker;
+        if (!$msFaker) {
+            $msFaker = \Faker\Factory::create('ms_MY');
+        }
         return $this->state([
             'status' => HelpdeskTicket::STATUS_CLOSED,
             'closed_by_id' => $userId,
@@ -179,7 +210,11 @@ class HelpdeskTicketFactory extends Factory
      */
     public function deleted(): static
     {
-        $deleterId = User::inRandomOrder()->value('id') ?? User::factory()->create(['name' => 'Deleter User (HelpdeskTicketFactory)'])->id;
+        static $userIds;
+        if (!isset($userIds)) {
+            $userIds = User::pluck('id')->all();
+        }
+        $deleterId = !empty($userIds) ? Arr::random($userIds) : null;
         return $this->state([
             'deleted_at' => now(),
             'deleted_by' => $deleterId,
