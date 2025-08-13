@@ -1,6 +1,6 @@
-# ICT Loan Application System Flow (Mk. 2.5)
+# ICT Loan Application System Flow (v4.0)
 
-This document outlines the complete workflow for an ICT equipment loan, detailing the key stages, primary actors, and associated code components based on the final system architecture.
+This document outlines the complete workflow for the ICT Equipment Loan module, one of the two core components of the MOTAC Integrated Resource Management System (v4.0). It details the key stages, primary actors, and associated code components based on the final system architecture.
 
 ---
 
@@ -152,33 +152,3 @@ These components are used throughout the loan workflow to provide core functiona
 - **Shared Views & Helpers:**
     - Reusable Blade components are located in `resources/views/components/` (e.g., for status badges).
     - `app/Helpers/Helpers.php` may contain utility functions used across the module.
-
----
-
-### Shared Components & Infrastructure (Used Throughout the Loan Workflow)
-
-- **Models:**  
-  `User.php`, `Department.php`, `Position.php`, `Grade.php` provide essential user context.
-
-- **Observers:**  
-  `app\Observers\BlameableObserver.php` automatically populates `created_by`, `updated_by`, `deleted_by` fields for models like `LoanApplication`, `LoanTransaction`, `Equipment`.
-
-- **Middleware:**
-    - **Authentication:** `auth:sanctum`, `config('jetstream.auth_session')`.
-    - **Authorization:** `can:` middleware for policy checks, role/permission (Spatie), `check.gradelevel`, `check.usergrade`.
-    - **General web middleware:** `EncryptCookies`, `StartSession`, `VerifyCsrfToken`, etc.
-
-- **Routing:**  
-  Defined in `routes/web.php` using Laravel's routing functions.
-
-- **Service Providers:**
-    - `AppServiceProvider.php`: Registers core services like `LoanApplicationService`, `LoanTransactionService`, `EquipmentService`, `NotificationService`.
-    - `AuthServiceProvider.php`: Registers model policies like `LoanApplicationPolicy`, `LoanTransactionPolicy`, `EquipmentPolicy`.
-    - `EventServiceProvider.php`: Registers observers like `BlameableObserver`.
-
-- **Views (Shared UI Elements):**
-    - Reusable Blade components in `resources/views/components/` (e.g., status badges, user info cards).
-    - Main application layout views.
-
-- **Helpers:**  
-  `app/Helpers/Helpers.php` may contain utility functions used across the module.

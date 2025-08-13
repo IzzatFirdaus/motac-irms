@@ -103,21 +103,7 @@ Selaras dengan prinsip **Antara Muka Minimalis dan Mudah**, **Kawalan Pengguna**
 
 ---
 
-## 7. Pematuhan 18 Prinsip MyGOVEA (Ringkas)
-
-- Fokus pengguna, borang yang jelas, navigasi ringkas
-- Data dan audit yang konsisten
-- Kandungan dan struktur maklumat terancang
-- Teknologi Laravel/Livewire yang sesuai
-- UI minimalis, seragam, mudah diakses
-- Komunikasi melalui notifikasi
-- Struktur hierarki untuk organisasi dan kelulusan
-- Kawalan pengguna, tetapan lalai, pencegahan ralat
-- Dokumentasi dan panduan disediakan
-
----
-
-## Dokumentasi Teknikal: Sistem Pengurusan Sumber Terintegrasi MOTAC (Versi 4.0)
+# Dokumentasi Teknikal: Sistem Pengurusan Sumber Terintegrasi MOTAC (Versi 4.0)
 
 **Versi Dokumen:** 4.0  
 **Tarikh Semakan:** 12 Ogos 2025  
@@ -156,7 +142,6 @@ Menggunakan Laravel (MVC) dan Livewire (**Teknologi Bersesuaian**, **Komponen UI
 ### 3.1 Corak MVC Laravel/Livewire
 
 **Pengawal (Controllers):**
-
 - `App\Http\Controllers\ApprovalController.php`
 - `App\Http\Controllers\EquipmentController.php`
 - `App\Http\Controllers\LoanApplicationController.php`
@@ -167,37 +152,30 @@ Menggunakan Laravel (MVC) dan Livewire (**Teknologi Bersesuaian**, **Komponen UI
 - `App\Http\Controllers\Admin\*Controller.php`
 
 **Model:**
-
 - `User`, `Department`, `Position`, `Grade`
 - `Equipment`, `EquipmentCategory`, `LoanApplication`, `LoanTransaction`, `Approval`
 - `HelpdeskTicket`, `HelpdeskCategory`, `HelpdeskComment`
 - `Notification`
 
 **Paparan (Views):**
-
 - `resources/views/`
 - `resources/views/livewire/`
 - `resources/views/emails/`
 
 **Servis:**
-
 - `app/Services/`: `ApprovalService`, `LoanApplicationService`, `LoanTransactionService`, `EquipmentService`, `HelpdeskService`, `NotificationService`
 
 **Middleware:**
-
 - **Kumpulan Web:** `EncryptCookies`, `StartSession`, `VerifyCsrfToken`, `LocaleMiddleware`
 - **Alias:** Laravel standard, Spatie Permission (`role`, `permission`), Custom (`check.gradelevel`)
 
 **Komponen Livewire:**
-
 - Contoh: `ResourceManagement\LoanApplication\ApplicationForm`, `Helpdesk\CreateTicketForm`, `Admin\BPM\ProcessIssuance`, `Admin\Helpdesk\TicketManagement`
 
 **Polisi:**
-
 - Logik kebenaran untuk model (`app/Policies/`), cth: `UserPolicy`, `LoanApplicationPolicy`, `HelpdeskTicketPolicy`, didaftarkan dalam `AuthServiceProvider`.
 
 **Pemerhati (Observers):**
-
 - `BlameableObserver` mengisi medan audit pada model tertentu.
 
 ---
@@ -237,44 +215,37 @@ Menggunakan Laravel (MVC) dan Livewire (**Teknologi Bersesuaian**, **Komponen UI
 ### 5.1 Aliran Kerja Pinjaman Peralatan ICT
 
 **Permulaan & Pengesahan Permohonan:**
-
 - **Pelaku:** Pemohon
 - **UI:** `App\Livewire\ResourceManagement\LoanApplication\ApplicationForm`
 - **Logik:** Isi borang, sahkan, status jadi `pending_support`.
 
 **Kelulusan Pegawai Penyokong:**
-
 - **Pelaku:** Pegawai Penyokong
 - **UI:** `App\Livewire\ResourceManagement\Approval\Dashboard`
 - **Logik:** Dirouting melalui `ApprovalService` kepada pegawai yang cukup gred.
 
 **Pengeluaran & Pemulangan Peralatan:**
-
 - **Pelaku:** Staf BPM
 - **UI & Logik:** Komponen `ProcessIssuance` dan `ProcessReturn` urus transaksi dan status peralatan melalui `LoanTransactionService`.
 
 ### 5.2 Aliran Kerja Tiket Helpdesk
 
 **Cipta Tiket:**
-
 - **Pelaku:** Pengguna/Pemohon
 - **UI:** `App\Livewire\Helpdesk\CreateTicketForm`
 - **Logik:** Pengguna hantar tiket, status `open`. Notifikasi `TicketCreatedNotification` dihantar.
 
 **Pengurusan & Penugasan Tiket:**
-
 - **Pelaku:** Pentadbir IT/Helpdesk Manager
 - **UI:** `App\Livewire\Helpdesk\Admin\TicketManagement`
 - **Logik:** Tiket ditugaskan kepada agen IT, status jadi `in_progress`. Notifikasi `TicketAssignedNotification` dihantar.
 
 **Penyelesaian Tiket:**
-
 - **Pelaku:** Agen IT, Pengguna
 - **UI:** `App\Livewire\Helpdesk\TicketDetails`
 - **Logik:** Agen berinteraksi melalui komen, status jadi `resolved` selepas selesai.
 
 **Penutupan Tiket:**
-
 - **Pelaku:** Agen IT/Sistem
 - **Logik:** Selepas diselesaikan, tiket ditutup dan masa `closed_at` direkodkan. Notifikasi `TicketClosedNotification` dihantar.
 

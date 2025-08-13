@@ -1,23 +1,14 @@
--- MOTAC ICT LOAN HRMS - Full SQL import script
--- Purpose:
---   - Provide a clean data import for a fresh database environment
---   - Insert the minimum viable master data (roles, departments, positions, grades, users, categories, locations, settings, helpdesk)
---   - Respect enums and constraints defined in your migrations
---   - Avoid FK issues by truncating in a safe order with FK checks disabled
---
--- Notes:
---   - This script assumes your schema (tables, FKs, indexes) is already created (via migrations).
---   - If you need a schema + data dump, run your migrations first, then execute this script to import data.
---   - Password hash used is Laravel's default hash for 'password'
---       ('password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi')
---   - All insert values comply with enums and nullable FKs based on migrations.
---   - This seeds a consistent base so you can run application or continue with Laravel seeders for larger datasets.
+-- MOTAC ICT LOAN HRMS - Full SQL import script (Corrected for CURRENT users table schema)
+-- This version matches the actual users table structure as checked with DESCRIBE users.
+-- Columns removed: motac_email, user_id_assigned, service_status, appointment_type, previous_department_name, previous_department_email
+-- Columns added: two_factor_secret, two_factor_recovery_codes, two_factor_confirmed_at
+-- Column order matches current schema for robust import.
+-- Use this after running all migrations.
 
 SET NAMES utf8mb4;
 SET time_zone = '+00:00';
 SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
 
--- Disable FK checks globally during truncate + seed to avoid constraint errors
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ------------------------------------------------------------
@@ -145,57 +136,55 @@ VALUES
 -- Tip: Change passwords after import if needed.
 
 INSERT INTO users (
-  id, name, email, email_verified_at, password, remember_token,
-  title, identification_number, passport_number,
-  department_id, position_id, grade_id, level, mobile_number, personal_email, motac_email, user_id_assigned,
-  service_status, appointment_type, previous_department_name, previous_department_email,
+  id, name, title, identification_number, passport_number,
+  department_id, position_id, grade_id, level, mobile_number, personal_email,
   status, is_admin, is_bpm_staff, profile_photo_path, employee_id,
-  created_by, updated_by, deleted_by, created_at, updated_at, deleted_at
+  email, email_verified_at, password, two_factor_secret, two_factor_recovery_codes, two_factor_confirmed_at,
+  remember_token, created_at, updated_at, created_by, updated_by, deleted_by, deleted_at
 ) VALUES
-  (1000, 'Pentadbir Sistem Utama', 'admin@motac.gov.my', NOW(),
-    '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NULL,
-    'tuan', '800101010001', 'AA12345678',
-    1, 101, 201, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  (1000, 'Pentadbir Sistem Utama', 'tuan', '800101010001', 'AA12345678',
+    1, 101, 201, NULL, NULL, NULL,
     'active', 1, 1, NULL, NULL,
-    NULL, NULL, NULL, NOW(), NOW(), NULL),
+    'admin@motac.gov.my', NOW(), '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+    NULL, NULL, NULL,
+    NULL, NOW(), NOW(), NULL, NULL, NULL, NULL),
 
-  (1001, 'Staf Sokongan BPM', 'bpmstaff@motac.gov.my', NOW(),
-    '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NULL,
-    'tuan', '850202020002', 'BB12345678',
-    1, 100, 200, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  (1001, 'Staf Sokongan BPM', 'tuan', '850202020002', 'BB12345678',
+    1, 100, 200, NULL, NULL, NULL,
     'active', 0, 1, NULL, NULL,
-    NULL, NULL, NULL, NOW(), NOW(), NULL),
+    'bpmstaff@motac.gov.my', NOW(), '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+    NULL, NULL, NULL,
+    NULL, NOW(), NOW(), NULL, NULL, NULL, NULL),
 
-  (1002, 'Pegawai IT Admin', 'itadmin@motac.gov.my', NOW(),
-    '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NULL,
-    'tuan', '820303030003', 'CC12345678',
-    1, 100, 200, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  (1002, 'Pegawai IT Admin', 'tuan', '820303030003', 'CC12345678',
+    1, 100, 200, NULL, NULL, NULL,
     'active', 0, 0, NULL, NULL,
-    NULL, NULL, NULL, NOW(), NOW(), NULL),
+    'itadmin@motac.gov.my', NOW(), '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+    NULL, NULL, NULL,
+    NULL, NOW(), NOW(), NULL, NULL, NULL, NULL),
 
-  (1003, 'Pegawai Penyokong (Approver)', 'approver@motac.gov.my', NOW(),
-    '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NULL,
-    'tuan', '780505050005', 'DD12345678',
-    1, 101, 201, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  (1003, 'Pegawai Penyokong (Approver)', 'tuan', '780505050005', 'DD12345678',
+    1, 101, 201, NULL, NULL, NULL,
     'active', 0, 0, NULL, NULL,
-    NULL, NULL, NULL, NOW(), NOW(), NULL),
+    'approver@motac.gov.my', NOW(), '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+    NULL, NULL, NULL,
+    NULL, NOW(), NOW(), NULL, NULL, NULL, NULL),
 
-  (1004, 'Pengguna Biasa Sistem', 'pengguna01@motac.gov.my', NOW(),
-    '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NULL,
-    'tuan', '900404040004', 'EE12345678',
-    1, 100, 202, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  (1004, 'Pengguna Biasa Sistem', 'tuan', '900404040004', 'EE12345678',
+    1, 100, 202, NULL, NULL, NULL,
     'active', 0, 0, NULL, NULL,
-    NULL, NULL, NULL, NOW(), NOW(), NULL),
+    'pengguna01@motac.gov.my', NOW(), '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+    NULL, NULL, NULL,
+    NULL, NOW(), NOW(), NULL, NULL, NULL, NULL),
 
-  (1005, 'Izzat Firdaus (System Developer)', 'izzatfirdaus@motac.gov.my', NOW(),
-    '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NULL,
-    'tuan', '980328145171', 'FF12345678',
-    1, 101, 201, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  (1005, 'Izzat Firdaus (System Developer)', 'tuan', '980328145171', 'FF12345678',
+    1, 101, 201, NULL, NULL, NULL,
     'active', 1, 1, NULL, NULL,
-    NULL, NULL, NULL, NOW(), NOW(), NULL);
+    'izzatfirdaus@motac.gov.my', NOW(), '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+    NULL, NULL, NULL,
+    NULL, NOW(), NOW(), NULL, NULL, NULL, NULL);
 
--- Assign roles to users (model_has_roles)
--- model_type for User model
+-- --- Assign roles to users as before ---
 SET @USER_MODEL := 'App\\Models\\User';
 
 -- Admin

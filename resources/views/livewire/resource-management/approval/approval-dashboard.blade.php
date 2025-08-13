@@ -1,4 +1,6 @@
 {{-- resources/views/livewire/resource-management/approval/approval-dashboard.blade.php --}}
+{{-- Approval Dashboard: displays approval tasks for officers. Used by /approvals route. --}}
+
 @push('page-style')
     <style>
         #approvalActionBootstrapModal .modal-dialog {
@@ -22,13 +24,14 @@
 
     <div class="card mb-4 motac-card">
         <div class="card-body motac-card-body">
+            {{-- Filters for approval tasks --}}
             <form wire:submit.prevent class="row g-3 align-items-end">
                 <div class="col-md-3">
                     <label for="filterTypeApproval" class="form-label form-label-sm">{{ __('approvals.filter.by_type') }}</label>
                     <select wire:model.live="filterType" id="filterTypeApproval" class="form-select form-select-sm">
                         <option value="all">{{ __('common.all_types') }}</option>
                         <option value="loan_application">{{ __('common.loan_application') }}</option>
-                        <option value="helpdesk_ticket">{{ __('common.helpdesk_ticket') }}</option>
+                        {{-- <option value="helpdesk_ticket">{{ __('common.helpdesk_ticket') }}</option> --}}
                     </select>
                 </div>
                 <div class="col-md-3">
@@ -52,6 +55,7 @@
         </div>
     </div>
 
+    {{-- Loading spinner while tasks load --}}
     <div wire:loading.delay.long class="w-100 text-center py-5">
         <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
             <span class="visually-hidden">{{ __('common.loading') }}</span>
@@ -59,6 +63,7 @@
         <p class="mt-2 fs-5">{{ __('approvals.loading_text') }}</p>
     </div>
 
+    {{-- Approval tasks table --}}
     <div wire:loading.remove>
         @if ($this->approvalTasks->isEmpty())
             <div class="alert alert-info d-flex align-items-center">
@@ -88,8 +93,8 @@
                                     <td class="px-3 py-2 small">
                                         @if ($approvable instanceof \App\Models\LoanApplication)
                                             <i class="bi bi-laptop text-primary me-1"></i>{{ __('common.loan_application') }}
-                                        @elseif ($approvable instanceof \App\Models\Ticket)
-                                            <i class="bi bi-ticket-fill text-success me-1"></i>{{ __('common.helpdesk_ticket') }}
+                                        {{-- @elseif ($approvable instanceof \App\Models\Ticket)
+                                            <i class="bi bi-ticket-fill text-success me-1"></i>{{ __('common.helpdesk_ticket') }} --}}
                                         @else
                                             <i class="bi bi-file-earmark-text-fill text-secondary me-1"></i>{{ __('common.unknown') }}
                                         @endif
@@ -139,8 +144,8 @@
                                 <p class="fw-medium text-dark">
                                     @if ($modalApprovable instanceof \App\Models\LoanApplication)
                                         <i class="bi bi-laptop text-primary me-1"></i>{{ __('common.loan_application') }}
-                                    @elseif ($modalApprovable instanceof \App\Models\Ticket)
-                                        <i class="bi bi-ticket-fill text-success me-1"></i>{{ __('common.helpdesk_ticket') }}
+                                    {{-- @elseif ($modalApprovable instanceof \App\Models\Ticket)
+                                        <i class="bi bi-ticket-fill text-success me-1"></i>{{ __('common.helpdesk_ticket') }} --}}
                                     @else
                                         <i class="bi bi-file-earmark-text-fill text-secondary me-1"></i>{{ __('common.unknown') }}
                                     @endif
@@ -155,8 +160,8 @@
                         {{-- Dynamic Content based on Approvable Type --}}
                         @if ($modalApprovable instanceof \App\Models\LoanApplication)
                             @livewire('resource-management.loan-application.loan-application-details', ['loanApplicationId' => $modalApprovable->id], key(['loan-app-details-'.$modalApprovable->id]))
-                        @elseif ($modalApprovable instanceof \App\Models\Ticket)
-                            @livewire('helpdesk.ticket-details', ['ticketId' => $modalApprovable->id, 'isModal' => true], key(['helpdesk-ticket-details', $modalApprovable->id]))
+                        {{-- @elseif ($modalApprovable instanceof \App\Models\Ticket)
+                            @livewire('helpdesk.ticket-details', ['ticketId' => $modalApprovable->id, 'isModal' => true], key(['helpdesk-ticket-details', $modalApprovable->id])) --}}
                         @else
                             <div class="alert alert-warning small">{{ __('approvals.modal.no_details_available') }}</div>
                         @endif

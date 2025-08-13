@@ -29,19 +29,20 @@ class EquipmentReport extends Component
      */
     public function getEquipmentListProperty()
     {
+        // Use tag_id instead of asset_tag for sorting and searching
         $query = Equipment::query()
             ->with(['department'])
-            ->orderBy('asset_tag', 'asc');
+            ->orderBy('tag_id', 'asc');
 
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('asset_tag', 'like', '%' . $this->search . '%')
+                $q->where('tag_id', 'like', '%' . $this->search . '%')
                   ->orWhere('brand', 'like', '%' . $this->search . '%')
                   ->orWhere('model', 'like', '%' . $this->search . '%');
             });
         }
         if ($this->filterStatus) {
-            $query->where('operational_status', $this->filterStatus);
+            $query->where('status', $this->filterStatus);
         }
         if ($this->filterDepartment) {
             $query->where('department_id', $this->filterDepartment);

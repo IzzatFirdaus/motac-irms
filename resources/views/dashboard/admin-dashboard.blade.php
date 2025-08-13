@@ -1,5 +1,6 @@
 {{-- resources/views/dashboard/admin-dashboard.blade.php --}}
-{{-- Admin Dashboard - Renamed from admin.blade.php for clarity and convention --}}
+{{-- Admin Dashboard for MOTAC IRMS --}}
+
 @extends('layouts.app')
 
 @section('title', __('dashboard.admin_title'))
@@ -48,8 +49,8 @@
                             <i class="bi bi-hourglass-split fs-2 text-gray-300"></i>
                         </div>
                     </div>
-                    @if (Route::has('approvals.index'))
-                    <a href="{{ route('approvals.index') }}" class="stretched-link" title="{{ __('dashboard.view_all_tasks') }}"></a>
+                    @if (Route::has('approvals.dashboard'))
+                    <a href="{{ route('approvals.dashboard') }}" class="stretched-link" title="{{ __('dashboard.view_all_tasks') }}"></a>
                     @endif
                 </div>
             </div>
@@ -124,13 +125,13 @@
                     <h6 class="m-0 fw-bold text-primary d-flex align-items-center">
                         <i class="bi bi-list-check me-2"></i>{{ __('dashboard.latest_tasks_title') }}
                     </h6>
-                    @if (Route::has('approvals.index'))
-                        <a href="{{route('approvals.index')}}" class="btn btn-sm btn-outline-primary motac-btn-outline">{{__('dashboard.view_all_tasks')}}</a>
+                    @if (Route::has('approvals.dashboard'))
+                        <a href="{{route('approvals.dashboard')}}" class="btn btn-sm btn-outline-primary motac-btn-outline">{{__('dashboard.view_all_tasks')}}</a>
                     @endif
                 </div>
                 <div class="card-body motac-card-body p-0">
-                    {{-- Livewire component for the approval dashboard --}}
-                    @livewire('resource-management.approval.dashboard', ['displayLimit' => 5, 'showFilters' => false])
+                    {{-- Livewire component for the latest approval tasks (limit 5, hide filters) --}}
+                    @livewire('resource-management.approval.approval-dashboard', ['displayLimit' => 5, 'showFilters' => false])
                 </div>
             </div>
         </div>

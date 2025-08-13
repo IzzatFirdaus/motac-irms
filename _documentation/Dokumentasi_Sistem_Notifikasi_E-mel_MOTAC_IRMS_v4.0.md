@@ -1,7 +1,6 @@
 # MOTAC IRMS: Sistem Notifikasi E-mel (v4.0)
 
 Dokumen ini menerangkan pelaksanaan sistem notifikasi e-mel dalam Sistem Pengurusan Sumber Terintegrasi MOTAC (IRMS) v4.0. Dalam versi ini, "ciri e-mel" merujuk khusus kepada notifikasi automatik yang dihantar kepada pengguna untuk memaklumkan kejadian dan perubahan status dalam modul teras aplikasi. Dokumentasi ini telah diselaraskan dengan PRINSIP REKA BENTUK MYGOVEA (18 Prinsip).
-<!-- Komentar: Dokumen ini memberi fokus kepada prinsip Komunikasi, Paparan/Menu Jelas, Pencegahan Ralat, dan Panduan & Dokumentasi. -->
 
 ---
 
@@ -28,8 +27,8 @@ Proses notifikasi mengikut pola konsisten berasaskan kejadian di seluruh aplikas
 2. **Logik Lapisan Servis:**  
    Kelas servis berkaitan (cth: `LoanApplicationService`, `HelpdeskService`) memproses tindakan tersebut.
 
-3. **Notifikasi Dijalankan (Dispatched):**  
-   Selepas tindakan berjaya dilaksanakan, servis memanggil `NotificationService` untuk menyediakan dan menjadualkan notifikasi spesifik.
+3. **Notifikasi Dihantar:**  
+   Selepas tindakan berjaya dilaksanakan, servis memanggil `NotificationService` untuk menghantar notifikasi spesifik.
 
 4. **Notifikasi Dihantar:**  
    Sistem menghantar notifikasi kepada pengguna melalui dua saluran:
@@ -37,7 +36,6 @@ Proses notifikasi mengikut pola konsisten berasaskan kejadian di seluruh aplikas
    - **E-mel:** E-mel berbentuk rasmi dihantar ke alamat e-mel pengguna yang berdaftar menggunakan pemandu e-mel aplikasi (cth: SMTP).
 
 ```mermaid
-%% Diagram aliran notifikasi: tindakan pengguna -> servis -> notifikasi (DB & E-mel)
 graph TD
     A[Tindakan Pengguna (cth: Hantar Permohonan Pinjaman)] --> B{Lapisan Servis (cth: LoanApplicationService)}
     B --> C{NotificationService Dipanggil}
@@ -94,19 +92,7 @@ Sistem notifikasi dibina menggunakan ciri standard Laravel dan kelas servis khus
 
 ---
 
-## 5. Pematuhan 18 Prinsip MyGOVEA (Ringkas)
-
-- Komunikasi: Notifikasi tepat masa, jelas dan relevan
-- Paparan/Menu Jelas: Kandungan e-mel dan notifikasi ringkas dan boleh diimbas
-- Kawalan Pengguna: Keutamaan notifikasi boleh dikonfigurasi (melalui tetapan sistem)
-- Pencegahan Ralat: Peringatan tarikh akhir dan amaran lewat
-- Panduan & Dokumentasi: Komen kod dan templat e-mel didokumentasi
-- Teknologi Bersesuaian: Gunakan saluran e-mel dan pangkalan data standard
-- Seragam: Pola notifikasi konsisten merentas modul
-
----
-
-## 6. Kesimpulan
+## 5. Kesimpulan
 
 Dalam versi 4.0 MOTAC IRMS, sistem e-mel adalah utiliti sokongan kritikal yang menumpukan kepada komunikasi. Ia memastikan semua pihak berkepentingan sentiasa dimaklumkan sepanjang aliran kerja pinjaman ICT dan helpdesk, memupuk ketelusan dan meningkatkan pengalaman pengguna tanpa menjadi modul aplikasi yang boleh diakses secara langsung.
 

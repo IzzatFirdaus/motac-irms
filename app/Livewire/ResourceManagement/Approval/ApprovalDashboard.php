@@ -19,7 +19,6 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -28,7 +27,7 @@ use Throwable;
 /**
  * ApprovalDashboard Livewire Component
  * Displays pending approval tasks and allows officers to record decisions.
- * System Design Ref: 6.2 (Approver Dashboard), 9.4 (Approval Workflow Module)
+ * Used for /approvals route as per routes/web.php
  */
 #[Layout('layouts.app')]
 class ApprovalDashboard extends Component
@@ -41,7 +40,7 @@ class ApprovalDashboard extends Component
     public string $filterStatus = Approval::STATUS_PENDING;
 
     #[Url(keep: true, history: true, as: 'jenis_permohonan')]
-    public string $filterType = ''; // Can be 'loan' or 'email' or empty for all
+    public string $filterType = ''; // Can be 'loan_application', 'helpdesk_ticket', or '' for all
 
     public string $searchTerm = '';
 
@@ -63,11 +62,17 @@ class ApprovalDashboard extends Component
     // --- Service Injection ---
     protected ApprovalService $approvalService;
 
+    /**
+     * Dependency injection for ApprovalService.
+     */
     public function boot(ApprovalService $approvalService): void
     {
         $this->approvalService = $approvalService;
     }
 
+    /**
+     * Component mount: authorize view and log access.
+     */
     public function mount(): void
     {
         $this->authorize('viewAny', Approval::class);
@@ -78,9 +83,7 @@ class ApprovalDashboard extends Component
     }
 
     /**
-     * Computed property to retrieve pending approval tasks for the authenticated user.
-     *
-     * @return LengthAwarePaginator<Approval>
+     * Retrieve approval tasks for the authenticated officer, with filters.
      */
     #[Computed]
     public function approvalTasks(): LengthAwarePaginator
@@ -91,17 +94,21 @@ class ApprovalDashboard extends Component
         $query = Approval::where('officer_id', $approver->id)
             ->with(['approvable', 'approvable.user', 'officer']);
 
-        // Apply filters
-        if ($this->filterStatus) {
+        // Apply status filter
+        if ($this->filterStatus && $this->filterStatus !== 'all') {
             $query->where('status', $this->filterStatus);
         }
 
-        if ($this->filterType) {
-            if ($this->filterType === 'loan') {
+        // Apply type filter (matches Blade: 'loan_application', 'helpdesk_ticket')
+        if ($this->filterType && $this->filterType !== 'all') {
+            if ($this->filterType === 'loan_application') {
                 $query->whereMorphedTo('approvable', LoanApplication::class);
             }
+            // If you support helpdesk_ticket, add logic for that model
+            // elseif ($this->filterType === 'helpdesk_ticket') { ... }
         }
 
+        // Search filter (searches applicant name/email for loan applications)
         if ($this->searchTerm) {
             $searchTermLower = strtolower($this->searchTerm);
             $query->where(function ($q) use ($searchTermLower) {
@@ -111,10 +118,11 @@ class ApprovalDashboard extends Component
                             ->orWhereRaw('LOWER(email) LIKE ?', ['%'.$searchTermLower.'%']);
                     });
                 });
+                // Extend this block if you add search for helpdesk_ticket
             });
         }
 
-        // Order by latest pending tasks first
+        // Order: latest pending first
         $query->orderByRaw("CASE
             WHEN status = '".Approval::STATUS_PENDING."' THEN 1
             WHEN status = '".Approval::STATUS_APPROVED."' THEN 2
@@ -137,7 +145,7 @@ class ApprovalDashboard extends Component
     /**
      * Open the modal for a specific approval task.
      */
-    public function openApprovalModal(int $approvalId, string $decisionType): void
+    public function openApprovalModal(int $approvalId, string $decisionType = ''): void
     {
         try {
             $approvalTask = Approval::with('approvable.loanApplicationItems')->findOrFail($approvalId);
@@ -145,7 +153,7 @@ class ApprovalDashboard extends Component
 
             $this->currentApprovalId = $approvalId;
             $this->currentApprovalTask = $approvalTask;
-            $this->approvalDecision = $decisionType;
+            $this->approvalDecision = $decisionType ?? '';
             $this->approvalNotes = '';
 
             $this->approvalItems = [];
@@ -296,7 +304,7 @@ class ApprovalDashboard extends Component
 
         if ($approvable instanceof LoanApplication) {
             $routeName = 'loan-applications.show';
-            $routeParams = ['loan_application' => $approvable->id];
+            $routeParams = ['loanApplication' => $approvable->id];
         }
 
         if ($routeName && Route::has($routeName)) {
@@ -315,6 +323,7 @@ class ApprovalDashboard extends Component
      */
     public function render(): View
     {
+        // Render the correct Blade file, as mapped in web.php
         return view('livewire.resource-management.approval.approval-dashboard');
     }
 }

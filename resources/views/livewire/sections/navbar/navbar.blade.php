@@ -1,5 +1,7 @@
 {{--
     Application Navbar (top navigation bar) - Refactored and documented.
+    This version fixes the error by inlining the user profile dropdown directly here,
+    removing the dependency on the now-missing 'layouts.partials.navbar.navbar-user-profile'.
     Expects:
       - $containerNav (Bootstrap container class)
       - $navbarDetachedClass (Extra class for navbar detachment)
@@ -8,10 +10,9 @@
 --}}
 
 <!--
-  IMPORTANT: Livewire components may only have ONE root HTML element.
+  IMPORTANT: Livewire components must have ONE root HTML element.
   This <nav> is the root for this component.
 -->
-
 <nav class="motac-navbar-alt {{ $containerNav }} {{ $navbarDetachedClass }}" id="layout-navbar" aria-label="@lang('common.main_title')">
     <div class="navbar-left">
         {{-- Hamburger menu for mobile view --}}
@@ -41,7 +42,7 @@
         </a>
     </div>
     <div class="navbar-right">
-        {{-- Language Switcher Dropdown (GET only, a11y-friendly) --}}
+        {{-- Language Switcher Dropdown --}}
         @if (count($availableLocales) > 1)
             <div class="navbar-action" tabindex="0">
                 <a href="#" aria-haspopup="true" aria-expanded="false" aria-label="@lang('common.language_selector')" title="@lang('common.language_selector')">
@@ -90,9 +91,46 @@
             @livewire('sections.navbar.notifications-dropdown')
         @endauth
 
-        {{-- User Profile Dropdown --}}
+        {{-- User Profile Dropdown - inlined to avoid missing partial --}}
         @auth
-            @include('layouts.partials.navbar.navbar-user-profile')
+            @php
+                $currentUser = Auth::user();
+            @endphp
+            <div class="navbar-action" tabindex="0">
+                <a href="#" aria-haspopup="true" aria-expanded="false" aria-label="{{ __('User Menu') }}">
+                    <img src="{{ $currentUser->profile_photo_url }}"
+                        alt="Avatar {{ $currentUser->name }}"
+                        class="navbar-avatar">
+                </a>
+                <div class="navbar-dropdown">
+                    <div style="padding: 16px 22px 10px 22px; border-bottom:1px solid #e6e6e6;">
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <img src="{{ $currentUser->profile_photo_url }}"
+                                alt="Avatar {{ $currentUser->name }}"
+                                class="navbar-avatar">
+                            <div>
+                                <strong>{{ $currentUser->name }}</strong><br>
+                                <small class="text-muted" style="font-size: 0.97em;">
+                                    {{ Str::title($currentUser->getRoleNames()->first() ?? __('User')) }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="{{ route('profile.show') }}"><i class="bi bi-person-circle"></i> {{ __('Profil Saya') }}</a>
+                    @can('view-settings-admin')
+                        <a href="{{ route('settings.users.index') }}"><i class="bi bi-gear"></i> {{ __('Tetapan Sistem') }}</a>
+                    @endcan
+                    <a href="#"><i class="bi bi-question-circle"></i> {{ __('Bantuan') }}</a>
+                    <div style="border-top:1px solid #e6e6e6;"></div>
+                    <form id="logout-form" method="POST" action="{{ route('logout') }}" class="d-none">
+                        @csrf
+                    </form>
+                    <a href="{{ route('logout') }}"
+                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                        <i class="bi bi-box-arrow-right"></i> {{ __('Log Keluar') }}
+                    </a>
+                </div>
+            </div>
         @else
             <div class="navbar-action" tabindex="0">
                 <a class="navbar-link" href="{{ route('login') }}" title="@lang('common.login')">

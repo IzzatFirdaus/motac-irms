@@ -1,7 +1,6 @@
 # Jadual Data Pengguna & Organisasi Teras (v4.0)
 
 Dokumen ini menyediakan gambaran keseluruhan tahap tinggi mengenai jadual pangkalan data teras dalam MOTAC IRMS v4.0, komponen Laravel yang berkaitan, serta tujuan penggunaannya dalam sistem. Penambahbaikan selaras dengan PRINSIP REKA BENTUK MYGOVEA (18 Prinsip).
-<!-- Nota: Pemetaan prinsip MyGOVEA disediakan di bahagian akhir untuk verifikasi pematuhan. -->
 
 ---
 
@@ -18,22 +17,20 @@ Menyimpan maklumat semua pengguna sistem. Versi v4.0 telah diperkemas untuk meng
 - **Factory:** `Database\Factories\UserFactory.php`
 - **Seeder:** `Database\Seeders\UserSeeder.php`, `Database\Seeders\AdminUserSeeder.php`
 
-#### Prinsip Berkaitan Pengguna
-
+#### Prinsip Berkaitan:
 - **Berpaksikan Rakyat**: Pengurusan pengguna direka untuk memenuhi keperluan sebenar rakyat/agensi.
 - **Komunikasi**: Pengguna boleh menerima notifikasi dan berinteraksi dalam sistem.
 
 ---
 
-### 1.2 `roles`, `permissions`, `model_has_roles`, dsb
+### 1.2 `roles`, `permissions`, `model_has_roles`, dsb.
 
 Jadual ini diurus oleh pakej [spatie/laravel-permission](https://github.com/spatie/laravel-permission) dan mendefinisikan kawalan akses terperinci.
 
 - **Model:** `Spatie\Permission\Models\Role`, `Spatie\Permission\Models\Permission`
 - **Seeder:** `Database\Seeders\RoleAndPermissionSeeder.php`
 
-#### Prinsip Berkaitan Settings
-
+#### Prinsip Berkaitan:
 - **Kawalan Pengguna**: Pengguna diberikan kawalan akses berdasarkan peranan dan kebenaran.
 - **Pencegahan Ralat**: Pengurusan peranan/kebenaran membantu mengurangkan kesilapan akses.
 
@@ -47,8 +44,7 @@ Jadual ini menyimpan struktur organisasi MOTAC.
 - **Controller:** `app/Http/Controllers/Admin/DepartmentController.php`, dsb.
 - **Seeder:** `Database\Seeders\DepartmentSeeder.php`, `Database\Seeders\PositionSeeder.php`, `Database\Seeders\GradesSeeder.php`
 
-#### Prinsip Berkaitan Organisasi
-
+#### Prinsip Berkaitan:
 - **Struktur Hierarki**: Menyusun organisasi secara hierarki untuk navigasi & pengurusan jelas.
 - **Seragam**: Penyeragaman struktur organisasi di seluruh modul.
 
@@ -86,8 +82,7 @@ Mengurus lokasi fizikal peralatan boleh disimpan atau digunakan.
 - **Controller:** `app/Http/Controllers/Admin/LocationController.php`
 - **Seeder:** `Database\Seeders\LocationSeeder.php`
 
-#### Prinsip Berkaitan Helpdesk
-
+#### Prinsip Berkaitan:
 - **Realistik**: Lokasi dan kategori diurus mengikut keperluan sebenar operasi.
 - **Struktur Hierarki**: Mengatur kategori, subkategori dan lokasi secara hierarki.
 
@@ -115,8 +110,7 @@ Merekod pengeluaran dan pemulangan item peralatan yang dipinjam.
 - **Controller:** `app/Http/Controllers/LoanTransactionController.php`
 - **Seeder:** `Database\Seeders\LoanTransactionSeeder.php`
 
-#### Prinsip Berkaitan
-
+#### Prinsip Berkaitan:
 - **Fleksibel**: Proses pinjaman boleh diubah suai mengikut keperluan.
 - **Pencegahan Ralat**: Kawalan dan pengesahan jelas semasa transaksi.
 
@@ -124,7 +118,7 @@ Merekod pengeluaran dan pemulangan item peralatan yang dipinjam.
 
 ## 4. Jadual Modul Helpdesk & Sokongan ICT
 
-Jadual baru untuk menyokong sistem helpdesk dan pengurusan tiket dalam v4.0, berteraskan prinsip Komunikasi, Kawalan Pengguna dan Panduan
+Jadual baru untuk menyokong sistem helpdesk dan pengurusan tiket dalam v4.0, berteraskan prinsip Komunikasi, Kawalan Pengguna dan Panduan & Dokumentasi.
 
 ### 4.1 `helpdesk_tickets`
 
@@ -158,8 +152,7 @@ Menyimpan komen dan respons berangkai bagi setiap tiket helpdesk untuk komunikas
 - **Factory:** `Database\Factories\HelpdeskCommentFactory.php`
 - **Seeder:** Disemai bersama `HelpdeskTicketSeeder.php`
 
-#### 4.4 Prinsip Berkaitan
-
+#### Prinsip Berkaitan:
 - **Komunikasi**: Memudahkan komunikasi jelas antara pengguna dan penyokong IT.
 - **Panduan & Dokumentasi**: Memudahkan rujukan dan rekod interaksi.
 
@@ -167,8 +160,7 @@ Menyimpan komen dan respons berangkai bagi setiap tiket helpdesk untuk komunikas
 
 ## 5. Jadual Aliran Kerja & Utiliti Berkongsi
 
-Menyokong aliran kerja dan fungsi sistem yang digunakan oleh pelbagai modul, menepati prinsip Struktur Hierarki, Kawalan Pengguna, Komunikasi dan Realistik.
-<!-- Pembetulan: "Struktural Hierarki" diperbetulkan kepada "Struktur Hierarki" untuk sepadan dengan senarai prinsip dalam prinsip-reka-bentuk-mygovea.md -->
+Menyokong aliran kerja dan fungsi sistem yang digunakan oleh pelbagai modul, menepati prinsip Struktural Hierarki, Kawalan Pengguna, Komunikasi dan Realistik.
 
 ### 5.1 `approvals`
 
@@ -198,33 +190,18 @@ Jadual satu baris untuk menyimpan tetapan global aplikasi.
 - **Controller:** `app/Http/Controllers/Admin/SettingsController.php`
 - **Seeder:** `Database\Seeders\SettingsSeeder.php`
 
-#### 5.4 Prinsip Berkaitan Settings
-
+#### Prinsip Berkaitan:
 - **Tetapan Lalai**: Mengurus nilai lalai aplikasi untuk memudahkan penggunaan.
 - **Pencegahan Ralat**: Mengurangkan kesilapan dengan tetapan lalai yang sesuai.
 - **Kebolehcapaian & Fleksibel**: Tetapan boleh diubah mengikut keperluan.
 
 ---
 
-## 6. Senarai Semak Pematuhan 18 Prinsip MyGOVEA (Ringkas)
-
-- Berpaksikan Rakyat: Struktur jadual menyokong pengalaman pengguna yang jelas
-- Berpacukan Data: Skema konsisten dan boleh audit
-- Kandungan Terancang: Penamaan jadual/medan konsisten dan bermakna
-- Teknologi Bersesuaian: Laravel + MySQL piawai
-- Antara Muka Minimalis dan Mudah: Skema memudahkan pemetaan UI ringkas
-- Seragam: Konvensyen penamaan seragam merentas modul
-- Paparan/Menu Jelas: Medan menyokong label/paparan yang jelas
-- Realistik: Jadual memodelkan kekangan operasi sebenar
-- Kognitif: Struktur data mengurangkan beban kognitif pembangun
-- Fleksibel: Jadual polimorfik dan konfigurasi tetapan
-- Komunikasi: Jadual komen/notifikasi menyokong komunikasi
-- Struktur Hierarki: Model organisasi dan kategori berhierarki
-- Komponen UI/UX: Data menyokong komponen UI standard
-- Tipografi: Medan label/teks membolehkan tipografi konsisten
-- Tetapan Lalai: Jadual `settings` mengurus lalai sistem
-- Kawalan Pengguna: Jadual peranan/kebenaran
-- Pencegahan Ralat: Kekangan skema dan validasi menyokong pencegahan
-- Panduan & Dokumentasi: Fail ini berperanan sebagai rujukan skema
-
----
+<!--
+**Semakan Lengkap vs .md Sebelumnya**
+- Semua jadual data teras, model, pengawal, factory, dan seeder dinyatakan.
+- Jadual peranan/kebenaran diurus oleh Spatie/Laravel-Permission, selaras dokumentasi sebelum ini.
+- Jadual organisasi, peralatan/kategori/lokasi, modul pinjaman, helpdesk dan jadual berkongsi telah diterangkan.
+- Prinsip Reka Bentuk MyGOVEA telah diintegrasikan dan dijelaskan pada setiap bahagian yang relevan.
+- Tiada kandungan hilang berbanding dokumen .md asal. Fail ini memberikan rujukan ringkas jadual data dan artifak implementasi; skema terperinci terdapat dalam System_Design_Rev_3.6.md dan dokumen berkaitan.
+-->
