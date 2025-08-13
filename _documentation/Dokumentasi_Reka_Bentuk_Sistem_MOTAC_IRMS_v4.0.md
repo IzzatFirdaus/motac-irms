@@ -62,6 +62,7 @@ Pengawal PHP tradisional mengendalikan permintaan HTTP backend, interaksi API, d
 Mewakili dan mengurus data menggunakan Eloquent ORM, termasuk hubungan polimorfik untuk kelulusan dan jejak audit automatik.
 
 **Model teras:**
+
 - `User`: Pengguna sistem dengan peranan dan data organisasi
 - `Department`: Jabatan dan unit organisasi
 - `Position`: Jawatan dalam MOTAC
@@ -86,6 +87,7 @@ Mewakili dan mengurus data menggunakan Eloquent ORM, termasuk hubungan polimorfi
 Templat Blade merender antara muka pengguna, termasuk komponen Livewire untuk seksyen dinamik. Terletak di `resources/views/` dan `resources/views/livewire/`.
 
 **Direktori paparan utama:**
+
 - `resources/views/loan-applications/`: Paparan permohonan pinjaman ICT
 - `resources/views/loan-transactions/`: Paparan pengeluaran/pemulangan peralatan
 - `resources/views/helpdesk/`: Paparan pengurusan tiket helpdesk
@@ -97,6 +99,7 @@ Templat Blade merender antara muka pengguna, termasuk komponen Livewire untuk se
 Mengandungi logik perniagaan untuk memastikan pengawal kekal ringkas. Terletak di `app/Services/`.
 
 **Servis teras:**
+
 - `LoanApplicationService`: Logik perniagaan untuk permohonan pinjaman
 - `LoanTransactionService`: Pemprosesan pengeluaran/pemulangan peralatan
 - `HelpdeskService`: Penciptaan, penugasan, dan pengurusan tiket
@@ -109,6 +112,7 @@ Mengandungi logik perniagaan untuk memastikan pengawal kekal ringkas. Terletak d
 Menguatkuasakan autentikasi, kebenaran, dan validasi permintaan.
 
 **Middleware utama:**
+
 - Autentikasi: `auth:sanctum`, pengawal sesi Jetstream
 - Kebenaran: Semakan polisi `can:`, middleware peranan/kebenaran
 - Custom: `check.gradelevel` untuk kebenaran berdasarkan gred
@@ -119,6 +123,7 @@ Menguatkuasakan autentikasi, kebenaran, dan validasi permintaan.
 Mengendalikan elemen UI dinamik dan logik sisi pelayan tanpa refresh penuh halaman.
 
 **Komponen utama:**
+
 - `ResourceManagement\LoanApplication\ApplicationForm`: Borang permohonan pinjaman dinamik
 - `ResourceManagement\Approval\Dashboard`: Antara muka pengurusan kelulusan
 - `ResourceManagement\Admin\BPM\ProcessIssuance`: Pemprosesan pengeluaran peralatan
@@ -133,6 +138,7 @@ Mengendalikan elemen UI dinamik dan logik sisi pelayan tanpa refresh penuh halam
 Mendefinisikan logik kebenaran untuk tindakan ke atas model tertentu. Terletak di `app/Policies/`.
 
 **Polisi utama:**
+
 - `LoanApplicationPolicy`: Kebenaran untuk permohonan pinjaman
 - `LoanTransactionPolicy`: Kebenaran untuk transaksi peralatan
 - `HelpdeskTicketPolicy`: Kebenaran untuk operasi helpdesk
@@ -177,9 +183,11 @@ Sistem menggunakan skema pangkalan data MySQL bersatu yang dioptimumkan untuk pe
 ### 4.1 Data Pengguna & Organisasi
 
 #### `users`
+
 Jadual pengguna utama menyimpan semua pengguna sistem termasuk pemohon, penyokong, staf BPM dan agen IT.
 
 **Medan:**
+
 - `id`: Kunci utama
 - `title`: Gelaran/hormat pengguna
 - `name`: Nama penuh
@@ -203,9 +211,11 @@ Jadual pengguna utama menyimpan semua pengguna sistem termasuk pemohon, penyokon
 - Timestamps: `created_at`, `updated_at`, `deleted_at`
 
 #### `departments`
+
 Struktur organisasi termasuk bahagian ibu pejabat dan pejabat negeri.
 
 **Medan:**
+
 - `id`: Kunci utama
 - `name`: Nama jabatan/bahagian
 - `branch_type`: Jenis cawangan (ibu pejabat, pejabat negeri, unit)
@@ -217,9 +227,11 @@ Struktur organisasi termasuk bahagian ibu pejabat dan pejabat negeri.
 - Timestamps: `created_at`, `updated_at`, `deleted_at`
 
 #### `positions`
+
 Jawatan dan gelaran dalam MOTAC.
 
 **Medan:**
+
 - `id`: Kunci utama
 - `name`: Gelaran jawatan
 - `grade_id`: Gred berkaitan (kunci asing)
@@ -229,9 +241,11 @@ Jawatan dan gelaran dalam MOTAC.
 - Timestamps: `created_at`, `updated_at`, `deleted_at`
 
 #### `grades`
+
 Gred organisasi dengan tahap kelulusan berhierarki.
 
 **Medan:**
+
 - `id`: Kunci utama
 - `name`: Nama gred (contoh: JUSA A, 54, 41)
 - `level`: Tahap berhierarki (integer)
@@ -243,9 +257,11 @@ Gred organisasi dengan tahap kelulusan berhierarki.
 ### 4.2 Modul Pinjaman Peralatan ICT
 
 #### `equipment`
+
 Inventori lengkap semua peralatan ICT yang boleh dipinjam.
 
 **Medan:**
+
 - `id`: Kunci utama
 - `asset_type`: Jenis aset (laptop, projektor, tablet, dll.)
 - `brand`: Jenama peralatan
@@ -273,9 +289,11 @@ Inventori lengkap semua peralatan ICT yang boleh dipinjam.
 - Timestamps: `created_at`, `updated_at`, `deleted_at`
 
 #### `equipment_categories`
+
 Pengkategorian utama jenis peralatan.
 
 **Medan:**
+
 - `id`: Kunci utama
 - `name`: Nama kategori (Komputer, Projektor, Peranti Mudah Alih, dll.)
 - `description`: Penerangan kategori
@@ -284,9 +302,11 @@ Pengkategorian utama jenis peralatan.
 - Timestamps: `created_at`, `updated_at`, `deleted_at`
 
 #### `sub_categories`
+
 Pengkategorian sekunder untuk jenis peralatan yang lebih spesifik.
 
 **Medan:**
+
 - `id`: Kunci utama
 - `name`: Nama sub-kategori
 - `equipment_category_id`: Kategori induk (kunci asing)
@@ -296,9 +316,11 @@ Pengkategorian sekunder untuk jenis peralatan yang lebih spesifik.
 - Timestamps: `created_at`, `updated_at`, `deleted_at`
 
 #### `locations`
+
 Lokasi fizikal di mana peralatan boleh disimpan atau digunakan.
 
 **Medan:**
+
 - `id`: Kunci utama
 - `name`: Nama lokasi
 - `address`: Alamat fizikal
@@ -309,9 +331,11 @@ Lokasi fizikal di mana peralatan boleh disimpan atau digunakan.
 - Timestamps: `created_at`, `updated_at`, `deleted_at`
 
 #### `loan_applications`
+
 Permohonan pinjaman peralatan ICT yang dihantar oleh pengguna.
 
 **Medan:**
+
 - `id`: Kunci utama
 - `user_id`: Pemohon (kunci asing ke users)
 - `responsible_officer_id`: Pegawai bertanggungjawab untuk pinjaman
@@ -338,9 +362,11 @@ Permohonan pinjaman peralatan ICT yang dihantar oleh pengguna.
 - Timestamps: `created_at`, `updated_at`, `deleted_at`
 
 #### `loan_application_items`
+
 Item peralatan individu yang dimohon dalam setiap permohonan.
 
 **Medan:**
+
 - `id`: Kunci utama
 - `loan_application_id`: Permohonan induk (kunci asing)
 - `equipment_type`: Jenis peralatan dimohon
@@ -352,9 +378,11 @@ Item peralatan individu yang dimohon dalam setiap permohonan.
 - Timestamps: `created_at`, `updated_at`, `deleted_at`
 
 #### `loan_transactions`
+
 Rekod transaksi pengeluaran dan pemulangan peralatan.
 
 **Medan:**
+
 - `id`: Kunci utama
 - `loan_application_id`: Permohonan berkaitan (kunci asing)
 - `type`: Jenis transaksi (issue, return)
@@ -370,9 +398,11 @@ Rekod transaksi pengeluaran dan pemulangan peralatan.
 - Timestamps: `created_at`, `updated_at`, `deleted_at`
 
 #### `loan_transaction_items`
+
 Item peralatan individu yang terlibat dalam setiap transaksi.
 
 **Medan:**
+
 - `id`: Kunci utama
 - `loan_transaction_id`: Transaksi induk (kunci asing)
 - `equipment_id`: Item peralatan spesifik (kunci asing)
@@ -384,9 +414,11 @@ Item peralatan individu yang terlibat dalam setiap transaksi.
 ### 4.3 Modul Helpdesk & Sokongan ICT
 
 #### `helpdesk_tickets`
+
 Sistem tiket helpdesk untuk permintaan sokongan IT.
 
 **Medan:**
+
 - `id`: Kunci utama
 - `user_id`: Pelapor tiket (kunci asing ke users)
 - `assigned_to_user_id`: Agen IT yang ditugaskan (kunci asing ke users, boleh kosong)
@@ -402,9 +434,11 @@ Sistem tiket helpdesk untuk permintaan sokongan IT.
 - Timestamps: `created_at`, `updated_at`, `deleted_at`
 
 #### `helpdesk_categories`
+
 Sistem pengkategorian tiket helpdesk.
 
 **Medan:**
+
 - `id`: Kunci utama
 - `name`: Nama kategori (Isu Perkakasan, Isu Perisian, Masalah Rangkaian, Isu Akaun, dll.)
 - `description`: Penerangan kategori
@@ -413,9 +447,11 @@ Sistem pengkategorian tiket helpdesk.
 - Timestamps: `created_at`, `updated_at`, `deleted_at`
 
 #### `helpdesk_comments`
+
 Komen berantai dan respons pada tiket helpdesk.
 
 **Medan:**
+
 - `id`: Kunci utama
 - `ticket_id`: Tiket induk (kunci asing ke helpdesk_tickets)
 - `user_id`: Penulis komen (kunci asing ke users)
@@ -427,9 +463,11 @@ Komen berantai dan respons pada tiket helpdesk.
 ### 4.4 Sistem Kelulusan & Notifikasi
 
 #### `approvals`
+
 Jadual polimorfik menyimpan rekod kelulusan untuk pelbagai proses.
 
 **Medan:**
+
 - `id`: Kunci utama
 - `approvable_type`: Jenis model yang diluluskan (polimorfik)
 - `approvable_id`: ID model yang diluluskan (polimorfik)
@@ -442,9 +480,11 @@ Jadual polimorfik menyimpan rekod kelulusan untuk pelbagai proses.
 - Timestamps: `created_at`, `updated_at`, `deleted_at`
 
 #### `notifications`
+
 Notifikasi sistem untuk pengguna.
 
 **Medan:**
+
 - `id`: Kunci utama (UUID)
 - `type`: Jenis kelas notifikasi
 - `notifiable_type`: Jenis model sasaran (polimorfik)
@@ -465,6 +505,7 @@ Notifikasi sistem untuk pengguna.
 **Pelaku Utama:** Pemohon
 
 **Aliran Proses:**
+
 1. Pengguna mengakses borang permohonan pinjaman melalui antaramuka IRMS
 2. Penyampaian borang dinamik dengan paparan medan bersyarat berdasarkan pilihan pengguna
 3. Penyelesaian borang berbilang seksyen mengikut struktur borang kertas rasmi (BAHAGIAN 1, BAHAGIAN 2, dll.)
@@ -475,6 +516,7 @@ Notifikasi sistem untuk pengguna.
 8. Penghantaran notifikasi automatik kepada pemohon mengesahkan penghantaran
 
 **Komponen:**
+
 - **UI:** `App\Livewire\ResourceManagement\LoanApplication\ApplicationForm`
 - **Logik Backend:** `LoanApplicationService::createApplication()`
 - **Perubahan Data:** Rekod baru `LoanApplication` dengan rekod `LoanApplicationItem`
@@ -485,6 +527,7 @@ Notifikasi sistem untuk pengguna.
 **Pelaku Utama:** Pegawai Penyokong (Gred 41+ mengikut konfigurasi)
 
 **Aliran Proses:**
+
 1. Permohonan secara automatik dirujuk kepada pegawai penyokong yang sesuai berdasarkan keperluan gred
 2. Pegawai menerima notifikasi permohonan tertunda
 3. Pegawai menyemak perincian permohonan, permintaan peralatan dan tujuan
@@ -496,6 +539,7 @@ Notifikasi sistem untuk pengguna.
 9. Notifikasi dihantar kepada pemohon dan staf BPM (jika diluluskan)
 
 **Komponen:**
+
 - **UI:** `App\Livewire\ResourceManagement\Approval\Dashboard`
 - **Logik Backend:** `ApprovalService::processDecision()`
 - **Perubahan Data:** Rekod `Approval` dicipta, status `LoanApplication` dikemas kini
@@ -506,6 +550,7 @@ Notifikasi sistem untuk pengguna.
 **Pelaku Utama:** Staf BPM
 
 **Aliran Proses:**
+
 1. Staf BPM menerima notifikasi permohonan diluluskan untuk diproses
 2. Pengesahan ketersediaan peralatan dalam inventori
 3. Item peralatan spesifik dipilih dan ditempah
@@ -518,6 +563,7 @@ Notifikasi sistem untuk pengguna.
 10. Notifikasi dihantar kepada pemohon mengesahkan pengeluaran peralatan
 
 **Komponen:**
+
 - **UI:** `App\Livewire\ResourceManagement\Admin\BPM\ProcessIssuance`
 - **Logik Backend:** `LoanTransactionService::processNewIssue()`
 - **Perubahan Data:** `LoanTransaction` dengan jenis 'issue', rekod `LoanTransactionItem`, kemas kini status peralatan
@@ -528,6 +574,7 @@ Notifikasi sistem untuk pengguna.
 **Pelaku Utama:** Pemohon/Pegawai Pemulangan, Staf BPM
 
 **Aliran Proses:**
+
 1. Pemohon atau pegawai yang ditetapkan memulangkan peralatan ke pejabat BPM
 2. Staf BPM memeriksa item yang dipulangkan berdasarkan senarai semak aksesori asal
 3. Penilaian keadaan peralatan dan dokumentasi
@@ -538,6 +585,7 @@ Notifikasi sistem untuk pengguna.
 8. Notifikasi akhir dihantar kepada pemohon
 
 **Komponen:**
+
 - **UI:** `App\Livewire\ResourceManagement\Admin\BPM\ProcessReturn`
 - **Logik Backend:** `LoanTransactionService::processExistingReturn()`
 - **Perubahan Data:** Transaksi pemulangan, kemas kini status peralatan, penyelesaian permohonan
@@ -550,6 +598,7 @@ Notifikasi sistem untuk pengguna.
 **Pelaku Utama:** Pengguna Akhir (mana-mana staf MOTAC)
 
 **Aliran Proses:**
+
 1. Pengguna mengakses sistem helpdesk melalui antaramuka IRMS
 2. Borang penciptaan tiket dengan pilihan kategori (Perkakasan, Perisian, Rangkaian, Isu Akaun)
 3. Penerangan masalah dengan pemilihan tahap keutamaan
@@ -559,6 +608,7 @@ Notifikasi sistem untuk pengguna.
 7. Notifikasi dihantar kepada pengguna (pengakuan) dan pasukan sokongan IT
 
 **Komponen:**
+
 - **UI:** `App\Livewire\Helpdesk\CreateTicketForm`
 - **Logik Backend:** `HelpdeskService::createTicket()`
 - **Perubahan Data:** Rekod baru `HelpdeskTicket` dicipta
@@ -569,6 +619,7 @@ Notifikasi sistem untuk pengguna.
 **Pelaku Utama:** Pentadbir IT/Pengurus Helpdesk
 
 **Aliran Proses:**
+
 1. Tiket baru muncul dalam dashboard pentadbir IT dengan penunjuk keutamaan
 2. Pengesahan dan pelarasan kategori tiket jika perlu
 3. Penilaian tahap keutamaan dan kemungkinan eskalasi
@@ -578,6 +629,7 @@ Notifikasi sistem untuk pengguna.
 7. Notifikasi penugasan dihantar kepada agen IT yang ditetapkan
 
 **Komponen:**
+
 - **UI:** `App\Livewire\Helpdesk\Admin\TicketManagement`
 - **Logik Backend:** `HelpdeskService::assignTicket()`
 - **Perubahan Data:** Pengisian `assigned_to_user_id`, kemas kini status
@@ -588,6 +640,7 @@ Notifikasi sistem untuk pengguna.
 **Pelaku Utama:** Agen IT, Pengguna Akhir
 
 **Aliran Proses:**
+
 1. Agen IT yang ditugaskan menerima notifikasi dan menyemak perincian tiket
 2. Agen boleh berkomunikasi dengan pengguna melalui sistem komen tiket
 3. Kemampuan nota dalaman untuk dokumentasi agen sahaja
@@ -599,6 +652,7 @@ Notifikasi sistem untuk pengguna.
 9. Notifikasi kepada pengguna mengenai penyelesaian berserta butiran
 
 **Komponen:**
+
 - **UI:** `App\Livewire\Helpdesk\TicketDetails`
 - **Logik Backend:** `HelpdeskService::resolveTicket()`
 - **Perubahan Data:** Kemas kini status, rekod `HelpdeskComment`, nota penyelesaian
@@ -609,6 +663,7 @@ Notifikasi sistem untuk pengguna.
 **Pelaku Utama:** Agen IT atau Sistem (Automatik)
 
 **Aliran Proses:**
+
 1. Tiket yang telah diselesaikan layak untuk ditutup selepas pengesahan pengguna atau tempoh tamat
 2. Pengesahan akhir penyelesaian dan kepuasan pengguna
 3. Penutupan tiket dengan masa rasmi `closed_at`
@@ -617,6 +672,7 @@ Notifikasi sistem untuk pengguna.
 6. Metrik prestasi dikemas kini untuk laporan dan analisis
 
 **Komponen:**
+
 - **Logik Backend:** `HelpdeskService::closeTicket()`
 - **Perubahan Data:** Status kepada `closed`, masa `closed_at`
 - **Notifikasi:** `TicketClosedNotification` kepada pengguna
@@ -630,6 +686,7 @@ Notifikasi sistem untuk pengguna.
 Sistem mengekalkan penjenamaan MOTAC yang konsisten di semua antara muka dengan prinsip reka bentuk responsif bagi memastikan kebolehcapaian di desktop, tablet dan peranti mudah alih. Antara muka menggunakan skema warna rasmi MOTAC dan garis panduan tipografi seperti yang dinyatakan dalam Dokumen Reka Bentuk v4.0.
 
 **Elemen Reka Bentuk Utama:**
+
 - Logo rasmi MOTAC dan penjenamaan di header dan footer
 - Corak navigasi konsisten di semua modul
 - Sistem grid responsif untuk paparan optimum pada semua peranti
@@ -640,6 +697,7 @@ Sistem mengekalkan penjenamaan MOTAC yang konsisten di semua antara muka dengan 
 Setiap peranan pengguna mempunyai antara muka dashboard yang dioptimumkan untuk tugas dan tanggungjawab mereka:
 
 #### Dashboard Pemohon
+
 - Gambaran status permohonan pinjaman peribadi
 - Tiket helpdesk aktif dengan penunjuk status
 - Akses pantas untuk permohonan/tiket baru
@@ -647,18 +705,21 @@ Setiap peranan pengguna mempunyai antara muka dashboard yang dioptimumkan untuk 
 - Peringatan pemulangan peralatan dan tarikh akhir
 
 #### Dashboard Penyokong
+
 - Senarai kelulusan tertunda dengan penunjuk keutamaan
 - Sejarah kelulusan dan penjejakan keputusan
 - Tindakan lulus/tolak pantas dengan kemampuan komen
 - Metrik prestasi pasukan dan statistik
 
 #### Dashboard Staf BPM
+
 - Status inventori peralatan dan ketersediaan
 - Senarai pengeluaran dan pemulangan tertunda
 - Penjejakan keadaan peralatan dan jadual penyelenggaraan
 - Sejarah transaksi dan jejak audit
 
 #### Dashboard Agen IT
+
 - Senarai tiket yang ditugaskan dengan penyusunan keutamaan
 - Alat penugasan dan eskalasi tiket
 - Integrasi pangkalan pengetahuan untuk penyelesaian lazim
@@ -669,18 +730,21 @@ Setiap peranan pengguna mempunyai antara muka dashboard yang dioptimumkan untuk 
 Sistem menggunakan komponen Livewire untuk mempertingkat pengalaman pengguna:
 
 **Borang Dinamik:**
+
 - Paparan medan bersyarat berdasarkan pilihan pengguna
 - Validasi dan pengendalian ralat masa nyata
 - Fungsi auto-simpan draf
 - Penunjuk kemajuan untuk proses berbilang langkah
 
 **Elemen Interaktif:**
+
 - Kemas kini status masa nyata tanpa refresh halaman
 - Carian dan penapisan dinamik
 - Paparan notifikasi segera
 - Jadual data responsif dengan susunan dan pagination
 
 **Komponen Boleh Diguna Semula:**
+
 - Lencana status dengan kod warna konsisten
 - Kad maklumat pengguna dengan penunjuk peranan
 - Panel perincian peralatan dengan status keadaan
@@ -693,17 +757,20 @@ Sistem menggunakan komponen Livewire untuk mempertingkat pengalaman pengguna:
 ### 7.1 Peraturan Pinjaman Peralatan ICT
 
 **Keperluan Kelayakan:**
+
 - Hanya staf MOTAC yang aktif boleh menghantar permohonan pinjaman
 - Pengguna mesti mempunyai jabatan dan jawatan yang sah
 - Pinjaman peralatan tertakluk kepada ketersediaan dan kelulusan
 - Had tempoh pinjaman maksimum berdasarkan jenis dan tujuan peralatan
 
 **Kuasa Kelulusan:**
+
 - Pegawai penyokong mesti Gred 41 ke atas seperti yang dikonfigurasi dalam `config/motac.php`
 - Kuasa kelulusan ditentukan mengikut hierarki organisasi
 - Keperluan gred dikuatkuasakan melalui middleware dan polisi
 
 **Pengurusan Peralatan:**
+
 - Peralatan mesti sedia dan dalam keadaan baik untuk pengeluaran
 - Penjejakan nombor siri untuk semua item yang dikeluarkan
 - Senarai semak aksesori wajib semasa pengeluaran dan pemulangan
@@ -712,12 +779,14 @@ Sistem menggunakan komponen Livewire untuk mempertingkat pengalaman pengguna:
 ### 7.2 Peraturan Sistem Helpdesk
 
 **Penciptaan Tiket:**
+
 - Semua staf MOTAC boleh mencipta tiket helpdesk
 - Medan wajib termasuk kategori, subjek dan penerangan
 - Tahap keutamaan dihadkan berdasarkan peranan pengguna dan jenis isu
 - Sistem penomboran tiket automatik untuk penjejakan
 
 **Logik Penugasan:**
+
 - Tiket baru automatik kelihatan kepada pasukan admin IT
 - Penugasan berdasarkan kepakaran kategori dan keseimbangan beban kerja
 - Prosedur eskalasi untuk tiket keutamaan tinggi atau tertunda
@@ -726,12 +795,14 @@ Sistem menggunakan komponen Livewire untuk mempertingkat pengalaman pengguna:
 ### 7.3 Peraturan Validasi
 
 **Validasi Data:**
+
 - Kelas FormRequest untuk validasi input menyeluruh
 - Validasi logik perniagaan di lapisan servis
 - Kekangan pangkalan data untuk integriti data
 - Validasi masa nyata di sisi klien untuk pengalaman pengguna
 
 **Validasi Keselamatan:**
+
 - Perlindungan CSRF pada semua borang
 - Pembersihan input dan pencegahan suntikan SQL
 - Validasi muat naik fail untuk lampiran helpdesk
@@ -744,18 +815,21 @@ Sistem menggunakan komponen Livewire untuk mempertingkat pengalaman pengguna:
 ### 8.1 Keselamatan
 
 **Autentikasi & Kebenaran:**
+
 - Laravel Fortify untuk aliran autentikasi mantap
 - Laravel Jetstream untuk pengurusan profil pengguna
 - Spatie Laravel Permission untuk kawalan akses berasaskan peranan
 - Middleware khusus gred untuk penguatkuasaan hierarki kelulusan
 
 **Perlindungan Data:**
+
 - Penyimpanan kata laluan terenkripsi menggunakan hashing Laravel
 - Validasi token CSRF pada semua operasi yang mengubah status
 - Validasi dan pembersihan input pada semua input pengguna
 - Pengendalian muat naik fail selamat dengan sekatan jenis dan saiz
 
 **Audit & Pematuhan:**
+
 - Jejak audit menyeluruh melalui BlameableObserver
 - Logging pangkalan data untuk semua operasi kritikal
 - Penjejakan tindakan pengguna untuk laporan pematuhan
@@ -764,12 +838,14 @@ Sistem menggunakan komponen Livewire untuk mempertingkat pengalaman pengguna:
 ### 8.2 Prestasi & Skalabiliti
 
 **Pengoptimuman Pangkalan Data:**
+
 - Pengindeksan yang betul pada medan yang kerap digunakan
 - Pengoptimuman query menggunakan amalan terbaik Eloquent
 - Pooling sambungan pangkalan data untuk pengguna serentak
 - Jadual penyelenggaraan dan pengoptimuman berkala
 
 **Strategi Caching:**
+
 - Caching di peringkat aplikasi untuk data yang kerap dicapai
 - Caching sesi untuk status autentikasi pengguna
 - Caching berasaskan fail untuk data konfigurasi statik
@@ -778,12 +854,14 @@ Sistem menggunakan komponen Livewire untuk mempertingkat pengalaman pengguna:
 ### 8.3 Amalan Pembangunan
 
 **Kualiti Kod:**
+
 - Pematuhan standard kod PSR-12
 - Ujian unit dan ciri yang komprehensif
 - Proses semakan kod untuk semua perubahan
 - Ujian automatik dalam pipeline CI/CD
 
 **Deploymen:**
+
 - Persekitaran pembangunan dan pengeluaran berasaskan Docker
 - Deploymen automatik melalui GitHub Actions
 - Pengurusan migrasi pangkalan data
@@ -796,36 +874,43 @@ Sistem menggunakan komponen Livewire untuk mempertingkat pengalaman pengguna:
 ### 9.1 Autentikasi & Pengurusan Pengguna
 
 **Pengawal:**
+
 - Pengawal autentikasi daripada Fortify/Jetstream
 - `UserController`: Pengurusan profil pengguna asas
 - Tindakan autentikasi khas untuk keperluan MOTAC
 
 **Model:**
+
 - `User`: Model pengguna teras dengan hubungan organisasi
 - `Department`, `Position`, `Grade`: Model struktur organisasi
 - Model Peranan dan Kebenaran melalui pakej Spatie
 
 **Servis:**
+
 - `UserService`: Logik perniagaan pengurusan pengguna
 - Servis autentikasi melalui tindakan Fortify
 
 **Polisi:**
+
 - `UserPolicy`: Kebenaran akses dan pengubahsuaian pengguna
 - Polisi kebenaran berasaskan gred
 
 **Komponen:**
+
 - Komponen Livewire pengurusan profil pengguna
 - Antara muka pengurusan hierarki organisasi
 
 ### 9.2 Modul Pinjaman Peralatan ICT
 
 **Pengawal:**
+
 - `LoanApplicationController`: Pengurusan permohonan pinjaman dan penjanaan PDF
 - `EquipmentController`: Penyemakan dan perincian peralatan
 - `LoanTransactionController`: Pemprosesan pengeluaran dan pemulangan
 - `Admin\EquipmentController`: Pengurusan peralatan secara pentadbiran
 
 **Model:**
+
 - `Equipment`: Inventori peralatan dengan spesifikasi penuh
 - `EquipmentCategory`, `SubCategory`: Pengkelasan peralatan
 - `LoanApplication`, `LoanApplicationItem`: Pengurusan permohonan pinjaman
@@ -833,22 +918,26 @@ Sistem menggunakan komponen Livewire untuk mempertingkat pengalaman pengguna:
 - `Location`: Pengurusan lokasi peralatan
 
 **Servis:**
+
 - `LoanApplicationService`: Logik perniagaan permohonan pinjaman
 - `LoanTransactionService`: Pemprosesan pengeluaran dan pemulangan
 - `EquipmentService`: Pengurusan inventori peralatan
 
 **Polisi:**
+
 - `LoanApplicationPolicy`: Kebenaran permohonan pinjaman
 - `LoanTransactionPolicy`: Kebenaran transaksi
 - `EquipmentPolicy`: Kawalan akses peralatan
 
 **Komponen Livewire:**
+
 - `LoanApplication\ApplicationForm`: Borang permohonan dinamik
 - `Admin\BPM\ProcessIssuance`: Antara muka pengeluaran peralatan
 - `Admin\BPM\ProcessReturn`: Pemprosesan pemulangan peralatan
 - Antara muka penyemakan dan pengurusan peralatan
 
 **Notifikasi:**
+
 - `ApplicationSubmitted`: Pengesahan permohonan
 - `ApplicationApproved`/`ApplicationRejected`: Notifikasi kelulusan
 - `LoanApplicationReadyForIssuanceNotification`: Amaran pemprosesan BPM
@@ -860,27 +949,33 @@ Sistem menggunakan komponen Livewire untuk mempertingkat pengalaman pengguna:
 ### 9.3 Modul Helpdesk & Sokongan ICT
 
 **Pengawal:**
+
 - `Helpdesk\TicketController`: Pengurusan tiket teras
 - `Admin\HelpdeskCategoryController`: Pengurusan kategori
 
 **Model:**
+
 - `HelpdeskTicket`: Entiti tiket teras
 - `HelpdeskCategory`: Pengkategorian tiket
 - `HelpdeskComment`: Komunikasi berantai tiket
 
 **Servis:**
+
 - `HelpdeskService`: Logik pengurusan tiket menyeluruh
 
 **Polisi:**
+
 - `HelpdeskTicketPolicy`: Kebenaran akses dan pengubahsuaian tiket
 
 **Komponen Livewire:**
+
 - `Helpdesk\CreateTicketForm`: Antara muka penciptaan tiket baru
 - `Helpdesk\TicketList`: Pengurusan tiket pengguna
 - `Helpdesk\TicketDetails`: Paparan tiket terperinci dengan komen
 - `Helpdesk\Admin\TicketManagement`: Antara muka pengurusan agen IT
 
 **Notifikasi:**
+
 - `TicketCreatedNotification`: Amaran tiket baru
 - `TicketAssignedNotification`: Notifikasi penugasan
 - `TicketStatusUpdatedNotification`: Amaran perubahan status
@@ -890,34 +985,43 @@ Sistem menggunakan komponen Livewire untuk mempertingkat pengalaman pengguna:
 ### 9.4 Modul Aliran Kerja Kelulusan (Berkongsi)
 
 **Pengawal:**
+
 - `ApprovalController`: Pengurusan kelulusan dan pencatatan keputusan
 
 **Model:**
+
 - `Approval`: Penjejakan kelulusan polimorfik
 
 **Servis:**
+
 - `ApprovalService`: Logik routing dan pemprosesan kelulusan
 
 **Polisi:**
+
 - `ApprovalPolicy`: Kebenaran kelulusan
 
 **Komponen:**
+
 - `Approval\Dashboard`: Antara muka pengurusan kelulusan pusat
 - Antara muka sejarah kelulusan dan audit
 
 ### 9.5 Notifikasi & Laporan
 
 **Pengawal:**
+
 - `NotificationController`: Pengurusan notifikasi pengguna
 - `ReportController`: Pelaporan dan analitik sistem
 
 **Model:**
+
 - `Notification`: Pengurusan notifikasi sistem
 
 **Servis:**
+
 - `NotificationService`: Penghantaran notifikasi pusat
 
 **Komponen:**
+
 - Antara muka pusat notifikasi
 - Dashboard pelaporan untuk analitik pinjaman dan helpdesk
 - Paparan metrik prestasi dan KPI
@@ -925,18 +1029,22 @@ Sistem menggunakan komponen Livewire untuk mempertingkat pengalaman pengguna:
 ### 9.6 Komponen Berkongsi & Infrastruktur
 
 **Penyedia:**
+
 - Pendaftaran penyedia servis untuk semua servis perniagaan
 - Pendaftaran pendengar event untuk pemerhati model
 - Pendaftaran polisi untuk kebenaran
 
 **Pemerhati:**
+
 - `BlameableObserver`: Pengisian medan audit automatik
 
 **Pembantu (Helpers):**
+
 - Fungsi utiliti untuk operasi lazim
 - Pembantu pemformatan tarikh dan lokaliti
 
 **Konfigurasi:**
+
 - `config/motac.php`: Tetapan khusus aplikasi
 - Keperluan gred untuk kelulusan
 - Konfigurasi senarai aksesori pinjaman
@@ -949,16 +1057,19 @@ Sistem menggunakan komponen Livewire untuk mempertingkat pengalaman pengguna:
 ### 10.1 Penyediaan Persekitaran
 
 **Persekitaran Pembangunan:**
+
 - Setup berasaskan Docker untuk konsistensi pasukan pembangunan
 - Pangkalan data tempatan dengan data ujian menyeluruh
 - Mailtrap untuk ujian e-mel semasa pembangunan
 
 **Persekitaran Staging:**
+
 - Persekitaran mirip produksi untuk ujian penerimaan pengguna
 - Ujian migrasi data penuh dan pengesahan
 - Ujian prestasi di bawah beban
 
 **Persekitaran Pengeluaran:**
+
 - Konfigurasi pelayan boleh skala dengan pemantauan
 - Strategi sandaran automatik
 - Pengukuhan keselamatan dan pematuhan
@@ -966,11 +1077,13 @@ Sistem menggunakan komponen Livewire untuk mempertingkat pengalaman pengguna:
 ### 10.2 Strategi Migrasi
 
 **Migrasi Data:**
+
 - Import dan validasi inventori peralatan sedia ada
 - Migrasi akaun pengguna daripada sistem asal
 - Pemeliharaan data pinjaman sejarah jika berkenaan
 
 **Integrasi Sistem:**
+
 - Endpoint API untuk integrasi sistem luaran
 - Konfigurasi webhook untuk deploymen automatik
 - Setup sistem pemantauan dan amaran
@@ -978,11 +1091,13 @@ Sistem menggunakan komponen Livewire untuk mempertingkat pengalaman pengguna:
 ### 10.3 Latihan Pengguna & Sokongan
 
 **Bahan Latihan:**
+
 - Manual pengguna komprehensif untuk setiap peranan
 - Tutorial video untuk operasi lazim
 - Panduan rujukan pantas untuk proses utama
 
 **Struktur Sokongan:**
+
 - Pasukan sokongan khusus semasa pelaksanaan
 - Pengumpulan maklum balas dan penjejakan isu
 - Penambahbaikan berterusan berdasarkan input pengguna
@@ -1008,6 +1123,7 @@ Pelaksanaan reka bentuk ini akan meningkatkan keupayaan MOTAC untuk mengurus sum
 ---
 
 **Kawalan Dokumen:**
+
 - **Versi:** 4.0
 - **Tarikh:** 12 Ogos 2025
 - **Penulis:** IzzatFirdaus
