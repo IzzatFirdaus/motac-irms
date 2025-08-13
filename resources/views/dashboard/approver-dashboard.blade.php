@@ -1,5 +1,6 @@
 {{-- resources/views/dashboard/approver-dashboard.blade.php --}}
-{{-- Approver Dashboard - Renamed from approver.blade.php for standardization --}}
+{{-- Approver Dashboard for MOTAC IRMS --}}
+
 @extends('layouts.app')
 
 @section('title', __('dashboard.approver_title'))
@@ -19,7 +20,7 @@
                 <div class="card-header py-3 d-flex align-items-center"><i class="bi bi-card-checklist me-2 text-primary"></i><h6 class="m-0 fw-bold text-primary">{{ __('dashboard.apps_awaiting_your_action') }}</h6></div>
                 <div class="card-body p-0">
                     {{-- Livewire component for user approval dashboard --}}
-                    @livewire('resource-management.approval.dashboard', ['userId' => Auth::id(), 'defaultStatusFilter' => 'pending', 'showFilters' => true])
+                    @livewire('resource-management.approval.approval-dashboard', ['userId' => Auth::id(), 'defaultStatusFilter' => 'pending', 'showFilters' => true])
                 </div>
             </div>
         </div>

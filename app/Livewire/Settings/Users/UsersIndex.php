@@ -46,7 +46,7 @@ class UsersIndex extends Component
     public function getUsersListProperty()
     {
         $query = User::select([
-                'id', 'name', 'email', 'motac_email', 'identification_number', 'status', 'title', 'department_id', 'profile_photo_path',
+                'id', 'name', 'email', 'identification_number', 'status', 'title', 'department_id', 'profile_photo_path', /*, 'motac_email' */
             ])
             ->with(['department:id,name', 'roles:id,name'])
             ->orderBy('name', 'asc');

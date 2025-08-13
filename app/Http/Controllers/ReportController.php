@@ -238,7 +238,15 @@ class ReportController extends Controller
 
     /**
      * NEW: Helpdesk-specific reports (stub).
+     * This is a fallback/action for /reports/helpdesk-tickets route.
      */
+    public function helpdeskTickets(Request $request): View|Response
+    {
+        // Logic to be implemented for helpdesk module
+        // For now, just render the stub view
+        return view('reports.helpdesk-tickets');
+    }
+
     public function helpdeskTicketVolume(Request $request): View|Response
     {
         // Logic to be implemented for helpdesk module

@@ -157,7 +157,8 @@ class User extends Authenticatable
     }
 
     /**
-     * Loans created by the user.
+     * Loans created by the user (created_by).
+     * @return HasMany
      */
     public function createdLoans(): HasMany
     {
@@ -166,6 +167,7 @@ class User extends Authenticatable
 
     /**
      * Loans where the user is responsible officer.
+     * @return HasMany
      */
     public function responsibleForLoans(): HasMany
     {
@@ -174,6 +176,7 @@ class User extends Authenticatable
 
     /**
      * Helpdesk tickets submitted by this user (as applicant).
+     * @return HasMany
      */
     public function tickets(): HasMany
     {
@@ -182,6 +185,7 @@ class User extends Authenticatable
 
     /**
      * Helpdesk tickets assigned to this user (as agent/staff).
+     * @return HasMany
      */
     public function assignedTickets(): HasMany
     {
@@ -189,11 +193,23 @@ class User extends Authenticatable
     }
 
     /**
-     * Approvals assigned to the user (as officer).
+     * Approvals assigned to the user (as officer, FK = officer_id).
+     * @return HasMany
      */
     public function approvalsAssigned(): HasMany
     {
-        // Approval model uses officer_id as the FK
+        return $this->hasMany(Approval::class, 'officer_id');
+    }
+
+    /**
+     * Approvals where this user is an approver (report/activity).
+     * This is used for user activity report with withCount.
+     * Uses officer_id FK, as per your approvals table.
+     * @return HasMany
+     */
+    public function approvalsAsApprover(): HasMany
+    {
+        // NOTE: This must match the FK in your approvals table (officer_id).
         return $this->hasMany(Approval::class, 'officer_id');
     }
 
@@ -217,6 +233,18 @@ class User extends Authenticatable
     public function deleter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by');
+    }
+
+    // --- LOAN APPLICATIONS RELATIONSHIPS ---
+
+    /**
+     * Get all loan applications where the user is the applicant.
+     * Used for user-specific loan application listings.
+     * @return HasMany
+     */
+    public function loanApplicationsAsApplicant(): HasMany
+    {
+        return $this->hasMany(LoanApplication::class, 'user_id');
     }
 
     // --- ROLE CONVENIENCE HELPERS ---
@@ -276,10 +304,10 @@ class User extends Authenticatable
 
     /**
      * Accessor for full name, including title if set.
+     * Example: "Encik Ahmad" or just "Ahmad"
      */
     public function getFullNameAttribute(): string
     {
-        // If title is set, format as "Title Name", else just Name
         return ($this->title ? (self::$TITLE_OPTIONS[$this->title] ?? $this->title) . ' ' : '') . $this->name;
     }
 
@@ -289,5 +317,91 @@ class User extends Authenticatable
     public function getProfilePhotoUrlAttribute(): string
     {
         return $this->profile_photo_url ?? '';
+    }
+
+    /**
+     * Get a Bootstrap badge class for a given role name.
+     * Used to visually distinguish user roles in the UI.
+     */
+    public static function getRoleBadgeClass(?string $role): string
+    {
+        if (!$role) {
+            return 'bg-secondary';
+        }
+
+        return match (strtolower($role)) {
+            'admin' => 'bg-primary',
+            'bpm staff' => 'bg-info',
+            'it admin' => 'bg-dark',
+            'approver' => 'bg-success',
+            'hod' => 'bg-warning',
+            'user' => 'bg-secondary',
+            default => 'bg-secondary',
+        };
+    }
+
+    /**
+     * Get available status options for user filtering and forms.
+     * Returns an associative array of status keys and their label.
+     */
+    public static function getStatusOptions(): array
+    {
+        return [
+            self::STATUS_ACTIVE => __('Aktif'),
+            self::STATUS_INACTIVE => __('Tidak Aktif'),
+            self::STATUS_SUSPENDED => __('Digantung'),
+            self::STATUS_PENDING => __('Menunggu'),
+        ];
+    }
+
+    /**
+     * Get available service status options for user forms and filters.
+     * Returns an associative array of service status keys and their label.
+     */
+    public static function getServiceStatusOptions(): array
+    {
+        return [
+            self::SERVICE_STATUS_TETAP => __('Tetap'),
+            self::SERVICE_STATUS_KONTRAK_MYSTEP => __('Kontrak MyStep'),
+            self::SERVICE_STATUS_PELAJAR_INDUSTRI => __('Pelajar Industri'),
+            self::SERVICE_STATUS_OTHER_AGENCY => __('Agensi Luar'),
+        ];
+    }
+
+    /**
+     * Get available appointment type options for user forms and filters.
+     * Returns an associative array of appointment type keys and their label.
+     */
+    public static function getAppointmentTypeOptions(): array
+    {
+        return [
+            self::APPOINTMENT_TYPE_BAHARU => __('Baharu'),
+            self::APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN => __('Kenaikan Pangkat/Pertukaran'),
+            self::APPOINTMENT_TYPE_LAIN_LAIN => __('Lain-lain'),
+        ];
+    }
+
+    /**
+     * Get available level options for user forms and filters.
+     * Returns an associative array of level keys and their label.
+     */
+    public static function getLevelOptions(): array
+    {
+        return [
+            '1' => 'Aras 1',
+            '2' => 'Aras 2',
+            '3' => 'Aras 3',
+            '4' => 'Aras 4',
+            '5' => 'Aras 5',
+        ];
+    }
+
+    /**
+     * Get available title options for user forms and filters.
+     * Returns an associative array of title keys and their label.
+     */
+    public static function getTitleOptions(): array
+    {
+        return self::$TITLE_OPTIONS;
     }
 }

@@ -144,8 +144,8 @@ class Kernel extends HttpKernel
         // Control access to application logs and debugging information
         'view_logs' => \App\Http\Middleware\ViewLogs::class,
 
-        // Permission to view approval tasks
-        'view_approval_tasks' => \App\Http\Middleware\CheckPermission::class . ':view_approval_tasks',
+        // Permission to view approval tasks - bind to ViewApprovalTasks middleware
+        'view_approval_tasks' => \App\Http\Middleware\ViewApprovalTasks::class,
 
         // Permission to view approval history
         'view_approval_history' => \App\Http\Middleware\CheckPermission::class . ':view_approval_history',

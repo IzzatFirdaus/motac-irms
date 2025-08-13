@@ -10,19 +10,19 @@ declare(strict_types=1);
 | This file defines all web routes for the MOTAC Integrated Resource Management System.
 | Includes controller and Livewire routes for both public and authenticated users.
 |
-| This version is a merge and correction of previous route files, ensuring all expected
-| named routes are defined, especially those referenced by views such as:
-|   - admin.equipment.index   → /admin/equipment-items (Livewire)
-|   - admin.equipment.issued-loans → /admin/equipment/issued-loans
-|   - approvals.dashboard     → /approvals (Livewire)
-| and any other admin/equipment/approvals routes required by the dashboard and sidebar.
+| IMPORTANT: This application uses a custom SuffixedTranslator that automatically
+| loads language files with locale suffixes (e.g., forms_en.php, forms_ms.php)
+| based on the current application locale.
+|
+| Last Updated: 2025-08-11 15:05:52 UTC by IzzatFirdaus
+| Changes: Streamlined routes to prioritize Livewire components and remove duplicates
 |--------------------------------------------------------------------------
 */
 
 use Illuminate\Support\Facades\Route;
 
 // --------------------------------------------------
-// Controller Imports (for public/static/some controller routes)
+// Controllers - Core Application Controllers
 // --------------------------------------------------
 use App\Http\Controllers\language\LanguageController;
 use App\Http\Controllers\LegalController;
@@ -35,78 +35,134 @@ use App\Http\Controllers\ApprovalController;
 use App\Http\Controllers\EquipmentController;
 
 // --------------------------------------------------
-// Livewire Component Imports (for all Livewire-based UI)
+// Livewire Components - Core Components
 // --------------------------------------------------
 use App\Livewire\ContactUs as ContactUsLW;
 use App\Livewire\EquipmentChecklist as EquipmentChecklistLW;
 use App\Livewire\LoanRequestForm as LoanRequestFormLW;
+
+// --------------------------------------------------
+// Livewire Components - Dashboards
+// --------------------------------------------------
 use App\Livewire\Dashboard as DashboardLW;
 use App\Livewire\Dashboard\AdminDashboard as AdminDashboardLW;
 use App\Livewire\Dashboard\ApproverDashboard as ApproverDashboardLW;
 use App\Livewire\Dashboard\BpmDashboard as BpmDashboardLW;
 use App\Livewire\Dashboard\ItAdminDashboard as ItAdminDashboardLW;
 use App\Livewire\Dashboard\UserDashboard as UserDashboardLW;
+
+// --------------------------------------------------
+// Livewire Components - Charts
+// --------------------------------------------------
 use App\Livewire\Charts\LoanSummaryChart;
+
+// --------------------------------------------------
+// Livewire Components - Resource Management
+// --------------------------------------------------
+// My Applications and Loan Application Form
 use App\Livewire\ResourceManagement\MyApplications\Loan\LoanApplicationsIndex as MyLoanApplicationsIndexLW;
 use App\Livewire\ResourceManagement\LoanApplication\LoanApplicationForm as LoanApplicationFormLW;
+
+// Approval System
 use App\Livewire\ResourceManagement\Approval\ApprovalDashboard as ApprovalDashboardLW;
 use App\Livewire\ResourceManagement\Approval\ApprovalHistory as ApprovalHistoryLW;
-use App\Livewire\ResourceManagement\Admin\Equipment\EquipmentIndex as AdminEquipmentIndexLW;
+
+// Admin - Equipment Management
 use App\Livewire\ResourceManagement\Admin\Equipment\EquipmentForm as AdminEquipmentFormLW;
+use App\Livewire\ResourceManagement\Admin\Equipment\EquipmentIndex as AdminEquipmentIndexLW;
+
+// Admin - BPM Operations
 use App\Livewire\ResourceManagement\Admin\BPM\IssuedLoans as AdminIssuedLoansLW;
 use App\Livewire\ResourceManagement\Admin\BPM\OutstandingLoans as AdminOutstandingLoansLW;
 use App\Livewire\ResourceManagement\Admin\BPM\ProcessIssuance as AdminProcessIssuanceLW;
 use App\Livewire\ResourceManagement\Admin\BPM\ProcessReturn as AdminProcessReturnLW;
+
+// Admin - Grades Management
 use App\Livewire\ResourceManagement\Admin\Grades\GradeIndex as AdminGradeIndexLW;
+
+// Admin - Users Management
 use App\Livewire\ResourceManagement\Admin\Users\UserIndex as AdminUserIndexLW;
+
+// Admin - Reports
 use App\Livewire\ResourceManagement\Admin\Reports\EquipmentInventoryReport as AdminEquipmentInventoryReportLW;
 use App\Livewire\ResourceManagement\Admin\Reports\EquipmentReport as AdminEquipmentReportLW;
 use App\Livewire\ResourceManagement\Admin\Reports\LoanApplicationsReport as AdminLoanApplicationsReportLW;
 use App\Livewire\ResourceManagement\Admin\Reports\UserActivityReport as AdminUserActivityReportLW;
+
+// Regular Reports (non-admin)
 use App\Livewire\ResourceManagement\Reports\EquipmentReport as EquipmentReportLW;
 use App\Livewire\ResourceManagement\Reports\LoanApplicationsReport as LoanApplicationsReportLW;
 use App\Livewire\ResourceManagement\Reports\ReportsIndex as ReportsIndexLW;
 use App\Livewire\ResourceManagement\Reports\UserActivityReport as UserActivityReportLW;
+
+// --------------------------------------------------
+// Livewire Components - Settings
+// --------------------------------------------------
+// User Management
 use App\Livewire\Settings\Users\UsersCreate as SettingsUsersCreateLW;
 use App\Livewire\Settings\Users\UsersEdit as SettingsUsersEditLW;
 use App\Livewire\Settings\Users\UsersIndex as SettingsUsersIndexLW;
 use App\Livewire\Settings\Users\UsersShow as SettingsUsersShowLW;
-use App\Livewire\Settings\Roles\RolesIndex as SettingsRolesIndexLW;
-use App\Livewire\Settings\Permissions\PermissionsIndex as SettingsPermissionsIndexLW;
+
+// Roles, Permissions, Departments, Positions
 use App\Livewire\Settings\Departments\DepartmentsIndex as SettingsDepartmentsIndexLW;
-use App\Livewire\Settings\Positions\PositionsIndex as SettingsPositionsIndexLW;
+use App\Livewire\Settings\Permissions\PermissionsIndex as SettingsPermissionsIndexLW;
+use App\Livewire\Settings\Roles\RolesIndex as SettingsRolesIndexLW;
+// Uncomment when the PositionsIndex Livewire class is created
+// use App\Livewire\Settings\Positions\PositionsIndex as SettingsPositionsIndexLW;
+
+// --------------------------------------------------
+// Livewire Components - Shared Components
+// --------------------------------------------------
 use App\Livewire\Shared\Notifications\NotificationsList;
+
+// --------------------------------------------------
+// Livewire Components - Helpdesk
+// --------------------------------------------------
 use App\Livewire\Helpdesk\CreateTicketForm;
 use App\Livewire\Helpdesk\MyTicketsIndex;
 use App\Livewire\Helpdesk\TicketDetails;
 use App\Livewire\Helpdesk\Admin\TicketManagement as AdminTicketManagementLW;
-use App\Livewire\Misc\ComingSoon as ComingSoonLW;
+
+// --------------------------------------------------
+// Livewire Components - Human Resource
+// --------------------------------------------------
 use App\Livewire\HumanResource\Structure\Departments as HRDepartmentsLW;
 use App\Livewire\HumanResource\Structure\EmployeeInfo as HREmployeeInfoLW;
 use App\Livewire\HumanResource\Structure\Positions as HRPositionsLW;
 
 // --------------------------------------------------
-// PUBLIC ROUTES
+// Livewire Components - Miscellaneous
+// --------------------------------------------------
+use App\Livewire\Misc\ComingSoon as ComingSoonLW;
+
+// --------------------------------------------------
+// Public Routes (accessible without authentication)
 // --------------------------------------------------
 
-// Home page (welcome)
+// Home page route
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-// Static policy and terms pages (static blade)
+// Static policy and terms pages (direct Blade views, no controller needed)
 Route::view('/privacy-policy', 'policy')->name('policy');
 Route::view('/terms-of-service', 'terms')->name('terms');
 
-// Contact Us (Livewire)
+// Contact Us page - using Livewire component directly
 Route::get('/contact-us', ContactUsLW::class)->name('contact-us');
 
-// Language switcher
+// --------------------------------------------------
+// Language Switching Route (accessible to all users)
+// --------------------------------------------------
 Route::get('lang/{lang}', [LanguageController::class, 'swap'])
     ->where('lang', 'en|ms')
     ->name('language.swap');
 
-// Test translation system (debug)
+// --------------------------------------------------
+// === TEST ROUTE FOR TRANSLATION LOADING ===
+// --------------------------------------------------
+// Debugging route for translation system testing
 Route::get('/test-lang', function () {
     return [
         'loaded_file_ms' => file_exists(resource_path('lang/ms/app_ms.php')),
@@ -120,7 +176,7 @@ Route::get('/test-lang', function () {
 });
 
 // --------------------------------------------------
-// AUTHENTICATED ROUTES (Livewire UI + controllers for process endpoints)
+// Authenticated Routes (protected by Jetstream/Sanctum/verified middleware)
 // --------------------------------------------------
 Route::middleware([
     'auth:sanctum',
@@ -129,92 +185,103 @@ Route::middleware([
 ])->group(function () {
 
     // -------------------------
-    // Dashboard Routes (role-based)
+    // Dashboard Routes (Livewire)
     // -------------------------
     Route::get('/dashboard', DashboardLW::class)->name('dashboard');
+
     Route::get('/dashboard/admin', AdminDashboardLW::class)
         ->name('admin.dashboard')
         ->middleware(['role:Admin|IT Admin']);
+
     Route::get('/dashboard/approver', ApproverDashboardLW::class)
         ->name('dashboard.approver')
         ->middleware(['role:Approver|Admin|IT Admin']);
+
     Route::get('/dashboard/bpm', BpmDashboardLW::class)
         ->name('dashboard.bpm')
         ->middleware(['role:BPM|Admin|IT Admin']);
+
     Route::get('/dashboard/itadmin', ItAdminDashboardLW::class)
         ->name('dashboard.itadmin')
         ->middleware(['role:IT Admin|Admin']);
+
     Route::get('/dashboard/user', UserDashboardLW::class)
         ->name('dashboard.user')
         ->middleware(['role:User|Admin|IT Admin']);
 
     // -------------------------
-    // Notifications (Livewire + mark-as-read)
+    // Notification Management (Livewire + controller for AJAX)
     // -------------------------
     Route::get('/notifications', NotificationsList::class)->name('notifications.index');
     Route::patch('/notifications/{notification}/mark-as-read', [NotificationController::class, 'markAsRead'])
         ->name('notifications.mark-as-read');
 
     // -------------------------
-    // User Profile (Livewire)
+    // User Profile Management (Livewire)
     // -------------------------
     Route::get('/user/profile', SettingsUsersShowLW::class)->name('profile.show');
 
     // -------------------------
-    // Loan Applications (Livewire + controller for process/print)
+    // ICT Equipment Loan Application Routes (mixed Livewire/controller)
     // -------------------------
     Route::prefix('loan-applications')->name('loan-applications.')->group(function () {
+        // Livewire routes for UI
         Route::get('/create', LoanApplicationFormLW::class)->name('create');
         Route::get('/my-applications', MyLoanApplicationsIndexLW::class)->name('my-applications.index');
         Route::get('/{loanApplication}/edit', LoanApplicationFormLW::class)
             ->name('edit')
             ->whereNumber('loanApplication');
-        Route::get('/{loanApplication}/print', [LoanApplicationController::class, 'printPdf'])
-            ->name('print')
-            ->whereNumber('loanApplication');
+
+        // Controller routes for core functions and processing
         Route::get('/{loanApplication}', [LoanApplicationController::class, 'show'])
             ->name('show')
             ->whereNumber('loanApplication');
-        // Equipment issuance/return (process endpoints)
-        Route::get('/{loanApplication}/issue', [LoanTransactionController::class, 'showIssueForm'])
-            ->name('issue')
-            ->whereNumber('loanApplication')
-            ->middleware('can:processIssuance,loanApplication');
-        Route::post('/{loanApplication}/issue', [LoanTransactionController::class, 'storeIssue'])
-            ->name('issue.store')
-            ->whereNumber('loanApplication')
-            ->middleware('can:processIssuance,loanApplication');
+
+        Route::get('/{loanApplication}/print', [LoanApplicationController::class, 'printPdf'])
+            ->name('print')
+            ->whereNumber('loanApplication');
+
+        // Transaction/processing routes
         Route::get('/transactions/{loanTransaction}/return', [LoanTransactionController::class, 'showReturnForm'])
             ->name('return')
             ->whereNumber('loanTransaction')
             ->middleware('can:processReturn,loanTransaction,loanTransaction.loanApplication');
+
         Route::post('/transactions/{loanTransaction}/return', [LoanTransactionController::class, 'storeReturn'])
             ->name('return.store')
             ->whereNumber('loanTransaction')
             ->middleware('can:processReturn,loanTransaction,loanTransaction.loanApplication');
+
+        Route::get('/{loanApplication}/issue', [LoanTransactionController::class, 'showIssueForm'])
+            ->name('issue')
+            ->whereNumber('loanApplication')
+            ->middleware('can:processIssuance,loanApplication');
+
+        Route::post('/{loanApplication}/issue', [LoanTransactionController::class, 'storeIssue'])
+            ->name('issue.store')
+            ->whereNumber('loanApplication')
+            ->middleware('can:processIssuance,loanApplication');
     });
 
     // -------------------------
-    // Equipment Management (User: index/show only)
+    // Equipment Management (View Only for Regular Users)
     // -------------------------
     Route::resource('equipment', EquipmentController::class)->only(['index', 'show']);
 
     // -------------------------
-    // Approval Workflows (Livewire + process endpoints)
+    // Approval Workflow System (Livewire)
     // -------------------------
     Route::prefix('approvals')->name('approvals.')->group(function () {
-        // Use Spatie's built-in permission middleware to avoid alias resolution issues.
-        // This ensures the route is accessible only to users with the 'view approval tasks' permission.
+        // Livewire dashboard and history views
         Route::get('/', ApprovalDashboardLW::class)
             ->name('dashboard')
-            ->middleware(['permission:view approval tasks']);
+            ->middleware(['view_approval_tasks']);
 
-        // Approval history is protected by a separate permission for finer access control.
         Route::get('/history', ApprovalHistoryLW::class)
             ->name('history')
-            ->middleware(['permission:view approval history']);
+            ->middleware(['view_approval_history']);
 
-        // Officer tasks
+        // Controller routes for AJAX and form submissions
         Route::get('/tasks', [ApprovalController::class, 'index'])->name('tasks');
         Route::get('/{approval}', [ApprovalController::class, 'show'])
             ->name('show')
@@ -225,37 +292,43 @@ Route::middleware([
     });
 
     // -------------------------
-    // ADMIN RESOURCE MANAGEMENT (Livewire only)
+    // Admin Resource Management (Livewire-centric)
     // -------------------------
     Route::prefix('admin')->name('admin.')->middleware(['role:Admin|IT Admin'])->group(function () {
-        // Equipment management (Livewire)
-        Route::get('equipment-items', AdminEquipmentIndexLW::class)->name('equipment.index');
-        Route::get('equipment-form', AdminEquipmentFormLW::class)->name('equipment.form');
-        // Issued/Outstanding/Process/Return (Livewire)
+        // Equipment - Livewire UI
+        Route::get('equipment-items', AdminEquipmentIndexLW::class)->name('equipment-items.index');
+        Route::get('equipment-form', AdminEquipmentFormLW::class)->name('equipment-items.form');
+
+        // BPM Operations - Livewire UI
         Route::get('equipment/issued-loans', AdminIssuedLoansLW::class)->name('equipment.issued-loans');
         Route::get('equipment/outstanding-loans', AdminOutstandingLoansLW::class)->name('equipment.outstanding-loans');
         Route::get('equipment/process-issuance', AdminProcessIssuanceLW::class)->name('equipment.process-issuance');
         Route::get('equipment/process-return', AdminProcessReturnLW::class)->name('equipment.process-return');
-        // Users (Livewire)
+
+        // Users - Livewire UI
         Route::get('users', AdminUserIndexLW::class)->name('users.index');
-        // Grades (Livewire)
+
+        // Grades - Livewire UI
         Route::get('grades', AdminGradeIndexLW::class)->name('grades.index');
-        // Reports (Livewire)
-        Route::get('reports/equipment-inventory', AdminEquipmentInventoryReportLW::class)->name('equipment.reports-inventory');
-        Route::get('reports/equipment-report', AdminEquipmentReportLW::class)->name('equipment.reports');
-        Route::get('reports/loan-applications', AdminLoanApplicationsReportLW::class)->name('loan-applications.reports');
-        Route::get('reports/user-activity', AdminUserActivityReportLW::class)->name('user-activity.reports');
+
+        // Admin Reports - Livewire UI
+        Route::get('reports/equipment-inventory', AdminEquipmentInventoryReportLW::class)->name('reports.equipment-inventory');
+        Route::get('reports/equipment-report', AdminEquipmentReportLW::class)->name('reports.equipment-report');
+        Route::get('reports/loan-applications', AdminLoanApplicationsReportLW::class)->name('reports.loan-applications');
+        Route::get('reports/user-activity', AdminUserActivityReportLW::class)->name('reports.user-activity');
     });
 
     // -------------------------
-    // Reports (Livewire + legacy controller)
+    // Reports Module (Livewire + controller for legacy reports)
     // -------------------------
     Route::prefix('reports')->name('reports.')->group(function () {
+        // Livewire report UI components
         Route::get('/', ReportsIndexLW::class)->name('index');
         Route::get('/equipment-inventory', EquipmentReportLW::class)->name('equipment-inventory');
         Route::get('/loan-applications', LoanApplicationsReportLW::class)->name('loan-applications');
         Route::get('/user-activity', UserActivityReportLW::class)->name('user-activity');
-        // Controller-based
+
+        // Controller-based reports (legacy/specialized formats)
         Route::get('/loan-history', [ReportController::class, 'loanHistory'])->name('loan-history');
         Route::get('/loan-status-summary', [ReportController::class, 'loanStatusSummary'])->name('loan-status-summary');
         Route::get('/utilization-report', [ReportController::class, 'utilizationReport'])->name('utilization-report');
@@ -263,13 +336,15 @@ Route::middleware([
     });
 
     // -------------------------
-    // Helpdesk (Livewire)
+    // Helpdesk Module (Livewire)
     // -------------------------
     Route::prefix('helpdesk')->name('helpdesk.')->group(function () {
-        // Admin/IT Admin/Helpdesk Agent routes
+        // Admin routes (must come before the catch-all route)
         Route::middleware(['role:Admin|IT Admin|Helpdesk Agent'])->group(function () {
-            Route::get('/admin/tickets', AdminTicketManagementLW::class)->name('admin.tickets');
+            Route::get('/admin/tickets', AdminTicketManagementLW::class)->name('admin.index');
         });
+
+        // User-facing helpdesk routes
         Route::get('/', MyTicketsIndex::class)->name('index');
         Route::get('/create', CreateTicketForm::class)->name('create');
         Route::get('/{ticket}', TicketDetails::class)
@@ -278,7 +353,7 @@ Route::middleware([
     });
 
     // -------------------------
-    // Human Resource (Livewire, optional)
+    // Human Resource Management (Optional Livewire module)
     // -------------------------
     Route::prefix('hr')->name('hr.')->middleware(['role:Admin|HR Admin'])->group(function () {
         Route::get('/departments', HRDepartmentsLW::class)->name('departments.index');
@@ -287,18 +362,27 @@ Route::middleware([
     });
 
     // -------------------------
-    // System Settings (Livewire)
+    // System Settings Panel (Livewire)
     // -------------------------
     Route::prefix('settings')->name('settings.')->middleware(['role:Admin'])->group(function () {
+        // Default settings index
         Route::get('/', SettingsUsersIndexLW::class)->name('index');
+
+        // User Management
         Route::get('/users', SettingsUsersIndexLW::class)->name('users.index');
         Route::get('/users/create', SettingsUsersCreateLW::class)->name('users.create');
         Route::get('/users/{user}', SettingsUsersShowLW::class)->name('users.show');
         Route::get('/users/{user}/edit', SettingsUsersEditLW::class)->name('users.edit');
+
+        // Roles, Permissions, Departments
         Route::get('/roles', SettingsRolesIndexLW::class)->name('roles.index');
         Route::get('/permissions', SettingsPermissionsIndexLW::class)->name('permissions.index');
         Route::get('/departments', SettingsDepartmentsIndexLW::class)->name('departments.index');
-        Route::get('/positions', SettingsPositionsIndexLW::class)->name('positions.index');
+
+        // Positions - Using Controller since Livewire component is not yet available
+        // Route::get('/positions', SettingsPositionsIndexLW::class)->name('positions.index');
+
+        // Log Viewer (3rd party package)
         Route::get('/log-viewer/{view?}', [\Opcodes\LogViewer\Http\Controllers\IndexController::class, '__invoke'])
             ->where('view', '(?!api).*')
             ->name('log-viewer.index')
@@ -306,12 +390,22 @@ Route::middleware([
     });
 
     // -------------------------
-    // Charts (Livewire)
+    // Transaction Management (controller for operations)
+    // -------------------------
+    Route::prefix('loan-transactions')->name('loan-transactions.')->group(function () {
+        Route::get('/', [LoanTransactionController::class, 'index'])->name('index');
+        Route::get('/{loanTransaction}', [LoanTransactionController::class, 'show'])
+            ->name('show')
+            ->whereNumber('loanTransaction');
+    });
+
+    // -------------------------
+    // Charts and Analytics (Livewire)
     // -------------------------
     Route::get('/charts/loan-summary', LoanSummaryChart::class)->name('charts.loan-summary');
 
     // -------------------------
-    // Miscellaneous (Livewire)
+    // Miscellaneous Pages (Livewire)
     // -------------------------
     Route::get('/coming-soon', ComingSoonLW::class)->name('misc.coming-soon');
     Route::get('/equipment-checklist', EquipmentChecklistLW::class)->name('misc.equipment-checklist');
@@ -332,20 +426,13 @@ Route::get('/error/{statusCode}', [MiscErrorController::class, 'show'])
 
 /*
 |--------------------------------------------------------------------------
-| Route Documentation
+| Vertical Menu Component Usage (Livewire)
 |--------------------------------------------------------------------------
-| The Livewire route admin.equipment.index points to the EquipmentIndex component at:
-|   /admin/equipment-items    (name: admin.equipment.index)
-| If you update this route, update all references to route('admin.equipment.index').
+| NOTE: The vertical menu is rendered via the Livewire component at
+| resources/views/livewire/sections/menu/vertical-menu.blade.php.
 |
-| The route admin.equipment.issued-loans is defined at:
-|   /admin/equipment/issued-loans (name: admin.equipment.issued-loans)
-| Used for loaned equipment statistics and links.
+| It's included in layouts using: @livewire('sections.menu.vertical-menu')
 |
-| The route approvals.dashboard is defined at:
-|   /approvals (name: approvals.dashboard)
-| Used for pending approvals/statistics.
-|
-| Use php artisan route:list to confirm all route names and paths.
+| The menu is dynamically rendered based on config/menu.php and user role.
 |--------------------------------------------------------------------------
 */

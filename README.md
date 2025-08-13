@@ -10,7 +10,7 @@
   </a>
   <h2 align="center">MOTAC Integrated Resource Management System</h2>
   <p align="center">
-    A centralized system for managing Email/User ID Provisioning and ICT Equipment Loans at the Ministry of Tourism, Arts and Culture, Malaysia.<br />
+    A centralized system for managing ICT Equipment Loans and a Helpdesk/Ticketing System at the Ministry of Tourism, Arts and Culture, Malaysia.<br />
     Based on the amralsaleeh/HRMS template structure and enhanced for MOTAC's operational needs.<br /><br />
     <a href="https://github.com/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS/issues">Report Bug</a>
     ·
@@ -23,9 +23,11 @@
 
 ## Overview
 
-**MOTAC Integrated Resource Management System (MOTAC IRMS)** is a Laravel-based web application designed to centralize, automate, and streamline resource management processes for the Ministry of Tourism, Arts and Culture (MOTAC), Malaysia:
-- **Email/User ID Provisioning**
+**MOTAC Integrated Resource Management System (MOTAC IRMS)** is a Laravel-based web application designed to centralize, automate, and streamline key operational processes for the Ministry of Tourism, Arts and Culture (MOTAC), Malaysia.
+
+Version 4.0 focuses on two core modules:
 - **ICT Equipment Loan Management**
+- **Helpdesk & ICT Support Management**
 
 MOTAC IRMS provides robust business rules, unified workflows, and a modern user experience to enhance efficiency, security, and accountability.
 
@@ -33,35 +35,25 @@ MOTAC IRMS provides robust business rules, unified workflows, and a modern user 
 
 ## Features
 
-- **Email/User ID Provisioning Management**  
-  Automates application, certification, approval, and provisioning of MOTAC email and user IDs, similar to MyMail workflows.
+- **ICT Equipment Loan Management** Handles requests, approvals, issuance, tracking, and returns for ICT equipment (laptops, projectors, etc.) for official use.
 
-- **ICT Equipment Loan Management**  
-  Handles requests, approvals, issuance, tracking, and returns for ICT equipment (laptops, projectors, etc.) for official use.
+- **Helpdesk & Ticketing System** Manages IT support tickets from creation and assignment to resolution and reporting, streamlining the support process for all ICT-related issues.
 
-- **Unified Data Management**  
-  Consolidates users, applications, approvals, equipment inventory, and notifications in a single secure database.
+- **Unified Data Management** Consolidates users, applications, support tickets, approvals, equipment inventory, and notifications in a single secure database.
 
-- **Automated Workflows & Process Standardization**  
-  Streamlines application/approval processes, minimizing manual steps and administrative workload.
+- **Automated Workflows & Process Standardization** Streamlines application/approval processes, minimizing manual steps and administrative workload for both loans and support tickets.
 
-- **Role-Based Access Control (RBAC) & Security**  
-  Fine-grained permissions for users, approvers, BPM staff, and IT Admins. Includes grade-based approval logic and standardized roles.
+- **Role-Based Access Control (RBAC) & Security** Fine-grained permissions for users, approvers, BPM staff, and IT Admins. Includes grade-based approval logic and standardized roles.
 
-- **Dynamic Forms with Livewire**  
-  Supports complex, conditional forms similar to MyMail and other official workflows.
+- **Dynamic Forms with Livewire** Supports complex, conditional forms for both loan applications and helpdesk ticket submission.
 
-- **Real-Time Reporting & Notifications**  
-  Provides insights into resource usage and application statuses. Sends email and in-app notifications for key events.
+- **Real-Time Reporting & Notifications** Provides insights into resource usage, loan statuses, and helpdesk performance. Sends email and in-app notifications for key events.
 
-- **ICT Equipment Inventory Management**  
-  Maintains detailed inventory with categories, sub-categories, physical locations, and status.
+- **ICT Equipment Inventory Management** Maintains detailed inventory with categories, sub-categories, physical locations, and status (available, on_loan, under_maintenance).
 
-- **Audit Trails & Accountability**  
-  Logs key actions (created_by, updated_by) for traceability and compliance.
+- **Audit Trails & Accountability** Logs key actions (created_by, updated_by) for traceability and compliance across all modules.
 
-- **Localization & Bahasa Melayu Support**  
-  Primary UI in Bahasa Melayu, with language switching and localized dates supported.
+- **Localization & Bahasa Melayu Support** Primary UI in Bahasa Melayu, with language switching and localized dates supported.
 
 ---
 
@@ -91,7 +83,7 @@ MOTAC IRMS provides robust business rules, unified workflows, and a modern user 
 
 1. **Clone the repository:**
     ```bash
-    git clone https://github.com/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS
+    git clone [https://github.com/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS](https://github.com/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS)
     ```
 2. **Navigate to the project folder:**
     ```bash
@@ -135,43 +127,31 @@ If using the base HRMS template, default credentials for development may be:
 ```text
 email: admin@demo.com
 password: admin
-```
-*Change these for production use! Actual admin credentials should be securely established and managed.*
+````
 
----
+*Change these for production use\! Actual admin credentials should be securely established and managed.*
+
+-----
 
 ## Contribution
 
-Contributions are welcome from authorized MOTAC developers and users.  
-- Use the [issue tracker](https://github.com/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS/issues) for feature requests and bug reports.
-- For security vulnerabilities, refer to [`SECURITY.md`](SECURITY.md).
+Contributions are welcome from authorized MOTAC developers and users.
 
----
+  - Use the [issue tracker](https://github.com/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS/issues) for feature requests and bug reports.
+  - For security vulnerabilities, refer to [`SECURITY.md`](SECURITY.md).
+
+-----
 
 ## Contact
 
-**Information Management Division (BPM)**  
-Ministry of Tourism, Arts and Culture (MOTAC), Malaysia  
-Project Link: [https://github.com/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS]  
+**Information Management Division (BPM)** Ministry of Tourism, Arts and Culture (MOTAC), Malaysia  
+Project Link: [https://github.com/IzzatFirdaus/MOTAC\_ICT\_LOAN\_HRMS]  
 *Official contact email to be provided by MOTAC/BPM.*
 
----
+-----
 
 ## License
 
 This project uses the MIT License if adopted from the base template.  
 See [`LICENSE.md`](https://github.com/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS/blob/master/LICENSE.md) for details.  
 MOTAC reserves the right to define specific licensing terms.
-
----
-
-[contributors-shield]: https://img.shields.io/github/contributors/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS.svg?style=flat-square
-[contributors-url]: https://github.com/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS.svg?style=flat-square
-[forks-url]: https://github.com/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS/network/members
-[stars-shield]: https://img.shields.io/github/stars/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS.svg?style=flat-square
-[stars-url]: https://github.com/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS/stargazers
-[issues-shield]: https://img.shields.io/github/issues/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS.svg?style=flat-square
-[issues-url]: https://github.com/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS/issues
-[license-shield]: https://img.shields.io/github/license/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS.svg?style=flat-square
-[license-url]: https://github.com/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS/blob/master/LICENSE.md

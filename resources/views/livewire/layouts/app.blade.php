@@ -13,6 +13,7 @@
     $isNavbar = $isNavbar ?? ($configData['isNavbar'] ?? true);
     $isFooter = $isFooter ?? ($configData['isFooter'] ?? true);
     $container = $container ?? ($configData['container'] ?? 'container-fluid');
+    $containerNav = $containerNav ?? ($configData['containerNav'] ?? 'container-fluid');
     $isFlex = $isFlex ?? ($configData['isFlex'] ?? false);
 
     // CSS class helpers for layout states
@@ -106,12 +107,15 @@
 
             <div class="layout-page">
                 @if ($isNavbar)
-                    {{-- Top Navbar - Use the Blade partial, not a Livewire component, as per file list --}}
-                    @include('layouts.partials.navbar.navbar-user-profile', [
-                        'containerNav' => $configData['containerNav'] ?? 'container-fluid',
+                    {{--
+                        Top Navbar - Uses the new Livewire Navbar component.
+                        This replaces the old navbar-user-profile partial, and provides
+                        language switcher, theme toggle, notifications, and profile dropdown.
+                        Passes container and detachment class to the component.
+                    --}}
+                    @livewire('sections.navbar.navbar', [
+                        'containerNav' => $containerNav,
                         'navbarDetachedClass' => $navbarDetached,
-                        'navbarFull' => $configData['navbarFull'] ?? true,
-                        'navbarHideToggle' => ($configData['myLayout'] ?? 'vertical') === 'horizontal',
                     ])
                 @endif
 
