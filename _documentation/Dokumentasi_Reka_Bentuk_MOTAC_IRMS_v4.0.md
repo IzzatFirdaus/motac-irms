@@ -1,4 +1,5 @@
 # Sistem Pengurusan Sumber Terintegrasi MOTAC  
+
 Dokumentasi Bahasa Reka Bentuk Versi 4.0 | Untuk Bahagian Pengurusan Maklumat (BPM)
 
 ---
@@ -6,77 +7,95 @@ Dokumentasi Bahasa Reka Bentuk Versi 4.0 | Untuk Bahagian Pengurusan Maklumat (B
 ## 1. Prinsip Teras Reka Bentuk
 
 ### 1.1 Berpaksikan Rakyat (Mesra Pengguna & Jelas)
+
 - **Akses Rakyat:** Reka bentuk aplikasi menempatkan keperluan dan kehendak pengguna sebagai fokus utama. Paparan antara muka, penggunaan menu, mesej dan komponen hendaklah mudah difahami dan relevan.
 - **Bahasa Melayu Utama:** Bahasa utama antara muka ialah Bahasa Melayu, dengan pilihan Inggeris secara kontekstual.
 - **Penglibatan Pengguna:** Pengguna dilibatkan dalam setiap fasa pembangunan untuk memastikan aplikasi memenuhi keperluan mereka.
 - **Memudahkan Pengguna:** Penggunaan navigasi dua klik ke fungsi utama, penandaan medan wajib dengan asterisk merah (*), dan arahan jelas.
 
 ### 1.2 Berpacukan Data
+
 - **Pengurusan Data Selamat:** Data diurus secara selamat dan mematuhi undang-undang privasi.
 - **Pemodelan Data:** Struktur data dianalisis dan direka supaya mudah difahami dan digunakan pembangun serta pengguna.
 - **Perkongsian Data:** Data dikongsi mengikut keperluan, persetujuan dan menambah nilai kepada agensi dan pengguna.
 
 ### 1.3 Kandungan Terancang
+
 - **Penyediaan Kandungan:** Kandungan, paparan dan maklumat aplikasi disusun secara jelas, tepat dan terancang agar matlamat perkhidmatan tercapai.
 - **Fasa Reka Bentuk:** Meliputi reka bentuk konsep dan seni bina, termasuk integrasi sistem lain dan keselamatan data.
 
 ### 1.4 Teknologi Bersesuaian
+
 - **Pilihan Teknologi:** Penggunaan teknologi dan alat pembangunan yang sesuai dengan objektif projek, pengetahuan organisasi dan keselamatan data.
 - **Keselarasan Infrastruktur:** Infrastruktur, hosting dan sistem keselamatan dipilih mengikut keperluan aplikasi.
 
 ### 1.5 Antara Muka Minimalis dan Mudah
+
 - **Minimalis:** Antara muka direka supaya mudah difahami, bebas komponen tidak perlu, dan navigasi intuitif.
 - **Responsif:** Rekaan responsif serta adaptif untuk pelbagai peranti dan saiz skrin.
 
 ### 1.6 Seragam
+
 - **Keseragaman:** Penggunaan piawaian konsisten untuk memastikan kualiti, kebolehgunaan dan kebolehoperasian antara modul aplikasi.
 - **Penyelenggaraan Mudah:** Piawaian memudahkan kemas kini dan mengurangkan kos pembangunan.
 
 ### 1.7 Paparan/Menu Jelas
+
 - **Paparan & Menu:** Elemen dan menu dipaparkan secara konsisten, mudah dikenali, dan memberikan maklum balas yang jelas kepada pengguna.
 
 ### 1.8 Realistik
+
 - **Ketepatan Fungsi:** Aplikasi dibangunkan mengikut keperluan sebenar pengguna dan keupayaan teknikal pasukan.
 - **Analisis Keperluan:** Pengujian dan penambahbaikan berterusan berdasarkan maklum balas pengguna.
 
 ### 1.9 Kognitif
+
 - **Reka Bentuk Kognitif:** Antara muka memudahkan proses kognitif pengguna, mengurangkan beban maklumat berlebihan dan memastikan elemen mudah dikenali.
 - **Maklum Balas Visual:** Penggunaan maklum balas visual dan naratif untuk meningkatkan pengalaman pengguna.
 
 ### 1.10 Fleksibel
+
 - **Kebolehskalaan & Modular:** Aplikasi mudah diperluas, diperkecil atau diubah suai tanpa menjejaskan prestasi.
 - **Konfigurasi & Integrasi:** Pengguna boleh mengubah tetapan aplikasi. Mudah diintegrasi dengan sistem lain melalui API/Web Services.
 - **Pengurusan Data Dinamik:** Mudah untuk import, eksport dan transformasi data.
 
 ### 1.11 Komunikasi
+
 - **Komunikasi Berkesan:** Proses komunikasi antara pengguna, pasukan pembangunan dan pihak berkepentingan adalah jelas dan terbuka.
 - **Pengurusan Perubahan:** Semua perubahan dimaklumkan kepada pihak terlibat untuk mengelakkan konflik.
 
 ### 1.12 Struktur Hierarki
+
 - **Susunan Hierarki:** Elemen antara muka diatur secara teratur mengikut hierarki logik untuk memudahkan navigasi dan penggunaan.
 - **Contoh E-Dagang:** Halaman utama, produk, troli beli-belah, akaun pengguna dan subsistem berkaitan.
 
 ### 1.13 Komponen Antara Muka & Pengalaman Pengguna (UI/UX)
+
 - **Komponen UI:** Butang, input, menu, bar navigasi dan petunjuk digunakan secara konsisten.
 - **Pengalaman UX:** Interaksi pengguna, persepsi terhadap aplikasi dan respons emosi diambil kira untuk menjamin kepuasan.
 
 ### 1.14 Tipografi
+
 - **Jenis & Saiz Huruf:** Pemilihan jenis huruf, saiz dan jarak antara huruf yang sesuai untuk keterbacaan.
 - **Hierarki Visual:** Menggunakan tipografi untuk membentuk hierarki maklumat.
 
 ### 1.15 Tetapan Lalai
+
 - **Nilai Lalai:** Penetapan nilai lalai pada konfigurasi, reka bentuk antara muka, keselamatan dan privasi untuk memudahkan penggunaan serta meningkatkan keselamatan.
 - **Responsif Peranti:** Tetapan lalai mengambil kira pelbagai dimensi peranti.
 
 ### 1.16 Kawalan Pengguna
+
 - **Kawalan Interaktif:** Pengguna diberikan kawalan jelas melalui butang, input, menu dan penunjuk.
 - **Konsisten & Mudah Diakses:** Kawalan konsisten, mudah diakses dan sesuai dengan peranti.
 
 ### 1.17 Pencegahan Ralat
+
 - **Panduan & Bantuan:** Menyediakan penunjuk dan bantuan jelas untuk elak kesilapan.
 - **Pengesahan & Ujian:** Pengesahan tindakan kritikal dan ujian pengguna untuk meningkatkan ketepatan.
 
 ### 1.18 Panduan & Dokumentasi
+
 - **Panduan Pembangunan:** Arahan dan prosedur pembangunan, ujian dan pelaksanaan aplikasi.
 - **Dokumentasi Teknikal & Pengguna:** Manual pengguna, tutorial, FAQ, sejarah perubahan dan dokumentasi keselamatan.
 - **Rujukan SPDK:** Agensi disarankan merujuk dokumen SPDK secara berterusan untuk penambahbaikan.
@@ -102,20 +121,20 @@ Dokumentasi Bahasa Reka Bentuk Versi 4.0 | Untuk Bahagian Pengurusan Maklumat (B
 
 - **Font Utama:** Noto Sans untuk keterbacaan Bahasa Melayu dan Inggeris.
 - **Skala:**
-    - h1: 1.75rem (28px) • Semibold
-    - h2: 1.5rem (24px) • Semibold
-    - h3: 1.25rem (20px) • Medium
-    - Badan: 0.875rem (14px) • Regular
-    - Label: 0.75rem (12px) • Medium
+  - h1: 1.75rem (28px) • Semibold
+  - h2: 1.5rem (24px) • Semibold
+  - h3: 1.25rem (20px) • Medium
+  - Badan: 0.875rem (14px) • Regular
+  - Label: 0.75rem (12px) • Medium
 - **Ketinggian Garis:** 1.6 untuk teks badan bagi keterbacaan optimum.
 
 ### 2.3 Ikonografi
 
 - **Set Utama:** Bootstrap Icons v1.8+
 - **Prinsip Penggunaan:**
-    - Ikon digabung dengan label teks untuk kejelasan.
-    - Saiz standard: 16px untuk teks, 24px untuk butang.
-    - Penggunaan warna semantik (merah untuk hapus, hijau untuk tambah).
+  - Ikon digabung dengan label teks untuk kejelasan.
+  - Saiz standard: 16px untuk teks, 24px untuk butang.
+  - Penggunaan warna semantik (merah untuk hapus, hijau untuk tambah).
 
 ---
 
@@ -199,11 +218,11 @@ graph LR
 
 - **Kawalan Versi:** Token reka bentuk disimpan dalam `design-tokens.json`. Rekod perubahan disimpan dalam `DESIGN_CHANGELOG.md`.
 - **Senarai Semak Pematuhan:** Sebelum komponen baru dilepas, ia mesti divalidasi:
-    - Teks Bahasa Melayu jelas dan formal.
-    - Nisbah kontras WCAG 2.1 AA dipatuhi.
-    - Komponen responsif sepenuhnya pada telefon, tablet & desktop.
-    - Reka bentuk selaras dengan pola dokumen ini.
-    - Penjenamaan MOTAC dan BPM diaplikasi dengan betul.
+  - Teks Bahasa Melayu jelas dan formal.
+  - Nisbah kontras WCAG 2.1 AA dipatuhi.
+  - Komponen responsif sepenuhnya pada telefon, tablet & desktop.
+  - Reka bentuk selaras dengan pola dokumen ini.
+  - Penjenamaan MOTAC dan BPM diaplikasi dengan betul.
 
 ---
 

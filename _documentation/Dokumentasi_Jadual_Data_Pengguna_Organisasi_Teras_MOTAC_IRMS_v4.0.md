@@ -17,20 +17,22 @@ Menyimpan maklumat semua pengguna sistem. Versi v4.0 telah diperkemas untuk meng
 - **Factory:** `Database\Factories\UserFactory.php`
 - **Seeder:** `Database\Seeders\UserSeeder.php`, `Database\Seeders\AdminUserSeeder.php`
 
-#### Prinsip Berkaitan:
+#### Prinsip Berkaitan
+
 - **Berpaksikan Rakyat**: Pengurusan pengguna direka untuk memenuhi keperluan sebenar rakyat/agensi.
 - **Komunikasi**: Pengguna boleh menerima notifikasi dan berinteraksi dalam sistem.
 
 ---
 
-### 1.2 `roles`, `permissions`, `model_has_roles`, dsb.
+### 1.2 `roles`, `permissions`, `model_has_roles`, dsb
 
 Jadual ini diurus oleh pakej [spatie/laravel-permission](https://github.com/spatie/laravel-permission) dan mendefinisikan kawalan akses terperinci.
 
 - **Model:** `Spatie\Permission\Models\Role`, `Spatie\Permission\Models\Permission`
 - **Seeder:** `Database\Seeders\RoleAndPermissionSeeder.php`
 
-#### Prinsip Berkaitan:
+#### Prinsip Berkaitan
+
 - **Kawalan Pengguna**: Pengguna diberikan kawalan akses berdasarkan peranan dan kebenaran.
 - **Pencegahan Ralat**: Pengurusan peranan/kebenaran membantu mengurangkan kesilapan akses.
 
@@ -44,7 +46,8 @@ Jadual ini menyimpan struktur organisasi MOTAC.
 - **Controller:** `app/Http/Controllers/Admin/DepartmentController.php`, dsb.
 - **Seeder:** `Database\Seeders\DepartmentSeeder.php`, `Database\Seeders\PositionSeeder.php`, `Database\Seeders\GradesSeeder.php`
 
-#### Prinsip Berkaitan:
+#### Prinsip Berkaitan
+
 - **Struktur Hierarki**: Menyusun organisasi secara hierarki untuk navigasi & pengurusan jelas.
 - **Seragam**: Penyeragaman struktur organisasi di seluruh modul.
 
@@ -82,7 +85,8 @@ Mengurus lokasi fizikal peralatan boleh disimpan atau digunakan.
 - **Controller:** `app/Http/Controllers/Admin/LocationController.php`
 - **Seeder:** `Database\Seeders\LocationSeeder.php`
 
-#### Prinsip Berkaitan:
+#### Prinsip Berkaitan
+
 - **Realistik**: Lokasi dan kategori diurus mengikut keperluan sebenar operasi.
 - **Struktur Hierarki**: Mengatur kategori, subkategori dan lokasi secara hierarki.
 
@@ -110,7 +114,8 @@ Merekod pengeluaran dan pemulangan item peralatan yang dipinjam.
 - **Controller:** `app/Http/Controllers/LoanTransactionController.php`
 - **Seeder:** `Database\Seeders\LoanTransactionSeeder.php`
 
-#### Prinsip Berkaitan:
+#### Prinsip Berkaitan
+
 - **Fleksibel**: Proses pinjaman boleh diubah suai mengikut keperluan.
 - **Pencegahan Ralat**: Kawalan dan pengesahan jelas semasa transaksi.
 
@@ -152,7 +157,8 @@ Menyimpan komen dan respons berangkai bagi setiap tiket helpdesk untuk komunikas
 - **Factory:** `Database\Factories\HelpdeskCommentFactory.php`
 - **Seeder:** Disemai bersama `HelpdeskTicketSeeder.php`
 
-#### Prinsip Berkaitan:
+#### Prinsip Berkaitan
+
 - **Komunikasi**: Memudahkan komunikasi jelas antara pengguna dan penyokong IT.
 - **Panduan & Dokumentasi**: Memudahkan rujukan dan rekod interaksi.
 
@@ -190,7 +196,8 @@ Jadual satu baris untuk menyimpan tetapan global aplikasi.
 - **Controller:** `app/Http/Controllers/Admin/SettingsController.php`
 - **Seeder:** `Database\Seeders\SettingsSeeder.php`
 
-#### Prinsip Berkaitan:
+#### Prinsip Berkaitan
+
 - **Tetapan Lalai**: Mengurus nilai lalai aplikasi untuk memudahkan penggunaan.
 - **Pencegahan Ralat**: Mengurangkan kesilapan dengan tetapan lalai yang sesuai.
 - **Kebolehcapaian & Fleksibel**: Tetapan boleh diubah mengikut keperluan.
