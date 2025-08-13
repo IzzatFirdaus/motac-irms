@@ -229,6 +229,7 @@ graph LR
 ---
 
 ## 7. Pematuhan 18 Prinsip Reka Bentuk MyGOVEA (Ringkas)
+
 - Berpaksikan Rakyat, Berpacukan Data, Kandungan Terancang, Teknologi Bersesuaian
 - Antara Muka Minimalis dan Mudah, Seragam, Paparan/Menu Jelas
 - Realistik, Kognitif, Fleksibel, Komunikasi, Struktur Hierarki
