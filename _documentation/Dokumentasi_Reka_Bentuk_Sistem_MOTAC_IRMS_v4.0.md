@@ -4,6 +4,7 @@
 **Tarikh Semakan:** 12 Ogos 2025  
 **Penulis:** IzzatFirdaus  
 **Berdasarkan:** BORANG PINJAMAN PERALATAN ICT 2024 SEWAAN C, keperluan helpdesk dalaman, dan struktur kod yang telah disahkan dari templat amralsaleeh/HRMS.
+<!-- Nota: Dokumen ini telah disemak untuk pematuhan kepada 18 Prinsip MyGOVEA. -->
 
 ---
 
@@ -505,7 +506,6 @@ Notifikasi sistem untuk pengguna.
 **Pelaku Utama:** Pemohon
 
 **Aliran Proses:**
-
 1. Pengguna mengakses borang permohonan pinjaman melalui antaramuka IRMS
 2. Penyampaian borang dinamik dengan paparan medan bersyarat berdasarkan pilihan pengguna
 3. Penyelesaian borang berbilang seksyen mengikut struktur borang kertas rasmi (BAHAGIAN 1, BAHAGIAN 2, dll.)
@@ -516,7 +516,6 @@ Notifikasi sistem untuk pengguna.
 8. Penghantaran notifikasi automatik kepada pemohon mengesahkan penghantaran
 
 **Komponen:**
-
 - **UI:** `App\Livewire\ResourceManagement\LoanApplication\ApplicationForm`
 - **Logik Backend:** `LoanApplicationService::createApplication()`
 - **Perubahan Data:** Rekod baru `LoanApplication` dengan rekod `LoanApplicationItem`
@@ -527,7 +526,6 @@ Notifikasi sistem untuk pengguna.
 **Pelaku Utama:** Pegawai Penyokong (Gred 41+ mengikut konfigurasi)
 
 **Aliran Proses:**
-
 1. Permohonan secara automatik dirujuk kepada pegawai penyokong yang sesuai berdasarkan keperluan gred
 2. Pegawai menerima notifikasi permohonan tertunda
 3. Pegawai menyemak perincian permohonan, permintaan peralatan dan tujuan
@@ -539,7 +537,6 @@ Notifikasi sistem untuk pengguna.
 9. Notifikasi dihantar kepada pemohon dan staf BPM (jika diluluskan)
 
 **Komponen:**
-
 - **UI:** `App\Livewire\ResourceManagement\Approval\Dashboard`
 - **Logik Backend:** `ApprovalService::processDecision()`
 - **Perubahan Data:** Rekod `Approval` dicipta, status `LoanApplication` dikemas kini
@@ -550,7 +547,6 @@ Notifikasi sistem untuk pengguna.
 **Pelaku Utama:** Staf BPM
 
 **Aliran Proses:**
-
 1. Staf BPM menerima notifikasi permohonan diluluskan untuk diproses
 2. Pengesahan ketersediaan peralatan dalam inventori
 3. Item peralatan spesifik dipilih dan ditempah
@@ -563,7 +559,6 @@ Notifikasi sistem untuk pengguna.
 10. Notifikasi dihantar kepada pemohon mengesahkan pengeluaran peralatan
 
 **Komponen:**
-
 - **UI:** `App\Livewire\ResourceManagement\Admin\BPM\ProcessIssuance`
 - **Logik Backend:** `LoanTransactionService::processNewIssue()`
 - **Perubahan Data:** `LoanTransaction` dengan jenis 'issue', rekod `LoanTransactionItem`, kemas kini status peralatan
@@ -574,7 +569,6 @@ Notifikasi sistem untuk pengguna.
 **Pelaku Utama:** Pemohon/Pegawai Pemulangan, Staf BPM
 
 **Aliran Proses:**
-
 1. Pemohon atau pegawai yang ditetapkan memulangkan peralatan ke pejabat BPM
 2. Staf BPM memeriksa item yang dipulangkan berdasarkan senarai semak aksesori asal
 3. Penilaian keadaan peralatan dan dokumentasi
@@ -585,7 +579,6 @@ Notifikasi sistem untuk pengguna.
 8. Notifikasi akhir dihantar kepada pemohon
 
 **Komponen:**
-
 - **UI:** `App\Livewire\ResourceManagement\Admin\BPM\ProcessReturn`
 - **Logik Backend:** `LoanTransactionService::processExistingReturn()`
 - **Perubahan Data:** Transaksi pemulangan, kemas kini status peralatan, penyelesaian permohonan
@@ -598,7 +591,6 @@ Notifikasi sistem untuk pengguna.
 **Pelaku Utama:** Pengguna Akhir (mana-mana staf MOTAC)
 
 **Aliran Proses:**
-
 1. Pengguna mengakses sistem helpdesk melalui antaramuka IRMS
 2. Borang penciptaan tiket dengan pilihan kategori (Perkakasan, Perisian, Rangkaian, Isu Akaun)
 3. Penerangan masalah dengan pemilihan tahap keutamaan
@@ -608,7 +600,6 @@ Notifikasi sistem untuk pengguna.
 7. Notifikasi dihantar kepada pengguna (pengakuan) dan pasukan sokongan IT
 
 **Komponen:**
-
 - **UI:** `App\Livewire\Helpdesk\CreateTicketForm`
 - **Logik Backend:** `HelpdeskService::createTicket()`
 - **Perubahan Data:** Rekod baru `HelpdeskTicket` dicipta
@@ -619,7 +610,6 @@ Notifikasi sistem untuk pengguna.
 **Pelaku Utama:** Pentadbir IT/Pengurus Helpdesk
 
 **Aliran Proses:**
-
 1. Tiket baru muncul dalam dashboard pentadbir IT dengan penunjuk keutamaan
 2. Pengesahan dan pelarasan kategori tiket jika perlu
 3. Penilaian tahap keutamaan dan kemungkinan eskalasi
@@ -629,7 +619,6 @@ Notifikasi sistem untuk pengguna.
 7. Notifikasi penugasan dihantar kepada agen IT yang ditetapkan
 
 **Komponen:**
-
 - **UI:** `App\Livewire\Helpdesk\Admin\TicketManagement`
 - **Logik Backend:** `HelpdeskService::assignTicket()`
 - **Perubahan Data:** Pengisian `assigned_to_user_id`, kemas kini status
@@ -640,7 +629,6 @@ Notifikasi sistem untuk pengguna.
 **Pelaku Utama:** Agen IT, Pengguna Akhir
 
 **Aliran Proses:**
-
 1. Agen IT yang ditugaskan menerima notifikasi dan menyemak perincian tiket
 2. Agen boleh berkomunikasi dengan pengguna melalui sistem komen tiket
 3. Kemampuan nota dalaman untuk dokumentasi agen sahaja
@@ -652,7 +640,6 @@ Notifikasi sistem untuk pengguna.
 9. Notifikasi kepada pengguna mengenai penyelesaian berserta butiran
 
 **Komponen:**
-
 - **UI:** `App\Livewire\Helpdesk\TicketDetails`
 - **Logik Backend:** `HelpdeskService::resolveTicket()`
 - **Perubahan Data:** Kemas kini status, rekod `HelpdeskComment`, nota penyelesaian
@@ -663,7 +650,6 @@ Notifikasi sistem untuk pengguna.
 **Pelaku Utama:** Agen IT atau Sistem (Automatik)
 
 **Aliran Proses:**
-
 1. Tiket yang telah diselesaikan layak untuk ditutup selepas pengesahan pengguna atau tempoh tamat
 2. Pengesahan akhir penyelesaian dan kepuasan pengguna
 3. Penutupan tiket dengan masa rasmi `closed_at`
@@ -672,7 +658,6 @@ Notifikasi sistem untuk pengguna.
 6. Metrik prestasi dikemas kini untuk laporan dan analisis
 
 **Komponen:**
-
 - **Logik Backend:** `HelpdeskService::closeTicket()`
 - **Perubahan Data:** Status kepada `closed`, masa `closed_at`
 - **Notifikasi:** `TicketClosedNotification` kepada pengguna
@@ -1104,7 +1089,30 @@ Sistem menggunakan komponen Livewire untuk mempertingkat pengalaman pengguna:
 
 ---
 
-## 11. Penutup
+## 11. Pematuhan 18 Prinsip MyGOVEA (Ringkas)
+
+- Berpaksikan Rakyat: UI mesra dan jelas
+- Berpacukan Data: Skema dan audit
+- Kandungan Terancang: Struktur dokumen dan sistem
+- Teknologi Bersesuaian: Laravel/Livewire
+- Antara Muka Minimalis dan Mudah: Komponen ringkas
+- Seragam: Pola konsisten
+- Paparan/Menu Jelas: Navigasi dan label
+- Realistik: Kekangan hierarki dan inventori
+- Kognitif: Pengurangan beban informasi
+- Fleksibel: Modular, konfigurasi
+- Komunikasi: Notifikasi, helpdesk
+- Struktur Hierarki: Organisasi, kelulusan
+- Komponen UI/UX: Pustaka komponen
+- Tipografi: Skala tipografi
+- Tetapan Lalai: Config lalai
+- Kawalan Pengguna: Polisi/roles
+- Pencegahan Ralat: Validasi/pengesahan
+- Panduan & Dokumentasi: Dokumen ini
+
+---
+
+## 12. Penutup
 
 Sistem Pengurusan Sumber Terintegrasi MOTAC (Versi 4.0) mewakili platform moden dan fokus yang direka khusus untuk operasi pengurusan pinjaman peralatan ICT dan sokongan helpdesk. Dengan menghapuskan modul provisioning email legasi dan memperkenalkan sistem tiket menyeluruh, aplikasi ini menyediakan penyelesaian yang cekap, selamat, dan efisien yang disesuaikan dengan keperluan operasi teras MOTAC.
 
@@ -1125,7 +1133,7 @@ Pelaksanaan reka bentuk ini akan meningkatkan keupayaan MOTAC untuk mengurus sum
 **Kawalan Dokumen:**
 
 - **Versi:** 4.0
-- **Tarikh:** 12 Ogos 2025
+- **Tarikh:** 13 Ogos 2025
 - **Penulis:** IzzatFirdaus
 - **Status:** Akhir
 - **Semakan Seterusnya:** 12 Februari 2026

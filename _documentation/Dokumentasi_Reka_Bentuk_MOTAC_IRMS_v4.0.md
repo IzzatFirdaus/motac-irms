@@ -1,6 +1,7 @@
 # Sistem Pengurusan Sumber Terintegrasi MOTAC  
 
 Dokumentasi Bahasa Reka Bentuk Versi 4.0 | Untuk Bahagian Pengurusan Maklumat (BPM)
+<!-- Dokumen ini memetakan keputusan reka bentuk kepada 18 Prinsip MyGOVEA; rujuk bahagian "Pematuhan MyGOVEA" di akhir. -->
 
 ---
 
@@ -167,6 +168,7 @@ Dokumentasi Bahasa Reka Bentuk Versi 4.0 | Untuk Bahagian Pengurusan Maklumat (B
 - **Aliran Kelulusan:** Sistem memaparkan aliran kelulusan secara visual.
 
 ```mermaid
+%% Carta alir ini menerangkan langkah utama pinjaman ICT dari permohonan sehingga pengeluaran
 graph LR
     A[Pemohon: Hantar Permohonan] --> B(Pegawai Penyokong: Semak & Sokong)
     B --> C(BPM: Proses & Luluskan)
@@ -202,7 +204,7 @@ graph LR
 
 ### 5.3 Widget Dashboard
 
-- **Kad Statistik:** Digunakan di papan pemuka untuk paparan metrik utama (cth: "Kelulusan Menunggu", "Tiket Terbuka"). Kad visual yang memudahkan pengguna melihat tugas tertunda.
+- **Kad Statistik:** Digunakan di papan pemuka untuk paparan metrik utama (cth: "Kelulusan Menunggu," "Tiket Terbuka"). Kad visual yang memudahkan pengguna melihat tugas tertunda.
 
 ---
 
@@ -226,5 +228,16 @@ graph LR
 
 ---
 
+## 7. Pematuhan 18 Prinsip Reka Bentuk MyGOVEA (Ringkas)
+- Berpaksikan Rakyat, Berpacukan Data, Kandungan Terancang, Teknologi Bersesuaian
+- Antara Muka Minimalis dan Mudah, Seragam, Paparan/Menu Jelas
+- Realistik, Kognitif, Fleksibel, Komunikasi, Struktur Hierarki
+- Komponen UI/UX, Tipografi, Tetapan Lalai, Kawalan Pengguna
+- Pencegahan Ralat, Panduan & Dokumentasi
+
+Semua keputusan reka bentuk dalam dokumen ini disemak melawan prinsip di atas. Rujuk fail prinsip-reka-bentuk-mygovea.md untuk butiran prinsip.
+
+---
+
 *Dokumen diselenggara oleh Pejabat Reka Bentuk BPM*  
-*Kemaskini terakhir: 12 Ogos 2025*
+*Kemaskini terakhir: 13 Ogos 2025*

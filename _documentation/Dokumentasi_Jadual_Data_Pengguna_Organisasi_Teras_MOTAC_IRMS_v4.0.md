@@ -1,6 +1,7 @@
 # Jadual Data Pengguna & Organisasi Teras (v4.0)
 
 Dokumen ini menyediakan gambaran keseluruhan tahap tinggi mengenai jadual pangkalan data teras dalam MOTAC IRMS v4.0, komponen Laravel yang berkaitan, serta tujuan penggunaannya dalam sistem. Penambahbaikan selaras dengan PRINSIP REKA BENTUK MYGOVEA (18 Prinsip).
+<!-- Nota: Pemetaan prinsip MyGOVEA disediakan di bahagian akhir untuk verifikasi pematuhan. -->
 
 ---
 
@@ -166,7 +167,8 @@ Menyimpan komen dan respons berangkai bagi setiap tiket helpdesk untuk komunikas
 
 ## 5. Jadual Aliran Kerja & Utiliti Berkongsi
 
-Menyokong aliran kerja dan fungsi sistem yang digunakan oleh pelbagai modul, menepati prinsip Struktural Hierarki, Kawalan Pengguna, Komunikasi dan Realistik.
+Menyokong aliran kerja dan fungsi sistem yang digunakan oleh pelbagai modul, menepati prinsip Struktur Hierarki, Kawalan Pengguna, Komunikasi dan Realistik.
+<!-- Pembetulan: "Struktural Hierarki" diperbetulkan kepada "Struktur Hierarki" untuk sepadan dengan senarai prinsip dalam prinsip-reka-bentuk-mygovea.md -->
 
 ### 5.1 `approvals`
 
@@ -204,11 +206,25 @@ Jadual satu baris untuk menyimpan tetapan global aplikasi.
 
 ---
 
-<!--
-**Semakan Lengkap vs .md Sebelumnya**
-- Semua jadual data teras, model, pengawal, factory, dan seeder dinyatakan.
-- Jadual peranan/kebenaran diurus oleh Spatie/Laravel-Permission, selaras dokumentasi sebelum ini.
-- Jadual organisasi, peralatan/kategori/lokasi, modul pinjaman, helpdesk dan jadual berkongsi telah diterangkan.
-- Prinsip Reka Bentuk MyGOVEA telah diintegrasikan dan dijelaskan pada setiap bahagian yang relevan.
-- Tiada kandungan hilang berbanding dokumen .md asal. Fail ini memberikan rujukan ringkas jadual data dan artifak implementasi; skema terperinci terdapat dalam System_Design_Rev_3.6.md dan dokumen berkaitan.
--->
+## 6. Senarai Semak Pematuhan 18 Prinsip MyGOVEA (Ringkas)
+
+- Berpaksikan Rakyat: Struktur jadual menyokong pengalaman pengguna yang jelas
+- Berpacukan Data: Skema konsisten dan boleh audit
+- Kandungan Terancang: Penamaan jadual/medan konsisten dan bermakna
+- Teknologi Bersesuaian: Laravel + MySQL piawai
+- Antara Muka Minimalis dan Mudah: Skema memudahkan pemetaan UI ringkas
+- Seragam: Konvensyen penamaan seragam merentas modul
+- Paparan/Menu Jelas: Medan menyokong label/paparan yang jelas
+- Realistik: Jadual memodelkan kekangan operasi sebenar
+- Kognitif: Struktur data mengurangkan beban kognitif pembangun
+- Fleksibel: Jadual polimorfik dan konfigurasi tetapan
+- Komunikasi: Jadual komen/notifikasi menyokong komunikasi
+- Struktur Hierarki: Model organisasi dan kategori berhierarki
+- Komponen UI/UX: Data menyokong komponen UI standard
+- Tipografi: Medan label/teks membolehkan tipografi konsisten
+- Tetapan Lalai: Jadual `settings` mengurus lalai sistem
+- Kawalan Pengguna: Jadual peranan/kebenaran
+- Pencegahan Ralat: Kekangan skema dan validasi menyokong pencegahan
+- Panduan & Dokumentasi: Fail ini berperanan sebagai rujukan skema
+
+---
