@@ -32,7 +32,7 @@ Proses bermula apabila pemohon membuat permohonan baru. Permohonan boleh disimpa
   - `app\Services\NotificationService`: Menghantar notifikasi kepada pemohon selepas penghantaran berjaya.
   - `App\Notifications\ApplicationSubmitted`: Notifikasi e-mel dan pangkalan data dihantar kepada pemohon.
 
-### Penyesuaian Prinsip MYGOVEA
+### Penyesuaian Prinsip MYGOVEA untuk Permulaan Permohonan & Pengesahan
 
 - **Berpaksikan Rakyat:** Setiap peringkat mengambil kira keperluan dan pengalaman pengguna.
 - **Antara Muka Minimalis dan Mudah:** Borang dan langkah mudah difahami.
@@ -69,7 +69,7 @@ Setelah dihantar, permohonan dirujuk kepada pegawai penyokong untuk semakan dan 
   - `App\Notifications\ApplicationApproved` / `App\Notifications\ApplicationRejected`: Notifikasi keputusan kepada pemohon.
   - `App\Notifications\LoanApplicationReadyForIssuanceNotification`: Notifikasi kepada staf BPM bahawa permohonan telah diluluskan.
 
-### Penyesuaian Prinsip MYGOVEA
+### Penyesuaian Prinsip MYGOVEA untuk Aliran Kelulusan Permohonan
 
 - **Struktur Hierarki:** Proses kelulusan bertingkat dan jelas.
 - **Komunikasi:** Notifikasi dan status dihantar kepada pihak berkaitan.
@@ -100,7 +100,7 @@ Permohonan yang diluluskan diproses oleh pasukan BPM, memilih aset spesifik dari
 - **Notifikasi & Komunikasi:**
   - `App\Notifications\EquipmentIssuedNotification`: Notifikasi kepada pemohon bahawa peralatan telah dikeluarkan.
 
-### Penyesuaian Prinsip MYGOVEA
+### Penyesuaian Prinsip MYGOVEA untuk Proses Pengeluaran Peralatan
 
 - **Kandungan Terancang:** Senarai semak dan data pengeluaran dikendalikan secara teratur.
 - **Fleksibel:** Proses boleh disesuaikan mengikut keperluan inventori.
@@ -141,7 +141,7 @@ Pemohon atau pegawai yang ditetapkan memulangkan peralatan. Staf BPM akan memeri
   - Kelas Mailables (cth: `App\Mail\EquipmentReturnedNotification`) membina kandungan e-mel.
   - Templat e-mel disimpan dalam `resources/views/emails/`.
 
-### Penyesuaian Prinsip MYGOVEA
+### Penyesuaian Prinsip MYGOVEA untuk Proses Pemulangan Peralatan
 
 - **Komponen UI/UX:** Borang dan paparan pemulangan konsisten, mudah difahami.
 - **Pencegahan Ralat:** Senarai semak dan pengesahan keadaan peralatan.
@@ -179,7 +179,7 @@ Komponen berikut digunakan sepanjang aliran pinjaman untuk memastikan fungsi ter
   - Komponen Blade boleh guna semula di `resources/views/components/` (cth: untuk lencana status).
   - `app/Helpers/Helpers.php` mengandungi fungsi utiliti yang digunakan merentasi modul.
 
-### Penyesuaian Prinsip MYGOVEA
+### Penyesuaian Prinsip MYGOVEA untuk Komponen Berkongsi & Infrastruktur
 
 - **Seragam & Fleksibel:** Seni bina modular, komponen boleh digunakan semula.
 - **Panduan & Dokumentasi:** Kod, polisi dan tetapan didokumentasi bagi memudahkan pemeliharaan serta rujukan.
@@ -210,6 +210,6 @@ Komponen berikut digunakan sepanjang aliran pinjaman untuk memastikan fungsi ter
 
 ---
 
-# Penutup
+## Penutup
 
 Dokumentasi aliran sistem pinjaman ICT telah diselaraskan sepenuhnya dengan 18 Prinsip Reka Bentuk MyGOVEA, memastikan aplikasi mesra pengguna, selamat, konsisten, mudah diselenggara dan mendukung keberkesanan operasi kerajaan digital MOTAC.

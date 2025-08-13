@@ -104,6 +104,7 @@ Selaras dengan prinsip **Antara Muka Minimalis dan Mudah**, **Kawalan Pengguna**
 ---
 
 ## 7. Pematuhan 18 Prinsip MyGOVEA (Ringkas)
+
 - Fokus pengguna, borang yang jelas, navigasi ringkas
 - Data dan audit yang konsisten
 - Kandungan dan struktur maklumat terancang
@@ -116,7 +117,7 @@ Selaras dengan prinsip **Antara Muka Minimalis dan Mudah**, **Kawalan Pengguna**
 
 ---
 
-# Dokumentasi Teknikal: Sistem Pengurusan Sumber Terintegrasi MOTAC (Versi 4.0)
+## Dokumentasi Teknikal: Sistem Pengurusan Sumber Terintegrasi MOTAC (Versi 4.0)
 
 **Versi Dokumen:** 4.0  
 **Tarikh Semakan:** 12 Ogos 2025  

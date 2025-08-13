@@ -26,9 +26,11 @@ Berikut ialah prinsip-prinsip reka bentuk seperti yang digariskan dalam [mygovea
 ---
 
 ## Penjelasan: Berpaksikan Rakyat (Citizen-Centric)
+
 _Reka bentuk yang berpaksikan rakyat (citizen-centric) merujuk kepada pendekatan yang menempatkan keperluan dan kehendak pengguna (rakyat) sebagai fokus utama._
 
-### Aspek utama reka bentuk berpaksikan rakyat:
+### Aspek utama reka bentuk berpaksikan rakyat
+
 - **Mematuhi Kehendak Pengguna:** Memerlukan pemahaman mendalam tentang keperluan, kehendak, dan konteks pengguna.
 - **Melibatkan Pengguna:** Melibatkan pengguna dalam setiap fasa pembangunan perkhidmatan, dari perancangan hingga pelaksanaan.
 - **Memudahkan Pengguna:** Paparan antara muka, penggunaan menu, mesej dan komponen reka bentuk hendaklah bersesuaian dan mudah difahami oleh rakyat mengikut heuristik (kelaziman).
@@ -40,14 +42,17 @@ _Reka bentuk yang berpaksikan rakyat (citizen-centric) merujuk kepada pendekatan
 ---
 
 ## Penjelasan: Berpacukan Data
+
 _Panduan dan pendekatan yang memanfaatkan data dengan lebih efisien untuk mengatasi pertindihan, membantu analisis keputusan dan perkongsian maklumat._
 
-### Prinsip utama:
+### Prinsip utama
+
 - Perkongsian data atas keperluan dan persetujuan.
 - Perkongsian data secara selamat.
 - Perkongsian data menambah nilai kepada sektor awam, rakyat dan negara.
 
-### Aspek:
+### Aspek Berpacukan Data
+
 - **Pemodelan Data:** Penentuan data yang diperlukan dan struktur data.
 - **Selaras dengan Objektif Projek:** Teknologi dan struktur data mengikut matlamat projek.
 - **Mudah difahami:** Reka bentuk data mudah difahami pembangun.
@@ -56,18 +61,22 @@ _Panduan dan pendekatan yang memanfaatkan data dengan lebih efisien untuk mengat
 ---
 
 ## Penjelasan: Kandungan Terancang
+
 _Kandungan disediakan dengan jelas dan tepat bagi memastikan matlamat perkhidmatan tercapai._
 
-### Fasa:
+### Fasa
+
 - **Fasa 1: Reka Bentuk Konsep:** Fungsi perkhidmatan dan pengalaman pengguna.
 - **Fasa 2: Reka Bentuk Seni Bina:** Penyimpanan data, integrasi sistem lain, struktur data, jenis aplikasi, keselamatan data.
 
 ---
 
 ## Penjelasan: Teknologi Bersesuaian
+
 _Penggunaan teknologi dan alatan yang bersesuaian bagi membangunkan perkhidmatan._
 
-### Aspek:
+### Aspek
+
 - Bahasa pengaturcaraan.
 - Rangka kerja pembangunan.
 - Pangkalan data.
@@ -79,9 +88,11 @@ _Penggunaan teknologi dan alatan yang bersesuaian bagi membangunkan perkhidmatan
 ---
 
 ## Penjelasan: Antara Muka Minimalis dan Mudah
+
 _Antara muka minimalis lebih mudah difahami dan digunakan berbanding yang kompleks._
 
-### Panduan:
+### Panduan
+
 - Elakkan komponen tidak diperlukan.
 - Gunakan komponen yang bersesuaian secara konsisten.
 - Bahasa dan terma jelas.
@@ -91,9 +102,11 @@ _Antara muka minimalis lebih mudah difahami dan digunakan berbanding yang komple
 ---
 
 ## Penjelasan: Seragam
+
 _Keseragaman merujuk kepada penggunaan piawaian konsisten untuk memastikan kualiti, kebolehgunaan dan kebolehoperasian antara pelbagai sistem aplikasi._
 
-### Kepentingan:
+### Kepentingan
+
 - Aplikasi selamat dan boleh dipercayai.
 - Mudah penyelenggaraan dan kemas kini.
 - Mengurangkan kos pembangunan.
@@ -102,16 +115,19 @@ _Keseragaman merujuk kepada penggunaan piawaian konsisten untuk memastikan kuali
 ---
 
 ## Penjelasan: Paparan/Menu Jelas
+
 _Paparan dan menu yang jelas penting untuk interaksi pengguna._
 
-### Paparan (UI):
+### Paparan (UI)
+
 - Konsistensi elemen pada kedudukan sama.
 - Penunjuk atau butang mudah dikenal pasti.
 - Mudah dipelajari dan diingati.
 - Pengguna boleh menjangka proses aplikasi.
 - Maklum balas jelas hasil interaksi.
 
-### Menu:
+### Menu
+
 - Susunan teratur dan logik.
 - Kepastian fungsi menu.
 - Kesederhanaan menu/sub-menu.
@@ -122,9 +138,11 @@ Paparan dan menu yang jelas adalah penting untuk memastikan pengguna dapat berin
 ---
 
 ## Penjelasan: Realistik
+
 _Pendekatan memastikan aplikasi praktikal, berfungsi dengan baik dan sesuai dengan keperluan pengguna._
 
-### Aspek Realistik:
+### Aspek Realistik
+
 - **Kepentingan Pengguna:** Fahami keperluan dan kehendak pengguna secara menyeluruh.
 - **Keterbatasan Teknikal:** Pertimbangkan sumber daya peranti, kecepatan jaringan, dan kesesuaian peranti.
 - **Kesesuaian dengan Objektif:** Reka bentuk aplikasi mengikut objektif dan matlamat pembangunan.
@@ -133,7 +151,8 @@ _Pendekatan memastikan aplikasi praktikal, berfungsi dengan baik dan sesuai deng
 - **Keselarasan dengan Anggaran dan Masa:** Patuhi anggaran dan jadual masa yang ditetapkan.
 - **Kesesuaian dengan Teknologi:** Pilih teknologi mengikut keperluan dan kemampuan pasukan.
 
-### Langkah-langkah:
+### Langkah-langkah
+
 - Analisis keperluan pengguna.
 - Pilihan teknologi yang sesuai.
 - Pertimbangan keterbatasan sumber daya.
@@ -146,9 +165,11 @@ _Pendekatan memastikan aplikasi praktikal, berfungsi dengan baik dan sesuai deng
 ---
 
 ## Penjelasan: Kognitif
+
 _Kognitif merujuk kepada aspek pemikiran dan proses kognitif pengguna semasa berinteraksi dengan aplikasi._
 
-### Aspek Kognitif dalam Reka Bentuk Aplikasi:
+### Aspek Kognitif dalam Reka Bentuk Aplikasi
+
 - **Kebolehgunaan:** Memudahkan interaksi melalui ikon, teks dan butang yang intuitif.
 - **Organisasi Maklumat:** Maklumat disusun teratur dan logik untuk akses mudah oleh pengguna.
 - **Pengurangan Beban Kognitif:** Kurangkan informasi berlebihan, kompleksiti dan pastikan elemen mudah dikenali.
@@ -157,7 +178,8 @@ _Kognitif merujuk kepada aspek pemikiran dan proses kognitif pengguna semasa ber
 - **Pengurangan Limpahan Maklumat:** Hanya paparkan maklumat relevan dan penting sahaja.
 - **Pengalaman Pengguna yang Menarik:** Gunakan elemen visual, animasi dan naratif untuk keterlibatan pengguna.
 
-### Cara Mengukur Beban Kognitif Pengguna:
+### Cara Mengukur Beban Kognitif Pengguna
+
 - **Kaedah Kognitif Load:**
   - **NASA Task Load Index (NASA-TLX):** Penilaian subjektif beban kognitif oleh pengguna.
   - **Dual-Task Performance:** Ujian pengguna melakukan dua tugas serentak untuk mengukur beban kognitif.
@@ -171,9 +193,10 @@ _Pengukuran beban kognitif membantu memahami pengalaman pengguna sebenar dan mem
 ---
 
 ## Penjelasan: Fleksibel
+
 _Fleksibel merujuk kepada kemampuan aplikasi untuk beradaptasi, berubah dan berfungsi dengan baik dalam pelbagai situasi dan keadaan._
 
-### Aspek Fleksibel dalam Reka Bentuk Aplikasi:
+### Aspek Fleksibel dalam Reka Bentuk Aplikasi
 
 - **Kebolehskalaan:** Aplikasi dapat mengatasi pertumbuhan dan perubahan skala, termasuk penambahan atau pengurangan kapasiti, pengguna dan data tanpa menjejaskan prestasi.
 - **Modular:** Komponen aplikasi dipisahkan menjadi modul-modul berasingan untuk memudahkan perubahan dan peningkatan tanpa menjejaskan keseluruhan sistem.
@@ -185,9 +208,10 @@ _Fleksibel merujuk kepada kemampuan aplikasi untuk beradaptasi, berubah dan berf
 ---
 
 ## Penjelasan: Komunikasi
+
 _Komunikasi merujuk kepada proses komunikasi efektif dengan pelbagai pihak yang terlibat dalam pembangunan aplikasi._
 
-### Aspek Komunikasi dalam Reka Bentuk Aplikasi:
+### Aspek Komunikasi dalam Reka Bentuk Aplikasi
 
 - **Keterlibatan Pengguna:** Komunikasi dengan pemegang taruh adalah kunci untuk memahami keperluan dan kehendak mereka. Penglibatan pemegang taruh dalam setiap fasa pembangunan membantu memastikan aplikasi memenuhi keperluan mereka.
 - **Kerjasama dalam Pasukan Pembangun:** Komunikasi yang baik antara ahli pasukan pembangun memastikan pemahaman yang sama tentang matlamat dan keperluan aplikasi.
@@ -198,9 +222,10 @@ _Komunikasi merujuk kepada proses komunikasi efektif dengan pelbagai pihak yang 
 ---
 
 ## Penjelasan: Struktur Hierarki
+
 _Struktur hierarki merujuk kepada penyusunan elemen-elemen antara muka pengguna (UI) dalam susunan hierarki yang logik dan teratur._
 
-### Kepentingan Struktur Hierarki dalam Reka Bentuk Aplikasi:
+### Kepentingan Struktur Hierarki dalam Reka Bentuk Aplikasi
 
 - **Mengatur Interaksi dan Maklumat:** Struktur hierarki membantu mengatur bagaimana pengguna berinteraksi dengan aplikasi serta bagaimana aplikasi mengendalikan maklumat dan fungsi yang disediakan.
 - **Memudahkan Navigasi dan Penggunaan:** Membantu pengguna agar mudah menavigasi aplikasi, menemui maklumat yang diperlukan dan menggunakan fungsi aplikasi dengan lancar.
@@ -210,9 +235,11 @@ _Struktur hierarki merujuk kepada penyusunan elemen-elemen antara muka pengguna 
 ---
 
 ## Penjelasan: Komponen Antara Muka dan Pengalaman Pengguna (UI/UX)
+
 _UI/UX adalah dua aspek penting dalam reka bentuk aplikasi yang saling berkait bagi menghasilkan reka bentuk yang baik._
 
 ### Komponen UI
+
 - **Definisi:** Komponen UI merujuk kepada elemen-elemen asas antara muka pengguna yang membentuk struktur dan interaksi visual aplikasi.
 - **Fungsi:** Menyusun antara muka pengguna secara konsisten dan mudah difahami.
 - **Contoh Komponen:** Butang, input teks, menu, bar navigasi, petunjuk dan lain-lain.
@@ -222,6 +249,7 @@ _UI/UX adalah dua aspek penting dalam reka bentuk aplikasi yang saling berkait b
   - Memudahkan pengurusan dan penyelenggaraan melalui konsistensi antara muka.
 
 ### Komponen UX
+
 - **Definisi:** Komponen UX merujuk kepada keseluruhan interaksi dan persepsi pengguna semasa menggunakan produk, perkhidmatan, atau aplikasi digital.
 - **Aspek UX:**
   - Interaksi pengguna termasuk antara muka, fungsi, prestasi, kebolehgunaan dan reaksi emosi.
@@ -229,14 +257,16 @@ _UI/UX adalah dua aspek penting dalam reka bentuk aplikasi yang saling berkait b
 - **Kepentingan:** UI yang baik meningkatkan kebolehgunaan, manakala UX yang baik memastikan interaksi pengguna lancar dan memuaskan.
 
 ### Gabungan UI dan UX
+
 - UI dan UX yang digabungkan secara efektif memberikan pengalaman yang positif dan memuaskan kepada pengguna semasa menggunakan aplikasi.
 
 ---
 
 ## Penjelasan: Tipografi
+
 _Tipografi merujuk kepada penggunaan jenis huruf, saiz huruf, jarak antara huruf dan atribut lain berkaitan teks dalam antara muka pengguna aplikasi._
 
-### Aspek Tipografi dalam Reka Bentuk Aplikasi:
+### Aspek Tipografi dalam Reka Bentuk Aplikasi
 
 - **Jenis Huruf:** Pemilihan jenis huruf yang sesuai untuk aplikasi dan mudah dibaca oleh pengguna.
 - **Saiz Huruf:** Penetapan saiz huruf yang sesuai untuk pelbagai jenis teks seperti teks utama, tajuk dan keterangan.
@@ -249,16 +279,17 @@ _Tipografi yang baik bukan sahaja membuat aplikasi kelihatan profesional, tetapi
 ---
 
 ## Penjelasan: Tetapan Lalai
+
 _Tetapan lalai merujuk kepada nilai atau keadaan asal yang ditetapkan untuk sesuatu elemen atau konfigurasi dalam aplikasi._
 
-### Aspek Tetapan Lalai dalam Reka Bentuk Aplikasi:
+### Aspek Tetapan Lalai dalam Reka Bentuk Aplikasi
 
 - **Nilai Lalai:** Digunakan apabila pengguna tidak mengkonfigurasi sesuatu pilihan, contohnya bahasa antara muka secara automatik menggunakan bahasa Melayu.
 - **Reka Bentuk Antara Muka:** Tetapan lalai pada UI seperti kedudukan butang “Batal” di sebelah kiri dan “Simpan” di sebelah kanan mengikut konvensyen biasa.
 - **Konfigurasi Sistem:** Tetapan lalai untuk pengaturan privasi, notifikasi, tema dan lain-lain yang mempengaruhi cara aplikasi berfungsi.
 - **Pengaturan Keselamatan:** Nilai lalai untuk aspek keselamatan seperti kata laluan harus dipilih dengan teliti supaya tidak mudah diteka.
 
-### Panduan Pemilihan Nilai Lalai:
+### Panduan Pemilihan Nilai Lalai
 
 - **Kenal Pasti Keperluan:** Fahami keperluan aplikasi dan kehendak pengguna sebelum menetapkan nilai lalai.
 - **Nilai Lalai Berasaskan Data:** Tetapkan nilai lalai berdasarkan data relevan, contohnya bahasa rasmi digunakan sebagai lalai.
@@ -271,9 +302,10 @@ _Tetapan lalai mempengaruhi pengalaman pengguna, keselamatan dan keberkesanan ap
 ---
 
 ## Penjelasan: Kawalan Pengguna
+
 _Kawalan pengguna merujuk kepada elemen interaktif yang diberikan kepada pengguna untuk mengendalikan aplikasi dan melakukan tindakan tertentu._
 
-### Aspek Kawalan Pengguna dalam Reka Bentuk Aplikasi:
+### Aspek Kawalan Pengguna dalam Reka Bentuk Aplikasi
 
 - **Jelas:** Kawalan pengguna perlu jelas dan menunjukkan kepada pengguna apa yang akan berlaku apabila digunakan.
 - **Konsisten:** Kawalan pengguna perlu sentiasa konsisten dalam keseluruhan aplikasi.
@@ -286,9 +318,10 @@ _Perancangan kawalan pengguna yang baik membantu meningkatkan kebolehgunaan dan 
 ---
 
 ## Penjelasan: Pencegahan Ralat
+
 _Pencegahan ralat merujuk kepada tindakan yang diambil untuk mengurangkan kemungkinan berlakunya kesilapan pengguna semasa menggunakan aplikasi._
 
-### Langkah-langkah Pencegahan Ralat dalam Pembangunan Aplikasi:
+### Langkah-langkah Pencegahan Ralat dalam Pembangunan Aplikasi
 
 - **Penggunaan Penunjuk dan Bantuan:** Memberikan panduan dan bantuan yang jelas kepada pengguna untuk menggunakan aplikasi.
 - **Pengesahan:** Meminta pengesahan daripada pengguna sebelum melaksanakan tindakan penting atau tidak boleh dipulihkan seperti memadam data.
@@ -301,9 +334,10 @@ _Pencegahan ralat membantu meningkatkan pengalaman pengguna dengan memastikan pe
 ---
 
 ## Penjelasan: Panduan dan Dokumentasi
+
 _Penyediaan panduan dan dokumentasi memainkan peranan penting dalam memastikan keberhasilan dan keselamatan aplikasi._
 
-### Jenis Dokumentasi yang Boleh Dibangunkan:
+### Jenis Dokumentasi yang Boleh Dibangunkan
 
 - **Panduan Pembangunan Aplikasi:** Memberikan arahan dan prosedur kepada pasukan pembangun merangkumi langkah membangun, menguji dan melaksanakan aplikasi. Panduan ini turut merangkumi aspek seperti reka bentuk UI, pengaturan keselamatan dan penggunaan alat pembangunan.
 - **Dokumentasi Teknikal:** Merangkumi maklumat teknikal seperti struktur pangkalan data, arkitektur sistem dan konfigurasi sistem untuk membantu pasukan pembangun memahami dan mengurus aplikasi.
