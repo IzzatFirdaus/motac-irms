@@ -1,6 +1,7 @@
 # Aliran Sistem Permohonan Pinjaman ICT (v4.0)
 
 Dokumen ini menerangkan keseluruhan aliran kerja untuk modul Pinjaman Peralatan ICT, salah satu daripada dua komponen utama dalam Sistem Pengurusan Sumber Terintegrasi MOTAC (v4.0). Setiap peringkat, pelaku utama dan komponen kod dinyatakan berdasarkan seni bina akhir sistem. Dokumentasi ini telah dikemaskini selaras dengan PRINSIP REKA BENTUK MYGOVEA (18 Prinsip).
+<!-- Nota: Dokumen ini dirujuk silang dengan prinsip-reka-bentuk-mygovea.md untuk memastikan pematuhan kepada 18 Prinsip MyGOVEA. -->
 
 ---
 
@@ -183,6 +184,29 @@ Komponen berikut digunakan sepanjang aliran pinjaman untuk memastikan fungsi ter
 - **Seragam & Fleksibel:** Seni bina modular, komponen boleh digunakan semula.
 - **Panduan & Dokumentasi:** Kod, polisi dan tetapan didokumentasi bagi memudahkan pemeliharaan serta rujukan.
 - **Teknologi Bersesuaian:** Penggunaan struktur dan servis Laravel yang optimum.
+
+---
+
+## 6. Senarai Semak Pematuhan 18 Prinsip MyGOVEA (Ringkas)
+<!-- Bahagian ini memetakan aliran kerja kepada prinsip MyGOVEA untuk rujukan pantas. -->
+- Berpaksikan Rakyat: Dipenuhi (borang jelas, langkah terarah)
+- Berpacukan Data: Dipenuhi (rekod status, audit trail)
+- Kandungan Terancang: Dipenuhi (struktur langkah, senarai semak)
+- Teknologi Bersesuaian: Dipenuhi (Laravel + Livewire)
+- Antara Muka Minimalis dan Mudah: Dipenuhi (UI ringkas)
+- Seragam: Dipenuhi (pola konsisten)
+- Paparan/Menu Jelas: Dipenuhi (dashboard, label status)
+- Realistik: Dipenuhi (sekatan gred, ketersediaan aset)
+- Kognitif: Dipenuhi (beban kognitif dikurang melalui langkah-langkah)
+- Fleksibel: Dipenuhi (proses boleh suai)
+- Komunikasi: Dipenuhi (notifikasi dua saluran)
+- Struktur Hierarki: Dipenuhi (rantai kelulusan)
+- Komponen UI/UX: Dipenuhi (komponen boleh guna semula)
+- Tipografi: Dipenuhi (skala dan kebolehbacaan)
+- Tetapan Lalai: Dipenuhi (auto-isi profil)
+- Kawalan Pengguna: Dipenuhi (polisi, peranan)
+- Pencegahan Ralat: Dipenuhi (validasi, pengesahan)
+- Panduan & Dokumentasi: Dipenuhi (rujukan dan komen kod)
 
 ---
 
