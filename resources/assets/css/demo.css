@@ -1,65 +1,103 @@
 /*
-* demo.css
-* File include item demo only specific css only
+* demo.css (MYDS-compliant)
+* File includes item demo-specific CSS only, adapted for MYDS design system standards.
+* Optimized for maximum cross-browser compatibility (IE 10+, Edge, Chrome, Firefox, Safari, Samsung Internet).
+* Last updated: 2025-08-14 08:16:03 UTC by Copilot Space
 ******************************************************************************/
 
-.light-style .menu .app-brand.demo {
-  height: 64px;
-}
-
+/* -----------------------------------------------------
+   Brand logo height for menu styles (MYDS: 64px nav height)
+----------------------------------------------------- */
+.light-style .menu .app-brand.demo,
 .dark-style .menu .app-brand.demo {
   height: 64px;
 }
 
+/* -----------------------------------------------------
+   App brand logo container - horizontal/vertical centering (MYDS + legacy)
+----------------------------------------------------- */
 .app-brand-logo.demo {
-  display: flexbox;
+  /* Legacy browser fallbacks */
+  display: table-cell;
+  vertical-align: middle;
+
+  /* Old WebKit (Safari < 9) */
+  display: -webkit-box;
+  -webkit-box-pack: center;
+  -webkit-box-align: center;
+
+  /* Firefox < 22 */
+  display: -moz-box;
+  -moz-box-pack: center;
+  -moz-box-align: center;
+
+  /* IE 10+ */
+  display: -ms-flexbox;
+  -ms-flex-pack: center;
+  -ms-flex-align: center;
+
+  /* Modern browsers (MYDS grid uses flex) */
+  display: -webkit-flex;
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 34px;
-  height: 24px;
-  -ms-flex-align: center;
-  -ms-flex-pack: center;
+
+  /* MYDS recommended logo sizing */
+  width: 38px;
+  height: 38px;
+  background: var(--myds-bg-white, #fff);
+  border: 2.5px solid var(--myds-primary-600, #2563EB);
+  border-radius: 8px;
+  box-shadow: 0 1px 6px rgba(25, 99, 235, 0.07);
 }
 
+/* SVG logo sizing within brand container */
 .app-brand-logo.demo svg {
-  width: 35px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
+  display: block;
 }
 
+/* Brand text typography (MYDS heading style) */
 .app-brand-text.demo {
-  font-size: 1.375rem;
+  font-family: 'Poppins', Arial, sans-serif;
+  font-size: 1.22em;
+  color: var(--myds-primary-800, #1E40AF);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-left: 8px;
 }
 
-/* ! For .layout-navbar-fixed added fix padding top tpo .layout-page */
+/* -----------------------------------------------------
+   Layout navbar fixed positioning adjustments (MYDS nav height)
+----------------------------------------------------- */
 .layout-navbar-fixed .layout-wrapper:not(.layout-without-menu) .layout-page {
   padding-top: 64px !important;
 }
 
-.layout-navbar-fixed .layout-wrapper:not(.layout-horizontal, .layout-without-menu) .layout-page {
+.layout-navbar-fixed .layout-wrapper:not(.layout-horizontal):not(.layout-without-menu) .layout-page {
   padding-top: 78px !important;
 }
 
-/* Navbar page z-index issue solution */
+/* Navbar z-index fix for content wrapper conflicts */
 .content-wrapper .navbar {
   z-index: auto;
 }
 
-/*
-* Content
-******************************************************************************/
-
+/* -----------------------------------------------------
+   Content Demo Utilities (MYDS spacing, grid)
+   - Use MYDS spacing tokens for vertical rhythm and inline spacing
+----------------------------------------------------- */
 .demo-blocks > * {
   display: block !important;
 }
 
 .demo-inline-spacing > * {
-  margin: 1rem 0.375rem 0 0 !important;
+  margin: var(--myds-spacing-12, 1rem) var(--myds-spacing-6, 0.375rem) 0 0 !important;
 }
 
-/* ? .demo-vertical-spacing class is used to have vertical margins between elements. To remove margin-top from the first-child, use .demo-only-element class with .demo-vertical-spacing class. For example, we have used this class in forms-input-groups.html file. */
 .demo-vertical-spacing > * {
-  margin-top: 1rem !important;
+  margin-top: var(--myds-spacing-12, 1rem) !important;
   margin-bottom: 0 !important;
 }
 
@@ -68,7 +106,7 @@
 }
 
 .demo-vertical-spacing-lg > * {
-  margin-top: 1.875rem !important;
+  margin-top: var(--myds-spacing-30, 1.875rem) !important;
   margin-bottom: 0 !important;
 }
 
@@ -77,7 +115,7 @@
 }
 
 .demo-vertical-spacing-xl > * {
-  margin-top: 5rem !important;
+  margin-top: var(--myds-spacing-80, 5rem) !important;
   margin-bottom: 0 !important;
 }
 
@@ -85,9 +123,11 @@
   margin-top: 0 !important;
 }
 
+/* -----------------------------------------------------
+   RTL (Right-to-Left) specific elements
+----------------------------------------------------- */
 .rtl-only {
   display: none !important;
-  text-align: left !important;
   direction: ltr !important;
 }
 
@@ -95,28 +135,152 @@
   display: block !important;
 }
 
-/*
-* Layout demo
-******************************************************************************/
-
+/* -----------------------------------------------------
+   Layout Demo Components (MYDS grid/flex)
+   - Uses MYDS grid system for vertical layouts
+----------------------------------------------------- */
 .layout-demo-wrapper {
+  /* Legacy browser fallbacks */
+  display: table;
+  width: 100%;
+
   display: -webkit-box;
-  display: flexbox;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-box-align: center;
+
+  display: -moz-box;
+  -moz-box-orient: vertical;
+  -moz-box-direction: normal;
+  -moz-box-align: center;
+
+  display: -ms-flexbox;
+  -ms-flex-direction: column;
+  -ms-flex-align: center;
+
+  /* MYDS grid: vertical flex */
+  display: -webkit-flex;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 1rem;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
+  margin-top: var(--myds-spacing-12, 1rem);
 }
 
+.layout-demo-wrapper-inner {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+/* Demo placeholder image sizing - responsive, MYDS max width */
 .layout-demo-placeholder img {
-  width: 900px;
+  width: 100%;
+  max-width: 740px; /* MYDS article/image max width */
+  height: auto;
 }
 
+/* Layout demo info text centering */
 .layout-demo-info {
-  margin-top: 1rem;
+  margin-top: var(--myds-spacing-12, 1rem);
+  margin-left: auto;
+  margin-right: auto;
   text-align: center;
+  width: 100%;
 }
+
+/* -----------------------------------------------------
+   Responsive adjustments for demo components (MYDS breakpoints)
+----------------------------------------------------- */
+@media (max-width: 1023px) {
+  .app-brand-logo.demo {
+    width: 32px;
+    height: 32px;
+  }
+  .app-brand-logo.demo svg {
+    width: 28px;
+    height: 28px;
+  }
+  .app-brand-text.demo {
+    font-size: 1.05em;
+  }
+  .demo-vertical-spacing > *,
+  .demo-vertical-spacing-lg > * {
+    margin-top: var(--myds-spacing-8, 0.75rem) !important;
+  }
+  .demo-vertical-spacing-xl > * {
+    margin-top: 2rem !important;
+  }
+  .layout-navbar-fixed .layout-wrapper:not(.layout-without-menu) .layout-page {
+    padding-top: 56px !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .app-brand-logo.demo {
+    width: 28px;
+    height: 28px;
+  }
+  .app-brand-logo.demo svg {
+    width: 24px;
+    height: 24px;
+  }
+  .app-brand-text.demo {
+    font-size: 1em;
+  }
+  .demo-vertical-spacing > *,
+  .demo-vertical-spacing-lg > * {
+    margin-top: var(--myds-spacing-6, 0.5rem) !important;
+  }
+  .demo-vertical-spacing-xl > * {
+    margin-top: 1.2rem !important;
+  }
+}
+
+/* -----------------------------------------------------
+   Print styles for demo components
+----------------------------------------------------- */
+@media print {
+  .demo-blocks,
+  .demo-inline-spacing,
+  .layout-demo-wrapper {
+    display: none !important;
+  }
+  .app-brand-logo.demo,
+  .app-brand-text.demo {
+    display: inline-block !important;
+  }
+}
+
+/* -----------------------------------------------------
+   Browser-specific hacks and fixes
+----------------------------------------------------- */
+/* IE 8-9 specific fixes */
+.lt-ie10 .layout-demo-wrapper {
+  display: table !important;
+}
+
+.lt-ie10 .layout-demo-wrapper-inner {
+  display: table-cell !important;
+  vertical-align: middle !important;
+}
+
+/* IE 10-11 specific flexbox fixes */
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  .layout-demo-wrapper {
+    display: -ms-flexbox !important;
+  }
+  .app-brand-logo.demo {
+    display: -ms-flexbox !important;
+  }
+}
+
+/*
+  === MYDS Documentation Notes ===
+
+  - All layout, grid, spacing, and typography adapted from MYDS standards.
+  - Logo, navbar, and grid use MYDS tokens and dimensions for visual consistency.
+  - Responsive breakpoints match MYDS 12-8-4 grid: desktop, tablet, mobile.
+  - Spacing tokens use --myds-spacing-* custom properties for maintainability and future-proofing.
+  - Demo utilities are scoped for demo purposes; production components should use official MYDS classes.
+  - Browser fallbacks remain for legacy support, but modern browsers use flex/grid as per MYDS spec.
+  - Print and RTL support for accessibility.
+*/
