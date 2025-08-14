@@ -4380,6 +4380,1003 @@ Counters provide at-a-glance information about item counts per tab.
 
 ---
 
+## Tag
+
+The Tag component is a visual indicator used to display the current state or status of an item, process, or entity. Tags help communicate statuses at a glance and come in multiple styles, sizes, and modes. They can optionally display a status dot for additional emphasis.
+
+### Anatomy & Usage (Tag)
+
+**Imports:**
+
+```javascript
+import { Tag } from "@govtechmy/myds-react/tag";
+```
+<!--
+Import the Tag component to visually indicate status, state, or categorization in your UI.
+-->
+
+**Component Structure Example:**
+
+```jsx
+export default () => (
+  <Tag size="medium" dot={true}>Default</Tag>
+  <Tag size="small" dot={false} variant="warning" mode="default">
+    <span>Default</span>
+  </Tag>
+);
+// Example shows a medium tag with a status dot, and a small warning tag without a dot.
+```
+
+### Tag Examples
+
+#### Tag Variant Example
+
+Use the `variant` prop to change the Tag's visual style.  
+Supported variants: `default`, `primary`, `success`, `danger`, `warning`.
+
+- **primary:** Relates to the product's brand.
+- **success:** Represents a successful outcome.
+- **danger:** Indicates a critical issue or error.
+- **warning:** Warns user of a potential issue.
+
+```jsx
+<Tag variant="default">Default</Tag>
+<Tag variant="primary">Primary</Tag>
+<Tag variant="success">Success</Tag>
+<Tag variant="danger">Danger</Tag>
+<Tag variant="warning">Warning</Tag>
+```
+<!--
+Variants communicate different states or statuses at a glance.
+-->
+
+#### Tag Size Example
+
+Use the `size` prop to change the size of the tag.  
+Supported sizes: `small`, `medium`, `large`.
+
+```jsx
+<Tag size="small">Small</Tag>
+<Tag size="medium">Medium</Tag>
+<Tag size="large">Large</Tag>
+```
+<!--
+Choose tag size for visual hierarchy or layout needs.
+-->
+
+#### Tag Mode Example
+
+Use the `mode` prop to change the tag's shape:
+
+- **default:** Slightly rounded edges.
+- **pill:** Fully rounded appearance.
+
+```jsx
+<Tag mode="default">Default</Tag>
+<Tag mode="pill">Pill</Tag>
+```
+<!--
+Mode adjusts the tag's border radius for different design aesthetics.
+-->
+
+#### Tag Dot Example
+
+Use the `dot` prop to toggle a status dot on the tag.  
+The dot acts as a visual indicator for the current state.
+
+```jsx
+<Tag dot={false}>No Dot</Tag>
+<Tag dot={true}>Dot</Tag>
+```
+<!--
+Dots are useful for representing live, active, or status indicators.
+-->
+
+### Tag Props
+
+#### Tag Component Props
+
+| Prop    | Type    | Default   |
+|---------|---------|-----------|
+| variant | enum    | default   |
+| size    | enum    | small     |
+| dot     | boolean | false     |
+| mode    | enum    | pill      |
+
+---
+
+## Text Area
+
+The Text Area component is a multi-line text input designed for longer form content. Unlike the Input component—which is limited to a single line—the Text Area expands vertically to accommodate multiple lines of text, making it ideal for comments, messages, or any large textual input.
+
+### Anatomy & Usage (Text Area)
+
+**Imports:**
+
+```javascript
+import { TextArea } from "@govtechmy/myds-react/textarea";
+```
+<!--
+Import the TextArea component for multi-line text input in forms.
+-->
+
+**Component Structure Example:**
+
+```jsx
+export default () => (
+  <TextArea
+    placeholder="Placeholder text displayed when the text area is empty."
+    size="small"
+    disabled={false}
+  />
+);
+// Renders a small TextArea with placeholder and enabled for user input.
+```
+
+### Text Area Examples
+
+#### Text Area Size Example
+
+Use the `size` prop to change the input field's size variant.  
+Supported sizes: `small`, `medium`, `large`. The default is `medium`.
+
+```jsx
+<TextArea size="small" placeholder="Enter your text for your small TextArea." />
+<TextArea size="medium" placeholder="Enter your text for your medium TextArea." />
+<TextArea size="large" placeholder="Enter your text for your large TextArea." />
+```
+<!--
+Choose size to fit different layouts or UI density requirements.
+-->
+
+#### Text Area Disabled Example
+
+Set the `disabled` prop to `true` to prevent user input and apply a visual styling that indicates the field cannot be edited.
+
+```jsx
+<TextArea disabled placeholder="The TextArea has been disabled." />
+```
+<!--
+Disabled state greys out the field and makes it non-interactive.
+-->
+
+### Text Area Props
+
+#### TextArea Component Props
+
+| Prop        | Type     | Default   |
+|-------------|----------|-----------|
+| size        | enum     | medium    |
+| disabled    | boolean  | false     |
+| placeholder | string   | -         |
+
+---
+
+## Theme Switch
+
+The Theme Switch component allows users to dynamically switch the application's theme (e.g., light, dark, or custom themes) for improved accessibility and personalized experience.
+
+### Anatomy & Usage (Theme Switch)
+
+**Imports:**
+
+```javascript
+import { ThemeProvider } from "@govtechmy/myds-react/hooks";
+import { ThemeSwitch } from "@govtechmy/myds-react/theme-switch";
+```
+<!--
+Import ThemeProvider to manage theme context, and ThemeSwitch to provide user controls for changing themes.
+-->
+
+**Component Structure Example:**
+
+```jsx
+export default () => (
+  <ThemeProvider>
+    {/* ThemeSwitch lets users toggle or select a theme */}
+    <ThemeSwitch />
+  </ThemeProvider>
+);
+// Always wrap your app in ThemeProvider to enable dynamic theme switching.
+```
+
+### Theme Switch Examples
+
+#### Theme Switch as Toggle Example
+
+By default, `ThemeSwitch` will appear as a toggle button, allowing users to switch between light and dark modes.
+
+```jsx
+<ThemeProvider>
+  <ThemeSwitch />
+</ThemeProvider>
+```
+<!--
+Toggle mode lets users switch between two primary themes: light and dark.
+-->
+
+#### Theme Switch as Select Example
+
+You can render `ThemeSwitch` as a select dropdown, so users can choose from a list of available themes.
+
+```jsx
+<ThemeProvider>
+  <ThemeSwitch as="select" />
+</ThemeProvider>
+```
+<!--
+Select mode presents all theme options in a dropdown menu.
+-->
+
+#### Theme Switch with Custom Themes Example
+
+Extend the available themes by providing the `themes` prop with custom labels, values, and icons.
+
+```jsx
+import { SunIcon, MoonIcon, SystemIcon } from "./icons";
+
+const customThemes = [
+  { label: "Light", value: "light", icon: <SunIcon /> },
+  { label: "Dark", value: "dark", icon: <MoonIcon /> },
+  { label: "System", value: "system", icon: <SystemIcon /> }
+];
+
+<ThemeProvider>
+  <ThemeSwitch themes={customThemes} />
+</ThemeProvider>
+```
+<!--
+Pass your own theme options for more flexibility and branding.
+-->
+
+### Important Usage Notes
+
+- **Always wrap your application with `ThemeProvider`** to enable theme switching features.
+- `ThemeProvider` manages the current theme and makes it available throughout your app.
+
+### Theme Switch Props
+
+#### ThemeSwitch Component Props
+
+| Prop   | Type    | Default |
+|--------|---------|---------|
+| as     | enum    | toggle  |
+| themes | Theme[] | See below |
+
+Default `themes` value:
+```jsx
+[
+  { 
+    label: "Light",
+    value: "light", 
+    icon: <SunIcon /> 
+  },
+  { 
+    label: "Dark",
+    value: "dark", 
+    icon: <MoonIcon /> 
+  }
+]
+```
+
+#### ThemeProvider Component Props
+
+| Prop         | Type      | Default |
+|--------------|-----------|---------|
+| defaultTheme | string    | light   |
+| children     | ReactNode | -       |
+
+---
+
+## Toast
+
+The Toast component provides non-intrusive notifications that temporarily appear on the screen to give feedback or alert users of an event. Toasts are ideal for showing messages, confirmations, warnings, errors, or informational updates without interrupting user workflows.
+
+### Anatomy & Usage (Toast)
+
+**Simple Usage with AutoToast**
+
+For most cases, `AutoToast` can be used directly.  
+It is a pre-assembled, simplified version that handles common notification use cases.
+
+```javascript
+import { AutoToast } from "@govtechmy/myds-react/toast";
+
+// Place AutoToast high up in the DOM tree (e.g., in your layout component)
+<AutoToast />;
+```
+<!--
+AutoToast listens globally for toast events and displays notifications as needed.
+-->
+
+**Triggering a Toast Notification**
+
+Use the `useToast` hook to publish or emit new toast events.
+
+```javascript
+import { useToast } from "@govtechmy/myds-react/hooks";
+
+export default () => {
+  const { toast } = useToast();
+  return (
+    <button
+      onClick={() => {
+        toast({
+          variant: "message",
+          title: "Hello, world!",
+          description: "this is a message toast description",
+        });
+      }}
+    >
+      Message
+    </button>
+  );
+};
+// This button triggers a toast notification when clicked.
+```
+
+**Advanced Usage with Manual Composition**
+
+For more control, manually assemble the Toast components.  
+This approach is useful when you need to manage toasts or customize their appearance and behavior.
+
+```javascript
+import {
+  ToastRoot,
+  ToastIcon,
+  ToastProgress,
+  ToastProvider,
+  ToastViewport,
+  ToastTitle,
+  ToastDescription,
+  ToastClose,
+} from "@govtechmy/myds-react/toast";
+
+export default () => (
+  <ToastProvider>
+    {toasts.map((toast, index) => (
+      <ToastRoot
+        key={toast.id || index}
+        variant={toast.variant || "message"}
+        {...toast}
+      >
+        <ToastIcon />
+        <div className="space-y-1">
+          <ToastTitle>{toast.title}</ToastTitle>
+          {toast.description && (
+            <ToastDescription>{toast.description}</ToastDescription>
+          )}
+        </div>
+        <ToastClose />
+        <ToastProgress />
+      </ToastRoot>
+    ))}
+    <ToastViewport />
+  </ToastProvider>
+);
+// This example manually renders a list of toasts managed in state.
+```
+
+### Toast Examples
+
+#### Toast Variant Example
+
+There are five supported toast variants:
+
+- **message:** Default notification for general feedback.
+- **info:** Provides additional details to keep the user informed.
+- **success:** Indicates a successful action, e.g., form submission.
+- **warning:** Alerts users to take notice or act.
+- **error:** Notifies users of issues that require resolution.
+
+```jsx
+toast({ variant: "success", title: "Saved!", description: "Your form was submitted successfully." });
+toast({ variant: "warning", title: "Reminder", description: "Don't forget to update your profile." });
+toast({ variant: "info", title: "Heads up!", description: "New updates are available." });
+toast({ variant: "error", title: "Error!", description: "Please resolve errors before proceeding." });
+```
+<!--
+Choose the variant that matches your notification type.
+-->
+
+### Toast Props
+
+#### ToastProvider Component
+
+- Abstracted from Radix UI's ToastProvider. Refer to API documentation for advanced usage.
+
+#### ToastViewport Component
+
+- Manages where toasts are rendered on the screen. Refer to API documentation for configuration.
+
+#### ToastRoot Component Props
+
+| Prop     | Type   | Default  |
+|----------|--------|----------|
+| variant  | enum   | message  |
+| duration | number | 5000     |
+
+#### ToastTitle Component
+
+- Displays the title of the notification. Abstracted from Radix UI's ToastTitle.
+
+#### ToastDescription Component
+
+- Shows additional details or context for the notification. Abstracted from Radix UI's ToastDescription.
+
+#### ToastClose Component
+
+- Provides a button or control for dismissing the toast. Abstracted from Radix UI's ToastClose.
+
+---
+
+## Toggle
+
+The Toggle component is a versatile switch that allows users to toggle between two states (e.g., on/off, enabled/disabled). It is commonly used for settings, preferences, and other binary options in forms or user interfaces.
+
+### Anatomy & Usage (Toggle)
+
+**Imports:**
+
+```javascript
+import { Toggle, ToggleThumb } from "@govtechmy/myds-react/toggle";
+```
+<!--
+Import Toggle and ToggleThumb to create a switch control for binary states.
+-->
+
+**Component Structure Example:**
+
+```jsx
+export default () => (
+  <Toggle>
+    <ToggleThumb />
+  </Toggle>
+);
+// This creates a basic toggle switch with a thumb indicating the current state.
+```
+
+### Toggle Examples
+
+#### Toggle Size Example
+
+Use the `size` prop to adjust the toggle's size.  
+Supported sizes: `small`, `medium`, `large` (default is `medium`).
+
+```jsx
+<Toggle size="small">
+  <ToggleThumb />
+</Toggle>
+<Toggle size="medium">
+  <ToggleThumb />
+</Toggle>
+<Toggle size="large">
+  <ToggleThumb />
+</Toggle>
+```
+<!--
+Choose the size that best fits your layout and design requirements.
+-->
+
+#### Toggle Disabled Example
+
+Set the `disabled` prop to `true` to make the toggle non-interactive and visually indicate its disabled state.
+
+```jsx
+<Toggle disabled>
+  <ToggleThumb />
+</Toggle>
+```
+<!--
+Disabled toggles cannot be changed by the user and have a faded appearance.
+-->
+
+#### Controlled Toggle Example
+
+Manage the toggle state externally using the `checked` and `onCheckedChange` props.
+
+```jsx
+const [checked, setChecked] = useState(false);
+
+<Toggle checked={checked} onCheckedChange={setChecked}>
+  <ToggleThumb />
+</Toggle>
+```
+<!--
+Controlled toggles allow you to synchronize state with your application logic.
+-->
+
+#### Uncontrolled Toggle Example
+
+Allow the toggle to manage its own state internally by omitting the `checked` prop.
+
+```jsx
+<Toggle defaultChecked={true}>
+  <ToggleThumb />
+</Toggle>
+```
+<!--
+Uncontrolled toggles manage their state automatically and are useful for simple use cases.
+-->
+
+### Toggle Props
+
+#### Toggle Component Props
+
+| Prop     | Type    | Default |
+|----------|---------|---------|
+| size     | enum    | medium  |
+| disabled | boolean | false   |
+
+---
+
+## Tooltip
+
+The Tooltip component provides brief, contextual information when users hover or focus on an element, enhancing clarity without cluttering the interface. Tooltips are ideal for explaining icons, buttons, or any interactive elements where the meaning might not be immediately clear.
+
+### Anatomy & Usage (Tooltip)
+
+**Imports:**
+
+```javascript
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@govtechmy/myds-react/tooltip";
+```
+<!--
+Import Tooltip components to add contextual info to interactive UI elements.
+-->
+
+**Component Structure Example:**
+
+```jsx
+<Tooltip>
+  <TooltipTrigger>
+    <button aria-label="Info">i</button>
+  </TooltipTrigger>
+  <TooltipContent>
+    This is a helpful description.
+  </TooltipContent>
+</Tooltip>
+// Tooltip wraps the trigger and content, showing the bubble when triggered.
+```
+
+### Tooltip Examples
+
+#### Controlled Tooltip Example
+
+You can manage the tooltip's open state programmatically using the `open` and `onOpenChange` props.
+Treat as an uncontrolled component using the `defaultOpen` prop.
+
+```jsx
+// Controlled
+const [isOpen, setIsOpen] = useState(false);
+
+<Tooltip open={isOpen} onOpenChange={setIsOpen}>
+  <TooltipTrigger>
+    <button aria-label="Help">?</button>
+  </TooltipTrigger>
+  <TooltipContent>
+    Click for more information.
+  </TooltipContent>
+</Tooltip>
+
+// Uncontrolled
+<Tooltip defaultOpen={true}>
+  <TooltipTrigger>
+    <button aria-label="Help">?</button>
+  </TooltipTrigger>
+  <TooltipContent>
+    Click for more information.
+  </TooltipContent>
+</Tooltip>
+```
+<!--
+Controlled approach allows external control of tooltip visibility. Uncontrolled manages its own state.
+-->
+
+#### Tooltip Content Placement Example
+
+You can manually adjust the placement of the TooltipContent bubble using the `side` prop.
+Accepted values: `left`, `right`, `top`, `bottom`.
+
+```jsx
+<Tooltip>
+  <TooltipTrigger>
+    <span aria-label="Help">?</span>
+  </TooltipTrigger>
+  <TooltipContent side="top">
+    Tooltip above the trigger.
+  </TooltipContent>
+</Tooltip>
+<Tooltip>
+  <TooltipTrigger>
+    <span aria-label="Help">?</span>
+  </TooltipTrigger>
+  <TooltipContent side="bottom">
+    Tooltip below the trigger.
+  </TooltipContent>
+</Tooltip>
+<Tooltip>
+  <TooltipTrigger>
+    <span aria-label="Help">?</span>
+  </TooltipTrigger>
+  <TooltipContent side="left">
+    Tooltip to the left.
+  </TooltipContent>
+</Tooltip>
+<Tooltip>
+  <TooltipTrigger>
+    <span aria-label="Help">?</span>
+  </TooltipTrigger>
+  <TooltipContent side="right">
+    Tooltip to the right.
+  </TooltipContent>
+</Tooltip>
+```
+<!--
+Choose placement for best readability and UX.
+-->
+
+### Tooltip Props
+
+#### Tooltip Component Props
+
+| Prop                  | Type      | Default    |
+|-----------------------|-----------|------------|
+| defaultOpen           | boolean   | -          |
+| open                  | boolean   | -          |
+| onOpenChange          | function  | -          |
+| delayDuration         | number    | 700        |
+| disableHoverableContent| boolean  | -          |
+
+#### TooltipContent Component Props
+
+| Prop          | Type        | Default         |
+|---------------|-------------|-----------------|
+| container     | HTMLElement | document.body   |
+| arrowPadding  | number      | -               |
+| align         | enum        | center          |
+| side          | enum        | top             |
+
+#### TooltipTrigger Component
+
+- The interactive element that shows the tooltip when hovered or focused.
+
+---
+
+## usePagination
+
+The `usePagination` hook manages pagination state and actions for lists and tables. It provides the necessary logic for self-assembled pagination components, making it easy to display paginated content with navigation controls.
+
+### Anatomy & Usage (usePagination)
+
+**Imports:**
+
+```javascript
+import { usePagination } from "@govtechmy/myds-react/hooks";
+```
+<!--
+Import the usePagination hook to manage page navigation, visible page numbers, and related logic in your list or table components.
+-->
+
+**Basic Hook Usage Example:**
+
+```javascript
+const { visiblePages, max } = usePagination({ count: 10, page: 1, limit: 10, maxDisplay: 4 });
+// visiblePages: Array of page numbers (and "..." for ellipsis) to display in controls
+// max: The maximum number of pages available given count and limit
+```
+
+### Self-Assembled Pagination Component Example
+
+The `usePagination` hook provides handlers and state needed to build a custom pagination component.  
+Below is an example of how to use it with MYDS Pagination primitives:
+
+```jsx
+import { usePagination } from "@govtechmy/myds-react/hooks";
+
+// Inside your component
+const { visiblePages } = usePagination({ count: 50, page: 3, limit: 10, maxDisplay: 4 });
+
+// Self-assembled Pagination component using MYDS primitives
+<Pagination>
+  <PaginationContent>
+    {/* Previous button */}
+    <PaginationItem>
+      <PaginationPrevious />
+    </PaginationItem>
+    {/* Render visible page numbers and ellipsis */}
+    {visiblePages.map((page, index) => (
+      <PaginationItem key={page}>
+        {page === "..."
+          ? <PaginationEllipsis /> // Shows an ellipsis for skipped pages
+          : typeof page === "number"
+              && <PaginationNumber number={page} /> // Shows a numbered page button
+        }
+      </PaginationItem>
+    ))}
+    {/* Next button */}
+    <PaginationItem>
+      <PaginationNext />
+    </PaginationItem>
+  </PaginationContent>
+</Pagination>
+```
+<!--
+This example builds a paginated navigation bar with dynamic visible pages, previous/next, and ellipsis as needed.
+-->
+
+### API Reference
+
+#### usePagination Arguments
+
+| Prop        | Type                     | Default |
+|-------------|--------------------------|---------|
+| count       | number                   | -       |
+| page        | number                   | -       |
+| limit       | number                   | -       |
+| maxDisplay  | number                   | -       |
+
+- `count`: Total number of items in the dataset.
+- `page`: Current active page number.
+- `limit`: Number of items per page.
+- `maxDisplay`: Maximum number of page buttons to display (including ellipsis).
+
+#### usePagination Return Values
+
+| Prop         | Type                  | Default |
+|--------------|-----------------------|---------|
+| visiblePages | Array<number | "..."> | -       |
+| max          | number                | -       |
+
+- `visiblePages`: Array of page numbers and/or "..." (ellipsis) for rendering pagination controls.
+- `max`: The total number of pages available.
+
+---
+
+## useTheme
+
+The `useTheme` hook provides access to the current theme and a method to switch themes dynamically within your application. It is essential for implementing user-selectable light/dark modes or custom themes in your UI.
+
+### Anatomy & Usage (useTheme)
+
+**Imports:**
+
+```javascript
+import { useTheme } from "@govtechmy/myds-react/hooks";
+```
+<!--
+Import useTheme to read and change the theme anywhere in your component tree.
+-->
+
+**Basic Hook Usage Example:**
+
+```javascript
+const { theme, setTheme } = useTheme();
+// theme: Current theme value (e.g., "light", "dark", or custom string)
+// setTheme: Function to change the theme, accepts a theme string
+```
+
+### Important Usage Notes
+
+- **ThemeProvider is required:**  
+  Always wrap your application with `ThemeProvider` to utilise the theme context and API provided by `useTheme`.
+- The context ensures all child components can read and update the theme.
+
+### Example: Building a Theme Switch Component
+
+The following component uses `useTheme` to toggle between light and dark modes:
+
+```javascript
+import { useTheme } from "@govtechmy/myds-react/hooks";
+
+// Simple toggle button to switch between light and dark themes
+const ThemeToggle = () => {
+  const { theme, setTheme } = useTheme();
+
+  // Switches the theme on button click
+  return (
+    <button onClick={() => setTheme(theme === "light" ? "dark" : "light")}>
+      Switch to {theme === "light" ? "dark" : "light"} mode
+    </button>
+  );
+};
+
+export { ThemeToggle };
+```
+<!--
+This button toggles the app theme between light and dark.
+-->
+
+#### Example: Theme Switch as Select Dropdown
+
+You can also build a dropdown menu to select from multiple themes:
+
+```javascript
+import { useTheme } from "@govtechmy/myds-react/hooks";
+
+const ThemeSelect = () => {
+  const { theme, setTheme } = useTheme();
+
+  return (
+    <select value={theme} onChange={e => setTheme(e.target.value)}>
+      <option value="light">Light</option>
+      <option value="dark">Dark</option>
+      <option value="system">System</option>
+      {/* Add more theme options as needed */}
+    </select>
+  );
+};
+
+export { ThemeSelect };
+```
+<!--
+Dropdown menus allow users to pick from more than two theme choices.
+-->
+
+### Declaring a Globally Accessible ThemeProvider
+
+Wrap your entire application layout with `ThemeProvider` to make the theme context available everywhere:
+
+```javascript
+import type { ReactNode } from "react";
+import { ThemeProvider } from "@govtechmy/myds-react/hooks";
+import { ThemeToggle } from "./ThemeToggle";
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <ThemeProvider>
+      <div className="app-container">
+        <ThemeToggle />
+        {children}
+      </div>
+    </ThemeProvider>
+  );
+}
+// ThemeProvider should wrap the whole app to enable global theme control.
+```
+<!--
+This ensures all components have access to theme state and can call setTheme.
+-->
+
+### API Reference
+
+#### useTheme Return Values
+
+| Prop     | Type                      | Default |
+|----------|---------------------------|---------|
+| theme    | string                    | "light" |
+| setTheme | (theme: string) => void   | -       |
+
+- `theme`: Current theme value (e.g., "light", "dark", "system", or custom).
+- `setTheme`: Function to update the current theme.
+
+#### ThemeProvider Component Props
+
+| Prop         | Type                      | Default |
+|--------------|---------------------------|---------|
+| defaultTheme | string                    | "light" |
+| setTheme     | (theme: string) => void   | -       |
+| children     | ReactNode                 | -       |
+
+---
+
+## useToast
+
+The `useToast` hook allows you to manage toast lifecycle events dynamically from anywhere inside your app. It provides methods to trigger toast notifications, subscribe/unsubscribe to toast events, and access currently active toasts.
+
+### Anatomy & Usage (useToast)
+
+**Imports:**
+
+```javascript
+import { useToast } from "@govtechmy/myds-react/hooks";
+```
+<!--
+Import useToast to trigger notifications, manage toast events, and access active toasts in your app.
+-->
+
+**Basic Hook Usage Example:**
+
+```javascript
+const { toast } = useToast();
+
+// Function to trigger a toast notification
+const handleClick = () => {
+  toast({
+    variant: "message",
+    title: "Hello, world!",
+    description: "This is a description",
+  });
+};
+```
+<!--
+Call toast() with a ToastEvent object to display a toast notification.
+-->
+
+### Important Usage Notes
+
+- Ensure you have `<AutoToast />` or a self-assembled Toast component defined somewhere in your application for toast notifications to be displayed.
+
+### Example: Trigger a Toast Event
+
+You can trigger a toast event by calling the `toast` method provided by the hook.  
+Define a ToastEvent object with required properties and pass it to `toast`.
+
+```javascript
+import { useToast } from "@govtechmy/myds-react/hooks";
+
+// Inside your component
+const { toast } = useToast();
+
+// Trigger a default message toast (variants: "success", "info", "warning", "error")
+toast({
+  variant: "message",
+  title: "Hello, world!",
+  description: "This is a description",
+});
+```
+<!--
+Variants allow you to show different types of notifications.
+-->
+
+### Example: Building a Self-Assembled Toast Listener
+
+The `useToast` hook provides methods to subscribe and unsubscribe to toast events, which is useful for custom toast implementations or advanced use cases.
+
+```javascript
+import { useEffect } from "react";
+import { useToast } from "@govtechmy/myds-react/hooks";
+
+// Inside your component
+const { subscribe, unsubscribe } = useToast();
+
+useEffect(() => {
+  subscribe(); // Subscribe to toast events when component mounts
+  return () => {
+    unsubscribe(); // Unsubscribe from toast events when component unmounts
+  };
+}, []);
+```
+<!--
+Subscribing allows your component to listen for toast events and manage custom notifications.
+-->
+
+### Example: Accessing Active Toasts
+
+You can access the current array of active toast events using the `toasts` object provided by the hook.
+
+```javascript
+import { useToast } from "@govtechmy/myds-react/hooks";
+
+const { toasts } = useToast();
+console.log(toasts); // Logs the array of currently active toast events
+```
+<!--
+Useful for debugging or custom toast rendering logic.
+-->
+
+### API Reference
+
+#### useToast Return Values
+
+| Prop        | Type                           | Default |
+|-------------|--------------------------------|---------|
+| toast       | (props: ToastEvent) => void    | -       |
+| toasts      | ToastEvent[]                   | -       |
+| subscribe   | () => void                     | -       |
+| unsubscribe | () => void                     | -       |
+
+- `toast`: Function to trigger a toast notification.
+- `toasts`: Array of currently active toast events.
+- `subscribe`: Function to subscribe to toast events.
+- `unsubscribe`: Function to unsubscribe from toast events.
+
+---
+
 > For more details:
 >
 > - [MYDS Design Guidelines](https://design.digital.gov.my/en/docs/design)
@@ -4389,5 +5386,5 @@ Counters provide at-a-glance information about item counts per tab.
 ---
 
 <!--
-## Next Section: Tag
+## Next Section: End of API
 -->
