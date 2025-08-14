@@ -4629,7 +4629,7 @@ const customThemes = [
 Pass your own theme options for more flexibility and branding.
 -->
 
-### Important Usage Notes
+### ThemeProvider Integration Notes
 
 - **Always wrap your application with `ThemeProvider`** to enable theme switching features.
 - `ThemeProvider` manages the current theme and makes it available throughout your app.
@@ -4644,6 +4644,7 @@ Pass your own theme options for more flexibility and branding.
 | themes | Theme[] | See below |
 
 Default `themes` value:
+
 ```jsx
 [
   { 
@@ -4659,7 +4660,7 @@ Default `themes` value:
 ]
 ```
 
-#### ThemeProvider Component Props
+#### ThemeProvider Component Props (useTheme)
 
 | Prop         | Type      | Default |
 |--------------|-----------|---------|
@@ -4668,13 +4669,13 @@ Default `themes` value:
 
 ---
 
-## Toast
+## Toast Component
 
 The Toast component provides non-intrusive notifications that temporarily appear on the screen to give feedback or alert users of an event. Toasts are ideal for showing messages, confirmations, warnings, errors, or informational updates without interrupting user workflows.
 
 ### Anatomy & Usage (Toast)
 
-**Simple Usage with AutoToast**
+### Simple Usage with AutoToast
 
 For most cases, `AutoToast` can be used directly.  
 It is a pre-assembled, simplified version that handles common notification use cases.
@@ -4689,7 +4690,7 @@ import { AutoToast } from "@govtechmy/myds-react/toast";
 AutoToast listens globally for toast events and displays notifications as needed.
 -->
 
-**Triggering a Toast Notification**
+### Triggering a Toast Notification
 
 Use the `useToast` hook to publish or emit new toast events.
 
@@ -4715,7 +4716,7 @@ export default () => {
 // This button triggers a toast notification when clicked.
 ```
 
-**Advanced Usage with Manual Composition**
+### Advanced Usage with Manual Composition
 
 For more control, manually assemble the Toast components.  
 This approach is useful when you need to manage toasts or customize their appearance and behavior.
@@ -5109,7 +5110,7 @@ const { visiblePages } = usePagination({ count: 50, page: 3, limit: 10, maxDispl
 This example builds a paginated navigation bar with dynamic visible pages, previous/next, and ellipsis as needed.
 -->
 
-### API Reference
+### usePagination API Reference
 
 #### usePagination Arguments
 
@@ -5129,7 +5130,7 @@ This example builds a paginated navigation bar with dynamic visible pages, previ
 
 | Prop         | Type                  | Default |
 |--------------|-----------------------|---------|
-| visiblePages | Array<number | "..."> | -       |
+| visiblePages | Array<number \| "..."> | -       |
 | max          | number                | -       |
 
 - `visiblePages`: Array of page numbers and/or "..." (ellipsis) for rendering pagination controls.
@@ -5160,7 +5161,7 @@ const { theme, setTheme } = useTheme();
 // setTheme: Function to change the theme, accepts a theme string
 ```
 
-### Important Usage Notes
+### ThemeProvider Usage Notes
 
 - **ThemeProvider is required:**  
   Always wrap your application with `ThemeProvider` to utilise the theme context and API provided by `useTheme`.
@@ -5242,7 +5243,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 This ensures all components have access to theme state and can call setTheme.
 -->
 
-### API Reference
+### useTheme API Reference
 
 #### useTheme Return Values
 
@@ -5359,7 +5360,7 @@ console.log(toasts); // Logs the array of currently active toast events
 Useful for debugging or custom toast rendering logic.
 -->
 
-### API Reference
+### useToast API Reference
 
 #### useToast Return Values
 
