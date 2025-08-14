@@ -1,0 +1,64 @@
+<x-app-layout>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h4 fw-bold">
+            <i class="bi bi-envelope-check-fill me-2"></i>
+            {{ __('reports.email_applications.title') }}
+        </h1>
+
+        <a href="{{ request()->fullUrlWithQuery(['export' => 'pdf']) }}"
+           class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-2 shadow-sm"
+           title="{{ __('Export to PDF') }}">
+            <i class="bi bi-file-earmark-pdf-fill"></i>
+            <i class="bi bi-download"></i>
+            {{ __('Export PDF') }}
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover table-bordered mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>{{ __('ID') }}</th>
+                        <th>{{ __('reports.email_applications.table.applicant') }}</th>
+                        <th>{{ __('reports.email_applications.table.application_type') }}</th>
+                        <th>{{ __('reports.email_applications.table.application_date') }}</th>
+                        <th>{{ __('reports.email_applications.table.proposed_email') }}</th>
+                        <th>{{ __('reports.email_applications.table.assigned_email') }}</th>
+                        <th>{{ __('reports.email_applications.table.status') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($emailApplications as $app)
+                        <tr>
+                            <td>#{{ $app->id }}</td>
+                            <td>{{ $app->user?->name ?? 'N/A' }}</td>
+                            <td>{{ $app->application_type }}</td>
+                            <td>{{ $app->created_at->format('Y-m-d') }}</td>
+                            <td>{{ $app->proposed_email ?? '-' }}</td>
+                            <td>{{ $app->final_assigned_email ?? '-' }}</td>
+                            <td>
+                                <span class="badge bg-secondary">
+                                    {{ $statuses[$app->status] ?? ucfirst($app->status) }}
+                                </span>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">
+                                <i class="bi bi-exclamation-circle"></i>
+                                {{ __('reports.email_applications.no_results') }}
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+
+            @if ($emailApplications->hasPages())
+                <div class="card-footer border-top d-flex justify-content-center">
+                    {{ $emailApplications->links() }}
+                </div>
+            @endif
+        </div>
+    </div>
+</x-app-layout>

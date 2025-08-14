@@ -1,0 +1,18 @@
+//  ===================================================================================================================
+//  ? TIP:  It is recommended to use this file for overriding bootstrap extended variables (_bootstrap-extended/_variables.scss).
+//  Copy and paste variables as needed, modify their values, and remove the !default flag.
+//  ===================================================================================================================
+
+// $font-size-root: 14px !default;
+// $success: #00ff00 !default;
+
+// Prefix for :root CSS variables
+$variable-prefix: bs- !default;
+// * Typography
+// *******************************************************************************
+// scss-docs-start font-variables
+$font-family-sans-serif: 'Noto Kufi Arabic', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !default;
+$font-family-monospace: monospace !default;  // You can update this font as well
+// stylelint-enable value-keyword-case
+$font-family-base: var(--#{$variable-prefix}font-sans-serif) !default;
+$font-family-code: var(--#{$variable-prefix}font-monospace) !default;
