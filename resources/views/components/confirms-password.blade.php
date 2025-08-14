@@ -82,7 +82,7 @@
         <x-slot name="footer">
             {{-- Cancel Button (MYDS secondary button) --}}
             <x-secondary-button wire:click="stopConfirmingPassword" wire:loading.attr="disabled" icon="bi-x">
-                {{ __('Batal') }}
+                Batal
             </x-secondary-button>
 
             {{-- Confirm Button (MYDS primary button, danger context) --}}

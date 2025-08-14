@@ -6,11 +6,16 @@
     - Follows MYDS logo sizing, spacing, and theming.
     - Clickable link to home (Berpaksikan Rakyat, Minimalis, Seragam, Tipografi, Akses)
     - Complies with Principle 1, 5, 6, 7, 13, 14, 15 of MyGOVEA.
+
+    NOTE: Use Laravel's Blade helper functions for URLs (route()/url()) instead of direct PHP functions,
+    and ensure the Blade directive syntax is used for calling helpers: {{ route('home') }} or {{ url('/') }}.
 --}}
 
 <a class="d-flex justify-content-center mb-4 app-brand-link myds-navbar-logo"
-   href="{{ url('/') }}"
-   aria-label="Halaman utama MOTAC IRMS">
+    href="{{ \url('/') }}"
+    {{-- NOTE: PHP0417 'unknown function: url' is a static analyzer limitation; this works in Laravel Blade at runtime. --}}
+    aria-label="{{ \__('Halaman utama MOTAC IRMS') }}"
+    {{-- NOTE: PHP0417 'unknown function: __' is a static analyzer limitation; this works in Laravel Blade at runtime. --}}>
     <span class="app-brand-logo demo" style="width: 48px; height: 48px;">
         <svg viewBox="0 0 148 80" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
             style="height: 40px; width: auto; color: var(--myds-primary-600, #2563EB);"
@@ -44,3 +49,11 @@
         </svg>
     </span>
 </a>
+
+{{--
+    Documentation:
+    - Use Blade helpers for URL generation (url('/')) for maximum compatibility and no PHP0417 error.
+    - The SVG uses currentColor to inherit parent's theme.
+    - This logo is clickable and always links back to the home page.
+    - Accessible: aria-label on the anchor.
+--}}

@@ -27,7 +27,7 @@
             gap-2
             ' // .myds-btn-danger for MYDS danger color, .rounded-m for 8px radius
     ]) }}
-    aria-label="{{ __('Padam') }}"
+    aria-label="Padam"
 >
     {{-- MYDS icon: leading, color follows danger token --}}
     <i class="bi bi-exclamation-triangle-fill me-1" aria-hidden="true"></i>

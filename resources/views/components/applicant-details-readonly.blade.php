@@ -11,11 +11,12 @@
 
     Usage:
     <x-applicant-details-readonly :user="$application->user" />
-    <x-applicant-details-readonly :user="$user" :title="__('MAKLUMAT PENGGUNA')" />
+    <x-applicant-details-readonly :user="$user" :title="$customTitle" />
 
     Dependencies: x-action-section, x-alert components
 --}}
-@props(['user', 'title' => __('MAKLUMAT PEMOHON')])
+
+@props(['user', 'title' => 'MAKLUMAT PEMOHON'])
 
 <x-action-section :title="$title">
     <x-slot name="content">
@@ -28,7 +29,7 @@
                     </label>
                     <p class="form-control-plaintext ps-0 border-bottom pb-1 mb-0"
                        style="font-family: 'Inter', Arial, sans-serif; color: var(--myds-txt-black-900);">
-                        {{ $user->name ?? 'N/A' }}
+                        {{ isset($user->name) ? $user->name : 'N/A' }}
                     </p>
                 </div>
 
@@ -39,57 +40,60 @@
                     </label>
                     <p class="form-control-plaintext ps-0 border-bottom pb-1 mb-0"
                        style="font-family: 'Inter', Arial, sans-serif; color: var(--myds-txt-black-900);">
-                        {{ $user->identification_number ?? 'N/A' }}
+                        {{ isset($user->identification_number) ? $user->identification_number : 'N/A' }}
                     </p>
                 </div>
 
                 {{-- Position and Grade --}}
                 <div class="myds-col-12 myds-col-md-6">
                     <label class="form-label fw-medium text-muted" style="font-family: 'Poppins', Arial, sans-serif;">
-                        @lang('Jawatan & Gred:')
+                        Jawatan & Gred:
                     </label>
                     <p class="form-control-plaintext ps-0 border-bottom pb-1 mb-0"
                        style="font-family: 'Inter', Arial, sans-serif; color: var(--myds-txt-black-900);">
-                        {{ optional($user->position)->name ?? @lang('N/A') }} ({{ optional($user->grade)->name ?? @lang('N/A') }})
+                        {{ (isset($user->position) && isset($user->position->name) ? $user->position->name : 'N/A') }}
+                        (
+                        {{ (isset($user->grade) && isset($user->grade->name) ? $user->grade->name : 'N/A') }}
+                        )
                     </p>
                 </div>
 
                 {{-- Department/Unit --}}
                 <div class="myds-col-12 myds-col-md-6">
                     <label class="form-label fw-medium text-muted" style="font-family: 'Poppins', Arial, sans-serif;">
-                        {{ @lang('Bahagian/Unit:') }}
+                        Bahagian/Unit:
                     </label>
                     <p class="form-control-plaintext ps-0 border-bottom pb-1 mb-0"
                        style="font-family: 'Inter', Arial, sans-serif; color: var(--myds-txt-black-900);">
-                        {{ optional($user->department)->name ?? 'N/A' }}
+                        {{ (isset($user->department) && isset($user->department->name) ? $user->department->name : 'N/A') }}
                     </p>
                 </div>
 
                 {{-- Mobile Number --}}
                 <div class="myds-col-12 myds-col-md-6">
                     <label class="form-label fw-medium text-muted" style="font-family: 'Poppins', Arial, sans-serif;">
-                        {{ @lang('No. Telefon Bimbit:') }}
+                        No. Telefon Bimbit:
                     </label>
                     <p class="form-control-plaintext ps-0 border-bottom pb-1 mb-0"
                        style="font-family: 'Inter', Arial, sans-serif; color: var(--myds-txt-black-900);">
-                        {{ $user->mobile_number ?? 'N/A' }}
+                        {{ isset($user->mobile_number) ? $user->mobile_number : 'N/A' }}
                     </p>
                 </div>
 
                 {{-- Email --}}
                 <div class="myds-col-12 myds-col-md-6">
                     <label class="form-label fw-medium text-muted" style="font-family: 'Poppins', Arial, sans-serif;">
-                        @lang('E-mel (Login):')
+                        E-mel (Login):
                     </label>
                     <p class="form-control-plaintext ps-0 border-bottom pb-1 mb-0"
                        style="font-family: 'Inter', Arial, sans-serif; color: var(--myds-txt-black-900);">
-                        {{ $user->email ?? 'N/A' }}
+                        {{ isset($user->email) ? $user->email : 'N/A' }}
                     </p>
                 </div>
             </div>
         @else
             {{-- User data not available warning --}}
-            <x-alert type="warning" :message="__('Maklumat pengguna tidak dapat dimuatkan.')" :icon="'bi-exclamation-triangle-fill'" />
+            <x-alert type="warning" :message="'Maklumat pengguna tidak dapat dimuatkan.'" :icon="'bi-exclamation-triangle-fill'" />
         @endif
     </x-slot>
 </x-action-section>

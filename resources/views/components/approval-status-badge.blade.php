@@ -6,17 +6,35 @@
     - Follows MyGOVEA principles: clarity, accessibility, minimalism, and status feedback.
     - Ensure all status display uses MYDS status color and typography tokens.
     - Status values and labels are mapped via model and helper.
+
+    NOTE: Adjustments applied:
+    - Explicitly pass both arguments to getStatusColorClass($status, 'approval') to fix PHP0423.
+    - Use PHP's built-in Str helper (Illuminate\Support\Str) only if available; otherwise, fallback to regular PHP string functions for fallback label.
 --}}
 
 @props(['status', 'class' => ''])
 
+
 @php
-    use Illuminate\Support\Str;
+    // Import Str helper if available
+        // No import needed; use fully qualified class name for Str helper
+
     // Map status to MYDS-compliant color token classes and semantic label
-    $badgeClass = \App\Helpers\Helpers::getStatusColorClass($status ?? '');
+    // Explicitly pass the type argument ('approval') to getStatusColorClass
+    $badgeClass = \App\Helpers\Helpers::getStatusColorClass($status ?? '', 'approval');
 
     // Status label: fallback to readable format if not found
-    $statusText = \App\Models\Approval::$STATUSES_LABELS[$status] ?? Str::title(str_replace('_', ' ', $status));
+    // Use model label if exists, otherwise convert status to readable string
+    if (isset(\App\Models\Approval::$STATUSES_LABELS[$status])) {
+        $statusText = \App\Models\Approval::$STATUSES_LABELS[$status];
+    } else {
+        // Fallback: use Str helper if available, otherwise use PHP functions
+        if (class_exists('Illuminate\\Support\\Str')) {
+            $statusText = \Illuminate\Support\Str::title(str_replace('_', ' ', $status));
+        } else {
+            $statusText = ucwords(str_replace('_', ' ', $status));
+        }
+    }
 @endphp
 
 <span

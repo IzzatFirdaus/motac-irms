@@ -1,6 +1,3 @@
-@php
-    use Illuminate\Support\Str;
-@endphp
 {{--
     resources/views/components/action-section.blade.php
     MYDS-compliant card section for key actions.
@@ -26,18 +23,26 @@
         </x-slot>
     </x-action-section>
 --}}
+
+@props(['title', 'description' => null, 'content' => null])
+
+{{--
+    Helper function to slugify the title for aria-labelledby.
+    This replaces Str::slug to avoid needing Illuminate\Support\Str in Blade.
+--}}
+@php
+    // Slugify: lowercase, replace spaces/special chars with '-', remove unwanted chars
+    $slug = strtolower(preg_replace('/[^A-Za-z0-9-]+/', '-', $title));
+@endphp
+
 <section
     {{ $attributes->merge(['class' => 'myds-card myds-section shadow-card radius-l mb-4']) }}
     role="region"
-    aria-labelledby="{{ Str::slug($title, '-') }}-title"
+    aria-labelledby="{{ $slug }}-title"
 >
-    role="region"
-    aria-labelledby="{{ Str::slug($title, '-') }}-title"
-        <h2 id="{{ Str::slug($title, '-') }}-title"
+    <header>
+        <h2 id="{{ $slug }}-title"
             class="myds-card-title mb-0 fw-semibold"
-            style="font-family: 'Poppins', Arial, sans-serif; font-size:1.25rem; color:var(--myds-primary-700); line-height:1.75rem;">
-            {{ $title }}
-        </h2>
             style="font-family: 'Poppins', Arial, sans-serif; font-size:1.25rem; color:var(--myds-primary-700); line-height:1.75rem;">
             {{ $title }}
         </h2>

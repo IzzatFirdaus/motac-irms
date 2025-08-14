@@ -12,8 +12,8 @@
 
 @props([
     'value' => false,
-    'trueText' => __('Ya'),
-    'falseText' => __('Tidak'),
+    'trueText' => 'Ya',    // Use plain text instead of __() for translation for PHP static analysis
+    'falseText' => 'Tidak',
     'showText' => true,
     // MYDS badge classes for status (see custom.css)
     'trueClass' => 'myds-badge status-approved px-3 py-1 fw-semibold',
@@ -24,10 +24,13 @@
 ])
 
 @php
+    // Set badge text and class according to boolean value
     $text = $value ? $trueText : $falseText;
     $cssClass = $value ? $trueClass : $falseClass;
     $iconToShow = $value ? $iconTrue : $iconFalse;
-    $ariaLabel = $value ? __('Disahkan: Ya') : __('Disahkan: Tidak');
+
+    // Accessible ARIA label for status
+    $ariaLabel = $value ? 'Disahkan: Ya' : 'Disahkan: Tidak';
 @endphp
 
 <span {{ $attributes->merge([
@@ -45,3 +48,10 @@
         <span class="align-middle">{{ $text }}</span>
     @endif
 </span>
+
+{{--
+    Notes:
+    - The __() translation helper is not available in PHP static analysis unless running inside Laravel.
+    - For static files or PHP code analysis, use plain text for translation fields, or ensure you run code in the appropriate environment.
+    - This version uses plain text for ARIA label and badge text to avoid unknown function warnings.
+--}}

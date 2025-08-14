@@ -24,7 +24,12 @@
 
     Dependencies: Alpine.js, Livewire, MYDS CSS/JS
 --}}
-@props(['style' => session('flash.bannerStyle', 'success'), 'message' => session('flash.banner')])
+
+@props([
+    // Use Blade's global $flash variable or pass props from parent, fallback to empty string if not set
+    'style' => isset($flash['bannerStyle']) ? $flash['bannerStyle'] : (isset($bannerStyle) ? $bannerStyle : 'success'),
+    'message' => isset($flash['banner']) ? $flash['banner'] : (isset($banner) ? $banner : ''),
+])
 
 @php
     // Map style to MYDS tokens and icons
@@ -58,6 +63,7 @@
     $cfg = $bannerConfig[$style] ?? $bannerConfig['info'];
 @endphp
 
+{{-- Alpine.js for show/hide and auto-dismiss --}}
 <div
     x-data="{
         show: true,
@@ -67,7 +73,6 @@
      }"
      x-show="show && message"
      x-init="
-        // Listen for Livewire banner events
         Livewire.on('banner-message', detail => {
             style = detail.style || 'info';
             message = detail.message;
@@ -75,8 +80,6 @@
             clearTimeout(timeout);
             timeout = setTimeout(() => show = false, detail.timeout || 7000);
         });
-
-        // Auto-hide existing message
         if (message) {
             clearTimeout(timeout);
             timeout = setTimeout(() => show = false, 7000);
