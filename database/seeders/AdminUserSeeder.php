@@ -31,7 +31,6 @@ class AdminUserSeeder extends Seeder
         foreach ($roles as $roleName) {
             Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
         }
-
         Log::info('AdminUserSeeder: Ensured all core application roles exist.');
 
         // --- 2. Ensure a default Department exists for seeded users ---
@@ -47,7 +46,7 @@ class AdminUserSeeder extends Seeder
         );
 
         // --- 3. Ensure Critical Grades for Approval Workflow Exist ---
-        config('motac.approval.min_loan_support_grade_level', 41);
+        $minSupportGradeLevel = (int) config('motac.approval.min_loan_support_grade_level', 41);
 
         $gradeF41 = Grade::updateOrCreate(
             ['name' => 'F41'],
@@ -57,12 +56,12 @@ class AdminUserSeeder extends Seeder
             ['name' => 'F44'],
             ['level' => 44, 'is_approver_grade' => true, 'description' => 'Pegawai Teknologi Maklumat Kanan']
         );
-        Log::info('AdminUserSeeder: Ensured grades F41 (Level 41) and F44 (Level 44) exist for testing approval logic.');
+        Log::info("AdminUserSeeder: Ensured grades F41 (Level 41) and F44 (Level 44) exist for testing approval logic.");
 
         // --- 4. Ensure related Positions exist ---
         $defaultPos = Position::updateOrCreate(['name' => 'Pegawai Teknologi Maklumat Sistem'], ['grade_id' => $gradeF41->id, 'is_active' => true]);
         $approverPos = Position::updateOrCreate(['name' => 'Ketua Unit Aplikasi'], ['grade_id' => $gradeF44->id, 'is_active' => true]);
-        Log::info('AdminUserSeeder: Ensured default and approver-level positions exist.');
+        Log::info("AdminUserSeeder: Ensured default and approver-level positions exist.");
 
         // --- 5. Define and Seed Users ---
         $defaultPassword = Hash::make(env('SEEDER_DEFAULT_PASSWORD', 'Motac.1234'));
@@ -116,11 +115,10 @@ class AdminUserSeeder extends Seeder
             );
 
             // Assign the specified role to the user
-            if (! $user->hasRole($data['role_name'])) {
+            if (!$user->hasRole($data['role_name'])) {
                 $user->assignRole($data['role_name']);
             }
-
-            Log::info(sprintf("AdminUserSeeder: Processed user '%s' (%s). Assigned Role: '%s'. Assigned Grade Level: %s.", $user->name, $user->email, $data['role_name'], $user->grade?->level));
+            Log::info("AdminUserSeeder: Processed user '{$user->name}' ({$user->email}). Assigned Role: '{$data['role_name']}'. Assigned Grade Level: {$user->grade?->level}.");
         }
 
         Log::info('AdminUserSeeder: Seeding of critical roles and administrative users has been completed successfully.');

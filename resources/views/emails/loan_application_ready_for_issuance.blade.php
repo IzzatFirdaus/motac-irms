@@ -71,11 +71,8 @@
                         <hr style="border: 0; border-top: 1px solid #dee2e6; margin: 25px 0;">
 
                         <div style="text-align: center;">
-                            {{-- --- THIS IS THE FIX --- --}}
-                            {{-- The route name in the href has been changed from 'loan-applications.show' to 'loan-applications.issue.form' --}}
-                            {{-- The button text has also been updated for clarity. --}}
-                            <a href="{{ route('loan-applications.issue.form', $loanApplication) }}" style="display: inline-block; background-color: #0d6efd; color: #ffffff; padding: 12px 25px; font-size: 16px; font-weight: bold; text-decoration: none; border-radius: 5px;" target="_blank">
-                                @lang('Proses Pengeluaran Peralatan')
+                            <a href="{{ route('loan-applications.show', $loanApplication->id) }}" style="display: inline-block; background-color: #0d6efd; color: #ffffff; padding: 12px 25px; font-size: 16px; font-weight: bold; text-decoration: none; border-radius: 5px;" target="_blank">
+                                @lang('Lihat & Proses Pengeluaran')
                             </a>
                         </div>
                     </div>
