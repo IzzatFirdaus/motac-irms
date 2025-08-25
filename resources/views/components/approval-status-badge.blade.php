@@ -1,16 +1,29 @@
-{{-- resources/views/components/approval-status-badge.blade.php --}}
+{{--
+    resources/views/components/approval-status-badge.blade.php
+
+    Displays approval status as a colored badge with proper localization.
+    Uses helper methods for consistent color coding across the application.
+
+    Props:
+    - $status: string - The approval status value (required)
+    - $class: string - Additional CSS classes (optional)
+
+    Usage:
+    <x-approval-status-badge :status="$approval->status" />
+    <x-approval-status-badge :status="'approved'" class="fs-6" />
+
+    Dependencies: App\Helpers\Helpers, App\Models\Approval
+--}}
 @props(['status', 'class' => ''])
 
 @php
-    // 1. Get the CSS class from the centralized helper function.
-    $badgeClass = \App\Helpers\Helpers::getStatusColorClass($status ?? '', 'approval');
+    // Get status color class from helper
+    $badgeClass = \App\Helpers\Helpers::getStatusColorClass($status ?? '');
 
-    // 2. Get the specific display text from the Approval model's static options.
-    // This uses the $STATUSES_LABELS array you've defined.
-    $statusText = \App\Models\Approval::getStatusOptions()[$status] ?? Str::title(str_replace('_', ' ', $status));
+    // Get localized status text
+    $statusText = \App\Models\Approval::$STATUSES_LABELS[$status] ?? Str::title(str_replace('_', ' ', $status));
 @endphp
 
 <span class="badge rounded-pill {{ $badgeClass }} {{ $class }}">
-    {{-- The __() helper handles translation --}}
     {{ __($statusText) }}
 </span>

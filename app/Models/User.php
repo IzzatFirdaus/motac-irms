@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Traits\Blameable; // EDITED: Import Blameable trait
+use App\Traits\Blameable;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +12,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Str; // Added for Str::title
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
@@ -20,187 +19,78 @@ use Spatie\Permission\Traits\HasRoles;
 
 /**
  * User Model for MOTAC System.
- * 
- * System Design Reference: MOTAC Integrated Resource Management System (Revision 3.5) - Section 4.1
- * Migration context: 2013_01_01_000000_create_users_table.php, 2013_11_01_132200_add_motac_columns_to_users_table.php
  *
  * @property int $id
  * @property string $name
- * @property string|null $title e.g., Encik, Puan, Dr.
- * @property string|null $identification_number NRIC
+ * @property string $email
+ * @property string|null $title
+ * @property string|null $identification_number
  * @property string|null $passport_number
  * @property int|null $department_id
  * @property int|null $position_id
  * @property int|null $grade_id
- * @property string|null $level For "Aras" or floor level, as string
- * @property string|null $mobile_number
- * @property string|null $personal_email If distinct from login email
- * @property string|null $motac_email
- * @property string|null $user_id_assigned Assigned User ID if different from email
- * @property string|null $service_status Taraf Perkhidmatan. Keys defined in User model.
- * @property string|null $appointment_type Pelantikan. Keys defined in User model.
- * @property string|null $previous_department_name
- * @property string|null $previous_department_email
+ * @property string|null $phone_number
  * @property string $status
- * @property int $is_admin Consider using Spatie roles exclusively.
- * @property int $is_bpm_staff Consider using Spatie roles exclusively.
- * @property string|null $profile_photo_path
- * @property int|null $employee_id
- * @property string $email
  * @property \Illuminate\Support\Carbon|null $email_verified_at
  * @property string $password
+ * @property string|null $remember_token
  * @property string|null $two_factor_secret
  * @property string|null $two_factor_recovery_codes
- * @property \Illuminate\Support\Carbon|null $two_factor_confirmed_at
- * @property string|null $remember_token
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deactivated_at
  * @property int|null $created_by
  * @property int|null $updated_by
  * @property int|null $deleted_by
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Approval> $approvalsMade
- * @property-read int|null $approvals_made_count
- * @property-read User|null $creator
- * @property-read User|null $deleter
- * @property-read \App\Models\Department|null $department
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\EmailApplication> $emailApplications
- * @property-read int|null $email_applications_count
- * @property-read \App\Models\Grade|null $grade
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanApplication> $loanApplicationsAsApplicant
- * @property-read int|null $loan_applications_as_applicant_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanApplication> $loanApplicationsAsResponsibleOfficer
- * @property-read int|null $loan_applications_as_responsible_officer_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanApplication> $loanApplicationsAsSupportingOfficer
- * @property-read int|null $loan_applications_as_supporting_officer_count
- * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
- * @property-read int|null $notifications_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Permission> $permissions
- * @property-read int|null $permissions_count
- * @property-read \App\Models\Position|null $position
  * @property-read string $profile_photo_url
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Role> $roles
- * @property-read int|null $roles_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
- * @property-read int|null $tokens_count
- * @property-read User|null $updater
- * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User permission($permissions, $without = false)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User role($roles, $guard = null, $without = false)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereAppointmentType($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereCreatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereDeletedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereDepartmentId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereEmail($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereEmailVerifiedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereEmployeeId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereGradeId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereIdentificationNumber($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereIsAdmin($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereIsBpmStaff($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereLevel($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereMobileNumber($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereMotacEmail($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePassportNumber($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePassword($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePersonalEmail($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePositionId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePreviousDepartmentEmail($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePreviousDepartmentName($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereProfilePhotoPath($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereRememberToken($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereServiceStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereTitle($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereTwoFactorConfirmedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereTwoFactorRecoveryCodes($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereTwoFactorSecret($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereUpdatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereUserIdAssigned($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutPermission($permissions)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutRole($roles, $guard = null)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutTrashed()
- * @mixin \Eloquent
+ * @property-read string $full_name
  */
 class User extends Authenticatable
 {
-    use Blameable;
-    use HasApiTokens;
-    use HasFactory;
-    use HasProfilePhoto;
-    use HasRoles;
-    use Notifiable;
-    use SoftDeletes;
-    use TwoFactorAuthenticatable; // EDITED: Added Blameable trait for audit trails
+    use Blameable, HasFactory, Notifiable, HasProfilePhoto, HasApiTokens, TwoFactorAuthenticatable, HasRoles, SoftDeletes;
 
-    public const STATUS_ACTIVE = 'active';
-
-    public const STATUS_INACTIVE = 'inactive';
-
-    public const STATUS_PENDING = 'pending';
-
-    public const SERVICE_STATUS_TETAP = '1';
-
-    public const SERVICE_STATUS_KONTRAK_MYSTEP = '2';
-
-    public const SERVICE_STATUS_PELAJAR_INDUSTRI = '3';
-
-    public const SERVICE_STATUS_OTHER_AGENCY = '4';
-
-    public const APPOINTMENT_TYPE_BAHARU = '1';
-
-    public const APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN = '2';
-
-    public const APPOINTMENT_TYPE_LAIN_LAIN = '3';
-
-    public const TITLE_ENCIK = 'Encik';
-
-    public const TITLE_PUAN = 'Puan';
-
-    public const TITLE_CIK = 'Cik';
-
-    public const TITLE_DR = 'Dr.';
-
-    public const TITLE_IR = 'Ir.';
+    // --- TITLE CONSTANTS ---
+    public const TITLE_ENCIK = 'encik';
+    public const TITLE_PUAN = 'puan';
+    public const TITLE_CIK = 'cik';
+    public const TITLE_DR = 'dr';
+    public const TITLE_PROF = 'prof';
+    public const TITLE_TUAN = 'tuan';
+    public const TITLE_PUANHAJJAH = 'puanhajah';
+    public const TITLE_DATUK = 'datuk';
+    public const TITLE_DATIN = 'datin';
+    public const TITLE_NONE = '';
 
     public static array $TITLE_OPTIONS = [
         self::TITLE_ENCIK => 'Encik',
         self::TITLE_PUAN => 'Puan',
         self::TITLE_CIK => 'Cik',
         self::TITLE_DR => 'Dr.',
-        self::TITLE_IR => 'Ir.',
+        self::TITLE_PROF => 'Prof.',
+        self::TITLE_TUAN => 'Tuan',
+        self::TITLE_PUANHAJJAH => 'Puan Hajjah',
+        self::TITLE_DATUK => 'Datuk',
+        self::TITLE_DATIN => 'Datin',
+        self::TITLE_NONE => '',
     ];
 
-    public static array $STATUS_OPTIONS = [
-        self::STATUS_ACTIVE => 'Aktif',
-        self::STATUS_INACTIVE => 'Tidak Aktif',
-        self::STATUS_PENDING => 'Menunggu Pengesahan',
-    ];
+    // --- STATUS CONSTANTS ---
+    public const STATUS_ACTIVE = 'active';
+    public const STATUS_INACTIVE = 'inactive';
+    public const STATUS_SUSPENDED = 'suspended';
+    public const STATUS_PENDING = 'pending';
 
-    public static array $SERVICE_STATUS_LABELS = [
-        self::SERVICE_STATUS_TETAP => 'Tetap',
-        self::SERVICE_STATUS_KONTRAK_MYSTEP => 'Lantikan Kontrak / MyStep',
-        self::SERVICE_STATUS_PELAJAR_INDUSTRI => 'Pelajar Latihan Industri (Ibu Pejabat Sahaja)',
-        self::SERVICE_STATUS_OTHER_AGENCY => 'E-mel Sandaran (Agensi Lain di MOTAC)',
-    ];
+    // --- SERVICE STATUS CONSTANTS ---
+    public const SERVICE_STATUS_TETAP = 'tetap';
+    public const SERVICE_STATUS_KONTRAK_MYSTEP = 'kontrak_mystep';
+    public const SERVICE_STATUS_PELAJAR_INDUSTRI = 'pelajar_industri';
+    public const SERVICE_STATUS_OTHER_AGENCY = 'other_agency';
 
-    public static array $APPOINTMENT_TYPE_LABELS = [
-        self::APPOINTMENT_TYPE_BAHARU => 'Baharu',
-        self::APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN => 'Kenaikan Pangkat/Pertukaran',
-        self::APPOINTMENT_TYPE_LAIN_LAIN => 'Lain-lain',
-    ];
-
-    protected $table = 'users';
+    // --- APPOINTMENT TYPE CONSTANTS ---
+    public const APPOINTMENT_TYPE_BAHARU = 'baharu';
+    public const APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN = 'kenaikan_pangkat_pertukaran';
+    public const APPOINTMENT_TYPE_LAIN_LAIN = 'lain_lain';
 
     protected $fillable = [
         'name',
@@ -209,172 +99,327 @@ class User extends Authenticatable
         'title',
         'identification_number',
         'passport_number',
-        'profile_photo_path',
+        'department_id',
         'position_id',
         'grade_id',
-        'department_id',
-        'level',
-        'mobile_number',
-        'personal_email',
-        'motac_email',
-        'user_id_assigned',
-        'service_status',
-        'appointment_type',
-        'previous_department_name',
-        'previous_department_email',
+        'phone_number',
         'status',
-        'email_verified_at',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
-        'two_factor_recovery_codes',
         'two_factor_secret',
+        'two_factor_recovery_codes',
     ];
 
-    protected $appends = ['profile_photo_url'];
-
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-        'two_factor_confirmed_at' => 'datetime',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-        'deleted_at' => 'datetime',
+    protected $appends = [
+        'profile_photo_url',
+        'full_name',
     ];
 
-    protected $attributes = [
-        'status' => self::STATUS_ACTIVE,
-    ];
-
-    public static function getStatusOptions(): array
+    /**
+     * Casts for model properties.
+     */
+    protected function casts(): array
     {
-        return self::$STATUS_OPTIONS;
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+            'deactivated_at' => 'datetime',
+        ];
     }
 
-    public static function getServiceStatusOptions(): array
-    {
-        return self::$SERVICE_STATUS_LABELS;
-    }
+    // --- RELATIONSHIPS ---
 
-    public static function getAppointmentTypeOptions(): array
+    /**
+     * Department to which the user belongs.
+     */
+    public function department(): BelongsTo
     {
-        return self::$APPOINTMENT_TYPE_LABELS;
-    }
-
-    public static function getTitleOptions(): array
-    {
-        return self::$TITLE_OPTIONS;
-    }
-
-    public static function getLevelOptions(): array
-    {
-        $levels = [];
-        for ($i = 1; $i <= 18; $i++) {
-            $levels[(string) $i] = (string) $i;
-        }
-
-        return $levels;
+        return $this->belongsTo(Department::class);
     }
 
     /**
-     * Get the display name for a given service status key.
+     * Position (jawatan) of the user.
      */
-    public static function getServiceStatusDisplayName(?string $statusKey): string
-    {
-        return __(self::$SERVICE_STATUS_LABELS[$statusKey] ?? Str::title(str_replace('_', ' ', (string) $statusKey)));
-    }
-
-    protected static function newFactory(): UserFactory
-    {
-        return UserFactory::new();
-    }
-
-    // Relationships
-    public function department(): BelongsTo
-    {
-        return $this->belongsTo(Department::class, 'department_id');
-    }
-
-    public function grade(): BelongsTo
-    {
-        return $this->belongsTo(Grade::class, 'grade_id');
-    }
-
     public function position(): BelongsTo
     {
-        return $this->belongsTo(Position::class, 'position_id');
+        return $this->belongsTo(Position::class);
     }
 
-    public function emailApplications(): HasMany
+    /**
+     * Grade (gred) of the user.
+     */
+    public function grade(): BelongsTo
     {
-        return $this->hasMany(EmailApplication::class, 'user_id');
+        return $this->belongsTo(Grade::class);
     }
 
-    public function loanApplicationsAsApplicant(): HasMany
+    /**
+     * Loans created by the user (created_by).
+     * @return HasMany
+     */
+    public function createdLoans(): HasMany
     {
-        return $this->hasMany(LoanApplication::class, 'user_id');
+        return $this->hasMany(LoanApplication::class, 'created_by');
     }
 
-    public function loanApplicationsAsResponsibleOfficer(): HasMany
+    /**
+     * Loans where the user is responsible officer.
+     * @return HasMany
+     */
+    public function responsibleForLoans(): HasMany
     {
         return $this->hasMany(LoanApplication::class, 'responsible_officer_id');
     }
 
-    public function loanApplicationsAsSupportingOfficer(): HasMany
+    /**
+     * Helpdesk tickets submitted by this user (as applicant).
+     * @return HasMany
+     */
+    public function tickets(): HasMany
     {
-        return $this->hasMany(LoanApplication::class, 'supporting_officer_id');
+        return $this->hasMany(Ticket::class, 'user_id');
     }
 
-    public function approvalsMade(): HasMany
+    /**
+     * Helpdesk tickets assigned to this user (as agent/staff).
+     * @return HasMany
+     */
+    public function assignedTickets(): HasMany
+    {
+        return $this->hasMany(Ticket::class, 'assigned_to');
+    }
+
+    /**
+     * Ticket comments made by this user.
+     * @return HasMany
+     */
+    public function ticketComments(): HasMany
+    {
+        return $this->hasMany(TicketComment::class, 'user_id');
+    }
+
+    /**
+     * Ticket attachments uploaded by this user.
+     * @return HasMany
+     */
+    public function ticketAttachments(): HasMany
+    {
+        return $this->hasMany(TicketAttachment::class, 'user_id');
+    }
+
+    /**
+     * Approvals assigned to the user (as officer, FK = officer_id).
+     * @return HasMany
+     */
+    public function approvalsAssigned(): HasMany
     {
         return $this->hasMany(Approval::class, 'officer_id');
     }
 
+    /**
+     * Approvals where this user is an approver (report/activity).
+     * This is used for user activity report with withCount.
+     * Uses officer_id FK, as per your approvals table.
+     * @return HasMany
+     */
+    public function approvalsAsApprover(): HasMany
+    {
+        // NOTE: This must match the FK in your approvals table (officer_id).
+        return $this->hasMany(Approval::class, 'officer_id');
+    }
+
+    /**
+     * Creator user (for blameable/audit).
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
-
+    /**
+     * Updater user (for blameable/audit).
+     */
     public function updater(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
-
+    /**
+     * Deleter user (for blameable/audit).
+     */
     public function deleter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by');
     }
 
-    // Helper methods for roles
+    // --- LOAN APPLICATIONS RELATIONSHIPS ---
+
+    /**
+     * Get all loan applications where the user is the applicant.
+     * Used for user-specific loan application listings.
+     * @return HasMany
+     */
+    public function loanApplicationsAsApplicant(): HasMany
+    {
+        return $this->hasMany(LoanApplication::class, 'user_id');
+    }
+
+    // --- ROLE CONVENIENCE HELPERS ---
+
+    /**
+     * Returns true if the user has the Admin role.
+     */
     public function isAdmin(): bool
     {
         return $this->hasRole('Admin');
     }
 
+    /**
+     * Returns true if the user has the BPM Staff role.
+     */
     public function isBpmStaff(): bool
     {
         return $this->hasRole('BPM Staff');
     }
 
+    /**
+     * Returns true if the user has the IT Admin role.
+     */
     public function isItAdmin(): bool
     {
         return $this->hasRole('IT Admin');
     }
 
+    /**
+     * Returns true if the user has the Approver role.
+     */
     public function isApprover(): bool
     {
         return $this->hasRole('Approver');
     }
 
+    /**
+     * Returns true if the user has the HOD (Head of Department) role.
+     */
     public function isHod(): bool
     {
         return $this->hasRole('HOD');
     }
 
-    public function routeNotificationForMail($notification = null): array|string
+    /**
+     * Check if the user has at least the required grade level.
+     */
+    public function hasGradeLevel(int $requiredGradeLevel): bool
     {
-        return $this->motac_email ?: $this->email;
+        if (!$this->grade) {
+            return false;
+        }
+        return $this->grade->level >= $requiredGradeLevel;
+    }
+
+    // --- ACCESSORS ---
+
+    /**
+     * Accessor for full name, including title if set.
+     * Example: "Encik Ahmad" or just "Ahmad"
+     */
+    public function getFullNameAttribute(): string
+    {
+        return ($this->title ? (self::$TITLE_OPTIONS[$this->title] ?? $this->title) . ' ' : '') . $this->name;
+    }
+
+    /**
+     * Accessor for user's profile photo URL (provided by Jetstream).
+     */
+    public function getProfilePhotoUrlAttribute(): string
+    {
+        return $this->profile_photo_url ?? '';
+    }
+
+    /**
+     * Get a Bootstrap badge class for a given role name.
+     * Used to visually distinguish user roles in the UI.
+     */
+    public static function getRoleBadgeClass(?string $role): string
+    {
+        if (!$role) {
+            return 'bg-secondary';
+        }
+
+        return match (strtolower($role)) {
+            'admin' => 'bg-primary',
+            'bpm staff' => 'bg-info',
+            'it admin' => 'bg-dark',
+            'approver' => 'bg-success',
+            'hod' => 'bg-warning',
+            'user' => 'bg-secondary',
+            default => 'bg-secondary',
+        };
+    }
+
+    /**
+     * Get available status options for user filtering and forms.
+     * Returns an associative array of status keys and their label.
+     */
+    public static function getStatusOptions(): array
+    {
+        return [
+            self::STATUS_ACTIVE => __('Aktif'),
+            self::STATUS_INACTIVE => __('Tidak Aktif'),
+            self::STATUS_SUSPENDED => __('Digantung'),
+            self::STATUS_PENDING => __('Menunggu'),
+        ];
+    }
+
+    /**
+     * Get available service status options for user forms and filters.
+     * Returns an associative array of service status keys and their label.
+     */
+    public static function getServiceStatusOptions(): array
+    {
+        return [
+            self::SERVICE_STATUS_TETAP => __('Tetap'),
+            self::SERVICE_STATUS_KONTRAK_MYSTEP => __('Kontrak MyStep'),
+            self::SERVICE_STATUS_PELAJAR_INDUSTRI => __('Pelajar Industri'),
+            self::SERVICE_STATUS_OTHER_AGENCY => __('Agensi Luar'),
+        ];
+    }
+
+    /**
+     * Get available appointment type options for user forms and filters.
+     * Returns an associative array of appointment type keys and their label.
+     */
+    public static function getAppointmentTypeOptions(): array
+    {
+        return [
+            self::APPOINTMENT_TYPE_BAHARU => __('Baharu'),
+            self::APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN => __('Kenaikan Pangkat/Pertukaran'),
+            self::APPOINTMENT_TYPE_LAIN_LAIN => __('Lain-lain'),
+        ];
+    }
+
+    /**
+     * Get available level options for user forms and filters.
+     * Returns an associative array of level keys and their label.
+     */
+    public static function getLevelOptions(): array
+    {
+        return [
+            '1' => 'Aras 1',
+            '2' => 'Aras 2',
+            '3' => 'Aras 3',
+            '4' => 'Aras 4',
+            '5' => 'Aras 5',
+        ];
+    }
+
+    /**
+     * Get available title options for user forms and filters.
+     * Returns an associative array of title keys and their label.
+     */
+    public static function getTitleOptions(): array
+    {
+        return self::$TITLE_OPTIONS;
     }
 }

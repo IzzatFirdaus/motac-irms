@@ -3,164 +3,212 @@
 namespace App\Livewire;
 
 use App\Models\Approval;
-use App\Models\EmailApplication;
 use App\Models\LoanApplication;
-use App\Services\ApprovalService; // For processing decisions
+use App\Services\ApprovalService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\Rule; // Make sure Rule is imported
-use Illuminate\View\View; // Make sure this is imported
+use Illuminate\Validation\Rule;
+use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\On; // For listening to events
+use Livewire\Attributes\On;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Throwable; // Import Throwable
+use Throwable;
+use Illuminate\Database\Eloquent\Builder;
 
-#[Layout('layouts.app')] // Bootstrap main layout
+#[Layout('layouts.app')]
+#[Title('Papan Pemuka Kelulusan')]
 class ApprovalDashboard extends Component
 {
     use AuthorizesRequests;
     use WithPagination;
 
-    public string $filterType = 'all'; // 'all', EmailApplication::class, LoanApplication::class
-
+    public string $filterType = 'all';
     public string $searchTerm = '';
-
-    public string $filterStatus = Approval::STATUS_PENDING; // Default to pending
-
-    // Modal properties for taking action
+    public string $filterStatus = Approval::STATUS_PENDING;
     public bool $showApprovalActionModal = false;
-
     public ?Approval $selectedApproval = null;
-
-    public string $decision = ''; // 'approved' or 'rejected'
-
+    public string $decision = '';
     public string $comments = '';
 
-    protected string $paginationTheme = 'bootstrap'; // <-- CONVERTED TO BOOTSTRAP
+    protected string $paginationTheme = 'bootstrap';
 
     protected ApprovalService $approvalService;
 
+    // Inject ApprovalService
     public function boot(ApprovalService $approvalService): void
     {
         $this->approvalService = $approvalService;
     }
 
-    #[Computed(persist: true, seconds: 300)]
-    public function approvalTasks(): LengthAwarePaginator
+    // Validation rules for the approval action modal
+    protected function rules(): array
     {
-        /** @var \App\Models\User|null $officer */
-        $officer = Auth::user();
-        if (! $officer) {
-            return new LengthAwarePaginator([], 0, 10, 1, ['path' => request()->url(), 'query' => request()->query()]);
+        return [
+            'decision' => [
+                'required',
+                'string',
+                Rule::in([Approval::STATUS_APPROVED, Approval::STATUS_REJECTED]),
+            ],
+            'comments' => [
+                Rule::when($this->decision === Approval::STATUS_REJECTED, ['required', 'string', 'min:10']),
+                'nullable', 'string', 'max:1000',
+            ],
+        ];
+    }
+
+    protected array $messages = [
+        'decision.required' => 'Sila pilih keputusan (Lulus/Tolak).',
+        'decision.in' => 'Keputusan yang dipilih tidak sah.',
+        'comments.required' => 'Sila masukkan komen untuk keputusan Penolakan.',
+        'comments.min' => 'Komen mestilah sekurang-kurangnya 10 aksara.',
+        'comments.max' => 'Komen tidak boleh melebihi 1000 aksara.',
+    ];
+
+    /**
+     * Computed property to get approval tasks for the current user.
+     */
+    #[Computed]
+    public function getApprovalTasksProperty(): LengthAwarePaginator
+    {
+        $user = Auth::user();
+        if (!$user || !$user->can('view_approvals')) {
+            return new LengthAwarePaginator([], 0, 10);
         }
 
-        $query = Approval::query()
-            ->where('officer_id', $officer->id)
+        $query = Approval::where('officer_id', $user->id)
             ->with([
                 'approvable' => function ($morphTo): void {
                     $morphTo->morphWith([
-                        EmailApplication::class => ['user:id,name,department_id', 'user.department:id,name'],
                         LoanApplication::class => ['user:id,name,department_id', 'user.department:id,name', 'loanApplicationItems'],
                     ]);
                 },
-            ])
-            ->orderBy('created_at', 'desc');
+            ]);
 
+        // Filter by status
         if ($this->filterStatus !== 'all') {
             $query->where('status', $this->filterStatus);
         }
 
+        // Filter by application type
         if ($this->filterType !== 'all') {
             $query->where('approvable_type', $this->filterType);
         }
 
-        if ($this->searchTerm !== '' && $this->searchTerm !== '0') {
-            $query->where(function ($q): void {
-                $q->whereHasMorph('approvable', [LoanApplication::class, EmailApplication::class], function ($qAppro, $type): void {
-                    $qAppro->whereHas('user', function ($qUser): void {
-                        $qUser->where('name', 'like', '%'.$this->searchTerm.'%')
-                            ->orWhere('email', 'like', '%'.$this->searchTerm.'%');
-                    });
-                    if ($type === LoanApplication::class) {
-                        $qAppro->orWhere('purpose', 'like', '%'.$this->searchTerm.'%'); //
-                    } elseif ($type === EmailApplication::class) {
-                        $qAppro->orWhere('proposed_email', 'like', '%'.$this->searchTerm.'%') //
-                            ->orWhere('purpose', 'like', '%'.$this->searchTerm.'%'); //
-                    }
-                })->orWhere('id', 'like', '%'.$this->searchTerm.'%'); //
+        // Search
+        if ($this->searchTerm !== '') {
+            $searchTerm = '%' . trim($this->searchTerm) . '%';
+            $query->where(function (Builder $q) use ($searchTerm): void {
+                $q->whereHasMorph('approvable', [LoanApplication::class], function (Builder $morphQuery) use ($searchTerm): void {
+                    $morphQuery->where('application_no', 'like', $searchTerm)
+                        ->orWhereHas('user', function (Builder $userQuery) use ($searchTerm): void {
+                            $userQuery->where('name', 'like', $searchTerm);
+                        });
+                });
             });
         }
 
+        $query->orderBy('created_at', 'desc');
         return $query->paginate(10);
     }
 
-    public function updatedFilterType(): void
+    #[Computed]
+    public function getStatusOptionsProperty(): array
     {
-        $this->resetPage();
+        return [
+            'all' => 'Semua Status',
+            Approval::STATUS_PENDING => Approval::$STATUSES_LABELS[Approval::STATUS_PENDING],
+            Approval::STATUS_APPROVED => Approval::$STATUSES_LABELS[Approval::STATUS_APPROVED],
+            Approval::STATUS_REJECTED => Approval::$STATUSES_LABELS[Approval::STATUS_REJECTED],
+        ];
     }
 
-    public function updatedSearchTerm(): void
+    #[Computed]
+    public function getTypeOptionsProperty(): array
     {
-        $this->resetPage();
+        return [
+            'all' => 'Semua Jenis Permohonan',
+            LoanApplication::class => 'Permohonan Pinjaman Peralatan ICT',
+        ];
     }
 
-    public function updatedFilterStatus(): void
-    {
-        $this->resetPage();
-    }
-
+    /**
+     * Show the modal for approval action.
+     */
     public function openApprovalActionModal(int $approvalId): void
     {
-        $this->selectedApproval = Approval::with('approvable.user')->find($approvalId);
-        if (! $this->selectedApproval) {
-            $this->dispatch('toastr', type: 'error', message: __('Rekod kelulusan tidak ditemui.'));
+        try {
+            $user = Auth::user();
+            $approval = Approval::where('officer_id', $user->id)
+                ->where('status', Approval::STATUS_PENDING)
+                ->findOrFail($approvalId);
 
-            return;
+            $this->authorize('approveOrReject', $approval);
+
+            $this->selectedApproval = $approval;
+            $this->decision = '';
+            $this->comments = '';
+            $this->resetErrorBag();
+
+            $this->showApprovalActionModal = true;
+            $this->dispatch('openApprovalActionModalEvent');
+        } catch (AuthorizationException $e) {
+            Log::warning('ApprovalDashboard: Authorization failed for openApprovalActionModal.', ['approval_id' => $approvalId, 'user_id' => Auth::id(), 'error' => $e->getMessage()]);
+            $this->dispatch('toastr', type: 'error', message: __('Anda tidak dibenarkan untuk melihat butiran kelulusan ini.'));
+            $this->closeModal();
+        } catch (\Exception $e) {
+            Log::error('ApprovalDashboard: Error showing action modal.', ['approval_id' => $approvalId, 'error' => $e->getMessage()]);
+            $this->dispatch('toastr', type: 'error', message: __('Gagal memaparkan modal keputusan.'));
+            $this->closeModal();
         }
-
-        // $this->authorize('actOn', $this->selectedApproval); // Authorization check
-        $this->decision = '';
-        $this->comments = $this->selectedApproval->comments ?? '';
-        $this->showApprovalActionModal = true;
-        $this->dispatch('openApprovalActionModalEvent'); // For JS to hook into Bootstrap modal
     }
 
+    /**
+     * Handles the submit action from the approval modal.
+     */
     public function submitDecision(): void
     {
-        $this->validate([
-            'decision' => ['required', Rule::in([Approval::STATUS_APPROVED, Approval::STATUS_REJECTED])],
-            'comments' => [Rule::requiredIf($this->decision === Approval::STATUS_REJECTED), 'nullable', 'string', 'min:5', 'max:1000'],
-        ]);
-
-        if (! $this->selectedApproval instanceof \App\Models\Approval) {
-            return;
-        }
-
-        /** @var User $user */
-        $user = Auth::user();
+        $this->validate();
 
         try {
-            $this->approvalService->recordDecision(
-                $this->selectedApproval,
-                $this->decision,
-                $this->comments,
-                $user
-            );
-            session()->flash('success', __('Keputusan kelulusan berjaya direkodkan.'));
-            $this->dispatch('toastr', type: 'success', message: __('Keputusan kelulusan berjaya direkodkan.'));
+            $user = Auth::user();
+            if (!$this->selectedApproval || !$user) {
+                throw new \Exception('No approval selected or user not authenticated.');
+            }
+
+            $this->authorize('approveOrReject', $this->selectedApproval);
+
+            if ($this->decision === Approval::STATUS_APPROVED) {
+                $this->approvalService->handleApprovedDecision(
+                    $this->selectedApproval,
+                    $this->selectedApproval->approvable,
+                    $this->comments
+                );
+                $this->dispatch('toastr', type: 'success', message: __('Keputusan Lulus berjaya direkodkan.'));
+            } elseif ($this->decision === Approval::STATUS_REJECTED) {
+                $this->approvalService->handleRejectedDecision(
+                    $this->selectedApproval,
+                    $this->selectedApproval->approvable,
+                    $this->comments
+                );
+                $this->dispatch('toastr', type: 'success', message: __('Keputusan Tolak berjaya direkodkan.'));
+            } else {
+                throw new \Exception('Invalid decision type provided.');
+            }
+
             $this->closeModal();
-            $this->refreshDataEvent(); // Corrected to call the existing method
+            $this->refreshDataEvent();
         } catch (AuthorizationException $e) {
             Log::error('ApprovalDashboard: Authorization error on submitDecision.', ['message' => $e->getMessage(), 'user_id' => $user->id]);
             $this->dispatch('toastr', type: 'error', message: __('Anda tidak dibenarkan untuk tindakan ini.'));
         } catch (Throwable $e) {
             Log::error('ApprovalDashboard: Error submitting decision.', ['exception' => $e, 'user_id' => $user->id]);
-            $this->dispatch('toastr', type: 'error', message: __('Gagal merekodkan keputusan: ').$e->getMessage());
+            $this->dispatch('toastr', type: 'error', message: __('Gagal merekodkan keputusan: ') . $e->getMessage());
         }
     }
 
@@ -172,19 +220,32 @@ class ApprovalDashboard extends Component
         $this->decision = '';
         $this->comments = '';
         $this->resetErrorBag();
-        $this->dispatch('closeApprovalActionModalEvent'); // For JS to hook into Bootstrap modal
+        $this->dispatch('closeApprovalActionModalEvent');
     }
 
     #[On('refresh-approval-list')]
-    public function refreshDataEvent(): void // Renamed to avoid conflict if a 'refreshData' property exists
+    public function refreshDataEvent(): void
     {
         unset($this->approvalTasks);
     }
 
+    /**
+     * Helper to get the URL for viewing the full application, based on the approvable type.
+     */
+    public function getViewApplicationRouteForSelected(): ?string
+    {
+        if (!$this->selectedApproval || !$this->selectedApproval->approvable) {
+            return null;
+        }
+        $approvable = $this->selectedApproval->approvable;
+        if ($approvable instanceof LoanApplication) {
+            return route('loan-applications.show', $approvable->id);
+        }
+        return null;
+    }
+
     public function render(): View
     {
-        return view('livewire.approval-dashboard', [
-            // 'approvalTasks' property will be automatically available due to #[Computed]
-        ])->title(__('Papan Pemuka Kelulusan'));
+        return view('livewire.approval-dashboard');
     }
 }

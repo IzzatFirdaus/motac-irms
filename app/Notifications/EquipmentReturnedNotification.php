@@ -22,17 +22,17 @@ class EquipmentReturnedNotification extends Notification implements ShouldQueue
     // These properties are now public to be accessed by the Mailable
     public LoanApplication $loanApplication;
 
-    public LoanTransaction $returnTransaction;
+    public ?LoanTransaction $returnTransaction; // Made nullable
 
-    public User $returnAcceptingOfficer;
+    public ?User $returnAcceptingOfficer; // Made nullable
 
     public function __construct(
         LoanApplication $loanApplication,
-        LoanTransaction $returnTransaction,
-        User $returnAcceptingOfficer
+        ?LoanTransaction $returnTransaction = null, // Added default null
+        ?User $returnAcceptingOfficer = null // Added default null
     ) {
         $this->loanApplication = $loanApplication->loadMissing('user');
-        $this->returnTransaction = $returnTransaction->loadMissing(['loanTransactionItems.equipment', 'returnAcceptingOfficer:id,name']);
+        $this->returnTransaction = $returnTransaction?->loadMissing(['loanTransactionItems.equipment', 'returnAcceptingOfficer:id,name']); // Handle nullable
         $this->returnAcceptingOfficer = $returnAcceptingOfficer;
     }
 
@@ -58,7 +58,7 @@ class EquipmentReturnedNotification extends Notification implements ShouldQueue
     // EDITED: Made minor corrections to ensure data consistency.
     public function toArray(User $notifiable): array
     {
-        $itemsDetails = $this->returnTransaction->loanTransactionItems->map(function (LoanTransactionItem $txItem): array {
+        $itemsDetails = $this->returnTransaction?->loanTransactionItems->map(function (LoanTransactionItem $txItem): array { // Handle nullable
             $equipment = $txItem->equipment;
             if ($equipment instanceof Equipment) {
                 return [
@@ -77,7 +77,7 @@ class EquipmentReturnedNotification extends Notification implements ShouldQueue
             }
 
             return ['transaction_item_id' => $txItem->id, 'error' => __('Butiran peralatan tidak lengkap.')];
-        })->toArray();
+        })->toArray() ?? []; // Handle nullable
 
         $loanAppId = $this->loanApplication->id;
         $applicantName = $this->loanApplication->user?->name ?? __('Pemohon');
@@ -93,14 +93,14 @@ class EquipmentReturnedNotification extends Notification implements ShouldQueue
             }
         }
 
-        $transactionDate = $this->returnTransaction->transaction_date?->format(config('app.date_format_my', 'd/m/Y'));
+        $transactionDate = $this->returnTransaction?->transaction_date?->format(config('app.date_format_my', 'd/m/Y')); // Handle nullable
 
         return [
             'loan_application_id' => $loanAppId,
             'applicant_name' => $applicantName,
-            'return_transaction_id' => $this->returnTransaction->id,
-            'returned_by_name' => $this->returnTransaction->returningOfficer?->name ?? __('Tidak direkodkan'),
-            'accepted_by_officer_name' => $this->returnAcceptingOfficer->name,
+            'return_transaction_id' => $this->returnTransaction->id ?? null, // Handle nullable
+            'returned_by_name' => $this->returnTransaction?->returningOfficer?->name ?? __('Tidak direkodkan'), // Handle nullable
+            'accepted_by_officer_name' => $this->returnAcceptingOfficer->name ?? __('Tidak diketahui'), // Handle nullable
             'transaction_date' => $transactionDate,
             'subject' => __('Peralatan Dipulangkan (Permohonan #:id)', ['id' => $loanAppId]),
             'message' => __('Peralatan bagi Permohonan Pinjaman #:id oleh :name telah dipulangkan.', ['id' => $loanAppId, 'name' => $applicantName]),

@@ -6,71 +6,99 @@ use App\Models\EquipmentCategory;
 use App\Models\SubCategory;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 
+/**
+ * Optimized Factory for SubCategory model.
+ *
+ * - Uses static caches to minimize DB queries for related foreign keys (EquipmentCategory, User).
+ * - Does NOT create related models in definition() (all related records must exist before using this factory in seeders).
+ * - All foreign keys can be provided via state; otherwise, will pick randomly from existing records.
+ * - Use with seeders that ensure equipment categories and users exist.
+ */
 class SubCategoryFactory extends Factory
 {
     protected $model = SubCategory::class;
 
     public function definition(): array
     {
-        // Use a Malaysian locale for faker
-        $msFaker = \Faker\Factory::create('ms_MY');
-
-        $equipmentCategoryId = EquipmentCategory::inRandomOrder()->first()?->id;
-        if (! $equipmentCategoryId && class_exists(EquipmentCategory::class) && method_exists(EquipmentCategory::class, 'factory')) {
-            $equipmentCategoryId = EquipmentCategory::factory()->create()->id;
+        // Static cache for EquipmentCategory IDs
+        static $categoryIds;
+        if (!isset($categoryIds)) {
+            $categoryIds = EquipmentCategory::pluck('id')->all();
         }
 
-        $createdAt = $this->faker->dateTimeBetween('-1 year', 'now');
-        $updatedAt = $this->faker->dateTimeBetween($createdAt, 'now');
-        $deletedAt = $this->faker->optional(0.1)->dateTimeBetween($createdAt, 'now');
+        // Static cache for User IDs
+        static $userIds;
+        if (!isset($userIds)) {
+            $userIds = User::pluck('id')->all();
+        }
+
+        // Pick random related IDs or null if none exist
+        $equipmentCategoryId = !empty($categoryIds) ? Arr::random($categoryIds) : null;
+        $auditUserId = !empty($userIds) ? Arr::random($userIds) : null;
+
+        // Use a static Malaysian faker for realism and speed
+        static $msFaker;
+        if (!$msFaker) {
+            $msFaker = \Faker\Factory::create('ms_MY');
+        }
+
+        $createdAt = Carbon::parse($this->faker->dateTimeBetween('-3 years', 'now'));
+        $updatedAt = Carbon::parse($this->faker->dateTimeBetween($createdAt, 'now'));
+        $isDeleted = $this->faker->boolean(1); // ~1% soft deleted for variety
+        $deletedAt = $isDeleted ? Carbon::parse($this->faker->dateTimeBetween($updatedAt, 'now')) : null;
 
         return [
             'equipment_category_id' => $equipmentCategoryId,
-            'name' => $msFaker->unique()->words(2, true).' Sub-Kategori',
+            'name' => $msFaker->unique()->words(2, true) . ' Sub-Kategori',
             'description' => $msFaker->optional(0.7)->sentence,
             'is_active' => $this->faker->boolean(95),
-            'created_at' => Carbon::parse($createdAt),
-            'updated_at' => Carbon::parse($updatedAt),
-            'deleted_at' => $deletedAt ? Carbon::parse($deletedAt) : null,
+            'created_by' => $auditUserId,
+            'updated_by' => $auditUserId,
+            'deleted_by' => null,
+            'created_at' => $createdAt,
+            'updated_at' => $updatedAt,
+            'deleted_at' => $deletedAt,
         ];
     }
 
+    /**
+     * State: Mark sub-category as inactive.
+     */
     public function inactive(): static
     {
-        return $this->state(
-            fn (array $attributes): array => [
-                'is_active' => false,
-            ]
-        );
+        return $this->state(fn(array $attributes): array => ['is_active' => false]);
     }
 
-    public function trashed(): static
+    /**
+     * State: Mark sub-category as soft deleted.
+     */
+    public function deleted(): static
     {
-        $deleterId = User::inRandomOrder()->first()?->id;
-        if (! $deleterId && class_exists(User::class) && method_exists(User::class, 'factory')) {
-            $deleterId = User::factory()->create()->id;
+        static $userIds;
+        if (!isset($userIds)) {
+            $userIds = User::pluck('id')->all();
         }
-
-        return $this->state(
-            fn (array $attributes): array => [
-                'deleted_at' => Carbon::now(),
-                'deleted_by' => $deleterId,
-            ]
-        );
+        $deleterId = !empty($userIds) ? Arr::random($userIds) : null;
+        return $this->state([
+            'deleted_at' => now(),
+            'deleted_by' => $deleterId,
+        ]);
     }
 
+    /**
+     * State: Assign a specific equipment category for the sub-category.
+     */
     public function forEquipmentCategory(EquipmentCategory|int $equipmentCategory): static
     {
         $equipmentCategoryId = $equipmentCategory instanceof EquipmentCategory
             ? $equipmentCategory->id
             : $equipmentCategory;
 
-        return $this->state(
-            fn (array $attributes): array => [
-                'equipment_category_id' => $equipmentCategoryId,
-            ]
-        );
+        return $this->state([
+            'equipment_category_id' => $equipmentCategoryId,
+        ]);
     }
 }

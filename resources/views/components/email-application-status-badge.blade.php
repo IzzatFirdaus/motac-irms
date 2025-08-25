@@ -1,45 +1,87 @@
-{{-- resources/views/components/email-application-status-badge.blade.php --}}
+{{--
+    resources/views/components/email-application-status-badge.blade.php
+
+    Displays email application status as a colored badge.
+    Supports both direct status values and EmailApplication model instances.
+
+    Props:
+    - $status: string - The status value (optional if application provided)
+    - $application: EmailApplication - Model instance with status (optional)
+
+    Usage:
+    <x-email-application-status-badge :status="'pending_support'" />
+    <x-email-application-status-badge :application="$emailApplication" />
+
+    Supported Statuses:
+    - draft, pending_support, pending_admin, approved, processing, completed
+    - rejected, provision_failed, cancelled
+
+    Dependencies: App\Models\EmailApplication
+--}}
 @props([
-    'status' => '', // The email application status key
-    'application' => null, // Pass the model to use the accessor
+    'status' => '',
+    'application' => null,
 ])
 
 @php
     $badgeClass = '';
     $statusLabel = '';
 
-    if ($application) {
-        $badgeClass = 'text-bg-' . $application->status_color;
-        $statusLabel = $application->status_label;
-    } else {
-        $statusOptions = \App\Models\EmailApplication::getStatusOptions();
-        $statusLabel = $statusOptions[$status] ?? Illuminate\Support\Str::title(str_replace('_', ' ', $status));
-        $color = 'dark'; // default color
+    // Local status labels (use translations where appropriate)
+    $statusOptions = [
+        'draft' => __('Draft'),
+        'pending_support' => __('Pending Sokongan'),
+        'pending_admin' => __('Pending Admin'),
+        'approved' => __('Diluluskan'),
+        'processing' => __('Diproses'),
+        'completed' => __('Selesai'),
+        'rejected' => __('Ditolak'),
+        'provision_failed' => __('Gagal Penyediaan'),
+        'cancelled' => __('Dibatalkan'),
+    ];
 
-        switch ($status) {
-            case \App\Models\EmailApplication::STATUS_DRAFT:
+    $determineColor = function (?string $s) {
+        $color = 'dark';
+        switch ($s) {
+            case 'draft':
                 $color = 'secondary';
                 break;
-            case \App\Models\EmailApplication::STATUS_PENDING_SUPPORT:
-            case \App\Models\EmailApplication::STATUS_PENDING_ADMIN:
+            case 'pending_support':
+            case 'pending_admin':
                 $color = 'warning';
                 break;
-            case \App\Models\EmailApplication::STATUS_APPROVED:
+            case 'approved':
                 $color = 'primary';
                 break;
-            case \App\Models\EmailApplication::STATUS_PROCESSING:
+            case 'processing':
                 $color = 'info';
                 break;
-            case \App\Models\EmailApplication::STATUS_COMPLETED:
+            case 'completed':
                 $color = 'success';
                 break;
-            case \App\Models\EmailApplication::STATUS_REJECTED:
-            case \App\Models\EmailApplication::STATUS_PROVISION_FAILED:
-            case \App\Models\EmailApplication::STATUS_CANCELLED:
+            case 'rejected':
+            case 'provision_failed':
+            case 'cancelled':
                 $color = 'danger';
                 break;
         }
-        $badgeClass = 'text-bg-' . $color;
+        return $color;
+    };
+
+    if ($application) {
+        // If the passed object provides explicit label/color use them, otherwise fall back to status string
+        if (isset($application->status_label) && isset($application->status_color)) {
+            $badgeClass = 'text-bg-' . $application->status_color;
+            $statusLabel = $application->status_label;
+        } elseif (isset($application->status)) {
+            $s = $application->status;
+            $statusLabel = $statusOptions[$s] ?? Illuminate\Support\Str::title(str_replace('_', ' ', $s));
+            $badgeClass = 'text-bg-' . $determineColor($s);
+        }
+    } else {
+        // Map provided status string to label and color
+        $statusLabel = $statusOptions[$status] ?? Illuminate\Support\Str::title(str_replace('_', ' ', $status));
+        $badgeClass = 'text-bg-' . $determineColor($status);
     }
 @endphp
 

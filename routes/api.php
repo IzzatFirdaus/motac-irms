@@ -1,8 +1,9 @@
 <?php
+// api.php
 
 declare(strict_types=1);
 
-use App\Http\Controllers\Api\EmailProvisioningController;
+// REMOVED: use App\Http\Controllers\Api\EmailProvisioningController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -29,11 +30,9 @@ Route::prefix('v1')
     ->middleware('auth:sanctum') // Protect these MOTAC-specific endpoints
     ->name('api.v1.') // Name prefix for v1 routes
     ->group(function (): void {
-        // Endpoint for triggering email provisioning by an authorized system component or admin
-        // The 'provision' method in EmailProvisioningController would handle the logic.
-        Route::post('/email-accounts/provision', [EmailProvisioningController::class, 'provisionEmailAccount']) // Method name updated for clarity
-            ->name('email-accounts.provision'); // [cite: 2]
-        // Add specific permissions/policy checks within the controller method if needed.
+        // REMOVED: Email Provisioning API endpoint
+        // Route::post('/email-accounts/provision', [EmailProvisioningController::class, 'provisionEmailAccount'])
+        //     ->name('email-accounts.provision');
 
         // Example: API endpoint to check equipment availability (if needed for external integration)
         // Route::get('/equipment/{equipment_tag_id}/availability', [App\Http\Controllers\Api\EquipmentApiController::class, 'checkAvailability'])

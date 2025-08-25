@@ -1,229 +1,225 @@
 {
+  "version": "2025-08-06",
+  "last_updated": "2025-08-06T12:19:04Z",
   "menu": [
+    {
+      "url": "/",
+      "name": "menu.home",
+      "icon": "house",
+      "guestOnly": true,
+      "meta": { "info": "Visible to guests only (not logged in)" }
+    },
+    {
+      "url": "/contact-us",
+      "name": "menu.contact_us",
+      "icon": "envelope",
+      "guestOnly": true,
+      "meta": { "info": "Visible to guests only (not logged in)" }
+    },
+    {
+      "url": "/login",
+      "name": "menu.login",
+      "icon": "box-arrow-in-right",
+      "guestOnly": true,
+      "meta": { "info": "Visible to guests only (not logged in)" }
+    },
     {
       "url": "/dashboard",
       "name": "menu.dashboard",
       "icon": "house-door-fill",
-      "slug": "dashboard",
-      "routeName": "dashboard"
+      "routeName": "dashboard",
+      "role": ["Admin", "BPM Staff", "IT Admin", "User", "Approver", "HOD"],
+      "meta": { "info": "Authenticated users only" }
     },
     {
-      "menuHeader": "menu.section.resource_management"
+      "menuHeader": "menu.section.resource_management",
+      "role": ["Admin", "BPM Staff", "IT Admin", "User", "Approver", "HOD"],
+      "meta": { "info": "Section header for authenticated users" }
     },
     {
       "name": "menu.my_applications.title",
       "icon": "folder-check",
-      "slug": "my-applications",
+      "routeNamePrefix": "loan-applications.index,helpdesk-tickets.index",
+      "role": ["User", "Admin", "BPM Staff", "IT Admin", "Approver", "HOD"],
       "submenu": [
-        {
-          "url": "/email-applications",
-          "name": "menu.my_applications.email",
-          "icon": "envelope-paper-fill",
-          "slug": "email-applications.index",
-          "routeName": "email-applications.index",
-          "permission": "view_email_applications"
-        },
         {
           "url": "/loan-applications",
           "name": "menu.my_applications.loan",
           "icon": "laptop-fill",
-          "slug": "loan-applications.index",
-          "routeName": "loan-applications.index",
-          "permission": "view_loan_applications"
+          "routeName": "loan-applications.index"
+        },
+        {
+          "url": "/helpdesk-tickets",
+          "name": "menu.my_applications.helpdesk",
+          "icon": "life-preserver",
+          "routeName": "helpdesk-tickets.index"
         }
-      ]
+      ],
+      "meta": { "info": "Authenticated users only" }
     },
     {
       "name": "menu.apply_for_resources.title",
       "icon": "file-earmark-plus-fill",
-      "slug": "application-forms",
+      "role": ["User"],
       "submenu": [
-        {
-          "url": "/email-applications/create",
-          "name": "menu.apply_for_resources.email",
-          "icon": "envelope-plus-fill",
-          "slug": "email-applications.create",
-          "routeName": "email-applications.create",
-          "permission": "create_email_applications"
-        },
         {
           "url": "/loan-applications/create",
           "name": "menu.apply_for_resources.loan",
           "icon": "box-arrow-up-right",
-          "slug": "loan-applications.create",
-          "routeName": "loan-applications.create",
-          "permission": "create_loan_applications"
+          "routeName": "loan-applications.create"
+        },
+        {
+          "url": "/helpdesk-tickets/create",
+          "name": "menu.apply_for_resources.helpdesk_ticket",
+          "icon": "ticket-fill",
+          "routeName": "helpdesk-tickets.create"
         }
-      ]
+      ],
+      "meta": { "info": "Authenticated users only" }
     },
     {
-      "url": "/approvals/dashboard",
-      "name": "menu.approvals_dashboard",
-      "icon": "person-check-fill",
-      "slug": "approvals.dashboard",
+      "name": "menu.approvals.title",
+      "icon": "clipboard-check-fill",
       "routeName": "approvals.dashboard",
-      "permission": "view_approval_tasks"
+      "role": ["Admin", "Approver", "HOD"],
+      "submenu": [],
+      "meta": { "info": "Authenticated users only" }
     },
     {
-      "name": "menu.administration.title",
-      "icon": "gear-wide-connected",
-      "slug": "resource-management",
-      "routeNamePrefix": "resource-management",
-      "permission": "view_equipment",
+      "name": "menu.resource_inventory.title",
+      "icon": "boxes",
+      "routeNamePrefix": "equipment.index,equipment.show,equipment.create,equipment.edit,loan-transactions.index,loan-transactions.show",
+      "role": ["Admin", "BPM Staff", "IT Admin"],
       "submenu": [
         {
-          "name": "menu.administration.bpm_operations.title",
+          "url": "/equipment",
+          "name": "menu.resource_inventory.equipment",
           "icon": "tools",
-          "slug": "resource-management.bpm",
-          "routeNamePrefix": "resource-management.bpm",
-          "permission": "process_loan_issuance",
-          "submenu": [
-            {
-              "url": "/resource-management/bpm/outstanding-loans",
-              "name": "menu.administration.bpm_operations.outstanding_loans",
-              "icon": "hourglass-split",
-              "slug": "resource-management.bpm.outstanding-loans",
-              "routeName": "resource-management.bpm.outstanding-loans",
-              "permission": "process_loan_issuance"
-            },
-            {
-              "url": "/resource-management/bpm/issued-loans",
-              "name": "menu.administration.bpm_operations.issued_loans",
-              "icon": "box-arrow-in-up-right",
-              "slug": "resource-management.bpm.issued-loans",
-              "routeName": "resource-management.bpm.issued-loans",
-              "permission": "process_loan_issuance"
-            }
-          ]
+          "routeName": "equipment.index"
         },
         {
-          "url": "/resource-management/equipment-admin",
-          "name": "menu.administration.equipment_management",
-          "icon": "pc-display",
-          "slug": "resource-management.equipment-admin.index",
-          "routeName": "resource-management.equipment-admin.index",
-          "permission": "view_equipment"
-        },
-        {
-          "url": "/resource-management/email-applications-admin",
-          "name": "menu.administration.email_applications",
-          "icon": "envelope-gear-fill",
-          "slug": "resource-management.email-applications-admin.index",
-          "routeName": "resource-management.email-applications-admin.index",
-          "permission": "view_any_admin_email_applications"
-        },
-        {
-          "url": "/resource-management/users-admin",
-          "name": "menu.administration.users_list",
-          "icon": "people-fill",
-          "slug": "resource-management.users-admin.index",
-          "routeName": "resource-management.users-admin.index",
-          "permission": "view_users"
+          "url": "/loan-transactions",
+          "name": "menu.resource_inventory.loan_transactions",
+          "icon": "exchange",
+          "routeName": "loan-transactions.index"
         }
-      ]
+      ],
+      "meta": { "info": "Authenticated users only" }
     },
     {
-      "menuHeader": "menu.section.system_config",
-      "permission": "manage_settings"
-    },
-    {
-      "name": "menu.settings.title",
-      "icon": "sliders",
-      "slug": "settings",
-      "routeNamePrefix": "settings",
-      "permission": "manage_settings",
-      "submenu": [
-        {
-          "url": "/settings/users",
-          "name": "menu.settings.user_management",
-          "icon": "person-lines-fill",
-          "slug": "settings.users.index",
-          "routeName": "settings.users.index",
-          "permission": "view_users"
-        },
-        {
-          "url": "/settings/roles",
-          "name": "menu.settings.roles_permissions",
-          "icon": "person-badge-fill",
-          "slug": "settings.roles.index",
-          "routeName": "settings.roles.index",
-          "permission": "manage_roles"
-        },
-        {
-          "url": "/settings/grades",
-          "name": "menu.settings.grades_management",
-          "icon": "bar-chart-steps",
-          "slug": "settings.grades.index",
-          "routeName": "settings.grades.index",
-          "permission": "manage_grades"
-        },
-        {
-          "url": "/settings/departments",
-          "name": "menu.settings.departments_management",
-          "icon": "building-fill",
-          "slug": "settings.departments.index",
-          "routeName": "settings.departments.index",
-          "permission": "manage_departments"
-        },
-        {
-          "url": "/settings/positions",
-          "name": "menu.settings.positions_management",
-          "icon": "person-workspace",
-          "slug": "settings.positions.index",
-          "routeName": "settings.positions.index",
-          "permission": "manage_positions"
-        }
-      ]
+      "menuHeader": "menu.section.reports_analytics",
+      "role": ["Admin", "BPM Staff", "IT Admin"],
+      "meta": { "info": "Section header for authenticated users" }
     },
     {
       "name": "menu.reports.title",
       "icon": "file-earmark-bar-graph-fill",
-      "slug": "reports",
-      "routeNamePrefix": "reports",
-      "permission": "view_equipment_reports",
+      "routeNamePrefix": "reports.",
+      "role": ["Admin", "BPM Staff", "IT Admin"],
       "submenu": [
         {
           "url": "/reports/equipment-inventory",
           "name": "menu.reports.equipment_report",
           "icon": "card-list",
-          "slug": "reports.equipment-inventory",
-          "routeName": "reports.equipment-inventory",
-          "permission": "view_equipment_reports"
-        },
-        {
-          "url": "/reports/email-accounts",
-          "name": "menu.reports.email_accounts_report",
-          "icon": "envelope-check-fill",
-          "slug": "reports.email-accounts",
-          "routeName": "reports.email-accounts",
-          "permission": "view_email_reports"
+          "routeName": "reports.equipment-inventory"
         },
         {
           "url": "/reports/loan-applications",
           "name": "menu.reports.loan_applications_report",
           "icon": "journal-text",
-          "slug": "reports.loan-applications",
-          "routeName": "reports.loan-applications",
-          "permission": "view_loan_reports"
+          "routeName": "reports.loan-applications"
+        },
+        {
+          "url": "/reports/helpdesk-tickets",
+          "name": "menu.reports.helpdesk_report",
+          "icon": "life-preserver",
+          "routeName": "reports.helpdesk-tickets"
         },
         {
           "url": "/reports/activity-log",
           "name": "menu.reports.user_activity_report",
-          "icon": "person-bounding-box",
-          "slug": "reports.activity-log",
-          "routeName": "reports.activity-log",
-          "permission": "view_user_activity_reports"
+          "icon": "person-check-fill",
+          "routeName": "reports.activity-log"
+        },
+        {
+          "url": "/reports/loan-history",
+          "name": "menu.reports.loan_history_report",
+          "icon": "clock-history",
+          "routeName": "reports.loan-history"
+        },
+        {
+          "url": "/reports/utilization-report",
+          "name": "menu.reports.utilization_report",
+          "icon": "graph-up",
+          "routeName": "reports.utilization-report"
+        },
+        {
+          "url": "/reports/loan-status-summary",
+          "name": "menu.reports.loan_status_summary_report",
+          "icon": "pie-chart-fill",
+          "routeName": "reports.loan-status-summary"
         }
-      ]
+      ],
+      "meta": { "info": "Authenticated users only" }
+    },
+    {
+      "menuHeader": "menu.section.system_settings",
+      "role": ["Admin"],
+      "meta": { "info": "Section header for Admin only" }
+    },
+    {
+      "name": "menu.system_settings.title",
+      "icon": "gear-fill",
+      "routeNamePrefix": "settings.",
+      "role": ["Admin"],
+      "submenu": [
+        {
+          "url": "/settings/users",
+          "name": "menu.system_settings.users",
+          "icon": "people-fill",
+          "routeName": "settings.users.index"
+        },
+        {
+          "url": "/settings/roles",
+          "name": "menu.system_settings.roles",
+          "icon": "person-badge-fill",
+          "routeName": "settings.roles.index"
+        },
+        {
+          "url": "/settings/permissions",
+          "name": "menu.system_settings.permissions",
+          "icon": "key-fill",
+          "routeName": "settings.permissions.index"
+        },
+        {
+          "url": "/settings/grades",
+          "name": "menu.system_settings.grades",
+          "icon": "award-fill",
+          "routeName": "settings.grades.index"
+        },
+        {
+          "url": "/settings/departments",
+          "name": "menu.system_settings.departments",
+          "icon": "building-fill",
+          "routeName": "settings.departments.index"
+        },
+        {
+          "url": "/settings/positions",
+          "name": "menu.system_settings.positions",
+          "icon": "briefcase-fill",
+          "routeName": "settings.positions.index"
+        }
+      ],
+      "meta": { "info": "Admin only" }
     },
     {
       "url": "/log-viewer",
       "name": "menu.system_logs",
       "icon": "file-text-fill",
-      "slug": "log-viewer.index",
       "routeName": "log-viewer.index",
       "target": "_blank",
-      "permission": "view_system_logs"
+      "role": ["Admin"],
+      "meta": { "info": "Admin only" }
     }
   ]
 }

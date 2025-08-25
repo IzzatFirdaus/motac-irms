@@ -1,79 +1,342 @@
 <?php
 
 // config/motac.php
+// MOTAC-specific configuration file for IRMS v4.0
+// Refactored for v4.0: Email/User ID Provisioning settings and keys removed. Helpdesk config included.
 
 return [
+    // General organization info
     'organization_name' => env('MOTAC_ORGANIZATION_NAME', 'MOTAC'),
     'organization_full_name' => env('MOTAC_ORGANIZATION_FULL_NAME', 'Ministry of Tourism, Arts and Culture Malaysia'),
 
+    // Approval grade levels for ICT Loan
     'approval' => [
-        // Specific minimum grade level (numeric representation) required for a supporting officer for ICT Loans
-        // As per ICT Loan Form (Part 5) & LoanApplicationService
+        // Minimum grade level required for supporting officer for ICT Loans
         'min_loan_support_grade_level' => env('MOTAC_MIN_LOAN_SUPPORT_GRADE_LEVEL', 41),
-
-        // Specific minimum grade level (numeric representation) for a supporting officer for Email/ID applications
-        // As per MyMail Form and system design (Section 7.2) & EmailApplicationService
-        'min_email_supporting_officer_grade_level' => env('MOTAC_MIN_EMAIL_SUPPORTING_OFFICER_GRADE_LEVEL', 9),
-
-        // General minimum grade level for viewing any approval records, if not specifically overridden.
-        // Used by ApprovalPolicy::viewAny as a general rule.
+        // Minimum grade level for viewing any approval records
         'min_general_view_approval_grade_level' => env('MOTAC_MIN_GENERAL_VIEW_APPROVAL_GRADE_LEVEL', 9),
-
-        // New key for the "General Approver" stage after initial support officer for loan applications
-        'min_loan_general_approver_grade_level' => env('MOTAC_MIN_LOAN_GENERAL_APPROVER_GRADE_LEVEL', 44), // Example: Grade 44 or higher
+        // New key for "General Approver" stage after support officer for loan applications
+        'min_loan_general_approver_grade_level' => env('MOTAC_MIN_LOAN_GENERAL_APPROVER_GRADE_LEVEL', 44),
     ],
 
-    'email_provisioning' => [
-        'api_endpoint' => env('MOTAC_EMAIL_PROVISIONING_API_ENDPOINT'),
-        'api_key' => env('MOTAC_EMAIL_PROVISIONING_API_KEY'),
-        'default_domain' => env('MOTAC_EMAIL_DEFAULT_DOMAIN', 'motac.gov.my'), //
+    // Grade options for dropdowns and form selections (extensive list)
+    // This array provides a comprehensive mapping of grade codes to grade labels for use in forms, filters, etc.
+    'grade_options' => [
+        '' => '- Select Grade -',
+        '1' => 'Minister',
+        '2' => 'Deputy Minister',
+        '3' => 'Turus III',
+        '4' => 'Jusa A',
+        '5' => 'Jusa B',
+        '6' => 'Jusa C',
+        '7' => 'Jusa A',
+        '8' => 'Jusa B',
+        '9' => 'Jusa C',
+        '10' => 'Jusa A',
+        '11' => 'Jusa B',
+        '12' => 'Jusa C',
+        '13' => '(14) 54',
+        '14' => '(13) 52',
+        '15' => '(12) 48',
+        '16' => '14 (54)',
+        '17' => '13 (52)',
+        '18' => '(12) 48',
+        '19' => '14 (54)',
+        '20' => '13 (52)',
+        '21' => '12 (48)',
+        '22' => '14 (54)',
+        '23' => '13 (52)',
+        '24' => '(12) 48',
+        '25' => '14 (54)',
+        '26' => '13 (52)',
+        '27' => '12 (48)',
+        '28' => '10 (44)',
+        '29' => '9 (41)',
+        '30' => '14 (54)',
+        '31' => '13 (52)',
+        '32' => '12 (48)',
+        '33' => '14 (54)',
+        '34' => '13 (52)',
+        '35' => '12 (48)',
+        '36' => '10 (44)',
+        '37' => '9 (41)',
+        '38' => '14 (54)',
+        '39' => '13 (52)',
+        '40' => '12 (48)',
+        '41' => '10 (44)',
+        '42' => '9 (41)',
+        '43' => '14 (54)',
+        '44' => '13 (52)',
+        '45' => '12 (48)',
+        '46' => '14 (54)',
+        '47' => '13 (52)',
+        '48' => '12 (48)',
+        '49' => '10 (44)',
+        '50' => '9 (41)',
+        '51' => '14 (54)',
+        '52' => '13 (52)',
+        '53' => '12 (48)',
+        '54' => '10 (44)',
+        '55' => '9 (41)',
+        '56' => '14 (54)',
+        '57' => '13 (52)',
+        '58' => '12 (48)',
+        '59' => '10 (44)',
+        '60' => '9 (41)',
+        '61' => '13 (52)',
+        '62' => '12 (48)',
+        '63' => '13 (52)',
+        '64' => '12 (48)',
+        '65' => '10 (44)',
+        '66' => '9 (41)',
+        '67' => '14 (54)',
+        '68' => '13 (52)',
+        '69' => '12 (48)',
+        '70' => '10 (44)',
+        '71' => '9 (41)',
+        '72' => '14 (53/54)',
+        '73' => '13 (51/52)',
+        '74' => '12 (47/48)',
+        '75' => '10 (43/44)',
+        '76' => '9 (41/42)',
+        '77' => '7 (37/38)',
+        '78' => '6 (31/32)',
+        '79' => '5 (29/30)',
+        '80' => '3 (25/26)',
+        '81' => '2 (21/22)',
+        '82' => '1 (19)',
+        '83' => '14 (54)',
+        '84' => '13 (52)',
+        '85' => '12 (48)',
+        '86' => '10 (44)',
+        '87' => '9 (41)',
+        '88' => '14 (54)',
+        '89' => '13 (52)',
+        '90' => '12 (48)',
+        '91' => '10 (44)',
+        '92' => '9 (41)',
+        '93' => '14 (54)',
+        '94' => '14 (53/54)',
+        '95' => '13 (51/52)',
+        '96' => '12 (47/48)',
+        '97' => '10 (44)',
+        '98' => '8 (40)',
+        '99' => '7 (38)',
+        '100' => '6 (32)',
+        '101' => '5 (29)',
+        '102' => '4 (28)',
+        '103' => '3 (26)',
+        '104' => '2 (22)',
+        '105' => '1 (19)',
+        '106' => '14 (54)',
+        '107' => '13 (52)',
+        '108' => '12 (48)',
+        '109' => '10 (44)',
+        '110' => '9 (41)',
+        '111' => '14 (54)',
+        '112' => '13 (52)',
+        '113' => '12 (48)',
+        '114' => '10 (44)',
+        '115' => '9 (41)',
+        '116' => '14 (54)',
+        '117' => '13 (52)',
+        '118' => '12 (48)',
+        '119' => '10 (44)',
+        '120' => '9 (41)',
+        '121' => '14 (54)',
+        '122' => '13 (52)',
+        '123' => '12 (48)',
+        '124' => '10 (44)',
+        '125' => '9 (41)',
+        '126' => '14 (54)',
+        '127' => '13 (52)',
+        '128' => '12 (48)',
+        '129' => '10 (44)',
+        '130' => '9 (41)',
+        '131' => '14 (54)',
+        '132' => '13 (52)',
+        '133' => '12 (48)',
+        '134' => '10 (44)',
+        '135' => '9 (41)',
+        '136' => '48',
+        '137' => '14 (54)',
+        '138' => '13 (52)',
+        '139' => '12 (48)',
+        '140' => '10 (44)',
+        '141' => '8 (40)',
+        '142' => '7 (38)',
+        '143' => '6 (32)',
+        '144' => '5 (29)',
+        '145' => '14 (54)',
+        '146' => '13 (52)',
+        '147' => '12 (48)',
+        '148' => '10 (44)',
+        '149' => '9 (41)',
+        '150' => '14 (54)',
+        '151' => '13 (52)',
+        '152' => '12 (48)',
+        '153' => '10 (44)',
+        '154' => '9 (41)',
+        '155' => '14 (53/54)',
+        '156' => '13 (51/52)',
+        '157' => '12 (47/48)',
+        '158' => '10 (43/44)',
+        '159' => '9 (41/42)',
+        '160' => '14 (54)',
+        '161' => '13 (52)',
+        '162' => '12 (48)',
+        '163' => '10 (44)',
+        '164' => '9 (41)',
+        '165' => '14 (53/54)',
+        '166' => '13 (51/52)',
+        '167' => '12 (47/48)',
+        '168' => '10 (43/44)',
+        '169' => '9 (41/42)',
+        '170' => '7 (37/38)',
+        '171' => '6 (31/32)',
+        '172' => '5 (29/30)',
+        '173' => '3 (25/26)',
+        '174' => '2 (21/22)',
+        '175' => '1 (19)',
+        '176' => '14 (54)',
+        '177' => '13 (52)',
+        '178' => '12 (48)',
+        '179' => '10 (44)',
+        '180' => '9 (41)',
+        '181' => '8 (40)',
+        '182' => '7 (38)',
+        '183' => '6 (32)',
+        '184' => '5 (29)',
+        '185' => '8 (40)',
+        '186' => '7 (38)',
+        '187' => '6 (32)',
+        '188' => '5 (29)',
+        '189' => '8 (40)',
+        '190' => '7 (38)',
+        '191' => '6 (32)',
+        '192' => '5 (29)',
+        '193' => '8 (40)',
+        '194' => '7 (38)',
+        '195' => '6 (32)',
+        '196' => '5 (29/30)',
+        '197' => '8 (40)',
+        '198' => '7 (38)',
+        '199' => '6 (32)',
+        '200' => '5 (29)',
+        '201' => '8 (40)',
+        '202' => '7 (38)',
+        '203' => '6 (32)',
+        '204' => '5 (29)',
+        '205' => '8 (40)',
+        '206' => '7 (38)',
+        '207' => '6 (32)',
+        '208' => '5 (29)',
+        '209' => '8 (40)',
+        '210' => '7 (38)',
+        '211' => '6 (32)',
+        '212' => '5 (29)',
+        '213' => '8 (40)',
+        '214' => '7 (38)',
+        '215' => '6 (32)',
+        '216' => '5 (29)',
+        '217' => '8 (40)',
+        '218' => '7 (38)',
+        '219' => '6 (32)',
+        '220' => '5 (29)',
+        '221' => '8 (40)',
+        '222' => '7 (38)',
+        '223' => '6 (32)',
+        '224' => '5 (29)',
+        '225' => '8 (40)',
+        '226' => '7 (38)',
+        '227' => '6 (32)',
+        '228' => '5 (29)',
+        '229' => '8 (40)',
+        '230' => '7 (38)',
+        '231' => '6 (32)',
+        '232' => '5 (29)',
+        '233' => '8 (40)',
+        '234' => '7 (38)',
+        '235' => '6 (32)',
+        '236' => '5 (29)',
+        '237' => '8 (40)',
+        '238' => '7 (38)',
+        '239' => '6 (32)',
+        '240' => '5 (29/30)',
+        '241' => '2 (22)',
+        '242' => '1 (19)',
+        '243' => '4 (28)',
+        '244' => '3 (26)',
+        '245' => '2 (22)',
+        '246' => '1 (19)',
+        '247' => '4 (28)',
+        '248' => '3 (26)',
+        '249' => '2 (22)',
+        '250' => '1 (19)',
+        '251' => '4 (28)',
+        '252' => '3 (26)',
+        '253' => '2 (22)',
+        '254' => '1 (19)',
+        '255' => '4 (28)',
+        '256' => '3 (26)',
+        '257' => '2 (22)',
+        '258' => '1 (19)',
+        '259' => '4 (28)',
+        '260' => '3 (26)',
+        '261' => '2 (22)',
+        '262' => '1 (19)',
+        '263' => '4 (28)',
+        '264' => '3 (26)',
+        '265' => '2 (22)',
+        '266' => '1 (19)',
+        '267' => '4 (28)',
+        '268' => '3 (26)',
+        '269' => '2 (22)',
+        '270' => '1 (19)',
+        '271' => '4 (28)',
+        '272' => '3 (26)',
+        '273' => '2 (22)',
+        '274' => '1 (19)',
+        '275' => '9 (41)',
+        '276' => '5 (29)',
+        '277' => '1 (19)',
+        '278' => 'Industrial Trainee',
+        '279' => '1 (19)',
+        '280' => '2 (22)',
+        '281' => '3 (26)',
+        '282' => '4 (28)',
     ],
 
-    'ict_equipment_loan' => [
-        'default_loan_duration_days' => env('MOTAC_DEFAULT_LOAN_DURATION_DAYS', 7),
-        'bpm_notification_recipient_email' => env('MOTAC_BPM_NOTIFICATION_RECIPIENT_EMAIL', 'bpm.ict@motac.gov.my'), // Example email
-        'max_items_per_loan' => env('MOTAC_MAX_ITEMS_PER_LOAN', 5), // Example value
-        'processing_time_working_days' => env('MOTAC_LOAN_PROCESSING_TIME_DAYS', 3), // As per System Design (Section 7.3)
-    ],
-
-    'mymail_form_options' => [ // REVISED: Corrected structure
-        // For EmailApplicationForm, mapping to users.appointment_type enum
-        //  Dropdown Menu Options for MyMail Integration" (Section 2. Pelantikan)
-        'appointment_types' => [
-            '' => '- Pilih Pelantikan -', // Default unselected option
-            'baharu' => 'Baharu', // "Value "1": Baharu" in Supplementary Document
-            'kenaikan_pangkat_pertukaran' => 'Kenaikan Pangkat/Pertukaran', // "Value "2": Kenaikan Pangkat/Pertukaran" in Supplementary Document
-            'lain_lain' => 'Lain-lain', // "Value "3": Lain-lain"
-        ], // REVISED: Closing bracket for appointment_types was moved
-
-        // For EmailApplicationForm, mapping to users.level
-        //  Dropdown Menu Options for MyMail Integration" (Section 6. Aras)
-        'aras_options' => [ // REVISED: Moved to be a direct child of mymail_form_options
-            '' => '- Pilih Aras -', // Default unselected option
-            '1' => '1',
-            '2' => '2',
-            '3' => '3',
-            '4' => '4',
-            '5' => '5',
-            '6' => '6',
-            '7' => '7',
-            '8' => '8',
-            '9' => '9',
-            '10' => '10',
-            '11' => '11',
-            '12' => '12',
-            '13' => '13',
-            '14' => '14',
-            '15' => '15',
-            '16' => '16',
-            '17' => '17',
-            '18' => '18',
+    // MyMail form options (legacy, used for dropdowns if any remain)
+    // Remove this block if not used anywhere in your forms/views anymore.
+    'mymail_form_options' => [
+        'unit_options' => [
+            '' => '- Pilih Unit -',
+            '1' => 'Bahagian Pembangunan Sumber Manusia (BPSM)',
+            '2' => 'Bahagian Kewangan',
+            '3' => 'Bahagian Audit Dalam',
+            '4' => 'Bahagian Pengurusan Maklumat (BPM)',
+            '5' => 'Unit Komunikasi Korporat (UKK)',
+            '6' => 'Unit Integriti',
+            '7' => 'Unit Undang-Undang',
+            '8' => 'Unit Naziran',
+            '9' => 'Unit Khidmat Pengurusan',
+            '10' => 'Unit Perolehan',
+            '11' => 'Unit Akaun',
+            '12' => 'Unit Pembangunan',
+            '13' => 'Unit Pelancongan',
+            '14' => 'Unit Kebudayaan',
+            '15' => 'Unit Kesenian',
+            '16' => 'Unit Warisan',
+            '17' => 'Unit Sukan',
+            '18' => 'Unit Antarabangsa',
+            '19' => 'Unit Penyelidikan & Pembangunan',
+            '20' => 'Unit Perhubungan Awam',
+            '21' => 'Perundangan',
+            '25' => 'Sekretariat Visit Malaysia',
         ],
-
-        // For EmailApplicationForm, for the "Gred Penyokong" dropdown.
-        //  Dropdown Menu Options for MyMail Integration" (Section 7. Gred Penyokong)
-        'supporting_officer_grades' => [ // REVISED: Moved to be a direct child of mymail_form_options
-            '' => '- Pilih Gred -', // Default unselected option
+        'grade_options' => [
+            '' => '- Pilih Gred -',
             'Turus III' => 'Turus III',
             'Jusa A' => 'Jusa A',
             'Jusa B' => 'Jusa B',
@@ -84,33 +347,42 @@ return [
             '10' => '10',
             '9' => '9',
         ],
-    ], // REVISED: Closing bracket for mymail_form_options was moved
+    ],
 
-    // Standard list of loanable accessories
-    // Used by ProcessIssuance and ProcessReturn Livewire components and LoanTransaction model
+    // List of loanable accessories for ICT equipment
     'loan_accessories_list' => [
         'Power Cable',
         'Bag',
         'Mouse',
         'HDMI Cable',
         'User Manual',
-        'Charger', // Often listed separately from power cable
+        'Charger',
         'Keyboard',
         'Stylus Pen',
         // Add other common accessories as needed
     ],
 
+    // Notification settings
     'notifications' => [
-        'admin_email_recipient' => env('MOTAC_ADMIN_EMAIL_RECIPIENT', 'sysadmin@motac.gov.my'), // Example email
-        // Add other notification-related configs if needed
+        'admin_email_recipient' => env('MOTAC_ADMIN_EMAIL_RECIPIENT', 'sysadmin@motac.gov.my'),
+        // Add more notification configs as needed
     ],
 
-    // Application-wide date formats (can also be in config/app.php, but placing here for module-specifics if any)
+    // Helpdesk system configuration section
+    'helpdesk' => [
+        'default_category' => env('HELPDESK_DEFAULT_CATEGORY', 'General'),
+        'default_priority' => env('HELPDESK_DEFAULT_PRIORITY', 'Medium'),
+        'support_email' => env('HELPDESK_SUPPORT_EMAIL', 'helpdesk@motac.gov.my'),
+        // SLA settings (example: hours until escalation for high priority)
+        'sla_hours_high_priority' => env('HELPDESK_SLA_HOURS_HIGH', 8),
+        'sla_hours_medium_priority' => env('HELPDESK_SLA_HOURS_MEDIUM', 24),
+        'sla_hours_low_priority' => env('HELPDESK_SLA_HOURS_LOW', 72),
+    ],
+
+    // Date formats for display
     'date_formats' => [
-        'date_my' => 'd/m/Y', // Example: 29/05/2025
-        'datetime_my' => 'd/m/Y H:i A', // Example: 29/05/2025 10:40 PM
+        'date_format_my_short' => 'd M Y',           // Example: 28 Mei 2025
+        'date_format_my_long' => 'j F Y, l',        // Example: 28 Mei 2025, Rabu
+        'datetime_format_my' => 'd M Y, h:i A',     // Example: 28 Mei 2025, 10:30 PG
     ],
-
-    // Other application-specific settings
-    'session_lifetime' => env('SESSION_LIFETIME', 120), // In minutes, aligns with system design note on session
 ];

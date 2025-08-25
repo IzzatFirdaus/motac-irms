@@ -1,4 +1,5 @@
 {{-- resources/views/_partials/_modals/modal-department.blade.php --}}
+{{-- Modal for creating/editing department records with Select2 integration --}}
 
 @pushOnce('custom-css')
 <link rel="stylesheet" href="{{asset('assets/vendor/libs/select2/select2.css')}}"/>
@@ -15,9 +16,8 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{__('Tutup')}}"></button>
       </div>
       <div class="modal-body p-3 p-md-4">
-        {{-- Linter warnings about unassigned $message (PHP1412) within @error blocks are false positives. --}}
+        {{-- Department form with responsive grid layout --}}
         <form wire:submit.prevent="submitDepartment" id="departmentFormModal" class="row g-3">
-
           <div class="col-md-6">
             <label for="departmentNameModal" class="form-label w-100">{{ __('Nama Jabatan') }} <span class="text-danger">*</span></label>
             <input wire:model.defer='departmentName' id="departmentNameModal" class="form-control @error('departmentName') is-invalid @enderror" type="text" placeholder="{{__('Cth: Bahagian Kewangan')}}"/>
@@ -34,18 +34,19 @@
             <label for="departmentBranchTypeModal" class="form-label w-100">{{ __('Jenis Cawangan') }} <span class="text-danger">*</span></label>
             <select wire:model.defer='departmentBranchType' id="departmentBranchTypeModal" class="form-select @error('departmentBranchType') is-invalid @enderror">
               <option value="">{{ __('-- Pilih Jenis Cawangan --') }}</option>
-              @foreach(\App\Models\Department::getBranchTypeOptions() as $value => $label) {{-- Assumes method returns value => translated_label --}}
+              {{-- Get branch type options from Department model --}}
+              @foreach(\App\Models\Department::getBranchTypeOptions() as $value => $label)
                 <option value="{{ $value }}">{{ e($label) }}</option>
               @endforeach
             </select>
             @error('departmentBranchType') <div class="invalid-feedback">{{ $message }}</div> @enderror
           </div>
 
+          {{-- Select2 dropdown for department head selection --}}
           <div wire:ignore class="col-md-6">
             <label for="select2DepartmentHeadIdModal" class="form-label w-100">{{ __('Ketua Jabatan (Pilihan)') }}</label>
             <select wire:model.defer='departmentHeadId' id="select2DepartmentHeadIdModal" class="select2-department-head form-select @error('departmentHeadId') is-invalid @enderror" data-placeholder="{{ __('Pilih Ketua Jabatan') }}">
               <option value="">{{ __('Pilih Ketua Jabatan (Pilihan)') }}</option>
-              {{-- $usersForHodSelection should be passed from the parent Livewire component --}}
               @foreach($usersForHodSelection ?? [] as $user)
                 @if(is_object($user))
                     <option value="{{ $user->id }}">{{ e($user->name) }} ({{ e($user->email) }})</option>
@@ -91,36 +92,47 @@
 <script src="{{asset('assets/vendor/libs/select2/select2.js')}}"></script>
 <script src="{{asset('assets/vendor/libs/select2/i18n/ms.js')}}"></script>
 <script>
+  // Initialize Select2 for department head selection in the modal
   document.addEventListener('livewire:initialized', function () {
     if (typeof jQuery !== 'undefined' && typeof $.fn.select2 === 'function') {
         const departmentModalElement = document.getElementById('departmentModal');
         const selectEl = $('#select2DepartmentHeadIdModal');
 
+        // Function to initialize Select2 for department head dropdown
         const initHodSelect2InModal = () => {
             if (selectEl.length) {
+                // Destroy existing Select2 instance if present
                 if (selectEl.hasClass("select2-hidden-accessible")) {
                     selectEl.select2('destroy');
                 }
+
+                // Initialize new Select2 instance
                 selectEl.select2({
                     placeholder: "{{ __('Pilih Ketua Jabatan (Pilihan)') }}",
                     dropdownParent: $(departmentModalElement),
                     allowClear: true,
                     language: "ms"
                 });
+
+                // Set current value from Livewire component
                 let currentHodId = @this.get('departmentHeadId');
                 selectEl.val(currentHodId).trigger('change.select2');
             }
         };
 
+        // Initialize Select2 when modal is shown
         if (departmentModalElement && selectEl.length) {
             $(departmentModalElement).on('shown.bs.modal', function () {
                 initHodSelect2InModal();
             });
+
+            // Update Livewire property when Select2 value changes
             selectEl.on('change', function (e) {
                 @this.set('departmentHeadId', $(this).val());
             });
         }
 
+        // Listen for Livewire event to refresh Select2 values
         Livewire.on('departmentModalOpened', () => {
             if (selectEl.data('select2')) {
                 let currentHodId = @this.get('departmentHeadId');

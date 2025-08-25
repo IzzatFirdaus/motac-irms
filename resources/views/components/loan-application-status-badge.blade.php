@@ -1,7 +1,26 @@
-{{-- resources/views/components/loan-application-status-badge.blade.php --}}
+{{--
+    resources/views/components/loan-application-status-badge.blade.php
+
+    Displays loan application status as a colored badge.
+    Supports both direct status values and LoanApplication model instances.
+
+    Props:
+    - $status: string - The status value (optional if application provided)
+    - $application: LoanApplication - Model instance with status (optional)
+
+    Usage:
+    <x-loan-application-status-badge :status="'pending_support'" />
+    <x-loan-application-status-badge :application="$loanApplication" />
+
+    Supported Statuses:
+    - draft, pending_*, approved, issued, returned, completed
+    - rejected, cancelled, overdue
+
+    Dependencies: App\Models\LoanApplication
+--}}
 @props([
-    'status' => '', // The loan application status key, e.g., 'pending_support'
-    'application' => null, // Pass the entire model to use the accessor
+    'status' => '',
+    'application' => null,
 ])
 
 @php
@@ -9,11 +28,11 @@
     $statusLabel = '';
 
     if ($application) {
-        // Use the accessor from the model if the object is provided
+        // Use application model properties if available
         $badgeClass = $application->status_color_class;
         $statusLabel = $application->status_label;
     } else {
-        // Fallback to switch statement if only status string is provided
+        // Map status to color and label
         $statusOptions = \App\Models\LoanApplication::getStatusOptions();
         $statusLabel = $statusOptions[$status] ?? Illuminate\Support\Str::title(str_replace('_', ' ', $status));
 

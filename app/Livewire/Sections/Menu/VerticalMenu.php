@@ -2,48 +2,115 @@
 
 namespace App\Livewire\Sections\Menu;
 
-use Illuminate\Support\Facades\Log; // Ensure Log facade is imported
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
-use stdClass;
 
+/**
+ * Livewire VerticalMenu component
+ * Loads the menu structure from config/menu.php and exposes it for the Blade view.
+ * Handles role-based visibility, guest-only items, and recursive submenus.
+ */
 class VerticalMenu extends Component
 {
     public $menuData;
-
     public $configData = [];
 
     /**
      * Mount the component and initialize its properties.
-     * UPDATED: Now loads menu data from config/menu.php
      */
     public function mount(): void
     {
-        Log::info('VerticalMenu component mounting...'); // Log when component mounts
-
-        // Set the theme configuration data from the helper
+        // Load global theme configuration
         $this->configData = \App\Helpers\Helpers::appClasses();
-        Log::debug('VerticalMenu configData loaded: '.json_encode($this->configData)); // Log config data
 
-        // Load menu data directly from the Laravel config file
-        try {
-            // config('menu') loads the entire array from config/menu.php
-            // We cast it to an object to maintain consistency for the view.
-            $menuConfig = config('menu');
-            $this->menuData = (object) $menuConfig;
-            Log::info('VerticalMenu menu data loaded from config/menu.php.'); // Log successful load
-            Log::debug('Menu data content: '.json_encode($this->menuData)); // Log menu data content
-        } catch (\Exception $exception) {
-            Log::error('Failed to load menu data from config/menu.php: '.$exception->getMessage());
-            $this->menuData = new stdClass;
-        }
+        // Load menu from PHP config
+        $menuConfig = config('menu');
+        $this->menuData = (object) $menuConfig;
 
-        // Ensure menuData->menu is always an array to prevent errors in the view
-        if (! isset($this->menuData->menu) || ! is_array($this->menuData->menu)) {
+        // Ensure menuData->menu is always an array
+        if (!isset($this->menuData->menu) || !is_array($this->menuData->menu)) {
             $this->menuData->menu = [];
-            Log::warning('menuData->menu was not an array or was not set. Initialized as empty array.'); // Log if menu is empty/invalid
         }
+    }
 
-        Log::info('VerticalMenu component mounted successfully.'); // Log completion of mount
+    /**
+     * Returns the first role of the authenticated user or null if guest.
+     */
+    public function getUserRoleProperty()
+    {
+        if (!Auth::check()) {
+            return null;
+        }
+        return Auth::user()->getRoleNames()->first();
+    }
+
+    /**
+     * Returns the current route name for active checks in Blade.
+     */
+    public function getCurrentRouteNameProperty()
+    {
+        return \Route::currentRouteName();
+    }
+
+    /**
+     * Filters the menu based on guest/authenticated status and role.
+     * - Guests only see items with 'guestOnly' => true.
+     * - Authenticated users only see items with their role in 'role' and NOT guestOnly.
+     * - Submenus and headers are recursively filtered.
+     */
+    public function getFilteredMenuDataProperty()
+    {
+        $role = $this->userRole;
+        $menu = $this->menuData->menu ?? [];
+
+        $filterMenu = function ($items) use (&$filterMenu, $role) {
+            $filtered = [];
+
+            foreach ($items as $item) {
+                $item = (object)$item;
+
+                // Show guestOnly items ONLY to guests
+                if (!Auth::check()) {
+                    if (isset($item->guestOnly) && $item->guestOnly) {
+                        // Recursively filter submenu for guests (if any)
+                        if (isset($item->submenu) && is_array($item->submenu)) {
+                            $item->submenu = $filterMenu($item->submenu);
+                        }
+                        $filtered[] = $item;
+                    }
+                    continue;
+                }
+
+                // Hide guestOnly items from authenticated users
+                if (isset($item->guestOnly) && $item->guestOnly) {
+                    continue;
+                }
+
+                // Authenticated users: Admin sees all, others according to role
+                $canView = false;
+                if (
+                    $role === 'Admin' ||
+                    (isset($item->role) && in_array($role, (array)$item->role))
+                ) {
+                    $canView = true;
+                }
+                // If item has no role and no guestOnly, allow for all authenticated users
+                elseif (!isset($item->role) && !isset($item->guestOnly)) {
+                    $canView = true;
+                }
+
+                if (!$canView) continue;
+
+                // Recursively filter submenu if present
+                if (isset($item->submenu) && is_array($item->submenu)) {
+                    $item->submenu = $filterMenu($item->submenu);
+                }
+                $filtered[] = $item;
+            }
+            return $filtered;
+        };
+
+        return $filterMenu($menu);
     }
 
     /**
@@ -51,8 +118,11 @@ class VerticalMenu extends Component
      */
     public function render()
     {
-        Log::info('VerticalMenu component rendering...'); // Log when render method is called
-
-        return view('livewire.sections.menu.vertical-menu');
+        return view('livewire.sections.menu.vertical-menu', [
+            'menuData' => (object)['menu' => $this->filteredMenuData],
+            'configData' => $this->configData,
+            'role' => $this->userRole,
+            'currentRouteName' => $this->currentRouteName,
+        ]);
     }
 }

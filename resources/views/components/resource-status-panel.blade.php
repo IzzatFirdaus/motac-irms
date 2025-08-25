@@ -1,16 +1,28 @@
-{{-- ++ ADDED: @props directive to define the component's API and set default values ++ --}}
+{{--
+    resources/views/components/resource-status-panel.blade.php
+
+    Displays a Bootstrap badge for a resource's status, with optional icon and prefix.
+
+    Props:
+    - $resource: The model instance for which to show the status
+    - $statusAttribute: string (default: 'status') - The attribute to use for status
+    - $type: string (for extensibility, not used for color)
+    - $showIcon: bool|string - True to auto-select icon, or a string for a custom icon
+    - $statusTextPrefix: string - Optional prefix before status text
+
+    Usage:
+    <x-resource-status-panel :resource="$equipment" statusAttribute="status" showIcon="bi-check-circle-fill" />
+--}}
 @props([
     'resource',
-    'statusAttribute' => 'status', // Defaults to 'status' if not provided
+    'statusAttribute' => 'status',
     'type' => 'unknown',
     'showIcon' => false,
     'statusTextPrefix' => ''
 ])
 
 @php
-    // The 'type' prop is already defined with a default value above.
-    $resolvedType = $type;
-
+    // Determine status value and label
     $statusValue = strtolower($resource->{$statusAttribute} ?? 'unknown');
 
     $statusLabelAccessorMethodName = 'get' . Illuminate\Support\Str::studly($statusAttribute) . 'LabelAttribute';
@@ -24,16 +36,16 @@
         $formattedStatus = __(Illuminate\Support\Str::title(str_replace('_', ' ', $statusValue)));
     }
 
-    $statusClass = \App\Helpers\Helpers::getStatusColorClass($statusValue, $resolvedType);
-
+    $statusClass = \App\Helpers\Helpers::getStatusColorClass($statusValue);
+    // Icon auto-selection logic
     $statusIconClass = '';
-    if ($showIcon === true) { // Auto-select icon based on status value
+    if ($showIcon === true) {
         switch ($statusValue) {
             case 'approved':
             case 'completed':
             case 'active':
             case 'available':
-            case 'returned_good': // Added for transaction statuses
+            case 'returned_good':
                 $statusIconClass = 'bi-check-circle-fill';
                 break;
             case 'pending':
@@ -48,15 +60,15 @@
                 $statusIconClass = 'bi-x-circle-fill';
                 break;
             case 'on_loan':
-            case 'issued': // Added for transaction statuses
+            case 'issued':
                 $statusIconClass = 'bi-arrow-up-right-circle-fill';
                 break;
-            case 'returned_damaged': // Added for transaction statuses
+            case 'returned_damaged':
             case 'damaged_needs_repair':
             case 'under_maintenance':
                 $statusIconClass = 'bi-tools';
                 break;
-             case 'overdue': // Added for application status
+            case 'overdue':
                 $statusIconClass = 'bi-alarm-fill';
                 break;
             default:
@@ -68,8 +80,6 @@
     }
 @endphp
 
-{{-- This is the actual HTML output of the component. It should be present in your file. --}}
-{{-- If your file is empty besides the PHP block, you should add this part. --}}
 <span {{ $attributes->merge(['class' => 'badge rounded-pill ' . $statusClass]) }}>
     @if($statusIconClass)
         <i class="{{ $statusIconClass }} me-1"></i>

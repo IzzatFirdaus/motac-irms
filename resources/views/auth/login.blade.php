@@ -1,36 +1,25 @@
 {{-- resources/views/auth/login.blade.php --}}
+{{-- Login page for the MOTAC system. Updated to use the new layout name: layout-blank.blade.php --}}
+
 @php
-    $customizerHidden = 'customizer-hide'; // Theme-specific variable
-    // $configData = App\Helpers\Helpers::appClasses(); // Not strictly needed if blankLayout handles global styles
+    $customizerHidden = $customizerHidden ?? 'customizer-hide'; // Ensure variable is set for layout
 @endphp
 
-@extends('layouts/blankLayout') {{-- Extends the MOTAC blank layout --}}
+@extends('layouts.layout-blank') {{-- Use the updated minimal layout for authentication pages --}}
 
 @section('title', __('Log Masuk Sistem')) {{-- Sets the page title --}}
 
 @section('page-style')
-    {{-- Removed page-auth.css as we are defining a simpler card layout --}}
-    {{-- Global styles for Noto Sans, buttons, inputs are expected from blankLayout/theme --}}
     <style>
-        /* Ensure body background and text colors match the theme (usually set in blankLayout) */
-        /* body { font-family: 'Noto Sans', sans-serif !important; line-height: 1.6; } */
-        /* .btn-primary { background-color: #0055A4 !important; border-color: #0055A4 !important; } */
-        /* .btn-primary:hover, .btn-primary:focus, .btn-primary:active { background-color: #00417d !important; border-color: #00417d !important; box-shadow: 0 0 0 0.25rem rgba(0, 85, 164, 0.5) !important; } */
-        /* .form-control:focus, .form-select:focus, .form-check-input:focus { border-color: #0055A4; box-shadow: 0 0 0 0.25rem rgba(0, 85, 164, 0.25); } */
-        /* .form-check-input:checked { background-color: #0055A4; border-color: #0055A4; } */
-
+        /* Footer link styles for login card */
         .login-card-footer a {
             text-decoration: none;
         }
-
         .login-card-footer a:hover {
             text-decoration: underline;
         }
-
         .app-brand-text {
-            /* Ensure consistent app brand text styling if needed */
             color: var(--bs-body-color) !important;
-            /* Match default body text color */
         }
     </style>
 @endsection
@@ -38,17 +27,15 @@
 @section('content')
     <div class="container py-5">
         <div class="row justify-content-center">
-            <div class="col-md-8 col-lg-6 col-xl-5"> {{-- Centered column for the login form --}}
-
-                {{-- Application Logo and Name - Above the card --}}
+            <div class="col-md-8 col-lg-6 col-xl-5">
+                {{-- Application Logo and Name --}}
                 <div class="app-brand justify-content-center mb-4">
                     <a href="{{ url('/') }}" class="app-brand-link gap-2">
                         <span class="app-brand-logo demo">
                             <img src="{{ asset('assets/img/logo/motac-logo.svg') }}" alt="{{ __('Logo MOTAC IRMS') }}"
                                 style="height: 32px; width: auto;">
                         </span>
-                        <span
-                            class="app-brand-text demo text-body fw-bold fs-4 ms-1 app-brand-text">{{ __('motac-irms') }}</span>
+                        <span class="app-brand-text demo text-body fw-bold fs-4 ms-1 app-brand-text">{{ __('motac-irms') }}</span>
                     </a>
                 </div>
 
@@ -64,14 +51,13 @@
                         <p class="mb-3 text-center text-muted small">
                             {{ __('Sila log masuk ke akaun anda.') }}
                         </p>
-
+                        {{-- Session status message --}}
                         @if (session('status'))
                             <div class="alert alert-success mb-3 py-2 small d-flex align-items-center" role="alert">
                                 <i class="bi bi-check-circle-fill me-2"></i>{{ session('status') }}
                             </div>
                         @endif
                         <x-validation-errors class="mb-3" />
-
                         <form id="formAuthentication" method="POST" action="{{ route('login') }}">
                             @csrf
                             <div class="mb-3">
@@ -86,14 +72,13 @@
                                 @enderror
                             </div>
                             <div class="mb-3 form-password-toggle">
-                                {{-- Label and Forgot Password link removed from here, will be in footer --}}
                                 <label class="form-label" for="login-password">{{ __('Kata Laluan') }}</label>
                                 <div class="input-group input-group-merge @error('password') is-invalid @enderror">
                                     <input type="password" id="login-password"
                                         class="form-control @error('password') is-invalid @enderror" name="password"
                                         placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
                                         aria-describedby="loginPasswordHelp" required autocomplete="current-password" />
-                                    <span class="input-group-text cursor-pointer toggle-password">
+                                    <span class="input-group-text cursor-pointer toggle-password" tabindex="0">
                                         <i class="bi bi-eye-slash-fill"></i>
                                     </span>
                                 </div>
@@ -103,7 +88,7 @@
                                     </span>
                                 @enderror
                             </div>
-                            <div class="mb-3"> {{-- Moved "Remember Me" and "Forgot Password?" here for better flow --}}
+                            <div class="mb-3">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" id="remember-me" name="remember"
@@ -150,13 +135,14 @@
 
 @push('custom-scripts')
     <script>
-        // Vanilla JS for password toggle
+        // Password visibility toggle logic
         document.addEventListener('DOMContentLoaded', function() {
-            const passwordToggles = document.querySelectorAll('.toggle-password');
-            passwordToggles.forEach(toggle => {
-                toggle.addEventListener('click', function() {
+            document.querySelectorAll('.toggle-password').forEach(function(toggle) {
+                toggle.addEventListener('click', function(e) {
+                    e.preventDefault();
                     const input = this.closest('.input-group').querySelector('input');
                     const icon = this.querySelector('i');
+                    if (!input) return;
                     if (input.type === "password") {
                         input.type = "text";
                         icon.classList.remove('bi-eye-slash-fill');
@@ -165,6 +151,14 @@
                         input.type = "password";
                         icon.classList.remove('bi-eye-fill');
                         icon.classList.add('bi-eye-slash-fill');
+                    }
+                });
+
+                // Also allow keyboard access to toggle with Enter/Space
+                toggle.addEventListener('keydown', function(e) {
+                    if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        this.click();
                     }
                 });
             });

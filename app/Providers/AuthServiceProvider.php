@@ -4,18 +4,18 @@ namespace App\Providers;
 
 use App\Models\Approval;
 use App\Models\Department;
-use App\Models\EmailApplication;
 use App\Models\Equipment;
 use App\Models\Grade;
+use App\Models\HelpdeskTicket;
 use App\Models\LoanApplication;
 use App\Models\LoanTransaction;
 use App\Models\Position;
 use App\Models\User;
 use App\Policies\ApprovalPolicy;
 use App\Policies\DepartmentPolicy;
-use App\Policies\EmailApplicationPolicy;
 use App\Policies\EquipmentPolicy;
 use App\Policies\GradePolicy;
+use App\Policies\HelpdeskTicketPolicy;
 use App\Policies\LoanApplicationPolicy;
 use App\Policies\LoanTransactionPolicy;
 use App\Policies\PositionPolicy;
@@ -23,6 +23,10 @@ use App\Policies\UserPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
+/**
+ * Registers model-to-policy mappings and global authorization logic.
+ * Updated for v4.0: Removes all EmailApplication references, adds HelpdeskTicketPolicy.
+ */
 class AuthServiceProvider extends ServiceProvider
 {
     /**
@@ -32,7 +36,6 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         Approval::class => ApprovalPolicy::class,
-        EmailApplication::class => EmailApplicationPolicy::class,
         Equipment::class => EquipmentPolicy::class,
         Grade::class => GradePolicy::class,
         LoanApplication::class => LoanApplicationPolicy::class,
@@ -40,6 +43,7 @@ class AuthServiceProvider extends ServiceProvider
         User::class => UserPolicy::class,
         Department::class => DepartmentPolicy::class,
         Position::class => PositionPolicy::class,
+        HelpdeskTicket::class => HelpdeskTicketPolicy::class, // Helpdesk module policy mapping
     ];
 
     /**
@@ -49,18 +53,15 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
+        // Grant all permissions to Admin users by default.
         Gate::before(function (User $user, string $ability): ?true {
             if ($user->hasRole('Admin')) {
                 return true;
             }
-
             return null;
         });
 
-        // --- FINAL, DEFINITIVE FIX ---
-        // Explicitly define a gate for viewing the equipment admin index.
-        // This removes all ambiguity in the test environment. The Gate::before
-        // method already handles Admins, so this only needs to check for BPM Staff.
+        // BPM Staff can view equipment admin interface.
         Gate::define('view-equipment-admin', function (User $user): bool {
             return $user->hasRole('BPM Staff');
         });

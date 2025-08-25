@@ -1,31 +1,22 @@
+{{-- resources/views/auth/register.blade.php --}}
+{{-- Registration page for the MOTAC system. Updated to use the new layout name: layout-blank.blade.php --}}
+
 @php
-    $customizerHidden = 'customizer-hide';
-    // $configData = App\Helpers\Helpers::appClasses(); // Not strictly needed for this card layout
+    $customizerHidden = $customizerHidden ?? 'customizer-hide';
 @endphp
 
-@extends('layouts/blankLayout')
+@extends('layouts.layout-blank') {{-- Use the updated minimal layout for authentication pages --}}
 
 @section('title', __('Daftar Akaun Baru'))
 
 @section('page-style')
-    {{-- <link rel="stylesheet" href="{{ asset(mix('assets/vendor/css/pages/page-auth.css')) }}"> --}} {{-- Commented out: No longer using the full-page illustration layout --}}
     <style>
-        /* These global styles should ideally be in your main app.css or theme's stylesheet */
-        /* body { font-family: 'Noto Sans', sans-serif !important; line-height: 1.6; } */
-        /* .btn-primary { background-color: #0055A4 !important; border-color: #0055A4 !important; } */
-        /* .btn-primary:hover { background-color: #00417d !important; border-color: #00417d !important; } */
-        /* .form-control:focus, .form-check-input:focus { border-color: #0055A4; box-shadow: 0 0 0 0.25rem rgba(0, 85, 164, 0.25); } */
-        /* .form-check-input:checked { background-color: #0055A4; border-color: #0055A4; } */
-
-        /* Style for footer links, similar to login.blade.php */
         .register-card-footer a {
             text-decoration: none;
         }
-
         .register-card-footer a:hover {
             text-decoration: underline;
         }
-
         .app-brand-text {
             color: var(--bs-body-color) !important;
         }
@@ -35,9 +26,9 @@
 @section('content')
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6 col-xl-5"> {{-- Centered column for the register form --}}
+        <div class="col-md-8 col-lg-6 col-xl-5">
 
-            {{-- Application Logo and Name - Placed above the card for consistency --}}
+            {{-- Application Logo and Name --}}
             <div class="app-brand justify-content-center mb-4">
               <a href="{{url('/')}}" class="app-brand-link gap-2">
                 <span class="app-brand-logo demo">
@@ -132,28 +123,11 @@
         </div>
     </div>
 </div>
-
-{{-- This section is removed as it's part of the old layout --}}
-{{--
-<div class="authentication-wrapper authentication-cover authentication-bg">
-  <div class="authentication-inner row m-0">
-    <div class="d-none d-lg-flex col-lg-7 p-0">
-      <div class="auth-cover-bg auth-cover-bg-color d-flex justify-content-center align-items-center">
-        <img src="{{ asset('assets/img/illustrations/motac-auth-professional-light.png') }}"
-             alt="{{ __('Ilustrasi Pendaftaran MOTAC') }}" class="img-fluid my-5 auth-illustration">
-        <img src="{{ asset('assets/img/illustrations/bg-shape-image-light.png') }}"
-             alt="{{ __('Corak Latar Belakang Hiasan') }}" class="platform-bg">
-      </div>
-    </div>
-    ...
-  </div>
-</div>
---}}
 @endsection
 
 @push('custom-scripts')
 <script>
-    // Vanilla JS for password toggle (this remains the same)
+    // Password visibility toggle for register form
     document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('.toggle-password').forEach(function(toggle) {
             toggle.addEventListener('click', function () {

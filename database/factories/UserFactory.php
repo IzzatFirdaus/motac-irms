@@ -7,12 +7,21 @@ use App\Models\Grade;
 use App\Models\Position;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
+ * Optimized Factory for the User model.
+ *
+ * - Uses static caches for Department, Grade, and Position IDs to avoid repeated database queries.
+ * - Never creates related models in definition() (for fast batch seeding).
+ * - All foreign keys are randomly assigned from existing IDs, or can be set via seeder using state().
+ * - Ensures all generated users have unique emails/IC numbers.
+ * - Handles soft-deletes, pending status, and role assignment via states and afterCreating hooks.
+ * - Uses fallback Faker instance to prevent null errors during early seeding phases.
+ *
+ * NOTE: Seeder should ensure referenced Departments, Grades, and Positions exist before using this factory.
  */
 class UserFactory extends Factory
 {
@@ -20,141 +29,200 @@ class UserFactory extends Factory
 
     public function definition(): array
     {
-        // Use a Malaysian locale for faker
-        $msFaker = \Faker\Factory::create('ms_MY');
+        // Static caches for foreign key IDs to minimize queries during batch seeding
+        static $departmentIds, $gradeIds, $positionIds;
+        if (!isset($departmentIds)) {
+            $departmentIds = Department::pluck('id')->all();
+        }
+        if (!isset($gradeIds)) {
+            $gradeIds = Grade::pluck('id')->all();
+        }
+        if (!isset($positionIds)) {
+            $positionIds = Position::pluck('id')->all();
+        }
 
-        $departmentId = Department::inRandomOrder()->value('id');
-        $positionId = Position::inRandomOrder()->value('id');
-        $gradeId = Grade::inRandomOrder()->value('id');
+        // Use a static ms_MY faker for localized names
+        static $msFaker;
+        if (!$msFaker) {
+            $msFaker = \Faker\Factory::create('ms_MY');
+        }
 
+        // Fallback faker instance in case $this->faker is null (can happen during early seeding)
+        $faker = $this->faker ?? \Faker\Factory::create();
+        // Defensive: ensure $faker is an object with expected methods (some test harnesses may set it to null)
+        if (!is_object($faker) || !method_exists($faker, 'bothify')) {
+            $faker = \Faker\Factory::create();
+        }
+
+        // Pick random IDs from cached arrays, fallback to null if empty
+        $departmentId = !empty($departmentIds) ? Arr::random($departmentIds) : null;
+        $gradeId = !empty($gradeIds) ? Arr::random($gradeIds) : null;
+        $positionId = !empty($positionIds) ? Arr::random($positionIds) : null;
+
+        // Use $msFaker for Malaysian names
         $name = $msFaker->name();
 
+        // Use fallback faker for unique values and standard fake data
+        $identificationNumber = $faker->unique()->numerify('############');
+        // Generate passport number defensively: fall back to a simple bothify if any faker chain fails
+        try {
+            $passportNumber = $faker->optional(0.15)->unique()->bothify('??########');
+            if ($passportNumber === null) {
+                // In rare cases optional()->unique() may yield null; ensure a non-null value
+                $passportNumber = \Faker\Factory::create()->bothify('??########');
+            }
+        } catch (\Throwable $e) {
+            $passportNumber = \Faker\Factory::create()->bothify('??########');
+        }
+
+        // Safe access to User title options with fallback
+        $titleOptions = defined('App\Models\User::TITLE_ENCIK') ?
+            (User::$TITLE_OPTIONS ?? [User::TITLE_ENCIK => 'Encik']) :
+            ['encik' => 'Encik', 'puan' => 'Puan', 'cik' => 'Cik', 'tuan' => 'Tuan'];
+        $titleKey = $faker->randomElement(array_keys($titleOptions));
+
+        // Safe access to User status constants with fallback
+        $statusOptions = [
+            defined('App\Models\User::STATUS_ACTIVE') ? User::STATUS_ACTIVE : 'active',
+            defined('App\Models\User::STATUS_INACTIVE') ? User::STATUS_INACTIVE : 'inactive',
+            defined('App\Models\User::STATUS_SUSPENDED') ? User::STATUS_SUSPENDED : 'suspended',
+            defined('App\Models\User::STATUS_PENDING') ? User::STATUS_PENDING : 'pending',
+        ];
+
         return [
+            // Core authentication columns
             'name' => $name,
-            'email' => $this->faker->unique()->safeEmail(),
+            'email' => $faker->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'password' => Hash::make('password'),
+            'password' => Hash::make('password'), // Default password for all factory users
             'remember_token' => Str::random(10),
-            'profile_photo_path' => null,
-            'title' => $this->faker->randomElement(array_keys(User::$TITLE_OPTIONS ?? [User::TITLE_ENCIK => 'Encik'])),
-            'identification_number' => $msFaker->unique()->myKadNumber(),
-            'passport_number' => $this->faker->optional(0.1)->passthrough(
-                $this->faker->unique()->bothify('?#########')
-            ),
+
+            // Domain-specific columns (MOTAC additions)
+            'title' => $titleKey,
+            'identification_number' => $identificationNumber,
+            'passport_number' => $passportNumber,
             'department_id' => $departmentId,
             'position_id' => $positionId,
             'grade_id' => $gradeId,
-            'level' => (string) $this->faker->numberBetween(1, 18),
-            'mobile_number' => $msFaker->mobileNumber(false, true),
-            'personal_email' => $this->faker->optional(0.3)->passthrough(
-                $this->faker->unique()->safeEmail()
-            ),
-            'motac_email' => $this->faker->optional(0.5)->passthrough(
-                Str::slug($name, '.').'@motac.gov.my'
-            ),
-            'user_id_assigned' => $this->faker->optional(0.2)->passthrough(
-                $this->faker->unique()->bothify('MOTAC####')
-            ),
-            'service_status' => $this->faker->randomElement([
-                User::SERVICE_STATUS_TETAP ?? '1',
-                User::SERVICE_STATUS_KONTRAK_MYSTEP ?? '2',
-                User::SERVICE_STATUS_PELAJAR_INDUSTRI ?? '3',
-            ]),
-            'appointment_type' => $this->faker->randomElement([
-                User::APPOINTMENT_TYPE_BAHARU ?? '1',
-                User::APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN ?? '2',
-                User::APPOINTMENT_TYPE_LAIN_LAIN ?? '3',
-            ]),
-            'previous_department_name' => null,
-            'previous_department_email' => null,
-            'status' => User::STATUS_ACTIVE ?? 'active',
+
+            // Status with fallback values - choose a stable default that matches migrations
+            'status' => User::STATUS_ACTIVE,
         ];
     }
 
-    public function canBeLoanApprover(): static
-    {
-        return $this->state(function (array $attributes): array {
-            $minSupportGradeLevel = (int) config('motac.approval.min_loan_support_grade_level', 41);
-            $grade = Grade::where('level', '>=', $minSupportGradeLevel)->whereNotNull('level')->inRandomOrder()->first();
-
-            if (! $grade) {
-                Log::warning(sprintf('UserFactory: No grade found with level >= %d. Cannot create a loan approver.', $minSupportGradeLevel));
-            }
-
-            return ['grade_id' => $grade?->id];
-        });
-    }
-
-    public function cannotBeLoanApprover(): static
-    {
-        return $this->state(function (array $attributes): array {
-            $minSupportGradeLevel = (int) config('motac.approval.min_loan_support_grade_level', 41);
-            $grade = Grade::where('level', '<', $minSupportGradeLevel)->whereNotNull('level')->inRandomOrder()->first();
-
-            if (! $grade) {
-                Log::warning(sprintf('UserFactory: No grade found with level < %d. Cannot create a non-approver user reliably.', $minSupportGradeLevel));
-            }
-
-            return ['grade_id' => $grade?->id];
-        });
-    }
-
+    /**
+     * State: Mark email as unverified.
+     */
     public function unverified(): static
     {
-        return $this->state(fn (array $attributes): array => ['email_verified_at' => null]);
+        return $this->state(fn (array $attributes): array => [
+            'email_verified_at' => null,
+        ]);
     }
 
+    /**
+     * After-creation: Assign default 'User' role if not already assigned.
+     * This is only for Eloquent model creation, not raw DB insert.
+     */
     public function configure(): static
     {
         return $this->afterCreating(function (User $user): void {
-            if (class_exists(\Spatie\Permission\Models\Role::class) && $user->roles->isEmpty()) {
-                $userRole = \Spatie\Permission\Models\Role::where('name', 'User')->first();
-                if ($userRole) {
-                    $user->assignRole($userRole);
-                } else {
-                    Log::warning(sprintf("UserFactory: Default 'User' role not found. User %s created without this role.", $user->email));
+            // Check if Spatie Permission package is available and user has assignRole method
+            if (class_exists(\Spatie\Permission\Models\Role::class) && method_exists($user, 'assignRole')) {
+                if ($user->roles->isEmpty()) {
+                    $userRole = \Spatie\Permission\Models\Role::where('name', 'User')->first();
+                    if ($userRole) {
+                        $user->assignRole($userRole);
+                    }
                 }
             }
         });
     }
 
+    /**
+     * State: Set user as pending (for UserSeeder).
+     */
     public function pending(): static
     {
-        return $this->state(fn (array $attributes): array => ['status' => User::STATUS_PENDING]);
+        $pendingStatus = defined('App\Models\User::STATUS_PENDING') ? User::STATUS_PENDING : 'pending';
+        return $this->state(fn (array $attributes): array => [
+            'status' => $pendingStatus,
+        ]);
     }
 
+    /**
+     * State: Assign user as Admin.
+     */
     public function asAdmin(): static
     {
-        return $this->afterCreating(fn (User $user) => $user->assignRole('Admin'));
+        return $this->afterCreating(function (User $user) {
+            if (method_exists($user, 'assignRole')) {
+                $user->assignRole('Admin');
+            }
+        });
     }
 
+    /**
+     * State: Assign user as BPM Staff.
+     */
     public function asBpmStaff(): static
     {
-        return $this->afterCreating(fn (User $user) => $user->assignRole('BPM Staff'));
+        return $this->afterCreating(function (User $user) {
+            if (method_exists($user, 'assignRole')) {
+                $user->assignRole('BPM Staff');
+            }
+        });
     }
 
+    /**
+     * State: Assign user as IT Admin.
+     */
     public function asItAdmin(): static
     {
-        return $this->afterCreating(fn (User $user) => $user->assignRole('IT Admin'));
+        return $this->afterCreating(function (User $user) {
+            if (method_exists($user, 'assignRole')) {
+                $user->assignRole('IT Admin');
+            }
+        });
     }
 
+    /**
+     * State: Assign user as Approver.
+     */
     public function asApprover(): static
     {
-        return $this->afterCreating(fn (User $user) => $user->assignRole('Approver'));
-    }
-
-    public function asHod(): static
-    {
-        return $this->afterCreating(function (User $user): void {
-            $user->assignRole('HOD');
-            if (! $user->hasRole('Approver')) {
+        return $this->afterCreating(function (User $user) {
+            if (method_exists($user, 'assignRole')) {
                 $user->assignRole('Approver');
             }
         });
     }
 
+    /**
+     * State: Assign user as HOD and ensure Approver role.
+     */
+    public function asHod(): static
+    {
+        return $this->afterCreating(function (User $user): void {
+            if (method_exists($user, 'assignRole')) {
+                $user->assignRole('HOD');
+                if (method_exists($user, 'hasRole') && !$user->hasRole('Approver')) {
+                    $user->assignRole('Approver');
+                }
+            }
+        });
+    }
+
+    /**
+     * State: Mark user as soft-deleted for testing.
+     * Also prefixes email and IC to maintain uniqueness.
+     */
     public function deleted(): static
     {
-        return $this->state(fn (array $attributes): array => ['deleted_at' => now()]);
+        return $this->state(fn (array $attributes): array => [
+            'deleted_at' => now(),
+            'email' => 'deleted-' . ($attributes['email'] ?? Str::uuid().'@deleted.local'),
+            'identification_number' => 'deleted-' . ($attributes['identification_number'] ?? Str::random(12)),
+        ]);
     }
 }

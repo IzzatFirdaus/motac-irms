@@ -2,37 +2,30 @@
 
 namespace App\Livewire\Dashboard;
 
-use App\Models\EmailApplication;
+use App\Models\HelpdeskTicket;
 use Illuminate\View\View;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
+/**
+ * IT Admin Dashboard Livewire Component
+ *
+ * Displays helpdesk ticket statistics for IT Admins.
+ */
 class ItAdminDashboard extends Component
 {
-    public int $pending_email_applications_count = 0;
+    public int $pending_helpdesk_tickets_count = 0;
+    public int $in_progress_helpdesk_tickets_count = 0;
 
-    public int $processing_email_applications_count = 0;
-
-    /**
-     * Mount the component and initialize the data.
-     * Fetches counts for email applications awaiting IT admin action or currently being processed.
-     */
     public function mount(): void
     {
-        $this->pending_email_applications_count = EmailApplication::where('status', EmailApplication::STATUS_PENDING_ADMIN)
-            ->count(); //
-
-        $this->processing_email_applications_count = EmailApplication::where('status', EmailApplication::STATUS_PROCESSING)
-            ->count(); //
+        $this->pending_helpdesk_tickets_count = HelpdeskTicket::where('status', 'open')->count();
+        $this->in_progress_helpdesk_tickets_count = HelpdeskTicket::where('status', 'in_progress')->count();
     }
 
-    /**
-     * Render the component.
-     */
-    #[Title('IT Admin Dashboard')] // Sets the browser page title
+    #[Title('IT Admin Dashboard')]
     public function render(): View
     {
-        return view('livewire.dashboard.it-admin-dashboard')
-            ->layout('layouts.app'); // Use the main application layout
+        return view('livewire.dashboard.it-admin-dashboard');
     }
 }

@@ -1,48 +1,54 @@
-<div x-data="{ showModal: @entangle('showModal').live }" x-show="showModal"
-    class="modal fade" tabindex="-1" style="display: {{ $showModal ? 'block' : 'none' }};" aria-modal="true" role="dialog">
+{{-- resources/views/livewire/settings/positions/position-form-modal.blade.php --}}
+{{-- Modal form for creating/updating a Position (Jawatan).
+     Used as a partial in positions-index.blade.php.
+     Expects Livewire entanglement for $showModal, $isEditMode, and form fields.
+--}}
+
+<div x-data="{ show: @entangle('showModal').live }" x-show="show" x-cloak class="modal fade" :class="{'show': show}" style="display: none;" role="dialog" aria-modal="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">{{ $isEditMode ? 'Edit Jawatan' : 'Cipta Jawatan Baru' }}</h5>
-                <button type="button" class="close" wire:click="closeModal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+        <div class="modal-content motac-modal-content">
+            <div class="modal-header motac-modal-header">
+                <h5 class="modal-title">{{ $isEditMode ? __('Kemaskini Jawatan') : __('Cipta Jawatan Baru') }}</h5>
+                <button type="button" class="btn-close" wire:click="closeModal" aria-label="Close"></button>
             </div>
             <form wire:submit.prevent="savePosition">
                 <div class="modal-body">
+                    {{-- Nama Jawatan --}}
                     <div class="form-group mb-3">
-                        <label for="name">Nama Jawatan<span class="text-danger">*</span></label>
-                        <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" placeholder="Contoh: Pegawai Teknologi Maklumat" wire:model.blur="name">
+                        <label for="name">{{ __('Nama Jawatan') }}<span class="text-danger">*</span></label>
+                        <input type="text" class="form-control @error('name') is-invalid @enderror" id="name"
+                               placeholder="Contoh: Pegawai Teknologi Maklumat" wire:model.defer="name">
                         @error('name') <span class="invalid-feedback">{{ $message }}</span> @enderror
                     </div>
-
+                    {{-- Gred Berkaitan --}}
                     <div class="form-group mb-3">
-                        <label for="grade_id">Gred Berkaitan</label>
-                        <select class="form-control @error('grade_id') is-invalid @enderror" id="grade_id" wire:model.blur="grade_id">
-                            <option value="">- Pilih Gred -</option>
+                        <label for="grade_id">{{ __('Gred Berkaitan') }}</label>
+                        <select class="form-select @error('grade_id') is-invalid @enderror" id="grade_id" wire:model.defer="grade_id">
+                            <option value="">{{ __('- Pilih Gred -') }}</option>
                             @foreach($gradeOptions as $id => $name)
                                 <option value="{{ $id }}">{{ $name }}</option>
                             @endforeach
                         </select>
                         @error('grade_id') <span class="invalid-feedback">{{ $message }}</span> @enderror
                     </div>
-
+                    {{-- Penerangan --}}
                     <div class="form-group mb-3">
-                        <label for="description">Penerangan (Pilihan)</label>
-                        <textarea class="form-control @error('description') is-invalid @enderror" id="description" rows="3" placeholder="Penerangan tambahan tentang jawatan..." wire:model.blur="description"></textarea>
+                        <label for="description">{{ __('Penerangan (Pilihan)') }}</label>
+                        <textarea class="form-control @error('description') is-invalid @enderror" id="description" rows="3"
+                                  placeholder="{{ __('Penerangan tambahan tentang jawatan...') }}" wire:model.defer="description"></textarea>
                         @error('description') <span class="invalid-feedback">{{ $message }}</span> @enderror
                     </div>
-
+                    {{-- Aktif --}}
                     <div class="form-group form-check mb-3">
-                        <input type="checkbox" class="form-check-input" id="is_active" wire:model.live="is_active">
-                        <label class="form-check-label" for="is_active">Aktif</label>
-                        @error('is_active') <span class="text-danger">{{ $message }}</span> @enderror
+                        <input type="checkbox" class="form-check-input" id="is_active" wire:model.defer="is_active">
+                        <label class="form-check-label" for="is_active">{{ __('Aktif') }}</label>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" wire:click="closeModal">Batal</button>
-                    <button type="submit" class="btn btn-primary">
-                        {{ $isEditMode ? 'Kemaskini' : 'Cipta' }}
+                    <button type="button" class="btn btn-secondary" wire:click="closeModal">{{ __('Batal') }}</button>
+                    <button type="submit" class="btn btn-primary" wire:loading.attr="disabled">
+                        <span wire:loading.remove>{{ $isEditMode ? __('Kemaskini') : __('Cipta') }}</span>
+                        <span wire:loading>{{ __('Menyimpan...') }}</span>
                     </button>
                 </div>
             </form>

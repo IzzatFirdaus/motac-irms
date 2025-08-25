@@ -1,18 +1,52 @@
 {
-  "name": "vuexy",
-  "version": "1.2.0",
+  "name": "motac-irms",
+  "version": "1.0.0",
   "private": true,
+  "description": "MOTAC Integrated Resource Management System (IRMS) - Asset, loan, and helpdesk management for MOTAC Malaysia",
   "scripts": {
     "dev": "npm run development",
-    "build": "mix --production",
     "development": "mix",
+    "build": "npm run production",
+    "prod": "npm run production",
+    "production": "mix --production",
     "watch": "mix watch",
     "watch-poll": "mix watch -- --watch-options-poll=1000",
     "hot": "mix watch --hot",
-    "prod": "npm run production",
-    "production": "mix --production",
     "lint:css": "stylelint \"resources/assets/css/**/*.css\"",
     "lint:css:fix": "stylelint \"resources/assets/css/**/*.css\" --fix"
+  },
+  "browserslist": [
+    "defaults",
+    "last 2 versions",
+    "not dead",
+    "Chrome >= 60",
+    "Firefox >= 60",
+    "Edge >= 79",
+    "Safari >= 11",
+    "iOS >= 11",
+    "Android >= 6"
+  ],
+  "babel": {
+    "presets": [
+      [
+        "@babel/env",
+        {
+          "targets": {
+              "browsers": [
+              "defaults",
+              "last 2 versions",
+              "not dead",
+              "Chrome >= 60",
+              "Firefox >= 60",
+              "Edge >= 79",
+              "Safari >= 11",
+              "iOS >= 11",
+              "Android >= 6"
+            ]
+          }
+        }
+      ]
+    ]
   },
   "devDependencies": {
     "@babel/core": "7.22.5",
@@ -35,7 +69,6 @@
     "cross-env": "7.0.3",
     "laravel-mix": "6.0.49",
     "lodash": "4.17.21",
-    "postcss": "^8.4.26",
     "prettier": "2.8.8",
     "resolve-url-loader": "5.0.0",
     "sass": "1.63.6",
@@ -43,57 +76,6 @@
     "stylelint": "^16.19.1",
     "stylelint-config-standard": "^38.0.0",
     "stylelint-order": "^7.0.0"
-  },
-  "overrides": {
-    "autoprefixer": "10.4.14",
-    "webpack": "5.88.1",
-    "webpack-cli": "4.9.1",
-    "prop-types": "15.8.1",
-    "sass": "1.63.6"
-  },
-  "resolutions": {
-    "autoprefixer": "10.4.14",
-    "webpack": "5.88.1",
-    "webpack-cli": "4.9.1",
-    "prop-types": "15.8.1",
-    "sass": "1.63.6"
-  },
-  "browserslist": [
-    ">= 1%",
-    "last 2 versions",
-    "not dead",
-    "Chrome >= 45",
-    "Firefox >= 38",
-    "Edge >= 12",
-    "Explorer >= 10",
-    "iOS >= 9",
-    "Safari >= 9",
-    "Android >= 4.4",
-    "Opera >= 30"
-  ],
-  "babel": {
-    "presets": [
-      [
-        "@babel/env",
-        {
-          "targets": {
-            "browsers": [
-              ">= 1%",
-              "last 2 versions",
-              "not dead",
-              "Chrome >= 45",
-              "Firefox >= 38",
-              "Edge >= 12",
-              "Explorer >= 10",
-              "iOS >= 9",
-              "Safari >= 9",
-              "Android >= 4.4",
-              "Opera >= 30"
-            ]
-          }
-        }
-      ]
-    ]
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "6.4.0",
@@ -155,8 +137,23 @@
     "spinkit": "2.0.1",
     "sweetalert2": "11.7.12",
     "swiper": "9.4.1",
+    "tailwindcss": "^4.1.12",
     "timepicker": "1.14.0",
     "toastr": "2.1.4",
     "typeahead.js": "0.11.1"
+  },
+  "overrides": {
+    "autoprefixer": "10.4.14",
+    "webpack": "5.88.1",
+    "webpack-cli": "4.9.1",
+    "prop-types": "15.8.1",
+    "sass": "1.63.6"
+  },
+  "resolutions": {
+    "autoprefixer": "10.4.14",
+    "webpack": "5.88.1",
+    "webpack-cli": "4.9.1",
+    "prop-types": "15.8.1",
+    "sass": "1.63.6"
   }
 }

@@ -5,99 +5,128 @@ namespace Database\Factories;
 use App\Models\Equipment;
 use App\Models\LoanApplication;
 use App\Models\LoanApplicationItem;
-use Illuminate\Database\Eloquent\Factories\Factory as EloquentFactory;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 
-class LoanApplicationItemFactory extends EloquentFactory
+/**
+ * Optimized Factory for LoanApplicationItem model.
+ *
+ * - Uses static caches for related IDs to reduce DB queries on batch seeding.
+ * - NEVER creates related models in definition().
+ * - All foreign keys can be passed via state; otherwise, chosen randomly from existing records.
+ * - Use with a seeder that ensures all referenced models exist before creating items.
+ */
+class LoanApplicationItemFactory extends Factory
 {
     protected $model = LoanApplicationItem::class;
 
     public function definition(): array
     {
-        $msFaker = \Faker\Factory::create('ms_MY');
+        // Static cache for LoanApplication IDs
+        static $loanApplicationIds;
+        if (!isset($loanApplicationIds)) {
+            $loanApplicationIds = LoanApplication::pluck('id')->all();
+        }
+        $loanApplicationId = $loanApplicationIds ? Arr::random($loanApplicationIds) : null;
 
-        $loanApplication = LoanApplication::inRandomOrder()->first() ?? LoanApplication::factory()->create();
+        // Static cache for User IDs for audit fields
+        static $userIds;
+        if (!isset($userIds)) {
+            $userIds = User::pluck('id')->all();
+        }
+        $auditUserId = $userIds ? Arr::random($userIds) : null;
 
-        $assetTypes = method_exists(Equipment::class, 'getAssetTypesList') ? Equipment::getAssetTypesList() : ['laptop', 'projector', 'printer'];
-        $requestedQuantity = $this->faker->numberBetween(1, 3);
-        $approvedQuantity = $this->faker->optional(0.7)->numberBetween(1, $requestedQuantity);
-        $issuedQuantity = ($approvedQuantity !== null && $this->faker->boolean(80)) ? $this->faker->numberBetween(0, $approvedQuantity) : 0;
-        $returnedQuantity = ($issuedQuantity > 0 && $this->faker->boolean(70)) ? $this->faker->numberBetween(0, $issuedQuantity) : 0;
+        // Static cache for available equipment types (asset_type column)
+        static $assetTypes;
+        if (!isset($assetTypes)) {
+            $assetTypes = Equipment::query()->distinct()->pluck('asset_type')->all();
+        }
+        $equipmentType = !empty($assetTypes)
+            ? Arr::random($assetTypes)
+            : $this->faker->randomElement(['laptop', 'projector', 'printer', 'monitor', 'tablet', 'desktop']);
 
-        $itemStatus = 'pending_approval';
-        if ($approvedQuantity !== null && $approvedQuantity > 0) {
-            $itemStatus = 'item_approved';
-            if ($issuedQuantity == $approvedQuantity && $approvedQuantity > 0) {
-                $itemStatus = 'fully_issued';
-                if ($returnedQuantity == $issuedQuantity) {
-                    $itemStatus = 'fully_returned';
-                }
-            } elseif ($issuedQuantity > 0) {
-                $itemStatus = 'partially_issued';
-            } elseif ($issuedQuantity == 0) {
-                $itemStatus = 'awaiting_issuance';
-            }
-        } elseif ($approvedQuantity === 0) {
-            $itemStatus = 'item_rejected';
+        // Quantity logic
+        $quantityRequested = $this->faker->numberBetween(1, 5);
+        $quantityApproved = $this->faker->numberBetween(0, $quantityRequested); // Sometimes not fully approved
+
+        // Timestamp logic
+        $createdAt = Carbon::parse($this->faker->dateTimeBetween('-1 year', 'now'));
+        $updatedAt = Carbon::parse($this->faker->dateTimeBetween($createdAt, 'now'));
+        $isDeleted = $this->faker->boolean(2); // ~2% soft deleted
+        $deletedAt = $isDeleted ? Carbon::parse($this->faker->dateTimeBetween($updatedAt, 'now')) : null;
+
+        // Use a static Malaysian faker for notes
+        static $msFaker;
+        if (!$msFaker) {
+            $msFaker = \Faker\Factory::create('ms_MY');
         }
 
         return [
-            'loan_application_id' => $loanApplication->id,
-            'equipment_type' => Arr::random($assetTypes !== [] ? $assetTypes : ['laptop']),
-            'quantity_requested' => $requestedQuantity,
-            'quantity_approved' => $approvedQuantity,
-            'quantity_issued' => $issuedQuantity,
-            'quantity_returned' => $returnedQuantity,
-            'status' => $itemStatus,
-            'notes' => $msFaker->optional(0.3)->sentence,
-            'deleted_by' => null,
+            'loan_application_id' => $loanApplicationId,
+            'equipment_type'      => $equipmentType,
+            'quantity_requested'  => $quantityRequested,
+            'quantity_approved'   => $quantityApproved,
+            'notes'               => $msFaker->optional(0.15)->sentence(8),
+            'status'              => LoanApplicationItem::STATUS_PENDING_APPROVAL,
+            'quantity_issued'     => 0,
+            'quantity_returned'   => 0,
+            'created_by'          => $auditUserId,
+            'updated_by'          => $auditUserId,
+            'deleted_by'          => $isDeleted ? $auditUserId : null,
+            'created_at'          => $createdAt,
+            'updated_at'          => $updatedAt,
+            'deleted_at'          => $deletedAt,
         ];
     }
 
-    public function quantityRequested(int $quantity): static
+    /**
+     * State: All requested items approved.
+     */
+    public function fullyApproved(): static
     {
-        return $this->state(fn (array $attributes): array => ['quantity_requested' => $quantity]);
-    }
-
-    public function quantityApproved(?int $quantity): static
-    {
-        return $this->state(fn (array $attributes): array => ['quantity_approved' => $quantity]);
-    }
-
-    public function quantityIssued(int $quantity): static
-    {
-        return $this->state(fn (array $attributes): array => ['quantity_issued' => $quantity]);
-    }
-
-    public function quantityReturned(int $quantity): static
-    {
-        return $this->state(fn (array $attributes): array => ['quantity_returned' => $quantity]);
-    }
-
-    public function type(string $type): static
-    {
-        $assetTypes = method_exists(Equipment::class, 'getAssetTypesList') ? Equipment::getAssetTypesList() : [];
-        if (! in_array($type, $assetTypes) && $assetTypes !== []) {
-            $type = Arr::random($assetTypes);
-        } elseif ($assetTypes === []) {
-            $type = 'laptop';
-        }
-
-        return $this->state(fn (array $attributes): array => ['equipment_type' => $type]);
-    }
-
-    public function fullyProcessed(): static
-    {
-        return $this->state(function (array $attributes): array {
-            $requested = $attributes['quantity_requested'] ?? $this->faker->numberBetween(1, 2);
-
+        return $this->state(function (array $attributes) {
             return [
-                'quantity_requested' => $requested,
-                'quantity_approved' => $requested,
-                'quantity_issued' => $requested,
-                'quantity_returned' => $requested,
-                'status' => 'fully_returned',
+                'quantity_approved' => $attributes['quantity_requested'] ?? 1,
             ];
         });
+    }
+
+    /**
+     * State: No items approved.
+     */
+    public function notApproved(): static
+    {
+        return $this->state([
+            'quantity_approved' => 0,
+        ]);
+    }
+
+    /**
+     * Assign to a specific loan application.
+     */
+    public function forLoanApplication(LoanApplication|int $loanApp): static
+    {
+        return $this->state([
+            'loan_application_id' => $loanApp instanceof LoanApplication ? $loanApp->id : $loanApp,
+        ]);
+    }
+
+    /**
+     * Mark this item as soft deleted.
+     */
+    public function deleted(): static
+    {
+        static $userIds;
+        if (!isset($userIds)) {
+            $userIds = User::pluck('id')->all();
+        }
+        $deleterId = $userIds ? Arr::random($userIds) : null;
+
+        return $this->state([
+            'deleted_at' => now(),
+            'deleted_by' => $deleterId,
+        ]);
     }
 }

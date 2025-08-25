@@ -9,25 +9,30 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
 use Livewire\WithPagination;
 
+/**
+ * Livewire component to display and manage issued loan applications for BPM/admin.
+ * Allows searching, pagination, and links to transaction/return actions.
+ */
 class IssuedLoans extends Component
 {
     use AuthorizesRequests;
     use WithPagination;
 
     public string $searchTerm = '';
-
     public int $perPage = 10;
 
     protected string $paginationTheme = 'bootstrap';
 
+    /**
+     * Authorization check on mount.
+     */
     public function mount(): void
     {
-        // Authorization check to ensure only permitted users can see this component.
         $this->authorize('viewAny', LoanTransaction::class);
     }
 
     /**
-     * Resets the page when the search term is updated for accurate pagination.
+     * Reset pagination when search term is updated.
      */
     public function updatingSearchTerm(): void
     {
@@ -35,51 +40,51 @@ class IssuedLoans extends Component
     }
 
     /**
-     * A computed property that fetches issued loans with advanced filtering and sorting.
+     * Computed property: gets the paginated, filtered issued loan applications.
      */
     public function getIssuedLoansProperty()
     {
         $query = LoanApplication::query()
-            // Fetches all relevant statuses for loans that are out of the inventory.
             ->whereIn('status', [
                 LoanApplication::STATUS_ISSUED,
                 LoanApplication::STATUS_PARTIALLY_ISSUED,
                 LoanApplication::STATUS_OVERDUE,
             ])
-            // Eager loads all necessary relationships for display and searching, preventing N+1 issues.
             ->with([
                 'user:id,name,department_id',
                 'user.department:id,name',
                 'loanApplicationItems.loanTransactionItems.equipment:id,tag_id,brand,model,serial_number',
                 'loanApplicationItems.loanTransactionItems.loanTransaction:id,type',
-                // ***** THIS IS THE FIX: Added 'type' to the selected columns *****
-                'loanTransactions' => fn ($q) => $q->where('type', LoanTransaction::TYPE_ISSUE)->select('id', 'loan_application_id', 'transaction_date', 'type')->orderByDesc('transaction_date'),
+                // Eager-load only latest issue transaction for each application
+                'loanTransactions' => fn ($q) => $q
+                    ->where('type', LoanTransaction::TYPE_ISSUE)
+                    ->select('id', 'loan_application_id', 'transaction_date', 'type')
+                    ->orderByDesc('transaction_date'),
             ]);
 
-        // Applies the search filter if the search term is not empty.
+        // Search by application ID, applicant name, tag ID, or serial number.
         if ($this->searchTerm !== '' && $this->searchTerm !== '0') {
             $search = '%'.strtolower($this->searchTerm).'%';
             $query->where(function ($q) use ($search): void {
-                $q->where('id', 'like', $search) // Search by Application ID
+                $q->where('id', 'like', $search)
                     ->orWhereHas('user', function ($sq) use ($search): void {
-                        $sq->whereRaw('LOWER(name) LIKE ?', [$search]); // Search by Applicant Name
+                        $sq->whereRaw('LOWER(name) LIKE ?', [$search]);
                     })
                     ->orWhereHas('loanApplicationItems.loanTransactionItems.equipment', function ($sq) use ($search): void {
-                        // Search by Equipment Tag ID or Serial Number
                         $sq->whereRaw('LOWER(tag_id) LIKE ?', [$search])
                             ->orWhereRaw('LOWER(serial_number) LIKE ?', [$search]);
                     });
             });
         }
 
-        // Default sorting to show overdue or soon-to-be-due items first.
+        // Sort: overdue/soonest due first.
         return $query->orderBy('loan_end_date', 'asc')
             ->orderBy('id', 'desc')
             ->paginate($this->perPage);
     }
 
     /**
-     * Renders the component's view, passing the paginated data.
+     * Render the Blade view for this component.
      */
     public function render(): View
     {

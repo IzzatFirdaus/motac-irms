@@ -5,21 +5,31 @@ namespace App\Livewire\Sections\Navbar;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
+/**
+ * NotificationsDropdown Livewire Component
+ *
+ * Renders a notifications dropdown, showing unread notifications for the user.
+ * Allows marking notifications as read (single or all).
+ */
 class NotificationsDropdown extends Component
 {
+    // Stores the last 10 unread notifications for the user
     public $unreadNotifications;
 
+    // Stores the unread notification count
     public $unreadCount = 0;
 
+    // Listen for Livewire events to refresh notifications
     protected $listeners = ['refresh-notifications' => 'mount'];
 
     /**
-     * Mount the component and fetch initial data.
+     * Mount the component and fetch the initial notifications data.
+     * Only fetch if the user is authenticated.
      */
     public function mount(): void
     {
         if (Auth::check()) {
-            // REVISED: Fetches notifications once to prevent multiple DB queries.
+            // Fetch unread notifications once for efficiency
             $notifications = Auth::user()->unreadNotifications;
             $this->unreadCount = $notifications->count();
             $this->unreadNotifications = $notifications->take(10);
@@ -30,11 +40,14 @@ class NotificationsDropdown extends Component
     }
 
     /**
-     * Mark a single notification as read and redirect if a URL exists.
+     * Mark a single notification as read and redirect if a URL exists in the notification.
+     *
+     * @param string $notificationId
      */
     public function markAsRead(string $notificationId): void
     {
-        $notification = Auth::user()->notifications()->find($notificationId);
+        $user = Auth::user();
+        $notification = $user ? $user->notifications()->find($notificationId) : null;
         if ($notification) {
             $notification->markAsRead();
             $this->mount(); // Refresh the list
@@ -49,15 +62,21 @@ class NotificationsDropdown extends Component
      */
     public function markAllAsRead(): void
     {
-        Auth::user()->unreadNotifications->markAsRead();
-        $this->mount(); // Refresh the list
+        $user = Auth::user();
+        if ($user) {
+            $user->unreadNotifications->markAsRead();
+            $this->mount(); // Refresh the list
+        }
     }
 
     /**
-     * Render the component's view.
+     * Render the notifications dropdown view.
      */
     public function render()
     {
-        return view('livewire.sections.navbar.notifications-dropdown');
+        return view('livewire.sections.navbar.notifications-dropdown', [
+            'unreadNotifications' => $this->unreadNotifications,
+            'unreadCount' => $this->unreadCount,
+        ]);
     }
 }

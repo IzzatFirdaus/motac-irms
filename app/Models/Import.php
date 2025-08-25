@@ -8,21 +8,26 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * 
+ * Import Model.
  *
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Import newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Import newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Import onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Import query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Import withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Import withoutTrashed()
- * @mixin \Eloquent
+ * Handles import job/file tracking for the system.
+ *
+ * @property int $id
+ * @property string $file_name
+ * @property int|null $file_size
+ * @property string|null $file_ext
+ * @property string|null $file_type
+ * @property string|null $status
+ * @property string|null $details
+ * @property int|null $current
+ * @property int|null $total
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
  */
 class Import extends Model
 {
-    use CreatedUpdatedDeletedBy;
-    use HasFactory;
-    use SoftDeletes;
+    use CreatedUpdatedDeletedBy, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'file_name',

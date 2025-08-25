@@ -92,16 +92,27 @@ Based on the design document (esp. Section 9), the components related to **Email
 |-------------|---------------------------------------------|
 | Controller  | `EmailAccountController`                    |
 | Model       | `EmailApplication`                          |
+<<<<<<< HEAD
 | Views       | `email-accounts/create.blade.php`<br>`email-accounts/show.blade.php` |
 | Services    | `EmailApplicationService`<br>`EmailProvisioningService`              |
+=======
+| Views       | `email-accounts/create.blade.php`, `email-accounts/show.blade.php` |
+| Services    | `EmailApplicationService`, `EmailProvisioningService`                |
+>>>>>>> release/v4.0
 
 ### 4.2 ICT Equipment Loan Module
 
 | Type        | Example File/Component                       |
 |-------------|---------------------------------------------|
+<<<<<<< HEAD
 | Controller  | `LoanApplicationController`<br>`EquipmentController`<br>`LoanTransactionController` |
 | Model       | `Equipment`<br>`LoanApplication`<br>`LoanApplicationItem`<br>`LoanTransaction`      |
 | Views       | `loans/create.blade.php`<br>`loans/show.blade.php`<br>`transactions/issue.blade.php`<br>`transactions/return.blade.php` |
+=======
+| Controller  | `LoanApplicationController`, `EquipmentController`, `LoanTransactionController` |
+| Model       | `Equipment`, `LoanApplication`, `LoanApplicationItem`, `LoanTransaction`      |
+| Views       | `loans/create.blade.php`,`loans/show.blade.php`,`transactions/issue.blade.php`,`transactions/return.blade.php` |
+>>>>>>> release/v4.0
 
 ### 4.3 Approval Workflow Module (Shared)
 
@@ -109,15 +120,25 @@ Based on the design document (esp. Section 9), the components related to **Email
 |-------------|-----------------------------|
 | Controller  | `ApprovalController`         |
 | Model       | `Approval`                  |
+<<<<<<< HEAD
 | Views       | `approvals/pending.blade.php`<br>`approvals/history.blade.php`<br>`approvals/show.blade.php` |
+=======
+| Views       | `approvals/pending.blade.php`,`approvals/history.blade.php`,`approvals/show.blade.php` |
+>>>>>>> release/v4.0
 
 ### 4.4 Notification & Reporting
 
 | Type        | Example File/Component                       |
 |-------------|---------------------------------------------|
+<<<<<<< HEAD
 | Controller  | `NotificationController`<br>`ReportController` |
 | Model       | `Notification`                              |
 | Views       | `notifications/index.blade.php`<br>`reports/equipment.blade.php`<br>`reports/email-accounts.blade.php` |
+=======
+| Controller  | `NotificationController`,`ReportController` |
+| Model       | `Notification`                              |
+| Views       | `notifications/index.blade.php`,`reports/equipment.blade.php`,`reports/email-accounts.blade.php` |
+>>>>>>> release/v4.0
 | Services    | `NotificationService`                       |
 
 ---

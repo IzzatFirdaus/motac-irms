@@ -3,12 +3,11 @@
 namespace App\Notifications;
 
 use App\Models\Approval;
-use App\Models\EmailApplication;
-use App\Models\LoanApplication;
+use App\Models\LoanApplication; // Keep this import
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Model; // Keep Model for generic polymorphic relation
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -18,82 +17,82 @@ class ApplicationNeedsAction extends Notification implements ShouldQueue
 
     public Approval $approvalTask;
 
+    /**
+     * The approvable item, specifically a LoanApplication now that EmailApplications are removed.
+     * @var LoanApplication|Model // More specific, but Model is fine if other types will exist later
+     */
     public Model $approvableItem;
 
-    /**
-     * Create a new notification instance.
-     * The constructor now only requires the Approval task.
-     */
     public function __construct(Approval $approvalTask)
     {
         $this->approvalTask = $approvalTask;
-        // The related application is derived directly from the approval task
+        // Ensure approvable and its user relationship are loaded
         $this->approvableItem = $approvalTask->approvable()->with('user')->firstOrFail();
     }
 
-    /**
-     * Get the notification's delivery channels.
-     */
     public function via(User $notifiable): array
     {
         return ['mail', 'database'];
     }
 
-    /**
-     * Get the mail representation of the notification.
-     */
     public function toMail(User $notifiable): MailMessage
     {
-        // --- EDITED CODE: START ---
-        // The toMail method now uses the ->view() method to render the custom Blade template.
+        // Asserting the type for better IDE support and clarity, though not strictly necessary if type is always LoanApplication
+        /** @var LoanApplication $app */
+        $app = $this->approvableItem;
+
         $subject = __('Tindakan Diperlukan: :itemType #:id', [
-            'itemType' => $this->getItemTypeDisplayName(),
-            'id' => $this->approvableItem->id,
+            'itemType' => $this->getItemTypeDisplayName($app), // Pass the application instance
+            'id' => $app->id,
         ]);
 
         return (new MailMessage)
             ->subject($subject)
-            ->view('emails.application-needs-action', ['notification' => $this, 'notifiable' => $notifiable]);
-        // --- EDITED CODE: END ---
+            ->view('emails.application-needs-action', [
+                'notification' => $this,
+                'notifiable' => $notifiable
+            ]);
     }
 
-    /**
-     * Get the URL for the notification's action.
-     * This helper is used by the Blade view.
-     */
     public function getActionUrl(): string
     {
-        return route('approvals.dashboard');
+        // This route should lead to the approval dashboard or the specific loan application for approval
+        return route('approvals.dashboard'); // Or route('loan-applications.show', $this->approvableItem->id); for specific view
     }
 
-    /**
-     * Get the array representation for the database notification.
-     */
     public function toArray(User $notifiable): array
     {
+        /** @var LoanApplication $app */
+        $app = $this->approvableItem;
+
         return [
             'title' => 'Tindakan Kelulusan Diperlukan',
-            'message' => 'Permohonan #'.$this->approvableItem->id.' oleh '.$this->approvableItem->user->name.' menunggu tindakan anda.',
+            'message' => __('Permohonan #:id oleh :applicantName menunggu tindakan anda.', [
+                'id' => $app->id,
+                'applicantName' => optional($app->user)->name,
+            ]),
             'action_url' => $this->getActionUrl(),
-            'related_model' => $this->approvableItem->getMorphClass(),
-            'related_id' => $this->approvableItem->id,
+            'related_model' => $app->getMorphClass(),
+            'related_id' => $app->id,
+            'icon' => 'ti ti-alert-triangle', // Consider adding a default icon
         ];
     }
 
     /**
-     * Helper to get a user-friendly name for the application type.
-     * This helper is used by the Blade view.
+     * Get the display name for the approvable item type.
+     * Updated to specifically handle LoanApplication.
+     *
+     * @param Model $approvableItem
+     * @return string
      */
-    public function getItemTypeDisplayName(): string
+    public function getItemTypeDisplayName(Model $approvableItem): string
     {
-        if ($this->approvableItem instanceof LoanApplication) {
+        // With EmailApplication removed, we can assume it's a LoanApplication
+        if ($approvableItem instanceof LoanApplication) {
             return __('Permohonan Pinjaman Peralatan ICT');
         }
 
-        if ($this->approvableItem instanceof EmailApplication) {
-            return __('Permohonan E-mel/ID Pengguna');
-        }
-
-        return __('Permohonan Umum');
+        // Fallback for any other morphable types that might be introduced later
+        return ucfirst(str_replace('_', ' ', class_basename($approvableItem)));
     }
 }

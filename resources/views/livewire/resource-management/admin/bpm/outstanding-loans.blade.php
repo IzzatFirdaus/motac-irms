@@ -70,7 +70,6 @@
                                         @endforeach
                                     </td>
                                     <td class="text-center px-3 py-2">
-                                        {{-- THE FIX IS APPLIED ON THE NEXT LINE: Use the new route name --}}
                                         <a href="{{ route('loan-applications.issue.form', ['loanApplication' => $application->id]) }}" class="btn btn-sm btn-primary">
                                             <i class="bi bi-box-arrow-in-up-right me-1"></i> @lang('Proses Pengeluaran')
                                         </a>

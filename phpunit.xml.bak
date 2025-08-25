@@ -1,31 +1,85 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="./vendor/phpunit/phpunit/phpunit.xsd"
-         bootstrap="vendor/autoload.php"
-         colors="true"
+<!--
+  MOTAC IRMS - PHPUnit Configuration Backup
+  Tailored for Integrated Resource Management System (Malaysia)
+  - Sets up test suites, code coverage, and environment for local/test runs
+  - Ensures correct timezone, DB, mail, and other system-specific options
+-->
+
+<phpunit
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="./vendor/phpunit/phpunit/phpunit.xsd"
+    bootstrap="vendor/autoload.php"
+    colors="true"
+    verbose="true"
+    stopOnFailure="false"
+    failOnRisky="true"
+    failOnWarning="true"
+    executionOrder="default"
 >
+    <!-- Test suites: Standard Laravel/Larastan convention -->
     <testsuites>
-        <testsuite name="Unit">
-            <directory suffix="Test.php">./tests/Unit</directory>
-        </testsuite>
         <testsuite name="Feature">
             <directory suffix="Test.php">./tests/Feature</directory>
         </testsuite>
+        <testsuite name="Unit">
+            <directory suffix="Test.php">./tests/Unit</directory>
+        </testsuite>
     </testsuites>
-    <coverage>
+
+    <!-- Code coverage setup: Only application code (not tests, not vendor) -->
+    <coverage processUncoveredFiles="true">
         <include>
             <directory suffix=".php">./app</directory>
         </include>
+        <exclude>
+            <directory>./app/Console</directory>
+            <directory>./app/Exceptions</directory>
+            <directory>./app/Providers</directory>
+            <directory>./tests</directory>
+            <directory>./database</directory>
+        </exclude>
+        <report>
+            <clover outputFile="build/logs/clover.xml"/>
+            <html outputDirectory="build/coverage"/>
+            <text outputFile="build/logs/coverage.txt"/>
+        </report>
     </coverage>
+
+    <!--
+      Test environment variables:
+      Aligns with .env.testing for safe, isolated test runs.
+      - Uses array/session/cache drivers for memory speed
+      - DB is dedicated for testing (will not affect dev/prod DB)
+      - No real emails sent; mail is logged or "array"
+      - Malaysia timezone and locale are set
+      - Disables Laravel Telescope during tests
+    -->
     <php>
         <env name="APP_ENV" value="testing"/>
-        <env name="BCRYPT_ROUNDS" value="4"/>
+        <env name="APP_DEBUG" value="true"/>
+        <env name="APP_KEY" value="base64:ps45u9S+Gc2PvZZCgt5EIDlRXHRWZwG/BazRRV3P2pU="/>
+        <env name="APP_URL" value="http://localhost:8000"/>
+        <env name="APP_TIMEZONE" value="Asia/Kuala_Lumpur"/>
+        <env name="LOCALE" value="ms"/>
         <env name="CACHE_DRIVER" value="array"/>
-        <!-- <env name="DB_CONNECTION" value="sqlite"/> -->
-        <!-- <env name="DB_DATABASE" value=":memory:"/> -->
-        <env name="MAIL_MAILER" value="array"/>
-        <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
+        <env name="QUEUE_CONNECTION" value="sync"/>
+        <env name="DB_CONNECTION" value="mysql"/>
+        <env name="DB_DATABASE" value="motac_irms_test"/>
+        <env name="DB_HOST" value="127.0.0.1"/>
+        <env name="DB_PORT" value="3306"/>
+        <env name="DB_USERNAME" value="root"/>
+        <env name="DB_PASSWORD" value=""/>
+        <env name="MAIL_MAILER" value="log"/>
+        <env name="MAIL_FROM_ADDRESS" value="noreply@motac.gov.my"/>
+        <env name="MAIL_FROM_NAME" value="motac-irms"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
+        <env name="BCRYPT_ROUNDS" value="4"/>
+        <!-- MOTAC IRMS system branding/theme for test UI rendering -->
+        <env name="THEME_LAYOUT" value="vertical"/>
+        <env name="THEME_SKIN" value="theme-motac"/>
+        <env name="THEME_STYLE" value="light"/>
+        <env name="THEME_PRIMARY_COLOR_MOTAC" value="#0055A4"/>
     </php>
 </phpunit>

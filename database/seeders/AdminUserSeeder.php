@@ -68,6 +68,14 @@ class AdminUserSeeder extends Seeder
         $defaultPassword = Hash::make(env('SEEDER_DEFAULT_PASSWORD', 'Motac.1234'));
         $now = Carbon::now();
 
+        // List of emails that are considered as seeded admins/developers/maintainers.
+        // These users should always have both 'Admin' and 'BPM Staff' roles for full system access.
+        $seededAdminEmails = [
+            env('ADMIN_EMAIL', 'admin@motac.gov.my'),
+            // Add more emails here if you add more seeded admins/developers in the future.
+            'izzatfirdaus@motac.gov.my', // system developer/maintainer
+        ];
+
         $usersData = [
             // Admin user with a high grade, making them eligible as a supporting officer.
             [
@@ -96,6 +104,11 @@ class AdminUserSeeder extends Seeder
                 'grade_id' => Grade::firstOrCreate(['name' => 'N19'], ['level' => 19])->id,
                 'position_id' => Position::firstOrCreate(['name' => 'Pembantu Tadbir'])->id,
             ],
+            // System developer/maintainer: must always be both Admin and BPM Staff
+            [
+                'role_name' => 'Admin', 'name' => 'Izzat Firdaus (System Developer)', 'email' => 'izzatfirdaus@motac.gov.my',
+                'identification_number' => '980328145171', 'grade_id' => $gradeF44->id, 'position_id' => $approverPos->id,
+            ],
         ];
 
         foreach ($usersData as $data) {
@@ -115,12 +128,24 @@ class AdminUserSeeder extends Seeder
                 ]
             );
 
-            // Assign the specified role to the user
+            // Assign the specified primary role to the user
             if (! $user->hasRole($data['role_name'])) {
                 $user->assignRole($data['role_name']);
             }
 
-            Log::info(sprintf("AdminUserSeeder: Processed user '%s' (%s). Assigned Role: '%s'. Assigned Grade Level: %s.", $user->name, $user->email, $data['role_name'], $user->grade?->level));
+            // Ensure seeded admin/dev/maintainer always have both 'Admin' and 'BPM Staff' roles
+            if (in_array($user->email, $seededAdminEmails, true)) {
+                if (! $user->hasRole('Admin')) {
+                    $user->assignRole('Admin');
+                }
+                if (! $user->hasRole('BPM Staff')) {
+                    $user->assignRole('BPM Staff');
+                }
+                Log::info("AdminUserSeeder: Ensured {$user->email} has both Admin and BPM Staff roles.");
+            }
+
+            Log::info(sprintf("AdminUserSeeder: Processed user '%s' (%s). Assigned Role: '%s'. Assigned Grade Level: %s.",
+                $user->name, $user->email, $data['role_name'], $user->grade?->level));
         }
 
         Log::info('AdminUserSeeder: Seeding of critical roles and administrative users has been completed successfully.');

@@ -1,72 +1,112 @@
 /*
 * demo.css
-* File include item demo only specific css only
+* File includes item demo-specific CSS only.
+* Optimized for maximum cross-browser compatibility (IE 8+, Edge, Chrome, Firefox, Safari, Samsung Internet).
+* Last updated: 2025-08-04 05:51:41 UTC by IzzatFirdaus
 ******************************************************************************/
 
-.light-style .menu .app-brand.demo {
-  height: 64px;
-}
-
+/* Brand logo height for dark and light menu styles */
+.light-style .menu .app-brand.demo,
 .dark-style .menu .app-brand.demo {
   height: 64px;
 }
 
+/*
+  App brand logo container - horizontal and vertical centering with maximum browser support
+  Uses multiple display methods for different browser generations:
+  - IE 8-9: Uses table-cell fallback
+  - IE 10-11: Uses -ms-flexbox
+  - Modern browsers: Uses flex
+*/
 .app-brand-logo.demo {
-  display: flexbox;
+  /* Fallback for very old browsers - table-cell method */
+  display: table-cell;
+  vertical-align: middle;
+
+  /* Old WebKit (Safari < 9) */
+  display: -webkit-box;
+  -webkit-box-pack: center;
+  -webkit-box-align: center;
+
+  /* Firefox < 22 */
+  display: -moz-box;
+  -moz-box-pack: center;
+  -moz-box-align: center;
+
+  /* IE 10+ */
+  display: -ms-flexbox;
+  -ms-flex-pack: center;
+  -ms-flex-align: center;
+
+  /* Modern browsers */
+  display: -webkit-flex;
   display: flex;
   justify-content: center;
   align-items: center;
+
+  /* Dimensions */
   width: 34px;
   height: 24px;
-  -ms-flex-align: center;
-  -ms-flex-pack: center;
 }
 
+/* SVG logo sizing within the brand container */
 .app-brand-logo.demo svg {
   width: 35px;
   height: 24px;
 }
 
+/* Brand text typography */
 .app-brand-text.demo {
   font-size: 1.375rem;
 }
 
-/* ! For .layout-navbar-fixed added fix padding top tpo .layout-page */
+/*
+  Layout navbar fixed positioning adjustments
+  Adds padding to prevent content from hiding under fixed navbar
+*/
 .layout-navbar-fixed .layout-wrapper:not(.layout-without-menu) .layout-page {
   padding-top: 64px !important;
 }
 
-.layout-navbar-fixed .layout-wrapper:not(.layout-horizontal, .layout-without-menu) .layout-page {
+.layout-navbar-fixed .layout-wrapper:not(.layout-horizontal):not(.layout-without-menu) .layout-page {
   padding-top: 78px !important;
 }
 
-/* Navbar page z-index issue solution */
+/* Navbar z-index fix for content wrapper conflicts */
 .content-wrapper .navbar {
   z-index: auto;
 }
 
 /*
-* Content
+* Content Demo Utilities
+* These classes are used for demo layout and spacing purposes
 ******************************************************************************/
 
+/* Forces all child elements to be block-level for demo purposes */
 .demo-blocks > * {
   display: block !important;
 }
 
+/* Adds consistent inline spacing between demo elements */
 .demo-inline-spacing > * {
   margin: 1rem 0.375rem 0 0 !important;
 }
 
-/* ? .demo-vertical-spacing class is used to have vertical margins between elements. To remove margin-top from the first-child, use .demo-only-element class with .demo-vertical-spacing class. For example, we have used this class in forms-input-groups.html file. */
+/*
+  Vertical spacing utilities for demo layouts
+  Creates consistent vertical rhythm between elements
+*/
 .demo-vertical-spacing > * {
   margin-top: 1rem !important;
   margin-bottom: 0 !important;
 }
 
+/* Removes top margin from first child when using demo-only-element modifier */
 .demo-vertical-spacing.demo-only-element > :first-child {
   margin-top: 0 !important;
 }
 
+/* Large vertical spacing variant */
 .demo-vertical-spacing-lg > * {
   margin-top: 1.875rem !important;
   margin-bottom: 0 !important;
@@ -76,6 +116,7 @@
   margin-top: 0 !important;
 }
 
+/* Extra large vertical spacing variant */
 .demo-vertical-spacing-xl > * {
   margin-top: 5rem !important;
   margin-bottom: 0 !important;
@@ -85,9 +126,12 @@
   margin-top: 0 !important;
 }
 
+/*
+  RTL (Right-to-Left) specific elements
+  Hidden by default, shown when dir="rtl" is set on parent
+*/
 .rtl-only {
   display: none !important;
-  text-align: left !important;
   direction: ltr !important;
 }
 
@@ -96,27 +140,176 @@
 }
 
 /*
-* Layout demo
+* Layout Demo Components
+* Used for showcasing layout variations and responsive design
 ******************************************************************************/
 
+/*
+  Layout demo wrapper: Creates a vertical flex layout with centered content
+  Multiple fallbacks ensure compatibility across all browser versions:
+
+  1. Table-cell fallback for IE 8-9
+  2. -webkit-box for old Safari
+  3. -moz-box for old Firefox
+  4. -ms-flexbox for IE 10-11
+  5. Standard flex for modern browsers
+*/
 .layout-demo-wrapper {
+  /* Fallback for IE 8-9 - uses table-cell with text-align workaround */
+  display: table;
+  width: 100%;
+
+  /* Old WebKit box model (Safari < 9) */
   display: -webkit-box;
-  display: flexbox;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-box-align: center;
+
+  /* Firefox box model (Firefox < 22) - Note: IE doesn't support these but they don't break IE */
+  display: -moz-box;
+  -moz-box-orient: vertical;
+  -moz-box-direction: normal;
+  -moz-box-align: center;
+
+  /* IE 10-11 flexbox */
+  display: -ms-flexbox;
+  -ms-flex-direction: column;
+  -ms-flex-align: center;
+
+  /* Modern flexbox */
+  display: -webkit-flex;
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  /* Spacing */
   margin-top: 1rem;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
 }
 
+/*
+  IE 8-9 fallback for layout-demo-wrapper
+  Uses table-cell to achieve vertical centering
+*/
+.layout-demo-wrapper-inner {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+/* Demo placeholder image sizing - responsive but with max width */
 .layout-demo-placeholder img {
-  width: 900px;
+  width: 100%;
+  max-width: 900px;
+  height: auto; /* Maintains aspect ratio */
 }
 
+/*
+  Layout demo info text centering
+  Uses multiple methods for maximum compatibility:
+  1. margin auto for IE 8+
+  2. text-align as fallback (works in most browsers despite warnings)
+*/
 .layout-demo-info {
   margin-top: 1rem;
-  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center; /* Fallback - works in most browsers despite compatibility warnings */
+  width: 100%;
 }
+
+/*
+* Responsive adjustments for demo components
+******************************************************************************/
+
+/* Mobile-first responsive design for demo elements */
+@media (max-width: 768px) {
+  /* Adjust brand logo size for mobile */
+  .app-brand-logo.demo {
+    width: 28px;
+    height: 20px;
+  }
+
+  .app-brand-logo.demo svg {
+    width: 28px;
+    height: 20px;
+  }
+
+  /* Smaller brand text on mobile */
+  .app-brand-text.demo {
+    font-size: 1.125rem;
+  }
+
+  /* Reduce demo spacing on mobile */
+  .demo-vertical-spacing > *,
+  .demo-vertical-spacing-lg > * {
+    margin-top: 0.75rem !important;
+  }
+
+  .demo-vertical-spacing-xl > * {
+    margin-top: 2rem !important;
+  }
+
+  /* Adjust navbar padding for mobile */
+  .layout-navbar-fixed .layout-wrapper:not(.layout-without-menu) .layout-page {
+    padding-top: 56px !important;
+  }
+}
+
+/*
+* Print styles for demo components
+******************************************************************************/
+@media print {
+  /* Hide demo-specific elements when printing */
+  .demo-blocks,
+  .demo-inline-spacing,
+  .layout-demo-wrapper {
+    display: none !important;
+  }
+
+  /* Ensure brand elements print correctly */
+  .app-brand-logo.demo,
+  .app-brand-text.demo {
+    display: inline-block !important;
+  }
+}
+
+/*
+  Browser-specific hacks and fixes
+  These target specific browser issues without breaking others
+*/
+
+/* IE 8-9 specific fixes */
+.lt-ie10 .layout-demo-wrapper {
+  display: table !important;
+}
+
+.lt-ie10 .layout-demo-wrapper-inner {
+  display: table-cell !important;
+  vertical-align: middle !important;
+}
+
+/* IE 10-11 specific flexbox fixes */
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  .layout-demo-wrapper {
+    display: -ms-flexbox !important;
+  }
+
+  .app-brand-logo.demo {
+    display: -ms-flexbox !important;
+  }
+}
+
+/*
+  Development notes:
+
+  1. The warnings about -webkit-box-*, -moz-box-*, and text-align not being supported
+     by IE are expected - these are progressive enhancement properties that provide
+     better experiences in supporting browsers while maintaining basic functionality in IE.
+
+  2. We use multiple display methods (table-cell, flexbox variants) to ensure the layout
+     works across all browsers, even if some properties are ignored.
+
+  3. The table-cell fallback ensures that even IE 8-9 can display centered content,
+     while modern browsers get the benefits of flexbox.
+
+  4. Responsive design ensures the demo components work well on all screen sizes.
+*/

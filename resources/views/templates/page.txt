@@ -1,32 +1,35 @@
+{{-- Blade page template for MOTAC IRMS --}}
 <div>
+    @php
+        // Retrieve application-wide configuration (theme, layout, etc.)
+        $configData = Helper::appClasses();
+    @endphp
 
-  @php
-    $configData = Helper::appClasses();
-  @endphp
+    {{-- Set the page title (replace 'HERE' with actual title in your page) --}}
+    @section('title', 'HERE')
 
-  @section('title', 'HERE')
+    {{-- Vendor styles specific to this page (add <link> tags here if needed) --}}
+    @section('vendor-style')
+    @endsection
 
-  @section('vendor-style')
+    {{-- Custom styles specific to this page --}}
+    @section('page-style')
+    @endsection
 
-  @endsection
+    {{-- Breadcrumb navigation --}}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{{ route('dashboard') }}">Dashboard</a>
+            </li>
+            <li class="breadcrumb-item active">Human Resource</li>
+            <li class="breadcrumb-item active">HERE</li>
+        </ol>
+    </nav>
 
-  @section('page-style')
+    {{-- MAIN PAGE CONTENT GOES HERE (replace this comment with your content) --}}
 
-  @endsection
-
-  <nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item">
-        <a href="{{ route('dashboard') }}">Dashboard</a>
-      </li>
-      <li class="breadcrumb-item active">Human Resource</li>
-      <li class="breadcrumb-item active">HERE</li>
-    </ol>
-  </nav>
-
-  {{-- HERE --}}
-
-  @push('custom-scripts')
-
-  @endpush
+    {{-- Push page-specific scripts to the custom-scripts stack --}}
+    @push('custom-scripts')
+    @endpush
 </div>

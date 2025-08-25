@@ -4,15 +4,26 @@ namespace Database\Factories;
 
 use App\Models\Grade;
 use App\Models\Position;
-use Illuminate\Database\Eloquent\Factories\Factory as EloquentFactory;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 
-class PositionFactory extends EloquentFactory
+/**
+ * Optimized Factory for the Position model (Jawatan).
+ *
+ * - Uses static caches for related Grade and User IDs to avoid repeated DB hits.
+ * - Does NOT create related models (Grade/User) inside definition().
+ * - All foreign keys (grade_id, created_by, updated_by) can be set from the seeder/state, otherwise chosen randomly from existing records.
+ * - Use with seeders that ensure grades and users exist before creating positions.
+ */
+class PositionFactory extends Factory
 {
     protected $model = Position::class;
 
     /**
-     * The official list of MOTAC position names.
+     * The official list of MOTAC position names (as seen in the PositionSeeder).
+     * This ensures generated names are consistent with actual system data.
      */
     private static array $motacPositions = [
         'Menteri', 'Timbalan Menteri', 'Ketua Setiausaha', 'Timbalan Ketua Setiausaha', 'Setiausaha Bahagian',
@@ -36,59 +47,87 @@ class PositionFactory extends EloquentFactory
 
     public function definition(): array
     {
-        $msFaker = \Faker\Factory::create('ms_MY');
+        // Static caches for Grade IDs and User IDs (for audit fields)
+        static $gradeIds, $userIds, $msFaker;
 
-        // Pick a realistic position name from the official list.
-        // The ->unique() modifier ensures we don't pick the same name twice in a single run.
-        $positionName = $this->faker->unique()->randomElement(self::$motacPositions);
-
-        // Find the corresponding seeded position to get its ID, which is used to find a related grade.
-        $seededPosition = Position::where('name', $positionName)->first();
-
-        // Find a real grade that is linked to this specific position.
-        $gradeId = null;
-        if ($seededPosition) {
-            // Find a grade where the position_id matches our selected position's ID.
-            $grade = Grade::where('position_id', $seededPosition->id)->inRandomOrder()->first();
-            $gradeId = $grade?->id;
+        if (!isset($gradeIds)) {
+            $gradeIds = Grade::pluck('id')->all();
+        }
+        if (!isset($userIds)) {
+            $userIds = User::pluck('id')->all();
+        }
+        if (!isset($msFaker)) {
+            $msFaker = \Faker\Factory::create('ms_MY');
         }
 
-        // Fallback logic: If seeders haven't been run, or no grade was found,
-        // pick any random grade that exists.
-        if (! $gradeId) {
-            $gradeId = Grade::inRandomOrder()->value('id');
-        }
+        // Pick random grade/user IDs if available
+        $gradeId = !empty($gradeIds) ? Arr::random($gradeIds) : null;
+        $auditUserId = !empty($userIds) ? Arr::random($userIds) : null;
+
+        $createdAt = Carbon::parse($this->faker->dateTimeBetween('-3 years', 'now'));
+        $updatedAt = Carbon::parse($this->faker->dateTimeBetween($createdAt, 'now'));
+        $isDeleted = $this->faker->boolean(2); // ~2% soft deleted
+        $deletedAt = $isDeleted ? Carbon::parse($this->faker->dateTimeBetween($updatedAt, 'now')) : null;
+
+        // Pick a position name from the official list. Duplicates allowed if factory exceeds unique count.
+        $positionName = $this->faker->randomElement(self::$motacPositions);
 
         return [
             'name' => $positionName,
             'description' => $msFaker->optional(0.7)->sentence(10, true),
             'is_active' => $this->faker->boolean(90),
             'grade_id' => $gradeId,
-            'created_at' => Carbon::parse($this->faker->dateTimeBetween('-3 years', 'now')),
-            'updated_at' => fn (array $attributes): \Illuminate\Support\Carbon => Carbon::parse($this->faker->dateTimeBetween($attributes['created_at'], 'now')),
+            'created_by' => $auditUserId,
+            'updated_by' => $auditUserId,
+            'deleted_by' => $isDeleted ? $auditUserId : null,
+            'created_at' => $createdAt,
+            'updated_at' => $updatedAt,
+            'deleted_at' => $deletedAt,
         ];
     }
 
+    /**
+     * State: Active position.
+     */
     public function active(): static
     {
-        return $this->state(fn (array $attributes): array => ['is_active' => true]);
+        return $this->state(['is_active' => true]);
     }
 
+    /**
+     * State: Inactive position.
+     */
     public function inactive(): static
     {
-        return $this->state(fn (array $attributes): array => ['is_active' => false]);
+        return $this->state(['is_active' => false]);
     }
 
+    /**
+     * State: Soft deleted position.
+     */
     public function deleted(): static
     {
-        return $this->state(fn (array $attributes): array => [
+        static $userIds;
+        if (!isset($userIds)) {
+            $userIds = User::pluck('id')->all();
+        }
+        $deleterId = !empty($userIds) ? Arr::random($userIds) : null;
+
+        return $this->state([
             'deleted_at' => now(),
             'is_active' => false,
+            'deleted_by' => $deleterId,
         ]);
     }
 
+    /**
+     * State to assign this position to a specific grade.
+     */
     public function forGrade(Grade|int $grade): static
     {
-        return $this->state(['grade_id' => $grade instanceof Grade ? $grade->id : $grade]);
+        $gradeId = $grade instanceof Grade ? $grade->id : $grade;
+        return $this->state([
+            'grade_id' => $gradeId,
+        ]);
     }
 }

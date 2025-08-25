@@ -1,4 +1,6 @@
 {{-- resources/views/layouts/commonMaster.blade.php --}}
+{{-- This is the root master layout for all MOTAC system pages. It sets up the HTML, head, and body, and includes theme styles, scripts, and accessibility features. --}}
+
 <!DOCTYPE html>
 
 @php
@@ -8,7 +10,6 @@
     $appName = __($configData['templateName'] ?? __('Sistem Pengurusan Sumber Bersepadu MOTAC'));
 @endphp
 
-{{-- The `class` attribute is empty here, as the theme is now exclusively controlled by the data-bs-theme attribute --}}
 <html lang="{{ $currentLocale }}" class="" dir="{{ $textDirection }}" data-theme="{{ $configData['myTheme'] ?? 'theme-motac' }}"
     data-assets-path="{{ asset('assets/') . '/' }}" data-base-url="{{ url('/') }}" data-framework="laravel"
     data-template="{{ ($configData['myLayout'] ?? 'vertical') . '-menu-' . ($configData['myTheme'] ?? 'theme-motac') . '-light' }}">
@@ -42,22 +43,21 @@
     {{-- == END: UNIFIED THEME MANAGEMENT SCRIPT == --}}
     {{-- =================================================================================== --}}
 
+    {{-- Include all main layout stylesheets (with RTL, theme, and custom MOTAC styles) --}}
+    @include('layouts.sections.layout-styles')
 
-    {{-- Include all common stylesheets --}}
-    @include('layouts.sections.styles')
-
-    {{-- Include helper scripts --}}
-    @include('layouts.sections.scriptsIncludes')
+    {{-- Include core JS helpers, theme config, and template customizer if enabled --}}
+    @include('layouts.sections.layout-scripts-includes')
 </head>
 
 <body>
-    {{-- Accessibility skip link --}}
+    {{-- Accessibility skip link for screen readers/keyboard navigation --}}
     <a href="#main-content" class="visually-hidden-focusable">{{ __('Langkau ke Kandungan Utama') }}</a>
 
     {{-- The layout-specific content will be injected here --}}
     @yield('layoutContent')
 
-    {{-- Include all common JavaScript files --}}
-    @include('layouts.sections.scripts')
+    {{-- Include all common JavaScript files and main initialization --}}
+    @include('layouts.sections.layout-scripts')
 </body>
 </html>

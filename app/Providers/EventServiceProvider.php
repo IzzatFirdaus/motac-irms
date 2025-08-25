@@ -1,11 +1,11 @@
 <?php
+// EventServiceProvider.php
 
 namespace App\Providers;
 
-// Models to be observed by BlameableObserver
+// Import required models and observer
 use App\Models\Approval;
 use App\Models\Department;
-use App\Models\EmailApplication;
 use App\Models\Equipment;
 use App\Models\EquipmentCategory;
 use App\Models\Grade;
@@ -16,16 +16,27 @@ use App\Models\LoanTransaction;
 use App\Models\LoanTransactionItem;
 use App\Models\Location as EquipmentLocation;
 use App\Models\Notification as CustomNotification;
-use App\Models\Position; // Ensure this is imported
+use App\Models\Position;
 use App\Models\Setting;
 use App\Models\SubCategory as EquipmentSubCategory;
 use App\Models\User;
-use App\Observers\BlameableObserver; // Ensure this observer exists and functions as expected
+use App\Observers\BlameableObserver;
+// Helpdesk Models
+use App\Models\HelpdeskTicket;
+use App\Models\HelpdeskCategory;
+use App\Models\HelpdeskPriority;
+use App\Models\HelpdeskComment;
+use App\Models\HelpdeskAttachment;
+
 // Laravel Events & Listeners
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
+/**
+ * Registers events and model observers for audit/history and Helpdesk integration.
+ * All EmailApplication references removed as per the v4.0 transformation plan.
+ */
 class EventServiceProvider extends ServiceProvider
 {
     /**
@@ -41,25 +52,21 @@ class EventServiceProvider extends ServiceProvider
 
     /**
      * The model observers for your application.
-     * This array registers the BlameableObserver for all models that require
-     * created_by, updated_by, and/or deleted_by audit trails as per System Design.
-     * Ensure BlameableObserver correctly sets user IDs.
+     * - BlameableObserver tracks created_by, updated_by, deleted_by, etc.
+     * - Helpdesk models are included as per v4.0 requirements.
      *
-     * @var array<class-string, array<int, class-string<\object>>>
+     * @var array<class-string, array<int, class-string>>
      */
     protected $observers = [
-        // User & Organizational Data Models
+        // User & HR Models
         User::class => [BlameableObserver::class],
         Department::class => [BlameableObserver::class],
-        Position::class => [BlameableObserver::class], // Ensure this line is present and uncommented
+        Position::class => [BlameableObserver::class],
         Grade::class => [BlameableObserver::class],
 
-        // Application Process Models
-        EmailApplication::class => [BlameableObserver::class],
+        // Loan Application & Transaction Models
         LoanApplication::class => [BlameableObserver::class],
         LoanApplicationItem::class => [BlameableObserver::class],
-
-        // Transaction Models
         LoanTransaction::class => [BlameableObserver::class],
         LoanTransactionItem::class => [BlameableObserver::class],
 
@@ -72,12 +79,19 @@ class EventServiceProvider extends ServiceProvider
         EquipmentSubCategory::class => [BlameableObserver::class],
         EquipmentLocation::class => [BlameableObserver::class],
 
-        // System Utility Models (if they have blameable fields as per DB design)
+        // System Utility Models
         Setting::class => [BlameableObserver::class],
         Import::class => [BlameableObserver::class],
 
-        // Custom Notification Model (if it has blameable fields)
-        CustomNotification::class => [BlameableObserver::class], // System Design Ref: Custom model for DB notifications with audit trails
+        // Custom Notification Model for audit trails
+        CustomNotification::class => [BlameableObserver::class],
+
+        // Helpdesk Models as per v4.0 transformation plan
+        HelpdeskTicket::class => [BlameableObserver::class],
+        HelpdeskCategory::class => [BlameableObserver::class],
+        HelpdeskPriority::class => [BlameableObserver::class],
+        HelpdeskComment::class => [BlameableObserver::class],
+        HelpdeskAttachment::class => [BlameableObserver::class],
     ];
 
     /**

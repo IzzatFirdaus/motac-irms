@@ -2,102 +2,147 @@
 
 namespace Database\Seeders;
 
-use App\Models\Department; // Ensure this matches your Department model namespace and name
+use App\Models\Department;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-// Corrected class name to match typical PSR-4 autoloading with a singular filename
-class DepartmentSeeder extends Seeder // Changed from DepartmentsSeeder to DepartmentSeeder
+/**
+ * Seeds the departments table with MOTAC organizational structure.
+ *
+ * Creates a mix of headquarters and state branch departments with realistic
+ * Malaysian government department names and structure.
+ */
+class DepartmentSeeder extends Seeder
 {
+    /**
+     * Run the department seeder.
+     *
+     * Ensures at least one user exists for audit fields, seeds predefined
+     * MOTAC departments, and adds additional random departments.
+     */
     public function run(): void
     {
-        Log::info('Starting Department seeding (Revision 3 - Corrected)...');
+        Log::info('Starting Department seeding...');
 
-        DB::statement('SET FOREIGN_KEY_CHECKS = 0;');
-        DB::table('departments')->truncate();
-        DB::statement('SET FOREIGN_KEY_CHECKS = 1;');
-        Log::info('Truncated departments table.');
+            // Ensure at least one user exists for audit fields before creating departments
+            $this->ensureAuditUserExists();
 
-        $adminUserForAudit = User::orderBy('id')->first();
-        $auditUserId = $adminUserForAudit?->id;
 
-        if (! $auditUserId) {
-            $adminUserForAudit = User::factory()->create(['name' => 'Audit User (DeptSeeder)']);
-            $auditUserId = $adminUserForAudit->id;
-            Log::info(sprintf('Created a fallback audit user with ID %d for DepartmentSeeder.', $auditUserId));
-        } else {
-            Log::info(sprintf('Using User ID %s for audit columns in DepartmentSeeder.', $auditUserId));
+            // Disable foreign key checks before truncating
+            \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
+            // Truncate all child tables referencing departments
+            $childTables = [
+                'equipment',
+                'loan_applications',
+                'loan_transactions',
+                'helpdesk_tickets',
+                // Add other tables with department_id FK as needed
+            ];
+            foreach ($childTables as $table) {
+                if (\Schema::hasTable($table)) {
+                    \DB::table($table)->truncate();
+                }
+            }
+
+            // Now truncate departments
+            Department::truncate();
+
+            // Re-enable foreign key checks
+            \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+            // Create predefined MOTAC departments
+            $this->createMotacDepartments();
+
+            // Create additional random departments for testing
+            $this->createAdditionalDepartments();
+
+            Log::info('Department seeding completed successfully.');
+    }
+
+    /**
+     * Ensure at least one user exists for audit fields.
+     * Creates a system audit user if no users exist in the database.
+     */
+    private function ensureAuditUserExists(): void
+    {
+        if (User::count() === 0) {
+            Log::info('No users found. Creating audit user for department seeding...');
+
+            // Create a simple audit user without complex relationships.
+            // Use only valid enum value for 'status' (e.g. 'inactive').
+            User::create([
+                'name' => 'Audit User (DeptSeeder)',
+                'email' => 'audit-deptseeder@motac.local',
+                'email_verified_at' => now(),
+                'password' => bcrypt('password'),
+                'title' => 'tuan',
+                'identification_number' => '999999999999',
+                'passport_number' => strtoupper(fake()->bothify('??########')),
+                'status' => 'inactive', // Use a valid ENUM value for status!
+            ]);
+
+            Log::info('Audit user created successfully.');
         }
+    }
 
-        $departments = [
-            // Headquarters (Ibu Pejabat) - Using Department::BRANCH_TYPE_HQ from your model
-            ['name' => 'Akaun', 'branch_type' => Department::BRANCH_TYPE_HQ, 'code' => 'AKN', 'description' => 'Bahagian Akaun.', 'is_active' => true],
-            ['name' => 'Audit Dalam', 'branch_type' => Department::BRANCH_TYPE_HQ, 'code' => 'AUDIT', 'description' => 'Unit Audit Dalam.', 'is_active' => true],
-            ['name' => 'Dasar Kebudayaan', 'branch_type' => Department::BRANCH_TYPE_HQ, 'code' => 'DSK', 'description' => 'Bahagian Dasar Kebudayaan.', 'is_active' => true],
-            ['name' => 'Dasar Pelancongan dan Hubungan Antarabangsa', 'branch_type' => Department::BRANCH_TYPE_HQ, 'code' => 'DPHA', 'description' => 'Bahagian Dasar Pelancongan dan Hubungan Antarabangsa.', 'is_active' => true],
-            ['name' => 'Hubungan Antarabangsa Kebudayaan', 'branch_type' => Department::BRANCH_TYPE_HQ, 'code' => 'HAK', 'description' => 'Bahagian Hubungan Antarabangsa Kebudayaan.', 'is_active' => true],
-            ['name' => 'Integriti', 'branch_type' => Department::BRANCH_TYPE_HQ, 'code' => 'INTG', 'description' => 'Unit Integriti.', 'is_active' => true],
-            ['name' => 'Kewangan', 'branch_type' => Department::BRANCH_TYPE_HQ, 'code' => 'KEW', 'description' => 'Bahagian Kewangan.', 'is_active' => true],
-            ['name' => 'Komunikasi Korporat', 'branch_type' => Department::BRANCH_TYPE_HQ, 'code' => 'KOMKOR', 'description' => 'Unit Komunikasi Korporat.', 'is_active' => true],
-            ['name' => 'KPI', 'branch_type' => Department::BRANCH_TYPE_HQ, 'code' => 'KPIUNIT', 'description' => 'Unit KPI.', 'is_active' => true],
-            ['name' => 'OSC MM2H', 'branch_type' => Department::BRANCH_TYPE_HQ, 'code' => 'MM2H', 'description' => 'Pusat Sehenti Malaysia My Second Home.', 'is_active' => true],
-            ['name' => 'Pejabat Ketua Setiausaha (KSU)', 'branch_type' => Department::BRANCH_TYPE_HQ, 'code' => 'PKSU', 'description' => 'Pejabat Ketua Setiausaha.', 'is_active' => true],
-            ['name' => 'Pejabat Menteri', 'branch_type' => Department::BRANCH_TYPE_HQ, 'code' => 'PMEN', 'description' => 'Pejabat Menteri.', 'is_active' => true],
-            ['name' => 'Pejabat Timbalan Ketua Setiausaha (Kebudayaan)', 'branch_type' => Department::BRANCH_TYPE_HQ, 'code' => 'PTKSK', 'description' => 'Pejabat Timbalan Ketua Setiausaha (Kebudayaan).', 'is_active' => true],
-            ['name' => 'Pejabat Timbalan Ketua Setiausaha (Pelancongan)', 'branch_type' => Department::BRANCH_TYPE_HQ, 'code' => 'PTKSP', 'description' => 'Pejabat Timbalan Ketua Setiausaha (Pelancongan).', 'is_active' => true],
-            ['name' => 'Pejabat Timbalan Ketua Setiausaha (Pengurusan)', 'branch_type' => Department::BRANCH_TYPE_HQ, 'code' => 'PTKSUR', 'description' => 'Pejabat Timbalan Ketua Setiausaha (Pengurusan).', 'is_active' => true],
-            ['name' => 'Pejabat Timbalan Menteri', 'branch_type' => Department::BRANCH_TYPE_HQ, 'code' => 'PTM', 'description' => 'Pejabat Timbalan Menteri.', 'is_active' => true],
-            ['name' => 'Pelesenan dan Penguatkuasaan Pelancongan', 'branch_type' => Department::BRANCH_TYPE_HQ, 'code' => 'PPP', 'description' => 'Bahagian Pelesenan dan Penguatkuasaan Pelancongan.', 'is_active' => true],
-            ['name' => 'Pembangunan Industri', 'branch_type' => Department::BRANCH_TYPE_HQ, 'code' => 'PBI', 'description' => 'Bahagian Pembangunan Industri.', 'is_active' => true],
-            ['name' => 'Pembangunan Prasarana', 'branch_type' => Department::BRANCH_TYPE_HQ, 'code' => 'PBPR', 'description' => 'Bahagian Pembangunan Prasarana.', 'is_active' => true],
-            ['name' => 'Pengurusan Acara', 'branch_type' => Department::BRANCH_TYPE_HQ, 'code' => 'PGA', 'description' => 'Bahagian Pengurusan Acara.', 'is_active' => true],
-            ['name' => 'Bahagian Pengurusan Maklumat', 'branch_type' => Department::BRANCH_TYPE_HQ, 'code' => 'BPM', 'description' => 'Bahagian Pengurusan Maklumat. Responsible for IT infrastructure, system development, and ICT support.', 'is_active' => true],
-            ['name' => 'Bahagian Pengurusan Sumber Manusia', 'branch_type' => Department::BRANCH_TYPE_HQ, 'code' => 'BSM', 'description' => 'Bahagian Pengurusan Sumber Manusia. Handles employee relations, recruitment, training, and benefits.', 'is_active' => true],
-            ['name' => 'Pentadbiran', 'branch_type' => Department::BRANCH_TYPE_HQ, 'code' => 'PENT', 'description' => 'Bahagian Pentadbiran.', 'is_active' => true],
-            ['name' => 'Perundangan', 'branch_type' => Department::BRANCH_TYPE_HQ, 'code' => 'UU', 'description' => 'Unit Perundangan.', 'is_active' => true],
-            ['name' => 'Sekretariat Visit Malaysia', 'branch_type' => Department::BRANCH_TYPE_HQ, 'code' => 'SVM', 'description' => 'Sekretariat Visit Malaysia.', 'is_active' => true],
+    /**
+     * Create predefined MOTAC departments with realistic structure.
+     */
+    private function createMotacDepartments(): void
+    {
+        // Get a user ID for audit fields (first user is always present due to ensureAuditUserExists)
+        $auditUserId = User::first()->id;
 
-            // State Offices (Pejabat Negeri) - Using Department::BRANCH_TYPE_STATE from your model
-            ['name' => 'MOTAC Johor', 'branch_type' => Department::BRANCH_TYPE_STATE, 'code' => 'JHR', 'description' => 'Pejabat MOTAC Negeri Johor.', 'is_active' => true],
-            ['name' => 'MOTAC Kedah', 'branch_type' => Department::BRANCH_TYPE_STATE, 'code' => 'KDH', 'description' => 'Pejabat MOTAC Negeri Kedah.', 'is_active' => true],
-            ['name' => 'MOTAC Kelantan', 'branch_type' => Department::BRANCH_TYPE_STATE, 'code' => 'KTN', 'description' => 'Pejabat MOTAC Negeri Kelantan.', 'is_active' => true],
-            ['name' => 'MOTAC Melaka', 'branch_type' => Department::BRANCH_TYPE_STATE, 'code' => 'MLK', 'description' => 'Pejabat MOTAC Negeri Melaka.', 'is_active' => true],
-            ['name' => 'MOTAC N. Sembilan', 'branch_type' => Department::BRANCH_TYPE_STATE, 'code' => 'NSN', 'description' => 'Pejabat MOTAC Negeri Sembilan.', 'is_active' => true],
-            ['name' => 'MOTAC Pahang', 'branch_type' => Department::BRANCH_TYPE_STATE, 'code' => 'PHG', 'description' => 'Pejabat MOTAC Negeri Pahang.', 'is_active' => true],
-            ['name' => 'MOTAC Perak', 'branch_type' => Department::BRANCH_TYPE_STATE, 'code' => 'PRK', 'description' => 'Pejabat MOTAC Negeri Perak.', 'is_active' => true],
-            ['name' => 'MOTAC Perlis', 'branch_type' => Department::BRANCH_TYPE_STATE, 'code' => 'PLS', 'description' => 'Pejabat MOTAC Negeri Perlis.', 'is_active' => true],
-            ['name' => 'MOTAC Pulau Pinang', 'branch_type' => Department::BRANCH_TYPE_STATE, 'code' => 'PNG', 'description' => 'Pejabat MOTAC Negeri Pulau Pinang.', 'is_active' => true],
-            ['name' => 'MOTAC Sabah', 'branch_type' => Department::BRANCH_TYPE_STATE, 'code' => 'SBH', 'description' => 'Pejabat MOTAC Negeri Sabah.', 'is_active' => true],
-            ['name' => 'MOTAC Sarawak', 'branch_type' => Department::BRANCH_TYPE_STATE, 'code' => 'SWK', 'description' => 'Pejabat MOTAC Negeri Sarawak.', 'is_active' => true],
-            ['name' => 'MOTAC Selangor', 'branch_type' => Department::BRANCH_TYPE_STATE, 'code' => 'SGR', 'description' => 'Pejabat MOTAC Negeri Selangor.', 'is_active' => true],
-            ['name' => 'MOTAC Terengganu', 'branch_type' => Department::BRANCH_TYPE_STATE, 'code' => 'TRG', 'description' => 'Pejabat MOTAC Negeri Terengganu.', 'is_active' => true],
-            ['name' => 'MOTAC WP Kuala Lumpur / Putrajaya', 'branch_type' => Department::BRANCH_TYPE_STATE, 'code' => 'KLP', 'description' => 'Pejabat MOTAC WP Kuala Lumpur / Putrajaya.', 'is_active' => true],
-            ['name' => 'MOTAC WP Labuan', 'branch_type' => Department::BRANCH_TYPE_STATE, 'code' => 'LBN', 'description' => 'Pejabat MOTAC WP Labuan.', 'is_active' => true],
+        // Define realistic MOTAC department structure
+        $motacDepartments = [
+            // Headquarters Departments
+            ['name' => 'Bahagian Pentadbiran', 'code' => 'BP', 'branch_type' => 'headquarters', 'description' => 'Menguruskan hal-hal pentadbiran am dan sumber manusia'],
+            ['name' => 'Bahagian Kewangan', 'code' => 'BK', 'branch_type' => 'headquarters', 'description' => 'Menguruskan kewangan dan belanjawan kementerian'],
+            ['name' => 'Bahagian Kebudayaan', 'code' => 'BKB', 'branch_type' => 'headquarters', 'description' => 'Membangun dan mempromosikan kebudayaan Malaysia'],
+            ['name' => 'Bahagian Kesenian', 'code' => 'BKS', 'branch_type' => 'headquarters', 'description' => 'Membangun industri kesenian tempatan'],
+            ['name' => 'Bahagian Pelancongan', 'code' => 'BPL', 'branch_type' => 'headquarters', 'description' => 'Mempromosikan pelancongan Malaysia'],
+            ['name' => 'Unit Teknologi Maklumat', 'code' => 'UTM', 'branch_type' => 'headquarters', 'description' => 'Menguruskan infrastruktur dan sistem ICT'],
+            ['name' => 'Unit Komunikasi Korporat', 'code' => 'UKK', 'branch_type' => 'headquarters', 'description' => 'Menguruskan komunikasi dan perhubungan awam'],
+            ['name' => 'Unit Perancangan Strategik', 'code' => 'UPS', 'branch_type' => 'headquarters', 'description' => 'Perancangan strategik dan dasar kementerian'],
+
+            // State Branch Departments (examples)
+            ['name' => 'Jabatan MOTAC Selangor', 'code' => 'JMSEL', 'branch_type' => 'state', 'description' => 'Pejabat negeri MOTAC di Selangor'],
+            ['name' => 'Jabatan MOTAC Johor', 'code' => 'JMJOH', 'branch_type' => 'state', 'description' => 'Pejabat negeri MOTAC di Johor'],
+            ['name' => 'Jabatan MOTAC Pulau Pinang', 'code' => 'JMPPG', 'branch_type' => 'state', 'description' => 'Pejabat negeri MOTAC di Pulau Pinang'],
+            ['name' => 'Jabatan MOTAC Sabah', 'code' => 'JMSAB', 'branch_type' => 'state', 'description' => 'Pejabat negeri MOTAC di Sabah'],
+            ['name' => 'Jabatan MOTAC Sarawak', 'code' => 'JMSRW', 'branch_type' => 'state', 'description' => 'Pejabat negeri MOTAC di Sarawak'],
         ];
 
-        Log::info('Creating/updating specific MOTAC departments from the defined list (Revision 3 - Corrected)...');
-        foreach ($departments as $departmentData) {
-            $departmentData['created_by'] = $auditUserId;
-            $departmentData['updated_by'] = $auditUserId;
-            $departmentData['head_of_department_id'] = $departmentData['head_of_department_id'] ?? null;
-
-            Department::firstOrCreate(
-                ['code' => $departmentData['code']],
-                $departmentData
-            );
+        foreach ($motacDepartments as $dept) {
+            Department::create([
+                'name' => $dept['name'],
+                'code' => $dept['code'],
+                'branch_type' => $dept['branch_type'],
+                'description' => $dept['description'],
+                'is_active' => true,
+                'head_of_department_id' => null, // Can set later if needed
+                'created_by' => $auditUserId,
+                'updated_by' => $auditUserId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
         }
 
-        Log::info('Finished creating/updating specific MOTAC departments.');
+        Log::info('Created ' . count($motacDepartments) . ' predefined MOTAC departments.');
+    }
 
-        $targetDepartmentCount = count($departments);
-        $currentDepartmentCount = Department::count();
+    /**
+     * Create additional random departments for testing purposes.
+     */
+    private function createAdditionalDepartments(): void
+    {
+        // Create 10 additional random departments using the factory
+        Department::factory()
+            ->count(10)
+            ->create();
 
-        if ($currentDepartmentCount < $targetDepartmentCount) {
-            Log::warning(sprintf('Current department count %s is less than defined list count %d. Some defined departments might not have been created due to issues (e.g. duplicate codes if logic was flawed).', $currentDepartmentCount, $targetDepartmentCount));
-        }
-
-        Log::info('Department seeding complete (Revision 3 - Corrected).');
+        Log::info('Created 10 additional random departments.');
     }
 }

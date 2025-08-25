@@ -1,27 +1,54 @@
+# ------------------------------------------------------------------------------
+# MOTAC IRMS - PHPStan Configuration (Larastan)
+# ------------------------------------------------------------------------------
+# This config is tailored for a modern Laravel/Larastan project used by
+# the MOTAC Integrated Resource Management System (Malaysia).
+# - Ensures stricter type safety, best practices, and ignores known safe issues.
+# - Use `vendor/bin/phpstan analyse` for static code analysis.
+# ------------------------------------------------------------------------------
+
 includes:
     - vendor/larastan/larastan/extension.neon
     - vendor/nesbot/carbon/extension.neon
 
 parameters:
+    # Analyze only application code (not tests or vendor)
     paths:
         - app/
-    # Level 10 is the highest level
+    # Analysis strictness: 0 (lenient) to 10 (strict). 5 is a good balance for teams.
     level: 5
-    # Keep this commented out unless you want to suppress the "if condition is always true" errors
+
+    # You may increase to level 6-8 for stricter checks as the codebase matures.
+
+    # Uncomment to allow uncertain PHPDoc types (default: true on level 6+)
     # treatPhpDocTypesAsCertain: false
 
+    # MOTAC IRMS-specific ignore patterns (documented for onboarding):
     ignoreErrors:
-        # Ignore errors related to IdeHelper classes in @mixin PHPDoc tags
+        # Ignore errors for @mixin tags on IDE Helper models (common in Laravel)
         - '#PHPDoc tag @mixin contains unknown class App\\Models\\IdeHelper(.*?)\.#'
-        # Ignore errors related to the generic 'object' type in the EventServiceProvider's observers property
+        # Ignore 'unknown class object' for observers in EventServiceProvider (Laravel convention)
         - '#Property App\\Providers\\EventServiceProvider::\$observers has unknown class object as its type\.#'
-        # Ignore Livewire's dynamic Title attribute error
+        # Ignore Livewire's dynamic Title attribute error (framework quirk)
         - '#^Attribute class Livewire\\Attributes\\Title constructor invoked with 0 parameters, 1 required\.#'
-        # You had '#PHPDoc tag @var#' commented out, which is too broad.
-        # If you have specific, legitimate cases where a @var PHPDoc is misplaced,
-        # you'll need a more specific regex. For now, we'll keep it commented.
-        # - '#PHPDoc tag @var above a method has no effect\.#'
-        # - '#PHPDoc tag @var does not specify variable name\.#'
+        # If you have custom codegen or macro related errors, add them here.
 
-#    excludePaths: # Keep this commented unless you have specific files to exclude
-#        - ./*/*/FileToBeExcluded.php
+    # If you want to exclude specific files or folders from analysis, uncomment below:
+    # excludePaths:
+    #     - tests/*
+    #     - database/*
+    #     - bootstrap/*
+    #     - public/*
+
+    # Set Laravel's container as universal factory to reduce false positives
+    # larastan
+    container_factory_class: 'NunoMaduro\Larastan\LaravelContainerFactory'
+
+    # If you use custom extensions or additional static analysis rules, add here
+
+# ------------------------------------------------------------------------------
+# Documentation:
+# - To run: vendor/bin/phpstan analyse
+# - For stricter checks: increase "level" (max: 10)
+# - For best results, keep this file versioned and reviewed as the system evolves.
+# ------------------------------------------------------------------------------

@@ -1,12 +1,8 @@
-{{-- resources/views/emails/notifications/motac_default_notification.blade.php --}}
 @component('mail::message')
-{{-- EDITED: Use the shared partial for the header to ensure consistency. --}}
 @include('emails._partials.email-header', ['logoUrl' => $logoUrl ?? secure_asset('assets/img/logo/motac_logo_email.png')])
 
-{{-- Greeting --}}
-# {{ $greeting ?? __('Salam Sejahtera') }}@if(isset($notifiableName) && !empty($notifiableName)), {{ $notifiableName }}@endif,
+# {{ $greeting ?? __('Salam Sejahtera') }}@if(isset($notifiableName) && !empty($notifiableName)), {{ $notifiableName }}@endif
 
-{{-- Email Lines (Content) --}}
 @if(isset($introLines) && is_array($introLines))
     @foreach ($introLines as $line)
         {{ $line }}
@@ -19,35 +15,30 @@
     @endforeach
 @endif
 
-@if(isset($lines) && is_array($lines)) {{-- Fallback for original 'lines' variable --}}
+@if(isset($lines) && is_array($lines))
     @foreach ($lines as $line)
         {{ $line }}
     @endforeach
 @endif
 
-
-{{-- Action Button (if provided) --}}
 @if (isset($actionText) && isset($actionUrl) && $actionUrl)
 @component('mail::button', ['url' => $actionUrl, 'color' => $actionColor ?? 'motac_primary'])
 {{ __($actionText) }}
 @endcomponent
 @endif
 
-{{-- Outro Lines --}}
 @if(isset($outroLines) && is_array($outroLines))
     @foreach ($outroLines as $line)
         {{ $line }}
     @endforeach
 @endif
 
-{{-- Salutation --}}
 {{ __('Sekian, terima kasih.') }}<br>
 <br>
 {{ __('Yang menjalankan amanah,') }}<br>
 *{{ $senderName ?? __('Bahagian Pengurusan Maklumat') }}*<br>
 *{{ $senderOrganization ?? __('Kementerian Pelancongan, Seni dan Budaya Malaysia') }}*
 
-{{-- Subcopy (Footer Note) --}}
 @isset($subcopy)
     @slot('subcopy')
         {{ $subcopy }}

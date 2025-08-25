@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
-use App\Models\EmailApplication;
 use App\Models\LoanApplication;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
@@ -20,21 +19,17 @@ class Dashboard extends Component
     public string $displayUserName = '';
     public bool $isNormalUser = false;
 
-    // Properties for the User Dashboard view
+    // For user dashboard
     public int $pendingUserLoanApplicationsCount = 0;
-    public int $pendingUserEmailApplicationsCount = 0;
     public EloquentCollection $userRecentLoanApplications;
-    public EloquentCollection $userRecentEmailApplications;
 
     public function __construct()
     {
-        // Initialize all collections to be safe
         $this->userRecentLoanApplications = new EloquentCollection();
-        $this->userRecentEmailApplications = new EloquentCollection();
     }
 
     /**
-     * Mount the component and fetch data based on the user's role.
+     * Mount and initialize dashboard data.
      */
     public function mount(): void
     {
@@ -48,67 +43,65 @@ class Dashboard extends Component
         }
 
         $this->displayUserName = $user->name;
-        $this->isNormalUser = $user->hasRole('User');
+        // Only treat as normal user if the user has ONLY the 'User' role
+    // Check roles for both guards
+    $webUser = \Auth::guard('web')->user();
+    $sanctumUser = \Auth::guard('sanctum')->user();
+    $webRoles = $webUser && $webUser->roles ? $webUser->roles->pluck('name') : collect();
+    $sanctumRoles = $sanctumUser && $sanctumUser->roles ? $sanctumUser->roles->pluck('name') : collect();
+    $allRoles = $webRoles->merge($sanctumRoles)->unique();
+    $this->isNormalUser = ($allRoles->count() === 1 && $allRoles->first() === 'User');
 
-        // Fetch data only if the user is a normal user.
-        // Admin data will be handled by the dedicated AdminDashboard component.
         if ($this->isNormalUser) {
-            $this->fetchUserData($user);
+            // Stat Card: Pending loan applications
+            $this->pendingUserLoanApplicationsCount = LoanApplication::where('user_id', $user->id)
+                ->whereIn('status', [
+                    LoanApplication::STATUS_DRAFT,
+                    LoanApplication::STATUS_PENDING_SUPPORT,
+                    LoanApplication::STATUS_PENDING_APPROVER_REVIEW,
+                    LoanApplication::STATUS_PENDING_BPM_REVIEW,
+                    LoanApplication::STATUS_APPROVED,
+                ])
+                ->count();
+
+            // Table: Recent loan applications
+            $this->userRecentLoanApplications = LoanApplication::where('user_id', $user->id)
+                ->with(['user:id,name'])
+                ->latest('updated_at')
+                ->limit(5)
+                ->get();
         }
     }
 
     /**
-     * Fetch data scoped to the currently logged-in normal user.
-     */
-    protected function fetchUserData(User $user): void
-    {
-        // Stat Card: ICT loan applications that are currently in process.
-        $this->pendingUserLoanApplicationsCount = LoanApplication::where('user_id', $user->id)
-            ->whereIn('status', [
-                LoanApplication::STATUS_DRAFT,
-                LoanApplication::STATUS_PENDING_SUPPORT,
-                LoanApplication::STATUS_PENDING_APPROVER_REVIEW,
-                LoanApplication::STATUS_PENDING_BPM_REVIEW,
-                LoanApplication::STATUS_APPROVED,
-            ])
-            ->count();
-
-        // Stat Card: Email/ID applications that are in process.
-        $this->pendingUserEmailApplicationsCount = EmailApplication::where('user_id', $user->id)
-            ->whereIn('status', [
-                EmailApplication::STATUS_DRAFT,
-                EmailApplication::STATUS_PENDING_SUPPORT,
-                EmailApplication::STATUS_PENDING_ADMIN,
-                EmailApplication::STATUS_PROCESSING,
-            ])
-            ->count();
-
-        // Table: The user's 5 most recently updated loan applications.
-        $this->userRecentLoanApplications = LoanApplication::where('user_id', $user->id)
-            ->with(['user:id,name'])
-            ->latest('updated_at')
-            ->limit(5)
-            ->get();
-
-        // Table: The user's 5 most recently updated email applications.
-        $this->userRecentEmailApplications = EmailApplication::where('user_id', $user->id)
-            ->with(['user:id,name'])
-            ->latest('updated_at')
-            ->limit(5)
-            ->get();
-    }
-
-    /**
-     * Render the correct dashboard view based on the user's role.
+     * Render the dashboard view depending on role.
      */
     public function render(): View
     {
         if ($this->isNormalUser) {
-            // Render the standard user dashboard
-            return view('livewire.dashboard.user-dashboard');
+            // Render the UserDashboard Livewire component for normal users
+            return view('livewire.dashboard.user-dashboard-wrapper');
         }
 
-        // For Admins and other roles, render the main admin dashboard component
+        // Check roles for both guards
+        $webUser = \Auth::guard('web')->user();
+        $sanctumUser = \Auth::guard('sanctum')->user();
+        $webRoles = $webUser && $webUser->roles ? $webUser->roles->pluck('name') : collect();
+        $sanctumRoles = $sanctumUser && $sanctumUser->roles ? $sanctumUser->roles->pluck('name') : collect();
+        $allRoles = $webRoles->merge($sanctumRoles)->unique();
+        if ($allRoles->contains('Admin')) {
+            return view('livewire.dashboard.admin-dashboard-wrapper');
+        }
+        if ($allRoles->contains('BPM')) {
+            return view('livewire.dashboard.bpm-dashboard-wrapper');
+        }
+        if ($allRoles->contains('IT Admin')) {
+            return view('livewire.dashboard.it-admin-dashboard-wrapper');
+        }
+        if ($allRoles->contains('Approver')) {
+            return view('livewire.dashboard.approver-dashboard-wrapper');
+        }
+        // Default fallback: admin dashboard
         return view('livewire.dashboard.admin-dashboard-wrapper');
     }
 }

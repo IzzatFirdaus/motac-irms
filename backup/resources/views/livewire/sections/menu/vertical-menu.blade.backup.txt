@@ -14,7 +14,7 @@
         $activeOpenClass = $layoutType === 'vertical' ? 'active open' : 'active';
         $currentUserRole = $role;
 
-        // Helper function for active states 
+        // Helper function for active states
         if (!function_exists('isMotacMenuItemActiveRecursiveCheck')) {
             function isMotacMenuItemActiveRecursiveCheck(
                 $item,
@@ -78,7 +78,7 @@
                         <img src="{{ asset($configData['appLogo'] ?? 'assets/img/logo/motac-logo.svg') }}"
                             alt="{{ __('Logo Aplikasi') }}" height="32">
                     </span>
-                    <span class="app-brand-text fw-semibold">{{ __($configData['templateName'] ?? 'Sistem MOTAC') }}</span>
+                    <span class="app-brand-text fw-semibold">{{ __($configData['templateName'] ?? 'MOTAC IRMS') }}</span>
                 </a>
                 <a href="javascript:void(0);" class="layout-menu-toggle menu-link ms-auto">
                     <i class="ti ti-x ti-sm align-middle d-block d-xl-none"></i>

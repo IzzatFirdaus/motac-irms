@@ -1,19 +1,24 @@
-{{-- resources/views/components/authentication-card-logo.blade.php --}}
-{{-- This component is well-implemented for a themeable logo on auth cards. --}}
-<a class="d-flex justify-content-center mb-4 app-brand-link" href="{{ url('/') }}"> {{-- Added app-brand-link for consistency if needed --}}
+{{--
+    resources/views/components/authentication-card-logo.blade.php
+
+    Logo component specifically designed for authentication pages.
+    Includes link to home page and proper MOTAC branding with gradients.
+
+    Usage:
+    <x-authentication-card-logo />
+
+    Features:
+    - Clickable link to home page
+    - Responsive sizing
+    - MOTAC blue color scheme
+    - Gradient effects for visual appeal
+--}}
+<a class="d-flex justify-content-center mb-4 app-brand-link" href="{{ url('/') }}">
     <span class="app-brand-logo demo">
-        {{-- The SVG below uses "currentColor" for its main path, which is good for theming via CSS.
-         The gradients are part of its design and may remain fixed or be adapted if the SVG source changes.
-         The height is set to 40px as per Design Doc 7.1 (Header logo).
-    --}}
         <svg viewBox="0 0 148 80" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-            style="height: 40px; width: auto; color: var(--bs-primary); {{-- Example: Setting color to Bootstrap primary --}}">
+            style="height: 40px; width: auto; color: var(--bs-primary);">
+            {{-- Gradient Definitions for Auth Card Logo --}}
             <defs>
-                {{-- Renamed IDs to be unique if this component is used multiple times on a page, or ensure they are scoped if that's an issue.
-            For inline SVGs, unique IDs are generally good practice.
-            However, for simple display, browser might handle duplicate gradient IDs if they are self-contained.
-            For robustness, added a suffix.
-        --}}
                 <linearGradient id="authCardLogo_a1" x1="46.49" x2="62.46" y1="53.39" y2="48.2"
                     gradientUnits="userSpaceOnUse">
                     <stop stop-opacity=".25" offset="0"></stop>
@@ -25,9 +30,13 @@
                 <linearGradient id="authCardLogo_d3" x1="107.12" x2="122.74" y1="53.41" y2="48.33"
                     xlink:href="#authCardLogo_a1"></linearGradient>
             </defs>
+
+            {{-- Main Logo Shape --}}
             <path style="fill: currentColor;" transform="translate(-.1)"
                 d="M121.36,0,104.42,45.08,88.71,3.28A5.09,5.09,0,0,0,83.93,0H64.27A5.09,5.09,0,0,0,59.5,3.28L43.79,45.08,26.85,0H.1L29.43,76.74A5.09,5.09,0,0,0,34.19,80H53.39a5.09,5.09,0,0,0,4.77-3.26L74.1,35l16,41.74A5.09,5.09,0,0,0,94.82,80h18.95a5.09,5.09,0,0,0,4.76-3.24L148.1,0Z">
             </path>
+
+            {{-- Gradient Overlay Effects --}}
             <path transform="translate(-.1)" d="M52.19,22.73l-8.4,22.35L56.51,78.94a5,5,0,0,0,1.64-2.19l7.34-19.2Z"
                 fill="url(#authCardLogo_a1)"></path>
             <path transform="translate(-.1)" d="M95.73,22l-7-18.69a5,5,0,0,0-1.64-2.21L74.1,35l8.33,21.79Z"

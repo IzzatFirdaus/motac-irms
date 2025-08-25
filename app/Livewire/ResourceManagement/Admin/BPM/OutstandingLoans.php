@@ -9,6 +9,10 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
 
+/**
+ * Livewire component for BPM/admin to manage and process outstanding loan applications
+ * (applications that are approved and pending issuance).
+ */
 #[Layout('layouts.app')]
 class OutstandingLoans extends Component
 {
@@ -16,19 +20,22 @@ class OutstandingLoans extends Component
     use WithPagination;
 
     public string $searchTerm = '';
-
-    public string $sortBy = 'updated_at'; // Default sort
-
-    public string $sortDirection = 'desc'; // Default direction
+    public string $sortBy = 'updated_at'; // Default sort column
+    public string $sortDirection = 'desc'; // Default sort direction
 
     protected string $paginationTheme = 'bootstrap';
 
+    /**
+     * Authorization check on mount.
+     */
     public function mount(): void
     {
         $this->authorize('viewAny', LoanApplication::class);
     }
 
-    // Toggles sort direction or changes sort column
+    /**
+     * Handles column sorting and toggling direction.
+     */
     public function sortBy(string $field): void
     {
         if ($this->sortBy === $field) {
@@ -41,14 +48,16 @@ class OutstandingLoans extends Component
         $this->resetPage();
     }
 
-    // Computed property to get the applications
+    /**
+     * Computed property: gets paginated, filtered outstanding applications.
+     */
     public function getOutstandingApplicationsProperty()
     {
         $this->authorize('viewAny', LoanApplication::class);
 
         $query = LoanApplication::query()
             ->with(['user:id,name', 'loanApplicationItems'])
-            ->where('status', LoanApplication::STATUS_APPROVED); // Fetches applications awaiting issuance
+            ->where('status', LoanApplication::STATUS_APPROVED);
 
         if ($this->searchTerm !== '' && $this->searchTerm !== '0') {
             $searchTerm = '%'.$this->searchTerm.'%';
@@ -69,15 +78,21 @@ class OutstandingLoans extends Component
         return $query->paginate(10);
     }
 
+    /**
+     * Reset pagination when search term is updated.
+     */
     public function updatingSearchTerm(): void
     {
         $this->resetPage();
     }
 
+    /**
+     * Render the Blade view for this component.
+     */
     public function render(): View
     {
         return view('livewire.resource-management.admin.bpm.outstanding-loans', [
             'applications' => $this->outstandingApplications,
-        ])->title(__('Permohonan Pinjaman Untuk Diproses (Tindakan BPM)'));
+        ]);
     }
 }

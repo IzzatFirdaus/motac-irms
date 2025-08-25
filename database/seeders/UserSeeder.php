@@ -3,93 +3,140 @@
 namespace Database\Seeders;
 
 use App\Models\Department;
-use App\Models\Grade; // For assigning users to existing departments
-use App\Models\Position;      // For assigning users to existing grades
-use App\Models\User;   // For assigning users to existing positions
+use App\Models\Grade;
+use App\Models\Position;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Log;
-use Spatie\Permission\Models\Role; // To check role existence
+use Spatie\Permission\Models\Role;
 
+/**
+ * Seeder for general users.
+ * Optimized for batch user creation by role, minimizes DB queries and assigns roles in bulk where possible.
+ * Ensures all users are assigned to existing Departments, Positions, and Grades.
+ * After creation, roles are assigned efficiently.
+ */
 class UserSeeder extends Seeder
 {
-    public function run(int $numberOfUsers = 50): void // Allow overriding the number of users
+    /**
+     * Run the database seeds.
+     * @param int $numberOfUsers
+     */
+    public function run(int $numberOfUsers = 50): void
     {
-        Log::info('Starting general User seeding (Revision 3)...');
+        Log::info('Starting optimized general User seeding...');
 
-        // Ensure AdminUserSeeder has run and created necessary roles.
-        // This seeder assumes roles like 'Admin', 'BPM Staff', 'IT Admin', 'User', 'Approver', 'HOD' exist.
-        if (Role::where('name', 'User')->doesntExist()) {
-            Log::error('Core roles not found. Please run RoleAndPermissionSeeder first. Aborting UserSeeder.');
+        // Ensure roles exist (should be created by RoleAndPermissionSeeder)
+        $coreRoles = ['User', 'BPM Staff', 'IT Admin', 'Approver', 'HOD'];
+        foreach ($coreRoles as $roleName) {
+            if (Role::where('name', $roleName)->doesntExist()) {
+                Log::error("Core role '{$roleName}' not found. Please run RoleAndPermissionSeeder first. Aborting UserSeeder.");
+                return;
+            }
+        }
 
+        // Ensure master data available for foreign keys
+        $departments = Department::pluck('id')->all();
+        $grades = Grade::pluck('id')->all();
+        $positions = Position::pluck('id')->all();
+
+        if (empty($departments) || empty($grades) || empty($positions)) {
+            Log::error('Departments, Grades, or Positions master data is missing. Please run their respective seeders first.');
             return;
         }
 
-        // Check if Admin user from a potential AdminUserSeeder already exists.
-        // This seeder should not recreate primary admin accounts.
-        // Example check, adjust email if your AdminUserSeeder uses a different one.
-        if (User::where('email', config('app.admin_email', 'admin@motac.gov.my'))->exists()) {
-            Log::info('Admin user (e.g., '.config('app.admin_email', 'admin@motac.gov.my').') already exists, UserSeeder will create additional users.');
+        // Don't create duplicate admin user (skip if exists)
+        $adminEmail = config('app.admin_email', 'admin@motac.gov.my');
+        if (User::where('email', $adminEmail)->exists()) {
+            Log::info("Admin user ($adminEmail) already exists. UserSeeder will only create additional users.");
         }
 
-        // Ensure there's some master data for users to belong to.
-        // The factory should ideally handle picking random existing ones.
-        if (Department::count() === 0 || Grade::count() === 0 || Position::count() === 0) {
-            Log::warning('Departments, Grades, or Positions master data is missing. Users may not have these attributes fully set by the factory unless the factory creates them. Consider running their respective seeders first.');
-            // Optionally, call them here if absolutely necessary, but DatabaseSeeder order is preferred.
-            // $this->call([DepartmentSeeder::class, GradeSeeder::class, PositionSeeder::class]);
-        }
-
+        // Define proportions for each role
         $rolesToUsersRatio = [
-            'User' => 0.50,      // General users
-            'BPM Staff' => 0.10,
-            'IT Admin' => 0.10,
-            'Approver' => 0.20,  // General approvers (e.g., supporting officers)
-            'HOD' => 0.10,       // Heads of Department
+            'User'      => 0.5,   // General users
+            'BPM Staff' => 0.1,
+            'IT Admin'  => 0.1,
+            'Approver'  => 0.2,
+            'HOD'       => 0.1,
         ];
 
-        $totalCreated = 0;
-
+        // Prepare user data for batch creation
+        $usersToCreate = [];
         foreach ($rolesToUsersRatio as $roleName => $ratio) {
-            $countForRole = (int) ($numberOfUsers * $ratio);
-            if ($countForRole === 0 && $ratio > 0) { // Ensure at least 1 if ratio is small for small $numberOfUsers
-                $countForRole = 1;
+            $countForRole = (int) round($numberOfUsers * $ratio);
+            $countForRole = max(1, $countForRole); // Ensure at least 1 per role
+
+            for ($i = 0; $i < $countForRole; $i++) {
+                $usersToCreate[] = [
+                    'role' => $roleName,
+                    'department_id' => $departments[array_rand($departments)],
+                    'grade_id'      => $grades[array_rand($grades)],
+                    'position_id'   => $positions[array_rand($positions)],
+                ];
             }
+        }
 
-            if ($countForRole > 0) {
-                $factory = User::factory()->count($countForRole);
-                $stateMethod = 'as'.str_replace(' ', '', $roleName); // e.g., asBpmStaff, asItAdmin
+        // Shuffle the user array for more randomness
+        shuffle($usersToCreate);
 
-                if (method_exists($factory, $stateMethod) && Role::where('name', $roleName)->exists()) {
-                    $factory->{$stateMethod}()->create();
-                    Log::info(sprintf("Created %d users with role '%s'.", $countForRole, $roleName));
-                    $totalCreated += $countForRole;
-                } elseif ($roleName === 'User' && Role::where('name', $roleName)->exists()) {
-                    // Default factory state should assign 'User' role
-                    $factory->create(); // Assumes factory's configure() method assigns 'User' role by default
-                    Log::info(sprintf("Created %d general users (default 'User' role).", $countForRole));
-                    $totalCreated += $countForRole;
-                } else {
-                    Log::warning(sprintf("State method '%s' for role '%s' not found in UserFactory or role does not exist. Skipping these users.", $stateMethod, $roleName));
+        // Prepare arrays for role assignment
+        $roleToUserIds = [];
+        $userRecords = [];
+
+        // Use factory to create all users, then assign roles efficiently after creation.
+        foreach ($usersToCreate as $data) {
+            $user = User::factory()->make([
+                'department_id' => $data['department_id'],
+                'grade_id'      => $data['grade_id'],
+                'position_id'   => $data['position_id'],
+                // status, email, etc. are randomized by the factory
+            ]);
+            $userRecords[] = $user->getAttributes();
+        }
+
+        // Insert all users in a batch
+        $insertedIds = [];
+        foreach (array_chunk($userRecords, 200) as $chunk) {
+            $ids = [];
+            foreach ($chunk as $userData) {
+                $user = User::create($userData);
+                $ids[] = $user->id;
+                // Keep track of role to user id mapping
+                $userRole = $usersToCreate[array_search($userData, $userRecords)]['role'] ?? 'User';
+                $roleToUserIds[$userRole][] = $user->id;
+            }
+            $insertedIds = array_merge($insertedIds, $ids);
+        }
+
+        // Assign roles in bulk after user creation
+        // Assign roles for both 'web' and 'sanctum' guards
+        $guards = ['web', 'sanctum'];
+        foreach ($roleToUserIds as $roleName => $userIds) {
+            foreach ($guards as $guard) {
+                $role = Role::where('name', $roleName)->where('guard_name', $guard)->first();
+                foreach ($userIds as $userId) {
+                    $user = User::find($userId);
+                    if ($user && method_exists($user, 'assignRole')) {
+                        $user->assignRole($role);
+                    }
                 }
             }
         }
 
-        // Create some deleted users for testing soft delete functionalities
-        if ($numberOfUsers > 0) { // Only if we are creating users
-            $deletedUsersCount = max(2, (int) ($numberOfUsers * 0.05)); // Create a small number of deleted users
-            User::factory()->count($deletedUsersCount)->deleted()->create();
-            Log::info(sprintf('Created %d deleted user records.', $deletedUsersCount));
-            $totalCreated += $deletedUsersCount; // These are also created users
-        }
+        // Create some soft deleted users for testing
+        $deletedUsersCount = max(2, (int) ($numberOfUsers * 0.05));
+        User::factory()
+            ->count($deletedUsersCount)
+            ->deleted()
+            ->create();
 
-        // Create some pending users for testing pending status functionalities
-        $pendingUsersCount = 5; // Example
-        if (Role::where('name', 'User')->exists()) { // Assuming pending users get 'User' role
-            User::factory()->count($pendingUsersCount)->pending()->create();
-            Log::info(sprintf("Created %d users with 'pending' status.", $pendingUsersCount));
-            $totalCreated += $pendingUsersCount;
-        }
+        // Create some pending users for testing
+        $pendingUsersCount = 5;
+        User::factory()
+            ->count($pendingUsersCount)
+            ->pending()
+            ->create();
 
-        Log::info(sprintf('General User seeding complete (Revision 3). Aimed for %d active users, total records processed: approximately %d.', $numberOfUsers, $totalCreated));
+        Log::info("Optimized User seeding complete. Created approximately $numberOfUsers active users, plus $deletedUsersCount deleted and $pendingUsersCount pending users.");
     }
 }

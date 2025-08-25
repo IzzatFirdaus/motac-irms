@@ -1,4 +1,18 @@
 {
+    // Exclude backup folders from search and file watching
+    "files.exclude": {
+        "**/backup": true,
+        "**/backup/**": true,
+        "**/_documentation/backup": true,
+        "**/_documentation/backup/**": true
+    },
+    "search.exclude": {
+        "**/backup": true,
+        "**/backup/**": true,
+        "**/_documentation/backup": true,
+        "**/_documentation/backup/**": true
+    },
+    // PHP & extension settings (kept from previous file)
     "php.version": "8.4",
     "CodeGPT.apiKey": "CodeGPT Plus Beta"
 }

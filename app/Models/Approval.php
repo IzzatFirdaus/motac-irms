@@ -14,269 +14,295 @@ use Illuminate\Support\Str;
 
 /**
  * Approval Model.
- * 
- * Represents an approval task for various approvable items (e.g., EmailApplication, LoanApplication).
- * System Design Reference: MOTAC Integrated Resource Management System (Revision 3) - Section 4.4
+ *
+ * Represents an approval task for a polymorphic "approvable" (e.g., LoanApplication).
+ * This model is aligned with the updated approvals table which supports richer workflow:
+ * - status as string (pending, approved, rejected, canceled, forwarded)
+ * - dedicated decision timestamps (approved_at, rejected_at, canceled_at, resubmitted_at)
+ * - notes field
  *
  * @property int $id
  * @property string $approvable_type
  * @property int $approvable_id
+ * @property string|null $stage
  * @property int $officer_id
- * @property string|null $stage e.g., support_review, admin_review, hod_review
  * @property string $status
- * @property string|null $comments
- * @property \Illuminate\Support\Carbon|null $approval_timestamp
+ * @property string|null $notes
+ * @property \Illuminate\Support\Carbon|null $approved_at
+ * @property \Illuminate\Support\Carbon|null $rejected_at
+ * @property \Illuminate\Support\Carbon|null $canceled_at
+ * @property \Illuminate\Support\Carbon|null $resubmitted_at
  * @property int|null $created_by
  * @property int|null $updated_by
  * @property int|null $deleted_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read Model|\Eloquent $approvable
+ *
+ * @property-read \Illuminate\Database\Eloquent\Model $approvable
+ * @property-read \App\Models\User|null $officer
  * @property-read \App\Models\User|null $creator
- * @property-read \App\Models\User|null $deleter
- * @property-read string|null $stage_translated
- * @property-read string $status_color_class
- * @property-read string $status_translated
- * @property-read \App\Models\User $officer
  * @property-read \App\Models\User|null $updater
+ * @property-read \App\Models\User|null $deleter
+ *
  * @method static \Database\Factories\ApprovalFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereApprovableId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereApprovableType($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereApprovalTimestamp($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereComments($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereCreatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereDeletedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereOfficerId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereStage($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereUpdatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval withoutTrashed()
- * @mixin \Eloquent
  */
 class Approval extends Model
 {
     use HasFactory;
     use SoftDeletes;
 
-    public const STATUS_PENDING = 'pending';
+    // ---- STATUS CONSTANTS (must match DB check constraint) ----
+    public const STATUS_PENDING   = 'pending';
+    public const STATUS_APPROVED  = 'approved';
+    public const STATUS_REJECTED  = 'rejected';
+    public const STATUS_CANCELED  = 'canceled';
+    public const STATUS_FORWARDED = 'forwarded'; // used when forwarded/resubmitted to another officer
 
-    public const STATUS_APPROVED = 'approved';
-
-    public const STATUS_REJECTED = 'rejected';
-
-    public const STATUS_CANCELED = 'canceled'; // Corrected typo from CANCELED to CANCELLED if that was intended based on LoanApplication model
-
-    // Stage Constants (Refined for clarity and distinction)
-    public const STAGE_EMAIL_SUPPORT_REVIEW = 'email_support_review';
-
-    public const STAGE_EMAIL_ADMIN_REVIEW = 'email_admin_review'; // If IT Admin does a review/approval step
-
+    // ---- STAGE CONSTANTS (expandable as workflow evolves) ----
+    public const STAGE_PENDING_HOD_REVIEW  = 'pending_hod_review';
+    public const STAGE_FINAL_APPROVAL      = 'final_approval';
     public const STAGE_LOAN_SUPPORT_REVIEW = 'loan_support_review';
+    public const STAGE_LOAN_APPROVER_REVIEW = 'loan_approver_review';
+    public const STAGE_LOAN_BPM_REVIEW     = 'loan_bpm_review';
+    public const STAGE_GENERAL_REVIEW      = 'general_review';
+    public const STAGE_SUPPORT_REVIEW      = 'support_review';
 
-    // public const STAGE_LOAN_HOD_REVIEW = 'loan_hod_review'; // Old Constant
-    public const STAGE_LOAN_APPROVER_REVIEW = 'loan_approver_review'; // New Constant for general approver
-
-    public const STAGE_LOAN_BPM_REVIEW = 'loan_bpm_review';
-
-    public const STAGE_GENERAL_REVIEW = 'general_review'; // Generic stage if needed
-
-    // This was in your model. If used for a common 'Support Review' across different types.
-    public const STAGE_SUPPORT_REVIEW = 'support_review';
-
+    // Human-readable status labels (used by accessors/UI)
     public static array $STATUSES_LABELS = [
-        self::STATUS_PENDING => 'Menunggu Keputusan',
-        self::STATUS_APPROVED => 'Diluluskan',
-        self::STATUS_REJECTED => 'Ditolak',
-        self::STATUS_CANCELED => 'Dibatalkan', // Corrected typo
+        self::STATUS_PENDING   => 'Menunggu Keputusan',
+        self::STATUS_APPROVED  => 'Diluluskan',
+        self::STATUS_REJECTED  => 'Ditolak',
+        self::STATUS_CANCELED  => 'Dibatalkan',
+        self::STATUS_FORWARDED => 'Dimajukan',
     ];
 
+    // Human-readable stage labels (used by accessors/UI)
     public static array $STAGES_LABELS = [
-        self::STAGE_EMAIL_SUPPORT_REVIEW => 'Sokongan Permohonan E-mel (Pegawai Penyokong)',
-        self::STAGE_EMAIL_ADMIN_REVIEW => 'Semakan Pentadbir E-mel (BPM/IT)',
-        self::STAGE_LOAN_SUPPORT_REVIEW => 'Sokongan Permohonan Pinjaman (Pegawai Penyokong)',
-        // self::STAGE_LOAN_HOD_REVIEW => 'Kelulusan Ketua Jabatan (Pinjaman)', // Old Label
-        self::STAGE_LOAN_APPROVER_REVIEW => 'Kelulusan Pegawai Pelulus (Pinjaman)', // New Label
-        self::STAGE_LOAN_BPM_REVIEW => 'Semakan & Kelulusan Akhir BPM (Pinjaman)',
-        self::STAGE_GENERAL_REVIEW => 'Peringkat Semakan Umum',
-        self::STAGE_SUPPORT_REVIEW => 'Peringkat Sokongan Umum',
+        self::STAGE_PENDING_HOD_REVIEW  => 'Semakan Ketua Jabatan',
+        self::STAGE_FINAL_APPROVAL      => 'Kelulusan Akhir',
+        self::STAGE_LOAN_SUPPORT_REVIEW => 'Semakan Sokongan Pinjaman',
+        self::STAGE_LOAN_APPROVER_REVIEW => 'Semakan Pelulus Pinjaman',
+        self::STAGE_LOAN_BPM_REVIEW     => 'Semakan BPM Pinjaman',
+        self::STAGE_GENERAL_REVIEW      => 'Semakan Umum',
+        self::STAGE_SUPPORT_REVIEW      => 'Semakan Sokongan',
     ];
 
-    protected $table = 'approvals';
-
+    // Mass-assignable columns (aligned with migration)
     protected $fillable = [
         'approvable_type',
         'approvable_id',
-        'officer_id',
         'stage',
+        'officer_id',
         'status',
-        'comments',
-        'approval_timestamp',
-        // created_by, updated_by are typically handled by observers or traits
+        'notes',
+        'approved_at',
+        'rejected_at',
+        'canceled_at',
+        'resubmitted_at',
+        // blameable fields are normally filled by observers or seeders; include only if you plan to mass-assign them
+        // 'created_by', 'updated_by', 'deleted_by',
     ];
 
+    // Attribute casting
     protected $casts = [
-        'approval_timestamp' => 'datetime',
-        'created_at' => 'datetime', // Eloquent handles these by default but explicit is fine
-        'updated_at' => 'datetime',
-        'deleted_at' => 'datetime',
+        'approved_at'   => 'datetime',
+        'rejected_at'   => 'datetime',
+        'canceled_at'   => 'datetime',
+        'resubmitted_at'=> 'datetime',
+        'created_at'    => 'datetime',
+        'updated_at'    => 'datetime',
+        'deleted_at'    => 'datetime',
     ];
 
-    protected $attributes = [
-        'status' => self::STATUS_PENDING, // Default status for new approval tasks
-    ];
-
-    // Static helpers
-    public static function getStatusOptions(): array
-    {
-        // Use translation helper for labels
-        return array_map(fn ($label) => __($label), self::$STATUSES_LABELS);
-    }
-
     /**
-     * Get all possible status values as a simple array of keys.
-     *
-     * @return array<string>
+     * Factory reference override.
      */
-    public static function getStatuses(): array
-    {
-        return array_keys(self::$STATUSES_LABELS);
-    }
-
-    /**
-     * Get decision statuses for forms (excluding pending).
-     *
-     * @return array<string, string>
-     */
-    public static function getDecisionStatuses(): array
-    {
-        return [
-            self::STATUS_APPROVED => __('Luluskan'),
-            self::STATUS_REJECTED => __('Tolak'),
-        ];
-    }
-
-    public static function getStageOptions(): array // Renamed from getStages for consistency
-    {
-        return array_map(fn ($label) => __($label), self::$STAGES_LABELS);
-    }
-
-    public static function getStageKeys(): array
-    {
-        return array_keys(self::$STAGES_LABELS);
-    }
-
-    public static function getStageDisplayName(?string $stageKey): string
-    {
-        if ($stageKey === null) {
-            return __('Tidak Berkaitan');
-        }
-
-        return __(self::$STAGES_LABELS[$stageKey] ?? Str::title(str_replace('_', ' ', $stageKey)));
-    }
-
     protected static function newFactory(): ApprovalFactory
     {
         return ApprovalFactory::new();
     }
 
-    // Relationships
+    // ---- RELATIONSHIPS ----
+
+    /**
+     * Polymorphic relationship to the approvable item (e.g., LoanApplication).
+     */
     public function approvable(): MorphTo
     {
         return $this->morphTo();
     }
 
+    /**
+     * Officer who is responsible for approval task.
+     */
     public function officer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'officer_id');
     }
 
+    /**
+     * Creator user (for blameable/audit).
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    /**
+     * Updater user (for blameable/audit).
+     */
     public function updater(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
 
+    /**
+     * Deleter user (for blameable/audit).
+     */
     public function deleter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by');
     }
 
-    // Accessors
-    public function getStatusTranslatedAttribute(): string
-    {
-        return __(self::$STATUSES_LABELS[$this->status] ?? Str::title(str_replace('_', ' ', (string) $this->status)));
-    }
+    // ---- ACCESSORS / PRESENTATION HELPERS ----
 
-    public function getStageTranslatedAttribute(): ?string
+    /**
+     * Get readable status label.
+     */
+    public function getStatusLabelAttribute(): string
     {
-        return $this->stage ? self::getStageDisplayName($this->stage) : null;
+        return self::$STATUSES_LABELS[$this->status] ?? Str::title(str_replace('_', ' ', (string) $this->status));
     }
 
     /**
-     * EDITED: Get the corresponding color class for the status badge.
+     * Get readable stage label.
      */
-    public function getStatusColorClassAttribute(): string
+    public function getStageLabelAttribute(): string
+    {
+        return self::$STAGES_LABELS[$this->stage] ?? Str::title(str_replace('_', ' ', (string) $this->stage));
+    }
+
+    /**
+     * Get bootstrap color class for status (for badge display).
+     */
+    public function getStatusColorAttribute(): string
     {
         return match ($this->status) {
-            self::STATUS_APPROVED => 'text-bg-success',
-            self::STATUS_REJECTED => 'text-bg-danger',
-            self::STATUS_CANCELED => 'text-bg-dark',
-            self::STATUS_PENDING => 'text-bg-warning',
-            default => 'text-bg-secondary',
+            self::STATUS_APPROVED  => 'text-bg-success',
+            self::STATUS_REJECTED  => 'text-bg-danger',
+            self::STATUS_CANCELED  => 'text-bg-dark',
+            self::STATUS_PENDING   => 'text-bg-warning',
+            self::STATUS_FORWARDED => 'text-bg-info',
+            default                => 'text-bg-secondary',
         };
     }
 
     /**
-     * Eager loads default relationships commonly needed when displaying approval information.
-     * This helps prevent N+1 query problems.
+     * Helper: returns all valid stage keys (for validation/factories/UI).
+     */
+    public static function getStageKeys(): array
+    {
+        return array_keys(self::$STAGES_LABELS);
+    }
+
+    /**
+     * Helper: returns all valid status keys (for validation/factories/UI).
+     */
+    public static function getStatusKeys(): array
+    {
+        return array_keys(self::$STATUSES_LABELS);
+    }
+
+    /**
+     * Eager-load default relationships for display (approvable and officer).
+     * This method is handy for controller/view layers to ensure necessary relations are loaded.
      */
     public function loadDefaultRelationships(): self
     {
         if (! $this->relationLoaded('approvable')) {
             $this->load([
                 'approvable' => function (MorphTo $morphTo): void {
+                    // Preload useful relationships for supported approvable models.
                     $morphTo->morphWith([
-                        EmailApplication::class => [
-                            'user:id,name,department_id,grade_id,position_id', // Select specific fields needed
-                            'user.department:id,name',
-                            'user.grade:id,name',
-                            'user.position:id,name',
-                        ],
                         LoanApplication::class => [
-                            'user:id,name,department_id,grade_id,position_id', // Select specific fields needed
+                            'user:id,name,department_id,grade_id,position_id',
                             'user.department:id,name',
                             'user.grade:id,name',
                             'user.position:id,name',
-                            'loanApplicationItems', // Changed from 'applicationItems'
+                            'loanApplicationItems',
                         ],
-                        // Add other approvable models here if necessary
                     ]);
                 },
             ]);
         }
 
         if (! $this->relationLoaded('officer')) {
-            $this->load('officer:id,name'); // Load only necessary fields
+            $this->load('officer:id,name');
         }
 
-        if (method_exists($this, 'creator') && ! $this->relationLoaded('creator')) {
-            $this->load('creator:id,name'); // Load only necessary fields
+        if (! $this->relationLoaded('creator')) {
+            $this->load('creator:id,name');
         }
 
         return $this;
+    }
+
+    // ---- SCOPES (useful for querying) ----
+
+    /**
+     * Scope: approvals assigned to a given officer.
+     */
+    public function scopeByOfficer($query, int $officerId)
+    {
+        return $query->where('officer_id', $officerId);
+    }
+
+    /**
+     * Scope: approvals for a particular stage.
+     */
+    public function scopeStage($query, string $stage)
+    {
+        return $query->where('stage', $stage);
+    }
+
+    /**
+     * Scope: pending approvals.
+     */
+    public function scopePending($query)
+    {
+        return $query->where('status', self::STATUS_PENDING);
+    }
+
+    /**
+     * Scope: approved approvals.
+     */
+    public function scopeApproved($query)
+    {
+        return $query->where('status', self::STATUS_APPROVED);
+    }
+
+    /**
+     * Scope: rejected approvals.
+     */
+    public function scopeRejected($query)
+    {
+        return $query->where('status', self::STATUS_REJECTED);
+    }
+
+    /**
+     * Scope: canceled approvals.
+     */
+    public function scopeCanceled($query)
+    {
+        return $query->where('status', self::STATUS_CANCELED);
+    }
+
+    /**
+     * Scope: forwarded approvals.
+     */
+    public function scopeForwarded($query)
+    {
+        return $query->where('status', self::STATUS_FORWARDED);
     }
 }

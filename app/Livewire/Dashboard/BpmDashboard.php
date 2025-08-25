@@ -5,12 +5,15 @@ namespace App\Livewire\Dashboard;
 use App\Models\Equipment;
 use Livewire\Component;
 
+/**
+ * BPM Dashboard Livewire Component
+ *
+ * Shows BPM inventory and outstanding loan data.
+ */
 class BpmDashboard extends Component
 {
     public int $availableLaptopsCount = 0;
-
     public int $availableProjectorsCount = 0;
-
     public int $availablePrintersCount = 0;
 
     public function mount(): void
@@ -30,7 +33,6 @@ class BpmDashboard extends Component
 
     public function render()
     {
-        // This view now contains the calls to the self-contained Livewire list components.
         return view('livewire.dashboard.bpm-dashboard');
     }
 }

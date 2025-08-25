@@ -1,19 +1,46 @@
-{{-- resources/views/components/dialog-modal.blade.php --}}
-@props(['id' => null, 'maxWidth' => null]) {{-- Removed title, content, footer as they come from slots --}}
+{{--
+    resources/views/components/dialog-modal.blade.php
 
-{{-- This component is a general dialog, assuming x-modal provides the
-     outer Bootstrap modal shell and standard named slots.
-     Ensure x-modal is styled according to MOTAC theme. --}}
+    Standard dialog modal component that extends the base modal.
+    Provides consistent structure for dialog-style modals.
+
+    Props:
+    - $id: string - Modal ID (optional)
+    - $maxWidth: string - Modal size (optional)
+
+    Slots:
+    - $title: Modal title
+    - $content: Main content area
+    - $footer: Footer with action buttons
+
+    Usage:
+    <x-dialog-modal>
+        <x-slot name="title">
+            {{ __('Edit User') }}
+        </x-slot>
+
+        <x-slot name="content">
+            <!-- Form fields here -->
+        </x-slot>
+
+        <x-slot name="footer">
+            <button type="button" class="btn btn-secondary">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </x-slot>
+    </x-dialog-modal>
+
+    Dependencies: x-modal component
+--}}
+@props(['id' => null, 'maxWidth' => null])
+
 <x-modal :id="$id" :maxWidth="$maxWidth" {{ $attributes }}>
     <x-slot name="title">
-        {{ $title }} {{-- Slot for title --}}
+        {{ $title }}
     </x-slot>
-
     <x-slot name="content">
-        {{ $content }} {{-- Slot for content --}}
+        {{ $content }}
     </x-slot>
-
     <x-slot name="footer">
-        {{ $footer }} {{-- Slot for footer buttons --}}
+        {{ $footer }}
     </x-slot>
 </x-modal>

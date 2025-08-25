@@ -1,13 +1,26 @@
+# MOTAC IRMS - StyleCI Configuration
+# ----------------------------------
+# This configuration enforces coding standards for PHP, JS, and CSS codebases
+# in the MOTAC Integrated Resource Management System.
+# - Uses Laravel preset for PHP for compatibility with Laravel conventions.
+# - Excludes files that should not be styled (index.php, webpack.mix.js).
+# - Enables CSS linting for consistent frontend styles.
+# - You can further customize this file as the system evolves.
+
 php:
-  preset: laravel
-  version: 8
+  preset: laravel          # Use Laravel's standard PHP code style
+  version: 8               # Target PHP 8.x for compatibility with MOTAC IRMS
   disabled:
-    - no_unused_imports
+    - no_unused_imports    # Allow unused imports for Laravel's facades and IDE helpers
   finder:
     not-name:
-      - index.php
+      - index.php          # Exclude entry point scripts from styling
+
 js:
   finder:
     not-name:
-      - webpack.mix.js
-css: true
+      - webpack.mix.js     # Exclude build configuration from JS style checks
+
+css: true                  # Enable CSS style checking for consistent frontend appearance
+
+# You may add more languages or rules as needed for MOTAC IRMS.

@@ -1,6 +1,10 @@
-{{-- resources/views/livewire/dashboard/admin-dashboard-wrapper.blade.php --}}
 <div>
-    {{-- This component checks the user's role and loads the appropriate dashboard view. --}}
+    {{--
+        Dashboard Role-Based Wrapper
+        Checks the current user's role (provided as $isAdmin, $isApprover, etc.).
+        Loads the relevant dashboard Livewire component.
+        If user has no special role, shows a friendly message.
+    --}}
     @if ($isAdmin)
         @livewire('dashboard.admin-dashboard')
     @elseif ($isApprover)
@@ -10,7 +14,6 @@
     @elseif ($isItAdmin)
         @livewire('dashboard.it-admin-dashboard')
     @else
-        {{-- Fallback for any other privileged user type --}}
         <div class="alert alert-info">{{ __('dashboard.welcome') }}, {{ $displayUserName }}!</div>
     @endif
 </div>

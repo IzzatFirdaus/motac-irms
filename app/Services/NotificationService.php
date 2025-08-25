@@ -4,386 +4,239 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Models\Approval;
-use App\Models\EmailApplication;
-use App\Models\LoanApplication;
-use App\Models\LoanTransaction;
-use App\Models\User;
-use App\Notifications\ApplicationApproved;
-use App\Notifications\ApplicationNeedsAction;
-use App\Notifications\ApplicationRejected;
-use App\Notifications\ApplicationStatusUpdatedNotification;
-use App\Notifications\ApplicationSubmitted;
-use App\Notifications\DefaultUserNotification;
-use App\Notifications\EmailApplicationReadyForProcessingNotification;
-use App\Notifications\EmailProvisionedNotification;
-use App\Notifications\EquipmentIncidentNotification;
-use App\Notifications\EquipmentIssuedNotification;
-use App\Notifications\EquipmentReturnedNotification;
-use App\Notifications\EquipmentReturnReminderNotification;
-use App\Notifications\LoanApplicationReadyForIssuanceNotification;
-use App\Notifications\ProvisioningFailedNotification;
-use App\Notifications\EquipmentOverdueNotification;
+use App\Models\{
+    Approval,
+    EmailApplication,
+    LoanApplication,
+    LoanTransaction,
+    User,
+    HelpdeskTicket,
+    HelpdeskComment,
+    Equipment
+};
+use App\Notifications\{
+    ApplicationApproved,
+    ApplicationNeedsAction,
+    ApplicationRejected,
+    ApplicationStatusUpdatedNotification,
+    ApplicationSubmitted,
+    DefaultUserNotification,
+    EquipmentIncidentNotification,
+    EquipmentIssuedNotification,
+    EquipmentReturnedNotification,
+    EquipmentReturnReminderNotification,
+    EquipmentOverdueNotification,
+    LoanApplicationReadyForIssuanceNotification,
+    SupportPendingApprovalNotification,
+    TicketCreatedNotification,
+    TicketAssignedNotification,
+    TicketStatusUpdatedNotification,
+    TicketCommentAddedNotification
+};
 use Exception;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Notification as NotificationFacade;
+use Illuminate\Support\Facades\Auth;
+
+class NotificationService
+{
+    public function notifyUser(User $user, Notification $notification): void
+    {
+        try {
+            $user->notify($notification);
+            Log::info("Notification sent to user {$user->id}.");
+        } catch (Exception $e) {
+            Log::error("Failed to send notification to user {$user->id}: " . $e->getMessage(), ['exception' => $e]);
+        }
+    }
+
+    /**
+     * Notify an approver that a new approval request is pending their action.
+     *
+     * @param User $approver
+     * @param Approval $approval
+     */
+    public function notifyApproverOfPendingApproval(User $approver, Approval $approval): void
+    {
+        $this->notifyUser($approver, new ApplicationNeedsAction($approval));
+    }
+
+    /**
+     * Notify support officers that a new loan application is pending their review.
+     *
+     * @param LoanApplication $loanApplication
+     */
+    public function notifySupportOfPendingApproval(LoanApplication $loanApplication): void
+    {
+    // Use the 'Supporting Officer' role name which exists in the system
+    $supportUsers = User::role('Supporting Officer')->get();
+        foreach ($supportUsers as $supportUser) {
+            $this->notifyUser($supportUser, new SupportPendingApprovalNotification($loanApplication));
+        }
+    }
+
+    /**
+     * Notify the applicant that their loan application has been approved.
+     *
+     * @param User $recipient
+     * @param LoanApplication $loanApplication
+     */
+    public function notifyApplicationApproved(User $recipient, LoanApplication $loanApplication): void
+    {
+        $this->notifyUser($recipient, new ApplicationApproved($loanApplication));
+    }
+
+    /**
+     * Notify the applicant that their loan application has been rejected.
+     *
+     * @param User $recipient The user to notify (applicant)
+     * @param LoanApplication $loanApplication The application that was rejected
+     * @param string $rejectionReason The reason for rejection
+     * @param User|null $rejecter The user who rejected the application (optional)
+     */
+    public function notifyApplicationRejected(User $recipient, LoanApplication $loanApplication, string $rejectionReason, ?User $rejecter = null): void
+    {
+        // If rejecter is not provided, use the currently authenticated user
+        if ($rejecter === null) {
+            // Safely handle the case when there might not be an authenticated user
+            if (Auth::check()) {
+                $rejecter = Auth::user();
+            } else {
+                // Use system user or the first admin as fallback
+                $rejecter = User::role('Admin')->first() ?? User::find(1);
+            }
+        }
+
+        // Create the notification with proper type hints to make IDE happy
+        $notification = new ApplicationRejected(
+            $loanApplication,   // First argument: LoanApplication
+            $rejecter,          // Second argument: User
+            $rejectionReason    // Third argument: string
+        );
+
+        // Send notification to recipient
+        $this->notifyUser($recipient, $notification);
+    }
 
 /**
- * Service to encapsulate logic for dispatching various notifications.
- * System Design Reference: MOTAC Integrated Resource Management System (Revision 3) - Section 3.1, 9.5
+ * Notify the applicant that their loan application status has been updated.
+ *
+ * @param User $recipient
+ * @param LoanApplication $loanApplication
+ * @param string $newStatus
+ * @param string|null $reason (optional, not in constructor)
  */
-final class NotificationService
+public function notifyApplicationStatusUpdated(User $recipient, LoanApplication $loanApplication, string $newStatus, ?string $reason = null): void
 {
-    private const LOG_AREA = 'NotificationService:';
-
-  public function notifyApplicantStatusUpdate(
-    EmailApplication|LoanApplication $application,
-    string $oldStatus,
-    string $newStatus
-  ): void {
-    $applicant = $application->user()->first();
-    $applicationClass = $application::class;
-    $applicationId = $application->id ?? 'N/A_APP_ID';
-
-    if (! $applicant instanceof User) {
-      Log::warning(self::LOG_AREA . sprintf(' Cannot notify applicant for %s ID %s. Applicant is missing.', $applicationClass, $applicationId), [
-        'application_type' => $applicationClass,
-        'application_id' => $applicationId,
-      ]);
-
-      return;
-    }
-
-    $applicantId = $applicant->id;
-    Log::info(self::LOG_AREA . sprintf(' Preparing ApplicationStatusUpdatedNotification to Applicant ID %d for %s ID %s. Status: %s -> %s.', $applicantId, $applicationClass, $applicationId, $oldStatus, $newStatus), [
-      'applicant_id' => $applicantId,
-      'application_id' => $applicationId,
-    ]);
-
-    try {
-      $notification = new ApplicationStatusUpdatedNotification($application, $oldStatus, $newStatus);
-      $applicant->notify($notification);
-      Log::info(self::LOG_AREA . sprintf(' ApplicationStatusUpdatedNotification sent to Applicant ID %d.', $applicantId));
-    } catch (Exception $exception) {
-      Log::error(self::LOG_AREA . sprintf(' Failed to send ApplicationStatusUpdatedNotification for %s ID %s: ', $applicationClass, $applicationId) . $exception->getMessage(), [
-        'exception' => $exception,
-      ]);
-    }
-  }
-
-  public function notifyUserWithDefaultNotification(
-    User $userToNotify,
-    string $taskTitle,
-    string $taskMessage,
-    ?Model $relatedItem = null,
-    ?string $actionUrl = null,
-    string $actionText = 'Lihat Butiran'
-  ): void {
-    $userId = $userToNotify->id ?? 'N/A_USER_ID';
-    $itemInfo = $relatedItem instanceof Model ? ' related to ' . ($relatedItem::class) . ' ID ' . ($relatedItem->id ?? 'N/A') : '';
-
-    Log::info(self::LOG_AREA . sprintf(" Preparing DefaultUserNotification to User ID %s for task '%s'%s.", $userId, $taskTitle, $itemInfo), [
-      'user_id' => $userId,
-      'task_title' => $taskTitle,
-    ]);
-
-    try {
-      $greetingKey = __('Salam Sejahtera, :name,', ['name' => $userToNotify->name ?? __('Pengguna')]);
-      $additionalData = [];
-      if ($relatedItem instanceof Model) {
-        $additionalData = [
-          'related_item_type' => $relatedItem->getMorphClass(),
-          'related_item_id' => $relatedItem->id,
-          'icon' => $this->getIconForModel($relatedItem),
-        ];
-      }
-
-      $notification = new DefaultUserNotification(
-        $taskTitle,
-        $greetingKey,
-        [$taskMessage],
-        $actionUrl,
-        $actionText,
-        $additionalData
-      );
-      $userToNotify->notify($notification);
-      Log::info(self::LOG_AREA . sprintf(' DefaultUserNotification sent to User ID %s.', $userId));
-    } catch (Exception $exception) {
-      Log::error(self::LOG_AREA . sprintf(' Failed to send DefaultUserNotification to User ID %s: ', $userId) . $exception->getMessage(), [
-        'exception' => $exception,
-      ]);
-    }
-  }
-
-  private function getIconForModel(?Model $model): string
-  {
-    if ($model instanceof EmailApplication) {
-      return 'ti ti-mail';
-    }
-
-    if ($model instanceof LoanApplication) {
-      return 'ti ti-archive';
-    }
-
-    if ($model instanceof Approval) {
-      return 'ti ti-clipboard-check';
-    }
-
-    return 'ti ti-info-circle';
-  }
-
-  public function notifyGroup(
-    iterable|User $users,
-    Notification $notificationInstance,
-    ?Model $relatedModel = null
-  ): void {
-    $context = $relatedModel instanceof Model ? ($relatedModel::class) . ' ID ' . ($relatedModel->id ?? 'N/A') : 'general context';
-    $notificationClass = $notificationInstance::class;
-
-    $notifiables = ($users instanceof User) ? [$users] : $users;
-    $userCount = 0;
-    if (is_array($notifiables) || $notifiables instanceof SupportCollection || $notifiables instanceof EloquentCollection) {
-      $userCount = count($notifiables);
-    } else {
-      foreach ($notifiables as $_) {
-        $userCount++;
-      }
-    }
-
-    if ($userCount === 0) {
-      Log::warning(self::LOG_AREA . sprintf("Attempted to send group notification '%s' but no users provided for context: %s.", $notificationClass, $context));
-
-      return;
-    }
-
-    Log::info(self::LOG_AREA . ' Preparing to send group notification ' . ($notificationClass) . sprintf(' for %s to %d user(s).', $context, $userCount));
-
-    try {
-      NotificationFacade::send($notifiables, $notificationInstance);
-      Log::info(self::LOG_AREA . ' Group notification ' . ($notificationClass) . sprintf(' dispatched to %d users for %s.', $userCount, $context));
-    } catch (Exception $exception) {
-      Log::error(self::LOG_AREA . ' Failed group notification dispatch of ' . ($notificationClass) . sprintf(' for %s: ', $context) . $exception->getMessage(), [
-        'exception' => $exception,
-      ]);
-    }
-  }
-
-  public function notifyApplicantApplicationSubmitted(EmailApplication|LoanApplication $application): void
-  {
-    if (! $application->user) {
-      return;
-    }
-
-    if (class_exists(ApplicationSubmitted::class)) {
-      $this->notifyGroup($application->user, new ApplicationSubmitted($application), $application);
-    } else {
-      Log::error(self::LOG_AREA . 'ApplicationSubmitted class not found.');
-    }
-  }
-
-  public function notifyApproverApplicationNeedsAction(Approval $approvalTask): void
-  {
-    $officer = $approvalTask->officer;
-
-    if (! $officer) {
-      Log::warning(self::LOG_AREA . "Cannot send 'ApplicationNeedsAction' because no officer is assigned to the approval task.", [
-        'approval_id' => $approvalTask->id,
-      ]);
-
-      return;
-    }
-
-    try {
-      $officer->notify(new ApplicationNeedsAction($approvalTask));
-
-      Log::info(self::LOG_AREA . "Successfully dispatched 'ApplicationNeedsAction' notification to officer.", [
-        'approver_id' => $officer->id,
-        'approval_id' => $approvalTask->id,
-      ]);
-    } catch (Exception $exception) {
-      Log::error(self::LOG_AREA . "Failed to send 'ApplicationNeedsAction' notification.", [
-        'error' => $exception->getMessage(),
-        'approver_id' => $officer->id,
-        'approval_id' => $approvalTask->id,
-      ]);
-    }
-  }
-
-  public function sendOverdueReminder(LoanApplication $application): void
-    {
-        if (! $application->user) {
-            Log::warning(self::LOG_AREA.' Cannot send overdue reminder; no applicant associated.', [
-                'application_id' => $application->id,
-            ]);
-            return;
-        }
-
-        try {
-            $application->user->notify(new EquipmentReturnReminderNotification($application, -1));
-            Log::info(self::LOG_AREA.' Overdue reminder sent to applicant.', [
-                'user_id' => $application->user->id,
-                'application_id' => $application->id,
-            ]);
-        } catch (Exception $exception) {
-            Log::error(self::LOG_AREA.' Failed to send EquipmentReturnReminderNotification: '.$exception->getMessage(), [
-                'exception' => $exception,
-                'application_id' => $application->id,
-            ]);
-        }
-    }
-
-  public function notifyApplicantApplicationApproved(EmailApplication|LoanApplication $application): void
-  {
-    if (! $application->user) {
-      return;
-    }
-
-    if (class_exists(ApplicationApproved::class)) {
-      $this->notifyGroup($application->user, new ApplicationApproved($application), $application);
-    } else {
-      Log::error(self::LOG_AREA . 'ApplicationApproved class not found.');
-    }
-  }
-
-  public function notifyApplicantApplicationRejected(EmailApplication|LoanApplication $application, User $rejecter, ?string $reason): void
-  {
-    if (! $application->user) {
-      return;
-    }
-
-    if (class_exists(ApplicationRejected::class)) {
-      $this->notifyGroup($application->user, new ApplicationRejected($application, $rejecter, $reason), $application);
-    } else {
-      Log::error(self::LOG_AREA . 'ApplicationRejected class not found.');
-    }
-  }
-
-  public function notifyAdminEmailReadyForProcessing(EmailApplication $application, User|iterable $admins): void
-  {
-    if (class_exists(EmailApplicationReadyForProcessingNotification::class)) {
-      $this->notifyGroup($admins, new EmailApplicationReadyForProcessingNotification($application), $application);
-    } else {
-      Log::error(self::LOG_AREA . 'EmailApplicationReadyForProcessingNotification class not found.');
-    }
-  }
-
-  public function notifyApplicantEmailProvisioned(EmailApplication $application): void
-  {
-    if (! $application->user) {
-      return;
-    }
-
-    if (class_exists(EmailProvisionedNotification::class)) {
-      $this->notifyGroup($application->user, new EmailProvisionedNotification($application), $application);
-    } else {
-      Log::error(self::LOG_AREA . 'EmailProvisionedNotification class not found.');
-    }
-  }
-
-  public function notifyAdminProvisioningFailed(EmailApplication $application, string $failureReason, User|iterable $admins, ?User $triggeringAdmin = null): void
-  {
-    if (class_exists(ProvisioningFailedNotification::class)) {
-      $this->notifyGroup($admins, new ProvisioningFailedNotification($application, $failureReason, $triggeringAdmin), $application);
-    } else {
-      Log::error(self::LOG_AREA . 'ProvisioningFailedNotification class not found.');
-    }
-  }
-
-  public function notifyBpmLoanReadyForIssuance(LoanApplication $application, User|iterable $bpmStaff): void
-  {
-    if (class_exists(LoanApplicationReadyForIssuanceNotification::class)) {
-      $this->notifyGroup($bpmStaff, new LoanApplicationReadyForIssuanceNotification($application), $application);
-    } else {
-      Log::error(self::LOG_AREA . 'LoanApplicationReadyForIssuanceNotification class not found.');
-    }
-  }
-
-  public function notifyApplicantEquipmentIssued(LoanApplication $application, LoanTransaction $issueTransaction, User $issuedByOfficer): void
-  {
-    if (! $application->user) {
-      return;
-    }
-
-    if (class_exists(EquipmentIssuedNotification::class)) {
-      $this->notifyGroup($application->user, new EquipmentIssuedNotification($application, $issueTransaction, $issuedByOfficer), $application);
-    } else {
-      Log::error(self::LOG_AREA . 'EquipmentIssuedNotification class not found.');
-    }
-  }
-
-  public function notifyApplicantEquipmentReturned(LoanApplication $application, LoanTransaction $returnTransaction, User $returnAcceptingOfficer): void
-  {
-    if (! $application->user) {
-      return;
-    }
-
-    if (class_exists(EquipmentReturnedNotification::class)) {
-      $this->notifyGroup($application->user, new EquipmentReturnedNotification($application, $returnTransaction, $returnAcceptingOfficer), $application);
-    } else {
-      Log::error(self::LOG_AREA . 'EquipmentReturnedNotification class not found.');
-    }
-  }
-
-  public function notifyUserEquipmentReturnReminder(LoanApplication $application, int $daysUntilReturn, User $userToNotify): void
-  {
-    if (class_exists(EquipmentReturnReminderNotification::class)) {
-      $this->notifyGroup($userToNotify, new EquipmentReturnReminderNotification($application, $daysUntilReturn), $application);
-    } else {
-      Log::error(self::LOG_AREA . 'EquipmentReturnReminderNotification class not found.');
-    }
-  }
-
-  public function notifyRelevantPartiesEquipmentIncident(LoanApplication $application, EloquentCollection $incidentItems, string $incidentType, User|iterable $partiesToNotify): void
-  {
-    if (class_exists(EquipmentIncidentNotification::class)) {
-      $this->notifyGroup($partiesToNotify, new EquipmentIncidentNotification($application, $incidentItems, $incidentType), $application);
-    } else {
-      Log::error(self::LOG_AREA . 'EquipmentIncidentNotification class not found.');
-    }
-  }
-
-  /**
-   * Notifies administrators about an application that is stuck in the workflow
-   * because no subsequent approver could be found.
-   */
-  public function notifyAdminOfOrphanedApplication(LoanApplication|EmailApplication $application): void
-  {
-    $admins = User::role('Admin')->where('status', User::STATUS_ACTIVE)->get();
-    if ($admins->isEmpty()) {
-      Log::error(self::LOG_AREA . "No active 'Admin' users found to notify about orphaned application.", [
-        'application_id' => $application->id,
-        'application_type' => $application->getMorphClass(),
-      ]);
-
-      return;
-    }
-
-    $appType = $application instanceof LoanApplication ? 'Pinjaman' : 'Emel';
-    $title = 'Amaran: Permohonan Terkandas';
-    $message = sprintf('Sistem gagal mencari pegawai yang sesuai untuk peringkat kelulusan seterusnya bagi permohonan %s #%d. Sila semak permohonan tersebut dan konfigurasikan aliran kerja kelulusan secara manual jika perlu.', $appType, $application->id);
-
-    $actionUrl = '#'; // Default URL
-    if ($application instanceof LoanApplication) {
-      $actionUrl = route('loan-applications.show', $application->id);
-    } elseif ($application instanceof EmailApplication) {
-      // Assuming a similar route exists for email applications
-      // $actionUrl = route('email-applications.show', $application->id);
-    }
-
-    $this->notifyGroup(
-      $admins,
-      new DefaultUserNotification(
-        $title,
-        'Salam Sejahtera,',
-        [$message],
-        $actionUrl,
-        'Lihat Permohonan'
-      ),
-      $application
+    // The ApplicationStatusUpdatedNotification constructor does not take $reason.
+    $notification = new ApplicationStatusUpdatedNotification(
+        $recipient,      // User
+        $loanApplication, // LoanApplication
+        $newStatus        // string
+        // $reason is not in the constructor, so do not pass it
     );
-  }
+
+    $this->notifyUser($recipient, $notification);
+}
+
+    /**
+     * Notify the applicant that their loan application is ready for issuance.
+     *
+     * @param User $recipient
+     * @param LoanApplication $loanApplication
+     */
+    public function notifyLoanApplicationReadyForIssuance(User $recipient, LoanApplication $loanApplication): void
+    {
+        $this->notifyUser($recipient, new LoanApplicationReadyForIssuanceNotification($loanApplication));
+    }
+
+    /**
+     * Notify a user that equipment has been issued.
+     *
+     * @param User $recipient
+     * @param LoanApplication $loanApplication
+     * @param LoanTransaction $loanTransaction
+     */
+    public function notifyLoanIssued(User $recipient, LoanApplication $loanApplication, LoanTransaction $loanTransaction): void
+    {
+        $this->notifyUser($recipient, new EquipmentIssuedNotification($loanApplication, $loanTransaction));
+    }
+
+    /**
+     * Notify a user that equipment has been returned.
+     *
+     * @param User $recipient
+     * @param LoanApplication $loanApplication
+     * @param LoanTransaction $loanTransaction
+     */
+    public function notifyLoanReturned(User $recipient, LoanApplication $loanApplication, LoanTransaction $loanTransaction): void
+    {
+        $this->notifyUser($recipient, new EquipmentReturnedNotification($loanApplication, $loanTransaction));
+    }
+
+    /**
+     * Notify about an incident related to equipment.
+     *
+     * @param User $recipient
+     * @param LoanApplication $loanApplication
+     * @param Equipment $equipment
+     * @param string $incidentType
+     * @param string|null $notes
+     */
+    public function notifyEquipmentIncident(User $recipient, LoanApplication $loanApplication, Equipment $equipment, string $incidentType, ?string $notes = null): void
+    {
+        $this->notifyUser($recipient, new EquipmentIncidentNotification(
+            $loanApplication,
+            collect([$equipment]),
+            $incidentType
+        ));
+    }
+
+    /**
+     * Notify a user about an upcoming equipment return date.
+     *
+     * @param User $recipient
+     * @param LoanApplication $loanApplication
+     * @param int $daysUntilReturn
+     */
+    public function notifyEquipmentReturnReminder(User $recipient, LoanApplication $loanApplication, int $daysUntilReturn): void
+    {
+        $this->notifyUser($recipient, new EquipmentReturnReminderNotification($loanApplication, $daysUntilReturn));
+    }
+
+    /**
+     * Notify a user about overdue equipment.
+     *
+     * @param User $recipient
+     * @param LoanTransaction $loanTransaction
+     * @param int $overdueDays
+     */
+    public function notifyEquipmentOverdue(User $recipient, LoanTransaction $loanTransaction, int $overdueDays): void
+    {
+        $this->notifyUser($recipient, new EquipmentOverdueNotification(
+            $loanTransaction->loanApplication,
+            $overdueDays
+        ));
+    }
+
+    public function notifyTicketCreated(User $recipient, HelpdeskTicket $ticket, string $recipientType): void
+    {
+        $this->notifyUser($recipient, new TicketCreatedNotification($ticket, $recipientType));
+    }
+
+    public function notifyTicketAssigned(User $assignedTo, HelpdeskTicket $ticket, User $assigner): void
+    {
+        $this->notifyUser($assignedTo, new TicketAssignedNotification($ticket, $assigner));
+    }
+
+    public function notifyTicketStatusUpdated(User $recipient, HelpdeskTicket $ticket, User $updater, string $recipientType): void
+    {
+        $this->notifyUser($recipient, new TicketStatusUpdatedNotification($ticket, $updater, $recipientType));
+    }
+
+    public function notifyTicketCommentAdded(User $recipient, HelpdeskComment $comment, User $commenter, string $recipientType): void
+    {
+        $this->notifyUser($recipient, new TicketCommentAddedNotification($comment, $commenter, $recipientType));
+    }
 }

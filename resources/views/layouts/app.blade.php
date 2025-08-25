@@ -1,4 +1,8 @@
-{{-- resources/views/layouts/app.blade.php --}}
+{{-- resources/views/layouts/layout-app.blade.php --}}
+{{-- Main application layout for Livewire full-page apps or those using the vertical sidebar and top navbar.
+    Filename updated from app.blade.php to layout-app.blade.php as per new convention.
+--}}
+
 @php
     $configData = \App\Helpers\Helpers::appClasses();
 
@@ -15,7 +19,7 @@
         <div class="layout-container">
 
             {{-- Sidebar / Menu --}}
-            @livewire('sections.menu.vertical-menu')
+            @livewire('sections.menu.vertical-menu') {{-- The vertical sidebar menu --}}
 
             <div class="layout-page">
                 {{-- Top Navbar --}}
@@ -43,7 +47,7 @@
             </div>
         </div>
 
-        {{-- Menu Overlay --}}
+        {{-- Menu Overlay for mobile/overlay states --}}
         <div class="layout-overlay layout-menu-toggle"></div>
         <div class="drag-target"></div>
     </div>

@@ -1,198 +1,157 @@
 <?php
 
-// File: database/seeders/ApprovalSeeder.php
-
 namespace Database\Seeders;
 
 use App\Models\Approval;
-use App\Models\EmailApplication;
-// Removed: use App\Models\Grade; // Not directly used in getOfficerIds anymore
 use App\Models\LoanApplication;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Builder; // Keep for type hinting if complex queries remain
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Collection as EloquentCollection;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
-use Spatie\Permission\Models\Role; // Import Role model
 
+/**
+ * Optimized ApprovalSeeder for batch creation.
+ * - Batches inserts for better performance.
+ * - Minimizes user and application queries.
+ * - Only creates approvals if there are loan applications and eligible officers.
+ * - Uses model constants and avoids per-record Eloquent creation where possible.
+ */
 class ApprovalSeeder extends Seeder
 {
     public function run(): void
     {
-        Log::info('Starting Approval seeding (Revised Officer Logic)...');
+        Log::info('Starting Approval seeding (Optimized)...');
 
+        // Find or create a user to use for audit columns (created_by/updated_by).
         $auditUser = User::orderBy('id')->first() ?? User::factory()->create(['name' => 'Audit User Fallback (ApprovalSeeder)']);
 
-        $officerIds = $this->getPotentialOfficerIds($auditUser->id);
-        if ($officerIds->isEmpty()) {
-            Log::warning('No potential approval officers found based on roles. Approval seeding will use a fallback officer.');
-            $fallbackOfficer = User::factory()->create(['name' => 'Fallback Approval Officer (ApprovalSeeder)']);
-            $officerIds = new EloquentCollection([$fallbackOfficer->id]);
-        }
-
-        $emailApplications = EmailApplication::query()->inRandomOrder()->limit(10)->get();
-        if ($emailApplications->isEmpty() && EmailApplication::count() > 0) {
-            $emailApplications = EmailApplication::take(5)->get();
-        } elseif (EmailApplication::count() === 0) {
-            Log::info('No EmailApplications found. Creating some for ApprovalSeeder.');
-            EmailApplication::factory(5)->create([
-                'user_id' => $auditUser->id,
-                'supporting_officer_id' => $officerIds->isNotEmpty() ? $officerIds->random() : null,
+        // Get all eligible officers (by role) once, as a flat array of IDs.
+        $officerIds = User::whereHas('roles', function ($q) {
+            $q->whereIn('name', [
+                'Admin', 'BPM Staff', 'IT Admin', 'HOD', 'Approver'
             ]);
-            $emailApplications = EmailApplication::all();
+        })->pluck('id')->all();
+
+        if (empty($officerIds)) {
+            Log::warning('No potential approval officers found. Using fallback audit user.');
+            $officerIds[] = $auditUser->id;
         }
 
-        $loanApplications = LoanApplication::query()->inRandomOrder()->limit(15)->get();
-        if ($loanApplications->isEmpty() && LoanApplication::count() > 0) {
-            $loanApplications = LoanApplication::take(5)->get();
-        } elseif (LoanApplication::count() === 0) {
-            Log::info('No LoanApplications found. Creating some for ApprovalSeeder.');
-            LoanApplication::factory(5)->create([
-                'user_id' => $auditUser->id,
-                'responsible_officer_id' => $officerIds->isNotEmpty() ? $officerIds->random() : null,
-            ]);
-            $loanApplications = LoanApplication::all();
+        // Fetch a selection of loan applications to attach approvals to.
+        $loanApplications = LoanApplication::inRandomOrder()->limit(20)->get();
+        if ($loanApplications->isEmpty()) {
+            Log::warning('No loan applications found to seed approvals for. Skipping.');
+            return;
         }
 
-        if ($emailApplications->isEmpty() && $loanApplications->isEmpty()) {
-            Log::warning('Still no Email or Loan Applications found. Skipping Approval seeding for applications.');
-        }
+        $now = Carbon::now();
+        $batch = [];
 
-        $approvalStatuses = [Approval::STATUS_APPROVED, Approval::STATUS_REJECTED, Approval::STATUS_PENDING];
+        // Helper: returns a full approval array with all columns, filling unused with null
+        $approvalArray = function ($overrides = []) use ($auditUser, $now) {
+            return array_merge([
+                'approvable_type' => $overrides['approvable_type'] ?? null,
+                'approvable_id' => $overrides['approvable_id'] ?? null,
+                'officer_id' => $overrides['officer_id'] ?? null,
+                'stage' => $overrides['stage'] ?? null,
+                'status' => $overrides['status'] ?? null,
+                'notes' => $overrides['notes'] ?? null,
+                'approved_at' => $overrides['approved_at'] ?? null,
+                'rejected_at' => $overrides['rejected_at'] ?? null,
+                'canceled_at' => $overrides['canceled_at'] ?? null,
+                'resubmitted_at' => $overrides['resubmitted_at'] ?? null,
+                'created_by' => $auditUser->id,
+                'updated_by' => $auditUser->id,
+                'deleted_by' => $overrides['deleted_by'] ?? null,
+                'created_at' => $now,
+                'updated_at' => $now,
+                'deleted_at' => $overrides['deleted_at'] ?? null,
+            ], $overrides);
+        };
 
-        Log::info('Seeding Approvals for Email Applications...');
-        foreach ($emailApplications as $application) {
-            if ($officerIds->isEmpty()) {
-                continue;
-            }
-            // Skip if no officers
-            $officerId = $officerIds->random();
-            $chosenStatus = Arr::random($approvalStatuses);
-
-            Approval::factory()
-                ->forApprovable($application)
-                ->stage(Approval::STAGE_EMAIL_SUPPORT_REVIEW)
-                ->status($chosenStatus)
-                ->create([
-                    'officer_id' => $officerId,
-                ]);
-
-            $firstApproval = $application->approvals()->where('stage', Approval::STAGE_EMAIL_SUPPORT_REVIEW)->latest()->first();
-            if ($firstApproval && $firstApproval->status === Approval::STATUS_APPROVED) {
-                if ($officerIds->isEmpty()) {
-                    continue;
-                }
-
-                $nextOfficerId = $officerIds->random();
-                $nextChosenStatus = Arr::random($approvalStatuses);
-                Approval::factory()
-                    ->forApprovable($application)
-                    ->stage(Approval::STAGE_EMAIL_ADMIN_REVIEW)
-                    ->status($nextChosenStatus)
-                    ->create([
-                        'officer_id' => $nextOfficerId,
-                    ]);
-            }
-        }
-
-        Log::info('Seeded Approvals for Email Applications.');
-
-        Log::info('Seeding Approvals for Loan Applications...');
+        // --- 1. Pending approvals (support_review) ---
         foreach ($loanApplications as $application) {
-            if ($officerIds->isEmpty()) {
-                continue;
-            }
-
-            $officerId = $officerIds->random();
-            $chosenStatus = Arr::random($approvalStatuses);
-
-            Approval::factory()
-                ->forApprovable($application)
-                ->stage(Approval::STAGE_LOAN_SUPPORT_REVIEW)
-                ->status($chosenStatus)
-                ->create([
-                    'officer_id' => $officerId,
-                ]);
-
-            $firstApproval = $application->approvals()->where('stage', Approval::STAGE_LOAN_SUPPORT_REVIEW)->latest()->first();
-            if ($firstApproval && $firstApproval->status === Approval::STATUS_APPROVED) {
-                if ($officerIds->isEmpty()) {
-                    continue;
-                }
-
-                $nextOfficerId = $officerIds->random();
-                $nextChosenStatus = Arr::random($approvalStatuses);
-                Approval::factory()
-                    ->forApprovable($application)
-                    ->stage(Approval::STAGE_LOAN_APPROVER_REVIEW) // MODIFIED from STAGE_LOAN_HOD_REVIEW
-                    ->status($nextChosenStatus)
-                    ->create([
-                        'officer_id' => $nextOfficerId,
-                    ]);
-
-                // Optionally add BPM review stage if HOD (now Approver) approved
-                $approverReviewApproval = $application->approvals()->where('stage', Approval::STAGE_LOAN_APPROVER_REVIEW)->latest()->first(); // MODIFIED variable name and stage
-                if ($approverReviewApproval && $approverReviewApproval->status === Approval::STATUS_APPROVED) { // MODIFIED variable name
-                    if ($officerIds->isEmpty()) {
-                        continue;
-                    }
-
-                    $bpmOfficerId = $officerIds->random();
-                    $bpmChosenStatus = Arr::random($approvalStatuses);
-                    Approval::factory()
-                        ->forApprovable($application)
-                        ->stage(Approval::STAGE_LOAN_BPM_REVIEW)
-                        ->status($bpmChosenStatus)
-                        ->create([
-                            'officer_id' => $bpmOfficerId,
-                        ]);
-                }
-            }
+            $batch[] = $approvalArray([
+                'approvable_type' => get_class($application),
+                'approvable_id' => $application->id,
+                'officer_id' => $officerIds[array_rand($officerIds)],
+                'stage' => Approval::STAGE_SUPPORT_REVIEW,
+                'status' => Approval::STATUS_PENDING,
+                'notes' => 'Menunggu semakan sokongan.',
+            ]);
         }
 
-        Log::info('Seeded Approvals for Loan Applications.');
-
-        if ($officerIds->isNotEmpty() && ($emailApplications->isNotEmpty() || $loanApplications->isNotEmpty())) {
-            $randomApprovable = $emailApplications->isNotEmpty() ? $emailApplications->random() : $loanApplications->random();
-            Approval::factory()
-                ->count(3)
-                ->forApprovable($randomApprovable)
-                ->stage(Approval::STAGE_GENERAL_REVIEW)
-                ->deleted()
-                ->create([
-                    'officer_id' => $officerIds->random(),
-                ]);
-            Log::info('Created 3 soft-deleted approvals.');
+        // --- 2. Approved & Rejected at final_approval ---
+        $approvedApps = $loanApplications->shuffle()->take(8);
+        foreach ($approvedApps as $application) {
+            $batch[] = $approvalArray([
+                'approvable_type' => get_class($application),
+                'approvable_id' => $application->id,
+                'officer_id' => $officerIds[array_rand($officerIds)],
+                'stage' => Approval::STAGE_FINAL_APPROVAL,
+                'status' => Approval::STATUS_APPROVED,
+                'approved_at' => $now->copy()->addMinutes(rand(1, 30)),
+                'notes' => 'Diluluskan di peringkat akhir.',
+            ]);
         }
 
-        Log::info('Approval seeding complete.');
-    }
-
-    /**
-     * Helper method to get User IDs for officers based on roles.
-     */
-    protected function getPotentialOfficerIds(?int $excludeUserId = null): EloquentCollection
-    {
-        // Define roles that typically handle approvals
-        $approverRoleNames = ['Admin', 'BPM Staff', 'IT Admin', 'HOD', 'Approver'];
-
-        $query = User::query()->whereHas('roles', function (Builder $q) use ($approverRoleNames): void {
-            $q->whereIn('name', $approverRoleNames);
-        });
-
-        if ($excludeUserId !== null) {
-            $query->where('id', '!=', $excludeUserId);
+        $rejectedApps = $loanApplications->shuffle()->take(5);
+        foreach ($rejectedApps as $application) {
+            $batch[] = $approvalArray([
+                'approvable_type' => get_class($application),
+                'approvable_id' => $application->id,
+                'officer_id' => $officerIds[array_rand($officerIds)],
+                'stage' => Approval::STAGE_FINAL_APPROVAL,
+                'status' => Approval::STATUS_REJECTED,
+                'rejected_at' => $now->copy()->addMinutes(rand(1, 30)),
+                'notes' => 'Ditolak di peringkat akhir.',
+            ]);
         }
 
-        $userIds = $query->pluck('id');
-
-        if ($userIds->isEmpty()) {
-            Log::warning('No specific officers found by roles, returning up to 5 random user IDs as fallback for seeder.');
-
-            return User::inRandomOrder()->limit(5)->pluck('id');
+        // --- 3. Canceled and Forwarded (workflow variety) ---
+        foreach ($loanApplications->shuffle()->take(2) as $application) {
+            $batch[] = $approvalArray([
+                'approvable_type' => get_class($application),
+                'approvable_id' => $application->id,
+                'officer_id' => $officerIds[array_rand($officerIds)],
+                'stage' => Approval::STAGE_GENERAL_REVIEW,
+                'status' => Approval::STATUS_CANCELED,
+                'canceled_at' => $now->copy()->addMinutes(rand(1, 30)),
+                'notes' => 'Dibatalkan oleh pemohon.',
+            ]);
+        }
+        foreach ($loanApplications->shuffle()->take(2) as $application) {
+            $batch[] = $approvalArray([
+                'approvable_type' => get_class($application),
+                'approvable_id' => $application->id,
+                'officer_id' => $officerIds[array_rand($officerIds)],
+                'stage' => Approval::STAGE_LOAN_SUPPORT_REVIEW,
+                'status' => Approval::STATUS_FORWARDED,
+                'resubmitted_at' => $now->copy()->addMinutes(rand(1, 30)),
+                'notes' => 'Permohonan dimajukan kepada pegawai lain.',
+            ]);
         }
 
-        return $userIds;
+        // --- 4. Soft deleted approvals for variety ---
+        foreach ($loanApplications->shuffle()->take(3) as $application) {
+            $batch[] = $approvalArray([
+                'approvable_type' => get_class($application),
+                'approvable_id' => $application->id,
+                'officer_id' => $officerIds[array_rand($officerIds)],
+                'stage' => Approval::STAGE_GENERAL_REVIEW,
+                'status' => Approval::STATUS_PENDING,
+                'notes' => 'Dihapus untuk ujian soft delete.',
+                'deleted_by' => $auditUser->id,
+                'deleted_at' => $now->copy()->addMinutes(rand(31, 60)),
+            ]);
+        }
+
+        // --- Perform bulk insert in chunks for memory/DB efficiency ---
+        $chunkSize = 100;
+        foreach (array_chunk($batch, $chunkSize) as $chunk) {
+            Approval::insert($chunk);
+        }
+
+        Log::info('ApprovalSeeder: Inserted ' . count($batch) . ' approval tasks in batch.');
     }
 }

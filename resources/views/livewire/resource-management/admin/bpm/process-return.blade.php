@@ -35,7 +35,7 @@
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" wire:model.live="returnItems.{{ $index }}.is_returning" id="return_item_{{ $index }}">
                             <label class="form-check-label fw-semibold" for="return_item_{{ $index }}">
-                                {{ $item['equipment_name'] }}
+                                {{ $item['equipment_name'] ?? ($item['brand'] . ' ' . $item['model_name'] . ' (Tag: ' . $item['tag_id'] . ')') }}
                             </label>
                         </div>
 
@@ -69,9 +69,8 @@
                     <div class="col-md-6 mb-3">
                         <label for="returning_officer_id" class="form-label fw-semibold">@lang('Peralatan Dipulangkan Oleh') <span class="text-danger">*</span></label>
                         <select wire:model="returning_officer_id" id="returning_officer_id" class="form-select @error('returning_officer_id') is-invalid @enderror">
-                             {{-- CORRECTED: Use array syntax to access properties --}}
-                             @foreach($users as $user)
-                                <option value="{{ $user['id'] }}">{{ $user['name'] }}</option>
+                             @foreach($users as $id => $name)
+                                <option value="{{ $id }}">{{ $name }}</option>
                             @endforeach
                         </select>
                          @error('returning_officer_id') <div class="invalid-feedback">{{ $message }}</div> @enderror

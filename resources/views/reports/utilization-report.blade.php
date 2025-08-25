@@ -1,3 +1,6 @@
+{{-- resources/views/reports/utilization-report.blade.php --}}
+{{-- Utilization Report Page --}}
+
 @extends('layouts.app')
 
 @section('title', __('reports.utilization.title'))
@@ -14,7 +17,6 @@
                 {{ __('Export PDF') }}
             </a>
         </div>
-
 
         <p class="mb-4 text-muted">{{ __('reports.utilization.description') }}</p>
 

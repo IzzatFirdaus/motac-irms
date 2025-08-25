@@ -1,10 +1,24 @@
 {
-  "name": "laravel/laravel",
+  "_comment": [
+    "MOTAC IRMS - composer.json",
+    "This file defines PHP dependencies, autoloading, and scripts for the MOTAC Integrated Resource Management System (MOTAC_IRMS).",
+    "Tailored for Laravel 11, PHP 8.2+, and modern development and QA workflows.",
+    "Key packages include Laravel Jetstream, Livewire, Spatie activity log & permissions, maatwebsite/excel, and MOTAC-specific helpers.",
+    "Development tools include Rector, Larastan, Pint, Microscope, Debugbar, IDE helper, and Vuexy Bootstrap Jetstream.",
+    "To install dependencies: run 'composer install'."
+  ],
+  "name": "motac/irms",
   "type": "project",
-  "description": "The Laravel Framework.",
+  "description": "MOTAC Integrated Resource Management System (IRMS) - Laravel 11, Livewire, Jetstream, Vuexy, and BPM customizations.",
   "keywords": [
     "framework",
-    "laravel"
+    "laravel",
+    "motac",
+    "irms",
+    "livewire",
+    "jetstream",
+    "vuexy",
+    "bpm"
   ],
   "license": "MIT",
   "require": {

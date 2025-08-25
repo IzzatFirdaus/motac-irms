@@ -1,44 +1,65 @@
-{{-- resources/views/livewire/sections/menu/vertical-menu.blade.php --}}
-<div>
-    {{-- Log at the start of the vertical menu blade --}}
-    @php
-        \Illuminate\Support\Facades\Log::info('Rendering vertical-menu.blade.php');
-        \Illuminate\Support\Facades\Log::debug('menuData available in vertical-menu: ' . (isset($menuData) ? 'true' : 'false'));
-        \Illuminate\Support\Facades\Log::debug('configData available in vertical-menu: ' . (isset($configData) ? 'true' : 'false'));
-    @endphp
+{{--
+    Canonical MOTAC IRMS vertical sidebar menu using Livewire.
+    Uses recursive submenu-partial for all submenus.
+    CSS and JS are loaded as assets, not inline.
 
-    <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme" aria-label="Navigasi Sistem">
+    Updated:
+    - Scoped for .motac-vertical-menu, consistent with sidebar.css.
+    - If user is a guest, shows only guest menu items (those with 'guestOnly' => true in config/menu.php).
+    - If authenticated, shows only their allowed menu items (never guest-only).
+    - Fallback: If no menu, show login link (for guest) or "No menu available" (for authenticated).
+--}}
 
-        <div class="app-brand demo px-3 py-2 border-bottom">
-            <a href="{{ url('/') }}" class="app-brand-link d-flex align-items-center gap-2">
-                <span class="app-brand-logo demo">
-                    <img src="{{ asset($configData['appLogo'] ?? 'assets/img/logo/motac-logo-icon.svg') }}"
-                        alt="{{ __('Logo Aplikasi') }}" height="32">
-                </span>
-                <span class="app-brand-text demo menu-text fw-bold ms-2">{{ __($configData['templateName'] ?? config('app.name')) }}</span>
-            </a>
-            <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto" aria-label="{{ __('Tutup/Buka Menu Sisi') }}">
-                <i class="bi bi-list d-block fs-4 align-middle"></i>
-            </a>
-        </div>
+<aside id="layout-menu" class="myds-vertical-menu" aria-label="Navigasi Sistem">
+    <div class="myds-sidebar-header">
+        <span class="myds-sidebar-logo">
+            <img src="{{ asset($configData['appLogo'] ?? 'assets/img/logo/motac-logo.svg') }}"
+                alt="{{ __('Logo Aplikasi') }}" height="32">
+        </span>
+        <span class="myds-sidebar-title heading-small fw-semibold">{{ __($configData['templateName'] ?? 'MOTAC IRMS') }}</span>
+        {{-- Ministry name commented out as per requirements --}}
+    </div>
 
-        <div class="menu-inner-shadow"></div>
-
-        <ul class="menu-inner py-1" role="menu">
-            @if (isset($menuData) && !empty($menuData->menu))
-                {{-- Log before including the submenu partial --}}
-                @php \Illuminate\Support\Facades\Log::info('Including submenu-partial.blade.php from vertical-menu.'); @endphp
-                @include('layouts.sections.menu.submenu-partial', ['menuItems' => $menuData->menu])
+    <ul class="myds-sidebar-menu">
+        {{-- Render menu if menuData and its 'menu' property exist and are a non-empty array --}}
+        @if (isset($menuData) && property_exists($menuData, 'menu') && is_array($menuData->menu) && count($menuData->menu))
+            {{-- Use the unified, recursive partial for all submenus --}}
+            @php
+                $webUser = Auth::guard('web')->user();
+                $sanctumUser = Auth::guard('sanctum')->user();
+                $webRoles = $webUser && $webUser->roles ? $webUser->roles->pluck('name') : collect();
+                $sanctumRoles = $sanctumUser && $sanctumUser->roles ? $sanctumUser->roles->pluck('name') : collect();
+                $allRoles = $webRoles->merge($sanctumRoles)->unique();
+            @endphp
+            @include('layouts.sections.menu.submenu-partial', [
+                'menuItems' => $menuData->menu,
+                'roles' => $allRoles,
+                'configData' => $configData,
+                'currentRouteName' => $currentRouteName,
+            ])
+        @else
+            {{-- Fallback for guests or no menu data --}}
+            @guest
+            <li class="myds-menu-item">
+                <a href="{{ route('login') }}" class="myds-menu-link">
+                    <i class="myds-menu-icon bi bi-box-arrow-in-right"></i>
+                    <div class="myds-menu-label heading-xsmall">{{ __('Sila log masuk untuk akses sistem dalaman') }}</div>
+                </a>
+            </li>
             @else
-                <li class="menu-item" role="none">
-                    <a href="javascript:void(0);" class="menu-link" role="menuitem">
-                        <i class="menu-icon bi bi-exclamation-circle-fill"></i>
-                        <div class="menu-item-label">{{ __('Tiada data menu tersedia.') }}</div>
-                    </a>
-                </li>
-                {{-- Log if no menu data is available --}}
-                @php \Illuminate\Support\Facades\Log::warning('No menu data available in vertical-menu.blade.php to render.'); @endphp
-            @endif
-        </ul>
-    </aside>
-</div>
+            <li class="myds-menu-item">
+                <a href="javascript:void(0);" class="myds-menu-link">
+                    <i class="myds-menu-icon bi bi-alert-circle"></i>
+                    <div class="myds-menu-label heading-xsmall">{{ __('Tiada data menu tersedia.') }}</div>
+                </a>
+            </li>
+            @endguest
+        @endif
+    </ul>
+    {{--
+        CSS and JS are now loaded via assets for compliance and maintainability.
+        Add the following in your main layout:
+        <link rel="stylesheet" href="{{ asset('assets/css/sidebar.css') }}">
+        <script src="{{ asset('assets/js/sidebar.js') }}"></script>
+    --}}
+</aside>
