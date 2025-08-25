@@ -16,51 +16,54 @@ class OutstandingLoans extends Component
     use WithPagination;
 
     public string $searchTerm = '';
-
-    public string $sortBy = 'updated_at'; // Default sort
-
-    public string $sortDirection = 'desc'; // Default direction
-
     protected string $paginationTheme = 'bootstrap';
+
+    // Added properties to control sorting
+    public string $sortBy = 'updated_at';
+    public string $sortDirection = 'desc';
 
     public function mount(): void
     {
         $this->authorize('viewAny', LoanApplication::class);
     }
 
-    // Toggles sort direction or changes sort column
+    // Method to handle changing the sort column and direction
     public function sortBy(string $field): void
     {
         if ($this->sortBy === $field) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
         } else {
+            // Default to ascending when changing columns, or descending for dates
             $this->sortDirection = in_array($field, ['updated_at', 'loan_end_date']) ? 'desc' : 'asc';
         }
-
         $this->sortBy = $field;
         $this->resetPage();
     }
 
-    // Computed property to get the applications
+
     public function getOutstandingApplicationsProperty()
     {
         $this->authorize('viewAny', LoanApplication::class);
 
         $query = LoanApplication::query()
-            ->with(['user:id,name', 'loanApplicationItems'])
-            ->where('status', LoanApplication::STATUS_APPROVED); // Fetches applications awaiting issuance
+            ->with([
+                'user:id,name',
+                'loanApplicationItems'
+            ])
+            ->where('status', LoanApplication::STATUS_APPROVED);
 
-        if ($this->searchTerm !== '' && $this->searchTerm !== '0') {
-            $searchTerm = '%'.$this->searchTerm.'%';
-            $query->where(function ($subQuery) use ($searchTerm): void {
+        if (!empty($this->searchTerm)) {
+            $searchTerm = '%' . $this->searchTerm . '%';
+            $query->where(function ($subQuery) use ($searchTerm) {
                 $subQuery->where('id', 'like', $searchTerm)
                     ->orWhere('purpose', 'like', $searchTerm)
-                    ->orWhereHas('user', function ($userQuery) use ($searchTerm): void {
+                    ->orWhereHas('user', function ($userQuery) use ($searchTerm) {
                         $userQuery->where('name', 'like', $searchTerm);
                     });
             });
         }
 
+        // The query now uses the dynamic sorting properties
         $validSorts = ['id', 'purpose', 'loan_end_date', 'updated_at'];
         if (in_array($this->sortBy, $validSorts)) {
             $query->orderBy($this->sortBy, $this->sortDirection);
