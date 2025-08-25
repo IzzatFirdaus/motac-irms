@@ -11,7 +11,7 @@ Jadual-jadual ini mendasari pengurusan pengguna, peranan, dan struktur organisas
 
 ### 1.1 `users` (Pengguna)
 
-Menyimpan maklumat semua pengguna sistem. Versi v4.0 telah diperkemas untuk menghapuskan medan modul legasi.
+Menyimpan maklumat semua pengguna sistem. Versi v4.0 telah diperkemas untuk menghapuskan medan modul legasi (termasuk email provisioning).
 
 - **Model:** `app/Models/User.php`
 - **Controller:** `app/Http/Controllers/UserController.php`, pelbagai pengawal autentikasi
@@ -126,42 +126,58 @@ Merekod pengeluaran dan pemulangan item peralatan yang dipinjam.
 
 Jadual baru untuk menyokong sistem helpdesk dan pengurusan tiket dalam v4.0, berteraskan prinsip Komunikasi, Kawalan Pengguna dan Panduan
 
-### 4.1 `helpdesk_tickets`
+### 4.1 `tickets`
 
 Menyimpan maklumat teras setiap tiket sokongan yang dihantar pengguna.
 
-- **Model:** `app/Models/HelpdeskTicket.php`
+- **Model:** `app/Models/Ticket.php`
 - **Controller:** `app/Http/Controllers/Helpdesk/TicketController.php`
-- **Livewire:** `App\Livewire\Helpdesk\TicketForm.php`, `TicketList.php`, `TicketDetail.php`
-- **Factory:** `Database\Factories\HelpdeskTicketFactory.php`
-- **Seeder:** `Database\Seeders\HelpdeskTicketSeeder.php`
+- **Livewire:** `App\Livewire\Helpdesk\CreateTicketForm.php`, `MyTicketsIndex.php`, `TicketDetails.php`, `Admin/TicketManagement.php`, `Admin/TicketReport.php`
+- **Factory:** `Database\Factories\TicketFactory.php`
+- **Seeder:** `Database\Seeders\TicketSeeder.php`
 
----
-
-### 4.2 `helpdesk_categories`
+### 4.2 `ticket_categories`
 
 Menentukan kategori tiket helpdesk (cth: 'Perkakasan', 'Perisian', 'Rangkaian').
 
-- **Model:** `app/Models/HelpdeskCategory.php`
-- **Controller:** `app/Http/Controllers/Admin/HelpdeskCategoryController.php`
-- **Factory:** `Database\Factories\HelpdeskCategoryFactory.php`
-- **Seeder:** `Database\Seeders\HelpdeskCategorySeeder.php`
+- **Model:** `app/Models/TicketCategory.php`
+- **Controller:** `app/Http/Controllers/Admin/TicketCategoryController.php`
+- **Factory:** `Database\Factories\TicketCategoryFactory.php`
+- **Seeder:** `Database\Seeders\TicketCategorySeeder.php`
 
----
+### 4.3 `ticket_priorities`
 
-### 4.3 `helpdesk_comments`
+Menentukan keutamaan tiket helpdesk.
+
+- **Model:** `app/Models/TicketPriority.php`
+- **Controller:** `app/Http/Controllers/Admin/TicketPriorityController.php`
+- **Factory:** `Database\Factories\TicketPriorityFactory.php`
+- **Seeder:** `Database\Seeders\TicketPrioritySeeder.php`
+
+### 4.4 `ticket_comments`
 
 Menyimpan komen dan respons berangkai bagi setiap tiket helpdesk untuk komunikasi antara pengguna dan agen IT.
 
-- **Model:** `app/Models/HelpdeskComment.php`
+- **Model:** `app/Models/TicketComment.php`
 - **Controller:** Diurus dalam `app/Http/Controllers/Helpdesk/TicketController.php`
-- **Factory:** `Database\Factories\HelpdeskCommentFactory.php`
-- **Seeder:** Disemai bersama `HelpdeskTicketSeeder.php`
+- **Factory:** `Database\Factories\TicketCommentFactory.php`
+- **Seeder:** Disemai bersama `TicketSeeder.php`
 
-#### 4.4 Prinsip Berkaitan
+### 4.5 `ticket_attachments`
+
+Menyimpan fail lampiran untuk tiket dan komen.
+
+- **Model:** `app/Models/TicketAttachment.php`
+- **Controller:** Diurus dalam `app/Http/Controllers/Helpdesk/TicketController.php`
+- **Factory:** `Database\\Factories\\TicketAttachmentFactory.php`
+- **Seeder:** Disemai bersama `TicketSeeder.php`
+
+#### Prinsip Berkaitan Modul Helpdesk
 
 - **Komunikasi**: Memudahkan komunikasi jelas antara pengguna dan penyokong IT.
 - **Panduan & Dokumentasi**: Memudahkan rujukan dan rekod interaksi.
+- **Kawalan Pengguna**: Pengguna boleh mengurus tiket dan komen.
+- **Pencegahan Ralat**: Validasi input dan status tiket.
 
 ---
 
@@ -172,7 +188,7 @@ Menyokong aliran kerja dan fungsi sistem yang digunakan oleh pelbagai modul, men
 
 ### 5.1 `approvals`
 
-Jadual polimorfik untuk menyimpan maklumat kelulusan pelbagai proses seperti permohonan pinjaman ICT.
+Jadual polimorfik untuk menyimpan maklumat kelulusan pelbagai proses seperti permohonan pinjaman ICT dan tiket helpdesk.
 
 - **Model:** `app/Models/Approval.php`
 - **Controller:** `app/Http/Controllers/ApprovalController.php`
