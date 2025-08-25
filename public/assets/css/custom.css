@@ -73,8 +73,11 @@ h1, h2, h3, h4, h5, h6 {
     gap: 12px;
 }
 .motac-navbar-alt .navbar-brand {
+    display: -ms-flexbox;
     display: flex;
+    -ms-flex-align: center;
     align-items: center;
+    /* gap: 12px; not supported in IE/old browsers, use margin as fallback */
     gap: 12px;
     text-decoration: none;
     color: var(--motac-navbar-text);
@@ -88,8 +91,11 @@ h1, h2, h3, h4, h5, h6 {
     background: #fff;
     border: 2.5px solid var(--motac-navbar-border);
     border-radius: 8px;
+    display: -ms-flexbox;
     display: flex;
+    -ms-flex-align: center;
     align-items: center;
+    -ms-flex-pack: center;
     justify-content: center;
     box-shadow: 0 1px 6px rgba(25, 118, 210, 0.07);
 }
@@ -107,9 +113,16 @@ h1, h2, h3, h4, h5, h6 {
     letter-spacing: 0.01em;
 }
 .motac-navbar-alt .navbar-links {
+    display: -ms-flexbox;
     display: flex;
+    -ms-flex-align: center;
     align-items: center;
+    /* gap: 18px; not supported in IE/old browsers, use margin as fallback */
     gap: 18px;
+    /* Fallback for gap */
+    > *:not(:last-child) {
+        margin-right: 18px;
+    }
     margin: 0 10px;
 }
 .motac-navbar-alt .navbar-link {
@@ -127,9 +140,16 @@ h1, h2, h3, h4, h5, h6 {
     outline: none;
 }
 .motac-navbar-alt .navbar-right {
+    display: -ms-flexbox;
     display: flex;
+    -ms-flex-align: center;
     align-items: center;
+    /* gap: 14px; not supported in IE/old browsers, use margin as fallback */
     gap: 14px;
+    /* Fallback for gap */
+    > *:not(:last-child) {
+        margin-right: 14px;
+    }
 }
 .motac-navbar-alt .navbar-action {
     position: relative;
@@ -175,9 +195,16 @@ h1, h2, h3, h4, h5, h6 {
 }
 .motac-navbar-alt .navbar-dropdown a,
 .motac-navbar-alt .navbar-dropdown button {
+    display: -ms-flexbox;
     display: flex;
+    -ms-flex-align: center;
     align-items: center;
+    /* gap: 9px; not supported in IE/old browsers, use margin as fallback */
     gap: 9px;
+    /* Fallback for gap */
+    > *:not(:last-child) {
+        margin-right: 9px;
+    }
     width: 100%;
     color: #222;
     background: none;
@@ -240,7 +267,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 @media (max-width: 600px) {
     .motac-navbar-alt {
-        flex-direction: column;
+    -ms-flex-direction: column;
+    flex-direction: column;
         align-items: stretch;
         padding: 0 4px;
         min-height: 52px;
@@ -313,9 +341,10 @@ h1, h2, h3, h4, h5, h6 {
     margin-right: auto;
     display: block;
     width: -webkit-fit-content; /* Webkit browsers */
-    width: fit-content;         /* Modern browsers */
     width: -moz-fit-content;    /* Firefox */
-    /* Order: -webkit, fit-content, -moz for best compatibility */
+    width: fit-content;         /* Modern browsers */
+    /* Fallback for unsupported browsers */
+    /* width: fit-content not supported in IE/old Edge, fallback to auto */
 }
 
 /* Flexbox container for centering - with comprehensive browser support */
@@ -580,6 +609,10 @@ h1, h2, h3, h4, h5, h6 {
     -ms-flex-align: center;
     align-items: center;
     margin-bottom: 12px;
+    /* Fallback for gap */
+    > *:not(:last-child) {
+        margin-right: 10px;
+    }
 }
 .footer-brand > *:not(:last-child) {
     margin-right: 10px;
@@ -685,7 +718,9 @@ h1, h2, h3, h4, h5, h6 {
 
 @media (max-width: 600px) {
     .footer-alt-container {
-        padding: 20px 8px 10px 8px;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    padding: 20px 8px 10px 8px;
     }
     .footer-brand-text {
         font-size: 1.05em;

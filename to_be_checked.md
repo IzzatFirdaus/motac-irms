@@ -1,18 +1,19 @@
-Here is a review of the directories/subdirectories from `DIRECTORY.md` that have **not been explicitly checked or discussed yet** in this Copilot Space:
 
----
+# MOTAC IRMS Directory Review
+
+Here is a review of the directories/subdirectories from `DIRECTORY.md` that have **not been explicitly checked or discussed yet** in this Copilot Space:
 
 ## Not Yet Checked Directories (with Description & File Listing)
 
----
-
 ### /app
 
-#### /app/Models  
-**Description:**  
+#### /app/Models
+
+**Description:**
 Contains all Eloquent models representing database tables/entities for users, departments, positions, grades, equipment, applications, transactions, approvals, notifications, and settings.
 
-**Files:**  
+**Files:**
+
 - ~~User.php~~
 - ~~Department.php~~
 - ~~Position.php~~
@@ -30,16 +31,16 @@ Contains all Eloquent models representing database tables/entities for users, de
 - ~~Notification.php~~
 - ~~Setting.php~~
 
-> **Status:**  
+> **Status:**
 > All files in `/app/Models` have now been checked or discussed.
 
----
+#### /app/Http/Controllers
 
-#### /app/Http/Controllers  
-**Description:**  
+**Description:**
 Holds all HTTP controller classes responsible for handling requests, business logic, and returning responses/views for web and API endpoints.
 
-**Files:**  
+**Files:**
+
 - Controller.php (base)
 - language/LanguageController.php
 - WebhookController.php
@@ -60,16 +61,17 @@ Holds all HTTP controller classes responsible for handling requests, business lo
 - Admin/LocationController.php
 - Admin/SettingsController.php
 
-**Checked:**  
+**Checked:**
+
 - LegalController.php (created and checked for hybrid markdown localization of policy/terms)
 
----
+#### /app/Services
 
-#### /app/Services  
-**Description:**  
+**Description:**
 Service classes encapsulate business logic for various modules, enabling code reuse and separation of concerns.
 
-**Files:**  
+**Files:**
+
 - ApprovalService.php
 - EmailApplicationService.php
 - EmailProvisioningService.php
@@ -78,13 +80,13 @@ Service classes encapsulate business logic for various modules, enabling code re
 - EquipmentService.php
 - NotificationService.php
 
----
+#### /app/Policies
 
-#### /app/Policies  
-**Description:**  
+**Description:**
 Policy classes define authorization logic for models, determining which user roles can perform actions on resources.
 
-**Files:**  
+**Files:**
+
 - UserPolicy.php
 - GradePolicy.php
 - EquipmentPolicy.php
@@ -92,22 +94,22 @@ Policy classes define authorization logic for models, determining which user rol
 - LoanTransactionPolicy.php
 - ApprovalPolicy.php
 
----
+#### /app/Observers
 
-#### /app/Observers  
-**Description:**  
+**Description:**
 Model observers for automating common actions (such as tracking who created/updated a record).
 
-**Files:**  
+**Files:**
+
 - BlameableObserver.php
 
----
+#### /app/Livewire
 
-#### /app/Livewire  
-**Description:**  
+**Description:**
 Livewire components for reactive user interfaces, especially for resource management (applications, approvals), settings, and admin functions.
 
-**Files:**  
+**Files:**
+
 - ResourceManagement/
   - EmailAccount/ApplicationForm.php
   - LoanApplication/ApplicationForm.php
@@ -119,13 +121,13 @@ Livewire components for reactive user interfaces, especially for resource manage
 - Settings/
   - Users/Index.php
 
----
+#### /app/Notifications
 
-#### /app/Notifications  
-**Description:**  
+**Description:**
 Notification classes for sending alerts on application status changes, equipment events, provisioning results, etc.
 
-**Files:**  
+**Files:**
+
 - ApplicationSubmitted.php
 - ApplicationNeedsAction.php
 - ApplicationApproved.php
@@ -141,24 +143,24 @@ Notification classes for sending alerts on application status changes, equipment
 - EmailApplicationReadyForProcessingNotification.php
 - EmailProvisionedNotification.php
 
----
+#### /app/Helpers
 
-#### /app/Helpers  
-**Description:**  
+**Description:**
 Utility/helper classes for commonly used functions across the app.
 
-**Files:**  
-- Helpers.php
+**Files:**
 
----
+- Helpers.php
 
 ### /database
 
-#### /database/migrations  
-**Description:**  
+#### /database/migrations
+
+**Description:**
 Migration files for creating/updating database tables as per Laravel conventions.
 
-**Files:**  
+**Files:**
+
 - ~~create_users_table.php~~
 - ~~create_departments_table.php~~
 - ~~create_positions_table.php~~
@@ -176,16 +178,16 @@ Migration files for creating/updating database tables as per Laravel conventions
 - ~~create_notifications_table.php~~
 - ~~create_settings_table.php~~
 
-> **Status:**  
+> **Status:**
 > All files in `/database/migrations` have now been checked or discussed.
 
----
+#### /database/seeders
 
-#### /database/seeders  
-**Description:**  
+**Description:**
 Seeder files for populating tables with initial/demo data.
 
-**Files:**  
+**Files:**
+
 - UserSeeder.php
 - AdminUserSeeder.php
 - DepartmentSeeder.php
@@ -202,13 +204,13 @@ Seeder files for populating tables with initial/demo data.
 - SettingsSeeder.php
 - RoleAndPermissionSeeder.php
 
----
+#### /database/factories
 
-#### /database/factories  
-**Description:**  
+**Description:**
 Factory files for generating fake/test data for models.
 
-**Files:**  
+**Files:**
+
 - UserFactory.php
 - EquipmentCategoryFactory.php
 - SubCategoryFactory.php
@@ -222,15 +224,15 @@ Factory files for generating fake/test data for models.
 - NotificationFactory.php
 - SettingFactory.php
 
----
-
 ### /resources
 
-#### /resources/views  
-**Description:**  
+#### /resources/views
+
+**Description:**
 Blade template files for the system's user interface, including all page layouts, Livewire component views, partials, emails, and print forms.
 
-**Files:**  
+**Files:**
+
 - ~~welcome.blade.php~~
 - ~~dashboard.blade.php~~
 - ~~layouts/~~
@@ -272,16 +274,16 @@ Blade template files for the system's user interface, including all page layouts
 - policy.blade.php (checked/created for hybrid markdown localization)
 - terms.blade.php (checked/created for hybrid markdown localization)
 
-> **Status:**  
+> **Status:**
 > All files in `/resources/views` (including emails) have now been checked or discussed.
 
----
+#### /resources/lang
 
-#### /resources/lang  
-**Description:**  
+**Description:**
 Language translation files for English and Bahasa Melayu (ms).
 
-**Files:**  
+**Files:**
+
 - en/
   - policy_en.php (checked/created, hybrid markdown)
   - terms_en.php (checked/created, hybrid markdown)
@@ -290,14 +292,13 @@ Language translation files for English and Bahasa Melayu (ms).
   - terms_ms.php (checked/created, hybrid markdown)
   - [Other translation files for Bahasa Melayu and English]
 
----
-
 ### /docs
 
-**Description:**  
+**Description:**
 Documentation files for system design, technical details, data tables, process flows, and feature implementation.
 
-**Files:**  
+**Files:**
+
 - System_Design_Rev_3.6.md
 - Technical_Documentation_MOTAC_IRMS_Rev_1.md
 - Core_User_&_Organizational_Data_Tables_Mk_2.md
@@ -305,47 +306,41 @@ Documentation files for system design, technical details, data tables, process f
 - Email_Feature_Implementation.md
 - Design_Document_Mk_2_MOTAC_IRMS.md
 
----
-
 ### /public
 
-**Description:**  
+**Description:**
 Publicly accessible assets such as icons, images, CSS, and JS.
 
-**Files:**  
+**Files:**
+
 - motac-icon.svg
 - motac-header.png
 - [Other assets: CSS, JS, images]
 
----
-
 ### /storage
 
-**Description:**  
+**Description:**
 Storage directory for file uploads, logs, cache, and framework-generated files.
 
-**Files:**  
-- [For uploads, logs, etc.]
+**Files:**
 
----
+- [For uploads, logs, etc.]
 
 ### /.github
 
-**Description:**  
+**Description:**
 GitHub-specific configuration for issues, workflows, and CI/CD.
 
-**Files:**  
+**Files:**
+
 - ISSUE_TEMPLATE/
 - workflows/
   - ci.yml
   - deploy.yml
 
----
+**Note:**
 
-**Note:**  
 Some files/directories (like config, routes) have already been checked and/or updated. If you want to check any of the above directories in detail (for example, to remove legacy EmailApplication code or add Helpdesk features), please specify which directory or files you want to review or update next.
-
----
 
 ---
 
@@ -361,8 +356,6 @@ Some files/directories (like config, routes) have already been checked and/or up
 - `/routes/web.php` (policy/terms route hybrid update)
 - `/app/Http/Controllers/LegalController.php` (for markdown hybrid)
 - `/resources/menu/verticalMenu.json`
-
----
 
 ## ☐ Still To Be Checked
 
@@ -381,7 +374,5 @@ Some files/directories (like config, routes) have already been checked and/or up
 - `/public`
 - `/storage`
 - `/.github`
-
----
 
 **This checklist will be updated as more directories and files are explicitly reviewed, modified, or discussed.**

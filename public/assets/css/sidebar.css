@@ -54,8 +54,10 @@
   position: relative;
   display: flex;
   display: -ms-flexbox;           /* IE10+ */
-  flex-direction: column;
-  -ms-flex-direction: column;     /* IE10+ */
+    display: -ms-flexbox;           /* IE10+ */
+    display: flex;
+    -ms-flex-direction: column;     /* IE10+ */
+    flex-direction: column;
   border-right: 1px solid var(--sidebar-border);
   font-family: inherit; /* inherit from body, not global override */
 }
@@ -66,9 +68,11 @@
   padding: 1.2em 1.3em 1em 1.3em;
   display: flex;
   display: -ms-flexbox;
-  align-items: center;
-  -ms-flex-align: center;
-  gap: 12px;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-align: center;
+    align-items: center; /* Not supported by IE < 11 */
+    gap: 12px; /* Not supported by IE/old browsers, use margin as fallback */
   border-bottom: 2px solid var(--sidebar-accent);
   transition: background var(--sidebar-transition), border-color var(--sidebar-transition);
 }
@@ -81,10 +85,12 @@
   background: #fff;
   display: flex;
   display: -ms-flexbox;
-  align-items: center;
-  -ms-flex-align: center;
-  justify-content: center;
-  -ms-flex-pack: center;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-align: center;
+    align-items: center; /* Not supported by IE < 11 */
+    -ms-flex-pack: center;
+    justify-content: center; /* Not supported by IE < 11 */
   box-shadow: 0 1px 3px rgba(25, 118, 210, 0.10);
   transition: box-shadow .18s;
 }
@@ -113,8 +119,8 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  flex: 1 1 auto;
   -ms-flex: 1 1 auto;
+  flex: 1 1 auto;
   overflow-y: auto;
   background: none;
 }
@@ -139,9 +145,11 @@
 .motac-vertical-menu .sidebar-menu .menu-link {
   display: flex;
   display: -ms-flexbox;
-  align-items: center;
-  -ms-flex-align: center;
-  gap: 16px;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-align: center;
+    align-items: center; /* Not supported by IE < 11 */
+    gap: 16px; /* Not supported by IE/old browsers, use margin as fallback */
   text-decoration: none;
   color: var(--sidebar-text);
   padding: 0.85em 1.6em 0.85em 1.5em;
@@ -279,16 +287,16 @@
   .motac-vertical-menu .sidebar-logo {
     display: -ms-flexbox !important;
   }
-  .motac-vertical-menu { -ms-flex-direction: column; }
+  .motac-vertical-menu { -ms-flex-direction: column; flex-direction: column; }
   .motac-vertical-menu .sidebar-header { -ms-flex-align: center; }
   .motac-vertical-menu .sidebar-logo { -ms-flex-align: center; -ms-flex-pack: center; }
-  .motac-vertical-menu .sidebar-menu { -ms-flex: 1 1 auto; }
+  .motac-vertical-menu .sidebar-menu { -ms-flex: 1 1 auto; flex: 1 1 auto; }
 }
 
 /* ==== Custom Scrollbars for Modern Browsers (optional) ==== */
 .motac-vertical-menu .sidebar-menu {
-  scrollbar-width: thin;
-  scrollbar-color: var(--sidebar-accent) var(--sidebar-bg);
+  scrollbar-width: thin; /* Not supported by IE/old browsers */
+  scrollbar-color: var(--sidebar-accent) var(--sidebar-bg); /* Not supported by IE/old browsers */
 }
 .motac-vertical-menu .sidebar-menu::-webkit-scrollbar {
   width: 7px;

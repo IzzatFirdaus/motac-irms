@@ -6,7 +6,7 @@ This document lists all key PHP Controller files in `app/Http/Controllers`, all 
 
 ## 1. Controller Classes (`app/Http/Controllers`)
 
-```
+```text
 app/Http/Controllers/
 ├── Admin/
 │   ├── DepartmentController.php
@@ -37,11 +37,122 @@ app/Http/Controllers/
 
 ## 2. Livewire Component Classes (`app/Livewire`)
 
-```
+```text
 app/Livewire/
 ├── Charts/
 │   └── LoanSummaryChart.php
 ├── ContactUs.php
+├── Dashboard/
+│   ├── AdminDashboard.php
+│   ├── ApproverDashboard.php
+│   ├── BpmDashboard.php
+│   ├── Dashboard.php
+│   ├── ItAdminDashboard.php
+│   └── UserDashboard.php
+├── EquipmentChecklist.php
+├── Helpdesk/
+│   ├── Admin/
+│   │   ├── TicketManagement.php
+│   │   └── TicketReport.php
+│   ├── CreateTicketForm.php
+│   ├── MyTicketsIndex.php
+│   ├── TicketDetail.php
+│   ├── TicketDetails.php
+│   ├── TicketForm.php
+│   └── TicketList.php
+├── HumanResource/
+│   └── Structure/
+│       ├── Departments.php
+│       ├── EmployeeInfo.php
+│       └── Positions.php
+├── LoanRequestForm.php
+├── Misc/
+│   └── ComingSoon.php
+├── ResourceManagement/
+│   ├── Admin/
+│   │   ├── BPM/
+│   │   │   ├── IssuedLoans.php
+│   │   │   ├── OutstandingLoans.php
+│   │   │   ├── ProcessIssuance.php
+│   │   │   └── ProcessReturn.php
+│   │   ├── Equipment/
+│   │   │   ├── EquipmentForm.php
+│   │   │   └── EquipmentIndex.php
+│   │   ├── Grades/
+│   │   │   └── GradeIndex.php
+│   │   ├── Reports/
+│   │   │   ├── EquipmentInventoryReport.php
+│   │   │   ├── EquipmentReport.php
+│   │   │   ├── LoanApplicationsReport.php
+│   │   │   └── UserActivityReport.php
+│   │   └── Users/
+│   │       └── UserIndex.php
+│   ├── Approval/
+│   │   ├── ApprovalDashboard.php
+│   │   └── ApprovalHistory.php
+│   ├── LoanApplication/
+│   │   └── LoanApplicationForm.php
+│   ├── MyApplications/
+│   │   └── Loan/
+│   │       └── LoanApplicationsIndex.php
+│   └── Reports/
+│       ├── EquipmentReport.php
+│       ├── LoanApplicationsReport.php
+│       ├── ReportsIndex.php
+│       └── UserActivityReport.php
+├── Sections/
+│   ├── Footer/
+│   │   └── Footer.php
+│   ├── Menu/
+│   │   └── VerticalMenu.php
+│   └── Navbar/
+│       ├── Navbar.php
+│       └── NotificationsDropdown.php
+├── Settings/
+│   ├── Departments/
+│   │   └── DepartmentsIndex.php
+│   ├── Permissions/
+│   │   └── PermissionsIndex.php
+│   ├── Roles/
+│   │   └── RolesIndex.php
+│   └── Users/
+│       ├── UsersCreate.php
+│       ├── UsersEdit.php
+│       ├── UsersIndex.php
+│       └── UsersShow.php
+├── Shared/
+│   ├── Notifications/
+│   │   └── NotificationsList.php
+│   └── TableFilters.php
+```
+
+## 3. Blade View Files (`resources/views`)
+
+```text
+├── _partials/
+│   ├── \_alerts/
+│   │   └── alert-general.blade.php
+│   ├── \_modals/
+│   │   ├── modal-category-info.blade.php
+│   │   ├── modal-category.blade.php
+│   │   ├── modal-department.blade.php
+│   │   ├── modal-import.blade.php
+│   │   ├── modal-leave-with-employee.blade.php
+│   │   ├── modal-motac-generic.blade.php
+│   │   ├── modal-position.blade.php
+│   │   └── modal-sub-category.blade.php
+│   ├── macros.blade.php
+│   ├── rocket.blade.php
+│   └── stat-card.blade.php
+
+```text
+app/Livewire/
+├── Charts/
+
+
+├── welcome.blade.php
+```text
+│   └── LoanSummaryChart.php
 ├── Dashboard/
 │   ├── AdminDashboard.php
 │   ├── ApproverDashboard.php
@@ -123,13 +234,26 @@ app/Livewire/
 │   ├── Notifications/
 │   │   └── NotificationsList.php
 │   └── TableFilters.php
-```
+```text
 
 ---
 
 ## 3. Blade View Files (`resources/views`)
 
-```
+```text
+---
+├── \_partials/
+│   ├── \_alerts/
+│   │   └── alert-general.blade.php
+│   ├── \_modals/
+│   │   ├── modal-category-info.blade.php
+│   │   ├── modal-category.blade.php
+│   │   ├── modal-department.blade.php
+│   │   ├── modal-import.blade.php
+
+## 3. Blade View Files (`resources/views`)
+
+```text
 resources/views/
 ├── _partials/
 │   ├── _alerts/
@@ -366,4 +490,3 @@ resources/views/
 ├── vendor/
 ├── welcome.blade.php
 ```
----
