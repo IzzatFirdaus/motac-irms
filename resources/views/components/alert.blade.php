@@ -1,133 +1,92 @@
-{{--
-    MYDS-compliant Alert Component
-    resources/views/components/alert.blade.php
-
-    - Supports: status types (success, danger, warning, info)
-    - Accessible: ARIA role, semantic icons, focusable close
-    - Uses MYDS color tokens, spacing, motion tokens
-    - Complies with MyGOVEA Principle 5, 6, 7, 8, 13, 14, 17 (Minimal, Consistent, Clear, Realistic, UI/UX, Typography, Error Prevention)
---}}
-
+{{-- resources/views/components/alert.blade.php --}}
 @props([
-    'type' => 'info',           // Alert type: success, danger, warning, info
-    'message' => null,          // Main message text
-    'title' => null,            // Custom title override
-    'dismissible' => null,      // Dismissibility
-    'icon' => null,             // Custom icon class
-    'errors' => null            // Validation errors to display
+    'type' => 'info',
+    'message' => null,
+    'title' => null,
+    'dismissible' => null,
+    'icon' => null,
+    'errors' => null // Crucial: This must be present
 ])
 
 @php
-    // MYDS status color tokens
-    $mydsTypeMap = [
-        'success' => [
-            'bg' => 'bg-success-50',
-            'border' => 'otl-success-200',
-            'icon' => 'bi-check-circle-fill',
-            'txt' => 'txt-success',
-            'defaultTitle' => 'Berjaya!'
-        ],
-        'danger' => [
-            'bg' => 'bg-danger-50',
-            'border' => 'otl-danger-200',
-            'icon' => 'bi-exclamation-triangle-fill',
-            'txt' => 'txt-danger',
-            'defaultTitle' => 'Ralat!'
-        ],
-        'warning' => [
-            'bg' => 'bg-warning-50',
-            'border' => 'otl-warning-200',
-            'icon' => 'bi-exclamation-triangle-fill',
-            'txt' => 'txt-warning',
-            'defaultTitle' => 'Amaran!'
-        ],
-        'info' => [
-            'bg' => 'bg-primary-50',
-            'border' => 'otl-primary-200',
-            'icon' => 'bi-info-circle-fill',
-            'txt' => 'txt-primary',
-            'defaultTitle' => 'Makluman'
-        ],
-    ];
+    $alertClass = 'alert';
+    $iconClassProvided = $icon;
+    $defaultIconClass = '';
+    $defaultTitle = '';
+    $isDismissible = $dismissible;
 
-    $mapped = $mydsTypeMap[$type] ?? $mydsTypeMap['info'];
-    $isDismissible = $dismissible ?? ($type !== 'info');
-    $alertTitle = $title ?? $mapped['defaultTitle'];
-    $currentIconClass = $icon ?? $mapped['icon'];
-    $hasContent = $message || !$slot->isEmpty() || ($errors && $errors->any());
+    switch ($type) {
+        case 'success':
+            $alertClass .= ' alert-success';
+            $defaultIconClass = 'bi-check-circle-fill';
+            $defaultTitle = __('Berjaya!');
+            if (is_null($isDismissible)) { $isDismissible = true; }
+            break;
+        case 'danger':
+            $alertClass .= ' alert-danger';
+            $defaultIconClass = 'bi-exclamation-triangle-fill';
+            $defaultTitle = __('Ralat!');
+            if (is_null($isDismissible)) { $isDismissible = true; }
+            break;
+        case 'warning':
+            $alertClass .= ' alert-warning';
+            $defaultIconClass = 'bi-exclamation-triangle-fill';
+            $defaultTitle = __('Amaran!');
+            if (is_null($isDismissible)) { $isDismissible = true; }
+            break;
+        case 'info':
+        default:
+            $alertClass .= ' alert-info';
+            $defaultIconClass = 'bi-info-circle-fill';
+            $defaultTitle = __('Makluman');
+            $type = 'info';
+            if (is_null($isDismissible)) { $isDismissible = false; }
+            break;
+    }
+
+    if ($isDismissible) {
+        $alertClass .= ' alert-dismissible fade show';
+    }
+
+    $alertTitle = $title ?? $defaultTitle;
+    $currentIconClass = $iconClassProvided ?? $defaultIconClass;
+
+    $hasContent = $message || !$slot->isEmpty() || ($errors && $errors->any()); // Crucial: This must check $errors
 @endphp
 
 @if ($hasContent)
-    <div
-        {{ $attributes->merge([
-            'class' => "myds-alert shadow-card {$mapped['bg']} border-start border-4 {$mapped['border']} px-4 py-3 mb-3 rounded-lg d-flex align-items-start position-relative animate__animated animate__fadeIn",
-            'role' => 'alert',
-            'style' => 'transition: 400ms cubic-bezier(0.4, 1.4, 0.2, 1);'
-        ]) }}
-        aria-live="polite"
-        tabindex="0"
-    >
-        {{-- Leading Icon (uses MYDS semantic icon and color) --}}
-        @if($currentIconClass)
-            <span class="flex-shrink-0 me-3" aria-hidden="true">
-                <i class="bi {{ $currentIconClass }} fs-4 {{ $mapped['txt'] }}"></i>
-            </span>
-        @endif
-
-        {{-- Alert Content --}}
-        <div class="flex-grow-1">
-            {{-- Alert Title --}}
-            @if($alertTitle)
-                <h5 class="alert-heading h6 fw-semibold mb-1 {{ $mapped['txt'] }} font-poppins">
-                    {{ $alertTitle }}
-                </h5>
-            @endif
-
-            {{-- Main Message --}}
-            @if ($message)
-                <div class="small mb-2 font-inter" style="color:var(--myds-txt-black-900)">
-                    {{ $message }}
+    <div {{ $attributes->merge(['class' => $alertClass]) }} role="alert">
+        <div class="d-flex align-items-start">
+            @if($currentIconClass)
+                <div class="flex-shrink-0 me-2">
+                    <i class="bi {{ $currentIconClass }} fs-5"></i>
                 </div>
             @endif
+            <div class="flex-grow-1">
+                @if($alertTitle)
+                    <h5 class="alert-heading h6 fw-semibold">{{ $alertTitle }}</h5>
+                @endif
 
-            {{-- Validation Errors List --}}
-            @if ($errors && $errors->any())
-                <ul class="mb-0 ps-3 small font-inter" aria-label="Senarai Ralat">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            @endif
+                @if ($message)
+                    <div @class(['small', 'mb-2' => ($errors && $errors->any()) || !$slot->isEmpty()])>{{ $message }}</div>
+                @endif
 
-            {{-- Additional Content Slot --}}
-            @if (!$slot->isEmpty())
-                <div class="font-inter mt-2">
+                {{-- This block is crucial for displaying validation errors --}}
+                @if ($errors && $errors->any())
+                    <ul class="mb-0 ps-3">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                @endif
+
+                @if (!$slot->isEmpty())
                     {{ $slot }}
-                </div>
+                @endif
+            </div>
+            @if ($isDismissible)
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('Tutup') }}"></button>
             @endif
         </div>
-
-        {{-- Dismiss Button (if dismissible) --}}
-        @if ($isDismissible)
-            <button type="button"
-                class="btn-close ms-3 mt-1"
-                data-bs-dismiss="alert"
-                aria-label="Tutup"
-                tabindex="0"
-                style="outline: 2px solid transparent; outline-offset: 2px;"
-            ></button>
-        @endif
     </div>
 @endif
-
-{{--
-    MYDS Alert Anatomy:
-    - Uses semantic colour tokens for background, border, text, and icon.
-    - Shadow and radius match standard MYDS card.
-    - ARIA role="alert", aria-live="polite" for accessibility.
-    - Dismiss button is focusable for keyboard users.
-    - Error list is rendered with ARIA label for screen readers.
-    - Animate.css fadeIn used for motion (MYDS easeoutback.medium).
-    - Typography: Poppins for heading, Inter for body, per MYDS spec.
-    - Compliant with MyGOVEA Principles: Citizen-centric, Minimal, Consistent, Clear, Error Prevention, Accessibility.
---}}

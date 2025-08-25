@@ -54,6 +54,10 @@
                                     <template x-if="itemsToIssue.length > 1"> {{-- Show remove button if more than one item --}}
                                         <button type="button" @click="removeItem(index)"
                                             class="btn btn-sm btn-outline-danger" title="{{ __('Buang Item Baris Ini') }}">
+<<<<<<< HEAD
+=======
+                                            {{-- Using a simple text or you can use a Bootstrap Icon here --}}
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                 viewBox="0 0 20 20" fill="currentColor">
                                                 <path fill-rule="evenodd"
@@ -66,6 +70,7 @@
 
                                 <div class="row g-3">
                                     <div class="col-md-6">
+<<<<<<< HEAD
                                         <label :for="'loan_app_item_id_' + index"
                                             class="form-label">{{ __('Rujuk Item Permohonan Asal') }} <span
                                                 class="text-danger">*</span></label>
@@ -74,6 +79,16 @@
                                             @change="updateAvailableEquipmentAndMaxQty(index)" required>
                                             <option value="">-- {{ __('Pilih Item Asal') }} --</option>
                                             @foreach ($loanApplication->loanApplicationItems as $appItem)
+=======
+                                        <label :for="`loan_app_item_id_${index}`"
+                                            class="form-label">{{ __('Rujuk Item Permohonan Asal') }} <span
+                                                class="text-danger">*</span></label>
+                                        <select class="form-select" :name="`items[${index}][loan_application_item_id]`"
+                                            :id="`loan_app_item_id_${index}`" x-model="item.loan_application_item_id"
+                                            @change="updateAvailableEquipmentAndMaxQty(index)" required>
+                                            <option value="">-- {{ __('Pilih Item Asal') }} --</option>
+                                            @foreach ($loanApplication->applicationItems as $appItem)
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
                                                 @if (($appItem->quantity_approved ?? 0) > ($appItem->quantity_issued ?? 0))
                                                     <option value="{{ $appItem->id }}"
                                                         data-equipment-type="{{ $appItem->equipment_type }}"
@@ -86,7 +101,12 @@
                                                 @endif
                                             @endforeach
                                         </select>
+<<<<<<< HEAD
                                         @error('items.*.loan_application_item_id')
+=======
+                                        @error('items.' . '*' . '.loan_application_item_id')
+                                            {{-- Adjusted for potential Alpine index variable name conflict --}}
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
                                             <div class="form-text text-danger small mt-1">{{ $message }}</div>
                                         @enderror
                                     </div>
@@ -97,7 +117,12 @@
                                                 class="text-danger">*</span></label>
                                         <select class="form-select" :name="'items[' + index + '][equipment_id]'"
                                             :id="'equipment_id_' + index" x-model="item.equipment_id" required
+<<<<<<< HEAD
                                             :disabled="!item.loan_application_item_id || getAvailableEquipmentForSelectedType(index).length === 0">
+=======
+                                            :disabled="!item.loan_application_item_id || getAvailableEquipmentForSelectedType(
+                                                index).length === 0">
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
                                             <option value="">-- {{ __('Pilih Peralatan') }} --</option>
                                             <template x-for="equip in getAvailableEquipmentForSelectedType(index)"
                                                 :key="equip.id">
@@ -116,18 +141,30 @@
                                                     {{ __('Sila pilih item permohonan asal dahulu.') }}</option>
                                             </template>
                                         </select>
+<<<<<<< HEAD
                                         @error('items.*.equipment_id')
+=======
+                                        @error('items.' . '*' . '.equipment_id')
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
                                             <div class="form-text text-danger small mt-1">{{ $message }}</div>
                                         @enderror
                                     </div>
                                 </div>
 
                                 <div class="mt-3">
+<<<<<<< HEAD
                                     <label :for="'quantity_issued_' + index"
                                         class="form-label">{{ __('Kuantiti Dikeluarkan Kali Ini') }} <span
                                             class="text-danger">*</span></label>
                                     <input type="number" class="form-control" :name="'items[' + index + '][quantity_issued]'"
                                         :id="'quantity_issued_' + index" x-model.number="item.quantity_issued"
+=======
+                                    <label :for="`quantity_issued_${index}`"
+                                        class="form-label">{{ __('Kuantiti Dikeluarkan Kali Ini') }} <span
+                                            class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" :name="`items[${index}][quantity_issued]`"
+                                        :id="`quantity_issued_${index}`" x-model.number="item.quantity_issued"
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
                                         min="1" :max="item.max_qty_to_issue" required
                                         :disabled="!item.loan_application_item_id || item.max_qty_to_issue === 0">
                                     <template x-if="item.loan_application_item_id">
@@ -140,7 +177,11 @@
                                                 x-text="item.quantity_already_issued_for_item">0</span>.
                                         </div>
                                     </template>
+<<<<<<< HEAD
                                     @error('items.*.quantity_issued')
+=======
+                                    @error('items.' . '*' . '.quantity_issued')
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
                                         <div class="form-text text-danger small mt-1">{{ $message }}</div>
                                     @enderror
                                 </div>
@@ -149,6 +190,10 @@
                                     <label
                                         class="form-label">{{ __('Aksesori Dikeluarkan (Tandakan yang berkaitan)') }}</label>
                                     @php
+<<<<<<< HEAD
+=======
+                                        // Fetch from config as per System Design Doc
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
                                         $standardAccessories = config('motac.loan_accessories_list', [
                                             'Power Adapter',
                                             'Beg',
@@ -156,7 +201,11 @@
                                             'Kabel USB',
                                             'Kabel HDMI/VGA',
                                             'Alat Kawalan Jauh',
+<<<<<<< HEAD
                                         ]); // [cite: 64]
+=======
+                                        ]);
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
                                     @endphp
                                     <div class="row row-cols-2 row-cols-sm-3 g-2 mt-1">
                                         @foreach ($standardAccessories as $accessory)
@@ -165,31 +214,54 @@
                                                 <div class="form-check">
                                                     <input class="form-check-input" type="checkbox"
                                                         value="{{ $accessoryValue }}"
+<<<<<<< HEAD
                                                         :id="'accessory_' + index + '_' + '{{ $accessoryValue }}'"
                                                         :name="'items[' + index + '][accessories_checklist_item][]'"
                                                         x-model="item.accessories_checklist_item">
                                                     <label class="form-check-label small"
                                                         :for="'accessory_' + index + '_' + '{{ $accessoryValue }}'">
+=======
+                                                        :id="`accessory_${index}_{{ $accessoryValue }}`"
+                                                        :name="`items[${index}][accessories_checklist_item][]`"
+                                                        x-model="item.accessories_checklist_item">
+                                                    <label class="form-check-label small"
+                                                        :for="`accessory_${index}_{{ $accessoryValue }}`">
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
                                                         {{ __($accessory) }}
                                                     </label>
                                                 </div>
                                             </div>
                                         @endforeach
                                     </div>
+<<<<<<< HEAD
                                     @error('items.*.accessories_checklist_item')
                                         <div class="form-text text-danger small mt-1">{{ $message }}</div>
                                     @enderror
                                     @error('items.*.accessories_checklist_item.*')
+=======
+                                    @error('items.' . '*' . '.accessories_checklist_item')
+                                        <div class="form-text text-danger small mt-1">{{ $message }}</div>
+                                    @enderror
+                                    @error('items.' . '*' . '.accessories_checklist_item.*')
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
                                         <div class="form-text text-danger small mt-1">{{ $message }}</div>
                                     @enderror
                                 </div>
 
                                 <div class="mt-3">
+<<<<<<< HEAD
                                     <label :for="'item_notes_' + index"
                                         class="form-label">{{ __('Nota untuk Item Baris Ini (Pilihan)') }}</label>
                                     <textarea class="form-control" :name="'items[' + index + '][issue_item_notes]'" :id="'item_notes_' + index"
                                         x-model="item.issue_item_notes" rows="2"></textarea>
                                     @error('items.*.issue_item_notes')
+=======
+                                    <label :for="`item_notes_${index}`"
+                                        class="form-label">{{ __('Nota untuk Item Baris Ini (Pilihan)') }}</label>
+                                    <textarea class="form-control" :name="`items[${index}][issue_item_notes]`" :id="`item_notes_${index}`"
+                                        x-model="item.issue_item_notes" rows="2"></textarea>
+                                    @error('items.' . '*' . '.issue_item_notes')
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
                                         <div class="form-text text-danger small mt-1">{{ $message }}</div>
                                     @enderror
                                 </div>
@@ -249,7 +321,14 @@
                             class="btn btn-secondary me-2">
                             {{ __('Batal') }}
                         </a>
+<<<<<<< HEAD
                         <button type="submit" class="btn btn-primary" :disabled="isSubmitDisabled()">
+=======
+                        <button type="submit" class="btn btn-primary"
+                            :disabled="itemsToIssue.length === 0 || itemsToIssue.some(item => !item.loan_application_item_id || !
+                                item.equipment_id || !item.quantity_issued || item.quantity_issued < 1 || item
+                                .quantity_issued > item.max_qty_to_issue)">
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
                             {{ __('Sahkan & Keluarkan Peralatan') }}
                         </button>
                     </div>
@@ -262,10 +341,15 @@
 
 @push('scripts')
     @php
+<<<<<<< HEAD
+=======
+        // Sanitize data for direct injection into JavaScript. Using JSON_HEX flags for added security.
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
         $jsonAvailableEquipmentGroupedByType = json_encode(
             $availableEquipmentGroupedByType ?? [],
             JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT,
         );
+<<<<<<< HEAD
     @endphp
     <script>
     document.addEventListener('alpine:init', () => {
@@ -430,5 +514,148 @@
             }
         }));
     });
+=======
+        // loanApplicationItemsData is used to populate the select options, not directly in Alpine state in this version of the script.
+        // If it were, it would need similar sanitization.
+    @endphp
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('issueForm', () => ({
+                allAvailableEquipmentGroupedByType: JSON.parse('{!! $jsonAvailableEquipmentGroupedByType !!}'),
+                itemsToIssue: [], // Initialized in init()
+                transactionDetails: {
+                    receiving_officer_id: '{{ $loanApplication->user_id ?? '' }}', // Pre-select applicant
+                    issue_notes: @json(old('issue_notes', ''))
+                },
+
+                init() {
+                    // Repopulate items from old input if validation failed
+                    const oldItems = @json(old('items', []));
+                    if (oldItems && oldItems.length > 0) {
+                        this.itemsToIssue = oldItems.map(item => ({
+                            loan_application_item_id: item.loan_application_item_id || '',
+                            equipment_id: item.equipment_id || '',
+                            quantity_issued: parseInt(item.quantity_issued, 10) || 1,
+                            max_qty_to_issue: 0, // Will be updated by updateAvailableEquipmentAndMaxQty
+                            selected_equipment_type: '', // Will be updated
+                            accessories_checklist_item: Array.isArray(item
+                                    .accessories_checklist_item) ? item
+                                .accessories_checklist_item : [],
+                            issue_item_notes: item.issue_item_notes || '',
+                            quantity_approved_for_item: 0, // Will be updated
+                            quantity_already_issued_for_item: 0 // Will be updated
+                        }));
+                        // Trigger updates for each repopulated item
+                        this.itemsToIssue.forEach((_, index) => {
+                            // Timeout to allow select options to render if they depend on dynamic data
+                            setTimeout(() => {
+                                this.updateAvailableEquipmentAndMaxQty(index);
+                            }, 0);
+                        });
+                    } else {
+                        // Start with one empty item if no old input
+                        this.addItem();
+                    }
+                    // Pre-fill receiving officer from old input if available
+                    const oldReceivingOfficer = @json(old('receiving_officer_id', $loanApplication->user_id ?? ''));
+                    if (oldReceivingOfficer) {
+                        this.transactionDetails.receiving_officer_id = oldReceivingOfficer;
+                    }
+                },
+
+                createEmptyItem() {
+                    return {
+                        loan_application_item_id: '',
+                        equipment_id: '',
+                        quantity_issued: 1,
+                        max_qty_to_issue: 0,
+                        selected_equipment_type: '',
+                        accessories_checklist_item: [],
+                        issue_item_notes: '',
+                        quantity_approved_for_item: 0,
+                        quantity_already_issued_for_item: 0
+                    };
+                },
+
+                addItem() {
+                    this.itemsToIssue.push(this.createEmptyItem());
+                },
+
+                removeItem(index) {
+                    if (this.itemsToIssue.length > 1) {
+                        this.itemsToIssue.splice(index, 1);
+                    } else {
+                        // Optionally, clear the fields of the last item instead of removing it
+                        // Or display a message that at least one item is required
+                        console.warn(
+                            "Cannot remove the last item. Clear fields if needed or add a new one.");
+                    }
+                },
+
+                updateAvailableEquipmentAndMaxQty(itemIndex) {
+                    const item = this.itemsToIssue[itemIndex];
+                    const selectedItemId = item.loan_application_item_id;
+                    //Alpine's $el might not be available here directly for select, so query DOM
+                    const selectElement = document.getElementById(`loan_app_item_id_${itemIndex}`);
+                    const selectedOption = selectElement ? selectElement.options[selectElement
+                        .selectedIndex] : null;
+
+                    if (selectedOption && selectedOption.value) {
+                        item.selected_equipment_type = selectedOption.dataset.equipmentType;
+                        const qtyApproved = parseInt(selectedOption.dataset.qtyApproved, 10) || 0;
+                        const qtyAlreadyIssued = parseInt(selectedOption.dataset.qtyIssued, 10) || 0;
+
+                        item.quantity_approved_for_item = qtyApproved;
+                        item.quantity_already_issued_for_item = qtyAlreadyIssued;
+                        item.max_qty_to_issue = qtyApproved - qtyAlreadyIssued;
+
+                        // Reset equipment_id if the main item (loan_application_item_id) changes
+                        // item.equipment_id = ''; // Consider if this reset is always desired
+
+                        // Adjust quantity_issued if it exceeds new max or is less than 1
+                        if (item.quantity_issued > item.max_qty_to_issue) {
+                            item.quantity_issued = item.max_qty_to_issue > 0 ? item.max_qty_to_issue :
+                            1;
+                        }
+                        if (item.quantity_issued < 1 && item.max_qty_to_issue > 0) {
+                            item.quantity_issued = 1;
+                        }
+                        if (item.max_qty_to_issue <= 0) {
+                            item.quantity_issued =
+                            0; // Or 1 if you always want to issue at least one if possible
+                        }
+
+                    } else {
+                        item.selected_equipment_type = '';
+                        item.max_qty_to_issue = 0;
+                        item.equipment_id = '';
+                        item.quantity_approved_for_item = 0;
+                        item.quantity_already_issued_for_item = 0;
+                        item.quantity_issued = 0;
+                    }
+                },
+
+                getAvailableEquipmentForSelectedType(itemIndex) {
+                    const currentItem = this.itemsToIssue[itemIndex];
+                    if (!currentItem || !currentItem.selected_equipment_type) return [];
+
+                    const equipmentType = currentItem.selected_equipment_type;
+                    const availableForType = this.allAvailableEquipmentGroupedByType[equipmentType] ||
+                    [];
+
+                    const selectedEquipmentIdsInOtherLines = this.itemsToIssue
+                        .filter((_, idx) => idx !== itemIndex)
+                        .map(itm => itm.equipment_id)
+                        .filter(id => id); // Filter out empty/null IDs
+
+                    return availableForType.filter(equip => {
+                        // Available if not selected in other lines OR if it's the one currently selected in this line
+                        return !selectedEquipmentIdsInOtherLines.includes(equip.id
+                        .toString()) || equip.id.toString() === currentItem.equipment_id;
+                    });
+                }
+            }));
+        });
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
     </script>
 @endpush

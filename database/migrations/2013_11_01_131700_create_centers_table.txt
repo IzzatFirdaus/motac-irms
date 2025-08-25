@@ -1,0 +1,66 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+  /**
+   * Run the migrations.
+   */
+  public function up(): void
+  {
+    Schema::create('centers', function (Blueprint $table) {
+      $table->id();
+      $table->string('name');
+      $table->time('start_work_hour');
+      $table->time('end_work_hour');
+      $table->json('weekends');
+      // Define holidays_per_year directly after weekends if that's the desired order
+      $table->integer('holidays_per_year')->nullable();
+      $table->boolean('is_active')->default(true);
+
+      $table
+        ->foreignId('created_by')
+        ->nullable()
+        ->constrained('users')
+        ->onDelete('set null');
+      $table
+        ->foreignId('updated_by')
+        ->nullable()
+        ->constrained('users')
+        ->onDelete('set null');
+      $table
+        ->foreignId('deleted_by')
+        ->nullable()
+        ->constrained('users')
+        ->onDelete('set null');
+
+      $table->timestamps();
+      $table->softDeletes();
+    });
+  }
+
+  /**
+   * Reverse the migrations.
+   */
+  public function down(): void
+  {
+    Schema::table('centers', function (Blueprint $table) {
+      // Check if columns exist before attempting to drop foreign keys for robustness
+      // Foreign key constraints are typically named: tablename_columnname_foreign
+      // However, Laravel's convention when just passing column name array is what's used here.
+      if (Schema::hasColumn('centers', 'created_by')) {
+        $table->dropForeign(['created_by']);
+      }
+      if (Schema::hasColumn('centers', 'updated_by')) {
+        $table->dropForeign(['updated_by']);
+      }
+      if (Schema::hasColumn('centers', 'deleted_by')) {
+        $table->dropForeign(['deleted_by']);
+      }
+    });
+    Schema::dropIfExists('centers');
+  }
+};

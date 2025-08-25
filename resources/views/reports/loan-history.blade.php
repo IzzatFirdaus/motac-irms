@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 @extends('layouts.app')
 
 @section('title', __('reports.loan_history.title'))
@@ -58,10 +59,40 @@
 
         {{-- Results Table --}}
         <div class="card-body">
+=======
+<x-app-layout>
+    {{-- The outer container is managed by x-app-layout --}}
+
+    <div class="card shadow-sm mb-4">
+        {{-- Card Header --}}
+        <div class="card-header">
+            <div class="d-flex flex-wrap align-items-center justify-content-between">
+                <div class="mt-2">
+                    <h3 class="h5 mb-0">
+                        {{ __('Loan History Report') }}
+                    </h3>
+                </div>
+                @if (Route::has('admin.reports.index'))
+                    <div class="mt-2 flex-shrink-0">
+                        <a href="{{ route('admin.reports.index') }}"
+                            class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center">
+                            <i class="ti ti-arrow-left me-1"></i>
+                            {{ __('Back to Reports') }}
+                        </a>
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        {{-- Card Body --}}
+        <div class="card-body">
+            {{-- General alerts partial - ensure this partial is also Bootstrap styled --}}
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
             @include('_partials._alerts.alert-general')
 
             <div class="table-responsive">
                 @if ($loanTransactions->count())
+<<<<<<< HEAD
                     <table class="table table-striped table-hover align-middle">
                         <thead class="table-light">
                             <tr>
@@ -72,11 +103,22 @@
                                 <th class="px-3 py-2 small text-uppercase text-muted">{{ __('reports.loan_history.table.type') }}</th>
                                 <th class="px-3 py-2 small text-uppercase text-muted">{{ __('reports.loan_history.table.date') }}</th>
                                 <th class="px-3 py-2 small text-uppercase text-muted">{{ __('reports.loan_history.table.officer') }}</th>
+=======
+                    <table class="table table-striped table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col" class="text-uppercase small">{{ __('ID') }}</th>
+                                <th scope="col" class="text-uppercase small">{{ __('Equipment') }}</th>
+                                <th scope="col" class="text-uppercase small">{{ __('User') }}</th>
+                                <th scope="col" class="text-uppercase small">{{ __('Type') }}</th>
+                                <th scope="col" class="text-uppercase small">{{ __('Date') }}</th>
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($loanTransactions as $transaction)
                                 <tr>
+<<<<<<< HEAD
                                     <td class="px-3 py-2 small fw-medium text-dark">#{{ $transaction->id }}</td>
                                     <td class="px-3 py-2 small">
                                         @if ($transaction->loanApplication)
@@ -96,23 +138,52 @@
                                     </td>
                                     <td class="px-3 py-2 small text-muted">{{ $transaction->transaction_date?->translatedFormat('d M Y, g:i A') }}</td>
                                     <td class="px-3 py-2 small text-muted">{{ $transaction->officer_name ?? __('common.not_available') }}</td>
+=======
+                                    <td class="fw-medium">{{ $transaction->id }}</td>
+                                    <td>{{ $transaction->equipment->name ?? __('N/A') }}</td>
+                                    <td>{{ $transaction->user->name ?? __('N/A') }}</td>
+                                    <td>
+                                        {{-- Consider mapping transaction_type to a more readable format if it's an enum/key --}}
+                                        {{ $transaction->transaction_type }}
+                                    </td>
+                                    <td>{{ $transaction->issue_timestamp?->format('Y-m-d H:i') }}</td>
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
 
                     @if ($loanTransactions->hasPages())
+<<<<<<< HEAD
                         <div class="mt-3 pt-3 border-top d-flex justify-content-center">
+=======
+                        <div class="mt-3 pt-3 border-top">
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
                             {{ $loanTransactions->links() }}
                         </div>
                     @endif
                 @else
+<<<<<<< HEAD
                     <div class="alert alert-info text-center" role="alert">
                         <i class="bi bi-info-circle-fill me-2"></i>{{ __('reports.loan_history.no_results') }}
+=======
+                    <div class="alert alert-warning d-flex align-items-center" role="alert">
+                        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img"
+                            aria-label="Warning:">
+                            <use xlink:href="#exclamation-triangle-fill" />
+                        </svg>
+                        <div>
+                            {{ __('No loan history found.') }}
+                        </div>
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
                     </div>
                 @endif
             </div>
         </div>
     </div>
+<<<<<<< HEAD
 </div>
 @endsection
+=======
+</x-app-layout>
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)

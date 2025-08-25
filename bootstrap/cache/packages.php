@@ -1,15 +1,4 @@
 <?php return array (
-  'asantibanez/livewire-charts' => 
-  array (
-    'aliases' => 
-    array (
-      'LivewireCharts' => 'Asantibanez\\LivewireCharts\\LivewireChartsFacade',
-    ),
-    'providers' => 
-    array (
-      0 => 'Asantibanez\\LivewireCharts\\LivewireChartsServiceProvider',
-    ),
-  ),
   'barryvdh/laravel-debugbar' => 
   array (
     'aliases' => 
@@ -19,18 +8,6 @@
     'providers' => 
     array (
       0 => 'Barryvdh\\Debugbar\\ServiceProvider',
-    ),
-  ),
-  'barryvdh/laravel-dompdf' => 
-  array (
-    'aliases' => 
-    array (
-      'PDF' => 'Barryvdh\\DomPDF\\Facade\\Pdf',
-      'Pdf' => 'Barryvdh\\DomPDF\\Facade\\Pdf',
-    ),
-    'providers' => 
-    array (
-      0 => 'Barryvdh\\DomPDF\\ServiceProvider',
     ),
   ),
   'barryvdh/laravel-ide-helper' => 
