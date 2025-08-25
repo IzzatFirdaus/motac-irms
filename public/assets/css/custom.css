@@ -1,15 +1,19 @@
 /* custom.css for MOTAC IRMS
    - Branding, status badges, forms, and responsive design
    - Optimized for maximum cross-browser compatibility (IE 10+, Samsung Internet 2.0+, Edge, Chrome, Firefox)
-   - Updated: 2025-08-04 05:49:20 UTC by IzzatFirdaus
+   - Updated: 2025-08-09 14:00:00 UTC by Copilot
 */
 
-/* Flatpickr calendar direction - ensures date picker displays left-to-right */
+/* -----------------------------------------------------
+   Flatpickr calendar direction - ensures date picker displays left-to-right
+----------------------------------------------------- */
 .flatpickr-calendar {
     direction: ltr;
 }
 
-/* 1. MOTAC Branding Variables - CSS Custom Properties for consistent theming */
+/* -----------------------------------------------------
+   1. MOTAC Branding Variables - CSS Custom Properties
+----------------------------------------------------- */
 :root {
     --motac-primary-color: #003366; /* MOTAC Blue - primary brand color */
     --motac-secondary-color: #FFCC00; /* MOTAC Yellow - secondary brand color */
@@ -18,9 +22,21 @@
     --danger-color: #dc3545; /* Red for errors/rejected status */
     --success-color: #28a745; /* Green for approved/success status */
     --warning-color: #ffc107; /* Yellow for pending/warning status */
+
+    /* Navbar-specific variables for alternative navbar design */
+    --motac-navbar-bg: #fff;
+    --motac-navbar-border: #003366;
+    --motac-navbar-accent: #1976d2;
+    --motac-navbar-accent-bg: #e3f0ff;
+    --motac-navbar-text: #003366;
+    --motac-navbar-hover: #f1f6fb;
+    --motac-navbar-link-hover: #1976d2;
+    --motac-navbar-shadow: 0 2px 10px rgba(25, 118, 210, 0.07);
 }
 
-/* 2. Typography & General Styling - Base styles for consistent appearance */
+/* -----------------------------------------------------
+   2. Typography & General Styling - Base styles
+----------------------------------------------------- */
 body {
     font-family: var(--motac-font-family);
     color: var(--motac-text-color);
@@ -33,7 +49,219 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--motac-primary-color);
 }
 
-/* 3. Button Styles - Consistent button appearance across the application */
+/* -----------------------------------------------------
+   MOTAC Navbar (Alternative Design)
+   - Modern, accessible, government-compliant navbar
+   - Responsive and visually consistent
+----------------------------------------------------- */
+.motac-navbar-alt {
+    width: 100%;
+    background: var(--motac-navbar-bg);
+    border-bottom: 3px solid var(--motac-navbar-border);
+    box-shadow: var(--motac-navbar-shadow);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 64px;
+    padding: 0 18px;
+    position: relative;
+    z-index: 11;
+}
+.motac-navbar-alt .navbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.motac-navbar-alt .navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: var(--motac-navbar-text);
+    font-weight: 700;
+    font-size: 1.22em;
+    letter-spacing: 0.04em;
+}
+.motac-navbar-alt .navbar-logo {
+    width: 38px;
+    height: 38px;
+    background: #fff;
+    border: 2.5px solid var(--motac-navbar-border);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 6px rgba(25, 118, 210, 0.07);
+}
+.motac-navbar-alt .navbar-logo img {
+    width: 30px;
+    height: auto;
+    display: block;
+}
+.motac-navbar-alt .navbar-ministry {
+    color: var(--motac-navbar-accent);
+    font-size: 0.97em;
+    margin-left: 6px;
+    font-weight: 600;
+    white-space: nowrap;
+    letter-spacing: 0.01em;
+}
+.motac-navbar-alt .navbar-links {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin: 0 10px;
+}
+.motac-navbar-alt .navbar-link {
+    color: var(--motac-navbar-text);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 8px 10px;
+    border-radius: 5px;
+    transition: background 0.18s, color 0.18s;
+}
+.motac-navbar-alt .navbar-link:hover,
+.motac-navbar-alt .navbar-link:focus {
+    background: var(--motac-navbar-accent-bg);
+    color: var(--motac-navbar-link-hover);
+    outline: none;
+}
+.motac-navbar-alt .navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.motac-navbar-alt .navbar-action {
+    position: relative;
+}
+.motac-navbar-alt .navbar-action > a,
+.motac-navbar-alt .navbar-action > button {
+    color: var(--motac-navbar-text);
+    background: none;
+    border: none;
+    font-size: 1.21em;
+    padding: 7px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.13s, color 0.13s;
+    display: flex;
+    align-items: center;
+}
+.motac-navbar-alt .navbar-action > a:hover,
+.motac-navbar-alt .navbar-action > button:hover,
+.motac-navbar-alt .navbar-action > a:focus,
+.motac-navbar-alt .navbar-action > button:focus {
+    background: var(--motac-navbar-hover);
+    color: var(--motac-navbar-link-hover);
+    outline: none;
+}
+.motac-navbar-alt .navbar-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 120%;
+    min-width: 200px;
+    background: #fff;
+    color: #222;
+    border-radius: 7px;
+    box-shadow: 0 5px 18px rgba(25, 118, 210, 0.06);
+    border: 1px solid #e6e6e6;
+    z-index: 100;
+    padding: 10px 0;
+    font-size: 1em;
+}
+.motac-navbar-alt .navbar-action.show .navbar-dropdown {
+    display: block;
+}
+.motac-navbar-alt .navbar-dropdown a,
+.motac-navbar-alt .navbar-dropdown button {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    width: 100%;
+    color: #222;
+    background: none;
+    border: none;
+    padding: 9px 22px;
+    text-decoration: none;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.motac-navbar-alt .navbar-dropdown a:hover,
+.motac-navbar-alt .navbar-dropdown button:hover {
+    background: #f6f7fa;
+    color: var(--motac-navbar-accent);
+}
+.motac-navbar-alt .navbar-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--motac-navbar-accent);
+    background: #e3f0ff;
+}
+.navbar-badge {
+    background: #dc3545;
+    color: #fff;
+    font-size: 0.78em;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 999px;
+    position: absolute;
+    top: 1px;
+    right: 4px;
+    z-index: 2;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+}
+.motac-navbar-alt .navbar-hamburger {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 2.1em;
+    color: var(--motac-navbar-text);
+    margin-right: 6px;
+    margin-left: -5px;
+}
+/* Responsive adjustments for navbar */
+@media (max-width: 1100px) {
+    .motac-navbar-alt .navbar-ministry {
+        display: none;
+    }
+}
+@media (max-width: 900px) {
+    .motac-navbar-alt .navbar-links {
+        display: none;
+    }
+    .motac-navbar-alt .navbar-hamburger {
+        display: inline-block;
+    }
+}
+@media (max-width: 600px) {
+    .motac-navbar-alt {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0 4px;
+        min-height: 52px;
+    }
+    .motac-navbar-alt .navbar-brand {
+        font-size: 1em;
+        gap: 6px;
+    }
+    .motac-navbar-alt .navbar-logo {
+        width: 30px;
+        height: 30px;
+    }
+    .motac-navbar-alt .navbar-avatar {
+        width: 32px;
+        height: 32px;
+    }
+}
+
+/* -----------------------------------------------------
+   3. Button Styles - Consistent button appearance
+----------------------------------------------------- */
 .btn-primary {
     background-color: var(--motac-primary-color);
     color: white;
@@ -62,7 +290,9 @@ h1, h2, h3, h4, h5, h6 {
     background-color: #e6b800; /* Slightly darker yellow for hover state */
 }
 
-/* 4. Status Badges/Labels - Visual indicators for application and equipment status */
+/* -----------------------------------------------------
+   4. Status Badges/Labels - Visual indicators
+----------------------------------------------------- */
 .status-badge {
     display: inline-block;
     padding: .25em .4em;
@@ -75,7 +305,6 @@ h1, h2, h3, h4, h5, h6 {
     color: white;
 }
 
-/* Status badge container - for centering badges without using unsupported properties */
 .status-badge-container {
     position: relative;
 }
@@ -147,7 +376,6 @@ h1, h2, h3, h4, h5, h6 {
     color: white;
 }
 
-/* Additional status states for comprehensive coverage */
 .status-draft {
     background-color: #6c757d; /* Muted gray for draft status */
     color: white;
@@ -168,14 +396,15 @@ h1, h2, h3, h4, h5, h6 {
     color: white;
 }
 
-/* 5. Form Styling - Enhanced form appearance and usability */
+/* -----------------------------------------------------
+   5. Form Styling - Enhanced form appearance and usability
+----------------------------------------------------- */
 .form-group label.required::after {
     content: ' *';
     color: var(--danger-color);
     font-weight: bold;
 }
 
-/* Consistent input field styling */
 .form-control {
     padding: 0.5em;
     border: 1px solid #ccc;
@@ -204,9 +433,10 @@ h1, h2, h3, h4, h5, h6 {
     opacity: 1;
 }
 
-/* 6. Responsive Design - Mobile-first approach for better user experience */
+/* -----------------------------------------------------
+   6. Responsive Design - Mobile-first approach
+----------------------------------------------------- */
 @media (max-width: 768px) {
-    /* Stack flex items vertically on small screens */
     .flex-container {
         display: -ms-flexbox;
         display: -webkit-flex;
@@ -216,13 +446,11 @@ h1, h2, h3, h4, h5, h6 {
         flex-direction: column;
     }
 
-    /* Slightly larger badges for mobile readability */
     .status-badge {
         font-size: 85%;
         padding: .3em .5em; /* Larger touch targets */
     }
 
-    /* Improved button sizing for mobile */
     .btn-primary,
     .btn-secondary {
         padding: 0.75em 1.5em;
@@ -231,14 +459,15 @@ h1, h2, h3, h4, h5, h6 {
         margin-bottom: 0.5em;
     }
 
-    /* Enhanced form controls for mobile */
     .form-control {
         padding: 0.75em;
         font-size: 16px; /* Prevents zoom on iOS */
     }
 }
 
-/* 7. Print Styles - Optimized appearance for printed forms */
+/* -----------------------------------------------------
+   7. Print Styles - Optimized appearance for printed forms
+----------------------------------------------------- */
 @media print {
     .status-badge {
         background-color: transparent !important;
@@ -251,13 +480,14 @@ h1, h2, h3, h4, h5, h6 {
         display: none; /* Hide interactive elements in print */
     }
 
-    /* Ensure proper page breaks */
     .page-break {
         page-break-before: always;
     }
 }
 
-/* 8. Accessibility Enhancements - Improved experience for screen readers and keyboard navigation */
+/* -----------------------------------------------------
+   8. Accessibility Enhancements
+----------------------------------------------------- */
 .sr-only {
     position: absolute;
     width: 1px;
@@ -270,12 +500,10 @@ h1, h2, h3, h4, h5, h6 {
     border: 0;
 }
 
-/* Focus indicators for keyboard navigation */
 .btn-primary:focus,
 .btn-secondary:focus,
 .form-control:focus {
     outline: 2px solid var(--motac-primary-color);
-    /* Note: outline-offset is not supported by IE and Edge < 15, but safe to use for newer browsers */
     outline-offset: 2px;
 }
 
@@ -286,7 +514,9 @@ h1, h2, h3, h4, h5, h6 {
     }
 }
 
-/* 9. Animation Classes - Smooth transitions for dynamic content */
+/* -----------------------------------------------------
+   9. Animation Classes - Smooth transitions for dynamic content
+----------------------------------------------------- */
 .fade-in {
     animation: fadeIn 0.3s ease-in;
 }
@@ -315,4 +545,155 @@ h1, h2, h3, h4, h5, h6 {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+/* -----------------------------------------------------
+   === MOTAC IRMS Footer Styles ===
+   Modern, accessible, government-compliant footer design
+----------------------------------------------------- */
+.bg-footer-alt {
+    background: #263238;
+    color: #fafafa;
+    border-top: 4px solid #1976d2;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.06);
+}
+
+.footer-alt-container {
+    display: -ms-flexbox;
+    -ms-flex-wrap: wrap;
+    -ms-flex-align: start;
+    -ms-flex-pack: justify;
+
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    padding: 24px 16px 16px 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.footer-brand {
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-align: center;
+    align-items: center;
+    margin-bottom: 12px;
+}
+.footer-brand > *:not(:last-child) {
+    margin-right: 10px;
+}
+.footer-logo {
+    width: 40px;
+    height: 40px;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 1px 4px rgba(25, 118, 210, 0.20);
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-align: center;
+    -ms-flex-pack: center;
+    align-items: center;
+    justify-content: center;
+}
+.footer-logo img {
+    width: 32px;
+    height: auto;
+    display: block;
+}
+.footer-brand-text {
+    font-weight: 700;
+    color: #fafafa;
+    font-size: 1.2em;
+    letter-spacing: 0.04em;
+}
+.footer-ministry {
+    color: #b3e5fc;
+    font-size: 1.03em;
+    margin-bottom: 6px;
+}
+.footer-legal {
+    color: #b0bec5;
+    font-size: 0.97em;
+    margin-bottom: 8px;
+}
+
+.footer-links {
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+.footer-links > *:not(:last-child) {
+    margin-bottom: 0.5em;
+}
+.footer-link {
+    color: #90caf9;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+    display: inline-block;
+    padding: 2px 0;
+}
+.footer-link:hover, .footer-link:focus {
+    color: #fff;
+    text-decoration: underline;
+    outline: none;
+}
+
+.footer-meta {
+    min-width: 170px;
+    font-size: 0.97em;
+    text-align: right;
+}
+.footer-meta .footer-version {
+    color: #b0bec5;
+    margin-bottom: 3px;
+    display: block;
+}
+
+.footer-social {
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-align: center;
+    align-items: center;
+    margin-top: 12px;
+}
+.footer-social > *:not(:last-child) {
+    margin-right: 10px;
+}
+.footer-social a {
+    color: #b3e5fc;
+    font-size: 1.25em;
+    transition: color 0.2s;
+}
+.footer-social a:hover { color: #fff; }
+
+@media (max-width: 900px) {
+    .footer-alt-container {
+        -ms-flex-direction: column;
+        flex-direction: column;
+        -ms-flex-pack: start;
+        justify-content: flex-start;
+    }
+    .footer-meta {
+        text-align: left;
+    }
+}
+
+@media (max-width: 600px) {
+    .footer-alt-container {
+        padding: 20px 8px 10px 8px;
+    }
+    .footer-brand-text {
+        font-size: 1.05em;
+    }
+    .footer-ministry {
+        font-size: 0.98em;
+    }
+    .footer-meta {
+        min-width: 0;
+    }
 }
