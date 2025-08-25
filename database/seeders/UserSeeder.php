@@ -91,7 +91,7 @@ class UserSeeder extends Seeder
                 'position_id'   => $data['position_id'],
                 // status, email, etc. are randomized by the factory
             ]);
-            $userRecords[] = $user->toArray();
+            $userRecords[] = $user->getAttributes();
         }
 
         // Insert all users in a batch

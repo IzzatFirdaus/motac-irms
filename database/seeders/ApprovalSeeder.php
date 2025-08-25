@@ -47,26 +47,44 @@ class ApprovalSeeder extends Seeder
         $now = Carbon::now();
         $batch = [];
 
+        // Helper: returns a full approval array with all columns, filling unused with null
+        $approvalArray = function ($overrides = []) use ($auditUser, $now) {
+            return array_merge([
+                'approvable_type' => $overrides['approvable_type'] ?? null,
+                'approvable_id' => $overrides['approvable_id'] ?? null,
+                'officer_id' => $overrides['officer_id'] ?? null,
+                'stage' => $overrides['stage'] ?? null,
+                'status' => $overrides['status'] ?? null,
+                'notes' => $overrides['notes'] ?? null,
+                'approved_at' => $overrides['approved_at'] ?? null,
+                'rejected_at' => $overrides['rejected_at'] ?? null,
+                'canceled_at' => $overrides['canceled_at'] ?? null,
+                'resubmitted_at' => $overrides['resubmitted_at'] ?? null,
+                'created_by' => $auditUser->id,
+                'updated_by' => $auditUser->id,
+                'deleted_by' => $overrides['deleted_by'] ?? null,
+                'created_at' => $now,
+                'updated_at' => $now,
+                'deleted_at' => $overrides['deleted_at'] ?? null,
+            ], $overrides);
+        };
+
         // --- 1. Pending approvals (support_review) ---
         foreach ($loanApplications as $application) {
-            $batch[] = [
+            $batch[] = $approvalArray([
                 'approvable_type' => get_class($application),
                 'approvable_id' => $application->id,
                 'officer_id' => $officerIds[array_rand($officerIds)],
                 'stage' => Approval::STAGE_SUPPORT_REVIEW,
                 'status' => Approval::STATUS_PENDING,
                 'notes' => 'Menunggu semakan sokongan.',
-                'created_by' => $auditUser->id,
-                'updated_by' => $auditUser->id,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ];
+            ]);
         }
 
         // --- 2. Approved & Rejected at final_approval ---
         $approvedApps = $loanApplications->shuffle()->take(8);
         foreach ($approvedApps as $application) {
-            $batch[] = [
+            $batch[] = $approvalArray([
                 'approvable_type' => get_class($application),
                 'approvable_id' => $application->id,
                 'officer_id' => $officerIds[array_rand($officerIds)],
@@ -74,16 +92,12 @@ class ApprovalSeeder extends Seeder
                 'status' => Approval::STATUS_APPROVED,
                 'approved_at' => $now->copy()->addMinutes(rand(1, 30)),
                 'notes' => 'Diluluskan di peringkat akhir.',
-                'created_by' => $auditUser->id,
-                'updated_by' => $auditUser->id,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ];
+            ]);
         }
 
         $rejectedApps = $loanApplications->shuffle()->take(5);
         foreach ($rejectedApps as $application) {
-            $batch[] = [
+            $batch[] = $approvalArray([
                 'approvable_type' => get_class($application),
                 'approvable_id' => $application->id,
                 'officer_id' => $officerIds[array_rand($officerIds)],
@@ -91,16 +105,12 @@ class ApprovalSeeder extends Seeder
                 'status' => Approval::STATUS_REJECTED,
                 'rejected_at' => $now->copy()->addMinutes(rand(1, 30)),
                 'notes' => 'Ditolak di peringkat akhir.',
-                'created_by' => $auditUser->id,
-                'updated_by' => $auditUser->id,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ];
+            ]);
         }
 
         // --- 3. Canceled and Forwarded (workflow variety) ---
         foreach ($loanApplications->shuffle()->take(2) as $application) {
-            $batch[] = [
+            $batch[] = $approvalArray([
                 'approvable_type' => get_class($application),
                 'approvable_id' => $application->id,
                 'officer_id' => $officerIds[array_rand($officerIds)],
@@ -108,14 +118,10 @@ class ApprovalSeeder extends Seeder
                 'status' => Approval::STATUS_CANCELED,
                 'canceled_at' => $now->copy()->addMinutes(rand(1, 30)),
                 'notes' => 'Dibatalkan oleh pemohon.',
-                'created_by' => $auditUser->id,
-                'updated_by' => $auditUser->id,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ];
+            ]);
         }
         foreach ($loanApplications->shuffle()->take(2) as $application) {
-            $batch[] = [
+            $batch[] = $approvalArray([
                 'approvable_type' => get_class($application),
                 'approvable_id' => $application->id,
                 'officer_id' => $officerIds[array_rand($officerIds)],
@@ -123,29 +129,21 @@ class ApprovalSeeder extends Seeder
                 'status' => Approval::STATUS_FORWARDED,
                 'resubmitted_at' => $now->copy()->addMinutes(rand(1, 30)),
                 'notes' => 'Permohonan dimajukan kepada pegawai lain.',
-                'created_by' => $auditUser->id,
-                'updated_by' => $auditUser->id,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ];
+            ]);
         }
 
         // --- 4. Soft deleted approvals for variety ---
         foreach ($loanApplications->shuffle()->take(3) as $application) {
-            $batch[] = [
+            $batch[] = $approvalArray([
                 'approvable_type' => get_class($application),
                 'approvable_id' => $application->id,
                 'officer_id' => $officerIds[array_rand($officerIds)],
                 'stage' => Approval::STAGE_GENERAL_REVIEW,
                 'status' => Approval::STATUS_PENDING,
                 'notes' => 'Dihapus untuk ujian soft delete.',
-                'created_by' => $auditUser->id,
-                'updated_by' => $auditUser->id,
                 'deleted_by' => $auditUser->id,
-                'created_at' => $now,
-                'updated_at' => $now,
                 'deleted_at' => $now->copy()->addMinutes(rand(31, 60)),
-            ];
+            ]);
         }
 
         // --- Perform bulk insert in chunks for memory/DB efficiency ---

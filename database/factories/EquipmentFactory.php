@@ -79,8 +79,14 @@ class EquipmentFactory extends Factory
     // Use a fresh local faker instance for identifier generation to avoid any null/bootstrapping issues
     $localFaker = \Faker\Factory::create('ms_MY');
     $itemCode = $localFaker->unique()->bothify('ITEM-????-#####');
-    $tagId = $localFaker->optional(0.9)->unique()->numerify('MOTAC/ICT/'.now()->year.'######');
-    $serialNumber = $localFaker->optional(0.95)->unique()->bothify('SN-########????');
+        $tagIdRaw = $localFaker->optional(0.9)->unique();
+        $tagId = $tagIdRaw
+            ? $tagIdRaw->numerify('MOTAC/ICT/'.now()->year.'######')
+            : 'MOTAC/ICT/'.now()->year . mt_rand(100000, 999999);
+        $serialNumberRaw = $localFaker->optional(0.95)->unique();
+        $serialNumber = $serialNumberRaw
+            ? $serialNumberRaw->bothify('SN-########????')
+            : 'SN-' . mt_rand(10000000, 99999999) . strtoupper(Str::random(4));
 
         // Enumerate asset type, status, and condition options from Equipment model
         $assetType = $this->faker->randomElement([
