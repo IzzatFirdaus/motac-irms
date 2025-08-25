@@ -117,7 +117,7 @@ class HelpdeskTicketFactory extends Factory
             // Only set closed_by_id when the factory chose a closed status; otherwise null.
             // closed_by_id will be set in an afterCreating callback to respect any overrides provided by tests
             'closed_by_id'       => null,
-            'closed_at'          => $status === \App\Models\HelpdeskTicket::STATUS_CLOSED ? $closedAt : null,
+            'closed_at'          => $status === HelpdeskTicket::STATUS_CLOSED ? $closedAt : null,
             'resolution_notes'   => $resolutionNotes,
             'sla_due_at'         => $slaDueAt,
             'created_by'         => $userId,
@@ -131,10 +131,10 @@ class HelpdeskTicketFactory extends Factory
 
     public function configure(): static
     {
-        return $this->afterCreating(function (\App\Models\HelpdeskTicket $ticket, $attributes = null) {
+        return $this->afterCreating(function (HelpdeskTicket $ticket, $attributes = null) {
             // If the ticket is closed but closed_by_id was not provided, set it based on assigned or user
-            if ($ticket->status === \App\Models\HelpdeskTicket::STATUS_CLOSED && empty($ticket->closed_by_id)) {
-                $closer = $ticket->assigned_to_user_id ?? $ticket->user_id ?? \App\Models\User::factory()->create()->id;
+            if ($ticket->status === HelpdeskTicket::STATUS_CLOSED && empty($ticket->closed_by_id)) {
+                $closer = $ticket->assigned_to_user_id ?? $ticket->user_id ?? User::factory()->create()->id;
                 $ticket->closed_by_id = $closer;
                 if (empty($ticket->closed_at)) {
                     $ticket->closed_at = now();
