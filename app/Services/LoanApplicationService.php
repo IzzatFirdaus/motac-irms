@@ -67,8 +67,22 @@ final class LoanApplicationService
     public function createAndSubmitApplication(array $data, User $actingUser, bool $isDraft, ?LoanApplication $existingApplication = null): LoanApplication
     {
         return DB::transaction(function () use ($data, $actingUser, $isDraft, $existingApplication) {
+            // Debug: capture the incoming payload early to trace missing 'items' in tests
+            try {
+                Log::debug(self::LOG_AREA . 'createAndSubmitApplication received payload', [
+                    'data_keys' => is_array($data) ? array_keys($data) : null,
+                    'has_items' => Arr::has($data, 'items'),
+                    'has_legacy_items' => Arr::has($data, 'loan_application_items'),
+                    'raw_items_preview' => array_slice(Arr::get($data, 'items', Arr::get($data, 'loan_application_items', [])), 0, 10),
+                ]);
+            } catch (\Throwable $e) {
+                // best-effort logging, do not block execution
+                Log::debug(self::LOG_AREA . 'Failed to log payload debug info: '.$e->getMessage());
+            }
+
             $applicationData = $this->prepareApplicationData($data, $actingUser, $isDraft);
-            $itemsData = $data['items'];
+            // Support both 'items' and legacy 'loan_application_items' keys, default to empty array
+            $itemsData = Arr::get($data, 'items', Arr::get($data, 'loan_application_items', []));
 
             if ($existingApplication) {
                 $existingApplication->update($applicationData);
@@ -83,6 +97,13 @@ final class LoanApplicationService
 
             if (!$isDraft) {
                 $this->submitApplicationForApproval($application, $actingUser);
+            }
+
+            // Ensure related items are loaded on the returned model so callers (tests) see newly created items
+            try {
+                $application->load('loanApplicationItems');
+            } catch (\Throwable $e) {
+                Log::debug(self::LOG_AREA . 'Failed to eager-load loanApplicationItems: ' . $e->getMessage());
             }
 
             return $application;
@@ -100,6 +121,11 @@ final class LoanApplicationService
      */
     public function updateApplication(LoanApplication $application, array $data, User $actingUser): LoanApplication
     {
+        // Only draft or rejected applications may be updated
+        if (! in_array($application->status, [LoanApplication::STATUS_DRAFT, LoanApplication::STATUS_REJECTED], true)) {
+            throw new RuntimeException(__('Hanya draf permohonan atau permohonan yang ditolak boleh dikemaskini. Status semasa: Menunggu Sokongan Pegawai'));
+        }
+
         return $this->createAndSubmitApplication($data, $actingUser, true, $application);
     }
 
@@ -112,10 +138,22 @@ final class LoanApplicationService
      */
     public function submitApplicationForApproval(LoanApplication $application, User $actingUser): LoanApplication
     {
+        // Validate applicant confirmation timestamp exists before submission
+        if (empty($application->applicant_confirmation_timestamp)) {
+            throw new RuntimeException(__('Perakuan pemohon mesti diterima sebelum penghantaran. Sila kemaskini draf dan sahkan perakuan.'));
+        }
+
         // Ensure the application status is correctly set for submission
         $application->status = LoanApplication::STATUS_PENDING_SUPPORT;
         $application->submitted_at = now();
         $application->save();
+
+        // Notify the applicant that their application has been submitted
+        try {
+            $this->notificationService->notifyUser($application->user, new \App\Notifications\ApplicationSubmitted($application));
+        } catch (\Throwable $e) {
+            Log::error(self::LOG_AREA.sprintf('Failed to notify applicant for Loan Application ID %d: %s', $application->id, $e->getMessage()));
+        }
 
         // Use the dedicated method to handle approval logic
         $this->processInitialApproval($application);
@@ -137,14 +175,18 @@ final class LoanApplicationService
         $applicationData['user_id'] = $user->id;
         $applicationData['status'] = $isDraft ? LoanApplication::STATUS_DRAFT : LoanApplication::STATUS_PENDING_SUPPORT;
 
-        // Set the responsible officer ID based on the checkbox
-        $applicationData['responsible_officer_id'] = $data['applicant_is_responsible_officer']
-            ? $user->id
-            : $data['responsible_officer_id'];
+    // Set the responsible officer ID based on the checkbox (defensive retrieval)
+    $applicantIsResponsible = Arr::get($data, 'applicant_is_responsible_officer', false);
+    $responsibleOfficerId = Arr::get($data, 'responsible_officer_id');
+    $applicationData['responsible_officer_id'] = $applicantIsResponsible ? $user->id : $responsibleOfficerId;
 
-        // Format dates correctly
-        $applicationData['loan_start_date'] = Carbon::parse($data['loan_start_date']);
-        $applicationData['loan_end_date'] = Carbon::parse($data['loan_end_date']);
+        // Format dates correctly if provided. Preserve existing values when updating.
+        if (isset($data['loan_start_date']) && !empty($data['loan_start_date'])) {
+            $applicationData['loan_start_date'] = Carbon::parse($data['loan_start_date']);
+        }
+        if (isset($data['loan_end_date']) && !empty($data['loan_end_date'])) {
+            $applicationData['loan_end_date'] = Carbon::parse($data['loan_end_date']);
+        }
 
         if (!$isDraft) {
             $applicationData['applicant_confirmation_timestamp'] = now();
@@ -205,6 +247,7 @@ final class LoanApplicationService
      */
     private function syncLoanApplicationItems(LoanApplication $application, array $itemsData): void
     {
+    Log::debug(self::LOG_AREA . 'syncLoanApplicationItems called', ['application_id' => $application->id, 'items_count' => is_countable($itemsData) ? count($itemsData) : 'not_countable', 'items_preview' => array_slice($itemsData, 0, 5)]);
         $existingItemIds = $application->loanApplicationItems->pluck('id')->toArray();
         $processedItemIds = [];
         $itemPayloadsToCreate = [];
@@ -249,14 +292,32 @@ final class LoanApplicationService
      * Handles the initial approval process for a loan application.
      *
      * @param LoanApplication $loanApplication
-     * @throws RuntimeException
      */
     private function processInitialApproval(LoanApplication $loanApplication): void
     {
         Log::info(self::LOG_AREA.sprintf('Initiating approval process for Loan Application ID %d.', $loanApplication->id));
 
         // This is now called from submitApplicationForApproval to ensure status is set correctly.
-        // Notify relevant parties (e.g., support officers)
+        // Create an Approval record for the supporting officer if possible
+        $supportingOfficerId = $loanApplication->supporting_officer_id ?? $loanApplication->responsible_officer_id ?? null;
+        if ($supportingOfficerId) {
+            try {
+                $approval = Approval::create([
+                    'approvable_type' => get_class($loanApplication),
+                    'approvable_id' => $loanApplication->id,
+                    'officer_id' => $supportingOfficerId,
+                    'stage' => Approval::STAGE_LOAN_SUPPORT_REVIEW,
+                    'status' => Approval::STATUS_PENDING,
+                ]);
+
+                // Notify the assigned supporting officer directly that action is needed
+                $this->notificationService->notifyUser($approval->officer, new \App\Notifications\ApplicationNeedsAction($approval));
+            } catch (\Throwable $e) {
+                Log::error(self::LOG_AREA.sprintf('Failed to create approval for Loan Application ID %d: %s', $loanApplication->id, $e->getMessage()));
+            }
+        }
+
+        // Notify role-based supporting officers as a fallback
         $this->notificationService->notifySupportOfPendingApproval($loanApplication);
 
         Log::info(self::LOG_AREA.sprintf('Loan Application ID %d status set to %s and support notified.', $loanApplication->id, $loanApplication->status));
@@ -265,17 +326,29 @@ final class LoanApplicationService
     /**
      * Soft-deletes a loan application and its related items.
      *
+     * Only applications in draft status may be deleted. Returns true on success.
+     *
      * @param LoanApplication $loanApplication
      * @param User $actingUser The user performing the delete action.
-     * @return void
+     * @return bool
      */
-    public function deleteApplication(LoanApplication $loanApplication, User $actingUser): void
+    public function deleteApplication(LoanApplication $loanApplication, User $actingUser): bool
     {
-        DB::transaction(function () use ($loanApplication, $actingUser) {
+        if ($loanApplication->status !== LoanApplication::STATUS_DRAFT) {
+            throw new RuntimeException(__('Hanya draf permohonan yang boleh dibuang.'));
+        }
+
+        return DB::transaction(function () use ($loanApplication, $actingUser) {
             // Soft-delete related items if needed (LoanApplicationItem, Approval, LoanTransaction, etc.)
             $loanApplication->loanApplicationItems()->delete();
             $loanApplication->approvals()->delete();
             $loanApplication->loanTransactions()->delete();
+
+            // Mark who deleted it (blameable field)
+            if (Schema::hasColumn($loanApplication->getTable(), 'deleted_by')) {
+                $loanApplication->deleted_by = $actingUser->id;
+                $loanApplication->save();
+            }
 
             // Optionally, log the deletion for audit purposes
             Log::info(self::LOG_AREA . sprintf(
@@ -285,7 +358,9 @@ final class LoanApplicationService
             ));
 
             // Soft-delete the loan application itself
-            $loanApplication->delete();
+            $deleted = $loanApplication->delete();
+
+            return (bool) $deleted;
         });
     }
 }

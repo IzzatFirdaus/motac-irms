@@ -1,0 +1,6 @@
+# Ignore backup and archival folders so the PHP analyzer doesn't report on old/archived copies
+
+backup/
+backup/**
+_documentation/backup/
+_documentation/backup/**

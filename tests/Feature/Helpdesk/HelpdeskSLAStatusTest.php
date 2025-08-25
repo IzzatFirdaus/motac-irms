@@ -12,12 +12,15 @@ class HelpdeskSLAStatusTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected $category;
+    protected $priority;
+
     protected function setUp(): void
     {
         parent::setUp();
         // Ensure necessary data exists for ticket creation
-        \App\Models\HelpdeskCategory::factory()->create(['name' => 'General']);
-        \App\Models\HelpdeskPriority::factory()->create(['name' => 'Medium', 'level' => 2]);
+    $this->category = \App\Models\HelpdeskCategory::factory()->create(['name' => 'General']);
+    $this->priority = \App\Models\HelpdeskPriority::factory()->create(['name' => 'Medium', 'level' => 2]);
     }
 
     /** @test */
@@ -26,6 +29,11 @@ class HelpdeskSLAStatusTest extends TestCase
         $user = User::factory()->create();
         $ticket = HelpdeskTicket::factory()->create([
             'user_id' => $user->id,
+            'category_id' => $this->category->id,
+            'priority_id' => $this->priority->id,
+            'assigned_to_user_id' => $user->id,
+            'created_by' => $user->id,
+            'updated_by' => $user->id,
             'sla_due_at' => Carbon::now()->addDay(),
             'status' => 'open'
         ]);
@@ -39,6 +47,11 @@ class HelpdeskSLAStatusTest extends TestCase
         $user = User::factory()->create();
         $ticket = HelpdeskTicket::factory()->create([
             'user_id' => $user->id,
+            'category_id' => $this->category->id,
+            'priority_id' => $this->priority->id,
+            'assigned_to_user_id' => $user->id,
+            'created_by' => $user->id,
+            'updated_by' => $user->id,
             'sla_due_at' => Carbon::now()->subDay(),
             'status' => 'open' // Not closed
         ]);
@@ -55,6 +68,11 @@ class HelpdeskSLAStatusTest extends TestCase
         $user = User::factory()->create();
         $ticket = HelpdeskTicket::factory()->create([
             'user_id' => $user->id,
+            'category_id' => $this->category->id,
+            'priority_id' => $this->priority->id,
+            'assigned_to_user_id' => $user->id,
+            'created_by' => $user->id,
+            'updated_by' => $user->id,
             'sla_due_at' => Carbon::now()->subDay(),
             'status' => 'closed'
         ]);
@@ -68,6 +86,11 @@ class HelpdeskSLAStatusTest extends TestCase
         $user = User::factory()->create();
         $ticket = HelpdeskTicket::factory()->create([
             'user_id' => $user->id,
+            'category_id' => $this->category->id,
+            'priority_id' => $this->priority->id,
+            'assigned_to_user_id' => $user->id,
+            'created_by' => $user->id,
+            'updated_by' => $user->id,
             'sla_due_at' => null,
             'status' => 'open'
         ]);
@@ -82,7 +105,8 @@ class HelpdeskSLAStatusTest extends TestCase
         $category = \App\Models\HelpdeskCategory::first();
         $priority = \App\Models\HelpdeskPriority::first();
 
-        $ticket = (new \App\Services\HelpdeskService(new \App\Services\TicketNotificationService()))->createTicket([
+    // Use the general NotificationService expected by HelpdeskService
+    $ticket = (new \App\Services\HelpdeskService(new \App\Services\NotificationService()))->createTicket([
             'title' => 'SLA Test',
             'description' => 'SLA description',
             'category_id' => $category->id,

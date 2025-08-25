@@ -64,7 +64,16 @@ class UserFactory extends Factory
 
         // Use fallback faker for unique values and standard fake data
         $identificationNumber = $faker->unique()->numerify('############');
-        $passportNumber = $faker->optional(0.15)->unique()->bothify('??########');
+        // Generate passport number defensively: fall back to a simple bothify if any faker chain fails
+        try {
+            $passportNumber = $faker->optional(0.15)->unique()->bothify('??########');
+            if ($passportNumber === null) {
+                // In rare cases optional()->unique() may yield null; ensure a non-null value
+                $passportNumber = \Faker\Factory::create()->bothify('??########');
+            }
+        } catch (\Throwable $e) {
+            $passportNumber = \Faker\Factory::create()->bothify('??########');
+        }
 
         // Safe access to User title options with fallback
         $titleOptions = defined('App\Models\User::TITLE_ENCIK') ?
@@ -96,8 +105,8 @@ class UserFactory extends Factory
             'position_id' => $positionId,
             'grade_id' => $gradeId,
 
-            // Status with fallback values
-            'status' => $faker->randomElement($statusOptions),
+            // Status with fallback values - choose a stable default that matches migrations
+            'status' => User::STATUS_ACTIVE,
         ];
     }
 
