@@ -1,49 +1,56 @@
-/* MOTAC IRMS Vertical Sidebar Styles - Scoped for Sidebar Only */
-/*
-   - All variables and selectors are scoped to .motac-vertical-menu to avoid style collision with custom.css or other global styles.
-   - Adapts to user's system preference (prefers-color-scheme) for light/dark mode.
-   - Includes legacy browser support (IE10+) with vendor prefixes.
-   - Comments explain structure and compatibility where relevant.
+/* MOTAC IRMS Vertical Sidebar Styles - MYDS Compliant
+   - Follows Malaysia Government Design System specifications
+   - All variables and selectors are scoped to .motac-vertical-menu
+   - Adapts to user's system preference (prefers-color-scheme) for light/dark mode
+   - Cross-browser compatibility (IE10+) with vendor prefixes
+   - Updated: 2025-08-25 03:08:55 UTC by IzzatFirdaus
 */
 
-/* ==== Sidebar-Scoped Variables (Light Mode) ==== */
+/* ==== Sidebar-Scoped Variables (Light Mode) - MYDS Color Tokens ==== */
 .motac-vertical-menu {
-  --sidebar-bg: #ffffff;
-  --sidebar-accent: #1976d2;
-  --sidebar-hover: #f6faff;
-  --sidebar-active: #e3f0ff;
-  --sidebar-text: #22304a;
-  --sidebar-text-muted: #94a3b8;
-  --sidebar-header-bg: #f1f6fa;
+  /* MYDS Color System */
+  --sidebar-bg: #FFFFFF;
+  --sidebar-accent: #2563EB; /* MYDS primary-600 */
+  --sidebar-hover: #F4F4F5; /* MYDS gray-100 */
+  --sidebar-active: #EFF6FF; /* MYDS primary-50 */
+  --sidebar-text: #18181B; /* MYDS txt-black-900 */
+  --sidebar-text-muted: #71717A; /* MYDS gray-500 */
+  --sidebar-header-bg: #FAFAFA; /* MYDS gray-50 */
+
+  /* MYDS Spacing System */
   --sidebar-width: 260px;
   --sidebar-collapsed-width: 72px;
   --sidebar-transition: 0.25s cubic-bezier(.4,0,.2,1);
-  --sidebar-border: #e3eaf2;
-  --sidebar-shadow: 0 3px 24px 0 rgba(40,64,110,.07);
-  --sidebar-menu-arrow: #1976d2;
-  --sidebar-badge-bg: #dc3545;
-  --sidebar-badge-text: #fff;
+
+  /* MYDS Border and Shadow */
+  --sidebar-border: #E4E4E7; /* MYDS gray-200 */
+  --sidebar-shadow: 0 3px 24px 0 rgba(37,99,235,.07); /* MYDS shadow */
+  --sidebar-menu-arrow: #2563EB; /* MYDS primary-600 */
+
+  /* MYDS Status Colors */
+  --sidebar-badge-bg: #DC2626; /* MYDS danger-600 */
+  --sidebar-badge-text: #FFFFFF;
 }
 
-/* ==== Dark Mode Sidebar Variables ==== */
+/* ==== Dark Mode Sidebar Variables - MYDS Dark Mode Tokens ==== */
 @media (prefers-color-scheme: dark) {
   .motac-vertical-menu {
     --sidebar-bg: #0e1826;
-    --sidebar-accent: #64b5f6;
-    --sidebar-hover: #18243a;
-    --sidebar-active: #22304a;
-    --sidebar-text: #e3f0ff;
-    --sidebar-text-muted: #607195;
+    --sidebar-accent: #6394FF; /* MYDS primary-400 for dark mode */
+    --sidebar-hover: #27272A; /* MYDS gray-800 for dark mode */
+    --sidebar-active: #1E40AF; /* MYDS primary-800 for dark mode */
+    --sidebar-text: #FAFAFA; /* MYDS gray-50 for dark mode */
+    --sidebar-text-muted: #A1A1AA; /* MYDS gray-400 for dark mode */
     --sidebar-header-bg: #16213a;
-    --sidebar-border: #23304b;
+    --sidebar-border: #3F3F46; /* MYDS gray-700 for dark mode */
     --sidebar-shadow: 0 3px 24px 0 rgba(20,30,60,.18);
-    --sidebar-menu-arrow: #64b5f6;
-    --sidebar-badge-bg: #f44336;
-    --sidebar-badge-text: #fff;
+    --sidebar-menu-arrow: #6394FF;
+    --sidebar-badge-bg: #F87171; /* MYDS danger-400 for dark mode */
+    --sidebar-badge-text: #FFFFFF;
   }
 }
 
-/* ==== Sidebar Main Container ==== */
+/* ==== Sidebar Main Container - MYDS Grid Compatible ==== */
 .motac-vertical-menu {
   width: var(--sidebar-width);
   min-height: 100vh;
@@ -52,88 +59,105 @@
   box-shadow: var(--sidebar-shadow);
   transition: width var(--sidebar-transition), background var(--sidebar-transition), color var(--sidebar-transition);
   position: relative;
+
+  /* Cross-browser flexbox support */
+  display: -ms-flexbox; /* IE10+ */
+  display: -webkit-flex; /* Safari */
   display: flex;
-  display: -ms-flexbox;           /* IE10+ */
-    display: -ms-flexbox;           /* IE10+ */
-    display: flex;
-    -ms-flex-direction: column;     /* IE10+ */
-    flex-direction: column;
+
+  /* IE10+ flexbox properties */
+  -ms-flex-direction: column;
+
+  /* Modern flexbox */
+  -webkit-flex-direction: column;
+  flex-direction: column;
+
   border-right: 1px solid var(--sidebar-border);
-  font-family: inherit; /* inherit from body, not global override */
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; /* MYDS typography */
 }
 
-/* ==== Sidebar Header ==== */
+/* ==== Sidebar Header - MYDS Typography ==== */
 .motac-vertical-menu .sidebar-header {
   background: var(--sidebar-header-bg);
-  padding: 1.2em 1.3em 1em 1.3em;
-  display: flex;
+  padding: 20px 24px 16px 24px; /* MYDS spacing */
   display: -ms-flexbox;
-    display: -ms-flexbox;
-    display: flex;
-    -ms-flex-align: center;
-    align-items: center; /* Not supported by IE < 11 */
-    gap: 12px; /* Not supported by IE/old browsers, use margin as fallback */
+  display: -webkit-flex;
+  display: flex;
+  -ms-flex-align: center;
+  -webkit-align-items: center;
+  align-items: center;
   border-bottom: 2px solid var(--sidebar-accent);
   transition: background var(--sidebar-transition), border-color var(--sidebar-transition);
 }
 
-/* ==== Sidebar Logo ==== */
+.motac-vertical-menu .sidebar-header > *:not(:last-child) {
+  margin-right: 12px; /* MYDS spacing fallback for gap */
+}
+
+/* ==== Sidebar Logo - MYDS Radius System ==== */
 .motac-vertical-menu .sidebar-logo {
   width: 36px;
   height: 36px;
-  border-radius: 8px;
+  border-radius: 8px; /* MYDS radius-m */
   background: #fff;
-  display: flex;
   display: -ms-flexbox;
-    display: -ms-flexbox;
-    display: flex;
-    -ms-flex-align: center;
-    align-items: center; /* Not supported by IE < 11 */
-    -ms-flex-pack: center;
-    justify-content: center; /* Not supported by IE < 11 */
-  box-shadow: 0 1px 3px rgba(25, 118, 210, 0.10);
+  display: -webkit-flex;
+  display: flex;
+  -ms-flex-align: center;
+  -ms-flex-pack: center;
+  -webkit-align-items: center;
+  -webkit-justify-content: center;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.10); /* MYDS shadow-button */
   transition: box-shadow .18s;
 }
+
 @media (prefers-color-scheme: dark) {
   .motac-vertical-menu .sidebar-logo {
-    background: #22304a;
+    background: #3F3F46; /* MYDS gray-700 for dark mode */
     box-shadow: 0 1px 6px 0 rgba(50,70,120,0.08);
   }
 }
+
 .motac-vertical-menu .sidebar-logo img {
   width: 28px;
   height: auto;
   display: block;
 }
+
 .motac-vertical-menu .sidebar-title {
-  font-weight: 700;
+  font-weight: 700; /* MYDS bold */
   font-size: 1.15em;
   color: var(--sidebar-accent);
   letter-spacing: 0.03em;
   white-space: nowrap;
   transition: color var(--sidebar-transition);
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; /* MYDS heading font */
 }
 
-/* ==== Menu List ==== */
+/* ==== Menu List - MYDS Flexbox Layout ==== */
 .motac-vertical-menu .sidebar-menu {
   list-style: none;
   margin: 0;
   padding: 0;
-  -ms-flex: 1 1 auto;
+  -ms-flex: 1 1 auto; /* IE10+ */
+  -webkit-flex: 1 1 auto;
   flex: 1 1 auto;
   overflow-y: auto;
   background: none;
 }
 
-/* ==== Menu Header ==== */
+/* ==== Menu Header - MYDS Typography ==== */
 .motac-vertical-menu .sidebar-menu .menu-header {
-  font-size: 0.85em;
+  font-size: 0.875rem; /* MYDS Body Small */
   color: var(--sidebar-text-muted);
-  padding: 1.2em 1.3em 0.5em 1.5em;
+  padding: 20px 24px 8px 24px; /* MYDS spacing */
   letter-spacing: 0.08em;
-  font-weight: 700;
+  font-weight: 700; /* MYDS bold */
   text-transform: uppercase;
   background: none;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 /* ==== Menu Item ==== */
@@ -141,170 +165,42 @@
   position: relative;
 }
 
-/* ==== Menu Link ==== */
+/* ==== Menu Link - MYDS Spacing and Radius ==== */
 .motac-vertical-menu .sidebar-menu .menu-link {
-  display: flex;
   display: -ms-flexbox;
-    display: -ms-flexbox;
-    display: flex;
-    -ms-flex-align: center;
-    align-items: center; /* Not supported by IE < 11 */
-    gap: 16px; /* Not supported by IE/old browsers, use margin as fallback */
+  display: -webkit-flex;
+  display: flex;
+  -ms-flex-align: center;
+  -webkit-align-items: center;
+  align-items: center;
   text-decoration: none;
   color: var(--sidebar-text);
-  padding: 0.85em 1.6em 0.85em 1.5em;
-  font-weight: 500;
-  border-left: 3px solid transparent;
-  background: none;
-  transition: background 0.20s, color 0.18s, border-color 0.15s;
-  cursor: pointer;
-  user-select: none;
-  -webkit-user-select: none; /* Chrome/Safari */
-  -moz-user-select: none;    /* Firefox */
-  -ms-user-select: none;     /* IE10+ */
-  outline: none;
-  border-radius: 0 20px 20px 0;
+  padding: 14px;
+  gap: 12px;
+  border-radius: 8px;
+  transition: background var(--sidebar-transition), color var(--sidebar-transition);
 }
-.motac-vertical-menu .sidebar-menu .menu-link:hover,
-.motac-vertical-menu .sidebar-menu .menu-link:focus,
-.motac-vertical-menu .sidebar-menu .menu-link.focus {
+
+.motac-vertical-menu .sidebar-menu .menu-link:hover {
   background: var(--sidebar-hover);
   color: var(--sidebar-accent);
-  outline: none;
 }
 
-/* ==== Active and Open States ==== */
-.motac-vertical-menu .sidebar-menu .menu-item.active > .menu-link,
-.motac-vertical-menu .sidebar-menu .menu-item.open > .menu-link {
+/* Active state for current menu item */
+.motac-vertical-menu .sidebar-menu .menu-item--active > .menu-link,
+.motac-vertical-menu .sidebar-menu .menu-link.active {
   background: var(--sidebar-active);
   color: var(--sidebar-accent);
-  border-left: 3px solid var(--sidebar-accent);
   font-weight: 600;
-  box-shadow: 0 2px 8px 0 rgba(25,118,210,0.03);
+  position: relative;
 }
 
-/* ==== Menu Icon ==== */
-.motac-vertical-menu .sidebar-menu .menu-icon {
-  font-size: 1.22em;
-  min-width: 24px;
-  text-align: center;
+/* Small icon/text helpers */
+.motac-vertical-menu .sidebar-menu .menu-link .menu-icon {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: inherit;
-  opacity: 0.95;
-  transition: color 0.18s;
-}
-
-/* ==== Menu Arrow ==== */
-.motac-vertical-menu .sidebar-menu .menu-arrow {
-  margin-left: auto;
-  transition: transform 0.2s, color 0.18s;
-  color: var(--sidebar-menu-arrow);
-  font-size: 1.12em;
-}
-.motac-vertical-menu .sidebar-menu .menu-item.open > .menu-link .menu-arrow {
-  transform: rotate(90deg);
-}
-
-/* ==== Submenu ==== */
-.motac-vertical-menu .sidebar-menu .menu-sub {
-  display: none;
-  background: none;
-  list-style: none;
-  padding-left: 0;
-  margin: 0;
-  border-left: 2px solid var(--sidebar-accent);
-}
-.motac-vertical-menu .sidebar-menu .menu-item.open > .menu-sub {
-  display: block;
-  animation: fadeInMenu 0.23s;
-}
-@keyframes fadeInMenu {
-  from {opacity: 0; transform: translateY(-7px);}
-  to {opacity: 1; transform: translateY(0);}
-}
-.motac-vertical-menu .sidebar-menu .menu-sub .menu-link {
-  padding-left: 2.9em;
-  font-size: 0.97em;
-  background: none;
-  border: none;
-  color: var(--sidebar-text-muted);
-  border-radius: 0 16px 16px 0;
-}
-.motac-vertical-menu .sidebar-menu .menu-sub .menu-item.active > .menu-link {
-  color: var(--sidebar-accent);
-  font-weight: 600;
-  background: var(--sidebar-active);
-  border-left: 3px solid var(--sidebar-accent);
-}
-.motac-vertical-menu .sidebar-menu .menu-sub .menu-link:hover,
-.motac-vertical-menu .sidebar-menu .menu-sub .menu-link:focus {
-  color: var(--sidebar-accent);
-  background: var(--sidebar-hover);
-}
-
-/* ==== Sidebar Badge Styling ==== */
-.motac-vertical-menu .badge {
-  display: inline-block;
-  min-width: 18px;
-  padding: 0 6px;
-  font-size: 0.75em;
-  font-weight: 700;
-  color: var(--sidebar-badge-text);
-  background-color: var(--sidebar-badge-bg);
-  border-radius: 10px;
-  margin-left: 0.5em;
-}
-
-/* ==== Responsive Adjustments ==== */
-@media (max-width: 900px) {
-  .motac-vertical-menu {
-    width: var(--sidebar-collapsed-width);
-    min-width: var(--sidebar-collapsed-width);
-  }
-  .motac-vertical-menu .sidebar-title { display: none; }
-  .motac-vertical-menu .sidebar-menu .menu-link > div:not(.menu-icon) { display: none; }
-  .motac-vertical-menu .sidebar-menu .menu-header { display: none; }
-}
-@media (max-width: 600px) {
-  .motac-vertical-menu {
-    position: fixed;
-    z-index: 120;
-    height: 100vh;
-    left: 0; top: 0;
-    width: 88vw;
-    min-width: 0;
-    max-width: 350px;
-    transition: width var(--sidebar-transition);
-  }
-}
-
-/* ==== Misc Utility Classes ==== */
-.motac-vertical-menu .mt-auto { margin-top: auto; }
-
-/* ==== IE10+ and Flexbox Fallbacks ==== */
-@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
-  .motac-vertical-menu,
-  .motac-vertical-menu .sidebar-header,
-  .motac-vertical-menu .sidebar-logo {
-    display: -ms-flexbox !important;
-  }
-  .motac-vertical-menu { -ms-flex-direction: column; flex-direction: column; }
-  .motac-vertical-menu .sidebar-header { -ms-flex-align: center; }
-  .motac-vertical-menu .sidebar-logo { -ms-flex-align: center; -ms-flex-pack: center; }
-  .motac-vertical-menu .sidebar-menu { -ms-flex: 1 1 auto; flex: 1 1 auto; }
-}
-
-/* ==== Custom Scrollbars for Modern Browsers (optional) ==== */
-.motac-vertical-menu .sidebar-menu {
-  scrollbar-width: thin; /* Not supported by IE/old browsers */
-  scrollbar-color: var(--sidebar-accent) var(--sidebar-bg); /* Not supported by IE/old browsers */
-}
-.motac-vertical-menu .sidebar-menu::-webkit-scrollbar {
-  width: 7px;
-}
-.motac-vertical-menu .sidebar-menu::-webkit-scrollbar-thumb {
-  background: var(--sidebar-accent);
-  border-radius: 3px;
-}
-.motac-vertical-menu .sidebar-menu::-webkit-scrollbar-track {
-  background: var(--sidebar-bg);
 }
