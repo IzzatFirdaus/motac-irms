@@ -49,6 +49,10 @@ class UserFactory extends Factory
 
         // Fallback faker instance in case $this->faker is null (can happen during early seeding)
         $faker = $this->faker ?? \Faker\Factory::create();
+        // Defensive: ensure $faker is an object with expected methods (some test harnesses may set it to null)
+        if (!is_object($faker) || !method_exists($faker, 'bothify')) {
+            $faker = \Faker\Factory::create();
+        }
 
         // Pick random IDs from cached arrays, fallback to null if empty
         $departmentId = !empty($departmentIds) ? Arr::random($departmentIds) : null;

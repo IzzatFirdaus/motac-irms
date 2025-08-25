@@ -13,10 +13,16 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Must match App\Models\LoanTransactionItem::$STATUSES_LABELS keys
         $itemStatuses = [
-            'issued', 'returned_pending_inspection', 'returned_good',
-            'returned_minor_damage', 'returned_major_damage',
-            'reported_lost', 'unserviceable_on_return',
+            'issued',
+            'returned', // General returned status (added to match model constant)
+            'returned_pending_inspection',
+            'returned_good',
+            'returned_minor_damage',
+            'returned_major_damage',
+            'reported_lost',
+            'unserviceable_on_return',
         ];
         $defaultStatus = 'issued';
 
@@ -31,16 +37,19 @@ return new class extends Migration
             $table->id();
             $table->foreignId('loan_transaction_id')->constrained('loan_transactions')->cascadeOnDelete();
             $table->foreignId('equipment_id')->constrained('equipment')->onDelete('cascade');
-            $table->foreignId('loan_application_item_id')->nullable()->comment('Link to requested item')->constrained('loan_application_items')->onDelete('set null');
+            $table->foreignId('loan_application_item_id')->nullable()->comment('Link to requested item')->constrained('loan_application_items')->nullOnDelete();
             $table->unsignedInteger('quantity_transacted')->default(1)->comment('Usually 1 for serialized items');
             $table->enum('status', $itemStatuses)->default($defaultStatus)->comment('Status of this item in this transaction');
             $table->enum('condition_on_return', $conditionStatuses)->nullable();
             $table->json('accessories_checklist_issue')->nullable();
             $table->json('accessories_checklist_return')->nullable();
             $table->text('item_notes')->nullable();
+
+            // Blameable
             $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('deleted_by')->nullable()->constrained('users')->onDelete('set null');
+
             $table->timestamps();
             $table->softDeletes();
         });
@@ -58,7 +67,7 @@ return new class extends Migration
                     try {
                         $table->dropForeign([$key]);
                     } catch (\Exception $e) {
-                        // Log warning if needed
+                        // ignore
                     }
                 }
             }
