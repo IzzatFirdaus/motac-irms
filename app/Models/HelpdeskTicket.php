@@ -197,4 +197,22 @@ class HelpdeskTicket extends Model
     {
         return $this->comments()->latest()->first();
     }
+
+    /**
+     * Whether the ticket is overdue based on SLA.
+     *
+     * Returns false when SLA is null or ticket is closed.
+     */
+    public function getIsOverdueAttribute(): bool
+    {
+        if ($this->isClosed()) {
+            return false;
+        }
+
+        if (is_null($this->sla_due_at)) {
+            return false;
+        }
+
+        return $this->sla_due_at->isPast();
+    }
 }

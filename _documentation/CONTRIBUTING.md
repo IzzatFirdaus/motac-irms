@@ -31,11 +31,13 @@ We welcome and appreciate all community contributions—whether you found a bug,
 1. **Fork the Repository**
 
 2. **Clone Your Fork Locally**
+
     ```bash
     git clone https://github.com/YOUR_USERNAME/MOTAC_IRMS.git
     ```
 
 3. **Create a Descriptive Branch**
+
     ```bash
     git checkout -b feature/your-feature-name
     ```
@@ -50,11 +52,13 @@ We welcome and appreciate all community contributions—whether you found a bug,
     - Check code style with Pint or Stylelint (`./vendor/bin/pint`, `npm run lint:css`).
 
 6. **Commit with a Descriptive Message**
+
     ```bash
     git commit -m "Add feature: user can export reports as PDF"
     ```
 
 7. **Push to Your Fork**
+
     ```bash
     git push origin feature/your-feature-name
     ```

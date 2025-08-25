@@ -69,7 +69,8 @@ class NotificationService
      */
     public function notifySupportOfPendingApproval(LoanApplication $loanApplication): void
     {
-        $supportUsers = User::role('Support')->get();
+    // Use the 'Supporting Officer' role name which exists in the system
+    $supportUsers = User::role('Supporting Officer')->get();
         foreach ($supportUsers as $supportUser) {
             $this->notifyUser($supportUser, new SupportPendingApprovalNotification($loanApplication));
         }

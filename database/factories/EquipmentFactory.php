@@ -76,9 +76,11 @@ class EquipmentFactory extends Factory
         $updatedAt = Carbon::parse($this->faker->dateTimeBetween($createdAt->toDateTimeString(), 'now'));
 
         // Generate unique asset identifiers
-        $itemCode = $this->faker->unique()->bothify('ITEM-????-#####');
-        $tagId = $this->faker->optional(0.9)->unique()->numerify('MOTAC/ICT/'.now()->year.'######');
-        $serialNumber = $this->faker->optional(0.95)->unique()->bothify('SN-########????');
+    // Use a fresh local faker instance for identifier generation to avoid any null/bootstrapping issues
+    $localFaker = \Faker\Factory::create('ms_MY');
+    $itemCode = $localFaker->unique()->bothify('ITEM-????-#####');
+    $tagId = $localFaker->optional(0.9)->unique()->numerify('MOTAC/ICT/'.now()->year.'######');
+    $serialNumber = $localFaker->optional(0.95)->unique()->bothify('SN-########????');
 
         // Enumerate asset type, status, and condition options from Equipment model
         $assetType = $this->faker->randomElement([

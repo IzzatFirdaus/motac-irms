@@ -30,13 +30,25 @@ class HelpdeskTicketFactory extends Factory
         if (!isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
+        // If no users exist yet, create one so FK fields can safely reference a valid user.
+        if (empty($userIds)) {
+            $userIds = [User::factory()->create()->id];
+        }
         // Cache Category IDs
         if (!isset($categoryIds)) {
             $categoryIds = HelpdeskCategory::pluck('id')->all();
         }
+        // Ensure at least one category exists for tests that expect it
+        if (empty($categoryIds)) {
+            $categoryIds = [HelpdeskCategory::factory()->create()->id];
+        }
         // Cache Priority IDs
         if (!isset($priorityIds)) {
             $priorityIds = HelpdeskPriority::pluck('id')->all();
+        }
+        // Ensure at least one priority exists for tests that expect it
+        if (empty($priorityIds)) {
+            $priorityIds = [HelpdeskPriority::factory()->create()->id];
         }
 
         // Pick random user/category/priority IDs or null if none exist
@@ -64,11 +76,16 @@ class HelpdeskTicketFactory extends Factory
         $createdAt = Carbon::parse($this->faker->dateTimeBetween('-6 months', 'now'));
         $updatedAt = Carbon::parse($this->faker->dateTimeBetween($createdAt, 'now'));
 
-        // Closed fields only set if status is closed
+        // Closed fields only set if status is closed. Make sure closed_by references a valid user.
         $closedById = null;
         $closedAt = null;
         if ($status === HelpdeskTicket::STATUS_CLOSED) {
-            $closedById = $assignedToUserId;
+            // prefer assigned user as the closer, otherwise fall back to the ticket owner
+            $closedById = $assignedToUserId ?? $userId;
+            // if somehow still null, ensure a user exists and use it
+            if (is_null($closedById)) {
+                $closedById = User::factory()->create()->id;
+            }
             $closedAt = Carbon::parse($this->faker->dateTimeBetween($updatedAt, 'now'));
         }
 
@@ -77,8 +94,11 @@ class HelpdeskTicketFactory extends Factory
             ? $msFaker->sentence(8)
             : null;
 
-        // SLA due (optional)
+        // SLA due (optional). If not provided, give a sensible default (48 hours) so SLA tests are predictable.
         $slaDueAt = $this->faker->optional(0.4)->dateTimeBetween($createdAt, '+2 weeks');
+        if (is_null($slaDueAt)) {
+            $slaDueAt = Carbon::parse($createdAt)->addHours(48);
+        }
 
         // Soft delete fields
         $isDeleted = $this->faker->boolean(2); // ~2% soft deleted
@@ -94,8 +114,10 @@ class HelpdeskTicketFactory extends Factory
             'priority_id'        => $priorityId,
             'user_id'            => $userId,
             'assigned_to_user_id'=> $assignedToUserId,
-            'closed_by_id'       => $closedById,
-            'closed_at'          => $closedAt,
+            // Only set closed_by_id when the factory chose a closed status; otherwise null.
+            // closed_by_id will be set in an afterCreating callback to respect any overrides provided by tests
+            'closed_by_id'       => null,
+            'closed_at'          => $status === \App\Models\HelpdeskTicket::STATUS_CLOSED ? $closedAt : null,
             'resolution_notes'   => $resolutionNotes,
             'sla_due_at'         => $slaDueAt,
             'created_by'         => $userId,
@@ -105,6 +127,21 @@ class HelpdeskTicketFactory extends Factory
             'updated_at'         => $updatedAt,
             'deleted_at'         => $deletedAt,
         ];
+    }
+
+    public function configure(): static
+    {
+        return $this->afterCreating(function (\App\Models\HelpdeskTicket $ticket, $attributes = null) {
+            // If the ticket is closed but closed_by_id was not provided, set it based on assigned or user
+            if ($ticket->status === \App\Models\HelpdeskTicket::STATUS_CLOSED && empty($ticket->closed_by_id)) {
+                $closer = $ticket->assigned_to_user_id ?? $ticket->user_id ?? \App\Models\User::factory()->create()->id;
+                $ticket->closed_by_id = $closer;
+                if (empty($ticket->closed_at)) {
+                    $ticket->closed_at = now();
+                }
+                $ticket->save();
+            }
+        });
     }
 
     /**

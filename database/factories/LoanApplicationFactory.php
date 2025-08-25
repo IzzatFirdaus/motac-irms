@@ -27,8 +27,9 @@ class LoanApplicationFactory extends Factory
         if (!isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $userId = !empty($userIds) ? Arr::random($userIds) : null;
-        $officerId = !empty($userIds) ? Arr::random($userIds) : null;
+    $userId = !empty($userIds) ? Arr::random($userIds) : null;
+    // Choose an officer ID only if there are users present and a random pick is available; otherwise null
+    $officerId = !empty($userIds) ? Arr::random($userIds) : null;
 
         // Use a static Malaysian faker for realism and speed
         static $msFaker;
@@ -76,7 +77,8 @@ class LoanApplicationFactory extends Factory
 
         return [
             'user_id'                => $userId,
-            'responsible_officer_id' => $officerId,
+            // Default to null to avoid FK constraint errors in tests that don't seed officers.
+            'responsible_officer_id' => null,
             'supporting_officer_id'  => null, // Optional, can be filled if needed
             'purpose'                => $msFaker->sentence(8), // Reason for application
             'location'               => $msFaker->city,
