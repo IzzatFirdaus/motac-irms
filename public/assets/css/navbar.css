@@ -18,9 +18,9 @@
   display: -ms-flexbox;
   display: flex;
   -ms-flex-align: center;
-  align-items: center;
+  align-items: center; /* Not supported by IE < 11, but safe for progressive enhancement */
   -ms-flex-pack: justify;
-  justify-content: space-between;
+  justify-content: space-between; /* Not supported by IE < 11, but safe for progressive enhancement */
   min-height: 64px;
   padding: 0 18px;
   position: relative;
@@ -32,10 +32,10 @@
   display: -ms-flexbox;
   display: flex;
   -ms-flex-align: center;
-  align-items: center;
+  align-items: center; /* Not supported by IE < 11 */
   /* Fallback for gap */
   margin-right: 12px;
-  gap: 12px;
+  gap: 12px; /* Not supported by IE/old browsers, use margin as fallback */
 }
 
 /* Brand/Logo */
@@ -43,10 +43,10 @@
   display: -ms-flexbox;
   display: flex;
   -ms-flex-align: center;
-  align-items: center;
+  align-items: center; /* Not supported by IE < 11 */
   /* Fallback for gap */
   margin-right: 12px;
-  gap: 12px;
+  gap: 12px; /* Not supported by IE/old browsers, use margin as fallback */
   text-decoration: none;
   color: var(--motac-navbar-text);
   font-weight: 700;
@@ -63,9 +63,9 @@
   display: -ms-flexbox;
   display: flex;
   -ms-flex-align: center;
-  align-items: center;
+  align-items: center; /* Not supported by IE < 11 */
   -ms-flex-pack: center;
-  justify-content: center;
+  justify-content: center; /* Not supported by IE < 11 */
   box-shadow: 0 1px 6px rgba(25, 118, 210, 0.07);
 }
 
@@ -89,10 +89,10 @@
   display: -ms-flexbox;
   display: flex;
   -ms-flex-align: center;
-  align-items: center;
+  align-items: center; /* Not supported by IE < 11 */
   /* Fallback for gap */
   margin-right: 18px;
-  gap: 18px;
+  gap: 18px; /* Not supported by IE/old browsers, use margin as fallback */
   margin: 0 10px;
 }
 
@@ -117,10 +117,10 @@
   display: -ms-flexbox;
   display: flex;
   -ms-flex-align: center;
-  align-items: center;
+  align-items: center; /* Not supported by IE < 11 */
   /* Fallback for gap */
   margin-right: 14px;
-  gap: 14px;
+  gap: 14px; /* Not supported by IE/old browsers, use margin as fallback */
 }
 
 .motac-navbar-alt .navbar-action {
@@ -140,7 +140,7 @@
   display: -ms-flexbox;
   display: flex;
   -ms-flex-align: center;
-  align-items: center;
+  align-items: center; /* Not supported by IE < 11 */
 }
 
 .motac-navbar-alt .navbar-action > a:hover,
@@ -178,10 +178,10 @@
   display: -ms-flexbox;
   display: flex;
   -ms-flex-align: center;
-  align-items: center;
+  align-items: center; /* Not supported by IE < 11 */
   /* Fallback for gap */
   margin-right: 9px;
-  gap: 9px;
+  gap: 9px; /* Not supported by IE/old browsers, use margin as fallback */
   width: 100%;
   color: #222;
   background: none;
@@ -206,7 +206,7 @@
   border-radius: 50%;
   /* Fallback for object-fit for older browsers */
   -o-object-fit: cover;
-     object-fit: cover;
+     object-fit: cover; /* Not supported by IE, safe for progressive enhancement */
   border: 2px solid var(--motac-navbar-accent);
   background: #e3f0ff;
 }
@@ -265,13 +265,13 @@
     flex-direction: column;
     /* IE10+ fallback for align-items */
     -ms-flex-align: stretch;
-    align-items: stretch;
+    align-items: stretch; /* Not supported by IE < 11 */
     padding: 0 4px;
     min-height: 52px;
   }
   .motac-navbar-alt .navbar-brand {
     font-size: 1em;
-    gap: 6px;
+    gap: 6px; /* Not supported by IE/old browsers, use margin as fallback */
   }
   .motac-navbar-alt .navbar-logo {
     width: 30px;

@@ -9,7 +9,7 @@ The security of the **MOTAC Integrated Resource Management System (MOTAC_IRMS)**
 If you discover a potential security vulnerability in the MOTAC_IRMS, we urge you to report it responsibly and promptly. We appreciate your efforts to help keep our system—and its users—safe.
 
 **Contact Email:**  
-security.bpm@motac.gov.my  
+[security.bpm@motac.gov.my](mailto:security.bpm@motac.gov.my)  
 *If this is not the correct contact, please refer to the official MOTAC/BPM channels or internal communication for updates.*
 
 ---

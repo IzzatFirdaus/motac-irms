@@ -73,7 +73,7 @@ This Code of Conduct is adapted from the [Contributor Covenant](https://www.cont
 
 Community Impact Guidelines are inspired by [Mozilla's code of conduct enforcement ladder](https://github.com/mozilla/diversity).
 
-For answers to common questions, see the [Contributor Covenant FAQ](https://www.contributor-covenant.org/faq). Translations are available [here](https://www.contributor-covenant.org/translations).
+For answers to common questions, see the [Contributor Covenant FAQ](https://www.contributor-covenant.org/faq). Translations are available at the [Contributor Covenant Translations page](https://www.contributor-covenant.org/translations).
 
 ---
 

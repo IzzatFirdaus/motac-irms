@@ -25,13 +25,13 @@
 
   /* Old WebKit (Safari < 9) */
   display: -webkit-box;
-  -webkit-box-pack: center;
-  -webkit-box-align: center;
+  -webkit-box-pack: center; /* Not supported by IE, safe to ignore */
+  -webkit-box-align: center; /* Not supported by IE, safe to ignore */
 
   /* Firefox < 22 */
   display: -moz-box;
-  -moz-box-pack: center;
-  -moz-box-align: center;
+  -moz-box-pack: center; /* Not supported by IE, safe to ignore */
+  -moz-box-align: center; /* Not supported by IE, safe to ignore */
 
   /* IE 10+ */
   display: -ms-flexbox;
@@ -41,8 +41,8 @@
   /* Modern browsers */
   display: -webkit-flex;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: center; /* Not supported by IE < 11 */
+  align-items: center;     /* Not supported by IE < 11 */
 
   /* Dimensions */
   width: 34px;
@@ -161,15 +161,15 @@
 
   /* Old WebKit box model (Safari < 9) */
   display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-  -webkit-box-align: center;
+  -webkit-box-orient: vertical; /* Not supported by IE, safe to ignore */
+  -webkit-box-direction: normal; /* Not supported by IE, safe to ignore */
+  -webkit-box-align: center;     /* Not supported by IE, safe to ignore */
 
   /* Firefox box model (Firefox < 22) - Note: IE doesn't support these but they don't break IE */
   display: -moz-box;
-  -moz-box-orient: vertical;
-  -moz-box-direction: normal;
-  -moz-box-align: center;
+  -moz-box-orient: vertical; /* Not supported by IE, safe to ignore */
+  -moz-box-direction: normal; /* Not supported by IE, safe to ignore */
+  -moz-box-align: center;     /* Not supported by IE, safe to ignore */
 
   /* IE 10-11 flexbox */
   display: -ms-flexbox;
@@ -180,7 +180,7 @@
   display: -webkit-flex;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: center; /* Not supported by IE < 11 */
 
   /* Spacing */
   margin-top: 1rem;
@@ -213,6 +213,7 @@
   margin-left: auto;
   margin-right: auto;
   text-align: center; /* Fallback - works in most browsers despite compatibility warnings */
+  /* Not supported by IE < 11, but works in most browsers */
   width: 100%;
 }
 
