@@ -21,17 +21,17 @@
     @endpush
 
     {{-- Form Header with BPM Logo and Title (uses language keys) --}}
-    <div class="d-flex justify-content-between align-items-center mb-2 mt-3">
+    <div class="d-flex justify-content-between align-items-center mb-24 mt-16">
         <div class="d-flex align-items-center">
             <div class="d-flex flex-column align-items-center me-3">
                 <img src="{{ asset('assets/img/logo/logo_bpm.png') }}"
                      alt="@lang('app.bpm_short_name')"
                      style="height: 60px; width: 60px; object-fit: contain;">
-                <small class="text-muted text-center mt-1">@lang('app.bpm_short_name')</small>
+                <small class="heading-xsmall text-muted text-center mt-1">@lang('app.bpm_short_name')</small>
             </div>
-            <h1 class="h4 fw-bold text-dark mb-0">@lang('forms.ict_loan_form_title')</h1>
+            <h1 class="heading-medium fw-semibold text-black-900 mb-0">@lang('forms.ict_loan_form_title')</h1>
         </div>
-        <small class="text-muted">@lang('forms.text_form_ref_no')</small>
+        <small class="heading-xsmall text-muted">@lang('forms.text_form_ref_no')</small>
     </div>
 
     {{-- Submission date info (edit mode) --}}
@@ -79,17 +79,17 @@
             {{-- Left Column: Applicant and Equipment Details --}}
             <div class="col-lg-7">
                 {{-- Applicant Information Card --}}
-                <div class="card motac-card mb-4">
-                    <div class="card-header motac-card-header p-3">
+                <div class="card motac-card mb-24">
+                    <div class="card-header motac-card-header py-16 px-24">
                         <div class="d-flex justify-content-between align-items-center">
-                            <h2 class="h5 mb-0 fw-semibold d-flex align-items-center">
-                                <i class="bi bi-person-lines-fill me-2 fs-5 motac-primary"></i>
+                            <h2 class="heading-small mb-0 fw-semibold d-flex align-items-center">
+                                <i class="bi bi-person-lines-fill me-2 fs-5 text-primary-500"></i>
                                 @lang('forms.section_applicant_info_ict')
                             </h2>
-                            <small class="text-muted">@lang('messages.instruction_mandatory_fields')</small>
+                            <small class="heading-xsmall text-muted">@lang('messages.instruction_mandatory_fields')</small>
                         </div>
                     </div>
-                    <div class="card-body p-4 motac-card-body">
+                    <div class="card-body py-24 px-24 motac-card-body">
                         <div class="row g-3">
                             {{-- Full Name --}}
                             <div class="col-md-6">
@@ -200,32 +200,32 @@
                 </div>
 
                 {{-- Equipment Details Card --}}
-                <div class="card motac-card mb-4">
-                    <div class="card-header motac-card-header p-3">
+                <div class="card motac-card mb-24">
+                    <div class="card-header motac-card-header py-16 px-24">
                         <div class="d-flex justify-content-between align-items-center">
-                            <h2 class="h5 mb-0 fw-semibold d-flex align-items-center">
-                                <i class="bi bi-tools me-2 fs-5 motac-primary"></i>
+                            <h2 class="heading-small mb-0 fw-semibold d-flex align-items-center">
+                                <i class="bi bi-tools me-2 fs-5 text-primary-500"></i>
                                 @lang('forms.section_equipment_details_ict')
                             </h2>
                             <button type="button"
                                     wire:click="addLoanItem"
-                                    class="btn btn-sm btn-outline-primary">
+                                    class="button variant-primary size-small">
                                 <i class="bi bi-plus-lg me-1"></i> @lang('app.button_add_equipment')
                             </button>
                         </div>
                     </div>
-                    <div class="card-body p-4 motac-card-body">
+                    <div class="card-body py-24 px-24 motac-card-body">
                         @forelse ($loan_application_items as $index => $item)
                             <div wire:key="loan_item_{{ $index }}" class="list-group-item mb-3 p-3 border rounded">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <h3 class="h6 mb-0 fw-medium text-primary">
+                                    <h3 class="heading-xsmall mb-0 fw-semibold text-primary-500">
                                         @lang('forms.title_equipment_item', ['index' => $index + 1])
                                     </h3>
                                     @if (count($loan_application_items) > 1)
                                         <button type="button"
                                                 wire:click="removeLoanItem({{ $index }})"
                                                 title="@lang('app.button_remove_equipment')"
-                                                class="btn btn-sm btn-icon btn-text-danger p-0">
+                                                class="button variant-danger size-small p-0">
                                             <i class="bi bi-x-circle-fill fs-5"></i>
                                         </button>
                                     @endif
@@ -279,8 +279,8 @@
                                 </div>
                             </div>
                         @empty
-                            <div class="text-center py-3 border rounded bg-light-subtle">
-                                <p class="text-muted mb-0">@lang('forms.text_no_equipment_added')</p>
+                            <div class="text-center py-16 border rounded bg-light-100">
+                                <p class="heading-xsmall text-muted mb-0">@lang('forms.text_no_equipment_added')</p>
                             </div>
                         @endforelse
 
@@ -294,14 +294,14 @@
             {{-- Right Column: Officer Info, Terms, Confirmation --}}
             <div class="col-lg-5">
                 {{-- Responsible Officer Card --}}
-                <div class="card motac-card mb-4">
-                    <div class="card-header motac-card-header p-3">
-                        <h2 class="h5 mb-0 fw-semibold d-flex align-items-center">
-                            <i class="bi bi-person-check-fill me-2 fs-5 motac-primary"></i>
+                <div class="card motac-card mb-24">
+                    <div class="card-header motac-card-header py-16 px-24">
+                        <h2 class="heading-small mb-0 fw-semibold d-flex align-items-center">
+                            <i class="bi bi-person-check-fill me-2 fs-5 text-primary-500"></i>
                             @lang('forms.section_responsible_officer_info')
                         </h2>
                     </div>
-                    <div class="card-body p-4 motac-card-body">
+                    <div class="card-body py-24 px-24 motac-card-body">
                         <div class="form-check mb-3">
                             <input id="applicant_is_responsible_officer"
                                    wire:model.live="applicant_is_responsible_officer"
@@ -337,14 +337,14 @@
                 </div>
 
                 {{-- Supporting Officer Card --}}
-                <div class="card motac-card mb-4">
-                    <div class="card-header motac-card-header p-3">
-                        <h2 class="h5 mb-0 fw-semibold d-flex align-items-center">
-                            <i class="bi bi-person-badge-fill me-2 fs-5 motac-primary"></i>
+                <div class="card motac-card mb-24">
+                    <div class="card-header motac-card-header py-16 px-24">
+                        <h2 class="heading-small mb-0 fw-semibold d-flex align-items-center">
+                            <i class="bi bi-person-badge-fill me-2 fs-5 text-primary-500"></i>
                             @lang('forms.section_supporting_officer_info')
                         </h2>
                     </div>
-                    <div class="card-body p-4 motac-card-body">
+                    <div class="card-body py-24 px-24 motac-card-body">
                         <div class="mb-3">
                             <label for="supporting_officer_id" class="form-label fw-medium">
                                 @lang('forms.label_supporting_officer_name')<span class="text-danger">*</span>
@@ -370,14 +370,14 @@
                 </div>
 
                 {{-- Terms and Conditions Card --}}
-                <div class="card motac-card mb-4">
-                    <div class="card-header motac-card-header p-3">
-                        <h2 class="h5 mb-0 fw-semibold d-flex align-items-center">
-                            <i class="bi bi-card-checklist me-2 fs-5 motac-primary"></i>
+                <div class="card motac-card mb-24">
+                    <div class="card-header motac-card-header py-16 px-24">
+                        <h2 class="heading-small mb-0 fw-semibold d-flex align-items-center">
+                            <i class="bi bi-card-checklist me-2 fs-5 text-primary-500"></i>
                             @lang('messages.terms_title')
                         </h2>
                     </div>
-                    <div class="card-body p-4 motac-card-body">
+                    <div class="card-body py-24 px-24 motac-card-body">
                         <div id="termsBox"
                              style="height: 250px; overflow-y: scroll; border: 1px solid #dee2e6; padding: 15px; background-color: #f8f9fa; border-radius: 0.375rem;"
                              class="small text-muted motac-terms-box"
@@ -403,14 +403,14 @@
                 </div>
 
                 {{-- Applicant Confirmation Card --}}
-                <div class="card motac-card mb-4">
-                    <div class="card-header motac-card-header p-3">
-                        <h2 class="h5 mb-0 fw-semibold d-flex align-items-center">
-                            <i class="bi bi-patch-check-fill me-2 fs-5 motac-primary"></i>
+                <div class="card motac-card mb-24">
+                    <div class="card-header motac-card-header py-16 px-24">
+                        <h2 class="heading-small mb-0 fw-semibold d-flex align-items-center">
+                            <i class="bi bi-patch-check-fill me-2 fs-5 text-primary-500"></i>
                             @lang('forms.section_applicant_confirmation_ict')
                         </h2>
                     </div>
-                    <div class="card-body p-4 motac-card-body">
+                    <div class="card-body py-24 px-24 motac-card-body">
                         <div class="form-check">
                             <input id="applicant_confirmation"
                                    wire:model="applicant_confirmation"
@@ -431,21 +431,21 @@
         </div>
 
         {{-- Footer: document reference and effective date (language keys where possible) --}}
-        <div class="d-flex justify-content-between pt-4 mt-4 border-top">
-            <small class="text-muted">
+        <div class="d-flex justify-content-between pt-16 mt-24 border-top">
+            <small class="heading-xsmall text-muted">
                 <strong>@lang('forms.text_document_no')</strong> PK.(S).KPK.08.(L3) Pin.1
             </small>
-            <small class="text-muted">
+            <small class="heading-xsmall text-muted">
                 <strong>@lang('forms.text_effective_date')</strong> 1/1/2024
             </small>
         </div>
 
         {{-- Action Buttons --}}
-        <div class="d-flex justify-content-end gap-2 pt-3">
+        <div class="d-flex justify-content-end gap-2 pt-16">
             @if ($isEditMode && $loanApplicationInstance)
                 <a href="{{ route('loan-applications.print', ['loan_application' => $loanApplicationInstance->id]) }}"
                    target="_blank"
-                   class="btn btn-outline-secondary d-inline-flex align-items-center">
+                   class="button variant-secondary size-medium d-inline-flex align-items-center">
                     <i class="bi bi-printer-fill me-1"></i>@lang('common.print')
                 </a>
             @endif
@@ -462,14 +462,14 @@
                     wire:click="saveAsDraft"
                     wire:loading.attr="disabled"
                     @click="clearCache()"
-                    class="btn btn-secondary">
+                    class="button variant-secondary size-medium">
                 <i class="bi bi-save me-1"></i>@lang('app.button_save_draft')
             </button>
 
             <button type="submit"
                     wire:loading.attr="disabled"
                     @click="clearCache()"
-                    class="btn btn-primary"
+                    class="button variant-primary size-medium"
                     x-bind:disabled="!applicantConfirmation || !termsScrolled">
                 <i class="bi bi-send-check-fill me-1"></i>
                 {{ $isEditMode && $this->loanApplicationInstance?->status !== \App\Models\LoanApplication::STATUS_DRAFT

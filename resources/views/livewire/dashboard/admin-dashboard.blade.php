@@ -15,90 +15,91 @@
 </style>
 @endpush
 
-<div class="container-fluid py-4">
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-dark fw-bold">{{ __('dashboard.admin_title') }}</h1>
-    </div>
+<div>
+    <div class="container-fluid py-4">
+        <div class="d-sm-flex align-items-center justify-content-between mb-24">
+            <h1 class="heading-medium fw-semibold text-black-900 mb-0">{{ __('dashboard.admin_title') }}</h1>
+        </div>
 
-    {{-- Stat Cards --}}
-    <div class="row">
-        @include('_partials.stat-card', [
-            'label' => __('dashboard.total_users'),
-            'value' => $users_count,
-            'icon' => 'bi-people-fill',
-            'color' => 'primary',
-            'link' => route('settings.users.index'),
-        ])
-        @include('_partials.stat-card', [
-            'label' => __('dashboard.pending_approvals'),
-            'value' => $pending_approvals_count,
-            'icon' => 'bi-hourglass-split',
-            'color' => 'warning',
-            'link' => route('approvals.dashboard'),
-        ])
-        @include('_partials.stat-card', [
-            'label' => __('dashboard.available_equipment'),
-            'value' => $equipment_available_count,
-            'icon' => 'bi-box-seam-fill',
-            'color' => 'info',
-            'link' => route('admin.equipment.index'),
-        ])
-        @include('_partials.stat-card', [
-            'label' => __('dashboard.loaned_equipment'),
-            'value' => $equipment_on_loan_count,
-            'icon' => 'bi-truck',
-            'color' => 'success',
-            'link' => route('admin.equipment.issued-loans'),
-        ])
-    </div>
+        {{-- Stat Cards --}}
+        <div class="row">
+            @include('_partials.stat-card', [
+                'label' => __('dashboard.total_users'),
+                'value' => $users_count,
+                'icon' => 'bi-people-fill',
+                'color' => 'primary-500',
+                'link' => route('settings.users.index'),
+            ])
+            @include('_partials.stat-card', [
+                'label' => __('dashboard.pending_approvals'),
+                'value' => $pending_approvals_count,
+                'icon' => 'bi-hourglass-split',
+                'color' => 'warning-500',
+                'link' => route('approvals.dashboard'),
+            ])
+            @include('_partials.stat-card', [
+                'label' => __('dashboard.available_equipment'),
+                'value' => $equipment_available_count,
+                'icon' => 'bi-box-seam-fill',
+                'color' => 'info-500',
+                'link' => route('admin.equipment.index'),
+            ])
+            @include('_partials.stat-card', [
+                'label' => __('dashboard.loaned_equipment'),
+                'value' => $equipment_on_loan_count,
+                'icon' => 'bi-truck',
+                'color' => 'success-500',
+                'link' => route('admin.equipment.issued-loans'),
+            ])
+        </div>
 
-    <div class="row">
-        @include('_partials.stat-card', [
-            'label' => __('dashboard.active_loans'),
-            'value' => $total_active_loans_count,
-            'icon' => 'bi-journal-text',
-            'color' => 'primary',
-            'link' => route('reports.loan-status-summary'),
-        ])
-        @include('_partials.stat-card', [
-            'label' => __('dashboard.overdue_loans'),
-            'value' => $overdue_loans_count,
-            'icon' => 'bi-exclamation-triangle-fill',
-            'color' => 'danger',
-            'link' => route('reports.loan-status-summary'),
-        ])
-        @include('_partials.stat-card', [
-            'label' => __('dashboard.utilization_rate'),
-            'value' => $equipment_utilization_rate . '%',
-            'icon' => 'bi-graph-up',
-            'color' => 'secondary',
-            'link' => route('reports.utilization-report'),
-        ])
-    </div>
+        <div class="row">
+            @include('_partials.stat-card', [
+                'label' => __('dashboard.active_loans'),
+                'value' => $total_active_loans_count,
+                'icon' => 'bi-journal-text',
+                'color' => 'primary-500',
+                'link' => route('reports.loan-status-summary'),
+            ])
+            @include('_partials.stat-card', [
+                'label' => __('dashboard.overdue_loans'),
+                'value' => $overdue_loans_count,
+                'icon' => 'bi-exclamation-triangle-fill',
+                'color' => 'danger-500',
+                'link' => route('reports.loan-status-summary'),
+            ])
+            @include('_partials.stat-card', [
+                'label' => __('dashboard.utilization_rate'),
+                'value' => $equipment_utilization_rate . '%',
+                'icon' => 'bi-graph-up',
+                'color' => 'secondary-500',
+                'link' => route('reports.utilization-report'),
+            ])
+        </div>
 
-    {{-- Equipment Status + Loan Chart --}}
-    <div class="row">
-        <div class="col-lg-4 mb-4">
-            <div class="card shadow-sm motac-card h-100">
-                <div class="card-header py-3 motac-card-header d-flex align-items-center">
-                    <i class="bi bi-boxes me-2 text-primary"></i>
-                    <h6 class="m-0 fw-bold text-primary">{{ __('dashboard.equipment_status_summary') }}</h6>
-                </div>
-                <div class="card-body motac-card-body">
-                    @foreach ($equipment_status_summary as $status => $count)
-                        <p class="mb-2 d-flex justify-content-between border-bottom pb-2">
-                            <span>{{ ucfirst(str_replace('_', ' ', $status)) }}</span>
-                            <strong class="text-dark">{{ $count }}</strong>
-                        </p>
-                    @endforeach
+        {{-- Equipment Status + Loan Chart --}}
+        <div class="row">
+            <div class="col-lg-4 mb-24 py-16">
+                <div class="card shadow-sm motac-card h-100">
+                    <div class="card-header py-3 motac-card-header d-flex align-items-center">
+                        <i class="bi bi-boxes me-2 text-primary"></i>
+                        <h6 class="m-0 fw-bold text-primary">{{ __('dashboard.equipment_status_summary') }}</h6>
+                    </div>
+                    <div class="card-body motac-card-body">
+                        @foreach ($equipment_status_summary as $status => $count)
+                            <p class="mb-2 d-flex justify-content-between border-bottom pb-2">
+                                <span>{{ ucfirst(str_replace('_', ' ', $status)) }}</span>
+                                <strong class="text-dark">{{ $count }}</strong>
+                            </p>
+                        @endforeach
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-lg-8 mb-4">
-            <div class="card shadow-sm motac-card h-100">
-                <div class="card-header py-3 motac-card-header d-flex align-items-center">
-                    <i class="bi bi-pie-chart-fill me-2 text-primary"></i>
-                    <h6 class="m-0 fw-bold text-primary">{{ __('dashboard.loan_stats_title') }}</h6>
+            <div class="col-lg-8 mb-24 py-16">
+                <div class="card shadow-sm motac-card h-100">
+                    <div class="card-header py-3 motac-card-header d-flex align-items-center">
+                        <i class="bi bi-pie-chart-fill me-2 text-primary"></i>
+                        <h6 class="m-0 fw-bold text-primary">{{ __('dashboard.loan_stats_title') }}</h6>
                 </div>
                 <div class="card-body motac-card-body">
                     <div class="row align-items-center">
@@ -136,7 +137,7 @@
     {{-- Approval Tasks --}}
     <div class="row">
         <div class="col-12">
-            <div class="card shadow-sm mb-4 motac-card">
+            <div class="card shadow-sm mb-24 motac-card">
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between motac-card-header">
                     <h6 class="m-0 fw-bold text-primary d-flex align-items-center">
                         <i class="bi bi-list-check me-2"></i>{{ __('dashboard.latest_tasks_title') }}

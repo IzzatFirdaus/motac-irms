@@ -12,46 +12,46 @@
 --}}
 
 <div>
-  <footer class="content-footer bg-footer-alt" aria-label="{{ __('Pengaki Laman') }}">
+  <footer class="myds-content-footer myds-bg-footer-alt" aria-label="{{ __('Pengaki Laman') }}">
     @php
       // Use value passed from the Footer.php component for Bootstrap container class
       $containerClass = $containerNav;
     @endphp
-    <div class="{{ $containerClass }} footer-alt-container">
+  <div class="{{ $containerClass }} myds-footer-alt-container">
       {{-- Left: Logo and Ministry Info --}}
       <div>
-        <div class="footer-brand">
-          <span class="footer-logo">
+        <div class="myds-footer-brand">
+          <span class="myds-footer-logo">
             <img src="{{ asset('assets/img/logo/motac-logo.svg') }}" alt="{{ __('Logo MOTAC') }}" />
           </span>
-          <span class="footer-brand-text">motac-irms</span>
+          <span class="myds-footer-brand-text heading-xsmall">motac-irms</span>
         </div>
-        <div class="footer-ministry">
+        <div class="myds-footer-ministry">
           {{ __('Kementerian Pelancongan, Seni dan Budaya Malaysia (MOTAC)') }}
         </div>
-        <div class="footer-legal">
+        <div class="myds-footer-legal">
           {{ __('Hak Cipta') }} &copy; <script>document.write(new Date().getFullYear())</script>. {{ __('Semua Hak Terpelihara.') }}
         </div>
-        <div class="footer-social">
-          <a href="https://www.facebook.com/mymotac/" target="_blank" aria-label="Facebook" class="footer-link"><i class="bi bi-facebook"></i></a>
-          <a href="https://www.instagram.com/mymotac/" target="_blank" aria-label="Instagram" class="footer-link"><i class="bi bi-instagram"></i></a>
-          <a href="https://x.com/mymotac" target="_blank" aria-label="X" class="footer-link"><i class="bi bi-twitter-x"></i></a>
-          <a href="https://www.youtube.com/user/mymotac" target="_blank" aria-label="YouTube" class="footer-link"><i class="bi bi-youtube"></i></a>
-          <a href="https://www.tiktok.com/@mymotac" target="_blank" aria-label="TikTok" class="footer-link"><i class="bi bi-tiktok"></i></a>
+        <div class="myds-footer-social">
+          <a href="https://www.facebook.com/mymotac/" target="_blank" aria-label="Facebook" class="myds-footer-link"><i class="bi bi-facebook"></i></a>
+          <a href="https://www.instagram.com/mymotac/" target="_blank" aria-label="Instagram" class="myds-footer-link"><i class="bi bi-instagram"></i></a>
+          <a href="https://x.com/mymotac" target="_blank" aria-label="X" class="myds-footer-link"><i class="bi bi-twitter-x"></i></a>
+          <a href="https://www.youtube.com/user/mymotac" target="_blank" aria-label="YouTube" class="myds-footer-link"><i class="bi bi-youtube"></i></a>
+          <a href="https://www.tiktok.com/@mymotac" target="_blank" aria-label="TikTok" class="myds-footer-link"><i class="bi bi-tiktok"></i></a>
         </div>
       </div>
 
       {{-- Center: Useful Links --}}
-      <nav class="footer-links" aria-label="{{ __('Pautan Penting') }}">
-        <a href="{{ route('terms') }}" class="footer-link">{{ __('Terma Perkhidmatan') }}</a>
-        <a href="{{ route('policy') }}" class="footer-link">{{ __('Dasar Privasi') }}</a>
-        <a href="{{ route('contact-us') }}" class="footer-link">{{ __('Hubungi ICT') }}</a>
+      <nav class="myds-footer-links" aria-label="{{ __('Pautan Penting') }}">
+        <a href="{{ route('terms') }}" class="myds-footer-link">{{ __('Terma Perkhidmatan') }}</a>
+        <a href="{{ route('policy') }}" class="myds-footer-link">{{ __('Dasar Privasi') }}</a>
+        <a href="{{ route('contact-us') }}" class="myds-footer-link">{{ __('Hubungi ICT') }}</a>
       </nav>
 
       {{-- Right: System Info --}}
-      <div class="footer-meta">
-        <span class="footer-version">{{ __('Versi Sistem') }}: {{ config('app.version', '1.0.0') }}</span>
-        <span class="footer-version">{{ __('Kemaskini Terakhir') }}: {{ date('d/m/Y') }}</span>
+      <div class="myds-footer-meta">
+        <span class="myds-footer-version">{{ __('Versi Sistem') }}: {{ config('app.version', '1.0.0') }}</span>
+        <span class="myds-footer-version">{{ __('Kemaskini Terakhir') }}: {{ date('d/m/Y') }}</span>
       </div>
     </div>
   </footer>

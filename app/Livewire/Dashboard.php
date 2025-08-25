@@ -43,25 +43,34 @@ class Dashboard extends Component
         }
 
         $this->displayUserName = $user->name;
-        $this->isNormalUser = $user->hasRole('User');
+        // Only treat as normal user if the user has ONLY the 'User' role
+    // Check roles for both guards
+    $webUser = \Auth::guard('web')->user();
+    $sanctumUser = \Auth::guard('sanctum')->user();
+    $webRoles = $webUser && $webUser->roles ? $webUser->roles->pluck('name') : collect();
+    $sanctumRoles = $sanctumUser && $sanctumUser->roles ? $sanctumUser->roles->pluck('name') : collect();
+    $allRoles = $webRoles->merge($sanctumRoles)->unique();
+    $this->isNormalUser = ($allRoles->count() === 1 && $allRoles->first() === 'User');
 
-        // Stat Card: Pending loan applications
-        $this->pendingUserLoanApplicationsCount = LoanApplication::where('user_id', $user->id)
-            ->whereIn('status', [
-                LoanApplication::STATUS_DRAFT,
-                LoanApplication::STATUS_PENDING_SUPPORT,
-                LoanApplication::STATUS_PENDING_APPROVER_REVIEW,
-                LoanApplication::STATUS_PENDING_BPM_REVIEW,
-                LoanApplication::STATUS_APPROVED,
-            ])
-            ->count();
+        if ($this->isNormalUser) {
+            // Stat Card: Pending loan applications
+            $this->pendingUserLoanApplicationsCount = LoanApplication::where('user_id', $user->id)
+                ->whereIn('status', [
+                    LoanApplication::STATUS_DRAFT,
+                    LoanApplication::STATUS_PENDING_SUPPORT,
+                    LoanApplication::STATUS_PENDING_APPROVER_REVIEW,
+                    LoanApplication::STATUS_PENDING_BPM_REVIEW,
+                    LoanApplication::STATUS_APPROVED,
+                ])
+                ->count();
 
-        // Table: Recent loan applications
-        $this->userRecentLoanApplications = LoanApplication::where('user_id', $user->id)
-            ->with(['user:id,name'])
-            ->latest('updated_at')
-            ->limit(5)
-            ->get();
+            // Table: Recent loan applications
+            $this->userRecentLoanApplications = LoanApplication::where('user_id', $user->id)
+                ->with(['user:id,name'])
+                ->latest('updated_at')
+                ->limit(5)
+                ->get();
+        }
     }
 
     /**
@@ -70,8 +79,29 @@ class Dashboard extends Component
     public function render(): View
     {
         if ($this->isNormalUser) {
-            return view('livewire.dashboard.user-dashboard');
+            // Render the UserDashboard Livewire component for normal users
+            return view('livewire.dashboard.user-dashboard-wrapper');
         }
+
+        // Check roles for both guards
+        $webUser = \Auth::guard('web')->user();
+        $sanctumUser = \Auth::guard('sanctum')->user();
+        $webRoles = $webUser && $webUser->roles ? $webUser->roles->pluck('name') : collect();
+        $sanctumRoles = $sanctumUser && $sanctumUser->roles ? $sanctumUser->roles->pluck('name') : collect();
+        $allRoles = $webRoles->merge($sanctumRoles)->unique();
+        if ($allRoles->contains('Admin')) {
+            return view('livewire.dashboard.admin-dashboard-wrapper');
+        }
+        if ($allRoles->contains('BPM')) {
+            return view('livewire.dashboard.bpm-dashboard-wrapper');
+        }
+        if ($allRoles->contains('IT Admin')) {
+            return view('livewire.dashboard.it-admin-dashboard-wrapper');
+        }
+        if ($allRoles->contains('Approver')) {
+            return view('livewire.dashboard.approver-dashboard-wrapper');
+        }
+        // Default fallback: admin dashboard
         return view('livewire.dashboard.admin-dashboard-wrapper');
     }
 }

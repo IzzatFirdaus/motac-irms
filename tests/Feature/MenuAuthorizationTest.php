@@ -24,17 +24,29 @@ class MenuAuthorizationTest extends TestCase
         parent::setUp();
         $this->app->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
-        // Create roles
-        Role::findOrCreate('Admin', 'web');
-        Role::findOrCreate('BPM Staff', 'web');
-        Role::findOrCreate('IT Admin', 'web');
-        Role::findOrCreate('User', 'web');
+        // Create roles for both guards
+        $guards = ['web', 'sanctum'];
+        foreach ($guards as $guard) {
+            Role::findOrCreate('Admin', $guard);
+            Role::findOrCreate('BPM Staff', $guard);
+            Role::findOrCreate('IT Admin', $guard);
+            Role::findOrCreate('User', $guard);
+        }
 
-        // Create users and assign roles
-        $this->adminUser = User::factory()->create()->assignRole('Admin');
-        $this->bpmStaffUser = User::factory()->create()->assignRole('BPM Staff');
-        $this->itAdminUser = User::factory()->create()->assignRole('IT Admin');
-        $this->regularUser = User::factory()->create()->assignRole('User');
+        // Create users and assign roles for both guards
+        $this->adminUser = User::factory()->create();
+        $this->bpmStaffUser = User::factory()->create();
+        $this->itAdminUser = User::factory()->create();
+        $this->regularUser = User::factory()->create();
+
+        foreach ($guards as $guard) {
+            $this->adminUser->assignRole(Role::findByName('Admin', $guard));
+            $this->bpmStaffUser->assignRole(Role::findByName('BPM Staff', $guard));
+            $this->itAdminUser->assignRole(Role::findByName('IT Admin', $guard));
+            $this->regularUser->assignRole(Role::findByName('User', $guard));
+        }
+
+        $this->app->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
     }
 
     /** @test */
