@@ -22,12 +22,13 @@ class GradeFactory extends Factory
 
     public function definition(): array
     {
-        // Static cache for User IDs (for blameable columns)
-        static $userIds;
-        if (!isset($userIds)) {
-            $userIds = User::pluck('id')->all();
+        // Always ensure at least one user exists for blameable columns
+        $userIds = User::pluck('id')->all();
+        if (empty($userIds)) {
+            $newUser = User::factory()->create();
+            $userIds = [$newUser->id];
         }
-        $auditUserId = !empty($userIds) ? Arr::random($userIds) : null;
+        $auditUserId = Arr::random($userIds);
 
         // Static Malaysian faker for realism and speed
         static $msFaker;

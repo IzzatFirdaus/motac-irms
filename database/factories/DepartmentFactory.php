@@ -23,15 +23,9 @@ class DepartmentFactory extends Factory
 
     public function definition(): array
     {
-        // Static cache for User IDs (for blameable columns and HOD)
-        static $userIds;
-        if (!isset($userIds)) {
-            // Cache all user IDs to avoid repeated DB queries during batch seeding
-            $userIds = User::pluck('id')->all();
-        }
-
-        // Pick a random user ID or null if no users exist
-        $auditUserId = !empty($userIds) ? Arr::random($userIds) : null;
+        // Always ensure at least one user exists for blameable columns and HOD
+        $user = User::first() ?: User::factory()->create();
+        $auditUserId = $user->id;
         // Optionally assign a head of department with 30% chance, or null
         $headOfDeptId = $this->faker->optional(0.3)->passthrough($auditUserId);
 

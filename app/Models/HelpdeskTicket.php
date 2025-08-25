@@ -71,6 +71,14 @@ class HelpdeskTicket extends Model
     ];
 
     /**
+     * Alias for applicant (user who created the ticket).
+     */
+    public function user(): BelongsTo
+    {
+        return $this->applicant();
+    }
+
+    /**
      * Category of the ticket.
      */
     public function category(): BelongsTo
@@ -93,6 +101,10 @@ class HelpdeskTicket extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    /**
+     * Alias for applicant (user who created the ticket).
+     */
 
     /**
      * The user assigned to resolve the ticket.

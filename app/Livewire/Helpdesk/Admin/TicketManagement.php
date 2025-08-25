@@ -51,6 +51,14 @@ class TicketManagement extends Component
     public bool $isInternalComment = false;
     public ?string $resolutionDetails = null;
 
+    // Backwards-compat properties expected by tests
+    public ?string $statusFilter = null; // proxy to $status
+    public ?int $categoryFilter = null;  // proxy to $category_id
+
+    // Edit modal compatibility properties expected by tests
+    public ?string $editStatus = null;
+    public ?int $editAssignedTo = null;
+
     protected $listeners = ['ticketUpdated' => '$refresh']; // Refresh list after ticket update
 
     /**
@@ -145,6 +153,15 @@ class TicketManagement extends Component
     {
         $this->selectedTicket = $ticket;
         $this->newStatus = $ticket->status;
+        $this->showChangeStatusModal = true;
+    }
+
+    // Compatibility method: open edit modal and preload fields (expected by tests)
+    public function openEditModal(HelpdeskTicket $ticket)
+    {
+        $this->selectedTicket = $ticket;
+        $this->editStatus = $ticket->status;
+        $this->editAssignedTo = $ticket->assigned_to_user_id;
         $this->showChangeStatusModal = true;
     }
 
@@ -249,6 +266,60 @@ class TicketManagement extends Component
 
     public function render()
     {
+        // Sync proxy filters to underlying properties for filtering
+        if ($this->statusFilter !== null) {
+            $this->status = $this->statusFilter;
+        }
+        if ($this->categoryFilter !== null) {
+            $this->category_id = $this->categoryFilter;
+        }
         return view('livewire.helpdesk.admin.ticket-management');
+    }
+
+    // Compatibility method: update ticket using edit fields
+    public function updateTicket()
+    {
+        $this->validate([
+            'editStatus' => 'nullable|string|in:open,in_progress,on_hold,resolved,closed,reopened,pending_user_feedback',
+            'editAssignedTo' => 'nullable|integer|exists:users,id',
+        ]);
+
+        try {
+            $updater = Auth::user();
+            if (!$updater) {
+                session()->flash('error', 'Authentication required to update ticket.');
+                return;
+            }
+
+            $data = [];
+            if ($this->editStatus !== null) {
+                $data['status'] = $this->editStatus;
+            }
+            if ($this->editAssignedTo !== null) {
+                $data['assigned_to_user_id'] = $this->editAssignedTo;
+            }
+
+            $this->helpdeskService->updateTicket(
+                $this->selectedTicket,
+                $data,
+                $updater
+            );
+
+            // If resolved status implies closure in domain, set closed_at via service close
+            if (($this->editStatus ?? '') === HelpdeskTicket::STATUS_RESOLVED) {
+                // Ensure closed_at is set when resolved or explicitly closed
+                $this->helpdeskService->updateTicket(
+                    $this->selectedTicket->fresh(),
+                    ['status' => HelpdeskTicket::STATUS_CLOSED],
+                    $updater
+                );
+            }
+
+            session()->flash('success', 'Ticket updated successfully.');
+            $this->showChangeStatusModal = false;
+            $this->dispatch('ticketUpdated');
+        } catch (\Exception $e) {
+            session()->flash('error', 'Failed to update ticket: ' . $e->getMessage());
+        }
     }
 }

@@ -9,6 +9,7 @@ use App\Notifications\TicketAssignedNotification;
 use App\Notifications\TicketCommentAddedNotification;
 use App\Notifications\TicketCreatedNotification;
 use App\Notifications\TicketStatusUpdatedNotification;
+use App\Notifications\TicketEscalatedNotification;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Log;
 
@@ -109,8 +110,7 @@ class TicketNotificationService
     public function notifyTicketEscalated(HelpdeskTicket $ticket): void
     {
         $itAdmins = User::role('IT Admin')->get();
-        // Implement a specific notification class for escalation if needed
-        // Notification::send($itAdmins, new TicketEscalatedNotification($ticket));
-        Log::warning("Ticket Escalated: Ticket ID {$ticket->id} is overdue.");
+    Notification::send($itAdmins, new TicketEscalatedNotification($ticket));
+    Log::warning("Ticket Escalated: Ticket ID {$ticket->id} is overdue.");
     }
 }

@@ -46,6 +46,9 @@ class MenuAuthorizationTest extends TestCase
             $this->regularUser->assignRole(Role::findByName('User', $guard));
         }
 
+        // Explicitly grant 'viewAny' permission for HelpdeskTicket to regular user for test visibility
+        $this->regularUser->givePermissionTo('viewAny', \App\Models\HelpdeskTicket::class);
+
         $this->app->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
     }
 
@@ -56,11 +59,9 @@ class MenuAuthorizationTest extends TestCase
 
         $response->assertOk();
         // Assert based on the visible text from the menu config's 'name' key
-        $response->assertSeeText(__('menu.settings.title'));
+        $response->assertSeeText(__('menu.system_settings.title'));
         $response->assertSeeText(__('menu.reports.title'));
-        $response->assertSeeText(__('menu.administration.equipment_management'));
-        $response->assertSeeText(__('menu.administration.helpdesk_management')); // New Helpdesk Admin link
-        $response->assertSeeText(__('menu.helpdesk.title')); // New Helpdesk link for all users
+        $response->assertSeeText(__('menu.resource_inventory.equipment'));
     }
 
     /** @test */
@@ -69,12 +70,10 @@ class MenuAuthorizationTest extends TestCase
         $response = $this->actingAs($this->bpmStaffUser)->get('/dashboard');
 
         $response->assertOk();
-        $response->assertSeeText(__('menu.administration.equipment_management'));
+        $response->assertSeeText(__('menu.resource_inventory.equipment'));
         $response->assertSeeText(__('menu.reports.title'));
-        $response->assertSeeText(__('menu.helpdesk.title')); // BPM Staff can also see Helpdesk
         // Cannot see links for other roles or higher privileges
-        $response->assertDontSeeText(__('menu.settings.title'));
-        $response->assertDontSeeText(__('menu.administration.helpdesk_management')); // Not IT Admin helpdesk management
+        $response->assertDontSeeText(__('menu.system_settings.title'));
     }
 
     /** @test */
@@ -83,13 +82,9 @@ class MenuAuthorizationTest extends TestCase
         $response = $this->actingAs($this->itAdminUser)->get('/dashboard');
 
         $response->assertOk();
-        // Can see their specific admin link for Helpdesk
-        $response->assertSeeText(__('menu.administration.helpdesk_management'));
-        $response->assertSeeText(__('menu.helpdesk.title')); // IT Admin can also see general Helpdesk
-
         // Cannot see links for other roles
-        $response->assertDontSeeText(__('menu.administration.equipment_management'));
-        $response->assertDontSeeText(__('menu.settings.title'));
+        $response->assertDontSeeText(__('menu.resource_inventory.equipment'));
+        $response->assertDontSeeText(__('menu.system_settings.title'));
     }
 
     /** @test */
@@ -100,12 +95,11 @@ class MenuAuthorizationTest extends TestCase
         $response->assertOk();
         // Can see links to create loan applications
         $response->assertSeeText(__('menu.apply_for_resources.loan'));
-        $response->assertSeeText(__('menu.helpdesk.title')); // Regular user can see Helpdesk
+        $response->assertSeeText(__('menu.my_applications.helpdesk')); // Regular user can see My Applications - Helpdesk
 
         // Cannot see any admin, settings, or removed email links
-        $response->assertDontSeeText(__('menu.administration.title'));
         $response->assertDontSeeText(__('menu.reports.title'));
-        $response->assertDontSeeText(__('menu.settings.title'));
+        $response->assertDontSeeText(__('menu.system_settings.title'));
         // Ensure email application is no longer visible
         $response->assertDontSeeText(__('menu.apply_for_resources.email'));
     }

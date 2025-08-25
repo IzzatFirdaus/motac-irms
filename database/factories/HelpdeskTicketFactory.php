@@ -26,36 +26,11 @@ class HelpdeskTicketFactory extends Factory
     {
         // --- Static caches for related IDs ---
         static $userIds, $categoryIds, $priorityIds;
-        // Cache User IDs
-        if (!isset($userIds)) {
-            $userIds = User::pluck('id')->all();
-        }
-        // If no users exist yet, create one so FK fields can safely reference a valid user.
-        if (empty($userIds)) {
-            $userIds = [User::factory()->create()->id];
-        }
-        // Cache Category IDs
-        if (!isset($categoryIds)) {
-            $categoryIds = HelpdeskCategory::pluck('id')->all();
-        }
-        // Ensure at least one category exists for tests that expect it
-        if (empty($categoryIds)) {
-            $categoryIds = [HelpdeskCategory::factory()->create()->id];
-        }
-        // Cache Priority IDs
-        if (!isset($priorityIds)) {
-            $priorityIds = HelpdeskPriority::pluck('id')->all();
-        }
-        // Ensure at least one priority exists for tests that expect it
-        if (empty($priorityIds)) {
-            $priorityIds = [HelpdeskPriority::factory()->create()->id];
-        }
-
-        // Pick random user/category/priority IDs or null if none exist
-        $userId = !empty($userIds) ? Arr::random($userIds) : null;
-        $assignedToUserId = !empty($userIds) ? Arr::random($userIds) : null;
-        $categoryId = !empty($categoryIds) ? Arr::random($categoryIds) : null;
-        $priorityId = !empty($priorityIds) ? Arr::random($priorityIds) : null;
+    // Always create a user, category, and priority for each ticket to guarantee valid FKs and uniqueness
+    $userId = User::factory()->create()->id;
+    $assignedToUserId = User::factory()->create()->id;
+    $categoryId = HelpdeskCategory::factory()->create()->id;
+    $priorityId = HelpdeskPriority::factory()->create()->id;
 
         // Use a static Malaysian faker for performance and realism
         static $msFaker;

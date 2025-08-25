@@ -92,7 +92,7 @@ class Dashboard extends Component
         if ($allRoles->contains('Admin')) {
             return view('livewire.dashboard.admin-dashboard-wrapper');
         }
-        if ($allRoles->contains('BPM')) {
+        if ($allRoles->contains('BPM Staff')) {
             return view('livewire.dashboard.bpm-dashboard-wrapper');
         }
         if ($allRoles->contains('IT Admin')) {

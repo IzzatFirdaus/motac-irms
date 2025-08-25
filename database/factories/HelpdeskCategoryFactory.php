@@ -23,13 +23,12 @@ class HelpdeskCategoryFactory extends Factory
     public function definition(): array
     {
         // Static cache for User IDs (for blameable columns)
-        static $userIds;
-        if (!isset($userIds)) {
-            $userIds = User::pluck('id')->all();
+        $userIds = User::pluck('id')->all();
+        if (empty($userIds)) {
+            $newUser = User::factory()->create();
+            $userIds = [$newUser->id];
         }
-
-        // Pick random user IDs or null if none exist
-        $auditUserId = !empty($userIds) ? Arr::random($userIds) : null;
+        $auditUserId = Arr::random($userIds);
 
         // Use static Malaysian faker for realism and speed
         static $msFaker;
@@ -54,8 +53,22 @@ class HelpdeskCategoryFactory extends Factory
             'Other'
         ];
 
+        // Ensure unique category name per test run, even if default list is exhausted
+        static $usedNames = [];
+        $name = null;
+        $available = array_diff($defaultCategories, $usedNames);
+        if (!empty($available)) {
+            $name = $this->faker->randomElement($available);
+        } else {
+            // If all default names are used, generate a unique name
+            do {
+                $name = $this->faker->unique()->word . '_' . $this->faker->unique()->randomNumber(5);
+            } while (in_array($name, $usedNames));
+        }
+        $usedNames[] = $name;
+
         return [
-            'name'        => $this->faker->unique()->randomElement($defaultCategories),
+            'name'        => $name,
             'description' => $msFaker->optional(0.6)->sentence(10),
             'is_active'   => $this->faker->boolean(90),
             // Blameable columns

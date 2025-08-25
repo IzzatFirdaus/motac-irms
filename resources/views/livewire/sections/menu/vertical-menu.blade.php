@@ -20,20 +20,18 @@
         {{-- Ministry name commented out as per requirements --}}
     </div>
 
+    @php
+        $menuObj = isset($filteredMenu)
+            ? (is_array($filteredMenu) ? (object) $filteredMenu : $filteredMenu)
+            : (object) ['menu' => []];
+        $menuItems = (isset($menuObj->menu) && is_array($menuObj->menu)) ? $menuObj->menu : [];
+    @endphp
     <ul class="myds-sidebar-menu">
-        {{-- Render menu if menuData and its 'menu' property exist and are a non-empty array --}}
-        @if (isset($menuData) && property_exists($menuData, 'menu') && is_array($menuData->menu) && count($menuData->menu))
+        {{-- Render menu if filtered menuItems exist and are a non-empty array --}}
+        @if (count($menuItems))
             {{-- Use the unified, recursive partial for all submenus --}}
-            @php
-                $webUser = Auth::guard('web')->user();
-                $sanctumUser = Auth::guard('sanctum')->user();
-                $webRoles = $webUser && $webUser->roles ? $webUser->roles->pluck('name') : collect();
-                $sanctumRoles = $sanctumUser && $sanctumUser->roles ? $sanctumUser->roles->pluck('name') : collect();
-                $allRoles = $webRoles->merge($sanctumRoles)->unique();
-            @endphp
             @include('layouts.sections.menu.submenu-partial', [
-                'menuItems' => $menuData->menu,
-                'roles' => $allRoles,
+                'menuItems' => $menuItems,
                 'configData' => $configData,
                 'currentRouteName' => $currentRouteName,
             ])

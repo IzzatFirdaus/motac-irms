@@ -89,7 +89,8 @@ return [
     'passwords' => [
         'users' => [
             'provider' => 'users',
-            'table' => 'password_reset_tokens',
+            // Standard Laravel table name used by the framework's migrations
+            'table' => 'password_resets',
             'expire' => 60,
             'throttle' => 60,
         ],

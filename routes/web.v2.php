@@ -353,6 +353,28 @@ Route::middleware([
     });
 
     // -------------------------
+    // Helpdesk TicketController Web Routes (for tests & legacy web flows)
+    // -------------------------
+    Route::prefix('helpdesk')->name('helpdesk.tickets.')->group(function () {
+        // Index and create views
+        Route::get('/tickets', [\App\Http\Controllers\Helpdesk\TicketController::class, 'index'])->name('index');
+        Route::get('/tickets/create', [\App\Http\Controllers\Helpdesk\TicketController::class, 'create'])->name('create');
+
+        // Store
+        Route::post('/tickets', [\App\Http\Controllers\Helpdesk\TicketController::class, 'store'])->name('store');
+
+        // Show, update, destroy
+        Route::get('/tickets/{ticket}', [\App\Http\Controllers\Helpdesk\TicketController::class, 'show'])->name('show')->whereNumber('ticket');
+        Route::put('/tickets/{ticket}', [\App\Http\Controllers\Helpdesk\TicketController::class, 'update'])->name('update')->whereNumber('ticket');
+        Route::delete('/tickets/{ticket}', [\App\Http\Controllers\Helpdesk\TicketController::class, 'destroy'])->name('destroy')->whereNumber('ticket');
+
+        // Legacy alias used in some tests
+        Route::get('/view', function () {
+            return redirect()->route('helpdesk.tickets.index');
+        })->name('view');
+    });
+
+    // -------------------------
     // Human Resource Management (Optional Livewire module)
     // -------------------------
     Route::prefix('hr')->name('hr.')->middleware(['role:Admin|HR Admin'])->group(function () {

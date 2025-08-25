@@ -31,29 +31,47 @@ class EquipmentFactory extends Factory
         static $userIds, $departmentIds, $equipmentCategoryIds, $subCategoryIdsByCat, $locationIds;
         if (!isset($userIds)) {
             $userIds = User::pluck('id')->all();
+            if (empty($userIds)) {
+                $userIds = [User::factory()->create()->id];
+            }
         }
         if (!isset($departmentIds)) {
             $departmentIds = Department::pluck('id')->all();
+            if (empty($departmentIds)) {
+                $departmentIds = [\App\Models\Department::factory()->create()->id];
+            }
         }
         if (!isset($equipmentCategoryIds)) {
             $equipmentCategoryIds = EquipmentCategory::pluck('id')->all();
+            if (empty($equipmentCategoryIds)) {
+                $equipmentCategoryIds = [\App\Models\EquipmentCategory::factory()->create()->id];
+            }
         }
         if (!isset($locationIds)) {
             $locationIds = Location::pluck('id')->all();
+            if (empty($locationIds)) {
+                $locationIds = [\App\Models\Location::factory()->create()->id];
+            }
         }
         if (!isset($subCategoryIdsByCat)) {
             // Map EquipmentCategory ID => array of SubCategory IDs
             $subCategoryIdsByCat = [];
-            foreach (SubCategory::all() as $subCat) {
+            $allSubCats = SubCategory::all();
+            if ($allSubCats->isEmpty()) {
+                // Ensure at least one subcategory tied to an equipment category exists
+                $catId = $equipmentCategoryIds[0] ?? EquipmentCategory::factory()->create()->id;
+                $allSubCats = collect([SubCategory::factory()->create(['equipment_category_id' => $catId])]);
+            }
+            foreach ($allSubCats as $subCat) {
                 $subCategoryIdsByCat[$subCat->equipment_category_id][] = $subCat->id;
             }
         }
 
         // Choose random IDs from cached arrays (or null if not available)
-        $auditUserId = !empty($userIds) ? Arr::random($userIds) : null;
-        $departmentId = !empty($departmentIds) ? Arr::random($departmentIds) : null;
-        $equipmentCategoryId = !empty($equipmentCategoryIds) ? Arr::random($equipmentCategoryIds) : null;
-        $locationId = !empty($locationIds) ? Arr::random($locationIds) : null;
+    $auditUserId = !empty($userIds) ? Arr::random($userIds) : null;
+    $departmentId = !empty($departmentIds) ? Arr::random($departmentIds) : null;
+    $equipmentCategoryId = !empty($equipmentCategoryIds) ? Arr::random($equipmentCategoryIds) : null;
+    $locationId = !empty($locationIds) ? Arr::random($locationIds) : null;
 
         // Pick a subcategory belonging to the selected equipment category
         $subCategoryId = null;

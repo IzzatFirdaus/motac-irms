@@ -36,10 +36,19 @@
         <a href="{{ route('loan-applications.my-applications.index') }}" class="myds-navbar-link">
             {{ __('Permohonan Pinjaman Saya') }}
         </a>
-        {{-- Link to Reports --}}
-        <a href="{{ route('reports.index') }}" class="myds-navbar-link">
-            {{ __('Laporan') }}
-        </a>
+        {{-- Link to Reports (visible to Admin, BPM Staff, IT Admin) --}}
+        @php
+            $canSeeReports = false;
+            if (Auth::check()) {
+                $user = Auth::user();
+                $canSeeReports = $user->hasRole('Admin') || $user->hasRole('BPM Staff') || $user->hasRole('IT Admin');
+            }
+        @endphp
+        @if($canSeeReports)
+            <a href="{{ route('reports.index') }}" class="myds-navbar-link">
+                {{ __('Laporan') }}
+            </a>
+        @endif
     </div>
     <div class="myds-navbar-right">
         {{-- Language Switcher Dropdown --}}

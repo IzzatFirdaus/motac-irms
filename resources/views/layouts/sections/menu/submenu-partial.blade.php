@@ -46,7 +46,7 @@
                 @isset($menu->icon)
                     <i class="menu-icon bi bi-{{ $menu->icon }}"></i>
                 @endisset
-                <div>{{ __($menu->name ?? '-') }}</div>
+                <div>{{ __($menu->name) }}</div>
                 @if ($hasSubmenu)
                     <span class="menu-arrow bi bi-chevron-right"></span>
                 @endif
@@ -56,7 +56,6 @@
                 <ul class="menu-sub">
                     @include('layouts.sections.menu.submenu-partial', [
                         'menuItems' => $menu->submenu,
-                        'role' => $role,
                         'configData' => $configData,
                         'currentRouteName' => $currentRouteName,
                     ])

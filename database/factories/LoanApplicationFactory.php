@@ -22,14 +22,10 @@ class LoanApplicationFactory extends Factory
 
     public function definition(): array
     {
-        // Static cache for User IDs (applicants and officers)
-        static $userIds;
-        if (!isset($userIds)) {
-            $userIds = User::pluck('id')->all();
-        }
-    $userId = !empty($userIds) ? Arr::random($userIds) : null;
-    // Choose an officer ID only if there are users present and a random pick is available; otherwise null
-    $officerId = !empty($userIds) ? Arr::random($userIds) : null;
+        // Always ensure at least one user exists for all foreign key columns
+        $user = User::first() ?: User::factory()->create();
+        $userId = $user->id;
+        $officerId = $user->id;
 
         // Use a static Malaysian faker for realism and speed
         static $msFaker;

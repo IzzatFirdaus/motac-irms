@@ -113,7 +113,7 @@ return [
             'name' => 'menu.resource_inventory.title',
             'icon' => 'boxes',
             'routeNamePrefix' => 'equipment.index,equipment.show,equipment.create,equipment.edit,loan-transactions.index,loan-transactions.show',
-            'role' => ['Admin', 'BPM Staff', 'IT Admin'],
+            'role' => ['Admin', 'BPM Staff'],
             'submenu' => [
                 [
                     'url' => '/equipment',
