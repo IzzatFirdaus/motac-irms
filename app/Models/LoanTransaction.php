@@ -248,6 +248,18 @@ class LoanTransaction extends Model
     // Static helper methods
 
     /**
+     * Returns the allowed transaction types for use in factories/seeders. (RAW values for enum)
+     * Use this in factories/seeder logic where you need the list of allowed 'type' values.
+     */
+    public static function getTypesOptions(): array
+    {
+        return [
+            self::TYPE_ISSUE,
+            self::TYPE_RETURN
+        ];
+    }
+
+    /**
      * Transaction type options for dropdowns.
      */
     public static function getTypeOptions(): array
@@ -303,6 +315,22 @@ class LoanTransaction extends Model
         ];
     }
 
+    /**
+     * Returns the default relations to be loaded for this model.
+     */
+    public static function getDefinedDefaultRelationsStatic(): array
+    {
+        return [
+            'loanApplication.user:id,name',
+            'loanTransactionItems.equipment:id,brand,model,tag_id',
+            'issuingOfficer:id,name',
+            'receivingOfficer:id,name',
+            'returningOfficer:id,name',
+            'returnAcceptingOfficer:id,name',
+            'relatedIssueTransaction',
+        ];
+    }
+
     // Helper methods
 
     /**
@@ -327,6 +355,7 @@ class LoanTransaction extends Model
      */
     public function updateParentLoanApplicationStatus(): void
     {
+        // Call the update method on the parent loan application if available.
         if ($this->loanApplication && method_exists($this->loanApplication, 'updateOverallStatusAfterTransaction')) {
             $this->loanApplication->updateOverallStatusAfterTransaction();
         }
@@ -338,6 +367,7 @@ class LoanTransaction extends Model
      */
     public function isFullyClosedOrReturned(): bool
     {
+        // Checks if this transaction (issue type) has been fully returned/closed
         if (!$this->isIssue()) {
             return true;
         }

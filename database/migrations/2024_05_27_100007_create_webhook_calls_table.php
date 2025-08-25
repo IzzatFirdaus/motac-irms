@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\Schema;
  */
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     * Creates the webhook_calls table with necessary columns.
+     */
     public function up(): void
     {
         Schema::create('webhook_calls', function (Blueprint $table): void {
@@ -22,8 +26,12 @@ return new class extends Migration
         });
     }
 
+    /**
+     * Reverse the migrations.
+     * Drops the webhook_calls table if it exists.
+     */
     public function down(): void
     {
-        Schema::dropIfExists('webhook_calls');
+        Schema::dropIfExists('webhook_calls'); // Properly drops table on rollback
     }
 };
