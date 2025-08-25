@@ -1,7 +1,8 @@
 /* custom.css for MOTAC IRMS
-   - Branding, status badges, forms, and responsive design
-   - Optimized for maximum cross-browser compatibility (IE 10+, Samsung Internet 2.0+, Edge, Chrome, Firefox)
-   - Updated: 2025-08-09 14:00:00 UTC by Copilot
+    - Requires variables.css to be loaded first
+    - Branding, status badges, forms, and responsive design
+    - Optimized for maximum cross-browser compatibility (IE 10+, Samsung Internet 2.0+, Edge, Chrome, Firefox)
+    - Updated: 2025-08-25 07:31:41 UTC by GitHub Copilot
 */
 
 /* -----------------------------------------------------
@@ -11,28 +12,7 @@
     direction: ltr;
 }
 
-/* -----------------------------------------------------
-   1. MOTAC Branding Variables - CSS Custom Properties
------------------------------------------------------ */
-:root {
-    --motac-primary-color: #003366; /* MOTAC Blue - primary brand color */
-    --motac-secondary-color: #FFCC00; /* MOTAC Yellow - secondary brand color */
-    --motac-text-color: #333333; /* Default text color */
-    --motac-font-family: 'Arial', sans-serif; /* Standard font stack */
-    --danger-color: #dc3545; /* Red for errors/rejected status */
-    --success-color: #28a745; /* Green for approved/success status */
-    --warning-color: #ffc107; /* Yellow for pending/warning status */
-
-    /* Navbar-specific variables for alternative navbar design */
-    --motac-navbar-bg: #fff;
-    --motac-navbar-border: #003366;
-    --motac-navbar-accent: #1976d2;
-    --motac-navbar-accent-bg: #e3f0ff;
-    --motac-navbar-text: #003366;
-    --motac-navbar-hover: #f1f6fb;
-    --motac-navbar-link-hover: #1976d2;
-    --motac-navbar-shadow: 0 2px 10px rgba(25, 118, 210, 0.07);
-}
+/* Branding tokens moved to variables.css */
 
 /* -----------------------------------------------------
    2. Typography & General Styling - Base styles
@@ -313,9 +293,9 @@ h1, h2, h3, h4, h5, h6 {
     margin-right: auto;
     display: block;
     width: -webkit-fit-content; /* Webkit browsers */
-    width: fit-content;         /* Modern browsers */
     width: -moz-fit-content;    /* Firefox */
-    /* Order: -webkit, fit-content, -moz for best compatibility */
+    width: fit-content;         /* Modern browsers */
+    /* Order: -webkit, -moz, fit-content for best compatibility */
 }
 
 /* Flexbox container for centering - with comprehensive browser support */
