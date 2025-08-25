@@ -141,6 +141,7 @@
     "spinkit": "2.0.1",
     "sweetalert2": "11.7.12",
     "swiper": "9.4.1",
+    "tailwindcss": "^4.1.12",
     "timepicker": "1.14.0",
     "toastr": "2.1.4",
     "typeahead.js": "0.11.1"
