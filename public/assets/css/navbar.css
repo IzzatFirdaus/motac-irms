@@ -8,12 +8,7 @@
 /* Import central variables (public copy). Ensure this file is loaded after variables.css in production builds if using concatenation. */
 @import url("./variables.css");
 
-/* Accessibility helpers */
-:root {
-  /* Keep a small local fallback for older build pipelines that don't support CSS variables */
-  --motac-navbar-border-fallback: #2563EB;
-}
-
+/* Accessibility helpers: variables are provided by variables.css - avoid duplicate :root declarations */
 /* Prefer keyboard focus-visible state for clearer outlines */
 :focus-visible {
   outline: var(--focus-ring);

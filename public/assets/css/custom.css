@@ -14,10 +14,7 @@
 /* Import central variables (public copy) - variables.css must be loaded before this file in production builds */
 @import url("./variables.css");
 
-/* Local fallbacks for legacy browsers (keep minimal) */
-:root {
-    --motac-primary-color: #003366;
-}
+/* Local fallbacks for legacy browsers are provided by variables.css if needed; avoid duplicate :root declarations here. */
 
 /* -----------------------------------------------------
    2. Typography & General Styling - Base styles
