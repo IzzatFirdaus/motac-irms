@@ -25,19 +25,40 @@ class DepartmentSeeder extends Seeder
     {
         Log::info('Starting Department seeding...');
 
-        // Ensure at least one user exists for audit fields before creating departments
-        $this->ensureAuditUserExists();
+            // Ensure at least one user exists for audit fields before creating departments
+            $this->ensureAuditUserExists();
 
-        // Truncate existing departments to start fresh
-        Department::truncate();
 
-        // Create predefined MOTAC departments
-        $this->createMotacDepartments();
+            // Disable foreign key checks before truncating
+            \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
-        // Create additional random departments for testing
-        $this->createAdditionalDepartments();
+            // Truncate all child tables referencing departments
+            $childTables = [
+                'equipment',
+                'loan_applications',
+                'loan_transactions',
+                'helpdesk_tickets',
+                // Add other tables with department_id FK as needed
+            ];
+            foreach ($childTables as $table) {
+                if (\Schema::hasTable($table)) {
+                    \DB::table($table)->truncate();
+                }
+            }
 
-        Log::info('Department seeding completed successfully.');
+            // Now truncate departments
+            Department::truncate();
+
+            // Re-enable foreign key checks
+            \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+            // Create predefined MOTAC departments
+            $this->createMotacDepartments();
+
+            // Create additional random departments for testing
+            $this->createAdditionalDepartments();
+
+            Log::info('Department seeding completed successfully.');
     }
 
     /**
