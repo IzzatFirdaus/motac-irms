@@ -12,7 +12,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // ENUM status values for loan applications
+        // ENUM status values for loan applications (must match LoanApplication model)
         $statuses = [
             'draft',
             'pending_support',
@@ -26,6 +26,8 @@ return new class extends Migration
             'overdue',
             'cancelled',
             'partially_returned_pending_inspection',
+            'completed',
+            'processing',
         ];
         $defaultStatus = 'draft';
 
@@ -52,9 +54,12 @@ return new class extends Migration
             $table->text('admin_notes')->nullable();
             $table->foreignId('current_approval_officer_id')->nullable()->constrained('users')->onDelete('set null');
             $table->string('current_approval_stage')->nullable();
+
+            // Blameable
             $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('deleted_by')->nullable()->constrained('users')->onDelete('set null');
+
             $table->timestamps();
             $table->softDeletes();
         });
