@@ -229,16 +229,10 @@ class LoanTransactionSeeder extends Seeder
 
         /** @var LoanApplication $app */
         foreach ($appsToMarkOverdue as $app) {
-<<<<<<< HEAD
-            if ($app instanceof LoanApplication) {
-                $app->update(['status' => LoanApplication::STATUS_OVERDUE]);
-            }
-=======
             // Update via query builder to sidestep "stdClass::update()" static-analysis warnings
             LoanApplication::whereKey($app->getKey())->update([
                 'status' => LoanApplication::STATUS_OVERDUE,
             ]);
->>>>>>> release/v4.0
         }
 
         Log::info('Marked relevant applications as overdue.');

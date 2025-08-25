@@ -245,8 +245,7 @@ class LoanTransaction extends Model
         return (int) $this->loanTransactionItems()->sum('quantity_transacted');
     }
 
-<<<<<<< HEAD
-    // --- STATIC HELPERS ---
+    // Static helper methods
 
     /**
      * Returns the allowed transaction types for use in factories/seeders. (RAW values for enum)
@@ -261,13 +260,7 @@ class LoanTransaction extends Model
     }
 
     /**
-     * Returns a translatable array of transaction types (for labels in UI).
-=======
-    // Static helper methods
-
-    /**
      * Transaction type options for dropdowns.
->>>>>>> release/v4.0
      */
     public static function getTypeOptions(): array
     {
@@ -278,12 +271,8 @@ class LoanTransaction extends Model
     }
 
     /**
-<<<<<<< HEAD
-     * Returns a translatable array of transaction statuses (for labels in UI).
-=======
      * Transaction status options for dropdowns.
      * This covers all statuses from the migration's enum.
->>>>>>> release/v4.0
      */
     public static function getStatusOptions(): array
     {
@@ -326,7 +315,6 @@ class LoanTransaction extends Model
         ];
     }
 
-<<<<<<< HEAD
     /**
      * Returns the default relations to be loaded for this model.
      */
@@ -343,14 +331,11 @@ class LoanTransaction extends Model
         ];
     }
 
-    // --- HELPER METHODS ---
-=======
     // Helper methods
 
     /**
      * Returns true if this transaction is an issue transaction.
      */
->>>>>>> release/v4.0
     public function isIssue(): bool
     {
         return $this->type === self::TYPE_ISSUE;
