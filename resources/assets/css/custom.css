@@ -5,6 +5,23 @@
     - Updated: 2025-08-25 07:31:41 UTC by GitHub Copilot
 */
 
+/* Ensure central tokens are available when building from resources */
+@import url("./variables.css");
+
+/* Accessibility helpers */
+:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
 /* -----------------------------------------------------
    Flatpickr calendar direction - ensures date picker displays left-to-right
 ----------------------------------------------------- */

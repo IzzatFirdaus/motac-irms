@@ -32,6 +32,23 @@
   --sidebar-badge-text: #FFFFFF;
 }
 
+/* Import central tokens for consistency (public copy). Keep local overrides above for sidebar-scoped adjustments. */
+@import url("./variables.css");
+
+/* Accessibility helpers scoped to sidebar */
+.motac-vertical-menu :focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motac-vertical-menu * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* ==== Dark Mode Sidebar Variables - MYDS Dark Mode Tokens ==== */
 @media (prefers-color-scheme: dark) {
   .motac-vertical-menu {

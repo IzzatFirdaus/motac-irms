@@ -11,27 +11,12 @@
     direction: ltr;
 }
 
-/* -----------------------------------------------------
-   1. MOTAC Branding Variables - CSS Custom Properties
------------------------------------------------------ */
+/* Import central variables (public copy) - variables.css must be loaded before this file in production builds */
+@import url("./variables.css");
+
+/* Local fallbacks for legacy browsers (keep minimal) */
 :root {
     --motac-primary-color: #003366;
-    --motac-secondary-color: #FFCC00;
-    --motac-text-color: #333333;
-    --motac-font-family: 'Arial', sans-serif;
-    --danger-color: #dc3545;
-    --success-color: #28a745;
-    --warning-color: #ffc107;
-
-    /* Navbar-specific variables */
-    --motac-navbar-bg: #fff;
-    --motac-navbar-border: #003366;
-    --motac-navbar-accent: #1976d2;
-    --motac-navbar-accent-bg: #e3f0ff;
-    --motac-navbar-text: #003366;
-    --motac-navbar-hover: #f1f6fb;
-    --motac-navbar-link-hover: #1976d2;
-    --motac-navbar-shadow: 0 2px 10px rgba(25, 118, 210, 0.07);
 }
 
 /* -----------------------------------------------------
