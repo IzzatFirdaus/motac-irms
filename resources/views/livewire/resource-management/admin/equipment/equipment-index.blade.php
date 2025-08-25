@@ -4,14 +4,14 @@
 
     <div class="container-fluid py-4">
         {{-- Page Header --}}
-        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4">
-            <h1 class="h2 fw-bold text-dark mb-2 mb-sm-0 d-flex align-items-center">
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-24">
+            <h1 class="heading-medium fw-semibold text-black-900 mb-0 d-flex align-items-center">
                 <i class="bi bi-hdd-stack-fill me-2"></i>
                 {{ __('Pengurusan Peralatan ICT') }}
             </h1>
             @can('create', App\Models\Equipment::class)
                 <button wire:click="createEquipment"
-                    class="btn btn-primary d-inline-flex align-items-center motac-btn-primary">
+                    class="button variant-primary size-medium d-inline-flex align-items-center">
                     <i class="bi bi-plus-lg me-1"></i> {{ __('Tambah Peralatan Baharu') }}
                 </button>
             @endcan
@@ -20,9 +20,9 @@
         @include('_partials._alerts.alert-general')
 
         {{-- Search and Filter Card --}}
-        <div class="card shadow-sm mb-4 motac-card">
-            <div class="card-header bg-light py-3 motac-card-header">
-                <h5 class="card-title fw-semibold mb-0 d-flex align-items-center">
+    <div class="card shadow-sm mb-24 motac-card">
+            <div class="card-header bg-light-100 py-16 motac-card-header">
+                <h5 class="heading-small fw-semibold text-black-900 mb-0 d-flex align-items-center">
                     <i class="bi bi-funnel-fill me-2"></i>
                     {{ __('Carian dan Saringan Peralatan') }}
                 </h5>
@@ -66,21 +66,21 @@
         </div>
 
         {{-- Equipment Table Card --}}
-        <div class="card shadow-sm motac-card">
+    <div class="card shadow-sm mb-24 motac-card">
             <div class="card-body p-0 motac-card-body">
                 <div class="table-responsive">
-                    <table class="table table-hover table-striped mb-0 align-middle">
-                        <thead class="table-light">
+                    <table class="table table-myds table-hover table-striped mb-0 align-middle">
+                        <thead class="table-light-100">
                             <tr>
-                                <th class="small text-uppercase text-muted fw-medium px-3 py-2" style="cursor:pointer;"
+                                <th class="heading-xsmall text-muted fw-semibold px-3 py-16" style="cursor:pointer;"
                                     wire:click="sortBy('tag_id')">{{ __('No. Tag Aset') }}</th>
-                                <th class="small text-uppercase text-muted fw-medium px-3 py-2">
+                                <th class="heading-xsmall text-muted fw-semibold px-3 py-16">
                                     {{ __('Jenis & Model') }}</th>
-                                <th class="small text-uppercase text-muted fw-medium px-3 py-2 text-center">
+                                <th class="heading-xsmall text-muted fw-semibold px-3 py-16 text-center">
                                     {{ __('Status') }}</th>
-                                <th class="small text-uppercase text-muted fw-medium px-3 py-2">{{ __('Lokasi') }}
+                                <th class="heading-xsmall text-muted fw-semibold px-3 py-16">{{ __('Lokasi') }}
                                 </th>
-                                <th class="text-center small text-uppercase text-muted fw-medium px-3 py-2">
+                                <th class="heading-xsmall text-muted fw-semibold px-3 py-16 text-center">
                                     {{ __('Tindakan') }}</th>
                             </tr>
                         </thead>
@@ -89,33 +89,33 @@
                                 <td colspan="5" class="p-0 border-0">
                                     <div wire:loading.flex class="progress bg-transparent rounded-0"
                                         style="height: 3px; width: 100%;">
-                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary-500"
                                             role="progressbar" style="width: 100%"></div>
                                     </div>
                                 </td>
                             </tr>
                             @forelse ($equipmentList as $item)
                                 <tr wire:key="equipment-item-{{ $item->id }}">
-                                    <td class="px-3 py-2 small fw-medium text-dark">{{ $item->tag_id ?? __('N/A') }}
+                                    <td class="px-3 py-16 heading-xsmall fw-semibold text-black-900">{{ $item->tag_id ?? __('N/A') }}
                                     </td>
-                                    <td class="px-3 py-2 small">
+                                    <td class="px-3 py-16 heading-xsmall">
                                         <span
-                                            class="fw-medium text-dark">{{ $item->asset_type_label ?? $item->asset_type }}</span>
+                                            class="fw-semibold text-black-900">{{ $item->asset_type_label ?? $item->asset_type }}</span>
                                         <div class="text-muted">{{ $item->brand ?? '' }} {{ $item->model ?? '' }}
                                         </div>
                                     </td>
-                                    <td class="px-3 py-2 small text-center">
+                                    <td class="px-3 py-16 heading-xsmall text-center">
                                         <x-equipment-status-badge :status="$item->status" />
                                     </td>
-                                    <td class="px-3 py-2 small text-muted">{{ $item->department->name ?? __('Umum') }}
+                                    <td class="px-3 py-16 heading-xsmall text-muted">{{ $item->department->name ?? __('Umum') }}
                                     </td>
-                                    <td class="px-3 py-2 text-center">
+                                    <td class="px-3 py-16 text-center">
                                         <div class="d-inline-flex align-items-center gap-1">
                                             @can('view', $item)
                                                 <button
                                                     wire:click="viewEquipment({{ $item->id }})"
                                                     type="button"
-                                                    class="btn btn-sm btn-outline-info border-0 p-1 motac-btn-icon"
+                                                    class="button variant-info size-small border-0 p-1 motac-btn-icon"
                                                     title="{{ __('Lihat Butiran') }}"><i
                                                         class="bi bi-eye-fill"></i></button>
                                             @endcan
@@ -123,7 +123,7 @@
                                                 <button
                                                     wire:click="editEquipment({{ $item->id }})"
                                                     type="button"
-                                                    class="btn btn-sm btn-outline-primary border-0 p-1 motac-btn-icon"
+                                                    class="button variant-primary size-small border-0 p-1 motac-btn-icon"
                                                     title="{{ __('Kemaskini') }}"><i
                                                         class="bi bi-pencil-fill"></i></button>
                                             @endcan
@@ -131,7 +131,7 @@
                                                 <button
                                                     wire:click="confirmDeleteEquipment({{ $item->id }})"
                                                     type="button"
-                                                    class="btn btn-sm btn-outline-danger border-0 p-1 motac-btn-icon"
+                                                    class="button variant-danger size-small border-0 p-1 motac-btn-icon"
                                                     title="{{ __('Padam') }}"><i class="bi bi-trash3-fill"></i></button>
                                             @endcan
                                         </div>
@@ -139,9 +139,9 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="px-3 py-5 text-center">
-                                        <div class="d-flex flex-column align-items-center text-muted small">
-                                            <i class="bi bi-hdd-stack-fill fs-1 text-secondary mb-2"></i>
+                                    <td colspan="5" class="px-3 py-24 text-center">
+                                        <div class="d-flex flex-column align-items-center text-muted heading-xsmall">
+                                            <i class="bi bi-hdd-stack-fill fs-1 text-secondary-500 mb-2"></i>
                                             <p>{{ __('Tiada rekod peralatan ICT ditemui.') }}</p>
                                         </div>
                                     </td>
@@ -151,8 +151,10 @@
                     </table>
                 </div>
                 @if ($equipmentList->hasPages())
-                    <div class="card-footer bg-light border-top py-3 motac-card-footer d-flex justify-content-center">
-                        {{ $equipmentList->links() }}
+                    <div class="card-footer bg-light-100 border-top py-16 motac-card-footer d-flex justify-content-center">
+                        <nav aria-label="MYDS Pagination">
+                            {{ $equipmentList->links('vendor.pagination.myds') }}
+                        </nav>
                     </div>
                 @endif
             </div>

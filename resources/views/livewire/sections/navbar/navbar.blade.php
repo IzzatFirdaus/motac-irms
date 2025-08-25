@@ -13,42 +13,42 @@
   IMPORTANT: Livewire components must have ONE root HTML element.
   This <nav> is the root for this component.
 -->
-<nav class="motac-navbar-alt {{ $containerNav }} {{ $navbarDetachedClass }}" id="layout-navbar" aria-label="@lang('common.main_title')">
-    <div class="navbar-left">
+<nav class="myds-navbar-alt {{ $containerNav }} {{ $navbarDetachedClass }}" id="layout-navbar" aria-label="@lang('common.main_title')">
+    <div class="myds-navbar-left">
         {{-- Hamburger menu for mobile view --}}
-        <button class="navbar-hamburger" aria-label="@lang('common.toggle_sidebar')" title="@lang('common.toggle_sidebar')">
+        <button class="myds-navbar-hamburger" aria-label="@lang('common.toggle_sidebar')" title="@lang('common.toggle_sidebar')">
             <i class="bi bi-list"></i>
         </button>
         {{-- Brand/Logo --}}
-        <a href="{{ url('/') }}" class="navbar-brand text-decoration-none">
-            <span class="navbar-logo">
+        <a href="{{ url('/') }}" class="myds-navbar-brand text-decoration-none">
+            <span class="myds-navbar-logo">
                 <img src="{{ asset('assets/img/logo/motac-logo.svg') }}" alt="Logo MOTAC">
             </span>
-            <span>motac-irms</span>
-            <span class="navbar-ministry d-none d-lg-inline">
+            <span class="heading-xsmall">motac-irms</span>
+            <span class="myds-navbar-ministry d-none d-lg-inline">
                 {{ __('Kementerian Pelancongan, Seni dan Budaya Malaysia') }}
             </span>
         </a>
     </div>
     {{-- Main navigation links (center) --}}
-    <div class="navbar-links d-none d-lg-flex">
+    <div class="myds-navbar-links d-none d-lg-flex">
         {{-- Link to My Loan Applications --}}
-        <a href="{{ route('loan-applications.my-applications.index') }}" class="navbar-link">
+        <a href="{{ route('loan-applications.my-applications.index') }}" class="myds-navbar-link">
             {{ __('Permohonan Pinjaman Saya') }}
         </a>
         {{-- Link to Reports --}}
-        <a href="{{ route('reports.index') }}" class="navbar-link">
+        <a href="{{ route('reports.index') }}" class="myds-navbar-link">
             {{ __('Laporan') }}
         </a>
     </div>
-    <div class="navbar-right">
+    <div class="myds-navbar-right">
         {{-- Language Switcher Dropdown --}}
         @if (count($availableLocales) > 1)
-            <div class="navbar-action" tabindex="0">
+            <div class="myds-navbar-action" tabindex="0">
                 <a href="#" aria-haspopup="true" aria-expanded="false" aria-label="@lang('common.language_selector')" title="@lang('common.language_selector')">
                     <span class="bi bi-translate"></span>
                 </a>
-                <div class="navbar-dropdown">
+                <div class="myds-navbar-dropdown">
                     @foreach ($availableLocales as $localeKey => $localeData)
                         <a href="{{ route('language.swap', ['lang' => $localeKey]) }}"
                            rel="nofollow"
@@ -67,7 +67,7 @@
         @endif
 
         {{-- Theme Switcher (toggle icon, not dropdown) --}}
-        <div class="navbar-action" tabindex="0" x-data="{
+    <div class="myds-navbar-action" tabindex="0" x-data="{
                 theme: localStorage.getItem('theme') || 'light',
                 toggleTheme() {
                     this.theme = this.theme === 'light' ? 'dark' : 'light';
@@ -80,7 +80,7 @@
                 aria-label="@lang('common.toggle_theme')"
                 title="@lang('common.toggle_theme')"
                 @click="toggleTheme()"
-                style="background: none; border: none; padding: 7px 10px; font-size: 1.21em; color: var(--motac-navbar-text);">
+                style="background: none; border: none; padding: 7px 10px; font-size: 1.21em; color: var(--myds-navbar-text);">
                 <i class="bi bi-moon-stars-fill" x-show="theme === 'light'"></i>
                 <i class="bi bi-sun-fill" x-show="theme === 'dark'"></i>
             </button>
@@ -96,18 +96,18 @@
             @php
                 $currentUser = Auth::user();
             @endphp
-            <div class="navbar-action" tabindex="0">
+            <div class="myds-navbar-action" tabindex="0">
                 <a href="#" aria-haspopup="true" aria-expanded="false" aria-label="{{ __('User Menu') }}">
                     <img src="{{ $currentUser->profile_photo_url }}"
                         alt="Avatar {{ $currentUser->name }}"
-                        class="navbar-avatar">
+                        class="myds-navbar-avatar">
                 </a>
-                <div class="navbar-dropdown">
+                <div class="myds-navbar-dropdown">
                     <div style="padding: 16px 22px 10px 22px; border-bottom:1px solid #e6e6e6;">
                         <div style="display:flex;align-items:center;gap:12px;">
                             <img src="{{ $currentUser->profile_photo_url }}"
                                 alt="Avatar {{ $currentUser->name }}"
-                                class="navbar-avatar">
+                                class="myds-navbar-avatar">
                             <div>
                                 <strong>{{ $currentUser->name }}</strong><br>
                                 <small class="text-muted" style="font-size: 0.97em;">
@@ -132,8 +132,8 @@
                 </div>
             </div>
         @else
-            <div class="navbar-action" tabindex="0">
-                <a class="navbar-link" href="{{ route('login') }}" title="@lang('common.login')">
+            <div class="myds-navbar-action" tabindex="0">
+                <a class="myds-navbar-link" href="{{ route('login') }}" title="@lang('common.login')">
                     <i class="bi bi-box-arrow-in-right"></i>
                     <span class="d-none d-md-inline">@lang('common.login')</span>
                 </a>

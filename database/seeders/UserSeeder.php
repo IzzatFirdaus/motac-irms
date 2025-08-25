@@ -109,12 +109,16 @@ class UserSeeder extends Seeder
         }
 
         // Assign roles in bulk after user creation
+        // Assign roles for both 'web' and 'sanctum' guards
+        $guards = ['web', 'sanctum'];
         foreach ($roleToUserIds as $roleName => $userIds) {
-            $role = Role::where('name', $roleName)->first();
-            foreach ($userIds as $userId) {
-                $user = User::find($userId);
-                if ($user && method_exists($user, 'assignRole')) {
-                    $user->assignRole($role);
+            foreach ($guards as $guard) {
+                $role = Role::where('name', $roleName)->where('guard_name', $guard)->first();
+                foreach ($userIds as $userId) {
+                    $user = User::find($userId);
+                    if ($user && method_exists($user, 'assignRole')) {
+                        $user->assignRole($role);
+                    }
                 }
             }
         }
