@@ -6,7 +6,7 @@ use Tests\TestCase;
 use App\Models\User;
 use App\Models\EmailApplication;
 use App\Models\Grade;
-use App\Policies\EmailApplicationPolicy; //
+use App\Policies\EmailApplicationPolicy;
 use Spatie\Permission\Models\Role;
 
 class EmailApplicationPolicyTest extends TestCase
