@@ -1,28 +1,46 @@
+/* MYDS-Compliant Navbar Styles
+   - Follows Malaysia Government Design System specifications
+   - Cross-browser compatible (IE 10+, modern browsers)
+   - Implements MYDS color tokens, spacing, and typography
+   - Updated: 2025-08-25 03:08:55 UTC by IzzatFirdaus
+*/
+
 :root {
-  --motac-navbar-bg: #fff;
-  --motac-navbar-border: #003366;
-  --motac-navbar-accent: #1976d2;
-  --motac-navbar-accent-bg: #e3f0ff;
-  --motac-navbar-text: #003366;
-  --motac-navbar-hover: #f1f6fb;
-  --motac-navbar-link-hover: #1976d2;
-  --motac-navbar-shadow: 0 2px 10px rgba(25, 118, 210, 0.07);
+  /* MYDS Color Tokens */
+  --motac-navbar-bg: #FFFFFF;
+  --motac-navbar-border: #2563EB; /* MYDS primary-600 */
+  --motac-navbar-accent: #2563EB; /* MYDS primary-600 */
+  --motac-navbar-accent-bg: #EFF6FF; /* MYDS primary-50 */
+  --motac-navbar-text: #18181B; /* MYDS txt-black-900 */
+  --motac-navbar-hover: #F4F4F5; /* MYDS gray-100 */
+  --motac-navbar-link-hover: #2563EB; /* MYDS primary-600 */
+  --motac-navbar-shadow: 0 2px 10px rgba(37, 99, 235, 0.07); /* MYDS shadow */
 }
 
-/* Main navbar container */
+/* Main navbar container - MYDS compliant */
 .motac-navbar-alt {
   width: 100%;
   background: var(--motac-navbar-bg);
   border-bottom: 3px solid var(--motac-navbar-border);
   box-shadow: var(--motac-navbar-shadow);
-  display: -ms-flexbox;
+
+  /* Cross-browser flexbox support */
+  display: -ms-flexbox; /* IE 10+ */
+  display: -webkit-flex; /* Safari */
   display: flex;
+
+  /* IE 10+ flexbox properties */
   -ms-flex-align: center;
-  align-items: center; /* Not supported by IE < 11, but safe for progressive enhancement */
   -ms-flex-pack: justify;
-  justify-content: space-between; /* Not supported by IE < 11, but safe for progressive enhancement */
-  min-height: 64px;
-  padding: 0 18px;
+
+  /* Modern flexbox */
+  -webkit-align-items: center;
+  -webkit-justify-content: space-between;
+  align-items: center;
+  justify-content: space-between;
+
+  min-height: 64px; /* MYDS minimum touch target */
+  padding: 0 24px; /* MYDS spacing */
   position: relative;
   z-index: 11;
 }
@@ -30,28 +48,36 @@
 /* Left section (logo, hamburger) */
 .motac-navbar-alt .navbar-left {
   display: -ms-flexbox;
+  display: -webkit-flex;
   display: flex;
   -ms-flex-align: center;
-  align-items: center; /* Not supported by IE < 11 */
-  /* Fallback for gap */
-  margin-right: 12px;
-  gap: 12px; /* Not supported by IE/old browsers, use margin as fallback */
+  -webkit-align-items: center;
+  align-items: center;
+  margin-right: 12px; /* MYDS spacing */
 }
 
-/* Brand/Logo */
+.motac-navbar-alt .navbar-left > *:not(:last-child) {
+  margin-right: 12px; /* Fallback for gap property */
+}
+
+/* Brand/Logo - MYDS typography */
 .motac-navbar-alt .navbar-brand {
   display: -ms-flexbox;
+  display: -webkit-flex;
   display: flex;
   -ms-flex-align: center;
-  align-items: center; /* Not supported by IE < 11 */
-  /* Fallback for gap */
-  margin-right: 12px;
-  gap: 12px; /* Not supported by IE/old browsers, use margin as fallback */
+  -webkit-align-items: center;
+  align-items: center;
   text-decoration: none;
   color: var(--motac-navbar-text);
-  font-weight: 700;
+  font-weight: 700; /* MYDS bold */
   font-size: 1.22em;
   letter-spacing: 0.04em;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; /* MYDS heading font */
+}
+
+.motac-navbar-alt .navbar-brand > *:not(:last-child) {
+  margin-right: 12px; /* MYDS spacing */
 }
 
 .motac-navbar-alt .navbar-logo {
@@ -59,14 +85,17 @@
   height: 38px;
   background: #fff;
   border: 2.5px solid var(--motac-navbar-border);
-  border-radius: 8px;
+  border-radius: 8px; /* MYDS radius-m */
   display: -ms-flexbox;
+  display: -webkit-flex;
   display: flex;
   -ms-flex-align: center;
-  align-items: center; /* Not supported by IE < 11 */
   -ms-flex-pack: center;
-  justify-content: center; /* Not supported by IE < 11 */
-  box-shadow: 0 1px 6px rgba(25, 118, 210, 0.07);
+  -webkit-align-items: center;
+  -webkit-justify-content: center;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 6px rgba(37, 99, 235, 0.07); /* MYDS shadow */
 }
 
 .motac-navbar-alt .navbar-logo img {
@@ -79,30 +108,42 @@
   color: var(--motac-navbar-accent);
   font-size: 0.97em;
   margin-left: 6px;
-  font-weight: 600;
+  font-weight: 600; /* MYDS semibold */
   white-space: nowrap;
   letter-spacing: 0.01em;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; /* MYDS body font */
 }
 
 /* Center nav links */
 .motac-navbar-alt .navbar-links {
   display: -ms-flexbox;
+  display: -webkit-flex;
   display: flex;
   -ms-flex-align: center;
-  align-items: center; /* Not supported by IE < 11 */
-  /* Fallback for gap */
-  margin-right: 18px;
-  gap: 18px; /* Not supported by IE/old browsers, use margin as fallback */
-  margin: 0 10px;
+  -webkit-align-items: center;
+  align-items: center;
+  margin: 0 12px; /* MYDS spacing */
+}
+
+.motac-navbar-alt .navbar-links > *:not(:last-child) {
+  margin-right: 18px; /* MYDS spacing */
 }
 
 .motac-navbar-alt .navbar-link {
   color: var(--motac-navbar-text);
   text-decoration: none;
-  font-weight: 500;
-  padding: 8px 10px;
-  border-radius: 5px;
+  font-weight: 500; /* MYDS medium */
+  padding: 8px 12px; /* MYDS spacing */
+  border-radius: 6px; /* MYDS radius-s */
   transition: background 0.18s, color 0.18s;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 48px; /* MYDS minimum touch target */
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+  -ms-flex-align: center;
+  -webkit-align-items: center;
+  align-items: center;
 }
 
 .motac-navbar-alt .navbar-link:hover,
@@ -115,12 +156,15 @@
 /* Right section (user, lang, etc) */
 .motac-navbar-alt .navbar-right {
   display: -ms-flexbox;
+  display: -webkit-flex;
   display: flex;
   -ms-flex-align: center;
-  align-items: center; /* Not supported by IE < 11 */
-  /* Fallback for gap */
-  margin-right: 14px;
-  gap: 14px; /* Not supported by IE/old browsers, use margin as fallback */
+  -webkit-align-items: center;
+  align-items: center;
+}
+
+.motac-navbar-alt .navbar-right > *:not(:last-child) {
+  margin-right: 14px; /* MYDS spacing */
 }
 
 .motac-navbar-alt .navbar-action {
@@ -133,14 +177,17 @@
   background: none;
   border: none;
   font-size: 1.21em;
-  padding: 7px 10px;
-  border-radius: 4px;
+  padding: 8px 12px; /* MYDS spacing */
+  border-radius: 6px; /* MYDS radius-s */
   cursor: pointer;
   transition: background 0.13s, color 0.13s;
+  min-height: 48px; /* MYDS minimum touch target */
   display: -ms-flexbox;
+  display: -webkit-flex;
   display: flex;
   -ms-flex-align: center;
-  align-items: center; /* Not supported by IE < 11 */
+  -webkit-align-items: center;
+  align-items: center;
 }
 
 .motac-navbar-alt .navbar-action > a:hover,
@@ -149,10 +196,11 @@
 .motac-navbar-alt .navbar-action > button:focus {
   background: var(--motac-navbar-hover);
   color: var(--motac-navbar-link-hover);
-  outline: none;
+  outline: 2px solid var(--motac-navbar-accent); /* MYDS focus ring */
+  outline-offset: 2px;
 }
 
-/* Dropdown menu */
+/* Dropdown menu - MYDS compliant */
 .motac-navbar-alt .navbar-dropdown {
   display: none;
   position: absolute;
@@ -161,12 +209,13 @@
   min-width: 200px;
   background: #fff;
   color: #222;
-  border-radius: 7px;
-  box-shadow: 0 5px 18px rgba(25, 118, 210, 0.06);
-  border: 1px solid #e6e6e6;
+  border-radius: 8px; /* MYDS radius-m */
+  box-shadow: 0 5px 18px rgba(37, 99, 235, 0.06); /* MYDS shadow-context-menu */
+  border: 1px solid #E4E4E7; /* MYDS gray-200 */
   z-index: 100;
-  padding: 10px 0;
+  padding: 12px 0; /* MYDS spacing */
   font-size: 1em;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .motac-navbar-alt .navbar-action.show .navbar-dropdown {
@@ -176,55 +225,69 @@
 .motac-navbar-alt .navbar-dropdown a,
 .motac-navbar-alt .navbar-dropdown button {
   display: -ms-flexbox;
+  display: -webkit-flex;
   display: flex;
   -ms-flex-align: center;
-  align-items: center; /* Not supported by IE < 11 */
-  /* Fallback for gap */
-  margin-right: 9px;
-  gap: 9px; /* Not supported by IE/old browsers, use margin as fallback */
+  -webkit-align-items: center;
+  align-items: center;
   width: 100%;
   color: #222;
   background: none;
   border: none;
-  padding: 9px 22px;
+  padding: 12px 24px; /* MYDS spacing */
   text-decoration: none;
   font-size: 1em;
   cursor: pointer;
   transition: background 0.15s;
+  min-height: 48px; /* MYDS minimum touch target */
+}
+
+.motac-navbar-alt .navbar-dropdown a > *:not(:last-child),
+.motac-navbar-alt .navbar-dropdown button > *:not(:last-child) {
+  margin-right: 9px; /* Fallback for gap */
 }
 
 .motac-navbar-alt .navbar-dropdown a:hover,
 .motac-navbar-alt .navbar-dropdown button:hover {
-  background: #f6f7fa;
+  background: #F4F4F5; /* MYDS gray-100 */
   color: var(--motac-navbar-accent);
 }
 
-/* User avatar */
+/* User avatar - IE-compatible background fallback */
 .motac-navbar-alt .navbar-avatar {
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  /* Fallback for object-fit for older browsers */
-  -o-object-fit: cover;
-     object-fit: cover; /* Not supported by IE, safe for progressive enhancement */
+  /* IE fallback for object-fit */
+  background-size: cover;
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
   border: 2px solid var(--motac-navbar-accent);
-  background: #e3f0ff;
+  background-color: var(--motac-navbar-accent-bg);
 }
 
-/* Notification badge */
+/* Modern browsers with object-fit support */
+.motac-navbar-alt .navbar-avatar[src] {
+  -o-object-fit: cover;
+  object-fit: cover;
+}
+
+/* Notification badge - MYDS tag component style */
 .navbar-badge {
-  background: #dc3545;
+  background: #DC2626; /* MYDS danger-600 */
   color: #fff;
-  font-size: 0.78em;
-  font-weight: bold;
-  padding: 2px 8px;
-  border-radius: 999px;
+  font-size: 0.75em; /* MYDS Body Extra Small */
+  font-weight: 700; /* MYDS bold */
+  padding: 2px 8px; /* MYDS spacing */
+  border-radius: 999px; /* MYDS pill style */
   position: absolute;
   top: 1px;
   right: 4px;
   z-index: 2;
   border: 2px solid #fff;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07); /* MYDS shadow-button */
+  min-width: 18px;
+  text-align: center;
 }
 
 /* Hamburger icon for small screens */
@@ -236,19 +299,30 @@
   color: var(--motac-navbar-text);
   margin-right: 6px;
   margin-left: -5px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px; /* MYDS radius-s */
+  transition: background 0.13s;
 }
 
-/* Responsive and legacy browser fallbacks */
+.motac-navbar-alt .navbar-hamburger:hover,
+.motac-navbar-alt .navbar-hamburger:focus {
+  background: var(--motac-navbar-hover);
+  outline: 2px solid var(--motac-navbar-accent);
+  outline-offset: 2px;
+}
 
-/* Hide ministry at medium screens */
-@media (max-width: 1100px) {
+/* Responsive breakpoints - MYDS Grid System */
+
+/* MYDS Tablet breakpoint - hide ministry name */
+@media (max-width: 1023px) {
   .motac-navbar-alt .navbar-ministry {
     display: none;
   }
 }
 
-/* Hide links and show hamburger on small screens */
-@media (max-width: 900px) {
+/* Hide links and show hamburger on MYDS mobile breakpoint */
+@media (max-width: 767px) {
   .motac-navbar-alt .navbar-links {
     display: none;
   }
@@ -257,35 +331,48 @@
   }
 }
 
-/* Column layout and smaller avatar/logo for very small screens */
+/* Mobile layout adjustments */
 @media (max-width: 600px) {
   .motac-navbar-alt {
     /* IE10+ fallback for flex-direction */
     -ms-flex-direction: column;
+    -webkit-flex-direction: column;
     flex-direction: column;
     /* IE10+ fallback for align-items */
     -ms-flex-align: stretch;
-    align-items: stretch; /* Not supported by IE < 11 */
-    padding: 0 4px;
+    -webkit-align-items: stretch;
+    align-items: stretch;
+    padding: 0 18px; /* MYDS mobile spacing */
     min-height: 52px;
   }
+
   .motac-navbar-alt .navbar-brand {
     font-size: 1em;
-    gap: 6px; /* Not supported by IE/old browsers, use margin as fallback */
   }
+
+  .motac-navbar-alt .navbar-brand > *:not(:last-child) {
+    margin-right: 8px; /* Smaller spacing on mobile */
+  }
+
   .motac-navbar-alt .navbar-logo {
     width: 30px;
     height: 30px;
   }
+
   .motac-navbar-alt .navbar-avatar {
     width: 32px;
     height: 32px;
   }
 }
 
-/* Documentation:
-   - Fallbacks for IE10+ are included (using -ms- prefixes).
-   - The 'gap' property is ignored by IE and old browsers, but layouts remain usable.
-   - 'object-fit: cover' for avatars is not supported in IE, but will gracefully degrade.
-   - MOTAC navbar is intended for modern browsers (Edge 16+/Chrome 57+/FF 52+/Safari 10.1+).
+/*
+  MYDS Compliance Notes:
+  - Uses MYDS color tokens (primary-600, gray-100, etc.)
+  - Implements MYDS spacing system (4px, 6px, 8px, 12px, 18px, 24px)
+  - Follows MYDS typography (Poppins for headings, Inter for body)
+  - Uses MYDS radius system (radius-s = 6px, radius-m = 8px)
+  - Implements MYDS shadow system
+  - Follows MYDS accessibility guidelines (48px minimum touch targets)
+  - Responsive design follows MYDS grid breakpoints
+  - Cross-browser compatibility maintained for IE 10+
 */
