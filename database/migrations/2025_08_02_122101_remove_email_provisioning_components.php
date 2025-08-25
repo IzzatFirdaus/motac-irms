@@ -19,45 +19,50 @@ return new class extends Migration
         // Drop the deprecated email_applications table
         Schema::dropIfExists('email_applications');
 
-        // Remove specific columns from users table if they exist
-        Schema::table('users', function (Blueprint $table) {
-            if (Schema::hasColumn('users', 'motac_email')) {
-                try {
-                    $sm = Schema::getConnection()->getDoctrineSchemaManager();
-                    $indexes = $sm->listTableIndexes('users');
-                    if (array_key_exists('users_motac_email_unique', $indexes)) {
-                        $table->dropUnique(['motac_email']);
+        // Remove specific columns from users table if they exist.
+        // Note: SQLite does not support DROP COLUMN in-place; skip destructive changes there.
+        if (Schema::getConnection()->getDriverName() === 'sqlite') {
+            Log::info('Skipping dropping user columns on sqlite (unsupported)');
+        } else {
+            Schema::table('users', function (Blueprint $table) {
+                if (Schema::hasColumn('users', 'motac_email')) {
+                    try {
+                        $sm = Schema::getConnection()->getDoctrineSchemaManager();
+                        $indexes = $sm->listTableIndexes('users');
+                        if (array_key_exists('users_motac_email_unique', $indexes)) {
+                            $table->dropUnique(['motac_email']);
+                        }
+                    } catch (\Exception $e) {
+                        Log::warning('Could not check or drop unique index for motac_email: ' . $e->getMessage());
                     }
-                } catch (\Exception $e) {
-                    Log::warning('Could not check or drop unique index for motac_email: ' . $e->getMessage());
+                    $table->dropColumn('motac_email');
                 }
-                $table->dropColumn('motac_email');
-            }
-            if (Schema::hasColumn('users', 'user_id_assigned')) {
-                try {
-                    $sm = Schema::getConnection()->getDoctrineSchemaManager();
-                    $indexes = $sm->listTableIndexes('users');
-                    if (array_key_exists('users_user_id_assigned_unique', $indexes)) {
-                        $table->dropUnique(['user_id_assigned']);
+                if (Schema::hasColumn('users', 'user_id_assigned')) {
+                    try {
+                        $sm = Schema::getConnection()->getDoctrineSchemaManager();
+                        $indexes = $sm->listTableIndexes('users');
+                        if (array_key_exists('users_user_id_assigned_unique', $indexes)) {
+                            $table->dropUnique(['user_id_assigned']);
+                        }
+                    } catch (\Exception $e) {
+                        Log::warning('Could not check or drop unique index for user_id_assigned: ' . $e->getMessage());
                     }
-                } catch (\Exception $e) {
-                    Log::warning('Could not check or drop unique index for user_id_assigned: ' . $e->getMessage());
+                    $table->dropColumn('user_id_assigned');
                 }
-                $table->dropColumn('user_id_assigned');
-            }
-            if (Schema::hasColumn('users', 'previous_department_name')) {
-                $table->dropColumn('previous_department_name');
-            }
-            if (Schema::hasColumn('users', 'previous_department_email')) {
-                $table->dropColumn('previous_department_email');
-            }
-            if (Schema::hasColumn('users', 'service_status')) {
-                $table->dropColumn('service_status');
-            }
-            if (Schema::hasColumn('users', 'appointment_type')) {
-                $table->dropColumn('appointment_type');
-            }
-        });
+                if (Schema::hasColumn('users', 'previous_department_name')) {
+                    $table->dropColumn('previous_department_name');
+                }
+                if (Schema::hasColumn('users', 'previous_department_email')) {
+                    $table->dropColumn('previous_department_email');
+                }
+                if (Schema::hasColumn('users', 'service_status')) {
+                    $table->dropColumn('service_status');
+                }
+                if (Schema::hasColumn('users', 'appointment_type')) {
+                    $table->dropColumn('appointment_type');
+                }
+            });
+        }
     }
 
     public function down(): void
