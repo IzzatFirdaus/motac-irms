@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Models;
@@ -89,18 +88,17 @@ final class Notification extends Model
             }
         });
 
-        if (in_array(SoftDeletes::class, class_uses_recursive(self::class))) {
+        if (in_array(SoftDeletes::class, class_uses_recursive(self::class), true)) {
             self::deleting(function (self $model): void {
-                if (Auth::check() && property_exists($model, 'deleted_by') && is_null($model->deleted_by)) {
+                if (Auth::check()) {
                     $user = Auth::user();
                     $model->deleted_by = $user->id;
                 }
             });
+
             self::restoring(function (self $model): void {
-                if (property_exists($model, 'deleted_by')) {
-                    $model->deleted_by = null;
-                }
-                if (Auth::check() && ! $model->isDirty('updated_by')) {
+                $model->deleted_by = null;
+                if (Auth::check()) {
                     $user = Auth::user();
                     $model->updated_by = $user->id;
                 }

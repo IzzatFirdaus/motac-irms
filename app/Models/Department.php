@@ -119,4 +119,13 @@ class Department extends Model
     {
         return self::getBranchTypeLabel($this->branch_type);
     }
+
+    /**
+     * Helpdesk tickets for this department.
+     * @return HasMany
+     */
+    public function tickets(): HasMany
+    {
+        return $this->hasMany(Ticket::class, 'department_id');
+    }
 }

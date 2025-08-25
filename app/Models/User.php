@@ -180,7 +180,7 @@ class User extends Authenticatable
      */
     public function tickets(): HasMany
     {
-        return $this->hasMany(HelpdeskTicket::class, 'user_id');
+        return $this->hasMany(Ticket::class, 'user_id');
     }
 
     /**
@@ -189,7 +189,25 @@ class User extends Authenticatable
      */
     public function assignedTickets(): HasMany
     {
-        return $this->hasMany(HelpdeskTicket::class, 'assigned_to_user_id');
+        return $this->hasMany(Ticket::class, 'assigned_to');
+    }
+
+    /**
+     * Ticket comments made by this user.
+     * @return HasMany
+     */
+    public function ticketComments(): HasMany
+    {
+        return $this->hasMany(TicketComment::class, 'user_id');
+    }
+
+    /**
+     * Ticket attachments uploaded by this user.
+     * @return HasMany
+     */
+    public function ticketAttachments(): HasMany
+    {
+        return $this->hasMany(TicketAttachment::class, 'user_id');
     }
 
     /**
