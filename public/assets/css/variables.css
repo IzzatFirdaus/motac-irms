@@ -89,6 +89,20 @@
     --motac-navbar-link-hover: #6394FF;
     --motac-navbar-accent-bg: #18181B;
     --motac-navbar-hover: #27272A;
+
+  /* Sidebar dark-mode tokens */
+  --sidebar-bg: #0e1826;
+  --sidebar-accent: #6394FF; /* MYDS primary-400 for dark mode */
+  --sidebar-hover: #27272A; /* MYDS gray-800 for dark mode */
+  --sidebar-active: #1E40AF; /* MYDS primary-800 for dark mode */
+  --sidebar-text: #FAFAFA; /* MYDS gray-50 for dark mode */
+  --sidebar-text-muted: #A1A1AA; /* MYDS gray-400 for dark mode */
+  --sidebar-header-bg: #16213a;
+  --sidebar-border: #3F3F46; /* MYDS gray-700 for dark mode */
+  --sidebar-shadow: 0 3px 24px 0 rgba(20,30,60,.18);
+  --sidebar-menu-arrow: #6394FF;
+  --sidebar-badge-bg: #F87171; /* MYDS danger-400 for dark mode */
+  --sidebar-badge-text: #FFFFFF;
   }
 }
 
