@@ -19,13 +19,13 @@
 
         @include('_partials._alerts.alert-general')
 
-        <div class="card shadow-sm">
-            <div class="card-header bg-light d-flex flex-wrap justify-content-between align-items-center gap-2 py-3">
+        <div class="card shadow-sm motac-card" data-motac-card="list">
+            <div class="card-header motac-card-header d-flex flex-wrap justify-content-between align-items-center gap-2 py-3">
                 <h3 class="h5 card-title fw-semibold mb-0 d-flex align-items-center">
                     <i class="bi bi-list-ul me-2"></i>{{ __('equipment.inventory_title') }}
                 </h3>
                 <form action="{{ route('resource-management.equipment-admin.index') }}" method="GET" class="d-flex gap-2">
-                    <input type="text" name="search" class="form-control form-control-sm" style="min-width: 250px;"
+                    <input type="text" name="search" class="form-control form-control-sm motac-search-input"
                         placeholder="{{ __('equipment.search_placeholder') }}" value="{{ request('search') }}"
                         aria-label="{{ __('equipment.search_placeholder') }}">
                     <button type="submit" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center">
@@ -103,7 +103,7 @@
                     </table>
                 </div>
                 @if ($equipmentList instanceof \Illuminate\Pagination\LengthAwarePaginator && $equipmentList->hasPages())
-                    <div class="card-footer bg-light border-top py-3">
+                    <div class="card-footer motac-card-footer border-top py-3">
                         {{ $equipmentList->links() }}
                     </div>
                 @endif
