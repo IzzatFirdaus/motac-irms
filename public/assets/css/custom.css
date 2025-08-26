@@ -677,3 +677,33 @@ h1, h2, h3, h4, h5, h6 {
         min-width: 0;
     }
 }
+
+/* -----------------------------------------------------
+   MOTAC Card Helpers - token driven
+----------------------------------------------------- */
+.motac-card {
+    background: var(--motac-card-bg, #fff);
+    color: var(--motac-text-color);
+    border: 1px solid var(--motac-card-border, rgba(15,23,42,0.04));
+    border-radius: var(--motac-radii-md, 8px);
+    transition: box-shadow 0.12s ease, transform 0.12s ease;
+}
+.motac-card:hover {
+    box-shadow: var(--motac-card-hover-shadow, 0 6px 20px rgba(15,23,42,0.06));
+}
+.motac-card-header {
+    background: var(--motac-card-header-bg, var(--motac-navbar-bg, #f8f9fa));
+    color: var(--motac-card-header-text, var(--motac-navbar-text));
+}
+.motac-card-footer {
+    background: var(--motac-card-footer-bg, var(--motac-navbar-bg));
+}
+
+/* Small helper for search inputs inside tokenised headers */
+.motac-search-input {
+    min-width: 250px;
+    border-radius: 6px;
+    border: 1px solid rgba(0,0,0,0.08);
+    padding: 6px 10px;
+}
+
