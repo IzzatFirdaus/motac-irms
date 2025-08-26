@@ -1,0 +1,26 @@
+# pack-refs with: peeled fully-peeled sorted 
+d5220ab76ed4c681a0c33b421c6db4801864421a refs/heads/docs/clean-directories-md-20250825
+369ddecaecd7f38e27977a85a2b2a7b591a1d4e5 refs/heads/docs/recreate-directories-md-20250825
+f2e1293ab16cfd779faeaec703a67b826d09e35c refs/heads/feat/loan-transactions-views
+78c84b79a3453de781c931a612e0216871437a87 refs/heads/feat/vite-migration
+3192adcaf01e4c819b87f09f8dd9b6f93dada9d3 refs/heads/feature/add-instructions-and-gitignore
+aee53fa383188e1d84f48c912a5cb3838bfcf7a8 refs/heads/feature/add-loan-migration-20250422
+b1904b8243717856e9f652f164d066da606aab8e refs/heads/feature/centralise-css-tokens
+3b2097d2f9244da3534e4b17dd4eaf3825ed3e83 refs/heads/feature/docs-update-2025
+a2b9c8bf0c1b504d481700b15d18c2ebc5e7d48d refs/heads/feature/finalize-docs-move-20250825
+3192838c4f8ee33638ace627f9137ac2080b9556 refs/heads/feature/migrations/tickets-sync
+2aee4f1d35f03f92acdf5085f3618629135b8632 refs/heads/feature/models-update
+6c61d4befed892ccd3b16daa23989ef01649c691 refs/heads/feature/move-md-to-_documentation-20250825
+d7c03221bef0d289b2993b2a5a3ce9d908fecb33 refs/heads/feature/move-md-to-documentation
+e9d36673fa9b010c9000207e7970bc4e39ca6e97 refs/heads/feature/package-update
+b155f7dc0130df636b07cc93d173ae086bb630da refs/heads/feature/public-assets-update
+629e947c35da0416bf6fe6329ab31572eb8ad5db refs/heads/feature/v4.0-helpdesk-sla-fixes
+63263173bc41de9836c1d98653b03c902d399d81 refs/heads/fix/dashboard-access-tests-20250825
+4711bf7b7f2576125d56a50ecb3827229d1dba16 refs/heads/fix/flatten-docs-nesting
+334c1d907e9f7bba95beddc6b7c4481f9b2c6050 refs/heads/fix/views-auth-and-transactions
+1459c8eb8bd72552ac6d4f66df510dbfc21beac7 refs/heads/main
+d3c9f295e890d86bf5d9748a0a2809272c46ba51 refs/heads/release/v4.0
+99a383067818629f64d71cef73bed9190917a34f refs/heads/release/v4.0-local-changes
+d3c9f295e890d86bf5d9748a0a2809272c46ba51 refs/heads/release/v4.0-reconciled-ours
+0a7119ed657c1b4ba8323f93b7e52c1619be6924 refs/heads/tailwind-fix
+4347006fb7dbf3b9452369bea6c8b4a0ebc1a2cd refs/tags/internship-project
