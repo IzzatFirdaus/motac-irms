@@ -4,14 +4,10 @@
   "private": true,
   "description": "MOTAC Integrated Resource Management System (IRMS) - Asset, loan, and helpdesk management for MOTAC Malaysia",
   "scripts": {
-    "dev": "npm run development",
-    "development": "mix",
-    "build": "npm run production",
-    "prod": "npm run production",
-    "production": "mix --production",
-    "watch": "mix watch",
-    "watch-poll": "mix watch -- --watch-options-poll=1000",
-    "hot": "mix watch --hot",
+    "dev": "vite --config vite.config.mjs",
+    "build": "vite build --config vite.config.mjs",
+    "preview": "vite preview --config vite.config.mjs",
+    "watch": "vite --config vite.config.mjs",
     "lint:css": "stylelint \"resources/assets/css/**/*.css\"",
     "lint:css:fix": "stylelint \"resources/assets/css/**/*.css\" --fix"
   },
@@ -32,7 +28,7 @@
         "@babel/env",
         {
           "targets": {
-              "browsers": [
+            "browsers": [
               "defaults",
               "last 2 versions",
               "not dead",
@@ -62,12 +58,14 @@
     "@fullcalendar/timeline": "^6.1.17",
     "@prettier/plugin-php": "0.19.6",
     "ajv": "8.12.0",
+    "alpinejs": "^3.14.9",
     "axios": "1.4.0",
     "babel-loader": "9.1.2",
     "browser-sync": "2.29.3",
     "browser-sync-webpack-plugin": "2.3.0",
     "cross-env": "7.0.3",
     "laravel-mix": "6.0.49",
+    "laravel-vite-plugin": "^1.0.5",
     "lodash": "4.17.21",
     "prettier": "2.8.8",
     "resolve-url-loader": "5.0.0",
@@ -75,7 +73,8 @@
     "sass-loader": "13.3.2",
     "stylelint": "^16.19.1",
     "stylelint-config-standard": "^38.0.0",
-    "stylelint-order": "^7.0.0"
+    "stylelint-order": "^7.0.0",
+    "vite": "^5.4.0"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "6.4.0",

@@ -48,6 +48,9 @@
 
     {{-- Include core JS helpers, theme config, and template customizer if enabled --}}
     @include('layouts.sections.layout-scripts-includes')
+
+    {{-- Vite assets: main app and optional modules --}}
+    @vite(['resources/js/app.js'])
 </head>
 
 <body>
