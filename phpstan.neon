@@ -12,6 +12,8 @@ includes:
     - vendor/nesbot/carbon/extension.neon
 
 parameters:
+    bootstrapFiles:
+        - phpstan-bootstrap.php
     # Analyze only application code (not tests or vendor)
     paths:
         - app/
