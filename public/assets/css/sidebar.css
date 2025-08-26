@@ -6,49 +6,8 @@
    - Updated: 2025-08-25 03:08:55 UTC by IzzatFirdaus
 */
 
-/* ==== Sidebar-Scoped Variables (Light Mode) - MYDS Color Tokens ==== */
-.motac-vertical-menu {
-  /* MYDS Color System */
-  --sidebar-bg: #FFFFFF;
-  --sidebar-accent: #2563EB; /* MYDS primary-600 */
-  --sidebar-hover: #F4F4F5; /* MYDS gray-100 */
-  --sidebar-active: #EFF6FF; /* MYDS primary-50 */
-  --sidebar-text: #18181B; /* MYDS txt-black-900 */
-  --sidebar-text-muted: #71717A; /* MYDS gray-500 */
-  --sidebar-header-bg: #FAFAFA; /* MYDS gray-50 */
-
-  /* MYDS Spacing System */
-  --sidebar-width: 260px;
-  --sidebar-collapsed-width: 72px;
-  --sidebar-transition: 0.25s cubic-bezier(.4,0,.2,1);
-
-  /* MYDS Border and Shadow */
-  --sidebar-border: #E4E4E7; /* MYDS gray-200 */
-  --sidebar-shadow: 0 3px 24px 0 rgba(37,99,235,.07); /* MYDS shadow */
-  --sidebar-menu-arrow: #2563EB; /* MYDS primary-600 */
-
-  /* MYDS Status Colors */
-  --sidebar-badge-bg: #DC2626; /* MYDS danger-600 */
-  --sidebar-badge-text: #FFFFFF;
-}
-
-/* ==== Dark Mode Sidebar Variables - MYDS Dark Mode Tokens ==== */
-@media (prefers-color-scheme: dark) {
-  .motac-vertical-menu {
-    --sidebar-bg: #0e1826;
-    --sidebar-accent: #6394FF; /* MYDS primary-400 for dark mode */
-    --sidebar-hover: #27272A; /* MYDS gray-800 for dark mode */
-    --sidebar-active: #1E40AF; /* MYDS primary-800 for dark mode */
-    --sidebar-text: #FAFAFA; /* MYDS gray-50 for dark mode */
-    --sidebar-text-muted: #A1A1AA; /* MYDS gray-400 for dark mode */
-    --sidebar-header-bg: #16213a;
-    --sidebar-border: #3F3F46; /* MYDS gray-700 for dark mode */
-    --sidebar-shadow: 0 3px 24px 0 rgba(20,30,60,.18);
-    --sidebar-menu-arrow: #6394FF;
-    --sidebar-badge-bg: #F87171; /* MYDS danger-400 for dark mode */
-    --sidebar-badge-text: #FFFFFF;
-  }
-}
+/* Sidebar tokens moved to variables.css to centralize design tokens. */
+/* Light and dark sidebar token values are defined in variables.css. */
 
 /* ==== Sidebar Main Container - MYDS Grid Compatible ==== */
 .motac-vertical-menu {
@@ -75,6 +34,23 @@
   border-right: 1px solid var(--sidebar-border);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; /* MYDS typography */
 }
+
+/* -----------------------------------------------------
+  MyDS-Prefixed Aliases (for templates using myds-*)
+  Mirrors the .motac-vertical-menu rules to avoid duplication
+----------------------------------------------------- */
+.myds-vertical-menu { width: var(--sidebar-width); min-height: 100vh; background: var(--sidebar-bg); color: var(--sidebar-text); box-shadow: var(--sidebar-shadow); transition: width var(--sidebar-transition), background var(--sidebar-transition), color var(--sidebar-transition); position: relative; display: -ms-flexbox; display: -webkit-flex; display: flex; -ms-flex-direction: column; -webkit-flex-direction: column; flex-direction: column; border-right: 1px solid var(--sidebar-border); font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+.myds-sidebar-header { background: var(--sidebar-header-bg); padding: 20px 24px 16px 24px; display: -ms-flexbox; display: -webkit-flex; display: flex; -ms-flex-align: center; -webkit-align-items: center; align-items: center; border-bottom: 2px solid var(--sidebar-accent); transition: background var(--sidebar-transition), border-color var(--sidebar-transition); }
+.myds-sidebar-logo { width: 36px; height: 36px; border-radius: 8px; background: #fff; display: -ms-flexbox; display: -webkit-flex; display: flex; -ms-flex-align: center; -ms-flex-pack: center; -webkit-align-items: center; -webkit-justify-content: center; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(37,99,235,.10); transition: box-shadow .18s; }
+.myds-sidebar-logo img { width: 28px; height: auto; display: block; }
+.myds-sidebar-title { font-weight: 700; font-size: 1.15em; color: var(--sidebar-accent); letter-spacing: 0.03em; white-space: nowrap; transition: color var(--sidebar-transition); font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+.myds-sidebar-menu { list-style: none; margin: 0; padding: 0; -ms-flex: 1 1 auto; -webkit-flex: 1 1 auto; flex: 1 1 auto; overflow-y: auto; background: none; }
+.myds-menu-header { font-size: 0.875rem; color: var(--sidebar-text-muted); padding: 20px 24px 8px 24px; letter-spacing: 0.08em; font-weight: 700; text-transform: uppercase; background: none; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+.myds-menu-item { position: relative; }
+.myds-menu-link { display: -ms-flexbox; display: -webkit-flex; display: flex; -ms-flex-align: center; -webkit-align-items: center; align-items: center; text-decoration: none; color: var(--sidebar-text); padding: 14px; gap: 12px; border-radius: 8px; transition: background var(--sidebar-transition), color var(--sidebar-transition); }
+.myds-menu-link:hover { background: var(--sidebar-hover); color: var(--sidebar-accent); }
+.myds-menu-item--active > .myds-menu-link, .myds-menu-link.active { background: var(--sidebar-active); color: var(--sidebar-accent); font-weight: 600; position: relative; }
+.myds-menu-icon { width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; color: inherit; }
 
 /* ==== Sidebar Header - MYDS Typography ==== */
 .motac-vertical-menu .sidebar-header {

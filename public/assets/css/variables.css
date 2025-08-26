@@ -33,6 +33,23 @@
   --footer-text: #fafafa;
   --footer-border: #1976d2;
 
+  /* Sidebar tokens (moved from sidebar.css) */
+  --sidebar-bg: #FFFFFF;
+  --sidebar-accent: #2563EB; /* MYDS primary-600 */
+  --sidebar-hover: #F4F4F5; /* MYDS gray-100 */
+  --sidebar-active: #EFF6FF; /* MYDS primary-50 */
+  --sidebar-text: #18181B; /* MYDS txt-black-900 */
+  --sidebar-text-muted: #71717A; /* MYDS gray-500 */
+  --sidebar-header-bg: #FAFAFA; /* MYDS gray-50 */
+  --sidebar-width: 260px;
+  --sidebar-collapsed-width: 72px;
+  --sidebar-transition: 0.25s cubic-bezier(.4,0,.2,1);
+  --sidebar-border: #E4E4E7; /* MYDS gray-200 */
+  --sidebar-shadow: 0 3px 24px 0 rgba(37,99,235,.07); /* MYDS shadow */
+  --sidebar-menu-arrow: #2563EB; /* MYDS primary-600 */
+  --sidebar-badge-bg: #DC2626; /* MYDS danger-600 */
+  --sidebar-badge-text: #FFFFFF;
+
   /* Spacing */
   --space-4: 4px;
   --space-8: 8px;
@@ -59,7 +76,7 @@
   --motion-ease: cubic-bezier(.4,0,.2,1);
 
   /* Misc */
-  --focus-ring: 2px solid var(--motac-primary-color);
+  --focus-ring: 3px solid color-mix(in srgb, var(--motac-navbar-accent) 85%, transparent);
 }
 
 /* Dark mode overrides (optional) */
@@ -73,4 +90,24 @@
     --motac-navbar-accent-bg: #18181B;
     --motac-navbar-hover: #27272A;
   }
+}
+
+/* Accessibility: Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* Apply scroll-behavior reset only when supported to avoid legacy browser errors */
+  @supports (scroll-behavior: auto) {
+    *, *::before, *::after {
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* High contrast support: allow components to opt-in to stronger borders */
+@media (prefers-contrast: more), (prefers-contrast: high) {
+  :root { --border-strong: 2px solid currentColor; }
 }
