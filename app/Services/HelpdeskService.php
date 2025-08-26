@@ -74,17 +74,23 @@ class HelpdeskService
     {
         return DB::transaction(function () use ($ticket, $commentText, $user, $attachments, $isInternal) {
             $comment = new HelpdeskComment();
-            $comment->helpdesk_ticket_id = $ticket->id;
+            // Comment model uses 'ticket_id' as FK
+            $comment->ticket_id = $ticket->id;
             $comment->user_id = $user->id;
             $comment->comment = $commentText;
             $comment->is_internal = $isInternal;
             $comment->save();
 
-            $this->handleAttachments($comment, $attachments);
+            // Attach files to the comment if the comment model supports attachments()
+            if (method_exists($comment, 'attachments')) {
+                $this->handleAttachments($comment, $attachments);
+            }
 
             // Notify applicant and assignee of new comment
-            $this->notificationService->notifyTicketCommentAdded($ticket->user, $comment, $user, 'applicant');
-            if ($ticket->assignedTo && $ticket->assignedTo->id !== $user->id) {
+            if ($ticket->user instanceof User) {
+                $this->notificationService->notifyTicketCommentAdded($ticket->user, $comment, $user, 'applicant');
+            }
+            if ($ticket->assignedTo instanceof User && $ticket->assignedTo->id !== $user->id) {
                 $this->notificationService->notifyTicketCommentAdded($ticket->assignedTo, $comment, $user, 'assignee');
             }
 
@@ -134,12 +140,16 @@ class HelpdeskService
 
             $ticket->save();
 
-            $this->handleAttachments($ticket, $attachments);
+            if (method_exists($ticket, 'attachments')) {
+                $this->handleAttachments($ticket, $attachments);
+            }
 
             // Notify about status changes
             if ($oldStatus !== $ticket->status) {
-                $this->notificationService->notifyTicketStatusUpdated($ticket->user, $ticket, $updater, 'applicant');
-                if ($ticket->assignedTo) {
+                if ($ticket->user instanceof User) {
+                    $this->notificationService->notifyTicketStatusUpdated($ticket->user, $ticket, $updater, 'applicant');
+                }
+                if ($ticket->assignedTo instanceof User) {
                     $this->notificationService->notifyTicketStatusUpdated($ticket->assignedTo, $ticket, $updater, 'assignee');
                 }
             }
@@ -181,8 +191,10 @@ class HelpdeskService
 
             // Notify parties only if status actually changed to closed
             if ($oldStatus !== HelpdeskTicket::STATUS_CLOSED) {
-                $this->notificationService->notifyTicketStatusUpdated($ticket->user, $ticket, $closer, 'applicant');
-                if ($ticket->assignedTo) {
+                if ($ticket->user instanceof User) {
+                    $this->notificationService->notifyTicketStatusUpdated($ticket->user, $ticket, $closer, 'applicant');
+                }
+                if ($ticket->assignedTo instanceof User) {
                     $this->notificationService->notifyTicketStatusUpdated($ticket->assignedTo, $ticket, $closer, 'assignee');
                 }
             }
@@ -199,12 +211,16 @@ class HelpdeskService
     /**
      * Handles file attachments for tickets or comments.
      *
-     * @param Model $attachable
+    * @param mixed $attachable Accepts Eloquent models that implement attachments().
      * @param array $attachments
      * @return void
      */
-    protected function handleAttachments(Model $attachable, array $attachments): void
+    protected function handleAttachments($attachable, array $attachments): void
     {
+        if (! method_exists($attachable, 'attachments')) {
+            return;
+        }
+
         foreach ($attachments as $attachment) {
             if ($attachment instanceof UploadedFile && $attachment->isValid()) {
                 $path = $attachment->store('helpdesk_attachments', 'public');

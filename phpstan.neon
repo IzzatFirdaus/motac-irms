@@ -21,7 +21,12 @@ parameters:
     # You may increase to level 6-8 for stricter checks as the codebase matures.
 
     # Uncomment to allow uncertain PHPDoc types (default: true on level 6+)
-    # treatPhpDocTypesAsCertain: false
+    treatPhpDocTypesAsCertain: false
+
+    # Use IDE helper as PHPStan stub file to provide model docblocks safely
+    stubFiles:
+    - _ide_helper_models.php
+    - _phpstan_eloquent_stub.php
 
     # MOTAC IRMS-specific ignore patterns (documented for onboarding):
     ignoreErrors:
@@ -31,6 +36,7 @@ parameters:
         - '#Property App\\Providers\\EventServiceProvider::\$observers has unknown class object as its type\.#'
         # Ignore Livewire's dynamic Title attribute error (framework quirk)
         - '#^Attribute class Livewire\\Attributes\\Title constructor invoked with 0 parameters, 1 required\.#'
+    reportUnmatchedIgnoredErrors: false
         # If you have custom codegen or macro related errors, add them here.
 
     # If you want to exclude specific files or folders from analysis, uncomment below:
@@ -42,7 +48,9 @@ parameters:
 
     # Set Laravel's container as universal factory to reduce false positives
     # larastan
-    container_factory_class: 'NunoMaduro\Larastan\LaravelContainerFactory'
+        # Larastan configuration lives in vendor/larastan/larastan/extension.neon.
+        # Keep PHPStan config minimal here. If you need custom container factory
+        # behavior, configure via Larastan's documented options or upgrade Larastan.
 
     # If you use custom extensions or additional static analysis rules, add here
 

@@ -22,6 +22,7 @@ use Illuminate\Support\Str;
  * @property int $loan_application_id
  * @property string $type
  * @property \Illuminate\Support\Carbon|null $transaction_date
+ * @property array|string|null $accessories_checklist_on_issue
  * @property int|null $issuing_officer_id
  * @property int|null $receiving_officer_id
  * @property array|null $accessories_checklist_on_issue
@@ -38,6 +39,7 @@ use Illuminate\Support\Str;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property \App\Models\LoanApplication|null $loanApplication
  */
 class LoanTransaction extends Model
 {

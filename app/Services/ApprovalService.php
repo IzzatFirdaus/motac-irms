@@ -7,7 +7,7 @@ namespace App\Services;
 use App\Models\Approval;
 use App\Models\LoanApplication;
 use App\Models\User;
-use Carbon\Carbon;
+// use Carbon\Carbon; // replaced with now() helper to satisfy static analysis types
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -102,25 +102,28 @@ class ApprovalService
             // Update the current approval record
             $approval->status = Approval::STATUS_APPROVED;
             $approval->comments = $comments;
-            $approval->approved_at = Carbon::now();
+            $approval->approved_at = now();
             $approval->save();
 
             Log::info(sprintf('Approval ID %d for Loan Application ID %d has been approved by officer ID %d.', $approval->id, $loanApplication->id, $approval->officer_id));
 
             // Check if there are further approval levels
-            $nextApproval = $loanApplication->approvals()->where('level', '>', $approval->level)->orderBy('level')->first();
+            $currentLevel = $approval->getAttribute('level');
+            $nextApproval = $loanApplication->approvals()->where('level', '>', $currentLevel)->orderBy('level')->first();
 
             if ($nextApproval) {
                 // If there's a next approval level, update the loan application status
                 // and notify the next approver.
-                $loanApplication->status = $this->determineNextApprovalStatus($nextApproval->level);
+                $loanApplication->status = $this->determineNextApprovalStatus($nextApproval->getAttribute('level'));
                 $loanApplication->save();
-                Log::info(sprintf('Loan Application ID %d status updated to %s. Next approval level is %s.', $loanApplication->id, $loanApplication->status, $nextApproval->level));
-                $this->notificationService->notifyApproverOfPendingApproval($nextApproval->officer, $nextApproval);
+                Log::info(sprintf('Loan Application ID %d status updated to %s. Next approval level is %s.', $loanApplication->id, $loanApplication->status, $nextApproval->getAttribute('level')));
+                if ($nextApproval->officer instanceof User) {
+                    $this->notificationService->notifyApproverOfPendingApproval($nextApproval->officer, $nextApproval);
+                }
             } else {
                 // If this was the final approval, mark the loan application as approved overall.
                 $loanApplication->status = LoanApplication::STATUS_APPROVED;
-                $loanApplication->approved_at = Carbon::now();
+                $loanApplication->approved_at = now();
                 $loanApplication->save();
                 Log::info(sprintf('Loan Application ID %d status updated to APPROVED (final approval).', $loanApplication->id));
 
@@ -131,7 +134,9 @@ class ApprovalService
                 // (e.g., support officers or inventory managers)
                 $issuingOfficers = User::whereHasRole('issuing_officer')->get(); // Example: Fetch users with 'issuing_officer' role
                 foreach ($issuingOfficers as $officer) {
-                    $this->notificationService->notifyLoanApplicationReadyForIssuance($officer, $loanApplication);
+                    if ($officer instanceof User) {
+                        $this->notificationService->notifyLoanApplicationReadyForIssuance($officer, $loanApplication);
+                    }
                 }
             }
         });
@@ -165,14 +170,14 @@ class ApprovalService
             // Update the approval record
             $approval->status = Approval::STATUS_REJECTED;
             $approval->comments = $reason;
-            $approval->rejected_at = Carbon::now();
+            $approval->rejected_at = now();
             $approval->save();
 
             Log::info(sprintf('Approval ID %d for Loan Application ID %d has been rejected by officer ID %d.', $approval->id, $loanApplication->id, $approval->officer_id));
 
             // Mark the loan application as rejected
             $loanApplication->status = LoanApplication::STATUS_REJECTED;
-            $loanApplication->rejected_at = Carbon::now();
+            $loanApplication->rejected_at = now();
             $loanApplication->save();
             Log::info(sprintf('Loan Application ID %d status updated to REJECTED.', $loanApplication->id));
 

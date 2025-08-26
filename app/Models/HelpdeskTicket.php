@@ -24,6 +24,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $user_id
  * @property int|null $assigned_to_user_id
  * @property \Illuminate\Support\Carbon|null $closed_at
+ * @property-read \App\Models\User|null $user
+ * @property-read \App\Models\User|null $assignedTo
  * @property string|null $resolution_notes
  * @property \Illuminate\Support\Carbon|null $sla_due_at
  * @property int|null $closed_by_id
@@ -132,6 +134,14 @@ class HelpdeskTicket extends Model
     public function latestComment(): HasMany
     {
         return $this->hasMany(HelpdeskComment::class, 'ticket_id')->latest();
+    }
+
+    /**
+     * Backwards-compatible alias used throughout services.
+     */
+    public function user(): BelongsTo
+    {
+        return $this->applicant();
     }
 
     /**

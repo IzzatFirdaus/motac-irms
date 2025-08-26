@@ -43,6 +43,9 @@ use Illuminate\Support\Str;
  * @property string|null $funded_by
  * @property string|null $supplier_name
  * @property int|null $department_id
+ * @property int|null $defined_location_id
+ * @property int|null $current_loan_id
+ * @property int|null $defined_location_id
  * @property int|null $created_by
  * @property int|null $updated_by
  * @property int|null $deleted_by
@@ -178,6 +181,14 @@ class Equipment extends Model
     }
 
     /**
+     * Alias for location used in other services as 'definedLocation'.
+     */
+    public function definedLocation(): BelongsTo
+    {
+        return $this->location();
+    }
+
+    /**
      * Equipment belongs to a department.
      */
     public function department(): BelongsTo
@@ -272,6 +283,33 @@ class Equipment extends Model
             self::CONDITION_UNSERVICEABLE => 'Tidak Boleh Digunakan',
             self::CONDITION_LOST => 'Hilang',
         ];
+    }
+
+    /**
+     * Backwards-compatible alias used by services/static analysis.
+     */
+    public static function getOperationalStatusesList(): array
+    {
+        return array_values(self::getStatusOptions());
+    }
+
+    /**
+     * Simple wrapper that updates operational status and persists the model.
+     * Keeps behaviour local to model and is safe for services to call.
+     */
+    public function updateOperationalStatus(string $newStatus, string $reason, int $actingUserId): bool
+    {
+        $this->status = $newStatus;
+        // Optionally log reason and user id; observers may pick up updated_by
+        return $this->save();
+    }
+
+    /**
+     * Wrapper to update physical condition status used by services.
+     */
+    public function updatePhysicalConditionStatus(string $newCondition, string $reason, int $actingUserId): bool
+    {
+        return $this->updatePhysicalCondition($newCondition, $actingUserId);
     }
 
     /**

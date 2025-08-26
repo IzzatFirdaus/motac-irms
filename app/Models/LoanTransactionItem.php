@@ -25,9 +25,13 @@ use Illuminate\Support\Str;
  * @property int $quantity_transacted
  * @property string $status
  * @property string|null $condition_on_return
- * @property array|null $accessories_checklist_issue
- * @property array|null $accessories_checklist_return
+ * @property array|string|null $accessories_checklist_issue
+ * @property array|string|null $accessories_checklist_return
  * @property string|null $item_notes
+ * @property string|null $notes
+ * @property int|null $quantity_returned
+ * @property string|null $return_status
+ * @property array|string|null $accessories_checklist_on_return
  * @property int|null $created_by
  * @property int|null $updated_by
  * @property int|null $deleted_by

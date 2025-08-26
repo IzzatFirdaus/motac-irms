@@ -35,6 +35,7 @@ use Illuminate\Support\Str;
  * @property \Illuminate\Support\Carbon|null $submitted_at
  * @property int|null $approved_by
  * @property \Illuminate\Support\Carbon|null $approved_at
+ * @property \Illuminate\Support\Carbon|null $issued_at
  * @property int|null $rejected_by
  * @property \Illuminate\Support\Carbon|null $rejected_at
  * @property int|null $cancelled_by

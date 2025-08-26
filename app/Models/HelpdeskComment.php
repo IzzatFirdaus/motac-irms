@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @property int $id
  * @property int $ticket_id
+ * @property int $helpdesk_ticket_id
  * @property int $user_id
  * @property string $comment
  * @property bool $is_internal

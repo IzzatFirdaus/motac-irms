@@ -24,6 +24,9 @@ use Illuminate\Support\Str;
  * @property int $id
  * @property string $approvable_type
  * @property int $approvable_id
+ * @property int|null $loan_application_id
+ * @property int|null $approver_id
+ * @property int|string|null $level
  * @property string|null $stage
  * @property int $officer_id
  * @property string $status
