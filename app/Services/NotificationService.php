@@ -33,7 +33,12 @@ use Illuminate\Support\Facades\Log;
 
 class NotificationService
 {
-    public function notifyUser(User $user, Notification $notification): void
+    /**
+     * Send a notification instance to a user.
+     *
+     * @param \Illuminate\Notifications\Notification $notification
+     */
+    public function notifyUser(User $user, $notification): void
     {
         try {
             $user->notify($notification);
