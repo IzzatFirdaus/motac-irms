@@ -11,7 +11,7 @@
 @section('title', __('Sahkan Kata Laluan'))
 
 @section('page-style')
-    <link rel="stylesheet" href="{{ asset(mix('assets/vendor/css/pages/page-auth.css')) }}">
+    <link rel="stylesheet" href="{{ asset('assets/vendor/css/pages/page-auth.css') }}">
     <style>
         body {
             font-family: 'Noto Sans', sans-serif !important;

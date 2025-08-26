@@ -89,7 +89,7 @@
                                         <a href="{{ route('loan-transactions.show', $latestIssueTransaction->id) }}" class="btn btn-sm btn-outline-info border-0 p-1" title="{{ __('Lihat Detail Transaksi Keluar') }}"><i class="bi bi-file-earmark-text fs-6 lh-1"></i></a>
                                         @if (!$loanApplication->isClosed())
                                             @can('processReturn', $latestIssueTransaction)
-                                                <a href="{{ route('loan-transactions.return.form', ['loanTransaction' => $latestIssueTransaction->id]) }}" class="btn btn-sm btn-outline-success border-0 p-1 ms-1" title="{{ __('Proses Pemulangan') }}"><i class="bi bi-arrow-return-left fs-6 lh-1"></i></a>
+                                                <a href="{{ route('loan-applications.return', ['loanTransaction' => $latestIssueTransaction->id]) }}" class="btn btn-sm btn-outline-success border-0 p-1 ms-1" title="{{ __('Proses Pemulangan') }}"><i class="bi bi-arrow-return-left fs-6 lh-1"></i></a>
                                             @endcan
                                         @endif
                                     @else

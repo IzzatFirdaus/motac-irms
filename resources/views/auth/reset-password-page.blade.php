@@ -10,7 +10,7 @@
 @section('title', __('Tetapkan Semula Kata Laluan'))
 
 @section('page-style')
-    <link rel="stylesheet" href="{{ asset(mix('assets/vendor/css/pages/page-auth.css')) }}">
+    <link rel="stylesheet" href="{{ asset('assets/vendor/css/pages/page-auth.css') }}">
     <style>
         body { font-family: 'Noto Sans', sans-serif !important; line-height: 1.6; }
         .btn-primary { background-color: #0055A4 !important; border-color: #0055A4 !important; }
