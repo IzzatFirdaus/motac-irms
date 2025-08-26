@@ -11,18 +11,20 @@ use Illuminate\View\Component;
 class EquipmentStatusBadge extends Component
 {
     public string $statusKey;
+
     public string $statusLabel;
+
     public string $badgeClass;
 
     /**
      * Create a new component instance.
      *
-     * @param  string  $status  The equipment status key.
+     * @param string $status The equipment status key.
      */
     public function __construct(string $status = '')
     {
-        $this->statusKey = $status;
-        $statusOptions = Equipment::getStatusOptions();
+        $this->statusKey   = $status;
+        $statusOptions     = Equipment::getStatusOptions();
         $this->statusLabel = $statusOptions[$this->statusKey] ?? Str::title(str_replace('_', ' ', $this->statusKey));
 
         switch ($this->statusKey) {

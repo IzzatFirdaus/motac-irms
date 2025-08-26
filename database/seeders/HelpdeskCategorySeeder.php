@@ -29,10 +29,10 @@ class HelpdeskCategorySeeder extends Seeder
 
         // Get an audit user (for blameable columns)
         $adminUserForAudit = User::orderBy('id')->first();
-        $auditUserId = $adminUserForAudit?->id;
-        if (!$auditUserId) {
+        $auditUserId       = $adminUserForAudit?->id;
+        if (! $auditUserId) {
             $adminUserForAudit = User::factory()->create(['name' => 'Audit User (HelpdeskCategorySeeder)']);
-            $auditUserId = $adminUserForAudit->id;
+            $auditUserId       = $adminUserForAudit->id;
             Log::info(sprintf('Created a fallback audit user with ID %d for HelpdeskCategorySeeder.', $auditUserId));
         } else {
             Log::info(sprintf('Using User ID %s for audit columns in HelpdeskCategorySeeder.', $auditUserId));
@@ -41,44 +41,44 @@ class HelpdeskCategorySeeder extends Seeder
         // Define core helpdesk categories (aligned with system domain and schema)
         $categories = [
             [
-                'name' => 'Hardware',
+                'name'        => 'Hardware',
                 'description' => 'Issues related to physical computer components, peripherals, etc.',
-                'is_active' => true,
+                'is_active'   => true,
             ],
             [
-                'name' => 'Software',
+                'name'        => 'Software',
                 'description' => 'Problems with operating systems, applications, or specialized software.',
-                'is_active' => true,
+                'is_active'   => true,
             ],
             [
-                'name' => 'Network',
+                'name'        => 'Network',
                 'description' => 'Connectivity issues, Wi-Fi problems, VPN access, etc.',
-                'is_active' => true,
+                'is_active'   => true,
             ],
             [
-                'name' => 'Account & Access',
+                'name'        => 'Account & Access',
                 'description' => 'Password resets, account lockouts, access permissions.',
-                'is_active' => true,
+                'is_active'   => true,
             ],
             [
-                'name' => 'Printer',
+                'name'        => 'Printer',
                 'description' => 'Printer setup, toner replacement, paper jams, and other printing issues.',
-                'is_active' => true,
+                'is_active'   => true,
             ],
             [
-                'name' => 'Email',
+                'name'        => 'Email',
                 'description' => 'Email client configuration, sending/receiving issues.',
-                'is_active' => true,
+                'is_active'   => true,
             ],
             [
-                'name' => 'System Performance',
+                'name'        => 'System Performance',
                 'description' => 'Slow computer, application crashes, freezing.',
-                'is_active' => true,
+                'is_active'   => true,
             ],
             [
-                'name' => 'Other',
+                'name'        => 'Other',
                 'description' => 'Miscellaneous IT support requests not covered by other categories.',
-                'is_active' => true,
+                'is_active'   => true,
             ],
         ];
 
@@ -96,6 +96,6 @@ class HelpdeskCategorySeeder extends Seeder
             );
         }
 
-        Log::info('HelpdeskCategory seeding complete. Created/verified ' . count($categories) . ' categories.');
+        Log::info('HelpdeskCategory seeding complete. Created/verified '.count($categories).' categories.');
     }
 }

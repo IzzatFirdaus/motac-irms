@@ -24,10 +24,10 @@ class HelpdeskPriorityFactory extends Factory
     {
         // Static cache for User IDs (for blameable columns)
         static $userIds;
-        if (!isset($userIds)) {
+        if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $auditUserId = !empty($userIds) ? Arr::random($userIds) : null;
+        $auditUserId = ! empty($userIds) ? Arr::random($userIds) : null;
 
         // Typical helpdesk priorities for consistency in testing
         $priorityPresets = [
@@ -40,7 +40,7 @@ class HelpdeskPriorityFactory extends Factory
 
         // Use a static Malaysian faker for realism and speed
         static $msFaker;
-        if (!$msFaker) {
+        if (! $msFaker) {
             $msFaker = \Faker\Factory::create('ms_MY');
         }
 
@@ -50,15 +50,15 @@ class HelpdeskPriorityFactory extends Factory
         $deletedAt = $isDeleted ? Carbon::parse($this->faker->dateTimeBetween($updatedAt, 'now')) : null;
 
         return [
-            'name'        => $priority['name'],
-            'level'       => $priority['level'],
-            'color_code'  => $priority['color_code'],
-            'created_by'  => $auditUserId,
-            'updated_by'  => $auditUserId,
-            'deleted_by'  => $isDeleted ? $auditUserId : null,
-            'created_at'  => $createdAt,
-            'updated_at'  => $updatedAt,
-            'deleted_at'  => $deletedAt,
+            'name'       => $priority['name'],
+            'level'      => $priority['level'],
+            'color_code' => $priority['color_code'],
+            'created_by' => $auditUserId,
+            'updated_by' => $auditUserId,
+            'deleted_by' => $isDeleted ? $auditUserId : null,
+            'created_at' => $createdAt,
+            'updated_at' => $updatedAt,
+            'deleted_at' => $deletedAt,
         ];
     }
 
@@ -68,10 +68,11 @@ class HelpdeskPriorityFactory extends Factory
     public function deleted(): static
     {
         static $userIds;
-        if (!isset($userIds)) {
+        if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $deleterId = !empty($userIds) ? Arr::random($userIds) : null;
+        $deleterId = ! empty($userIds) ? Arr::random($userIds) : null;
+
         return $this->state([
             'deleted_at' => now(),
             'deleted_by' => $deleterId,

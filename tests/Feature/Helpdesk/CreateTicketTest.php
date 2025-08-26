@@ -28,7 +28,7 @@ class CreateTicketTest extends TestCase
     /** @test */
     public function a_user_can_create_a_helpdesk_ticket()
     {
-        $user = User::factory()->create();
+        $user     = User::factory()->create();
         $category = HelpdeskCategory::first();
         $priority = HelpdeskPriority::first();
 
@@ -42,12 +42,12 @@ class CreateTicketTest extends TestCase
             ->assertRedirect(route('helpdesk.view', HelpdeskTicket::first()->id)); // Assert redirect to new ticket
 
         $this->assertDatabaseHas('helpdesk_tickets', [
-            'user_id' => $user->id,
-            'title' => 'My Printer is Not Working',
+            'user_id'     => $user->id,
+            'title'       => 'My Printer is Not Working',
             'description' => 'The printer in my office is not printing anything.',
             'category_id' => $category->id,
             'priority_id' => $priority->id,
-            'status' => 'open',
+            'status'      => 'open',
         ]);
 
         // Assert that an SLA due date is set
@@ -57,7 +57,7 @@ class CreateTicketTest extends TestCase
     /** @test */
     public function a_user_can_upload_attachments_when_creating_a_ticket()
     {
-        $user = User::factory()->create();
+        $user     = User::factory()->create();
         $category = HelpdeskCategory::first();
         $priority = HelpdeskPriority::first();
 

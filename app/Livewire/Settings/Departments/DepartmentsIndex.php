@@ -11,7 +11,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 
 /**
- * DepartmentsIndex Livewire Component
+ * DepartmentsIndex Livewire Component.
  *
  * Handles all department management logic for Settings > Departments, including
  * listing, search, sort, create, update, delete, and modal management.
@@ -24,23 +24,33 @@ class DepartmentsIndex extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $sortField = 'name';
+
     public string $sortDirection = 'asc';
 
     public bool $showModal = false;
+
     public bool $isEditMode = false;
+
     public ?Department $editingDepartment = null;
 
     // Form fields
     public string $name = '';
+
     public string $code = '';
+
     public string $branch_type = '';
+
     public string $description = '';
+
     public bool $is_active = true;
 
     // Deletion confirmation modal
     public bool $showDeleteConfirmationModal = false;
+
     public ?int $departmentIdToDelete = null;
+
     public string $departmentNameToDelete = '';
 
     // Branch type dropdown options
@@ -109,7 +119,7 @@ class DepartmentsIndex extends Component
         $this->authorize('create', Department::class);
         $this->resetInputFields();
         $this->isEditMode = false;
-        $this->showModal = true;
+        $this->showModal  = true;
     }
 
     /**
@@ -120,13 +130,13 @@ class DepartmentsIndex extends Component
         $this->authorize('update', $department);
         $this->resetInputFields();
         $this->editingDepartment = $department;
-        $this->name = $department->name;
-        $this->code = $department->code ?? '';
-        $this->branch_type = $department->branch_type;
-        $this->description = $department->description ?? '';
-        $this->is_active = $department->is_active;
-        $this->isEditMode = true;
-        $this->showModal = true;
+        $this->name              = $department->name;
+        $this->code              = $department->code ?? '';
+        $this->branch_type       = $department->branch_type;
+        $this->description       = $department->description ?? '';
+        $this->is_active         = $department->is_active;
+        $this->isEditMode        = true;
+        $this->showModal         = true;
     }
 
     /**
@@ -139,12 +149,12 @@ class DepartmentsIndex extends Component
             : $this->authorize('create', Department::class);
 
         $validatedData = $this->validate();
-        $data = [
-            'name' => $validatedData['name'],
-            'code' => $validatedData['code'],
+        $data          = [
+            'name'        => $validatedData['name'],
+            'code'        => $validatedData['code'],
             'branch_type' => $validatedData['branch_type'],
             'description' => $validatedData['description'],
-            'is_active' => $validatedData['is_active'],
+            'is_active'   => $validatedData['is_active'],
         ];
 
         if ($this->isEditMode && $this->editingDepartment instanceof Department && $this->editingDepartment->exists) {
@@ -178,11 +188,12 @@ class DepartmentsIndex extends Component
 
             if ($department->users()->count() > 0) {
                 session()->flash('error', __('Jabatan ":name" tidak boleh dipadam kerana ia telah ditugaskan kepada pengguna.', ['name' => $department->name]));
+
                 return;
             }
 
-            $this->departmentIdToDelete = $id;
-            $this->departmentNameToDelete = $department->name;
+            $this->departmentIdToDelete        = $id;
+            $this->departmentNameToDelete      = $department->name;
             $this->showDeleteConfirmationModal = true;
         } else {
             session()->flash('error', __('Jabatan tidak ditemui.'));
@@ -201,6 +212,7 @@ class DepartmentsIndex extends Component
             if ($department->users()->count() > 0) {
                 session()->flash('error', __('Jabatan ":name" tidak boleh dipadam kerana ia telah ditugaskan kepada pengguna.', ['name' => $department->name]));
                 $this->closeDeleteConfirmationModal();
+
                 return;
             }
 
@@ -217,8 +229,8 @@ class DepartmentsIndex extends Component
     public function closeDeleteConfirmationModal(): void
     {
         $this->showDeleteConfirmationModal = false;
-        $this->departmentIdToDelete = null;
-        $this->departmentNameToDelete = '';
+        $this->departmentIdToDelete        = null;
+        $this->departmentNameToDelete      = '';
     }
 
     /**
@@ -231,11 +243,11 @@ class DepartmentsIndex extends Component
                                 : null;
 
         return [
-            'name' => ['required', 'string', 'max:255', ValidationRule::unique('departments', 'name')->ignore($departmentIdToIgnore)],
-            'code' => ['nullable', 'string', 'max:50', ValidationRule::unique('departments', 'code')->ignore($departmentIdToIgnore)],
+            'name'        => ['required', 'string', 'max:255', ValidationRule::unique('departments', 'name')->ignore($departmentIdToIgnore)],
+            'code'        => ['nullable', 'string', 'max:50', ValidationRule::unique('departments', 'code')->ignore($departmentIdToIgnore)],
             'branch_type' => ['required', 'string', ValidationRule::in(array_keys($this->branchTypeOptions))],
             'description' => 'nullable|string|max:1000',
-            'is_active' => 'required|boolean',
+            'is_active'   => 'required|boolean',
         ];
     }
 
@@ -244,14 +256,14 @@ class DepartmentsIndex extends Component
      */
     private function resetInputFields(): void
     {
-        $this->name = '';
-        $this->code = '';
+        $this->name        = '';
+        $this->code        = '';
         $this->description = '';
-        $this->is_active = true;
+        $this->is_active   = true;
         $this->branch_type = $this->branchTypeOptions === [] ? '' : array_key_first($this->branchTypeOptions);
 
         $this->editingDepartment = new Department;
-        $this->isEditMode = false;
+        $this->isEditMode        = false;
         $this->resetErrorBag();
         $this->resetValidation();
     }
@@ -262,7 +274,7 @@ class DepartmentsIndex extends Component
     public function render()
     {
         return view('livewire.settings.departments.departments-index', [
-            'departments' => $this->departments,
+            'departments'       => $this->departments,
             'branchTypeOptions' => $this->branchTypeOptions,
         ]);
     }

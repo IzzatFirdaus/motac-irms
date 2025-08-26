@@ -12,7 +12,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -32,26 +31,41 @@ class LoanRequestForm extends Component
 
     // Loan application model for edit mode
     public ?LoanApplication $loanApplication = null;
+
     public bool $isEdit = false;
+
     public string $title = 'Permohonan Pinjaman Baru';
 
     // Applicant details (some are prefilled, some editable)
     public string $applicant_name = '';
+
     public string $applicant_jawatan_gred = '';
+
     public string $applicant_bahagian_unit = '';
+
     public string $applicant_mobile_number = '';
 
     // Main loan application fields
     public string $purpose = '';
+
     public string $location = '';
+
     public ?string $return_location = null;
+
     public ?string $loan_start_date = null;
+
     public ?string $loan_end_date = null;
+
     public bool $isApplicantResponsible = true;
+
     public ?int $responsible_officer_id = null;
+
     public ?string $manual_responsible_officer_name = '';
+
     public ?string $manual_responsible_officer_jawatan_gred = '';
+
     public ?string $manual_responsible_officer_mobile = '';
+
     public array $items = [];
 
     // Confirmation from applicant before submission
@@ -59,6 +73,7 @@ class LoanRequestForm extends Component
 
     // Form select options
     public SupportCollection $equipmentTypeOptions;
+
     public SupportCollection $systemUsersForResponsibleOfficer;
 
     // Service dependency
@@ -69,8 +84,8 @@ class LoanRequestForm extends Component
      */
     public function boot(LoanApplicationService $loanApplicationService): void
     {
-        $this->loanApplicationService = $loanApplicationService;
-        $this->equipmentTypeOptions = collect(Equipment::$ASSET_TYPES_LABELS);
+        $this->loanApplicationService           = $loanApplicationService;
+        $this->equipmentTypeOptions             = collect(Equipment::$ASSET_TYPES_LABELS);
         $this->systemUsersForResponsibleOfficer = User::whereHas('roles', function ($query) {
             $query->whereIn('name', ['Admin', 'Support']);
         })->get(['id', 'name', 'jawatan_gred']);
@@ -83,7 +98,7 @@ class LoanRequestForm extends Component
     {
         if ($loanApplicationId > 0) {
             $this->isEdit = true;
-            $this->title = 'Kemaskini Permohonan Pinjaman';
+            $this->title  = 'Kemaskini Permohonan Pinjaman';
             try {
                 $this->loanApplication = $this->loanApplicationService->findLoanApplicationById(
                     $loanApplicationId,
@@ -95,24 +110,26 @@ class LoanRequestForm extends Component
             } catch (AuthorizationException $e) {
                 $this->dispatch('swal:error', ['message' => 'You are not authorized to view this loan application.']);
                 $this->redirect(route('loan-applications.index'), navigate: true);
+
                 return;
             } catch (Throwable $e) {
                 $this->dispatch('swal:error', ['message' => 'Failed to load loan application for editing.']);
                 $this->redirect(route('loan-applications.index'), navigate: true);
+
                 return;
             }
         } else {
             // New Application - Prefill with logged-in user info
             /** @var User $currentUser */
-            $currentUser = Auth::user();
-            $this->applicant_name = $currentUser->name ?? '';
-            $this->applicant_jawatan_gred = $currentUser->jawatan_gred ?? '';
+            $currentUser                   = Auth::user();
+            $this->applicant_name          = $currentUser->name          ?? '';
+            $this->applicant_jawatan_gred  = $currentUser->jawatan_gred  ?? '';
             $this->applicant_bahagian_unit = $currentUser->bahagian_unit ?? '';
             $this->applicant_mobile_number = $currentUser->mobile_number ?? '';
-            $this->items[] = [
-                'equipment_type' => '',
+            $this->items[]                 = [
+                'equipment_type'     => '',
                 'quantity_requested' => 1,
-                'notes' => '',
+                'notes'              => '',
             ];
         }
     }
@@ -126,13 +143,13 @@ class LoanRequestForm extends Component
 
         return [
             'applicant_mobile_number' => ['required', 'string', 'regex:/^[0-9\-\+\s\(\)]*$/', 'min:9', 'max:20'],
-            'purpose' => ['required', 'string', 'min:10', 'max:1000'],
-            'location' => ['required', 'string', 'min:5', 'max:255'],
-            'return_location' => ['nullable', 'string', 'max:255'],
-            'loan_start_date' => ['required', 'date_format:Y-m-d\TH:i', 'after_or_equal:today'],
-            'loan_end_date' => ['required', 'date_format:Y-m-d\TH:i', 'after_or_equal:loan_start_date'],
-            'isApplicantResponsible' => ['boolean'],
-            'responsible_officer_id' => [
+            'purpose'                 => ['required', 'string', 'min:10', 'max:1000'],
+            'location'                => ['required', 'string', 'min:5', 'max:255'],
+            'return_location'         => ['nullable', 'string', 'max:255'],
+            'loan_start_date'         => ['required', 'date_format:Y-m-d\TH:i', 'after_or_equal:today'],
+            'loan_end_date'           => ['required', 'date_format:Y-m-d\TH:i', 'after_or_equal:loan_start_date'],
+            'isApplicantResponsible'  => ['boolean'],
+            'responsible_officer_id'  => [
                 'nullable',
                 'exists:users,id',
                 Rule::notIn([Auth::id() ?? 0]),
@@ -142,26 +159,20 @@ class LoanRequestForm extends Component
                 'string', 'max:255',
             ],
             'manual_responsible_officer_jawatan_gred' => [
-                Rule::requiredIf(fn (): bool =>
-                    !$this->isApplicantResponsible &&
-                    ($this->manual_responsible_officer_name !== null && $this->manual_responsible_officer_name !== '' && $this->manual_responsible_officer_name !== '0') &&
-                    $isFinalSubmission
+                Rule::requiredIf(fn (): bool => ! $this->isApplicantResponsible && ($this->manual_responsible_officer_name !== null && $this->manual_responsible_officer_name !== '' && $this->manual_responsible_officer_name !== '0') && $isFinalSubmission
                 ),
                 'nullable', 'string', 'max:255',
             ],
             'manual_responsible_officer_mobile' => [
-                Rule::requiredIf(fn (): bool =>
-                    !$this->isApplicantResponsible &&
-                    ($this->manual_responsible_officer_name !== null && $this->manual_responsible_officer_name !== '' && $this->manual_responsible_officer_name !== '0') &&
-                    $isFinalSubmission
+                Rule::requiredIf(fn (): bool => ! $this->isApplicantResponsible && ($this->manual_responsible_officer_name !== null && $this->manual_responsible_officer_name !== '' && $this->manual_responsible_officer_name !== '0') && $isFinalSubmission
                 ),
                 'nullable', 'string', 'regex:/^[0-9\-\+\s\(\)]*$/', 'min:9', 'max:20',
             ],
-            'items' => ['required', 'array', 'min:1'],
-            'items.*.equipment_type' => ['required', Rule::in(array_keys(Equipment::$ASSET_TYPES_LABELS ?? []))],
+            'items'                      => ['required', 'array', 'min:1'],
+            'items.*.equipment_type'     => ['required', Rule::in(array_keys(Equipment::$ASSET_TYPES_LABELS ?? []))],
             'items.*.quantity_requested' => ['required', 'integer', 'min:1', 'max:100'],
-            'items.*.notes' => ['nullable', 'string', 'max:500'],
-            'applicant_confirmation' => $isFinalSubmission ? ['accepted'] : ['boolean'],
+            'items.*.notes'              => ['nullable', 'string', 'max:500'],
+            'applicant_confirmation'     => $isFinalSubmission ? ['accepted'] : ['boolean'],
         ];
     }
 
@@ -181,9 +192,9 @@ class LoanRequestForm extends Component
     public function addItem(): void
     {
         $this->items[] = [
-            'equipment_type' => '',
+            'equipment_type'     => '',
             'quantity_requested' => 1,
-            'notes' => '',
+            'notes'              => '',
         ];
     }
 
@@ -217,18 +228,18 @@ class LoanRequestForm extends Component
             // Gather payload for service
             $payload = [
                 // User info may be filled by service itself, but can pass for completeness
-                'applicant_mobile_number' => $this->applicant_mobile_number,
-                'purpose' => $this->purpose,
-                'location' => $this->location,
-                'return_location' => $this->return_location,
-                'loan_start_date' => $this->loan_start_date,
-                'loan_end_date' => $this->loan_end_date,
-                'applicant_is_responsible_officer' => $this->isApplicantResponsible,
-                'responsible_officer_id' => $this->responsible_officer_id,
-                'manual_responsible_officer_name' => $this->manual_responsible_officer_name,
+                'applicant_mobile_number'                 => $this->applicant_mobile_number,
+                'purpose'                                 => $this->purpose,
+                'location'                                => $this->location,
+                'return_location'                         => $this->return_location,
+                'loan_start_date'                         => $this->loan_start_date,
+                'loan_end_date'                           => $this->loan_end_date,
+                'applicant_is_responsible_officer'        => $this->isApplicantResponsible,
+                'responsible_officer_id'                  => $this->responsible_officer_id,
+                'manual_responsible_officer_name'         => $this->manual_responsible_officer_name,
                 'manual_responsible_officer_jawatan_gred' => $this->manual_responsible_officer_jawatan_gred,
-                'manual_responsible_officer_mobile' => $this->manual_responsible_officer_mobile,
-                'items' => $this->items,
+                'manual_responsible_officer_mobile'       => $this->manual_responsible_officer_mobile,
+                'items'                                   => $this->items,
                 // Include applicant_confirmation in case service wants to use
                 'applicant_confirmation' => $this->applicant_confirmation,
             ];
@@ -243,7 +254,7 @@ class LoanRequestForm extends Component
                     $message = 'Permohonan pinjaman berjaya dikemaskini!';
                 } else {
                     $this->loanApplication = $this->loanApplicationService->createAndSubmitApplication(
-                        $payload, $user, !$isFinalButtonClicked
+                        $payload, $user, ! $isFinalButtonClicked
                     );
                     $message = 'Permohonan pinjaman berjaya dihantar!';
                 }
@@ -255,7 +266,7 @@ class LoanRequestForm extends Component
             $this->dispatch('swal:error', ['message' => 'Sila semak semula borang.']);
             throw $e;
         } catch (Throwable $e) {
-            $this->dispatch('swal:error', ['message' => 'Gagal menghantar permohonan pinjaman: ' . $e->getMessage()]);
+            $this->dispatch('swal:error', ['message' => 'Gagal menghantar permohonan pinjaman: '.$e->getMessage()]);
         }
 
         return redirect()->route('loan-applications.index');
@@ -266,35 +277,37 @@ class LoanRequestForm extends Component
      */
     private function fillFormWithLoanApplicationData(): void
     {
-        if (!$this->loanApplication) return;
+        if (! $this->loanApplication) {
+            return;
+        }
 
-        $this->applicant_name = $this->loanApplication->user->name ?? '';
-        $this->applicant_jawatan_gred = $this->loanApplication->user->jawatan_gred ?? '';
-        $this->applicant_bahagian_unit = $this->loanApplication->user->bahagian_unit ?? '';
+        $this->applicant_name          = $this->loanApplication->user->name              ?? '';
+        $this->applicant_jawatan_gred  = $this->loanApplication->user->jawatan_gred      ?? '';
+        $this->applicant_bahagian_unit = $this->loanApplication->user->bahagian_unit     ?? '';
         $this->applicant_mobile_number = $this->loanApplication->applicant_mobile_number ?? ($this->loanApplication->user->mobile_number ?? '');
-        $this->purpose = $this->loanApplication->purpose;
-        $this->location = $this->loanApplication->location;
-        $this->return_location = $this->loanApplication->return_location;
-        $this->loan_start_date = $this->loanApplication->loan_start_date?->format('Y-m-d\TH:i');
-        $this->loan_end_date = $this->loanApplication->loan_end_date?->format('Y-m-d\TH:i');
+        $this->purpose                 = $this->loanApplication->purpose;
+        $this->location                = $this->loanApplication->location;
+        $this->return_location         = $this->loanApplication->return_location;
+        $this->loan_start_date         = $this->loanApplication->loan_start_date?->format('Y-m-d\TH:i');
+        $this->loan_end_date           = $this->loanApplication->loan_end_date?->format('Y-m-d\TH:i');
         // Responsible officer logic
         $this->isApplicantResponsible = is_null($this->loanApplication->responsible_officer_id)
             || $this->loanApplication->responsible_officer_id === $this->loanApplication->user_id;
 
-        if (!$this->isApplicantResponsible && $this->loanApplication->responsibleOfficer) {
+        if (! $this->isApplicantResponsible && $this->loanApplication->responsibleOfficer) {
             $this->responsible_officer_id = $this->loanApplication->responsible_officer_id;
         }
         // Fill items
         $this->items = $this->loanApplication->loanApplicationItems->map(function ($item): array {
             return [
-                'id' => $item->id,
-                'equipment_type' => $item->equipment_type,
+                'id'                 => $item->id,
+                'equipment_type'     => $item->equipment_type,
                 'quantity_requested' => $item->quantity_requested,
-                'notes' => $item->notes,
+                'notes'              => $item->notes,
             ];
         })->toArray();
 
-        $this->applicant_confirmation = (bool)$this->loanApplication->applicant_confirmation_timestamp;
+        $this->applicant_confirmation = (bool) $this->loanApplication->applicant_confirmation_timestamp;
     }
 
     /**
@@ -305,13 +318,11 @@ class LoanRequestForm extends Component
     {
         $currentUser = Auth::user();
         if (
-            $this->isEdit &&
-            $this->loanApplication instanceof LoanApplication &&
-            $this->loanApplication->status !== LoanApplication::STATUS_DRAFT &&
-            !$currentUser->hasRole('Admin')
+            $this->isEdit && $this->loanApplication instanceof LoanApplication && $this->loanApplication->status !== LoanApplication::STATUS_DRAFT && ! $currentUser->hasRole('Admin')
         ) {
             return $this->loanApplication->status;
         }
+
         return $isFinalButtonClicked ? LoanApplication::STATUS_PENDING_SUPPORT : LoanApplication::STATUS_DRAFT;
     }
 }

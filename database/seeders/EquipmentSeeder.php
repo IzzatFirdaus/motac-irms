@@ -44,7 +44,7 @@ class EquipmentSeeder extends Seeder
         Log::info('Starting EquipmentSeeder (Revision 3)...');
 
         $adminUserForAudit = User::orderBy('id')->first();
-        $auditUserId = $adminUserForAudit?->id;
+        $auditUserId       = $adminUserForAudit?->id;
 
         if (! $auditUserId) {
             $this->call(UserSeeder::class); // Ensure UserSeeder creates at least one user, or a specific AdminUserSeeder

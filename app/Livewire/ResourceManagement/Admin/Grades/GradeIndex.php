@@ -23,16 +23,22 @@ class GradeIndex extends Component
     public string $searchTerm = '';
 
     public bool $showCreateModal = false;
+
     public bool $showEditModal = false;
+
     public bool $showDeleteModal = false;
 
     public ?Grade $editingGrade = null;
+
     public ?Grade $deletingGrade = null;
 
     // Form Fields
     public string $name = '';
+
     public ?int $level = null;
+
     public ?int $min_approval_grade_id = null;
+
     public bool $is_approver_grade = false;
 
     protected string $paginationTheme = 'bootstrap';
@@ -43,7 +49,7 @@ class GradeIndex extends Component
     public function mount(): void
     {
         $this->authorize('viewAny', Grade::class);
-        $this->editingGrade = new Grade; // For form binding on create
+        $this->editingGrade      = new Grade; // For form binding on create
         $this->is_approver_grade = false; // Default for new grade
     }
 
@@ -59,7 +65,7 @@ class GradeIndex extends Component
         if ($this->searchTerm !== '' && $this->searchTerm !== '0') {
             $query->where(function ($q) {
                 $q->where('name', 'like', '%'.$this->searchTerm.'%')
-                  ->orWhere('level', 'like', '%'.$this->searchTerm.'%');
+                    ->orWhere('level', 'like', '%'.$this->searchTerm.'%');
             });
         }
 
@@ -108,12 +114,12 @@ class GradeIndex extends Component
     {
         $this->authorize('update', $grade);
         $this->resetForm();
-        $this->editingGrade = $grade;
-        $this->name = $grade->name;
-        $this->level = $grade->level;
+        $this->editingGrade          = $grade;
+        $this->name                  = $grade->name;
+        $this->level                 = $grade->level;
         $this->min_approval_grade_id = $grade->min_approval_grade_id;
-        $this->is_approver_grade = (bool) $grade->is_approver_grade;
-        $this->showEditModal = true;
+        $this->is_approver_grade     = (bool) $grade->is_approver_grade;
+        $this->showEditModal         = true;
     }
 
     /**
@@ -123,6 +129,7 @@ class GradeIndex extends Component
     {
         if (! $this->editingGrade instanceof Grade || ! $this->editingGrade->exists) {
             $this->dispatch('toastr', type: 'error', message: __('Ralat: Tiada gred dipilih untuk dikemaskini.'));
+
             return;
         }
 
@@ -132,6 +139,7 @@ class GradeIndex extends Component
         // Prevent a grade from selecting itself as min_approval_grade_id
         if ($this->editingGrade->id == $validated['min_approval_grade_id']) {
             $this->addError('min_approval_grade_id', 'Gred kelulusan minimum tidak boleh sama dengan gred semasa.');
+
             return;
         }
 
@@ -146,7 +154,7 @@ class GradeIndex extends Component
     public function openDeleteModal(Grade $grade): void
     {
         $this->authorize('delete', $grade);
-        $this->deletingGrade = $grade;
+        $this->deletingGrade   = $grade;
         $this->showDeleteModal = true;
     }
 
@@ -189,7 +197,7 @@ class GradeIndex extends Component
     public function closeModal(): void
     {
         $this->showCreateModal = false;
-        $this->showEditModal = false;
+        $this->showEditModal   = false;
         $this->showDeleteModal = false;
         $this->resetForm();
         $this->resetErrorBag();
@@ -209,7 +217,7 @@ class GradeIndex extends Component
     public function render(): View
     {
         return view('livewire.resource-management.admin.grades.grade-index', [
-            'gradesList' => $this->grades,
+            'gradesList'                 => $this->grades,
             'availableGradesForDropdown' => $this->availableGradesForDropdown,
         ]);
     }
@@ -222,10 +230,10 @@ class GradeIndex extends Component
         $gradeIdToIgnore = $this->editingGrade instanceof Grade && $this->editingGrade->exists ? $this->editingGrade->id : null;
 
         return [
-            'name' => ['required', 'string', 'max:50', ValidationRule::unique('grades', 'name')->ignore($gradeIdToIgnore)],
-            'level' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'name'                  => ['required', 'string', 'max:50', ValidationRule::unique('grades', 'name')->ignore($gradeIdToIgnore)],
+            'level'                 => ['nullable', 'integer', 'min:1', 'max:100'],
             'min_approval_grade_id' => ['nullable', 'exists:grades,id'],
-            'is_approver_grade' => ['boolean'],
+            'is_approver_grade'     => ['boolean'],
         ];
     }
 
@@ -234,11 +242,11 @@ class GradeIndex extends Component
      */
     private function resetForm(): void
     {
-        $this->name = '';
-        $this->level = null;
+        $this->name                  = '';
+        $this->level                 = null;
         $this->min_approval_grade_id = null;
-        $this->is_approver_grade = false;
-        $this->editingGrade = new Grade;
-        $this->deletingGrade = null;
+        $this->is_approver_grade     = false;
+        $this->editingGrade          = new Grade;
+        $this->deletingGrade         = null;
     }
 }

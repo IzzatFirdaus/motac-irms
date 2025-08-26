@@ -14,7 +14,9 @@ class TicketCommentAddedNotification extends Notification implements ShouldQueue
     use Queueable;
 
     protected HelpdeskComment $comment;
+
     protected User $commenter;
+
     protected string $recipientType; // 'applicant', 'agent', 'internal_admin'
 
     /**
@@ -22,8 +24,8 @@ class TicketCommentAddedNotification extends Notification implements ShouldQueue
      */
     public function __construct(HelpdeskComment $comment, User $commenter, string $recipientType)
     {
-        $this->comment = $comment;
-        $this->commenter = $commenter;
+        $this->comment       = $comment;
+        $this->commenter     = $commenter;
         $this->recipientType = $recipientType;
     }
 
@@ -42,11 +44,11 @@ class TicketCommentAddedNotification extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $ticket = $this->comment->ticket;
+        $ticket        = $this->comment->ticket;
         $commenterName = $this->commenter->name;
 
-        $subject = "New Comment on Helpdesk Ticket #{$ticket->id}";
-        $greeting = "Dear {$notifiable->name},";
+        $subject     = "New Comment on Helpdesk Ticket #{$ticket->id}";
+        $greeting    = "Dear {$notifiable->name},";
         $messageLine = '';
 
         if ($this->recipientType === 'applicant') {
@@ -54,17 +56,17 @@ class TicketCommentAddedNotification extends Notification implements ShouldQueue
         } elseif ($this->recipientType === 'agent') {
             $messageLine = "A new comment has been added to ticket **#{$ticket->id}** (`{$ticket->title}`) by `{$commenterName}`.";
         } elseif ($this->recipientType === 'internal_admin') {
-            $subject = "Internal Comment on Helpdesk Ticket #{$ticket->id}";
+            $subject     = "Internal Comment on Helpdesk Ticket #{$ticket->id}";
             $messageLine = "An internal comment has been added to ticket **#{$ticket->id}** (`{$ticket->title}`) by `{$commenterName}`.";
         }
 
         return (new MailMessage)
-                    ->subject($subject)
-                    ->greeting($greeting)
-                    ->line($messageLine)
-                    ->line("Comment: \"{$this->comment->comment}\"")
-                    ->action('View Ticket', url('/helpdesk/' . $ticket->id))
-                    ->line('Thank you.');
+            ->subject($subject)
+            ->greeting($greeting)
+            ->line($messageLine)
+            ->line("Comment: \"{$this->comment->comment}\"")
+            ->action('View Ticket', url('/helpdesk/'.$ticket->id))
+            ->line('Thank you.');
     }
 
     /**
@@ -75,11 +77,11 @@ class TicketCommentAddedNotification extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-            'ticket_id' => $this->comment->ticket_id,
-            'comment_id' => $this->comment->id,
+            'ticket_id'      => $this->comment->ticket_id,
+            'comment_id'     => $this->comment->id,
             'commenter_name' => $this->commenter->name,
-            'message' => "New comment on ticket #{$this->comment->ticket_id}.",
-            'url' => url('/helpdesk/' . $this->comment->ticket_id),
+            'message'        => "New comment on ticket #{$this->comment->ticket_id}.",
+            'url'            => url('/helpdesk/'.$this->comment->ticket_id),
         ];
     }
 }

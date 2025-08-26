@@ -4,12 +4,12 @@ namespace App\Livewire\Helpdesk;
 
 use App\Models\HelpdeskTicket;
 use App\Services\HelpdeskService;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Illuminate\Support\Facades\Auth;
 
 /**
- * TicketDetails
+ * TicketDetails.
  *
  * Shows a ticket's details and allows agent to add comments/attachments.
  */
@@ -18,14 +18,17 @@ class TicketDetails extends Component
     use WithFileUploads;
 
     public HelpdeskTicket $ticket;
+
     public $newComment;
+
     public $commentAttachments = [];
+
     public $isInternalComment = false; // For IT Admin only
 
     protected HelpdeskService $helpdeskService;
 
     protected $rules = [
-        'newComment' => 'required|string|min:3',
+        'newComment'           => 'required|string|min:3',
         'commentAttachments.*' => 'nullable|file|max:2048|mimes:jpg,png,pdf,docx,txt,xlsx',
     ];
 
@@ -57,13 +60,14 @@ class TicketDetails extends Component
             $this->ticket->refresh();
             session()->flash('message', 'Comment added successfully.');
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to add comment: ' . $e->getMessage());
+            session()->flash('error', 'Failed to add comment: '.$e->getMessage());
         }
     }
 
     public function render()
     {
         $this->ticket->load(['comments.user', 'comments.attachments', 'attachments']);
+
         return view('livewire.helpdesk.ticket-details', [
             'ticket' => $this->ticket,
         ]);

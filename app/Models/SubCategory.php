@@ -16,14 +16,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * Defines sub-categories for ICT equipment, linked to EquipmentCategory.
  *
- * @property int $id
- * @property int $equipment_category_id
- * @property string $name
- * @property string|null $description
- * @property bool $is_active
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
+ * @property int                             $id
+ * @property int                             $equipment_category_id
+ * @property string                          $name
+ * @property string|null                     $description
+ * @property bool                            $is_active
+ * @property int|null                        $created_by
+ * @property int|null                        $updated_by
+ * @property int|null                        $deleted_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
@@ -42,7 +42,7 @@ class SubCategory extends Model
     ];
 
     protected $casts = [
-        'is_active' => 'boolean',
+        'is_active'  => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
@@ -71,10 +71,12 @@ class SubCategory extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
     public function updater(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
+
     public function deleter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by');
@@ -97,6 +99,6 @@ class SubCategory extends Model
 
     public function scopeByName($query, string $name)
     {
-        return $query->where('name', 'LIKE', '%' . $name . '%');
+        return $query->where('name', 'LIKE', '%'.$name.'%');
     }
 }

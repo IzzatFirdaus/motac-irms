@@ -115,7 +115,7 @@ return [
     */
 
     'limiters' => [
-        'login' => 'login', // Rate limiter defined in FortifyServiceProvider
+        'login'      => 'login', // Rate limiter defined in FortifyServiceProvider
         'two-factor' => 'two-factor', // Rate limiter defined in FortifyServiceProvider
     ],
 
@@ -150,7 +150,7 @@ return [
         Features::updateProfileInformation(), // REVISED: Uncommented as UpdateUserProfileInformation action is configured in FortifyServiceProvider
         Features::updatePasswords(),
         Features::twoFactorAuthentication([ // REVISED: Uncommented as User model has 2FA fields and FortifyServiceProvider handles 2FA rate limiting
-            'confirm' => true,
+            'confirm'         => true,
             'confirmPassword' => true, // Recommended for security
             // 'window' => 0,
         ]),

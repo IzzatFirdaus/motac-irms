@@ -42,9 +42,7 @@ class ApprovalPolicy
     public function update(User $user, Approval $approval): bool
     {
         // ADJUSTMENT: Added a permission check alongside the ownership and status check.
-        return $user->can('act_on_approval_tasks') &&
-          $approval->officer_id === $user->id &&
-          $approval->status === Approval::STATUS_PENDING;
+        return $user->can('act_on_approval_tasks') && $approval->officer_id === $user->id && $approval->status === Approval::STATUS_PENDING;
     }
 
     /**

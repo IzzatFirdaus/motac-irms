@@ -27,7 +27,7 @@ class GradeController extends Controller
 
     /**
      * Display a listing of the grades for administration within Settings.
-     * Route: settings.grades.index
+     * Route: settings.grades.index.
      */
     public function index(): View
     {
@@ -43,7 +43,7 @@ class GradeController extends Controller
 
     /**
      * Show the form for creating a new grade.
-     * Route: settings.grades.create
+     * Route: settings.grades.create.
      */
     public function create(): View
     {
@@ -56,7 +56,7 @@ class GradeController extends Controller
 
     /**
      * Store a newly created grade in storage.
-     * Route: settings.grades.store
+     * Route: settings.grades.store.
      */
     public function store(StoreGradeRequest $request): RedirectResponse
     {
@@ -76,7 +76,7 @@ class GradeController extends Controller
 
     /**
      * Display the specified grade.
-     * Route: settings.grades.show
+     * Route: settings.grades.show.
      */
     public function show(Grade $grade): View
     {
@@ -92,7 +92,7 @@ class GradeController extends Controller
 
     /**
      * Show the form for editing the specified grade.
-     * Route: settings.grades.edit
+     * Route: settings.grades.edit.
      */
     public function edit(Grade $grade): View
     {
@@ -105,7 +105,7 @@ class GradeController extends Controller
 
     /**
      * Store an updated grade in storage.
-     * Route: settings.grades.update
+     * Route: settings.grades.update.
      */
     public function update(UpdateGradeRequest $request, Grade $grade): RedirectResponse
     {
@@ -125,7 +125,7 @@ class GradeController extends Controller
 
     /**
      * Remove the specified grade from storage.
-     * Route: settings.grades.destroy
+     * Route: settings.grades.destroy.
      */
     public function destroy(Grade $grade): RedirectResponse
     {

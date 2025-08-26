@@ -10,7 +10,7 @@ use Laravel\Jetstream\Contracts\DeletesUsers;
  * This includes:
  *   - Deleting the user's profile photo (if any)
  *   - Revoking and deleting all API tokens associated with the user
- *   - Soft-deleting the user record itself (if soft deletes are enabled)
+ *   - Soft-deleting the user record itself (if soft deletes are enabled).
  *
  * System is up-to-date with v4.0: No references to legacy email provisioning or EmailApplication logic.
  */
@@ -19,7 +19,7 @@ class DeleteUser implements DeletesUsers
     /**
      * Delete the given user and related data.
      *
-     * @param  User  $user  The user instance to be deleted
+     * @param User $user The user instance to be deleted
      */
     public function delete(User $user): void
     {

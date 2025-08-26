@@ -1,4 +1,5 @@
 <?php
+
 // English translations for password reset and recovery messages
 // Mirrors the structure of passwords_ms.php for maintainability
 

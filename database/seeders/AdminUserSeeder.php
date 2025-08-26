@@ -38,11 +38,11 @@ class AdminUserSeeder extends Seeder
         $defaultDept = Department::updateOrCreate(
             ['code' => 'BPM'],
             [
-                'name' => 'Bahagian Pengurusan Maklumat (BPM MOTAC)',
+                'name'        => 'Bahagian Pengurusan Maklumat (BPM MOTAC)',
                 'branch_type' => Department::BRANCH_TYPE_HQ,
-                'is_active' => true,
-                'created_by' => $auditUserId,
-                'updated_by' => $auditUserId,
+                'is_active'   => true,
+                'created_by'  => $auditUserId,
+                'updated_by'  => $auditUserId,
             ]
         );
 
@@ -60,13 +60,13 @@ class AdminUserSeeder extends Seeder
         Log::info('AdminUserSeeder: Ensured grades F41 (Level 41) and F44 (Level 44) exist for testing approval logic.');
 
         // --- 4. Ensure related Positions exist ---
-        $defaultPos = Position::updateOrCreate(['name' => 'Pegawai Teknologi Maklumat Sistem'], ['grade_id' => $gradeF41->id, 'is_active' => true]);
+        $defaultPos  = Position::updateOrCreate(['name' => 'Pegawai Teknologi Maklumat Sistem'], ['grade_id' => $gradeF41->id, 'is_active' => true]);
         $approverPos = Position::updateOrCreate(['name' => 'Ketua Unit Aplikasi'], ['grade_id' => $gradeF44->id, 'is_active' => true]);
         Log::info('AdminUserSeeder: Ensured default and approver-level positions exist.');
 
         // --- 5. Define and Seed Users ---
         $defaultPassword = Hash::make(env('SEEDER_DEFAULT_PASSWORD', 'Motac.1234'));
-        $now = Carbon::now();
+        $now             = Carbon::now();
 
         // List of emails that are considered as seeded admins/developers/maintainers.
         // These users should always have both 'Admin' and 'BPM Staff' roles for full system access.
@@ -79,34 +79,34 @@ class AdminUserSeeder extends Seeder
         $usersData = [
             // Admin user with a high grade, making them eligible as a supporting officer.
             [
-                'role_name' => 'Admin', 'name' => 'Pentadbir Sistem Utama', 'email' => env('ADMIN_EMAIL', 'admin@motac.gov.my'),
+                'role_name'             => 'Admin', 'name' => 'Pentadbir Sistem Utama', 'email' => env('ADMIN_EMAIL', 'admin@motac.gov.my'),
                 'identification_number' => '800101010001', 'grade_id' => $gradeF44->id, 'position_id' => $approverPos->id,
             ],
             // BPM Staff for handling issuance and returns. Grade is sufficient for loan approval scenarios.
             [
-                'role_name' => 'BPM Staff', 'name' => 'Staf Sokongan BPM', 'email' => 'bpmstaff@motac.gov.my',
+                'role_name'             => 'BPM Staff', 'name' => 'Staf Sokongan BPM', 'email' => 'bpmstaff@motac.gov.my',
                 'identification_number' => '850202020002', 'grade_id' => $gradeF41->id, 'position_id' => $defaultPos->id,
             ],
             // IT Admin for email provisioning tasks.
             [
-                'role_name' => 'IT Admin', 'name' => 'Pegawai IT Admin', 'email' => 'itadmin@motac.gov.my',
+                'role_name'             => 'IT Admin', 'name' => 'Pegawai IT Admin', 'email' => 'itadmin@motac.gov.my',
                 'identification_number' => '820303030003', 'grade_id' => $gradeF41->id, 'position_id' => $defaultPos->id,
             ],
             // A dedicated 'Approver' user with a high grade, suitable for testing approval flows.
             [
-                'role_name' => 'Approver', 'name' => 'Pegawai Penyokong (Approver)', 'email' => 'approver@motac.gov.my',
+                'role_name'             => 'Approver', 'name' => 'Pegawai Penyokong (Approver)', 'email' => 'approver@motac.gov.my',
                 'identification_number' => '780505050005', 'grade_id' => $gradeF44->id, 'position_id' => $approverPos->id,
             ],
             // A standard user with a grade level that does not meet the approval threshold.
             [
-                'role_name' => 'User', 'name' => 'Pengguna Biasa Sistem', 'email' => 'pengguna01@motac.gov.my',
+                'role_name'             => 'User', 'name' => 'Pengguna Biasa Sistem', 'email' => 'pengguna01@motac.gov.my',
                 'identification_number' => '900404040004',
-                'grade_id' => Grade::firstOrCreate(['name' => 'N19'], ['level' => 19])->id,
-                'position_id' => Position::firstOrCreate(['name' => 'Pembantu Tadbir'])->id,
+                'grade_id'              => Grade::firstOrCreate(['name' => 'N19'], ['level' => 19])->id,
+                'position_id'           => Position::firstOrCreate(['name' => 'Pembantu Tadbir'])->id,
             ],
             // System developer/maintainer: must always be both Admin and BPM Staff
             [
-                'role_name' => 'Admin', 'name' => 'Izzat Firdaus (System Developer)', 'email' => 'izzatfirdaus@motac.gov.my',
+                'role_name'             => 'Admin', 'name' => 'Izzat Firdaus (System Developer)', 'email' => 'izzatfirdaus@motac.gov.my',
                 'identification_number' => '980328145171', 'grade_id' => $gradeF44->id, 'position_id' => $approverPos->id,
             ],
         ];
@@ -115,16 +115,16 @@ class AdminUserSeeder extends Seeder
             $user = User::updateOrCreate(
                 ['email' => $data['email']],
                 [
-                    'name' => $data['name'],
-                    'password' => $defaultPassword,
+                    'name'                  => $data['name'],
+                    'password'              => $defaultPassword,
                     'identification_number' => $data['identification_number'],
-                    'department_id' => $defaultDept->id,
-                    'position_id' => $data['position_id'],
-                    'grade_id' => $data['grade_id'],
-                    'status' => User::STATUS_ACTIVE,
-                    'email_verified_at' => $now,
-                    'created_by' => $auditUserId,
-                    'updated_by' => $auditUserId,
+                    'department_id'         => $defaultDept->id,
+                    'position_id'           => $data['position_id'],
+                    'grade_id'              => $data['grade_id'],
+                    'status'                => User::STATUS_ACTIVE,
+                    'email_verified_at'     => $now,
+                    'created_by'            => $auditUserId,
+                    'updated_by'            => $auditUserId,
                 ]
             );
 

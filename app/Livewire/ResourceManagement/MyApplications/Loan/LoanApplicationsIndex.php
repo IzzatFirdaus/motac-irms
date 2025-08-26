@@ -30,14 +30,20 @@ class LoanApplicationsIndex extends Component
     use WithPagination;
 
     public string $searchTerm = '';
+
     public string $filterStatus = '';
+
     protected string $paginationTheme = 'bootstrap';
+
     public int $perPage = 10;
 
     // Approval/cancel modal state
     public ?int $selectedApplicationId = null;
+
     public bool $showApprovalActionModal = false;
+
     public ?string $approvalActionType = null;
+
     public string $approvalComments = '';
 
     // Service for approval actions
@@ -47,6 +53,7 @@ class LoanApplicationsIndex extends Component
     protected array $rules = [
         'approvalComments' => '',
     ];
+
     protected array $messages = [
         'approvalComments.required' => 'Sila masukkan sebab penolakan.',
     ];
@@ -81,8 +88,8 @@ class LoanApplicationsIndex extends Component
 
         if ($this->searchTerm) {
             $query->where(function ($q) {
-                $q->where('application_number', 'like', '%' . $this->searchTerm . '%')
-                    ->orWhere('purpose', 'like', '%' . $this->searchTerm . '%');
+                $q->where('application_number', 'like', '%'.$this->searchTerm.'%')
+                    ->orWhere('purpose', 'like', '%'.$this->searchTerm.'%');
             });
         }
 
@@ -100,20 +107,20 @@ class LoanApplicationsIndex extends Component
     {
         // Map status constants to readable labels (can use translation keys here)
         return [
-            '' => __('Semua Status'),
-            LoanApplication::STATUS_DRAFT => __('Draf'),
-            LoanApplication::STATUS_PENDING_SUPPORT => __('Menunggu Sokongan Pegawai'),
-            LoanApplication::STATUS_PENDING_APPROVER_REVIEW => __('Menunggu Kelulusan'),
-            LoanApplication::STATUS_PENDING_BPM_REVIEW => __('Menunggu Pengesahan BPM'),
-            LoanApplication::STATUS_APPROVED => __('Diluluskan'),
-            LoanApplication::STATUS_REJECTED => __('Ditolak'),
-            LoanApplication::STATUS_PARTIALLY_ISSUED => __('Dikeluarkan Sebahagian'),
-            LoanApplication::STATUS_ISSUED => __('Dikeluarkan'),
-            LoanApplication::STATUS_RETURNED => __('Telah Dipulangkan'),
-            LoanApplication::STATUS_OVERDUE => __('Tertunggak'),
-            LoanApplication::STATUS_CANCELLED => __('Dibatalkan'),
+            ''                                                            => __('Semua Status'),
+            LoanApplication::STATUS_DRAFT                                 => __('Draf'),
+            LoanApplication::STATUS_PENDING_SUPPORT                       => __('Menunggu Sokongan Pegawai'),
+            LoanApplication::STATUS_PENDING_APPROVER_REVIEW               => __('Menunggu Kelulusan'),
+            LoanApplication::STATUS_PENDING_BPM_REVIEW                    => __('Menunggu Pengesahan BPM'),
+            LoanApplication::STATUS_APPROVED                              => __('Diluluskan'),
+            LoanApplication::STATUS_REJECTED                              => __('Ditolak'),
+            LoanApplication::STATUS_PARTIALLY_ISSUED                      => __('Dikeluarkan Sebahagian'),
+            LoanApplication::STATUS_ISSUED                                => __('Dikeluarkan'),
+            LoanApplication::STATUS_RETURNED                              => __('Telah Dipulangkan'),
+            LoanApplication::STATUS_OVERDUE                               => __('Tertunggak'),
+            LoanApplication::STATUS_CANCELLED                             => __('Dibatalkan'),
             LoanApplication::STATUS_PARTIALLY_RETURNED_PENDING_INSPECTION => __('Dipulangkan Sebahagian'),
-            LoanApplication::STATUS_COMPLETED => __('Selesai'),
+            LoanApplication::STATUS_COMPLETED                             => __('Selesai'),
         ];
     }
 
@@ -123,8 +130,8 @@ class LoanApplicationsIndex extends Component
     public function confirmApprovalAction(int $applicationId, string $actionType): void
     {
         $this->selectedApplicationId = $applicationId;
-        $this->approvalActionType = $actionType;
-        $this->approvalComments = '';
+        $this->approvalActionType    = $actionType;
+        $this->approvalComments      = '';
         $this->resetValidation();
 
         // Set required validation for rejection, optional otherwise
@@ -171,18 +178,18 @@ class LoanApplicationsIndex extends Component
             $this->closeApprovalActionModal();
             $this->resetPage();
         } catch (AuthorizationException $e) {
-            Log::error('Authorization error performing approval action: ' . $e->getMessage(), [
-                'user_id' => Auth::id(),
+            Log::error('Authorization error performing approval action: '.$e->getMessage(), [
+                'user_id'        => Auth::id(),
                 'application_id' => $this->selectedApplicationId,
-                'action_type' => $this->approvalActionType,
+                'action_type'    => $this->approvalActionType,
             ]);
             $this->dispatch('toastr', type: 'error', message: 'Anda tidak mempunyai kebenaran untuk melakukan tindakan ini.');
         } catch (Throwable $e) {
-            Log::error('Error performing approval action for loan application: ' . $e->getMessage(), [
-                'user_id' => Auth::id(),
+            Log::error('Error performing approval action for loan application: '.$e->getMessage(), [
+                'user_id'        => Auth::id(),
                 'application_id' => $this->selectedApplicationId,
-                'action_type' => $this->approvalActionType,
-                'error' => $e->getTraceAsString(),
+                'action_type'    => $this->approvalActionType,
+                'error'          => $e->getTraceAsString(),
             ]);
             $this->dispatch('toastr', type: 'error', message: 'Gagal melakukan tindakan. Sila cuba sebentar lagi.');
         }
@@ -194,8 +201,8 @@ class LoanApplicationsIndex extends Component
     public function closeApprovalActionModal(): void
     {
         $this->selectedApplicationId = null;
-        $this->approvalActionType = null;
-        $this->approvalComments = '';
+        $this->approvalActionType    = null;
+        $this->approvalComments      = '';
         $this->resetValidation();
         $this->showApprovalActionModal = false;
         $this->dispatch('closeModal', elementId: 'approvalActionModal');
@@ -212,11 +219,11 @@ class LoanApplicationsIndex extends Component
             $this->authorize('delete', $application);
             $application->delete();
 
-            $this->dispatch('toastr', type: 'success', message: 'Permohonan draf #' . $id . ' telah berjaya dipadam.');
+            $this->dispatch('toastr', type: 'success', message: 'Permohonan draf #'.$id.' telah berjaya dipadam.');
         } catch (AuthorizationException $e) {
             $this->dispatch('toastr', type: 'error', message: 'Anda tidak mempunyai kebenaran untuk memadam permohonan ini.');
         } catch (\Exception $e) {
-            Log::error('Failed to delete loan application: ' . $e->getMessage());
+            Log::error('Failed to delete loan application: '.$e->getMessage());
             $this->dispatch('toastr', type: 'error', message: 'Gagal memadam permohonan tersebut.');
         }
     }
@@ -252,7 +259,7 @@ class LoanApplicationsIndex extends Component
     public function render(): View
     {
         return view('livewire.resource-management.my-applications.loan.loan-applications-index', [
-            'applications' => $this->loanApplications,
+            'applications'  => $this->loanApplications,
             'statusOptions' => $this->statusOptions,
         ]);
     }

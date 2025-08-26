@@ -24,13 +24,18 @@ class LoanApplicationsReport extends Component
 
     // Filter properties
     public ?string $filterStatus = '';
+
     public ?int $filterDepartmentId = null; // Filter by applicant's department
+
     public ?string $filterDateFrom = null; // Start date filter
+
     public ?string $filterDateTo = null;   // End date filter
+
     public string $searchTerm = ''; // Search by applicant name, purpose, ID
 
     // Sorting properties
     public string $sortBy = 'created_at';
+
     public string $sortDirection = 'desc';
 
     protected string $paginationTheme = 'bootstrap';
@@ -104,7 +109,7 @@ class LoanApplicationsReport extends Component
         // Log the report query for audit.
         Log::info(sprintf('Livewire\LoanApplicationsReport: Fetched %d loan applications for report.', $reportData->total()), [
             'admin_user_id' => Auth::id(),
-            'filters' => $this->getPublicFilters(),
+            'filters'       => $this->getPublicFilters(),
         ]);
 
         return $reportData;
@@ -129,7 +134,7 @@ class LoanApplicationsReport extends Component
     public function updating($property): void
     {
         if (in_array($property, [
-            'filterStatus', 'filterDepartmentId', 'filterDateFrom', 'filterDateTo', 'searchTerm', 'perPage'
+            'filterStatus', 'filterDepartmentId', 'filterDateFrom', 'filterDateTo', 'searchTerm', 'perPage',
         ])) {
             $this->resetPage();
         }
@@ -143,7 +148,7 @@ class LoanApplicationsReport extends Component
         if ($this->sortBy === $column) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
         } else {
-            $this->sortBy = $column;
+            $this->sortBy        = $column;
             $this->sortDirection = 'asc';
         }
 
@@ -156,7 +161,7 @@ class LoanApplicationsReport extends Component
     public function resetFilters(): void
     {
         $this->reset(['filterStatus', 'filterDepartmentId', 'filterDateFrom', 'filterDateTo', 'searchTerm']);
-        $this->sortBy = 'created_at';
+        $this->sortBy        = 'created_at';
         $this->sortDirection = 'desc';
         $this->resetPage();
     }
@@ -167,14 +172,14 @@ class LoanApplicationsReport extends Component
     private function getPublicFilters(): array
     {
         return [
-            'searchTerm' => $this->searchTerm,
-            'filterStatus' => $this->filterStatus,
+            'searchTerm'         => $this->searchTerm,
+            'filterStatus'       => $this->filterStatus,
             'filterDepartmentId' => $this->filterDepartmentId,
-            'filterDateFrom' => $this->filterDateFrom,
-            'filterDateTo' => $this->filterDateTo,
-            'sortBy' => $this->sortBy,
-            'sortDirection' => $this->sortDirection,
-            'perPage' => $this->perPage,
+            'filterDateFrom'     => $this->filterDateFrom,
+            'filterDateTo'       => $this->filterDateTo,
+            'sortBy'             => $this->sortBy,
+            'sortDirection'      => $this->sortDirection,
+            'perPage'            => $this->perPage,
         ];
     }
 
@@ -184,8 +189,8 @@ class LoanApplicationsReport extends Component
     public function render()
     {
         return view('livewire.resource-management.admin.reports.loan-applications-report', [
-            'reportData' => $this->reportData,
-            'statusOptions' => $this->statusOptions,
+            'reportData'        => $this->reportData,
+            'statusOptions'     => $this->statusOptions,
             'departmentOptions' => $this->departmentOptions,
         ]);
     }

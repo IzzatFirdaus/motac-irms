@@ -2,9 +2,9 @@
 
 namespace App\Translation;
 
-use Illuminate\Translation\FileLoader;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Translation\FileLoader;
 
 /**
  * Custom FileLoader to support suffixed translation files, e.g. app_ms.php, dashboard_en.php.
@@ -14,6 +14,7 @@ class SuffixedFileLoader extends FileLoader
 {
     /**
      * The base path to the language files.
+     *
      * @var string
      */
     protected $basePath;
@@ -21,7 +22,6 @@ class SuffixedFileLoader extends FileLoader
     /**
      * Constructor for SuffixedFileLoader.
      *
-     * @param \Illuminate\Filesystem\Filesystem $files
      * @param string $path
      */
     public function __construct(Filesystem $files, $path)
@@ -39,7 +39,7 @@ class SuffixedFileLoader extends FileLoader
     public function load($locale, $group, $namespace = null)
     {
         // Debug log to trace loader calls and parameters
-        Log::debug("[SuffixedFileLoader] load() called: locale={$locale}, group={$group}, namespace=" . ($namespace ?? 'null'));
+        Log::debug("[SuffixedFileLoader] load() called: locale={$locale}, group={$group}, namespace=".($namespace ?? 'null'));
 
         // Attempt to load suffixed translation file
         $lines = $this->loadSuffixed($locale, $group, $namespace);
@@ -58,9 +58,10 @@ class SuffixedFileLoader extends FileLoader
     /**
      * Attempt to load a suffixed language file, like app_ms.php or dashboard_en.php.
      *
-     * @param string $locale The locale (e.g. 'en' or 'ms').
-     * @param string $group  The translation group/file (e.g. 'app', 'dashboard').
+     * @param string      $locale    The locale (e.g. 'en' or 'ms').
+     * @param string      $group     The translation group/file (e.g. 'app', 'dashboard').
      * @param string|null $namespace The optional namespace.
+     *
      * @return array|null The loaded lines if file exists, otherwise null.
      */
     protected function loadSuffixed($locale, $group, $namespace = null)
@@ -76,9 +77,11 @@ class SuffixedFileLoader extends FileLoader
 
         if ($this->files->exists($file)) {
             Log::debug("[SuffixedFileLoader] File exists: {$file}");
+
             return $this->files->getRequire($file);
         }
         Log::debug("[SuffixedFileLoader] File does not exist: {$file}");
+
         return null;
     }
 
@@ -87,6 +90,7 @@ class SuffixedFileLoader extends FileLoader
      *
      * @param string $namespace
      * @param string $path
+     *
      * @return string
      */
     protected function addNamespacePath($namespace, $path)
@@ -94,6 +98,7 @@ class SuffixedFileLoader extends FileLoader
         if (isset($this->hints[$namespace])) {
             return $this->hints[$namespace];
         }
+
         return $path;
     }
 }

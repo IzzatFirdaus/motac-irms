@@ -43,7 +43,7 @@ class CheckOverdueReturns extends Command
      */
     public function handle(): int
     {
-        $now = Carbon::now();
+        $now                 = Carbon::now();
         $overdueApplications = LoanApplication::query()
             ->whereIn('status', [
                 LoanApplication::STATUS_ISSUED,
@@ -54,25 +54,28 @@ class CheckOverdueReturns extends Command
 
         if ($overdueApplications->isEmpty()) {
             $this->info('No overdue applications found.');
+
             return \Symfony\Component\Console\Command\Command::SUCCESS;
         }
 
         foreach ($overdueApplications as $application) {
-            $user = $application->user;
+            $user                   = $application->user;
             $latestIssueTransaction = $application->latestIssueTransaction; // Get the latest issue transaction
 
-            if (!$user) {
-                Log::warning('Overdue loan application (ID: ' . $application->id . ') has no associated user. Skipping notification.', [
+            if (! $user) {
+                Log::warning('Overdue loan application (ID: '.$application->id.') has no associated user. Skipping notification.', [
                     'loan_application_id' => $application->id,
                 ]);
+
                 continue;
             }
 
-            if (!$latestIssueTransaction) {
-                Log::warning('Overdue loan application (ID: ' . $application->id . ') has no issue transaction. Skipping notification.', [
+            if (! $latestIssueTransaction) {
+                Log::warning('Overdue loan application (ID: '.$application->id.') has no issue transaction. Skipping notification.', [
                     'loan_application_id' => $application->id,
-                    'user_id' => $user->id,
+                    'user_id'             => $user->id,
                 ]);
+
                 continue;
             }
 
@@ -81,9 +84,9 @@ class CheckOverdueReturns extends Command
 
             Log::warning('Overdue loan application detected', [
                 'loan_application_id' => $application->id,
-                'user_id' => $user->id,
-                'due_date' => $application->loan_end_date,
-                'overdue_days' => $overdueDays,
+                'user_id'             => $user->id,
+                'due_date'            => $application->loan_end_date,
+                'overdue_days'        => $overdueDays,
             ]);
 
             // Notify applicant about overdue loan
@@ -93,7 +96,8 @@ class CheckOverdueReturns extends Command
             // $this->notificationService->notifySupervisorOfOverdue($application);
         }
 
-        $this->info('Overdue applications processed: ' . $overdueApplications->count());
+        $this->info('Overdue applications processed: '.$overdueApplications->count());
+
         return \Symfony\Component\Console\Command\Command::SUCCESS;
     }
 }

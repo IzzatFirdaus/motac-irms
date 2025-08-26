@@ -15,40 +15,43 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * Main ticket model for the Helpdesk system.
  *
- * @property int $id
- * @property string $title
- * @property string $description
- * @property int $category_id
- * @property string $status
- * @property int $priority_id
- * @property int $user_id
- * @property int|null $assigned_to_user_id
+ * @property int                             $id
+ * @property string                          $title
+ * @property string                          $description
+ * @property int                             $category_id
+ * @property string                          $status
+ * @property int                             $priority_id
+ * @property int                             $user_id
+ * @property int|null                        $assigned_to_user_id
  * @property \Illuminate\Support\Carbon|null $closed_at
  * @property-read \App\Models\User|null $user
  * @property-read \App\Models\User|null $assignedTo
- * @property string|null $resolution_notes
+ * @property string|null                     $resolution_notes
  * @property \Illuminate\Support\Carbon|null $sla_due_at
- * @property int|null $closed_by_id
+ * @property int|null                        $closed_by_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  */
 class HelpdeskTicket extends Model
 {
-    use HasFactory, CreatedUpdatedDeletedBy, SoftDeletes;
+    use CreatedUpdatedDeletedBy, HasFactory, SoftDeletes;
 
     // Status constants for strict status management
     public const STATUS_OPEN = 'open';
+
     public const STATUS_IN_PROGRESS = 'in_progress';
+
     public const STATUS_RESOLVED = 'resolved';
+
     public const STATUS_CLOSED = 'closed';
 
     // Status options for UI and validation
     public const STATUS_OPTIONS = [
-        self::STATUS_OPEN => 'Open',
+        self::STATUS_OPEN        => 'Open',
         self::STATUS_IN_PROGRESS => 'In Progress',
-        self::STATUS_RESOLVED => 'Resolved',
-        self::STATUS_CLOSED => 'Closed',
+        self::STATUS_RESOLVED    => 'Resolved',
+        self::STATUS_CLOSED      => 'Closed',
     ];
 
     // Mass assignable attributes
@@ -68,7 +71,7 @@ class HelpdeskTicket extends Model
 
     // Casting attributes to appropriate data types
     protected $casts = [
-        'closed_at' => 'datetime',
+        'closed_at'  => 'datetime',
         'sla_due_at' => 'datetime',
     ];
 

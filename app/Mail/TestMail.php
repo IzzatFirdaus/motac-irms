@@ -12,6 +12,7 @@ class TestMail extends Mailable
 
     /**
      * Optional data passed to the email view.
+     *
      * @var array
      */
     public $data;
@@ -35,7 +36,7 @@ class TestMail extends Mailable
     {
         // Use the correct blade view: resources/views/emails/test-email.blade.php
         return $this->subject('Testing Papercut SMTP with Laravel')
-                    ->view('emails.test-email')
-                    ->with('data', $this->data);
+            ->view('emails.test-email')
+            ->with('data', $this->data);
     }
 }

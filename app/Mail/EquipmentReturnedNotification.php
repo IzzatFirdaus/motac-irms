@@ -10,7 +10,6 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Carbon;
 
 /**
  * Mailable for notifying the applicant when equipment is returned and recorded.
@@ -20,14 +19,16 @@ class EquipmentReturnedNotification extends Mailable
     use Queueable, SerializesModels;
 
     public LoanApplication $loanApplication;
+
     public LoanTransaction $returnTransaction;
+
     public User $notifiable;
 
     public function __construct(LoanApplication $loanApplication, LoanTransaction $returnTransaction, User $notifiable)
     {
-        $this->loanApplication = $loanApplication->loadMissing('user');
+        $this->loanApplication   = $loanApplication->loadMissing('user');
         $this->returnTransaction = $returnTransaction->loadMissing(['loanTransactionItems.equipment', 'returnAcceptingOfficer']);
-        $this->notifiable = $notifiable;
+        $this->notifiable        = $notifiable;
     }
 
     public function envelope(): Envelope
@@ -43,9 +44,9 @@ class EquipmentReturnedNotification extends Mailable
         return new Content(
             view: 'emails.equipment-returned',
             with: [
-                'loanApplication' => $this->loanApplication,
+                'loanApplication'   => $this->loanApplication,
                 'returnTransaction' => $this->returnTransaction,
-                'actionUrl' => route('loan-applications.show', $this->loanApplication->id),
+                'actionUrl'         => route('loan-applications.show', $this->loanApplication->id),
             ]
         );
     }

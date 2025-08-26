@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 /**
- * DashboardController
+ * DashboardController.
  *
  * Routes users to the appropriate dashboard based on their role and approval responsibilities.
  * Gathers and passes key statistics to each dashboard view.
@@ -20,9 +20,6 @@ class DashboardController extends Controller
 {
     /**
      * Handle the incoming request and route to the correct dashboard based on user role.
-     *
-     * @param Request $request
-     * @return View
      */
     public function __invoke(Request $request): View
     {
@@ -55,14 +52,12 @@ class DashboardController extends Controller
 
     /**
      * Gathers data and returns the view for the Admin dashboard.
-     *
-     * @return View
      */
     private function showAdminDashboard(): View
     {
         $data = [
-            'users_count' => User::count(),
-            'pending_approvals_count' => Approval::where('status', 'pending')->count(),
+            'users_count'               => User::count(),
+            'pending_approvals_count'   => Approval::where('status', 'pending')->count(),
             'equipment_available_count' => Equipment::where('status', 'available')->count(),
             // EmailApplication data removed as per system update
         ];
@@ -72,14 +67,12 @@ class DashboardController extends Controller
 
     /**
      * Gathers data and returns the view for the BPM Staff dashboard.
-     *
-     * @return View
      */
     private function showBpmDashboard(): View
     {
         $data = [
-            'pending_loan_applications_count' => LoanApplication::where('status', 'pending_approval')->count(),
-            'pending_equipment_issuance_count' => LoanApplication::where('status', 'approved')->count(),
+            'pending_loan_applications_count'   => LoanApplication::where('status', 'pending_approval')->count(),
+            'pending_equipment_issuance_count'  => LoanApplication::where('status', 'approved')->count(),
             'loan_applications_due_today_count' => LoanApplication::whereHas('loanTransaction', function ($query) {
                 $query->whereDate('due_date', today());
             })->count(),
@@ -91,15 +84,13 @@ class DashboardController extends Controller
 
     /**
      * Gathers data and returns the view for the IT Admin dashboard.
-     *
-     * @return View
      */
     private function showItAdminDashboard(): View
     {
         $data = [
-            'total_equipment_count' => Equipment::count(),
+            'total_equipment_count'     => Equipment::count(),
             'equipment_in_repair_count' => Equipment::where('status', 'in_repair')->count(),
-            'equipment_disposed_count' => Equipment::where('status', 'disposed')->count(),
+            'equipment_disposed_count'  => Equipment::where('status', 'disposed')->count(),
             // EmailApplication data removed as per system update
         ];
 
@@ -108,9 +99,6 @@ class DashboardController extends Controller
 
     /**
      * Gathers data and returns the view for the Approver dashboard.
-     *
-     * @param User $user
-     * @return View
      */
     private function showApproverDashboard(User $user): View
     {
@@ -130,9 +118,6 @@ class DashboardController extends Controller
 
     /**
      * Gathers data and returns the view for a general user.
-     *
-     * @param User $user
-     * @return View
      */
     private function showUserDashboard(User $user): View
     {

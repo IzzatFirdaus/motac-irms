@@ -1,4 +1,5 @@
 <?php
+
 // routes/web.php
 
 declare(strict_types=1);
@@ -20,33 +21,32 @@ declare(strict_types=1);
 |--------------------------------------------------------------------------
 */
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\DepartmentController as AdminDepartmentController;
 
 // --------------------------------------------------
 // Controllers - Admin Controllers
 // --------------------------------------------------
-use App\Http\Controllers\Admin\DepartmentController as AdminDepartmentController;
 use App\Http\Controllers\Admin\EquipmentController as AdminEquipmentController;
 use App\Http\Controllers\Admin\GradeController as AdminGradeController;
 use App\Http\Controllers\Admin\PositionController as AdminPositionController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Api\HelpdeskApiController;
 
 // --------------------------------------------------
 // Controllers - API Controllers
 // --------------------------------------------------
-use App\Http\Controllers\Api\HelpdeskApiController;
+use App\Http\Controllers\ApprovalController;
 
 // --------------------------------------------------
 // Controllers - Helpdesk Controllers
 // --------------------------------------------------
-use App\Http\Controllers\Helpdesk\TicketController as HelpdeskTicketController;
+use App\Http\Controllers\DashboardController;
 
 // --------------------------------------------------
 // Controllers - Main Application Controllers
 // --------------------------------------------------
-use App\Http\Controllers\ApprovalController;
-use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EquipmentController;
+use App\Http\Controllers\Helpdesk\TicketController as HelpdeskTicketController;
 use App\Http\Controllers\language\LanguageController;
 use App\Http\Controllers\LegalController;
 use App\Http\Controllers\LoanApplicationController;
@@ -55,82 +55,82 @@ use App\Http\Controllers\MiscErrorController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\WebhookController;
+use App\Livewire\Charts\LoanSummaryChart;
 
 // --------------------------------------------------
 // Livewire Components - Core Components
 // --------------------------------------------------
 use App\Livewire\ContactUs as ContactUsLW;
-use App\Livewire\EquipmentChecklist as EquipmentChecklistLW;
-use App\Livewire\LoanRequestForm as LoanRequestFormLW;
+use App\Livewire\Dashboard\AdminDashboard as AdminDashboardLW;
+use App\Livewire\Dashboard\ApproverDashboard as ApproverDashboardLW;
 
 // --------------------------------------------------
 // Livewire Components - Dashboards
 // --------------------------------------------------
 use App\Livewire\Dashboard as DashboardLW;
-use App\Livewire\Dashboard\AdminDashboard as AdminDashboardLW;
-use App\Livewire\Dashboard\ApproverDashboard as ApproverDashboardLW;
 use App\Livewire\Dashboard\BpmDashboard as BpmDashboardLW;
-use App\Livewire\Dashboard\Dashboard as DashboardComponentLW;
 use App\Livewire\Dashboard\ItAdminDashboard as ItAdminDashboardLW;
 use App\Livewire\Dashboard\UserDashboard as UserDashboardLW;
+use App\Livewire\EquipmentChecklist as EquipmentChecklistLW;
+use App\Livewire\Helpdesk\Admin\TicketManagement as AdminTicketManagementLW;
 
 // --------------------------------------------------
 // Livewire Components - Charts
 // --------------------------------------------------
-use App\Livewire\Charts\LoanSummaryChart;
+use App\Livewire\Helpdesk\CreateTicketForm;
 
 // --------------------------------------------------
 // Livewire Components - Resource Management
 // --------------------------------------------------
 // My Applications and Loan Application Form
-use App\Livewire\ResourceManagement\MyApplications\Loan\LoanApplicationsIndex as MyLoanApplicationsIndexLW;
-use App\Livewire\ResourceManagement\LoanApplication\LoanApplicationForm as LoanApplicationFormLW;
+use App\Livewire\Helpdesk\MyTicketsIndex;
+use App\Livewire\Helpdesk\TicketDetails;
 
 // Approval System
-use App\Livewire\ResourceManagement\Approval\ApprovalDashboard as ApprovalDashboardLW;
-use App\Livewire\ResourceManagement\Approval\ApprovalHistory as ApprovalHistoryLW;
+use App\Livewire\HumanResource\Structure\Departments as HRDepartmentsLW;
+use App\Livewire\HumanResource\Structure\EmployeeInfo as HREmployeeInfoLW;
 
 // Admin - Equipment Management
-use App\Livewire\ResourceManagement\Admin\Equipment\EquipmentForm as AdminEquipmentFormLW;
-use App\Livewire\ResourceManagement\Admin\Equipment\EquipmentIndex as AdminEquipmentIndexLW;
+use App\Livewire\HumanResource\Structure\Positions as HRPositionsLW;
+use App\Livewire\LoanRequestForm as LoanRequestFormLW;
 
 // Admin - BPM Operations
+use App\Livewire\Misc\ComingSoon as ComingSoonLW;
 use App\Livewire\ResourceManagement\Admin\BPM\IssuedLoans as AdminIssuedLoansLW;
 use App\Livewire\ResourceManagement\Admin\BPM\OutstandingLoans as AdminOutstandingLoansLW;
 use App\Livewire\ResourceManagement\Admin\BPM\ProcessIssuance as AdminProcessIssuanceLW;
-use App\Livewire\ResourceManagement\Admin\BPM\ProcessReturn as AdminProcessReturnLW;
 
 // Admin - Grades Management
-use App\Livewire\ResourceManagement\Admin\Grades\GradeIndex as AdminGradeIndexLW;
+use App\Livewire\ResourceManagement\Admin\BPM\ProcessReturn as AdminProcessReturnLW;
 
 // Admin - Users Management
-use App\Livewire\ResourceManagement\Admin\Users\UserIndex as AdminUserIndexLW;
+use App\Livewire\ResourceManagement\Admin\Equipment\EquipmentForm as AdminEquipmentFormLW;
 
 // Admin - Reports
+use App\Livewire\ResourceManagement\Admin\Equipment\EquipmentIndex as AdminEquipmentIndexLW;
+use App\Livewire\ResourceManagement\Admin\Grades\GradeIndex as AdminGradeIndexLW;
 use App\Livewire\ResourceManagement\Admin\Reports\EquipmentInventoryReport as AdminEquipmentInventoryReportLW;
 use App\Livewire\ResourceManagement\Admin\Reports\EquipmentReport as AdminEquipmentReportLW;
-use App\Livewire\ResourceManagement\Admin\Reports\LoanApplicationsReport as AdminLoanApplicationsReportLW;
-use App\Livewire\ResourceManagement\Admin\Reports\UserActivityReport as AdminUserActivityReportLW;
 
 // Regular Reports (non-admin)
-use App\Livewire\ResourceManagement\Reports\EquipmentReport as EquipmentReportLW;
-use App\Livewire\ResourceManagement\Reports\LoanApplicationsReport as LoanApplicationsReportLW;
-use App\Livewire\ResourceManagement\Reports\ReportsIndex as ReportsIndexLW;
-use App\Livewire\ResourceManagement\Reports\UserActivityReport as UserActivityReportLW;
+use App\Livewire\ResourceManagement\Admin\Reports\LoanApplicationsReport as AdminLoanApplicationsReportLW;
+use App\Livewire\ResourceManagement\Admin\Reports\UserActivityReport as AdminUserActivityReportLW;
+use App\Livewire\ResourceManagement\Admin\Users\UserIndex as AdminUserIndexLW;
+use App\Livewire\ResourceManagement\Approval\ApprovalDashboard as ApprovalDashboardLW;
 
 // --------------------------------------------------
 // Livewire Components - Settings
 // --------------------------------------------------
 // User Management
-use App\Livewire\Settings\Users\UsersCreate as SettingsUsersCreateLW;
-use App\Livewire\Settings\Users\UsersEdit as SettingsUsersEditLW;
-use App\Livewire\Settings\Users\UsersIndex as SettingsUsersIndexLW;
-use App\Livewire\Settings\Users\UsersShow as SettingsUsersShowLW;
+use App\Livewire\ResourceManagement\Approval\ApprovalHistory as ApprovalHistoryLW;
+use App\Livewire\ResourceManagement\LoanApplication\LoanApplicationForm as LoanApplicationFormLW;
+use App\Livewire\ResourceManagement\MyApplications\Loan\LoanApplicationsIndex as MyLoanApplicationsIndexLW;
+use App\Livewire\ResourceManagement\Reports\EquipmentReport as EquipmentReportLW;
 
 // Roles, Permissions, Departments, Positions
-use App\Livewire\Settings\Departments\DepartmentsIndex as SettingsDepartmentsIndexLW;
-use App\Livewire\Settings\Permissions\PermissionsIndex as SettingsPermissionsIndexLW;
-use App\Livewire\Settings\Roles\RolesIndex as SettingsRolesIndexLW;
+use App\Livewire\ResourceManagement\Reports\LoanApplicationsReport as LoanApplicationsReportLW;
+use App\Livewire\ResourceManagement\Reports\ReportsIndex as ReportsIndexLW;
+use App\Livewire\ResourceManagement\Reports\UserActivityReport as UserActivityReportLW;
 
 // Note: Positions Livewire component exists in views but not in app/Livewire
 // Uncomment when the Livewire class is created
@@ -139,39 +139,31 @@ use App\Livewire\Settings\Roles\RolesIndex as SettingsRolesIndexLW;
 // --------------------------------------------------
 // Livewire Components - Shared Components
 // --------------------------------------------------
-use App\Livewire\Shared\Notifications\NotificationsList;
-use App\Livewire\Shared\TableFilters;
+use App\Livewire\Settings\Departments\DepartmentsIndex as SettingsDepartmentsIndexLW;
 
 // --------------------------------------------------
 // Livewire Components - Sections (Layout Components)
 // --------------------------------------------------
-use App\Livewire\Sections\Footer\Footer as FooterLW;
-use App\Livewire\Sections\Menu\VerticalMenu as VerticalMenuLW;
-use App\Livewire\Sections\Navbar\Navbar as NavbarLW;
-use App\Livewire\Sections\Navbar\NotificationsDropdown as NotificationsDropdownLW;
 
 // --------------------------------------------------
 // Livewire Components - Helpdesk
 // --------------------------------------------------
-use App\Livewire\Helpdesk\CreateTicketForm;
-use App\Livewire\Helpdesk\MyTicketsIndex;
-use App\Livewire\Helpdesk\TicketDetail;
-use App\Livewire\Helpdesk\TicketDetails;
-use App\Livewire\Helpdesk\TicketForm;
-use App\Livewire\Helpdesk\TicketList;
-use App\Livewire\Helpdesk\Admin\TicketManagement as AdminTicketManagementLW;
+use App\Livewire\Settings\Permissions\PermissionsIndex as SettingsPermissionsIndexLW;
+use App\Livewire\Settings\Roles\RolesIndex as SettingsRolesIndexLW;
+use App\Livewire\Settings\Users\UsersCreate as SettingsUsersCreateLW;
+use App\Livewire\Settings\Users\UsersEdit as SettingsUsersEditLW;
 
 // --------------------------------------------------
 // Livewire Components - Human Resource
 // --------------------------------------------------
-use App\Livewire\HumanResource\Structure\Departments as HRDepartmentsLW;
-use App\Livewire\HumanResource\Structure\EmployeeInfo as HREmployeeInfoLW;
-use App\Livewire\HumanResource\Structure\Positions as HRPositionsLW;
+use App\Livewire\Settings\Users\UsersIndex as SettingsUsersIndexLW;
+use App\Livewire\Settings\Users\UsersShow as SettingsUsersShowLW;
+use App\Livewire\Shared\Notifications\NotificationsList;
 
 // --------------------------------------------------
 // Livewire Components - Miscellaneous
 // --------------------------------------------------
-use App\Livewire\Misc\ComingSoon as ComingSoonLW;
+use Illuminate\Support\Facades\Route;
 
 // --------------------------------------------------
 // Public Routes (accessible without authentication)
@@ -215,10 +207,10 @@ Route::get('/test-lang', function () {
         // Will output the current app locale (should be 'en' or 'ms')
         'current_locale' => app()->getLocale(),
         // Test translation keys for app, dashboard, common
-        'system_name' => __('app.system_name'),
+        'system_name'     => __('app.system_name'),
         'motac_full_name' => __('app.motac_full_name'),
         'dashboard_apply' => __('dashboard.apply_ict_loan_title'),
-        'common_login' => __('common.login'),
+        'common_login'    => __('common.login'),
     ];
 });
 
@@ -414,12 +406,12 @@ Route::middleware([
             // Traditional controller routes for ticket management
             Route::resource('/admin/tickets-controller', HelpdeskTicketController::class)
                 ->names([
-                    'index' => 'admin.tickets-controller.index',
-                    'create' => 'admin.tickets-controller.create',
-                    'store' => 'admin.tickets-controller.store',
-                    'show' => 'admin.tickets-controller.show',
-                    'edit' => 'admin.tickets-controller.edit',
-                    'update' => 'admin.tickets-controller.update',
+                    'index'   => 'admin.tickets-controller.index',
+                    'create'  => 'admin.tickets-controller.create',
+                    'store'   => 'admin.tickets-controller.store',
+                    'show'    => 'admin.tickets-controller.show',
+                    'edit'    => 'admin.tickets-controller.edit',
+                    'update'  => 'admin.tickets-controller.update',
                     'destroy' => 'admin.tickets-controller.destroy',
                 ]);
         });

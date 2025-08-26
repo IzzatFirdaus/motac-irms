@@ -22,16 +22,16 @@ return Application::configure(basePath: dirname(__DIR__))
         // This section registers all required middleware aliases from your System Design document.
         // These are used for route-specific authorization and validation.
         $middleware->alias([
-            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
-            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'role'               => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'permission'         => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
-            'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+            'verified'           => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
 
             // Custom middleware aliases from your project design
             'allow_admin_during_maintenance' => \App\Http\Middleware\AllowAdminDuringMaintenance::class,
-            'validate.webhook.signature' => \App\Http\Middleware\ValidateSignature::class,
-            'check.gradelevel' => \App\Http\Middleware\CheckGradeLevel::class,
-            'check.usergrade' => \App\Http\Middleware\CheckUserGrade::class,
+            'validate.webhook.signature'     => \App\Http\Middleware\ValidateSignature::class,
+            'check.gradelevel'               => \App\Http\Middleware\CheckGradeLevel::class,
+            'check.usergrade'                => \App\Http\Middleware\CheckUserGrade::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

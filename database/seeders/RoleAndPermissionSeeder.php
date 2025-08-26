@@ -28,18 +28,18 @@ class RoleAndPermissionSeeder extends Seeder
 
         // ADJUSTMENT: Added more granular permissions and new Helpdesk permissions.
         $permissionsByGroup = [
-            'User Management' => ['view_users', 'create_users', 'edit_users', 'delete_users'],
+            'User Management'      => ['view_users', 'create_users', 'edit_users', 'delete_users'],
             'Equipment Management' => ['view_equipment', 'create_equipment', 'edit_equipment', 'delete_equipment', 'view_equipment_details'],
-            'Loan Applications' => [
+            'Loan Applications'    => [
                 'create_loan_applications', 'view_loan_applications', 'edit_loan_applications', 'cancel_loan_applications', 'submit_loan_applications',
                 'approve_loan_applications', 'reject_loan_applications', 'issue_loan_equipment', 'process_loan_return', 'view_loan_transactions',
             ],
             // REMOVED: 'Email Applications' => [...],
-            'Approval Management' => ['view_any_approvals', 'view_approval_tasks', 'act_on_approval_tasks', 'view_approval_history'],
-            'Master Data Management' => ['view_departments', 'create_departments', 'edit_departments', 'delete_departments', 'view_positions', 'create_positions', 'edit_positions', 'delete_positions', 'view_grades', 'create_grades', 'edit_grades', 'delete_grades', 'view_contracts', 'create_contracts', 'edit_contracts', 'delete_contracts', 'view_locations', 'create_locations', 'edit_locations', 'delete_locations', 'view_centers', 'create_centers', 'edit_centers', 'delete_centers', 'view_equipment_categories', 'create_equipment_categories', 'edit_equipment_categories', 'delete_equipment_categories', 'view_sub_categories', 'create_sub_categories', 'edit_sub_categories', 'delete_sub_categories'],
-            'System Settings' => ['manage_settings'],
+            'Approval Management'     => ['view_any_approvals', 'view_approval_tasks', 'act_on_approval_tasks', 'view_approval_history'],
+            'Master Data Management'  => ['view_departments', 'create_departments', 'edit_departments', 'delete_departments', 'view_positions', 'create_positions', 'edit_positions', 'delete_positions', 'view_grades', 'create_grades', 'edit_grades', 'delete_grades', 'view_contracts', 'create_contracts', 'edit_contracts', 'delete_contracts', 'view_locations', 'create_locations', 'edit_locations', 'delete_locations', 'view_centers', 'create_centers', 'edit_centers', 'delete_centers', 'view_equipment_categories', 'create_equipment_categories', 'edit_equipment_categories', 'delete_equipment_categories', 'view_sub_categories', 'create_sub_categories', 'edit_sub_categories', 'delete_sub_categories'],
+            'System Settings'         => ['manage_settings'],
             'Notification Management' => ['view_notifications', 'mark_notifications_as_read'],
-            'Report Management' => ['view_equipment_reports', 'view_loan_reports', 'view_user_activity_reports'], // REMOVED: 'view_email_reports'
+            'Report Management'       => ['view_equipment_reports', 'view_loan_reports', 'view_user_activity_reports'], // REMOVED: 'view_email_reports'
             // NEW: Helpdesk Management
             'Helpdesk Management' => [
                 'create_helpdesk_tickets',

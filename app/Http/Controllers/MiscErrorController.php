@@ -16,10 +16,8 @@ class MiscErrorController extends Controller
     /**
      * Display a MOTAC-styled error page for a given HTTP status code.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $statusCode  The HTTP status code for the error (e.g. 401, 403, 404, 422, 429, 500, 503)
-     * @param  string|null  $message  Optional custom message to display
-     * @return \Illuminate\View\View
+     * @param int         $statusCode The HTTP status code for the error (e.g. 401, 403, 404, 422, 429, 500, 503)
+     * @param string|null $message    Optional custom message to display
      */
     public function show(Request $request, int $statusCode = 500, ?string $message = null): View
     {
@@ -30,12 +28,12 @@ class MiscErrorController extends Controller
 
         // Log error page access for auditing/troubleshooting
         Log::warning('Error page rendered via MiscErrorController.', [
-            'status_code' => $statusCode,
+            'status_code'    => $statusCode,
             'custom_message' => $message,
-            'url' => $request->fullUrl(),
-            'method' => $request->method(),
-            'user_id' => Auth::id(),
-            'ip_address' => $request->ip(),
+            'url'            => $request->fullUrl(),
+            'method'         => $request->method(),
+            'user_id'        => Auth::id(),
+            'ip_address'     => $request->ip(),
         ]);
 
         // Map the status code to a matching Blade error view if it exists
@@ -54,7 +52,7 @@ class MiscErrorController extends Controller
         // Optionally allow a custom message to override the view's default message
         return view($view, [
             'configData' => $configData,
-            'message' => $message,
+            'message'    => $message,
         ]);
     }
 }

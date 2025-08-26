@@ -25,13 +25,13 @@ class UserPolicy
      * Determine whether the user can view a specific user model.
      * Users can view their own profile. Administrators and BPM staff can view any user's profile.
      *
-     * @param  \App\Models\User  $user  The authenticated user performing the action.
-     * @param  \App\Models\User  $model  The user model being viewed.
+     * @param \App\Models\User $user  The authenticated user performing the action.
+     * @param \App\Models\User $model The user model being viewed.
      */
     public function view(User $user, User $model): Response|bool
     {
         return $user->id === $model->id || // User can view their own profile
-          $user->hasRole('Admin') ||      // Standardized to 'Admin'
+          $user->hasRole('Admin')       || // Standardized to 'Admin'
           $user->hasRole('BPM Staff')      // Standardized to 'BPM Staff'
           ? Response::allow()
           : Response::deny('Anda tidak mempunyai kebenaran untuk melihat profil pengguna ini.');
@@ -54,8 +54,8 @@ class UserPolicy
      * Administrators can update any user's profile.
      * BPM staff can update any user's profile, except for users who are administrators.
      *
-     * @param  \App\Models\User  $user  The authenticated user performing the action.
-     * @param  \App\Models\User  $model  The user model being updated.
+     * @param \App\Models\User $user  The authenticated user performing the action.
+     * @param \App\Models\User $model The user model being updated.
      */
     public function update(User $user, User $model): Response|bool
     {
@@ -80,8 +80,8 @@ class UserPolicy
      * Determine whether the user can delete a specific user model.
      * Only administrators can delete users, and they cannot delete their own account through this policy.
      *
-     * @param  \App\Models\User  $user  The authenticated user performing the action.
-     * @param  \App\Models\User  $model  The user model being deleted.
+     * @param \App\Models\User $user  The authenticated user performing the action.
+     * @param \App\Models\User $model The user model being deleted.
      */
     public function delete(User $user, User $model): Response|bool
     {
@@ -131,7 +131,7 @@ class UserPolicy
     public function viewSensitiveData(User $user, User $model): Response|bool
     {
         return $user->id === $model->id || // User can view their own sensitive data
-          $user->hasRole('Admin') ||      // Standardized to 'Admin'
+          $user->hasRole('Admin')       || // Standardized to 'Admin'
           $user->hasRole('BPM Staff')      // Standardized to 'BPM Staff'
           ? Response::allow()
           : Response::deny('Anda tidak mempunyai kebenaran untuk melihat data sensitif pengguna ini.');

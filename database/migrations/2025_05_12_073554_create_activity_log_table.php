@@ -13,7 +13,7 @@ class CreateActivityLogTable extends Migration
     public function up(): void
     {
         $connection = config('activitylog.database_connection') ?: config('database.default');
-        $tableName = config('activitylog.table_name', 'activity_log');
+        $tableName  = config('activitylog.table_name', 'activity_log');
 
         Schema::connection($connection)->create(
             $tableName,
@@ -33,7 +33,7 @@ class CreateActivityLogTable extends Migration
     public function down(): void
     {
         $connection = config('activitylog.database_connection') ?: config('database.default');
-        $tableName = config('activitylog.table_name', 'activity_log');
+        $tableName  = config('activitylog.table_name', 'activity_log');
 
         Schema::connection($connection)->dropIfExists($tableName);
     }

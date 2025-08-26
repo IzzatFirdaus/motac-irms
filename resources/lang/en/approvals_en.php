@@ -1,4 +1,5 @@
 <?php
+
 // English translations for Approval Dashboard module and actions
 // Structured by category for ease of maintenance and reference
 // (Mirrored to match the updated structure of approvals_ms.php)
@@ -29,14 +30,14 @@ return [
 
     // === Approval Module Actions ===
     'actions' => [
-        'review'           => 'Review',
-        'view_details'     => 'View Details',
-        'view_task'        => 'View Task',
-        'view_full_app'    => 'View Full Application',
-        'submit_decision'  => 'Submit Decision',
-        'no_permission'    => 'No permission',
-        'approve_option'   => 'Approve',       // Added for parity with ms
-        'reject_option'    => 'Reject',        // Added for parity with ms
+        'review'               => 'Review',
+        'view_details'         => 'View Details',
+        'view_task'            => 'View Task',
+        'view_full_app'        => 'View Full Application',
+        'submit_decision'      => 'Submit Decision',
+        'no_permission'        => 'No permission',
+        'approve_option'       => 'Approve',       // Added for parity with ms
+        'reject_option'        => 'Reject',        // Added for parity with ms
         'return_for_amendment' => 'Return for Amendment',
         'transfer_to_officer'  => 'Transfer to Another Officer',
         'select_officer'       => 'Select Officer',

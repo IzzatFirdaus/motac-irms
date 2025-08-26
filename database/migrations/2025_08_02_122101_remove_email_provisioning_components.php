@@ -2,9 +2,9 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Removes deprecated email provisioning components/tables and related user columns.
@@ -27,25 +27,25 @@ return new class extends Migration
             Schema::table('users', function (Blueprint $table) {
                 if (Schema::hasColumn('users', 'motac_email')) {
                     try {
-                        $sm = Schema::getConnection()->getDoctrineSchemaManager();
+                        $sm      = Schema::getConnection()->getDoctrineSchemaManager();
                         $indexes = $sm->listTableIndexes('users');
                         if (array_key_exists('users_motac_email_unique', $indexes)) {
                             $table->dropUnique(['motac_email']);
                         }
                     } catch (\Exception $e) {
-                        Log::warning('Could not check or drop unique index for motac_email: ' . $e->getMessage());
+                        Log::warning('Could not check or drop unique index for motac_email: '.$e->getMessage());
                     }
                     $table->dropColumn('motac_email');
                 }
                 if (Schema::hasColumn('users', 'user_id_assigned')) {
                     try {
-                        $sm = Schema::getConnection()->getDoctrineSchemaManager();
+                        $sm      = Schema::getConnection()->getDoctrineSchemaManager();
                         $indexes = $sm->listTableIndexes('users');
                         if (array_key_exists('users_user_id_assigned_unique', $indexes)) {
                             $table->dropUnique(['user_id_assigned']);
                         }
                     } catch (\Exception $e) {
-                        Log::warning('Could not check or drop unique index for user_id_assigned: ' . $e->getMessage());
+                        Log::warning('Could not check or drop unique index for user_id_assigned: '.$e->getMessage());
                     }
                     $table->dropColumn('user_id_assigned');
                 }

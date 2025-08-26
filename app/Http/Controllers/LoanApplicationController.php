@@ -54,7 +54,7 @@ class LoanApplicationController extends Controller
 
         // Get supporting officers (filtered by grade level)
         $minSupportGradeLevel = (int) config('motac.approval.min_loan_support_grade_level', 41);
-        $supportingOfficers = User::where('status', User::STATUS_ACTIVE)
+        $supportingOfficers   = User::where('status', User::STATUS_ACTIVE)
             ->whereHas('grade', function ($query) use ($minSupportGradeLevel): void {
                 $query->where('level', '>=', $minSupportGradeLevel);
             })
@@ -66,9 +66,9 @@ class LoanApplicationController extends Controller
         $equipmentAssetTypeOptions = Equipment::getAssetTypeOptions() ?? [];
 
         return view('loan-applications.create', [
-            'responsibleOfficers' => $responsibleOfficers,
-            'supportingOfficers' => $supportingOfficers,
-            'equipmentAssetTypeOptions' => $equipmentAssetTypeOptions
+            'responsibleOfficers'       => $responsibleOfficers,
+            'supportingOfficers'        => $supportingOfficers,
+            'equipmentAssetTypeOptions' => $equipmentAssetTypeOptions,
         ]);
     }
 
@@ -78,7 +78,7 @@ class LoanApplicationController extends Controller
     public function store(StoreLoanApplicationRequest $request): RedirectResponse
     {
         /** @var User $user */
-        $user = $request->user();
+        $user          = $request->user();
         $validatedData = $request->validated();
 
         Log::info(sprintf('LoanApplicationController@store: User ID %d attempting to create and submit new loan application via traditional form.', $user->id), ['data_keys' => array_keys($validatedData)]);
@@ -102,11 +102,11 @@ class LoanApplicationController extends Controller
                 ->with('error', __('Sila semak semula borang permohonan. Terdapat maklumat yang tidak sah.'));
         } catch (Throwable $e) {
             Log::error(sprintf('Error creating and submitting loan application for User ID: %d (traditional form).', $user->id), [
-                'error' => $e->getMessage(),
+                'error'           => $e->getMessage(),
                 'exception_class' => get_class($e),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'request_data' => $request->except(['_token', 'password', 'password_confirmation']),
+                'file'            => $e->getFile(),
+                'line'            => $e->getLine(),
+                'request_data'    => $request->except(['_token', 'password', 'password_confirmation']),
             ]);
             $userMessage = ($e instanceof \RuntimeException || $e instanceof \InvalidArgumentException || $e instanceof ModelNotFoundException)
                 ? $e->getMessage()
@@ -126,9 +126,9 @@ class LoanApplicationController extends Controller
 
         // Eager load all relationships needed for display
         $loanApplication->loadMissing([
-            'user' => fn ($q) => $q->with(['position:id,name', 'grade:id,name', 'department:id,name']),
+            'user'               => fn ($q) => $q->with(['position:id,name', 'grade:id,name', 'department:id,name']),
             'responsibleOfficer' => fn ($q) => $q->with(['position:id,name', 'grade:id,name', 'department:id,name']),
-            'supportingOfficer' => fn ($q) => $q->with(['position:id,name', 'grade:id,name', 'department:id,name']),
+            'supportingOfficer'  => fn ($q) => $q->with(['position:id,name', 'grade:id,name', 'department:id,name']),
             'approvedBy:id,name,title',
             'rejectedBy:id,name,title',
             'cancelledBy:id,name,title',
@@ -148,7 +148,7 @@ class LoanApplicationController extends Controller
         ]);
 
         // Attach status label and color class for UI
-        $statusLabel = $loanApplication->status_label;
+        $statusLabel      = $loanApplication->status_label;
         $statusColorClass = $loanApplication->status_color_class;
 
         // Load item status labels and equipment type labels for each item
@@ -158,8 +158,8 @@ class LoanApplicationController extends Controller
         }
 
         return view('loan-applications.show', [
-            'loanApplication' => $loanApplication,
-            'statusLabel' => $statusLabel,
+            'loanApplication'  => $loanApplication,
+            'statusLabel'      => $statusLabel,
             'statusColorClass' => $statusColorClass,
         ]);
     }
@@ -174,7 +174,7 @@ class LoanApplicationController extends Controller
 
         // Eager load all necessary relations for PDF generation
         $loanApplication->loadMissing([
-            'user' => fn ($q) => $q->with(['position:id,name', 'grade:id,name', 'department:id,name']),
+            'user'               => fn ($q) => $q->with(['position:id,name', 'grade:id,name', 'department:id,name']),
             'responsibleOfficer' => fn ($q) => $q->with(['position:id,name', 'grade:id,name']),
             'approvals.officer',
             'loanApplicationItems',
@@ -203,7 +203,7 @@ class LoanApplicationController extends Controller
     public function update(UpdateLoanApplicationRequest $request, LoanApplication $loanApplication): RedirectResponse
     {
         $this->authorize('update', $loanApplication);
-        $user = $request->user();
+        $user          = $request->user();
         $validatedData = $request->validated();
 
         Log::info(sprintf('LoanApplicationController@update: User ID %s attempting to update LoanApplication ID %d via traditional form.', $user->id, $loanApplication->id));
@@ -221,11 +221,11 @@ class LoanApplicationController extends Controller
                 ->with('success', __('Permohonan pinjaman berjaya dikemaskini.'));
         } catch (Throwable $throwable) {
             Log::error(sprintf('Error updating LoanApplication ID %d by User ID %s (traditional form).', $loanApplication->id, $user->id), [
-                'error' => $throwable->getMessage(),
+                'error'           => $throwable->getMessage(),
                 'exception_class' => get_class($throwable),
-                'file' => $throwable->getFile(),
-                'line' => $throwable->getLine(),
-                'request_data' => $request->except(['_token', 'password', 'password_confirmation']),
+                'file'            => $throwable->getFile(),
+                'line'            => $throwable->getLine(),
+                'request_data'    => $request->except(['_token', 'password', 'password_confirmation']),
             ]);
             $userMessage = ($throwable instanceof \RuntimeException || $throwable instanceof \InvalidArgumentException || $throwable instanceof ModelNotFoundException)
                 ? $throwable->getMessage()
@@ -255,10 +255,10 @@ class LoanApplicationController extends Controller
                 ->with('success', __('Permohonan pinjaman berjaya dihantar untuk kelulusan.'));
         } catch (Throwable $throwable) {
             Log::error(sprintf('Error submitting LoanApplication ID %d by User ID %s (traditional flow).', $loanApplication->id, $user->id), [
-                'error' => $throwable->getMessage(),
+                'error'           => $throwable->getMessage(),
                 'exception_class' => get_class($throwable),
-                'file' => $throwable->getFile(),
-                'line' => $throwable->getLine(),
+                'file'            => $throwable->getFile(),
+                'line'            => $throwable->getLine(),
             ]);
             $userMessage = ($throwable instanceof \RuntimeException || $throwable instanceof \InvalidArgumentException)
                 ? $throwable->getMessage()
@@ -286,10 +286,10 @@ class LoanApplicationController extends Controller
                 ->with('success', __('Permohonan pinjaman berjaya dibuang.'));
         } catch (Throwable $throwable) {
             Log::error(sprintf('Error soft deleting LoanApplication ID %d by User ID %s (traditional flow).', $loanApplication->id, $user->id), [
-                'error' => $throwable->getMessage(),
+                'error'           => $throwable->getMessage(),
                 'exception_class' => get_class($throwable),
-                'file' => $throwable->getFile(),
-                'line' => $throwable->getLine(),
+                'file'            => $throwable->getFile(),
+                'line'            => $throwable->getLine(),
             ]);
             $userMessage = ($throwable instanceof \RuntimeException) ? $throwable->getMessage() : __('Gagal membuang permohonan pinjaman.');
 

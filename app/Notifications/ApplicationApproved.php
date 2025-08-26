@@ -44,7 +44,6 @@ final class ApplicationApproved extends Notification implements ShouldQueue
         // This condition becomes simpler as only LoanApplication is expected
         $defaultFormat = config('app.datetime_format_my', 'd/m/Y H:i A');
 
-
         if ($date instanceof Carbon) {
             return $date->format($defaultFormat);
         }
@@ -61,9 +60,9 @@ final class ApplicationApproved extends Notification implements ShouldQueue
 
     public function toMail(User $notifiable): MailMessage
     {
-        $applicantName = $this->application->user?->name ?? $notifiable->name ?? __('Pemohon');
+        $applicantName          = $this->application->user?->name ?? $notifiable->name ?? __('Pemohon');
         $applicationTypeDisplay = __('Permohonan Pinjaman Peralatan ICT');
-        $applicationId = $this->application->id ?? 'N/A';
+        $applicationId          = $this->application->id ?? 'N/A';
 
         $subject = __('Permohonan :appType Anda Diluluskan (#:appId)', ['appType' => $applicationTypeDisplay, 'appId' => $applicationId]);
 
@@ -89,14 +88,14 @@ final class ApplicationApproved extends Notification implements ShouldQueue
      */
     public function toArray(User $notifiable): array
     {
-        $applicationId = $this->application->id ?? null;
-        $applicationMorphClass = $this->application->getMorphClass();
+        $applicationId          = $this->application->id ?? null;
+        $applicationMorphClass  = $this->application->getMorphClass();
         $applicationTypeDisplay = __('Permohonan Pinjaman Peralatan ICT'); // Simplified
 
         $applicantName = $this->application->user?->name ?? __('Pemohon');
 
-        $applicationUrl = '#';
-        $routeName = '';
+        $applicationUrl  = '#';
+        $routeName       = '';
         $routeParameters = [];
 
         if ($applicationId) {
@@ -104,7 +103,7 @@ final class ApplicationApproved extends Notification implements ShouldQueue
             $isLoanApp = $this->application instanceof LoanApplication;
 
             if ($isLoanApp) {
-                $routeName = 'resource-management.my-applications.loan.show';
+                $routeName       = 'resource-management.my-applications.loan.show';
                 $routeParameters = ['loan_application' => $applicationId];
             }
             // Removed else block for EmailApplication
@@ -114,18 +113,18 @@ final class ApplicationApproved extends Notification implements ShouldQueue
                     $applicationUrl = route($routeName, $routeParameters);
                 } catch (\Exception $e) {
                     Log::error('Error generating URL for ApplicationApproved toArray: '.$e->getMessage(), [
-                        'exception' => $e,
-                        'application_id' => $applicationId,
+                        'exception'        => $e,
+                        'application_id'   => $applicationId,
                         'application_type' => $applicationMorphClass,
-                        'route_name' => $routeName,
+                        'route_name'       => $routeName,
                     ]);
                     $applicationUrl = '#';
                 }
             } elseif ($routeName !== '' && $routeName !== '0') {
                 Log::warning('Route not found for in-app ApplicationApproved notification.', [
-                    'application_id' => $applicationId,
+                    'application_id'   => $applicationId,
                     'application_type' => $applicationMorphClass,
-                    'route_name' => $routeName,
+                    'route_name'       => $routeName,
                 ]);
             }
         }
@@ -137,8 +136,8 @@ final class ApplicationApproved extends Notification implements ShouldQueue
 
     private function getActionUrl(): string
     {
-        $viewUrl = '#';
-        $routeName = 'resource-management.my-applications.loan.show';
+        $viewUrl         = '#';
+        $routeName       = 'resource-management.my-applications.loan.show';
         $routeParameters = ['loan_application' => $this->application->id];
 
         if (Route::has($routeName)) {
@@ -146,7 +145,7 @@ final class ApplicationApproved extends Notification implements ShouldQueue
                 $viewUrl = route($routeName, $routeParameters);
             } catch (\Exception $e) {
                 Log::error('Error generating URL for ApplicationApproved mail: '.$e->getMessage(), [
-                    'application_id' => $this->application->id,
+                    'application_id'   => $this->application->id,
                     'application_type' => $this->application->getMorphClass(),
                 ]);
             }

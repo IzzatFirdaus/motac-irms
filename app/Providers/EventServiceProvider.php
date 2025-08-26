@@ -1,4 +1,5 @@
 <?php
+
 // EventServiceProvider.php
 
 namespace App\Providers;
@@ -9,6 +10,11 @@ use App\Models\Department;
 use App\Models\Equipment;
 use App\Models\EquipmentCategory;
 use App\Models\Grade;
+use App\Models\HelpdeskAttachment;
+use App\Models\HelpdeskCategory;
+use App\Models\HelpdeskComment;
+use App\Models\HelpdeskPriority;
+use App\Models\HelpdeskTicket;
 use App\Models\Import;
 use App\Models\LoanApplication;
 use App\Models\LoanApplicationItem;
@@ -16,17 +22,12 @@ use App\Models\LoanTransaction;
 use App\Models\LoanTransactionItem;
 use App\Models\Location as EquipmentLocation;
 use App\Models\Notification as CustomNotification;
+// Helpdesk Models
 use App\Models\Position;
 use App\Models\Setting;
 use App\Models\SubCategory as EquipmentSubCategory;
 use App\Models\User;
 use App\Observers\BlameableObserver;
-// Helpdesk Models
-use App\Models\HelpdeskTicket;
-use App\Models\HelpdeskCategory;
-use App\Models\HelpdeskPriority;
-use App\Models\HelpdeskComment;
-use App\Models\HelpdeskAttachment;
 
 // Laravel Events & Listeners
 use Illuminate\Auth\Events\Registered;
@@ -59,38 +60,38 @@ class EventServiceProvider extends ServiceProvider
      */
     protected $observers = [
         // User & HR Models
-        User::class => [BlameableObserver::class],
+        User::class       => [BlameableObserver::class],
         Department::class => [BlameableObserver::class],
-        Position::class => [BlameableObserver::class],
-        Grade::class => [BlameableObserver::class],
+        Position::class   => [BlameableObserver::class],
+        Grade::class      => [BlameableObserver::class],
 
         // Loan Application & Transaction Models
-        LoanApplication::class => [BlameableObserver::class],
+        LoanApplication::class     => [BlameableObserver::class],
         LoanApplicationItem::class => [BlameableObserver::class],
-        LoanTransaction::class => [BlameableObserver::class],
+        LoanTransaction::class     => [BlameableObserver::class],
         LoanTransactionItem::class => [BlameableObserver::class],
 
         // Approval Model
         Approval::class => [BlameableObserver::class],
 
         // Inventory & Supporting Models
-        Equipment::class => [BlameableObserver::class],
-        EquipmentCategory::class => [BlameableObserver::class],
+        Equipment::class            => [BlameableObserver::class],
+        EquipmentCategory::class    => [BlameableObserver::class],
         EquipmentSubCategory::class => [BlameableObserver::class],
-        EquipmentLocation::class => [BlameableObserver::class],
+        EquipmentLocation::class    => [BlameableObserver::class],
 
         // System Utility Models
         Setting::class => [BlameableObserver::class],
-        Import::class => [BlameableObserver::class],
+        Import::class  => [BlameableObserver::class],
 
         // Custom Notification Model for audit trails
         CustomNotification::class => [BlameableObserver::class],
 
         // Helpdesk Models as per v4.0 transformation plan
-        HelpdeskTicket::class => [BlameableObserver::class],
-        HelpdeskCategory::class => [BlameableObserver::class],
-        HelpdeskPriority::class => [BlameableObserver::class],
-        HelpdeskComment::class => [BlameableObserver::class],
+        HelpdeskTicket::class     => [BlameableObserver::class],
+        HelpdeskCategory::class   => [BlameableObserver::class],
+        HelpdeskPriority::class   => [BlameableObserver::class],
+        HelpdeskComment::class    => [BlameableObserver::class],
         HelpdeskAttachment::class => [BlameableObserver::class],
     ];
 

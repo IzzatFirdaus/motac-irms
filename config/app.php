@@ -40,7 +40,7 @@ return [
     | Application URL & Asset URL
     |--------------------------------------------------------------------------
     */
-    'url' => env('APP_URL', 'http://localhost'),
+    'url'       => env('APP_URL', 'http://localhost'),
     'asset_url' => env('ASSET_URL'),
 
     /*
@@ -57,7 +57,7 @@ return [
     | Defines the default and fallback locales used by Laravel.
     | The 'available_locales' array is used for language switching UI.
     */
-    'locale' => env('APP_LOCALE', 'ms'),
+    'locale'          => env('APP_LOCALE', 'ms'),
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
 
     /*
@@ -68,24 +68,24 @@ return [
     */
     'available_locales' => [
         'ms' => [
-            'name' => 'Bahasa Melayu',
-            'script' => 'Latn',
-            'native' => 'Bahasa Melayu',
-            'regional' => 'ms_MY',
-            'flag' => 'my',
+            'name'      => 'Bahasa Melayu',
+            'script'    => 'Latn',
+            'native'    => 'Bahasa Melayu',
+            'regional'  => 'ms_MY',
+            'flag'      => 'my',
             'flag_code' => 'my',
             'direction' => 'ltr',
-            'key' => 'ms'
+            'key'       => 'ms',
         ],
         'en' => [
-            'name' => 'English',
-            'script' => 'Latn',
-            'native' => 'English',
-            'regional' => 'en_US',
-            'flag' => 'us',
+            'name'      => 'English',
+            'script'    => 'Latn',
+            'native'    => 'English',
+            'regional'  => 'en_US',
+            'flag'      => 'us',
             'flag_code' => 'us',
             'direction' => 'ltr',
-            'key' => 'en'
+            'key'       => 'en',
         ],
     ],
 
@@ -101,7 +101,7 @@ return [
     | Encryption Key & Cipher
     |--------------------------------------------------------------------------
     */
-    'key' => env('APP_KEY'),
+    'key'    => env('APP_KEY'),
     'cipher' => 'AES-256-CBC',
 
     /*
@@ -158,11 +158,11 @@ return [
     */
     'date_formats' => [
         'date_format_my_short' => 'd M Y',
-        'date_format_my_long' => 'j F Y, l',
-        'datetime_format_my' => 'd M Y, h:i A',
-        'time_format_24h' => 'H:i',
-        'time_format_12h' => 'h:i A',
-        'full_datetime' => 'd M Y \a\t h:i A',
+        'date_format_my_long'  => 'j F Y, l',
+        'datetime_format_my'   => 'd M Y, h:i A',
+        'time_format_24h'      => 'H:i',
+        'time_format_12h'      => 'h:i A',
+        'full_datetime'        => 'd M Y \a\t h:i A',
     ],
 
     /*
@@ -172,40 +172,40 @@ return [
     | Contains branding, contact, and system-specific configuration.
     */
     'custom_settings' => [
-        'organization_name' => 'Kementerian Pelancongan, Seni dan Budaya Malaysia',
+        'organization_name'       => 'Kementerian Pelancongan, Seni dan Budaya Malaysia',
         'organization_short_name' => 'MOTAC',
-        'division_name' => 'Bahagian Pengurusan Maklumat',
-        'division_short_name' => 'BPM',
-        'system_description' => 'Sistem Pengurusan Sumber Bersepadu MOTAC untuk pengurusan pinjaman peralatan ICT dan sistem meja bantuan.',
-        'system_version' => env('APP_VERSION', '4.0.0'),
-        'default_language' => 'ms',
-        'branding' => [
-            'primary_color' => '#0047AB',
+        'division_name'           => 'Bahagian Pengurusan Maklumat',
+        'division_short_name'     => 'BPM',
+        'system_description'      => 'Sistem Pengurusan Sumber Bersepadu MOTAC untuk pengurusan pinjaman peralatan ICT dan sistem meja bantuan.',
+        'system_version'          => env('APP_VERSION', '4.0.0'),
+        'default_language'        => 'ms',
+        'branding'                => [
+            'primary_color'   => '#0047AB',
             'secondary_color' => '#FFD700',
-            'accent_color' => '#28a745',
-            'warning_color' => '#ffc107',
-            'danger_color' => '#dc3545',
-            'logo_url' => env('APP_LOGO_URL', '/assets/img/motac-logo.png'),
-            'favicon_url' => env('APP_FAVICON_URL', '/assets/img/favicon.ico'),
-            'theme' => env('APP_THEME', 'theme-motac'),
+            'accent_color'    => '#28a745',
+            'warning_color'   => '#ffc107',
+            'danger_color'    => '#dc3545',
+            'logo_url'        => env('APP_LOGO_URL', '/assets/img/motac-logo.png'),
+            'favicon_url'     => env('APP_FAVICON_URL', '/assets/img/favicon.ico'),
+            'theme'           => env('APP_THEME', 'theme-motac'),
         ],
         'contact' => [
-            'email' => env('CONTACT_EMAIL', 'bpm@motac.gov.my'),
-            'phone' => env('CONTACT_PHONE', '+603-8891 7200'),
-            'address' => 'Tingkat 10, Blok D, Kompleks Kerja Raya, Jalan Sultan Salahuddin, 50580 Kuala Lumpur',
+            'email'        => env('CONTACT_EMAIL', 'bpm@motac.gov.my'),
+            'phone'        => env('CONTACT_PHONE', '+603-8891 7200'),
+            'address'      => 'Tingkat 10, Blok D, Kompleks Kerja Raya, Jalan Sultan Salahuddin, 50580 Kuala Lumpur',
             'office_hours' => 'Isnin - Jumaat: 8:00 AM - 5:00 PM',
         ],
         'limits' => [
-            'max_loan_duration_days' => 90,
+            'max_loan_duration_days'  => 90,
             'max_file_upload_size_mb' => 2,
             'session_timeout_minutes' => 120,
-            'max_equipment_per_loan' => 10,
+            'max_equipment_per_loan'  => 10,
         ],
         // Helpdesk-specific settings
         'helpdesk' => [
             'default_category' => env('HELPDESK_DEFAULT_CATEGORY', 'General'),
             'default_priority' => env('HELPDESK_DEFAULT_PRIORITY', 'Medium'),
-            'support_email' => env('HELPDESK_SUPPORT_EMAIL', 'helpdesk@motac.gov.my'),
+            'support_email'    => env('HELPDESK_SUPPORT_EMAIL', 'helpdesk@motac.gov.my'),
         ],
     ],
 
@@ -218,7 +218,7 @@ return [
     'translation' => [
         'use_suffixed_files' => true, // Use app_en.php, dashboard_en.php, etc.
         'cache_translations' => env('CACHE_TRANSLATIONS', true),
-        'fallback_behavior' => 'graceful',
-        'log_missing_keys' => env('LOG_MISSING_TRANSLATIONS', true),
+        'fallback_behavior'  => 'graceful',
+        'log_missing_keys'   => env('LOG_MISSING_TRANSLATIONS', true),
     ],
 ];

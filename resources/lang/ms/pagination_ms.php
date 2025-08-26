@@ -1,4 +1,5 @@
 <?php
+
 // Bahasa Melayu translations for pagination controls
 // Disusun untuk kemudahan navigasi halaman
 

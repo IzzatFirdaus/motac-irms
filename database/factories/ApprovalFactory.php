@@ -30,14 +30,14 @@ class ApprovalFactory extends Factory
     {
         // Static cache for User IDs to avoid repeated DB queries
         static $userIds;
-        if (!isset($userIds)) {
+        if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $officerId = !empty($userIds) ? Arr::random($userIds) : null;
+        $officerId = ! empty($userIds) ? Arr::random($userIds) : null;
 
         // Static faker for Malay locale
         static $msFaker;
-        if (!$msFaker) {
+        if (! $msFaker) {
             $msFaker = \Faker\Factory::create('ms_MY');
         }
 
@@ -50,10 +50,10 @@ class ApprovalFactory extends Factory
         $statusKeys = method_exists(Approval::class, 'getStatusKeys')
             ? Approval::getStatusKeys()
             : array_keys(Approval::$STATUSES_LABELS ?? [
-                Approval::STATUS_PENDING => 'Pending',
-                Approval::STATUS_APPROVED => 'Approved',
-                Approval::STATUS_REJECTED => 'Rejected',
-                Approval::STATUS_CANCELED => 'Canceled',
+                Approval::STATUS_PENDING   => 'Pending',
+                Approval::STATUS_APPROVED  => 'Approved',
+                Approval::STATUS_REJECTED  => 'Rejected',
+                Approval::STATUS_CANCELED  => 'Canceled',
                 Approval::STATUS_FORWARDED => 'Forwarded',
             ]);
         $status = $this->faker->randomElement($statusKeys);
@@ -63,9 +63,9 @@ class ApprovalFactory extends Factory
         $updatedAt = Carbon::parse($this->faker->dateTimeBetween($createdAt, 'now'));
 
         // Decision timestamps (nullable, set according to status)
-        $approvedAt = $status === Approval::STATUS_APPROVED ? Carbon::parse($this->faker->dateTimeBetween($createdAt, $updatedAt)) : null;
-        $rejectedAt = $status === Approval::STATUS_REJECTED ? Carbon::parse($this->faker->dateTimeBetween($createdAt, $updatedAt)) : null;
-        $canceledAt = $status === Approval::STATUS_CANCELED ? Carbon::parse($this->faker->dateTimeBetween($createdAt, $updatedAt)) : null;
+        $approvedAt    = $status === Approval::STATUS_APPROVED ? Carbon::parse($this->faker->dateTimeBetween($createdAt, $updatedAt)) : null;
+        $rejectedAt    = $status === Approval::STATUS_REJECTED ? Carbon::parse($this->faker->dateTimeBetween($createdAt, $updatedAt)) : null;
+        $canceledAt    = $status === Approval::STATUS_CANCELED ? Carbon::parse($this->faker->dateTimeBetween($createdAt, $updatedAt)) : null;
         $resubmittedAt = $status === Approval::STATUS_FORWARDED ? Carbon::parse($this->faker->dateTimeBetween($createdAt, $updatedAt)) : null;
 
         return [
@@ -96,7 +96,7 @@ class ApprovalFactory extends Factory
         return $this->state(function (array $attributes) use ($statusValue): array {
             $now = now();
             static $msFaker;
-            if (!$msFaker) {
+            if (! $msFaker) {
                 $msFaker = \Faker\Factory::create('ms_MY');
             }
             $data = [
@@ -105,17 +105,18 @@ class ApprovalFactory extends Factory
             // Set timestamp/notes based on status
             if ($statusValue === Approval::STATUS_APPROVED) {
                 $data['approved_at'] = $attributes['approved_at'] ?? $now;
-                $data['notes'] = $attributes['notes'] ?? $msFaker->optional()->sentence();
+                $data['notes']       = $attributes['notes']       ?? $msFaker->optional()->sentence();
             } elseif ($statusValue === Approval::STATUS_REJECTED) {
                 $data['rejected_at'] = $attributes['rejected_at'] ?? $now;
-                $data['notes'] = $attributes['notes'] ?? $msFaker->sentence();
+                $data['notes']       = $attributes['notes']       ?? $msFaker->sentence();
             } elseif ($statusValue === Approval::STATUS_CANCELED) {
                 $data['canceled_at'] = $attributes['canceled_at'] ?? $now;
-                $data['notes'] = $attributes['notes'] ?? $msFaker->optional()->sentence();
+                $data['notes']       = $attributes['notes']       ?? $msFaker->optional()->sentence();
             } elseif ($statusValue === Approval::STATUS_FORWARDED) {
                 $data['resubmitted_at'] = $attributes['resubmitted_at'] ?? $now;
-                $data['notes'] = $attributes['notes'] ?? $msFaker->optional()->sentence();
+                $data['notes']          = $attributes['notes']          ?? $msFaker->optional()->sentence();
             }
+
             return $data;
         });
     }
@@ -142,10 +143,10 @@ class ApprovalFactory extends Factory
     public function pending(): static
     {
         return $this->status(Approval::STATUS_PENDING)->state([
-            'notes' => null,
-            'approved_at' => null,
-            'rejected_at' => null,
-            'canceled_at' => null,
+            'notes'          => null,
+            'approved_at'    => null,
+            'rejected_at'    => null,
+            'canceled_at'    => null,
             'resubmitted_at' => null,
         ]);
     }
@@ -174,9 +175,10 @@ class ApprovalFactory extends Factory
         $validStages = method_exists(Approval::class, 'getStageKeys')
             ? Approval::getStageKeys()
             : array_keys(Approval::$STAGES_LABELS ?? []);
-        if (!in_array($stage, $validStages) && !empty($validStages)) {
+        if (! in_array($stage, $validStages) && ! empty($validStages)) {
             // Optionally log a warning here
         }
+
         return $this->state(['stage' => $stage]);
     }
 
@@ -186,10 +188,11 @@ class ApprovalFactory extends Factory
     public function deleted(): static
     {
         static $userIds;
-        if (!isset($userIds)) {
+        if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $deleterId = !empty($userIds) ? Arr::random($userIds) : null;
+        $deleterId = ! empty($userIds) ? Arr::random($userIds) : null;
+
         return $this->state([
             'deleted_at' => now(),
             'deleted_by' => $deleterId,
@@ -203,7 +206,7 @@ class ApprovalFactory extends Factory
     {
         return $this->state([
             'approvable_type' => $approvable->getMorphClass(),
-            'approvable_id' => $approvable->id,
+            'approvable_id'   => $approvable->id,
         ]);
     }
 }

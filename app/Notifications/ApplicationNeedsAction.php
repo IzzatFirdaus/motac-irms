@@ -19,6 +19,7 @@ class ApplicationNeedsAction extends Notification implements ShouldQueue
 
     /**
      * The approvable item, specifically a LoanApplication now that EmailApplications are removed.
+     *
      * @var LoanApplication|Model // More specific, but Model is fine if other types will exist later
      */
     public Model $approvableItem;
@@ -43,14 +44,14 @@ class ApplicationNeedsAction extends Notification implements ShouldQueue
 
         $subject = __('Tindakan Diperlukan: :itemType #:id', [
             'itemType' => $this->getItemTypeDisplayName($app), // Pass the application instance
-            'id' => $app->id,
+            'id'       => $app->id,
         ]);
 
         return (new MailMessage)
             ->subject($subject)
             ->view('emails.application-needs-action', [
                 'notification' => $this,
-                'notifiable' => $notifiable
+                'notifiable'   => $notifiable,
             ]);
     }
 
@@ -66,24 +67,21 @@ class ApplicationNeedsAction extends Notification implements ShouldQueue
         $app = $this->approvableItem;
 
         return [
-            'title' => 'Tindakan Kelulusan Diperlukan',
+            'title'   => 'Tindakan Kelulusan Diperlukan',
             'message' => __('Permohonan #:id oleh :applicantName menunggu tindakan anda.', [
-                'id' => $app->id,
+                'id'            => $app->id,
                 'applicantName' => optional($app->user)->name,
             ]),
-            'action_url' => $this->getActionUrl(),
+            'action_url'    => $this->getActionUrl(),
             'related_model' => $app->getMorphClass(),
-            'related_id' => $app->id,
-            'icon' => 'ti ti-alert-triangle', // Consider adding a default icon
+            'related_id'    => $app->id,
+            'icon'          => 'ti ti-alert-triangle', // Consider adding a default icon
         ];
     }
 
     /**
      * Get the display name for the approvable item type.
      * Updated to specifically handle LoanApplication.
-     *
-     * @param Model $approvableItem
-     * @return string
      */
     public function getItemTypeDisplayName(Model $approvableItem): string
     {

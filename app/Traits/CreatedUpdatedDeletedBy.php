@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 
 /**
- * Trait CreatedUpdatedDeletedBy
+ * Trait CreatedUpdatedDeletedBy.
  *
  * Provides automatic management of created_by, updated_by, and deleted_by fields
  * for Eloquent models using model events. This trait is an alternative or complement
@@ -46,7 +46,7 @@ trait CreatedUpdatedDeletedBy
             });
 
             static::restoring(function ($model) {
-                $userId = Auth::check() ? Auth::id() : null;
+                $userId            = Auth::check() ? Auth::id() : null;
                 $model->deleted_by = null;
                 if (! $model->isDirty('updated_by')) {
                     $model->updated_by = $userId;

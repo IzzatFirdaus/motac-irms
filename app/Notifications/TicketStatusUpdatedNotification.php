@@ -14,7 +14,9 @@ class TicketStatusUpdatedNotification extends Notification implements ShouldQueu
     use Queueable;
 
     protected HelpdeskTicket $ticket;
+
     protected User $updater;
+
     protected string $recipientType; // 'applicant' or 'agent'
 
     /**
@@ -22,8 +24,8 @@ class TicketStatusUpdatedNotification extends Notification implements ShouldQueu
      */
     public function __construct(HelpdeskTicket $ticket, User $updater, string $recipientType)
     {
-        $this->ticket = $ticket;
-        $this->updater = $updater;
+        $this->ticket        = $ticket;
+        $this->updater       = $updater;
         $this->recipientType = $recipientType;
     }
 
@@ -42,8 +44,8 @@ class TicketStatusUpdatedNotification extends Notification implements ShouldQueu
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $subject = "Helpdesk Ticket #{$this->ticket->id} Status Updated to '{$this->ticket->status}'";
-        $greeting = "Dear {$notifiable->name},";
+        $subject     = "Helpdesk Ticket #{$this->ticket->id} Status Updated to '{$this->ticket->status}'";
+        $greeting    = "Dear {$notifiable->name},";
         $updaterName = $this->updater->name;
 
         $message = '';
@@ -57,11 +59,11 @@ class TicketStatusUpdatedNotification extends Notification implements ShouldQueu
         }
 
         return (new MailMessage)
-                    ->subject($subject)
-                    ->greeting($greeting)
-                    ->line($message)
-                    ->action('View Ticket', url('/helpdesk/' . $this->ticket->id))
-                    ->line('Thank you.');
+            ->subject($subject)
+            ->greeting($greeting)
+            ->line($message)
+            ->action('View Ticket', url('/helpdesk/'.$this->ticket->id))
+            ->line('Thank you.');
     }
 
     /**
@@ -72,12 +74,12 @@ class TicketStatusUpdatedNotification extends Notification implements ShouldQueu
     public function toArray(object $notifiable): array
     {
         return [
-            'ticket_id' => $this->ticket->id,
-            'title' => $this->ticket->title,
-            'status' => $this->ticket->status,
+            'ticket_id'  => $this->ticket->id,
+            'title'      => $this->ticket->title,
+            'status'     => $this->ticket->status,
             'updated_by' => $this->updater->name,
-            'message' => "Ticket #{$this->ticket->id} status updated to '{$this->ticket->status}'.",
-            'url' => url('/helpdesk/' . $this->ticket->id),
+            'message'    => "Ticket #{$this->ticket->id} status updated to '{$this->ticket->status}'.",
+            'url'        => url('/helpdesk/'.$this->ticket->id),
         ];
     }
 }

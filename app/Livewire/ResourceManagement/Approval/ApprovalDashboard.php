@@ -16,7 +16,6 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
@@ -27,7 +26,7 @@ use Throwable;
 /**
  * ApprovalDashboard Livewire Component
  * Displays pending approval tasks and allows officers to record decisions.
- * Used for /approvals route as per routes/web.php
+ * Used for /approvals route as per routes/web.php.
  */
 #[Layout('layouts.app')]
 class ApprovalDashboard extends Component
@@ -77,7 +76,7 @@ class ApprovalDashboard extends Component
     {
         $this->authorize('viewAny', Approval::class);
         Log::info('Livewire\Approval\ApprovalDashboard: Approval dashboard loaded.', [
-            'user_id' => Auth::id(),
+            'user_id'    => Auth::id(),
             'ip_address' => request()->ip(),
         ]);
     }
@@ -135,8 +134,8 @@ class ApprovalDashboard extends Component
 
         Log::info(sprintf('Livewire\Approval\ApprovalDashboard: Fetched %d approval tasks for user %d.', $tasks->total(), $approver->id), [
             'filterStatus' => $this->filterStatus,
-            'filterType' => $this->filterType,
-            'searchTerm' => $this->searchTerm,
+            'filterType'   => $this->filterType,
+            'searchTerm'   => $this->searchTerm,
         ]);
 
         return $tasks;
@@ -151,25 +150,25 @@ class ApprovalDashboard extends Component
             $approvalTask = Approval::with('approvable.loanApplicationItems')->findOrFail($approvalId);
             $this->authorize('performApproval', $approvalTask);
 
-            $this->currentApprovalId = $approvalId;
+            $this->currentApprovalId   = $approvalId;
             $this->currentApprovalTask = $approvalTask;
-            $this->approvalDecision = $decisionType ?? '';
-            $this->approvalNotes = '';
+            $this->approvalDecision    = $decisionType ?? '';
+            $this->approvalNotes       = '';
 
             $this->approvalItems = [];
             if ($approvalTask->approvable instanceof LoanApplication) {
                 foreach ($approvalTask->approvable->loanApplicationItems as $item) {
                     $this->approvalItems[] = [
-                        'id' => $item->id,
-                        'equipment_id' => $item->equipment_id,
+                        'id'                 => $item->id,
+                        'equipment_id'       => $item->equipment_id,
                         'requested_quantity' => $item->quantity,
-                        'quantity_approved' => ($decisionType === Approval::STATUS_APPROVED) ? $item->quantity : 0,
-                        'equipment_name' => $item->equipment->brand.' '.$item->equipment->model.' ('.$item->equipment->tag_id.')',
+                        'quantity_approved'  => ($decisionType === Approval::STATUS_APPROVED) ? $item->quantity : 0,
+                        'equipment_name'     => $item->equipment->brand.' '.$item->equipment->model.' ('.$item->equipment->tag_id.')',
                     ];
                 }
             }
 
-            $this->modalTitle = ($decisionType === Approval::STATUS_APPROVED) ? 'Lulus Permohonan' : 'Tolak Permohonan';
+            $this->modalTitle        = ($decisionType === Approval::STATUS_APPROVED) ? 'Lulus Permohonan' : 'Tolak Permohonan';
             $this->showApprovalModal = true;
 
             Log::info(sprintf('Livewire\Approval\ApprovalDashboard: Opened approval modal for task %d with decision type %s.', $approvalId, $decisionType), [
@@ -214,7 +213,7 @@ class ApprovalDashboard extends Component
             $this->resetPage();
             Log::info(sprintf('Livewire\Approval\ApprovalDashboard: Approval decision recorded for task %d.', $this->currentApprovalId), [
                 'decision' => $this->approvalDecision,
-                'user_id' => $user->id,
+                'user_id'  => $user->id,
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             $this->dispatch('toastr', type: 'error', message: __('Sila semak semula borang kelulusan anda.'));
@@ -251,18 +250,19 @@ class ApprovalDashboard extends Component
 
         if ($this->approvalDecision === Approval::STATUS_APPROVED && $this->currentApprovalTask?->approvable instanceof LoanApplication) {
             foreach ($this->approvalItems as $index => $item) {
-                $maxQty = $item['requested_quantity'];
-                $rules['approvalItems.' . $index . '.quantity_approved'] = [
+                $maxQty                                              = $item['requested_quantity'];
+                $rules['approvalItems.'.$index.'.quantity_approved'] = [
                     'required',
                     'integer',
                     'min:0',
-                    'max:' . $maxQty,
+                    'max:'.$maxQty,
                 ];
             }
         }
 
         $validated = $this->validate($rules, $this->getValidationMessages());
         Log::debug('Livewire\Approval\ApprovalDashboard: Approval inputs validated.', ['validated' => $validated]);
+
         return $validated;
     }
 
@@ -272,20 +272,21 @@ class ApprovalDashboard extends Component
     protected function getValidationMessages(): array
     {
         $messages = [
-            'approvalNotes.max' => __('approvals.validation.notes_max'),
+            'approvalNotes.max'   => __('approvals.validation.notes_max'),
             'approvalItems.array' => __('approvals.validation.items_array'),
         ];
 
         if ($this->approvalDecision === Approval::STATUS_APPROVED && $this->currentApprovalTask?->approvable instanceof LoanApplication) {
             foreach ($this->approvalItems as $index => $item) {
-                $itemTypeDisplay = $item['equipment_name'] ?? 'Item';
-                $maxQty = $item['requested_quantity'];
-                $messages['approvalItems.' . $index . '.quantity_approved.required'] = __('approvals.validation.quantity_required', ['itemType' => $itemTypeDisplay]);
-                $messages['approvalItems.' . $index . '.quantity_approved.integer'] = __('approvals.validation.quantity_integer', ['itemType' => $itemTypeDisplay]);
-                $messages['approvalItems.' . $index . '.quantity_approved.min'] = __('approvals.validation.quantity_min', ['itemType' => $itemTypeDisplay]);
-                $messages['approvalItems.' . $index . '.quantity_approved.max'] = __('approvals.validation.quantity_max', ['itemType' => $itemTypeDisplay, 'max' => $maxQty]);
+                $itemTypeDisplay                                                 = $item['equipment_name'] ?? 'Item';
+                $maxQty                                                          = $item['requested_quantity'];
+                $messages['approvalItems.'.$index.'.quantity_approved.required'] = __('approvals.validation.quantity_required', ['itemType' => $itemTypeDisplay]);
+                $messages['approvalItems.'.$index.'.quantity_approved.integer']  = __('approvals.validation.quantity_integer', ['itemType' => $itemTypeDisplay]);
+                $messages['approvalItems.'.$index.'.quantity_approved.min']      = __('approvals.validation.quantity_min', ['itemType' => $itemTypeDisplay]);
+                $messages['approvalItems.'.$index.'.quantity_approved.max']      = __('approvals.validation.quantity_max', ['itemType' => $itemTypeDisplay, 'max' => $maxQty]);
             }
         }
+
         return $messages;
     }
 
@@ -295,15 +296,15 @@ class ApprovalDashboard extends Component
     public function getViewApplicationRoute(Approval $approvalTask): ?string
     {
         $approvable = $approvalTask->approvable;
-        if (!$approvable || !$approvable->id) {
+        if (! $approvable || ! $approvable->id) {
             return null;
         }
 
-        $routeName = null;
+        $routeName   = null;
         $routeParams = [];
 
         if ($approvable instanceof LoanApplication) {
-            $routeName = 'loan-applications.show';
+            $routeName   = 'loan-applications.show';
             $routeParams = ['loanApplication' => $approvable->id];
         }
 
@@ -311,10 +312,12 @@ class ApprovalDashboard extends Component
             try {
                 return route($routeName, $routeParams);
             } catch (\Exception $e) {
-                Log::error('Error generating getViewApplicationRoute: ' . $e->getMessage(), ['routeName' => $routeName, 'params' => $routeParams]);
+                Log::error('Error generating getViewApplicationRoute: '.$e->getMessage(), ['routeName' => $routeName, 'params' => $routeParams]);
+
                 return null;
             }
         }
+
         return null;
     }
 

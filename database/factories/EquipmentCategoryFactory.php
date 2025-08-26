@@ -24,16 +24,16 @@ class EquipmentCategoryFactory extends Factory
     {
         // Static cache for User IDs (for blameable columns)
         static $userIds;
-        if (!isset($userIds)) {
+        if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
 
         // Pick random user IDs or null if none exist
-        $auditUserId = !empty($userIds) ? Arr::random($userIds) : null;
+        $auditUserId = ! empty($userIds) ? Arr::random($userIds) : null;
 
         // Use a static Malaysian faker for realism and speed
         static $msFaker;
-        if (!$msFaker) {
+        if (! $msFaker) {
             $msFaker = \Faker\Factory::create('ms_MY');
         }
 
@@ -45,19 +45,19 @@ class EquipmentCategoryFactory extends Factory
         // Use a pool of common ICT equipment category names for realism
         $categoryNames = [
             'Komputer Riba', 'Projektor LCD', 'Pencetak', 'Peralatan Rangkaian',
-            'Peranti Input/Output', 'Storan Mudah Alih', 'Komputer Meja', 'Peralatan ICT Lain'
+            'Peranti Input/Output', 'Storan Mudah Alih', 'Komputer Meja', 'Peralatan ICT Lain',
         ];
 
         return [
-            'name' => $this->faker->unique()->randomElement($categoryNames) . ' ' . $this->faker->unique()->word(),
+            'name'        => $this->faker->unique()->randomElement($categoryNames).' '.$this->faker->unique()->word(),
             'description' => $msFaker->optional(0.8)->sentence(),
-            'is_active' => $this->faker->boolean(90),
-            'created_by' => $auditUserId,
-            'updated_by' => $auditUserId,
-            'deleted_by' => $isDeleted ? $auditUserId : null,
-            'created_at' => $createdAt,
-            'updated_at' => $updatedAt,
-            'deleted_at' => $deletedAt,
+            'is_active'   => $this->faker->boolean(90),
+            'created_by'  => $auditUserId,
+            'updated_by'  => $auditUserId,
+            'deleted_by'  => $isDeleted ? $auditUserId : null,
+            'created_at'  => $createdAt,
+            'updated_at'  => $updatedAt,
+            'deleted_at'  => $deletedAt,
         ];
     }
 
@@ -83,10 +83,11 @@ class EquipmentCategoryFactory extends Factory
     public function deleted(): static
     {
         static $userIds;
-        if (!isset($userIds)) {
+        if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $deleterId = !empty($userIds) ? Arr::random($userIds) : null;
+        $deleterId = ! empty($userIds) ? Arr::random($userIds) : null;
+
         return $this->state([
             'deleted_at' => now(),
             'deleted_by' => $deleterId,

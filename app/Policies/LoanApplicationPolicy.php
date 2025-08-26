@@ -36,12 +36,7 @@ class LoanApplicationPolicy
      */
     public function view(User $user, LoanApplication $loanApplication): Response|bool
     {
-        return $user->id === $loanApplication->user_id ||
-          $user->id === $loanApplication->responsible_officer_id ||
-          $user->id === $loanApplication->supporting_officer_id ||
-          ($loanApplication->current_approval_officer_id && $user->id === $loanApplication->current_approval_officer_id) ||
-          $user->hasRole(['BPM Staff', 'Approver', 'HOD']) ||
-          $user->can('view_loan_applications')
+        return $user->id === $loanApplication->user_id || $user->id === $loanApplication->responsible_officer_id || $user->id === $loanApplication->supporting_officer_id || ($loanApplication->current_approval_officer_id && $user->id === $loanApplication->current_approval_officer_id) || $user->hasRole(['BPM Staff', 'Approver', 'HOD']) || $user->can('view_loan_applications')
           ? Response::allow()
           : Response::deny(__('Anda tidak mempunyai kebenaran untuk melihat permohonan pinjaman ini.'));
     }
@@ -61,7 +56,7 @@ class LoanApplicationPolicy
      */
     public function update(User $user, LoanApplication $loanApplication): Response|bool
     {
-        $isOwner = $user->id === $loanApplication->user_id;
+        $isOwner          = $user->id                                               === $loanApplication->user_id;
         $isEditableStatus = $loanApplication->isDraft() || $loanApplication->status === LoanApplication::STATUS_REJECTED;
 
         return $isOwner && $isEditableStatus
@@ -104,8 +99,7 @@ class LoanApplicationPolicy
      */
     public function submit(User $user, LoanApplication $loanApplication): Response|bool
     {
-        $canSubmit = ($user->id === $loanApplication->user_id &&
-          ($loanApplication->isDraft() || $loanApplication->status === LoanApplication::STATUS_REJECTED));
+        $canSubmit = ($user->id === $loanApplication->user_id && ($loanApplication->isDraft() || $loanApplication->status === LoanApplication::STATUS_REJECTED));
 
         return $canSubmit
           ? Response::allow()
@@ -195,8 +189,7 @@ class LoanApplicationPolicy
      */
     public function processIssuance(User $user, LoanApplication $loanApplication): Response|bool
     {
-        $canProcess = $user->hasRole('BPM Staff') &&
-          in_array($loanApplication->status, [
+        $canProcess = $user->hasRole('BPM Staff') && in_array($loanApplication->status, [
               LoanApplication::STATUS_APPROVED,
               LoanApplication::STATUS_PARTIALLY_ISSUED,
           ]);
@@ -211,8 +204,7 @@ class LoanApplicationPolicy
      */
     public function processReturn(User $user, LoanApplication $loanApplication): Response|bool
     {
-        $canProcess = $user->hasRole('BPM Staff') &&
-          in_array($loanApplication->status, [
+        $canProcess = $user->hasRole('BPM Staff') && in_array($loanApplication->status, [
               LoanApplication::STATUS_ISSUED,
               LoanApplication::STATUS_PARTIALLY_ISSUED,
               LoanApplication::STATUS_OVERDUE,

@@ -7,20 +7,18 @@ use Illuminate\Support\Facades\Auth;
 
 class CheckPermission
 {
-  /**
-   * Handle an incoming request.
-   *
-   * @param  \Illuminate\Http\Request  $request
-   * @param  \Closure  $next
-   * @param  string  $permission
-   * @return mixed
-   */
-  public function handle($request, Closure $next, $permission)
-  {
-    if (!Auth::user() || !Auth::user()->can($permission)) {
-      abort(403, 'Unauthorized action.');
-    }
+    /**
+     * Handle an incoming request.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param string                   $permission
+     */
+    public function handle($request, Closure $next, $permission)
+    {
+        if (! Auth::user() || ! Auth::user()->can($permission)) {
+            abort(403, 'Unauthorized action.');
+        }
 
-    return $next($request);
-  }
+        return $next($request);
+    }
 }

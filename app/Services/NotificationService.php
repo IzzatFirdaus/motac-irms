@@ -4,40 +4,32 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Models\{
-    Approval,
-    EmailApplication,
-    LoanApplication,
-    LoanTransaction,
-    User,
-    HelpdeskTicket,
-    HelpdeskComment,
-    Equipment
-};
-use App\Notifications\{
-    ApplicationApproved,
-    ApplicationNeedsAction,
-    ApplicationRejected,
-    ApplicationStatusUpdatedNotification,
-    ApplicationSubmitted,
-    DefaultUserNotification,
-    EquipmentIncidentNotification,
-    EquipmentIssuedNotification,
-    EquipmentReturnedNotification,
-    EquipmentReturnReminderNotification,
-    EquipmentOverdueNotification,
-    LoanApplicationReadyForIssuanceNotification,
-    SupportPendingApprovalNotification,
-    TicketCreatedNotification,
-    TicketAssignedNotification,
-    TicketStatusUpdatedNotification,
-    TicketCommentAddedNotification
-};
+use App\Models\Approval;
+use App\Models\Equipment;
+use App\Models\HelpdeskComment;
+use App\Models\HelpdeskTicket;
+use App\Models\LoanApplication;
+use App\Models\LoanTransaction;
+use App\Models\User;
+use App\Notifications\ApplicationApproved;
+use App\Notifications\ApplicationNeedsAction;
+use App\Notifications\ApplicationRejected;
+use App\Notifications\ApplicationStatusUpdatedNotification;
+use App\Notifications\EquipmentIncidentNotification;
+use App\Notifications\EquipmentIssuedNotification;
+use App\Notifications\EquipmentOverdueNotification;
+use App\Notifications\EquipmentReturnedNotification;
+use App\Notifications\EquipmentReturnReminderNotification;
+use App\Notifications\LoanApplicationReadyForIssuanceNotification;
+use App\Notifications\SupportPendingApprovalNotification;
+use App\Notifications\TicketAssignedNotification;
+use App\Notifications\TicketCommentAddedNotification;
+use App\Notifications\TicketCreatedNotification;
+use App\Notifications\TicketStatusUpdatedNotification;
 use Exception;
-use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class NotificationService
 {
@@ -47,15 +39,12 @@ class NotificationService
             $user->notify($notification);
             Log::info("Notification sent to user {$user->id}.");
         } catch (Exception $e) {
-            Log::error("Failed to send notification to user {$user->id}: " . $e->getMessage(), ['exception' => $e]);
+            Log::error("Failed to send notification to user {$user->id}: ".$e->getMessage(), ['exception' => $e]);
         }
     }
 
     /**
      * Notify an approver that a new approval request is pending their action.
-     *
-     * @param User $approver
-     * @param Approval $approval
      */
     public function notifyApproverOfPendingApproval(User $approver, Approval $approval): void
     {
@@ -64,13 +53,11 @@ class NotificationService
 
     /**
      * Notify support officers that a new loan application is pending their review.
-     *
-     * @param LoanApplication $loanApplication
      */
     public function notifySupportOfPendingApproval(LoanApplication $loanApplication): void
     {
-    // Use the 'Supporting Officer' role name which exists in the system
-    $supportUsers = User::role('Supporting Officer')->get();
+        // Use the 'Supporting Officer' role name which exists in the system
+        $supportUsers = User::role('Supporting Officer')->get();
         foreach ($supportUsers as $supportUser) {
             $this->notifyUser($supportUser, new SupportPendingApprovalNotification($loanApplication));
         }
@@ -78,9 +65,6 @@ class NotificationService
 
     /**
      * Notify the applicant that their loan application has been approved.
-     *
-     * @param User $recipient
-     * @param LoanApplication $loanApplication
      */
     public function notifyApplicationApproved(User $recipient, LoanApplication $loanApplication): void
     {
@@ -90,10 +74,10 @@ class NotificationService
     /**
      * Notify the applicant that their loan application has been rejected.
      *
-     * @param User $recipient The user to notify (applicant)
+     * @param User            $recipient       The user to notify (applicant)
      * @param LoanApplication $loanApplication The application that was rejected
-     * @param string $rejectionReason The reason for rejection
-     * @param User|null $rejecter The user who rejected the application (optional)
+     * @param string          $rejectionReason The reason for rejection
+     * @param User|null       $rejecter        The user who rejected the application (optional)
      */
     public function notifyApplicationRejected(User $recipient, LoanApplication $loanApplication, string $rejectionReason, ?User $rejecter = null): void
     {
@@ -119,32 +103,26 @@ class NotificationService
         $this->notifyUser($recipient, $notification);
     }
 
-/**
- * Notify the applicant that their loan application status has been updated.
- *
- * @param User $recipient
- * @param LoanApplication $loanApplication
- * @param string $newStatus
- * @param string|null $reason (optional, not in constructor)
- */
-public function notifyApplicationStatusUpdated(User $recipient, LoanApplication $loanApplication, string $newStatus, ?string $reason = null): void
-{
-    // The ApplicationStatusUpdatedNotification constructor does not take $reason.
-    $notification = new ApplicationStatusUpdatedNotification(
-        $recipient,      // User
-        $loanApplication, // LoanApplication
-        $newStatus        // string
-        // $reason is not in the constructor, so do not pass it
-    );
+    /**
+     * Notify the applicant that their loan application status has been updated.
+     *
+     * @param string|null $reason (optional, not in constructor)
+     */
+    public function notifyApplicationStatusUpdated(User $recipient, LoanApplication $loanApplication, string $newStatus, ?string $reason = null): void
+    {
+        // The ApplicationStatusUpdatedNotification constructor does not take $reason.
+        $notification = new ApplicationStatusUpdatedNotification(
+            $recipient,      // User
+            $loanApplication, // LoanApplication
+            $newStatus        // string
+            // $reason is not in the constructor, so do not pass it
+        );
 
-    $this->notifyUser($recipient, $notification);
-}
+        $this->notifyUser($recipient, $notification);
+    }
 
     /**
      * Notify the applicant that their loan application is ready for issuance.
-     *
-     * @param User $recipient
-     * @param LoanApplication $loanApplication
      */
     public function notifyLoanApplicationReadyForIssuance(User $recipient, LoanApplication $loanApplication): void
     {
@@ -153,10 +131,6 @@ public function notifyApplicationStatusUpdated(User $recipient, LoanApplication 
 
     /**
      * Notify a user that equipment has been issued.
-     *
-     * @param User $recipient
-     * @param LoanApplication $loanApplication
-     * @param LoanTransaction $loanTransaction
      */
     public function notifyLoanIssued(User $recipient, LoanApplication $loanApplication, LoanTransaction $loanTransaction): void
     {
@@ -165,10 +139,6 @@ public function notifyApplicationStatusUpdated(User $recipient, LoanApplication 
 
     /**
      * Notify a user that equipment has been returned.
-     *
-     * @param User $recipient
-     * @param LoanApplication $loanApplication
-     * @param LoanTransaction $loanTransaction
      */
     public function notifyLoanReturned(User $recipient, LoanApplication $loanApplication, LoanTransaction $loanTransaction): void
     {
@@ -177,26 +147,16 @@ public function notifyApplicationStatusUpdated(User $recipient, LoanApplication 
 
     /**
      * Notify about an incident related to equipment.
-     *
-     * @param User $recipient
-     * @param LoanApplication $loanApplication
-     * @param Equipment $equipment
-     * @param string $incidentType
-     * @param string|null $notes
      */
     public function notifyEquipmentIncident(User $recipient, LoanApplication $loanApplication, Equipment $equipment, string $incidentType, ?string $notes = null): void
     {
-    // Ensure we pass an Eloquent Collection as required by the notification constructor
-    $collection = \App\Models\Equipment::whereIn('id', [$equipment->id])->get();
-    $this->notifyUser($recipient, new EquipmentIncidentNotification($loanApplication, $collection, $incidentType));
+        // Ensure we pass an Eloquent Collection as required by the notification constructor
+        $collection = \App\Models\Equipment::whereIn('id', [$equipment->id])->get();
+        $this->notifyUser($recipient, new EquipmentIncidentNotification($loanApplication, $collection, $incidentType));
     }
 
     /**
      * Notify a user about an upcoming equipment return date.
-     *
-     * @param User $recipient
-     * @param LoanApplication $loanApplication
-     * @param int $daysUntilReturn
      */
     public function notifyEquipmentReturnReminder(User $recipient, LoanApplication $loanApplication, int $daysUntilReturn): void
     {
@@ -205,10 +165,6 @@ public function notifyApplicationStatusUpdated(User $recipient, LoanApplication 
 
     /**
      * Notify a user about overdue equipment.
-     *
-     * @param User $recipient
-     * @param LoanTransaction $loanTransaction
-     * @param int $overdueDays
      */
     public function notifyEquipmentOverdue(User $recipient, LoanTransaction $loanTransaction, int $overdueDays): void
     {

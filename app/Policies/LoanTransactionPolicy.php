@@ -118,8 +118,8 @@ class LoanTransactionPolicy
      * Determine whether the user can process a return (view form and store).
      * This method is used by both the returnForm and storeReturn methods in the controller.
      *
-     * @param  \App\Models\User  $user  The authenticated user.
-     * @param  \App\Models\LoanTransaction  $issueLoanTransaction  The original ISSUE transaction being returned.
+     * @param \App\Models\User            $user                 The authenticated user.
+     * @param \App\Models\LoanTransaction $issueLoanTransaction The original ISSUE transaction being returned.
      */
     public function processReturn(User $user, LoanTransaction $issueLoanTransaction): Response
     {

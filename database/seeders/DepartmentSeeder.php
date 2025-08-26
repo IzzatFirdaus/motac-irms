@@ -25,40 +25,39 @@ class DepartmentSeeder extends Seeder
     {
         Log::info('Starting Department seeding...');
 
-            // Ensure at least one user exists for audit fields before creating departments
-            $this->ensureAuditUserExists();
+        // Ensure at least one user exists for audit fields before creating departments
+        $this->ensureAuditUserExists();
 
+        // Disable foreign key checks before truncating
+        \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
-            // Disable foreign key checks before truncating
-            \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-
-            // Truncate all child tables referencing departments
-            $childTables = [
-                'equipment',
-                'loan_applications',
-                'loan_transactions',
-                'helpdesk_tickets',
-                // Add other tables with department_id FK as needed
-            ];
-            foreach ($childTables as $table) {
-                if (\Schema::hasTable($table)) {
-                    \DB::table($table)->truncate();
-                }
+        // Truncate all child tables referencing departments
+        $childTables = [
+            'equipment',
+            'loan_applications',
+            'loan_transactions',
+            'helpdesk_tickets',
+            // Add other tables with department_id FK as needed
+        ];
+        foreach ($childTables as $table) {
+            if (\Schema::hasTable($table)) {
+                \DB::table($table)->truncate();
             }
+        }
 
-            // Now truncate departments
-            Department::truncate();
+        // Now truncate departments
+        Department::truncate();
 
-            // Re-enable foreign key checks
-            \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        // Re-enable foreign key checks
+        \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-            // Create predefined MOTAC departments
-            $this->createMotacDepartments();
+        // Create predefined MOTAC departments
+        $this->createMotacDepartments();
 
-            // Create additional random departments for testing
-            $this->createAdditionalDepartments();
+        // Create additional random departments for testing
+        $this->createAdditionalDepartments();
 
-            Log::info('Department seeding completed successfully.');
+        Log::info('Department seeding completed successfully.');
     }
 
     /**
@@ -73,14 +72,14 @@ class DepartmentSeeder extends Seeder
             // Create a simple audit user without complex relationships.
             // Use only valid enum value for 'status' (e.g. 'inactive').
             User::create([
-                'name' => 'Audit User (DeptSeeder)',
-                'email' => 'audit-deptseeder@motac.local',
-                'email_verified_at' => now(),
-                'password' => bcrypt('password'),
-                'title' => 'tuan',
+                'name'                  => 'Audit User (DeptSeeder)',
+                'email'                 => 'audit-deptseeder@motac.local',
+                'email_verified_at'     => now(),
+                'password'              => bcrypt('password'),
+                'title'                 => 'tuan',
                 'identification_number' => '999999999999',
-                'passport_number' => strtoupper(fake()->bothify('??########')),
-                'status' => 'inactive', // Use a valid ENUM value for status!
+                'passport_number'       => strtoupper(fake()->bothify('??########')),
+                'status'                => 'inactive', // Use a valid ENUM value for status!
             ]);
 
             Log::info('Audit user created successfully.');
@@ -117,20 +116,20 @@ class DepartmentSeeder extends Seeder
 
         foreach ($motacDepartments as $dept) {
             Department::create([
-                'name' => $dept['name'],
-                'code' => $dept['code'],
-                'branch_type' => $dept['branch_type'],
-                'description' => $dept['description'],
-                'is_active' => true,
+                'name'                  => $dept['name'],
+                'code'                  => $dept['code'],
+                'branch_type'           => $dept['branch_type'],
+                'description'           => $dept['description'],
+                'is_active'             => true,
                 'head_of_department_id' => null, // Can set later if needed
-                'created_by' => $auditUserId,
-                'updated_by' => $auditUserId,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_by'            => $auditUserId,
+                'updated_by'            => $auditUserId,
+                'created_at'            => now(),
+                'updated_at'            => now(),
             ]);
         }
 
-        Log::info('Created ' . count($motacDepartments) . ' predefined MOTAC departments.');
+        Log::info('Created '.count($motacDepartments).' predefined MOTAC departments.');
     }
 
     /**

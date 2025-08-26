@@ -12,16 +12,16 @@ use Illuminate\Support\Str;
 /**
  * Department Model.
  *
- * @property int $id
- * @property string $name
- * @property string|null $description
- * @property string|null $branch_type
- * @property string|null $code
- * @property bool $is_active
- * @property int|null $head_of_department_id
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
+ * @property int                             $id
+ * @property string                          $name
+ * @property string|null                     $description
+ * @property string|null                     $branch_type
+ * @property string|null                     $code
+ * @property bool                            $is_active
+ * @property int|null                        $head_of_department_id
+ * @property int|null                        $created_by
+ * @property int|null                        $updated_by
+ * @property int|null                        $deleted_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
@@ -38,11 +38,12 @@ class Department extends Model
     use HasFactory, SoftDeletes;
 
     public const BRANCH_TYPE_STATE = 'state';
+
     public const BRANCH_TYPE_HQ = 'headquarters';
 
     public static array $BRANCH_TYPE_LABELS = [
         self::BRANCH_TYPE_STATE => 'Pejabat Negeri',
-        self::BRANCH_TYPE_HQ => 'Ibu Pejabat',
+        self::BRANCH_TYPE_HQ    => 'Ibu Pejabat',
     ];
 
     protected $table = 'departments';
@@ -57,7 +58,7 @@ class Department extends Model
     ];
 
     protected $casts = [
-        'is_active' => 'boolean',
+        'is_active'  => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
@@ -103,10 +104,12 @@ class Department extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
     public function updater(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
+
     public function deleter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by');
@@ -122,7 +125,6 @@ class Department extends Model
 
     /**
      * Helpdesk tickets for this department.
-     * @return HasMany
      */
     public function tickets(): HasMany
     {

@@ -8,22 +8,27 @@ use Illuminate\Validation\Rule as ValidationRule;
 use Livewire\Component;
 
 /**
- * Positions Livewire Component
+ * Positions Livewire Component.
  *
  * Handles CRUD operations for positions in the organizational structure.
  */
 class Positions extends Component
 {
     public $positions = [];
+
     public ?Position $positionInstance = null;
 
     // Form fields
     public string $name = '';
+
     public ?string $description = null;
+
     public ?int $grade_id = null;
+
     public bool $is_active = true;
 
     public bool $isEditMode = false;
+
     public ?int $confirmedId = null;
 
     // Dropdown options
@@ -49,10 +54,10 @@ class Positions extends Component
         }
 
         return [
-            'name' => ['required', 'string', 'max:255', $nameRule],
+            'name'        => ['required', 'string', 'max:255', $nameRule],
             'description' => ['nullable', 'string', 'max:1000'],
-            'grade_id' => ['required', 'integer', 'exists:grades,id'],
-            'is_active' => ['boolean'],
+            'grade_id'    => ['required', 'integer', 'exists:grades,id'],
+            'is_active'   => ['boolean'],
         ];
     }
 
@@ -80,10 +85,10 @@ class Positions extends Component
         $this->validate();
 
         $data = [
-            'name' => $this->name,
+            'name'        => $this->name,
             'description' => $this->description,
-            'grade_id' => $this->grade_id,
-            'is_active' => $this->is_active,
+            'grade_id'    => $this->grade_id,
+            'is_active'   => $this->is_active,
         ];
 
         if ($this->isEditMode && $this->positionInstance instanceof Position) {
@@ -105,7 +110,7 @@ class Positions extends Component
     public function showNewPositionModal(): void
     {
         $this->resetForm();
-        $this->isEditMode = false;
+        $this->isEditMode       = false;
         $this->positionInstance = null;
         $this->dispatch('openModal', elementId: '#positionModal');
     }
@@ -116,13 +121,13 @@ class Positions extends Component
     public function showEditPositionModal(Position $position): void
     {
         $this->resetForm();
-        $this->isEditMode = true;
+        $this->isEditMode       = true;
         $this->positionInstance = $position;
 
-        $this->name = $position->name;
+        $this->name        = $position->name;
         $this->description = $position->description;
-        $this->grade_id = $position->grade_id;
-        $this->is_active = $position->is_active;
+        $this->grade_id    = $position->grade_id;
+        $this->is_active   = $position->is_active;
         $this->dispatch('openModal', elementId: '#positionModal');
     }
 
@@ -152,11 +157,11 @@ class Positions extends Component
     {
         $this->resetErrorBag();
         $this->resetValidation();
-        $this->name = '';
-        $this->description = null;
-        $this->grade_id = null;
-        $this->is_active = true;
+        $this->name             = '';
+        $this->description      = null;
+        $this->grade_id         = null;
+        $this->is_active        = true;
         $this->positionInstance = null;
-        $this->isEditMode = false;
+        $this->isEditMode       = false;
     }
 }

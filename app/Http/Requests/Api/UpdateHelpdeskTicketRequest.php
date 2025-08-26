@@ -22,7 +22,7 @@ class UpdateHelpdeskTicketRequest extends FormRequest
     /**
      * Determine if the user is authorized to make this request.
      * Consider implementing policy-based checks, e.g.:
-     * return $this->user()?->can('update', $this->route('ticket')) ?? false;
+     * return $this->user()?->can('update', $this->route('ticket')) ?? false;.
      */
     public function authorize(): bool
     {
@@ -41,10 +41,10 @@ class UpdateHelpdeskTicketRequest extends FormRequest
         $data = $this->all();
 
         // Map legacy keys to canonical attribute names used by the model/service
-        if (!isset($data['title']) && isset($data['subject'])) {
+        if (! isset($data['title']) && isset($data['subject'])) {
             $data['title'] = $data['subject'];
         }
-        if (!isset($data['resolution_notes']) && isset($data['resolution_details'])) {
+        if (! isset($data['resolution_notes']) && isset($data['resolution_details'])) {
             $data['resolution_notes'] = $data['resolution_details'];
         }
 
@@ -103,13 +103,14 @@ class UpdateHelpdeskTicketRequest extends FormRequest
                 'max:2000',
                 Rule::requiredIf(function () {
                     $status = $this->input('status');
+
                     return in_array($status, [HelpdeskTicket::STATUS_RESOLVED, HelpdeskTicket::STATUS_CLOSED], true);
                 }),
             ],
 
             // Assignment and scheduling
             'assigned_to_user_id' => ['sometimes', 'nullable', 'exists:users,id'],
-            'sla_due_at' => ['sometimes', 'nullable', 'date'],
+            'sla_due_at'          => ['sometimes', 'nullable', 'date'],
 
             // Attachments (5MB each)
             'attachments.*' => ['nullable', 'file', 'max:5120'],
@@ -122,15 +123,15 @@ class UpdateHelpdeskTicketRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'title' => __('Title'),
-            'description' => __('Description'),
-            'status' => __('Status'),
-            'resolution_notes' => __('Resolution notes'),
-            'category_id' => __('Category'),
-            'priority_id' => __('Priority'),
+            'title'               => __('Title'),
+            'description'         => __('Description'),
+            'status'              => __('Status'),
+            'resolution_notes'    => __('Resolution notes'),
+            'category_id'         => __('Category'),
+            'priority_id'         => __('Priority'),
             'assigned_to_user_id' => __('Assignee'),
-            'sla_due_at' => __('SLA due at'),
-            'attachments.*' => __('Attachment'),
+            'sla_due_at'          => __('SLA due at'),
+            'attachments.*'       => __('Attachment'),
         ];
     }
 

@@ -14,7 +14,7 @@ return new class extends Migration
     public function up(): void
     {
         $defaultAssetType = class_exists(Equipment::class) && defined(Equipment::class.'::ASSET_TYPE_OTHER_ICT') ? Equipment::ASSET_TYPE_OTHER_ICT : 'other_ict';
-        $defaultStatus = class_exists(Equipment::class) && defined(Equipment::class.'::STATUS_AVAILABLE') ? Equipment::STATUS_AVAILABLE : 'available';
+        $defaultStatus    = class_exists(Equipment::class)    && defined(Equipment::class.'::STATUS_AVAILABLE') ? Equipment::STATUS_AVAILABLE : 'available';
         $defaultCondition = class_exists(Equipment::class) && defined(Equipment::class.'::CONDITION_GOOD') ? Equipment::CONDITION_GOOD : 'good';
 
         Schema::create('equipment', function (Blueprint $table) use ($defaultAssetType, $defaultStatus, $defaultCondition): void {

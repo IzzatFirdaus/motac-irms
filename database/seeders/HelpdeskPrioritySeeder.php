@@ -29,12 +29,12 @@ class HelpdeskPrioritySeeder extends Seeder
 
         // Find or create an admin user for audit columns
         $adminUserForAudit = User::orderBy('id')->first();
-        $auditUserId = $adminUserForAudit?->id;
+        $auditUserId       = $adminUserForAudit?->id;
 
-        if (!$auditUserId) {
+        if (! $auditUserId) {
             // If no user exists, create a fallback audit user
             $adminUserForAudit = User::factory()->create(['name' => 'Audit User (HelpdeskPrioritySeeder)']);
-            $auditUserId = $adminUserForAudit->id;
+            $auditUserId       = $adminUserForAudit->id;
             Log::info(sprintf('Created a fallback audit user with ID %d for HelpdeskPrioritySeeder.', $auditUserId));
         } else {
             Log::info(sprintf('Using User ID %s for audit columns in HelpdeskPrioritySeeder.', $auditUserId));
@@ -75,6 +75,6 @@ class HelpdeskPrioritySeeder extends Seeder
             );
         }
 
-        Log::info('HelpdeskPriority seeding complete. Created/verified ' . count($priorities) . ' priorities.');
+        Log::info('HelpdeskPriority seeding complete. Created/verified '.count($priorities).' priorities.');
     }
 }

@@ -21,6 +21,7 @@ class LoanApplicationIssued extends Mailable implements ShouldQueue
     use Queueable, SerializesModels;
 
     public LoanApplication $loanApplication;
+
     public EloquentCollection $issueTransactions;
 
     public function __construct(LoanApplication $loanApplication)
@@ -38,13 +39,13 @@ class LoanApplicationIssued extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         $applicantName = $this->loanApplication->user?->name ?? 'Pemohon Tidak Diketahui';
-        $applicationId = $this->loanApplication->id ?? 'N/A';
+        $applicationId = $this->loanApplication->id          ?? 'N/A';
 
         return new Envelope(
             to: [new Address($this->loanApplication->user->email, $applicantName)],
             subject: __('Notifikasi Peralatan Pinjaman ICT Telah Dikeluarkan (Permohonan #:id - :name)', [
-                'id' => $applicationId,
-                'name' => $applicantName
+                'id'   => $applicationId,
+                'name' => $applicantName,
             ])
         );
     }
@@ -54,7 +55,7 @@ class LoanApplicationIssued extends Mailable implements ShouldQueue
         return new Content(
             view: 'emails.loan-application-issued',
             with: [
-                'loanApplication' => $this->loanApplication,
+                'loanApplication'   => $this->loanApplication,
                 'issueTransactions' => $this->issueTransactions,
             ]
         );

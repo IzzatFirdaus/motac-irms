@@ -31,12 +31,14 @@ class LoanTransactionSeeder extends Seeder
         // Ensure there are users and equipment before proceeding
         if (User::count() === 0 || Equipment::count() === 0) {
             Log::error('LoanTransactionSeeder requires at least one User and one Equipment record. Aborting.');
+
             return;
         }
 
         $officerIds = $this->getOfficerIds(); // SupportCollection of user IDs
         if ($officerIds->isEmpty()) {
             Log::error('No users available to act as officers. Aborting.');
+
             return;
         }
 
@@ -56,6 +58,7 @@ class LoanTransactionSeeder extends Seeder
      * Creates 'issue' transactions for approved/partially issued loan applications.
      *
      * @param SupportCollection $officerIds A list of officer user IDs to assign.
+     *
      * @return EloquentCollection<LoanTransaction> A collection of created issue transactions.
      */
     private function seedIssueTransactions(SupportCollection $officerIds): EloquentCollection
@@ -75,7 +78,7 @@ class LoanTransactionSeeder extends Seeder
             ->get()
             ->keyBy('id');
 
-        $issuedTransactions = new EloquentCollection();
+        $issuedTransactions = new EloquentCollection;
 
         Log::info(sprintf("Creating 'Issued' Loan Transactions for %s applications...", $approvedApplications->count()));
 
@@ -92,7 +95,7 @@ class LoanTransactionSeeder extends Seeder
                 ->asIssue()
                 ->forLoanApplication($application)
                 ->create([
-                    'issuing_officer_id' => $officerIds->random(),
+                    'issuing_officer_id'   => $officerIds->random(),
                     'receiving_officer_id' => $application->user_id,
                 ]);
 
@@ -141,6 +144,7 @@ class LoanTransactionSeeder extends Seeder
         }
 
         Log::info(sprintf("Created %d 'Issued' Loan Transactions.", $issuedTransactions->count()));
+
         return $issuedTransactions;
     }
 
@@ -148,7 +152,6 @@ class LoanTransactionSeeder extends Seeder
      * Creates 'return' transactions for a subset of issued transactions.
      *
      * @param EloquentCollection<LoanTransaction> $issuedTransactions
-     * @param SupportCollection $officerIds
      */
     private function seedReturnTransactions(EloquentCollection $issuedTransactions, SupportCollection $officerIds): void
     {
@@ -177,7 +180,7 @@ class LoanTransactionSeeder extends Seeder
                 ->forLoanApplication($issueTransaction->loanApplication)
                 ->relatedTo($issueTransaction)
                 ->create([
-                    'returning_officer_id' => $issueTransaction->loanApplication->user_id,
+                    'returning_officer_id'        => $issueTransaction->loanApplication->user_id,
                     'return_accepting_officer_id' => $officerIds->random(),
                 ]);
 
@@ -185,6 +188,7 @@ class LoanTransactionSeeder extends Seeder
             foreach ($issueTransaction->loanTransactionItems as $issuedItem) {
                 if (! $issuedItem->equipment) {
                     Log::warning(sprintf('Skipping return for item ID %s due to missing equipment.', $issuedItem->id));
+
                     continue;
                 }
 
@@ -252,6 +256,7 @@ class LoanTransactionSeeder extends Seeder
 
         if ($ids->isEmpty()) {
             Log::warning('No BPM/Admin officers found. Falling back to all users.');
+
             return User::pluck('id'); // Support\Collection
         }
 

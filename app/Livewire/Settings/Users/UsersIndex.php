@@ -23,9 +23,13 @@ class UsersIndex extends Component
     use WithPagination;
 
     public string $search = '';
+
     public ?string $filterRole = null;
+
     public ?string $filterStatus = null;
+
     public array $rolesForFilter = [];
+
     public array $statusOptions = [];
 
     protected string $paginationTheme = 'bootstrap';
@@ -37,7 +41,7 @@ class UsersIndex extends Component
     {
         $this->authorize('viewAny', User::class);
         $this->rolesForFilter = Role::orderBy('name')->pluck('name', 'name')->all();
-        $this->statusOptions = User::getStatusOptions();
+        $this->statusOptions  = User::getStatusOptions();
     }
 
     /**
@@ -46,8 +50,8 @@ class UsersIndex extends Component
     public function getUsersListProperty()
     {
         $query = User::select([
-                'id', 'name', 'email', 'identification_number', 'status', 'title', 'department_id', 'profile_photo_path', /*, 'motac_email' */
-            ])
+            'id', 'name', 'email', 'identification_number', 'status', 'title', 'department_id', 'profile_photo_path', /* , 'motac_email' */
+        ])
             ->with(['department:id,name', 'roles:id,name'])
             ->orderBy('name', 'asc');
 
@@ -96,6 +100,7 @@ class UsersIndex extends Component
     public function redirectToCreateUser(): \Illuminate\Http\RedirectResponse
     {
         $this->authorize('create', User::class);
+
         return redirect()->route('settings.users.create');
     }
 
@@ -109,14 +114,15 @@ class UsersIndex extends Component
 
         if (Auth::id() === $user->id) {
             $this->dispatch('toastr', type: 'error', message: __('Anda tidak boleh memadam akaun anda sendiri.'));
+
             return;
         }
 
         $this->dispatch('open-delete-modal', [
-            'id' => $userId,
+            'id'              => $userId,
             'itemDescription' => __('pengguna').' '.$userName,
-            'deleteMethod' => 'deleteUser',
-            'modelClass' => User::class,
+            'deleteMethod'    => 'deleteUser',
+            'modelClass'      => User::class,
         ]);
     }
 
@@ -130,6 +136,7 @@ class UsersIndex extends Component
 
         if (Auth::id() === $user->id) {
             session()->flash('error', __('Anda tidak boleh memadam akaun anda sendiri.'));
+
             return;
         }
 
@@ -145,9 +152,9 @@ class UsersIndex extends Component
     public function render()
     {
         return view('livewire.settings.users.users-index', [
-            'usersList' => $this->usersList,
+            'usersList'      => $this->usersList,
             'rolesForFilter' => $this->rolesForFilter,
-            'statusOptions' => $this->statusOptions,
+            'statusOptions'  => $this->statusOptions,
         ]);
     }
 }

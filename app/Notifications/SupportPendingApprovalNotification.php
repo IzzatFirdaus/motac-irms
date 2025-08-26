@@ -2,8 +2,8 @@
 
 namespace App\Notifications;
 
-use Illuminate\Notifications\Notification;
 use App\Models\LoanApplication;
+use Illuminate\Notifications\Notification;
 
 class SupportPendingApprovalNotification extends Notification
 {
@@ -24,6 +24,6 @@ class SupportPendingApprovalNotification extends Notification
         return (new \Illuminate\Notifications\Messages\MailMessage)
             ->subject('Loan Application Pending Support Review')
             ->line('A new loan application requires support officer review.')
-            ->action('View Application', url('/loan-applications/' . $this->loanApplication->id));
+            ->action('View Application', url('/loan-applications/'.$this->loanApplication->id));
     }
 }

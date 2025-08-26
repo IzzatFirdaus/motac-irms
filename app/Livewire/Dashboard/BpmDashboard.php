@@ -6,14 +6,16 @@ use App\Models\Equipment;
 use Livewire\Component;
 
 /**
- * BPM Dashboard Livewire Component
+ * BPM Dashboard Livewire Component.
  *
  * Shows BPM inventory and outstanding loan data.
  */
 class BpmDashboard extends Component
 {
     public int $availableLaptopsCount = 0;
+
     public int $availableProjectorsCount = 0;
+
     public int $availablePrintersCount = 0;
 
     public function mount(): void

@@ -3,17 +3,17 @@
 namespace App\Http\Controllers\Helpdesk;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Helpdesk\StoreHelpdeskTicketRequest;
+use App\Http\Requests\Helpdesk\UpdateHelpdeskTicketRequest;
 use App\Models\HelpdeskTicket;
 use App\Services\HelpdeskService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
-use App\Http\Requests\Helpdesk\StoreHelpdeskTicketRequest;
-use App\Http\Requests\Helpdesk\UpdateHelpdeskTicketRequest;
 
 /**
- * TicketController
+ * TicketController.
  *
  * Handles the main Helpdesk ticket web interface (non-API).
  * Most business logic is delegated to the HelpdeskService or Livewire components.
@@ -70,7 +70,7 @@ class TicketController extends Controller
 
             Log::info('Helpdesk Web: Ticket created successfully.', [
                 'ticket_id' => $ticket->id,
-                'user_id' => $user->id,
+                'user_id'   => $user->id,
             ]);
 
             return redirect()->route('helpdesk.tickets.show', $ticket)
@@ -78,9 +78,10 @@ class TicketController extends Controller
         } catch (\Exception $e) {
             Log::error('Helpdesk Web: Failed to create ticket.', [
                 'user_id' => $user->id,
-                'error' => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ]);
-            return back()->with('error', __('Gagal menghantar tiket bantuan: ') . $e->getMessage())
+
+            return back()->with('error', __('Gagal menghantar tiket bantuan: ').$e->getMessage())
                 ->withInput();
         }
     }
@@ -94,6 +95,7 @@ class TicketController extends Controller
         $this->authorize('view', $ticket);
         // Optionally eager load relations for display, e.g. category, priority, comments
         $ticket->load(['category', 'priority', 'applicant', 'assignedTo', 'comments', 'attachments']);
+
         return view('helpdesk.show', compact('ticket'));
     }
 
@@ -106,6 +108,7 @@ class TicketController extends Controller
         $this->authorize('update', $ticket);
         // Optionally eager load for form display
         $ticket->load(['category', 'priority', 'assignedTo']);
+
         return view('helpdesk.edit', compact('ticket'));
     }
 
@@ -131,7 +134,7 @@ class TicketController extends Controller
 
             Log::info('Helpdesk Web: Ticket updated successfully.', [
                 'ticket_id' => $ticket->id,
-                'user_id' => $user->id,
+                'user_id'   => $user->id,
             ]);
 
             return redirect()->route('helpdesk.tickets.show', $ticket)
@@ -139,11 +142,11 @@ class TicketController extends Controller
         } catch (\Exception $e) {
             Log::error('Helpdesk Web: Failed to update ticket.', [
                 'ticket_id' => $ticket->id,
-                'user_id' => $user->id,
-                'error' => $e->getMessage(),
+                'user_id'   => $user->id,
+                'error'     => $e->getMessage(),
             ]);
 
-            return back()->with('error', __('Gagal mengemaskini tiket: ') . $e->getMessage())
+            return back()->with('error', __('Gagal mengemaskini tiket: ').$e->getMessage())
                 ->withInput();
         }
     }
@@ -160,7 +163,7 @@ class TicketController extends Controller
 
             Log::info('Helpdesk Web: Ticket deleted (soft) successfully.', [
                 'ticket_id' => $ticket->id,
-                'user_id' => Auth::id(),
+                'user_id'   => Auth::id(),
             ]);
 
             return redirect()->route('helpdesk.tickets.index')
@@ -168,11 +171,11 @@ class TicketController extends Controller
         } catch (\Exception $e) {
             Log::error('Helpdesk Web: Failed to delete ticket.', [
                 'ticket_id' => $ticket->id,
-                'user_id' => Auth::id(),
-                'error' => $e->getMessage(),
+                'user_id'   => Auth::id(),
+                'error'     => $e->getMessage(),
             ]);
 
-            return back()->with('error', __('Gagal memadam tiket: ') . $e->getMessage());
+            return back()->with('error', __('Gagal memadam tiket: ').$e->getMessage());
         }
     }
 }

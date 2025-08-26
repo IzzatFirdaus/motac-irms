@@ -25,10 +25,10 @@ class StoreGradeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:50', Rule::unique('grades', 'name')->whereNull('deleted_at')],
-            'level' => ['required', 'integer', 'min:1', Rule::unique('grades', 'level')->whereNull('deleted_at')],
+            'name'                  => ['required', 'string', 'max:50', Rule::unique('grades', 'name')->whereNull('deleted_at')],
+            'level'                 => ['required', 'integer', 'min:1', Rule::unique('grades', 'level')->whereNull('deleted_at')],
             'min_approval_grade_id' => ['nullable', 'integer', Rule::exists('grades', 'id')],
-            'is_approver_grade' => ['required', 'boolean'],
+            'is_approver_grade'     => ['required', 'boolean'],
         ];
     }
 
@@ -40,14 +40,14 @@ class StoreGradeRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Nama Gred wajib diisi.',
-            'name.unique' => 'Nama Gred ini telah wujud.',
-            'level.required' => 'Tahap Gred wajib diisi.',
-            'level.integer' => 'Tahap Gred mestilah nombor.',
-            'level.min' => 'Tahap Gred mestilah sekurang-kurangnya 1.',
-            'level.unique' => 'Tahap Gred ini telah wujud.',
+            'name.required'                => 'Nama Gred wajib diisi.',
+            'name.unique'                  => 'Nama Gred ini telah wujud.',
+            'level.required'               => 'Tahap Gred wajib diisi.',
+            'level.integer'                => 'Tahap Gred mestilah nombor.',
+            'level.min'                    => 'Tahap Gred mestilah sekurang-kurangnya 1.',
+            'level.unique'                 => 'Tahap Gred ini telah wujud.',
             'min_approval_grade_id.exists' => 'Gred Kelulusan Minima yang dipilih tidak sah.',
-            'is_approver_grade.required' => 'Status Gred Pelulus wajib dipilih.',
+            'is_approver_grade.required'   => 'Status Gred Pelulus wajib dipilih.',
         ];
     }
 }

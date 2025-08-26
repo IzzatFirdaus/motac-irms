@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Models;
@@ -18,17 +19,17 @@ use Illuminate\Support\Str;
  *
  * Stores notification records for notifiable entities (users, etc).
  *
- * @property string $id
- * @property string $type
- * @property string $notifiable_type
- * @property int $notifiable_id
- * @property array $data
+ * @property string                          $id
+ * @property string                          $type
+ * @property string                          $notifiable_type
+ * @property int                             $notifiable_id
+ * @property array                           $data
  * @property \Illuminate\Support\Carbon|null $read_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
+ * @property int|null                        $created_by
+ * @property int|null                        $updated_by
+ * @property int|null                        $deleted_by
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \Illuminate\Database\Eloquent\Model $notifiable
  * @property-read \App\Models\User|null $creator
@@ -40,7 +41,9 @@ final class Notification extends Model
     use HasFactory, SoftDeletes;
 
     public $incrementing = false;
+
     protected $keyType = 'string';
+
     protected $table = 'notifications';
 
     protected $fillable = [
@@ -56,8 +59,8 @@ final class Notification extends Model
     ];
 
     protected $casts = [
-        'data' => 'array',
-        'read_at' => 'datetime',
+        'data'       => 'array',
+        'read_at'    => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
@@ -83,7 +86,7 @@ final class Notification extends Model
 
         self::updating(function (self $model): void {
             if (Auth::check() && ! $model->isDirty('updated_by')) {
-                $user = Auth::user();
+                $user              = Auth::user();
                 $model->updated_by = $user->id;
             }
         });
@@ -91,7 +94,7 @@ final class Notification extends Model
         if (in_array(SoftDeletes::class, class_uses_recursive(self::class), true)) {
             self::deleting(function (self $model): void {
                 if (Auth::check()) {
-                    $user = Auth::user();
+                    $user              = Auth::user();
                     $model->deleted_by = $user->id;
                 }
             });
@@ -99,7 +102,7 @@ final class Notification extends Model
             self::restoring(function (self $model): void {
                 $model->deleted_by = null;
                 if (Auth::check()) {
-                    $user = Auth::user();
+                    $user              = Auth::user();
                     $model->updated_by = $user->id;
                 }
             });
@@ -123,10 +126,12 @@ final class Notification extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
     public function updater(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
+
     public function deleter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by');
@@ -139,8 +144,10 @@ final class Notification extends Model
     {
         if (is_null($this->read_at)) {
             $this->forceFill(['read_at' => $this->freshTimestamp()])->save();
+
             return true;
         }
+
         return false;
     }
 
@@ -151,8 +158,10 @@ final class Notification extends Model
     {
         if (! is_null($this->read_at)) {
             $this->forceFill(['read_at' => null])->save();
+
             return true;
         }
+
         return false;
     }
 

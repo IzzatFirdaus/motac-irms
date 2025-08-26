@@ -1,4 +1,5 @@
 <?php
+
 // English translations for pagination controls
 // Structured to match pagination_ms.php for easy localization
 

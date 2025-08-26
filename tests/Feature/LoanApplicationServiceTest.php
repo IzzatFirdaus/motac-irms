@@ -61,16 +61,16 @@ class LoanApplicationServiceTest extends TestCase
         $this->admin = User::factory()->create(); // Assumes a BlameableObserver is setting created_by
         $this->actingAs($this->admin); // Set a default user for blameable fields
 
-        $this->hod = User::factory()->create();
-        $this->department = Department::factory()->create(['head_of_department_id' => $this->hod->id]);
+        $this->hod            = User::factory()->create();
+        $this->department     = Department::factory()->create(['head_of_department_id' => $this->hod->id]);
         $this->applicantGrade = Grade::factory()->create(['name' => 'N19', 'level' => 19]);
-        $this->applicant = User::factory()->create([
+        $this->applicant      = User::factory()->create([
             'department_id' => $this->department->id,
-            'grade_id' => $this->applicantGrade->id,
+            'grade_id'      => $this->applicantGrade->id,
         ]);
 
         $this->supportingOfficerGrade = Grade::factory()->create(['name' => '41', 'level' => 41, 'is_approver_grade' => true]);
-        $this->supportingOfficer = User::factory()->create(['grade_id' => $this->supportingOfficerGrade->id]);
+        $this->supportingOfficer      = User::factory()->create(['grade_id' => $this->supportingOfficerGrade->id]);
 
         // Set mock config for minimum grade level for supporting officer in loans
         Config::set('motac.approval.min_loan_support_grade_level', 41);
@@ -83,17 +83,17 @@ class LoanApplicationServiceTest extends TestCase
     {
         $this->actingAs($this->applicant); // The applicant is performing the action
 
-        $equipment = Equipment::factory()->create(['status' => 'available']);
+        $equipment       = Equipment::factory()->create(['status' => 'available']);
         $applicationData = [
-            'purpose' => 'Unit Test Purpose - Draft',
-            'location' => 'Unit Test Location',
+            'purpose'         => 'Unit Test Purpose - Draft',
+            'location'        => 'Unit Test Location',
             'loan_start_date' => now()->addDays(2)->toDateTimeString(),
-            'loan_end_date' => now()->addDays(5)->toDateTimeString(),
-            'items' => [
+            'loan_end_date'   => now()->addDays(5)->toDateTimeString(),
+            'items'           => [
                 ['equipment_type' => $equipment->asset_type, 'quantity_requested' => 1, 'notes' => 'Draft item note'],
             ],
             'applicant_confirmation' => false, // For draft, this is false
-            'supporting_officer_id' => $this->supportingOfficer->id,
+            'supporting_officer_id'  => $this->supportingOfficer->id,
         ];
 
         $loanApplication = $this->loanApplicationService->createAndSubmitApplication(
@@ -123,10 +123,10 @@ class LoanApplicationServiceTest extends TestCase
         $this->actingAs($this->applicant);
 
         $draftApplication = LoanApplication::factory()->create([
-            'user_id' => $this->applicant->id,
-            'status' => LoanApplication::STATUS_DRAFT,
+            'user_id'                          => $this->applicant->id,
+            'status'                           => LoanApplication::STATUS_DRAFT,
             'applicant_confirmation_timestamp' => now(), // Crucial for submission
-            'supporting_officer_id' => $this->supportingOfficer->id,
+            'supporting_officer_id'            => $this->supportingOfficer->id,
         ]);
 
         $submittedApplication = $this->loanApplicationService->submitApplicationForApproval(
@@ -140,11 +140,11 @@ class LoanApplicationServiceTest extends TestCase
 
         // Check if an approval task was created
         $this->assertDatabaseHas('approvals', [
-            'approvable_id' => $submittedApplication->id,
+            'approvable_id'   => $submittedApplication->id,
             'approvable_type' => LoanApplication::class,
-            'officer_id' => $this->supportingOfficer->id,
-            'stage' => Approval::STAGE_LOAN_SUPPORT_REVIEW,
-            'status' => Approval::STATUS_PENDING,
+            'officer_id'      => $this->supportingOfficer->id,
+            'stage'           => Approval::STAGE_LOAN_SUPPORT_REVIEW,
+            'status'          => Approval::STATUS_PENDING,
         ]);
 
         // Assert correct notifications were sent
@@ -158,10 +158,10 @@ class LoanApplicationServiceTest extends TestCase
         $this->expectExceptionMessage(__('Perakuan pemohon mesti diterima sebelum penghantaran. Sila kemaskini draf dan sahkan perakuan.'));
 
         $application = LoanApplication::factory()->create([
-            'user_id' => $this->applicant->id,
-            'status' => LoanApplication::STATUS_DRAFT,
+            'user_id'                          => $this->applicant->id,
+            'status'                           => LoanApplication::STATUS_DRAFT,
             'applicant_confirmation_timestamp' => null, // Missing timestamp
-            'supporting_officer_id' => $this->supportingOfficer->id,
+            'supporting_officer_id'            => $this->supportingOfficer->id,
         ]);
 
         $this->loanApplicationService->submitApplicationForApproval($application, $this->applicant);
@@ -176,13 +176,13 @@ class LoanApplicationServiceTest extends TestCase
 
         $loanApplication = LoanApplication::factory()->create([
             'user_id' => $this->applicant->id,
-            'status' => LoanApplication::STATUS_DRAFT,
+            'status'  => LoanApplication::STATUS_DRAFT,
             'purpose' => 'Initial Purpose',
         ]);
         $updateData = [
-            'purpose' => 'Updated Purpose for Draft',
-            'location' => 'Updated Location',
-            'items' => [], // Assuming items are handled separately or synced
+            'purpose'               => 'Updated Purpose for Draft',
+            'location'              => 'Updated Location',
+            'items'                 => [], // Assuming items are handled separately or synced
             'supporting_officer_id' => $this->supportingOfficer->id,
         ];
 
@@ -204,13 +204,13 @@ class LoanApplicationServiceTest extends TestCase
 
         $rejectedApplication = LoanApplication::factory()->create([
             'user_id' => $this->applicant->id,
-            'status' => LoanApplication::STATUS_REJECTED,
+            'status'  => LoanApplication::STATUS_REJECTED,
             'purpose' => 'Purpose that was rejected',
         ]);
         $updateData = [
-            'purpose' => 'Corrected purpose for resubmission',
-            'location' => 'New location',
-            'items' => [],
+            'purpose'               => 'Corrected purpose for resubmission',
+            'location'              => 'New location',
+            'items'                 => [],
             'supporting_officer_id' => $this->supportingOfficer->id,
         ];
 
@@ -232,7 +232,7 @@ class LoanApplicationServiceTest extends TestCase
 
         $application = LoanApplication::factory()->create([
             'user_id' => $this->applicant->id,
-            'status' => LoanApplication::STATUS_PENDING_SUPPORT,
+            'status'  => LoanApplication::STATUS_PENDING_SUPPORT,
         ]);
         $updateData = ['purpose' => 'Trying to update submitted app'];
 
@@ -248,7 +248,7 @@ class LoanApplicationServiceTest extends TestCase
 
         $draftApplication = LoanApplication::factory()->create([
             'user_id' => $this->applicant->id,
-            'status' => LoanApplication::STATUS_DRAFT,
+            'status'  => LoanApplication::STATUS_DRAFT,
         ]);
         LoanApplicationItem::factory()->create(['loan_application_id' => $draftApplication->id]);
 
@@ -267,7 +267,7 @@ class LoanApplicationServiceTest extends TestCase
 
         $application = LoanApplication::factory()->create([
             'user_id' => $this->applicant->id,
-            'status' => LoanApplication::STATUS_PENDING_SUPPORT,
+            'status'  => LoanApplication::STATUS_PENDING_SUPPORT,
         ]);
 
         $this->loanApplicationService->deleteApplication($application, $this->applicant);

@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\LoanApplication;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -24,6 +23,7 @@ class LoanApplicationSeeder extends Seeder
         $userCount = User::count();
         if ($userCount === 0) {
             Log::error('No Users found. Cannot seed Loan Applications. Please run UserSeeder first.');
+
             return;
         }
 
@@ -36,14 +36,14 @@ class LoanApplicationSeeder extends Seeder
 
         // How many of each type to create
         $counts = [
-            'draft' => 15,
+            'draft'                     => 15,
             'certified_pending_support' => 10,
-            'approved_with_items' => 12,
-            'issued_with_items' => 8,
-            'returned_with_items' => 6,
-            'rejected' => 5,
-            'cancelled' => 3,
-            'deleted' => 2,
+            'approved_with_items'       => 12,
+            'issued_with_items'         => 8,
+            'returned_with_items'       => 6,
+            'rejected'                  => 5,
+            'cancelled'                 => 3,
+            'deleted'                   => 2,
         ];
 
         // 1. Draft applications (batch create, no after-creation hooks needed)
@@ -56,7 +56,7 @@ class LoanApplicationSeeder extends Seeder
                 // Randomize applicant
                 'user_id' => function () use (&$userIds) {
                     return array_pop($userIds) ?? User::inRandomOrder()->value('id');
-                }
+                },
             ]);
         Log::info("Created {$counts['draft']} draft loan applications.");
 
@@ -68,9 +68,9 @@ class LoanApplicationSeeder extends Seeder
             ->create([
                 'created_by' => $auditUserId,
                 'updated_by' => $auditUserId,
-                'user_id' => function () use (&$userIds) {
+                'user_id'    => function () use (&$userIds) {
                     return array_pop($userIds) ?? User::inRandomOrder()->value('id');
-                }
+                },
             ]);
         Log::info("Created {$counts['certified_pending_support']} certified & pending support loan applications.");
 
@@ -82,9 +82,9 @@ class LoanApplicationSeeder extends Seeder
             ->create([
                 'created_by' => $auditUserId,
                 'updated_by' => $auditUserId,
-                'user_id' => function () use (&$userIds) {
+                'user_id'    => function () use (&$userIds) {
                     return array_pop($userIds) ?? User::inRandomOrder()->value('id');
-                }
+                },
             ]);
         Log::info("Created {$counts['approved_with_items']} approved loan applications with items.");
 
@@ -96,9 +96,9 @@ class LoanApplicationSeeder extends Seeder
             ->create([
                 'created_by' => $auditUserId,
                 'updated_by' => $auditUserId,
-                'user_id' => function () use (&$userIds) {
+                'user_id'    => function () use (&$userIds) {
                     return array_pop($userIds) ?? User::inRandomOrder()->value('id');
-                }
+                },
             ]);
         Log::info("Created {$counts['issued_with_items']} issued loan applications with items.");
 
@@ -110,9 +110,9 @@ class LoanApplicationSeeder extends Seeder
             ->create([
                 'created_by' => $auditUserId,
                 'updated_by' => $auditUserId,
-                'user_id' => function () use (&$userIds) {
+                'user_id'    => function () use (&$userIds) {
                     return array_pop($userIds) ?? User::inRandomOrder()->value('id');
-                }
+                },
             ]);
         Log::info("Created {$counts['returned_with_items']} returned loan applications with items.");
 
@@ -123,9 +123,9 @@ class LoanApplicationSeeder extends Seeder
             ->create([
                 'created_by' => $auditUserId,
                 'updated_by' => $auditUserId,
-                'user_id' => function () use (&$userIds) {
+                'user_id'    => function () use (&$userIds) {
                     return array_pop($userIds) ?? User::inRandomOrder()->value('id');
-                }
+                },
             ]);
         Log::info("Created {$counts['rejected']} rejected loan applications.");
 
@@ -136,9 +136,9 @@ class LoanApplicationSeeder extends Seeder
             ->create([
                 'created_by' => $auditUserId,
                 'updated_by' => $auditUserId,
-                'user_id' => function () use (&$userIds) {
+                'user_id'    => function () use (&$userIds) {
                     return array_pop($userIds) ?? User::inRandomOrder()->value('id');
-                }
+                },
             ]);
         Log::info("Created {$counts['cancelled']} cancelled loan applications.");
 
@@ -150,9 +150,9 @@ class LoanApplicationSeeder extends Seeder
                 'created_by' => $auditUserId,
                 'updated_by' => $auditUserId,
                 'deleted_by' => $auditUserId,
-                'user_id' => function () use (&$userIds) {
+                'user_id'    => function () use (&$userIds) {
                     return array_pop($userIds) ?? User::inRandomOrder()->value('id');
-                }
+                },
             ]);
         Log::info("Created {$counts['deleted']} deleted loan applications.");
 

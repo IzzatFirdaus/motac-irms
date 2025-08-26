@@ -18,8 +18,11 @@ class EquipmentReport extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $filterStatus = '';
+
     public string $filterDepartment = '';
+
     public int $perPage = 15;
 
     protected string $paginationTheme = 'bootstrap';
@@ -36,9 +39,9 @@ class EquipmentReport extends Component
 
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('tag_id', 'like', '%' . $this->search . '%')
-                  ->orWhere('brand', 'like', '%' . $this->search . '%')
-                  ->orWhere('model', 'like', '%' . $this->search . '%');
+                $q->where('tag_id', 'like', '%'.$this->search.'%')
+                    ->orWhere('brand', 'like', '%'.$this->search.'%')
+                    ->orWhere('model', 'like', '%'.$this->search.'%');
             });
         }
         if ($this->filterStatus) {
@@ -54,9 +57,20 @@ class EquipmentReport extends Component
     /**
      * Reset pagination when filters or search are updated.
      */
-    public function updatingSearch() { $this->resetPage(); }
-    public function updatedFilterStatus() { $this->resetPage(); }
-    public function updatedFilterDepartment() { $this->resetPage(); }
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedFilterStatus()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedFilterDepartment()
+    {
+        $this->resetPage();
+    }
 
     /**
      * Render the equipment report Blade view.
@@ -64,19 +78,19 @@ class EquipmentReport extends Component
     public function render(): View
     {
         // For filter options - you can improve with a repository/service for real projects
-        $departments = \App\Models\Department::orderBy('name')->get();
+        $departments   = \App\Models\Department::orderBy('name')->get();
         $statusOptions = [
-            '' => __('All'),
+            ''          => __('All'),
             'available' => __('Available'),
-            'on_loan' => __('On Loan'),
+            'on_loan'   => __('On Loan'),
             'in_repair' => __('In Repair'),
-            'disposed' => __('Disposed'),
-            'lost' => __('Lost'),
+            'disposed'  => __('Disposed'),
+            'lost'      => __('Lost'),
         ];
 
         return view('livewire.resource-management.reports.equipment-report', [
             'equipmentList' => $this->equipmentList,
-            'departments' => $departments,
+            'departments'   => $departments,
             'statusOptions' => $statusOptions,
         ]);
     }

@@ -14,7 +14,7 @@ return new class extends Migration
     public function up(): void
     {
         $transactionTypes = ['issue', 'return'];
-        $defaultType = 'issue';
+        $defaultType      = 'issue';
 
         $transactionStatuses = [
             'pending',
@@ -67,7 +67,7 @@ return new class extends Migration
             $foreignKeys = [
                 'loan_application_id', 'issuing_officer_id', 'receiving_officer_id',
                 'returning_officer_id', 'return_accepting_officer_id', 'related_transaction_id',
-                'created_by', 'updated_by', 'deleted_by'
+                'created_by', 'updated_by', 'deleted_by',
             ];
             foreach ($foreignKeys as $key) {
                 if (Schema::hasColumn('loan_transactions', $key)) {

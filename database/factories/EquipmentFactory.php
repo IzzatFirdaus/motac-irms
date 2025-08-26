@@ -29,19 +29,19 @@ class EquipmentFactory extends Factory
     {
         // Cache related IDs for performance (static array persists across calls)
         static $userIds, $departmentIds, $equipmentCategoryIds, $subCategoryIdsByCat, $locationIds;
-        if (!isset($userIds)) {
+        if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        if (!isset($departmentIds)) {
+        if (! isset($departmentIds)) {
             $departmentIds = Department::pluck('id')->all();
         }
-        if (!isset($equipmentCategoryIds)) {
+        if (! isset($equipmentCategoryIds)) {
             $equipmentCategoryIds = EquipmentCategory::pluck('id')->all();
         }
-        if (!isset($locationIds)) {
+        if (! isset($locationIds)) {
             $locationIds = Location::pluck('id')->all();
         }
-        if (!isset($subCategoryIdsByCat)) {
+        if (! isset($subCategoryIdsByCat)) {
             // Map EquipmentCategory ID => array of SubCategory IDs
             $subCategoryIdsByCat = [];
             foreach (SubCategory::all() as $subCat) {
@@ -50,43 +50,43 @@ class EquipmentFactory extends Factory
         }
 
         // Choose random IDs from cached arrays (or null if not available)
-        $auditUserId = !empty($userIds) ? Arr::random($userIds) : null;
-        $departmentId = !empty($departmentIds) ? Arr::random($departmentIds) : null;
-        $equipmentCategoryId = !empty($equipmentCategoryIds) ? Arr::random($equipmentCategoryIds) : null;
-        $locationId = !empty($locationIds) ? Arr::random($locationIds) : null;
+        $auditUserId         = ! empty($userIds) ? Arr::random($userIds) : null;
+        $departmentId        = ! empty($departmentIds) ? Arr::random($departmentIds) : null;
+        $equipmentCategoryId = ! empty($equipmentCategoryIds) ? Arr::random($equipmentCategoryIds) : null;
+        $locationId          = ! empty($locationIds) ? Arr::random($locationIds) : null;
 
         // Pick a subcategory belonging to the selected equipment category
         $subCategoryId = null;
-        if ($equipmentCategoryId && !empty($subCategoryIdsByCat[$equipmentCategoryId])) {
+        if ($equipmentCategoryId && ! empty($subCategoryIdsByCat[$equipmentCategoryId])) {
             $subCategoryId = Arr::random($subCategoryIdsByCat[$equipmentCategoryId]);
         }
 
         // Use static Faker for ms_MY locale
         static $msFaker;
-        if (!$msFaker) {
+        if (! $msFaker) {
             $msFaker = \Faker\Factory::create('ms_MY');
         }
 
         // Generate dates
-        $purchaseDateRaw = $this->faker->optional(0.8)->dateTimeBetween('-5 years', '-3 months');
-        $purchaseDate = $purchaseDateRaw ? Carbon::instance($purchaseDateRaw) : null;
+        $purchaseDateRaw    = $this->faker->optional(0.8)->dateTimeBetween('-5 years', '-3 months');
+        $purchaseDate       = $purchaseDateRaw ? Carbon::instance($purchaseDateRaw) : null;
         $warrantyExpiryDate = $purchaseDate ? $purchaseDate->copy()->addYears($this->faker->numberBetween(1, 3)) : null;
 
         $createdAt = $purchaseDate ?? Carbon::parse($this->faker->dateTimeThisDecade('-2 years'));
         $updatedAt = Carbon::parse($this->faker->dateTimeBetween($createdAt->toDateTimeString(), 'now'));
 
         // Generate unique asset identifiers
-    // Use a fresh local faker instance for identifier generation to avoid any null/bootstrapping issues
-    $localFaker = \Faker\Factory::create('ms_MY');
-    $itemCode = $localFaker->unique()->bothify('ITEM-????-#####');
-        $tagIdRaw = $localFaker->optional(0.9)->unique();
-        $tagId = $tagIdRaw
+        // Use a fresh local faker instance for identifier generation to avoid any null/bootstrapping issues
+        $localFaker = \Faker\Factory::create('ms_MY');
+        $itemCode   = $localFaker->unique()->bothify('ITEM-????-#####');
+        $tagIdRaw   = $localFaker->optional(0.9)->unique();
+        $tagId      = $tagIdRaw
             ? $tagIdRaw->numerify('MOTAC/ICT/'.now()->year.'######')
-            : 'MOTAC/ICT/'.now()->year . mt_rand(100000, 999999);
+            : 'MOTAC/ICT/'.now()->year.mt_rand(100000, 999999);
         $serialNumberRaw = $localFaker->optional(0.95)->unique();
-        $serialNumber = $serialNumberRaw
+        $serialNumber    = $serialNumberRaw
             ? $serialNumberRaw->bothify('SN-########????')
-            : 'SN-' . mt_rand(10000000, 99999999) . strtoupper(Str::random(4));
+            : 'SN-'.mt_rand(10000000, 99999999).strtoupper(Str::random(4));
 
         // Enumerate asset type, status, and condition options from Equipment model
         $assetType = $this->faker->randomElement([
@@ -119,41 +119,41 @@ class EquipmentFactory extends Factory
 
         // Acquisition type and classification (as string, not enum constants here)
         $acquisitionType = $this->faker->optional(0.8)->randomElement([
-            'purchase', 'lease', 'donation', 'transfer', 'other'
+            'purchase', 'lease', 'donation', 'transfer', 'other',
         ]);
         $classification = $this->faker->optional(0.8)->randomElement([
-            'asset', 'inventory', 'consumable', 'other'
+            'asset', 'inventory', 'consumable', 'other',
         ]);
 
         return [
             'equipment_category_id' => $equipmentCategoryId,
-            'sub_category_id' => $subCategoryId,
-            'item_code' => $itemCode,
-            'tag_id' => $tagId,
-            'serial_number' => $serialNumber,
-            'asset_type' => $assetType,
-            'brand' => $this->faker->randomElement(['Dell', 'HP', 'Lenovo', 'Acer', 'Apple', 'Canon', 'Epson', 'Samsung']),
-            'model' => Str::title($this->faker->words(mt_rand(1, 2), true)).' '.$this->faker->bothify('##??X'),
-            'description' => $msFaker->optional(0.7)->paragraph(2),
-            'purchase_price' => $purchaseDate ? $this->faker->randomFloat(2, 100, 5000) : null,
-            'purchase_date' => $purchaseDate ? $purchaseDate->format('Y-m-d') : null,
-            'warranty_expiry_date' => $warrantyExpiryDate ? $warrantyExpiryDate->format('Y-m-d') : null,
-            'status' => $status,
-            'condition_status' => $conditionStatus,
-            'location_id' => $locationId,
-            'current_location' => $msFaker->optional(0.7)->address(),
-            'notes' => $msFaker->optional(0.4)->paragraph(1),
-            'classification' => $classification,
-            'acquisition_type' => $acquisitionType,
-            'funded_by' => $msFaker->optional(0.5)->company(),
-            'supplier_name' => $msFaker->optional(0.7)->company(),
-            'department_id' => $departmentId,
-            'created_by' => $auditUserId,
-            'updated_by' => $auditUserId,
-            'deleted_by' => null,
-            'created_at' => $createdAt,
-            'updated_at' => $updatedAt,
-            'deleted_at' => null,
+            'sub_category_id'       => $subCategoryId,
+            'item_code'             => $itemCode,
+            'tag_id'                => $tagId,
+            'serial_number'         => $serialNumber,
+            'asset_type'            => $assetType,
+            'brand'                 => $this->faker->randomElement(['Dell', 'HP', 'Lenovo', 'Acer', 'Apple', 'Canon', 'Epson', 'Samsung']),
+            'model'                 => Str::title($this->faker->words(mt_rand(1, 2), true)).' '.$this->faker->bothify('##??X'),
+            'description'           => $msFaker->optional(0.7)->paragraph(2),
+            'purchase_price'        => $purchaseDate ? $this->faker->randomFloat(2, 100, 5000) : null,
+            'purchase_date'         => $purchaseDate ? $purchaseDate->format('Y-m-d') : null,
+            'warranty_expiry_date'  => $warrantyExpiryDate ? $warrantyExpiryDate->format('Y-m-d') : null,
+            'status'                => $status,
+            'condition_status'      => $conditionStatus,
+            'location_id'           => $locationId,
+            'current_location'      => $msFaker->optional(0.7)->address(),
+            'notes'                 => $msFaker->optional(0.4)->paragraph(1),
+            'classification'        => $classification,
+            'acquisition_type'      => $acquisitionType,
+            'funded_by'             => $msFaker->optional(0.5)->company(),
+            'supplier_name'         => $msFaker->optional(0.7)->company(),
+            'department_id'         => $departmentId,
+            'created_by'            => $auditUserId,
+            'updated_by'            => $auditUserId,
+            'deleted_by'            => null,
+            'created_at'            => $createdAt,
+            'updated_at'            => $updatedAt,
+            'deleted_at'            => null,
         ];
     }
 
@@ -259,13 +259,14 @@ class EquipmentFactory extends Factory
     public function deleted(): static
     {
         static $userIds;
-        if (!isset($userIds)) {
+        if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $deleterId = !empty($userIds) ? Arr::random($userIds) : null;
+        $deleterId = ! empty($userIds) ? Arr::random($userIds) : null;
+
         return $this->state([
             'deleted_at' => now(),
-            'status' => Equipment::STATUS_DISPOSED,
+            'status'     => Equipment::STATUS_DISPOSED,
             'deleted_by' => $deleterId,
         ]);
     }

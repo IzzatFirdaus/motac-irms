@@ -31,8 +31,8 @@ class EquipmentReturnedNotification extends Notification implements ShouldQueue
         ?LoanTransaction $returnTransaction = null, // Added default null
         ?User $returnAcceptingOfficer = null // Added default null
     ) {
-        $this->loanApplication = $loanApplication->loadMissing('user');
-        $this->returnTransaction = $returnTransaction?->loadMissing(['loanTransactionItems.equipment', 'returnAcceptingOfficer:id,name']); // Handle nullable
+        $this->loanApplication        = $loanApplication->loadMissing('user');
+        $this->returnTransaction      = $returnTransaction?->loadMissing(['loanTransactionItems.equipment', 'returnAcceptingOfficer:id,name']); // Handle nullable
         $this->returnAcceptingOfficer = $returnAcceptingOfficer;
     }
 
@@ -63,27 +63,27 @@ class EquipmentReturnedNotification extends Notification implements ShouldQueue
             if ($equipment instanceof Equipment) {
                 return [
                     'transaction_item_id' => $txItem->id,
-                    'equipment_id' => $equipment->id,
+                    'equipment_id'        => $equipment->id,
                     // CORRECTED: Uses the asset_type_label accessor from the Equipment model.
-                    'asset_type' => $equipment->asset_type_label ?? __('Peralatan Tidak Dikenali'),
-                    'brand_model' => trim(($equipment->brand ?? '').' '.($equipment->model ?? '')),
-                    'tag_id' => $equipment->tag_id,
-                    'serial_number' => $equipment->serial_number,
+                    'asset_type'        => $equipment->asset_type_label ?? __('Peralatan Tidak Dikenali'),
+                    'brand_model'       => trim(($equipment->brand ?? '').' '.($equipment->model ?? '')),
+                    'tag_id'            => $equipment->tag_id,
+                    'serial_number'     => $equipment->serial_number,
                     'quantity_returned' => $txItem->quantity_transacted,
                     // CORRECTED: Uses the condition_on_return_translated accessor for consistency.
                     'condition_on_return' => $txItem->condition_on_return_translated ?? __('Tidak dinyatakan'),
-                    'item_notes' => $txItem->item_notes,
+                    'item_notes'          => $txItem->item_notes,
                 ];
             }
 
             return ['transaction_item_id' => $txItem->id, 'error' => __('Butiran peralatan tidak lengkap.')];
         })->toArray() ?? []; // Handle nullable
 
-        $loanAppId = $this->loanApplication->id;
+        $loanAppId     = $this->loanApplication->id;
         $applicantName = $this->loanApplication->user?->name ?? __('Pemohon');
 
         $applicationUrl = '#';
-        $routeName = 'resource-management.my-applications.loan.show';
+        $routeName      = 'resource-management.my-applications.loan.show';
         if ($loanAppId && Route::has($routeName)) {
             try {
                 $applicationUrl = route($routeName, ['loan_application' => $loanAppId]);
@@ -96,18 +96,18 @@ class EquipmentReturnedNotification extends Notification implements ShouldQueue
         $transactionDate = $this->returnTransaction?->transaction_date?->format(config('app.date_format_my', 'd/m/Y')); // Handle nullable
 
         return [
-            'loan_application_id' => $loanAppId,
-            'applicant_name' => $applicantName,
-            'return_transaction_id' => $this->returnTransaction->id ?? null, // Handle nullable
-            'returned_by_name' => $this->returnTransaction?->returningOfficer?->name ?? __('Tidak direkodkan'), // Handle nullable
-            'accepted_by_officer_name' => $this->returnAcceptingOfficer->name ?? __('Tidak diketahui'), // Handle nullable
-            'transaction_date' => $transactionDate,
-            'subject' => __('Peralatan Dipulangkan (Permohonan #:id)', ['id' => $loanAppId]),
-            'message' => __('Peralatan bagi Permohonan Pinjaman #:id oleh :name telah dipulangkan.', ['id' => $loanAppId, 'name' => $applicantName]),
-            'url' => ($applicationUrl !== '#') ? $applicationUrl : null,
-            'returned_items' => $itemsDetails,
-            'overall_status' => $this->loanApplication->status === LoanApplication::STATUS_RETURNED ? __('Selesai') : __('Sebahagian Dipulangkan'),
-            'icon' => 'ti ti-transfer-in',
+            'loan_application_id'      => $loanAppId,
+            'applicant_name'           => $applicantName,
+            'return_transaction_id'    => $this->returnTransaction->id                       ?? null, // Handle nullable
+            'returned_by_name'         => $this->returnTransaction?->returningOfficer?->name ?? __('Tidak direkodkan'), // Handle nullable
+            'accepted_by_officer_name' => $this->returnAcceptingOfficer->name                ?? __('Tidak diketahui'), // Handle nullable
+            'transaction_date'         => $transactionDate,
+            'subject'                  => __('Peralatan Dipulangkan (Permohonan #:id)', ['id' => $loanAppId]),
+            'message'                  => __('Peralatan bagi Permohonan Pinjaman #:id oleh :name telah dipulangkan.', ['id' => $loanAppId, 'name' => $applicantName]),
+            'url'                      => ($applicationUrl !== '#') ? $applicationUrl : null,
+            'returned_items'           => $itemsDetails,
+            'overall_status'           => $this->loanApplication->status === LoanApplication::STATUS_RETURNED ? __('Selesai') : __('Sebahagian Dipulangkan'),
+            'icon'                     => 'ti ti-transfer-in',
         ];
     }
 }

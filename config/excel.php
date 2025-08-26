@@ -42,14 +42,14 @@ return [
         |
         */
         'csv' => [
-            'delimiter' => ',',
-            'enclosure' => '"',
-            'line_ending' => PHP_EOL,
-            'use_bom' => false,
+            'delimiter'              => ',',
+            'enclosure'              => '"',
+            'line_ending'            => PHP_EOL,
+            'use_bom'                => false,
             'include_separator_line' => false,
-            'excel_compatibility' => false,
-            'output_encoding' => '',
-            'test_auto_detect' => true,
+            'excel_compatibility'    => false,
+            'output_encoding'        => '',
+            'test_auto_detect'       => true,
         ],
 
         /*
@@ -61,15 +61,15 @@ return [
         |
         */
         'properties' => [
-            'creator' => '',
+            'creator'        => '',
             'lastModifiedBy' => '',
-            'title' => '',
-            'description' => '',
-            'subject' => '',
-            'keywords' => '',
-            'category' => '',
-            'manager' => '',
-            'company' => '',
+            'title'          => '',
+            'description'    => '',
+            'subject'        => '',
+            'keywords'       => '',
+            'category'       => '',
+            'manager'        => '',
+            'company'        => '',
         ],
     ],
 
@@ -123,11 +123,11 @@ return [
         |
         */
         'csv' => [
-            'delimiter' => null,
-            'enclosure' => '"',
+            'delimiter'        => null,
+            'enclosure'        => '"',
             'escape_character' => '\\',
-            'contiguous' => false,
-            'input_encoding' => 'UTF-8',
+            'contiguous'       => false,
+            'input_encoding'   => 'UTF-8',
         ],
 
         /*
@@ -139,15 +139,15 @@ return [
         |
         */
         'properties' => [
-            'creator' => '',
+            'creator'        => '',
             'lastModifiedBy' => '',
-            'title' => '',
-            'description' => '',
-            'subject' => '',
-            'keywords' => '',
-            'category' => '',
-            'manager' => '',
-            'company' => '',
+            'title'          => '',
+            'description'    => '',
+            'subject'        => '',
+            'keywords'       => '',
+            'category'       => '',
+            'manager'        => '',
+            'company'        => '',
         ],
 
     ],
@@ -162,21 +162,21 @@ return [
     |
     */
     'extension_detector' => [
-        'xlsx' => Excel::XLSX,
-        'xlsm' => Excel::XLSX,
-        'xltx' => Excel::XLSX,
-        'xltm' => Excel::XLSX,
-        'xls' => Excel::XLS,
-        'xlt' => Excel::XLS,
-        'ods' => Excel::ODS,
-        'ots' => Excel::ODS,
-        'slk' => Excel::SLK,
-        'xml' => Excel::XML,
+        'xlsx'     => Excel::XLSX,
+        'xlsm'     => Excel::XLSX,
+        'xltx'     => Excel::XLSX,
+        'xltm'     => Excel::XLSX,
+        'xls'      => Excel::XLS,
+        'xlt'      => Excel::XLS,
+        'ods'      => Excel::ODS,
+        'ots'      => Excel::ODS,
+        'slk'      => Excel::SLK,
+        'xml'      => Excel::XML,
         'gnumeric' => Excel::GNUMERIC,
-        'htm' => Excel::HTML,
-        'html' => Excel::HTML,
-        'csv' => Excel::CSV,
-        'tsv' => Excel::TSV,
+        'htm'      => Excel::HTML,
+        'html'     => Excel::HTML,
+        'csv'      => Excel::CSV,
+        'tsv'      => Excel::TSV,
 
         /*
         |--------------------------------------------------------------------------
@@ -292,7 +292,7 @@ return [
     */
     'transactions' => [
         'handler' => 'db',
-        'db' => [
+        'db'      => [
             'connection' => null,
         ],
     ],
@@ -341,7 +341,7 @@ return [
         | in conjunction with queued imports and exports.
         |
         */
-        'remote_disk' => null,
+        'remote_disk'   => null,
         'remote_prefix' => null,
 
         /*

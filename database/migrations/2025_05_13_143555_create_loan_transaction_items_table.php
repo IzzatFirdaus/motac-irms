@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Equipment;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -60,7 +59,7 @@ return new class extends Migration
         Schema::table('loan_transaction_items', function (Blueprint $table): void {
             $foreignKeys = [
                 'loan_transaction_id', 'equipment_id', 'loan_application_item_id',
-                'created_by', 'updated_by', 'deleted_by'
+                'created_by', 'updated_by', 'deleted_by',
             ];
             foreach ($foreignKeys as $key) {
                 if (Schema::hasColumn('loan_transaction_items', $key)) {

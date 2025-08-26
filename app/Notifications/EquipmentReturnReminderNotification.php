@@ -66,14 +66,14 @@ class EquipmentReturnReminderNotification extends Notification implements Should
 
     public function toArray(User $notifiable): array
     {
-        $applicationId = $this->loanApplication->id;
+        $applicationId      = $this->loanApplication->id;
         $expectedReturnDate = $this->loanApplication->loan_end_date?->translatedFormat(config('app.date_format_my', 'd/m/Y'));
-        $returnLocation = $this->loanApplication->return_location ?? __('Unit ICT, Bahagian Pengurusan Maklumat');
+        $returnLocation     = $this->loanApplication->return_location ?? __('Unit ICT, Bahagian Pengurusan Maklumat');
 
-        $status = 'return_reminder';
+        $status  = 'return_reminder';
         $subject = __('Peringatan Pulangan Peralatan');
         $message = '';
-        $icon = 'ti ti-calendar-event';
+        $icon    = 'ti ti-calendar-event';
 
         if ($this->daysUntilReturn > 0) {
             $subject = __('Peringatan: Peralatan Perlu Dipulangkan Dalam :days Hari', ['days' => $this->daysUntilReturn]);
@@ -83,10 +83,10 @@ class EquipmentReturnReminderNotification extends Notification implements Should
             $message = __('Peralatan untuk Permohonan #:id perlu dipulangkan hari ini (:date).', ['id' => $applicationId, 'date' => $expectedReturnDate]);
         } else {
             $daysOverdue = abs($this->daysUntilReturn);
-            $status = 'overdue';
-            $subject = __('PERHATIAN: Peralatan Lewat Dipulangkan (:days Hari)', ['days' => $daysOverdue]);
-            $message = __('Peralatan untuk Permohonan #:id telah lewat dipulangkan :days hari. Tarikh pulang jangkaan: :date.', ['id' => $applicationId, 'days' => $daysOverdue, 'date' => $expectedReturnDate]);
-            $icon = 'ti ti-alarm-snooze';
+            $status      = 'overdue';
+            $subject     = __('PERHATIAN: Peralatan Lewat Dipulangkan (:days Hari)', ['days' => $daysOverdue]);
+            $message     = __('Peralatan untuk Permohonan #:id telah lewat dipulangkan :days hari. Tarikh pulang jangkaan: :date.', ['id' => $applicationId, 'days' => $daysOverdue, 'date' => $expectedReturnDate]);
+            $icon        = 'ti ti-alarm-snooze';
         }
 
         $subject .= __(' (#:id)', ['id' => $applicationId]);
@@ -94,17 +94,17 @@ class EquipmentReturnReminderNotification extends Notification implements Should
         $applicationUrl = $this->getActionUrl();
 
         return [
-            'loan_application_id' => $applicationId,
-            'applicant_id' => $this->loanApplication->user_id,
+            'loan_application_id'    => $applicationId,
+            'applicant_id'           => $this->loanApplication->user_id,
             'responsible_officer_id' => $this->loanApplication->responsible_officer_id,
-            'status_key' => $status,
-            'days_value' => $this->daysUntilReturn,
-            'subject' => $subject,
-            'message' => $message,
-            'url' => ($applicationUrl !== '#') ? $applicationUrl : null,
-            'expected_return_date' => $expectedReturnDate,
-            'return_location' => $returnLocation,
-            'icon' => $icon,
+            'status_key'             => $status,
+            'days_value'             => $this->daysUntilReturn,
+            'subject'                => $subject,
+            'message'                => $message,
+            'url'                    => ($applicationUrl !== '#') ? $applicationUrl : null,
+            'expected_return_date'   => $expectedReturnDate,
+            'return_location'        => $returnLocation,
+            'icon'                   => $icon,
         ];
     }
 }

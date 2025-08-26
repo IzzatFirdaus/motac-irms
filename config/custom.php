@@ -13,26 +13,26 @@ return [
     'custom' => [
         // --- Core Theme Settings ---
         'myLayout' => env('THEME_LAYOUT', 'vertical'), // Default: 'vertical'. Options: 'vertical', 'horizontal'. (Aligns with Design Doc 3.1 Vertical Side Navigation)
-        'myTheme' => env('THEME_SKIN', 'theme-motac'),  // Default: 'theme-motac'. Options could be 'theme-default', 'theme-bordered', 'theme-semi-dark'. Assumes 'theme-motac' will contain MOTAC specific styling.
-        'myStyle' => env('THEME_STYLE', 'light'),     // Default: 'light'. Options: 'light', 'dark'. (Design Doc 5.0 Dark Mode)
+        'myTheme'  => env('THEME_SKIN', 'theme-motac'),  // Default: 'theme-motac'. Options could be 'theme-default', 'theme-bordered', 'theme-semi-dark'. Assumes 'theme-motac' will contain MOTAC specific styling.
+        'myStyle'  => env('THEME_STYLE', 'light'),     // Default: 'light'. Options: 'light', 'dark'. (Design Doc 5.0 Dark Mode)
 
         // --- RTL Support ---
         // 'myRTLSupport': true if theme has distinct LTR/RTL CSS (e.g., core.css vs. core-rtl.css).
         // 'myRTLMode': true to default HTML dir to 'rtl'. MOTAC is primarily LTR (Bahasa Melayu).
         'myRTLSupport' => env('THEME_RTL_ASSETS_SUPPORT', true), // Assumes theme supports separate RTL assets.
-        'myRTLMode' => env('THEME_DEFAULT_RTL_MODE', false),    // Default to LTR for MOTAC.
+        'myRTLMode'    => env('THEME_DEFAULT_RTL_MODE', false),    // Default to LTR for MOTAC.
 
         // --- Theme Customizer UI Panel (for development/admin, typically disabled for end-users) ---
-        'hasCustomizer' => env('THEME_HAS_CUSTOMIZER_JS', false),   // Load template-customizer.js? Default to false for production.
+        'hasCustomizer'     => env('THEME_HAS_CUSTOMIZER_JS', false),   // Load template-customizer.js? Default to false for production.
         'displayCustomizer' => env('THEME_DISPLAY_CUSTOMIZER_UI', false), // Show the customizer UI panel? Default to false.
 
         // --- Layout Behavior Flags (Fixed vs. Static elements) ---
         // Design Language: Modern Government Aesthetic often implies clear, stable navigation.
-        'menuFixed' => env('THEME_MENU_FIXED', true),             // Default: true (Fixed sidebar)
-        'menuCollapsed' => env('THEME_MENU_COLLAPSED', false),    // Default: false (Menu expanded by default)
-        'navbarFixed' => env('THEME_NAVBAR_FIXED', true),           // Default: true (Fixed top navbar)
+        'menuFixed'      => env('THEME_MENU_FIXED', true),             // Default: true (Fixed sidebar)
+        'menuCollapsed'  => env('THEME_MENU_COLLAPSED', false),    // Default: false (Menu expanded by default)
+        'navbarFixed'    => env('THEME_NAVBAR_FIXED', true),           // Default: true (Fixed top navbar)
         'navbarDetached' => env('THEME_NAVBAR_DETACHED', false),   // Default: false (Full-width, integrated navbar typical for formal systems)
-        'footerFixed' => env('THEME_FOOTER_FIXED', false),          // Default: false (Static footer)
+        'footerFixed'    => env('THEME_FOOTER_FIXED', false),          // Default: false (Static footer)
 
         // --- Horizontal Menu Specific (only if 'myLayout' is 'horizontal') ---
         'showDropdownOnHover' => env('THEME_HORIZONTAL_MENU_HOVER', true),
@@ -40,15 +40,15 @@ return [
         // --- Content Container Settings ---
         // 'container-fluid' for full-width, 'container-xxl' (or similar) for boxed.
         // Design Language: "Clean, uncluttered interfaces" could support either, but fluid is often more modern.
-        'container' => env('THEME_CONTENT_CONTAINER', 'container-fluid'), // Default: 'container-fluid' for main content area
+        'container'    => env('THEME_CONTENT_CONTAINER', 'container-fluid'), // Default: 'container-fluid' for main content area
         'containerNav' => env('THEME_NAVBAR_CONTAINER', 'container-fluid'), // Default: 'container-fluid' for navbar content
 
         // --- Flags for Conditional Rendering in Layouts (passed via Helpers::appClasses) ---
         'contentNavbar' => env('THEME_CONTENT_NAVBAR', true), // Does the layout typically include a navbar above content?
-        'isMenu' => env('THEME_IS_MENU', true),             // Is a sidebar menu generally present?
-        'isNavbar' => env('THEME_IS_NAVBAR', true),          // Is a top navbar generally present?
-        'isFooter' => env('THEME_IS_FOOTER', true),          // Is a footer generally present?
-        'isFlex' => env('THEME_IS_FLEX_LAYOUT', false),      // For special page layouts requiring top-level flex container.
+        'isMenu'        => env('THEME_IS_MENU', true),             // Is a sidebar menu generally present?
+        'isNavbar'      => env('THEME_IS_NAVBAR', true),          // Is a top navbar generally present?
+        'isFooter'      => env('THEME_IS_FOOTER', true),          // Is a footer generally present?
+        'isFlex'        => env('THEME_IS_FLEX_LAYOUT', false),      // For special page layouts requiring top-level flex container.
 
         // --- MOTAC Specific Branding Colors ---
         // Design Language 2.1: Primary Color (MOTAC Blue)

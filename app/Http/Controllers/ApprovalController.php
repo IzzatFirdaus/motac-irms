@@ -36,7 +36,7 @@ class ApprovalController extends Controller
                 'approvable' => function ($morphTo) { //
                     $morphTo->morphWith([ //
                         EmailApplication::class => ['user:id,name'], //
-                        LoanApplication::class => ['user:id,name'], //
+                        LoanApplication::class  => ['user:id,name'], //
                     ]);
                 },
                 'officer:id,name', //
@@ -59,7 +59,7 @@ class ApprovalController extends Controller
                 'approvable' => function ($morphTo) { //
                     $morphTo->morphWith([ //
                         EmailApplication::class => ['user:id,name'], //
-                        LoanApplication::class => ['user:id,name'], //
+                        LoanApplication::class  => ['user:id,name'], //
                     ]);
                 },
                 'officer:id,name', //
@@ -123,7 +123,7 @@ class ApprovalController extends Controller
     ): RedirectResponse {
         /** @var User $processingUser */
         $processingUser = $request->user();
-        $validatedData = $request->validated();
+        $validatedData  = $request->validated();
 
         Log::info("ApprovalController@recordDecision: User ID {$processingUser->id} recording decision for Approval Task ID {$approval->id}.", //
             ['decision' => $validatedData['decision'], 'has_comments' => ! empty($validatedData['comments'])]
@@ -131,20 +131,16 @@ class ApprovalController extends Controller
 
         $itemQuantitiesForService = null;
 
-        if ($approval->approvable_type === LoanApplication::class &&
-            // Ensures quantity adjustment is typically done at the supporting officer stage,
+        if ($approval->approvable_type === LoanApplication::class && // Ensures quantity adjustment is typically done at the supporting officer stage,
             // or adjust this condition if other stages also adjust quantities.
-            $approval->stage === Approval::STAGE_LOAN_SUPPORT_REVIEW &&
-            $validatedData['decision'] === Approval::STATUS_APPROVED &&
-            isset($validatedData['items_approved']) &&
-            is_array($validatedData['items_approved'])) {
+            $approval->stage === Approval::STAGE_LOAN_SUPPORT_REVIEW && $validatedData['decision'] === Approval::STATUS_APPROVED && isset($validatedData['items_approved']) && is_array($validatedData['items_approved'])) {
 
             $itemQuantitiesForService = [];
             foreach ($validatedData['items_approved'] as $loanApplicationItemId => $itemData) {
                 if (isset($itemData['quantity_approved'])) { // Ensure the specific key exists
                     $itemQuantitiesForService[] = [
                         'loan_application_item_id' => (int) $loanApplicationItemId,
-                        'quantity_approved' => (int) $itemData['quantity_approved'],
+                        'quantity_approved'        => (int) $itemData['quantity_approved'],
                     ];
                 }
             }
@@ -160,7 +156,7 @@ class ApprovalController extends Controller
                 $itemQuantitiesForService // Pass the new, possibly transformed, parameter
             );
             $decisionText = $validatedData['decision'] === Approval::STATUS_APPROVED ? __('DILULUSKAN') : __('DITOLAK'); //
-            $message = __('Keputusan untuk tugasan #:taskId telah berjaya direkodkan sebagai :decision.', ['taskId' => $approval->id, 'decision' => $decisionText]); //
+            $message      = __('Keputusan untuk tugasan #:taskId telah berjaya direkodkan sebagai :decision.', ['taskId' => $approval->id, 'decision' => $decisionText]); //
             Log::info("Decision '{$validatedData['decision']}' recorded for Approval ID {$approval->id} by User ID {$processingUser->id}."); //
 
             // Redirect to the specific application's show page after decision

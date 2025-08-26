@@ -46,10 +46,10 @@ class QueryLogServiceProvider extends ServiceProvider // Corrected class name
                     'Long running query detected.',
                     [
                         'connection_name' => $connection->getName(),
-                        'query' => $event->sql,          // SQL from the event
-                        'bindings' => $event->bindings,   // Bindings from the event
-                        'time_ms' => $event->time,        // Execution time in milliseconds from the event
-                        'url' => $url,
+                        'query'           => $event->sql,          // SQL from the event
+                        'bindings'        => $event->bindings,   // Bindings from the event
+                        'time_ms'         => $event->time,        // Execution time in milliseconds from the event
+                        'url'             => $url,
                     ]
                 );
             });

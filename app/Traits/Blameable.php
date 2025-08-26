@@ -8,7 +8,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * Trait Blameable
+ * Trait Blameable.
  *
  * Provides relationships for blameable fields (created_by, updated_by, deleted_by).
  * Used in conjunction with the BlameableObserver to maintain audit trails.

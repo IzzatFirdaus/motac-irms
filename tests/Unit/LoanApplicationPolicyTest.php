@@ -41,11 +41,11 @@ class LoanApplicationPolicyTest extends TestCase
         // Create Users
         $this->applicant = User::factory()->create();
         $this->otherUser = User::factory()->create();
-        $this->bpmStaff = User::factory()->create()->assignRole('BPM Staff');
+        $this->bpmStaff  = User::factory()->create()->assignRole('BPM Staff');
         $this->adminUser = User::factory()->create()->assignRole('Admin');
 
         // Setup supporting officer with the required grade level
-        $grade41 = Grade::factory()->create(['name' => '41', 'level' => 41]);
+        $grade41                 = Grade::factory()->create(['name' => '41', 'level' => 41]);
         $this->supportingOfficer = User::factory()->create(['grade_id' => $grade41->id]);
         config(['motac.approval.min_loan_support_grade_level' => 41]);
     }
@@ -70,7 +70,7 @@ class LoanApplicationPolicyTest extends TestCase
     {
         $application = LoanApplication::factory()->make([
             'user_id' => $this->applicant->id,
-            'status' => LoanApplication::STATUS_DRAFT,
+            'status'  => LoanApplication::STATUS_DRAFT,
         ]);
         $this->assertTrue($this->policy->update($this->applicant, $application)->allowed());
     }
@@ -79,7 +79,7 @@ class LoanApplicationPolicyTest extends TestCase
     {
         $application = LoanApplication::factory()->make([
             'user_id' => $this->applicant->id,
-            'status' => LoanApplication::STATUS_PENDING_SUPPORT,
+            'status'  => LoanApplication::STATUS_PENDING_SUPPORT,
         ]);
         $this->assertFalse($this->policy->update($this->applicant, $application)->allowed());
     }
@@ -88,7 +88,7 @@ class LoanApplicationPolicyTest extends TestCase
     {
         $application = LoanApplication::factory()->make([
             'user_id' => $this->applicant->id,
-            'status' => LoanApplication::STATUS_DRAFT,
+            'status'  => LoanApplication::STATUS_DRAFT,
         ]);
         $this->assertTrue($this->policy->submit($this->applicant, $application)->allowed());
     }
@@ -102,13 +102,13 @@ class LoanApplicationPolicyTest extends TestCase
     public function test_supporting_officer_with_correct_grade_can_record_decision(): void
     {
         $application = LoanApplication::factory()->create([
-            'status' => LoanApplication::STATUS_PENDING_SUPPORT,
+            'status'                 => LoanApplication::STATUS_PENDING_SUPPORT,
             'current_approval_stage' => Approval::STAGE_LOAN_SUPPORT_REVIEW,
         ]);
         $application->approvals()->create([
             'officer_id' => $this->supportingOfficer->id,
-            'stage' => Approval::STAGE_LOAN_SUPPORT_REVIEW,
-            'status' => Approval::STATUS_PENDING,
+            'stage'      => Approval::STAGE_LOAN_SUPPORT_REVIEW,
+            'status'     => Approval::STATUS_PENDING,
         ]);
 
         $this->assertTrue($this->policy->recordDecision($this->supportingOfficer, $application)->allowed());

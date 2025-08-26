@@ -11,13 +11,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * TicketCategory model for Helpdesk system.
  * Represents categories like Hardware, Software, etc.
  *
- * @property int $id
- * @property string $name
- * @property string|null $description
- * @property bool $is_active
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
+ * @property int                             $id
+ * @property string                          $name
+ * @property string|null                     $description
+ * @property bool                            $is_active
+ * @property int|null                        $created_by
+ * @property int|null                        $updated_by
+ * @property int|null                        $deleted_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at

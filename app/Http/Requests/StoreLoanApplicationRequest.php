@@ -25,8 +25,8 @@ class StoreLoanApplicationRequest extends FormRequest
         $today = now()->startOfDay()->format('Y-m-d H:i:s'); // Compare with start of day for date part
 
         return [
-            'purpose' => ['required', 'string', 'min:10', 'max:1000'],
-            'location' => ['required', 'string', 'max:255'],
+            'purpose'         => ['required', 'string', 'min:10', 'max:1000'],
+            'location'        => ['required', 'string', 'max:255'],
             'return_location' => ['nullable', 'string', 'max:255'],
 
             // =====================================================================================
@@ -37,16 +37,16 @@ class StoreLoanApplicationRequest extends FormRequest
             // == the traditional (non-Livewire) form submission.
             // =====================================================================================
             'loan_start_date' => ['required', 'date', 'after_or_equal:'.$today],
-            'loan_end_date' => ['required', 'date', 'after_or_equal:loan_start_date'],
+            'loan_end_date'   => ['required', 'date', 'after_or_equal:loan_start_date'],
 
             'responsible_officer_id' => ['nullable', 'integer', Rule::exists('users', 'id')],
-            'supporting_officer_id' => ['required', 'integer', Rule::exists('users', 'id')],
+            'supporting_officer_id'  => ['required', 'integer', Rule::exists('users', 'id')],
 
             'items' => ['required', 'array', 'min:1'],
             // System Design: Equipment model defines asset types
-            'items.*.equipment_type' => ['required', 'string', 'max:255', Rule::in(array_keys(Equipment::getAssetTypeOptions()))],
+            'items.*.equipment_type'     => ['required', 'string', 'max:255', Rule::in(array_keys(Equipment::getAssetTypeOptions()))],
             'items.*.quantity_requested' => ['required', 'integer', 'min:1', 'max:99'],
-            'items.*.notes' => ['nullable', 'string', 'max:1000'],
+            'items.*.notes'              => ['nullable', 'string', 'max:1000'],
 
             'applicant_confirmation' => ['required', 'accepted'],
         ];
@@ -55,33 +55,33 @@ class StoreLoanApplicationRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'purpose.required' => __('Tujuan Permohonan wajib diisi.'),
-            'purpose.min' => __('Tujuan Permohonan mesti sekurang-kurangnya :min aksara.'),
-            'purpose.max' => __('Tujuan Permohonan tidak boleh melebihi :max aksara.'),
-            'location.required' => __('Lokasi penggunaan peralatan wajib diisi.'),
-            'location.max' => __('Lokasi penggunaan peralatan tidak boleh melebihi :max aksara.'),
+            'purpose.required'    => __('Tujuan Permohonan wajib diisi.'),
+            'purpose.min'         => __('Tujuan Permohonan mesti sekurang-kurangnya :min aksara.'),
+            'purpose.max'         => __('Tujuan Permohonan tidak boleh melebihi :max aksara.'),
+            'location.required'   => __('Lokasi penggunaan peralatan wajib diisi.'),
+            'location.max'        => __('Lokasi penggunaan peralatan tidak boleh melebihi :max aksara.'),
             'return_location.max' => __('Lokasi pemulangan tidak boleh melebihi :max aksara.'),
 
-            'loan_start_date.required' => __('Tarikh & Masa Pinjaman wajib diisi.'),
-            'loan_start_date.date' => __('Format Tarikh & Masa Pinjaman tidak sah.'),
+            'loan_start_date.required'       => __('Tarikh & Masa Pinjaman wajib diisi.'),
+            'loan_start_date.date'           => __('Format Tarikh & Masa Pinjaman tidak sah.'),
             'loan_start_date.after_or_equal' => __('Tarikh & Masa Pinjaman mestilah pada atau selepas hari/masa semasa.'),
-            'loan_end_date.required' => __('Tarikh & Masa Dijangka Pulang wajib diisi.'),
-            'loan_end_date.date' => __('Format Tarikh & Masa Dijangka Pulang tidak sah.'),
-            'loan_end_date.after_or_equal' => __('Tarikh & Masa Dijangka Pulang mestilah selepas atau sama dengan Tarikh & Masa Pinjaman.'),
+            'loan_end_date.required'         => __('Tarikh & Masa Dijangka Pulang wajib diisi.'),
+            'loan_end_date.date'             => __('Format Tarikh & Masa Dijangka Pulang tidak sah.'),
+            'loan_end_date.after_or_equal'   => __('Tarikh & Masa Dijangka Pulang mestilah selepas atau sama dengan Tarikh & Masa Pinjaman.'),
 
-            'responsible_officer_id.exists' => __('Pegawai Bertanggungjawab yang dipilih tidak sah.'),
+            'responsible_officer_id.exists'  => __('Pegawai Bertanggungjawab yang dipilih tidak sah.'),
             'supporting_officer_id.required' => __('Pegawai Penyokong wajib dipilih.'),
-            'supporting_officer_id.exists' => __('Pegawai Penyokong yang dipilih tidak sah.'),
+            'supporting_officer_id.exists'   => __('Pegawai Penyokong yang dipilih tidak sah.'),
 
-            'items.required' => __('Sila tambah sekurang-kurangnya satu item peralatan.'),
-            'items.min' => __('Sila tambah sekurang-kurangnya satu item peralatan.'),
-            'items.*.equipment_type.required' => __('Jenis Peralatan wajib diisi untuk item di kedudukan :position.'),
-            'items.*.equipment_type.in' => __('Jenis Peralatan yang dipilih tidak sah untuk item di kedudukan :position.'),
+            'items.required'                      => __('Sila tambah sekurang-kurangnya satu item peralatan.'),
+            'items.min'                           => __('Sila tambah sekurang-kurangnya satu item peralatan.'),
+            'items.*.equipment_type.required'     => __('Jenis Peralatan wajib diisi untuk item di kedudukan :position.'),
+            'items.*.equipment_type.in'           => __('Jenis Peralatan yang dipilih tidak sah untuk item di kedudukan :position.'),
             'items.*.quantity_requested.required' => __('Kuantiti wajib diisi untuk item di kedudukan :position.'),
-            'items.*.quantity_requested.integer' => __('Kuantiti mesti nombor bulat untuk item di kedudukan :position.'),
-            'items.*.quantity_requested.min' => __('Kuantiti mestilah sekurang-kurangnya 1 untuk item di kedudukan :position.'),
-            'items.*.quantity_requested.max' => __('Kuantiti tidak boleh melebihi :max untuk item di kedudukan :position.'),
-            'items.*.notes.max' => __('Catatan untuk item di kedudukan :position tidak boleh melebihi :max aksara.'),
+            'items.*.quantity_requested.integer'  => __('Kuantiti mesti nombor bulat untuk item di kedudukan :position.'),
+            'items.*.quantity_requested.min'      => __('Kuantiti mestilah sekurang-kurangnya 1 untuk item di kedudukan :position.'),
+            'items.*.quantity_requested.max'      => __('Kuantiti tidak boleh melebihi :max untuk item di kedudukan :position.'),
+            'items.*.notes.max'                   => __('Catatan untuk item di kedudukan :position tidak boleh melebihi :max aksara.'),
 
             'applicant_confirmation.required' => __('Anda mesti membuat pengesahan permohonan.'),
             'applicant_confirmation.accepted' => __('Anda mesti bersetuju dengan perakuan dan syarat permohonan.'),

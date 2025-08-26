@@ -2,13 +2,13 @@
 
 namespace App\Livewire\Charts;
 
-use Asantibanez\LivewireCharts\Models\PieChartModel;
-use Livewire\Component;
 use App\Models\LoanApplication;
+use Asantibanez\LivewireCharts\Models\PieChartModel;
 use Illuminate\Support\Facades\DB;
+use Livewire\Component;
 
 /**
- * LoanSummaryChart
+ * LoanSummaryChart.
  *
  * Pie chart component to display summary statistics for loan applications.
  * Updated for v4.0: No EmailApplication or legacy status references remain.
@@ -27,7 +27,7 @@ class LoanSummaryChart extends Component
 
     /**
      * Computed property to generate the PieChartModel for the summary chart.
-     * This is referenced in the Livewire view with $this->chartModel
+     * This is referenced in the Livewire view with $this->chartModel.
      *
      * @return PieChartModel
      */
@@ -42,24 +42,24 @@ class LoanSummaryChart extends Component
 
         // Define labels for the loan statuses (no legacy or email statuses)
         $labels = [
-            LoanApplication::STATUS_PENDING_SUPPORT   => __('dashboard.status_pending_support'),
-            LoanApplication::STATUS_APPROVED          => __('dashboard.status_approved'),
-            LoanApplication::STATUS_ISSUED            => __('dashboard.status_on_loan'),
-            LoanApplication::STATUS_RETURNED          => __('dashboard.status_returned'),
-            LoanApplication::STATUS_REJECTED          => __('dashboard.status_rejected'),
+            LoanApplication::STATUS_PENDING_SUPPORT => __('dashboard.status_pending_support'),
+            LoanApplication::STATUS_APPROVED        => __('dashboard.status_approved'),
+            LoanApplication::STATUS_ISSUED          => __('dashboard.status_on_loan'),
+            LoanApplication::STATUS_RETURNED        => __('dashboard.status_returned'),
+            LoanApplication::STATUS_REJECTED        => __('dashboard.status_rejected'),
         ];
 
         // Define colors for each status slice
         $colors = [
-            LoanApplication::STATUS_PENDING_SUPPORT   => '#ffc107', // Amber
-            LoanApplication::STATUS_APPROVED          => '#0d6efd', // Blue
-            LoanApplication::STATUS_ISSUED            => '#0dcaf0', // Cyan
-            LoanApplication::STATUS_RETURNED          => '#198754', // Green
-            LoanApplication::STATUS_REJECTED          => '#dc3545', // Red
+            LoanApplication::STATUS_PENDING_SUPPORT => '#ffc107', // Amber
+            LoanApplication::STATUS_APPROVED        => '#0d6efd', // Blue
+            LoanApplication::STATUS_ISSUED          => '#0dcaf0', // Cyan
+            LoanApplication::STATUS_RETURNED        => '#198754', // Green
+            LoanApplication::STATUS_REJECTED        => '#dc3545', // Red
         ];
 
         // Create and build the pie chart
-        $pie = (new PieChartModel())
+        $pie = (new PieChartModel)
             ->setTitle(__('dashboard.loan_stats_title'));
 
         foreach ($stats as $status => $count) {

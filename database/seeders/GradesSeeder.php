@@ -25,7 +25,7 @@ class GradesSeeder extends Seeder
         Log::info('Truncated grades table.');
 
         $adminUserForAudit = User::orderBy('id')->first();
-        $auditUserId = $adminUserForAudit?->id;
+        $auditUserId       = $adminUserForAudit?->id;
         if ($auditUserId) {
             Log::info(sprintf('Using User ID %s for audit columns in GradesSeeder.', $auditUserId));
         }
@@ -186,16 +186,16 @@ class GradesSeeder extends Seeder
 
         $dataToInsert = [];
         foreach ($uniqueGrades as $gradeData) {
-            $level = $this->extractLevelFromName($gradeData['name']);
+            $level          = $this->extractLevelFromName($gradeData['name']);
             $dataToInsert[] = [
-                'name' => $gradeData['name'],
-                'position_id' => $gradeData['position_id'],
-                'level' => $level,
+                'name'              => $gradeData['name'],
+                'position_id'       => $gradeData['position_id'],
+                'level'             => $level,
                 'is_approver_grade' => $level && $level >= 9,
-                'created_by' => $auditUserId,
-                'updated_by' => $auditUserId,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_by'        => $auditUserId,
+                'updated_by'        => $auditUserId,
+                'created_at'        => now(),
+                'updated_at'        => now(),
             ];
         }
 
@@ -209,7 +209,7 @@ class GradesSeeder extends Seeder
 
     /**
      * Extracts the primary numeric level from a grade name string.
-     * e.g., '14 (54)' -> 54, '9 (41/42)' -> 41, 'JUSA C' -> 56
+     * e.g., '14 (54)' -> 54, '9 (41/42)' -> 41, 'JUSA C' -> 56.
      */
     private function extractLevelFromName(string $name): ?int
     {

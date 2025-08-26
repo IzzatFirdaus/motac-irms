@@ -25,18 +25,17 @@ class ApprovalService
      * Create a new approval record for a loan application.
      *
      * @param LoanApplication $loanApplication The loan application to be approved.
-     * @param User $approver The user designated as the approver.
-     * @param string $level The approval level (e.g., 'level_1', 'level_2').
-     * @return Approval
+     * @param User            $approver        The user designated as the approver.
+     * @param string          $level           The approval level (e.g., 'level_1', 'level_2').
      */
     public function createApproval(LoanApplication $loanApplication, User $approver, string $level): Approval
     {
         return DB::transaction(function () use ($loanApplication, $approver, $level) {
             $approval = new Approval([
                 'loan_application_id' => $loanApplication->id,
-                'approver_id' => $approver->id,
-                'level' => $level,
-                'status' => 'pending', // Default status
+                'approver_id'         => $approver->id,
+                'level'               => $level,
+                'status'              => 'pending', // Default status
             ]);
             $approval->save();
 
@@ -52,18 +51,17 @@ class ApprovalService
     /**
      * Record a decision for an approval task.
      *
-     * @param Approval $approval The approval model instance.
-     * @param string $decision The decision made (e.g., 'approved', 'rejected').
-     * @param string|null $notes Optional notes for the decision.
-     * @param array $approvalItems Additional approval items (if any, for loan applications).
-     * @return void
+     * @param Approval    $approval      The approval model instance.
+     * @param string      $decision      The decision made (e.g., 'approved', 'rejected').
+     * @param string|null $notes         Optional notes for the decision.
+     * @param array       $approvalItems Additional approval items (if any, for loan applications).
      */
     public function recordApprovalDecision(Approval $approval, string $decision, ?string $notes = null, array $approvalItems = []): void
     {
         DB::transaction(function () use ($approval, $decision, $notes, $approvalItems) {
             // Set status and timestamps based on decision
             $approval->status = $decision;
-            $approval->notes = $notes;
+            $approval->notes  = $notes;
 
             if ($decision === Approval::STATUS_APPROVED) {
                 $approval->approved_at = now();
@@ -80,9 +78,9 @@ class ApprovalService
             // foreach ($approvalItems as $itemId => $itemDecision) { ... }
 
             Log::info('Approval decision recorded.', [
-                'approval_id' => $approval->id,
-                'decision' => $decision,
-                'notes' => $notes,
+                'approval_id'    => $approval->id,
+                'decision'       => $decision,
+                'notes'          => $notes,
                 'approval_items' => $approvalItems,
             ]);
         });
@@ -91,17 +89,18 @@ class ApprovalService
     /**
      * Handles the logic after an approval decision is approved.
      *
-     * @param Approval $approval The approval record that was approved.
+     * @param Approval        $approval        The approval record that was approved.
      * @param LoanApplication $loanApplication The associated loan application.
-     * @param string|null $comments Optional comments from the approver.
+     * @param string|null     $comments        Optional comments from the approver.
+     *
      * @throws Throwable
      */
     public function handleApprovedDecision(Approval $approval, LoanApplication $loanApplication, ?string $comments): void
     {
         DB::transaction(function () use ($approval, $loanApplication, $comments): void {
             // Update the current approval record
-            $approval->status = Approval::STATUS_APPROVED;
-            $approval->comments = $comments;
+            $approval->status      = Approval::STATUS_APPROVED;
+            $approval->comments    = $comments;
             $approval->approved_at = now();
             $approval->save();
 
@@ -122,7 +121,7 @@ class ApprovalService
                 }
             } else {
                 // If this was the final approval, mark the loan application as approved overall.
-                $loanApplication->status = LoanApplication::STATUS_APPROVED;
+                $loanApplication->status      = LoanApplication::STATUS_APPROVED;
                 $loanApplication->approved_at = now();
                 $loanApplication->save();
                 Log::info(sprintf('Loan Application ID %d status updated to APPROVED (final approval).', $loanApplication->id));
@@ -144,39 +143,32 @@ class ApprovalService
 
     /**
      * Determine the loan application status based on the next approval level.
-     *
-     * @param string $nextLevel
-     * @return string
      */
     private function determineNextApprovalStatus(string $nextLevel): string
     {
         return match ($nextLevel) {
             'level_2' => LoanApplication::STATUS_PENDING_APPROVER_REVIEW,
             'level_3' => LoanApplication::STATUS_PENDING_BPM_REVIEW,
-            default => LoanApplication::STATUS_PROCESSING, // Fallback
+            default   => LoanApplication::STATUS_PROCESSING, // Fallback
         };
     }
 
     /**
      * Handles the logic after an approval decision is rejected.
-     *
-     * @param Approval $approval
-     * @param LoanApplication $loanApplication
-     * @param string|null $reason
      */
     public function handleRejectedDecision(Approval $approval, LoanApplication $loanApplication, ?string $reason): void
     {
         DB::transaction(function () use ($approval, $loanApplication, $reason): void {
             // Update the approval record
-            $approval->status = Approval::STATUS_REJECTED;
-            $approval->comments = $reason;
+            $approval->status      = Approval::STATUS_REJECTED;
+            $approval->comments    = $reason;
             $approval->rejected_at = now();
             $approval->save();
 
             Log::info(sprintf('Approval ID %d for Loan Application ID %d has been rejected by officer ID %d.', $approval->id, $loanApplication->id, $approval->officer_id));
 
             // Mark the loan application as rejected
-            $loanApplication->status = LoanApplication::STATUS_REJECTED;
+            $loanApplication->status      = LoanApplication::STATUS_REJECTED;
             $loanApplication->rejected_at = now();
             $loanApplication->save();
             Log::info(sprintf('Loan Application ID %d status updated to REJECTED.', $loanApplication->id));

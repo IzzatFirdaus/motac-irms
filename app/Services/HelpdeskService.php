@@ -8,14 +8,13 @@ use App\Models\HelpdeskComment;
 use App\Models\HelpdeskTicket;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * HelpdeskService
+ * HelpdeskService.
  *
  * Handles core business logic for helpdesk tickets, including creation, updates,
  * closing, commenting, and attachment management.
@@ -32,21 +31,20 @@ class HelpdeskService
     /**
      * Create a new helpdesk ticket and handle file attachments.
      *
-     * @param array $data Ticket data (validated fields).
-     * @param User $applicant User creating the ticket.
+     * @param array $data        Ticket data (validated fields).
+     * @param User  $applicant   User creating the ticket.
      * @param array $attachments Optional file attachments.
-     * @return HelpdeskTicket
      */
     public function createTicket(array $data, User $applicant, array $attachments = []): HelpdeskTicket
     {
         return DB::transaction(function () use ($data, $applicant, $attachments) {
-            $ticket = new HelpdeskTicket();
+            $ticket = new HelpdeskTicket;
             $ticket->fill($data);
             $ticket->user_id = $applicant->id;
-            $ticket->status = HelpdeskTicket::STATUS_OPEN;
+            $ticket->status  = HelpdeskTicket::STATUS_OPEN;
 
             // Set SLA due date (default 48h unless config override)
-            $slaHours = config('motac.helpdesk.default_sla_hours', 48);
+            $slaHours           = config('motac.helpdesk.default_sla_hours', 48);
             $ticket->sla_due_at = Carbon::now()->addHours($slaHours);
 
             $ticket->save();
@@ -62,22 +60,15 @@ class HelpdeskService
 
     /**
      * Add a comment to a helpdesk ticket.
-     *
-     * @param HelpdeskTicket $ticket
-     * @param string $commentText
-     * @param User $user
-     * @param array $attachments
-     * @param bool $isInternal
-     * @return HelpdeskComment
      */
     public function addComment(HelpdeskTicket $ticket, string $commentText, User $user, array $attachments = [], bool $isInternal = false): HelpdeskComment
     {
         return DB::transaction(function () use ($ticket, $commentText, $user, $attachments, $isInternal) {
-            $comment = new HelpdeskComment();
+            $comment = new HelpdeskComment;
             // Comment model uses 'ticket_id' as FK
-            $comment->ticket_id = $ticket->id;
-            $comment->user_id = $user->id;
-            $comment->comment = $commentText;
+            $comment->ticket_id   = $ticket->id;
+            $comment->user_id     = $user->id;
+            $comment->comment     = $commentText;
             $comment->is_internal = $isInternal;
             $comment->save();
 
@@ -101,16 +92,12 @@ class HelpdeskService
     /**
      * Update an existing helpdesk ticket (web or API).
      *
-     * @param HelpdeskTicket $ticket
      * @param array $data Validated update data
-     * @param User $updater
-     * @param array $attachments
-     * @return HelpdeskTicket
      */
     public function updateTicket(HelpdeskTicket $ticket, array $data, User $updater, array $attachments = []): HelpdeskTicket
     {
         return DB::transaction(function () use ($ticket, $data, $updater, $attachments) {
-            $oldStatus = $ticket->status;
+            $oldStatus           = $ticket->status;
             $oldAssignedToUserId = $ticket->assigned_to_user_id;
 
             // Exclude attachments from fillable data
@@ -118,11 +105,11 @@ class HelpdeskService
             unset($fillableData['attachments']);
 
             // Map legacy/alternate fields for compatibility
-            if (isset($fillableData['subject']) && !isset($fillableData['title'])) {
+            if (isset($fillableData['subject']) && ! isset($fillableData['title'])) {
                 $fillableData['title'] = $fillableData['subject'];
                 unset($fillableData['subject']);
             }
-            if (isset($fillableData['resolution_details']) && !isset($fillableData['resolution_notes'])) {
+            if (isset($fillableData['resolution_details']) && ! isset($fillableData['resolution_notes'])) {
                 $fillableData['resolution_notes'] = $fillableData['resolution_details'];
                 unset($fillableData['resolution_details']);
             }
@@ -133,7 +120,7 @@ class HelpdeskService
             if (isset($data['status'])) {
                 if ($data['status'] === HelpdeskTicket::STATUS_CLOSED && is_null($ticket->closed_at)) {
                     $ticket->closed_at = Carbon::now();
-                } elseif ($data['status'] !== HelpdeskTicket::STATUS_CLOSED && !is_null($ticket->closed_at)) {
+                } elseif ($data['status'] !== HelpdeskTicket::STATUS_CLOSED && ! is_null($ticket->closed_at)) {
                     $ticket->closed_at = null; // Re-open the ticket if status changes from closed
                 }
             }
@@ -160,9 +147,9 @@ class HelpdeskService
             }
 
             Log::info(sprintf('Helpdesk Ticket ID %d updated by User ID %d.', $ticket->id, $updater->id), [
-                'ticket_id' => $ticket->id,
+                'ticket_id'  => $ticket->id,
                 'updated_by' => $updater->id,
-                'changes' => $ticket->getChanges()
+                'changes'    => $ticket->getChanges(),
             ]);
 
             return $ticket;
@@ -172,10 +159,7 @@ class HelpdeskService
     /**
      * Close a helpdesk ticket.
      *
-     * @param HelpdeskTicket $ticket
      * @param array $data ['resolution_notes' => ..., ...]
-     * @param User $closer
-     * @return HelpdeskTicket
      */
     public function closeTicket(HelpdeskTicket $ticket, array $data, User $closer): HelpdeskTicket
     {
@@ -185,8 +169,8 @@ class HelpdeskService
             $ticket->status = HelpdeskTicket::STATUS_CLOSED;
             // Use 'resolution_notes' as canonical; fallback to 'resolution_details' for legacy/compat.
             $ticket->resolution_notes = $data['resolution_notes'] ?? ($data['resolution_details'] ?? null);
-            $ticket->closed_by_id = $closer->id;
-            $ticket->closed_at = Carbon::now();
+            $ticket->closed_by_id     = $closer->id;
+            $ticket->closed_at        = Carbon::now();
             $ticket->save();
 
             // Notify parties only if status actually changed to closed
@@ -201,7 +185,7 @@ class HelpdeskService
 
             Log::info(sprintf('Helpdesk Ticket ID %d closed by User ID %d.', $ticket->id, $closer->id), [
                 'ticket_id' => $ticket->id,
-                'closed_by' => $closer->id
+                'closed_by' => $closer->id,
             ]);
 
             return $ticket;
@@ -211,9 +195,7 @@ class HelpdeskService
     /**
      * Handles file attachments for tickets or comments.
      *
-    * @param mixed $attachable Accepts Eloquent models that implement attachments().
-     * @param array $attachments
-     * @return void
+     * @param mixed $attachable Accepts Eloquent models that implement attachments().
      */
     protected function handleAttachments($attachable, array $attachments): void
     {

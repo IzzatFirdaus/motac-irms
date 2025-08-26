@@ -20,7 +20,7 @@ class CloseHelpdeskTicketRequest extends FormRequest
     /**
      * Determine if the user is authorized to make this request.
      * Consider implementing policy-based checks, e.g.:
-     * return $this->user()?->can('close', $this->route('ticket')) ?? false;
+     * return $this->user()?->can('close', $this->route('ticket')) ?? false;.
      */
     public function authorize(): bool
     {
@@ -38,7 +38,7 @@ class CloseHelpdeskTicketRequest extends FormRequest
         $data = $this->all();
 
         // Map legacy key to canonical attribute used by the model/service
-        if (!isset($data['resolution_notes']) && isset($data['resolution_details'])) {
+        if (! isset($data['resolution_notes']) && isset($data['resolution_details'])) {
             $data['resolution_notes'] = $data['resolution_details'];
         }
 
@@ -50,7 +50,7 @@ class CloseHelpdeskTicketRequest extends FormRequest
         }
 
         // Ensure status is present; controller/service expects an explicit "closed" status
-        if (!isset($data['status'])) {
+        if (! isset($data['status'])) {
             $data['status'] = HelpdeskTicket::STATUS_CLOSED;
         } else {
             // Normalize case to match constants
@@ -70,7 +70,7 @@ class CloseHelpdeskTicketRequest extends FormRequest
         return [
             // Require canonical key after mapping
             'resolution_notes' => ['required', 'string', 'max:2000'],
-            'status' => [
+            'status'           => [
                 'required',
                 'string',
                 Rule::in([HelpdeskTicket::STATUS_CLOSED]),
@@ -85,7 +85,7 @@ class CloseHelpdeskTicketRequest extends FormRequest
     {
         return [
             'resolution_notes' => __('Resolution notes'),
-            'status' => __('Status'),
+            'status'           => __('Status'),
         ];
     }
 

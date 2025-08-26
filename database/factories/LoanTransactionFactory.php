@@ -26,21 +26,21 @@ class LoanTransactionFactory extends Factory
         // Static caches to minimize DB queries for related IDs
         static $loanApplicationIds;
         static $userIds;
-        if (!isset($loanApplicationIds)) {
+        if (! isset($loanApplicationIds)) {
             $loanApplicationIds = LoanApplication::pluck('id')->all();
         }
-        if (!isset($userIds)) {
+        if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
 
         // Pick related IDs or null if none exist (should be ensured by seeder)
-        $loanApplicationId = !empty($loanApplicationIds) ? Arr::random($loanApplicationIds) : null;
-        $officerId = !empty($userIds) ? Arr::random($userIds) : null;
-        $otherOfficerId = !empty($userIds) ? Arr::random($userIds) : null;
+        $loanApplicationId = ! empty($loanApplicationIds) ? Arr::random($loanApplicationIds) : null;
+        $officerId         = ! empty($userIds) ? Arr::random($userIds) : null;
+        $otherOfficerId    = ! empty($userIds) ? Arr::random($userIds) : null;
 
         // Use a static Malaysian faker for speed and realism
         static $msFaker;
-        if (!$msFaker) {
+        if (! $msFaker) {
             $msFaker = \Faker\Factory::create('ms_MY');
         }
 
@@ -53,29 +53,29 @@ class LoanTransactionFactory extends Factory
         $transactionDate = Carbon::parse($this->faker->dateTimeBetween('-1 year', 'now'));
 
         // Fields for issue or return
-        $issuingOfficerId = null;
-        $receivingOfficerId = null;
-        $issueNotes = null;
-        $issueTimestamp = null;
-        $returningOfficerId = null;
-        $returnAcceptingOfficerId = null;
-        $returnNotes = null;
-        $returnTimestamp = null;
-        $accessoriesList = config('motac.loan_accessories_list', ['Adapter Kuasa', 'Tetikus', 'Beg Komputer Riba']);
-        $accessoriesChecklistOnIssue = null;
+        $issuingOfficerId             = null;
+        $receivingOfficerId           = null;
+        $issueNotes                   = null;
+        $issueTimestamp               = null;
+        $returningOfficerId           = null;
+        $returnAcceptingOfficerId     = null;
+        $returnNotes                  = null;
+        $returnTimestamp              = null;
+        $accessoriesList              = config('motac.loan_accessories_list', ['Adapter Kuasa', 'Tetikus', 'Beg Komputer Riba']);
+        $accessoriesChecklistOnIssue  = null;
         $accessoriesChecklistOnReturn = null;
 
         if ($type === LoanTransaction::TYPE_ISSUE) {
-            $issuingOfficerId = $officerId;
-            $receivingOfficerId = $otherOfficerId;
-            $issueNotes = $msFaker->optional(0.3)->sentence(10);
-            $issueTimestamp = $transactionDate->copy()->addMinutes($this->faker->numberBetween(0, 120));
+            $issuingOfficerId            = $officerId;
+            $receivingOfficerId          = $otherOfficerId;
+            $issueNotes                  = $msFaker->optional(0.3)->sentence(10);
+            $issueTimestamp              = $transactionDate->copy()->addMinutes($this->faker->numberBetween(0, 120));
             $accessoriesChecklistOnIssue = $this->faker->randomElements($accessoriesList, $this->faker->numberBetween(0, count($accessoriesList)));
         } else {
-            $returningOfficerId = $officerId;
-            $returnAcceptingOfficerId = $otherOfficerId;
-            $returnNotes = $msFaker->optional(0.3)->sentence(10);
-            $returnTimestamp = $transactionDate->copy()->addMinutes($this->faker->numberBetween(0, 120));
+            $returningOfficerId           = $officerId;
+            $returnAcceptingOfficerId     = $otherOfficerId;
+            $returnNotes                  = $msFaker->optional(0.3)->sentence(10);
+            $returnTimestamp              = $transactionDate->copy()->addMinutes($this->faker->numberBetween(0, 120));
             $accessoriesChecklistOnReturn = $this->faker->randomElements($accessoriesList, $this->faker->numberBetween(0, count($accessoriesList)));
         }
 
@@ -105,28 +105,28 @@ class LoanTransactionFactory extends Factory
         $deletedBy = $isDeleted ? $officerId : null;
 
         return [
-            'loan_application_id' => $loanApplicationId,
-            'type' => $type,
-            'transaction_date' => $transactionDate,
-            'issuing_officer_id' => $issuingOfficerId,
-            'receiving_officer_id' => $receivingOfficerId,
-            'accessories_checklist_on_issue' => $accessoriesChecklistOnIssue,
-            'issue_notes' => $issueNotes,
-            'issue_timestamp' => $issueTimestamp,
-            'returning_officer_id' => $returningOfficerId,
-            'return_accepting_officer_id' => $returnAcceptingOfficerId,
+            'loan_application_id'             => $loanApplicationId,
+            'type'                            => $type,
+            'transaction_date'                => $transactionDate,
+            'issuing_officer_id'              => $issuingOfficerId,
+            'receiving_officer_id'            => $receivingOfficerId,
+            'accessories_checklist_on_issue'  => $accessoriesChecklistOnIssue,
+            'issue_notes'                     => $issueNotes,
+            'issue_timestamp'                 => $issueTimestamp,
+            'returning_officer_id'            => $returningOfficerId,
+            'return_accepting_officer_id'     => $returnAcceptingOfficerId,
             'accessories_checklist_on_return' => $accessoriesChecklistOnReturn,
-            'return_notes' => $returnNotes,
-            'return_timestamp' => $returnTimestamp,
-            'related_transaction_id' => null, // Can be set via state
-            'due_date' => $type === LoanTransaction::TYPE_ISSUE ? $transactionDate->copy()->addDays($this->faker->numberBetween(3, 14))->toDateString() : null,
-            'status' => $status,
-            'created_by' => $officerId,
-            'updated_by' => $officerId,
-            'deleted_by' => $deletedBy,
-            'created_at' => $createdAt,
-            'updated_at' => $updatedAt,
-            'deleted_at' => $deletedAt,
+            'return_notes'                    => $returnNotes,
+            'return_timestamp'                => $returnTimestamp,
+            'related_transaction_id'          => null, // Can be set via state
+            'due_date'                        => $type === LoanTransaction::TYPE_ISSUE ? $transactionDate->copy()->addDays($this->faker->numberBetween(3, 14))->toDateString() : null,
+            'status'                          => $status,
+            'created_by'                      => $officerId,
+            'updated_by'                      => $officerId,
+            'deleted_by'                      => $deletedBy,
+            'created_at'                      => $createdAt,
+            'updated_at'                      => $updatedAt,
+            'deleted_at'                      => $deletedAt,
         ];
     }
 
@@ -137,28 +137,29 @@ class LoanTransactionFactory extends Factory
     {
         // Use state to ensure proper type and fields for issue transaction
         static $userIds;
-        if (!isset($userIds)) {
+        if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $officerId = !empty($userIds) ? Arr::random($userIds) : null;
+        $officerId       = ! empty($userIds) ? Arr::random($userIds) : null;
         $accessoriesList = config('motac.loan_accessories_list', ['Adapter Kuasa', 'Tetikus', 'Beg Komputer Riba']);
 
         return $this->state(function (array $attributes) use ($officerId, $accessoriesList) {
             $transactionDate = $attributes['transaction_date'] ?? now();
+
             return [
-                'type' => LoanTransaction::TYPE_ISSUE,
-                'issuing_officer_id' => $officerId,
-                'receiving_officer_id' => $officerId,
-                'issue_notes' => \Faker\Factory::create('ms_MY')->optional(0.3)->sentence(10),
-                'issue_timestamp' => $transactionDate instanceof Carbon ? $transactionDate->copy()->addMinutes(random_int(0, 120)) : now(),
-                'returning_officer_id' => null,
-                'return_accepting_officer_id' => null,
-                'return_notes' => null,
-                'return_timestamp' => null,
-                'accessories_checklist_on_issue' => fake()->randomElements($accessoriesList, fake()->numberBetween(0, count($accessoriesList))),
+                'type'                            => LoanTransaction::TYPE_ISSUE,
+                'issuing_officer_id'              => $officerId,
+                'receiving_officer_id'            => $officerId,
+                'issue_notes'                     => \Faker\Factory::create('ms_MY')->optional(0.3)->sentence(10),
+                'issue_timestamp'                 => $transactionDate instanceof Carbon ? $transactionDate->copy()->addMinutes(random_int(0, 120)) : now(),
+                'returning_officer_id'            => null,
+                'return_accepting_officer_id'     => null,
+                'return_notes'                    => null,
+                'return_timestamp'                => null,
+                'accessories_checklist_on_issue'  => fake()->randomElements($accessoriesList, fake()->numberBetween(0, count($accessoriesList))),
                 'accessories_checklist_on_return' => null,
-                'due_date' => $transactionDate instanceof Carbon ? $transactionDate->copy()->addDays(fake()->numberBetween(3, 14))->toDateString() : now()->addDays(7)->toDateString(),
-                'status' => LoanTransaction::STATUS_ISSUED,
+                'due_date'                        => $transactionDate instanceof Carbon ? $transactionDate->copy()->addDays(fake()->numberBetween(3, 14))->toDateString() : now()->addDays(7)->toDateString(),
+                'status'                          => LoanTransaction::STATUS_ISSUED,
             ];
         });
     }
@@ -169,28 +170,29 @@ class LoanTransactionFactory extends Factory
     public function asReturn(): static
     {
         static $userIds;
-        if (!isset($userIds)) {
+        if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $officerId = !empty($userIds) ? Arr::random($userIds) : null;
+        $officerId       = ! empty($userIds) ? Arr::random($userIds) : null;
         $accessoriesList = config('motac.loan_accessories_list', ['Adapter Kuasa', 'Tetikus', 'Beg Komputer Riba']);
 
         return $this->state(function (array $attributes) use ($officerId, $accessoriesList) {
             $transactionDate = $attributes['transaction_date'] ?? now();
+
             return [
-                'type' => LoanTransaction::TYPE_RETURN,
-                'issuing_officer_id' => null,
-                'receiving_officer_id' => null,
-                'issue_notes' => null,
-                'issue_timestamp' => null,
-                'returning_officer_id' => $officerId,
-                'return_accepting_officer_id' => $officerId,
-                'return_notes' => \Faker\Factory::create('ms_MY')->optional(0.3)->sentence(10),
-                'return_timestamp' => $transactionDate instanceof Carbon ? $transactionDate->copy()->addMinutes(random_int(0, 120)) : now(),
-                'accessories_checklist_on_issue' => null,
+                'type'                            => LoanTransaction::TYPE_RETURN,
+                'issuing_officer_id'              => null,
+                'receiving_officer_id'            => null,
+                'issue_notes'                     => null,
+                'issue_timestamp'                 => null,
+                'returning_officer_id'            => $officerId,
+                'return_accepting_officer_id'     => $officerId,
+                'return_notes'                    => \Faker\Factory::create('ms_MY')->optional(0.3)->sentence(10),
+                'return_timestamp'                => $transactionDate instanceof Carbon ? $transactionDate->copy()->addMinutes(random_int(0, 120)) : now(),
+                'accessories_checklist_on_issue'  => null,
                 'accessories_checklist_on_return' => fake()->randomElements($accessoriesList, fake()->numberBetween(0, count($accessoriesList))),
-                'due_date' => null,
-                'status' => LoanTransaction::STATUS_RETURNED_GOOD,
+                'due_date'                        => null,
+                'status'                          => LoanTransaction::STATUS_RETURNED_GOOD,
             ];
         });
     }
@@ -201,10 +203,11 @@ class LoanTransactionFactory extends Factory
     public function deleted(): static
     {
         static $userIds;
-        if (!isset($userIds)) {
+        if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $officerId = !empty($userIds) ? Arr::random($userIds) : null;
+        $officerId = ! empty($userIds) ? Arr::random($userIds) : null;
+
         return $this->state([
             'deleted_at' => now(),
             'deleted_by' => $officerId,

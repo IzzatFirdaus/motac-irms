@@ -10,11 +10,8 @@ use App\Models\LoanTransaction;
 use App\Models\LoanTransactionItem;
 use App\Services\LoanApplicationService;
 use App\Services\LoanTransactionService;
-use Exception;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -27,7 +24,7 @@ use Livewire\Component;
 use Throwable;
 
 /**
- * EquipmentChecklist Livewire Component
+ * EquipmentChecklist Livewire Component.
  *
  * Handles the equipment checklist for loan transactions (issue and return).
  * Manages issuing equipment, returning equipment, accessories, and condition tracking.
@@ -40,20 +37,26 @@ class EquipmentChecklist extends Component
 
     // Main properties for the component
     public $loanApplicationId;
+
     public array $selectedEquipmentIds = []; // For multiple equipment selection
+
     public string $transactionType = 'issue'; // 'issue' or 'return'
+
     public $officerId;
 
     // Accessories and notes
     public array $accessories = [];
+
     public string $notes = '';
 
     // Return-specific properties
     public string $equipmentConditionOnReturn = '';
+
     public string $returnNotes = '';
 
     // Model instances
     public ?LoanTransaction $loanTransaction = null;
+
     public ?LoanApplication $loanApplication = null;
 
     // Configuration and options
@@ -61,10 +64,11 @@ class EquipmentChecklist extends Component
 
     // Service dependencies
     protected LoanApplicationService $loanApplicationService;
+
     protected LoanTransactionService $loanTransactionService;
 
     /**
-     * Boot method - Dependency injection for services
+     * Boot method - Dependency injection for services.
      */
     public function boot(
         LoanApplicationService $loanApplicationService,
@@ -76,7 +80,7 @@ class EquipmentChecklist extends Component
     }
 
     /**
-     * Mount the component with initial data
+     * Mount the component with initial data.
      */
     public function mount(
         ?int $loanApplicationId = null,
@@ -85,15 +89,15 @@ class EquipmentChecklist extends Component
     ): void {
         Log::info('EquipmentChecklist: Mounting component.', [
             'loanApplicationId' => $loanApplicationId,
-            'type' => $type,
+            'type'              => $type,
             'loanTransactionId' => $loanTransactionId,
-            'user_id' => Auth::id(),
+            'user_id'           => Auth::id(),
         ]);
 
         // Initialize properties
-        $this->loanApplicationId = $loanApplicationId;
-        $this->transactionType = $type ?? 'issue';
-        $this->officerId = Auth::id();
+        $this->loanApplicationId  = $loanApplicationId;
+        $this->transactionType    = $type ?? 'issue';
+        $this->officerId          = Auth::id();
         $this->allAccessoriesList = Equipment::getDefaultAccessoriesList();
 
         try {
@@ -109,8 +113,8 @@ class EquipmentChecklist extends Component
 
         } catch (Throwable $e) {
             Log::error('EquipmentChecklist: Error during component mount.', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+                'error'             => $e->getMessage(),
+                'trace'             => $e->getTraceAsString(),
                 'loanApplicationId' => $loanApplicationId,
                 'loanTransactionId' => $loanTransactionId,
             ]);
@@ -120,7 +124,7 @@ class EquipmentChecklist extends Component
     }
 
     /**
-     * Load the loan application with required relationships
+     * Load the loan application with required relationships.
      */
     private function loadLoanApplication(): void
     {
@@ -138,7 +142,7 @@ class EquipmentChecklist extends Component
             ]
         );
 
-        if (!$this->loanApplication instanceof LoanApplication) {
+        if (! $this->loanApplication instanceof LoanApplication) {
             Log::warning('EquipmentChecklist: Loan application not found.', [
                 'loanApplicationId' => $this->loanApplicationId,
             ]);
@@ -149,7 +153,7 @@ class EquipmentChecklist extends Component
     }
 
     /**
-     * Load existing transaction for edit mode
+     * Load existing transaction for edit mode.
      */
     private function loadExistingTransaction(int $loanTransactionId): void
     {
@@ -162,8 +166,7 @@ class EquipmentChecklist extends Component
         ])->find($loanTransactionId);
 
         if (
-            !$this->loanTransaction ||
-            (int)$this->loanTransaction->loan_application_id !== (int)$this->loanApplicationId
+            ! $this->loanTransaction || (int) $this->loanTransaction->loan_application_id !== (int) $this->loanApplicationId
         ) {
             Log::warning('EquipmentChecklist: Transaction not found or mismatched.', [
                 'loanTransactionId' => $loanTransactionId,
@@ -179,11 +182,11 @@ class EquipmentChecklist extends Component
     }
 
     /**
-     * Populate form fields from transaction data for edit
+     * Populate form fields from transaction data for edit.
      */
     private function populateFormFromTransaction(): void
     {
-        if (!$this->loanTransaction) {
+        if (! $this->loanTransaction) {
             return;
         }
         // Get equipment IDs from transaction items
@@ -196,7 +199,7 @@ class EquipmentChecklist extends Component
         if ($this->transactionType === LoanTransaction::TYPE_RETURN) {
             if ($firstItem) {
                 $this->equipmentConditionOnReturn = $firstItem->condition_on_return
-                    ?? ($firstItem->equipment->condition_status ?? Equipment::CONDITION_GOOD);
+                                                                          ?? ($firstItem->equipment->condition_status ?? Equipment::CONDITION_GOOD);
                 $this->returnNotes = $this->loanTransaction->return_notes ?? $firstItem->item_notes ?? '';
                 $this->accessories = json_decode(
                     $firstItem->accessories_checklist_on_return ?? '[]',
@@ -205,7 +208,7 @@ class EquipmentChecklist extends Component
             }
         } elseif ($this->transactionType === LoanTransaction::TYPE_ISSUE) {
             if ($firstItem) {
-                $this->notes = $this->loanTransaction->issue_notes ?? $firstItem->item_notes ?? '';
+                $this->notes       = $this->loanTransaction->issue_notes ?? $firstItem->item_notes ?? '';
                 $this->accessories = json_decode(
                     $firstItem->accessories_checklist_on_issue ?? '[]',
                     true
@@ -215,12 +218,12 @@ class EquipmentChecklist extends Component
     }
 
     /**
-     * Computed property: Get available equipment for issue
+     * Computed property: Get available equipment for issue.
      */
     #[Computed]
     public function getAvailableEquipmentProperty(): Collection
     {
-        if (!$this->loanApplication || $this->transactionType !== 'issue') {
+        if (! $this->loanApplication || $this->transactionType !== 'issue') {
             return collect();
         }
 
@@ -241,12 +244,12 @@ class EquipmentChecklist extends Component
     }
 
     /**
-     * Computed property: Get equipment currently on loan for return
+     * Computed property: Get equipment currently on loan for return.
      */
     #[Computed]
     public function getOnLoanEquipmentProperty(): Collection
     {
-        if (!$this->loanApplication || $this->transactionType !== 'return') {
+        if (! $this->loanApplication || $this->transactionType !== 'return') {
             return collect();
         }
 
@@ -263,7 +266,7 @@ class EquipmentChecklist extends Component
     }
 
     /**
-     * Validation rules for the form
+     * Validation rules for the form.
      */
     protected function rules(): array
     {
@@ -290,7 +293,7 @@ class EquipmentChecklist extends Component
         if ($this->transactionType === 'issue') {
             $rules['notes'] = ['nullable', 'string', 'max:1000'];
         } elseif ($this->transactionType === 'return') {
-            $rules['returnNotes'] = ['nullable', 'string', 'max:1000'];
+            $rules['returnNotes']                = ['nullable', 'string', 'max:1000'];
             $rules['equipmentConditionOnReturn'] = [
                 'required',
                 'string',
@@ -302,21 +305,21 @@ class EquipmentChecklist extends Component
     }
 
     /**
-     * Custom validation messages
+     * Custom validation messages.
      */
     protected function messages(): array
     {
         return [
-            'selectedEquipmentIds.required' => __('Sila pilih sekurang-kurangnya satu peralatan.'),
-            'selectedEquipmentIds.min' => __('Sila pilih sekurang-kurangnya satu peralatan.'),
-            'selectedEquipmentIds.*.exists' => __('Peralatan yang dipilih tidak sah.'),
+            'selectedEquipmentIds.required'       => __('Sila pilih sekurang-kurangnya satu peralatan.'),
+            'selectedEquipmentIds.min'            => __('Sila pilih sekurang-kurangnya satu peralatan.'),
+            'selectedEquipmentIds.*.exists'       => __('Peralatan yang dipilih tidak sah.'),
             'equipmentConditionOnReturn.required' => __('Sila pilih keadaan peralatan semasa pulangan.'),
-            'equipmentConditionOnReturn.in' => __('Keadaan peralatan yang dipilih tidak sah.'),
+            'equipmentConditionOnReturn.in'       => __('Keadaan peralatan yang dipilih tidak sah.'),
         ];
     }
 
     /**
-     * Save the transaction (main method)
+     * Save the transaction (main method).
      */
     public function saveTransaction(): void
     {
@@ -347,44 +350,44 @@ class EquipmentChecklist extends Component
 
         } catch (ValidationException $e) {
             Log::warning('EquipmentChecklist: Validation failed.', [
-                'errors' => $e->errors(),
+                'errors'          => $e->errors(),
                 'transactionType' => $this->transactionType,
             ]);
             throw $e;
         } catch (Throwable $e) {
             Log::error('EquipmentChecklist: Error saving transaction.', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'transactionType' => $this->transactionType,
+                'error'             => $e->getMessage(),
+                'trace'             => $e->getTraceAsString(),
+                'transactionType'   => $this->transactionType,
                 'loanApplicationId' => $this->loanApplicationId,
             ]);
 
-            $errorMessage = __('Gagal menyimpan transaksi: ') . $e->getMessage();
+            $errorMessage = __('Gagal menyimpan transaksi: ').$e->getMessage();
             session()->flash('error', $errorMessage);
             $this->dispatch('swal:error', ['message' => $errorMessage]);
         }
     }
 
     /**
-     * Process equipment issue transaction
+     * Process equipment issue transaction.
      */
     private function processIssueTransaction(): void
     {
         Log::info('EquipmentChecklist: Processing issue transaction.', [
             'loanApplicationId' => $this->loanApplicationId,
-            'equipmentIds' => $this->selectedEquipmentIds,
-            'officer_id' => Auth::id(),
+            'equipmentIds'      => $this->selectedEquipmentIds,
+            'officer_id'        => Auth::id(),
         ]);
 
         // Create or update the loan transaction
         $transactionData = [
-            'loan_application_id' => $this->loanApplicationId,
-            'type' => LoanTransaction::TYPE_ISSUE,
-            'issue_timestamp' => now(),
-            'issuing_officer_id' => Auth::id(),
-            'issue_notes' => $this->notes,
+            'loan_application_id'            => $this->loanApplicationId,
+            'type'                           => LoanTransaction::TYPE_ISSUE,
+            'issue_timestamp'                => now(),
+            'issuing_officer_id'             => Auth::id(),
+            'issue_notes'                    => $this->notes,
             'accessories_checklist_on_issue' => json_encode(array_filter($this->accessories)),
-            'status' => LoanTransaction::STATUS_COMPLETED,
+            'status'                         => LoanTransaction::STATUS_COMPLETED,
         ];
 
         if ($this->loanTransaction) {
@@ -401,7 +404,7 @@ class EquipmentChecklist extends Component
     }
 
     /**
-     * Process individual equipment issue
+     * Process individual equipment issue.
      */
     private function processEquipmentIssue(LoanTransaction $transaction, int $equipmentId): void
     {
@@ -409,51 +412,51 @@ class EquipmentChecklist extends Component
 
         // Create transaction item
         LoanTransactionItem::create([
-            'loan_transaction_id' => $transaction->id,
-            'equipment_id' => $equipmentId,
-            'quantity_transacted' => 1,
-            'condition_on_issue' => $equipment->condition_status,
+            'loan_transaction_id'            => $transaction->id,
+            'equipment_id'                   => $equipmentId,
+            'quantity_transacted'            => 1,
+            'condition_on_issue'             => $equipment->condition_status,
             'accessories_checklist_on_issue' => json_encode(array_filter($this->accessories)),
-            'item_notes' => $this->notes,
+            'item_notes'                     => $this->notes,
         ]);
 
         // Update equipment status
         $equipment->update([
-            'status' => Equipment::STATUS_ON_LOAN,
+            'status'                      => Equipment::STATUS_ON_LOAN,
             'current_loan_application_id' => $this->loanApplicationId,
-            'loaned_at' => now(),
+            'loaned_at'                   => now(),
         ]);
     }
 
     /**
-     * Process equipment return transaction
+     * Process equipment return transaction.
      */
     private function processReturnTransaction(): void
     {
         Log::info('EquipmentChecklist: Processing return transaction.', [
             'loanApplicationId' => $this->loanApplicationId,
-            'equipmentIds' => $this->selectedEquipmentIds,
-            'officer_id' => Auth::id(),
+            'equipmentIds'      => $this->selectedEquipmentIds,
+            'officer_id'        => Auth::id(),
         ]);
 
         // Find or create return transaction
         if ($this->loanTransaction && $this->loanTransaction->type === LoanTransaction::TYPE_ISSUE) {
             $this->loanTransaction->update([
-                'return_timestamp' => now(),
-                'return_accepting_officer_id' => Auth::id(),
-                'return_notes' => $this->returnNotes,
+                'return_timestamp'                => now(),
+                'return_accepting_officer_id'     => Auth::id(),
+                'return_notes'                    => $this->returnNotes,
                 'accessories_checklist_on_return' => json_encode(array_filter($this->accessories)),
             ]);
             $transaction = $this->loanTransaction;
         } else {
             $transactionData = [
-                'loan_application_id' => $this->loanApplicationId,
-                'type' => LoanTransaction::TYPE_RETURN,
-                'return_timestamp' => now(),
-                'return_accepting_officer_id' => Auth::id(),
-                'return_notes' => $this->returnNotes,
+                'loan_application_id'             => $this->loanApplicationId,
+                'type'                            => LoanTransaction::TYPE_RETURN,
+                'return_timestamp'                => now(),
+                'return_accepting_officer_id'     => Auth::id(),
+                'return_notes'                    => $this->returnNotes,
                 'accessories_checklist_on_return' => json_encode(array_filter($this->accessories)),
-                'status' => LoanTransaction::STATUS_COMPLETED,
+                'status'                          => LoanTransaction::STATUS_COMPLETED,
             ];
             $transaction = LoanTransaction::create($transactionData);
         }
@@ -465,7 +468,7 @@ class EquipmentChecklist extends Component
     }
 
     /**
-     * Process individual equipment return
+     * Process individual equipment return.
      */
     private function processEquipmentReturn(LoanTransaction $transaction, int $equipmentId): void
     {
@@ -478,29 +481,29 @@ class EquipmentChecklist extends Component
 
         if ($transactionItem) {
             $transactionItem->update([
-                'condition_on_return' => $this->equipmentConditionOnReturn,
+                'condition_on_return'             => $this->equipmentConditionOnReturn,
                 'accessories_checklist_on_return' => json_encode(array_filter($this->accessories)),
-                'return_notes' => $this->returnNotes,
+                'return_notes'                    => $this->returnNotes,
             ]);
         } else {
             LoanTransactionItem::create([
-                'loan_transaction_id' => $transaction->id,
-                'equipment_id' => $equipmentId,
-                'quantity_transacted' => 1,
-                'condition_on_return' => $this->equipmentConditionOnReturn,
+                'loan_transaction_id'             => $transaction->id,
+                'equipment_id'                    => $equipmentId,
+                'quantity_transacted'             => 1,
+                'condition_on_return'             => $this->equipmentConditionOnReturn,
                 'accessories_checklist_on_return' => json_encode(array_filter($this->accessories)),
-                'return_notes' => $this->returnNotes,
+                'return_notes'                    => $this->returnNotes,
             ]);
         }
 
         // Update equipment status based on condition
         $newStatus = $this->determineEquipmentStatusAfterReturn($this->equipmentConditionOnReturn);
         $equipment->update([
-            'status' => $newStatus,
-            'condition_status' => $this->equipmentConditionOnReturn,
+            'status'                      => $newStatus,
+            'condition_status'            => $this->equipmentConditionOnReturn,
             'current_loan_application_id' => null,
-            'loaned_at' => null,
-            'returned_at' => now(),
+            'loaned_at'                   => null,
+            'returned_at'                 => now(),
         ]);
     }
 
@@ -515,12 +518,12 @@ class EquipmentChecklist extends Component
             Equipment::CONDITION_GOOD, Equipment::CONDITION_FAIR, Equipment::CONDITION_NEW => Equipment::STATUS_AVAILABLE,
             Equipment::CONDITION_MINOR_DAMAGE, Equipment::CONDITION_MAJOR_DAMAGE, Equipment::CONDITION_UNSERVICEABLE => Equipment::STATUS_UNDER_MAINTENANCE,
             Equipment::CONDITION_LOST => Equipment::STATUS_LOST,
-            default => Equipment::STATUS_AVAILABLE,
+            default                   => Equipment::STATUS_AVAILABLE,
         };
     }
 
     /**
-     * Redirect after successful save
+     * Redirect after successful save.
      */
     private function redirectAfterSave(): void
     {
@@ -538,7 +541,7 @@ class EquipmentChecklist extends Component
     }
 
     /**
-     * Add a new accessory input field
+     * Add a new accessory input field.
      */
     public function addAccessory(): void
     {
@@ -546,7 +549,7 @@ class EquipmentChecklist extends Component
     }
 
     /**
-     * Remove an accessory from the list
+     * Remove an accessory from the list.
      */
     public function removeAccessory(int $index): void
     {
@@ -555,30 +558,30 @@ class EquipmentChecklist extends Component
     }
 
     /**
-     * Reset the form to initial state
+     * Reset the form to initial state.
      */
     public function resetForm(): void
     {
-        $this->selectedEquipmentIds = [];
-        $this->accessories = [];
-        $this->notes = '';
-        $this->returnNotes = '';
+        $this->selectedEquipmentIds       = [];
+        $this->accessories                = [];
+        $this->notes                      = '';
+        $this->returnNotes                = '';
         $this->equipmentConditionOnReturn = '';
         $this->resetErrorBag();
     }
 
     /**
-     * Render the component view
+     * Render the component view.
      */
     public function render(): \Illuminate\View\View
     {
         return view('livewire.equipment-checklist', [
             'availableEquipment' => $this->availableEquipment,
-            'onLoanEquipment' => $this->onLoanEquipment,
+            'onLoanEquipment'    => $this->onLoanEquipment,
             'allAccessoriesList' => $this->allAccessoriesList,
-            'loanApplication' => $this->loanApplication,
-            'loanTransaction' => $this->loanTransaction,
-            'transactionType' => $this->transactionType,
+            'loanApplication'    => $this->loanApplication,
+            'loanTransaction'    => $this->loanTransaction,
+            'transactionType'    => $this->transactionType,
         ]);
     }
 }

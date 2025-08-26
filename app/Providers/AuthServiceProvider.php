@@ -35,15 +35,15 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        Approval::class => ApprovalPolicy::class,
-        Equipment::class => EquipmentPolicy::class,
-        Grade::class => GradePolicy::class,
+        Approval::class        => ApprovalPolicy::class,
+        Equipment::class       => EquipmentPolicy::class,
+        Grade::class           => GradePolicy::class,
         LoanApplication::class => LoanApplicationPolicy::class,
         LoanTransaction::class => LoanTransactionPolicy::class,
-        User::class => UserPolicy::class,
-        Department::class => DepartmentPolicy::class,
-        Position::class => PositionPolicy::class,
-        HelpdeskTicket::class => HelpdeskTicketPolicy::class, // Helpdesk module policy mapping
+        User::class            => UserPolicy::class,
+        Department::class      => DepartmentPolicy::class,
+        Position::class        => PositionPolicy::class,
+        HelpdeskTicket::class  => HelpdeskTicketPolicy::class, // Helpdesk module policy mapping
     ];
 
     /**
@@ -58,6 +58,7 @@ class AuthServiceProvider extends ServiceProvider
             if ($user->hasRole('Admin')) {
                 return true;
             }
+
             return null;
         });
 

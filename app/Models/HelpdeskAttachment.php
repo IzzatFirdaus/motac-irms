@@ -13,18 +13,18 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * Stores files attached to helpdesk tickets or comments (polymorphic).
  *
- * @property int $id
- * @property string $attachable_type
- * @property int $attachable_id
- * @property string $file_path
- * @property string $file_name
- * @property int $file_size
- * @property string $file_type
+ * @property int                             $id
+ * @property string                          $attachable_type
+ * @property int                             $attachable_id
+ * @property string                          $file_path
+ * @property string                          $file_name
+ * @property int                             $file_size
+ * @property string                          $file_type
  * @property \Illuminate\Support\Carbon|null $deleted_at
  */
 class HelpdeskAttachment extends Model
 {
-    use HasFactory, CreatedUpdatedDeletedBy, SoftDeletes;
+    use CreatedUpdatedDeletedBy, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'attachable_type',
@@ -62,18 +62,19 @@ class HelpdeskAttachment extends Model
     {
         $bytes = $this->file_size;
         if ($bytes >= 1073741824) {
-            $bytes = number_format($bytes / 1073741824, 2) . ' GB';
+            $bytes = number_format($bytes / 1073741824, 2).' GB';
         } elseif ($bytes >= 1048576) {
-            $bytes = number_format($bytes / 1048576, 2) . ' MB';
+            $bytes = number_format($bytes / 1048576, 2).' MB';
         } elseif ($bytes >= 1024) {
-            $bytes = number_format($bytes / 1024, 2) . ' KB';
+            $bytes = number_format($bytes / 1024, 2).' KB';
         } elseif ($bytes > 1) {
-            $bytes = $bytes . ' bytes';
+            $bytes = $bytes.' bytes';
         } elseif ($bytes == 1) {
-            $bytes = $bytes . ' byte';
+            $bytes = $bytes.' byte';
         } else {
             $bytes = '0 bytes';
         }
+
         return $bytes;
     }
 }

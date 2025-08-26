@@ -25,9 +25,9 @@ class ApplicationStatusUpdatedNotification extends Notification implements Shoul
 
     public function __construct(User $user, LoanApplication $application, string $newStatus)
     {
-        $this->user = $user;
+        $this->user        = $user;
         $this->application = $application->loadMissing('user');
-        $this->newStatus = $newStatus;
+        $this->newStatus   = $newStatus;
     }
 
     public function via(User $notifiable): array
@@ -37,17 +37,17 @@ class ApplicationStatusUpdatedNotification extends Notification implements Shoul
 
     public function toMail(User $notifiable): MailMessage
     {
-        $applicantName = $this->application->user?->name ?? $notifiable->name ?? __('Pemohon');
+        $applicantName          = $this->application->user?->name ?? $notifiable->name ?? __('Pemohon');
         $applicationTypeDisplay = __('Permohonan Pinjaman Peralatan ICT');
-        $applicationId = $this->application->id ?? 'N/A';
-        $newStatusDisplay = $this->getStatusLabel($this->application, $this->newStatus);
+        $applicationId          = $this->application->id ?? 'N/A';
+        $newStatusDisplay       = $this->getStatusLabel($this->application, $this->newStatus);
 
         $subject = __('Status :appType Anda Dikemaskini (#:appId)', ['appType' => $applicationTypeDisplay, 'appId' => $applicationId]);
 
         $introLines = [
             __('Status :appType anda dengan nombor rujukan **#:id** telah dikemaskini dalam sistem.', [
                 'appType' => $applicationTypeDisplay,
-                'id' => $applicationId,
+                'id'      => $applicationId,
             ]),
             __('Status terkini: **:newStatus**', ['newStatus' => $newStatusDisplay]),
         ];
@@ -55,44 +55,44 @@ class ApplicationStatusUpdatedNotification extends Notification implements Shoul
         return (new MailMessage)
             ->subject($subject)
             ->view('emails.notifications.motac_default_notification', [
-                'greeting' => __('Salam Sejahtera'),
+                'greeting'       => __('Salam Sejahtera'),
                 'notifiableName' => $applicantName,
-                'introLines' => $introLines,
-                'actionText' => __('Lihat Permohonan'),
-                'actionUrl' => $this->getActionUrl(),
+                'introLines'     => $introLines,
+                'actionText'     => __('Lihat Permohonan'),
+                'actionUrl'      => $this->getActionUrl(),
             ]);
     }
 
     public function toArray(User $notifiable): array
     {
         $applicationTypeDisplay = __('Permohonan Pinjaman Peralatan ICT');
-        $applicationMorphClass = $this->application->getMorphClass();
-        $applicationId = $this->application->id ?? null;
-        $applicantId = $this->application->user_id ?? ($notifiable->id ?? null);
-        $newStatusDisplay = $this->getStatusLabel($this->application, $this->newStatus);
-        $applicationUrl = $this->getActionUrl();
+        $applicationMorphClass  = $this->application->getMorphClass();
+        $applicationId          = $this->application->id      ?? null;
+        $applicantId            = $this->application->user_id ?? ($notifiable->id ?? null);
+        $newStatusDisplay       = $this->getStatusLabel($this->application, $this->newStatus);
+        $applicationUrl         = $this->getActionUrl();
 
         return [
-            'application_type_morph' => $applicationMorphClass,
+            'application_type_morph'   => $applicationMorphClass,
             'application_type_display' => $applicationTypeDisplay,
-            'application_id' => $applicationId,
-            'applicant_id' => $applicantId,
-            'subject' => __('Status :appType Dikemaskini (#:id)', ['appType' => $applicationTypeDisplay, 'id' => $applicationId ?? 'N/A']),
-            'message' => __('Status :appType anda (#:id) telah dikemaskini ke **:newStatus**.', [
-                'appType' => $applicationTypeDisplay,
-                'id' => $applicationId ?? 'N/A',
+            'application_id'           => $applicationId,
+            'applicant_id'             => $applicantId,
+            'subject'                  => __('Status :appType Dikemaskini (#:id)', ['appType' => $applicationTypeDisplay, 'id' => $applicationId ?? 'N/A']),
+            'message'                  => __('Status :appType anda (#:id) telah dikemaskini ke **:newStatus**.', [
+                'appType'   => $applicationTypeDisplay,
+                'id'        => $applicationId ?? 'N/A',
                 'newStatus' => $newStatusDisplay,
             ]),
-            'url' => ($applicationUrl !== '#') ? $applicationUrl : null,
-            'new_status_key' => $this->newStatus,
+            'url'                => ($applicationUrl !== '#') ? $applicationUrl : null,
+            'new_status_key'     => $this->newStatus,
             'new_status_display' => $newStatusDisplay,
-            'icon' => 'ti ti-refresh-alert',
+            'icon'               => 'ti ti-refresh-alert',
         ];
     }
 
     private function getActionUrl(): string
     {
-        $routeName = 'resource-management.my-applications.loan.show';
+        $routeName       = 'resource-management.my-applications.loan.show';
         $routeParameters = ['loan_application' => $this->application->id];
 
         if (Route::has($routeName)) {
@@ -110,6 +110,7 @@ class ApplicationStatusUpdatedNotification extends Notification implements Shoul
     {
         if (method_exists($application, 'getStatusOptions')) {
             $options = $application::getStatusOptions();
+
             return $options[$statusKey] ?? ucfirst(str_replace('_', ' ', $statusKey));
         }
 

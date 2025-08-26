@@ -8,8 +8,10 @@
   ],
   "preset": "laravel",
   "rules": {
-    "blank_line_after_namespace": false,
-    "array_syntax": "short",
+  "blank_line_after_namespace": false,
+  "array_syntax": {
+    "syntax": "short"
+  },
     "ordered_imports": true,
     "no_unused_imports": true,
     "no_extra_blank_lines": true,

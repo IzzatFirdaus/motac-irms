@@ -21,11 +21,11 @@ class SubCategoriesSeeder extends Seeder
         Log::info('Truncated sub_categories table.');
 
         $adminUserForAudit = User::orderBy('id')->first();
-        $auditUserId = $adminUserForAudit?->id;
+        $auditUserId       = $adminUserForAudit?->id;
 
         if (! $auditUserId) {
             $adminUserForAudit = User::factory()->create(['name' => 'Audit User (SubCatSeeder)']);
-            $auditUserId = $adminUserForAudit->id;
+            $auditUserId       = $adminUserForAudit->id;
             Log::info(sprintf('Created a fallback audit user with ID %d for SubCategoriesSeeder.', $auditUserId));
         } else {
             Log::info(sprintf('Using User ID %s for audit columns in SubCategoriesSeeder.', $auditUserId));
@@ -74,14 +74,14 @@ class SubCategoriesSeeder extends Seeder
                 // Fields align with SubCategory.php model's fillable array
                 SubCategory::firstOrCreate(
                     [
-                        'name' => $subCategoryDef['name'],
+                        'name'                  => $subCategoryDef['name'],
                         'equipment_category_id' => $parentCategory->id,
                     ],
                     [
                         'description' => $subCategoryDef['description'] ?? null,
-                        'is_active' => $subCategoryDef['is_active'] ?? true,
-                        'created_by' => $auditUserId,
-                        'updated_by' => $auditUserId,
+                        'is_active'   => $subCategoryDef['is_active']   ?? true,
+                        'created_by'  => $auditUserId,
+                        'updated_by'  => $auditUserId,
                     ]
                 );
                 $createdSpecificCount++;
@@ -97,7 +97,7 @@ class SubCategoriesSeeder extends Seeder
 
         if ($equipmentCategories->isNotEmpty() && class_exists(SubCategory::class) && method_exists(SubCategory::class, 'factory')) {
             $currentSubCategoryCount = SubCategory::count(); // Aim for total, considering already created specifics. More simply, just add a fixed number of factory ones.
-            $needed = max(0, $targetFactoryCount);
+            $needed                  = max(0, $targetFactoryCount);
             // Create at least $targetFactoryCount new ones via factory if possible.
             Log::info(sprintf('Creating %d additional random subcategories using factory...', $needed));
             SubCategory::factory()

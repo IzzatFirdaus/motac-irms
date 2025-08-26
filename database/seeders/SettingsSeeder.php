@@ -20,13 +20,13 @@ class SettingsSeeder extends Seeder
         Log::info('Truncated settings table.');
 
         $adminUserForAudit = User::orderBy('id')->first(); // Get first user, likely an admin
-        $auditUserId = $adminUserForAudit?->id;
+        $auditUserId       = $adminUserForAudit?->id;
 
         if (! $auditUserId) {
             // Create a fallback user if no users exist (e.g., running seeders in a very specific order or fresh db)
             // This relies on UserFactory being correctly set up.
             $fallbackUser = User::factory()->create(['name' => 'Audit User (SettingsSeeder)']);
-            $auditUserId = $fallbackUser->id;
+            $auditUserId  = $fallbackUser->id;
             Log::info(sprintf('Created a fallback audit user with ID %d for SettingsSeeder.', $auditUserId));
         } else {
             Log::info(sprintf('Using User ID %s for audit columns in SettingsSeeder.', $auditUserId));
@@ -36,8 +36,8 @@ class SettingsSeeder extends Seeder
         // The SettingFactory.php you provided already defines many of these.
         // These overrides ensure specific values for this MOTAC RMS instance.
         $settingsOverrides = [
-            'site_name' => 'MOTAC Integrated Resource Management System - Seeded', // Specific site name for this seed
-            'site_logo_path' => '/images/motac_logo_default.png', // Provide a default or ensure this path is valid
+            'site_name'                       => 'MOTAC Integrated Resource Management System - Seeded', // Specific site name for this seed
+            'site_logo_path'                  => '/images/motac_logo_default.png', // Provide a default or ensure this path is valid
             'default_notification_email_from' => env('MAIL_FROM_ADDRESS', 'noreply.rms@motac.gov.my'),
             'default_notification_email_name' => env('MAIL_FROM_NAME', 'MOTAC Resource Management System'),
 
@@ -48,7 +48,7 @@ class SettingsSeeder extends Seeder
 
             // SMS API credentials should ideally be null if not configured via .env
             // The factory sets them as optional or null.
-            'sms_api_sender' => env('SMS_SENDER_ID', 'MOTACRMS'), // Your factory sets this to 'MOTAC_RMS' in defaultRow
+            'sms_api_sender'   => env('SMS_SENDER_ID', 'MOTACRMS'), // Your factory sets this to 'MOTAC_RMS' in defaultRow
             'sms_api_username' => env('SMS_API_USERNAME'), // Let factory handle or pull from env
             'sms_api_password' => env('SMS_API_PASSWORD'), // Let factory handle or pull from env
 

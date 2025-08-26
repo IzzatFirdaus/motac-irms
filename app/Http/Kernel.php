@@ -5,7 +5,7 @@ namespace App\Http;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 /**
- * HTTP Kernel - Defines the middleware stack for the MOTAC IRMS application
+ * HTTP Kernel - Defines the middleware stack for the MOTAC IRMS application.
  *
  * This kernel includes middleware for:
  * - Multi-language support with automatic locale detection
@@ -74,7 +74,7 @@ class Kernel extends HttpKernel
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
 
             // API rate limiting
-            \Illuminate\Routing\Middleware\ThrottleRequests::class . ':api',
+            \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
 
             // Route model binding for API routes
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
@@ -93,16 +93,16 @@ class Kernel extends HttpKernel
         // Laravel Built-in Middleware
         // --------------------------------------------------
 
-        'auth' => \App\Http\Middleware\Authenticate::class,
-        'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
-        'auth.session' => \Illuminate\Session\Middleware\AuthenticateSession::class,
-        'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
-        'can' => \Illuminate\Auth\Middleware\Authorize::class,
-        'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
+        'auth'             => \App\Http\Middleware\Authenticate::class,
+        'auth.basic'       => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
+        'auth.session'     => \Illuminate\Session\Middleware\AuthenticateSession::class,
+        'cache.headers'    => \Illuminate\Http\Middleware\SetCacheHeaders::class,
+        'can'              => \Illuminate\Auth\Middleware\Authorize::class,
+        'guest'            => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'password.confirm' => \Illuminate\Auth\Middleware\RequirePassword::class,
-        'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
-        'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
-        'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        'signed'           => \Illuminate\Routing\Middleware\ValidateSignature::class,
+        'throttle'         => \Illuminate\Routing\Middleware\ThrottleRequests::class,
+        'verified'         => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
 
         // --------------------------------------------------
         // Spatie Permission Package (RBAC - Role-Based Access Control)
@@ -129,7 +129,7 @@ class Kernel extends HttpKernel
 
         // Grade-level authorization middleware for hierarchical permissions
         'check.gradelevel' => \App\Http\Middleware\CheckGradeLevel::class,
-        'check.usergrade' => \App\Http\Middleware\CheckUserGrade::class,
+        'check.usergrade'  => \App\Http\Middleware\CheckUserGrade::class,
 
         // Log viewer authorization
         'authorize.logviewer' => \App\Http\Middleware\AuthorizeLogViewer::class,
@@ -148,7 +148,7 @@ class Kernel extends HttpKernel
         'view_approval_tasks' => \App\Http\Middleware\ViewApprovalTasks::class,
 
         // Permission to view approval history
-        'view_approval_history' => \App\Http\Middleware\CheckPermission::class . ':view_approval_history',
+        'view_approval_history' => \App\Http\Middleware\CheckPermission::class.':view_approval_history',
 
         // Optional: Fallback log viewer middleware if needed
         // 'logviewer.auth' => \Opcodes\LogViewer\Http\Middleware\AuthorizeLogViewer::class,
