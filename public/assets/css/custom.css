@@ -1,7 +1,8 @@
 /* custom.css for MOTAC IRMS
-   - Branding, status badges, forms, and responsive design
-   - Optimized for maximum cross-browser compatibility (IE 10+, Samsung Internet 2.0+, Edge, Chrome, Firefox)
-   - Updated: 2025-08-25 04:22:10 UTC by Copilot
+    - Requires variables.css to be loaded first
+    - Branding, status badges, forms, and responsive design
+    - Optimized for maximum cross-browser compatibility (IE 10+, Samsung Internet 2.0+, Edge, Chrome, Firefox)
+    - Updated: 2025-08-25 07:31:41 UTC by GitHub Copilot
 */
 
 /* -----------------------------------------------------
@@ -11,28 +12,7 @@
     direction: ltr;
 }
 
-/* -----------------------------------------------------
-   1. MOTAC Branding Variables - CSS Custom Properties
------------------------------------------------------ */
-:root {
-    --motac-primary-color: #003366;
-    --motac-secondary-color: #FFCC00;
-    --motac-text-color: #333333;
-    --motac-font-family: 'Arial', sans-serif;
-    --danger-color: #dc3545;
-    --success-color: #28a745;
-    --warning-color: #ffc107;
-
-    /* Navbar-specific variables */
-    --motac-navbar-bg: #fff;
-    --motac-navbar-border: #003366;
-    --motac-navbar-accent: #1976d2;
-    --motac-navbar-accent-bg: #e3f0ff;
-    --motac-navbar-text: #003366;
-    --motac-navbar-hover: #f1f6fb;
-    --motac-navbar-link-hover: #1976d2;
-    --motac-navbar-shadow: 0 2px 10px rgba(25, 118, 210, 0.07);
-}
+/* Branding tokens moved to variables.css */
 
 /* -----------------------------------------------------
    2. Typography & General Styling - Base styles
@@ -40,9 +20,10 @@
 body {
     font-family: var(--motac-font-family);
     color: var(--motac-text-color);
-    line-height: 1.6;
+    line-height: 1.6; /* Improves readability */
 }
 
+/* Heading styles with MOTAC branding */
 h1, h2, h3, h4, h5, h6 {
     font-family: var(--motac-font-family);
     color: var(--motac-primary-color);
@@ -50,17 +31,16 @@ h1, h2, h3, h4, h5, h6 {
 
 /* -----------------------------------------------------
    MOTAC Navbar (Alternative Design)
+   - Modern, accessible, government-compliant navbar
+   - Responsive and visually consistent
 ----------------------------------------------------- */
 .motac-navbar-alt {
     width: 100%;
     background: var(--motac-navbar-bg);
     border-bottom: 3px solid var(--motac-navbar-border);
     box-shadow: var(--motac-navbar-shadow);
-    display: -ms-flexbox;
     display: flex;
-    -ms-flex-align: center;
     align-items: center;
-    -ms-flex-pack: justify;
     justify-content: space-between;
     min-height: 64px;
     padding: 0 18px;
@@ -68,23 +48,19 @@ h1, h2, h3, h4, h5, h6 {
     z-index: 11;
 }
 .motac-navbar-alt .navbar-left {
-    display: -ms-flexbox;
     display: flex;
-    -ms-flex-align: center;
     align-items: center;
-    /* fallback for gap */
-}
-.motac-navbar-alt .navbar-left > *:not(:last-child) {
-    margin-right: 12px;
+    gap: 12px;
 }
 .motac-navbar-alt .navbar-brand {
-    display: -ms-flexbox;
     display: flex;
-    -ms-flex-align: center;
     align-items: center;
-}
-.motac-navbar-alt .navbar-brand > *:not(:last-child) {
-    margin-right: 12px;
+    gap: 12px;
+    text-decoration: none;
+    color: var(--motac-navbar-text);
+    font-weight: 700;
+    font-size: 1.22em;
+    letter-spacing: 0.04em;
 }
 .motac-navbar-alt .navbar-logo {
     width: 38px;
@@ -92,11 +68,8 @@ h1, h2, h3, h4, h5, h6 {
     background: #fff;
     border: 2.5px solid var(--motac-navbar-border);
     border-radius: 8px;
-    display: -ms-flexbox;
     display: flex;
-    -ms-flex-align: center;
     align-items: center;
-    -ms-flex-pack: center;
     justify-content: center;
     box-shadow: 0 1px 6px rgba(25, 118, 210, 0.07);
 }
@@ -114,13 +87,10 @@ h1, h2, h3, h4, h5, h6 {
     letter-spacing: 0.01em;
 }
 .motac-navbar-alt .navbar-links {
-    display: -ms-flexbox;
     display: flex;
-    -ms-flex-align: center;
     align-items: center;
-}
-.motac-navbar-alt .navbar-links > *:not(:last-child) {
-    margin-right: 18px;
+    gap: 18px;
+    margin: 0 10px;
 }
 .motac-navbar-alt .navbar-link {
     color: var(--motac-navbar-text);
@@ -137,13 +107,9 @@ h1, h2, h3, h4, h5, h6 {
     outline: none;
 }
 .motac-navbar-alt .navbar-right {
-    display: -ms-flexbox;
     display: flex;
-    -ms-flex-align: center;
     align-items: center;
-}
-.motac-navbar-alt .navbar-right > *:not(:last-child) {
-    margin-right: 14px;
+    gap: 14px;
 }
 .motac-navbar-alt .navbar-action {
     position: relative;
@@ -158,9 +124,7 @@ h1, h2, h3, h4, h5, h6 {
     border-radius: 4px;
     cursor: pointer;
     transition: background 0.13s, color 0.13s;
-    display: -ms-flexbox;
     display: flex;
-    -ms-flex-align: center;
     align-items: center;
 }
 .motac-navbar-alt .navbar-action > a:hover,
@@ -191,10 +155,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 .motac-navbar-alt .navbar-dropdown a,
 .motac-navbar-alt .navbar-dropdown button {
-    display: -ms-flexbox;
     display: flex;
-    -ms-flex-align: center;
     align-items: center;
+    gap: 9px;
     width: 100%;
     color: #222;
     background: none;
@@ -205,10 +168,6 @@ h1, h2, h3, h4, h5, h6 {
     cursor: pointer;
     transition: background 0.15s;
 }
-.motac-navbar-alt .navbar-dropdown a > *:not(:last-child),
-.motac-navbar-alt .navbar-dropdown button > *:not(:last-child) {
-    margin-right: 9px;
-}
 .motac-navbar-alt .navbar-dropdown a:hover,
 .motac-navbar-alt .navbar-dropdown button:hover {
     background: #f6f7fa;
@@ -218,16 +177,9 @@ h1, h2, h3, h4, h5, h6 {
     width: 38px;
     height: 38px;
     border-radius: 50%;
-    /* fallback for object-fit */
-    background-size: cover;
-    background-position: 50% 50%;
+    object-fit: cover;
     border: 2px solid var(--motac-navbar-accent);
     background: #e3f0ff;
-}
-@supports (object-fit: cover) {
-    .motac-navbar-alt .navbar-avatar {
-        object-fit: cover;
-    }
 }
 .navbar-badge {
     background: #dc3545;
@@ -252,7 +204,6 @@ h1, h2, h3, h4, h5, h6 {
     margin-right: 6px;
     margin-left: -5px;
 }
-
 /* Responsive adjustments for navbar */
 @media (max-width: 1100px) {
     .motac-navbar-alt .navbar-ministry {
@@ -269,18 +220,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 @media (max-width: 600px) {
     .motac-navbar-alt {
-        -ms-flex-direction: column;
         flex-direction: column;
-        -ms-flex-align: stretch;
         align-items: stretch;
         padding: 0 4px;
         min-height: 52px;
     }
     .motac-navbar-alt .navbar-brand {
         font-size: 1em;
-    }
-    .motac-navbar-alt .navbar-brand > *:not(:last-child) {
-        margin-right: 6px;
+        gap: 6px;
     }
     .motac-navbar-alt .navbar-logo {
         width: 30px;
@@ -302,11 +249,11 @@ h1, h2, h3, h4, h5, h6 {
     padding: 0.5em 1.2em;
     border-radius: 0.25em;
     cursor: pointer;
-    transition: background 0.2s ease;
+    transition: background 0.2s ease; /* Smooth hover transition */
 }
 .btn-primary:hover,
 .btn-primary:focus {
-    background-color: #00274d;
+    background-color: #00274d; /* Slightly darker shade for hover state */
 }
 
 .btn-secondary {
@@ -320,7 +267,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 .btn-secondary:hover,
 .btn-secondary:focus {
-    background-color: #e6b800;
+    background-color: #e6b800; /* Slightly darker yellow for hover state */
 }
 
 /* -----------------------------------------------------
@@ -332,7 +279,7 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 75%;
     font-weight: 700;
     line-height: 1;
-    white-space: nowrap;
+    white-space: nowrap; /* Prevents text wrapping */
     vertical-align: baseline;
     border-radius: .25rem;
     color: white;
@@ -345,20 +292,25 @@ h1, h2, h3, h4, h5, h6 {
     margin-left: auto;
     margin-right: auto;
     display: block;
-    width: -webkit-fit-content;
-    width: -moz-fit-content;
-    width: fit-content;
-    /* Order: -webkit, -moz, fit-content for compatibility */
+    width: -webkit-fit-content; /* Webkit browsers */
+    width: -moz-fit-content;    /* Firefox */
+    width: fit-content;         /* Modern browsers */
+    /* Order: -webkit, -moz, fit-content for best compatibility */
 }
 
 /* Flexbox container for centering - with comprehensive browser support */
 .status-badge-flex-container {
+    /* IE 10+ flexbox support */
     display: -ms-flexbox;
     -ms-flex-direction: row;
     -ms-flex-pack: center;
+
+    /* Webkit flexbox (older Safari) */
     display: -webkit-flex;
     -webkit-flex-direction: row;
     -webkit-justify-content: center;
+
+    /* Modern flexbox */
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -374,7 +326,7 @@ h1, h2, h3, h4, h5, h6 {
     }
 }
 
-/* Status-specific badge colors */
+/* Status-specific badge colors - matches application workflow states */
 .status-approved {
     background-color: var(--success-color);
     color: white;
@@ -385,7 +337,7 @@ h1, h2, h3, h4, h5, h6 {
 .status-pending_bpm_review,
 .status-pending {
     background-color: var(--warning-color);
-    color: #333;
+    color: #333; /* Dark text for better contrast on yellow background */
 }
 
 .status-rejected {
@@ -400,27 +352,27 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .status-on_loan {
-    background-color: #17a2b8;
+    background-color: #17a2b8; /* Bootstrap info color */
     color: white;
 }
 
 .status-draft {
-    background-color: #6c757d;
+    background-color: #6c757d; /* Muted gray for draft status */
     color: white;
 }
 
 .status-returned {
-    background-color: #007bff;
+    background-color: #007bff; /* Blue for returned equipment */
     color: white;
 }
 
 .status-overdue {
-    background-color: #dc3545;
+    background-color: #dc3545; /* Red for overdue items */
     color: white;
 }
 
 .status-cancelled {
-    background-color: #6c757d;
+    background-color: #6c757d; /* Gray for cancelled applications */
     color: white;
 }
 
@@ -440,20 +392,20 @@ h1, h2, h3, h4, h5, h6 {
     transition: border-color 0.2s ease;
     font-family: var(--motac-font-family);
     font-size: 1em;
-    width: 100%;
-    box-sizing: border-box;
+    width: 100%; /* Ensures full width in container */
+    box-sizing: border-box; /* Includes padding in width calculation */
 }
 
 .form-control:focus {
     border-color: var(--motac-primary-color);
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(0, 51, 102, 0.2);
+    outline: none; /* Removes default browser outline */
+    box-shadow: 0 0 0 2px rgba(0, 51, 102, 0.2); /* Custom focus indicator */
 }
 
 /* Dynamic form sections - controlled via JavaScript for conditional fields */
 .conditional-field-section {
-    display: none;
-    transition: opacity 0.3s ease;
+    display: none; /* Hidden by default */
+    transition: opacity 0.3s ease; /* Smooth show/hide transition */
 }
 
 .conditional-field-section.active {
@@ -476,20 +428,20 @@ h1, h2, h3, h4, h5, h6 {
 
     .status-badge {
         font-size: 85%;
-        padding: .3em .5em;
+        padding: .3em .5em; /* Larger touch targets */
     }
 
     .btn-primary,
     .btn-secondary {
         padding: 0.75em 1.5em;
         font-size: 1em;
-        width: 100%;
+        width: 100%; /* Full width buttons on mobile */
         margin-bottom: 0.5em;
     }
 
     .form-control {
         padding: 0.75em;
-        font-size: 16px;
+        font-size: 16px; /* Prevents zoom on iOS */
     }
 }
 
@@ -505,7 +457,7 @@ h1, h2, h3, h4, h5, h6 {
 
     .btn-primary,
     .btn-secondary {
-        display: none;
+        display: none; /* Hide interactive elements in print */
     }
 
     .page-break {
@@ -577,6 +529,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* -----------------------------------------------------
    === MOTAC IRMS Footer Styles ===
+   Modern, accessible, government-compliant footer design
 ----------------------------------------------------- */
 .bg-footer-alt {
     background: #263238;
@@ -590,10 +543,12 @@ h1, h2, h3, h4, h5, h6 {
     -ms-flex-wrap: wrap;
     -ms-flex-align: start;
     -ms-flex-pack: justify;
+
     display: flex;
     flex-wrap: wrap;
     align-items: flex-start;
     justify-content: space-between;
+
     padding: 24px 16px 16px 16px;
     max-width: 1200px;
     margin: 0 auto;
@@ -721,40 +676,4 @@ h1, h2, h3, h4, h5, h6 {
     .footer-meta {
         min-width: 0;
     }
-}
-
-/* -----------------------------------------------------
-   Cross-browser flexbox fallback for .footer-alt-container (IE10+)
------------------------------------------------------ */
-@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
-    .footer-alt-container {
-        display: -ms-flexbox;
-        -ms-flex-direction: column;
-        flex-direction: column;
-        -ms-flex-pack: start;
-        justify-content: flex-start;
-    }
-}
-
-/* -----------------------------------------------------
-   Fixes for IE10+ for flex-direction, align-items, gap, fit-content, object-fit
------------------------------------------------------ */
-/* Example for .example-flex-container needing direction/align fallback */
-.example-flex-container {
-    display: -ms-flexbox;
-    display: flex;
-    -ms-flex-direction: row;
-    flex-direction: row;
-    -ms-flex-align: center;
-    align-items: center;
-    /* fallback for gap */
-}
-.example-flex-container > *:not(:last-child) {
-    margin-right: 18px;
-}
-/* If you use "fit-content" for width, always list -webkit, -moz, fit-content order */
-.example-fit-content {
-    width: -webkit-fit-content;
-    width: -moz-fit-content;
-    width: fit-content;
 }

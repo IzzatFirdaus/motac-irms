@@ -1,4 +1,8 @@
 <?php
+// Prevent executing this file at runtime. It's intended for IDEs and static analysis only.
+if (!defined('IDE_HELPER_MODELS_ALLOWED')) {
+	return;
+}
 
 // @formatter:off
 // phpcs:ignoreFile
@@ -14,7 +18,7 @@
 namespace App\Models{
 /**
  * Approval Model.
- * 
+ *
  * Represents an approval task for various approvable items (e.g., EmailApplication, LoanApplication).
  * System Design Reference: MOTAC Integrated Resource Management System (Revision 3) - Section 4.4
  *
@@ -69,7 +73,7 @@ namespace App\Models{
 namespace App\Models{
 /**
  * Department Model.
- * 
+ *
  * System Design Reference: MOTAC Integrated Resource Management System (Revision 3) - Section 4.1 (Database Schema for departments implies head_of_department_id)
  * Migration context: 2013_11_01_131800_create_departments_table.php uses head_of_department_id
  *
@@ -120,7 +124,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property int $id
  * @property int|null $equipment_category_id
@@ -309,7 +313,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $attachable
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment newModelQuery()
@@ -321,7 +325,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\HelpdeskTicket> $tickets
  * @property-read int|null $tickets_count
@@ -334,7 +338,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\HelpdeskAttachment> $attachments
  * @property-read int|null $attachments_count
@@ -349,7 +353,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\HelpdeskTicket> $tickets
  * @property-read int|null $tickets_count
@@ -362,7 +366,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property-read \App\Models\User|null $applicant
  * @property-read \App\Models\User|null $assignedTo
@@ -384,7 +388,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Import newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Import newQuery()
@@ -399,7 +403,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property int $id
  * @property int $user_id Applicant User ID
@@ -495,7 +499,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property int $id
  * @property int $loan_application_id
@@ -549,7 +553,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property int $id
  * @property int $loan_application_id
@@ -630,7 +634,7 @@ namespace App\Models{
 namespace App\Models{
 /**
  * Loan Transaction Item Model.
- * 
+ *
  * Represents a specific equipment item within a loan transaction (either an issue or a return).
  * System Design Reference: MOTAC Integrated Resource Management System (Revision 3.5) - Section 4.3
  *
@@ -744,7 +748,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $type
@@ -793,7 +797,7 @@ namespace App\Models{
 namespace App\Models{
 /**
  * Position Model (Jawatan).
- * 
+ *
  * System Design Reference: MOTAC Integrated Resource Management System (Revision 3) - Section 4.1, positions table
  *
  * @property int $id
@@ -839,7 +843,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property int $id
  * @property string $name
@@ -868,7 +872,7 @@ namespace App\Models{
 namespace App\Models{
 /**
  * Setting Model.
- * 
+ *
  * Manages application-wide settings, typically as a single row in the database.
  * Assumes a global BlameableObserver handles created_by, updated_by, deleted_by.
  *
@@ -936,7 +940,7 @@ namespace App\Models{
 namespace App\Models{
 /**
  * SubCategory Model.
- * 
+ *
  * Defines sub-categories for ICT equipment, linked to EquipmentCategory.
  * System Design Reference: MOTAC Integrated Resource Management System (Revision 3) - Section 4.3
  * Assumes a global BlameableObserver handles created_by, updated_by, deleted_by.
@@ -987,7 +991,7 @@ namespace App\Models{
 namespace App\Models{
 /**
  * User Model for MOTAC System.
- * 
+ *
  * System Design Reference: MOTAC Integrated Resource Management System (Revision 3.5) - Section 4.1
  * Migration context: 2013_01_01_000000_create_users_table.php, 2013_11_01_132200_add_motac_columns_to_users_table.php
  *
