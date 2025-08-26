@@ -72,11 +72,11 @@
       </div>
       <div class="modal-footer">
         <!-- Cancel Button -->
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+        <button type="button" class="btn btn-outline-secondary motac-btn-outline" data-bs-dismiss="modal">
           <i class="bi bi-x-lg me-1"></i>{{ __('Batal') }}
         </button>
         <!-- Save/Submit Button, changes label depending on mode -->
-        <button type="submit" class="btn btn-primary d-inline-flex align-items-center" form="subCategoryFormModal"
+        <button type="submit" class="btn btn-primary d-inline-flex align-items-center motac-btn-primary" form="subCategoryFormModal"
                 wire:loading.attr="disabled" wire:target="submitSubCategory">
           <span wire:loading wire:target="submitSubCategory" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
           <i class="bi {{ $isEditMode ? 'bi-save-fill' : 'bi-check-lg' }} me-1" wire:loading.remove wire:target="submitSubCategory"></i>

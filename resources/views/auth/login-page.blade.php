@@ -41,8 +41,8 @@
                     </a>
                 </div>
 
-                <div class="card shadow-sm">
-                    <div class="card-header bg-primary text-white p-3">
+                    <div class="motac-card shadow-sm">
+                        <div class="motac-card-header bg-primary text-white p-3">
                         <h4 class="mb-0 text-white d-flex align-items-center">
                             <i class="bi bi-box-arrow-in-right me-2"></i>
                             {{ __('Log Masuk Sistem') }}
@@ -108,12 +108,12 @@
                                     @endif
                                 </div>
                             </div>
-                            <button class="btn btn-primary d-grid w-100" type="submit">
+                <button class="motac-btn-primary d-grid w-100" type="submit">
                                 <i class="bi bi-box-arrow-in-right me-1"></i>{{ __('Log Masuk') }}
                             </button>
                         </form>
-                    </div>
-                    <div class="card-footer text-center text-muted small p-3 login-card-footer">
+            </div>
+            <div class="motac-card-footer text-center text-muted small p-3 login-card-footer">
                         @if (Route::has('register'))
                             <p class="mb-2">
                                 <span>{{ __('Pengguna baru?') }}</span>

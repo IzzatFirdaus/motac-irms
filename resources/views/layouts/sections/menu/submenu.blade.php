@@ -49,14 +49,14 @@
 
                         @isset($submenuItem->icon)
                             {{-- Bootstrap icons, where $submenuItem->icon is just the name like 'envelope-paper-fill' --}}
-                            <i class="menu-icon bi bi-{{ $submenuItem->icon }}"></i>
+                            <i class="menu-icon bi bi-{{ $submenuItem->icon }}" aria-hidden="true"></i>
                         @endisset
 
                         {{-- Robust label rendering --}}
                         <div>{{ __($submenuItem->name ?? null ? $submenuItem->name : '-') }}</div>
 
                         @isset($submenuItem->badge)
-                            <div class="badge bg-label-{{ $submenuItem->badge[0] }} rounded-pill ms-auto">
+                            <div class="motac-badge motac-badge-{{ $submenuItem->badge[0] }} ms-auto" role="status" aria-label="{{ __($submenuItem->badge[1]) }}">
                                 {{ __($submenuItem->badge[1]) }}</div>
                         @endisset
                     </a>

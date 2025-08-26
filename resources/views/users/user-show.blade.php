@@ -14,7 +14,7 @@
                         {{ __('Profil Pengguna') }}
                     </h1>
                     {{-- Back button to user index --}}
-                    <a href="{{ url()->previous(route('users.user-index')) }}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center">
+                    <a href="{{ url()->previous(route('users.user-index')) }}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center motac-btn-outline">
                         <i class="bi bi-arrow-left me-1"></i> {{ __('Kembali ke Senarai Pengguna') }}
                     </a>
                 </div>
@@ -77,16 +77,18 @@
 
                             <dt class="col-sm-4 text-muted fw-medium">{{ __('Status Akaun') }}</dt>
                             <dd class="col-sm-8 text-dark">
-                                <span class="badge rounded-pill {{ $user->status === \App\Models\User::STATUS_ACTIVE ? 'bg-success' : 'bg-secondary' }}">
-                                    {{ $user->status === \App\Models\User::STATUS_ACTIVE ? __('Aktif') : __('Tidak Aktif') }}
-                                </span>
+                                @if($user->status === \App\Models\User::STATUS_ACTIVE)
+                                    <span class="motac-badge motac-badge-success rounded-pill" role="status">{{ __('Aktif') }}</span>
+                                @else
+                                    <span class="motac-badge motac-badge-secondary rounded-pill" role="status">{{ __('Tidak Aktif') }}</span>
+                                @endif
                             </dd>
 
                             @if ($user->roles->isNotEmpty())
                                 <dt class="col-sm-4 text-muted fw-medium">{{ __('Peranan Sistem') }}</dt>
                                 <dd class="col-sm-8 text-dark">
                                     @foreach($user->roles as $role)
-                                        <span class="badge bg-info text-dark me-1">{{ e($role->name) }}</span>
+                                        <span class="motac-badge motac-badge-info me-1" role="status">{{ e($role->name) }}</span>
                                     @endforeach
                                 </dd>
                             @endif

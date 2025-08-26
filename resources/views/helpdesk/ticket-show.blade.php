@@ -8,12 +8,12 @@
     <h1 class="mb-4">{{ __('Butiran Tiket Bantuan') }}</h1>
 
     {{-- Ticket summary --}}
-    <div class="card mb-3">
-        <div class="card-header">
+    <div class="motac-card mb-3">
+        <div class="motac-card-header">
             <strong>{{ $ticket->title }}</strong>
-            <span class="badge bg-info float-end">{{ __($ticket->status) }}</span>
+            <span class="motac-badge motac-badge-info float-end" role="status" aria-label="{{ __($ticket->status) }}">{{ __($ticket->status) }}</span>
         </div>
-        <div class="card-body">
+        <div class="motac-card-body">
             <p><strong>{{ __('Kategori') }}:</strong> {{ $ticket->category->name ?? '-' }}</p>
             <p><strong>{{ __('Keutamaan') }}:</strong> {{ $ticket->priority->name ?? '-' }}</p>
             <p><strong>{{ __('Dihantar oleh') }}:</strong> {{ $ticket->applicant->name ?? '-' }}</p>
@@ -63,11 +63,11 @@
     @livewire('helpdesk.ticket-comment-form', ['ticket' => $ticket->id])
 
     <div class="mt-3">
-        <a href="{{ route('helpdesk.tickets.index') }}" class="btn btn-secondary">
+        <a href="{{ route('helpdesk.tickets.index') }}" class="motac-btn-secondary d-inline-flex align-items-center" aria-label="{{ __('Kembali ke Senarai Tiket') }}">
             {{ __('Kembali ke Senarai Tiket') }}
         </a>
         @can('update', $ticket)
-            <a href="{{ route('helpdesk.tickets.edit', $ticket) }}" class="btn btn-primary">
+            <a href="{{ route('helpdesk.tickets.edit', $ticket) }}" class="motac-btn-primary d-inline-flex align-items-center" aria-label="{{ __('Kemaskini') }}">
                 {{ __('Kemaskini') }}
             </a>
         @endcan
@@ -75,7 +75,7 @@
             <form action="{{ route('helpdesk.tickets.destroy', $ticket) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('Padam tiket ini?') }}')">
                 @csrf
                 @method('DELETE')
-                <button class="btn btn-danger">{{ __('Padam') }}</button>
+                <button class="motac-btn-danger d-inline-flex align-items-center" aria-label="{{ __('Padam') }}">{{ __('Padam') }}</button>
             </form>
         @endcan
     </div>

@@ -14,7 +14,7 @@
                     <i class="bi bi-plus-circle-fill me-2"></i>{{ __('Tambah Peralatan ICT Baru') }}
                 </h1>
                 <a href="{{ route('resource-management.equipment-admin.index') }}"
-                    class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center">
+                    class="motac-btn-outline btn-sm d-inline-flex align-items-center">
                     <i class="bi bi-arrow-left me-1"></i> {{ __('Kembali ke Senarai') }}
                 </a>
             </div>
@@ -156,11 +156,11 @@
                 </div>
 
                 <div class="d-flex justify-content-center mt-4 gap-2">
-                    <button type="submit" class="btn btn-primary d-inline-flex align-items-center">
+                    <button type="submit" class="motac-btn-primary d-inline-flex align-items-center">
                         <i class="bi bi-check-circle-fill me-2"></i>
                         {{ __('Simpan Peralatan') }}
                     </button>
-                    <a href="{{ route('resource-management.equipment-admin.index') }}" class="btn btn-outline-secondary d-inline-flex align-items-center">
+                    <a href="{{ route('resource-management.equipment-admin.index') }}" class="motac-btn-outline d-inline-flex align-items-center">
                         <i class="bi bi-x-circle me-2"></i>
                         {{ __('Batal') }}
                     </a>

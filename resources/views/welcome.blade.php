@@ -29,7 +29,7 @@
                 </p>
                 {{-- Show dashboard button for authenticated users --}}
                 @auth
-                    <a href="{{ route('dashboard') }}" class="btn btn-primary btn-lg">
+                    <a href="{{ route('dashboard') }}" class="btn btn-primary btn-lg motac-btn-primary">
                         <i class="bi bi-speedometer2 me-2"></i> {{ __('dashboard.dashboard') }}
                     </a>
                 @endauth
@@ -49,7 +49,7 @@
                             {{ __('dashboard.apply_ict_loan_text') }}
                         </p>
                         @auth
-                            <a href="{{ route('loan-applications.create') }}" class="btn btn-outline-primary btn-sm">
+                            <a href="{{ route('loan-applications.create') }}" class="btn btn-outline-primary btn-sm motac-btn-outline">
                                 <i class="bi bi-handbag-fill me-1"></i> {{ __('forms.button_submit') }}
                             </a>
                         @endauth
@@ -68,10 +68,10 @@
                             {{ __('dashboard.create_helpdesk_ticket_text') }}
                         </p>
                         @auth
-                            <a href="{{ route('helpdesk.create') }}" class="btn btn-outline-success btn-sm">
+                            <a href="{{ route('helpdesk.create') }}" class="btn btn-outline-success btn-sm motac-btn-outline">
                                 <i class="bi bi-ticket-detailed me-1"></i> {{ __('forms.helpdesk_button_submit_ticket') }}
                             </a>
-                            <a href="{{ route('helpdesk.index') }}" class="btn btn-outline-info btn-sm ms-2">
+                            <a href="{{ route('helpdesk.index') }}" class="btn btn-outline-info btn-sm ms-2 motac-btn-outline">
                                 <i class="bi bi-card-checklist me-1"></i> {{ __('dashboard.view_my_tickets') }}
                             </a>
                         @endauth

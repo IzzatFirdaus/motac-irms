@@ -23,11 +23,11 @@
                     {{ __('Hak Cipta') }} &copy; {{ date('Y') }}. {{ __('Semua Hak Terpelihara.') }}
                 </div>
                 <div class="footer-social">
-                    <a href="https://www.facebook.com/mymotac/" target="_blank" aria-label="Facebook" class="footer-link"><i class="bi bi-facebook"></i></a>
-                    <a href="https://www.instagram.com/mymotac/" target="_blank" aria-label="Instagram" class="footer-link"><i class="bi bi-instagram"></i></a>
-                    <a href="https://x.com/mymotac" target="_blank" aria-label="X" class="footer-link"><i class="bi bi-twitter-x"></i></a>
-                    <a href="https://www.youtube.com/user/mymotac" target="_blank" aria-label="YouTube" class="footer-link"><i class="bi bi-youtube"></i></a>
-                    <a href="https://www.tiktok.com/@mymotac" target="_blank" aria-label="TikTok" class="footer-link"><i class="bi bi-tiktok"></i></a>
+                    <a href="https://www.facebook.com/mymotac/" target="_blank" aria-label="Facebook" class="footer-link"><i class="bi bi-facebook" aria-hidden="true"></i></a>
+                    <a href="https://www.instagram.com/mymotac/" target="_blank" aria-label="Instagram" class="footer-link"><i class="bi bi-instagram" aria-hidden="true"></i></a>
+                    <a href="https://x.com/mymotac" target="_blank" aria-label="X" class="footer-link"><i class="bi bi-twitter-x" aria-hidden="true"></i></a>
+                    <a href="https://www.youtube.com/user/mymotac" target="_blank" aria-label="YouTube" class="footer-link"><i class="bi bi-youtube" aria-hidden="true"></i></a>
+                    <a href="https://www.tiktok.com/@mymotac" target="_blank" aria-label="TikTok" class="footer-link"><i class="bi bi-tiktok" aria-hidden="true"></i></a>
                 </div>
             </div>
 

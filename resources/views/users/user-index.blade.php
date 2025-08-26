@@ -48,7 +48,7 @@
                                     <td class="py-2 px-3 small text-dark">
                                         {{ $user->full_name ?? $user->name }}
                                         @if ($user->hasRole('Admin')) {{-- Show Admin badge if user has Admin role --}}
-                                            <span class="badge bg-primary rounded-pill ms-1 align-middle" style="font-size: 0.7em;">{{__('Admin')}}</span>
+                                            <span class="motac-badge motac-badge-primary rounded-pill ms-1 align-middle" style="font-size: 0.7em;" role="status">{{__('Admin')}}</span>
                                         @endif
                                     </td>
                                     <td class="py-2 px-3 small text-muted">{{ $user->motac_email ?? '-' }}</td>
@@ -57,7 +57,7 @@
                                     <td class="text-end py-2 px-3">
                                         {{-- View Profile button --}}
                                         <a href="{{ route('users.show', $user->id) }}"
-                                            class="btn btn-sm btn-outline-primary d-inline-flex align-items-center"
+                                            class="btn btn-sm btn-outline-primary d-inline-flex align-items-center motac-btn-icon"
                                             title="{{__('Lihat Profil')}}">
                                             <i class="bi bi-eye-fill"></i>
                                         </a>

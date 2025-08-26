@@ -1,9 +1,6 @@
 @php
     // The $message variable is automatically available within @error blocks in Laravel Blade.
-<<<<<<< HEAD
     // Linter warnings about unassigned $message (PHP1412) within @error blocks are false positives.
-=======
->>>>>>> b3ca845 (code additions and edits)
 @endphp
 @extends('layouts.app')
 
@@ -11,25 +8,6 @@
 
 @section('content')
     <div class="container py-4">
-<<<<<<< HEAD
-        <div class="col-lg-9 mx-auto"> {{-- Adjusted for better centering and consistency --}}
-            <div class="card shadow-lg rounded-3 border-0"> {{-- Enhanced card styling --}}
-                <div class="card-body p-4 p-sm-5">
-                    <h1 class="fs-2 fw-bold mb-4 text-center text-dark"> {{-- Enhanced title --}}
-                        {{ __('Permohonan Akaun E-mel / ID Pengguna MOTAC') }}
-                    </h1>
-
-                    @include('partials.validation-errors-alt') {{-- Assuming a consolidated error partial --}}
-                    @include('partials.alert-messages')    {{-- Assuming a consolidated session message partial --}}
-
-                    {{-- Livewire form: wire:submit points to the primary submission/update action --}}
-                    <form wire:submit.prevent="{{ $isEdit ? 'updateApplication' : 'submitForApproval' }}" class="vstack gap-4">
-                        {{-- @csrf NOT NEEDED FOR LIVEWIRE FORMS --}}
-
-                        {{-- Applicant Details Section --}}
-                        <section aria-labelledby="applicant-info-heading">
-                            <h2 id="applicant-info-heading" class="fs-5 fw-semibold mb-3 border-bottom pb-2 text-dark">
-=======
         <div class="col-lg-8 mx-auto">
             <div class="card shadow-lg">
                 <div class="card-body p-4 p-sm-5">
@@ -51,7 +29,6 @@
                         </div>
                     @endif
 
-                    {{-- Display success or error messages from session --}}
                     @if (session()->has('success'))
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
                             {{ session('success') }}
@@ -68,87 +45,114 @@
 
 
                     <form wire:submit.prevent="{{ $isEdit ? 'updateApplication' : 'submitApplication' }}" class="vstack gap-4">
-                        @csrf
-
-                        {{-- Applicant Details Section --}}
-                        <section aria-labelledby="applicant-info-heading">
-                            <h2 id="applicant-info-heading" class="fs-5 fw-semibold mb-3 border-bottom pb-2">
->>>>>>> b3ca845 (code additions and edits)
-                                {{ __('Maklumat Pemohon (Dipaparkan dari Profil Anda)') }}
-                            </h2>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-<<<<<<< HEAD
-                                    <label class="form-label fw-medium text-muted">{{ __('Nama Penuh') }}:</label>
-                                    <p class="mb-0 text-dark">{{ e($applicant_name) }}</p>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-medium text-muted">{{ $isPassportInputMode ? __('No. Pasport') : __('No. Kad Pengenalan') }}:</label>
-                                    <p class="mb-0 text-dark">
-                                        {{ $isPassportInputMode ? e($applicant_passport_number) : e($applicant_identification_number) }}
-                                    </p>
-                                </div>
-                                @if ($showApplicantJawatanGred)
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-medium text-muted">{{ __('Jawatan & Gred') }}:</label>
-                                        <p class="mb-0 text-dark">{{ e($applicant_jawatan_gred) }}</p>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-medium text-muted">{{ __('Bahagian/Unit') }}:</label>
-                                        <p class="mb-0 text-dark">{{ e($applicant_bahagian_unit) }}</p>
-                                    </div>
-                                @endif
-                                <div class="col-md-6">
-                                    <label class="form-label fw-medium text-muted">{{ __('Aras') }}:</label>
-                                    <p class="mb-0 text-dark">{{ e($applicant_level_aras ?? 'N/A') }}</p>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-medium text-muted">{{ __('No. Telefon Bimbit') }}:</label>
-                                    <p class="mb-0 text-dark">{{ e($applicant_mobile_number) }}</p>
-                                </div>
-                                <div class="col-md-12">
-                                    <label class="form-label fw-medium text-muted">{{ __('E-mel Peribadi') }}:</label>
-                                    <p class="mb-0 text-dark">{{ e($applicant_personal_email) }}</p>
-=======
-                                    <label class="form-label text-muted">{{ __('Nama Penuh') }}:</label>
-                                    <p>{{ $applicant_name }}</p>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label text-muted">{{ $isPassportInputMode ? __('No. Pasport') : __('No. Kad Pengenalan') }}:</label>
-                                    <p>{{ $isPassportInputMode ? $applicant_passport_number : $applicant_identification_number }}</p>
-                                </div>
-                                @if ($showApplicantJawatanGred)
-                                    <div class="col-md-6">
-                                        <label class="form-label text-muted">{{ __('Jawatan & Gred') }}:</label>
-                                        <p>{{ $applicant_jawatan_gred }}</p>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label text-muted">{{ __('Bahagian/Unit') }}:</label>
-                                        <p>{{ $applicant_bahagian_unit }}</p>
-                                    </div>
-                                @endif
-                                <div class="col-md-6">
-                                    <label class="form-label text-muted">{{ __('Aras') }}:</label>
-                                    <p>{{ $applicant_level_aras ?? 'N/A' }}</p>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label text-muted">{{ __('No. Telefon Bimbit') }}:</label>
-                                    <p>{{ $applicant_mobile_number }}</p>
-                                </div>
-                                <div class="col-md-12">
-                                    <label class="form-label text-muted">{{ __('E-mel Peribadi') }}:</label>
-                                    <p>{{ $applicant_personal_email }}</p>
->>>>>>> b3ca845 (code additions and edits)
                                 </div>
                             </div>
                         </section>
 
                         {{-- Application Specific Details --}}
                         <section aria-labelledby="application-specific-heading">
-<<<<<<< HEAD
-                            <h2 id="application-specific-heading" class="fs-5 fw-semibold mb-3 border-bottom pb-2 text-dark">{{ __('Butiran Permohonan Akaun') }}</h2>
+                            <h2 id="application-specific-heading" class="fs-5 fw-semibold mb-3 border-bottom pb-2">{{ __('Butiran Permohonan Akaun') }}</h2>
                             <div class="row g-3">
                                 <div class="col-md-6">
+                                    <label for="service_status" class="form-label">{{ __('Taraf Perkhidmatan') }} <span class="text-danger">*</span></label>
+                                    <select wire:model.live="service_status" id="service_status" class="form-select @error('service_status') is-invalid @enderror" required>
+                                        @foreach ($serviceStatusOptions as $key => $label)
+                                            <option value="{{ $key }}">{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('service_status') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="appointment_type" class="form-label">{{ __('Jenis Pelantikan') }} <span class="text-danger">*</span></label>
+                                    <select wire:model.live="appointment_type" id="appointment_type" class="form-select @error('appointment_type') is-invalid @enderror" required>
+                                        @foreach ($appointmentTypeOptions as $key => $label)
+                                            <option value="{{ $key }}">{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('appointment_type') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+
+                                @if ($showPreviousDepartment)
+                                    <div class="col-12">
+                                        <div class="p-3 border rounded bg-light mt-2">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <label for="previous_department_name" class="form-label">{{ __('Jabatan Terdahulu (Jika Pertukaran)') }} <span class="text-danger">*</span></label>
+                                                    <input type="text" wire:model.defer="previous_department_name" id="previous_department_name" class="form-control @error('previous_department_name') is-invalid @enderror">
+                                                    @error('previous_department_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="previous_department_email" class="form-label">{{ __('E-mel Rasmi Jabatan Terdahulu') }} <span class="text-danger">*</span></label>
+                                                    <input type="email" wire:model.defer="previous_department_email" id="previous_department_email" class="form-control @error('previous_department_email') is-invalid @enderror">
+                                                    @error('previous_department_email') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if ($showServiceDates)
+                                    <div class="col-md-6">
+                                        <label for="service_start_date" class="form-label">{{ __('Tarikh Mula Khidmat') }} <span class="text-danger">*</span></label>
+                                        <input type="date" wire:model.defer="service_start_date" id="service_start_date" class="form-control @error('service_start_date') is-invalid @enderror">
+                                        @error('service_start_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="service_end_date" class="form-label">{{ __('Tarikh Akhir Khidmat') }} <span class="text-danger">*</span></label>
+                                        <input type="date" wire:model.defer="service_end_date" id="service_end_date" class="form-control @error('service_end_date') is-invalid @enderror">
+                                        @error('service_end_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    </div>
+                                @endif
+
+                                <div class="col-12">
+                                    <label for="purpose" class="form-label">{{ __('Cadangan ID E-mel / Tujuan / Catatan') }} <span class="text-danger">*</span></label>
+                                    <textarea wire:model.defer="purpose" id="purpose" rows="3" class="form-control @error('purpose') is-invalid @enderror"></textarea>
+                                    @error('purpose') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="proposed_email" class="form-label">{{ __('Cadangan E-mel') }}</label>
+                                    <input type="text" wire:model.defer="proposed_email" id="proposed_email" class="form-control @error('proposed_email') is-invalid @enderror" placeholder="nama.anda@{{ config('motac.email_provisioning.default_domain', 'motac.gov.my') }}">
+                                    <div class="form-text">{{ __('Biarkan kosong jika hanya memohon ID Pengguna.') }}</div>
+                                    @error('proposed_email') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+                                 <div class="col-md-6 d-flex align-items-end">
+                                    <div class="form-check mb-2">
+                                        <input type="checkbox" wire:model.live="is_group_email_request" id="is_group_email_request" class="form-check-input">
+                                        <label for="is_group_email_request" class="form-check-label">{{ __('Ini adalah permohonan untuk Group E-mel?') }}</label>
+                                    </div>
+                                </div>
+
+                                @if ($is_group_email_request)
+                                    <div class="col-12">
+                                        <div class="p-3 border rounded bg-light mt-2">
+                                             <h3 class="fs-6 fw-semibold mb-2">{{ __('Butiran Group E-mel') }}</h3>
+                                             <p class="text-muted small mb-2">{{__('Sila lengkapkan maklumat di bawah untuk permohonan Group E-mel.')}}</p>
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <label for="group_email" class="form-label">{{ __('Alamat Group E-mel Dicadangkan') }} <span class="text-danger">*</span></label>
+                                                    <input type="email" wire:model.defer="group_email" id="group_email" class="form-control @error('group_email') is-invalid @enderror" placeholder="nama.kumpulan@{{ config('motac.email_provisioning.default_domain', 'motac.gov.my') }}">
+                                                    @error('group_email') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="group_admin_name" class="form-label">{{ __('Nama Admin/EO/CC Group') }} <span class="text-danger">*</span></label>
+                                                    <input type="text" wire:model.defer="group_admin_name" id="group_admin_name" class="form-control @error('group_admin_name') is-invalid @enderror">
+                                                    @error('group_admin_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                                </div>
+                                                <div class="col-12">
+                                                    <label for="group_admin_email" class="form-label">{{ __('E-mel Admin/EO/CC Group') }} <span class="text-danger">*</span></label>
+                                                    <input type="email" wire:model.defer="group_admin_email" id="group_admin_email" class="form-control @error('group_admin_email') is-invalid @enderror">
+                                                    @error('group_admin_email') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                                </div>
+                                                 <div class="col-12">
+                                                    <div class="alert alert-warning mt-2 small">{{__('*Sila pastikan E-mel Admin/EO/CC Group E-mel adalah e-mel rasmi MOTAC yang sah.')}}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        </section>
                                     <label for="service_status_form" class="form-label">{{ __('Taraf Perkhidmatan') }} <span class="text-danger">*</span></label>
                                     <select wire:model.live="service_status" id="service_status_form"
                                         class="form-select @error('service_status') is-invalid @enderror" required>

@@ -27,16 +27,16 @@ use App\Notifications\TicketCommentAddedNotification;
 use App\Notifications\TicketCreatedNotification;
 use App\Notifications\TicketStatusUpdatedNotification;
 use Exception;
-use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 class NotificationService
 {
-    public function notifyUser(User $user, Notification $notification): void
+    public function notifyUser(User $user, object $notification): void
     {
         try {
-            $user->notify($notification);
+            Notification::send($user, $notification);
             Log::info("Notification sent to user {$user->id}.");
         } catch (Exception $e) {
             Log::error("Failed to send notification to user {$user->id}: ".$e->getMessage(), ['exception' => $e]);
@@ -151,7 +151,7 @@ class NotificationService
     public function notifyEquipmentIncident(User $recipient, LoanApplication $loanApplication, Equipment $equipment, string $incidentType, ?string $notes = null): void
     {
         // Ensure we pass an Eloquent Collection as required by the notification constructor
-        $collection = \App\Models\Equipment::whereIn('id', [$equipment->id])->get();
+        $collection = Equipment::whereIn('id', [$equipment->id])->get();
         $this->notifyUser($recipient, new EquipmentIncidentNotification($loanApplication, $collection, $incidentType));
     }
 

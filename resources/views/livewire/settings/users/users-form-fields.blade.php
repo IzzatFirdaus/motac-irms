@@ -243,19 +243,19 @@
 
     {{-- Section 8: Form Action Buttons --}}
     {{-- Submit and Reset buttons with loading states --}}
-    <div class="mt-4 pt-3 border-top text-end">
+    <div class="mt-4 pt-3 border-top text-end motac-modal-footer">
         {{-- Reset Form Button - Only show on create mode --}}
         @if($mode === 'create')
-        <button type="button" wire:click="resetForm" class="btn btn-outline-secondary me-2">
-            <i class="fas fa-undo me-1"></i> {{ __('Reset Borang') }}
+        <button type="button" wire:click="resetForm" class="motac-btn-outline me-2" aria-label="{{ __('Reset Borang') }}">
+            <i class="fas fa-undo me-1" aria-hidden="true"></i> {{ __('Reset Borang') }}
         </button>
         @endif
 
         {{-- Submit Button - Different text based on mode --}}
-        <button type="submit" class="btn btn-primary px-4" wire:loading.attr="disabled">
+        <button type="submit" class="motac-btn-primary px-4" wire:loading.attr="disabled" aria-live="polite">
             {{-- Normal state - show appropriate text based on create/edit mode --}}
             <span wire:loading.remove wire:target="saveUser">
-                <i class="fas fa-save me-1"></i>
+                <i class="fas fa-save me-1" aria-hidden="true"></i>
                 {{ $mode === 'create' ? __('Simpan Pengguna') : __('Kemaskini Pengguna') }}
             </span>
             {{-- Loading state - show spinner and loading text --}}

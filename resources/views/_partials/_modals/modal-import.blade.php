@@ -29,10 +29,10 @@
             </div>
           </div>
           <div class="col-12 text-center mt-2">
-            <button type="button" class="btn btn-outline-secondary me-2" data-bs-dismiss="modal" aria-label="{{__('Batal')}}" wire:loading.attr="disabled">
+            <button type="button" class="btn btn-outline-secondary motac-btn-outline me-2" data-bs-dismiss="modal" aria-label="{{__('Batal')}}" wire:loading.attr="disabled">
                 <i class="bi bi-x-lg me-1"></i>{{ __('Batal') }}
             </button>
-            <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="importFromExcel, file">
+            <button type="submit" class="btn btn-primary motac-btn-primary" wire:loading.attr="disabled" wire:target="importFromExcel, file">
               {{-- Dynamic button content based on loading state --}}
               <span wire:loading.remove wire:target="importFromExcel, file">
                 <i class="bi bi-upload me-1"></i> {{ __('Hantar & Proses') }}

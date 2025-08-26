@@ -8,12 +8,12 @@
 --}}
 
 <div class="container-fluid">
-    <div class="card shadow-sm motac-card mb-4">
-        <div class="card-header bg-light py-3 motac-card-header d-flex align-items-center">
-            <i class="bi bi-bell-fill me-2 text-primary"></i>
+    <div class="motac-card shadow-sm mb-4">
+        <div class="motac-card-header d-flex align-items-center py-3">
+            <i class="bi bi-bell-fill me-2 text-primary" aria-hidden="true"></i>
             <h5 class="mb-0 fw-medium text-dark">{{ __('Senarai Notifikasi') }}</h5>
         </div>
-        <div class="card-body motac-card-body">
+        <div class="motac-card-body">
             {{-- Search box for filtering notifications --}}
             <div class="row mb-3">
                 <div class="col-md-6">
@@ -59,15 +59,15 @@
                                 </td>
                                 <td class="px-3 py-2 text-center">
                                     @if (is_null($notification->read_at))
-                                        <span class="badge bg-warning-subtle text-warning-emphasis rounded-pill">{{ __('Belum Dibaca') }}</span>
+                                        <span class="motac-badge motac-badge-warning rounded-pill" role="status" aria-label="{{ __('Belum Dibaca') }}">{{ __('Belum Dibaca') }}</span>
                                     @else
-                                        <span class="badge bg-success-subtle text-success-emphasis rounded-pill">{{ __('Dibaca') }}</span>
+                                        <span class="motac-badge motac-badge-success rounded-pill" role="status" aria-label="{{ __('Dibaca') }}">{{ __('Dibaca') }}</span>
                                     @endif
                                 </td>
                                 <td class="px-3 py-2 text-end">
                                     @if (is_null($notification->read_at))
-                                        <button wire:click="markAsRead('{{ $notification->id }}')" class="btn btn-sm btn-outline-primary motac-btn-outline" title="{{ __('Tanda sebagai dibaca') }}">
-                                            <i class="bi bi-check2-square"></i> {{ __('Dibaca') }}
+                                        <button wire:click="markAsRead('{{ $notification->id }}')" class="motac-btn-outline btn-sm" title="{{ __('Tanda sebagai dibaca') }}">
+                                            <i class="bi bi-check2-square" aria-hidden="true"></i> {{ __('Dibaca') }}
                                         </button>
                                     @else
                                         <span class="text-muted small">{{ __('Tiada tindakan') }}</span>

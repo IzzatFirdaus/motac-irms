@@ -12,7 +12,7 @@
         </h1>
         @can('manage_permissions')
             <button wire:click="create"
-                class="btn btn-primary d-inline-flex align-items-center text-uppercase small fw-semibold mt-2 mt-sm-0 px-3 py-2 motac-btn-primary">
+                class="motac-btn-primary d-inline-flex align-items-center text-uppercase small fw-semibold mt-2 mt-sm-0 px-3 py-2">
                 <i class="bi bi-plus-lg me-1"></i> {{ __('Tambah Kebenaran Baru') }}
             </button>
         @endcan
@@ -113,8 +113,8 @@
                         </div>
                     </div>
                     <div class="modal-footer motac-modal-footer">
-                        <button type="button" class="btn btn-secondary" wire:click="closeModal">{{ __('Batal') }}</button>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="button" class="motac-btn-outline" wire:click="closeModal">{{ __('Batal') }}</button>
+                        <button type="submit" class="motac-btn-primary">
                             <span wire:loading wire:target="savePermission" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
                             <i wire:loading.remove wire:target="savePermission" class="bi bi-check-lg me-1"></i>
                             {{ $isEditMode ? __('Simpan Perubahan') : __('Cipta Kebenaran') }}
@@ -143,8 +143,8 @@
                      <p class="small text-danger">{{ __('Tindakan ini tidak boleh diterbalikkan.') }}</p>
                 </div>
                 <div class="modal-footer motac-modal-footer">
-                    <button type="button" class="btn btn-secondary" wire:click="closeDeleteConfirmationModal">{{ __('Batal') }}</button>
-                    <button type="button" class="btn btn-danger" wire:click="deletePermission">
+                    <button type="button" class="motac-btn-outline" wire:click="closeDeleteConfirmationModal">{{ __('Batal') }}</button>
+                    <button type="button" class="motac-btn-danger" wire:click="deletePermission">
                         <span wire:loading wire:target="deletePermission" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
                         <i wire:loading.remove wire:target="deletePermission" class="bi bi-trash3-fill me-1"></i>
                         {{ __('Padam') }}

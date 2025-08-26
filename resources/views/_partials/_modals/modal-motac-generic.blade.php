@@ -51,17 +51,17 @@
                     {{ $modalFooterContent }}
                 @else
                     {{-- Default footer with Cancel button --}}
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ __('Batal') }}</button>
+                    <button type="button" class="btn btn-outline-secondary motac-btn-outline" data-bs-dismiss="modal">{{ __('Batal') }}</button>
 
                     {{-- Submit button for form-based modals --}}
                     @if(isset($modalFormId) && !empty($modalFormId))
-                        <button type="submit" form="{{ $modalFormId }}" class="btn btn-primary">
+                        <button type="submit" form="{{ $modalFormId }}" class="btn btn-primary motac-btn-primary">
                             <i class="bi bi-check-lg me-1"></i>
                             {{ __($modalSubmitButtonText ?? 'Simpan') }}
                         </button>
                     {{-- Submit button for Livewire action-based modals --}}
                     @elseif(isset($livewireSubmitAction) && !empty($livewireSubmitAction))
-                        <button type="button" wire:click="{{ $livewireSubmitAction }}" class="btn btn-primary" wire:loading.attr="disabled" wire:target="{{ $livewireSubmitAction }}">
+                        <button type="button" wire:click="{{ $livewireSubmitAction }}" class="btn btn-primary motac-btn-primary" wire:loading.attr="disabled" wire:target="{{ $livewireSubmitAction }}">
                             {{-- Button content changes based on loading state --}}
                             <span wire:loading.remove wire:target="{{ $livewireSubmitAction }}">
                                 <i class="bi bi-check-lg me-1"></i>

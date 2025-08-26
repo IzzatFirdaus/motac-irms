@@ -22,11 +22,11 @@
                 @csrf
                 @method('PUT')
 
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-light py-3">
+                <div class="motac-card shadow-sm mb-4">
+                    <div class="motac-card-header bg-light py-3">
                         <h3 class="h5 card-title fw-semibold mb-0">{{ __('Butiran Asas Peralatan') }}</h3>
                     </div>
-                    <div class="card-body p-4">
+                    <div class="motac-card-body p-4">
                         <div class="row g-3">
                             {{-- Asset Type --}}
                             <div class="col-md-6 mb-3">
@@ -153,11 +153,11 @@
 
                 {{-- Submit/cancel buttons --}}
                 <div class="d-flex justify-content-center mt-4 gap-2">
-                    <button type="submit" class="btn btn-primary d-inline-flex align-items-center">
+                    <button type="submit" class="motac-btn-primary d-inline-flex align-items-center">
                         <i class="bi bi-save-fill me-2"></i>
                         {{ __('Kemaskini Peralatan') }}
                     </button>
-                    <a href="{{ route('resource-management.equipment-admin.index') }}" class="btn btn-outline-secondary d-inline-flex align-items-center">
+                    <a href="{{ route('resource-management.equipment-admin.index') }}" class="motac-btn-outline d-inline-flex align-items-center">
                         <i class="bi bi-x-circle me-2"></i>
                         {{ __('Batal') }}
                     </a>
@@ -165,7 +165,7 @@
             </form>
 
             <div class="mt-4 text-center">
-                <a href="{{ route('resource-management.equipment-admin.index') }}" class="btn btn-link text-secondary d-inline-flex align-items-center">
+                <a href="{{ route('resource-management.equipment-admin.index') }}" class="motac-btn-outline text-secondary d-inline-flex align-items-center">
                     <i class="bi bi-arrow-left-circle-fill me-2"></i>
                     {{ __('Kembali ke Senarai Peralatan Pentadbir') }}
                 </a>

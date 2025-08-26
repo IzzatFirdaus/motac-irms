@@ -83,7 +83,7 @@
                 </div>
 
                 <div class="text-center mt-4 mb-3">
-                    <a href="{{ url('/') }}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center">
+                    <a href="{{ url('/') }}" class="motac-btn-outline motac-btn-sm d-inline-flex align-items-center">
                         <i class="bi bi-arrow-left-circle-fill me-1"></i>{{ __('app.back_to_dashboard') }}
                     </a>
                 </div>

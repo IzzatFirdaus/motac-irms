@@ -35,8 +35,8 @@
                 {{ __('Maaf, berlaku ralat di pihak kami. Sila cuba semula nanti atau hubungi sokongan jika masalah berterusan.') }}
             </p>
             {{-- Button to home page --}}
-            <a href="{{ url('/') }}" class="btn btn-danger d-inline-flex align-items-center">
-                <i class="bi bi-house-door-fill me-2"></i>{{ __('Laman Utama') }}
+            <a href="{{ url('/') }}" class="motac-btn-danger d-inline-flex align-items-center" aria-label="{{ __('Laman Utama') }}">
+                <i class="bi bi-house-door-fill me-2" aria-hidden="true"></i>{{ __('Laman Utama') }}
             </a>
             {{-- Optional illustration for server error --}}
             {{--

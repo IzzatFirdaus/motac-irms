@@ -40,7 +40,7 @@
 
     @if ($reviewUrl && $reviewUrl !== '#')
         <div class="text-center mt-4">
-            <a href="{{ $reviewUrl }}" class="btn btn-primary">{{ __('Lihat Tugasan Kelulusan') }}</a>
+            <a href="{{ $reviewUrl }}" class="motac-btn-primary d-inline-block">{{ __('Lihat Tugasan Kelulusan') }}</a>
         </div>
     @endif
 

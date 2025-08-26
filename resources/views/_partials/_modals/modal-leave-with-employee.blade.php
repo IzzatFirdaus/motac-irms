@@ -145,9 +145,9 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary"
+                    <button type="button" class="btn btn-outline-secondary motac-btn-outline"
                         data-bs-dismiss="modal">{{ __('Batal') }}</button>
-                    <button type="submit" form="leaveSubmitForm" class="btn btn-primary" wire:click="submitLeave"
+                    <button type="submit" form="leaveSubmitForm" class="btn btn-primary motac-btn-primary" wire:click="submitLeave"
                         wire:loading.attr="disabled" wire:target="submitLeave">
                         <span wire:loading wire:target="submitLeave" class="spinner-border spinner-border-sm me-1"
                             role="status" aria-hidden="true"></span>

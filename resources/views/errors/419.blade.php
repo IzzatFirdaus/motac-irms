@@ -31,8 +31,8 @@
             <p class="mb-4 mx-auto col-md-8 col-lg-6 text-muted">
                 {{ __('Sesi anda telah tamat atau permintaan tidak sah. Sila muat semula halaman atau log masuk semula untuk meneruskan.') }}
             </p>
-            <a href="{{ url('/login') }}" class="btn btn-warning d-inline-flex align-items-center">
-                <i class="bi bi-box-arrow-in-right me-2"></i>{{ __('Log Masuk Semula') }}
+            <a href="{{ url('/login') }}" class="motac-btn-warning d-inline-flex align-items-center" aria-label="{{ __('Log Masuk Semula') }}">
+                <i class="bi bi-box-arrow-in-right me-2" aria-hidden="true"></i>{{ __('Log Masuk Semula') }}
             </a>
             <div class="mt-4">
                 {{-- Optional: Add your own MOTAC-branded "Session Expired" illustration here --}}

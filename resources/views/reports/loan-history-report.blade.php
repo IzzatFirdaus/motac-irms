@@ -8,15 +8,15 @@
 @section('content')
 <div class="container-fluid py-4">
     <div class="card shadow-sm mb-4 motac-card">
-        <div class="card-header bg-light py-3">
+    <div class="card-header py-3 motac-card-header">
             <div class="d-flex flex-wrap align-items-center justify-content-between">
                 <h3 class="h5 mb-0 fw-semibold d-flex align-items-center">
                     <i class="bi bi-clock-history me-2"></i>
                     {{ __('reports.loan_history.page_header') }}
                 </h3>
                 <div class="mt-2 mt-sm-0 flex-shrink-0">
-                    <a href="{{ route('reports.index') }}"
-                       class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center motac-btn-outline">
+                          <a href="{{ route('reports.index') }}"
+                              class="motac-btn-outline motac-btn-sm d-inline-flex align-items-center">
                         <i class="bi bi-arrow-left me-1"></i>
                         {{ __('reports.back_to_list') }}
                     </a>
@@ -54,7 +54,7 @@
                     <input type="date" name="date_to" id="date_to" value="{{ request('date_to') }}" class="form-control form-control-sm">
                 </div>
                 <div class="col-md-1">
-                    <button type="submit" class="btn btn-sm btn-primary w-100">{{ __('reports.filters.filter_button') }}</button>
+                    <button type="submit" class="motac-btn-primary motac-btn-sm w-100">{{ __('reports.filters.filter_button') }}</button>
                 </div>
             </form>
         </div>
@@ -93,7 +93,7 @@
                                     </td>
                                     <td class="px-3 py-2 small text-muted">{{ $transaction->loanApplication->user->name ?? __('common.not_available') }}</td>
                                     <td class="px-3 py-2 small">
-                                        <span class="badge rounded-pill {{ $transaction->type === \App\Models\LoanTransaction::TYPE_ISSUE ? 'bg-info-subtle text-info-emphasis' : 'bg-primary-subtle text-primary-emphasis' }}">
+                                        <span class="motac-badge {{ $transaction->type === \App\Models\LoanTransaction::TYPE_ISSUE ? 'motac-badge-info' : 'motac-badge-primary' }}" role="status">
                                             {{ $transaction->type_label }}
                                         </span>
                                     </td>
@@ -110,9 +110,7 @@
                         </div>
                     @endif
                 @else
-                    <div class="alert alert-info text-center" role="alert">
-                        <i class="bi bi-info-circle-fill me-2"></i>{{ __('reports.loan_history.no_results') }}
-                    </div>
+                    <x-alert type="info" class="text-center">{{ __('reports.loan_history.no_results') }}</x-alert>
                 @endif
             </div>
         </div>

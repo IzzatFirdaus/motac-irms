@@ -7,10 +7,10 @@
 
 <div wire:ignore.self class="modal fade" id="departmentModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="departmentModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header">
+    <div class="modal-content motac-modal-content">
+      <div class="modal-header motac-modal-header">
         <h5 class="modal-title" id="departmentModalLabel">
-            <i class="bi {{ $isEditMode ? 'bi-pencil-square' : 'bi-building-fill-add' }} me-2 fs-5"></i>
+            <i class="bi {{ $isEditMode ? 'bi-pencil-square' : 'bi-building-fill-add' }} me-2 fs-5" aria-hidden="true"></i>
             {{ $isEditMode ? __('Kemaskini Jabatan') : __('Tambah Jabatan Baharu') }}
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{__('Tutup')}}"></button>
@@ -73,14 +73,14 @@
           </div>
         </form>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-            <i class="bi bi-x-lg me-1"></i>{{ __('Batal') }}
-        </button>
-        <button type="submit" class="btn btn-primary d-inline-flex align-items-center" form="departmentFormModal"
+    <div class="modal-footer motac-modal-footer">
+    <button type="button" class="motac-btn-outline" data-bs-dismiss="modal">
+      <i class="bi bi-x-lg me-1" aria-hidden="true"></i>{{ __('Batal') }}
+    </button>
+    <button type="submit" class="motac-btn-primary d-inline-flex align-items-center" form="departmentFormModal"
                 wire:loading.attr="disabled" wire:target="submitDepartment">
             <span wire:loading wire:target="submitDepartment" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-            <i class="bi {{ $isEditMode ? 'bi-save-fill' : 'bi-check-lg' }} me-1" wire:loading.remove wire:target="submitDepartment"></i>
+      <i class="bi {{ $isEditMode ? 'bi-save-fill' : 'bi-check-lg' }} me-1" wire:loading.remove wire:target="submitDepartment" aria-hidden="true"></i>
             {{ $isEditMode ? __('Simpan Perubahan') : __('Tambah Jabatan') }}
         </button>
       </div>

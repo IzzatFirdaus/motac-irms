@@ -44,11 +44,11 @@
                 class="menu-link{{ $hasSubmenu ? ' menu-toggle' : '' }}"
                 @if ($hasSubmenu) aria-haspopup="true" aria-expanded="{{ $isActive ? 'true' : 'false' }}" tabindex="0" @endif>
                 @isset($menu->icon)
-                    <i class="menu-icon bi bi-{{ $menu->icon }}"></i>
+                    <i class="menu-icon bi bi-{{ $menu->icon }}" aria-hidden="true"></i>
                 @endisset
                 <div>{{ __($menu->name ?? '-') }}</div>
                 @if ($hasSubmenu)
-                    <span class="menu-arrow bi bi-chevron-right"></span>
+                    <span class="menu-arrow bi bi-chevron-right" aria-hidden="true"></span>
                 @endif
             </a>
             {{-- Recursive rendering for submenus --}}

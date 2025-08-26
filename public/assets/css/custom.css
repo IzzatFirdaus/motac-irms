@@ -242,6 +242,71 @@ h1, h2, h3, h4, h5, h6 {
 /* -----------------------------------------------------
    3. Button Styles - Consistent button appearance
 ----------------------------------------------------- */
+.motac-btn-base {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    border-radius: var(--radius-s, 6px);
+    padding: 8px 14px;
+    border: 1px solid transparent;
+    transition: background var(--motion-short, .2s) var(--motion-ease, ease),
+                color var(--motion-short, .2s) var(--motion-ease, ease),
+                border-color var(--motion-short, .2s) var(--motion-ease, ease),
+                box-shadow var(--motion-short, .2s) var(--motion-ease, ease);
+}
+/* Apply base properties to variant classes too, for backward compatibility */
+.motac-btn-primary,
+.motac-btn-secondary,
+.motac-btn-outline,
+.motac-btn-success,
+.motac-btn-danger,
+.motac-btn-warning {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    border-radius: var(--radius-s, 6px);
+    padding: 8px 14px;
+    border: 1px solid transparent;
+    transition: background var(--motion-short, .2s) var(--motion-ease, ease),
+                color var(--motion-short, .2s) var(--motion-ease, ease),
+                border-color var(--motion-short, .2s) var(--motion-ease, ease),
+                box-shadow var(--motion-short, .2s) var(--motion-ease, ease);
+}
+.motac-btn-primary { background: var(--motac-primary-color); color: #fff; border-color: var(--motac-primary-color); box-shadow: var(--shadow-button); }
+.motac-btn-primary:hover, .motac-btn-primary:focus { filter: brightness(0.95); }
+.motac-btn-secondary { background: var(--motac-secondary-color); color: #222; border-color: var(--motac-secondary-color); box-shadow: var(--shadow-button); }
+.motac-btn-secondary:hover, .motac-btn-secondary:focus { filter: brightness(0.98); }
+.motac-btn-outline { background: transparent; color: var(--motac-primary-color); border-color: var(--motac-primary-color); }
+.motac-btn-outline:hover, .motac-btn-outline:focus { background: rgba(0, 51, 102, 0.06); }
+.motac-btn-success { background: var(--success-color); color: #fff; border-color: var(--success-color); }
+.motac-btn-danger { background: var(--danger-color); color: #fff; border-color: var(--danger-color); }
+.motac-btn-warning { background: var(--warning-color); color: #222; border-color: var(--warning-color); }
+
+/* Icon-only circular button for actions */
+.motac-btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    border: 1px solid #e5e7eb;
+    color: var(--motac-primary-color);
+    background: #fff;
+    transition: background var(--motion-short, .2s) var(--motion-ease, ease),
+                border-color var(--motion-short, .2s) var(--motion-ease, ease);
+}
+.motac-btn-icon:hover, .motac-btn-icon:focus { background: #f8fafc; border-color: #dbe2ea; outline: none; }
+.motac-btn-icon .bi { font-size: 1rem; }
+
+/* Size helpers */
+.motac-btn-sm { padding: 6px 10px; font-size: .875rem; }
+.motac-btn-lg { padding: 10px 16px; font-size: 1.05rem; }
+
+/* Compose base + variants by adding both classes in markup: class="motac-btn-base motac-btn-primary" */
+
 .btn-primary {
     background-color: var(--motac-primary-color);
     color: white;
@@ -273,6 +338,15 @@ h1, h2, h3, h4, h5, h6 {
 /* -----------------------------------------------------
    4. Status Badges/Labels - Visual indicators
 ----------------------------------------------------- */
+.motac-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; font-size: .75rem; font-weight: 700; border-radius: var(--radius-full, 999px); line-height: 1; }
+.motac-badge-primary { background: var(--motac-primary-color); color: #fff; }
+.motac-badge-success { background: var(--success-color); color: #fff; }
+.motac-badge-warning { background: var(--warning-color); color: #222; }
+.motac-badge-danger { background: var(--danger-color); color: #fff; }
+.motac-badge-info { background: #0ea5e9; color: #fff; }
+/* Neutral/secondary badge */
+.motac-badge-secondary { background: #6b7280; color: #fff; }
+
 .status-badge {
     display: inline-block;
     padding: .25em .4em;
@@ -706,4 +780,12 @@ h1, h2, h3, h4, h5, h6 {
     border: 1px solid rgba(0,0,0,0.08);
     padding: 6px 10px;
 }
+
+/* -----------------------------------------------------
+    MOTAC Modal Helpers - for Alpine/Livewire modals
+----------------------------------------------------- */
+.motac-modal-content { border-radius: var(--radius-m, 8px); border: 1px solid var(--motac-card-border, rgba(15,23,42,0.08)); }
+.motac-modal-header { background: var(--motac-card-header-bg, #f8f9fa); border-bottom: 1px solid rgba(0,0,0,0.06); }
+.motac-modal-footer { background: var(--motac-card-footer-bg, #f8f9fa); border-top: 1px solid rgba(0,0,0,0.06); }
+.motac-modal-body { background: var(--motac-card-bg, #fff); }
 

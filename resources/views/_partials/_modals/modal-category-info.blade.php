@@ -9,10 +9,10 @@
 <div wire:ignore.self class="modal fade" id="categoryInfoModal" tabindex="-1" aria-labelledby="categoryInfoModalLabel"
     aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content p-0">
-            <div class="modal-header">
+        <div class="modal-content motac-modal-content">
+            <div class="modal-header motac-modal-header">
                 <h5 class="modal-title" id="categoryInfoModalLabel">
-                    <i class="bi bi-diagram-3-fill me-2"></i>
+                    <i class="bi bi-diagram-3-fill me-2" aria-hidden="true"></i>
                     {{ $categoryInfo->name ?? __('Informasi Kategori') }}
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"
@@ -26,9 +26,9 @@
                     <p class="text-center text-muted fst-italic">{{ __('Memuatkan struktur pokok...') }}</p>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x-lg me-1"></i>{{ __('Tutup') }}
+            <div class="modal-footer motac-modal-footer">
+                <button type="button" class="motac-btn-outline" data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-1" aria-hidden="true"></i>{{ __('Tutup') }}
                 </button>
             </div>
         </div>

@@ -34,8 +34,8 @@
                 @auth
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
-                        <button class="btn btn-outline-secondary d-inline-flex align-items-center" type="submit">
-                            <i class="bi bi-box-arrow-left me-2"></i>{{ __('Log Keluar') }}
+                        <button class="motac-btn-outline d-inline-flex align-items-center" type="submit" aria-label="{{ __('Log Keluar') }}">
+                            <i class="bi bi-box-arrow-left me-2" aria-hidden="true"></i>{{ __('Log Keluar') }}
                         </button>
                     </form>
                 @endauth

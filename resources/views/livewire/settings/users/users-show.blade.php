@@ -14,24 +14,24 @@
                     <span class="text-muted fw-normal ms-2"> - {{ $userToShow->name }}</span>
                 @endif
             </h1>
-            <a href="{{ route('settings.users.index') }}" wire:navigate class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center motac-btn-outline">
-                <i class="fas fa-arrow-left me-1"></i>
+            <a href="{{ route('settings.users.index') }}" wire:navigate class="motac-btn-outline btn-sm d-inline-flex align-items-center" aria-label="{{ __('Kembali ke Senarai Pengguna') }}">
+                <i class="fas fa-arrow-left me-1" aria-hidden="true"></i>
                 {{ __('Kembali ke Senarai Pengguna') }}
             </a>
         </div>
         <!-- User Details Card -->
-        <div class="card shadow-sm motac-card">
-            <div class="card-header bg-light py-3 motac-card-header">
+        <div class="motac-card shadow-sm">
+            <div class="motac-card-header py-3">
                 <h3 class="h5 card-title fw-semibold mb-0">{{ __('Butiran Pengguna') }}</h3>
             </div>
-            <div class="card-body">
+            <div class="motac-card-body">
                 <div class="row">
                     <!-- User avatar and summary column -->
                     <div class="col-md-3 text-center mb-4">
                         <img src="{{ $userToShow->profile_photo_url }}" alt="{{ $userToShow->name }}" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
                         <h5 class="mb-1">{{ $userToShow->name }}</h5>
                         <p class="text-muted small">{{ $userToShow->email }}</p>
-                        <span class="badge rounded-pill {{ \App\Models\User::getRoleBadgeClass($userToShow->roles->first()->name ?? '') }}">
+                        <span class="motac-badge {{ \App\Models\User::getRoleBadgeClass($userToShow->roles->first()->name ?? '') }}">
                             {{ $userToShow->roles->first()->name ?? __('Tiada Peranan') }}
                         </span>
                     </div>
@@ -78,9 +78,9 @@
                                     <tr>
                                         <th>{{ __('Status') }}</th>
                                         <td>
-                                            <span class="badge {{ $userToShow->status == 'active' ? 'bg-success' : 'bg-danger' }}">
-                                                {{ $userToShow->status == 'active' ? __('Aktif') : __('Tidak Aktif') }}
-                                            </span>
+                                                            <span class="motac-badge {{ $userToShow->status == 'active' ? 'motac-badge-success' : 'motac-badge-danger' }}">
+                                                                {{ $userToShow->status == 'active' ? __('Aktif') : __('Tidak Aktif') }}
+                                                            </span>
                                         </td>
                                     </tr>
                                     <tr>
@@ -123,15 +123,15 @@
                             @can('update', $userToShow)
                                 <!-- Always provide the 'user' parameter to the edit route.
                                      If $userToShow->id is not set, fallback to Auth user's id. -->
-                                <a href="{{ route('settings.users.edit', ['user' => $userToShow->id ?? Auth::id()]) }}" wire:navigate class="btn btn-primary me-2">
-                                    <i class="fas fa-edit me-1"></i> {{ __('Edit Pengguna') }}
+                                <a href="{{ route('settings.users.edit', ['user' => $userToShow->id ?? Auth::id()]) }}" wire:navigate class="motac-btn-primary me-2 d-inline-flex align-items-center" aria-label="{{ __('Edit Pengguna') }}">
+                                    <i class="fas fa-edit me-1" aria-hidden="true"></i> {{ __('Edit Pengguna') }}
                                 </a>
                             @endcan
                             @can('delete', $userToShow)
                                 {{-- Prevent deleting self --}}
                                 @if (Auth::user()->id !== $userToShow->id)
-                                    <button wire:click="$dispatch('open-delete-modal', { id: {{ $userToShow->id }}, itemDescription: '{{ __('pengguna') }} {{ $userToShow->name }}', deleteMethod: 'deleteUser' })" class="btn btn-danger">
-                                        <i class="fas fa-trash-alt me-1"></i> {{ __('Padam Pengguna') }}
+                                    <button wire:click="$dispatch('open-delete-modal', { id: {{ $userToShow->id }}, itemDescription: '{{ __('pengguna') }} {{ $userToShow->name }}', deleteMethod: 'deleteUser' })" class="motac-btn-danger d-inline-flex align-items-center" aria-label="{{ __('Padam Pengguna') }}">
+                                        <i class="fas fa-trash-alt me-1" aria-hidden="true"></i> {{ __('Padam Pengguna') }}
                                     </button>
                                 @endif
                             @endcan

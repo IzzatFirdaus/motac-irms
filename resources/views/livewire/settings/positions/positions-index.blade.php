@@ -11,7 +11,7 @@
             {{ __('Pengurusan Jawatan') }}
         </h1>
         @can('create', App\Models\Position::class)
-            <button wire:click="create" class="btn btn-primary d-inline-flex align-items-center text-uppercase small fw-semibold mt-2 mt-sm-0 px-3 py-2 motac-btn-primary">
+            <button wire:click="create" class="motac-btn-primary d-inline-flex align-items-center text-uppercase small fw-semibold mt-2 mt-sm-0 px-3 py-2" aria-label="{{ __('Tambah Jawatan Baru') }}">
                 <i class="bi bi-plus-lg me-2"></i>
                 {{ __('Tambah Jawatan Baru') }}
             </button>
@@ -22,8 +22,8 @@
 
     {{-- Search Card --}}
     <div class="card shadow-sm mb-4 motac-card">
-        <div class="card-header bg-light py-3 motac-card-header d-flex align-items-center">
-            <i class="bi bi-search me-2 text-primary"></i>
+        <div class="card-header py-3 motac-card-header d-flex align-items-center">
+            <i class="bi bi-search me-2 text-primary" aria-hidden="true"></i>
             <h5 class="mb-0 fw-medium text-dark">{{ __('Carian Jawatan') }}</h5>
         </div>
         <div class="card-body p-3 motac-card-body">
@@ -35,9 +35,9 @@
 
     {{-- Positions Table Card --}}
     <div class="card shadow-sm motac-card">
-        <div class="card-header bg-light py-3 d-flex flex-wrap justify-content-between align-items-center motac-card-header">
+        <div class="card-header py-3 d-flex flex-wrap justify-content-between align-items-center motac-card-header">
             <h5 class="mb-0 fw-medium text-dark d-flex align-items-center">
-                <i class="bi bi-list-ul me-2 text-primary"></i>{{ __('Senarai Jawatan') }}
+                <i class="bi bi-list-ul me-2 text-primary" aria-hidden="true"></i>{{ __('Senarai Jawatan') }}
             </h5>
             @if ($positions->total() > 0)
                 <span class="text-muted small">
@@ -68,20 +68,20 @@
                                 </td>
                                 <td class="px-3 py-2 small text-muted">{{ $position->grade->name ?? 'N/A' }}</td>
                                 <td class="px-3 py-2 small">
-                                    <span class="badge bg-{{ $position->is_active ? 'success' : 'secondary' }}-subtle text-{{ $position->is_active ? 'success' : 'secondary' }}-emphasis rounded-pill">
+                                    <span class="motac-badge {{ $position->is_active ? 'motac-badge-success' : 'motac-badge-secondary' }}" role="status">
                                         {{ $position->is_active ? __('Aktif') : __('Tidak Aktif') }}
                                     </span>
                                 </td>
                                 <td class="px-3 py-2 text-end">
                                     <div class="d-inline-flex align-items-center gap-1">
                                         @can('update', $position)
-                                            <button wire:click="edit({{ $position->id }})" class="btn btn-sm btn-icon btn-outline-primary border-0" title="{{ __('Kemaskini') }}">
-                                                <i class="bi bi-pencil-fill"></i>
+                                            <button wire:click="edit({{ $position->id }})" class="motac-btn-icon" aria-label="{{ __('Kemaskini') }}">
+                                                <i class="bi bi-pencil-fill" aria-hidden="true"></i>
                                             </button>
                                         @endcan
                                         @can('delete', $position)
-                                            <button wire:click="confirmPositionDeletion({{ $position->id }})" class="btn btn-sm btn-icon btn-outline-danger border-0" title="{{ __('Padam') }}">
-                                                <i class="bi bi-trash3-fill"></i>
+                                            <button wire:click="confirmPositionDeletion({{ $position->id }})" class="motac-btn-icon" aria-label="{{ __('Padam') }}">
+                                                <i class="bi bi-trash3-fill" aria-hidden="true"></i>
                                             </button>
                                         @endcan
                                     </div>
@@ -117,7 +117,7 @@
             <div class="modal-content motac-modal-content">
                 <div class="modal-header motac-modal-header">
                     <h5 class="modal-title d-flex align-items-center">
-                        <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
+                        <i class="bi bi-exclamation-triangle-fill text-danger me-2" aria-hidden="true"></i>
                         {{ __('Sahkan Pemadaman Jawatan') }}
                     </h5>
                     <button type="button" class="btn-close" wire:click="closeDeleteConfirmationModal" aria-label="Close"></button>
@@ -125,9 +125,9 @@
                 <div class="modal-body">
                     <p>{{ __('Adakah anda pasti ingin memadam jawatan') }} "<strong>{{ $positionNameToDelete }}</strong>"? {{ __('Tindakan ini tidak boleh diundur.') }}</p>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" wire:click="closeDeleteConfirmationModal">{{ __('Batal') }}</button>
-                    <button type="button" class="btn btn-danger" wire:click="deletePosition">{{ __('Ya, Padam') }}</button>
+                <div class="modal-footer motac-modal-footer">
+                    <button type="button" class="motac-btn-outline" wire:click="closeDeleteConfirmationModal">{{ __('Batal') }}</button>
+                    <button type="button" class="motac-btn-danger" wire:click="deletePosition">{{ __('Ya, Padam') }}</button>
                 </div>
             </div>
         </div>

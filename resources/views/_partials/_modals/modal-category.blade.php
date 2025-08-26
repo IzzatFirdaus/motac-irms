@@ -9,11 +9,11 @@
     aria-hidden="true">
     {{-- Use standard Bootstrap modal sizing with MOTAC theme --}}
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content p-0"> {{-- Reduced default padding, specific padding in header/body/footer --}}
-            <div class="modal-header"> {{-- Modal header for structure --}}
+        <div class="modal-content motac-modal-content"> {{-- Reduced default padding, specific padding in header/body/footer --}}
+            <div class="modal-header motac-modal-header"> {{-- Modal header for structure --}}
                 <h5 class="modal-title" id="categoryModalLabel">
                     {{-- Icon for edit/new based on Design Language principles --}}
-                    <i class="bi {{ $isEdit ? 'bi-pencil-square' : 'bi-plus-lg' }} me-2"></i>
+                    <i class="bi {{ $isEdit ? 'bi-pencil-square' : 'bi-plus-lg' }} me-2" aria-hidden="true"></i>
                     {{ $isEdit ? __('Kemaskini Kategori') : __('Kategori Baharu') }}
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"
@@ -32,15 +32,15 @@
                         @enderror
                     </div>
 
-                    <div class="col-12 text-center mt-2">
-                        <button type="button" class="btn btn-outline-secondary me-2" data-bs-dismiss="modal"
+                    <div class="col-12 text-center mt-2 motac-modal-footer">
+                        <button type="button" class="motac-btn-outline me-2" data-bs-dismiss="modal"
                             aria-label="{{ __('Batal') }}">
-                            <i class="bi bi-x-lg me-1"></i>{{ __('Batal') }}
+                            <i class="bi bi-x-lg me-1" aria-hidden="true"></i>{{ __('Batal') }}
                         </button>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="motac-btn-primary" aria-label="{{ __('Hantar') }}">
                             <span wire:loading wire:target="submitCategory"
                                 class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                            <i class="bi bi-check-lg me-1" wire:loading.remove></i>
+                            <i class="bi bi-check-lg me-1" wire:loading.remove aria-hidden="true"></i>
                             {{ __('Hantar') }}
                         </button>
                     </div>

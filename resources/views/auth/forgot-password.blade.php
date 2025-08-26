@@ -39,8 +39,8 @@
                     </a>
                 </div>
 
-                <div class="card shadow-sm">
-                    <div class="card-header bg-primary text-white p-3">
+                <div class="motac-card shadow-sm">
+                    <div class="motac-card-header bg-primary text-white p-3">
                         <h4 class="mb-0 text-white d-flex align-items-center">
                             <i class="bi bi-lock-fill me-2"></i>
                             {{ __('Lupa Kata Laluan') }}
@@ -71,7 +71,7 @@
                                     </span>
                                 @enderror
                             </div>
-                            <button type="submit" class="btn btn-primary d-grid w-100">
+                            <button type="submit" class="motac-btn-primary d-grid w-100">
                                 <i class="bi bi-envelope-arrow-up-fill me-1"></i>{{ __('Hantar Pautan Tetapan Semula') }}
                             </button>
                         </form>
@@ -83,7 +83,7 @@
                             @endif
                         </div>
                     </div>
-                    <div class="card-footer text-center text-muted small p-3 auth-card-footer">
+                    <div class="motac-card-footer text-center text-muted small p-3 auth-card-footer">
                         <div>
                             @if (Route::has('policy.show'))
                                 <a href="{{ route('policy.show') }}" class="mx-2">{{ __('Dasar Privasi') }}</a>

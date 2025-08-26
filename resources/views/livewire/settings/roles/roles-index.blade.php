@@ -13,8 +13,8 @@
         </div>
         <div class="col text-end">
             @can('manage_roles')
-            <button wire:click="createRole" class="btn btn-primary d-inline-flex align-items-center text-uppercase small fw-semibold px-3 py-2 motac-btn-primary">
-                <i class="bi bi-plus-lg me-1"></i> {{ __('Tambah Peranan Baru') }}
+            <button wire:click="createRole" class="motac-btn-primary d-inline-flex align-items-center text-uppercase small fw-semibold px-3 py-2" aria-label="{{ __('Tambah Peranan Baru') }}">
+                <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> {{ __('Tambah Peranan Baru') }}
             </button>
             @endcan
         </div>
@@ -22,12 +22,12 @@
 
     @include('_partials._alerts.alert-general')
 
-    <div class="card shadow-sm motac-card">
-        <div class="card-header bg-light py-3 motac-card-header d-flex align-items-center">
-             <i class="bi bi-list-ul me-2 text-primary"></i>
+    <div class="motac-card shadow-sm">
+        <div class="motac-card-header d-flex align-items-center py-3">
+             <i class="bi bi-list-ul me-2 text-primary" aria-hidden="true"></i>
             <h5 class="mb-0 fw-medium text-dark">{{ __('Senarai Peranan Sedia Ada') }}</h5>
         </div>
-        <div class="card-body p-0 motac-card-body">
+        <div class="motac-card-body p-0">
             @if ($roles->count() > 0)
                 <div class="table-responsive">
                     <table class="table table-hover table-striped align-middle mb-0">
@@ -58,20 +58,20 @@
                                     <td class="px-3 py-2 small text-dark fw-medium">{{ $role->name }}</td>
                                     <td class="px-3 py-2 small text-muted">{{ $role->guard_name }}</td>
                                     <td class="px-3 py-2 small text-center text-muted">
-                                        <span class="badge bg-info-subtle text-info-emphasis rounded-pill">{{ $role->permissions_count }}</span>
+                                        <span class="motac-badge motac-badge-info rounded-pill" role="status" aria-label="{{ $role->permissions_count }}">{{ $role->permissions_count }}</span>
                                     </td>
                                     <td class="px-3 py-2 small text-center text-muted">
-                                        <span class="badge bg-primary-subtle text-primary-emphasis rounded-pill">{{ $role->users_count }}</span>
+                                        <span class="motac-badge motac-badge-primary rounded-pill" role="status" aria-label="{{ $role->users_count }}">{{ $role->users_count }}</span>
                                     </td>
                                     <td class="px-3 py-2 small text-muted">{{ $role->created_at->translatedFormat(config('app.date_format_my', 'd/m/Y') . ' H:i') }}</td>
                                     <td class="px-3 py-2 text-end">
                                         @can('manage_roles')
-                                            <button wire:click="editRole({{ $role->id }})" class="btn btn-sm btn-icon btn-outline-primary border-0 me-1 motac-btn-icon" title="{{ __('Kemaskini') }}">
-                                                <i class="bi bi-pencil-fill fs-6"></i>
+                                            <button wire:click="editRole({{ $role->id }})" class="motac-btn-icon btn-sm border-0 me-1" title="{{ __('Kemaskini') }}" aria-label="{{ __('Kemaskini') }}">
+                                                <i class="bi bi-pencil-fill fs-6" aria-hidden="true"></i>
                                             </button>
-                                            <button wire:click="confirmDelete({{ $role->id }})" class="btn btn-sm btn-icon btn-outline-danger border-0 motac-btn-icon" title="{{ __('Padam') }}"
+                                            <button wire:click="confirmDelete({{ $role->id }})" class="motac-btn-icon btn-sm border-0" title="{{ __('Padam') }}" aria-label="{{ __('Padam') }}"
                                                 @if(in_array($role->name, $coreRoles)) disabled @endif >
-                                                <i class="bi bi-trash3-fill fs-6"></i>
+                                                <i class="bi bi-trash3-fill fs-6" aria-hidden="true"></i>
                                             </button>
                                         @endcan
                                     </td>
@@ -131,12 +131,12 @@
                         </div>
                     </div>
                     <div class="modal-footer motac-modal-footer">
-                        <button type="button" class="btn btn-secondary" wire:click="closeModal">{{ __('Batal') }}</button>
-                        <button type="submit" class="btn btn-primary">
-                            <span wire:loading wire:target="{{ $isEditMode ? 'updateRole' : 'storeRole' }}" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                            <i wire:loading.remove wire:target="{{ $isEditMode ? 'updateRole' : 'storeRole' }}" class="bi bi-check-lg me-1"></i>
-                            {{ $isEditMode ? __('Simpan Perubahan') : __('Cipta Peranan') }}
-                        </button>
+                        <button type="button" class="motac-btn-secondary" wire:click="closeModal">{{ __('Batal') }}</button>
+                            <button type="submit" class="motac-btn-primary">
+                                <span wire:loading wire:target="{{ $isEditMode ? 'updateRole' : 'storeRole' }}" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                <i wire:loading.remove wire:target="{{ $isEditMode ? 'updateRole' : 'storeRole' }}" class="bi bi-check-lg me-1" aria-hidden="true"></i>
+                                {{ $isEditMode ? __('Simpan Perubahan') : __('Cipta Peranan') }}
+                            </button>
                     </div>
                 </form>
             </div>
@@ -161,10 +161,10 @@
                     <p class="small text-danger">{{ __('Tindakan ini tidak boleh diterbalikkan.') }}</p>
                 </div>
                 <div class="modal-footer motac-modal-footer">
-                    <button type="button" class="btn btn-secondary" wire:click="closeDeleteConfirmationModal">{{ __('Batal') }}</button>
-                    <button type="button" class="btn btn-danger" wire:click="deleteRole">
+                    <button type="button" class="motac-btn-secondary" wire:click="closeDeleteConfirmationModal">{{ __('Batal') }}</button>
+                    <button type="button" class="motac-btn-danger" wire:click="deleteRole">
                         <span wire:loading wire:target="deleteRole" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                        <i wire:loading.remove wire:target="deleteRole" class="bi bi-trash3-fill me-1"></i>
+                        <i wire:loading.remove wire:target="deleteRole" class="bi bi-trash3-fill me-1" aria-hidden="true"></i>
                         {{ __('Padam') }}
                     </button>
                 </div>

@@ -83,7 +83,7 @@
                                 <span class="input-group-text cursor-pointer toggle-password"><i class="bi bi-eye-slash-fill"></i></span>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary d-grid w-100 mb-3">
+                        <button type="submit" class="motac-btn-primary d-grid w-100 mb-3">
                             <i class="bi bi-key-fill me-1"></i>{{ __('Tetapkan Kata Laluan Baru') }}
                         </button>
                         <div class="text-center">

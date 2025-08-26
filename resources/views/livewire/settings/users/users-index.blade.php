@@ -10,8 +10,8 @@
         </div>
         <div class="col text-end">
             @can('create', App\Models\User::class)
-                <button wire:click="redirectToCreateUser" class="button variant-primary size-medium d-inline-flex align-items-center">
-                    <i class="bi bi-plus-lg me-1"></i> {{ __('Tambah Pengguna') }}
+                <button wire:click="redirectToCreateUser" class="motac-btn-primary d-inline-flex align-items-center" aria-label="{{ __('Tambah Pengguna') }}">
+                    <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> {{ __('Tambah Pengguna') }}
                 </button>
             @endcan
         </div>
@@ -22,7 +22,7 @@
             <i class="bi bi-filter me-2 text-primary-500"></i>
             <h5 class="heading-small fw-semibold text-black-900 mb-0">{{ __('Penapis') }}</h5>
         </div>
-        <div class="card-body">
+    <div class="motac-card-body">
             <div class="row g-3">
                 <div class="col-md-6 col-lg-4">
                     <label for="search" class="form-label small fw-medium text-muted">{{ __('Carian') }}</label>
@@ -92,31 +92,29 @@
                                     <td class="px-3 py-16 heading-xsmall">
                                         @if ($user->roles->isNotEmpty())
                                             @foreach ($user->roles as $role)
-                                                <span class="badge bg-primary-500 text-white rounded-pill">{{ $role->name }}</span>
+                                                <span class="motac-badge motac-badge-primary rounded-pill">{{ $role->name }}</span>
                                             @endforeach
                                         @else
                                             -
                                         @endif
                                     </td>
                                     <td class="px-3 py-16">
-                                        <span class="badge bg-{{ $user->status === 'active' ? 'success-500' : 'danger-500' }} text-white rounded-pill">
-                                            {{ $statusOptions[$user->status] }}
-                                        </span>
+                                        <span class="motac-badge {{ $user->status === 'active' ? 'motac-badge-success' : 'motac-badge-danger' }}">{{ $statusOptions[$user->status] }}</span>
                                     </td>
                                     <td class="px-3 py-16 text-end">
                                         @can('view', $user)
-                                            <a href="{{ route('settings.users.show', $user->id) }}" class="button variant-info size-small border-0 me-1 motac-btn-icon" title="{{ __('Lihat') }}">
-                                                <i class="bi bi-eye-fill fs-6"></i>
+                                            <a href="{{ route('settings.users.show', $user->id) }}" class="motac-btn-icon border-0 me-1" title="{{ __('Lihat') }}" aria-label="{{ __('Lihat') }}">
+                                                <i class="bi bi-eye-fill fs-6" aria-hidden="true"></i>
                                             </a>
                                         @endcan
                                         @can('update', $user)
-                                            <a href="{{ route('settings.users.edit', $user->id) }}" class="button variant-primary size-small border-0 me-1 motac-btn-icon" title="{{ __('Kemaskini') }}">
-                                                <i class="bi bi-pencil-fill fs-6"></i>
+                                            <a href="{{ route('settings.users.edit', $user->id) }}" class="motac-btn-icon border-0 me-1" title="{{ __('Kemaskini') }}" aria-label="{{ __('Kemaskini') }}">
+                                                <i class="bi bi-pencil-fill fs-6" aria-hidden="true"></i>
                                             </a>
                                         @endcan
                                         @can('delete', $user)
-                                            <button wire:click="confirmUserDeletion({{ $user->id }}, '{{ $user->name }}')" class="button variant-danger size-small border-0 motac-btn-icon" title="{{ __('Padam') }}">
-                                                <i class="bi bi-trash3-fill fs-6"></i>
+                                            <button wire:click="confirmUserDeletion({{ $user->id }}, '{{ $user->name }}')" class="motac-btn-icon border-0" title="{{ __('Padam') }}" aria-label="{{ __('Padam') }}">
+                                                <i class="bi bi-trash3-fill fs-6" aria-hidden="true"></i>
                                             </button>
                                         @endcan
                                     </td>
@@ -133,10 +131,7 @@
                     </div>
                 @endif
             @else
-                <div class="alert alert-info-500 text-center m-24">
-                    <i class="bi bi-info-circle-fill me-2"></i>
-                    {{ __('Tiada pengguna ditemui.') }}
-                </div>
+                <x-alert type="info" class="text-center m-24" :message="__('Tiada pengguna ditemui.')" />
             @endif
         </div>
     </div>
@@ -168,9 +163,9 @@
                 <div class="modal-body">
                     <p>{{ __('Adakah anda pasti ingin memadam') }} "<strong><span x-text="itemDescription"></span></strong>"? {{ __('Tindakan ini tidak boleh diundur.') }}</p>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @click="show = false">{{ __('Batal') }}</button>
-                    <button type="button" class="btn btn-danger" @click="$wire.call(deleteMethod, itemId); show = false;">{{ __('Padam') }}</button>
+                <div class="modal-footer motac-modal-footer">
+                    <button type="button" class="motac-btn-outline" @click="show = false">{{ __('Batal') }}</button>
+                    <button type="button" class="motac-btn-danger" @click="$wire.call(deleteMethod, itemId); show = false;">{{ __('Padam') }}</button>
                 </div>
             </div>
         </div>

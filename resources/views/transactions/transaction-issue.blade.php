@@ -53,7 +53,7 @@
                                     <h4 class="h5 fw-semibold mb-0" x-text="'{{ __('Item Baris') }} #' + (index + 1)"></h4>
                                     <template x-if="itemsToIssue.length > 1">
                                         <button type="button" @click="removeItem(index)"
-                                            class="btn btn-sm btn-outline-danger" title="{{ __('Buang Item Baris Ini') }}">
+                                            class="motac-btn-icon" title="{{ __('Buang Item Baris Ini') }}" aria-label="{{ __('Buang Item Baris Ini') }}">
                                             {{-- Trash icon --}}
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                 viewBox="0 0 20 20" fill="currentColor">
@@ -205,7 +205,7 @@
 
                     {{-- Add item row button --}}
                     <button type="button" @click="addItem()"
-                        class="btn btn-outline-primary btn-sm text-uppercase mt-3 d-inline-flex align-items-center">
+                        class="motac-btn-outline motac-btn-sm text-uppercase mt-3 d-inline-flex align-items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
                             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="me-2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -251,12 +251,12 @@
                     </div>
 
                     {{-- Submit/cancel buttons --}}
-                    <div class="mt-4 d-flex justify-content-end">
+                    <div class="mt-4 d-flex justify-content-end motac-modal-footer">
                         <a href="{{ route('resource-management.loan-applications.show', $loanApplication) }}"
-                            class="btn btn-secondary me-2">
+                            class="motac-btn-outline me-2" aria-label="{{ __('Batal') }}">
                             {{ __('Batal') }}
                         </a>
-                        <button type="submit" class="btn btn-primary" :disabled="isSubmitDisabled()">
+                        <button type="submit" class="motac-btn-primary" :disabled="isSubmitDisabled()">
                             {{ __('Sahkan & Keluarkan Peralatan') }}
                         </button>
                     </div>

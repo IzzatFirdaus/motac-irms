@@ -51,6 +51,8 @@
 <link rel="stylesheet" href="{{ asset('assets/vendor/libs/toastr/toastr.css') }}" />
 
 {{-- Custom styles for MOTAC System --}}
+{{-- Central tokens must load before component CSS --}}
+<link rel="stylesheet" href="{{ asset('assets/css/variables.css') }}" />
 <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}" />
 
 @yield('vendor-style')

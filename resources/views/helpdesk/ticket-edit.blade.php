@@ -10,7 +10,7 @@
     @livewire('helpdesk.ticket-edit', ['ticket' => $ticket->id])
 
     <div class="mt-3">
-        <a href="{{ route('helpdesk.tickets.show', $ticket) }}" class="btn btn-secondary">
+        <a href="{{ route('helpdesk.tickets.show', $ticket) }}" class="motac-btn-secondary d-inline-flex align-items-center" aria-label="{{ __('Kembali ke Butiran Tiket') }}">
             {{ __('Kembali ke Butiran Tiket') }}
         </a>
     </div>
