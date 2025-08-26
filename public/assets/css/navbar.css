@@ -5,17 +5,9 @@
    - Updated: 2025-08-25 03:08:55 UTC by IzzatFirdaus
 */
 
-:root {
-  /* MYDS Color Tokens */
-  --motac-navbar-bg: #FFFFFF;
-  --motac-navbar-border: #2563EB; /* MYDS primary-600 */
-  --motac-navbar-accent: #2563EB; /* MYDS primary-600 */
-  --motac-navbar-accent-bg: #EFF6FF; /* MYDS primary-50 */
-  --motac-navbar-text: #18181B; /* MYDS txt-black-900 */
-  --motac-navbar-hover: #F4F4F5; /* MYDS gray-100 */
-  --motac-navbar-link-hover: #2563EB; /* MYDS primary-600 */
-  --motac-navbar-shadow: 0 2px 10px rgba(37, 99, 235, 0.07); /* MYDS shadow */
-}
+/* This file expects design tokens to be provided by `variables.css` which
+  must be loaded before any component CSS. Navbar tokens are centralized
+  in `public/assets/css/variables.css` to ensure a single source of truth. */
 
 /* Main navbar container - MYDS compliant */
 .motac-navbar-alt {
