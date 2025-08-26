@@ -34,7 +34,11 @@
                 @auth
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
+<<<<<<< HEAD
                         <button class="motac-btn-outline d-inline-flex align-items-center" type="submit" aria-label="{{ __('Log Keluar') }}">
+=======
+                        <button class="motac-btn-outline-secondary d-inline-flex align-items-center" type="submit" aria-label="{{ __('Log Keluar') }}">
+>>>>>>> copilot/vscode1756220669923
                             <i class="bi bi-box-arrow-left me-2" aria-hidden="true"></i>{{ __('Log Keluar') }}
                         </button>
                     </form>
