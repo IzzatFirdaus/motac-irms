@@ -24,8 +24,8 @@
         {{-- General alert partial, displays flash messages, etc. --}}
         @include('_partials._alerts.alert-general')
 
-        <div class="card shadow-sm">
-            <div class="card-header bg-light py-3">
+        <div class="card shadow-sm motac-card">
+            <div class="card-header bg-light py-3 motac-card-header">
                 <h3 class="h5 card-title fw-semibold mb-0">{{ __('Senarai Menunggu Kelulusan') }}</h3>
             </div>
             @if ($approvals->isEmpty())
@@ -79,12 +79,12 @@
                                     <td class="px-3 py-2 text-center">
                                         @can('update', $approvalTask)
                                             <a href="{{ route('approvals.show', $approvalTask->id) }}"
-                                                class="btn btn-sm btn-primary d-inline-flex align-items-center">
+                                                class="btn btn-sm btn-primary d-inline-flex align-items-center motac-btn-primary">
                                                 <i class="bi bi-pencil-square me-1"></i> {{ __('Lihat & Ambil Tindakan') }}
                                             </a>
                                         @else
                                             <a href="{{ route('approvals.show', $approvalTask->id) }}"
-                                                class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center">
+                                                class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center motac-btn-outline">
                                                 <i class="bi bi-eye-fill me-1"></i> {{ __('Lihat Sahaja') }}
                                             </a>
                                         @endcan

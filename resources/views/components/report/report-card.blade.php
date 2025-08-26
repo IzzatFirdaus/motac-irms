@@ -12,7 +12,7 @@
 --}}
 
 <div class="col">
-    <div class="card h-100 shadow-sm motac-card">
+    <div class="motac-card h-100 shadow-sm">
         <div class="card-body d-flex flex-column p-4">
             {{-- Icon at the top --}}
             <div class="mb-2">
@@ -23,7 +23,7 @@
             {{-- Description --}}
             <p class="card-text small text-muted mb-4">{{ $description }}</p>
             {{-- "View Report" Button at the bottom --}}
-            <a href="{{ $route }}" class="btn btn-primary btn-sm mt-auto d-inline-flex align-items-center motac-btn-primary">
+            <a href="{{ $route }}" class="motac-btn-primary btn-sm mt-auto d-inline-flex align-items-center" role="button" aria-label="{{ __('Lihat Laporan: :title', ['title' => $title]) }}">
                 <i class="bi bi-eye-fill me-1"></i>{{ __('reports.view_report') }}
             </a>
         </div>

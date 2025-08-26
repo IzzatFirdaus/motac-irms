@@ -151,7 +151,7 @@ class NotificationService
     public function notifyEquipmentIncident(User $recipient, LoanApplication $loanApplication, Equipment $equipment, string $incidentType, ?string $notes = null): void
     {
         // Ensure we pass an Eloquent Collection as required by the notification constructor
-        $collection = \App\Models\Equipment::whereIn('id', [$equipment->id])->get();
+        $collection = Equipment::whereIn('id', [$equipment->id])->get();
         $this->notifyUser($recipient, new EquipmentIncidentNotification($loanApplication, $collection, $incidentType));
     }
 

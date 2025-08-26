@@ -29,8 +29,8 @@
             <p class="mb-4 mx-auto col-md-8 col-lg-6 text-muted">
                 {{ __('Anda tidak mempunyai kebenaran yang mencukupi untuk mengakses sumber atau halaman ini. Sila hubungi pentadbir sistem jika anda memerlukan akses.') }}
             </p>
-            <a href="{{ url('/') }}" class="btn btn-primary d-inline-flex align-items-center">
-                <i class="bi bi-house-door-fill me-2"></i>{{ __('Kembali ke Laman Utama') }}
+            <a href="{{ url('/') }}" class="motac-btn-primary d-inline-flex align-items-center" aria-label="{{ __('Kembali ke Laman Utama') }}">
+                <i class="bi bi-house-door-fill me-2" aria-hidden="true"></i>{{ __('Kembali ke Laman Utama') }}
             </a>
             <div class="mt-4">
                 {{-- Add your own MOTAC-branded "Forbidden" illustration here --}}

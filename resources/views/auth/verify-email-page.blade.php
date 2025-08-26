@@ -31,7 +31,7 @@
                     <span class="app-brand-text demo text-body fw-bold fs-4 ms-1">{{ __(config('app.name', 'MOTAC')) }}</span>
                 </a>
             </div>
-            <div class="card shadow-sm">
+            <div class="motac-card shadow-sm">
                 <div class="card-body">
                     <div class="text-center">
                         <h3 class="mb-1 fw-semibold">{{ __('Sahkan Alamat E-mel Anda') }} <i class="bi bi-envelope-check-fill text-primary ms-1"></i></h3>
@@ -50,13 +50,13 @@
                     <div class="mt-4 d-flex flex-column justify-content-center gap-2">
                         <form method="POST" action="{{ route('verification.send') }}">
                             @csrf
-                            <button type="submit" class="btn btn-primary d-grid w-100">
+                            <button type="submit" class="motac-btn-primary d-grid w-100">
                                 <i class="bi bi-send-arrow-up-fill me-1"></i>{{ __('Hantar Semula E-mel Pengesahan') }}
                             </button>
                         </form>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="btn btn-outline-danger d-grid w-100">
+                            <button type="submit" class="motac-btn-outline d-grid w-100">
                                 <i class="bi bi-box-arrow-left me-1"></i>{{ __('Log Keluar') }}
                             </button>
                         </form>

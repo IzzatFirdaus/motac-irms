@@ -15,8 +15,8 @@
     <div class="row">
         {{-- Pending Helpdesk Tickets Card --}}
         <div class="col-xl-6 col-md-6 mb-4">
-            <div class="card border-start border-warning border-4 shadow-sm h-100 py-2 motac-card">
-                <div class="card-body">
+            <div class="motac-card border-start border-warning border-4 shadow-sm h-100 py-2">
+                <div class="motac-card-body">
                     <div class="row g-0 align-items-center">
                         <div class="col">
                             <div class="text-xs fw-bold text-warning text-uppercase mb-1">
@@ -36,8 +36,8 @@
 
         {{-- My Assigned Helpdesk Tickets Card --}}
         <div class="col-xl-6 col-md-6 mb-4">
-            <div class="card border-start border-primary border-4 shadow-sm h-100 py-2 motac-card">
-                <div class="card-body">
+            <div class="motac-card border-start border-primary border-4 shadow-sm h-100 py-2">
+                <div class="motac-card-body">
                     <div class="row g-0 align-items-center">
                         <div class="col">
                             <div class="text-xs fw-bold text-primary text-uppercase mb-1">
@@ -59,16 +59,16 @@
     {{-- Recent Activity / Helpdesk Tickets to Process --}}
     <div class="row">
         <div class="col-12">
-            <div class="card shadow-sm mb-4 motac-card">
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between motac-card-header">
+            <div class="motac-card shadow-sm mb-4">
+                <div class="motac-card-header py-3 d-flex flex-row align-items-center justify-content-between">
                     <h6 class="m-0 fw-bold text-primary d-flex align-items-center">
                         <i class="bi bi-list-check me-2"></i>{{ __('dashboard.helpdesk_tickets_to_process_title') }}
                     </h6>
                     @if (Route::has('helpdesk.admin.index'))
-                        <a href="{{route('helpdesk.admin.index')}}" class="btn btn-sm btn-outline-primary motac-btn-outline">{{__('dashboard.view_all_helpdesk_tickets')}}</a>
+                        <a href="{{route('helpdesk.admin.index')}}" class="motac-btn-outline btn-sm">{{__('dashboard.view_all_helpdesk_tickets')}}</a>
                     @endif
                 </div>
-                <div class="card-body motac-card-body p-0">
+                <div class="motac-card-body p-0">
                     {{-- Livewire component to list pending helpdesk tickets for IT Admin --}}
                     @livewire('helpdesk.admin.ticket-management', ['displayLimit' => 5, 'defaultStatusFilter' => 'open'])
                 </div>

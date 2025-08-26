@@ -35,8 +35,8 @@
                 {{ __('Terdapat masalah dalam data yang dihantar. Sila semak semula borang dan cuba sekali lagi.') }}
             </p>
             {{-- Back to previous page --}}
-            <a href="javascript:history.back()" class="btn btn-secondary d-inline-flex align-items-center">
-                <i class="bi bi-arrow-left-circle-fill me-2"></i>{{ __('Kembali') }}
+            <a href="javascript:history.back()" class="motac-btn-secondary d-inline-flex align-items-center" aria-label="{{ __('Kembali') }}">
+                <i class="bi bi-arrow-left-circle-fill me-2" aria-hidden="true"></i>{{ __('Kembali') }}
             </a>
             {{-- Optional illustration --}}
             {{--

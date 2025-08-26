@@ -53,7 +53,7 @@
                                     </td>
                                     <td class="py-2 px-3 small">{{ e($item->current_location ?? 'N/A') }}</td>
                                     <td class="py-2 px-3 text-end">
-                                        <a href="{{ route('equipment.show', $item) }}" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center">
+                                        <a href="{{ route('equipment.show', $item) }}" class="motac-btn-outline btn-sm d-inline-flex align-items-center">
                                             <i class="bi bi-eye-fill me-1"></i>{{ __('Lihat') }}
                                         </a>
                                     </td>

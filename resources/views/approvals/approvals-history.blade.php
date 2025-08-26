@@ -93,7 +93,7 @@
                 </div>
 
                 @if ($approvals->hasPages())
-                    <div class="card-footer bg-light border-top py-3 d-flex justify-content-center">
+                    <div class="card-footer bg-light motac-card-footer border-top py-3 d-flex justify-content-center">
                         {{ $approvals->links() }}
                     </div>
                 @endif

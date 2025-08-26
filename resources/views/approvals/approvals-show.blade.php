@@ -21,8 +21,8 @@
     <div class="container py-4">
         <div class="row justify-content-center">
             <div class="col-lg-9 col-xl-8">
-                <div class="card shadow-lg rounded-4">
-                    <div class="card-header bg-light py-3 px-3 px-sm-4 border-bottom-0">
+                <div class="card shadow-lg rounded-4 motac-card">
+                    <div class="card-header bg-light py-3 px-3 px-sm-4 border-bottom-0 motac-card-header">
                         <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center">
                             <h2 class="h5 card-title mb-1 mb-sm-0 fw-semibold text-dark">
                                 <i class="bi bi-clipboard-check-fill me-2"></i>{{ __('Butiran Tugasan Kelulusan') }}
@@ -93,7 +93,7 @@
                             @endif
                         </dl>
 
-                        @include('approvals.comments', ['approval' => $approval])
+                                @include('approvals.comments', ['approval' => $approval])
 
                         @if ($approvableItem)
                             @if ($approvableItem instanceof \App\Models\LoanApplication)
@@ -101,10 +101,10 @@
                                     'loanApplication' => $approvableItem,
                                     'panelTitle' => __('Butiran Permohonan Pinjaman'),
                                 ])
-                            @elseif ($approvableItem instanceof \App\Models\HelpdeskTicket)
+                                @elseif ($approvableItem instanceof \App\Models\HelpdeskTicket)
                                 {{-- Helpdesk Ticket Details Panel --}}
-                                <div class="card shadow-sm mb-4">
-                                    <div class="card-header bg-light py-3">
+                                <div class="card shadow-sm mb-4 motac-card">
+                                    <div class="card-header bg-light py-3 motac-card-header">
                                         <h2 class="h5 card-title mb-0 fw-semibold">{{ __('Butiran Tiket Meja Bantuan') }}</h2>
                                     </div>
                                     <div class="card-body p-4">

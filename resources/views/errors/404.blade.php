@@ -33,8 +33,8 @@
             <p class="mb-4 mx-auto col-md-8 col-lg-6 text-muted">
                 {{ __('Harap maaf, halaman yang anda cuba akses tidak wujud atau telah dipindahkan. Sila semak URL atau kembali ke halaman utama.') }}
             </p>
-            <a href="{{ url('/') }}" class="btn btn-primary d-inline-flex align-items-center">
-                <i class="bi bi-house-door-fill me-2"></i>{{ __('Kembali ke Laman Utama') }}
+            <a href="{{ url('/') }}" class="motac-btn-primary d-inline-flex align-items-center" aria-label="{{ __('Kembali ke Laman Utama') }}">
+                <i class="bi bi-house-door-fill me-2" aria-hidden="true"></i>{{ __('Kembali ke Laman Utama') }}
             </a>
             {{-- Illustration image block can be enabled here if desired --}}
             {{--
