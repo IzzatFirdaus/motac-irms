@@ -27,16 +27,16 @@ use App\Notifications\TicketCommentAddedNotification;
 use App\Notifications\TicketCreatedNotification;
 use App\Notifications\TicketStatusUpdatedNotification;
 use Exception;
+use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Notification;
 
 class NotificationService
 {
-    public function notifyUser(User $user, object $notification): void
+    public function notifyUser(User $user, Notification $notification): void
     {
         try {
-            Notification::send($user, $notification);
+            $user->notify($notification);
             Log::info("Notification sent to user {$user->id}.");
         } catch (Exception $e) {
             Log::error("Failed to send notification to user {$user->id}: ".$e->getMessage(), ['exception' => $e]);
