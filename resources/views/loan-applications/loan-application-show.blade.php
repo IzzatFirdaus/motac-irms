@@ -175,7 +175,7 @@
 
                         @if ($loanApplication->latest_issue_transaction)
                             @can('processReturn', $loanApplication->latest_issue_transaction)
-                                <a href="{{ route('loan-transactions.return.form', $loanApplication->latest_issue_transaction) }}" class="btn btn-success"><i class="bi bi-arrow-down-left-circle-fill me-1"></i> {{ __('loan-applications.process_return') }}</a>
+                                <a href="{{ route('loan-applications.return', $loanApplication->latest_issue_transaction) }}" class="btn btn-success"><i class="bi bi-arrow-down-left-circle-fill me-1"></i> {{ __('loan-applications.process_return') }}</a>
                             @endcan
                         @endif
                     </div>

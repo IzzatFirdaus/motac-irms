@@ -64,7 +64,7 @@
                                                         </a>
                                                         @if ($transaction->loanApplication && $transaction->loanApplication->canBeReturned() && !$transaction->isFullyClosedOrReturned())
                                                             @can('createReturn', $transaction->loanApplication)
-                                                                <a href="{{ route('resource-management.bpm.loan-transactions.return.form', $transaction) }}"
+                                                                <a href="{{ route('loan-applications.return', $transaction) }}"
                                                                     class="btn btn-success" title="{{ __('Proses Pulangan') }}">
                                                                     <i class="bi bi-arrow-return-left"></i>
                                                                 </a>
