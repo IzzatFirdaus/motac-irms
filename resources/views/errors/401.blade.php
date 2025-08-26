@@ -32,8 +32,8 @@
             <p class="mb-4 mx-auto col-md-8 col-lg-6 text-muted">
                 {{ __('Anda tidak mempunyai kebenaran yang sah untuk mengakses halaman ini. Sila pastikan anda telah log masuk dengan akaun yang betul atau hubungi pentadbir sistem jika anda percaya ini adalah satu kesilapan.') }}
             </p>
-            <a href="{{ url('/') }}" class="btn btn-primary d-inline-flex align-items-center">
-                <i class="bi bi-house-door-fill me-2"></i>{{ __('Kembali ke Laman Utama') }}
+            <a href="{{ url('/') }}" class="motac-btn-primary d-inline-flex align-items-center" aria-label="{{ __('Kembali ke Laman Utama') }}">
+                <i class="bi bi-house-door-fill me-2" aria-hidden="true"></i>{{ __('Kembali ke Laman Utama') }}
             </a>
             <div class="mt-4">
                 {{-- Illustration (add your own MOTAC-branded illustration for unauthorized access) --}}

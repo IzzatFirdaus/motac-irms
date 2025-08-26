@@ -2,8 +2,10 @@
 {{-- Renamed from api-token-manager.blade.php for clarity and consistency with naming convention --}}
 
 <div>
-    {{-- API Token Manager Section: Styled with MOTAC Bootstrap card classes --}}
-    <x-form-section submit="createApiToken">
+    {{-- API Token Manager Section: use token-driven motac-card wrapper --}}
+    <div class="motac-card mb-3">
+        <div class="motac-card-header px-3 py-2">
+            <x-form-section submit="createApiToken">
         <x-slot name="title">
             {{ __('Cipta Token API') }}
         </x-slot>
@@ -55,13 +57,17 @@
                 {{ __('Cipta') }}
             </x-button>
         </x-slot>
-    </x-form-section>
+            </x-form-section>
+        </div>
+    </div>
 
     {{-- List all existing API tokens for the user --}}
     @if ($this->user->tokens->isNotEmpty())
         <hr class="my-4">
         <div class="mt-4">
-            <x-action-section>
+            <div class="motac-card">
+                <div class="motac-card-header px-3 py-2">
+                    <x-action-section>
                 <x-slot name="title">
                     {{ __('Urus Token API') }}
                 </x-slot>
@@ -100,7 +106,9 @@
                         @endforeach
                     </div>
                 </x-slot>
-            </x-action-section>
+                    </x-action-section>
+                </div>
+            </div>
         </div>
     @endif
 

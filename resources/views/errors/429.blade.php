@@ -35,8 +35,8 @@
                 {{ __('Anda telah menghantar terlalu banyak permintaan dalam masa singkat. Sila tunggu sebentar dan cuba lagi.') }}
             </p>
             {{-- Option to retry --}}
-            <a href="javascript:location.reload()" class="btn btn-info d-inline-flex align-items-center">
-                <i class="bi bi-arrow-clockwise me-2"></i>{{ __('Cuba Sekali Lagi') }}
+            <a href="javascript:location.reload()" class="motac-btn-info d-inline-flex align-items-center" aria-label="{{ __('Cuba Sekali Lagi') }}">
+                <i class="bi bi-arrow-clockwise me-2" aria-hidden="true"></i>{{ __('Cuba Sekali Lagi') }}
             </a>
             {{-- Optional illustration --}}
             {{--

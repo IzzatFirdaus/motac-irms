@@ -9,7 +9,7 @@
     {{-- Place to add a Livewire component for the ticket creation form --}}
     @livewire('helpdesk.ticket-create')
     <div class="mt-3">
-        <a href="{{ route('helpdesk.tickets.index') }}" class="btn btn-secondary">
+        <a href="{{ route('helpdesk.tickets.index') }}" class="motac-btn-secondary d-inline-flex align-items-center" aria-label="{{ __('Kembali ke Senarai Tiket') }}">
             {{ __('Kembali ke Senarai Tiket') }}
         </a>
     </div>

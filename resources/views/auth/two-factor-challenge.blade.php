@@ -73,15 +73,15 @@
                                 <x-input-error for="recovery_code" class="mt-2 small text-danger d-block" />
                             </div>
                             <div class="d-flex justify-content-between my-3 flex-wrap gap-2">
-                                <button type="button" class="btn btn-sm btn-outline-secondary" x-show="! recovery"
+                                <button type="button" class="motac-btn-outline btn-sm" x-show="! recovery"
                                     x-on:click="recovery = true; $nextTick(() => { $refs.recovery_code.focus()})">
                                     {{ __('Guna kod pemulihan') }}
                                 </button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary" x-cloak x-show="recovery"
+                                <button type="button" class="motac-btn-outline btn-sm" x-cloak x-show="recovery"
                                     x-on:click="recovery = false; $nextTick(() => { $refs.code.focus() })">
                                     {{ __('Guna kod pengesahan') }}
                                 </button>
-                                <x-button type="submit" class="btn btn-primary btn-sm">
+                                <x-button type="submit" class="motac-btn-primary btn-sm">
                                     <i class="bi bi-box-arrow-in-right me-1"></i>{{ __('Log Masuk') }}
                                 </x-button>
                             </div>

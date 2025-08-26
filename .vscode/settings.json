@@ -1,18 +1,38 @@
 {
-    // Exclude backup folders from search and file watching
-    "files.exclude": {
-        "**/backup": true,
-        "**/backup/**": true,
-        "**/_documentation/backup": true,
-        "**/_documentation/backup/**": true
-    },
-    "search.exclude": {
-        "**/backup": true,
-        "**/backup/**": true,
-        "**/_documentation/backup": true,
-        "**/_documentation/backup/**": true
-    },
-    // PHP & extension settings (kept from previous file)
-    "php.version": "8.4",
-    "CodeGPT.apiKey": "CodeGPT Plus Beta"
+  // Workspace settings: exclude vendor and backup folders from heavy analysis and search
+  "intelephense.files.exclude": [
+    "**/vendor/**",
+    "**/public/assets/vendor/**"
+  ],
+
+  // Hide vendor and backup folders from the explorer and from search (reduces noise)
+  "files.exclude": {
+    "**/vendor/**": true,
+    "**/public/assets/vendor/**": true,
+    "**/backup": true,
+    "**/backup/**": true,
+    "**/_documentation/backup": true,
+    "**/_documentation/backup/**": true
+  },
+
+  "search.exclude": {
+    "**/vendor/**": true,
+    "**/public/assets/vendor/**": true,
+    "**/backup": true,
+    "**/backup/**": true,
+    "**/_documentation/backup": true,
+    "**/_documentation/backup/**": true
+  },
+
+  // Reduce file watching on large vendor folders (helps performance)
+  "files.watcherExclude": {
+    "**/vendor/**": true,
+    "**/public/assets/vendor/**": true,
+    "**/backup/**": true,
+    "**/_documentation/backup/**": true
+  }
+
+  // If CSS diagnostics from other extensions still surface for vendor files,
+  // consider disabling CSS validation in this workspace by adding:
+  // "css.validate": false
 }

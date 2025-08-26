@@ -80,7 +80,7 @@
                                 </span>
                             @enderror
                         </div>
-                        <button type="submit" class="btn btn-primary d-grid w-100 mb-3">
+                        <button type="submit" class="motac-btn-primary d-grid w-100 mb-3">
                             <i class="bi bi-check-circle-fill me-1"></i>{{ __('Sahkan') }}
                         </button>
                     </form>

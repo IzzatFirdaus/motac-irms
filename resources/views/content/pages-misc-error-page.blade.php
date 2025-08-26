@@ -25,11 +25,11 @@
   <style>
     /* MOTAC-specific overrides for error pages */
     .misc-wrapper .display-5 {
-        color: var(--bs-danger); /* Use Bootstrap danger color for the error code/title */
+  color: var(--danger-color); /* Use MOTAC danger token for the error code/title */
     }
     .motac-error-icon {
         font-size: 5rem;
-        color: var(--bs-secondary); /* Example color for a decorative icon */
+  color: var(--motac-secondary-color); /* Example color for a decorative icon */
         margin-bottom: 1rem;
     }
   </style>
@@ -46,7 +46,7 @@
       <p class="mb-4 mx-auto col-md-8 col-lg-6">
         {{ __('Harap maaf, halaman yang anda cari tidak dapat ditemui pada pelayan ini. Sila semak URL atau kembali ke halaman utama.') }}
       </p>
-      <a href="{{ url('/') }}" class="btn btn-primary d-inline-flex align-items-center">
+  <a href="{{ url('/') }}" class="motac-btn-primary d-inline-flex align-items-center">
         <i class="bi bi-house-door-fill me-2"></i>{{ __('Kembali ke Halaman Utama') }}
       </a>
       <div class="mt-4">

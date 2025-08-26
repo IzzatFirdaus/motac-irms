@@ -10,7 +10,7 @@
     @livewire('helpdesk.ticket-index')
 
     <div class="mt-4">
-        <a href="{{ route('helpdesk.tickets.create') }}" class="btn btn-primary">
+        <a href="{{ route('helpdesk.tickets.create') }}" class="motac-btn-primary d-inline-flex align-items-center" aria-label="{{ __('Buat Tiket Baru') }}">
             {{ __('Buat Tiket Baru') }}
         </a>
     </div>

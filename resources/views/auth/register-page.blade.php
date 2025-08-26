@@ -37,8 +37,8 @@
               </a>
             </div>
 
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white p-3">
+            <div class="motac-card shadow-sm">
+                <div class="motac-card-header bg-primary text-white p-3">
                     <h4 class="mb-0 text-white d-flex align-items-center">
                         <i class="bi bi-person-plus-fill me-2"></i>
                         {{ __('Daftar Akaun Baru') }}
@@ -103,12 +103,12 @@
                             </div>
                         @endif
 
-                        <button type="submit" class="btn btn-primary d-grid w-100">
+            <button type="submit" class="motac-btn-primary d-grid w-100">
                             <i class="bi bi-person-plus-fill me-1"></i>{{ __('Daftar Akaun') }}
                         </button>
                     </form>
-                </div>
-                <div class="card-footer text-center text-muted small p-3 register-card-footer">
+        </div>
+        <div class="motac-card-footer text-center text-muted small p-3 register-card-footer">
                     <p class="mb-0">
                         <span>{{ __('Sudah mempunyai akaun?') }}</span>
                         @if (Route::has('login'))

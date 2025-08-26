@@ -3,7 +3,7 @@
     <div class="mb-3">
         <p class="h6 fw-semibold mb-2 text-dark">{{ __('Catatan Pegawai:') }}</p>
         @if (!empty($approval->comments))
-            <div class="bg-light border p-3 rounded text-dark small">
+            <div class="bg-light border p-3 rounded text-dark small motac-card">
                 {{-- Display comments with line breaks preserved --}}
                 {!! nl2br(e($approval->comments)) !!}
             </div>

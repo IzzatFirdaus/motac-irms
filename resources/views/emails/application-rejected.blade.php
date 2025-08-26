@@ -42,7 +42,7 @@
 
     @if($actionUrl && $actionUrl !== '#')
         <div class="text-center mt-4">
-            <a href="{{ $actionUrl }}" class="btn btn-secondary">{{ __('Lihat Butiran Permohonan') }}</a>
+            <a href="{{ $actionUrl }}" class="motac-btn-outline d-inline-block">{{ __('Lihat Butiran Permohonan') }}</a>
         </div>
     @endif
 

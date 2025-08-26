@@ -14,7 +14,7 @@
             <div>
                 @can('update', $equipment)
                     <a href="{{ route('resource-management.equipment-admin.edit', $equipment) }}"
-                        class="btn btn-outline-primary btn-sm me-2 d-inline-flex align-items-center">
+                        class="motac-btn-outline btn-sm me-2 d-inline-flex align-items-center">
                         <i class="bi bi-pencil-fill me-1"></i> {{ __('Edit Peralatan (Pentadbir)') }}
                     </a>
                 @endcan
