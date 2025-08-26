@@ -25,6 +25,7 @@ class HelpdeskServiceTest extends TestCase
     use RefreshDatabase;
 
     protected $helpdeskService;
+
     protected $notificationServiceMock;
 
     protected function setUp(): void
@@ -47,12 +48,12 @@ class HelpdeskServiceTest extends TestCase
     /** @test */
     public function it_can_create_a_ticket_and_send_notification()
     {
-        $user = User::factory()->create();
+        $user     = User::factory()->create();
         $category = HelpdeskCategory::first();
         $priority = HelpdeskPriority::first();
 
         $data = [
-            'title' => 'Printer not working',
+            'title'       => 'Printer not working',
             'description' => 'Cannot print from any application.',
             'category_id' => $category->id,
             'priority_id' => $priority->id,
@@ -71,10 +72,10 @@ class HelpdeskServiceTest extends TestCase
 
         $this->assertInstanceOf(HelpdeskTicket::class, $ticket);
         $this->assertDatabaseHas('helpdesk_tickets', [
-            'id' => $ticket->id,
-            'title' => $data['title'],
+            'id'      => $ticket->id,
+            'title'   => $data['title'],
             'user_id' => $user->id,
-            'status' => HelpdeskTicket::STATUS_OPEN,
+            'status'  => HelpdeskTicket::STATUS_OPEN,
         ]);
         $this->assertNotNull($ticket->sla_due_at);
         $this->assertCount(1, $ticket->attachments);
@@ -84,8 +85,8 @@ class HelpdeskServiceTest extends TestCase
     /** @test */
     public function it_can_add_a_comment_and_send_notifications()
     {
-        $user = User::factory()->create();
-        $ticket = HelpdeskTicket::factory()->create(['user_id' => $user->id]);
+        $user        = User::factory()->create();
+        $ticket      = HelpdeskTicket::factory()->create(['user_id' => $user->id]);
         $commentText = 'Here is a screenshot.';
         $attachments = [
             UploadedFile::fake()->image('screenshot.png'),
@@ -103,9 +104,9 @@ class HelpdeskServiceTest extends TestCase
 
         $this->assertInstanceOf(HelpdeskComment::class, $comment);
         $this->assertDatabaseHas('helpdesk_comments', [
-            'ticket_id' => $ticket->id,
-            'user_id' => $user->id,
-            'comment' => $commentText,
+            'ticket_id'   => $ticket->id,
+            'user_id'     => $user->id,
+            'comment'     => $commentText,
             'is_internal' => false,
         ]);
         $this->assertCount(1, $comment->attachments);
@@ -115,8 +116,8 @@ class HelpdeskServiceTest extends TestCase
     /** @test */
     public function it_can_add_an_internal_comment_and_send_notifications()
     {
-        $user = User::factory()->create();
-        $ticket = HelpdeskTicket::factory()->create(['user_id' => $user->id]);
+        $user        = User::factory()->create();
+        $ticket      = HelpdeskTicket::factory()->create(['user_id' => $user->id]);
         $commentText = 'Internal note.';
 
         $this->notificationServiceMock
@@ -128,7 +129,7 @@ class HelpdeskServiceTest extends TestCase
 
         $this->assertTrue($comment->is_internal);
         $this->assertDatabaseHas('helpdesk_comments', [
-            'id' => $comment->id,
+            'id'          => $comment->id,
             'is_internal' => true,
         ]);
     }
@@ -136,17 +137,17 @@ class HelpdeskServiceTest extends TestCase
     /** @test */
     public function it_can_update_a_ticket_and_send_notifications_on_status_and_assignment_change()
     {
-        $user = User::factory()->create();
+        $user     = User::factory()->create();
         $assignee = User::factory()->create();
-        $ticket = HelpdeskTicket::factory()->create([
-            'user_id' => $user->id,
+        $ticket   = HelpdeskTicket::factory()->create([
+            'user_id'             => $user->id,
             'assigned_to_user_id' => null,
-            'status' => HelpdeskTicket::STATUS_OPEN,
+            'status'              => HelpdeskTicket::STATUS_OPEN,
         ]);
         $data = [
-            'status' => HelpdeskTicket::STATUS_IN_PROGRESS,
+            'status'              => HelpdeskTicket::STATUS_IN_PROGRESS,
             'assigned_to_user_id' => $assignee->id,
-            'title' => 'Updated title',
+            'title'               => 'Updated title',
         ];
 
         // Should notify status update to applicant and assignee, and assignment to assignee
@@ -168,26 +169,26 @@ class HelpdeskServiceTest extends TestCase
         $this->assertEquals(HelpdeskTicket::STATUS_IN_PROGRESS, $updated->status);
         $this->assertEquals($assignee->id, $updated->assigned_to_user_id);
         $this->assertDatabaseHas('helpdesk_tickets', [
-            'id' => $ticket->id,
-            'status' => HelpdeskTicket::STATUS_IN_PROGRESS,
+            'id'                  => $ticket->id,
+            'status'              => HelpdeskTicket::STATUS_IN_PROGRESS,
             'assigned_to_user_id' => $assignee->id,
-            'title' => 'Updated title',
+            'title'               => 'Updated title',
         ]);
     }
 
     /** @test */
     public function it_sets_closed_at_when_status_becomes_closed_and_notifies()
     {
-        $user = User::factory()->create();
+        $user   = User::factory()->create();
         $ticket = HelpdeskTicket::factory()->create([
-            'user_id' => $user->id,
-            'status' => HelpdeskTicket::STATUS_OPEN,
+            'user_id'   => $user->id,
+            'status'    => HelpdeskTicket::STATUS_OPEN,
             'closed_at' => null,
         ]);
         $closer = User::factory()->create();
 
         $data = [
-            'status' => HelpdeskTicket::STATUS_CLOSED,
+            'status'           => HelpdeskTicket::STATUS_CLOSED,
             'resolution_notes' => 'Fixed!',
         ];
 
@@ -206,10 +207,10 @@ class HelpdeskServiceTest extends TestCase
     /** @test */
     public function it_nullifies_closed_at_when_status_changes_from_closed_and_notifies()
     {
-        $user = User::factory()->create();
+        $user   = User::factory()->create();
         $ticket = HelpdeskTicket::factory()->create([
-            'user_id' => $user->id,
-            'status' => HelpdeskTicket::STATUS_CLOSED,
+            'user_id'   => $user->id,
+            'status'    => HelpdeskTicket::STATUS_CLOSED,
             'closed_at' => now(),
         ]);
         $updater = User::factory()->create();
@@ -232,11 +233,11 @@ class HelpdeskServiceTest extends TestCase
     /** @test */
     public function it_can_close_a_ticket_and_send_notification()
     {
-        $user = User::factory()->create();
+        $user   = User::factory()->create();
         $ticket = HelpdeskTicket::factory()->create([
-            'user_id' => $user->id,
-            'status' => HelpdeskTicket::STATUS_IN_PROGRESS,
-            'closed_at' => null,
+            'user_id'          => $user->id,
+            'status'           => HelpdeskTicket::STATUS_IN_PROGRESS,
+            'closed_at'        => null,
             'resolution_notes' => null,
         ]);
         $closer = User::factory()->create();

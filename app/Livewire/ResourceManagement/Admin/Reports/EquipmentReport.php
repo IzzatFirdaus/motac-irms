@@ -27,18 +27,26 @@ class EquipmentReport extends Component
 
     // Filter properties
     public ?string $filterAssetType = '';
+
     public ?string $filterStatus = '';
+
     public ?string $filterCondition = '';
+
     public ?int $filterDepartmentId = null;
+
     public ?int $filterLocationId = null;
+
     public ?int $filterCategoryId = null;
+
     public string $searchTerm = '';
 
     // Sorting properties
     public string $sortBy = 'tag_id';
+
     public string $sortDirection = 'asc';
 
     protected string $paginationTheme = 'bootstrap';
+
     public int $perPage = 15;
 
     /**
@@ -48,7 +56,7 @@ class EquipmentReport extends Component
     {
         Log::info("Livewire\EquipmentReport: Generating Equipment Report page.", [
             'admin_user_id' => Auth::id(),
-            'ip_address' => request()->ip(),
+            'ip_address'    => request()->ip(),
         ]);
     }
 
@@ -141,7 +149,7 @@ class EquipmentReport extends Component
     {
         if (in_array($property, [
             'filterAssetType', 'filterStatus', 'filterCondition',
-            'filterDepartmentId', 'filterLocationId', 'filterCategoryId', 'searchTerm'
+            'filterDepartmentId', 'filterLocationId', 'filterCategoryId', 'searchTerm',
         ])) {
             $this->resetPage();
         }
@@ -155,7 +163,7 @@ class EquipmentReport extends Component
         if ($this->sortBy === $column) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
         } else {
-            $this->sortBy = $column;
+            $this->sortBy        = $column;
             $this->sortDirection = 'asc';
         }
 
@@ -170,9 +178,9 @@ class EquipmentReport extends Component
         $this->reset([
             'filterAssetType', 'filterStatus', 'filterCondition',
             'filterDepartmentId', 'filterLocationId', 'filterCategoryId', 'searchTerm',
-            'sortBy', 'sortDirection'
+            'sortBy', 'sortDirection',
         ]);
-        $this->sortBy = 'tag_id';
+        $this->sortBy        = 'tag_id';
         $this->sortDirection = 'asc';
         $this->resetPage();
     }
@@ -183,13 +191,13 @@ class EquipmentReport extends Component
     public function render()
     {
         return view('livewire.resource-management.admin.reports.equipment-report', [
-            'reportData' => $this->reportDataProperty,
-            'assetTypeOptions' => $this->assetTypeOptionsProperty,
-            'statusOptions' => $this->statusOptionsProperty,
+            'reportData'             => $this->reportDataProperty,
+            'assetTypeOptions'       => $this->assetTypeOptionsProperty,
+            'statusOptions'          => $this->statusOptionsProperty,
             'conditionStatusOptions' => $this->conditionStatusOptionsProperty,
-            'departmentOptions' => $this->departmentOptionsProperty,
-            'locationOptions' => $this->locationOptionsProperty,
-            'categoryOptions' => $this->categoryOptionsProperty,
+            'departmentOptions'      => $this->departmentOptionsProperty,
+            'locationOptions'        => $this->locationOptionsProperty,
+            'categoryOptions'        => $this->categoryOptionsProperty,
         ]);
     }
 }

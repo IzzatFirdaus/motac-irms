@@ -18,27 +18,27 @@ use Illuminate\Support\Str;
  *
  * Represents an equipment issue or return record for a loan application.
  *
- * @property int $id
- * @property int $loan_application_id
- * @property string $type
- * @property \Illuminate\Support\Carbon|null $transaction_date
- * @property array|string|null $accessories_checklist_on_issue
- * @property int|null $issuing_officer_id
- * @property int|null $receiving_officer_id
- * @property array|null $accessories_checklist_on_issue
- * @property string|null $issue_notes
- * @property \Illuminate\Support\Carbon|null $issue_timestamp
- * @property int|null $returning_officer_id
- * @property int|null $return_accepting_officer_id
- * @property array|null $accessories_checklist_on_return
- * @property string|null $return_notes
- * @property \Illuminate\Support\Carbon|null $return_timestamp
- * @property int|null $related_transaction_id
- * @property string $status
- * @property \Illuminate\Support\Carbon|null $due_date
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property int                              $id
+ * @property int                              $loan_application_id
+ * @property string                           $type
+ * @property \Illuminate\Support\Carbon|null  $transaction_date
+ * @property array|string|null                $accessories_checklist_on_issue
+ * @property int|null                         $issuing_officer_id
+ * @property int|null                         $receiving_officer_id
+ * @property array|null                       $accessories_checklist_on_issue
+ * @property string|null                      $issue_notes
+ * @property \Illuminate\Support\Carbon|null  $issue_timestamp
+ * @property int|null                         $returning_officer_id
+ * @property int|null                         $return_accepting_officer_id
+ * @property array|null                       $accessories_checklist_on_return
+ * @property string|null                      $return_notes
+ * @property \Illuminate\Support\Carbon|null  $return_timestamp
+ * @property int|null                         $related_transaction_id
+ * @property string                           $status
+ * @property \Illuminate\Support\Carbon|null  $due_date
+ * @property \Illuminate\Support\Carbon|null  $created_at
+ * @property \Illuminate\Support\Carbon|null  $updated_at
+ * @property \Illuminate\Support\Carbon|null  $deleted_at
  * @property \App\Models\LoanApplication|null $loanApplication
  */
 class LoanTransaction extends Model
@@ -47,21 +47,34 @@ class LoanTransaction extends Model
 
     // Transaction types
     public const TYPE_ISSUE = 'issue';
+
     public const TYPE_RETURN = 'return';
 
     // Status constants (must match migration enum)
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_ISSUED = 'issued';
+
     public const STATUS_RETURNED_PENDING_INSPECTION = 'returned_pending_inspection';
+
     public const STATUS_RETURNED_GOOD = 'returned_good';
+
     public const STATUS_RETURNED_DAMAGED = 'returned_damaged';
+
     public const STATUS_ITEMS_REPORTED_LOST = 'items_reported_lost';
+
     public const STATUS_COMPLETED = 'completed';
+
     public const STATUS_CANCELLED = 'cancelled';
+
     public const STATUS_OVERDUE = 'overdue';
+
     public const STATUS_RETURNED = 'returned';
+
     public const STATUS_PARTIALLY_RETURNED = 'partially_returned';
+
     public const STATUS_RETURNED_WITH_LOSS = 'returned_with_loss';
+
     public const STATUS_RETURNED_WITH_DAMAGE_AND_LOSS = 'returned_with_damage_and_loss';
 
     protected $table = 'loan_transactions';
@@ -82,23 +95,23 @@ class LoanTransaction extends Model
         'return_timestamp',
         'related_transaction_id',
         'due_date',
-        'status'
+        'status',
     ];
 
     protected $casts = [
-        'transaction_date' => 'datetime',
-        'issue_timestamp' => 'datetime',
-        'return_timestamp' => 'datetime',
-        'due_date' => 'date',
-        'accessories_checklist_on_issue' => 'array',
+        'transaction_date'                => 'datetime',
+        'issue_timestamp'                 => 'datetime',
+        'return_timestamp'                => 'datetime',
+        'due_date'                        => 'date',
+        'accessories_checklist_on_issue'  => 'array',
         'accessories_checklist_on_return' => 'array',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-        'deleted_at' => 'datetime'
+        'created_at'                      => 'datetime',
+        'updated_at'                      => 'datetime',
+        'deleted_at'                      => 'datetime',
     ];
 
     protected $attributes = [
-        'status' => self::STATUS_PENDING
+        'status' => self::STATUS_PENDING,
     ];
 
     protected static function newFactory(): LoanTransactionFactory
@@ -196,9 +209,9 @@ class LoanTransaction extends Model
     public function getTypeColorClassAttribute(): string
     {
         return match ($this->type) {
-            self::TYPE_ISSUE => 'text-bg-info',
+            self::TYPE_ISSUE  => 'text-bg-info',
             self::TYPE_RETURN => 'text-bg-primary',
-            default => 'text-bg-secondary',
+            default           => 'text-bg-secondary',
         };
     }
 
@@ -229,10 +242,12 @@ class LoanTransaction extends Model
         if ($this->loanTransactionItems->isNotEmpty()) {
             $firstItem = $this->loanTransactionItems->first();
             if ($firstItem?->equipment) {
-                return trim(($firstItem->equipment->brand ?? '') . ' ' . ($firstItem->equipment->model ?? __('Item Peralatan')));
+                return trim(($firstItem->equipment->brand ?? '').' '.($firstItem->equipment->model ?? __('Item Peralatan')));
             }
+
             return __('Item Tidak Diketahui');
         }
+
         return __('Tiada Item');
     }
 
@@ -244,6 +259,7 @@ class LoanTransaction extends Model
         if ($this->relationLoaded('loanTransactionItems')) {
             return (int) $this->loanTransactionItems->sum('quantity_transacted');
         }
+
         return (int) $this->loanTransactionItems()->sum('quantity_transacted');
     }
 
@@ -257,7 +273,7 @@ class LoanTransaction extends Model
     {
         return [
             self::TYPE_ISSUE,
-            self::TYPE_RETURN
+            self::TYPE_RETURN,
         ];
     }
 
@@ -267,7 +283,7 @@ class LoanTransaction extends Model
     public static function getTypeOptions(): array
     {
         return [
-            self::TYPE_ISSUE => __('reports.filters.type_issue'),
+            self::TYPE_ISSUE  => __('reports.filters.type_issue'),
             self::TYPE_RETURN => __('reports.filters.type_return'),
         ];
     }
@@ -279,18 +295,18 @@ class LoanTransaction extends Model
     public static function getStatusOptions(): array
     {
         return [
-            self::STATUS_PENDING => __('common.statuses.pending'),
-            self::STATUS_ISSUED => __('common.statuses.issued'),
-            self::STATUS_RETURNED_PENDING_INSPECTION => __('common.statuses.returned_pending_inspection'),
-            self::STATUS_RETURNED_GOOD => __('common.statuses.returned_good'),
-            self::STATUS_RETURNED_DAMAGED => __('common.statuses.returned_damaged'),
-            self::STATUS_ITEMS_REPORTED_LOST => __('common.statuses.items_reported_lost'),
-            self::STATUS_COMPLETED => __('common.statuses.completed'),
-            self::STATUS_CANCELLED => __('common.statuses.cancelled'),
-            self::STATUS_OVERDUE => __('common.statuses.overdue'),
-            self::STATUS_RETURNED => __('common.statuses.returned'),
-            self::STATUS_PARTIALLY_RETURNED => __('common.statuses.partially_returned'),
-            self::STATUS_RETURNED_WITH_LOSS => __('common.statuses.returned_with_loss'),
+            self::STATUS_PENDING                       => __('common.statuses.pending'),
+            self::STATUS_ISSUED                        => __('common.statuses.issued'),
+            self::STATUS_RETURNED_PENDING_INSPECTION   => __('common.statuses.returned_pending_inspection'),
+            self::STATUS_RETURNED_GOOD                 => __('common.statuses.returned_good'),
+            self::STATUS_RETURNED_DAMAGED              => __('common.statuses.returned_damaged'),
+            self::STATUS_ITEMS_REPORTED_LOST           => __('common.statuses.items_reported_lost'),
+            self::STATUS_COMPLETED                     => __('common.statuses.completed'),
+            self::STATUS_CANCELLED                     => __('common.statuses.cancelled'),
+            self::STATUS_OVERDUE                       => __('common.statuses.overdue'),
+            self::STATUS_RETURNED                      => __('common.statuses.returned'),
+            self::STATUS_PARTIALLY_RETURNED            => __('common.statuses.partially_returned'),
+            self::STATUS_RETURNED_WITH_LOSS            => __('common.statuses.returned_with_loss'),
             self::STATUS_RETURNED_WITH_DAMAGE_AND_LOSS => __('common.statuses.returned_with_damage_and_loss'),
         ];
     }
@@ -370,7 +386,7 @@ class LoanTransaction extends Model
     public function isFullyClosedOrReturned(): bool
     {
         // Checks if this transaction (issue type) has been fully returned/closed
-        if (!$this->isIssue()) {
+        if (! $this->isIssue()) {
             return true;
         }
 
@@ -384,6 +400,7 @@ class LoanTransaction extends Model
             ->pluck('id');
 
         $totalQuantityReturned = LoanTransactionItem::whereIn('loan_transaction_id', $returnTransactionIds)->sum('quantity_transacted');
+
         return $totalQuantityReturned >= $totalQuantityIssued;
     }
 }

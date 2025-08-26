@@ -5,13 +5,13 @@ namespace App\Livewire\Helpdesk;
 use App\Models\HelpdeskCategory;
 use App\Models\HelpdeskPriority;
 use App\Services\HelpdeskService;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Auth;
 
 /**
- * CreateTicketForm
+ * CreateTicketForm.
  *
  * Allows user to submit a new helpdesk ticket with attachments.
  */
@@ -20,15 +20,19 @@ class CreateTicketForm extends Component
     use WithFileUploads;
 
     public $title;
+
     public $description;
+
     public $category_id;
+
     public $priority_id;
+
     public $attachments = [];
 
     protected HelpdeskService $helpdeskService;
 
     /**
-     * Inject HelpdeskService
+     * Inject HelpdeskService.
      */
     public function boot(HelpdeskService $helpdeskService)
     {
@@ -41,10 +45,10 @@ class CreateTicketForm extends Component
     protected function rules()
     {
         return [
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'category_id' => ['required', 'integer', Rule::exists('helpdesk_categories', 'id')],
-            'priority_id' => ['required', 'integer', Rule::exists('helpdesk_priorities', 'id')],
+            'title'         => 'required|string|max:255',
+            'description'   => 'required|string',
+            'category_id'   => ['required', 'integer', Rule::exists('helpdesk_categories', 'id')],
+            'priority_id'   => ['required', 'integer', Rule::exists('helpdesk_priorities', 'id')],
             'attachments.*' => 'nullable|file|max:2048|mimes:jpg,png,pdf,docx,txt,xlsx',
         ];
     }
@@ -59,7 +63,7 @@ class CreateTicketForm extends Component
         try {
             $ticket = $this->helpdeskService->createTicket(
                 [
-                    'title' => $this->title,
+                    'title'       => $this->title,
                     'description' => $this->description,
                     'category_id' => $this->category_id,
                     'priority_id' => $this->priority_id,
@@ -69,9 +73,10 @@ class CreateTicketForm extends Component
             );
 
             session()->flash('message', 'Ticket created successfully!');
+
             return redirect()->route('helpdesk.show', $ticket->id);
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to create ticket: ' . $e->getMessage());
+            session()->flash('error', 'Failed to create ticket: '.$e->getMessage());
         }
     }
 

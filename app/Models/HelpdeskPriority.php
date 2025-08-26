@@ -13,14 +13,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * Represents priority levels for helpdesk tickets.
  *
- * @property int $id
- * @property string $name
- * @property int $level
+ * @property int         $id
+ * @property string      $name
+ * @property int         $level
  * @property string|null $color_code
  */
 class HelpdeskPriority extends Model
 {
-    use HasFactory, CreatedUpdatedDeletedBy, SoftDeletes;
+    use CreatedUpdatedDeletedBy, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'name',

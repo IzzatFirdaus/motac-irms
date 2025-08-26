@@ -28,10 +28,10 @@ class UpdateGradeRequest extends FormRequest
         $gradeId = $this->route('grade')->id;
 
         return [
-            'name' => ['required', 'string', 'max:50', Rule::unique('grades', 'name')->ignore($gradeId)->whereNull('deleted_at')],
-            'level' => ['required', 'integer', 'min:1', Rule::unique('grades', 'level')->ignore($gradeId)->whereNull('deleted_at')],
+            'name'                  => ['required', 'string', 'max:50', Rule::unique('grades', 'name')->ignore($gradeId)->whereNull('deleted_at')],
+            'level'                 => ['required', 'integer', 'min:1', Rule::unique('grades', 'level')->ignore($gradeId)->whereNull('deleted_at')],
             'min_approval_grade_id' => ['nullable', 'integer', Rule::exists('grades', 'id'), Rule::notIn([$gradeId])], // Cannot be its own min approval grade
-            'is_approver_grade' => ['required', 'boolean'],
+            'is_approver_grade'     => ['required', 'boolean'],
         ];
     }
 
@@ -43,13 +43,13 @@ class UpdateGradeRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Nama Gred wajib diisi.',
-            'name.unique' => 'Nama Gred ini telah wujud.',
-            'level.required' => 'Tahap Gred wajib diisi.',
-            'level.unique' => 'Tahap Gred ini telah wujud.',
+            'name.required'                => 'Nama Gred wajib diisi.',
+            'name.unique'                  => 'Nama Gred ini telah wujud.',
+            'level.required'               => 'Tahap Gred wajib diisi.',
+            'level.unique'                 => 'Tahap Gred ini telah wujud.',
             'min_approval_grade_id.exists' => 'Gred Kelulusan Minima yang dipilih tidak sah.',
             'min_approval_grade_id.not_in' => 'Gred Kelulusan Minima tidak boleh sama dengan gred semasa.',
-            'is_approver_grade.required' => 'Status Gred Pelulus wajib dipilih.',
+            'is_approver_grade.required'   => 'Status Gred Pelulus wajib dipilih.',
         ];
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 // English translations for main menu and navigation items
 // This file mirrors the structure and keys of menu_ms.php for bilingual synchronization.
 
@@ -8,16 +9,16 @@ return [
 
     // === Sections: Public, Resource Management, Reports, System Settings ===
     'section' => [
-        'public'               => 'Public',
-        'resource_management'  => 'Resource Management',
-        'reports_analytics'    => 'Reports & Analytics',
-        'system_settings'      => 'System Settings',
+        'public'              => 'Public',
+        'resource_management' => 'Resource Management',
+        'reports_analytics'   => 'Reports & Analytics',
+        'system_settings'     => 'System Settings',
     ],
 
     // === Guest-only / Public Menu Items ===
-    'home'        => 'Home',
-    'contact_us'  => 'Contact Us',
-    'login'       => 'Login',
+    'home'       => 'Home',
+    'contact_us' => 'Contact Us',
+    'login'      => 'Login',
 
     // === My Applications (Submenu) ===
     'my_applications' => [
@@ -28,10 +29,10 @@ return [
 
     // === Apply for New Resources ===
     'apply_for_resources' => [
-        'title'             => 'Apply for New Resources',
-        'loan'              => 'New ICT Equipment Loan',
-        'loan_application'  => 'New ICT Equipment Loan', // for backward compatibility
-        'helpdesk_ticket'   => 'New Helpdesk Ticket',
+        'title'            => 'Apply for New Resources',
+        'loan'             => 'New ICT Equipment Loan',
+        'loan_application' => 'New ICT Equipment Loan', // for backward compatibility
+        'helpdesk_ticket'  => 'New Helpdesk Ticket',
     ],
 
     // === Approvals ===
@@ -75,12 +76,12 @@ return [
 
     // === General Settings (Submenu) ===
     'general_settings' => [
-        'title'                      => 'General Settings',
-        'manage_grades'              => 'Manage Job Grades',
-        'manage_departments'         => 'Manage Departments/Divisions',
-        'manage_asset_types'         => 'Manage Asset Types',
-        'manage_equipment_conditions'=> 'Manage Equipment Conditions',
-        'manage_accessories'         => 'Manage Accessories',
+        'title'                       => 'General Settings',
+        'manage_grades'               => 'Manage Job Grades',
+        'manage_departments'          => 'Manage Departments/Divisions',
+        'manage_asset_types'          => 'Manage Asset Types',
+        'manage_equipment_conditions' => 'Manage Equipment Conditions',
+        'manage_accessories'          => 'Manage Accessories',
     ],
 
     // === System Logs ===

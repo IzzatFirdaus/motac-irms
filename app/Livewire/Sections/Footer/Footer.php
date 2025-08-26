@@ -6,7 +6,7 @@ use App\Helpers\Helpers;
 use Livewire\Component;
 
 /**
- * Footer Livewire Component
+ * Footer Livewire Component.
  *
  * Renders the application footer and determines the Bootstrap container class
  * based on the application's layout settings.

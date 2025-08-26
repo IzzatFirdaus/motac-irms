@@ -19,6 +19,7 @@ class IssuedLoans extends Component
     use WithPagination;
 
     public string $searchTerm = '';
+
     public int $perPage = 10;
 
     protected string $paginationTheme = 'bootstrap';

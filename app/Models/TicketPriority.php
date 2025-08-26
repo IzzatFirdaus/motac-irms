@@ -12,14 +12,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * Represents priority levels for helpdesk tickets (e.g., Low, Medium, High, Critical).
  *
- * @property int $id
- * @property string $name
- * @property string|null $description
- * @property int $level
- * @property bool $is_active
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
+ * @property int                             $id
+ * @property string                          $name
+ * @property string|null                     $description
+ * @property int                             $level
+ * @property bool                            $is_active
+ * @property int|null                        $created_by
+ * @property int|null                        $updated_by
+ * @property int|null                        $deleted_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
@@ -39,8 +39,8 @@ class TicketPriority extends Model
     ];
 
     protected $casts = [
-        'level' => 'integer',
-        'is_active' => 'boolean',
+        'level'      => 'integer',
+        'is_active'  => 'boolean',
         'created_by' => 'integer',
         'updated_by' => 'integer',
         'deleted_by' => 'integer',

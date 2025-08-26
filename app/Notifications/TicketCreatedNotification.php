@@ -13,6 +13,7 @@ class TicketCreatedNotification extends Notification implements ShouldQueue
     use Queueable;
 
     protected HelpdeskTicket $ticket;
+
     protected string $recipientType; // 'applicant' or 'admin'
 
     /**
@@ -20,7 +21,7 @@ class TicketCreatedNotification extends Notification implements ShouldQueue
      */
     public function __construct(HelpdeskTicket $ticket, string $recipientType)
     {
-        $this->ticket = $ticket;
+        $this->ticket        = $ticket;
         $this->recipientType = $recipientType;
     }
 
@@ -45,19 +46,19 @@ class TicketCreatedNotification extends Notification implements ShouldQueue
 
         $greeting = ($this->recipientType === 'applicant')
             ? "Dear {$notifiable->name},"
-            : "Hello,";
+            : 'Hello,';
 
         $introLine = ($this->recipientType === 'applicant')
             ? "Your helpdesk ticket **#{$this->ticket->id}** with the subject `{$this->ticket->title}` has been successfully created."
             : "A new helpdesk ticket **#{$this->ticket->id}** has been submitted by `{$this->ticket->applicant->name}` with the subject `{$this->ticket->title}`.";
 
         return (new MailMessage)
-                    ->subject($subject)
-                    ->greeting($greeting)
-                    ->line($introLine)
-                    ->line("Description: {$this->ticket->description}")
-                    ->action('View Ticket', url('/helpdesk/' . $this->ticket->id))
-                    ->line('Thank you for using our application!');
+            ->subject($subject)
+            ->greeting($greeting)
+            ->line($introLine)
+            ->line("Description: {$this->ticket->description}")
+            ->action('View Ticket', url('/helpdesk/'.$this->ticket->id))
+            ->line('Thank you for using our application!');
     }
 
     /**
@@ -69,12 +70,12 @@ class TicketCreatedNotification extends Notification implements ShouldQueue
     {
         return [
             'ticket_id' => $this->ticket->id,
-            'title' => $this->ticket->title,
-            'status' => $this->ticket->status,
-            'message' => ($this->recipientType === 'applicant')
+            'title'     => $this->ticket->title,
+            'status'    => $this->ticket->status,
+            'message'   => ($this->recipientType === 'applicant')
                 ? "Your helpdesk ticket #{$this->ticket->id} has been created."
                 : "New helpdesk ticket #{$this->ticket->id} submitted.",
-            'url' => url('/helpdesk/' . $this->ticket->id),
+            'url' => url('/helpdesk/'.$this->ticket->id),
         ];
     }
 }

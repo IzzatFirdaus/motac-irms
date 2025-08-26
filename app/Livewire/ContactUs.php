@@ -2,13 +2,13 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
-use Illuminate\View\View;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
+use Illuminate\View\View;
+use Livewire\Component;
 
 /**
- * Livewire Component: Contact Us
+ * Livewire Component: Contact Us.
  *
  * Features:
  * - Contact information display with localization support
@@ -21,21 +21,29 @@ use Illuminate\Validation\ValidationException;
  * This component should be embedded in a page that extends the main layout.
  *
  * @author IzzatFirdaus
+ *
  * @last_update 2025-08-10
  */
 class ContactUs extends Component
 {
     // Form fields (typed properties)
     public string $name = '';
+
     public string $email = '';
+
     public string $phone = '';
+
     public string $subject = '';
+
     public string $message = '';
+
     public string $inquiry_type = '';
+
     public bool $consent = false;
 
     // UI state flags
     public bool $showSuccessMessage = false;
+
     public bool $showErrorMessage = false;
 
     /**
@@ -102,9 +110,9 @@ class ContactUs extends Component
         } catch (\Throwable $e) {
             // Log the error for debugging
             \Log::error('Contact form submission error', [
-                'message' => $e->getMessage(),
+                'message'   => $e->getMessage(),
                 'exception' => $e,
-                'trace' => $e->getTraceAsString(),
+                'trace'     => $e->getTraceAsString(),
             ]);
 
             // Show user-friendly error message
@@ -117,13 +125,13 @@ class ContactUs extends Component
      */
     public function resetForm(): void
     {
-        $this->name = '';
-        $this->email = '';
-        $this->phone = '';
-        $this->subject = '';
-        $this->message = '';
+        $this->name         = '';
+        $this->email        = '';
+        $this->phone        = '';
+        $this->subject      = '';
+        $this->message      = '';
         $this->inquiry_type = '';
-        $this->consent = false;
+        $this->consent      = false;
 
         $this->resetValidation();
     }

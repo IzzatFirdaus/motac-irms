@@ -24,14 +24,18 @@ class UserActivityReport extends Component
 
     // Filter properties
     public string $searchTerm = ''; // Search by user name/email
+
     public ?int $filterDepartmentId = null;
+
     public ?string $filterRoleName = null;
 
     // Sorting properties
     public string $sortBy = 'name';
+
     public string $sortDirection = 'asc';
 
     protected string $paginationTheme = 'bootstrap';
+
     public int $perPage = 15;
 
     /**
@@ -48,10 +52,10 @@ class UserActivityReport extends Component
     public function getReportDataProperty()
     {
         $query = User::withCount([
-                // 'emailApplications', // Uncomment if relationship exists
-                'loanApplicationsAsApplicant',
-                'approvalsMade',
-            ])
+            // 'emailApplications', // Uncomment if relationship exists
+            'loanApplicationsAsApplicant',
+            'approvalsMade',
+        ])
             ->with(['department', 'roles'])
             ->when($this->searchTerm, function ($q) {
                 $q->where(function ($subQuery) {
@@ -113,7 +117,7 @@ class UserActivityReport extends Component
         if ($this->sortBy === $column) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
         } else {
-            $this->sortBy = $column;
+            $this->sortBy        = $column;
             $this->sortDirection = 'asc';
         }
         $this->resetPage();
@@ -125,9 +129,9 @@ class UserActivityReport extends Component
     public function render()
     {
         return view('livewire.resource-management.admin.reports.user-activity-report', [
-            'reportData' => $this->reportData,
+            'reportData'        => $this->reportData,
             'departmentOptions' => $this->departmentOptions,
-            'roleOptions' => $this->roleOptions,
+            'roleOptions'       => $this->roleOptions,
         ]);
     }
 }

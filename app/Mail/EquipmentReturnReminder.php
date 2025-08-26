@@ -18,14 +18,16 @@ class EquipmentReturnReminder extends Mailable
     use Queueable, SerializesModels;
 
     public LoanApplication $loanApplication;
+
     public int $daysUntilReturn;
+
     public User $notifiable;
 
     public function __construct(LoanApplication $loanApplication, int $daysUntilReturn, User $notifiable)
     {
         $this->loanApplication = $loanApplication;
         $this->daysUntilReturn = $daysUntilReturn;
-        $this->notifiable = $notifiable;
+        $this->notifiable      = $notifiable;
     }
 
     public function envelope(): Envelope
@@ -52,8 +54,8 @@ class EquipmentReturnReminder extends Mailable
             with: [
                 'loanApplication' => $this->loanApplication,
                 'daysUntilReturn' => $this->daysUntilReturn,
-                'notifiable' => $this->notifiable,
-                'actionUrl' => route('loan-applications.show', $this->loanApplication->id),
+                'notifiable'      => $this->notifiable,
+                'actionUrl'       => route('loan-applications.show', $this->loanApplication->id),
             ]
         );
     }

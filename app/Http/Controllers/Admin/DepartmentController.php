@@ -49,7 +49,7 @@ class DepartmentController extends Controller
         Log::info('Admin\\DepartmentController@create: Displaying create department form.', ['admin_user_id' => Auth::id()]);
 
         $branchTypes = Department::getBranchTypeOptions();
-        $users = User::orderBy('name')->get(['id', 'name']); // Fetch all users for the Head of Department dropdown
+        $users       = User::orderBy('name')->get(['id', 'name']); // Fetch all users for the Head of Department dropdown
 
         return view('admin.departments.create', compact('branchTypes', 'users'));
     }
@@ -62,11 +62,11 @@ class DepartmentController extends Controller
         Log::info('Admin\\DepartmentController@store: Attempting to create a new department.', ['admin_user_id' => Auth::id()]);
 
         $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'branch_type' => 'required|string|in:' . implode(',', array_keys(Department::$BRANCH_TYPE_LABELS)),
-            'code' => 'nullable|string|max:50|unique:departments,code',
-            'description' => 'nullable|string|max:500',
-            'is_active' => 'required|boolean',
+            'name'                  => 'required|string|max:255',
+            'branch_type'           => 'required|string|in:'.implode(',', array_keys(Department::$BRANCH_TYPE_LABELS)),
+            'code'                  => 'nullable|string|max:50|unique:departments,code',
+            'description'           => 'nullable|string|max:500',
+            'is_active'             => 'required|boolean',
             'head_of_department_id' => 'nullable|exists:users,id',
         ]);
 
@@ -81,7 +81,7 @@ class DepartmentController extends Controller
         } catch (\Exception $exception) {
             Log::error('Admin\\DepartmentController@store: Failed to create department.', [
                 'exception_message' => $exception->getMessage(),
-                'admin_user_id' => Auth::id(),
+                'admin_user_id'     => Auth::id(),
             ]);
 
             return back()->with('error', __('Gagal untuk menambah jabatan.'))->withInput();
@@ -109,7 +109,7 @@ class DepartmentController extends Controller
         Log::info(sprintf('Admin\\DepartmentController@edit: Displaying edit form for department ID: %d.', $department->id), ['admin_user_id' => Auth::id()]);
 
         $branchTypes = Department::getBranchTypeOptions();
-        $users = User::orderBy('name')->get(['id', 'name']); // Fetch all users for the Head of Department dropdown
+        $users       = User::orderBy('name')->get(['id', 'name']); // Fetch all users for the Head of Department dropdown
 
         return view('admin.departments.edit', compact('department', 'branchTypes', 'users'));
     }
@@ -122,11 +122,11 @@ class DepartmentController extends Controller
         Log::info(sprintf('Admin\\DepartmentController@update: Attempting to update department ID: %d.', $department->id), ['admin_user_id' => Auth::id()]);
 
         $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'branch_type' => 'required|string|in:' . implode(',', array_keys(Department::$BRANCH_TYPE_LABELS)),
-            'code' => 'nullable|string|max:50|unique:departments,code,' . $department->id,
-            'description' => 'nullable|string|max:500',
-            'is_active' => 'required|boolean',
+            'name'                  => 'required|string|max:255',
+            'branch_type'           => 'required|string|in:'.implode(',', array_keys(Department::$BRANCH_TYPE_LABELS)),
+            'code'                  => 'nullable|string|max:50|unique:departments,code,'.$department->id,
+            'description'           => 'nullable|string|max:500',
+            'is_active'             => 'required|boolean',
             'head_of_department_id' => 'nullable|exists:users,id',
         ]);
 
@@ -141,7 +141,7 @@ class DepartmentController extends Controller
         } catch (\Exception $exception) {
             Log::error(sprintf('Admin\\DepartmentController@update: Failed to update department ID %d.', $department->id), [
                 'exception_message' => $exception->getMessage(),
-                'admin_user_id' => Auth::id(),
+                'admin_user_id'     => Auth::id(),
             ]);
 
             return back()->with('error', __('Gagal untuk mengemaskini jabatan.'))->withInput();
@@ -164,7 +164,7 @@ class DepartmentController extends Controller
         } catch (\Exception $exception) {
             Log::error(sprintf('Admin\\DepartmentController@destroy: Failed to delete department ID %d.', $department->id), [
                 'exception_message' => $exception->getMessage(),
-                'admin_user_id' => Auth::id(),
+                'admin_user_id'     => Auth::id(),
             ]);
 
             return back()->with('error', __('Gagal untuk memadam jabatan.'));

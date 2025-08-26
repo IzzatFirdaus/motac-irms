@@ -11,13 +11,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * TicketPriority model for Helpdesk system.
  * Represents priority levels like Low, Medium, High, etc.
  *
- * @property int $id
- * @property string $name
- * @property int $level
- * @property string|null $color_code
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
+ * @property int                             $id
+ * @property string                          $name
+ * @property int                             $level
+ * @property string|null                     $color_code
+ * @property int|null                        $created_by
+ * @property int|null                        $updated_by
+ * @property int|null                        $deleted_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at

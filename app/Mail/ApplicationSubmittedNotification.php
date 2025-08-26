@@ -20,24 +20,26 @@ class ApplicationSubmittedNotification extends Mailable implements ShouldQueue
     use Queueable, SerializesModels;
 
     public LoanApplication $application;
+
     public User $approver;
+
     public ?string $reviewUrl;
 
     public function __construct(LoanApplication $application, User $approver, ?string $reviewUrl = null)
     {
         $this->application = $application->loadMissing('user', 'loanApplicationItems');
-        $this->approver = $approver;
-        $this->reviewUrl = $reviewUrl;
+        $this->approver    = $approver;
+        $this->reviewUrl   = $reviewUrl;
 
         Log::debug('ApplicationSubmittedNotification: Mailable instance created.', [
             'application_id' => $this->application->id ?? 'N/A',
-            'approver_id' => $this->approver->id,
+            'approver_id'    => $this->approver->id,
         ]);
     }
 
     public function envelope(): Envelope
     {
-        $subject = __('Tindakan Diperlukan: Permohonan Pinjaman Peralatan ICT Baru Dihantar') . ' (#' . $this->application->id . ')';
+        $subject = __('Tindakan Diperlukan: Permohonan Pinjaman Peralatan ICT Baru Dihantar').' (#'.$this->application->id.')';
 
         return new Envelope(
             subject: $subject,
@@ -50,9 +52,9 @@ class ApplicationSubmittedNotification extends Mailable implements ShouldQueue
         return new Content(
             view: 'emails.application-submitted-notification',
             with: [
-                'application' => $this->application,
+                'application'  => $this->application,
                 'approverName' => $this->approver->name,
-                'reviewUrl' => $this->reviewUrl,
+                'reviewUrl'    => $this->reviewUrl,
             ]
         );
     }

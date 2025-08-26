@@ -2,7 +2,6 @@
 
 namespace App\Livewire\HumanResource\Structure;
 
-use App\Models\Center;
 use App\Models\Department;
 use App\Models\Employee;
 use App\Models\Position;
@@ -15,7 +14,7 @@ use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
 /**
- * EmployeeInfo Livewire Component
+ * EmployeeInfo Livewire Component.
  *
  * Displays information about a specific employee, including their timeline and assets.
  * Allows toggling status and adding/updating timeline entries.
@@ -23,19 +22,27 @@ use Livewire\Component;
 class EmployeeInfo extends Component
 {
     public $centers;
+
     public $departments;
+
     public $positions;
 
     // public $employee; // Type-hinted
     // public $timeline = null; // current timeline
     public $employeeTimelines;
+
     public array $employeeTimelineInfo = [];
+
     public $employeeAssets;
 
     public bool $isEdit = false;
+
     public ?int $confirmedId = null;
+
     public ?int $selectedCenter = null;
+
     public ?int $selectedDepartment = null;
+
     public ?int $selectedPosition = null;
 
     /**
@@ -45,7 +52,7 @@ class EmployeeInfo extends Component
     {
         // Load select options for departments and positions.
         $this->departments = Department::orderBy('name')->get();
-        $this->positions = Position::orderBy('name')->get();
+        $this->positions   = Position::orderBy('name')->get();
         // Add similar logic for centers if required.
     }
 
@@ -90,18 +97,18 @@ class EmployeeInfo extends Component
      */
     public function submitTimeline(): void
     {
-        $this->employeeTimelineInfo['centerId'] = $this->selectedCenter;
+        $this->employeeTimelineInfo['centerId']     = $this->selectedCenter;
         $this->employeeTimelineInfo['departmentId'] = $this->selectedDepartment;
-        $this->employeeTimelineInfo['positionId'] = $this->selectedPosition;
+        $this->employeeTimelineInfo['positionId']   = $this->selectedPosition;
 
         $this->validate([
-            'selectedCenter' => 'required|exists:centers,id',
-            'selectedDepartment' => 'required|exists:departments,id',
-            'selectedPosition' => 'required|exists:positions,id',
-            'employeeTimelineInfo.startDate' => 'required|date',
-            'employeeTimelineInfo.endDate' => 'nullable|date|after_or_equal:employeeTimelineInfo.startDate',
+            'selectedCenter'                  => 'required|exists:centers,id',
+            'selectedDepartment'              => 'required|exists:departments,id',
+            'selectedPosition'                => 'required|exists:positions,id',
+            'employeeTimelineInfo.startDate'  => 'required|date',
+            'employeeTimelineInfo.endDate'    => 'nullable|date|after_or_equal:employeeTimelineInfo.startDate',
             'employeeTimelineInfo.is_sequent' => 'required|boolean',
-            'employeeTimelineInfo.notes' => 'nullable|string|max:1000',
+            'employeeTimelineInfo.notes'      => 'nullable|string|max:1000',
         ]);
 
         $this->isEdit ? $this->updateTimeline() : $this->storeTimeline();
@@ -116,10 +123,10 @@ class EmployeeInfo extends Component
         $this->resetValidation();
         $this->reset(['timeline', 'selectedCenter', 'selectedDepartment', 'selectedPosition', 'employeeTimelineInfo']);
         $this->employeeTimelineInfo = [
-            'startDate' => Carbon::now()->toDateString(),
-            'endDate' => null,
+            'startDate'  => Carbon::now()->toDateString(),
+            'endDate'    => null,
             'is_sequent' => false,
-            'notes' => null,
+            'notes'      => null,
         ];
         $this->dispatch('clearSelect2Values');
         $this->dispatch('openModal', elementId: '#timelineModal');
@@ -165,17 +172,18 @@ class EmployeeInfo extends Component
     {
         if (! $this->timeline) {
             session()->flash('toastr', ['type' => 'error', 'message' => __('Rekod sejarah tidak ditemui.')]);
+
             return;
         }
 
         $this->timeline->update([
-            'center_id' => $this->selectedCenter,
+            'center_id'     => $this->selectedCenter,
             'department_id' => $this->selectedDepartment,
-            'position_id' => $this->selectedPosition,
-            'start_date' => $this->employeeTimelineInfo['startDate'],
-            'end_date' => $this->employeeTimelineInfo['endDate'] ?? null,
-            'is_sequent' => $this->employeeTimelineInfo['is_sequent'],
-            'notes' => $this->employeeTimelineInfo['notes'] ?? null,
+            'position_id'   => $this->selectedPosition,
+            'start_date'    => $this->employeeTimelineInfo['startDate'],
+            'end_date'      => $this->employeeTimelineInfo['endDate'] ?? null,
+            'is_sequent'    => $this->employeeTimelineInfo['is_sequent'],
+            'notes'         => $this->employeeTimelineInfo['notes'] ?? null,
         ]);
 
         $this->dispatch('closeModal', elementId: '#timelineModal');

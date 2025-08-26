@@ -20,6 +20,7 @@ class LoanApplicationReturned extends Mailable implements ShouldQueue
     use Queueable, SerializesModels;
 
     public LoanApplication $loanApplication;
+
     public LoanTransaction $loanTransaction;
 
     public function __construct(LoanApplication $loanApplication, LoanTransaction $loanTransaction)
@@ -31,13 +32,13 @@ class LoanApplicationReturned extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         $applicantName = $this->loanApplication->user?->name ?? 'Pemohon Tidak Diketahui';
-        $applicationId = $this->loanApplication->id ?? 'N/A';
-        $transactionId = $this->loanTransaction->id ?? 'N/A';
+        $applicationId = $this->loanApplication->id          ?? 'N/A';
+        $transactionId = $this->loanTransaction->id          ?? 'N/A';
 
         return new Envelope(
             to: [new Address($this->loanApplication->user->email, $applicantName)],
             subject: __('Notifikasi Peralatan Pinjaman ICT Telah Dipulangkan (Permohonan #:id - Transaksi #:trx)', [
-                'id' => $applicationId,
+                'id'  => $applicationId,
                 'trx' => $transactionId,
             ])
         );

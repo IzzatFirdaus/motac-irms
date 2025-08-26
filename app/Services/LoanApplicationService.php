@@ -8,7 +8,6 @@ use App\Models\Approval;
 use App\Models\LoanApplication;
 use App\Models\LoanApplicationItem;
 use App\Models\LoanTransaction;
-use App\Models\LoanTransactionItem as AppLoanTransactionItemModel;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -17,7 +16,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
-use InvalidArgumentException;
 use RuntimeException;
 
 final class LoanApplicationService
@@ -25,7 +23,9 @@ final class LoanApplicationService
     private const LOG_AREA = 'LoanApplicationService: ';
 
     private ApprovalService $approvalService;
+
     private LoanTransactionService $loanTransactionService;
+
     private NotificationService $notificationService;
 
     private array $defaultLoanApplicationRelations = [
@@ -49,37 +49,36 @@ final class LoanApplicationService
         LoanTransactionService $loanTransactionService,
         NotificationService $notificationService
     ) {
-        $this->approvalService = $approvalService;
+        $this->approvalService        = $approvalService;
         $this->loanTransactionService = $loanTransactionService;
-        $this->notificationService = $notificationService;
-    // Touch dependencies for static analysis (no runtime effect)
-    $this->markDependenciesAsRead();
+        $this->notificationService    = $notificationService;
+        // Touch dependencies for static analysis (no runtime effect)
+        $this->markDependenciesAsRead();
     }
 
     /**
      * Create or update a loan application, and optionally submit it for approval.
      * This method combines create/update logic and handles both drafts and submissions.
      *
-     * @param array $data The validated data from the form.
-     * @param User $actingUser The user performing the action.
-     * @param bool $isDraft True if saving as a draft, false for submission.
+     * @param array                $data                The validated data from the form.
+     * @param User                 $actingUser          The user performing the action.
+     * @param bool                 $isDraft             True if saving as a draft, false for submission.
      * @param LoanApplication|null $existingApplication The application to update, if any.
-     * @return LoanApplication
      */
     public function createAndSubmitApplication(array $data, User $actingUser, bool $isDraft, ?LoanApplication $existingApplication = null): LoanApplication
     {
         return DB::transaction(function () use ($data, $actingUser, $isDraft, $existingApplication) {
             // Debug: capture the incoming payload early to trace missing 'items' in tests
             try {
-                Log::debug(self::LOG_AREA . 'createAndSubmitApplication received payload', [
-                    'data_keys' => is_array($data) ? array_keys($data) : null,
-                    'has_items' => Arr::has($data, 'items'),
-                    'has_legacy_items' => Arr::has($data, 'loan_application_items'),
+                Log::debug(self::LOG_AREA.'createAndSubmitApplication received payload', [
+                    'data_keys'         => is_array($data) ? array_keys($data) : null,
+                    'has_items'         => Arr::has($data, 'items'),
+                    'has_legacy_items'  => Arr::has($data, 'loan_application_items'),
                     'raw_items_preview' => array_slice(Arr::get($data, 'items', Arr::get($data, 'loan_application_items', [])), 0, 10),
                 ]);
             } catch (\Throwable $e) {
                 // best-effort logging, do not block execution
-                Log::debug(self::LOG_AREA . 'Failed to log payload debug info: '.$e->getMessage());
+                Log::debug(self::LOG_AREA.'Failed to log payload debug info: '.$e->getMessage());
             }
 
             $applicationData = $this->prepareApplicationData($data, $actingUser, $isDraft);
@@ -89,15 +88,15 @@ final class LoanApplicationService
             if ($existingApplication) {
                 $existingApplication->update($applicationData);
                 $application = $existingApplication;
-                Log::info(self::LOG_AREA . "Updating application ID: {$application->id}", ['is_draft' => $isDraft]);
+                Log::info(self::LOG_AREA."Updating application ID: {$application->id}", ['is_draft' => $isDraft]);
             } else {
                 $application = LoanApplication::create($applicationData);
-                Log::info(self::LOG_AREA . "Creating new application.", ['user_id' => $actingUser->id, 'is_draft' => $isDraft]);
+                Log::info(self::LOG_AREA.'Creating new application.', ['user_id' => $actingUser->id, 'is_draft' => $isDraft]);
             }
 
             $this->syncLoanApplicationItems($application, $itemsData);
 
-            if (!$isDraft) {
+            if (! $isDraft) {
                 $this->submitApplicationForApproval($application, $actingUser);
             }
 
@@ -105,7 +104,7 @@ final class LoanApplicationService
             try {
                 $application->load('loanApplicationItems');
             } catch (\Throwable $e) {
-                Log::debug(self::LOG_AREA . 'Failed to eager-load loanApplicationItems: ' . $e->getMessage());
+                Log::debug(self::LOG_AREA.'Failed to eager-load loanApplicationItems: '.$e->getMessage());
             }
 
             return $application;
@@ -117,9 +116,8 @@ final class LoanApplicationService
      * This is a more specific method used for updating drafts.
      *
      * @param LoanApplication $application The application instance.
-     * @param array $data The validated form data.
-     * @param User $actingUser The user performing the update.
-     * @return LoanApplication
+     * @param array           $data        The validated form data.
+     * @param User            $actingUser  The user performing the update.
      */
     public function updateApplication(LoanApplication $application, array $data, User $actingUser): LoanApplication
     {
@@ -135,8 +133,7 @@ final class LoanApplicationService
      * Submits a loan application for the approval process.
      *
      * @param LoanApplication $application The application to submit.
-     * @param User $actingUser The user submitting the application.
-     * @return LoanApplication
+     * @param User            $actingUser  The user submitting the application.
      */
     public function submitApplicationForApproval(LoanApplication $application, User $actingUser): LoanApplication
     {
@@ -146,7 +143,7 @@ final class LoanApplicationService
         }
 
         // Ensure the application status is correctly set for submission
-        $application->status = LoanApplication::STATUS_PENDING_SUPPORT;
+        $application->status       = LoanApplication::STATUS_PENDING_SUPPORT;
         $application->submitted_at = now();
         $application->save();
 
@@ -166,31 +163,30 @@ final class LoanApplicationService
     /**
      * Prepares the main application data array for creation or update.
      *
-     * @param array $data Raw validated data.
-     * @param User $user The acting user.
-     * @param bool $isDraft If the application is a draft.
-     * @return array
+     * @param array $data    Raw validated data.
+     * @param User  $user    The acting user.
+     * @param bool  $isDraft If the application is a draft.
      */
     private function prepareApplicationData(array $data, User $user, bool $isDraft): array
     {
-        $applicationData = Arr::except($data, ['loan_application_items', 'applicant_confirmation', 'applicant_is_responsible_officer']);
+        $applicationData            = Arr::except($data, ['loan_application_items', 'applicant_confirmation', 'applicant_is_responsible_officer']);
         $applicationData['user_id'] = $user->id;
-        $applicationData['status'] = $isDraft ? LoanApplication::STATUS_DRAFT : LoanApplication::STATUS_PENDING_SUPPORT;
+        $applicationData['status']  = $isDraft ? LoanApplication::STATUS_DRAFT : LoanApplication::STATUS_PENDING_SUPPORT;
 
-    // Set the responsible officer ID based on the checkbox (defensive retrieval)
-    $applicantIsResponsible = Arr::get($data, 'applicant_is_responsible_officer', false);
-    $responsibleOfficerId = Arr::get($data, 'responsible_officer_id');
-    $applicationData['responsible_officer_id'] = $applicantIsResponsible ? $user->id : $responsibleOfficerId;
+        // Set the responsible officer ID based on the checkbox (defensive retrieval)
+        $applicantIsResponsible                    = Arr::get($data, 'applicant_is_responsible_officer', false);
+        $responsibleOfficerId                      = Arr::get($data, 'responsible_officer_id');
+        $applicationData['responsible_officer_id'] = $applicantIsResponsible ? $user->id : $responsibleOfficerId;
 
         // Format dates correctly if provided. Preserve existing values when updating.
-        if (isset($data['loan_start_date']) && !empty($data['loan_start_date'])) {
+        if (isset($data['loan_start_date']) && ! empty($data['loan_start_date'])) {
             $applicationData['loan_start_date'] = Carbon::parse($data['loan_start_date']);
         }
-        if (isset($data['loan_end_date']) && !empty($data['loan_end_date'])) {
+        if (isset($data['loan_end_date']) && ! empty($data['loan_end_date'])) {
             $applicationData['loan_end_date'] = Carbon::parse($data['loan_end_date']);
         }
 
-        if (!$isDraft) {
+        if (! $isDraft) {
             $applicationData['applicant_confirmation_timestamp'] = now();
         }
 
@@ -200,9 +196,9 @@ final class LoanApplicationService
     /**
      * Find a loan application by its ID with specified relations.
      *
-     * @param int $id The ID of the loan application.
+     * @param int   $id        The ID of the loan application.
      * @param array $relations Optional relations to load.
-     * @return LoanApplication
+     *
      * @throws ModelNotFoundException
      */
     public function findLoanApplicationById(int $id, array $relations = []): LoanApplication
@@ -222,8 +218,7 @@ final class LoanApplicationService
      * Get a paginated list of loan applications with filters.
      *
      * @param array $filters Filters for the query (e.g., 'status', 'user_id').
-     * @param int $perPage Number of items per page.
-     * @return LengthAwarePaginator
+     * @param int   $perPage Number of items per page.
      */
     public function getLoanApplications(array $filters = [], int $perPage = 10): LengthAwarePaginator
     {
@@ -245,33 +240,33 @@ final class LoanApplicationService
      * Syncs loan application items. Creates new, updates existing, deletes removed.
      *
      * @param LoanApplication $application The loan application.
-     * @param array $itemsData The items data from the form.
+     * @param array           $itemsData   The items data from the form.
      */
     private function syncLoanApplicationItems(LoanApplication $application, array $itemsData): void
     {
-    Log::debug(self::LOG_AREA . 'syncLoanApplicationItems called', ['application_id' => $application->id, 'items_count' => is_countable($itemsData) ? count($itemsData) : 'not_countable', 'items_preview' => array_slice($itemsData, 0, 5)]);
-        $existingItemIds = $application->loanApplicationItems->pluck('id')->toArray();
-        $processedItemIds = [];
+        Log::debug(self::LOG_AREA.'syncLoanApplicationItems called', ['application_id' => $application->id, 'items_count' => is_countable($itemsData) ? count($itemsData) : 'not_countable', 'items_preview' => array_slice($itemsData, 0, 5)]);
+        $existingItemIds      = $application->loanApplicationItems->pluck('id')->toArray();
+        $processedItemIds     = [];
         $itemPayloadsToCreate = [];
 
         foreach ($itemsData as $itemData) {
             $quantity = (int) ($itemData['quantity_requested'] ?? 0);
-            $itemId = Arr::get($itemData, 'id');
+            $itemId   = Arr::get($itemData, 'id');
 
             if ($itemId && in_array($itemId, $existingItemIds, true)) {
                 if ($quantity > 0) {
                     LoanApplicationItem::find($itemId)?->update([
-                        'equipment_type' => $itemData['equipment_type'],
+                        'equipment_type'     => $itemData['equipment_type'],
                         'quantity_requested' => $quantity,
-                        'notes' => $itemData['notes'] ?? null,
+                        'notes'              => $itemData['notes'] ?? null,
                     ]);
                     $processedItemIds[] = $itemId;
                 }
             } elseif ($quantity > 0) {
                 $itemPayloadsToCreate[] = [
-                    'equipment_type' => $itemData['equipment_type'],
+                    'equipment_type'     => $itemData['equipment_type'],
                     'quantity_requested' => $quantity,
-                    'notes' => $itemData['notes'] ?? null,
+                    'notes'              => $itemData['notes'] ?? null,
                 ];
             }
         }
@@ -292,8 +287,6 @@ final class LoanApplicationService
 
     /**
      * Handles the initial approval process for a loan application.
-     *
-     * @param LoanApplication $loanApplication
      */
     private function processInitialApproval(LoanApplication $loanApplication): void
     {
@@ -306,10 +299,10 @@ final class LoanApplicationService
             try {
                 $approval = Approval::create([
                     'approvable_type' => get_class($loanApplication),
-                    'approvable_id' => $loanApplication->id,
-                    'officer_id' => $supportingOfficerId,
-                    'stage' => Approval::STAGE_LOAN_SUPPORT_REVIEW,
-                    'status' => Approval::STATUS_PENDING,
+                    'approvable_id'   => $loanApplication->id,
+                    'officer_id'      => $supportingOfficerId,
+                    'stage'           => Approval::STAGE_LOAN_SUPPORT_REVIEW,
+                    'status'          => Approval::STATUS_PENDING,
                 ]);
 
                 // Notify the assigned supporting officer directly that action is needed
@@ -330,9 +323,7 @@ final class LoanApplicationService
      *
      * Only applications in draft status may be deleted. Returns true on success.
      *
-     * @param LoanApplication $loanApplication
      * @param User $actingUser The user performing the delete action.
-     * @return bool
      */
     public function deleteApplication(LoanApplication $loanApplication, User $actingUser): bool
     {
@@ -353,7 +344,7 @@ final class LoanApplicationService
             }
 
             // Optionally, log the deletion for audit purposes
-            Log::info(self::LOG_AREA . sprintf(
+            Log::info(self::LOG_AREA.sprintf(
                 'Loan application ID %d and its related records soft-deleted by User ID %d.',
                 $loanApplication->id,
                 $actingUser->id

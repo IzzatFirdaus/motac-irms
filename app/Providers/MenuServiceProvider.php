@@ -26,7 +26,7 @@ class MenuServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $menuDataObject = new stdClass; // Default to an empty object
+        $menuDataObject       = new stdClass; // Default to an empty object
         $menuDataObject->menu = [];   // Ensure 'menu' property exists as an array by default
 
         try {

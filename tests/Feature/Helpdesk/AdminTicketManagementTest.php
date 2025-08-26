@@ -52,19 +52,19 @@ class AdminTicketManagementTest extends TestCase
         $itAdmin->assignRole('IT Admin');
 
         $applicant = User::factory()->create();
-        $agent = User::factory()->create();
+        $agent     = User::factory()->create();
         $agent->assignRole('IT Admin');
 
         $category = HelpdeskCategory::first();
         $priority = HelpdeskPriority::first();
 
         $ticket = HelpdeskTicket::create([
-            'title' => 'Test Ticket',
+            'title'       => 'Test Ticket',
             'description' => 'Test description',
             'category_id' => $category->id,
-            'status' => 'open',
+            'status'      => 'open',
             'priority_id' => $priority->id,
-            'user_id' => $applicant->id,
+            'user_id'     => $applicant->id,
         ]);
 
         Livewire::actingAs($itAdmin)
@@ -83,19 +83,19 @@ class AdminTicketManagementTest extends TestCase
     public function assigned_agent_can_update_their_assigned_ticket_status()
     {
         $applicant = User::factory()->create();
-        $agent = User::factory()->create();
+        $agent     = User::factory()->create();
         $agent->assignRole('IT Admin');
 
         $category = HelpdeskCategory::first();
         $priority = HelpdeskPriority::first();
 
         $ticket = HelpdeskTicket::create([
-            'title' => 'Test Ticket for Agent',
-            'description' => 'Test description',
-            'category_id' => $category->id,
-            'status' => 'open',
-            'priority_id' => $priority->id,
-            'user_id' => $applicant->id,
+            'title'               => 'Test Ticket for Agent',
+            'description'         => 'Test description',
+            'category_id'         => $category->id,
+            'status'              => 'open',
+            'priority_id'         => $priority->id,
+            'user_id'             => $applicant->id,
             'assigned_to_user_id' => $agent->id,
         ]);
 
@@ -123,13 +123,13 @@ class AdminTicketManagementTest extends TestCase
         $priority2 = HelpdeskPriority::firstOrCreate(['name' => 'High', 'level' => 3]);
 
         HelpdeskTicket::factory()->create([
-            'title' => 'Ticket A', 'status' => 'open', 'category_id' => $category1->id, 'priority_id' => $priority1->id
+            'title' => 'Ticket A', 'status' => 'open', 'category_id' => $category1->id, 'priority_id' => $priority1->id,
         ]);
         HelpdeskTicket::factory()->create([
-            'title' => 'Ticket B', 'status' => 'in_progress', 'category_id' => $category2->id, 'priority_id' => $priority2->id
+            'title' => 'Ticket B', 'status' => 'in_progress', 'category_id' => $category2->id, 'priority_id' => $priority2->id,
         ]);
         HelpdeskTicket::factory()->create([
-            'title' => 'Ticket C', 'status' => 'resolved', 'category_id' => $category1->id, 'priority_id' => $priority2->id
+            'title' => 'Ticket C', 'status' => 'resolved', 'category_id' => $category1->id, 'priority_id' => $priority2->id,
         ]);
 
         Livewire::actingAs($itAdmin)

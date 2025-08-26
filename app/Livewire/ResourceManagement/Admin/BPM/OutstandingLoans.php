@@ -20,7 +20,9 @@ class OutstandingLoans extends Component
     use WithPagination;
 
     public string $searchTerm = '';
+
     public string $sortBy = 'updated_at'; // Default sort column
+
     public string $sortDirection = 'desc'; // Default sort direction
 
     protected string $paginationTheme = 'bootstrap';

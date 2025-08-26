@@ -28,7 +28,7 @@ class ApprovalSeeder extends Seeder
         // Get all eligible officers (by role) once, as a flat array of IDs.
         $officerIds = User::whereHas('roles', function ($q) {
             $q->whereIn('name', [
-                'Admin', 'BPM Staff', 'IT Admin', 'HOD', 'Approver'
+                'Admin', 'BPM Staff', 'IT Admin', 'HOD', 'Approver',
             ]);
         })->pluck('id')->all();
 
@@ -41,31 +41,32 @@ class ApprovalSeeder extends Seeder
         $loanApplications = LoanApplication::inRandomOrder()->limit(20)->get();
         if ($loanApplications->isEmpty()) {
             Log::warning('No loan applications found to seed approvals for. Skipping.');
+
             return;
         }
 
-        $now = Carbon::now();
+        $now   = Carbon::now();
         $batch = [];
 
         // Helper: returns a full approval array with all columns, filling unused with null
         $approvalArray = function ($overrides = []) use ($auditUser, $now) {
             return array_merge([
                 'approvable_type' => $overrides['approvable_type'] ?? null,
-                'approvable_id' => $overrides['approvable_id'] ?? null,
-                'officer_id' => $overrides['officer_id'] ?? null,
-                'stage' => $overrides['stage'] ?? null,
-                'status' => $overrides['status'] ?? null,
-                'notes' => $overrides['notes'] ?? null,
-                'approved_at' => $overrides['approved_at'] ?? null,
-                'rejected_at' => $overrides['rejected_at'] ?? null,
-                'canceled_at' => $overrides['canceled_at'] ?? null,
-                'resubmitted_at' => $overrides['resubmitted_at'] ?? null,
-                'created_by' => $auditUser->id,
-                'updated_by' => $auditUser->id,
-                'deleted_by' => $overrides['deleted_by'] ?? null,
-                'created_at' => $now,
-                'updated_at' => $now,
-                'deleted_at' => $overrides['deleted_at'] ?? null,
+                'approvable_id'   => $overrides['approvable_id']   ?? null,
+                'officer_id'      => $overrides['officer_id']      ?? null,
+                'stage'           => $overrides['stage']           ?? null,
+                'status'          => $overrides['status']          ?? null,
+                'notes'           => $overrides['notes']           ?? null,
+                'approved_at'     => $overrides['approved_at']     ?? null,
+                'rejected_at'     => $overrides['rejected_at']     ?? null,
+                'canceled_at'     => $overrides['canceled_at']     ?? null,
+                'resubmitted_at'  => $overrides['resubmitted_at']  ?? null,
+                'created_by'      => $auditUser->id,
+                'updated_by'      => $auditUser->id,
+                'deleted_by'      => $overrides['deleted_by'] ?? null,
+                'created_at'      => $now,
+                'updated_at'      => $now,
+                'deleted_at'      => $overrides['deleted_at'] ?? null,
             ], $overrides);
         };
 
@@ -73,11 +74,11 @@ class ApprovalSeeder extends Seeder
         foreach ($loanApplications as $application) {
             $batch[] = $approvalArray([
                 'approvable_type' => get_class($application),
-                'approvable_id' => $application->id,
-                'officer_id' => $officerIds[array_rand($officerIds)],
-                'stage' => Approval::STAGE_SUPPORT_REVIEW,
-                'status' => Approval::STATUS_PENDING,
-                'notes' => 'Menunggu semakan sokongan.',
+                'approvable_id'   => $application->id,
+                'officer_id'      => $officerIds[array_rand($officerIds)],
+                'stage'           => Approval::STAGE_SUPPORT_REVIEW,
+                'status'          => Approval::STATUS_PENDING,
+                'notes'           => 'Menunggu semakan sokongan.',
             ]);
         }
 
@@ -86,12 +87,12 @@ class ApprovalSeeder extends Seeder
         foreach ($approvedApps as $application) {
             $batch[] = $approvalArray([
                 'approvable_type' => get_class($application),
-                'approvable_id' => $application->id,
-                'officer_id' => $officerIds[array_rand($officerIds)],
-                'stage' => Approval::STAGE_FINAL_APPROVAL,
-                'status' => Approval::STATUS_APPROVED,
-                'approved_at' => $now->copy()->addMinutes(rand(1, 30)),
-                'notes' => 'Diluluskan di peringkat akhir.',
+                'approvable_id'   => $application->id,
+                'officer_id'      => $officerIds[array_rand($officerIds)],
+                'stage'           => Approval::STAGE_FINAL_APPROVAL,
+                'status'          => Approval::STATUS_APPROVED,
+                'approved_at'     => $now->copy()->addMinutes(rand(1, 30)),
+                'notes'           => 'Diluluskan di peringkat akhir.',
             ]);
         }
 
@@ -99,12 +100,12 @@ class ApprovalSeeder extends Seeder
         foreach ($rejectedApps as $application) {
             $batch[] = $approvalArray([
                 'approvable_type' => get_class($application),
-                'approvable_id' => $application->id,
-                'officer_id' => $officerIds[array_rand($officerIds)],
-                'stage' => Approval::STAGE_FINAL_APPROVAL,
-                'status' => Approval::STATUS_REJECTED,
-                'rejected_at' => $now->copy()->addMinutes(rand(1, 30)),
-                'notes' => 'Ditolak di peringkat akhir.',
+                'approvable_id'   => $application->id,
+                'officer_id'      => $officerIds[array_rand($officerIds)],
+                'stage'           => Approval::STAGE_FINAL_APPROVAL,
+                'status'          => Approval::STATUS_REJECTED,
+                'rejected_at'     => $now->copy()->addMinutes(rand(1, 30)),
+                'notes'           => 'Ditolak di peringkat akhir.',
             ]);
         }
 
@@ -112,23 +113,23 @@ class ApprovalSeeder extends Seeder
         foreach ($loanApplications->shuffle()->take(2) as $application) {
             $batch[] = $approvalArray([
                 'approvable_type' => get_class($application),
-                'approvable_id' => $application->id,
-                'officer_id' => $officerIds[array_rand($officerIds)],
-                'stage' => Approval::STAGE_GENERAL_REVIEW,
-                'status' => Approval::STATUS_CANCELED,
-                'canceled_at' => $now->copy()->addMinutes(rand(1, 30)),
-                'notes' => 'Dibatalkan oleh pemohon.',
+                'approvable_id'   => $application->id,
+                'officer_id'      => $officerIds[array_rand($officerIds)],
+                'stage'           => Approval::STAGE_GENERAL_REVIEW,
+                'status'          => Approval::STATUS_CANCELED,
+                'canceled_at'     => $now->copy()->addMinutes(rand(1, 30)),
+                'notes'           => 'Dibatalkan oleh pemohon.',
             ]);
         }
         foreach ($loanApplications->shuffle()->take(2) as $application) {
             $batch[] = $approvalArray([
                 'approvable_type' => get_class($application),
-                'approvable_id' => $application->id,
-                'officer_id' => $officerIds[array_rand($officerIds)],
-                'stage' => Approval::STAGE_LOAN_SUPPORT_REVIEW,
-                'status' => Approval::STATUS_FORWARDED,
-                'resubmitted_at' => $now->copy()->addMinutes(rand(1, 30)),
-                'notes' => 'Permohonan dimajukan kepada pegawai lain.',
+                'approvable_id'   => $application->id,
+                'officer_id'      => $officerIds[array_rand($officerIds)],
+                'stage'           => Approval::STAGE_LOAN_SUPPORT_REVIEW,
+                'status'          => Approval::STATUS_FORWARDED,
+                'resubmitted_at'  => $now->copy()->addMinutes(rand(1, 30)),
+                'notes'           => 'Permohonan dimajukan kepada pegawai lain.',
             ]);
         }
 
@@ -136,13 +137,13 @@ class ApprovalSeeder extends Seeder
         foreach ($loanApplications->shuffle()->take(3) as $application) {
             $batch[] = $approvalArray([
                 'approvable_type' => get_class($application),
-                'approvable_id' => $application->id,
-                'officer_id' => $officerIds[array_rand($officerIds)],
-                'stage' => Approval::STAGE_GENERAL_REVIEW,
-                'status' => Approval::STATUS_PENDING,
-                'notes' => 'Dihapus untuk ujian soft delete.',
-                'deleted_by' => $auditUser->id,
-                'deleted_at' => $now->copy()->addMinutes(rand(31, 60)),
+                'approvable_id'   => $application->id,
+                'officer_id'      => $officerIds[array_rand($officerIds)],
+                'stage'           => Approval::STAGE_GENERAL_REVIEW,
+                'status'          => Approval::STATUS_PENDING,
+                'notes'           => 'Dihapus untuk ujian soft delete.',
+                'deleted_by'      => $auditUser->id,
+                'deleted_at'      => $now->copy()->addMinutes(rand(31, 60)),
             ]);
         }
 
@@ -152,6 +153,6 @@ class ApprovalSeeder extends Seeder
             Approval::insert($chunk);
         }
 
-        Log::info('ApprovalSeeder: Inserted ' . count($batch) . ' approval tasks in batch.');
+        Log::info('ApprovalSeeder: Inserted '.count($batch).' approval tasks in batch.');
     }
 }

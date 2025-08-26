@@ -41,12 +41,12 @@ class RecordApprovalDecisionRequest extends FormRequest
         /** @var Approval|null $approval */
         $approval = $this->route('approval'); //
 
-        if ($approval && //
+        if ($approval                                        && //
             $approval->approvable instanceof LoanApplication && //
             // Only require quantity adjustments if the stage is relevant (e.g., support review)
             // and decision is approved. Adjust sta
             $this->input('decision') === Approval::STATUS_APPROVED) { //
-            $rules['items_approved'] = ['required', 'array', 'min:1']; //
+            $rules['items_approved']                            = ['required', 'array', 'min:1']; //
             $rules['items_approved.*.loan_application_item_id'] = [ //
                 'required', 'integer',
                 Rule::exists('loan_application_items', 'id')->where(function ($query) use ($approval) { //
@@ -56,9 +56,9 @@ class RecordApprovalDecisionRequest extends FormRequest
             $rules['items_approved.*.quantity_approved'] = [ //
                 'required', 'integer', 'min:0',
                 function ($attribute, $value, $fail) use ($approval) { //
-                    $index = explode('.', $attribute)[1]; // Get the array index
+                    $index                 = explode('.', $attribute)[1]; // Get the array index
                     $loanApplicationItemId = $this->input("items_approved.{$index}.loan_application_item_id"); //
-                    $loanAppItem = $approval->approvable->loanApplicationItems->find($loanApplicationItemId); //
+                    $loanAppItem           = $approval->approvable->loanApplicationItems->find($loanApplicationItemId); //
 
                     if ($loanAppItem && $value > $loanAppItem->quantity_requested) { //
                         $fail(__('Kuantiti diluluskan tidak boleh melebihi kuantiti dipohon.')); //
@@ -75,18 +75,18 @@ class RecordApprovalDecisionRequest extends FormRequest
     {
         $messages = [
             'decision.required' => __('Sila pilih keputusan (Lulus/Tolak).'),
-            'decision.in' => __('Keputusan yang dipilih tidak sah.'),
+            'decision.in'       => __('Keputusan yang dipilih tidak sah.'),
             'comments.required' => __('Ruangan ulasan wajib diisi apabila menolak permohonan.'),
-            'comments.min' => __('Ulasan hendaklah sekurang-kurangnya :min aksara.'),
-            'comments.max' => __('Ulasan tidak boleh melebihi :max aksara.'),
+            'comments.min'      => __('Ulasan hendaklah sekurang-kurangnya :min aksara.'),
+            'comments.max'      => __('Ulasan tidak boleh melebihi :max aksara.'),
 
-            'items_approved.required' => __('Sila nyatakan kuantiti diluluskan untuk setiap item.'),
-            'items_approved.array' => __('Format kuantiti diluluskan tidak sah.'),
-            'items_approved.min' => __('Sila nyatakan kuantiti diluluskan untuk sekurang-kurangnya satu item.'),
+            'items_approved.required'                            => __('Sila nyatakan kuantiti diluluskan untuk setiap item.'),
+            'items_approved.array'                               => __('Format kuantiti diluluskan tidak sah.'),
+            'items_approved.min'                                 => __('Sila nyatakan kuantiti diluluskan untuk sekurang-kurangnya satu item.'),
             'items_approved.*.loan_application_item_id.required' => __('ID item permohonan asal wajib ada.'),
-            'items_approved.*.loan_application_item_id.exists' => __('Item permohonan asal tidak sah untuk permohonan ini.'),
-            'items_approved.*.quantity_approved.min' => __('Kuantiti diluluskan tidak boleh kurang dari 0.'),
-            'items_approved.*.approval_item_notes.max' => __('Catatan item kelulusan tidak boleh melebihi :max aksara.'),
+            'items_approved.*.loan_application_item_id.exists'   => __('Item permohonan asal tidak sah untuk permohonan ini.'),
+            'items_approved.*.quantity_approved.min'             => __('Kuantiti diluluskan tidak boleh kurang dari 0.'),
+            'items_approved.*.approval_item_notes.max'           => __('Catatan item kelulusan tidak boleh melebihi :max aksara.'),
         ];
 
         /** @var Approval|null $approval */
@@ -95,7 +95,7 @@ class RecordApprovalDecisionRequest extends FormRequest
         if ($approval && $approval->approvable instanceof LoanApplication) {
             foreach ($this->input('items_approved', []) as $index => $item) {
                 $loanApplicationItemId = $item['loan_application_item_id'] ?? null;
-                $loanAppItem = null;
+                $loanAppItem           = null;
                 if ($loanApplicationItemId) {
                     $loanAppItem = $approval->approvable->loanApplicationItems->find($loanApplicationItemId);
                 }
@@ -110,9 +110,9 @@ class RecordApprovalDecisionRequest extends FormRequest
                 $maxQty = $loanAppItem ? $loanAppItem->quantity_requested : 0; //
 
                 $messages['items_approved.'.$loanApplicationItemId.'.quantity_approved.required'] = __('Kuantiti diluluskan untuk :itemType wajib diisi.', ['itemType' => $itemTypeDisplay]); //
-                $messages['items_approved.'.$loanApplicationItemId.'.quantity_approved.integer'] = __('Kuantiti diluluskan untuk :itemType mesti nombor bulat.', ['itemType' => $itemTypeDisplay]); //
-                $messages['items_approved.'.$loanApplicationItemId.'.quantity_approved.min'] = __('Kuantiti diluluskan untuk :itemType tidak boleh kurang dari 0.', ['itemType' => $itemTypeDisplay]); //
-                $messages['items_approved.'.$loanApplicationItemId.'.quantity_approved.max'] = __('Kuantiti diluluskan untuk :itemType tidak boleh melebihi kuantiti dipohon (:max).', ['itemType' => $itemTypeDisplay, 'max' => $maxQty]); //
+                $messages['items_approved.'.$loanApplicationItemId.'.quantity_approved.integer']  = __('Kuantiti diluluskan untuk :itemType mesti nombor bulat.', ['itemType' => $itemTypeDisplay]); //
+                $messages['items_approved.'.$loanApplicationItemId.'.quantity_approved.min']      = __('Kuantiti diluluskan untuk :itemType tidak boleh kurang dari 0.', ['itemType' => $itemTypeDisplay]); //
+                $messages['items_approved.'.$loanApplicationItemId.'.quantity_approved.max']      = __('Kuantiti diluluskan untuk :itemType tidak boleh melebihi kuantiti dipohon (:max).', ['itemType' => $itemTypeDisplay, 'max' => $maxQty]); //
             }
         }
         // Removed the conditional block for EmailApplication as per the refactoring plan.

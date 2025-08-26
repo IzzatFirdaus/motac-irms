@@ -15,8 +15,8 @@ class CheckGradeLevel
      * Handle an incoming request.
      * Checks if the authenticated user's grade level meets the specified minimum.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     * @param  string|int  $minRequiredGradeLevelNumeric  The minimum numeric grade level required.
+     * @param \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response) $next
+     * @param string|int                                                                       $minRequiredGradeLevelNumeric The minimum numeric grade level required.
      */
     public function handle(Request $request, Closure $next, $minRequiredGradeLevelNumeric): Response
     {
@@ -35,7 +35,7 @@ class CheckGradeLevel
         // Ensure user has a grade and the grade has a numeric level property
         if (! $user->grade || ! isset($user->grade->level) || ! is_numeric($user->grade->level)) {
             Log::warning('CheckGradeLevel: User does not have a valid or numeric grade level configured.', [ // [cite: 3]
-                'user_id' => $user->id,
+                'user_id'    => $user->id,
                 'user_email' => $user->email,
                 'route_name' => $request->route()?->getName(),
             ]);
@@ -43,18 +43,18 @@ class CheckGradeLevel
         }
 
         $userGradeLevelNumeric = (int) $user->grade->level; // [cite: 3]
-        $requiredGradeLevel = (int) $minRequiredGradeLevelNumeric; // [cite: 3]
+        $requiredGradeLevel    = (int) $minRequiredGradeLevelNumeric; // [cite: 3]
 
         if ($userGradeLevelNumeric >= $requiredGradeLevel) { // [cite: 3]
             return $next($request);
         }
 
         Log::warning('CheckGradeLevel: User grade level insufficient.', [ // [cite: 3]
-            'user_id' => $user->id,
-            'user_email' => $user->email,
-            'user_grade_level' => $userGradeLevelNumeric,
+            'user_id'              => $user->id,
+            'user_email'           => $user->email,
+            'user_grade_level'     => $userGradeLevelNumeric,
             'required_grade_level' => $requiredGradeLevel,
-            'route_name' => $request->route()?->getName(),
+            'route_name'           => $request->route()?->getName(),
         ]);
         abort(403, 'Akses Ditolak. Tahap Gred anda tidak mencukupi untuk mengakses sumber ini.'); // [cite: 3]
     }

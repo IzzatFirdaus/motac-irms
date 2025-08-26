@@ -2,13 +2,13 @@
 
 namespace App\Providers;
 
-use App\Translation\SuffixedTranslator;
 use App\Translation\SuffixedFileLoader;
-use Illuminate\Support\ServiceProvider;
+use App\Translation\SuffixedTranslator;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\ServiceProvider;
 
 /**
- * Custom Translation Service Provider for MOTAC IRMS
+ * Custom Translation Service Provider for MOTAC IRMS.
  *
  * This service provider replaces Laravel's default translation system with a custom
  * implementation that supports suffixed language files (e.g., forms_en.php, app_ms.php).
@@ -20,8 +20,8 @@ use Illuminate\Support\Facades\Log;
  * - Enhanced error handling and logging
  * - Performance optimizations for translation loading
  *
- * @package App\Providers
  * @author MOTAC ICT Team
+ *
  * @since 1.0.0
  */
 class TranslationServiceProvider extends ServiceProvider
@@ -31,8 +31,6 @@ class TranslationServiceProvider extends ServiceProvider
      *
      * This method sets up the translation system to use suffixed language files
      * while maintaining compatibility with Laravel's translation features.
-     *
-     * @return void
      */
     public function register()
     {
@@ -48,8 +46,6 @@ class TranslationServiceProvider extends ServiceProvider
      *
      * This FileLoader will attempt to load files using the suffixed convention (e.g. app_en.php)
      * and gracefully fallback to the standard convention (e.g. app.php) if the suffixed file is not found.
-     *
-     * @return void
      */
     protected function registerTranslationLoader()
     {
@@ -59,7 +55,7 @@ class TranslationServiceProvider extends ServiceProvider
                 return new SuffixedFileLoader($app['files'], $app['path.lang']);
             } catch (\Exception $e) {
                 // Log error and provide fallback
-                Log::error('Failed to initialize translation loader: ' . $e->getMessage());
+                Log::error('Failed to initialize translation loader: '.$e->getMessage());
                 throw new \RuntimeException('Translation system initialization failed. Please check your language files.', 0, $e);
             }
         });
@@ -70,8 +66,6 @@ class TranslationServiceProvider extends ServiceProvider
      *
      * The SuffixedTranslator extends Laravel's default translator to support
      * automatic locale suffix appending and enhanced fallback behavior.
-     *
-     * @return void
      */
     protected function registerSuffixedTranslator()
     {
@@ -91,7 +85,7 @@ class TranslationServiceProvider extends ServiceProvider
 
                 // Set the fallback locale
                 $fallbackLocale = $app['config']['app.fallback_locale'];
-                if (!empty($fallbackLocale)) {
+                if (! empty($fallbackLocale)) {
                     $translator->setFallback($fallbackLocale);
                 }
 
@@ -99,7 +93,7 @@ class TranslationServiceProvider extends ServiceProvider
 
             } catch (\Exception $e) {
                 // Log error and provide emergency fallback
-                Log::error('Failed to initialize suffixed translator: ' . $e->getMessage());
+                Log::error('Failed to initialize suffixed translator: '.$e->getMessage());
                 throw new \RuntimeException('Custom translation system initialization failed.', 0, $e);
             }
         });
@@ -110,8 +104,6 @@ class TranslationServiceProvider extends ServiceProvider
      *
      * This method is called after all service providers have been registered.
      * It performs any additional setup required for the translation system.
-     *
-     * @return void
      */
     public function boot()
     {
@@ -126,12 +118,10 @@ class TranslationServiceProvider extends ServiceProvider
 
     /**
      * Configure translation caching if enabled.
-     *
-     * @return void
      */
     protected function configureCaching()
     {
-        if (config('translation.cache_translations', true) && !$this->app->environment('local')) {
+        if (config('translation.cache_translations', true) && ! $this->app->environment('local')) {
             // Enable translation caching in production environments
             // This can significantly improve performance for large applications
             Log::debug('Translation caching is enabled for improved performance.');

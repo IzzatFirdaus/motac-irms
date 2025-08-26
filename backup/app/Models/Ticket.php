@@ -4,8 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -13,16 +13,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * Ticket model for Helpdesk system (v4.0).
  * Represents a generic helpdesk ticket.
  *
- * @property int $id
- * @property string $subject
- * @property string $description
- * @property int $user_id
- * @property int|null $assigned_to_user_id
- * @property int $category_id
- * @property int $priority_id
- * @property string $status
+ * @property int                             $id
+ * @property string                          $subject
+ * @property string                          $description
+ * @property int                             $user_id
+ * @property int|null                        $assigned_to_user_id
+ * @property int                             $category_id
+ * @property int                             $priority_id
+ * @property string                          $status
  * @property \Illuminate\Support\Carbon|null $due_date
- * @property string|null $resolution_notes
+ * @property string|null                     $resolution_notes
  * @property \Illuminate\Support\Carbon|null $closed_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -49,7 +49,7 @@ class Ticket extends Model
     ];
 
     protected $casts = [
-        'due_date' => 'datetime',
+        'due_date'  => 'datetime',
         'closed_at' => 'datetime',
     ];
 

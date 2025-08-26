@@ -23,22 +23,31 @@ class PositionsIndex extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $sortField = 'name';
+
     public string $sortDirection = 'asc';
 
     public bool $showModal = false;
+
     public bool $isEditMode = false;
+
     public ?Position $editingPosition = null;
 
     // Form fields
     public string $name = '';
+
     public ?int $grade_id = null;
+
     public string $description = '';
+
     public bool $is_active = true;
 
     // Delete modal state
     public bool $showDeleteConfirmationModal = false;
+
     public ?int $positionIdToDelete = null;
+
     public string $positionNameToDelete = '';
 
     // List of grade options for the dropdown
@@ -52,7 +61,7 @@ class PositionsIndex extends Component
     public function mount(): void
     {
         $this->authorize('viewAny', Position::class);
-        $this->gradeOptions = Grade::orderBy('name')->pluck('name', 'id')->all();
+        $this->gradeOptions    = Grade::orderBy('name')->pluck('name', 'id')->all();
         $this->editingPosition = new Position;
     }
 
@@ -78,9 +87,9 @@ class PositionsIndex extends Component
         $query = Position::with('grade:id,name')
             ->when($this->search, function ($q) {
                 $q->where('name', 'like', '%'.$this->search.'%')
-                  ->orWhereHas('grade', function ($q) {
-                      $q->where('name', 'like', '%'.$this->search.'%');
-                  });
+                    ->orWhereHas('grade', function ($q) {
+                        $q->where('name', 'like', '%'.$this->search.'%');
+                    });
             });
 
         if ($this->sortField !== '' && $this->sortField !== '0') {
@@ -100,7 +109,7 @@ class PositionsIndex extends Component
         $this->authorize('create', Position::class);
         $this->resetInputFields();
         $this->isEditMode = false;
-        $this->showModal = true;
+        $this->showModal  = true;
     }
 
     /**
@@ -111,12 +120,12 @@ class PositionsIndex extends Component
         $this->authorize('update', $position);
         $this->resetInputFields();
         $this->editingPosition = $position;
-        $this->name = $position->name;
-        $this->grade_id = $position->grade_id;
-        $this->description = $position->description ?? '';
-        $this->is_active = $position->is_active;
-        $this->isEditMode = true;
-        $this->showModal = true;
+        $this->name            = $position->name;
+        $this->grade_id        = $position->grade_id;
+        $this->description     = $position->description ?? '';
+        $this->is_active       = $position->is_active;
+        $this->isEditMode      = true;
+        $this->showModal       = true;
     }
 
     /**
@@ -168,10 +177,11 @@ class PositionsIndex extends Component
             // Prevent deletion if in use by any user
             if ($position->users()->count() > 0) {
                 session()->flash('error', __('Jawatan ":name" tidak boleh dipadam kerana ia telah ditugaskan kepada pengguna.', ['name' => $position->name]));
+
                 return;
             }
-            $this->positionIdToDelete   = $id;
-            $this->positionNameToDelete = $position->name;
+            $this->positionIdToDelete          = $id;
+            $this->positionNameToDelete        = $position->name;
             $this->showDeleteConfirmationModal = true;
         } else {
             session()->flash('error', __('Jawatan tidak ditemui.'));
@@ -190,6 +200,7 @@ class PositionsIndex extends Component
             if ($position->users()->count() > 0) {
                 session()->flash('error', __('Jawatan ":name" tidak boleh dipadam kerana ia telah ditugaskan kepada pengguna.', ['name' => $position->name]));
                 $this->closeDeleteConfirmationModal();
+
                 return;
             }
 
@@ -205,8 +216,8 @@ class PositionsIndex extends Component
     public function closeDeleteConfirmationModal(): void
     {
         $this->showDeleteConfirmationModal = false;
-        $this->positionIdToDelete = null;
-        $this->positionNameToDelete = '';
+        $this->positionIdToDelete          = null;
+        $this->positionNameToDelete        = '';
     }
 
     /**
@@ -231,12 +242,12 @@ class PositionsIndex extends Component
      */
     private function resetInputFields(): void
     {
-        $this->name = '';
-        $this->grade_id = null;
-        $this->description = '';
-        $this->is_active = true;
+        $this->name            = '';
+        $this->grade_id        = null;
+        $this->description     = '';
+        $this->is_active       = true;
         $this->editingPosition = new Position;
-        $this->isEditMode = false;
+        $this->isEditMode      = false;
         $this->resetErrorBag();
         $this->resetValidation();
     }
@@ -247,7 +258,7 @@ class PositionsIndex extends Component
     public function render()
     {
         return view('livewire.settings.positions.positions-index', [
-            'positions' => $this->positions, // Computed property
+            'positions'    => $this->positions, // Computed property
             'gradeOptions' => $this->gradeOptions,
         ]);
     }

@@ -26,7 +26,7 @@ class PositionSeeder extends Seeder
         Log::info('Truncated positions table.');
 
         $adminUserForAudit = User::orderBy('id')->first();
-        $auditUserId = $adminUserForAudit?->id;
+        $auditUserId       = $adminUserForAudit?->id;
         if ($auditUserId) {
             Log::info(sprintf('Using User ID %s for audit columns in PositionSeeder.', $auditUserId));
         }

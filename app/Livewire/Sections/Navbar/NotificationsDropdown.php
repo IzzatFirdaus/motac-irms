@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 /**
- * NotificationsDropdown Livewire Component
+ * NotificationsDropdown Livewire Component.
  *
  * Renders a notifications dropdown, showing unread notifications for the user.
  * Allows marking notifications as read (single or all).
@@ -30,23 +30,21 @@ class NotificationsDropdown extends Component
     {
         if (Auth::check()) {
             // Fetch unread notifications once for efficiency
-            $notifications = Auth::user()->unreadNotifications;
-            $this->unreadCount = $notifications->count();
+            $notifications             = Auth::user()->unreadNotifications;
+            $this->unreadCount         = $notifications->count();
             $this->unreadNotifications = $notifications->take(10);
         } else {
             $this->unreadNotifications = collect();
-            $this->unreadCount = 0;
+            $this->unreadCount         = 0;
         }
     }
 
     /**
      * Mark a single notification as read and redirect if a URL exists in the notification.
-     *
-     * @param string $notificationId
      */
     public function markAsRead(string $notificationId): void
     {
-        $user = Auth::user();
+        $user         = Auth::user();
         $notification = $user ? $user->notifications()->find($notificationId) : null;
         if ($notification) {
             $notification->markAsRead();
@@ -76,7 +74,7 @@ class NotificationsDropdown extends Component
     {
         return view('livewire.sections.navbar.notifications-dropdown', [
             'unreadNotifications' => $this->unreadNotifications,
-            'unreadCount' => $this->unreadCount,
+            'unreadCount'         => $this->unreadCount,
         ]);
     }
 }

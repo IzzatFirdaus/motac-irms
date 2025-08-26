@@ -11,7 +11,7 @@ use Livewire\WithPagination;
 use Spatie\Permission\Models\Permission;
 
 /**
- * PermissionsIndex Livewire Component
+ * PermissionsIndex Livewire Component.
  *
  * Handles listing, creating, editing, and deleting permissions for the system.
  * Uses Bootstrap 5 theming and expects the blade view at resources/views/livewire/settings/permissions/permissions-index.blade.php.
@@ -23,13 +23,17 @@ class PermissionsIndex extends Component
     use WithPagination;
 
     public bool $showModal = false;
+
     public bool $isEditMode = false;
+
     public ?Permission $editingPermission = null;
 
     public string $name = ''; // Permission name (form input)
 
     public bool $showDeleteConfirmationModal = false;
+
     public ?int $permissionIdToDelete = null;
+
     public string $permissionNameToDelete = '';
 
     protected string $paginationTheme = 'bootstrap';
@@ -51,7 +55,7 @@ class PermissionsIndex extends Component
         abort_unless(Auth::user()?->can('manage_permissions'), 403, __('Tindakan tidak dibenarkan.'));
         $this->resetInputFields();
         $this->isEditMode = false;
-        $this->showModal = true;
+        $this->showModal  = true;
     }
 
     /**
@@ -62,9 +66,9 @@ class PermissionsIndex extends Component
         abort_unless(Auth::user()?->can('manage_permissions'), 403, __('Tindakan tidak dibenarkan.'));
         $this->resetInputFields();
         $this->editingPermission = $permission;
-        $this->name = $permission->name;
-        $this->isEditMode = true;
-        $this->showModal = true;
+        $this->name              = $permission->name;
+        $this->isEditMode        = true;
+        $this->showModal         = true;
     }
 
     /**
@@ -107,10 +111,11 @@ class PermissionsIndex extends Component
         if ($permission) {
             if ($permission->roles()->count() > 0) {
                 session()->flash('error', __('Kebenaran ":name" tidak boleh dipadam kerana ia telah ditugaskan kepada peranan.', ['name' => $permission->name]));
+
                 return;
             }
-            $this->permissionIdToDelete = $id;
-            $this->permissionNameToDelete = $permission->name;
+            $this->permissionIdToDelete        = $id;
+            $this->permissionNameToDelete      = $permission->name;
             $this->showDeleteConfirmationModal = true;
         } else {
             session()->flash('error', __('Kebenaran tidak ditemui.'));
@@ -129,6 +134,7 @@ class PermissionsIndex extends Component
             if ($permission->roles()->count() > 0) {
                 session()->flash('error', __('Kebenaran ":name" tidak boleh dipadam kerana ia telah ditugaskan kepada peranan.', ['name' => $permission->name]));
                 $this->closeDeleteConfirmationModal();
+
                 return;
             }
 
@@ -145,8 +151,8 @@ class PermissionsIndex extends Component
     public function closeDeleteConfirmationModal(): void
     {
         $this->showDeleteConfirmationModal = false;
-        $this->permissionIdToDelete = null;
-        $this->permissionNameToDelete = '';
+        $this->permissionIdToDelete        = null;
+        $this->permissionNameToDelete      = '';
     }
 
     /**
@@ -174,9 +180,9 @@ class PermissionsIndex extends Component
      */
     private function resetInputFields(): void
     {
-        $this->name = '';
+        $this->name              = '';
         $this->editingPermission = new Permission;
-        $this->isEditMode = false;
+        $this->isEditMode        = false;
         $this->resetErrorBag();
         $this->resetValidation();
     }
@@ -187,6 +193,7 @@ class PermissionsIndex extends Component
     public function render()
     {
         $permissions = Permission::orderBy('name')->paginate(10);
+
         return view('livewire.settings.permissions.permissions-index', [
             'permissions' => $permissions,
         ]);

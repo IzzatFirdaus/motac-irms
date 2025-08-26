@@ -19,7 +19,7 @@ class JetstreamServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      * This is where you can customize Jetstream features.
-     * System Design Reference: [cite: 58, 342] (if Jetstream is used)
+     * System Design Reference: [cite: 58, 342] (if Jetstream is used).
      */
     public function boot(): void
     {

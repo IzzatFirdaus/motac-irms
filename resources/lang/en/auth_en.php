@@ -1,4 +1,5 @@
 <?php
+
 // English translations for authentication and login errors
 // Mirrors the structure and intent of auth_ms.php for consistency
 

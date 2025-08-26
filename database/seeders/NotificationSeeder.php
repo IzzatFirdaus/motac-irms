@@ -38,11 +38,11 @@ class NotificationSeeder extends Seeder
         Log::info('Found '.User::count().' Users for potential notification assignment.');
 
         $adminUserForAudit = User::orderBy('id')->first();
-        $auditUserId = $adminUserForAudit?->id;
+        $auditUserId       = $adminUserForAudit?->id;
         if (! $auditUserId) {
             // This case should ideally not be hit if UserSeeder runs first.
             $adminUserForAudit = User::factory()->create(['name' => 'Audit User (NotifSeeder)']);
-            $auditUserId = $adminUserForAudit->id;
+            $auditUserId       = $adminUserForAudit->id;
             Log::info(sprintf('Created a fallback audit user with ID %d for NotificationSeeder blameable fields.', $auditUserId));
         }
 
@@ -66,7 +66,7 @@ class NotificationSeeder extends Seeder
             Log::info(sprintf('Created %d notifications.', $totalNotificationsToCreate));
 
             // Mark some as read
-            $numReadNotifications = (int) ($totalNotificationsToCreate * 0.3);
+            $numReadNotifications    = (int) ($totalNotificationsToCreate * 0.3);
             $notificationsToMarkRead = Notification::whereNull('read_at')
                 ->inRandomOrder()
                 ->limit($numReadNotifications)

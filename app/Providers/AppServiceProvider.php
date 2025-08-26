@@ -11,20 +11,17 @@ use App\Services\LoanTransactionService;
 use App\Services\NotificationService;
 use App\Services\TicketNotificationService;
 use App\Services\UserService;
+use App\Translation\SuffixedTranslator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Translation\FileLoader;
 use Illuminate\Translation\Translator;
-use App\Translation\SuffixedTranslator;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -50,6 +47,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton('translator', function ($app) {
             $loader = $app['translation.loader'];
             $locale = $app['config']['app.locale'];
+
             // Use SuffixedTranslator instead of Laravel's default Translator
             return new SuffixedTranslator($loader, $locale);
         });
@@ -72,6 +70,7 @@ class AppServiceProvider extends ServiceProvider
         // Log missing translation keys for maintenance.
         Lang::handleMissingKeysUsing(function (string $key, array $replacements, string $locale): string {
             Log::warning(sprintf('Missing translation key detected: [%s] for locale [%s].', $key, $locale), ['replacements' => $replacements]);
+
             return $key;
         });
 

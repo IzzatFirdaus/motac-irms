@@ -21,27 +21,26 @@ use Illuminate\Support\Str;
  * - dedicated decision timestamps (approved_at, rejected_at, canceled_at, resubmitted_at)
  * - notes field
  *
- * @property int $id
- * @property string $approvable_type
- * @property int $approvable_id
- * @property int|null $loan_application_id
- * @property int|null $approver_id
- * @property int|string|null $level
- * @property string|null $stage
- * @property int $officer_id
- * @property string $status
- * @property string|null $notes
+ * @property int                             $id
+ * @property string                          $approvable_type
+ * @property int                             $approvable_id
+ * @property int|null                        $loan_application_id
+ * @property int|null                        $approver_id
+ * @property int|string|null                 $level
+ * @property string|null                     $stage
+ * @property int                             $officer_id
+ * @property string                          $status
+ * @property string|null                     $notes
  * @property \Illuminate\Support\Carbon|null $approved_at
  * @property \Illuminate\Support\Carbon|null $rejected_at
  * @property \Illuminate\Support\Carbon|null $canceled_at
  * @property \Illuminate\Support\Carbon|null $resubmitted_at
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
+ * @property int|null                        $created_by
+ * @property int|null                        $updated_by
+ * @property int|null                        $deleted_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- *
  * @property-read \Illuminate\Database\Eloquent\Model $approvable
  * @property-read \App\Models\User|null $officer
  * @property-read \App\Models\User|null $creator
@@ -56,20 +55,30 @@ class Approval extends Model
     use SoftDeletes;
 
     // ---- STATUS CONSTANTS (must match DB check constraint) ----
-    public const STATUS_PENDING   = 'pending';
-    public const STATUS_APPROVED  = 'approved';
-    public const STATUS_REJECTED  = 'rejected';
-    public const STATUS_CANCELED  = 'canceled';
+    public const STATUS_PENDING = 'pending';
+
+    public const STATUS_APPROVED = 'approved';
+
+    public const STATUS_REJECTED = 'rejected';
+
+    public const STATUS_CANCELED = 'canceled';
+
     public const STATUS_FORWARDED = 'forwarded'; // used when forwarded/resubmitted to another officer
 
     // ---- STAGE CONSTANTS (expandable as workflow evolves) ----
-    public const STAGE_PENDING_HOD_REVIEW  = 'pending_hod_review';
-    public const STAGE_FINAL_APPROVAL      = 'final_approval';
+    public const STAGE_PENDING_HOD_REVIEW = 'pending_hod_review';
+
+    public const STAGE_FINAL_APPROVAL = 'final_approval';
+
     public const STAGE_LOAN_SUPPORT_REVIEW = 'loan_support_review';
+
     public const STAGE_LOAN_APPROVER_REVIEW = 'loan_approver_review';
-    public const STAGE_LOAN_BPM_REVIEW     = 'loan_bpm_review';
-    public const STAGE_GENERAL_REVIEW      = 'general_review';
-    public const STAGE_SUPPORT_REVIEW      = 'support_review';
+
+    public const STAGE_LOAN_BPM_REVIEW = 'loan_bpm_review';
+
+    public const STAGE_GENERAL_REVIEW = 'general_review';
+
+    public const STAGE_SUPPORT_REVIEW = 'support_review';
 
     // Human-readable status labels (used by accessors/UI)
     public static array $STATUSES_LABELS = [
@@ -82,13 +91,13 @@ class Approval extends Model
 
     // Human-readable stage labels (used by accessors/UI)
     public static array $STAGES_LABELS = [
-        self::STAGE_PENDING_HOD_REVIEW  => 'Semakan Ketua Jabatan',
-        self::STAGE_FINAL_APPROVAL      => 'Kelulusan Akhir',
-        self::STAGE_LOAN_SUPPORT_REVIEW => 'Semakan Sokongan Pinjaman',
+        self::STAGE_PENDING_HOD_REVIEW   => 'Semakan Ketua Jabatan',
+        self::STAGE_FINAL_APPROVAL       => 'Kelulusan Akhir',
+        self::STAGE_LOAN_SUPPORT_REVIEW  => 'Semakan Sokongan Pinjaman',
         self::STAGE_LOAN_APPROVER_REVIEW => 'Semakan Pelulus Pinjaman',
-        self::STAGE_LOAN_BPM_REVIEW     => 'Semakan BPM Pinjaman',
-        self::STAGE_GENERAL_REVIEW      => 'Semakan Umum',
-        self::STAGE_SUPPORT_REVIEW      => 'Semakan Sokongan',
+        self::STAGE_LOAN_BPM_REVIEW      => 'Semakan BPM Pinjaman',
+        self::STAGE_GENERAL_REVIEW       => 'Semakan Umum',
+        self::STAGE_SUPPORT_REVIEW       => 'Semakan Sokongan',
     ];
 
     // Mass-assignable columns (aligned with migration)
@@ -109,13 +118,13 @@ class Approval extends Model
 
     // Attribute casting
     protected $casts = [
-        'approved_at'   => 'datetime',
-        'rejected_at'   => 'datetime',
-        'canceled_at'   => 'datetime',
-        'resubmitted_at'=> 'datetime',
-        'created_at'    => 'datetime',
-        'updated_at'    => 'datetime',
-        'deleted_at'    => 'datetime',
+        'approved_at'    => 'datetime',
+        'rejected_at'    => 'datetime',
+        'canceled_at'    => 'datetime',
+        'resubmitted_at' => 'datetime',
+        'created_at'     => 'datetime',
+        'updated_at'     => 'datetime',
+        'deleted_at'     => 'datetime',
     ];
 
     /**

@@ -22,8 +22,11 @@ class UserIndex extends Component
     use WithPagination;
 
     public string $search = '';
+
     public ?string $filterRole = null; // Store role name
+
     public ?string $filterStatus = null; // Store user status
+
     public array $roleOptions = [];
 
     protected string $paginationTheme = 'bootstrap';
@@ -102,6 +105,7 @@ class UserIndex extends Component
     public function redirectToCreateUser(): \Illuminate\Http\RedirectResponse
     {
         $this->authorize('create', User::class);
+
         return redirect()->route('settings.users.create'); // Assumes the route exists
     }
 
@@ -112,6 +116,7 @@ class UserIndex extends Component
     {
         $user = User::findOrFail($userId);
         $this->authorize('update', $user);
+
         return redirect()->route('settings.users.edit', $user);
     }
 
@@ -131,7 +136,7 @@ class UserIndex extends Component
     public function render()
     {
         return view('livewire.resource-management.admin.users.user-index', [
-            'usersList' => $this->users,
+            'usersList'      => $this->users,
             'rolesForFilter' => $this->roleOptions,
         ]);
     }

@@ -9,7 +9,7 @@ use Illuminate\View\View;
 use Livewire\Component;
 
 /**
- * Navbar Livewire Component
+ * Navbar Livewire Component.
  *
  * Renders the application navbar, including language switcher and theme toggler.
  * Accepts container and detachment class from the parent layout.
@@ -29,32 +29,30 @@ class Navbar extends Component
      */
     public function mount(string $containerNav = 'container-fluid', string $navbarDetachedClass = ''): void
     {
-        $this->containerNav = $containerNav;
+        $this->containerNav        = $containerNav;
         $this->navbarDetachedClass = $navbarDetachedClass;
     }
 
     /**
      * Get all available locales for the language switcher.
      * Ensures each locale has a flag_code.
-     *
-     * @return array
      */
     private function getAvailableLocales(): array
     {
         $configuredLocales = Config::get('app.available_locales', []);
-        $processedLocales = [];
+        $processedLocales  = [];
 
         foreach ($configuredLocales as $localeKey => $properties) {
-            if (!is_array($properties)) {
+            if (! is_array($properties)) {
                 continue;
             }
 
             // Generate the flag code (e.g., 'my' for ms_MY, 'us' for en_US)
-            $regional = $properties['regional'] ?? '';
-            $parts = explode('_', $regional);
+            $regional    = $properties['regional'] ?? '';
+            $parts       = explode('_', $regional);
             $countryCode = count($parts) === 2 ? strtolower($parts[1]) : null;
 
-            $processedLocales[$localeKey] = $properties;
+            $processedLocales[$localeKey]              = $properties;
             $processedLocales[$localeKey]['flag_code'] = $properties['flag_code'] ?? ($countryCode ?? ($localeKey === 'ms' ? 'my' : 'us'));
         }
 
@@ -63,19 +61,16 @@ class Navbar extends Component
 
     /**
      * Get data for the current/active locale.
-     *
-     * @param array $availableLocales
-     * @return array
      */
     private function getCurrentLocaleData(array $availableLocales): array
     {
-        $currentLocaleKey = App::getLocale();
+        $currentLocaleKey    = App::getLocale();
         $currentLocaleConfig = $availableLocales[$currentLocaleKey] ?? null;
 
         return [
-            'key' => $currentLocaleKey,
+            'key'       => $currentLocaleKey,
             'flag_code' => $currentLocaleConfig['flag_code'] ?? ($currentLocaleKey === 'ms' ? 'my' : 'us'),
-            'name' => $currentLocaleConfig['name'] ?? Str::upper($currentLocaleKey),
+            'name'      => $currentLocaleConfig['name']      ?? Str::upper($currentLocaleKey),
         ];
     }
 
@@ -84,14 +79,14 @@ class Navbar extends Component
      */
     public function render(): View
     {
-        $availableLocales = $this->getAvailableLocales();
+        $availableLocales  = $this->getAvailableLocales();
         $currentLocaleData = $this->getCurrentLocaleData($availableLocales);
 
         return view('livewire.sections.navbar.navbar', [
-            'containerNav' => $this->containerNav,
+            'containerNav'        => $this->containerNav,
             'navbarDetachedClass' => $this->navbarDetachedClass,
-            'availableLocales' => $availableLocales,
-            'currentLocaleData' => $currentLocaleData,
+            'availableLocales'    => $availableLocales,
+            'currentLocaleData'   => $currentLocaleData,
         ]);
     }
 }

@@ -19,12 +19,13 @@ final class EquipmentOverdueNotification extends Notification implements ShouldQ
     use Queueable;
 
     private LoanApplication $loanApplication;
+
     private int $daysOverdue;
 
     public function __construct(LoanApplication $loanApplication, int $daysOverdue) // Modified constructor
     {
         $this->loanApplication = $loanApplication->loadMissing(['user', 'responsibleOfficer']);
-        $this->daysOverdue = $daysOverdue;
+        $this->daysOverdue     = $daysOverdue;
     }
 
     public function via(User $notifiable): array
@@ -34,7 +35,7 @@ final class EquipmentOverdueNotification extends Notification implements ShouldQ
 
     public function toMail(User $notifiable): MailMessage
     {
-        $applicantName = $notifiable->name ?? __('Pemohon'); // $notifiable is the direct recipient
+        $applicantName = $notifiable->name          ?? __('Pemohon'); // $notifiable is the direct recipient
         $applicationId = $this->loanApplication->id ?? 'N/A';
         // If the notification is also sent to the responsible officer, their name can be mentioned.
         // $responsibleOfficerName = $this->loanApplication->responsibleOfficer?->name ?? $this->loanApplication->user?->name ?? __('Pegawai Bertanggungjawab');
@@ -43,23 +44,23 @@ final class EquipmentOverdueNotification extends Notification implements ShouldQ
             ? Carbon::parse($this->loanApplication->loan_end_date)->format(config('app.date_format', 'd/m/Y'))
             : __('Tidak dinyatakan');
 
-        $mailMessage = (new MailMessage())
-            ->subject(__("Peringatan: Peralatan Pinjaman Lewat Pulang (:days hari) - Permohonan #:id", ['days' => $this->daysOverdue, 'id' => $applicationId]))
+        $mailMessage = (new MailMessage)
+            ->subject(__('Peringatan: Peralatan Pinjaman Lewat Pulang (:days hari) - Permohonan #:id', ['days' => $this->daysOverdue, 'id' => $applicationId]))
             ->greeting(__('Salam Sejahtera, :name,', ['name' => $applicantName]))
             ->error() // Marks the email as important/error level
             ->line(__('Peralatan yang dipinjam di bawah Permohonan Pinjaman Peralatan ICT **#:id** telah lewat dipulangkan sebanyak **:days hari**.', ['id' => $applicationId, 'days' => $this->daysOverdue]))
-            ->line(__("Tarikh pemulangan yang dijangka adalah pada **:date**.", ['date' => $expectedReturnDate]))
+            ->line(__('Tarikh pemulangan yang dijangka adalah pada **:date**.', ['date' => $expectedReturnDate]))
             ->line('')
             ->line(__('Sila pulangkan peralatan tersebut dengan kadar **SEGERA** kepada Unit ICT atau pegawai yang bertanggungjawab.'));
 
         $applicationUrl = '#';
-        $routeName = 'resource-management.my-applications.loan.show'; // Standardized route
+        $routeName      = 'resource-management.my-applications.loan.show'; // Standardized route
         if ($this->loanApplication->id && Route::has($routeName)) {
             try {
                 $applicationUrl = route($routeName, $this->loanApplication->id);
             } catch (\Exception $e) {
-                Log::error('Error generating URL for EquipmentOverdueNotification: ' . $e->getMessage(), [
-                    'exception' => $e,
+                Log::error('Error generating URL for EquipmentOverdueNotification: '.$e->getMessage(), [
+                    'exception'      => $e,
                     'application_id' => $this->loanApplication->id ?? null,
                 ]);
                 $applicationUrl = '#'; // Fallback
@@ -79,19 +80,19 @@ final class EquipmentOverdueNotification extends Notification implements ShouldQ
 
     public function toArray(User $notifiable): array
     {
-        $applicationId = $this->loanApplication->id ?? null;
+        $applicationId      = $this->loanApplication->id ?? null;
         $expectedReturnDate = $this->loanApplication->loan_end_date
             ? Carbon::parse($this->loanApplication->loan_end_date)->format(config('app.date_format', 'd/m/Y'))
             : __('Tidak dinyatakan');
 
         $applicationUrl = '#';
-        $routeName = 'resource-management.my-applications.loan.show';
+        $routeName      = 'resource-management.my-applications.loan.show';
         if ($applicationId && Route::has($routeName)) {
             try {
                 $applicationUrl = route($routeName, $applicationId);
             } catch (\Exception $e) {
-                Log::error('Error generating URL for EquipmentOverdueNotification toArray: ' . $e->getMessage(), [
-                    'exception' => $e,
+                Log::error('Error generating URL for EquipmentOverdueNotification toArray: '.$e->getMessage(), [
+                    'exception'      => $e,
                     'application_id' => $applicationId,
                 ]);
                 $applicationUrl = '#'; // Fallback
@@ -99,16 +100,16 @@ final class EquipmentOverdueNotification extends Notification implements ShouldQ
         }
 
         return [
-            'loan_application_id' => $applicationId,
-            'applicant_id' => $this->loanApplication->user_id ?? null,
+            'loan_application_id'    => $applicationId,
+            'applicant_id'           => $this->loanApplication->user_id                ?? null,
             'responsible_officer_id' => $this->loanApplication->responsible_officer_id ?? null,
-            'status' => 'overdue',
-            'days_overdue' => $this->daysOverdue,
-            'subject' => __("Peralatan Lewat Pulang (:days hari)", ['days' => $this->daysOverdue]) . ($applicationId !== null ? " (#{$applicationId})" : ''),
-            'message' => __("Peralatan untuk Permohonan #:id telah lewat dipulangkan :days hari. Tarikh pulang jangkaan: :date.", ['id' => $applicationId ?? 'N/A', 'days' => $this->daysOverdue, 'date' => $expectedReturnDate]),
-            'url' => ($applicationUrl !== '#') ? $applicationUrl : null,
-            'expected_return_date' => $expectedReturnDate,
-            'icon' => 'ti ti-alarm-snooze',
+            'status'                 => 'overdue',
+            'days_overdue'           => $this->daysOverdue,
+            'subject'                => __('Peralatan Lewat Pulang (:days hari)', ['days' => $this->daysOverdue]).($applicationId !== null ? " (#{$applicationId})" : ''),
+            'message'                => __('Peralatan untuk Permohonan #:id telah lewat dipulangkan :days hari. Tarikh pulang jangkaan: :date.', ['id' => $applicationId ?? 'N/A', 'days' => $this->daysOverdue, 'date' => $expectedReturnDate]),
+            'url'                    => ($applicationUrl !== '#') ? $applicationUrl : null,
+            'expected_return_date'   => $expectedReturnDate,
+            'icon'                   => 'ti ti-alarm-snooze',
         ];
     }
 

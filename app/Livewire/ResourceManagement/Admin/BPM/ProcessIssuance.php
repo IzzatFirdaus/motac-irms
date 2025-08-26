@@ -5,7 +5,6 @@ namespace App\Livewire\ResourceManagement\Admin\BPM;
 use App\Models\Equipment;
 use App\Models\LoanApplication;
 use App\Models\LoanTransaction;
-use App\Models\User;
 use App\Services\LoanTransactionService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Collection;
@@ -23,13 +22,19 @@ class ProcessIssuance extends Component
     use AuthorizesRequests;
 
     public LoanApplication $loanApplication;
+
     public array $allAccessoriesList = [];
+
     public $availableEquipment = [];
+
     public Collection $potentialRecipients;
+
     public array $issueItems = [];
 
     public $receiving_officer_id;
+
     public $transaction_date;
+
     public string $issue_notes = '';
 
     /**
@@ -38,11 +43,11 @@ class ProcessIssuance extends Component
     protected function messages(): array
     {
         return [
-            'issueItems.min' => __('Sekurang-kurangnya satu baris item mesti disediakan untuk pengeluaran.'),
+            'issueItems.min'                     => __('Sekurang-kurangnya satu baris item mesti disediakan untuk pengeluaran.'),
             'issueItems.*.equipment_id.required' => __('Sila pilih satu peralatan spesifik (Tag ID) untuk Baris #:position.'),
             'issueItems.*.equipment_id.distinct' => __('Peralatan yang sama (Tag ID) tidak boleh dipilih lebih dari sekali.'),
-            'receiving_officer_id.required' => __('Sila pilih pegawai yang menerima peralatan.'),
-            'transaction_date.required' => __('Sila tetapkan tarikh pengeluaran.'),
+            'receiving_officer_id.required'      => __('Sila pilih pegawai yang menerima peralatan.'),
+            'transaction_date.required'          => __('Sila tetapkan tarikh pengeluaran.'),
         ];
     }
 
@@ -54,7 +59,7 @@ class ProcessIssuance extends Component
         $loanApplicationId = $this->loanApplication->id;
 
         return [
-            'issueItems' => ['required', 'array', 'min:1'],
+            'issueItems'                            => ['required', 'array', 'min:1'],
             'issueItems.*.loan_application_item_id' => [
                 'required', 'integer', Rule::exists('loan_application_items', 'id')->where('loan_application_id', $loanApplicationId),
             ],
@@ -62,9 +67,9 @@ class ProcessIssuance extends Component
                 'required', 'distinct', Rule::exists('equipment', 'id')->where('status', Equipment::STATUS_AVAILABLE),
             ],
             'issueItems.*.accessories_checklist' => ['nullable', 'array'],
-            'receiving_officer_id' => ['required', 'integer', Rule::exists('users', 'id')],
-            'transaction_date' => ['required', 'date_format:Y-m-d'],
-            'issue_notes' => ['nullable', 'string', 'max:2000'],
+            'receiving_officer_id'               => ['required', 'integer', Rule::exists('users', 'id')],
+            'transaction_date'                   => ['required', 'date_format:Y-m-d'],
+            'issue_notes'                        => ['nullable', 'string', 'max:2000'],
         ];
     }
 
@@ -82,7 +87,7 @@ class ProcessIssuance extends Component
         $this->authorize('processIssuance', $this->loanApplication);
 
         $this->allAccessoriesList = config('motac.loan_accessories_list', []);
-        $this->transaction_date = now()->format('Y-m-d');
+        $this->transaction_date   = now()->format('Y-m-d');
 
         // List of recipients: applicant + responsible officer
         $this->potentialRecipients = collect([$this->loanApplication->user, $this->loanApplication->responsibleOfficer])
@@ -99,9 +104,9 @@ class ProcessIssuance extends Component
                 for ($i = 0; $i < $balanceToIssue; $i++) {
                     $this->issueItems[] = [
                         'loan_application_item_id' => $approvedItem->id,
-                        'equipment_type' => $approvedItem->equipment_type,
-                        'equipment_id' => null,
-                        'accessories_checklist' => [],
+                        'equipment_type'           => $approvedItem->equipment_type,
+                        'equipment_id'             => null,
+                        'accessories_checklist'    => [],
                     ];
                 }
             }
@@ -117,27 +122,28 @@ class ProcessIssuance extends Component
 
         if ($this->issueItems === []) {
             $this->addError('issueItems', __('Tiada baki peralatan untuk dikeluarkan bagi permohonan ini.'));
+
             return null;
         }
 
-        $validatedData = $this->validate();
+        $validatedData  = $this->validate();
         $issuingOfficer = Auth::user();
 
         try {
             // Prepare payload for the service
             $itemsPayload = collect($validatedData['issueItems'])->map(function ($item): array {
                 return [
-                    'equipment_id' => $item['equipment_id'],
-                    'loan_application_item_id' => $item['loan_application_item_id'],
-                    'quantity_issued' => 1,
+                    'equipment_id'               => $item['equipment_id'],
+                    'loan_application_item_id'   => $item['loan_application_item_id'],
+                    'quantity_issued'            => 1,
                     'accessories_checklist_item' => $item['accessories_checklist'] ?? [],
                 ];
             })->toArray();
 
             $transactionDetails = [
                 'receiving_officer_id' => $validatedData['receiving_officer_id'],
-                'transaction_date' => $validatedData['transaction_date'],
-                'issue_notes' => $validatedData['issue_notes'] ?? null,
+                'transaction_date'     => $validatedData['transaction_date'],
+                'issue_notes'          => $validatedData['issue_notes'] ?? null,
             ];
 
             $loanTransactionService->processNewIssue(
@@ -148,6 +154,7 @@ class ProcessIssuance extends Component
             );
 
             session()->flash('success', __('Rekod pengeluaran peralatan telah berjaya disimpan.'));
+
             return $this->redirectRoute('loan-applications.show', ['loan_application' => $this->loanApplication->id], navigate: true);
 
         } catch (Throwable $throwable) {

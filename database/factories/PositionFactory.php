@@ -50,19 +50,19 @@ class PositionFactory extends Factory
         // Static caches for Grade IDs and User IDs (for audit fields)
         static $gradeIds, $userIds, $msFaker;
 
-        if (!isset($gradeIds)) {
+        if (! isset($gradeIds)) {
             $gradeIds = Grade::pluck('id')->all();
         }
-        if (!isset($userIds)) {
+        if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        if (!isset($msFaker)) {
+        if (! isset($msFaker)) {
             $msFaker = \Faker\Factory::create('ms_MY');
         }
 
         // Pick random grade/user IDs if available
-        $gradeId = !empty($gradeIds) ? Arr::random($gradeIds) : null;
-        $auditUserId = !empty($userIds) ? Arr::random($userIds) : null;
+        $gradeId     = ! empty($gradeIds) ? Arr::random($gradeIds) : null;
+        $auditUserId = ! empty($userIds) ? Arr::random($userIds) : null;
 
         $createdAt = Carbon::parse($this->faker->dateTimeBetween('-3 years', 'now'));
         $updatedAt = Carbon::parse($this->faker->dateTimeBetween($createdAt, 'now'));
@@ -73,16 +73,16 @@ class PositionFactory extends Factory
         $positionName = $this->faker->randomElement(self::$motacPositions);
 
         return [
-            'name' => $positionName,
+            'name'        => $positionName,
             'description' => $msFaker->optional(0.7)->sentence(10, true),
-            'is_active' => $this->faker->boolean(90),
-            'grade_id' => $gradeId,
-            'created_by' => $auditUserId,
-            'updated_by' => $auditUserId,
-            'deleted_by' => $isDeleted ? $auditUserId : null,
-            'created_at' => $createdAt,
-            'updated_at' => $updatedAt,
-            'deleted_at' => $deletedAt,
+            'is_active'   => $this->faker->boolean(90),
+            'grade_id'    => $gradeId,
+            'created_by'  => $auditUserId,
+            'updated_by'  => $auditUserId,
+            'deleted_by'  => $isDeleted ? $auditUserId : null,
+            'created_at'  => $createdAt,
+            'updated_at'  => $updatedAt,
+            'deleted_at'  => $deletedAt,
         ];
     }
 
@@ -108,14 +108,14 @@ class PositionFactory extends Factory
     public function deleted(): static
     {
         static $userIds;
-        if (!isset($userIds)) {
+        if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $deleterId = !empty($userIds) ? Arr::random($userIds) : null;
+        $deleterId = ! empty($userIds) ? Arr::random($userIds) : null;
 
         return $this->state([
             'deleted_at' => now(),
-            'is_active' => false,
+            'is_active'  => false,
             'deleted_by' => $deleterId,
         ]);
     }
@@ -126,6 +126,7 @@ class PositionFactory extends Factory
     public function forGrade(Grade|int $grade): static
     {
         $gradeId = $grade instanceof Grade ? $grade->id : $grade;
+
         return $this->state([
             'grade_id' => $gradeId,
         ]);

@@ -1,4 +1,5 @@
 <?php
+
 // Bahasa Melayu translations for password reset and recovery
 // Disusun untuk mesej berkaitan tetapan semula kata laluan
 

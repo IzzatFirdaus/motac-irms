@@ -31,33 +31,33 @@ class UserFactory extends Factory
     {
         // Static caches for foreign key IDs to minimize queries during batch seeding
         static $departmentIds, $gradeIds, $positionIds;
-        if (!isset($departmentIds)) {
+        if (! isset($departmentIds)) {
             $departmentIds = Department::pluck('id')->all();
         }
-        if (!isset($gradeIds)) {
+        if (! isset($gradeIds)) {
             $gradeIds = Grade::pluck('id')->all();
         }
-        if (!isset($positionIds)) {
+        if (! isset($positionIds)) {
             $positionIds = Position::pluck('id')->all();
         }
 
         // Use a static ms_MY faker for localized names
         static $msFaker;
-        if (!$msFaker) {
+        if (! $msFaker) {
             $msFaker = \Faker\Factory::create('ms_MY');
         }
 
         // Fallback faker instance in case $this->faker is null (can happen during early seeding)
         $faker = $this->faker ?? \Faker\Factory::create();
         // Defensive: ensure $faker is an object with expected methods (some test harnesses may set it to null)
-        if (!is_object($faker) || !method_exists($faker, 'bothify')) {
+        if (! is_object($faker) || ! method_exists($faker, 'bothify')) {
             $faker = \Faker\Factory::create();
         }
 
         // Pick random IDs from cached arrays, fallback to null if empty
-        $departmentId = !empty($departmentIds) ? Arr::random($departmentIds) : null;
-        $gradeId = !empty($gradeIds) ? Arr::random($gradeIds) : null;
-        $positionId = !empty($positionIds) ? Arr::random($positionIds) : null;
+        $departmentId = ! empty($departmentIds) ? Arr::random($departmentIds) : null;
+        $gradeId      = ! empty($gradeIds) ? Arr::random($gradeIds) : null;
+        $positionId   = ! empty($positionIds) ? Arr::random($positionIds) : null;
 
         // Use $msFaker for Malaysian names
         $name = $msFaker->name();
@@ -91,19 +91,19 @@ class UserFactory extends Factory
 
         return [
             // Core authentication columns
-            'name' => $name,
-            'email' => $faker->unique()->safeEmail(),
+            'name'              => $name,
+            'email'             => $faker->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'password' => Hash::make('password'), // Default password for all factory users
-            'remember_token' => Str::random(10),
+            'password'          => Hash::make('password'), // Default password for all factory users
+            'remember_token'    => Str::random(10),
 
             // Domain-specific columns (MOTAC additions)
-            'title' => $titleKey,
+            'title'                 => $titleKey,
             'identification_number' => $identificationNumber,
-            'passport_number' => $passportNumber,
-            'department_id' => $departmentId,
-            'position_id' => $positionId,
-            'grade_id' => $gradeId,
+            'passport_number'       => $passportNumber,
+            'department_id'         => $departmentId,
+            'position_id'           => $positionId,
+            'grade_id'              => $gradeId,
 
             // Status with fallback values - choose a stable default that matches migrations
             'status' => User::STATUS_ACTIVE,
@@ -145,6 +145,7 @@ class UserFactory extends Factory
     public function pending(): static
     {
         $pendingStatus = defined('App\Models\User::STATUS_PENDING') ? User::STATUS_PENDING : 'pending';
+
         return $this->state(fn (array $attributes): array => [
             'status' => $pendingStatus,
         ]);
@@ -206,7 +207,7 @@ class UserFactory extends Factory
         return $this->afterCreating(function (User $user): void {
             if (method_exists($user, 'assignRole')) {
                 $user->assignRole('HOD');
-                if (method_exists($user, 'hasRole') && !$user->hasRole('Approver')) {
+                if (method_exists($user, 'hasRole') && ! $user->hasRole('Approver')) {
                     $user->assignRole('Approver');
                 }
             }
@@ -220,9 +221,9 @@ class UserFactory extends Factory
     public function deleted(): static
     {
         return $this->state(fn (array $attributes): array => [
-            'deleted_at' => now(),
-            'email' => 'deleted-' . ($attributes['email'] ?? Str::uuid().'@deleted.local'),
-            'identification_number' => 'deleted-' . ($attributes['identification_number'] ?? Str::random(12)),
+            'deleted_at'            => now(),
+            'email'                 => 'deleted-'.($attributes['email'] ?? Str::uuid().'@deleted.local'),
+            'identification_number' => 'deleted-'.($attributes['identification_number'] ?? Str::random(12)),
         ]);
     }
 }

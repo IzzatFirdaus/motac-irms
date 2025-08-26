@@ -13,14 +13,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * Position Model (Jawatan).
  *
- * @property int $id
- * @property string $name
- * @property string|null $description
- * @property bool $is_active
- * @property int|null $grade_id
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
+ * @property int                             $id
+ * @property string                          $name
+ * @property string|null                     $description
+ * @property bool                            $is_active
+ * @property int|null                        $grade_id
+ * @property int|null                        $created_by
+ * @property int|null                        $updated_by
+ * @property int|null                        $deleted_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
@@ -42,8 +42,8 @@ class Position extends Model
     ];
 
     protected $casts = [
-        'is_active' => 'boolean',
-        'grade_id' => 'integer',
+        'is_active'  => 'boolean',
+        'grade_id'   => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
@@ -80,10 +80,12 @@ class Position extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
     public function updater(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
+
     public function deleter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by');
@@ -98,6 +100,7 @@ class Position extends Model
             return $query;
         }
         $searchTerm = '%'.$term.'%';
+
         return $query->where(function ($subQuery) use ($searchTerm) {
             $subQuery->where($this->getTable().'.name', 'like', $searchTerm)
                 ->orWhere($this->getTable().'.description', 'like', $searchTerm);

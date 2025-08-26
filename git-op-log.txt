@@ -1,0 +1,124 @@
+﻿=== Git operation log started 08/26/2025 21:28:28 ===
+Working dir: C:\XAMPP\htdocs\MOTAC_ICT_LOAN_HRMS
+--- Git status ---
+## release/v4.0...canonical/release/v4.0
+?? git-op-log.txt
+--- Ensure pint/composer ---
+vendor/bin/pint exists; skipping composer install
+--- Run pint if available ---
+
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ Laravel  
+    PASS   ................................................................................................................................................................................................................................ 0 files  
+
+--- Prepare feature branch ---
+git : fatal: a branch named 'feature/centralise-css-tokens' already exists
+At line:4 char:3
++   git checkout -b feature/centralise-css-tokens 2>&1 | Out-File -File ...
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (fatal: a branch... already exists:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+--- Staging files ---
+Staged:
+--- Commit ---
+On branch release/v4.0
+Your branch is up to date with 'canonical/release/v4.0'.
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	git-op-log.txt
+
+nothing added to commit but untracked files present (use "git add" to track)
+--- Push feature to canonical ---
+branch 'feature/centralise-css-tokens' set up to track 'canonical/feature/centralise-css-tokens'.
+git : Everything up-to-date
+At line:1 char:1
++ git push canonical feature/centralise-css-tokens --set-upstream 2>&1  ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Everything up-to-date:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+--- Fetch canonical ---
+--- Checkout release/v4.0 and reset ---
+Your branch is up to date with 'canonical/release/v4.0'.
+git : Already on 'release/v4.0'
+At line:1 char:1
++ git checkout release/v4.0 2>&1 | Out-File -FilePath $log -Append -Enc ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Already on 'release/v4.0':String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+HEAD is now at d451fdb Merge feature/centralise-css-tokens into release/v4.0 (auto-resolve: prefer feature changes)
+--- Merge feature into release/v4.0 (-X theirs) ---
+Already up to date.
+--- Capture HEAD/merge commit ---
+d451fdb
+d451fdb Merge feature/centralise-css-tokens into release/v4.0 (auto-resolve: prefer feature changes)
+70b3ae0 Centralise CSS tokens: move navbar tokens to variables.css and remove duplicate :root from navbar.css
+cd6dc7c Adds bare mirrored backup of motac-irms-v3.git
+dc24e81 Merge feature/centralise-css-tokens into release/v4.0 (auto-resolve: prefer feature changes)
+d17baa3 Add dark-mode sidebar tokens to variables.css
+7f22599 Centralize CSS tokens in variables.css and update component CSS
+--- Push release to canonical ---
+git : Everything up-to-date
+At line:1 char:1
++ git push canonical release/v4.0 2>&1 | Out-File -FilePath $log -Appen ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Everything up-to-date:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+--- Final branch list ---
+  backup/auto-resolve-incoming-20250826070608                       3874237 Update LoanApplicationFactory to use renamed constants and restructure LoanTransactionSeeder for clarity and efficiency.
+  backup/auto-resolve-incoming-20250826070638                       3874237 Update LoanApplicationFactory to use renamed constants and restructure LoanTransactionSeeder for clarity and efficiency.
+  backup/before-final-resolve-20250826083135                        3ba572e Refactor user dashboard to exclusively render Livewire dashboard component and fix LoanTransactionSeeder TypeError for successful database seeding and role recognition.
+  backup/canonical-release-v4.0-20250826                            8e580da [canonical/release/v4.0: behind 220] Add comprehensive SRS documentation for MOTAC IRMS including diagrams, use cases, and data models
+  backup/force-incoming-20250826070803                              3874237 Update LoanApplicationFactory to use renamed constants and restructure LoanTransactionSeeder for clarity and efficiency.
+  backup/force-incoming-complete-20250826071601                     d13b3a6 fix(loans): Resolve authorization and database errors in services and policies to pass all feature tests.
+  backup/force-incoming-final-20250826070908                        3874237 Update LoanApplicationFactory to use renamed constants and restructure LoanTransactionSeeder for clarity and efficiency.
+  backup/merge-intermediate-20250826065514                          492a74e Merge migration/rebased-to-release-v4.0-20250826 into release/v4.0 (automated)
+  backup/rebase-before-auto-resolve-20250826070122                  3429565 Refactor and fix the end-to-end ICT loan workflow, simplifying the approval process and improving the issuance, return, and dashboard components for BPM staff.
+  backup/rebase-before-auto-resolve-20250826070227                  def8a96 Fixes loan application creation bugs and refactors the module's views to correctly implement Bootstrap dark mode theming and resolve UI color issues.
+  backup/rebase-progress-20250826084203                             9f48e4e fix: resolve merge conflicts in PHP files
+  backup/restore-before-files-20250826082408                        3ba572e Refactor user dashboard to exclusively render Livewire dashboard component and fix LoanTransactionSeeder TypeError for successful database seeding and role recognition.
+  feat/loan-transactions-views                                      f2e1293 [origin/feat/loan-transactions-views] feat(views): add loan-transactions pages and phpstan bootstrap
+  feat/vite-migration                                               78c84b7 [origin/feat/vite-migration] feat(build): add Vite config, app CSS and switch scripts
+  feature/centralise-css-tokens                                     70b3ae0 [canonical/feature/centralise-css-tokens] Centralise CSS tokens: move navbar tokens to variables.css and remove duplicate :root from navbar.css
+  feature/centralize-css-tokens                                     06daa78 chore(css): remove duplicate :root fallbacks; use central variables.css
+  feature/myds-tokens-and-menu-filter                               72747d5 feat(helpdesk, loan, dashboard): align routes, Livewire API, factories, and notifications for tests\n\n- routes/web.php: switch /dashboard to controller-based, add helpdesk TicketController routes + legacy alias, add loan-applications.store, approvals.recordDecision alias, widen admin middleware to include BPM Staff, align helpdesk admin route name\n- Livewire Helpdesk Admin: add openEditModal, editStatus/editAssignedTo, updateTicket, statusFilter/categoryFilter proxies\n- EquipmentFactory: ensure related FKs exist to avoid constraint violations in tests\n- TicketNotificationService: implement TicketEscalatedNotification and send to IT Admins\n- Add dashboard view alias file and translations scaffold\n- Misc: menu filter + navbar gating maintained\n\nRefs: MenuAuthorizationTest green; progressing on full suite
+  fix/dashboard-access-tests-20250825                               6326317 [origin/fix/dashboard-access-tests-20250825] Fix dashboard access tests: correct role assignment and guard usage (2025-08-25)
+  fix/views-auth-and-transactions                                   334c1d9 [origin/fix/views-auth-and-transactions] fix(views): replace mix() with asset(), route corrections and resolve email-accounts conflict
+  main                                                              61a8d96 [origin/main: ahead 1] fix: resolve merge conflicts in PHP files
+  migration/main-resolved-20250826                                  f1bab85 6/6/25 edits ict loan application components
+  migration/rebased-to-release-v4.0-20250826                        f1bab85 6/6/25 edits ict loan application components
+  mirrored/motac-irms-v3-HEAD                                       1459c8e Resolve merge conflicts after merging release/v4.0 into main (2025-08-25)
+  mirrored/motac-irms-v3-docs-clean-directories-md-20250825         d5220ab docs: clean and normalize _documentation/DIRECTORIES.md
+  mirrored/motac-irms-v3-docs-recreate-directories-md-20250825      369ddec docs: recreate lint-clean DIRECTORIES.md
+  mirrored/motac-irms-v3-feat-loan-transactions-views               f2e1293 feat(views): add loan-transactions pages and phpstan bootstrap
+  mirrored/motac-irms-v3-feat-vite-migration                        78c84b7 feat(build): add Vite config, app CSS and switch scripts
+  mirrored/motac-irms-v3-feature-add-instructions-and-gitignore     3192adc docs: add instructions file and gitignore sqlite DB
+  mirrored/motac-irms-v3-feature-add-loan-migration-20250422        aee53fa feat(migration): add create_loan_applications migration (2025_04_22)
+  mirrored/motac-irms-v3-feature-centralise-css-tokens              b1904b8 Centralize CSS tokens in variables.css and refactor custom.css
+  mirrored/motac-irms-v3-feature-docs-update-2025                   3b2097d docs: update user/org data schedule documentation
+  mirrored/motac-irms-v3-feature-finalize-docs-move-20250825        a2b9c8b chore(docs): finalize move of markdown files into _documentation (flattened)
+  mirrored/motac-irms-v3-feature-migrations-tickets-sync            3192838 fix(tests): defensive faker fallback in UserFactory to avoid null faker
+  mirrored/motac-irms-v3-feature-models-update                      2aee4f1 feat(models): update Department, Notification, and User models
+  mirrored/motac-irms-v3-feature-move-md-to-_documentation-20250825 6c61d4b chore(docs): move all markdown files into _documentation (2025-08-25)
+  mirrored/motac-irms-v3-feature-move-md-to-documentation           d7c0322 chore(docs): move all .md files into MOTAC_ICT_LOAN_HRMS_documentation
+  mirrored/motac-irms-v3-feature-package-update                     e9d3667 chore(package): update package.json changes
+  mirrored/motac-irms-v3-feature-public-assets-update               b155f7d chore(assets): update public assets and mix-manifest
+  mirrored/motac-irms-v3-feature-v4.0-helpdesk-sla-fixes            629e947 Helpdesk SLA, factories, notification, and documentation fixes for v4.0
+  mirrored/motac-irms-v3-fix-dashboard-access-tests-20250825        6326317 Fix dashboard access tests: correct role assignment and guard usage (2025-08-25)
+  mirrored/motac-irms-v3-fix-flatten-docs-nesting                   4711bf7 chore(docs): flatten nested _documentation directories
+  mirrored/motac-irms-v3-fix-views-auth-and-transactions            334c1d9 fix(views): replace mix() with asset(), route corrections and resolve email-accounts conflict
+  mirrored/motac-irms-v3-main                                       1459c8e Resolve merge conflicts after merging release/v4.0 into main (2025-08-25)
+  mirrored/motac-irms-v3-release-v4.0                               d3c9f29 merge origin/release/v4.0 into release/v4.0-reconciled-ours (prefer ours)
+  mirrored/motac-irms-v3-release-v4.0-local-changes                 99a3830 chore: merge fix/views-auth-and-transactions into release/v4.0
+  mirrored/motac-irms-v3-release-v4.0-reconciled-ours               d3c9f29 merge origin/release/v4.0 into release/v4.0-reconciled-ours (prefer ours)
+  mirrored/motac-irms-v3-tailwind-fix                               0a7119e fix: Tailwind config, document SCSS warnings, update MYDS design docs, and vendor asset hashes for v4.0 compatibility
+* release/v4.0                                                      d451fdb [canonical/release/v4.0] Merge feature/centralise-css-tokens into release/v4.0 (auto-resolve: prefer feature changes)
+  release/v4.0-backup-pre-merge                                     99a3830 chore: merge fix/views-auth-and-transactions into release/v4.0
+  release/v4.0-local-changes                                        99a3830 [origin/release/v4.0-local-changes] chore: merge fix/views-auth-and-transactions into release/v4.0
+  release/v4.0-reconciled-ours                                      d3c9f29 [origin/release/v4.0-reconciled-ours] merge origin/release/v4.0 into release/v4.0-reconciled-ours (prefer ours)
+  wip/commit-notification-phpstan                                   add84e7 wip: persist local edits to NotificationService.php and phpstan.neon before merging
+=== END: 08/26/2025 21:28:38 ===

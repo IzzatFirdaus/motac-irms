@@ -13,17 +13,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * Represents job grades in the system. Used for user profiles, positions, and approval levels.
  *
- * @property int $id
- * @property string $name
- * @property int|null $level
- * @property int|null $position_id
- * @property int|null $min_approval_grade_id
- * @property bool $is_approver_grade
- * @property string|null $description
- * @property string|null $service_scheme
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
+ * @property int                             $id
+ * @property string                          $name
+ * @property int|null                        $level
+ * @property int|null                        $position_id
+ * @property int|null                        $min_approval_grade_id
+ * @property bool                            $is_approver_grade
+ * @property string|null                     $description
+ * @property string|null                     $service_scheme
+ * @property int|null                        $created_by
+ * @property int|null                        $updated_by
+ * @property int|null                        $deleted_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
@@ -54,13 +54,13 @@ class Grade extends Model
     ];
 
     protected $casts = [
-        'level' => 'integer',
-        'position_id' => 'integer',
+        'level'                 => 'integer',
+        'position_id'           => 'integer',
         'min_approval_grade_id' => 'integer',
-        'is_approver_grade' => 'boolean',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-        'deleted_at' => 'datetime',
+        'is_approver_grade'     => 'boolean',
+        'created_at'            => 'datetime',
+        'updated_at'            => 'datetime',
+        'deleted_at'            => 'datetime',
     ];
 
     /**

@@ -69,7 +69,7 @@ class TicketControllerTest extends TestCase
         $priority = HelpdeskPriority::first();
 
         $data = [
-            'title' => 'Cannot print to printer',
+            'title'       => 'Cannot print to printer',
             'description' => 'The office printer is not responding.',
             'category_id' => $category->id,
             'priority_id' => $priority->id,
@@ -82,7 +82,7 @@ class TicketControllerTest extends TestCase
 
         $response->assertRedirect();
         $this->assertDatabaseHas('helpdesk_tickets', [
-            'title' => 'Cannot print to printer',
+            'title'   => 'Cannot print to printer',
             'user_id' => $user->id,
         ]);
         Storage::disk('public')->assertExists(
@@ -110,13 +110,13 @@ class TicketControllerTest extends TestCase
         $this->actingAs($user);
         $ticket = HelpdeskTicket::factory()->create([
             'user_id' => $user->id,
-            'title' => 'Old title',
+            'title'   => 'Old title',
         ]);
         $category = HelpdeskCategory::first();
         $priority = HelpdeskPriority::first();
 
         $response = $this->put(route('helpdesk.tickets.update', $ticket), [
-            'title' => 'New title',
+            'title'       => 'New title',
             'description' => 'Updated description',
             'category_id' => $category->id,
             'priority_id' => $priority->id,
@@ -124,8 +124,8 @@ class TicketControllerTest extends TestCase
         $response->assertRedirect(route('helpdesk.tickets.show', $ticket));
 
         $this->assertDatabaseHas('helpdesk_tickets', [
-            'id' => $ticket->id,
-            'title' => 'New title',
+            'id'          => $ticket->id,
+            'title'       => 'New title',
             'description' => 'Updated description',
         ]);
     }
@@ -148,7 +148,7 @@ class TicketControllerTest extends TestCase
     /** @test */
     public function user_cannot_update_others_ticket()
     {
-        $user = User::factory()->create();
+        $user      = User::factory()->create();
         $otherUser = User::factory()->create();
         $this->actingAs($user);
         $ticket = HelpdeskTicket::factory()->create(['user_id' => $otherUser->id]);
@@ -162,7 +162,7 @@ class TicketControllerTest extends TestCase
     /** @test */
     public function user_cannot_delete_others_ticket()
     {
-        $user = User::factory()->create();
+        $user      = User::factory()->create();
         $otherUser = User::factory()->create();
         $this->actingAs($user);
         $ticket = HelpdeskTicket::factory()->create(['user_id' => $otherUser->id]);

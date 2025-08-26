@@ -17,7 +17,7 @@ use Throwable;
 
 /**
  * Service class for managing User-related business logic.
- * System Design Reference: Sections 3.1 (Services), 9.1
+ * System Design Reference: Sections 3.1 (Services), 9.1.
  */
 final class UserService
 {
@@ -30,11 +30,12 @@ final class UserService
      * Blameable fields (created_by, updated_by) are expected to be handled by
      * the CreatedUpdatedDeletedBy trait or a BlameableObserver on the User model.
      *
-     * @param  array<string, mixed>  $data  User data including 'password'.
-     * @return User The newly created User model.
+     * @param array<string, mixed> $data User data including 'password'.
      *
      * @throws InvalidArgumentException If essential data like password is missing.
-     * @throws RuntimeException If user creation fails at the database level.
+     * @throws RuntimeException         If user creation fails at the database level.
+     *
+     * @return User The newly created User model.
      */
     public function createUser(array $data): User
     {
@@ -54,11 +55,12 @@ final class UserService
      * If 'password' key exists in $data but its value is empty, it's ignored (password not changed).
      * Blameable field (updated_by) is expected to be handled by User model's trait/observer.
      *
-     * @param  User  $user  The User instance to update.
-     * @param  array<string, mixed>  $data  Data to update.
-     * @return bool True if the update resulted in changes being saved, false otherwise.
+     * @param User                 $user The User instance to update.
+     * @param array<string, mixed> $data Data to update.
      *
      * @throws RuntimeException If user update fails due to an exception.
+     *
+     * @return bool True if the update resulted in changes being saved, false otherwise.
      */
     public function updateUser(User $user, array $data): bool
     {
@@ -105,7 +107,8 @@ final class UserService
     /**
      * Retrieves all users, optionally with eager loaded relationships.
      *
-     * @param  array<int, string>  $with  Relationships to eager load.
+     * @param array<int, string> $with Relationships to eager load.
+     *
      * @return EloquentCollection<int, User>
      */
     public function getAllUsers(array $with = []): EloquentCollection
@@ -150,7 +153,7 @@ final class UserService
         if (! method_exists(User::class, 'role') && ! method_exists(User::query(), 'role')) {
             Log::error(self::LOG_AREA.sprintf(" User model or query builder does not have a 'role' scope/method. Cannot get users by role '%s'. Ensure Spatie/laravel-permission or similar is correctly set up on User model.", $roleName));
 
-            return new EloquentCollection();
+            return new EloquentCollection;
         }
 
         /** @phpstan-ignore-next-line */
@@ -211,12 +214,13 @@ final class UserService
      *
      * @template T
      *
-     * @param  \Closure(): T  $callback  The database operation to execute.
-     * @param  string  $actionDescription  A description of the action for logging.
-     * @param  array<string, mixed>  $logContext  Additional context for logging.
-     * @return T The result of the callback.
+     * @param \Closure(): T        $callback          The database operation to execute.
+     * @param string               $actionDescription A description of the action for logging.
+     * @param array<string, mixed> $logContext        Additional context for logging.
      *
      * @throws RuntimeException If the transaction fails.
+     *
+     * @return T The result of the callback.
      */
     private function executeInTransaction(\Closure $callback, string $actionDescription, array $logContext = [])
     {
@@ -231,8 +235,8 @@ final class UserService
             DB::rollBack();
             Log::error(self::LOG_AREA.' Failed to '.$actionDescription.'.', array_merge($logContext, [
                 'exception_message' => $throwable->getMessage(),
-                'exception_class' => get_class($throwable),
-                'trace_snippet' => substr($throwable->getTraceAsString(), 0, 500),
+                'exception_class'   => get_class($throwable),
+                'trace_snippet'     => substr($throwable->getTraceAsString(), 0, 500),
             ]));
             throw new RuntimeException(__('Gagal untuk ').$actionDescription.': '.$throwable->getMessage(), (int) $throwable->getCode(), $throwable);
         }
@@ -241,10 +245,11 @@ final class UserService
     /**
      * Prepares user data for creation: hashes password and sets default status.
      *
-     * @param  array<string, mixed>  $data
-     * @return array<string, mixed>
+     * @param array<string, mixed> $data
      *
      * @throws InvalidArgumentException if password is not provided or invalid.
+     *
+     * @return array<string, mixed>
      */
     private function prepareUserDataForCreation(array $data): array
     {
@@ -273,7 +278,8 @@ final class UserService
     /**
      * Prepares password for update: hashes if provided and non-empty, unsets if key exists but value is empty.
      *
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
+     *
      * @return array<string, mixed>
      */
     private function preparePasswordForUpdate(array $data): array

@@ -23,18 +23,17 @@ class OrphanedApplicationRequiresAttentionNotification extends Notification impl
     /**
      * Create a new notification instance.
      *
-     * @param  Model  $application  The orphaned application instance (e.g., LoanApplication)
-     * @param  string  $reason  A brief reason why it's orphaned (e.g., "No approver found")
+     * @param Model  $application The orphaned application instance (e.g., LoanApplication)
+     * @param string $reason      A brief reason why it's orphaned (e.g., "No approver found")
      */
     public function __construct(Model $application, string $reason = 'No suitable approver could be automatically assigned.')
     {
         $this->application = $application;
-        $this->reason = $reason;
+        $this->reason      = $reason;
 
         if ($this->application instanceof LoanApplication) {
             $this->applicationTypeDisplay = __('Permohonan Pinjaman ICT');
-        }
-        else {
+        } else {
             $this->applicationTypeDisplay = __('Permohonan Tidak Diketahui');
             Log::warning('OrphanedApplicationRequiresAttentionNotification: Unknown application type encountered.', ['application_class' => get_class($application)]);
         }
@@ -42,8 +41,6 @@ class OrphanedApplicationRequiresAttentionNotification extends Notification impl
 
     /**
      * Get the notification's delivery channels.
-     *
-     * @param  mixed  $notifiable
      */
     public function via($notifiable): array
     {
@@ -52,13 +49,11 @@ class OrphanedApplicationRequiresAttentionNotification extends Notification impl
 
     /**
      * Get the mail representation of the notification.
-     *
-     * @param  mixed  $notifiable
      */
     public function toMail($notifiable): MailMessage
     {
         $applicationId = $this->application->id ?? 'N/A';
-        $viewUrl = '#';
+        $viewUrl       = '#';
 
         if ($this->application instanceof LoanApplication && $this->application->id) {
             $viewUrl = route('loan-applications.show', $this->application->id);
@@ -75,13 +70,11 @@ class OrphanedApplicationRequiresAttentionNotification extends Notification impl
 
     /**
      * Get the array representation of the notification.
-     *
-     * @param  mixed  $notifiable
      */
     public function toArray($notifiable): array
     {
         $applicationId = $this->application->id ?? 'N/A';
-        $viewUrl = '#';
+        $viewUrl       = '#';
         if ($this->application instanceof LoanApplication && $this->application->id) {
             $viewUrl = route('loan-applications.show', $this->application->id);
         }
@@ -89,16 +82,16 @@ class OrphanedApplicationRequiresAttentionNotification extends Notification impl
         // Add route for other application types
 
         return [
-            'application_id' => $applicationId,
-            'application_type_morph' => $this->application->getMorphClass(),
+            'application_id'           => $applicationId,
+            'application_type_morph'   => $this->application->getMorphClass(),
             'application_type_display' => $this->applicationTypeDisplay,
-            'applicant_name' => $this->application->user?->name ?? __('Tidak diketahui'),
-            'status_key' => $this->application->status ?? 'orphaned_attention',
-            'title' => __(':appType ID #:id Memerlukan Penetapan Pelulus', ['appType' => $this->applicationTypeDisplay, 'id' => $applicationId]),
-            'message' => __('Sistem tidak dapat menetapkan pelulus secara automatik untuk :appType ID #:id. Alasan: :reason. Sila ambil tindakan.', ['appType' => $this->applicationTypeDisplay, 'id' => $applicationId, 'reason' => $this->reason]),
-            'icon' => 'ti ti-alert-triangle', // Alert icon
-            'url' => $viewUrl,
-            'notification_type' => 'system_attention',
+            'applicant_name'           => $this->application->user?->name ?? __('Tidak diketahui'),
+            'status_key'               => $this->application->status      ?? 'orphaned_attention',
+            'title'                    => __(':appType ID #:id Memerlukan Penetapan Pelulus', ['appType' => $this->applicationTypeDisplay, 'id' => $applicationId]),
+            'message'                  => __('Sistem tidak dapat menetapkan pelulus secara automatik untuk :appType ID #:id. Alasan: :reason. Sila ambil tindakan.', ['appType' => $this->applicationTypeDisplay, 'id' => $applicationId, 'reason' => $this->reason]),
+            'icon'                     => 'ti ti-alert-triangle', // Alert icon
+            'url'                      => $viewUrl,
+            'notification_type'        => 'system_attention',
         ];
     }
 }

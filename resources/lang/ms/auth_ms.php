@@ -1,4 +1,5 @@
 <?php
+
 // Bahasa Melayu translations for authentication and login errors
 // Disusun mengikut kategori mesej untuk kemudahan rujukan dan penyelenggaraan
 

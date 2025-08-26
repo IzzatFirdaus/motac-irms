@@ -25,23 +25,23 @@ class SubCategoryFactory extends Factory
     {
         // Static cache for EquipmentCategory IDs
         static $categoryIds;
-        if (!isset($categoryIds)) {
+        if (! isset($categoryIds)) {
             $categoryIds = EquipmentCategory::pluck('id')->all();
         }
 
         // Static cache for User IDs
         static $userIds;
-        if (!isset($userIds)) {
+        if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
 
         // Pick random related IDs or null if none exist
-        $equipmentCategoryId = !empty($categoryIds) ? Arr::random($categoryIds) : null;
-        $auditUserId = !empty($userIds) ? Arr::random($userIds) : null;
+        $equipmentCategoryId = ! empty($categoryIds) ? Arr::random($categoryIds) : null;
+        $auditUserId         = ! empty($userIds) ? Arr::random($userIds) : null;
 
         // Use a static Malaysian faker for realism and speed
         static $msFaker;
-        if (!$msFaker) {
+        if (! $msFaker) {
             $msFaker = \Faker\Factory::create('ms_MY');
         }
 
@@ -52,15 +52,15 @@ class SubCategoryFactory extends Factory
 
         return [
             'equipment_category_id' => $equipmentCategoryId,
-            'name' => $msFaker->unique()->words(2, true) . ' Sub-Kategori',
-            'description' => $msFaker->optional(0.7)->sentence,
-            'is_active' => $this->faker->boolean(95),
-            'created_by' => $auditUserId,
-            'updated_by' => $auditUserId,
-            'deleted_by' => null,
-            'created_at' => $createdAt,
-            'updated_at' => $updatedAt,
-            'deleted_at' => $deletedAt,
+            'name'                  => $msFaker->unique()->words(2, true).' Sub-Kategori',
+            'description'           => $msFaker->optional(0.7)->sentence,
+            'is_active'             => $this->faker->boolean(95),
+            'created_by'            => $auditUserId,
+            'updated_by'            => $auditUserId,
+            'deleted_by'            => null,
+            'created_at'            => $createdAt,
+            'updated_at'            => $updatedAt,
+            'deleted_at'            => $deletedAt,
         ];
     }
 
@@ -69,7 +69,7 @@ class SubCategoryFactory extends Factory
      */
     public function inactive(): static
     {
-        return $this->state(fn(array $attributes): array => ['is_active' => false]);
+        return $this->state(fn (array $attributes): array => ['is_active' => false]);
     }
 
     /**
@@ -78,10 +78,11 @@ class SubCategoryFactory extends Factory
     public function deleted(): static
     {
         static $userIds;
-        if (!isset($userIds)) {
+        if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $deleterId = !empty($userIds) ? Arr::random($userIds) : null;
+        $deleterId = ! empty($userIds) ? Arr::random($userIds) : null;
+
         return $this->state([
             'deleted_at' => now(),
             'deleted_by' => $deleterId,

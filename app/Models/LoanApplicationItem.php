@@ -20,16 +20,16 @@ use Illuminate\Support\Str;
  * Each item records the type of equipment, amount requested/approved/issued/returned,
  * and status within the application's approval and issuance workflow.
  *
- * @property int $id
- * @property int $loan_application_id
- * @property int|null $equipment_id
- * @property string $equipment_type
- * @property int $quantity_requested
- * @property int|null $quantity_approved
- * @property int $quantity_issued
- * @property int $quantity_returned
- * @property string $status
- * @property string|null $notes
+ * @property int                             $id
+ * @property int                             $loan_application_id
+ * @property int|null                        $equipment_id
+ * @property string                          $equipment_type
+ * @property int                             $quantity_requested
+ * @property int|null                        $quantity_approved
+ * @property int                             $quantity_issued
+ * @property int                             $quantity_returned
+ * @property string                          $status
+ * @property string|null                     $notes
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
@@ -40,24 +40,31 @@ class LoanApplicationItem extends Model
 
     // Status constants for item approval and issuance/return workflow
     public const STATUS_PENDING_APPROVAL = 'pending_approval';
+
     public const STATUS_ITEM_APPROVED = 'item_approved';
+
     public const STATUS_ITEM_REJECTED = 'item_rejected';
+
     public const STATUS_AWAITING_ISSUANCE = 'awaiting_issuance';
+
     public const STATUS_FULLY_ISSUED = 'fully_issued';
+
     public const STATUS_PARTIALLY_ISSUED = 'partially_issued';
+
     public const STATUS_FULLY_RETURNED = 'fully_returned';
+
     public const STATUS_ITEM_CANCELLED = 'item_cancelled';
 
     // Labels for each status (used for UI/presentation)
     public const ITEM_STATUS_LABELS = [
-        self::STATUS_PENDING_APPROVAL => 'Menunggu Kelulusan (Item)',
-        self::STATUS_ITEM_APPROVED => 'Diluluskan (Item)',
-        self::STATUS_ITEM_REJECTED => 'Ditolak (Item)',
+        self::STATUS_PENDING_APPROVAL  => 'Menunggu Kelulusan (Item)',
+        self::STATUS_ITEM_APPROVED     => 'Diluluskan (Item)',
+        self::STATUS_ITEM_REJECTED     => 'Ditolak (Item)',
         self::STATUS_AWAITING_ISSUANCE => 'Menunggu Pengeluaran',
-        self::STATUS_FULLY_ISSUED => 'Telah Dikeluarkan Sepenuhnya',
-        self::STATUS_PARTIALLY_ISSUED => 'Telah Dikeluarkan Sebahagian',
-        self::STATUS_FULLY_RETURNED => 'Telah Dipulangkan Sepenuhnya',
-        self::STATUS_ITEM_CANCELLED => 'Dibatalkan (Item)',
+        self::STATUS_FULLY_ISSUED      => 'Telah Dikeluarkan Sepenuhnya',
+        self::STATUS_PARTIALLY_ISSUED  => 'Telah Dikeluarkan Sebahagian',
+        self::STATUS_FULLY_RETURNED    => 'Telah Dipulangkan Sepenuhnya',
+        self::STATUS_ITEM_CANCELLED    => 'Dibatalkan (Item)',
     ];
 
     /**
@@ -80,12 +87,12 @@ class LoanApplicationItem extends Model
      */
     protected $casts = [
         'quantity_requested' => 'integer',
-        'quantity_approved' => 'integer',
-        'quantity_issued' => 'integer',
-        'quantity_returned' => 'integer',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-        'deleted_at' => 'datetime',
+        'quantity_approved'  => 'integer',
+        'quantity_issued'    => 'integer',
+        'quantity_returned'  => 'integer',
+        'created_at'         => 'datetime',
+        'updated_at'         => 'datetime',
+        'deleted_at'         => 'datetime',
     ];
 
     /**
@@ -99,7 +106,7 @@ class LoanApplicationItem extends Model
             if (empty($item->status)) {
                 $item->status = self::STATUS_PENDING_APPROVAL;
             }
-            $item->quantity_issued = $item->quantity_issued ?? 0;
+            $item->quantity_issued   = $item->quantity_issued   ?? 0;
             $item->quantity_returned = $item->quantity_returned ?? 0;
         });
 
@@ -186,7 +193,7 @@ class LoanApplicationItem extends Model
             ->whereNotIn('status', [LoanTransactionItem::STATUS_ITEM_REPORTED_LOST])
             ->sum('quantity_transacted');
 
-        $this->quantity_issued = $issuedQty;
+        $this->quantity_issued   = $issuedQty;
         $this->quantity_returned = $returnedQty;
 
         if ($this->isDirty(['quantity_issued', 'quantity_returned'])) {

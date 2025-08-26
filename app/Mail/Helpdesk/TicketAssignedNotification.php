@@ -17,20 +17,22 @@ class TicketAssignedNotification extends Mailable implements ShouldQueue
     use Queueable, SerializesModels;
 
     public HelpdeskTicket $ticket;
+
     public User $assignedTo;
+
     public string $ticketUrl;
 
     public function __construct(HelpdeskTicket $ticket, User $assignedTo, string $ticketUrl)
     {
-        $this->ticket = $ticket->loadMissing(['user', 'category', 'priority']);
+        $this->ticket     = $ticket->loadMissing(['user', 'category', 'priority']);
         $this->assignedTo = $assignedTo;
-        $this->ticketUrl = $ticketUrl;
+        $this->ticketUrl  = $ticketUrl;
     }
 
     public function envelope(): Envelope
     {
         $subject = __('Tiket Sokongan IT Ditugaskan Kepada Anda (#:id - :subject)', [
-            'id' => $this->ticket->id,
+            'id'      => $this->ticket->id,
             'subject' => $this->ticket->subject,
         ]);
 
@@ -39,8 +41,8 @@ class TicketAssignedNotification extends Mailable implements ShouldQueue
             subject: $subject,
             tags: ['helpdesk', 'ticket-assigned'],
             metadata: [
-                'ticket_id' => (string)$this->ticket->id,
-                'assigned_to_user_id' => (string)$this->assignedTo->id,
+                'ticket_id'           => (string) $this->ticket->id,
+                'assigned_to_user_id' => (string) $this->assignedTo->id,
             ]
         );
     }
@@ -50,9 +52,9 @@ class TicketAssignedNotification extends Mailable implements ShouldQueue
         return new Content(
             view: 'emails.helpdesk.ticket-assigned',
             with: [
-                'ticket' => $this->ticket,
+                'ticket'         => $this->ticket,
                 'assignedToName' => $this->assignedTo->name,
-                'ticketUrl' => $this->ticketUrl,
+                'ticketUrl'      => $this->ticketUrl,
             ]
         );
     }

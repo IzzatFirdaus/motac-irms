@@ -41,12 +41,12 @@ return [
             // MAIL_HOST, MAIL_PORT, MAIL_ENCRYPTION, MAIL_USERNAME, MAIL_PASSWORD
             // are configured via .env as per System Design Rev. 3. [cite: 65]
             // For development, these would point to Mailtrap. [cite: 50]
-            'host' => env('MAIL_HOST', 'smtp.mailgun.org'),
-            'port' => env('MAIL_PORT', 587),
-            'encryption' => env('MAIL_ENCRYPTION', 'tls'),
-            'username' => env('MAIL_USERNAME'),
-            'password' => env('MAIL_PASSWORD'),
-            'timeout' => null,
+            'host'         => env('MAIL_HOST', 'smtp.mailgun.org'),
+            'port'         => env('MAIL_PORT', 587),
+            'encryption'   => env('MAIL_ENCRYPTION', 'tls'),
+            'username'     => env('MAIL_USERNAME'),
+            'password'     => env('MAIL_PASSWORD'),
+            'timeout'      => null,
             'local_domain' => env('MAIL_EHLO_DOMAIN'), // Formerly 'ehlo_domain' in older Laravel versions
         ],
 
@@ -74,12 +74,12 @@ return [
 
         'sendmail' => [
             'transport' => 'sendmail',
-            'path' => env('MAIL_SENDMAIL_PATH', '/usr/sbin/sendmail -bs -i'),
+            'path'      => env('MAIL_SENDMAIL_PATH', '/usr/sbin/sendmail -bs -i'),
         ],
 
         'log' => [
             'transport' => 'log',
-            'channel' => env('MAIL_LOG_CHANNEL'), // Logs emails to a log channel instead of sending
+            'channel'   => env('MAIL_LOG_CHANNEL'), // Logs emails to a log channel instead of sending
         ],
 
         'array' => [
@@ -88,7 +88,7 @@ return [
 
         'failover' => [
             'transport' => 'failover',
-            'mailers' => [
+            'mailers'   => [
                 'smtp', // Primary mailer
                 'log',  // Fallback mailer
             ],
@@ -110,7 +110,7 @@ return [
 
     'from' => [
         'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-        'name' => env('MAIL_FROM_NAME', 'Example'),
+        'name'    => env('MAIL_FROM_NAME', 'Example'),
     ],
 
     /*

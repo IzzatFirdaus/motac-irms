@@ -24,11 +24,11 @@ class UpdateHelpdeskTicketRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
-            'category_id'         => ['sometimes', 'required', 'exists:helpdesk_categories,id'],
-            'priority_id'         => ['sometimes', 'required', 'exists:helpdesk_priorities,id'],
-            'title'               => ['sometimes', 'required', 'string', 'max:255'],
-            'description'         => ['sometimes', 'required', 'string', 'max:5000'],
-            'status'              => ['sometimes', 'required', 'string', Rule::in([
+            'category_id' => ['sometimes', 'required', 'exists:helpdesk_categories,id'],
+            'priority_id' => ['sometimes', 'required', 'exists:helpdesk_priorities,id'],
+            'title'       => ['sometimes', 'required', 'string', 'max:255'],
+            'description' => ['sometimes', 'required', 'string', 'max:5000'],
+            'status'      => ['sometimes', 'required', 'string', Rule::in([
                 HelpdeskTicket::STATUS_OPEN,
                 HelpdeskTicket::STATUS_IN_PROGRESS,
                 HelpdeskTicket::STATUS_RESOLVED,
@@ -58,10 +58,10 @@ class UpdateHelpdeskTicketRequest extends FormRequest
         $input = $this->all();
 
         // Support legacy/alternative field names
-        if (isset($input['subject']) && !isset($input['title'])) {
+        if (isset($input['subject']) && ! isset($input['title'])) {
             $input['title'] = $input['subject'];
         }
-        if (isset($input['resolution_details']) && !isset($input['resolution_notes'])) {
+        if (isset($input['resolution_details']) && ! isset($input['resolution_notes'])) {
             $input['resolution_notes'] = $input['resolution_details'];
         }
 
@@ -86,21 +86,21 @@ class UpdateHelpdeskTicketRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'category_id.required'     => __('Kategori diperlukan.'),
-            'category_id.exists'       => __('Kategori tidak sah.'),
-            'priority_id.required'     => __('Keutamaan diperlukan.'),
-            'priority_id.exists'       => __('Keutamaan tidak sah.'),
-            'title.required'           => __('Tajuk diperlukan.'),
-            'title.max'                => __('Tajuk tidak boleh melebihi 255 aksara.'),
-            'description.required'     => __('Deskripsi diperlukan.'),
-            'description.max'          => __('Deskripsi tidak boleh melebihi 5000 aksara.'),
-            'status.required'          => __('Status diperlukan.'),
-            'status.in'                => __('Status tidak sah.'),
+            'category_id.required'       => __('Kategori diperlukan.'),
+            'category_id.exists'         => __('Kategori tidak sah.'),
+            'priority_id.required'       => __('Keutamaan diperlukan.'),
+            'priority_id.exists'         => __('Keutamaan tidak sah.'),
+            'title.required'             => __('Tajuk diperlukan.'),
+            'title.max'                  => __('Tajuk tidak boleh melebihi 255 aksara.'),
+            'description.required'       => __('Deskripsi diperlukan.'),
+            'description.max'            => __('Deskripsi tidak boleh melebihi 5000 aksara.'),
+            'status.required'            => __('Status diperlukan.'),
+            'status.in'                  => __('Status tidak sah.'),
             'assigned_to_user_id.exists' => __('Pengguna tugasan tidak sah.'),
-            'resolution_notes.required'=> __('Catatan penyelesaian diperlukan apabila status ditutup atau diselesaikan.'),
-            'resolution_notes.max'     => __('Catatan penyelesaian tidak boleh melebihi 2000 aksara.'),
-            'attachments.*.file'       => __('Setiap lampiran mesti fail yang sah.'),
-            'attachments.*.max'        => __('Setiap lampiran tidak boleh melebihi 5MB.'),
+            'resolution_notes.required'  => __('Catatan penyelesaian diperlukan apabila status ditutup atau diselesaikan.'),
+            'resolution_notes.max'       => __('Catatan penyelesaian tidak boleh melebihi 2000 aksara.'),
+            'attachments.*.file'         => __('Setiap lampiran mesti fail yang sah.'),
+            'attachments.*.max'          => __('Setiap lampiran tidak boleh melebihi 5MB.'),
         ];
     }
 
@@ -110,14 +110,14 @@ class UpdateHelpdeskTicketRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'category_id'   => __('kategori'),
-            'priority_id'   => __('keutamaan'),
-            'title'         => __('tajuk'),
-            'description'   => __('deskripsi'),
-            'status'        => __('status'),
+            'category_id'         => __('kategori'),
+            'priority_id'         => __('keutamaan'),
+            'title'               => __('tajuk'),
+            'description'         => __('deskripsi'),
+            'status'              => __('status'),
             'assigned_to_user_id' => __('ditugaskan kepada'),
-            'resolution_notes' => __('catatan penyelesaian'),
-            'attachments'   => __('lampiran'),
+            'resolution_notes'    => __('catatan penyelesaian'),
+            'attachments'         => __('lampiran'),
         ];
     }
 }

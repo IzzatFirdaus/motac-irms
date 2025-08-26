@@ -1,16 +1,17 @@
 <?php
 
 /**
- * TicketNotificationService
+ * TicketNotificationService.
  *
  * Service responsible for sending notifications related to helpdesk tickets.
  *
  * PHP version 8.2
  *
  * @category Services
- * @package  App\Services
+ *
  * @author   MOTAC IRMS <dev@motac.example>
  * @license  https://opensource.org/licenses/MIT MIT
+ *
  * @link     https://example.com/motac-irms
  */
 
@@ -23,16 +24,17 @@ use App\Notifications\TicketAssignedNotification;
 use App\Notifications\TicketCommentAddedNotification;
 use App\Notifications\TicketCreatedNotification;
 use App\Notifications\TicketStatusUpdatedNotification;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 /**
  * Handles sending notifications for helpdesk tickets.
  *
  * @category Services
- * @package  App\Services
+ *
  * @author   MOTAC IRMS <dev@motac.example>
  * @license  https://opensource.org/licenses/MIT MIT
+ *
  * @link     https://example.com/motac-irms
  */
 class TicketNotificationService
@@ -41,8 +43,6 @@ class TicketNotificationService
      * Notify when a new ticket is created.
      *
      * @param HelpdeskTicket $ticket The newly created ticket.
-     *
-     * @return void
      */
     public function notifyTicketCreated(HelpdeskTicket $ticket): void
     {
@@ -70,8 +70,6 @@ class TicketNotificationService
      *
      * @param HelpdeskTicket $ticket   The ticket being assigned.
      * @param User           $assigner The user who performed the assignment.
-     *
-     * @return void
      */
     public function notifyTicketAssigned(HelpdeskTicket $ticket, User $assigner): void
     {
@@ -97,8 +95,6 @@ class TicketNotificationService
      *
      * @param HelpdeskTicket $ticket  The updated ticket.
      * @param User           $updater The user who updated the ticket status.
-     *
-     * @return void
      */
     public function notifyTicketStatusUpdated(HelpdeskTicket $ticket, User $updater): void
     {
@@ -124,8 +120,6 @@ class TicketNotificationService
      *
      * @param HelpdeskComment $comment   The comment that was added.
      * @param User            $commenter The user who added the comment.
-     *
-     * @return void
      */
     public function notifyTicketCommentAdded(HelpdeskComment $comment, User $commenter): void
     {
@@ -171,8 +165,6 @@ class TicketNotificationService
      * This method might be called by a scheduled command.
      *
      * @param HelpdeskTicket $ticket The ticket that was escalated.
-     *
-     * @return void
      */
     public function notifyTicketEscalated(HelpdeskTicket $ticket): void
     {

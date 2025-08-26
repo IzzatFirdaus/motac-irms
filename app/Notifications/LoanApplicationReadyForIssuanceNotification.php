@@ -47,9 +47,9 @@ class LoanApplicationReadyForIssuanceNotification extends Notification implement
      */
     public function toArray(User $notifiable): array
     {
-        $loanApp = $this->loanApplication;
-        $loanApplicationId = $loanApp->id ?? null;
-        $applicantName = $loanApp->user?->name ?? 'Pemohon Tidak Dikenali';
+        $loanApp           = $this->loanApplication;
+        $loanApplicationId = $loanApp->id          ?? null;
+        $applicantName     = $loanApp->user?->name ?? 'Pemohon Tidak Dikenali';
 
         $applicationUrl = '#';
         if ($loanApplicationId) {
@@ -71,16 +71,16 @@ class LoanApplicationReadyForIssuanceNotification extends Notification implement
         // The returned array now includes the corrected URL.
         return [
             'loan_application_id' => $loanApplicationId,
-            'applicant_name' => $applicantName,
-            'status_application' => $loanApp->status,
-            'subject' => __('Permohonan Pinjaman #:id Sedia Untuk Pengeluaran', ['id' => $loanApplicationId ?? 'N/A']),
-            'message' => __('Permohonan pinjaman #:id oleh :applicantName sedia untuk pengeluaran peralatan. Item: :items', [
-                'id' => $loanApplicationId ?? 'N/A',
+            'applicant_name'      => $applicantName,
+            'status_application'  => $loanApp->status,
+            'subject'             => __('Permohonan Pinjaman #:id Sedia Untuk Pengeluaran', ['id' => $loanApplicationId ?? 'N/A']),
+            'message'             => __('Permohonan pinjaman #:id oleh :applicantName sedia untuk pengeluaran peralatan. Item: :items', [
+                'id'            => $loanApplicationId ?? 'N/A',
                 'applicantName' => $applicantName,
-                'items' => implode(', ', $itemDetails),
+                'items'         => implode(', ', $itemDetails),
             ]),
-            'url' => $applicationUrl,
-            'icon' => 'ti ti-package',
+            'url'             => $applicationUrl,
+            'icon'            => 'ti ti-package',
             'action_required' => true,
         ];
     }

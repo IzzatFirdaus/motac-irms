@@ -20,7 +20,6 @@ class UserSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     * @param int $numberOfUsers
      */
     public function run(int $numberOfUsers = 50): void
     {
@@ -31,17 +30,19 @@ class UserSeeder extends Seeder
         foreach ($coreRoles as $roleName) {
             if (Role::where('name', $roleName)->doesntExist()) {
                 Log::error("Core role '{$roleName}' not found. Please run RoleAndPermissionSeeder first. Aborting UserSeeder.");
+
                 return;
             }
         }
 
         // Ensure master data available for foreign keys
         $departments = Department::pluck('id')->all();
-        $grades = Grade::pluck('id')->all();
-        $positions = Position::pluck('id')->all();
+        $grades      = Grade::pluck('id')->all();
+        $positions   = Position::pluck('id')->all();
 
         if (empty($departments) || empty($grades) || empty($positions)) {
             Log::error('Departments, Grades, or Positions master data is missing. Please run their respective seeders first.');
+
             return;
         }
 
@@ -68,7 +69,7 @@ class UserSeeder extends Seeder
 
             for ($i = 0; $i < $countForRole; $i++) {
                 $usersToCreate[] = [
-                    'role' => $roleName,
+                    'role'          => $roleName,
                     'department_id' => $departments[array_rand($departments)],
                     'grade_id'      => $grades[array_rand($grades)],
                     'position_id'   => $positions[array_rand($positions)],
@@ -81,7 +82,7 @@ class UserSeeder extends Seeder
 
         // Prepare arrays for role assignment
         $roleToUserIds = [];
-        $userRecords = [];
+        $userRecords   = [];
 
         // Use factory to create all users, then assign roles efficiently after creation.
         foreach ($usersToCreate as $data) {
@@ -99,10 +100,10 @@ class UserSeeder extends Seeder
         foreach (array_chunk($userRecords, 200) as $chunk) {
             $ids = [];
             foreach ($chunk as $userData) {
-                $user = User::create($userData);
+                $user  = User::create($userData);
                 $ids[] = $user->id;
                 // Keep track of role to user id mapping
-                $userRole = $usersToCreate[array_search($userData, $userRecords)]['role'] ?? 'User';
+                $userRole                   = $usersToCreate[array_search($userData, $userRecords)]['role'] ?? 'User';
                 $roleToUserIds[$userRole][] = $user->id;
             }
             $insertedIds = array_merge($insertedIds, $ids);

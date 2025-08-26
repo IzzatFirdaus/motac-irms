@@ -26,12 +26,12 @@ class LocationSeeder extends Seeder
 
         // Find an admin user to associate with the created records
         $adminUserForAudit = User::orderBy('id')->first();
-        $auditUserId = $adminUserForAudit?->id;
+        $auditUserId       = $adminUserForAudit?->id;
 
         // If no user exists, create one for auditing purposes
         if (! $auditUserId) {
             $adminUserForAudit = User::factory()->create(['name' => 'Audit User (LocationSeeder)']);
-            $auditUserId = $adminUserForAudit->id;
+            $auditUserId       = $adminUserForAudit->id;
             Log::info(sprintf('Created a fallback audit user with ID %d for LocationSeeder.', $auditUserId));
         } else {
             Log::info(sprintf('Using User ID %s for audit columns in LocationSeeder.', $auditUserId));
@@ -40,54 +40,54 @@ class LocationSeeder extends Seeder
         // A static list of essential locations to ensure they always exist
         $locations = [
             [
-                'name' => 'MOTAC HQ - Aras G, Stor Utama ICT',
+                'name'        => 'MOTAC HQ - Aras G, Stor Utama ICT',
                 'description' => 'Stor utama penyimpanan peralatan ICT di Ibu Pejabat MOTAC, Aras G.',
-                'address' => 'Kementerian Pelancongan, Seni dan Budaya, Aras G, Presint 5',
-                'city' => 'Putrajaya',
-                'state' => 'WP Putrajaya',
-                'country' => 'Malaysia',
+                'address'     => 'Kementerian Pelancongan, Seni dan Budaya, Aras G, Presint 5',
+                'city'        => 'Putrajaya',
+                'state'       => 'WP Putrajaya',
+                'country'     => 'Malaysia',
                 'postal_code' => '62200',
-                'is_active' => true,
+                'is_active'   => true,
             ],
             [
-                'name' => 'MOTAC HQ - Aras 10, Bilik Server Utama',
+                'name'        => 'MOTAC HQ - Aras 10, Bilik Server Utama',
                 'description' => 'Lokasi selamat untuk server utama dan peralatan rangkaian di Ibu Pejabat.',
-                'address' => 'Kementerian Pelancongan, Seni dan Budaya, Aras 10, Presint 5',
-                'city' => 'Putrajaya',
-                'state' => 'WP Putrajaya',
-                'country' => 'Malaysia',
+                'address'     => 'Kementerian Pelancongan, Seni dan Budaya, Aras 10, Presint 5',
+                'city'        => 'Putrajaya',
+                'state'       => 'WP Putrajaya',
+                'country'     => 'Malaysia',
                 'postal_code' => '62200',
-                'is_active' => true,
+                'is_active'   => true,
             ],
             [
-                'name' => 'MOTAC HQ - Aras 18, Bahagian Pengurusan Maklumat',
+                'name'        => 'MOTAC HQ - Aras 18, Bahagian Pengurusan Maklumat',
                 'description' => 'Ruang pejabat Bahagian Pengurusan Maklumat di Aras 18.',
-                'address' => 'Kementerian Pelancongan, Seni dan Budaya, Aras 18, Presint 5',
-                'city' => 'Putrajaya',
-                'state' => 'WP Putrajaya',
-                'country' => 'Malaysia',
+                'address'     => 'Kementerian Pelancongan, Seni dan Budaya, Aras 18, Presint 5',
+                'city'        => 'Putrajaya',
+                'state'       => 'WP Putrajaya',
+                'country'     => 'Malaysia',
                 'postal_code' => '62200',
-                'is_active' => true,
+                'is_active'   => true,
             ],
             [
-                'name' => 'Pejabat MOTAC Negeri Perak - Pejabat Am',
+                'name'        => 'Pejabat MOTAC Negeri Perak - Pejabat Am',
                 'description' => 'Pejabat pentadbiran utama di MOTAC Negeri Perak, Ipoh.',
-                'address' => 'Jalan Panglima Bukit Gantang Wahab',
-                'city' => 'Ipoh',
-                'state' => 'Perak',
-                'country' => 'Malaysia',
+                'address'     => 'Jalan Panglima Bukit Gantang Wahab',
+                'city'        => 'Ipoh',
+                'state'       => 'Perak',
+                'country'     => 'Malaysia',
                 'postal_code' => '30000',
-                'is_active' => true,
+                'is_active'   => true,
             ],
             [
-                'name' => 'Auditorium Kementerian',
+                'name'        => 'Auditorium Kementerian',
                 'description' => 'Auditorium utama untuk acara rasmi dan taklimat.',
-                'address' => 'Kementerian Pelancongan, Seni dan Budaya, Aras 2, Presint 5',
-                'city' => 'Putrajaya',
-                'state' => 'WP Putrajaya',
-                'country' => 'Malaysia',
+                'address'     => 'Kementerian Pelancongan, Seni dan Budaya, Aras 2, Presint 5',
+                'city'        => 'Putrajaya',
+                'state'       => 'WP Putrajaya',
+                'country'     => 'Malaysia',
                 'postal_code' => '62200',
-                'is_active' => true,
+                'is_active'   => true,
             ],
         ];
 
@@ -106,7 +106,7 @@ class LocationSeeder extends Seeder
         Log::info('Ensured specific MOTAC locations exist.');
 
         // Define a target for how many total locations you want
-        $targetCount = 15; // Increased target slightly
+        $targetCount  = 15; // Increased target slightly
         $currentCount = Location::count();
 
         // If we have fewer than the target, create more using a factory
@@ -123,7 +123,7 @@ class LocationSeeder extends Seeder
                     Location::factory()->create([
                         'created_by' => $auditUserId,
                         'updated_by' => $auditUserId,
-                        'is_active' => true,
+                        'is_active'  => true,
                     ]);
                     $createdCount++;
                 } catch (UniqueConstraintViolationException $e) {

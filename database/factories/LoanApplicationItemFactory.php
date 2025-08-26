@@ -26,30 +26,30 @@ class LoanApplicationItemFactory extends Factory
     {
         // Static cache for LoanApplication IDs
         static $loanApplicationIds;
-        if (!isset($loanApplicationIds)) {
+        if (! isset($loanApplicationIds)) {
             $loanApplicationIds = LoanApplication::pluck('id')->all();
         }
         $loanApplicationId = $loanApplicationIds ? Arr::random($loanApplicationIds) : null;
 
         // Static cache for User IDs for audit fields
         static $userIds;
-        if (!isset($userIds)) {
+        if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
         $auditUserId = $userIds ? Arr::random($userIds) : null;
 
         // Static cache for available equipment types (asset_type column)
         static $assetTypes;
-        if (!isset($assetTypes)) {
+        if (! isset($assetTypes)) {
             $assetTypes = Equipment::query()->distinct()->pluck('asset_type')->all();
         }
-        $equipmentType = !empty($assetTypes)
+        $equipmentType = ! empty($assetTypes)
             ? Arr::random($assetTypes)
             : $this->faker->randomElement(['laptop', 'projector', 'printer', 'monitor', 'tablet', 'desktop']);
 
         // Quantity logic
         $quantityRequested = $this->faker->numberBetween(1, 5);
-        $quantityApproved = $this->faker->numberBetween(0, $quantityRequested); // Sometimes not fully approved
+        $quantityApproved  = $this->faker->numberBetween(0, $quantityRequested); // Sometimes not fully approved
 
         // Timestamp logic
         $createdAt = Carbon::parse($this->faker->dateTimeBetween('-1 year', 'now'));
@@ -59,7 +59,7 @@ class LoanApplicationItemFactory extends Factory
 
         // Use a static Malaysian faker for notes
         static $msFaker;
-        if (!$msFaker) {
+        if (! $msFaker) {
             $msFaker = \Faker\Factory::create('ms_MY');
         }
 
@@ -119,7 +119,7 @@ class LoanApplicationItemFactory extends Factory
     public function deleted(): static
     {
         static $userIds;
-        if (!isset($userIds)) {
+        if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
         $deleterId = $userIds ? Arr::random($userIds) : null;

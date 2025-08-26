@@ -11,11 +11,11 @@ use App\Models\HelpdeskTicket;
 use App\Services\HelpdeskService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 /**
- * HelpdeskApiController
+ * HelpdeskApiController.
  *
  * Provides API endpoints for creating, updating, and closing helpdesk tickets.
  * Handles authentication, validation, and delegates business logic to HelpdeskService.
@@ -38,15 +38,15 @@ class HelpdeskApiController extends Controller
     {
         try {
             $validatedData = $request->validate([
-                'category_id' => 'required|exists:helpdesk_categories,id',
-                'priority_id' => 'required|exists:helpdesk_priorities,id',
-                'subject' => 'required|string|max:255',
-                'description' => 'required|string',
+                'category_id'   => 'required|exists:helpdesk_categories,id',
+                'priority_id'   => 'required|exists:helpdesk_priorities,id',
+                'subject'       => 'required|string|max:255',
+                'description'   => 'required|string',
                 'attachments.*' => 'nullable|file|max:5120', // 5MB max per file
             ]);
 
             $applicant = Auth::user();
-            if (!$applicant) {
+            if (! $applicant) {
                 return response()->json(['message' => 'Unauthenticated user.', 'error' => 'Authentication required.'], 401);
             }
 
@@ -56,11 +56,11 @@ class HelpdeskApiController extends Controller
 
             return response()->json(['message' => 'Ticket created successfully', 'ticket_id' => $ticket->id], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::warning('API Ticket Creation Validation Error: ' . $e->getMessage(), ['errors' => $e->errors(), 'request' => $request->all()]);
+            Log::warning('API Ticket Creation Validation Error: '.$e->getMessage(), ['errors' => $e->errors(), 'request' => $request->all()]);
 
             return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);
         } catch (\Exception $e) {
-            Log::error('API Ticket Creation Error: ' . $e->getMessage(), ['exception_class' => get_class($e), 'request' => $request->all()]);
+            Log::error('API Ticket Creation Error: '.$e->getMessage(), ['exception_class' => get_class($e), 'request' => $request->all()]);
 
             return response()->json(['message' => 'Failed to create ticket', 'error' => $e->getMessage()], 500);
         }
@@ -74,7 +74,7 @@ class HelpdeskApiController extends Controller
     {
         try {
             $updater = Auth::user();
-            if (!$updater) {
+            if (! $updater) {
                 return response()->json(['message' => 'Unauthenticated user.', 'error' => 'Authentication required.'], 401);
             }
 
@@ -84,9 +84,9 @@ class HelpdeskApiController extends Controller
 
             return response()->json(['message' => 'Ticket updated successfully', 'ticket_id' => $ticket->id]);
         } catch (\Exception $e) {
-            Log::error(sprintf('API Ticket Update Error for Ticket ID %d: ', $ticket->id) . $e->getMessage(), [
+            Log::error(sprintf('API Ticket Update Error for Ticket ID %d: ', $ticket->id).$e->getMessage(), [
                 'exception_class' => get_class($e),
-                'request' => $request->all(),
+                'request'         => $request->all(),
             ]);
 
             return response()->json(['message' => 'Failed to update ticket', 'error' => $e->getMessage()], 500);
@@ -101,7 +101,7 @@ class HelpdeskApiController extends Controller
     {
         try {
             $closer = Auth::user();
-            if (!$closer) {
+            if (! $closer) {
                 return response()->json(['message' => 'Unauthenticated user.', 'error' => 'Authentication required.'], 401);
             }
 
@@ -111,9 +111,9 @@ class HelpdeskApiController extends Controller
 
             return response()->json(['message' => 'Ticket closed successfully', 'ticket_id' => $ticket->id]);
         } catch (\Exception $e) {
-            Log::error(sprintf('API Ticket Closure Error for Ticket ID %d: ', $ticket->id) . $e->getMessage(), [
+            Log::error(sprintf('API Ticket Closure Error for Ticket ID %d: ', $ticket->id).$e->getMessage(), [
                 'exception_class' => get_class($e),
-                'request' => $request->all(),
+                'request'         => $request->all(),
             ]);
 
             return response()->json(['message' => 'Failed to close ticket', 'error' => $e->getMessage()], 500);

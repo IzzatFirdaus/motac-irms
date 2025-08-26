@@ -19,26 +19,26 @@ use Illuminate\Support\Facades\Schema;
  *
  * Manages application-wide settings, typically as a single row in the database.
  *
- * @property int $id
- * @property string $site_name
- * @property string|null $site_logo_path
- * @property string|null $default_notification_email_from
- * @property string|null $default_notification_email_name
- * @property string|null $sms_api_sender
- * @property string|null $sms_api_username
- * @property string|null $sms_api_password
- * @property string|null $terms_and_conditions_loan
- * @property string|null $terms_and_conditions_email
- * @property string $application_name
- * @property string|null $default_system_email
- * @property int $default_loan_period_days
- * @property int $max_loan_items_per_application
- * @property string|null $contact_us_email
- * @property bool $system_maintenance_mode
- * @property string|null $system_maintenance_message
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
+ * @property int                             $id
+ * @property string                          $site_name
+ * @property string|null                     $site_logo_path
+ * @property string|null                     $default_notification_email_from
+ * @property string|null                     $default_notification_email_name
+ * @property string|null                     $sms_api_sender
+ * @property string|null                     $sms_api_username
+ * @property string|null                     $sms_api_password
+ * @property string|null                     $terms_and_conditions_loan
+ * @property string|null                     $terms_and_conditions_email
+ * @property string                          $application_name
+ * @property string|null                     $default_system_email
+ * @property int                             $default_loan_period_days
+ * @property int                             $max_loan_items_per_application
+ * @property string|null                     $contact_us_email
+ * @property bool                            $system_maintenance_mode
+ * @property string|null                     $system_maintenance_message
+ * @property int|null                        $created_by
+ * @property int|null                        $updated_by
+ * @property int|null                        $deleted_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
@@ -69,12 +69,12 @@ class Setting extends Model
     ];
 
     protected $casts = [
-        'default_loan_period_days' => 'integer',
+        'default_loan_period_days'       => 'integer',
         'max_loan_items_per_application' => 'integer',
-        'system_maintenance_mode' => 'boolean',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-        'deleted_at' => 'datetime',
+        'system_maintenance_mode'        => 'boolean',
+        'created_at'                     => 'datetime',
+        'updated_at'                     => 'datetime',
+        'deleted_at'                     => 'datetime',
     ];
 
     /**
@@ -85,9 +85,10 @@ class Setting extends Model
         return Cache::rememberForever(self::SETTINGS_CACHE_KEY, function (): ?self {
             Log::debug('Cache miss for application settings. Fetching from database.');
             $settings = self::first();
-            if (!$settings) {
+            if (! $settings) {
                 Log::warning('Application settings record not found in database. Consider running SettingsSeeder.');
             }
+
             return $settings;
         });
     }
@@ -101,6 +102,7 @@ class Setting extends Model
         if ($settings instanceof self && (property_exists($settings, $key) || array_key_exists($key, $settings->getAttributes()) || method_exists($settings, $key))) {
             return $settings->{$key} ?? $default;
         }
+
         return $default;
     }
 
@@ -112,13 +114,14 @@ class Setting extends Model
         DB::beginTransaction();
         try {
             $settings = self::firstOrNew([]);
-            if (!in_array($key, $settings->getFillable()) && !Schema::hasColumn($settings->getTable(), $key)) {
+            if (! in_array($key, $settings->getFillable()) && ! Schema::hasColumn($settings->getTable(), $key)) {
                 Log::error(sprintf('Attempted to set unknown or non-fillable/non-column setting key: %s.', $key));
                 DB::rollBack();
+
                 return false;
             }
             $settings->{$key} = $value;
-            $saved = $settings->save();
+            $saved            = $settings->save();
             DB::commit();
             if ($saved) {
                 self::clearCache();
@@ -126,10 +129,11 @@ class Setting extends Model
             } else {
                 Log::error(sprintf("Failed to save setting '%s'.", $key));
             }
+
             return $saved;
         } catch (\Throwable $throwable) {
             DB::rollBack();
-            Log::error(sprintf("Error setting setting '%s': ", $key) . $throwable->getMessage(), ['exception' => $throwable, 'key' => $key, 'value' => $value]);
+            Log::error(sprintf("Error setting setting '%s': ", $key).$throwable->getMessage(), ['exception' => $throwable, 'key' => $key, 'value' => $value]);
             throw $throwable;
         }
     }
@@ -140,22 +144,25 @@ class Setting extends Model
     public static function forget(string $key): bool
     {
         $settings = self::getSettingsRecord();
-        if (!$settings instanceof self) {
+        if (! $settings instanceof self) {
             Log::warning(sprintf("Attempted to forget setting '%s', but no settings record exists.", $key));
+
             return false;
         }
-        if (!in_array($key, $settings->getFillable()) && !Schema::hasColumn($settings->getTable(), $key)) {
-            Log::warning('Attempted to forget unknown or non-fillable/non-column setting key: ' . $key);
+        if (! in_array($key, $settings->getFillable()) && ! Schema::hasColumn($settings->getTable(), $key)) {
+            Log::warning('Attempted to forget unknown or non-fillable/non-column setting key: '.$key);
+
             return false;
         }
         $settings->{$key} = null;
-        $saved = $settings->save();
+        $saved            = $settings->save();
         if ($saved) {
             self::clearCache();
             Log::info(sprintf("Setting '%s' set to null successfully.", $key));
         } else {
             Log::error(sprintf("Failed to set setting '%s' to null.", $key));
         }
+
         return $saved;
     }
 
@@ -173,43 +180,55 @@ class Setting extends Model
     {
         return self::get('application_name', 'MOTAC RMS');
     }
+
     public static function getDefaultSystemEmail(): ?string
     {
         return self::get('default_system_email');
     }
+
     public static function getDefaultLoanPeriodDays(): int
     {
         return (int) self::get('default_loan_period_days', 7);
     }
+
     public static function getMaxLoanItemsPerApplication(): int
     {
         return (int) self::get('max_loan_items_per_application', 5);
     }
+
     public static function getContactUsEmail(): ?string
     {
         return self::get('contact_us_email');
     }
+
     public static function isSystemInMaintenanceMode(): bool
     {
         return (bool) self::get('system_maintenance_mode', false);
     }
+
     public static function getSystemMaintenanceMessage(): ?string
     {
         return self::get('system_maintenance_message');
     }
+
     public static function getSmsApiUsername(): ?string
     {
         $value = self::get('sms_api_username');
+
         return is_string($value) || $value === null ? $value : null;
     }
+
     public static function getSmsApiPassword(): ?string
     {
         $value = self::get('sms_api_password');
+
         return is_string($value) || $value === null ? $value : null;
     }
+
     public static function getSmsApiSender(): ?string
     {
         $value = self::get('sms_api_sender');
+
         return is_string($value) || $value === null ? $value : null;
     }
 
@@ -236,10 +255,12 @@ class Setting extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
     public function updater(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
+
     public function deleter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by');

@@ -15,7 +15,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 
 /**
- * TicketManagement
+ * TicketManagement.
  *
  * Livewire component for managing helpdesk tickets (admin/staff view).
  */
@@ -28,33 +28,46 @@ class TicketManagement extends Component
     // Filtering and searching properties
     #[Url]
     public string $search = '';
+
     #[Url]
     public ?string $status = null;
+
     #[Url]
     public ?int $category_id = null;
+
     #[Url]
     public ?int $priority_id = null;
+
     #[Url]
     public ?int $assigned_to_user_id = null;
 
     // Modal and ticket selection properties
     public HelpdeskTicket $selectedTicket;
+
     public bool $showTicketDetailsModal = false;
+
     public bool $showAssignTicketModal = false;
+
     public bool $showChangeStatusModal = false;
+
     public bool $showAddCommentModal = false;
+
     public bool $showCloseTicketModal = false;
 
     public string $newStatus = '';
+
     public ?int $assigneeId = null;
+
     public string $commentText = '';
+
     public bool $isInternalComment = false;
+
     public ?string $resolutionDetails = null;
 
     protected $listeners = ['ticketUpdated' => '$refresh']; // Refresh list after ticket update
 
     /**
-     * Inject HelpdeskService
+     * Inject HelpdeskService.
      */
     public function boot(HelpdeskService $helpdeskService)
     {
@@ -70,14 +83,14 @@ class TicketManagement extends Component
         return HelpdeskTicket::query()
             ->with(['user', 'category', 'priority', 'assignedTo'])
             ->when($this->search, function (Builder $query) {
-                $query->where('title', 'like', '%' . $this->search . '%')
-                      ->orWhere('description', 'like', '%' . $this->search . '%')
-                      ->orWhereHas('user', fn($q) => $q->where('name', 'like', '%' . $this->search . '%'));
+                $query->where('title', 'like', '%'.$this->search.'%')
+                    ->orWhere('description', 'like', '%'.$this->search.'%')
+                    ->orWhereHas('user', fn ($q) => $q->where('name', 'like', '%'.$this->search.'%'));
             })
-            ->when($this->status, fn(Builder $query) => $query->where('status', $this->status))
-            ->when($this->category_id, fn(Builder $query) => $query->where('category_id', $this->category_id))
-            ->when($this->priority_id, fn(Builder $query) => $query->where('priority_id', $this->priority_id))
-            ->when($this->assigned_to_user_id, fn(Builder $query) => $query->where('assigned_to_user_id', $this->assigned_to_user_id))
+            ->when($this->status, fn (Builder $query) => $query->where('status', $this->status))
+            ->when($this->category_id, fn (Builder $query) => $query->where('category_id', $this->category_id))
+            ->when($this->priority_id, fn (Builder $query) => $query->where('priority_id', $this->priority_id))
+            ->when($this->assigned_to_user_id, fn (Builder $query) => $query->where('assigned_to_user_id', $this->assigned_to_user_id))
             ->latest()
             ->paginate(10);
     }
@@ -103,14 +116,14 @@ class TicketManagement extends Component
 
     public function viewTicketDetails(HelpdeskTicket $ticket)
     {
-        $this->selectedTicket = $ticket;
+        $this->selectedTicket         = $ticket;
         $this->showTicketDetailsModal = true;
     }
 
     public function openAssignTicketModal(HelpdeskTicket $ticket)
     {
-        $this->selectedTicket = $ticket;
-        $this->assigneeId = $ticket->assigned_to_user_id;
+        $this->selectedTicket        = $ticket;
+        $this->assigneeId            = $ticket->assigned_to_user_id;
         $this->showAssignTicketModal = true;
     }
 
@@ -122,8 +135,9 @@ class TicketManagement extends Component
 
         try {
             $updater = Auth::user();
-            if (!$updater) {
+            if (! $updater) {
                 session()->flash('error', 'Authentication required to assign ticket.');
+
                 return;
             }
 
@@ -137,14 +151,14 @@ class TicketManagement extends Component
             $this->showAssignTicketModal = false;
             $this->dispatch('ticketUpdated');
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to assign ticket: ' . $e->getMessage());
+            session()->flash('error', 'Failed to assign ticket: '.$e->getMessage());
         }
     }
 
     public function openChangeStatusModal(HelpdeskTicket $ticket)
     {
-        $this->selectedTicket = $ticket;
-        $this->newStatus = $ticket->status;
+        $this->selectedTicket        = $ticket;
+        $this->newStatus             = $ticket->status;
         $this->showChangeStatusModal = true;
     }
 
@@ -156,8 +170,9 @@ class TicketManagement extends Component
 
         try {
             $updater = Auth::user();
-            if (!$updater) {
+            if (! $updater) {
                 session()->flash('error', 'Authentication required to change ticket status.');
+
                 return;
             }
 
@@ -171,29 +186,30 @@ class TicketManagement extends Component
             $this->showChangeStatusModal = false;
             $this->dispatch('ticketUpdated');
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to change ticket status: ' . $e->getMessage());
+            session()->flash('error', 'Failed to change ticket status: '.$e->getMessage());
         }
     }
 
     public function openAddCommentModal(HelpdeskTicket $ticket)
     {
-        $this->selectedTicket = $ticket;
-        $this->commentText = '';
-        $this->isInternalComment = false;
+        $this->selectedTicket      = $ticket;
+        $this->commentText         = '';
+        $this->isInternalComment   = false;
         $this->showAddCommentModal = true;
     }
 
     public function addComment()
     {
         $this->validate([
-            'commentText' => 'required|string|min:5',
+            'commentText'       => 'required|string|min:5',
             'isInternalComment' => 'boolean',
         ]);
 
         try {
             $commenter = Auth::user();
-            if (!$commenter) {
+            if (! $commenter) {
                 session()->flash('error', 'Authentication required to add comment.');
+
                 return;
             }
 
@@ -209,14 +225,14 @@ class TicketManagement extends Component
             $this->showAddCommentModal = false;
             $this->dispatch('ticketUpdated');
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to add comment: ' . $e->getMessage());
+            session()->flash('error', 'Failed to add comment: '.$e->getMessage());
         }
     }
 
     public function openCloseTicketModal(HelpdeskTicket $ticket)
     {
-        $this->selectedTicket = $ticket;
-        $this->resolutionDetails = $ticket->resolution_details;
+        $this->selectedTicket       = $ticket;
+        $this->resolutionDetails    = $ticket->resolution_details;
         $this->showCloseTicketModal = true;
     }
 
@@ -228,8 +244,9 @@ class TicketManagement extends Component
 
         try {
             $closer = Auth::user();
-            if (!$closer) {
+            if (! $closer) {
                 session()->flash('error', 'Authentication required to close ticket.');
+
                 return;
             }
 
@@ -243,7 +260,7 @@ class TicketManagement extends Component
             $this->showCloseTicketModal = false;
             $this->dispatch('ticketUpdated');
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to close ticket: ' . $e->getMessage());
+            session()->flash('error', 'Failed to close ticket: '.$e->getMessage());
         }
     }
 

@@ -18,27 +18,26 @@ use Illuminate\Support\Str;
  * Each record links a transaction (issue/return) with a specific equipment asset,
  * and may be associated with a LoanApplicationItem for workflow tracking.
  *
- * @property int $id
- * @property int $loan_transaction_id
- * @property int $equipment_id
- * @property int|null $loan_application_item_id
- * @property int $quantity_transacted
- * @property string $status
- * @property string|null $condition_on_return
- * @property array|string|null $accessories_checklist_issue
- * @property array|string|null $accessories_checklist_return
- * @property string|null $item_notes
- * @property string|null $notes
- * @property int|null $quantity_returned
- * @property string|null $return_status
- * @property array|string|null $accessories_checklist_on_return
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
+ * @property int                             $id
+ * @property int                             $loan_transaction_id
+ * @property int                             $equipment_id
+ * @property int|null                        $loan_application_item_id
+ * @property int                             $quantity_transacted
+ * @property string                          $status
+ * @property string|null                     $condition_on_return
+ * @property array|string|null               $accessories_checklist_issue
+ * @property array|string|null               $accessories_checklist_return
+ * @property string|null                     $item_notes
+ * @property string|null                     $notes
+ * @property int|null                        $quantity_returned
+ * @property string|null                     $return_status
+ * @property array|string|null               $accessories_checklist_on_return
+ * @property int|null                        $created_by
+ * @property int|null                        $updated_by
+ * @property int|null                        $deleted_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- *
  * @property-read \App\Models\LoanTransaction $loanTransaction
  * @property-read \App\Models\Equipment $equipment
  * @property-read \App\Models\LoanApplicationItem|null $loanApplicationItem
@@ -49,24 +48,31 @@ class LoanTransactionItem extends Model
 
     // ---- STATUS CONSTANTS (should match migration and business logic) ----
     public const STATUS_ITEM_ISSUED = 'issued';
+
     public const STATUS_ITEM_RETURNED = 'returned';
+
     public const STATUS_ITEM_RETURNED_PENDING_INSPECTION = 'returned_pending_inspection';
+
     public const STATUS_ITEM_RETURNED_GOOD = 'returned_good';
+
     public const STATUS_ITEM_RETURNED_MINOR_DAMAGE = 'returned_minor_damage';
+
     public const STATUS_ITEM_RETURNED_MAJOR_DAMAGE = 'returned_major_damage';
+
     public const STATUS_ITEM_REPORTED_LOST = 'reported_lost';
+
     public const STATUS_ITEM_UNSERVICEABLE_ON_RETURN = 'unserviceable_on_return';
 
     // Labels for status constants for UI and reporting
     public static array $STATUSES_LABELS = [
-        self::STATUS_ITEM_ISSUED => 'Telah Dikeluarkan',
-        self::STATUS_ITEM_RETURNED => 'Telah Dipulangkan (Umum)',
+        self::STATUS_ITEM_ISSUED                      => 'Telah Dikeluarkan',
+        self::STATUS_ITEM_RETURNED                    => 'Telah Dipulangkan (Umum)',
         self::STATUS_ITEM_RETURNED_PENDING_INSPECTION => 'Dipulangkan (Menunggu Semakan)',
-        self::STATUS_ITEM_RETURNED_GOOD => 'Dipulangkan (Keadaan Baik)',
-        self::STATUS_ITEM_RETURNED_MINOR_DAMAGE => 'Dipulangkan (Rosak Ringan)',
-        self::STATUS_ITEM_RETURNED_MAJOR_DAMAGE => 'Dipulangkan (Rosak Teruk)',
-        self::STATUS_ITEM_REPORTED_LOST => 'Dilaporkan Hilang',
-        self::STATUS_ITEM_UNSERVICEABLE_ON_RETURN => 'Dipulangkan (Tidak Boleh Servis)',
+        self::STATUS_ITEM_RETURNED_GOOD               => 'Dipulangkan (Keadaan Baik)',
+        self::STATUS_ITEM_RETURNED_MINOR_DAMAGE       => 'Dipulangkan (Rosak Ringan)',
+        self::STATUS_ITEM_RETURNED_MAJOR_DAMAGE       => 'Dipulangkan (Rosak Teruk)',
+        self::STATUS_ITEM_REPORTED_LOST               => 'Dilaporkan Hilang',
+        self::STATUS_ITEM_UNSERVICEABLE_ON_RETURN     => 'Dipulangkan (Tidak Boleh Servis)',
     ];
 
     // Statuses applicable for returns
@@ -104,12 +110,12 @@ class LoanTransactionItem extends Model
 
     // ---- ATTRIBUTE CASTING ----
     protected $casts = [
-        'quantity_transacted' => 'integer',
-        'accessories_checklist_issue' => 'array',
+        'quantity_transacted'          => 'integer',
+        'accessories_checklist_issue'  => 'array',
         'accessories_checklist_return' => 'array',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-        'deleted_at' => 'datetime',
+        'created_at'                   => 'datetime',
+        'updated_at'                   => 'datetime',
+        'deleted_at'                   => 'datetime',
     ];
 
     // Default value for quantity (usually 1 for asset-based transactions)
@@ -174,21 +180,22 @@ class LoanTransactionItem extends Model
      */
     public function getConditionOnReturnTranslatedAttribute(): ?string
     {
-        if (!$this->condition_on_return) {
+        if (! $this->condition_on_return) {
             return null;
         }
         // Use Equipment::getConditionStatusesList() to resolve label
         $conditionList = method_exists(Equipment::class, 'getConditionStatusesList')
             ? Equipment::getConditionStatusesList()
             : [
-                Equipment::CONDITION_NEW => 'Baru',
-                Equipment::CONDITION_GOOD => 'Baik',
-                Equipment::CONDITION_FAIR => 'Sederhana',
-                Equipment::CONDITION_MINOR_DAMAGE => 'Rosak Minor',
-                Equipment::CONDITION_MAJOR_DAMAGE => 'Rosak Major',
+                Equipment::CONDITION_NEW           => 'Baru',
+                Equipment::CONDITION_GOOD          => 'Baik',
+                Equipment::CONDITION_FAIR          => 'Sederhana',
+                Equipment::CONDITION_MINOR_DAMAGE  => 'Rosak Minor',
+                Equipment::CONDITION_MAJOR_DAMAGE  => 'Rosak Major',
                 Equipment::CONDITION_UNSERVICEABLE => 'Tidak Boleh Digunakan',
-                Equipment::CONDITION_LOST => 'Hilang',
+                Equipment::CONDITION_LOST          => 'Hilang',
             ];
+
         return __($conditionList[$this->condition_on_return] ?? Str::title(str_replace('_', ' ', (string) $this->condition_on_return)));
     }
 

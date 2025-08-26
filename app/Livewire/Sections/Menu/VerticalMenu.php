@@ -13,6 +13,7 @@ use Livewire\Component;
 class VerticalMenu extends Component
 {
     public $menuData;
+
     public $configData = [];
 
     /**
@@ -24,11 +25,11 @@ class VerticalMenu extends Component
         $this->configData = \App\Helpers\Helpers::appClasses();
 
         // Load menu from PHP config
-        $menuConfig = config('menu');
+        $menuConfig     = config('menu');
         $this->menuData = (object) $menuConfig;
 
         // Ensure menuData->menu is always an array
-        if (!isset($this->menuData->menu) || !is_array($this->menuData->menu)) {
+        if (! isset($this->menuData->menu) || ! is_array($this->menuData->menu)) {
             $this->menuData->menu = [];
         }
     }
@@ -38,9 +39,10 @@ class VerticalMenu extends Component
      */
     public function getUserRoleProperty()
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return null;
         }
+
         return Auth::user()->getRoleNames()->first();
     }
 
@@ -67,10 +69,10 @@ class VerticalMenu extends Component
             $filtered = [];
 
             foreach ($items as $item) {
-                $item = (object)$item;
+                $item = (object) $item;
 
                 // Show guestOnly items ONLY to guests
-                if (!Auth::check()) {
+                if (! Auth::check()) {
                     if (isset($item->guestOnly) && $item->guestOnly) {
                         // Recursively filter submenu for guests (if any)
                         if (isset($item->submenu) && is_array($item->submenu)) {
@@ -78,6 +80,7 @@ class VerticalMenu extends Component
                         }
                         $filtered[] = $item;
                     }
+
                     continue;
                 }
 
@@ -89,17 +92,18 @@ class VerticalMenu extends Component
                 // Authenticated users: Admin sees all, others according to role
                 $canView = false;
                 if (
-                    $role === 'Admin' ||
-                    (isset($item->role) && in_array($role, (array)$item->role))
+                    $role === 'Admin' || (isset($item->role) && in_array($role, (array) $item->role))
                 ) {
                     $canView = true;
                 }
                 // If item has no role and no guestOnly, allow for all authenticated users
-                elseif (!isset($item->role) && !isset($item->guestOnly)) {
+                elseif (! isset($item->role) && ! isset($item->guestOnly)) {
                     $canView = true;
                 }
 
-                if (!$canView) continue;
+                if (! $canView) {
+                    continue;
+                }
 
                 // Recursively filter submenu if present
                 if (isset($item->submenu) && is_array($item->submenu)) {
@@ -107,6 +111,7 @@ class VerticalMenu extends Component
                 }
                 $filtered[] = $item;
             }
+
             return $filtered;
         };
 
@@ -119,9 +124,9 @@ class VerticalMenu extends Component
     public function render()
     {
         return view('livewire.sections.menu.vertical-menu', [
-            'menuData' => (object)['menu' => $this->filteredMenuData],
-            'configData' => $this->configData,
-            'role' => $this->userRole,
+            'menuData'         => (object) ['menu' => $this->filteredMenuData],
+            'configData'       => $this->configData,
+            'role'             => $this->userRole,
             'currentRouteName' => $this->currentRouteName,
         ]);
     }

@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 /**
- * EquipmentController
+ * EquipmentController.
  *
  * Handles requests related to viewing and managing equipment assets.
  * Applies authorization, filtering, and paginated listing of equipment.
@@ -36,16 +36,13 @@ class EquipmentController extends Controller
 
     /**
      * Display a listing of the equipment, with filtering and pagination.
-     *
-     * @param  Request  $request
-     * @return View
      */
     public function index(Request $request): View
     {
         /** @var User|null $user */
         $user = Auth::user();
         Log::info('EquipmentController@index: Fetching equipment list for general viewing.', [
-            'user_id' => $user?->id,
+            'user_id'           => $user?->id,
             'filters_requested' => $request->all(),
         ]);
 
@@ -79,12 +76,9 @@ class EquipmentController extends Controller
         // Non-privileged users should see only 'available' equipment unless they filter by status
         // Check that required methods/constants exist to avoid errors
         if (
-            $user &&
-            method_exists($user, 'hasAnyRole') &&
-            ! $user->hasAnyRole(['Admin', 'BPM Staff', 'IT Admin']) &&
-            ! $request->filled('status')
+            $user && method_exists($user, 'hasAnyRole') && ! $user->hasAnyRole(['Admin', 'BPM Staff', 'IT Admin']) && ! $request->filled('status')
         ) {
-            if (defined(Equipment::class . '::STATUS_AVAILABLE')) {
+            if (defined(Equipment::class.'::STATUS_AVAILABLE')) {
                 $filters['status'] = Equipment::STATUS_AVAILABLE;
             } else {
                 Log::warning('Equipment::STATUS_AVAILABLE constant is not defined.');
@@ -99,10 +93,10 @@ class EquipmentController extends Controller
         );
 
         // Prepare dropdown/filter options for the view
-        $assetTypes = Equipment::getAssetTypeOptions();
+        $assetTypes          = Equipment::getAssetTypeOptions();
         $operationalStatuses = Equipment::getStatusOptions();
-        $conditionStatuses = Equipment::getConditionStatusesList();
-        $classifications = Equipment::getClassificationOptions();
+        $conditionStatuses   = Equipment::getConditionStatusesList();
+        $classifications     = Equipment::getClassificationOptions();
 
         // Fetch all active equipment categories and their subcategories for filtering
         $equipmentCategories = EquipmentCategory::active()
@@ -117,17 +111,17 @@ class EquipmentController extends Controller
             ->get(['id', 'name']);
 
         $viewData = [
-            'equipmentList'      => $equipmentPaginator,
-            'requestFilters'     => $request->only([
+            'equipmentList'  => $equipmentPaginator,
+            'requestFilters' => $request->only([
                 'asset_type', 'status', 'condition_status', 'classification',
-                'equipment_category_id', 'sub_category_id', 'location_id', 'search'
+                'equipment_category_id', 'sub_category_id', 'location_id', 'search',
             ]),
-            'assetTypes'         => $assetTypes,
-            'operationalStatuses'=> $operationalStatuses,
-            'conditionStatuses'  => $conditionStatuses,
-            'classifications'    => $classifications,
-            'equipmentCategories'=> $equipmentCategories,
-            'locations'          => $locations,
+            'assetTypes'          => $assetTypes,
+            'operationalStatuses' => $operationalStatuses,
+            'conditionStatuses'   => $conditionStatuses,
+            'classifications'     => $classifications,
+            'equipmentCategories' => $equipmentCategories,
+            'locations'           => $locations,
         ];
 
         // Render the equipment listing view
@@ -136,9 +130,6 @@ class EquipmentController extends Controller
 
     /**
      * Display the specified equipment with relevant relationships loaded.
-     *
-     * @param  Equipment  $equipment
-     * @return View
      */
     public function show(Equipment $equipment): View
     {

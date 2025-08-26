@@ -5,7 +5,7 @@ namespace App\Livewire\Misc;
 use Livewire\Component;
 
 /**
- * ComingSoon Livewire Component
+ * ComingSoon Livewire Component.
  *
  * Renders a "Coming Soon" page for features/modules that are under development.
  * Uses a dedicated Blade view with formal Malay language per Design Language guidelines.

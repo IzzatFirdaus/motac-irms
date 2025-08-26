@@ -14,16 +14,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * Stores comments on HelpdeskTicket, can be internal or external.
  *
- * @property int $id
- * @property int $ticket_id
- * @property int $helpdesk_ticket_id
- * @property int $user_id
+ * @property int    $id
+ * @property int    $ticket_id
+ * @property int    $helpdesk_ticket_id
+ * @property int    $user_id
  * @property string $comment
- * @property bool $is_internal
+ * @property bool   $is_internal
  */
 class HelpdeskComment extends Model
 {
-    use HasFactory, CreatedUpdatedDeletedBy, SoftDeletes;
+    use CreatedUpdatedDeletedBy, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'ticket_id',
@@ -73,7 +73,7 @@ class HelpdeskComment extends Model
      */
     public function isExternal(): bool
     {
-        return !$this->is_internal;
+        return ! $this->is_internal;
     }
 
     /**

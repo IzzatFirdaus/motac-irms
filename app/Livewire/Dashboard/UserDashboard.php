@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 /**
- * UserDashboard Livewire Component
+ * UserDashboard Livewire Component.
  *
  * Shows the dashboard for a normal user, with loan stats, quick actions, and recent applications.
  * This is often included by the main Dashboard component.
@@ -15,16 +15,20 @@ use Livewire\Component;
 class UserDashboard extends Component
 {
     public string $displayUserName = '';
+
     public int $pending_loans_count = 0;
+
     public int $approved_loans_count = 0;
+
     public int $rejected_loans_count = 0;
+
     public int $total_loans_count = 0;
 
     public $recent_applications;
 
     public function mount()
     {
-        $user = Auth::user();
+        $user                  = Auth::user();
         $this->displayUserName = $user->name ?? '';
 
         $this->pending_loans_count = LoanApplication::where('user_id', $user->id)
@@ -45,12 +49,12 @@ class UserDashboard extends Component
     public function render()
     {
         return view('livewire.dashboard.user-dashboard', [
-            'displayUserName' => $this->displayUserName,
-            'pending_loans_count' => $this->pending_loans_count,
+            'displayUserName'      => $this->displayUserName,
+            'pending_loans_count'  => $this->pending_loans_count,
             'approved_loans_count' => $this->approved_loans_count,
             'rejected_loans_count' => $this->rejected_loans_count,
-            'total_loans_count' => $this->total_loans_count,
-            'recent_applications' => $this->recent_applications,
+            'total_loans_count'    => $this->total_loans_count,
+            'recent_applications'  => $this->recent_applications,
         ]);
     }
 }

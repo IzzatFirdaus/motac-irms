@@ -8,12 +8,12 @@ use Illuminate\Support\Facades\Auth;
 
 class ViewLogs
 {
-  public function handle(Request $request, Closure $next)
-  {
-    if (Auth::check() && Auth::user()->hasPermissionTo('view logs')) {
-      return $next($request);
-    }
+    public function handle(Request $request, Closure $next)
+    {
+        if (Auth::check() && Auth::user()->hasPermissionTo('view logs')) {
+            return $next($request);
+        }
 
-    abort(401, 'Unauthorised');
-  }
+        abort(401, 'Unauthorised');
+    }
 }

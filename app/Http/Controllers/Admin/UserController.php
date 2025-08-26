@@ -3,16 +3,16 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Department;
-use App\Models\Position;
 use App\Models\Grade;
+use App\Models\Position;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules\Password;
-use Spatie\Permission\Models\Role; // For assigning roles
-use Illuminate\Support\Facades\Log; // Added for logging
-use Illuminate\Support\Facades\Auth; // Explicitly import Auth facade
+use Illuminate\Support\Facades\Log; // For assigning roles
+use Illuminate\Validation\Rules\Password; // Added for logging
+use Spatie\Permission\Models\Role; // Explicitly import Auth facade
 
 class UserController extends Controller
 {
@@ -43,7 +43,7 @@ class UserController extends Controller
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
                     ->orWhere('identification_number', 'like', "%{$search}%");
-                    // Removed 'motac_email' as per refactoring plan.
+                // Removed 'motac_email' as per refactoring plan.
             });
         }
 
@@ -68,9 +68,9 @@ class UserController extends Controller
         $users = $query->orderBy('name', 'asc')->paginate(config('pagination.default_size', 15));
 
         $departments = Department::orderBy('name', 'asc')->get();
-        $positions = Position::orderBy('name', 'asc')->get();
-        $grades = Grade::orderBy('name', 'asc')->get();
-        $roles = Role::orderBy('name', 'asc')->get();
+        $positions   = Position::orderBy('name', 'asc')->get();
+        $grades      = Grade::orderBy('name', 'asc')->get();
+        $roles       = Role::orderBy('name', 'asc')->get();
 
         return view('admin.users.index', compact('users', 'departments', 'positions', 'grades', 'roles'));
     }
@@ -82,9 +82,10 @@ class UserController extends Controller
     {
         Log::info('Admin UserController@create: Displaying create user form.', ['admin_user_id' => Auth::id()]);
         $departments = Department::orderBy('name', 'asc')->get();
-        $positions = Position::orderBy('name', 'asc')->get();
-        $grades = Grade::orderBy('name', 'asc')->get();
-        $roles = Role::orderBy('name', 'asc')->get();
+        $positions   = Position::orderBy('name', 'asc')->get();
+        $grades      = Grade::orderBy('name', 'asc')->get();
+        $roles       = Role::orderBy('name', 'asc')->get();
+
         return view('admin.users.create', compact('departments', 'positions', 'grades', 'roles'));
     }
 
@@ -94,27 +95,27 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'name'                  => 'required|string|max:255',
+            'email'                 => 'required|string|email|max:255|unique:users',
             'identification_number' => 'nullable|string|max:255|unique:users',
-            'department_id' => 'required|exists:departments,id',
-            'position_id' => 'required|exists:positions,id',
-            'grade_id' => 'required|exists:grades,id',
-            'is_active' => 'required|boolean', // Added validation for is_active
-            'roles' => 'nullable|array',
-            'roles.*' => 'exists:roles,name',
-            'password' => ['required', 'confirmed', Password::defaults()],
+            'department_id'         => 'required|exists:departments,id',
+            'position_id'           => 'required|exists:positions,id',
+            'grade_id'              => 'required|exists:grades,id',
+            'is_active'             => 'required|boolean', // Added validation for is_active
+            'roles'                 => 'nullable|array',
+            'roles.*'               => 'exists:roles,name',
+            'password'              => ['required', 'confirmed', Password::defaults()],
         ]);
 
         $user = User::create([
-            'name' => $validatedData['name'],
-            'email' => $validatedData['email'],
+            'name'                  => $validatedData['name'],
+            'email'                 => $validatedData['email'],
             'identification_number' => $validatedData['identification_number'],
-            'department_id' => $validatedData['department_id'],
-            'position_id' => $validatedData['position_id'],
-            'grade_id' => $validatedData['grade_id'],
-            'is_active' => $validatedData['is_active'], // Assign is_active
-            'password' => Hash::make($validatedData['password']),
+            'department_id'         => $validatedData['department_id'],
+            'position_id'           => $validatedData['position_id'],
+            'grade_id'              => $validatedData['grade_id'],
+            'is_active'             => $validatedData['is_active'], // Assign is_active
+            'password'              => Hash::make($validatedData['password']),
         ]);
 
         if ($request->filled('roles')) {
@@ -132,6 +133,7 @@ class UserController extends Controller
     {
         Log::info(sprintf('Admin UserController@show: Displaying user ID: %d.', $user->id), ['admin_user_id' => Auth::id()]);
         $user->load(['department', 'position', 'grade', 'roles']); // Eager load relationships
+
         return view('admin.users.show', compact('user'));
     }
 
@@ -142,9 +144,9 @@ class UserController extends Controller
     {
         Log::info(sprintf('Admin UserController@edit: Displaying edit form for user ID: %d.', $user->id), ['admin_user_id' => Auth::id()]);
         $departments = Department::orderBy('name', 'asc')->get();
-        $positions = Position::orderBy('name', 'asc')->get();
-        $grades = Grade::orderBy('name', 'asc')->get();
-        $roles = Role::orderBy('name', 'asc')->get();
+        $positions   = Position::orderBy('name', 'asc')->get();
+        $grades      = Grade::orderBy('name', 'asc')->get();
+        $roles       = Role::orderBy('name', 'asc')->get();
 
         // Load current roles for the user
         $userRoles = $user->roles->pluck('name')->toArray();
@@ -158,20 +160,20 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'identification_number' => 'nullable|string|max:255|unique:users,identification_number,' . $user->id,
-            'department_id' => 'required|exists:departments,id',
-            'position_id' => 'required|exists:positions,id',
-            'grade_id' => 'required|exists:grades,id',
-            'is_active' => 'required|boolean', // Validate is_active
-            'roles' => 'nullable|array',
-            'roles.*' => 'exists:roles,name',
-            'password' => ['nullable', 'confirmed', Password::defaults()],
+            'name'                  => 'required|string|max:255',
+            'email'                 => 'required|string|email|max:255|unique:users,email,'.$user->id,
+            'identification_number' => 'nullable|string|max:255|unique:users,identification_number,'.$user->id,
+            'department_id'         => 'required|exists:departments,id',
+            'position_id'           => 'required|exists:positions,id',
+            'grade_id'              => 'required|exists:grades,id',
+            'is_active'             => 'required|boolean', // Validate is_active
+            'roles'                 => 'nullable|array',
+            'roles.*'               => 'exists:roles,name',
+            'password'              => ['nullable', 'confirmed', Password::defaults()],
         ]);
 
         $userData = $validatedData;
-        if (!empty($validatedData['password'])) {
+        if (! empty($validatedData['password'])) {
             $userData['password'] = Hash::make($validatedData['password']);
         } else {
             unset($userData['password']);
@@ -202,15 +204,18 @@ class UserController extends Controller
         // Prevent deleting own account, or add specific logic if needed
         if ($user->id === Auth::id()) {
             Log::warning(sprintf('Admin User ID: %d attempted to delete own account (ID: %d).', Auth::id(), $user->id));
+
             return redirect()->route('admin.users.index')->with('error', 'You cannot delete your own account.');
         }
 
         try {
             $user->delete(); // Soft delete
             Log::info(sprintf('Admin User ID: %d deleted successfully (soft-delete).', $user->id), ['admin_user_id' => Auth::id()]);
+
             return redirect()->route('admin.users.index')->with('success', 'User deleted successfully.');
         } catch (\Exception $exception) {
             Log::error(sprintf('Error soft-deleting user ID %d by admin: ', $user->id).$exception->getMessage(), ['exception_class' => get_class($exception), 'trace_snippet' => substr($exception->getTraceAsString(), 0, 500)]);
+
             return back()->with('error', 'Failed to delete user: '.$exception->getMessage());
         }
     }

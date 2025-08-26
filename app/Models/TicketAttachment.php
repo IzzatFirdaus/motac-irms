@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Models;
@@ -13,16 +14,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * Represents file attachments for helpdesk tickets and comments.
  *
- * @property int $id
- * @property int $ticket_id
- * @property int|null $comment_id
- * @property int $user_id
- * @property string $filename
- * @property string $filepath
- * @property string|null $mime_type
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
+ * @property int                             $id
+ * @property int                             $ticket_id
+ * @property int|null                        $comment_id
+ * @property int                             $user_id
+ * @property string                          $filename
+ * @property string                          $filepath
+ * @property string|null                     $mime_type
+ * @property int|null                        $created_by
+ * @property int|null                        $updated_by
+ * @property int|null                        $deleted_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
@@ -46,9 +47,9 @@ class TicketAttachment extends Model
     ];
 
     protected $casts = [
-        'ticket_id' => 'integer',
+        'ticket_id'  => 'integer',
         'comment_id' => 'integer',
-        'user_id' => 'integer',
+        'user_id'    => 'integer',
         'created_by' => 'integer',
         'updated_by' => 'integer',
         'deleted_by' => 'integer',

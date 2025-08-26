@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Models;
@@ -14,13 +15,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * Represents comments left on helpdesk tickets.
  *
- * @property int $id
- * @property int $ticket_id
- * @property int $user_id
- * @property string $comment
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
+ * @property int                             $id
+ * @property int                             $ticket_id
+ * @property int                             $user_id
+ * @property string                          $comment
+ * @property int|null                        $created_by
+ * @property int|null                        $updated_by
+ * @property int|null                        $deleted_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
@@ -41,8 +42,8 @@ class TicketComment extends Model
     ];
 
     protected $casts = [
-        'ticket_id' => 'integer',
-        'user_id' => 'integer',
+        'ticket_id'  => 'integer',
+        'user_id'    => 'integer',
         'created_by' => 'integer',
         'updated_by' => 'integer',
         'deleted_by' => 'integer',

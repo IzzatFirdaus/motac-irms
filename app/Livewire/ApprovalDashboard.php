@@ -6,6 +6,7 @@ use App\Models\Approval;
 use App\Models\LoanApplication;
 use App\Services\ApprovalService;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
@@ -19,7 +20,6 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Throwable;
-use Illuminate\Database\Eloquent\Builder;
 
 #[Layout('layouts.app')]
 #[Title('Papan Pemuka Kelulusan')]
@@ -29,11 +29,17 @@ class ApprovalDashboard extends Component
     use WithPagination;
 
     public string $filterType = 'all';
+
     public string $searchTerm = '';
+
     public string $filterStatus = Approval::STATUS_PENDING;
+
     public bool $showApprovalActionModal = false;
+
     public ?Approval $selectedApproval = null;
+
     public string $decision = '';
+
     public string $comments = '';
 
     protected string $paginationTheme = 'bootstrap';
@@ -64,10 +70,10 @@ class ApprovalDashboard extends Component
 
     protected array $messages = [
         'decision.required' => 'Sila pilih keputusan (Lulus/Tolak).',
-        'decision.in' => 'Keputusan yang dipilih tidak sah.',
+        'decision.in'       => 'Keputusan yang dipilih tidak sah.',
         'comments.required' => 'Sila masukkan komen untuk keputusan Penolakan.',
-        'comments.min' => 'Komen mestilah sekurang-kurangnya 10 aksara.',
-        'comments.max' => 'Komen tidak boleh melebihi 1000 aksara.',
+        'comments.min'      => 'Komen mestilah sekurang-kurangnya 10 aksara.',
+        'comments.max'      => 'Komen tidak boleh melebihi 1000 aksara.',
     ];
 
     /**
@@ -77,7 +83,7 @@ class ApprovalDashboard extends Component
     public function getApprovalTasksProperty(): LengthAwarePaginator
     {
         $user = Auth::user();
-        if (!$user || !$user->can('view_approvals')) {
+        if (! $user || ! $user->can('view_approvals')) {
             return new LengthAwarePaginator([], 0, 10);
         }
 
@@ -102,7 +108,7 @@ class ApprovalDashboard extends Component
 
         // Search
         if ($this->searchTerm !== '') {
-            $searchTerm = '%' . trim($this->searchTerm) . '%';
+            $searchTerm = '%'.trim($this->searchTerm).'%';
             $query->where(function (Builder $q) use ($searchTerm): void {
                 $q->whereHasMorph('approvable', [LoanApplication::class], function (Builder $morphQuery) use ($searchTerm): void {
                     $morphQuery->where('application_no', 'like', $searchTerm)
@@ -114,6 +120,7 @@ class ApprovalDashboard extends Component
         }
 
         $query->orderBy('created_at', 'desc');
+
         return $query->paginate(10);
     }
 
@@ -121,8 +128,8 @@ class ApprovalDashboard extends Component
     public function getStatusOptionsProperty(): array
     {
         return [
-            'all' => 'Semua Status',
-            Approval::STATUS_PENDING => Approval::$STATUSES_LABELS[Approval::STATUS_PENDING],
+            'all'                     => 'Semua Status',
+            Approval::STATUS_PENDING  => Approval::$STATUSES_LABELS[Approval::STATUS_PENDING],
             Approval::STATUS_APPROVED => Approval::$STATUSES_LABELS[Approval::STATUS_APPROVED],
             Approval::STATUS_REJECTED => Approval::$STATUSES_LABELS[Approval::STATUS_REJECTED],
         ];
@@ -132,7 +139,7 @@ class ApprovalDashboard extends Component
     public function getTypeOptionsProperty(): array
     {
         return [
-            'all' => 'Semua Jenis Permohonan',
+            'all'                  => 'Semua Jenis Permohonan',
             LoanApplication::class => 'Permohonan Pinjaman Peralatan ICT',
         ];
     }
@@ -143,7 +150,7 @@ class ApprovalDashboard extends Component
     public function openApprovalActionModal(int $approvalId): void
     {
         try {
-            $user = Auth::user();
+            $user     = Auth::user();
             $approval = Approval::where('officer_id', $user->id)
                 ->where('status', Approval::STATUS_PENDING)
                 ->findOrFail($approvalId);
@@ -151,8 +158,8 @@ class ApprovalDashboard extends Component
             $this->authorize('approveOrReject', $approval);
 
             $this->selectedApproval = $approval;
-            $this->decision = '';
-            $this->comments = '';
+            $this->decision         = '';
+            $this->comments         = '';
             $this->resetErrorBag();
 
             $this->showApprovalActionModal = true;
@@ -177,7 +184,7 @@ class ApprovalDashboard extends Component
 
         try {
             $user = Auth::user();
-            if (!$this->selectedApproval || !$user) {
+            if (! $this->selectedApproval || ! $user) {
                 throw new \Exception('No approval selected or user not authenticated.');
             }
 
@@ -208,7 +215,7 @@ class ApprovalDashboard extends Component
             $this->dispatch('toastr', type: 'error', message: __('Anda tidak dibenarkan untuk tindakan ini.'));
         } catch (Throwable $e) {
             Log::error('ApprovalDashboard: Error submitting decision.', ['exception' => $e, 'user_id' => $user->id]);
-            $this->dispatch('toastr', type: 'error', message: __('Gagal merekodkan keputusan: ') . $e->getMessage());
+            $this->dispatch('toastr', type: 'error', message: __('Gagal merekodkan keputusan: ').$e->getMessage());
         }
     }
 
@@ -216,9 +223,9 @@ class ApprovalDashboard extends Component
     public function closeModal(): void
     {
         $this->showApprovalActionModal = false;
-        $this->selectedApproval = null;
-        $this->decision = '';
-        $this->comments = '';
+        $this->selectedApproval        = null;
+        $this->decision                = '';
+        $this->comments                = '';
         $this->resetErrorBag();
         $this->dispatch('closeApprovalActionModalEvent');
     }
@@ -234,13 +241,14 @@ class ApprovalDashboard extends Component
      */
     public function getViewApplicationRouteForSelected(): ?string
     {
-        if (!$this->selectedApproval || !$this->selectedApproval->approvable) {
+        if (! $this->selectedApproval || ! $this->selectedApproval->approvable) {
             return null;
         }
         $approvable = $this->selectedApproval->approvable;
         if ($approvable instanceof LoanApplication) {
             return route('loan-applications.show', $approvable->id);
         }
+
         return null;
     }
 

@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
 use Rector\Set\ValueObject\SetList;
+
 // If you use Rector Laravel sets, require and use the correct package and class.
 // Example: use Rector\Laravel\Set\LaravelSetList;
 // You can use Symfony sets if you use Symfony components
@@ -20,15 +21,15 @@ use Rector\Set\ValueObject\SetList;
 return static function (RectorConfig $rectorConfig): void {
     // Specify the project directories to refactor
     $rectorConfig->paths([
-        __DIR__ . '/app',
-        __DIR__ . '/bootstrap',
-        __DIR__ . '/config',
-        __DIR__ . '/database',
-        __DIR__ . '/public',
-        __DIR__ . '/resources',
-        __DIR__ . '/routes',
+        __DIR__.'/app',
+        __DIR__.'/bootstrap',
+        __DIR__.'/config',
+        __DIR__.'/database',
+        __DIR__.'/public',
+        __DIR__.'/resources',
+        __DIR__.'/routes',
         // __DIR__ . '/src', // Uncomment if you have a 'src' directory
-        __DIR__ . '/tests',
+        __DIR__.'/tests',
     ]);
 
     // Apply relevant Rector rule sets for MOTAC IRMS
@@ -56,10 +57,10 @@ return static function (RectorConfig $rectorConfig): void {
 
     // Exclude files/directories that should not be refactored
     $rectorConfig->skip([
-        __DIR__ . '/vendor',            // Always exclude vendor!
-        __DIR__ . '/storage',           // Exclude storage (runtime data)
-        __DIR__ . '/bootstrap/cache',   // Exclude cached files
-        __DIR__ . '/public/build',      // Exclude frontend build output
+        __DIR__.'/vendor',            // Always exclude vendor!
+        __DIR__.'/storage',           // Exclude storage (runtime data)
+        __DIR__.'/bootstrap/cache',   // Exclude cached files
+        __DIR__.'/public/build',      // Exclude frontend build output
 
         // If you want to temporarily exclude a file from Rector, add it here.
         // Example:
@@ -67,7 +68,7 @@ return static function (RectorConfig $rectorConfig): void {
     ]);
 
     // Use a local cache directory for faster repeated runs
-    $rectorConfig->cacheDirectory(__DIR__ . '/.rector_cache');
+    $rectorConfig->cacheDirectory(__DIR__.'/.rector_cache');
 
     // Optionally, reduce output verbosity by showing only short rule names
     // $rectorConfig->withShortName();

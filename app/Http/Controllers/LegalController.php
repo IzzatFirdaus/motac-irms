@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
 
 class LegalController extends Controller
@@ -14,13 +12,13 @@ class LegalController extends Controller
     public function policy()
     {
         // Determine locale and use correct key for the hybrid language-markdown approach
-        $locale = app()->getLocale();
-        $key = $locale === 'ms' ? 'policy_ms.content' : 'policy_en.content';
+        $locale     = app()->getLocale();
+        $key        = $locale === 'ms' ? 'policy_ms.content' : 'policy_en.content';
         $policyHtml = Str::markdown(__($key));
 
         return view('policy', [
             'policyHtml' => $policyHtml,
-            'locale' => $locale,
+            'locale'     => $locale,
         ]);
     }
 
@@ -29,13 +27,13 @@ class LegalController extends Controller
      */
     public function terms()
     {
-        $locale = app()->getLocale();
-        $key = $locale === 'ms' ? 'terms_ms.content' : 'terms_en.content';
+        $locale    = app()->getLocale();
+        $key       = $locale === 'ms' ? 'terms_ms.content' : 'terms_en.content';
         $termsHtml = Str::markdown(__($key));
 
         return view('terms', [
             'termsHtml' => $termsHtml,
-            'locale' => $locale,
+            'locale'    => $locale,
         ]);
     }
 }

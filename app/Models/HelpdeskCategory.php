@@ -13,14 +13,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * Represents categories for helpdesk tickets.
  *
- * @property int $id
- * @property string $name
+ * @property int         $id
+ * @property string      $name
  * @property string|null $description
- * @property bool $is_active
+ * @property bool        $is_active
  */
 class HelpdeskCategory extends Model
 {
-    use HasFactory, CreatedUpdatedDeletedBy, SoftDeletes;
+    use CreatedUpdatedDeletedBy, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'name',

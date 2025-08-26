@@ -17,15 +17,17 @@ use Livewire\Component;
 class Dashboard extends Component
 {
     public string $displayUserName = '';
+
     public bool $isNormalUser = false;
 
     // For user dashboard
     public int $pendingUserLoanApplicationsCount = 0;
+
     public EloquentCollection $userRecentLoanApplications;
 
     public function __construct()
     {
-        $this->userRecentLoanApplications = new EloquentCollection();
+        $this->userRecentLoanApplications = new EloquentCollection;
     }
 
     /**
@@ -36,21 +38,22 @@ class Dashboard extends Component
         /** @var User|null $user */
         $user = Auth::user();
 
-        if (!$user) {
+        if (! $user) {
             $this->displayUserName = __('Pengguna Tetamu');
             Log::warning('MOTAC Dashboard: User not authenticated during mount.');
+
             return;
         }
 
         $this->displayUserName = $user->name;
         // Only treat as normal user if the user has ONLY the 'User' role
-    // Check roles for both guards
-    $webUser = \Auth::guard('web')->user();
-    $sanctumUser = \Auth::guard('sanctum')->user();
-    $webRoles = $webUser && $webUser->roles ? $webUser->roles->pluck('name') : collect();
-    $sanctumRoles = $sanctumUser && $sanctumUser->roles ? $sanctumUser->roles->pluck('name') : collect();
-    $allRoles = $webRoles->merge($sanctumRoles)->unique();
-    $this->isNormalUser = ($allRoles->count() === 1 && $allRoles->first() === 'User');
+        // Check roles for both guards
+        $webUser            = \Auth::guard('web')->user();
+        $sanctumUser        = \Auth::guard('sanctum')->user();
+        $webRoles           = $webUser         && $webUser->roles ? $webUser->roles->pluck('name') : collect();
+        $sanctumRoles       = $sanctumUser && $sanctumUser->roles ? $sanctumUser->roles->pluck('name') : collect();
+        $allRoles           = $webRoles->merge($sanctumRoles)->unique();
+        $this->isNormalUser = ($allRoles->count() === 1 && $allRoles->first() === 'User');
 
         if ($this->isNormalUser) {
             // Stat Card: Pending loan applications
@@ -84,11 +87,11 @@ class Dashboard extends Component
         }
 
         // Check roles for both guards
-        $webUser = \Auth::guard('web')->user();
-        $sanctumUser = \Auth::guard('sanctum')->user();
-        $webRoles = $webUser && $webUser->roles ? $webUser->roles->pluck('name') : collect();
+        $webUser      = \Auth::guard('web')->user();
+        $sanctumUser  = \Auth::guard('sanctum')->user();
+        $webRoles     = $webUser         && $webUser->roles ? $webUser->roles->pluck('name') : collect();
         $sanctumRoles = $sanctumUser && $sanctumUser->roles ? $sanctumUser->roles->pluck('name') : collect();
-        $allRoles = $webRoles->merge($sanctumRoles)->unique();
+        $allRoles     = $webRoles->merge($sanctumRoles)->unique();
         if ($allRoles->contains('Admin')) {
             return view('livewire.dashboard.admin-dashboard-wrapper');
         }
@@ -101,6 +104,7 @@ class Dashboard extends Component
         if ($allRoles->contains('Approver')) {
             return view('livewire.dashboard.approver-dashboard-wrapper');
         }
+
         // Default fallback: admin dashboard
         return view('livewire.dashboard.admin-dashboard-wrapper');
     }

@@ -2,9 +2,9 @@
 
 namespace App\Translation;
 
-use Illuminate\Translation\Translator;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Translation\Translator;
 
 /**
  * Custom Translator for MOTAC IRMS Suffixed Language Files.
@@ -13,14 +13,17 @@ use Illuminate\Support\Facades\Cache;
 class SuffixedTranslator extends Translator
 {
     protected const CACHE_PREFIX = 'motac_translation_';
+
     protected const CACHE_DURATION = 60; // minutes
+
     protected array $missingKeys = [];
+
     protected array $metrics = [
         'total_requests' => 0,
-        'cache_hits' => 0,
-        'suffixed_hits' => 0, // For parity with old metrics
-        'fallback_hits' => 0,
-        'missing_keys' => 0,
+        'cache_hits'     => 0,
+        'suffixed_hits'  => 0, // For parity with old metrics
+        'fallback_hits'  => 0,
+        'missing_keys'   => 0,
     ];
 
     /**
@@ -29,13 +32,14 @@ class SuffixedTranslator extends Translator
     public function get($key, array $replace = [], $locale = null, $fallback = true)
     {
         $this->metrics['total_requests']++;
-        $locale = $locale ?? $this->locale;
+        $locale   = $locale ?? $this->locale;
         $cacheKey = $this->generateCacheKey($key, $locale, $replace);
 
         if ($this->shouldUseCache()) {
             $cached = Cache::get($cacheKey);
             if ($cached !== null) {
                 $this->metrics['cache_hits']++;
+
                 return $cached;
             }
         }
@@ -59,15 +63,15 @@ class SuffixedTranslator extends Translator
      */
     protected function handleMissingTranslation($key, $locale)
     {
-        $missingKeyId = $key . '.' . $locale;
-        if (!in_array($missingKeyId, $this->missingKeys)) {
+        $missingKeyId = $key.'.'.$locale;
+        if (! in_array($missingKeyId, $this->missingKeys)) {
             $this->missingKeys[] = $missingKeyId;
             if (config('translation.log_missing_keys', true)) {
-                Log::warning("Missing translation key detected", [
-                    'key' => $key,
-                    'locale' => $locale,
-                    'request_url' => request()->url() ?? 'N/A',
-                    'user_agent' => request()->userAgent() ?? 'N/A',
+                Log::warning('Missing translation key detected', [
+                    'key'         => $key,
+                    'locale'      => $locale,
+                    'request_url' => request()->url()       ?? 'N/A',
+                    'user_agent'  => request()->userAgent() ?? 'N/A',
                 ]);
             }
         }
@@ -78,8 +82,9 @@ class SuffixedTranslator extends Translator
      */
     protected function generateCacheKey($key, $locale, array $replace)
     {
-        $replaceHash = !empty($replace) ? md5(serialize($replace)) : 'no_replace';
-        return self::CACHE_PREFIX . md5($key . '.' . $locale . '.' . $replaceHash);
+        $replaceHash = ! empty($replace) ? md5(serialize($replace)) : 'no_replace';
+
+        return self::CACHE_PREFIX.md5($key.'.'.$locale.'.'.$replaceHash);
     }
 
     /**
@@ -87,9 +92,7 @@ class SuffixedTranslator extends Translator
      */
     protected function shouldUseCache()
     {
-        return config('translation.cache_translations', true) &&
-            !app()->environment('local') &&
-            extension_loaded('redis');
+        return config('translation.cache_translations', true) && ! app()->environment('local') && extension_loaded('redis');
     }
 
     /** Get translation performance metrics for debugging. */
@@ -112,16 +115,19 @@ class SuffixedTranslator extends Translator
     public function clearCache()
     {
         try {
-            $pattern = self::CACHE_PREFIX . '*';
-            $keys = Cache::getRedis()->keys($pattern);
-            if (!empty($keys)) {
+            $pattern = self::CACHE_PREFIX.'*';
+            $keys    = Cache::getRedis()->keys($pattern);
+            if (! empty($keys)) {
                 Cache::getRedis()->del($keys);
                 Log::info('Translation cache cleared successfully.', ['keys_cleared' => count($keys)]);
+
                 return true;
             }
+
             return true;
         } catch (\Exception $e) {
-            Log::error('Failed to clear translation cache: ' . $e->getMessage());
+            Log::error('Failed to clear translation cache: '.$e->getMessage());
+
             return false;
         }
     }
@@ -135,10 +141,10 @@ class SuffixedTranslator extends Translator
     {
         $this->metrics = [
             'total_requests' => 0,
-            'cache_hits' => 0,
-            'suffixed_hits' => 0,
-            'fallback_hits' => 0,
-            'missing_keys' => 0,
+            'cache_hits'     => 0,
+            'suffixed_hits'  => 0,
+            'fallback_hits'  => 0,
+            'missing_keys'   => 0,
         ];
         $this->missingKeys = [];
     }

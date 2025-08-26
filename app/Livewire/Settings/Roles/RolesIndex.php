@@ -22,16 +22,27 @@ class RolesIndex extends Component
     use WithPagination;
 
     public bool $showModal = false;
+
     public bool $isEditMode = false;
+
     public ?Role $editingRole = null;
+
     public ?Role $deletingRole = null;
+
     public string $name = '';
+
     public array $selectedPermissions = [];
+
     public bool $showDeleteConfirmationModal = false;
+
     public ?int $roleIdToDelete = null;
+
     public string $roleNameToDelete = '';
+
     public array $allPermissionsForView = [];
+
     public array $coreRoles = [];
+
     protected string $paginationTheme = 'bootstrap';
 
     /**
@@ -40,8 +51,8 @@ class RolesIndex extends Component
     public function mount(): void
     {
         abort_unless(Auth::user()?->can('manage_roles'), 403, __('Tindakan tidak dibenarkan.'));
-        $this->coreRoles = config('motac.core_roles', ['Admin', 'BPM Staff', 'IT Admin', 'User']);
-        $roleModelClass = config('permission.models.role');
+        $this->coreRoles   = config('motac.core_roles', ['Admin', 'BPM Staff', 'IT Admin', 'User']);
+        $roleModelClass    = config('permission.models.role');
         $this->editingRole = new $roleModelClass;
         $this->loadAllPermissions();
     }
@@ -83,7 +94,7 @@ class RolesIndex extends Component
         $this->authorize('create', config('permission.models.role'));
         $this->resetInputFields();
         $this->isEditMode = false;
-        $this->showModal = true;
+        $this->showModal  = true;
     }
 
     /**
@@ -95,7 +106,7 @@ class RolesIndex extends Component
         $this->validate();
 
         $roleModelClass = config('permission.models.role');
-        $role = $roleModelClass::create(['name' => $this->name, 'guard_name' => 'web']);
+        $role           = $roleModelClass::create(['name' => $this->name, 'guard_name' => 'web']);
         $role->syncPermissions($this->selectedPermissions);
 
         $this->dispatch('toastr', type: 'success', message: __('Peranan berjaya dicipta!'));
@@ -108,7 +119,7 @@ class RolesIndex extends Component
     public function editRole(int $roleId): void
     {
         $this->authorize('update', config('permission.models.role'));
-        $roleModelClass = config('permission.models.role');
+        $roleModelClass    = config('permission.models.role');
         $this->editingRole = $roleModelClass::findById($roleId, 'web');
 
         // Prevent editing core roles or roles with users
@@ -118,13 +129,14 @@ class RolesIndex extends Component
         ) {
             $this->dispatch('toastr', type: 'error', message: 'Tidak boleh mengedit peranan sistem atau peranan yang mempunyai pengguna bersekutu.');
             $this->closeModal();
+
             return;
         }
 
-        $this->name = $this->editingRole->name;
+        $this->name                = $this->editingRole->name;
         $this->selectedPermissions = $this->editingRole->permissions()->pluck('id')->toArray();
-        $this->isEditMode = true;
-        $this->showModal = true;
+        $this->isEditMode          = true;
+        $this->showModal           = true;
     }
 
     /**
@@ -141,6 +153,7 @@ class RolesIndex extends Component
         ) {
             $this->dispatch('toastr', type: 'error', message: 'Tidak boleh mengemaskini peranan sistem atau peranan yang mempunyai pengguna bersekutu.');
             $this->closeModal();
+
             return;
         }
 
@@ -159,12 +172,13 @@ class RolesIndex extends Component
     {
         $this->authorize('delete', config('permission.models.role'));
 
-        $roleModelClass = config('permission.models.role');
+        $roleModelClass     = config('permission.models.role');
         $this->deletingRole = $roleModelClass::findById($roleId, 'web');
 
         if (! $this->deletingRole) {
             $this->dispatch('toastr', type: 'error', message: __('Peranan tidak ditemui.'));
             $this->closeDeleteConfirmationModal();
+
             return;
         }
 
@@ -172,11 +186,12 @@ class RolesIndex extends Component
         if ($this->deletingRole->users()->exists() || in_array($this->deletingRole->name, $this->coreRoles, true)) {
             $this->dispatch('toastr', type: 'error', message: __('Tidak boleh memadam peranan sistem atau peranan yang mempunyai pengguna bersekutu.'));
             $this->closeDeleteConfirmationModal();
+
             return;
         }
 
-        $this->roleIdToDelete = $roleId;
-        $this->roleNameToDelete = $this->deletingRole->name;
+        $this->roleIdToDelete              = $roleId;
+        $this->roleNameToDelete            = $this->deletingRole->name;
         $this->showDeleteConfirmationModal = true;
         $this->dispatch('openModal', elementId: 'deleteConfirmationModal');
     }
@@ -190,7 +205,7 @@ class RolesIndex extends Component
 
         if ($this->roleIdToDelete) {
             $roleModelClass = config('permission.models.role');
-            $role = $roleModelClass::findById($this->roleIdToDelete, 'web');
+            $role           = $roleModelClass::findById($this->roleIdToDelete, 'web');
 
             if ($role) {
                 if ($role->users()->exists() || in_array($role->name, $this->coreRoles, true)) {
@@ -213,7 +228,7 @@ class RolesIndex extends Component
      */
     public function closeModal(): void
     {
-        $this->showModal = false;
+        $this->showModal                   = false;
         $this->showDeleteConfirmationModal = false;
         $this->resetInputFields();
         $this->resetErrorBag();
@@ -225,8 +240,8 @@ class RolesIndex extends Component
     public function closeDeleteConfirmationModal(): void
     {
         $this->showDeleteConfirmationModal = false;
-        $this->roleIdToDelete = null;
-        $this->roleNameToDelete = '';
+        $this->roleIdToDelete              = null;
+        $this->roleNameToDelete            = '';
         $this->resetErrorBag();
     }
 
@@ -236,9 +251,9 @@ class RolesIndex extends Component
     public function render(): \Illuminate\View\View
     {
         return view('livewire.settings.roles.roles-index', [
-            'roles' => $this->roles,
+            'roles'                 => $this->roles,
             'allPermissionsForView' => $this->allPermissionsForView,
-            'coreRoles' => $this->coreRoles,
+            'coreRoles'             => $this->coreRoles,
         ]);
     }
 
@@ -254,7 +269,7 @@ class RolesIndex extends Component
                 'required', 'string', 'min:3', 'max:125',
                 ValidationRule::unique(config('permission.table_names.roles', 'roles'), 'name')->ignore($roleIdToIgnore),
             ],
-            'selectedPermissions' => 'nullable|array',
+            'selectedPermissions'   => 'nullable|array',
             'selectedPermissions.*' => 'exists:'.config('permission.table_names.permissions', 'permissions').',id',
         ];
     }
@@ -264,11 +279,11 @@ class RolesIndex extends Component
      */
     private function resetInputFields(): void
     {
-        $this->name = '';
+        $this->name                = '';
         $this->selectedPermissions = [];
-        $roleModelClass = config('permission.models.role');
-        $this->editingRole = new $roleModelClass;
-        $this->isEditMode = false;
+        $roleModelClass            = config('permission.models.role');
+        $this->editingRole         = new $roleModelClass;
+        $this->isEditMode          = false;
         $this->resetErrorBag();
     }
 }

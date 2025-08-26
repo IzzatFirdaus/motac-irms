@@ -25,51 +25,87 @@ class EquipmentIndex extends Component
     use WithPagination;
 
     public string $searchTerm = '';
+
     public string $filterAssetType = '';
+
     public string $filterStatus = '';
+
     public string $filterCondition = '';
+
     public ?int $filterDepartmentId = null;
+
     public string $sortField = 'created_at';
+
     public string $sortDirection = 'desc';
 
     public bool $showCreateModal = false;
+
     public bool $showEditModal = false;
+
     public bool $showDeleteModal = false;
+
     public bool $showViewModal = false;
 
     public ?Equipment $editingEquipment = null;
+
     public ?Equipment $deletingEquipment = null;
+
     public ?Equipment $viewingEquipment = null;
+
     public bool $isEditing = false;
 
     // Form fields for create/edit modals
     public string $asset_type = '';
+
     public ?string $brand = null;
+
     public ?string $model_name = null;
+
     public string $serial_number = '';
+
     public string $tag_id = '';
+
     public ?string $purchase_date = null;
+
     public ?string $warranty_expiry_date = null;
+
     public string $status = '';
+
     public ?string $current_location = null;
+
     public ?string $notes = null;
+
     public string $condition_status = '';
+
     public ?int $department_id = null;
+
     public ?string $item_code = null;
+
     public ?string $description = null;
+
     public ?float $purchase_price = null;
+
     public ?string $acquisition_type = null;
+
     public ?string $classification = null;
+
     public ?string $funded_by = null;
+
     public ?string $supplier_name = null;
+
     public ?array $specifications = null;
 
     // Dropdown options
     public array $assetTypeOptions = [];
+
     public array $statusOptions = [];
+
     public array $conditionStatusOptions = [];
+
     public array $departmentOptions = [];
+
     public array $acquisitionTypeOptions = [];
+
     public array $classificationOptions = [];
 
     /**
@@ -80,12 +116,12 @@ class EquipmentIndex extends Component
         $this->authorize('viewAny', Equipment::class);
 
         // Populate options from model constants/methods
-        $this->assetTypeOptions = Equipment::getAssetTypeOptions();
-        $this->statusOptions = Equipment::getStatusOptions();
+        $this->assetTypeOptions       = Equipment::getAssetTypeOptions();
+        $this->statusOptions          = Equipment::getStatusOptions();
         $this->conditionStatusOptions = Equipment::getConditionStatusesList();
         $this->acquisitionTypeOptions = Equipment::getAcquisitionTypeOptions();
-        $this->classificationOptions = Equipment::getClassificationOptions();
-        $this->departmentOptions = Department::orderBy('name')->pluck('name', 'id')->toArray();
+        $this->classificationOptions  = Equipment::getClassificationOptions();
+        $this->departmentOptions      = Department::orderBy('name')->pluck('name', 'id')->toArray();
 
         $this->resetForm();
     }
@@ -96,26 +132,26 @@ class EquipmentIndex extends Component
     protected function rules(): array
     {
         return [
-            'asset_type' => ['required', 'string', ValidationRule::in(array_keys($this->assetTypeOptions))],
-            'brand' => ['nullable', 'string', 'max:255'],
-            'model_name' => ['nullable', 'string', 'max:255'],
-            'serial_number' => ['required', 'string', 'max:255', ValidationRule::unique('equipment', 'serial_number')->ignore($this->editingEquipment?->id)],
-            'tag_id' => ['required', 'string', 'max:255', ValidationRule::unique('equipment', 'tag_id')->ignore($this->editingEquipment?->id)],
-            'purchase_date' => ['nullable', 'date_format:Y-m-d'],
+            'asset_type'           => ['required', 'string', ValidationRule::in(array_keys($this->assetTypeOptions))],
+            'brand'                => ['nullable', 'string', 'max:255'],
+            'model_name'           => ['nullable', 'string', 'max:255'],
+            'serial_number'        => ['required', 'string', 'max:255', ValidationRule::unique('equipment', 'serial_number')->ignore($this->editingEquipment?->id)],
+            'tag_id'               => ['required', 'string', 'max:255', ValidationRule::unique('equipment', 'tag_id')->ignore($this->editingEquipment?->id)],
+            'purchase_date'        => ['nullable', 'date_format:Y-m-d'],
             'warranty_expiry_date' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:purchase_date'],
-            'status' => ['required', 'string', ValidationRule::in(array_keys($this->statusOptions))],
-            'current_location' => ['nullable', 'string', 'max:255'],
-            'notes' => ['nullable', 'string'],
-            'condition_status' => ['required', 'string', ValidationRule::in(array_keys($this->conditionStatusOptions))],
-            'item_code' => ['nullable', 'string', 'max:50', ValidationRule::unique('equipment', 'item_code')->ignore($this->editingEquipment?->id)],
-            'description' => 'nullable|string|max:1000',
-            'purchase_price' => 'nullable|numeric|min:0',
-            'acquisition_type' => ['nullable', 'string', ValidationRule::in(array_keys($this->acquisitionTypeOptions))],
-            'classification' => ['nullable', 'string', ValidationRule::in(array_keys($this->classificationOptions))],
-            'funded_by' => 'nullable|string|max:100',
-            'supplier_name' => 'nullable|string|max:100',
-            'specifications' => 'nullable|array',
-            'department_id' => 'nullable|integer|exists:departments,id',
+            'status'               => ['required', 'string', ValidationRule::in(array_keys($this->statusOptions))],
+            'current_location'     => ['nullable', 'string', 'max:255'],
+            'notes'                => ['nullable', 'string'],
+            'condition_status'     => ['required', 'string', ValidationRule::in(array_keys($this->conditionStatusOptions))],
+            'item_code'            => ['nullable', 'string', 'max:50', ValidationRule::unique('equipment', 'item_code')->ignore($this->editingEquipment?->id)],
+            'description'          => 'nullable|string|max:1000',
+            'purchase_price'       => 'nullable|numeric|min:0',
+            'acquisition_type'     => ['nullable', 'string', ValidationRule::in(array_keys($this->acquisitionTypeOptions))],
+            'classification'       => ['nullable', 'string', ValidationRule::in(array_keys($this->classificationOptions))],
+            'funded_by'            => 'nullable|string|max:100',
+            'supplier_name'        => 'nullable|string|max:100',
+            'specifications'       => 'nullable|array',
+            'department_id'        => 'nullable|integer|exists:departments,id',
         ];
     }
 
@@ -157,11 +193,30 @@ class EquipmentIndex extends Component
         $this->resetPage();
     }
 
-    public function updatingSearchTerm(): void { $this->resetPage(); }
-    public function updatingFilterAssetType(): void { $this->resetPage(); }
-    public function updatingFilterStatus(): void { $this->resetPage(); }
-    public function updatingFilterCondition(): void { $this->resetPage(); }
-    public function updatingFilterDepartmentId(): void { $this->resetPage(); }
+    public function updatingSearchTerm(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterAssetType(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterStatus(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterCondition(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterDepartmentId(): void
+    {
+        $this->resetPage();
+    }
 
     public function createEquipment(): void
     {
@@ -204,7 +259,7 @@ class EquipmentIndex extends Component
     {
         $this->authorize('update', $equipment);
         $this->editingEquipment = $equipment;
-        $this->isEditing = true;
+        $this->isEditing        = true;
         $this->populateFields();
         $this->showEditModal = true;
         $this->dispatch('open-modal', elementId: '#equipmentFormModal');
@@ -244,7 +299,7 @@ class EquipmentIndex extends Component
     {
         $this->authorize('delete', $equipment);
         $this->deletingEquipment = $equipment;
-        $this->showDeleteModal = true;
+        $this->showDeleteModal   = true;
         $this->dispatch('open-modal', elementId: '#deleteConfirmationModal');
         Log::info('Opened delete confirmation modal for equipment ID: '.$equipment->id);
     }
@@ -258,6 +313,7 @@ class EquipmentIndex extends Component
             session()->flash('error', __('Peralatan tidak boleh dipadam kerana sedang dalam pinjaman.'));
             Log::warning('Attempted to delete equipment on loan.', ['equipment_id' => $this->deletingEquipment->id]);
             $this->closeModals();
+
             return;
         }
 
@@ -276,7 +332,7 @@ class EquipmentIndex extends Component
     {
         $this->authorize('view', $equipment);
         $this->viewingEquipment = $equipment;
-        $this->showViewModal = true;
+        $this->showViewModal    = true;
         $this->dispatch('open-modal', elementId: '#viewEquipmentModal');
         Log::info('Opened view equipment modal for ID: '.$equipment->id);
     }
@@ -287,26 +343,26 @@ class EquipmentIndex extends Component
     private function populateFields(): void
     {
         if ($this->editingEquipment) {
-            $this->asset_type = $this->editingEquipment->asset_type;
-            $this->brand = $this->editingEquipment->brand;
-            $this->model_name = $this->editingEquipment->model;
-            $this->serial_number = $this->editingEquipment->serial_number;
-            $this->tag_id = $this->editingEquipment->tag_id;
-            $this->purchase_date = $this->editingEquipment->purchase_date?->format('Y-m-d');
+            $this->asset_type           = $this->editingEquipment->asset_type;
+            $this->brand                = $this->editingEquipment->brand;
+            $this->model_name           = $this->editingEquipment->model;
+            $this->serial_number        = $this->editingEquipment->serial_number;
+            $this->tag_id               = $this->editingEquipment->tag_id;
+            $this->purchase_date        = $this->editingEquipment->purchase_date?->format('Y-m-d');
             $this->warranty_expiry_date = $this->editingEquipment->warranty_end_date?->format('Y-m-d');
-            $this->status = $this->editingEquipment->status;
-            $this->current_location = $this->editingEquipment->current_location;
-            $this->notes = $this->editingEquipment->notes;
-            $this->condition_status = $this->editingEquipment->condition_status;
-            $this->department_id = $this->editingEquipment->department_id;
-            $this->item_code = $this->editingEquipment->item_code;
-            $this->description = $this->editingEquipment->description;
-            $this->purchase_price = $this->editingEquipment->purchase_price;
-            $this->acquisition_type = $this->editingEquipment->acquisition_type;
-            $this->classification = $this->editingEquipment->classification;
-            $this->funded_by = $this->editingEquipment->funded_by;
-            $this->supplier_name = $this->editingEquipment->supplier_name;
-            $this->specifications = $this->editingEquipment->specifications ? json_decode($this->editingEquipment->specifications, true) : null;
+            $this->status               = $this->editingEquipment->status;
+            $this->current_location     = $this->editingEquipment->current_location;
+            $this->notes                = $this->editingEquipment->notes;
+            $this->condition_status     = $this->editingEquipment->condition_status;
+            $this->department_id        = $this->editingEquipment->department_id;
+            $this->item_code            = $this->editingEquipment->item_code;
+            $this->description          = $this->editingEquipment->description;
+            $this->purchase_price       = $this->editingEquipment->purchase_price;
+            $this->acquisition_type     = $this->editingEquipment->acquisition_type;
+            $this->classification       = $this->editingEquipment->classification;
+            $this->funded_by            = $this->editingEquipment->funded_by;
+            $this->supplier_name        = $this->editingEquipment->supplier_name;
+            $this->specifications       = $this->editingEquipment->specifications ? json_decode($this->editingEquipment->specifications, true) : null;
         }
     }
 
@@ -318,27 +374,27 @@ class EquipmentIndex extends Component
         $this->resetValidation();
         $this->resetErrorBag();
 
-        $this->asset_type = key($this->assetTypeOptions);
-        $this->brand = null;
-        $this->model_name = null;
-        $this->serial_number = '';
-        $this->tag_id = '';
-        $this->purchase_date = null;
+        $this->asset_type           = key($this->assetTypeOptions);
+        $this->brand                = null;
+        $this->model_name           = null;
+        $this->serial_number        = '';
+        $this->tag_id               = '';
+        $this->purchase_date        = null;
         $this->warranty_expiry_date = null;
-        $this->status = key($this->statusOptions);
-        $this->current_location = null;
-        $this->notes = null;
-        $this->condition_status = key($this->conditionStatusOptions);
-        $this->department_id = null;
+        $this->status               = key($this->statusOptions);
+        $this->current_location     = null;
+        $this->notes                = null;
+        $this->condition_status     = key($this->conditionStatusOptions);
+        $this->department_id        = null;
 
-        $this->item_code = null;
-        $this->description = null;
-        $this->purchase_price = null;
+        $this->item_code        = null;
+        $this->description      = null;
+        $this->purchase_price   = null;
         $this->acquisition_type = key($this->acquisitionTypeOptions);
-        $this->classification = key($this->classificationOptions);
-        $this->funded_by = null;
-        $this->supplier_name = null;
-        $this->specifications = null;
+        $this->classification   = key($this->classificationOptions);
+        $this->funded_by        = null;
+        $this->supplier_name    = null;
+        $this->specifications   = null;
 
         $this->isEditing = false;
     }
@@ -349,9 +405,9 @@ class EquipmentIndex extends Component
     private function closeModals(): void
     {
         $this->showCreateModal = false;
-        $this->showEditModal = false;
+        $this->showEditModal   = false;
         $this->showDeleteModal = false;
-        $this->showViewModal = false;
+        $this->showViewModal   = false;
         $this->dispatch('close-modal');
         $this->resetForm();
     }
@@ -363,7 +419,7 @@ class EquipmentIndex extends Component
     {
         return view('livewire.resource-management.admin.equipment.equipment-index', [
             'equipmentList' => $this->equipmentList,
-            'departments' => $this->departmentOptions,
+            'departments'   => $this->departmentOptions,
         ]);
     }
 }

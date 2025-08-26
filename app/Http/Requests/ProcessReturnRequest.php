@@ -47,15 +47,15 @@ final class ProcessReturnRequest extends FormRequest
     {
         /** @var LoanTransaction|null $issueTransactionFromRoute */
         $issueTransactionFromRoute = $this->route('loanTransaction');
-        $issueTransactionId = $issueTransactionFromRoute?->id;
+        $issueTransactionId        = $issueTransactionFromRoute?->id;
 
         return [
             // Overall transaction details
             // transaction_date is now part of the 'items' structure for more flexibility,
             // or can be a single field. Assuming a single transaction_date for the whole return operation.
-            'transaction_date' => ['sometimes', 'required', 'date_format:Y-m-d H:i:s', 'before_or_equal:now'],
+            'transaction_date'     => ['sometimes', 'required', 'date_format:Y-m-d H:i:s', 'before_or_equal:now'],
             'returning_officer_id' => ['required', 'integer', Rule::exists('users', 'id')],
-            'return_notes' => ['nullable', 'string', 'max:2000'], // Overall notes for the return transaction
+            'return_notes'         => ['nullable', 'string', 'max:2000'], // Overall notes for the return transaction
 
             // Item details
             'items' => ['required', 'array', 'min:1'],
@@ -81,7 +81,7 @@ final class ProcessReturnRequest extends FormRequest
                 // Custom rule to check against originally issued quantity and already returned for THAT item
                 function ($attribute, $value, $fail) use ($issueTransactionFromRoute): void {
                     // $attribute is like 'items.123.quantity_returned' where 123 is original_tx_item_id
-                    $parts = explode('.', $attribute);
+                    $parts                = explode('.', $attribute);
                     $originalIssuedItemId = $parts[1] ?? null; // This is the key of the item in the items array
 
                     if ($originalIssuedItemId === null || $originalIssuedItemId === '' || $originalIssuedItemId === '0' || ! is_numeric($originalIssuedItemId)) {
@@ -103,9 +103,9 @@ final class ProcessReturnRequest extends FormRequest
                     // The service layer (processExistingReturn) should have the ultimate responsibility for preventing over-return.
                     if ((int) $value > $originalIssuedItem->quantity_transacted) {
                         $fail(__('Kuantiti pemulangan (:value) untuk item rujukan #:original_item_id melebihi kuantiti asal dikeluarkan (:issued_qty).', [
-                            'value' => $value,
+                            'value'            => $value,
                             'original_item_id' => $originalIssuedItemId,
-                            'issued_qty' => $originalIssuedItem->quantity_transacted,
+                            'issued_qty'       => $originalIssuedItem->quantity_transacted,
                         ]));
                     }
                 },
@@ -114,8 +114,8 @@ final class ProcessReturnRequest extends FormRequest
             // item_status_on_return will be derived by the service or ProcessReturn Livewire component.
             // If you want to validate it here, ensure it's submitted and add:
             // 'items.*.item_status_on_return' => ['required', 'string', Rule::in(LoanTransactionItem::getReturnApplicableStatuses())],
-            'items.*.return_item_notes' => ['nullable', 'string', 'max:1000'],
-            'items.*.accessories_checklist_item' => ['nullable', 'array'],
+            'items.*.return_item_notes'            => ['nullable', 'string', 'max:1000'],
+            'items.*.accessories_checklist_item'   => ['nullable', 'array'],
             'items.*.accessories_checklist_item.*' => ['nullable', 'string', 'max:255'],
         ];
     }
@@ -123,20 +123,20 @@ final class ProcessReturnRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'transaction_date.required' => __('Tarikh transaksi pemulangan wajib diisi.'),
+            'transaction_date.required'     => __('Tarikh transaksi pemulangan wajib diisi.'),
             'returning_officer_id.required' => __('Pegawai Yang Memulangkan perlu dinyatakan.'),
-            'items.required' => __('Sila pilih sekurang-kurangnya satu item peralatan untuk dipulangkan.'),
-            'items.min' => __('Sila pilih sekurang-kurangnya satu item peralatan untuk dipulangkan.'),
+            'items.required'                => __('Sila pilih sekurang-kurangnya satu item peralatan untuk dipulangkan.'),
+            'items.min'                     => __('Sila pilih sekurang-kurangnya satu item peralatan untuk dipulangkan.'),
 
             'items.*.loan_transaction_item_id.required' => __('ID item rujukan asal mesti ada untuk setiap item yang dipulangkan.'),
-            'items.*.loan_transaction_item_id.exists' => __('ID item rujukan asal tidak sah atau bukan milik transaksi pengeluaran ini.'),
-            'items.*.quantity_returned.required' => __('Kuantiti pemulangan mesti diisi.'),
-            'items.*.quantity_returned.integer' => __('Kuantiti pemulangan mesti nombor bulat.'),
-            'items.*.quantity_returned.min' => __('Kuantiti pemulangan mesti sekurang-kurangnya 1.'),
-            'items.*.condition_on_return.required' => __('Keadaan semasa pemulangan mesti dinyatakan.'),
-            'items.*.condition_on_return.in' => __('Keadaan semasa pemulangan yang dipilih tidak sah.'),
+            'items.*.loan_transaction_item_id.exists'   => __('ID item rujukan asal tidak sah atau bukan milik transaksi pengeluaran ini.'),
+            'items.*.quantity_returned.required'        => __('Kuantiti pemulangan mesti diisi.'),
+            'items.*.quantity_returned.integer'         => __('Kuantiti pemulangan mesti nombor bulat.'),
+            'items.*.quantity_returned.min'             => __('Kuantiti pemulangan mesti sekurang-kurangnya 1.'),
+            'items.*.condition_on_return.required'      => __('Keadaan semasa pemulangan mesti dinyatakan.'),
+            'items.*.condition_on_return.in'            => __('Keadaan semasa pemulangan yang dipilih tidak sah.'),
             // Add messages for item_status_on_return if validated
-            'items.*.return_item_notes.max' => __('Catatan item tidak boleh melebihi :max aksara.'),
+            'items.*.return_item_notes.max'            => __('Catatan item tidak boleh melebihi :max aksara.'),
             'items.*.accessories_checklist_item.array' => __('Senarai aksesori item mesti dalam format yang betul.'),
         ];
     }

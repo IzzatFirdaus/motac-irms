@@ -20,11 +20,11 @@ class EquipmentCategorySeeder extends Seeder
         Log::info('Truncated equipment_categories table.');
 
         $adminUserForAudit = User::orderBy('id')->first();
-        $auditUserId = $adminUserForAudit?->id;
+        $auditUserId       = $adminUserForAudit?->id;
 
         if (! $auditUserId) {
             $adminUserForAudit = User::factory()->create(['name' => 'Audit User (EqCategorySeeder)']);
-            $auditUserId = $adminUserForAudit->id;
+            $auditUserId       = $adminUserForAudit->id;
             Log::info(sprintf('Created a fallback audit user with ID %d for EquipmentCategorySeeder.', $auditUserId));
         } else {
             Log::info(sprintf('Using User ID %s for audit columns in EquipmentCategorySeeder.', $auditUserId));
@@ -32,44 +32,44 @@ class EquipmentCategorySeeder extends Seeder
 
         $categories = [
             [
-                'name' => 'Komputer Riba',
+                'name'        => 'Komputer Riba',
                 'description' => 'Komputer mudah alih untuk kegunaan pejabat dan lapangan.',
-                'is_active' => true,
+                'is_active'   => true,
             ],
             [
-                'name' => 'Projektor LCD',
+                'name'        => 'Projektor LCD',
                 'description' => 'Alat untuk paparan visual mesyuarat dan pembentangan.',
-                'is_active' => true,
+                'is_active'   => true,
             ],
             [
-                'name' => 'Pencetak', // More general
+                'name'        => 'Pencetak', // More general
                 'description' => 'Pencetak untuk dokumen pejabat (Laser, Inkjet).',
-                'is_active' => true,
+                'is_active'   => true,
             ],
             [
-                'name' => 'Peralatan Rangkaian',
+                'name'        => 'Peralatan Rangkaian',
                 'description' => 'Penghala, suis, dan perkakasan rangkaian lain.',
-                'is_active' => true,
+                'is_active'   => true,
             ],
             [
-                'name' => 'Peranti Input/Output', // Peripherals
+                'name'        => 'Peranti Input/Output', // Peripherals
                 'description' => 'Papan kekunci, tetikus, kamera web, monitor, dll.',
-                'is_active' => true,
+                'is_active'   => true,
             ],
             [
-                'name' => 'Storan Mudah Alih',
+                'name'        => 'Storan Mudah Alih',
                 'description' => 'Pemacu keras luaran dan pemacu kilat USB.',
-                'is_active' => true,
+                'is_active'   => true,
             ],
             [
-                'name' => 'Komputer Meja (Desktop PC)',
+                'name'        => 'Komputer Meja (Desktop PC)',
                 'description' => 'Komputer stesen kerja tetap.',
-                'is_active' => true,
+                'is_active'   => true,
             ],
             [
-                'name' => 'Peralatan ICT Lain',
+                'name'        => 'Peralatan ICT Lain',
                 'description' => 'Peralatan ICT lain yang tidak dikategorikan secara spesifik.',
-                'is_active' => true,
+                'is_active'   => true,
             ],
         ];
 
@@ -99,7 +99,7 @@ class EquipmentCategorySeeder extends Seeder
                 ->create([
                     'created_by' => $auditUserId,
                     'updated_by' => $auditUserId,
-                    'is_active' => true,
+                    'is_active'  => true,
                 ]);
             Log::info(sprintf('Created %s additional equipment categories using factory.', $needed));
         }

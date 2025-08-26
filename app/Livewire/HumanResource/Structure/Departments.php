@@ -8,7 +8,7 @@ use Illuminate\Validation\Rule as ValidationRule;
 use Livewire\Component;
 
 /**
- * Departments Livewire Component
+ * Departments Livewire Component.
  *
  * Handles CRUD operations for the Departments structure.
  * Allows creating, editing, listing, and deleting departments,
@@ -22,17 +22,24 @@ class Departments extends Component
 
     // Form fields for department management
     public string $name = '';
+
     public string $branch_type = '';
+
     public ?string $code = null;
+
     public ?string $description = null;
+
     public bool $is_active = true;
+
     public ?int $head_of_department_id = null;
 
     public bool $isEditMode = false;
+
     public ?int $confirmedId = null; // For delete confirmation
 
     // Dropdown options
     public array $branchTypeOptions = [];
+
     public array $userOptions = [];
 
     /**
@@ -41,7 +48,7 @@ class Departments extends Component
     public function mount(): void
     {
         $this->branchTypeOptions = Department::getBranchTypeOptions();
-        $this->userOptions = User::orderBy('name')->pluck('name', 'id')->all();
+        $this->userOptions       = User::orderBy('name')->pluck('name', 'id')->all();
         $this->loadDepartments();
         $this->resetForm(); // Set default form state
     }
@@ -60,11 +67,11 @@ class Departments extends Component
         }
 
         return [
-            'name' => ['required', 'string', 'max:255', $nameRule],
-            'branch_type' => ['required', 'string', ValidationRule::in(array_keys($this->branchTypeOptions))],
-            'code' => ['nullable', 'string', 'max:50', $codeRule],
-            'description' => ['nullable', 'string', 'max:1000'],
-            'is_active' => ['boolean'],
+            'name'                  => ['required', 'string', 'max:255', $nameRule],
+            'branch_type'           => ['required', 'string', ValidationRule::in(array_keys($this->branchTypeOptions))],
+            'code'                  => ['nullable', 'string', 'max:50', $codeRule],
+            'description'           => ['nullable', 'string', 'max:1000'],
+            'is_active'             => ['boolean'],
             'head_of_department_id' => ['nullable', 'integer', 'exists:users,id'],
         ];
     }
@@ -75,10 +82,10 @@ class Departments extends Component
     protected function messages(): array
     {
         return [
-            'name.required' => __('Nama jabatan diperlukan.'),
-            'name.unique' => __('Nama jabatan ini telah wujud.'),
-            'branch_type.required' => __('Jenis cawangan diperlukan.'),
-            'code.unique' => __('Kod jabatan ini telah wujud.'),
+            'name.required'                => __('Nama jabatan diperlukan.'),
+            'name.unique'                  => __('Nama jabatan ini telah wujud.'),
+            'branch_type.required'         => __('Jenis cawangan diperlukan.'),
+            'code.unique'                  => __('Kod jabatan ini telah wujud.'),
             'head_of_department_id.exists' => __('Ketua jabatan yang dipilih tidak sah.'),
         ];
     }
@@ -107,11 +114,11 @@ class Departments extends Component
         $this->validate();
 
         $data = [
-            'name' => $this->name,
-            'branch_type' => $this->branch_type,
-            'code' => $this->code,
-            'description' => $this->description,
-            'is_active' => $this->is_active,
+            'name'                  => $this->name,
+            'branch_type'           => $this->branch_type,
+            'code'                  => $this->code,
+            'description'           => $this->description,
+            'is_active'             => $this->is_active,
             'head_of_department_id' => $this->head_of_department_id,
         ];
 
@@ -134,7 +141,7 @@ class Departments extends Component
     public function showNewDepartmentModal(): void
     {
         $this->resetForm();
-        $this->isEditMode = false;
+        $this->isEditMode         = false;
         $this->departmentInstance = null;
         $this->dispatch('openModal', elementId: '#departmentModal');
     }
@@ -145,14 +152,14 @@ class Departments extends Component
     public function showEditDepartmentModal(Department $department): void
     {
         $this->resetForm();
-        $this->isEditMode = true;
+        $this->isEditMode         = true;
         $this->departmentInstance = $department;
 
-        $this->name = $department->name;
-        $this->branch_type = $department->branch_type;
-        $this->code = $department->code;
-        $this->description = $department->description;
-        $this->is_active = $department->is_active;
+        $this->name                  = $department->name;
+        $this->branch_type           = $department->branch_type;
+        $this->code                  = $department->code;
+        $this->description           = $department->description;
+        $this->is_active             = $department->is_active;
         $this->head_of_department_id = $department->head_of_department_id;
         $this->dispatch('openModal', elementId: '#departmentModal');
     }
@@ -185,15 +192,15 @@ class Departments extends Component
         $this->resetErrorBag();
         $this->resetValidation();
 
-        $this->name = '';
-        $this->branch_type = ($this->branchTypeOptions === [] ? Department::BRANCH_TYPE_HQ : array_key_first($this->branchTypeOptions));
-        $this->code = null;
-        $this->description = null;
-        $this->is_active = true;
+        $this->name                  = '';
+        $this->branch_type           = ($this->branchTypeOptions === [] ? Department::BRANCH_TYPE_HQ : array_key_first($this->branchTypeOptions));
+        $this->code                  = null;
+        $this->description           = null;
+        $this->is_active             = true;
         $this->head_of_department_id = null;
 
         $this->departmentInstance = null;
-        $this->isEditMode = false;
+        $this->isEditMode         = false;
     }
 
     /**

@@ -24,14 +24,14 @@ class GradeFactory extends Factory
     {
         // Static cache for User IDs (for blameable columns)
         static $userIds;
-        if (!isset($userIds)) {
+        if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $auditUserId = !empty($userIds) ? Arr::random($userIds) : null;
+        $auditUserId = ! empty($userIds) ? Arr::random($userIds) : null;
 
         // Static Malaysian faker for realism and speed
         static $msFaker;
-        if (!$msFaker) {
+        if (! $msFaker) {
             $msFaker = \Faker\Factory::create('ms_MY');
         }
 
@@ -44,25 +44,25 @@ class GradeFactory extends Factory
         } elseif ($level >= 68) {
             $name = 'Timbalan Menteri (Ujian)';
         } elseif ($level >= 66) {
-            $name = 'TURUS I (' . $level . ')';
+            $name = 'TURUS I ('.$level.')';
         } elseif ($level >= 64) {
-            $name = 'TURUS II (' . $level . ')';
+            $name = 'TURUS II ('.$level.')';
         } elseif ($level >= 62) {
-            $name = 'TURUS III (' . $level . ')';
+            $name = 'TURUS III ('.$level.')';
         } elseif ($level >= 60) {
-            $name = 'JUSA A (' . $level . ')';
+            $name = 'JUSA A ('.$level.')';
         } elseif ($level >= 58) {
-            $name = 'JUSA B (' . $level . ')';
+            $name = 'JUSA B ('.$level.')';
         } elseif ($level >= 56) {
-            $name = 'JUSA C (' . $level . ')';
+            $name = 'JUSA C ('.$level.')';
         } elseif ($level >= 41) {
             // P&P grades like N41, F41, etc.
             $prefix = $this->faker->randomElement(['N', 'F', 'M', 'E', 'W', 'S', 'J', 'DG']);
-            $name = $prefix . $level;
+            $name   = $prefix.$level;
         } else {
             // Support staff grades like N19, FT19, etc.
             $prefix = $this->faker->randomElement(['N', 'FT', 'W', 'H', 'KP', 'U', 'C']);
-            $name = $prefix . $level;
+            $name   = $prefix.$level;
         }
 
         $createdAt = Carbon::parse($this->faker->dateTimeBetween('-5 years', 'now'));
@@ -71,18 +71,18 @@ class GradeFactory extends Factory
         $deletedAt = $isDeleted ? Carbon::parse($this->faker->dateTimeBetween($updatedAt, 'now')) : null;
 
         return [
-            'name' => $name,
-            'level' => $level,
+            'name'                  => $name,
+            'level'                 => $level,
             'min_approval_grade_id' => null, // Set via policy/seeder logic if needed
-            'is_approver_grade' => $level >= 41, // Typical threshold for approval (P&P and above)
-            'description' => $msFaker->optional(0.5)->sentence(),
-            'service_scheme' => $this->faker->optional(0.5)->randomElement(['Perkhidmatan Awam', 'Perkhidmatan Pendidikan', 'Perkhidmatan Sokongan']),
-            'created_by' => $auditUserId,
-            'updated_by' => $auditUserId,
-            'deleted_by' => $isDeleted ? $auditUserId : null,
-            'created_at' => $createdAt,
-            'updated_at' => $updatedAt,
-            'deleted_at' => $deletedAt,
+            'is_approver_grade'     => $level >= 41, // Typical threshold for approval (P&P and above)
+            'description'           => $msFaker->optional(0.5)->sentence(),
+            'service_scheme'        => $this->faker->optional(0.5)->randomElement(['Perkhidmatan Awam', 'Perkhidmatan Pendidikan', 'Perkhidmatan Sokongan']),
+            'created_by'            => $auditUserId,
+            'updated_by'            => $auditUserId,
+            'deleted_by'            => $isDeleted ? $auditUserId : null,
+            'created_at'            => $createdAt,
+            'updated_at'            => $updatedAt,
+            'deleted_at'            => $deletedAt,
         ];
     }
 
@@ -92,11 +92,12 @@ class GradeFactory extends Factory
     public function approverGrade(): static
     {
         return $this->state(function (array $attributes): array {
-            $level = $this->faker->unique()->numberBetween(41, 70);
+            $level  = $this->faker->unique()->numberBetween(41, 70);
             $prefix = $this->faker->randomElement(['N', 'F', 'M', 'E', 'W', 'S', 'J', 'DG']);
+
             return [
-                'level' => $level,
-                'name' => $prefix . $level,
+                'level'             => $level,
+                'name'              => $prefix.$level,
                 'is_approver_grade' => true,
             ];
         });
@@ -108,11 +109,12 @@ class GradeFactory extends Factory
     public function nonApproverGrade(): static
     {
         return $this->state(function (array $attributes): array {
-            $level = $this->faker->unique()->numberBetween(1, 40);
+            $level  = $this->faker->unique()->numberBetween(1, 40);
             $prefix = $this->faker->randomElement(['N', 'FT', 'W', 'H', 'KP', 'U', 'C']);
+
             return [
-                'level' => $level,
-                'name' => $prefix . $level,
+                'level'             => $level,
+                'name'              => $prefix.$level,
                 'is_approver_grade' => false,
             ];
         });
@@ -124,11 +126,12 @@ class GradeFactory extends Factory
     public function deleted(): static
     {
         static $userIds;
-        if (!isset($userIds)) {
+        if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $deleterId = !empty($userIds) ? Arr::random($userIds) : null;
-        return $this->state(fn(array $attributes): array => [
+        $deleterId = ! empty($userIds) ? Arr::random($userIds) : null;
+
+        return $this->state(fn (array $attributes): array => [
             'deleted_at' => now(),
             'deleted_by' => $deleterId,
         ]);

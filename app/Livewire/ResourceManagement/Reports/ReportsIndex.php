@@ -2,11 +2,11 @@
 
 namespace App\Livewire\ResourceManagement\Reports;
 
-use Livewire\Component;
 use Livewire\Attributes\Layout;
+use Livewire\Component;
 
 /**
- * ReportsIndex Livewire component
+ * ReportsIndex Livewire component.
  *
  * This component displays the reports dashboard/landing page,
  * showing cards/links to each available report in the system.

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Traits\Blameable;
-use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -20,26 +19,26 @@ use Spatie\Permission\Traits\HasRoles;
 /**
  * User Model for MOTAC System.
  *
- * @property int $id
- * @property string $name
- * @property string $email
- * @property string|null $title
- * @property string|null $identification_number
- * @property string|null $passport_number
- * @property int|null $department_id
- * @property int|null $position_id
- * @property int|null $grade_id
- * @property string|null $phone_number
- * @property string $status
+ * @property int                             $id
+ * @property string                          $name
+ * @property string                          $email
+ * @property string|null                     $title
+ * @property string|null                     $identification_number
+ * @property string|null                     $passport_number
+ * @property int|null                        $department_id
+ * @property int|null                        $position_id
+ * @property int|null                        $grade_id
+ * @property string|null                     $phone_number
+ * @property string                          $status
  * @property \Illuminate\Support\Carbon|null $email_verified_at
- * @property string $password
- * @property string|null $remember_token
- * @property string|null $two_factor_secret
- * @property string|null $two_factor_recovery_codes
+ * @property string                          $password
+ * @property string|null                     $remember_token
+ * @property string|null                     $two_factor_secret
+ * @property string|null                     $two_factor_recovery_codes
  * @property \Illuminate\Support\Carbon|null $deactivated_at
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
+ * @property int|null                        $created_by
+ * @property int|null                        $updated_by
+ * @property int|null                        $deleted_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
@@ -48,48 +47,65 @@ use Spatie\Permission\Traits\HasRoles;
  */
 class User extends Authenticatable
 {
-    use Blameable, HasFactory, Notifiable, HasProfilePhoto, HasApiTokens, TwoFactorAuthenticatable, HasRoles, SoftDeletes;
+    use Blameable, HasApiTokens, HasFactory, HasProfilePhoto, HasRoles, Notifiable, SoftDeletes, TwoFactorAuthenticatable;
 
     // --- TITLE CONSTANTS ---
     public const TITLE_ENCIK = 'encik';
+
     public const TITLE_PUAN = 'puan';
+
     public const TITLE_CIK = 'cik';
+
     public const TITLE_DR = 'dr';
+
     public const TITLE_PROF = 'prof';
+
     public const TITLE_TUAN = 'tuan';
+
     public const TITLE_PUANHAJJAH = 'puanhajah';
+
     public const TITLE_DATUK = 'datuk';
+
     public const TITLE_DATIN = 'datin';
+
     public const TITLE_NONE = '';
 
     public static array $TITLE_OPTIONS = [
-        self::TITLE_ENCIK => 'Encik',
-        self::TITLE_PUAN => 'Puan',
-        self::TITLE_CIK => 'Cik',
-        self::TITLE_DR => 'Dr.',
-        self::TITLE_PROF => 'Prof.',
-        self::TITLE_TUAN => 'Tuan',
+        self::TITLE_ENCIK      => 'Encik',
+        self::TITLE_PUAN       => 'Puan',
+        self::TITLE_CIK        => 'Cik',
+        self::TITLE_DR         => 'Dr.',
+        self::TITLE_PROF       => 'Prof.',
+        self::TITLE_TUAN       => 'Tuan',
         self::TITLE_PUANHAJJAH => 'Puan Hajjah',
-        self::TITLE_DATUK => 'Datuk',
-        self::TITLE_DATIN => 'Datin',
-        self::TITLE_NONE => '',
+        self::TITLE_DATUK      => 'Datuk',
+        self::TITLE_DATIN      => 'Datin',
+        self::TITLE_NONE       => '',
     ];
 
     // --- STATUS CONSTANTS ---
     public const STATUS_ACTIVE = 'active';
+
     public const STATUS_INACTIVE = 'inactive';
+
     public const STATUS_SUSPENDED = 'suspended';
+
     public const STATUS_PENDING = 'pending';
 
     // --- SERVICE STATUS CONSTANTS ---
     public const SERVICE_STATUS_TETAP = 'tetap';
+
     public const SERVICE_STATUS_KONTRAK_MYSTEP = 'kontrak_mystep';
+
     public const SERVICE_STATUS_PELAJAR_INDUSTRI = 'pelajar_industri';
+
     public const SERVICE_STATUS_OTHER_AGENCY = 'other_agency';
 
     // --- APPOINTMENT TYPE CONSTANTS ---
     public const APPOINTMENT_TYPE_BAHARU = 'baharu';
+
     public const APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN = 'kenaikan_pangkat_pertukaran';
+
     public const APPOINTMENT_TYPE_LAIN_LAIN = 'lain_lain';
 
     protected $fillable = [
@@ -125,8 +141,8 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'deactivated_at' => 'datetime',
+            'password'          => 'hashed',
+            'deactivated_at'    => 'datetime',
         ];
     }
 
@@ -158,7 +174,6 @@ class User extends Authenticatable
 
     /**
      * Loans created by the user (created_by).
-     * @return HasMany
      */
     public function createdLoans(): HasMany
     {
@@ -167,7 +182,6 @@ class User extends Authenticatable
 
     /**
      * Loans where the user is responsible officer.
-     * @return HasMany
      */
     public function responsibleForLoans(): HasMany
     {
@@ -176,7 +190,6 @@ class User extends Authenticatable
 
     /**
      * Helpdesk tickets submitted by this user (as applicant).
-     * @return HasMany
      */
     public function tickets(): HasMany
     {
@@ -185,7 +198,6 @@ class User extends Authenticatable
 
     /**
      * Helpdesk tickets assigned to this user (as agent/staff).
-     * @return HasMany
      */
     public function assignedTickets(): HasMany
     {
@@ -194,7 +206,6 @@ class User extends Authenticatable
 
     /**
      * Ticket comments made by this user.
-     * @return HasMany
      */
     public function ticketComments(): HasMany
     {
@@ -203,7 +214,6 @@ class User extends Authenticatable
 
     /**
      * Ticket attachments uploaded by this user.
-     * @return HasMany
      */
     public function ticketAttachments(): HasMany
     {
@@ -212,7 +222,6 @@ class User extends Authenticatable
 
     /**
      * Approvals assigned to the user (as officer, FK = officer_id).
-     * @return HasMany
      */
     public function approvalsAssigned(): HasMany
     {
@@ -223,7 +232,6 @@ class User extends Authenticatable
      * Approvals where this user is an approver (report/activity).
      * This is used for user activity report with withCount.
      * Uses officer_id FK, as per your approvals table.
-     * @return HasMany
      */
     public function approvalsAsApprover(): HasMany
     {
@@ -238,6 +246,7 @@ class User extends Authenticatable
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
     /**
      * Updater user (for blameable/audit).
      */
@@ -245,6 +254,7 @@ class User extends Authenticatable
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
+
     /**
      * Deleter user (for blameable/audit).
      */
@@ -258,7 +268,6 @@ class User extends Authenticatable
     /**
      * Get all loan applications where the user is the applicant.
      * Used for user-specific loan application listings.
-     * @return HasMany
      */
     public function loanApplicationsAsApplicant(): HasMany
     {
@@ -312,9 +321,10 @@ class User extends Authenticatable
      */
     public function hasGradeLevel(int $requiredGradeLevel): bool
     {
-        if (!$this->grade) {
+        if (! $this->grade) {
             return false;
         }
+
         return $this->grade->level >= $requiredGradeLevel;
     }
 
@@ -322,11 +332,11 @@ class User extends Authenticatable
 
     /**
      * Accessor for full name, including title if set.
-     * Example: "Encik Ahmad" or just "Ahmad"
+     * Example: "Encik Ahmad" or just "Ahmad".
      */
     public function getFullNameAttribute(): string
     {
-        return ($this->title ? (self::$TITLE_OPTIONS[$this->title] ?? $this->title) . ' ' : '') . $this->name;
+        return ($this->title ? (self::$TITLE_OPTIONS[$this->title] ?? $this->title).' ' : '').$this->name;
     }
 
     /**
@@ -343,18 +353,18 @@ class User extends Authenticatable
      */
     public static function getRoleBadgeClass(?string $role): string
     {
-        if (!$role) {
+        if (! $role) {
             return 'bg-secondary';
         }
 
         return match (strtolower($role)) {
-            'admin' => 'bg-primary',
+            'admin'     => 'bg-primary',
             'bpm staff' => 'bg-info',
-            'it admin' => 'bg-dark',
-            'approver' => 'bg-success',
-            'hod' => 'bg-warning',
-            'user' => 'bg-secondary',
-            default => 'bg-secondary',
+            'it admin'  => 'bg-dark',
+            'approver'  => 'bg-success',
+            'hod'       => 'bg-warning',
+            'user'      => 'bg-secondary',
+            default     => 'bg-secondary',
         };
     }
 
@@ -365,10 +375,10 @@ class User extends Authenticatable
     public static function getStatusOptions(): array
     {
         return [
-            self::STATUS_ACTIVE => __('Aktif'),
-            self::STATUS_INACTIVE => __('Tidak Aktif'),
+            self::STATUS_ACTIVE    => __('Aktif'),
+            self::STATUS_INACTIVE  => __('Tidak Aktif'),
             self::STATUS_SUSPENDED => __('Digantung'),
-            self::STATUS_PENDING => __('Menunggu'),
+            self::STATUS_PENDING   => __('Menunggu'),
         ];
     }
 
@@ -379,10 +389,10 @@ class User extends Authenticatable
     public static function getServiceStatusOptions(): array
     {
         return [
-            self::SERVICE_STATUS_TETAP => __('Tetap'),
-            self::SERVICE_STATUS_KONTRAK_MYSTEP => __('Kontrak MyStep'),
+            self::SERVICE_STATUS_TETAP            => __('Tetap'),
+            self::SERVICE_STATUS_KONTRAK_MYSTEP   => __('Kontrak MyStep'),
             self::SERVICE_STATUS_PELAJAR_INDUSTRI => __('Pelajar Industri'),
-            self::SERVICE_STATUS_OTHER_AGENCY => __('Agensi Luar'),
+            self::SERVICE_STATUS_OTHER_AGENCY     => __('Agensi Luar'),
         ];
     }
 
@@ -393,9 +403,9 @@ class User extends Authenticatable
     public static function getAppointmentTypeOptions(): array
     {
         return [
-            self::APPOINTMENT_TYPE_BAHARU => __('Baharu'),
+            self::APPOINTMENT_TYPE_BAHARU                      => __('Baharu'),
             self::APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN => __('Kenaikan Pangkat/Pertukaran'),
-            self::APPOINTMENT_TYPE_LAIN_LAIN => __('Lain-lain'),
+            self::APPOINTMENT_TYPE_LAIN_LAIN                   => __('Lain-lain'),
         ];
     }
 

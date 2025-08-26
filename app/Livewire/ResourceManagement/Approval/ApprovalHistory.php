@@ -49,6 +49,7 @@ class ApprovalHistory extends Component
 
     // Configuration properties
     protected string $paginationTheme = 'bootstrap';
+
     protected int $perPage = 15;
 
     /**
@@ -69,10 +70,10 @@ class ApprovalHistory extends Component
         // $this->authorize('viewAny', Approval::class);
 
         Log::info('ApprovalHistory: Component mounted by user.', [
-            'user_id' => Auth::id(),
-            'user_name' => Auth::user()?->name ?? 'Unknown',
+            'user_id'    => Auth::id(),
+            'user_name'  => Auth::user()?->name ?? 'Unknown',
             'ip_address' => request()->ip(),
-            'timestamp' => now()->format('Y-m-d H:i:s'),
+            'timestamp'  => now()->format('Y-m-d H:i:s'),
         ]);
     }
 
@@ -148,15 +149,15 @@ class ApprovalHistory extends Component
 
         // Log the query results for debugging and audit purposes
         Log::debug('ApprovalHistory: Query executed successfully.', [
-            'user_id' => $currentUser->id,
-            'total_results' => $approvals->total(),
-            'current_page' => $approvals->currentPage(),
+            'user_id'         => $currentUser->id,
+            'total_results'   => $approvals->total(),
+            'current_page'    => $approvals->currentPage(),
             'filters_applied' => [
-                'type' => $this->filterType,
-                'decision' => $this->filterDecision,
+                'type'      => $this->filterType,
+                'decision'  => $this->filterDecision,
                 'date_from' => $this->dateFrom,
-                'date_to' => $this->dateTo,
-                'search' => $this->search,
+                'date_to'   => $this->dateTo,
+                'search'    => $this->search,
             ],
         ]);
 
@@ -174,10 +175,10 @@ class ApprovalHistory extends Component
 
         if (in_array($propertyName, $filterProperties)) {
             $this->resetPage();
-            Log::debug("ApprovalHistory: Filter updated and pagination reset.", [
-                'property' => $propertyName,
+            Log::debug('ApprovalHistory: Filter updated and pagination reset.', [
+                'property'  => $propertyName,
                 'new_value' => $this->$propertyName,
-                'user_id' => Auth::id(),
+                'user_id'   => Auth::id(),
             ]);
         }
     }
@@ -193,7 +194,7 @@ class ApprovalHistory extends Component
         $this->resetPage(); // Reset pagination
 
         Log::info('ApprovalHistory: All filters reset to defaults.', [
-            'user_id' => Auth::id(),
+            'user_id'   => Auth::id(),
             'timestamp' => now()->format('Y-m-d H:i:s'),
         ]);
 
@@ -208,7 +209,7 @@ class ApprovalHistory extends Component
     public function getApplicationTypeOptionsProperty(): array
     {
         return [
-            'all' => __('Semua Jenis'),
+            'all'              => __('Semua Jenis'),
             'loan_application' => __('Permohonan Pinjaman'),
             // Future application types can be added here
         ];
@@ -221,10 +222,10 @@ class ApprovalHistory extends Component
     public function getDecisionOptionsProperty(): array
     {
         return [
-            'all' => __('Semua Keputusan'),
+            'all'                     => __('Semua Keputusan'),
             Approval::STATUS_APPROVED => __('Diluluskan'),
             Approval::STATUS_REJECTED => __('Ditolak'),
-            Approval::STATUS_PENDING => __('Menunggu'),
+            Approval::STATUS_PENDING  => __('Menunggu'),
         ];
     }
 
@@ -240,11 +241,11 @@ class ApprovalHistory extends Component
         Log::info('ApprovalHistory: Export requested by user.', [
             'user_id' => Auth::id(),
             'filters' => [
-                'type' => $this->filterType,
-                'decision' => $this->filterDecision,
+                'type'      => $this->filterType,
+                'decision'  => $this->filterDecision,
                 'date_from' => $this->dateFrom,
-                'date_to' => $this->dateTo,
-                'search' => $this->search,
+                'date_to'   => $this->dateTo,
+                'search'    => $this->search,
             ],
         ]);
     }
@@ -255,9 +256,9 @@ class ApprovalHistory extends Component
     public function render(): View
     {
         return view('livewire.resource-management.approval.approval-history', [
-            'approvals' => $this->approvals, // Use the computed property
+            'approvals'              => $this->approvals, // Use the computed property
             'applicationTypeOptions' => $this->applicationTypeOptions,
-            'decisionOptions' => $this->decisionOptions,
+            'decisionOptions'        => $this->decisionOptions,
         ]);
     }
 }

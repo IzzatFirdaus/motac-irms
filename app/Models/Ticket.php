@@ -13,20 +13,20 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * Represents a helpdesk ticket submitted by users for ICT support.
  *
- * @property int $id
- * @property string $subject
- * @property string $description
- * @property int $user_id
- * @property int $department_id
- * @property int $category_id
- * @property int $priority_id
- * @property string $status
+ * @property int                             $id
+ * @property string                          $subject
+ * @property string                          $description
+ * @property int                             $user_id
+ * @property int                             $department_id
+ * @property int                             $category_id
+ * @property int                             $priority_id
+ * @property string                          $status
  * @property \Illuminate\Support\Carbon|null $resolved_at
- * @property int|null $resolved_by
- * @property int|null $assigned_to
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
+ * @property int|null                        $resolved_by
+ * @property int|null                        $assigned_to
+ * @property int|null                        $created_by
+ * @property int|null                        $updated_by
+ * @property int|null                        $deleted_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
@@ -59,19 +59,19 @@ class Ticket extends Model
     ];
 
     protected $casts = [
-        'user_id' => 'integer',
+        'user_id'       => 'integer',
         'department_id' => 'integer',
-        'category_id' => 'integer',
-        'priority_id' => 'integer',
-        'resolved_by' => 'integer',
-        'assigned_to' => 'integer',
-        'created_by' => 'integer',
-        'updated_by' => 'integer',
-        'deleted_by' => 'integer',
-        'resolved_at' => 'datetime',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-        'deleted_at' => 'datetime',
+        'category_id'   => 'integer',
+        'priority_id'   => 'integer',
+        'resolved_by'   => 'integer',
+        'assigned_to'   => 'integer',
+        'created_by'    => 'integer',
+        'updated_by'    => 'integer',
+        'deleted_by'    => 'integer',
+        'resolved_at'   => 'datetime',
+        'created_at'    => 'datetime',
+        'updated_at'    => 'datetime',
+        'deleted_at'    => 'datetime',
     ];
 
     /**

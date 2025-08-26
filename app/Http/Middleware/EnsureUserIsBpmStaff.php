@@ -17,7 +17,7 @@ class EnsureUserIsBpmStaff
      * Handle an incoming request.
      * Allows access if the user has the 'BPM Staff' role or is a seeded admin/maintainer.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response) $next
      */
     public function handle(Request $request, Closure $next): Response
     {

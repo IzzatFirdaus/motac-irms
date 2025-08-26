@@ -7,12 +7,11 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Support\Facades\View as ViewFacade;
 
 /**
  * LocaleMiddleware - Handles application locale setting and ensures renamed auth view compatibility.
@@ -31,20 +30,21 @@ class LocaleMiddleware
      * Sets the application locale based on user preference, session, or fallback.
      * Also registers view hints for renamed auth pages for compatibility.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response) $next
      */
     public function handle(Request $request, Closure $next): Response
     {
         // === [Locale Handling] ===
         $configuredLocales = Config::get('app.available_locales', []);
-        $fallbackLocale = Config::get('app.fallback_locale', 'en');
-        $finalLocale = $fallbackLocale; // Default to fallback locale
+        $fallbackLocale    = Config::get('app.fallback_locale', 'en');
+        $finalLocale       = $fallbackLocale; // Default to fallback locale
 
         // Ensure configured locales is a valid array
-        if (!is_array($configuredLocales) || empty($configuredLocales)) {
+        if (! is_array($configuredLocales) || empty($configuredLocales)) {
             Log::warning("LocaleMiddleware: config('app.available_locales') is missing, empty, or not an array. Using fallback locale: {$fallbackLocale}");
             App::setLocale($fallbackLocale);
             $this->registerAuthViewHints(); // Register view hints even if locale is not set
+
             return $next($request);
         }
 
@@ -91,7 +91,7 @@ class LocaleMiddleware
 
         // Optional: Log locale changes for debugging (remove in production)
         if (Config::get('app.debug')) {
-            Log::debug("LocaleMiddleware: Set application locale to '{$finalLocale}' for user: " . (Auth::check() ? Auth::user()->name : 'guest'));
+            Log::debug("LocaleMiddleware: Set application locale to '{$finalLocale}' for user: ".(Auth::check() ? Auth::user()->name : 'guest'));
         }
 
         return $next($request);
@@ -121,11 +121,11 @@ class LocaleMiddleware
 
         $authViewsPath = resource_path('views/auth');
         foreach ($viewMap as $view) {
-            $originalPath = $authViewsPath . "/{$view}.blade.php";
-            $renamedPath = $authViewsPath . "/{$view}-page.blade.php";
+            $originalPath = $authViewsPath."/{$view}.blade.php";
+            $renamedPath  = $authViewsPath."/{$view}-page.blade.php";
 
             // Only create the link if the renamed exists and the original does not
-            if (!file_exists($originalPath) && file_exists($renamedPath)) {
+            if (! file_exists($originalPath) && file_exists($renamedPath)) {
                 // Try to create a symlink for the view (preferred for dev), fallback to copy
                 try {
                     // On some systems, symlink requires elevated privileges; fallback to copy if fails
@@ -137,7 +137,7 @@ class LocaleMiddleware
                     }
                 } catch (\Throwable $e) {
                     // If symlink or copy fails, ignore and let the missing view error show as fallback
-                    Log::warning("LocaleMiddleware: Could not create alias for auth view '{$view}': " . $e->getMessage());
+                    Log::warning("LocaleMiddleware: Could not create alias for auth view '{$view}': ".$e->getMessage());
                 }
             }
         }

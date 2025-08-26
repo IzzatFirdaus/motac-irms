@@ -1,4 +1,5 @@
 <?php
+
 // Bahasa Melayu translations for Approval Dashboard module and actions
 // Disusun mengikut kategori untuk memudahkan penyelenggaraan dan rujukan
 
@@ -28,12 +29,12 @@ return [
 
     // === Tindakan Modul Kelulusan ===
     'actions' => [
-        'review'           => 'Semak',
-        'view_details'     => 'Lihat Butiran',
-        'view_task'        => 'Lihat Tugasan',
-        'view_full_app'    => 'Lihat Permohonan Penuh',
-        'submit_decision'  => 'Hantar Keputusan',
-        'no_permission'    => 'Tiada kebenaran',
+        'review'          => 'Semak',
+        'view_details'    => 'Lihat Butiran',
+        'view_task'       => 'Lihat Tugasan',
+        'view_full_app'   => 'Lihat Permohonan Penuh',
+        'submit_decision' => 'Hantar Keputusan',
+        'no_permission'   => 'Tiada kebenaran',
     ],
 
     // === Popup/Modals & Dialog - Semakan Tugasan Kelulusan ===

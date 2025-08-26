@@ -8,13 +8,14 @@ use Illuminate\View\View;
 use Livewire\Component;
 
 /**
- * ApproverDashboard Livewire Component
+ * ApproverDashboard Livewire Component.
  *
  * Dashboard for officers with approval tasks.
  */
 class ApproverDashboard extends Component
 {
     public int $approved_last_30_days = 0;
+
     public int $rejected_last_30_days = 0;
 
     public function mount(): void

@@ -47,8 +47,7 @@ class NotificationController extends Controller
     /**
      * Mark a specific notification as read.
      *
-     * @param  \App\Models\Notification  $notification  Route model bound instance
-     * @return RedirectResponse
+     * @param \App\Models\Notification $notification Route model bound instance
      */
     public function markAsRead(CustomDatabaseNotification $notification): RedirectResponse
     {
@@ -56,9 +55,9 @@ class NotificationController extends Controller
         $user = Auth::user();
 
         // Authorize: notification must belong to the current user
-        if ((string) $notification->notifiable_id !== (string) $user->id ||
-            $notification->notifiable_type !== $user->getMorphClass()) {
+        if ((string) $notification->notifiable_id !== (string) $user->id || $notification->notifiable_type !== $user->getMorphClass()) {
             Log::warning(sprintf('User %d attempted to act on notification ID %s not belonging to them.', $user->id, $notification->id));
+
             return redirect()->back()->with('error', __('Anda tidak mempunyai kebenaran untuk mengubah notifikasi ini.'));
         }
 
@@ -66,6 +65,7 @@ class NotificationController extends Controller
         if ($notification->unread()) { // Uses is_null(read_at)
             $notification->markAsRead(); // Sets read_at timestamp
             Log::info(sprintf('Notification ID %s marked as read by User ID %d.', $notification->id, $user->id));
+
             return redirect()->back()->with('success', __('Notifikasi telah ditanda sebagai dibaca.'));
         }
 
@@ -79,12 +79,13 @@ class NotificationController extends Controller
     public function markAllAsRead(): RedirectResponse
     {
         /** @var User $user */
-        $user = Auth::user();
+        $user                = Auth::user();
         $unreadNotifications = $user->unreadNotifications(); // Query builder
 
         if ($unreadNotifications->count() > 0) {
             $unreadNotifications->update(['read_at' => now()]);
             Log::info(sprintf('All unread notifications marked as read for User ID %d.', $user->id));
+
             return redirect()->back()->with('success', __('Semua notifikasi telah ditanda sebagai dibaca.'));
         }
 

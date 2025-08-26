@@ -16,18 +16,18 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * Represents a physical location or branch for assets/equipment.
  *
- * @property int $id
- * @property string $name
- * @property string|null $description
- * @property string|null $address
- * @property string|null $city
- * @property string|null $state
- * @property string|null $country
- * @property string|null $postal_code
- * @property bool $is_active
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
+ * @property int                             $id
+ * @property string                          $name
+ * @property string|null                     $description
+ * @property string|null                     $address
+ * @property string|null                     $city
+ * @property string|null                     $state
+ * @property string|null                     $country
+ * @property string|null                     $postal_code
+ * @property bool                            $is_active
+ * @property int|null                        $created_by
+ * @property int|null                        $updated_by
+ * @property int|null                        $deleted_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
@@ -45,7 +45,7 @@ class Location extends Model
     ];
 
     protected $casts = [
-        'is_active' => 'boolean',
+        'is_active'  => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
@@ -69,10 +69,12 @@ class Location extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
     public function updater(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
+
     public function deleter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by');

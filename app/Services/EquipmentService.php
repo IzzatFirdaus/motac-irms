@@ -17,7 +17,7 @@ use Throwable;
 /**
  * Service class for managing ICT Equipment.
  * Handles business logic related to equipment CRUD, status changes, and querying.
- * System Design Reference: Sections 3.1 (Services), 9.3
+ * System Design Reference: Sections 3.1 (Services), 9.3.
  */
 final class EquipmentService
 {
@@ -26,11 +26,12 @@ final class EquipmentService
     /**
      * Get all equipment with optional filters and eager loading.
      *
-     * @param  array<string, mixed>  $filters  Available filters: 'status', 'condition_status', 'asset_type', 'search', 'location_id', 'department_id', 'classification', 'acquisition_type'.
-     * @param  array<int, string>  $with  Relationships to eager load.
-     * @param  int  $perPage  Items per page. Use -1 for all results (returns EloquentCollection).
-     * @param  string  $sortBy  Column to sort by.
-     * @param  string  $sortDirection  Sort direction ('asc' or 'desc').
+     * @param array<string, mixed> $filters       Available filters: 'status', 'condition_status', 'asset_type', 'search', 'location_id', 'department_id', 'classification', 'acquisition_type'.
+     * @param array<int, string>   $with          Relationships to eager load.
+     * @param int                  $perPage       Items per page. Use -1 for all results (returns EloquentCollection).
+     * @param string               $sortBy        Column to sort by.
+     * @param string               $sortDirection Sort direction ('asc' or 'desc').
+     *
      * @return LengthAwarePaginator<Equipment>|EloquentCollection<int, Equipment>
      */
     public function getAllEquipment(
@@ -47,7 +48,7 @@ final class EquipmentService
         // Default relationships to eager load for general listings
         // MODIFIED: Removed 'grade:id,name' as Equipment model does not have a direct 'grade' relationship.
         $defaultWith = ['department:id,name', 'equipmentCategory:id,name', 'subCategory:id,name', 'definedLocation:id,name'];
-        $finalWith = array_unique(array_merge($defaultWith, $with));
+        $finalWith   = array_unique(array_merge($defaultWith, $with));
 
         if ($finalWith !== []) {
             $query->with($finalWith);
@@ -114,8 +115,8 @@ final class EquipmentService
 
         // Apply sorting
         // Added 'item_code' to allowed sorts. Removed 'name' if not a direct field of Equipment.
-        $allowedSorts = ['item_code', 'tag_id', 'asset_type', 'brand', 'model', 'status', 'condition_status', 'purchase_date', 'created_at', 'updated_at'];
-        $safeSortBy = in_array($sortBy, $allowedSorts) ? $sortBy : 'tag_id';
+        $allowedSorts      = ['item_code', 'tag_id', 'asset_type', 'brand', 'model', 'status', 'condition_status', 'purchase_date', 'created_at', 'updated_at'];
+        $safeSortBy        = in_array($sortBy, $allowedSorts) ? $sortBy : 'tag_id';
         $safeSortDirection = strtolower($sortDirection) === 'desc' ? 'desc' : 'asc';
         $query->orderBy($safeSortBy, $safeSortDirection);
 
@@ -129,8 +130,9 @@ final class EquipmentService
     /**
      * Find a specific equipment item by its ID, with optional eager loading.
      *
-     * @param  int  $id  The ID of the equipment.
-     * @param  array<int, string>  $with  Relationships to eager load.
+     * @param int                $id   The ID of the equipment.
+     * @param array<int, string> $with Relationships to eager load.
+     *
      * @return Equipment|null The found equipment model or null if not found.
      */
     public function findEquipmentById(int $id, array $with = []): ?Equipment
@@ -170,10 +172,11 @@ final class EquipmentService
      * Create a new equipment item.
      * Assumes BlameableObserver handles created_by/updated_by via Auth::user().
      *
-     * @param  array<string, mixed>  $data  Validated data for creating equipment.
-     * @return Equipment The newly created equipment model.
+     * @param array<string, mixed> $data Validated data for creating equipment.
      *
      * @throws RuntimeException If creation fails.
+     *
+     * @return Equipment The newly created equipment model.
      */
     public function createEquipment(array $data): Equipment
     {
@@ -197,11 +200,12 @@ final class EquipmentService
      * Update an existing equipment item.
      * Assumes BlameableObserver handles updated_by via Auth::user().
      *
-     * @param  Equipment  $equipment  The equipment model instance to update.
-     * @param  array<string, mixed>  $data  Validated data for updating equipment.
-     * @return bool True if update was successful, false otherwise.
+     * @param Equipment            $equipment The equipment model instance to update.
+     * @param array<string, mixed> $data      Validated data for updating equipment.
      *
      * @throws RuntimeException If update fails.
+     *
+     * @return bool True if update was successful, false otherwise.
      */
     public function updateEquipment(Equipment $equipment, array $data): bool
     {
@@ -224,10 +228,11 @@ final class EquipmentService
      * Soft delete an equipment item.
      * Assumes BlameableObserver handles deleted_by.
      *
-     * @param  Equipment  $equipment  The equipment model instance to delete.
-     * @return bool True if soft delete was successful.
+     * @param Equipment $equipment The equipment model instance to delete.
      *
      * @throws RuntimeException If deletion is not allowed (e.g., on loan) or fails.
+     *
+     * @return bool True if soft delete was successful.
      */
     public function deleteEquipment(Equipment $equipment): bool
     {
@@ -308,11 +313,11 @@ final class EquipmentService
         ?string $reason = null
     ): bool {
         Log::info(self::LOG_AREA.' Attempting to update equipment operational status.', [
-            'equipment_id' => $equipment->id,
+            'equipment_id'   => $equipment->id,
             'current_status' => $equipment->status,
-            'new_status' => $newOperationalStatus,
+            'new_status'     => $newOperationalStatus,
             'acting_user_id' => $actingUser->id,
-            'reason' => $reason,
+            'reason'         => $reason,
         ]);
 
         if (! in_array($newOperationalStatus, Equipment::getOperationalStatusesList())) {
@@ -330,7 +335,7 @@ final class EquipmentService
         DB::beginTransaction();
         try {
             $defaultReason = $reason ?? __('Status operasi dikemaskini oleh pentadbir.');
-            $updated = $equipment->updateOperationalStatus($newOperationalStatus, $defaultReason, $actingUser->id);
+            $updated       = $equipment->updateOperationalStatus($newOperationalStatus, $defaultReason, $actingUser->id);
             DB::commit();
             Log::info(self::LOG_AREA.' Equipment ID '.$equipment->id.' operational status updated to '.$newOperationalStatus.': '.($updated ? 'Success' : 'No changes or failed'));
 
@@ -353,11 +358,11 @@ final class EquipmentService
         ?string $reason = null
     ): bool {
         Log::info(self::LOG_AREA.' Attempting to update equipment physical condition status.', [
-            'equipment_id' => $equipment->id,
+            'equipment_id'      => $equipment->id,
             'current_condition' => $equipment->condition_status,
-            'new_condition' => $newConditionStatus,
-            'acting_user_id' => $actingUser->id,
-            'reason' => $reason,
+            'new_condition'     => $newConditionStatus,
+            'acting_user_id'    => $actingUser->id,
+            'reason'            => $reason,
         ]);
 
         if (! in_array($newConditionStatus, Equipment::getConditionStatusesList())) {
@@ -367,7 +372,7 @@ final class EquipmentService
         DB::beginTransaction();
         try {
             $defaultReason = $reason ?? __('Status keadaan fizikal dikemaskini oleh pentadbir.');
-            $updated = $equipment->updatePhysicalConditionStatus($newConditionStatus, $defaultReason, $actingUser->id);
+            $updated       = $equipment->updatePhysicalConditionStatus($newConditionStatus, $defaultReason, $actingUser->id);
             DB::commit();
             Log::info(self::LOG_AREA.' Equipment ID '.$equipment->id.' physical condition status updated to '.$newConditionStatus.': '.($updated ? 'Success' : 'No changes or failed'));
 

@@ -20,29 +20,29 @@ use Illuminate\Support\Str;
  *
  * Represents a loan application for ICT equipment.
  *
- * @property int $id
- * @property int $user_id
- * @property int|null $responsible_officer_id
- * @property int|null $supporting_officer_id
- * @property string $purpose
- * @property string|null $location
- * @property string|null $return_location
+ * @property int                             $id
+ * @property int                             $user_id
+ * @property int|null                        $responsible_officer_id
+ * @property int|null                        $supporting_officer_id
+ * @property string                          $purpose
+ * @property string|null                     $location
+ * @property string|null                     $return_location
  * @property \Illuminate\Support\Carbon|null $loan_start_date
  * @property \Illuminate\Support\Carbon|null $loan_end_date
- * @property string $status
- * @property string|null $rejection_reason
+ * @property string                          $status
+ * @property string|null                     $rejection_reason
  * @property \Illuminate\Support\Carbon|null $applicant_confirmation_timestamp
  * @property \Illuminate\Support\Carbon|null $submitted_at
- * @property int|null $approved_by
+ * @property int|null                        $approved_by
  * @property \Illuminate\Support\Carbon|null $approved_at
  * @property \Illuminate\Support\Carbon|null $issued_at
- * @property int|null $rejected_by
+ * @property int|null                        $rejected_by
  * @property \Illuminate\Support\Carbon|null $rejected_at
- * @property int|null $cancelled_by
+ * @property int|null                        $cancelled_by
  * @property \Illuminate\Support\Carbon|null $cancelled_at
- * @property string|null $admin_notes
- * @property int|null $current_approval_officer_id
- * @property string|null $current_approval_stage
+ * @property string|null                     $admin_notes
+ * @property int|null                        $current_approval_officer_id
+ * @property string|null                     $current_approval_stage
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
@@ -53,18 +53,31 @@ class LoanApplication extends Model
 
     // Loan application status constants for workflow
     public const STATUS_PROCESSING = 'processing';
+
     public const STATUS_DRAFT = 'draft';
+
     public const STATUS_PENDING_SUPPORT = 'pending_support';
+
     public const STATUS_PENDING_APPROVER_REVIEW = 'pending_approver_review';
+
     public const STATUS_PENDING_BPM_REVIEW = 'pending_bpm_review';
+
     public const STATUS_APPROVED = 'approved';
+
     public const STATUS_REJECTED = 'rejected';
+
     public const STATUS_PARTIALLY_ISSUED = 'partially_issued';
+
     public const STATUS_ISSUED = 'issued';
+
     public const STATUS_RETURNED = 'returned';
+
     public const STATUS_OVERDUE = 'overdue';
+
     public const STATUS_CANCELLED = 'cancelled';
+
     public const STATUS_PARTIALLY_RETURNED_PENDING_INSPECTION = 'partially_returned_pending_inspection';
+
     public const STATUS_COMPLETED = 'completed';
 
     protected $table = 'loan_applications';
@@ -90,17 +103,17 @@ class LoanApplication extends Model
         'cancelled_at',
         'admin_notes',
         'current_approval_officer_id',
-        'current_approval_stage'
+        'current_approval_stage',
     ];
 
     protected $casts = [
-        'loan_start_date' => 'datetime',
-        'loan_end_date' => 'datetime',
+        'loan_start_date'                  => 'datetime',
+        'loan_end_date'                    => 'datetime',
         'applicant_confirmation_timestamp' => 'datetime',
-        'submitted_at' => 'datetime',
-        'approved_at' => 'datetime',
-        'rejected_at' => 'datetime',
-        'cancelled_at' => 'datetime',
+        'submitted_at'                     => 'datetime',
+        'approved_at'                      => 'datetime',
+        'rejected_at'                      => 'datetime',
+        'cancelled_at'                     => 'datetime',
     ];
 
     protected $attributes = ['status' => self::STATUS_DRAFT];
@@ -177,20 +190,20 @@ class LoanApplication extends Model
     public static function getStatusOptions(): array
     {
         return [
-            self::STATUS_DRAFT => __('loan-applications.statuses.draft'),
-            self::STATUS_PENDING_SUPPORT => __('loan-applications.statuses.pending_support'),
-            self::STATUS_PENDING_APPROVER_REVIEW => __('loan-applications.statuses.pending_approver_review'),
-            self::STATUS_PENDING_BPM_REVIEW => __('loan-applications.statuses.pending_bpm_review'),
-            self::STATUS_APPROVED => __('loan-applications.statuses.approved'),
-            self::STATUS_REJECTED => __('loan-applications.statuses.rejected'),
-            self::STATUS_PARTIALLY_ISSUED => __('loan-applications.statuses.partially_issued'),
-            self::STATUS_ISSUED => __('loan-applications.statuses.issued'),
-            self::STATUS_RETURNED => __('loan-applications.statuses.returned'),
-            self::STATUS_OVERDUE => __('loan-applications.statuses.overdue'),
-            self::STATUS_CANCELLED => __('loan-applications.statuses.cancelled'),
+            self::STATUS_DRAFT                                 => __('loan-applications.statuses.draft'),
+            self::STATUS_PENDING_SUPPORT                       => __('loan-applications.statuses.pending_support'),
+            self::STATUS_PENDING_APPROVER_REVIEW               => __('loan-applications.statuses.pending_approver_review'),
+            self::STATUS_PENDING_BPM_REVIEW                    => __('loan-applications.statuses.pending_bpm_review'),
+            self::STATUS_APPROVED                              => __('loan-applications.statuses.approved'),
+            self::STATUS_REJECTED                              => __('loan-applications.statuses.rejected'),
+            self::STATUS_PARTIALLY_ISSUED                      => __('loan-applications.statuses.partially_issued'),
+            self::STATUS_ISSUED                                => __('loan-applications.statuses.issued'),
+            self::STATUS_RETURNED                              => __('loan-applications.statuses.returned'),
+            self::STATUS_OVERDUE                               => __('loan-applications.statuses.overdue'),
+            self::STATUS_CANCELLED                             => __('loan-applications.statuses.cancelled'),
             self::STATUS_PARTIALLY_RETURNED_PENDING_INSPECTION => __('loan-applications.statuses.partially_returned_pending_inspection'),
-            self::STATUS_COMPLETED => __('loan-applications.statuses.completed'),
-            self::STATUS_PROCESSING => __('loan-applications.statuses.processing'),
+            self::STATUS_COMPLETED                             => __('loan-applications.statuses.completed'),
+            self::STATUS_PROCESSING                            => __('loan-applications.statuses.processing'),
         ];
     }
 
@@ -236,12 +249,13 @@ class LoanApplication extends Model
 
     public function isOverdue(): bool
     {
-        if (!in_array($this->status, [self::STATUS_ISSUED, self::STATUS_PARTIALLY_ISSUED])) {
+        if (! in_array($this->status, [self::STATUS_ISSUED, self::STATUS_PARTIALLY_ISSUED])) {
             return false;
         }
         if ($this->loan_end_date && $this->loan_end_date->isPast()) {
             return $this->loanApplicationItems()->where('quantity_issued', '>', DB::raw('IFNULL(quantity_returned, 0)'))->exists();
         }
+
         return false;
     }
 
@@ -251,11 +265,11 @@ class LoanApplication extends Model
     public function updateOverallStatusAfterTransaction(): void
     {
         $this->load('loanApplicationItems');
-        $totalApproved = (int) $this->loanApplicationItems->sum('quantity_approved');
-        $totalIssued = (int) $this->loanApplicationItems->sum('quantity_issued');
-        $totalReturned = (int) $this->loanApplicationItems->sum('quantity_returned');
+        $totalApproved  = (int) $this->loanApplicationItems->sum('quantity_approved');
+        $totalIssued    = (int) $this->loanApplicationItems->sum('quantity_issued');
+        $totalReturned  = (int) $this->loanApplicationItems->sum('quantity_returned');
         $originalStatus = $this->status;
-        $newStatus = $originalStatus;
+        $newStatus      = $originalStatus;
 
         if ($totalIssued > 0) {
             if ($totalReturned >= $totalIssued) {
@@ -305,7 +319,7 @@ class LoanApplication extends Model
             self::STATUS_ISSUED,
             self::STATUS_PARTIALLY_ISSUED,
             self::STATUS_PARTIALLY_RETURNED_PENDING_INSPECTION,
-            self::STATUS_OVERDUE
+            self::STATUS_OVERDUE,
         ]);
     }
 
@@ -313,7 +327,7 @@ class LoanApplication extends Model
     {
         return $query->whereIn('status', [
             self::STATUS_ISSUED,
-            self::STATUS_PARTIALLY_ISSUED
+            self::STATUS_PARTIALLY_ISSUED,
         ])
             ->whereDate('loan_end_date', '<', now());
     }
@@ -323,7 +337,7 @@ class LoanApplication extends Model
         return $query
             ->whereIn('status', [
                 self::STATUS_ISSUED,
-                self::STATUS_PARTIALLY_ISSUED
+                self::STATUS_PARTIALLY_ISSUED,
             ])
             ->whereDate('loan_end_date', '=', now()->addDays($days)->toDateString());
     }

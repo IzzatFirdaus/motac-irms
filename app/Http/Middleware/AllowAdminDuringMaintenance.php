@@ -14,9 +14,9 @@ class AllowAdminDuringMaintenance
     /**
      * Handle an incoming request.
      * Allows users with specific roles to access the application during maintenance mode.
-     * System Design Reference: 3.1 Custom Middleware
+     * System Design Reference: 3.1 Custom Middleware.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response) $next
      */
     public function handle(Request $request, Closure $next): Response
     {

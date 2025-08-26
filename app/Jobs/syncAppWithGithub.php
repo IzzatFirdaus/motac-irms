@@ -24,7 +24,7 @@ class SyncAppWithGithub extends ProcessWebhookJob
                 $alreadyUpToDate = true;
             }
             // Optional: Log buffer for debug
-            info("Deploy Output: " . $buffer);
+            info('Deploy Output: '.$buffer);
         });
 
         if ($alreadyUpToDate) {

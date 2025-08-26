@@ -9,7 +9,6 @@ use App\Http\Requests\ProcessReturnRequest;
 use App\Models\Equipment;
 use App\Models\LoanApplication;
 use App\Models\LoanTransaction;
-use App\Models\LoanTransactionItem;
 use App\Services\LoanTransactionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -33,19 +32,19 @@ final class LoanTransactionController extends Controller
 
     /**
      * Display a paginated listing of all loan transactions.
-     * Route: GET /loan-transactions
+     * Route: GET /loan-transactions.
      */
     public function index(): View
     {
         $this->authorize('viewAny', LoanTransaction::class);
 
         $transactions = LoanTransaction::with([
-                'loanApplication.user',
-                'issuingOfficer',
-                'receivingOfficer',
-                'returningOfficer',
-                'returnAcceptingOfficer'
-            ])
+            'loanApplication.user',
+            'issuingOfficer',
+            'receivingOfficer',
+            'returningOfficer',
+            'returnAcceptingOfficer',
+        ])
             ->latest('transaction_date')
             ->paginate(20);
 
@@ -55,7 +54,7 @@ final class LoanTransactionController extends Controller
 
     /**
      * Show the form for recording equipment issuance for a loan application.
-     * Route: GET /loan-applications/{loanApplication}/issue
+     * Route: GET /loan-applications/{loanApplication}/issue.
      */
     public function showIssueForm(LoanApplication $loanApplication): View
     {
@@ -70,21 +69,21 @@ final class LoanTransactionController extends Controller
         $allAccessoriesList = config('motac.loan_accessories_list', []);
 
         return view('loan-transactions.issue', [
-            'loanApplication' => $loanApplication,
-            'availableEquipment' => $availableEquipment,
+            'loanApplication'                    => $loanApplication,
+            'availableEquipment'                 => $availableEquipment,
             'loanApplicantAndResponsibleOfficer' => $loanApplicantAndResponsibleOfficer,
-            'allAccessoriesList' => $allAccessoriesList,
+            'allAccessoriesList'                 => $allAccessoriesList,
         ]);
     }
 
     /**
      * Store the recorded equipment issuance for a loan application.
-     * Route: POST /loan-applications/{loanApplication}/issue
+     * Route: POST /loan-applications/{loanApplication}/issue.
      */
     public function storeIssue(IssueEquipmentRequest $request, LoanApplication $loanApplication): RedirectResponse
     {
         $issuingOfficer = Auth::user();
-        if (!$issuingOfficer) {
+        if (! $issuingOfficer) {
             return redirect()->back()->with('error', 'Sila log masuk semula.');
         }
 
@@ -107,7 +106,7 @@ final class LoanTransactionController extends Controller
 
     /**
      * Display the details of a specific loan transaction.
-     * Route: GET /loan-transactions/{loanTransaction}
+     * Route: GET /loan-transactions/{loanTransaction}.
      */
     public function show(LoanTransaction $loanTransaction): View
     {
@@ -123,7 +122,7 @@ final class LoanTransactionController extends Controller
             'receivingOfficer',
             'returningOfficer',
             'returnAcceptingOfficer',
-            'relatedIssueTransaction'
+            'relatedIssueTransaction',
         ]);
 
         // For each item, access status/condition for display (no assignment needed for accessors)
@@ -135,7 +134,7 @@ final class LoanTransactionController extends Controller
 
     /**
      * Show the form for recording equipment return for an ISSUE transaction.
-     * Route: GET /loan-transactions/{loanTransaction}/return
+     * Route: GET /loan-transactions/{loanTransaction}/return.
      */
     public function showReturnForm(LoanTransaction $loanTransaction): View|RedirectResponse
     {
@@ -151,35 +150,35 @@ final class LoanTransactionController extends Controller
             'loanApplication.user',
             'loanApplication.responsibleOfficer',
             'loanTransactionItems.equipment',
-            'loanTransactionItems.loanApplicationItem'
+            'loanTransactionItems.loanApplicationItem',
         ]);
 
-        $loanApplication = $loanTransaction->loanApplication;
-        $issuedItemsForThisTransaction = $loanTransaction->loanTransactionItems;
-        $allAccessoriesList = config('motac.loan_accessories_list', []);
+        $loanApplication                    = $loanTransaction->loanApplication;
+        $issuedItemsForThisTransaction      = $loanTransaction->loanTransactionItems;
+        $allAccessoriesList                 = config('motac.loan_accessories_list', []);
         $loanApplicantAndResponsibleOfficer = collect([$loanApplication->user, $loanApplication->responsibleOfficer])
             ->filter()->unique('id');
 
         // Pass all data required for the return form view
         return view('loan-transactions.return', [
-            'loanTransaction' => $loanTransaction,
-            'loanApplication' => $loanApplication,
-            'issuedItemsForThisTransaction' => $issuedItemsForThisTransaction,
-            'allAccessoriesList' => $allAccessoriesList,
+            'loanTransaction'                    => $loanTransaction,
+            'loanApplication'                    => $loanApplication,
+            'issuedItemsForThisTransaction'      => $issuedItemsForThisTransaction,
+            'allAccessoriesList'                 => $allAccessoriesList,
             'loanApplicantAndResponsibleOfficer' => $loanApplicantAndResponsibleOfficer,
         ]);
     }
 
     /**
      * Store the recorded equipment return for an ISSUE transaction.
-     * Route: POST /loan-transactions/{loanTransaction}/return
+     * Route: POST /loan-transactions/{loanTransaction}/return.
      */
     public function storeReturn(ProcessReturnRequest $request, LoanTransaction $loanTransaction): RedirectResponse
     {
         $this->authorize('processReturn', [$loanTransaction, $loanTransaction->loanApplication]);
 
         $returnAcceptingOfficer = Auth::user();
-        if (!$returnAcceptingOfficer) {
+        if (! $returnAcceptingOfficer) {
             return redirect()->back()->with('error', 'Sila log masuk semula.');
         }
 

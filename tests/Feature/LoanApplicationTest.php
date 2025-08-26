@@ -24,9 +24,13 @@ class LoanApplicationTest extends TestCase
     use RefreshDatabase;
 
     protected User $applicantUser;
+
     protected User $supportingOfficerUser;
+
     protected User $hodUser;
+
     protected User $bpmStaffUser;
+
     protected User $adminUser;
 
     protected function setUp(): void
@@ -48,14 +52,14 @@ class LoanApplicationTest extends TestCase
         Permission::findOrCreate('act_on_approval_tasks', 'web');
 
         // Create users and assign roles
-        $this->applicantUser = User::factory()->create()->assignRole('Applicant');
+        $this->applicantUser         = User::factory()->create()->assignRole('Applicant');
         $this->supportingOfficerUser = User::factory()->create()->assignRole(['Supporting Officer', 'Approver']);
-        $this->hodUser = User::factory()->create()->assignRole('HOD');
-        $this->bpmStaffUser = User::factory()->create()->assignRole('BPM Staff');
-        $this->adminUser = User::factory()->create()->assignRole('Admin');
+        $this->hodUser               = User::factory()->create()->assignRole('HOD');
+        $this->bpmStaffUser          = User::factory()->create()->assignRole('BPM Staff');
+        $this->adminUser             = User::factory()->create()->assignRole('Admin');
 
         // Supporting Officer needs grade 41 for approval
-        $grade41 = Grade::factory()->create(['name' => '41', 'level' => 41, 'is_approver_grade' => true]);
+        $grade41                               = Grade::factory()->create(['name' => '41', 'level' => 41, 'is_approver_grade' => true]);
         $this->supportingOfficerUser->grade_id = $grade41->id;
         $this->supportingOfficerUser->givePermissionTo('act_on_approval_tasks');
         $this->supportingOfficerUser->save();
@@ -64,7 +68,7 @@ class LoanApplicationTest extends TestCase
         Config::set('motac.approval.min_loan_support_grade_level', 41);
 
         // Set up department for applicant (needed for routing approvals)
-        $department = Department::factory()->create(['head_of_department_id' => $this->hodUser->id]);
+        $department                         = Department::factory()->create(['head_of_department_id' => $this->hodUser->id]);
         $this->applicantUser->department_id = $department->id;
         $this->applicantUser->save();
     }
@@ -76,13 +80,13 @@ class LoanApplicationTest extends TestCase
     public function test_applicant_can_submit_new_loan_application(): void
     {
         $applicationData = [
-            'purpose' => 'Required for official business trip.',
-            'location' => 'Test Location',
-            'loan_start_date' => now()->format('Y-m-d H:i:s'),
-            'loan_end_date' => now()->addDays(1)->format('Y-m-d H:i:s'),
-            'supporting_officer_id' => $this->supportingOfficerUser->id,
+            'purpose'                => 'Required for official business trip.',
+            'location'               => 'Test Location',
+            'loan_start_date'        => now()->format('Y-m-d H:i:s'),
+            'loan_end_date'          => now()->addDays(1)->format('Y-m-d H:i:s'),
+            'supporting_officer_id'  => $this->supportingOfficerUser->id,
             'applicant_confirmation' => true,
-            'items' => [['equipment_type' => 'laptop', 'quantity_requested' => 1]],
+            'items'                  => [['equipment_type' => 'laptop', 'quantity_requested' => 1]],
         ];
 
         $response = $this->actingAs($this->applicantUser)->post(route('loan-applications.store'), $applicationData);
@@ -96,17 +100,17 @@ class LoanApplicationTest extends TestCase
     public function test_approving_a_loan_application_succeeds(): void
     {
         $loanApplication = LoanApplication::factory()->create(['status' => LoanApplication::STATUS_PENDING_SUPPORT]);
-        $item = $loanApplication->loanApplicationItems()->create(['equipment_type' => 'laptop', 'quantity_requested' => 1]);
-        $approval = $loanApplication->approvals()->create([
+        $item            = $loanApplication->loanApplicationItems()->create(['equipment_type' => 'laptop', 'quantity_requested' => 1]);
+        $approval        = $loanApplication->approvals()->create([
             'officer_id' => $this->supportingOfficerUser->id,
-            'stage' => 'loan_support_review'
+            'stage'      => 'loan_support_review',
         ]);
 
         // Only designated approver should be able to act
         $response = $this->actingAs($this->supportingOfficerUser)
             ->post(route('approvals.recordDecision', $approval->id), [
-                'decision' => 'approved',
-                'comments' => 'Approved by Admin for testing.',
+                'decision'       => 'approved',
+                'comments'       => 'Approved by Admin for testing.',
                 'items_approved' => [
                     $item->id => ['quantity_approved' => '1'],
                 ],
@@ -114,8 +118,8 @@ class LoanApplicationTest extends TestCase
 
         $response->assertRedirect()->assertSessionHas('success');
         $this->assertDatabaseHas('loan_applications', [
-            'id' => $loanApplication->id,
-            'status' => LoanApplication::STATUS_APPROVED
+            'id'     => $loanApplication->id,
+            'status' => LoanApplication::STATUS_APPROVED,
         ]);
     }
 
@@ -125,21 +129,21 @@ class LoanApplicationTest extends TestCase
      */
     public function test_bpm_staff_can_issue_equipment(): void
     {
-        $equipment = Equipment::factory()->create(['status' => Equipment::STATUS_AVAILABLE]);
+        $equipment       = Equipment::factory()->create(['status' => Equipment::STATUS_AVAILABLE]);
         $loanApplication = LoanApplication::factory()->create(['status' => LoanApplication::STATUS_APPROVED]);
-        $item = $loanApplication->loanApplicationItems()->create([
-            'equipment_type' => 'laptop',
+        $item            = $loanApplication->loanApplicationItems()->create([
+            'equipment_type'     => 'laptop',
             'quantity_requested' => 1,
-            'quantity_approved' => 1
+            'quantity_approved'  => 1,
         ]);
 
         $issueData = [
             'receiving_officer_id' => $this->applicantUser->id,
-            'transaction_date' => now()->format('Y-m-d H:i:s'),
-            'items' => [[
+            'transaction_date'     => now()->format('Y-m-d H:i:s'),
+            'items'                => [[
                 'loan_application_item_id' => $item->id,
-                'equipment_id' => $equipment->id,
-                'quantity_issued' => 1,
+                'equipment_id'             => $equipment->id,
+                'quantity_issued'          => 1,
             ]],
         ];
 
@@ -156,34 +160,34 @@ class LoanApplicationTest extends TestCase
      */
     public function test_bpm_staff_can_process_equipment_return(): void
     {
-        $equipment = Equipment::factory()->create(['status' => Equipment::STATUS_ON_LOAN]);
+        $equipment       = Equipment::factory()->create(['status' => Equipment::STATUS_ON_LOAN]);
         $loanApplication = LoanApplication::factory()->create(['status' => LoanApplication::STATUS_ISSUED]);
         $applicationItem = $loanApplication->loanApplicationItems()->create([
-            'equipment_type' => $equipment->asset_type,
+            'equipment_type'     => $equipment->asset_type,
             'quantity_requested' => 1,
-            'quantity_approved' => 1,
-            'quantity_issued' => 1
+            'quantity_approved'  => 1,
+            'quantity_issued'    => 1,
         ]);
         $issueTransaction = LoanTransaction::factory()->create([
             'loan_application_id' => $loanApplication->id,
-            'type' => 'issue',
-            'status' => LoanTransaction::STATUS_ISSUED
+            'type'                => 'issue',
+            'status'              => LoanTransaction::STATUS_ISSUED,
         ]);
         $issuedItem = $issueTransaction->loanTransactionItems()->create([
-            'equipment_id' => $equipment->id,
-            'quantity_transacted' => 1,
-            'loan_application_item_id' => $applicationItem->id
+            'equipment_id'             => $equipment->id,
+            'quantity_transacted'      => 1,
+            'loan_application_item_id' => $applicationItem->id,
         ]);
 
         $returnData = [
             'returning_officer_id' => $this->applicantUser->id,
-            'transaction_date' => now()->format('Y-m-d H:i:s'),
-            'items' => [[
+            'transaction_date'     => now()->format('Y-m-d H:i:s'),
+            'items'                => [[
                 'loan_transaction_item_id' => $issuedItem->id,
-                'equipment_id' => $equipment->id,
-                'quantity_returned' => 1,
-                'condition_on_return' => 'good',
-                'item_status_on_return' => 'returned_good',
+                'equipment_id'             => $equipment->id,
+                'quantity_returned'        => 1,
+                'condition_on_return'      => 'good',
+                'item_status_on_return'    => 'returned_good',
             ]],
         ];
 

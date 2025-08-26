@@ -34,10 +34,10 @@ class MenuAuthorizationTest extends TestCase
         }
 
         // Create users and assign roles for both guards
-        $this->adminUser = User::factory()->create();
+        $this->adminUser    = User::factory()->create();
         $this->bpmStaffUser = User::factory()->create();
-        $this->itAdminUser = User::factory()->create();
-        $this->regularUser = User::factory()->create();
+        $this->itAdminUser  = User::factory()->create();
+        $this->regularUser  = User::factory()->create();
 
         foreach ($guards as $guard) {
             $this->adminUser->assignRole(Role::findByName('Admin', $guard));

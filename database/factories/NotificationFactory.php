@@ -24,16 +24,16 @@ class NotificationFactory extends Factory
     {
         // Static cache for user IDs
         static $userIds;
-        if (!isset($userIds)) {
+        if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
 
         // Pick a random user as notifiable (or null if none exist)
-        $notifiableUserId = !empty($userIds) ? Arr::random($userIds) : null;
+        $notifiableUserId = ! empty($userIds) ? Arr::random($userIds) : null;
 
         // Use a static Malaysian faker for realism and speed
         static $msFaker;
-        if (!$msFaker) {
+        if (! $msFaker) {
             $msFaker = \Faker\Factory::create('ms_MY');
         }
 
@@ -82,24 +82,24 @@ class NotificationFactory extends Factory
 
         // Notification data payload
         $payloadData = [
-            'subject'   => $msFaker->sentence(6),
-            'message'   => $msFaker->paragraph(2),
-            'url'       => $this->faker->optional(0.7)->url,
-            'icon'      => Arr::random(self::$icons ?? $icons),
-            'status'    => $this->faker->optional(0.6)->randomElement([
-                'pending', 'approved', 'rejected', 'issued', 'returned', 'overdue'
+            'subject' => $msFaker->sentence(6),
+            'message' => $msFaker->paragraph(2),
+            'url'     => $this->faker->optional(0.7)->url,
+            'icon'    => Arr::random(self::$icons ?? $icons),
+            'status'  => $this->faker->optional(0.6)->randomElement([
+                'pending', 'approved', 'rejected', 'issued', 'returned', 'overdue',
             ]),
             'action_required' => $this->faker->optional(0.2)->boolean(),
-            'created_at' => now()->toDateTimeString(),
+            'created_at'      => now()->toDateTimeString(),
         ];
 
         // Read at: 30% chance to be read
         $readAt = $this->faker->optional(0.3)->dateTimeThisYear();
 
         // Audit fields (nullable)
-        $createdBy   = $notifiableUserId;
-        $updatedBy   = $notifiableUserId;
-        $deletedBy   = null;
+        $createdBy = $notifiableUserId;
+        $updatedBy = $notifiableUserId;
+        $deletedBy = null;
 
         return [
             'id'              => (string) Str::uuid(),
@@ -143,10 +143,11 @@ class NotificationFactory extends Factory
     public function deleted(): static
     {
         static $userIds;
-        if (!isset($userIds)) {
+        if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $deleterId = !empty($userIds) ? Arr::random($userIds) : null;
+        $deleterId = ! empty($userIds) ? Arr::random($userIds) : null;
+
         return $this->state([
             'deleted_at' => now(),
             'deleted_by' => $deleterId,
