@@ -1,7 +1,6 @@
 {
-  // Workspace settings: exclude vendor and backup folders from heavy analysis and search
+  // Workspace settings: exclude large public vendor assets from analysis, but allow Intelephense to index framework vendor code
   "intelephense.files.exclude": [
-    "**/vendor/**",
     "**/public/assets/vendor/**"
   ],
 
