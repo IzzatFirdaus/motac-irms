@@ -1,34 +1,44 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Parameter \\#1 \\$photo of method App\\\\Models\\\\User\\:\\:updateProfilePhoto\\(\\) expects Illuminate\\\\Http\\\\UploadedFile, string given\\.$#"
+			message: "#^Call to an undefined method Illuminate\\\\Foundation\\\\Auth\\\\User\\:\\:updateProfilePhoto\\(\\)\\.$#"
 			count: 1
 			path: app/Actions/Fortify/UpdateUserProfileInformation.php
 
 		-
-			message: "#^Call to an undefined method App\\\\Models\\\\EmailApplication\\:\\:isApproved\\(\\)\\.$#"
+			message: "#^Call to function is_object\\(\\) with non\\-falsy\\-string will always evaluate to false\\.$#"
 			count: 1
-			path: app/Http/Controllers/Api/EmailProvisioningController.php
+			path: app/Helpers/Helpers.php
 
 		-
-			message: "#^Offset 'message' on array\\{success\\: false, message\\: string, assigned_email\\: string\\|null, assigned_user_id\\: string\\|null, error_code\\: string\\|null\\} on left side of \\?\\? always exists and is not nullable\\.$#"
+			message: "#^Cannot call method getName\\(\\) on object\\|string\\.$#"
 			count: 1
-			path: app/Http/Controllers/Api/EmailProvisioningController.php
+			path: app/Helpers/Helpers.php
 
 		-
-			message: "#^Offset 'message' on array\\{success\\: true, message\\: string, assigned_email\\: string\\|null, assigned_user_id\\: string\\|null, error_code\\: string\\|null\\} on left side of \\?\\? always exists and is not nullable\\.$#"
+			message: "#^Cannot call method parameters\\(\\) on object\\|string\\.$#"
 			count: 1
-			path: app/Http/Controllers/Api/EmailProvisioningController.php
+			path: app/Helpers/Helpers.php
 
 		-
-			message: "#^Offset 'status_code' on array\\{success\\: false, message\\: string, assigned_email\\: string\\|null, assigned_user_id\\: string\\|null, error_code\\: string\\|null\\} in isset\\(\\) does not exist\\.$#"
+			message: "#^Call to an undefined method App\\\\Services\\\\ApprovalService\\:\\:processApprovalDecision\\(\\)\\.$#"
 			count: 1
-			path: app/Http/Controllers/Api/EmailProvisioningController.php
+			path: app/Http/Controllers/ApprovalController.php
 
 		-
-			message: "#^Result of && is always false\\.$#"
+			message: "#^Class App\\\\Models\\\\EmailApplication not found\\.$#"
+			count: 4
+			path: app/Http/Controllers/ApprovalController.php
+
+		-
+			message: "#^Relation 'loanTransaction' is not found in App\\\\Models\\\\LoanApplication model\\.$#"
 			count: 1
-			path: app/Http/Controllers/Api/EmailProvisioningController.php
+			path: app/Http/Controllers/DashboardController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Equipment\\:\\:getClassificationOptions\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/EquipmentController.php
 
 		-
 			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
@@ -41,24 +51,29 @@ parameters:
 			path: app/Http/Controllers/LoanApplicationController.php
 
 		-
-			message: "#^If condition is always true\\.$#"
+			message: "#^Access to an undefined property App\\\\Models\\\\User\\:\\:\\$preferred_locale\\.$#"
 			count: 1
-			path: app/Http/Controllers/NotificationController.php
+			path: app/Http/Controllers/language/LanguageController.php
 
 		-
-			message: "#^Unreachable statement \\- code above always terminates\\.$#"
+			message: "#^Access to an undefined property App\\\\Models\\\\User\\:\\:\\$preferred_locale\\.$#"
 			count: 1
-			path: app/Http/Controllers/NotificationController.php
+			path: app/Http/Middleware/LocaleMiddleware.php
 
 		-
-			message: "#^Job class App\\\\Jobs\\\\SyncAppWithGithub constructor invoked with 0 parameters in App\\\\Jobs\\\\SyncAppWithGithub\\:\\:dispatch\\(\\), 1 required\\.$#"
+			message: "#^Call to an undefined static method App\\\\Models\\\\Equipment\\:\\:getAcquisitionTypeOptions\\(\\)\\.$#"
 			count: 1
-			path: app/Http/Controllers/WebhookController.php
+			path: app/Http/Requests/Admin/StoreEquipmentRequest.php
 
 		-
-			message: "#^Negated boolean expression is always false\\.$#"
+			message: "#^Call to an undefined static method App\\\\Models\\\\Equipment\\:\\:getClassificationOptions\\(\\)\\.$#"
 			count: 1
-			path: app/Http/Middleware/CheckGradeLevel.php
+			path: app/Http/Requests/Admin/StoreEquipmentRequest.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Equipment\\:\\:getConditionStatusOptions\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Requests/Admin/StoreEquipmentRequest.php
 
 		-
 			message: "#^Call to an undefined static method App\\\\Models\\\\Equipment\\:\\:getInitialStatusOptions\\(\\)\\.$#"
@@ -66,108 +81,88 @@ parameters:
 			path: app/Http/Requests/Admin/StoreEquipmentRequest.php
 
 		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Equipment\\:\\:getAcquisitionTypeOptions\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Requests/Admin/UpdateEquipmentRequest.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Equipment\\:\\:getClassificationOptions\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Requests/Admin/UpdateEquipmentRequest.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Equipment\\:\\:getConditionStatusOptions\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Requests/Admin/UpdateEquipmentRequest.php
+
+		-
 			message: "#^Access to an undefined property \\(object\\|string\\)\\:\\:\\$id\\.$#"
 			count: 1
 			path: app/Http/Requests/Admin/UpdateGradeRequest.php
 
 		-
-			message: "#^Left side of && is always true\\.$#"
-			count: 2
-			path: app/Http/Requests/RecordApprovalDecisionRequest.php
-
-		-
-			message: "#^Access to property \\$id on an unknown class App\\\\Livewire\\\\User\\.$#"
-			count: 2
-			path: app/Livewire/ApprovalDashboard.php
-
-		-
-			message: "#^Call to an undefined method App\\\\Services\\\\ApprovalService\\:\\:recordDecision\\(\\)\\.$#"
+			message: "#^Parameter \\#2 \\$loanApplication of method App\\\\Services\\\\ApprovalService\\:\\:handleApprovedDecision\\(\\) expects App\\\\Models\\\\LoanApplication, Illuminate\\\\Database\\\\Eloquent\\\\Model given\\.$#"
 			count: 1
 			path: app/Livewire/ApprovalDashboard.php
 
 		-
-			message: "#^PHPDoc tag @var for variable \\$user contains unknown class App\\\\Livewire\\\\User\\.$#"
+			message: "#^Parameter \\#2 \\$loanApplication of method App\\\\Services\\\\ApprovalService\\:\\:handleRejectedDecision\\(\\) expects App\\\\Models\\\\LoanApplication, Illuminate\\\\Database\\\\Eloquent\\\\Model given\\.$#"
 			count: 1
 			path: app/Livewire/ApprovalDashboard.php
 
 		-
-			message: "#^Access to an undefined static property App\\\\Models\\\\EmailApplication\\:\\:\\$STATUSES_LIST\\.$#"
+			message: "#^Variable \\$user might not be defined\\.$#"
 			count: 1
-			path: app/Livewire/EmailApplicationForm.php
+			path: app/Livewire/ApprovalDashboard.php
 
 		-
-			message: "#^Call to an undefined method App\\\\Services\\\\EmailApplicationService\\:\\:createApplication\\(\\)\\.$#"
+			message: "#^Access to an undefined property App\\\\Livewire\\\\ContactUs\\:\\:\\$inquiryTypes\\.$#"
 			count: 1
-			path: app/Livewire/EmailApplicationForm.php
+			path: app/Livewire/ContactUs.php
 
 		-
-			message: "#^Call to an undefined method App\\\\Services\\\\EmailApplicationService\\:\\:processApplicationSubmission\\(\\)\\.$#"
+			message: "#^Relation 'equipment' is not found in App\\\\Models\\\\LoanApplication model\\.$#"
 			count: 1
-			path: app/Livewire/EmailApplicationForm.php
+			path: app/Livewire/Dashboard/Dashboard.php
 
 		-
-			message: "#^Call to an undefined method App\\\\Services\\\\EmailApplicationService\\:\\:updateApplication\\(\\)\\.$#"
+			message: "#^Relation 'equipment' is not found in App\\\\Models\\\\LoanApplication model\\.$#"
 			count: 1
-			path: app/Livewire/EmailApplicationForm.php
+			path: app/Livewire/Dashboard/UserDashboard.php
 
 		-
-			message: "#^Cannot access property \\$appointment_type on string\\.$#"
-			count: 1
-			path: app/Livewire/EmailApplicationForm.php
-
-		-
-			message: "#^Cannot access property \\$service_status on string\\.$#"
-			count: 1
-			path: app/Livewire/EmailApplicationForm.php
-
-		-
-			message: "#^Left side of && is always true\\.$#"
-			count: 1
-			path: app/Livewire/EmailApplicationForm.php
-
-		-
-			message: "#^Negated boolean expression is always false\\.$#"
-			count: 2
-			path: app/Livewire/EmailApplicationForm.php
-
-		-
-			message: "#^Right side of && is always true\\.$#"
-			count: 1
-			path: app/Livewire/EmailApplicationForm.php
-
-		-
-			message: "#^Call to an undefined method App\\\\Services\\\\LoanTransactionService\\:\\:findTransaction\\(\\)\\.$#"
+			message: "#^Access to an undefined property App\\\\Livewire\\\\EquipmentChecklist\\:\\:\\$availableEquipment\\.$#"
 			count: 1
 			path: app/Livewire/EquipmentChecklist.php
 
 		-
-			message: "#^Call to an undefined static method App\\\\Models\\\\Equipment\\:\\:getDefaultAccessoriesList\\(\\)\\.$#"
+			message: "#^Access to an undefined property App\\\\Livewire\\\\EquipmentChecklist\\:\\:\\$onLoanEquipment\\.$#"
 			count: 1
 			path: app/Livewire/EquipmentChecklist.php
 
 		-
-			message: "#^Parameter \\#1 \\$callback of method Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int,App\\\\Models\\\\LoanApplicationItem\\>\\:\\:mapWithKeys\\(\\) expects callable\\(App\\\\Models\\\\LoanApplicationItem, int\\)\\: array, Closure\\(mixed\\)\\: Illuminate\\\\Support\\\\Collection\\<int, string\\> given\\.$#"
+			message: "#^Method App\\\\Livewire\\\\EquipmentChecklist\\:\\:getAvailableEquipmentProperty\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Collection but returns Illuminate\\\\Support\\\\Collection\\<\\(int\\|string\\), mixed\\>\\.$#"
 			count: 1
 			path: app/Livewire/EquipmentChecklist.php
 
 		-
-			message: "#^Right side of && is always false\\.$#"
+			message: "#^Method App\\\\Livewire\\\\EquipmentChecklist\\:\\:getOnLoanEquipmentProperty\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Collection but returns Illuminate\\\\Support\\\\Collection\\<\\(int\\|string\\), mixed\\>\\.$#"
 			count: 1
 			path: app/Livewire/EquipmentChecklist.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Models\\\\Department\\:\\:\\$head_user_id\\.$#"
+			message: "#^Access to an undefined property App\\\\Models\\\\HelpdeskTicket\\:\\:\\$resolution_details\\.$#"
 			count: 1
-			path: app/Livewire/HumanResource/Structure/Departments.php
+			path: app/Livewire/Helpdesk/Admin/TicketManagement.php
 
 		-
-			message: "#^Relation 'headUser' is not found in App\\\\Models\\\\Department model\\.$#"
+			message: "#^Access to an undefined property App\\\\Livewire\\\\Helpdesk\\\\MyTicketsIndex\\:\\:\\$tickets\\.$#"
 			count: 1
-			path: app/Livewire/HumanResource/Structure/Departments.php
+			path: app/Livewire/Helpdesk/MyTicketsIndex.php
 
 		-
 			message: "#^Access to an undefined property App\\\\Livewire\\\\HumanResource\\\\Structure\\\\EmployeeInfo\\:\\:\\$employee\\.$#"
-			count: 6
+			count: 5
 			path: app/Livewire/HumanResource/Structure/EmployeeInfo.php
 
 		-
@@ -181,16 +176,6 @@ parameters:
 			path: app/Livewire/LoanRequestForm.php
 
 		-
-			message: "#^Negated boolean expression is always false\\.$#"
-			count: 2
-			path: app/Livewire/LoanRequestForm.php
-
-		-
-			message: "#^Using nullsafe method call on non\\-nullable type Carbon\\\\Carbon\\. Use \\-\\> instead\\.$#"
-			count: 2
-			path: app/Livewire/LoanRequestForm.php
-
-		-
 			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Admin\\\\BPM\\\\IssuedLoans\\:\\:\\$issuedLoans\\.$#"
 			count: 1
 			path: app/Livewire/ResourceManagement/Admin/BPM/IssuedLoans.php
@@ -201,69 +186,94 @@ parameters:
 			path: app/Livewire/ResourceManagement/Admin/BPM/OutstandingLoans.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Admin\\\\Equipment\\\\Index\\:\\:\\$assetTypeOptions\\.$#"
+			message: "#^Access to an undefined property App\\\\Models\\\\LoanTransactionItem\\:\\:\\$condition_on_transaction\\.$#"
 			count: 1
-			path: app/Livewire/ResourceManagement/Admin/Equipment/Index.php
+			path: app/Livewire/ResourceManagement/Admin/BPM/ProcessReturn.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Admin\\\\Equipment\\\\Index\\:\\:\\$conditionStatusOptions\\.$#"
+			message: "#^Access to an undefined property App\\\\Models\\\\Equipment\\:\\:\\$warranty_end_date\\.$#"
 			count: 1
-			path: app/Livewire/ResourceManagement/Admin/Equipment/Index.php
+			path: app/Livewire/ResourceManagement/Admin/Equipment/EquipmentForm.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Admin\\\\Equipment\\\\Index\\:\\:\\$departmentOptions\\.$#"
+			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Admin\\\\Equipment\\\\EquipmentIndex\\:\\:\\$equipmentList\\.$#"
 			count: 1
-			path: app/Livewire/ResourceManagement/Admin/Equipment/Index.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Admin\\\\Equipment\\\\Index\\:\\:\\$equipmentList\\.$#"
-			count: 1
-			path: app/Livewire/ResourceManagement/Admin/Equipment/Index.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Admin\\\\Equipment\\\\Index\\:\\:\\$statusOptions\\.$#"
-			count: 1
-			path: app/Livewire/ResourceManagement/Admin/Equipment/Index.php
+			path: app/Livewire/ResourceManagement/Admin/Equipment/EquipmentIndex.php
 
 		-
 			message: "#^Access to an undefined property App\\\\Models\\\\Equipment\\:\\:\\$specifications\\.$#"
 			count: 1
-			path: app/Livewire/ResourceManagement/Admin/Equipment/Index.php
+			path: app/Livewire/ResourceManagement/Admin/Equipment/EquipmentIndex.php
 
 		-
-			message: "#^Else branch is unreachable because ternary operator condition is always true\\.$#"
-			count: 2
-			path: app/Livewire/ResourceManagement/Admin/Equipment/Index.php
-
-		-
-			message: "#^Property App\\\\Livewire\\\\ResourceManagement\\\\Admin\\\\Equipment\\\\Index\\:\\:\\$purchase_price \\(float\\|null\\) does not accept string\\|null\\.$#"
+			message: "#^Access to an undefined property App\\\\Models\\\\Equipment\\:\\:\\$warranty_end_date\\.$#"
 			count: 1
-			path: app/Livewire/ResourceManagement/Admin/Equipment/Index.php
+			path: app/Livewire/ResourceManagement/Admin/Equipment/EquipmentIndex.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Admin\\\\Grades\\\\Index\\:\\:\\$availableGradesForDropdown\\.$#"
+			message: "#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\<App\\\\Models\\\\Equipment\\>\\:\\:search\\(\\)\\.$#"
 			count: 1
-			path: app/Livewire/ResourceManagement/Admin/Grades/Index.php
+			path: app/Livewire/ResourceManagement/Admin/Equipment/EquipmentIndex.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Admin\\\\Grades\\\\Index\\:\\:\\$grades\\.$#"
+			message: "#^Call to an undefined static method App\\\\Models\\\\Equipment\\:\\:getAcquisitionTypeOptions\\(\\)\\.$#"
 			count: 1
-			path: app/Livewire/ResourceManagement/Admin/Grades/Index.php
+			path: app/Livewire/ResourceManagement/Admin/Equipment/EquipmentIndex.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Admin\\\\Reports\\\\EmailAccountsReport\\:\\:\\$reportDataProperty\\.$#"
+			message: "#^Call to an undefined static method App\\\\Models\\\\Equipment\\:\\:getClassificationOptions\\(\\)\\.$#"
 			count: 1
-			path: app/Livewire/ResourceManagement/Admin/Reports/EmailAccountsReport.php
+			path: app/Livewire/ResourceManagement/Admin/Equipment/EquipmentIndex.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Admin\\\\Reports\\\\EmailAccountsReport\\:\\:\\$serviceStatusOptionsProperty\\.$#"
+			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Admin\\\\Grades\\\\GradeIndex\\:\\:\\$availableGradesForDropdown\\.$#"
 			count: 1
-			path: app/Livewire/ResourceManagement/Admin/Reports/EmailAccountsReport.php
+			path: app/Livewire/ResourceManagement/Admin/Grades/GradeIndex.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Admin\\\\Reports\\\\EmailAccountsReport\\:\\:\\$statusOptionsProperty\\.$#"
+			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Admin\\\\Grades\\\\GradeIndex\\:\\:\\$grades\\.$#"
 			count: 1
-			path: app/Livewire/ResourceManagement/Admin/Reports/EmailAccountsReport.php
+			path: app/Livewire/ResourceManagement/Admin/Grades/GradeIndex.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Admin\\\\Reports\\\\EquipmentInventoryReport\\:\\:\\$assetTypeOptionsProperty\\.$#"
+			count: 1
+			path: app/Livewire/ResourceManagement/Admin/Reports/EquipmentInventoryReport.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Admin\\\\Reports\\\\EquipmentInventoryReport\\:\\:\\$categoryOptionsProperty\\.$#"
+			count: 1
+			path: app/Livewire/ResourceManagement/Admin/Reports/EquipmentInventoryReport.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Admin\\\\Reports\\\\EquipmentInventoryReport\\:\\:\\$conditionStatusOptionsProperty\\.$#"
+			count: 1
+			path: app/Livewire/ResourceManagement/Admin/Reports/EquipmentInventoryReport.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Admin\\\\Reports\\\\EquipmentInventoryReport\\:\\:\\$departmentOptionsProperty\\.$#"
+			count: 1
+			path: app/Livewire/ResourceManagement/Admin/Reports/EquipmentInventoryReport.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Admin\\\\Reports\\\\EquipmentInventoryReport\\:\\:\\$locationOptionsProperty\\.$#"
+			count: 1
+			path: app/Livewire/ResourceManagement/Admin/Reports/EquipmentInventoryReport.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Admin\\\\Reports\\\\EquipmentInventoryReport\\:\\:\\$reportDataProperty\\.$#"
+			count: 1
+			path: app/Livewire/ResourceManagement/Admin/Reports/EquipmentInventoryReport.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Admin\\\\Reports\\\\EquipmentInventoryReport\\:\\:\\$statusOptionsProperty\\.$#"
+			count: 1
+			path: app/Livewire/ResourceManagement/Admin/Reports/EquipmentInventoryReport.php
+
+		-
+			message: "#^Relation 'category' is not found in App\\\\Models\\\\Equipment model\\.$#"
+			count: 1
+			path: app/Livewire/ResourceManagement/Admin/Reports/EquipmentInventoryReport.php
 
 		-
 			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Admin\\\\Reports\\\\EquipmentReport\\:\\:\\$assetTypeOptionsProperty\\.$#"
@@ -301,6 +311,16 @@ parameters:
 			path: app/Livewire/ResourceManagement/Admin/Reports/EquipmentReport.php
 
 		-
+			message: "#^Relation 'category' is not found in App\\\\Models\\\\Equipment model\\.$#"
+			count: 1
+			path: app/Livewire/ResourceManagement/Admin/Reports/EquipmentReport.php
+
+		-
+			message: "#^Relation 'creator' is not found in App\\\\Models\\\\Equipment model\\.$#"
+			count: 1
+			path: app/Livewire/ResourceManagement/Admin/Reports/EquipmentReport.php
+
+		-
 			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Admin\\\\Reports\\\\LoanApplicationsReport\\:\\:\\$departmentOptions\\.$#"
 			count: 1
 			path: app/Livewire/ResourceManagement/Admin/Reports/LoanApplicationsReport.php
@@ -316,7 +336,7 @@ parameters:
 			path: app/Livewire/ResourceManagement/Admin/Reports/LoanApplicationsReport.php
 
 		-
-			message: "#^Attribute class Livewire\\\\Attributes\\\\Title constructor invoked with 0 parameters, 1 required\\.$#"
+			message: "#^Access to an undefined static property App\\\\Models\\\\LoanApplication\\:\\:\\$STATUS_OPTIONS\\.$#"
 			count: 1
 			path: app/Livewire/ResourceManagement/Admin/Reports/LoanApplicationsReport.php
 
@@ -336,99 +356,79 @@ parameters:
 			path: app/Livewire/ResourceManagement/Admin/Reports/UserActivityReport.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Admin\\\\Users\\\\Index\\:\\:\\$users\\.$#"
+			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Admin\\\\Users\\\\UserIndex\\:\\:\\$users\\.$#"
 			count: 1
-			path: app/Livewire/ResourceManagement/Admin/Users/Index.php
+			path: app/Livewire/ResourceManagement/Admin/Users/UserIndex.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Approval\\\\Dashboard\\:\\:\\$currentApprovalDetails\\.$#"
-			count: 5
-			path: app/Livewire/ResourceManagement/Approval/Dashboard.php
+			message: "#^Access to an undefined property App\\\\Models\\\\LoanApplicationItem\\:\\:\\$quantity\\.$#"
+			count: 2
+			path: app/Livewire/ResourceManagement/Approval/ApprovalDashboard.php
 
 		-
 			message: "#^Access to an undefined property Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:\\$id\\.$#"
 			count: 1
-			path: app/Livewire/ResourceManagement/Approval/Dashboard.php
+			path: app/Livewire/ResourceManagement/Approval/ApprovalDashboard.php
 
 		-
-			message: "#^Call to an undefined method App\\\\Livewire\\\\ResourceManagement\\\\Approval\\\\Dashboard\\:\\:resolvePage\\(\\)\\.$#"
+			message: "#^Variable \\$decisionType on left side of \\?\\? always exists and is not nullable\\.$#"
 			count: 1
-			path: app/Livewire/ResourceManagement/Approval/Dashboard.php
+			path: app/Livewire/ResourceManagement/Approval/ApprovalDashboard.php
 
 		-
-			message: "#^Negated boolean expression is always false\\.$#"
+			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Approval\\\\ApprovalHistory\\:\\:\\$applicationTypeOptions\\.$#"
+			count: 1
+			path: app/Livewire/ResourceManagement/Approval/ApprovalHistory.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Approval\\\\ApprovalHistory\\:\\:\\$approvals\\.$#"
+			count: 1
+			path: app/Livewire/ResourceManagement/Approval/ApprovalHistory.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Approval\\\\ApprovalHistory\\:\\:\\$decisionOptions\\.$#"
+			count: 1
+			path: app/Livewire/ResourceManagement/Approval/ApprovalHistory.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\MyApplications\\\\Loan\\\\LoanApplicationsIndex\\:\\:\\$loanApplications\\.$#"
+			count: 1
+			path: app/Livewire/ResourceManagement/MyApplications/Loan/LoanApplicationsIndex.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\MyApplications\\\\Loan\\\\LoanApplicationsIndex\\:\\:\\$statusOptions\\.$#"
+			count: 1
+			path: app/Livewire/ResourceManagement/MyApplications/Loan/LoanApplicationsIndex.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Reports\\\\EquipmentReport\\:\\:\\$equipmentList\\.$#"
+			count: 1
+			path: app/Livewire/ResourceManagement/Reports/EquipmentReport.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Reports\\\\LoanApplicationsReport\\:\\:\\$loanApplications\\.$#"
+			count: 1
+			path: app/Livewire/ResourceManagement/Reports/LoanApplicationsReport.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\Reports\\\\UserActivityReport\\:\\:\\$users\\.$#"
+			count: 1
+			path: app/Livewire/ResourceManagement/Reports/UserActivityReport.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Livewire\\\\Sections\\\\Menu\\\\VerticalMenu\\:\\:\\$currentRouteName\\.$#"
+			count: 1
+			path: app/Livewire/Sections/Menu/VerticalMenu.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Livewire\\\\Sections\\\\Menu\\\\VerticalMenu\\:\\:\\$filteredMenuData\\.$#"
+			count: 1
+			path: app/Livewire/Sections/Menu/VerticalMenu.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Livewire\\\\Sections\\\\Menu\\\\VerticalMenu\\:\\:\\$userRole\\.$#"
 			count: 2
-			path: app/Livewire/ResourceManagement/Approval/Dashboard.php
-
-		-
-			message: "#^Undefined variable\\: \\$user$#"
-			count: 1
-			path: app/Livewire/ResourceManagement/Approval/Dashboard.php
-
-		-
-			message: "#^Attribute class Livewire\\\\Attributes\\\\Title constructor invoked with 0 parameters, 1 required\\.$#"
-			count: 1
-			path: app/Livewire/ResourceManagement/Approval/History.php
-
-		-
-			message: "#^Call to an undefined method App\\\\Livewire\\\\ResourceManagement\\\\Approval\\\\History\\:\\:resolvePage\\(\\)\\.$#"
-			count: 1
-			path: app/Livewire/ResourceManagement/Approval/History.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\EmailApplication\\:\\:\\$application_reason_notes\\.$#"
-			count: 1
-			path: app/Livewire/ResourceManagement/EmailAccount/ApplicationForm.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\EmailApplication\\:\\:\\$contact_person_email\\.$#"
-			count: 1
-			path: app/Livewire/ResourceManagement/EmailAccount/ApplicationForm.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\EmailApplication\\:\\:\\$contact_person_name\\.$#"
-			count: 1
-			path: app/Livewire/ResourceManagement/EmailAccount/ApplicationForm.php
-
-		-
-			message: "#^If condition is always true\\.$#"
-			count: 2
-			path: app/Livewire/ResourceManagement/EmailAccount/ApplicationForm.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\MyApplications\\\\Email\\\\Index\\:\\:\\$emailApplications\\.$#"
-			count: 1
-			path: app/Livewire/ResourceManagement/MyApplications/Email/Index.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\MyApplications\\\\Email\\\\Index\\:\\:\\$statusOptions\\.$#"
-			count: 1
-			path: app/Livewire/ResourceManagement/MyApplications/Email/Index.php
-
-		-
-			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
-			count: 1
-			path: app/Livewire/ResourceManagement/MyApplications/Email/Index.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\MyApplications\\\\Loan\\\\Index\\:\\:\\$loanApplications\\.$#"
-			count: 1
-			path: app/Livewire/ResourceManagement/MyApplications/Loan/Index.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\ResourceManagement\\\\MyApplications\\\\Loan\\\\Index\\:\\:\\$statusOptions\\.$#"
-			count: 1
-			path: app/Livewire/ResourceManagement/MyApplications/Loan/Index.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\LoanApplication\\:\\:\\$can_act_on\\.$#"
-			count: 1
-			path: app/Livewire/ResourceManagement/MyApplications/Loan/Index.php
-
-		-
-			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
-			count: 1
-			path: app/Livewire/ResourceManagement/MyApplications/Loan/Index.php
+			path: app/Livewire/Sections/Menu/VerticalMenu.php
 
 		-
 			message: "#^Access to an undefined property App\\\\Models\\\\User\\:\\:\\$unreadNotifications\\.$#"
@@ -436,39 +436,64 @@ parameters:
 			path: app/Livewire/Sections/Navbar/NotificationsDropdown.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\Settings\\\\Departments\\\\Index\\:\\:\\$departments\\.$#"
+			message: "#^Access to an undefined property App\\\\Livewire\\\\Settings\\\\Departments\\\\DepartmentsIndex\\:\\:\\$departments\\.$#"
 			count: 1
-			path: app/Livewire/Settings/Departments/Index.php
+			path: app/Livewire/Settings/Departments/DepartmentsIndex.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\Settings\\\\Positions\\\\Index\\:\\:\\$positions\\.$#"
+			message: "#^Access to an undefined property App\\\\Livewire\\\\Settings\\\\Positions\\\\PositionsIndex\\:\\:\\$positions\\.$#"
 			count: 1
-			path: app/Livewire/Settings/Positions/Index.php
+			path: app/Livewire/Settings/Positions/PositionsIndex.php
 
 		-
-			message: "#^If condition is always true\\.$#"
+			message: "#^Access to an undefined property App\\\\Livewire\\\\Settings\\\\Roles\\\\RolesIndex\\:\\:\\$roles\\.$#"
 			count: 1
-			path: app/Livewire/Settings/Roles/Index.php
+			path: app/Livewire/Settings/Roles/RolesIndex.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\Settings\\\\Users\\\\Index\\:\\:\\$usersList\\.$#"
+			message: "#^Access to an undefined property App\\\\Models\\\\User\\:\\:\\$motac_email\\.$#"
 			count: 1
-			path: app/Livewire/Settings/Users/Index.php
+			path: app/Livewire/Settings/Users/UsersEdit.php
 
 		-
-			message: "#^Access to an undefined property Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:\\$id\\.$#"
+			message: "#^Access to an undefined property App\\\\Models\\\\User\\:\\:\\$previous_department_email\\.$#"
 			count: 1
-			path: app/Mail/ApplicationNeedsAction.php
+			path: app/Livewire/Settings/Users/UsersEdit.php
 
 		-
-			message: "#^Else branch is unreachable because ternary operator condition is always true\\.$#"
+			message: "#^Access to an undefined property App\\\\Models\\\\User\\:\\:\\$previous_department_name\\.$#"
 			count: 1
-			path: app/Mail/ApplicationSubmittedNotification.php
+			path: app/Livewire/Settings/Users/UsersEdit.php
 
 		-
-			message: "#^Result of \\|\\| is always true\\.$#"
+			message: "#^Access to an undefined property App\\\\Livewire\\\\Settings\\\\Users\\\\UsersIndex\\:\\:\\$usersList\\.$#"
 			count: 1
-			path: app/Mail/ApplicationSubmittedNotification.php
+			path: app/Livewire/Settings/Users/UsersIndex.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Livewire\\\\Shared\\\\Notifications\\\\NotificationsList\\:\\:\\$notifications\\.$#"
+			count: 1
+			path: app/Livewire/Shared/Notifications/NotificationsList.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\HelpdeskTicket\\:\\:\\$subject\\.$#"
+			count: 1
+			path: app/Mail/Helpdesk/TicketAssignedNotification.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\HelpdeskTicket\\:\\:\\$subject\\.$#"
+			count: 1
+			path: app/Mail/Helpdesk/TicketClosedNotification.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\HelpdeskTicket\\:\\:\\$subject\\.$#"
+			count: 1
+			path: app/Mail/Helpdesk/TicketCreatedNotification.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\HelpdeskTicket\\:\\:\\$subject\\.$#"
+			count: 1
+			path: app/Mail/Helpdesk/TicketStatusUpdatedNotification.php
 
 		-
 			message: "#^Access to an undefined property App\\\\Models\\\\LoanApplication\\:\\:\\$transactions\\.$#"
@@ -481,94 +506,9 @@ parameters:
 			path: app/Mail/LoanApplicationOverdueReminder.php
 
 		-
-			message: "#^PHPDoc tag @mixin contains unknown class App\\\\Models\\\\IdeHelperApproval\\.$#"
-			count: 1
-			path: app/Models/Approval.php
-
-		-
-			message: "#^PHPDoc tag @mixin contains unknown class App\\\\Models\\\\IdeHelperDepartment\\.$#"
-			count: 1
-			path: app/Models/Department.php
-
-		-
-			message: "#^PHPDoc tag @mixin contains unknown class App\\\\Models\\\\IdeHelperEmailApplication\\.$#"
-			count: 1
-			path: app/Models/EmailApplication.php
-
-		-
-			message: "#^PHPDoc tag @mixin contains unknown class App\\\\Models\\\\IdeHelperEquipment\\.$#"
-			count: 1
-			path: app/Models/Equipment.php
-
-		-
-			message: "#^Generic type Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany\\<App\\\\Models\\\\Equipment\\> in PHPDoc tag @return does not specify all template types of class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/EquipmentCategory.php
-
-		-
-			message: "#^Generic type Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany\\<App\\\\Models\\\\SubCategory\\> in PHPDoc tag @return does not specify all template types of class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/EquipmentCategory.php
-
-		-
-			message: "#^Method App\\\\Models\\\\EquipmentCategory\\:\\:equipment\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany\\<App\\\\Models\\\\Equipment\\> but returns Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany\\<App\\\\Models\\\\Equipment, \\$this\\(App\\\\Models\\\\EquipmentCategory\\)\\>\\.$#"
-			count: 1
-			path: app/Models/EquipmentCategory.php
-
-		-
-			message: "#^Method App\\\\Models\\\\EquipmentCategory\\:\\:subCategories\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany\\<App\\\\Models\\\\SubCategory\\> but returns Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany\\<App\\\\Models\\\\SubCategory, \\$this\\(App\\\\Models\\\\EquipmentCategory\\)\\>\\.$#"
-			count: 1
-			path: app/Models/EquipmentCategory.php
-
-		-
-			message: "#^PHPDoc tag @mixin contains unknown class App\\\\Models\\\\IdeHelperEquipmentCategory\\.$#"
-			count: 1
-			path: app/Models/EquipmentCategory.php
-
-		-
-			message: "#^PHPDoc tag @mixin contains unknown class App\\\\Models\\\\IdeHelperGrade\\.$#"
-			count: 1
-			path: app/Models/Grade.php
-
-		-
-			message: "#^PHPDoc tag @mixin contains unknown class App\\\\Models\\\\IdeHelperImport\\.$#"
-			count: 1
-			path: app/Models/Import.php
-
-		-
-			message: "#^Left side of && is always true\\.$#"
-			count: 1
-			path: app/Models/LoanApplication.php
-
-		-
-			message: "#^If condition is always true\\.$#"
-			count: 1
-			path: app/Models/LoanTransaction.php
-
-		-
-			message: "#^PHPDoc tag @mixin contains unknown class App\\\\Models\\\\IdeHelperLoanTransaction\\.$#"
-			count: 1
-			path: app/Models/LoanTransaction.php
-
-		-
-			message: "#^Unreachable statement \\- code above always terminates\\.$#"
-			count: 1
-			path: app/Models/LoanTransaction.php
-
-		-
 			message: "#^Using nullsafe property access on non\\-nullable type App\\\\Models\\\\LoanTransactionItem\\. Use \\-\\> instead\\.$#"
 			count: 1
 			path: app/Models/LoanTransaction.php
-
-		-
-			message: "#^PHPDoc tag @mixin contains unknown class App\\\\Models\\\\IdeHelperLoanTransactionItem\\.$#"
-			count: 1
-			path: app/Models/LoanTransactionItem.php
-
-		-
-			message: "#^PHPDoc tag @return with type void is incompatible with native type Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo\\.$#"
-			count: 1
-			path: app/Models/LoanTransactionItem.php
 
 		-
 			message: "#^Using nullsafe method call on non\\-nullable type App\\\\Models\\\\LoanTransaction\\. Use \\-\\> instead\\.$#"
@@ -576,74 +516,9 @@ parameters:
 			path: app/Models/LoanTransactionItem.php
 
 		-
-			message: "#^Using nullsafe property access on non\\-nullable type App\\\\Models\\\\LoanTransaction\\. Use \\-\\> instead\\.$#"
+			message: "#^If condition is always true\\.$#"
 			count: 1
-			path: app/Models/LoanTransactionItem.php
-
-		-
-			message: "#^Generic type Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany\\<App\\\\Models\\\\Equipment\\> in PHPDoc tag @return does not specify all template types of class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Location.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Location\\:\\:equipment\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany\\<App\\\\Models\\\\Equipment\\> but returns Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany\\<App\\\\Models\\\\Equipment, \\$this\\(App\\\\Models\\\\Location\\)\\>\\.$#"
-			count: 1
-			path: app/Models/Location.php
-
-		-
-			message: "#^PHPDoc tag @mixin contains unknown class App\\\\Models\\\\IdeHelperLocation\\.$#"
-			count: 1
-			path: app/Models/Location.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Notification\\:\\:creator\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo\\<App\\\\Models\\\\User, App\\\\Models\\\\Notification\\> but returns Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo\\<App\\\\Models\\\\User, \\$this\\(App\\\\Models\\\\Notification\\)\\>\\.$#"
-			count: 1
-			path: app/Models/Notification.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Notification\\:\\:deleter\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo\\<App\\\\Models\\\\User, App\\\\Models\\\\Notification\\> but returns Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo\\<App\\\\Models\\\\User, \\$this\\(App\\\\Models\\\\Notification\\)\\>\\.$#"
-			count: 1
-			path: app/Models/Notification.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Notification\\:\\:notifiable\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\MorphTo\\<Illuminate\\\\Database\\\\Eloquent\\\\Model, App\\\\Models\\\\Notification\\> but returns Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\MorphTo\\<Illuminate\\\\Database\\\\Eloquent\\\\Model, \\$this\\(App\\\\Models\\\\Notification\\)\\>\\.$#"
-			count: 1
-			path: app/Models/Notification.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Notification\\:\\:updater\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo\\<App\\\\Models\\\\User, App\\\\Models\\\\Notification\\> but returns Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo\\<App\\\\Models\\\\User, \\$this\\(App\\\\Models\\\\Notification\\)\\>\\.$#"
-			count: 1
-			path: app/Models/Notification.php
-
-		-
-			message: "#^PHPDoc tag @mixin contains unknown class App\\\\Models\\\\IdeHelperNotification\\.$#"
-			count: 1
-			path: app/Models/Notification.php
-
-		-
-			message: "#^PHPDoc tag @mixin contains unknown class App\\\\Models\\\\IdeHelperPosition\\.$#"
-			count: 1
-			path: app/Models/Position.php
-
-		-
-			message: "#^PHPDoc tag @mixin contains unknown class App\\\\Models\\\\IdeHelperRole\\.$#"
-			count: 1
-			path: app/Models/Role.php
-
-		-
-			message: "#^PHPDoc tag @mixin contains unknown class App\\\\Models\\\\IdeHelperSetting\\.$#"
-			count: 1
-			path: app/Models/Setting.php
-
-		-
-			message: "#^PHPDoc tag @mixin contains unknown class App\\\\Models\\\\IdeHelperSubCategory\\.$#"
-			count: 1
-			path: app/Models/SubCategory.php
-
-		-
-			message: "#^PHPDoc tag @mixin contains unknown class App\\\\Models\\\\IdeHelperUser\\.$#"
-			count: 1
-			path: app/Models/User.php
+			path: app/Notifications/ApplicationApproved.php
 
 		-
 			message: "#^Left side of && is always true\\.$#"
@@ -651,29 +526,9 @@ parameters:
 			path: app/Notifications/ApplicationApproved.php
 
 		-
-			message: "#^Access to an undefined property Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:\\$id\\.$#"
-			count: 3
-			path: app/Notifications/ApplicationNeedsAction.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:\\$user\\.$#"
-			count: 1
-			path: app/Notifications/ApplicationNeedsAction.php
-
-		-
-			message: "#^Left side of && is always true\\.$#"
-			count: 1
-			path: app/Notifications/ApplicationRejected.php
-
-		-
-			message: "#^Static call to instance method stdClass\\:\\:getStatusOptions\\(\\)\\.$#"
+			message: "#^Property App\\\\Notifications\\\\ApplicationStatusUpdatedNotification\\:\\:\\$user is never read, only written\\.$#"
 			count: 1
 			path: app/Notifications/ApplicationStatusUpdatedNotification.php
-
-		-
-			message: "#^Variable \\$routeName in isset\\(\\) always exists and is not nullable\\.$#"
-			count: 1
-			path: app/Notifications/ApplicationSubmitted.php
 
 		-
 			message: "#^Access to an undefined property Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:\\$equipment\\.$#"
@@ -686,44 +541,9 @@ parameters:
 			path: app/Notifications/EquipmentIncidentNotification.php
 
 		-
-			message: "#^Parameter \\#1 \\$callback of method Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<\\(int\\|string\\),Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\:\\:map\\(\\) expects callable\\(Illuminate\\\\Database\\\\Eloquent\\\\Model, int\\|string\\)\\: array\\{transaction_item_id\\: int, item_notes\\: string\\|null, equipment_id\\: int, tag_id\\: string\\|null, asset_type\\: string, brand_model\\: string, serial_number\\: string\\|null, condition_on_return\\?\\: string\\|null\\}, Closure\\(App\\\\Models\\\\LoanTransactionItem\\)\\: array\\{transaction_item_id\\: int, item_notes\\: string\\|null, equipment_id\\: int, tag_id\\: string\\|null, asset_type\\: string, brand_model\\: non\\-falsy\\-string, serial_number\\: string\\|null, condition_on_return\\?\\: string\\|null\\} given\\.$#"
+			message: "#^Parameter \\#1 \\$callback of method Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<\\(int\\|string\\),Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\:\\:map\\(\\) expects callable\\(Illuminate\\\\Database\\\\Eloquent\\\\Model, int\\|string\\)\\: \\(array\\{transaction_item_id\\: int, item_notes\\: string\\|null, condition_on_return\\?\\: string\\|null\\}\\|array\\{transaction_item_id\\: int, item_notes\\: string\\|null, equipment_id\\: int, tag_id\\: string\\|null, asset_type\\: string, brand_model\\: string, serial_number\\: string\\|null, condition_on_return\\?\\: string\\|null\\}\\), Closure\\(App\\\\Models\\\\LoanTransactionItem\\)\\: \\(array\\{transaction_item_id\\: int, item_notes\\: string\\|null, condition_on_return\\?\\: string\\|null\\}\\|array\\{transaction_item_id\\: int, item_notes\\: string\\|null, equipment_id\\: int, tag_id\\: string\\|null, asset_type\\: string, brand_model\\: non\\-falsy\\-string, serial_number\\: string\\|null, condition_on_return\\?\\: string\\|null\\}\\) given\\.$#"
 			count: 1
 			path: app/Notifications/EquipmentIncidentNotification.php
-
-		-
-			message: "#^If condition is always true\\.$#"
-			count: 1
-			path: app/Notifications/EquipmentIssuedNotification.php
-
-		-
-			message: "#^Unreachable statement \\- code above always terminates\\.$#"
-			count: 1
-			path: app/Notifications/EquipmentIssuedNotification.php
-
-		-
-			message: "#^Using nullsafe method call on non\\-nullable type Carbon\\\\Carbon\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: app/Notifications/EquipmentReturnReminderNotification.php
-
-		-
-			message: "#^Unreachable statement \\- code above always terminates\\.$#"
-			count: 1
-			path: app/Notifications/EquipmentReturnedNotification.php
-
-		-
-			message: "#^Using nullsafe method call on non\\-nullable type Carbon\\\\Carbon\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: app/Notifications/EquipmentReturnedNotification.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:\\$id\\.$#"
-			count: 1
-			path: app/Notifications/OrphanedApplicationRequiresAttentionNotification.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:\\$status\\.$#"
-			count: 1
-			path: app/Notifications/OrphanedApplicationRequiresAttentionNotification.php
 
 		-
 			message: "#^Access to an undefined property Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:\\$created_by\\.$#"
@@ -751,16 +571,6 @@ parameters:
 			path: app/Policies/DepartmentPolicy.php
 
 		-
-			message: "#^Property App\\\\Providers\\\\EventServiceProvider\\:\\:\\$observers \\(array\\<class\\-string, array\\<int, class\\-string\\<object\\>\\>\\>\\) does not accept default value of type array\\<string, array\\<int, string\\>\\>\\.$#"
-			count: 1
-			path: app/Providers/EventServiceProvider.php
-
-		-
-			message: "#^Property App\\\\Providers\\\\EventServiceProvider\\:\\:\\$observers has unknown class object as its type\\.$#"
-			count: 1
-			path: app/Providers/EventServiceProvider.php
-
-		-
 			message: "#^PHPDoc tag @var above a method has no effect\\.$#"
 			count: 1
 			path: app/Providers/RouteServiceProvider.php
@@ -771,61 +581,16 @@ parameters:
 			path: app/Providers/RouteServiceProvider.php
 
 		-
-			message: "#^Access to an undefined property Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:\\$user\\.$#"
-			count: 1
+			message: "#^Access to an undefined property App\\\\Models\\\\Approval\\:\\:\\$comments\\.$#"
+			count: 2
 			path: app/Services/ApprovalService.php
 
 		-
-			message: "#^Parameter \\#1 \\$application of method App\\\\Services\\\\NotificationService\\:\\:notifyApplicantApplicationRejected\\(\\) expects App\\\\Models\\\\EmailApplication\\|App\\\\Models\\\\LoanApplication, Illuminate\\\\Database\\\\Eloquent\\\\Model given\\.$#"
-			count: 1
-			path: app/Services/ApprovalService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\NotificationService\\:\\:notifyApproverApplicationNeedsAction\\(\\) invoked with 3 parameters, 1 required\\.$#"
-			count: 1
-			path: app/Services/EmailApplicationService.php
-
-		-
-			message: "#^Offset 'message' on array\\{success\\: false, message\\: string, assigned_email\\: string\\|null, assigned_user_id\\: string\\|null, error_code\\: string\\|null\\} on left side of \\?\\? always exists and is not nullable\\.$#"
-			count: 1
-			path: app/Services/EmailApplicationService.php
-
-		-
-			message: "#^Comparison operation \"\\>\" between int\\<1, max\\> and 0 is always true\\.$#"
-			count: 1
-			path: app/Services/EquipmentService.php
-
-		-
-			message: "#^Variable \\$finalWith in empty\\(\\) always exists and is not falsy\\.$#"
-			count: 1
-			path: app/Services/EquipmentService.php
-
-		-
-			message: "#^Call to an undefined static method App\\\\Models\\\\LoanApplication\\:\\:getStatusKeys\\(\\)\\.$#"
-			count: 1
-			path: app/Services/LoanApplicationService.php
-
-		-
-			message: "#^Offset 'items' on array in empty\\(\\) always exists and is not falsy\\.$#"
-			count: 1
-			path: app/Services/LoanApplicationService.php
-
-		-
-			message: "#^Right side of && is always true\\.$#"
-			count: 1
-			path: app/Services/LoanApplicationService.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:\\$id\\.$#"
+			message: "#^PHPDoc tag @param for parameter \\$user contains unresolvable type\\.$#"
 			count: 1
 			path: app/Services/NotificationService.php
 
 		-
-			message: "#^Instanceof between Traversable\\<mixed, mixed\\> and Illuminate\\\\Database\\\\Eloquent\\\\Collection will always evaluate to false\\.$#"
-			count: 1
-			path: app/Services/NotificationService.php
-
-		-
-			message: "#^Negated boolean expression is always false\\.$#"
-			count: 1
-			path: app/Services/NotificationService.php
+			message: "#^Call to an undefined static method Illuminate\\\\Support\\\\Facades\\\\Cache\\:\\:getRedis\\(\\)\\.$#"
+			count: 2
+			path: app/Translation/SuffixedTranslator.php

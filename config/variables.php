@@ -12,7 +12,7 @@ return [
     'templateKeyword'     => 'motac, bpm, sistem dalaman, pengurusan sumber, pinjaman ict, sistem meja bantuan, kementerian pelancongan seni dan budaya',
 
     // URLs
-    'productPage'   => rtrim(env('APP_URL', 'http://localhost'), '/').'/dashboard',
+    'productPage'   => rtrim(env('APP_URL', 'http://localhost'), '/') . '/dashboard',
     'documentation' => '#',
     'repositoryUrl' => 'https://github.com/IzzatFirdaus/MOTAC_ICT_LOAN_HRMS',
 
