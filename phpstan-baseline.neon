@@ -21,24 +21,14 @@ parameters:
 			path: app/Helpers/Helpers.php
 
 		-
-			message: "#^Call to an undefined method App\\\\Services\\\\ApprovalService\\:\\:processApprovalDecision\\(\\)\\.$#"
+			message: "#^Method App\\\\Services\\\\ApprovalService\\:\\:processApprovalDecision\\(\\) invoked with 5 parameters, 2\\-4 required\\.$#"
 			count: 1
-			path: app/Http/Controllers/ApprovalController.php
-
-		-
-			message: "#^Class App\\\\Models\\\\EmailApplication not found\\.$#"
-			count: 4
 			path: app/Http/Controllers/ApprovalController.php
 
 		-
 			message: "#^Relation 'loanTransaction' is not found in App\\\\Models\\\\LoanApplication model\\.$#"
 			count: 1
 			path: app/Http/Controllers/DashboardController.php
-
-		-
-			message: "#^Call to an undefined static method App\\\\Models\\\\Equipment\\:\\:getClassificationOptions\\(\\)\\.$#"
-			count: 1
-			path: app/Http/Controllers/EquipmentController.php
 
 		-
 			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
@@ -49,51 +39,6 @@ parameters:
 			message: "#^Instanceof between Throwable and Illuminate\\\\Database\\\\Eloquent\\\\ModelNotFoundException will always evaluate to false\\.$#"
 			count: 2
 			path: app/Http/Controllers/LoanApplicationController.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\User\\:\\:\\$preferred_locale\\.$#"
-			count: 1
-			path: app/Http/Controllers/language/LanguageController.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\User\\:\\:\\$preferred_locale\\.$#"
-			count: 1
-			path: app/Http/Middleware/LocaleMiddleware.php
-
-		-
-			message: "#^Call to an undefined static method App\\\\Models\\\\Equipment\\:\\:getAcquisitionTypeOptions\\(\\)\\.$#"
-			count: 1
-			path: app/Http/Requests/Admin/StoreEquipmentRequest.php
-
-		-
-			message: "#^Call to an undefined static method App\\\\Models\\\\Equipment\\:\\:getClassificationOptions\\(\\)\\.$#"
-			count: 1
-			path: app/Http/Requests/Admin/StoreEquipmentRequest.php
-
-		-
-			message: "#^Call to an undefined static method App\\\\Models\\\\Equipment\\:\\:getConditionStatusOptions\\(\\)\\.$#"
-			count: 1
-			path: app/Http/Requests/Admin/StoreEquipmentRequest.php
-
-		-
-			message: "#^Call to an undefined static method App\\\\Models\\\\Equipment\\:\\:getInitialStatusOptions\\(\\)\\.$#"
-			count: 1
-			path: app/Http/Requests/Admin/StoreEquipmentRequest.php
-
-		-
-			message: "#^Call to an undefined static method App\\\\Models\\\\Equipment\\:\\:getAcquisitionTypeOptions\\(\\)\\.$#"
-			count: 1
-			path: app/Http/Requests/Admin/UpdateEquipmentRequest.php
-
-		-
-			message: "#^Call to an undefined static method App\\\\Models\\\\Equipment\\:\\:getClassificationOptions\\(\\)\\.$#"
-			count: 1
-			path: app/Http/Requests/Admin/UpdateEquipmentRequest.php
-
-		-
-			message: "#^Call to an undefined static method App\\\\Models\\\\Equipment\\:\\:getConditionStatusOptions\\(\\)\\.$#"
-			count: 1
-			path: app/Http/Requests/Admin/UpdateEquipmentRequest.php
 
 		-
 			message: "#^Access to an undefined property \\(object\\|string\\)\\:\\:\\$id\\.$#"
@@ -212,16 +157,6 @@ parameters:
 
 		-
 			message: "#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\<App\\\\Models\\\\Equipment\\>\\:\\:search\\(\\)\\.$#"
-			count: 1
-			path: app/Livewire/ResourceManagement/Admin/Equipment/EquipmentIndex.php
-
-		-
-			message: "#^Call to an undefined static method App\\\\Models\\\\Equipment\\:\\:getAcquisitionTypeOptions\\(\\)\\.$#"
-			count: 1
-			path: app/Livewire/ResourceManagement/Admin/Equipment/EquipmentIndex.php
-
-		-
-			message: "#^Call to an undefined static method App\\\\Models\\\\Equipment\\:\\:getClassificationOptions\\(\\)\\.$#"
 			count: 1
 			path: app/Livewire/ResourceManagement/Admin/Equipment/EquipmentIndex.php
 
@@ -431,11 +366,6 @@ parameters:
 			path: app/Livewire/Sections/Menu/VerticalMenu.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Models\\\\User\\:\\:\\$unreadNotifications\\.$#"
-			count: 2
-			path: app/Livewire/Sections/Navbar/NotificationsDropdown.php
-
-		-
 			message: "#^Access to an undefined property App\\\\Livewire\\\\Settings\\\\Departments\\\\DepartmentsIndex\\:\\:\\$departments\\.$#"
 			count: 1
 			path: app/Livewire/Settings/Departments/DepartmentsIndex.php
@@ -449,11 +379,6 @@ parameters:
 			message: "#^Access to an undefined property App\\\\Livewire\\\\Settings\\\\Roles\\\\RolesIndex\\:\\:\\$roles\\.$#"
 			count: 1
 			path: app/Livewire/Settings/Roles/RolesIndex.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\User\\:\\:\\$motac_email\\.$#"
-			count: 1
-			path: app/Livewire/Settings/Users/UsersEdit.php
 
 		-
 			message: "#^Access to an undefined property App\\\\Models\\\\User\\:\\:\\$previous_department_email\\.$#"
@@ -584,11 +509,6 @@ parameters:
 			message: "#^Access to an undefined property App\\\\Models\\\\Approval\\:\\:\\$comments\\.$#"
 			count: 2
 			path: app/Services/ApprovalService.php
-
-		-
-			message: "#^PHPDoc tag @param for parameter \\$user contains unresolvable type\\.$#"
-			count: 1
-			path: app/Services/NotificationService.php
 
 		-
 			message: "#^Call to an undefined static method Illuminate\\\\Support\\\\Facades\\\\Cache\\:\\:getRedis\\(\\)\\.$#"
