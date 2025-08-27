@@ -152,8 +152,8 @@ class ProcessReturn extends Component
 
             return $this->redirectRoute('loan-applications.show', ['loan_application' => $this->loanApplication->id], navigate: true);
         } catch (Throwable $throwable) {
-            Log::error('Error in ProcessReturn@submitReturn: '.$throwable->getMessage(), ['exception' => $throwable]);
-            session()->flash('error', __('Gagal merekodkan pemulangan: ').$throwable->getMessage());
+            Log::error('Error in ProcessReturn@submitReturn: ' . $throwable->getMessage(), ['exception' => $throwable]);
+            session()->flash('error', __('Gagal merekodkan pemulangan: ') . $throwable->getMessage());
         }
 
         return null;

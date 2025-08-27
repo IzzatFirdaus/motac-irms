@@ -31,6 +31,10 @@ use Throwable;
  */
 #[Layout('layouts.app')]
 #[Title('Senarai Semak Peralatan')]
+/**
+ * @property-read \Illuminate\Database\Eloquent\Collection $availableEquipment
+ * @property-read \Illuminate\Database\Eloquent\Collection $onLoanEquipment
+ */
 class EquipmentChecklist extends Component
 {
     use \Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -66,6 +70,13 @@ class EquipmentChecklist extends Component
     protected LoanApplicationService $loanApplicationService;
 
     protected LoanTransactionService $loanTransactionService;
+
+    /**
+     * Magic computed properties for Livewire/PHStan awareness.
+     *
+     * @property-read \Illuminate\Database\Eloquent\Collection $availableEquipment
+     * @property-read \Illuminate\Database\Eloquent\Collection $onLoanEquipment
+     */
 
     /**
      * Boot method - Dependency injection for services.
@@ -223,7 +234,7 @@ class EquipmentChecklist extends Component
     public function getAvailableEquipmentProperty(): Collection
     {
         if (! $this->loanApplication || $this->transactionType !== 'issue') {
-            return collect();
+            return new Collection();
         }
 
         // Get equipment types requested in the application
@@ -249,7 +260,7 @@ class EquipmentChecklist extends Component
     public function getOnLoanEquipmentProperty(): Collection
     {
         if (! $this->loanApplication || $this->transactionType !== 'return') {
-            return collect();
+            return new Collection();
         }
 
         // Get equipment currently on loan for this application
@@ -360,7 +371,7 @@ class EquipmentChecklist extends Component
                 'loanApplicationId' => $this->loanApplicationId,
             ]);
 
-            $errorMessage = __('Gagal menyimpan transaksi: ').$e->getMessage();
+            $errorMessage = __('Gagal menyimpan transaksi: ') . $e->getMessage();
             session()->flash('error', $errorMessage);
             $this->dispatch('swal:error', ['message' => $errorMessage]);
         }
@@ -574,8 +585,9 @@ class EquipmentChecklist extends Component
     public function render(): \Illuminate\View\View
     {
         return view('livewire.equipment-checklist', [
-            'availableEquipment' => $this->availableEquipment,
-            'onLoanEquipment'    => $this->onLoanEquipment,
+            // Use explicit getters to satisfy static analysis instead of magic properties
+            'availableEquipment' => $this->getAvailableEquipmentProperty(),
+            'onLoanEquipment'    => $this->getOnLoanEquipmentProperty(),
             'allAccessoriesList' => $this->allAccessoriesList,
             'loanApplication'    => $this->loanApplication,
             'loanTransaction'    => $this->loanTransaction,

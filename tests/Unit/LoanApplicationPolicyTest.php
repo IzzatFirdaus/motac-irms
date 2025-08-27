@@ -36,7 +36,7 @@ class LoanApplicationPolicyTest extends TestCase
         Role::findOrCreate('BPM Staff', 'web');
         Role::findOrCreate('Approver', 'web'); // <-- ADD THIS LINE
         Role::findOrCreate('HOD', 'web');      // <-- ADD THIS LINE
-        $this->policy = new LoanApplicationPolicy;
+        $this->policy = new LoanApplicationPolicy();
 
         // Create Users
         $this->applicant = User::factory()->create();

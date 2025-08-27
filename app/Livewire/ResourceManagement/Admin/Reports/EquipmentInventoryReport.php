@@ -20,6 +20,15 @@ use Livewire\WithPagination;
  */
 #[Layout('layouts.app')]
 #[Title('Laporan Inventori Peralatan ICT')]
+/**
+ * @property-read \Illuminate\Pagination\LengthAwarePaginator $reportData
+ * @property-read array $assetTypeOptions
+ * @property-read array $statusOptions
+ * @property-read array $conditionStatusOptions
+ * @property-read \Illuminate\Support\Collection $departmentOptions
+ * @property-read \Illuminate\Support\Collection $locationOptions
+ * @property-read \Illuminate\Support\Collection $categoryOptions
+ */
 class EquipmentInventoryReport extends Component
 {
     use AuthorizesRequests;
@@ -75,11 +84,11 @@ class EquipmentInventoryReport extends Component
             ->when($this->filterCategoryId, fn ($q) => $q->where('category_id', $this->filterCategoryId))
             ->when($this->searchTerm, function ($q) {
                 $q->where(function ($subQuery) {
-                    $subQuery->where('tag_id', 'like', '%'.$this->searchTerm.'%')
-                        ->orWhere('serial_number', 'like', '%'.$this->searchTerm.'%')
-                        ->orWhere('model', 'like', '%'.$this->searchTerm.'%')
-                        ->orWhere('brand', 'like', '%'.$this->searchTerm.'%')
-                        ->orWhere('item_code', 'like', '%'.$this->searchTerm.'%');
+                    $subQuery->where('tag_id', 'like', '%' . $this->searchTerm . '%')
+                        ->orWhere('serial_number', 'like', '%' . $this->searchTerm . '%')
+                        ->orWhere('model', 'like', '%' . $this->searchTerm . '%')
+                        ->orWhere('brand', 'like', '%' . $this->searchTerm . '%')
+                        ->orWhere('item_code', 'like', '%' . $this->searchTerm . '%');
                 });
             })
             ->orderBy($this->sortBy, $this->sortDirection);
@@ -169,13 +178,13 @@ class EquipmentInventoryReport extends Component
     public function render()
     {
         return view('livewire.resource-management.admin.reports.equipment-inventory-report', [
-            'reportData'             => $this->reportDataProperty,
-            'assetTypeOptions'       => $this->assetTypeOptionsProperty,
-            'statusOptions'          => $this->statusOptionsProperty,
-            'conditionStatusOptions' => $this->conditionStatusOptionsProperty,
-            'departmentOptions'      => $this->departmentOptionsProperty,
-            'locationOptions'        => $this->locationOptionsProperty,
-            'categoryOptions'        => $this->categoryOptionsProperty,
+            'reportData'             => $this->getReportDataProperty(),
+            'assetTypeOptions'       => $this->getAssetTypeOptionsProperty(),
+            'statusOptions'          => $this->getStatusOptionsProperty(),
+            'conditionStatusOptions' => $this->getConditionStatusOptionsProperty(),
+            'departmentOptions'      => $this->getDepartmentOptionsProperty(),
+            'locationOptions'        => $this->getLocationOptionsProperty(),
+            'categoryOptions'        => $this->getCategoryOptionsProperty(),
         ]);
     }
 }

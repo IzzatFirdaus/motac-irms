@@ -27,7 +27,7 @@ class Dashboard extends Component
 
     public function __construct()
     {
-        $this->userRecentLoanApplications = new EloquentCollection;
+        $this->userRecentLoanApplications = new EloquentCollection();
     }
 
     /**

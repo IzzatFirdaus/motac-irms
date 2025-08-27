@@ -35,15 +35,15 @@ class ApplicationSubmitted extends Notification implements ShouldQueue
      */
     public function toMail($notifiable): MailMessage
     {
-        return (new MailMessage)
+        return (new MailMessage())
             ->subject('Permohonan Pinjaman ICT Telah Dihantar')
             ->greeting('Assalamualaikum & Salam Sejahtera')
             ->line('Permohonan pinjaman ICT anda telah berjaya dihantar untuk semakan dan kelulusan.')
-            ->line('Tujuan: '.($this->application->purpose ?? '-'))
-            ->line('Lokasi: '.($this->application->location ?? '-'))
-            ->line('Tarikh Mula: '.($this->application->loan_start_date ?? '-'))
-            ->line('Tarikh Tamat: '.($this->application->loan_end_date ?? '-'))
-            ->action('Lihat Permohonan', url('/loan-applications/'.$this->application->id))
+            ->line('Tujuan: ' . ($this->application->purpose ?? '-'))
+            ->line('Lokasi: ' . ($this->application->location ?? '-'))
+            ->line('Tarikh Mula: ' . ($this->application->loan_start_date ?? '-'))
+            ->line('Tarikh Tamat: ' . ($this->application->loan_end_date ?? '-'))
+            ->action('Lihat Permohonan', url('/loan-applications/' . $this->application->id))
             ->line('Terima kasih kerana menggunakan sistem pinjaman ICT MOTAC.');
     }
 

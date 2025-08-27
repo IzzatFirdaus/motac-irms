@@ -47,7 +47,7 @@ class ApplicationNeedsAction extends Notification implements ShouldQueue
             'id'       => $app->id,
         ]);
 
-        return (new MailMessage)
+        return (new MailMessage())
             ->subject($subject)
             ->view('emails.application-needs-action', [
                 'notification' => $this,

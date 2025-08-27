@@ -26,7 +26,7 @@ class AlertErrors extends Component
         // If a title is provided, use it. Otherwise, let the x-alert component use its default for 'danger'.
         $this->title = $title;
         // If no specific errors bag is passed, use the global $errors bag.
-        $this->errors = $errors ?? session()->get('errors', new ViewErrorBag);
+        $this->errors = $errors ?? session()->get('errors', new ViewErrorBag());
     }
 
     /**

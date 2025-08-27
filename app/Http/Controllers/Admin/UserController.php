@@ -163,8 +163,8 @@ class UserController extends Controller
     {
         $validatedData = $request->validate([
             'name'                  => 'required|string|max:255',
-            'email'                 => 'required|string|email|max:255|unique:users,email,'.$user->id,
-            'identification_number' => 'nullable|string|max:255|unique:users,identification_number,'.$user->id,
+            'email'                 => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'identification_number' => 'nullable|string|max:255|unique:users,identification_number,' . $user->id,
             'department_id'         => 'required|exists:departments,id',
             'position_id'           => 'required|exists:positions,id',
             'grade_id'              => 'required|exists:grades,id',
@@ -216,9 +216,9 @@ class UserController extends Controller
 
             return redirect()->route('admin.users.index')->with('success', 'User deleted successfully.');
         } catch (\Exception $exception) {
-            Log::error(sprintf('Error soft-deleting user ID %d by admin: ', $user->id).$exception->getMessage(), ['exception_class' => get_class($exception), 'trace_snippet' => substr($exception->getTraceAsString(), 0, 500)]);
+            Log::error(sprintf('Error soft-deleting user ID %d by admin: ', $user->id) . $exception->getMessage(), ['exception_class' => get_class($exception), 'trace_snippet' => substr($exception->getTraceAsString(), 0, 500)]);
 
-            return back()->with('error', 'Failed to delete user: '.$exception->getMessage());
+            return back()->with('error', 'Failed to delete user: ' . $exception->getMessage());
         }
     }
 }

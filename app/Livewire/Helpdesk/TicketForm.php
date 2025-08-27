@@ -78,7 +78,7 @@ class TicketForm extends Component
             // Redirect to the ticket's show page (route name according to convention)
             return redirect()->route('helpdesk.tickets.show', $ticket->id);
         } catch (\Exception $e) {
-            session()->flash('error', __('Gagal menghantar tiket: ').$e->getMessage());
+            session()->flash('error', __('Gagal menghantar tiket: ') . $e->getMessage());
         }
     }
 

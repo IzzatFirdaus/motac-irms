@@ -14,6 +14,9 @@ use Livewire\WithPagination;
  * (applications that are approved and pending issuance).
  */
 #[Layout('layouts.app')]
+/**
+ * @property-read \Illuminate\Pagination\LengthAwarePaginator $outstandingApplications
+ */
 class OutstandingLoans extends Component
 {
     use AuthorizesRequests;
@@ -62,7 +65,7 @@ class OutstandingLoans extends Component
             ->where('status', LoanApplication::STATUS_APPROVED);
 
         if ($this->searchTerm !== '' && $this->searchTerm !== '0') {
-            $searchTerm = '%'.$this->searchTerm.'%';
+            $searchTerm = '%' . $this->searchTerm . '%';
             $query->where(function ($subQuery) use ($searchTerm): void {
                 $subQuery->where('id', 'like', $searchTerm)
                     ->orWhere('purpose', 'like', $searchTerm)
@@ -94,7 +97,7 @@ class OutstandingLoans extends Component
     public function render(): View
     {
         return view('livewire.resource-management.admin.bpm.outstanding-loans', [
-            'applications' => $this->outstandingApplications,
+            'applications' => $this->getOutstandingApplicationsProperty(),
         ]);
     }
 }

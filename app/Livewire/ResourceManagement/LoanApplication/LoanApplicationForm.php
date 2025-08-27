@@ -131,7 +131,7 @@ class LoanApplicationForm extends Component
         $this->authorize('create', LoanApplication::class);
         $user                            = Auth::user();
         $this->applicantName             = $user->name;
-        $this->applicantPositionAndGrade = ($user->position?->name ?? __('common.not_available')).' ('.($user->grade?->name ?? __('common.not_available')).')';
+        $this->applicantPositionAndGrade = ($user->position?->name ?? __('common.not_available')) . ' (' . ($user->grade?->name ?? __('common.not_available')) . ')';
         $this->applicantDepartment       = $user->department?->name ?? __('common.not_available');
         $this->applicant_phone           = $user->mobile_number     ?? '';
         $this->addLoanItem();
@@ -149,7 +149,7 @@ class LoanApplicationForm extends Component
 
             $user                            = $application->user;
             $this->applicantName             = $user?->name ?? '';
-            $this->applicantPositionAndGrade = ($user?->position?->name ?? __('common.not_available')).' ('.($user?->grade?->name ?? __('common.not_available')).')';
+            $this->applicantPositionAndGrade = ($user?->position?->name ?? __('common.not_available')) . ' (' . ($user?->grade?->name ?? __('common.not_available')) . ')';
             $this->applicantDepartment       = $user?->department?->name     ?? __('common.not_available');
             $this->applicant_phone           = $application->applicant_phone ?? $user->mobile_number ?? '';
 
@@ -168,7 +168,7 @@ class LoanApplicationForm extends Component
                 $this->addLoanItem();
             }
         } catch (Throwable $e) {
-            Log::error('Error loading existing loan application: '.$e->getMessage());
+            Log::error('Error loading existing loan application: ' . $e->getMessage());
             session()->flash('error', __('messages.system_error'));
             $this->redirectRoute('dashboard', navigate: true);
         }
@@ -227,7 +227,7 @@ class LoanApplicationForm extends Component
             'purpose'                                     => ['required', 'string', 'min:10', 'max:500'],
             'location'                                    => ['required', 'string', 'min:5', 'max:255'],
             'return_location'                             => ['nullable', 'string', 'max:255', Rule::when($this->return_location, ['different:location'])],
-            'loan_start_date'                             => ['required', 'date', 'after_or_equal:'.now()->startOfDay()->toDateTimeString()],
+            'loan_start_date'                             => ['required', 'date', 'after_or_equal:' . now()->startOfDay()->toDateTimeString()],
             'loan_end_date'                               => ['required', 'date', 'after:loan_start_date'],
             'applicant_is_responsible_officer'            => ['boolean'],
             'responsible_officer_id'                      => [Rule::requiredIf(! $this->applicant_is_responsible_officer), 'nullable', 'exists:users,id'],

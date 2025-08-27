@@ -44,7 +44,7 @@ class PermissionsIndex extends Component
     public function mount(): void
     {
         abort_unless(Auth::user()?->can('manage_permissions'), 403, __('Tindakan tidak dibenarkan.'));
-        $this->editingPermission = new Permission;
+        $this->editingPermission = new Permission();
     }
 
     /**
@@ -181,7 +181,7 @@ class PermissionsIndex extends Component
     private function resetInputFields(): void
     {
         $this->name              = '';
-        $this->editingPermission = new Permission;
+        $this->editingPermission = new Permission();
         $this->isEditMode        = false;
         $this->resetErrorBag();
         $this->resetValidation();

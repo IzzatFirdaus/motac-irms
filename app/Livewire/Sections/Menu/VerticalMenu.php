@@ -10,6 +10,11 @@ use Livewire\Component;
  * Loads the menu structure from config/menu.php and exposes it for the Blade view.
  * Handles role-based visibility, guest-only items, and recursive submenus.
  */
+/**
+ * @property-read string|null $userRole
+ * @property-read string|null $currentRouteName
+ * @property-read array $filteredMenuData
+ */
 class VerticalMenu extends Component
 {
     public $menuData;
@@ -95,9 +100,8 @@ class VerticalMenu extends Component
                     $role === 'Admin' || (isset($item->role) && in_array($role, (array) $item->role))
                 ) {
                     $canView = true;
-                }
-                // If item has no role and no guestOnly, allow for all authenticated users
-                elseif (! isset($item->role) && ! isset($item->guestOnly)) {
+                } elseif (! isset($item->role) && ! isset($item->guestOnly)) {
+                    // If item has no role and no guestOnly, allow for all authenticated users
                     $canView = true;
                 }
 

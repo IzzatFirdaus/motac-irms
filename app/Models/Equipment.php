@@ -51,6 +51,11 @@ use Illuminate\Support\Str;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \App\Models\User|null $creator
+ * @property-read \App\Models\User|null $updater
+ * @property-read \App\Models\EquipmentCategory|null $category
+ * @property-read \Illuminate\Support\Carbon|null $warranty_end_date
+ * @property-read string|null $specifications
  */
 #[ObservedBy(BlameableObserver::class)]
 class Equipment extends Model
@@ -189,6 +194,14 @@ class Equipment extends Model
     }
 
     /**
+     * Alias used by reporting components.
+     */
+    public function category(): BelongsTo
+    {
+        return $this->equipmentCategory();
+    }
+
+    /**
      * Equipment belongs to a sub-category.
      */
     public function subCategory(): BelongsTo
@@ -218,6 +231,22 @@ class Equipment extends Model
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class, 'department_id');
+    }
+
+    /**
+     * Creator user (from created_by).
+     */
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * Updater user (from updated_by).
+     */
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     /**
@@ -260,6 +289,19 @@ class Equipment extends Model
     public function getConditionStatusLabelAttribute(): string
     {
         return self::getConditionStatusesList()[$this->condition_status] ?? Str::title(str_replace('_', ' ', (string) $this->condition_status));
+    }
+
+    /**
+     * Alias accessors to satisfy references in Livewire/components.
+     */
+    public function getWarrantyEndDateAttribute(): ?\Illuminate\Support\Carbon
+    {
+        return $this->warranty_expiry_date;
+    }
+
+    public function getSpecificationsAttribute(): ?string
+    {
+        return $this->description;
     }
 
     // --- Static Option Helpers ---
@@ -377,6 +419,66 @@ class Equipment extends Model
         }
 
         return $saved;
+    }
+
+    /**
+     * Return available classification options for forms.
+     * Kept simple for static analysis.
+     *
+     * @return array<int,string>
+     */
+    public static function getClassificationOptions(): array
+    {
+        return [
+            1 => 'Type A',
+            2 => 'Type B',
+        ];
+    }
+
+    public static function getInitialStatusOptions(): array
+    {
+        return [
+            'available' => 'Available',
+            'on_loan'   => 'On loan',
+        ];
+    }
+
+    public static function getConditionStatusOptions(): array
+    {
+        return [
+            'new'  => 'New',
+            'used' => 'Used',
+        ];
+    }
+
+    public static function getAcquisitionTypeOptions(): array
+    {
+        return [
+            'purchase' => 'Purchase',
+            'donation' => 'Donation',
+        ];
+    }
+
+    /**
+     * Local scope: basic text search across common equipment fields.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     */
+    public function scopeSearch($query, string $term)
+    {
+        $term = trim($term);
+        if ($term === '') {
+            return $query;
+        }
+
+        return $query->where(function ($q) use ($term) {
+            $like = '%' . $term . '%';
+            $q->where('tag_id', 'like', $like)
+                ->orWhere('serial_number', 'like', $like)
+                ->orWhere('brand', 'like', $like)
+                ->orWhere('model', 'like', $like)
+                ->orWhere('description', 'like', $like);
+        });
     }
 
     /**

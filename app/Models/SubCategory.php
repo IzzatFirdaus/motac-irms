@@ -100,6 +100,6 @@ class SubCategory extends Model
 
     public function scopeByName($query, string $name)
     {
-        return $query->where('name', 'LIKE', '%'.$name.'%');
+        return $query->where('name', 'LIKE', '%' . $name . '%');
     }
 }

@@ -71,9 +71,16 @@ class DashboardController extends Controller
     private function showBpmDashboard(): View
     {
         $data = [
-            'pending_loan_applications_count'   => LoanApplication::where('status', 'pending_approval')->count(),
-            'pending_equipment_issuance_count'  => LoanApplication::where('status', 'approved')->count(),
-            'loan_applications_due_today_count' => LoanApplication::whereHas('loanTransaction', function ($query) {
+            'pending_loan_applications_count' => LoanApplication::whereIn('status', [
+                LoanApplication::STATUS_PENDING_SUPPORT,
+                LoanApplication::STATUS_PENDING_APPROVER_REVIEW,
+                LoanApplication::STATUS_PENDING_BPM_REVIEW,
+            ])->count(),
+            'pending_equipment_issuance_count' => LoanApplication::whereIn('status', [
+                LoanApplication::STATUS_APPROVED,
+                LoanApplication::STATUS_PARTIALLY_ISSUED,
+            ])->count(),
+            'loan_applications_due_today_count' => LoanApplication::whereHas('loanTransactions', function ($query) {
                 $query->whereDate('due_date', today());
             })->count(),
             // EmailApplication data removed as per system update

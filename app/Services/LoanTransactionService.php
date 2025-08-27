@@ -43,7 +43,7 @@ final class LoanTransactionService
         User $issuingOfficer,
         array $transactionDetails
     ): LoanTransaction {
-        Log::info(self::LOG_AREA.sprintf('Processing new issue for LA ID: %d by User ID: %d', $loanApplication->id, $issuingOfficer->id), [
+        Log::info(self::LOG_AREA . sprintf('Processing new issue for LA ID: %d by User ID: %d', $loanApplication->id, $issuingOfficer->id), [
             'item_count'   => count($itemsPayload),
             'details_keys' => array_keys($transactionDetails),
         ]);
@@ -78,9 +78,9 @@ final class LoanTransactionService
                     $equipment->status = Equipment::STATUS_ON_LOAN;
                     $equipment->setAttribute('current_loan_id', $transaction->id);
                     $equipment->save();
-                    Log::info(self::LOG_AREA.sprintf('Equipment ID %d status set to ON_LOAN for transaction ID %d.', $equipment->id, $transaction->id));
+                    Log::info(self::LOG_AREA . sprintf('Equipment ID %d status set to ON_LOAN for transaction ID %d.', $equipment->id, $transaction->id));
                 } else {
-                    Log::error(self::LOG_AREA.sprintf('Equipment ID %d not found for transaction item creation.', $itemData['equipment_id']));
+                    Log::error(self::LOG_AREA . sprintf('Equipment ID %d not found for transaction item creation.', $itemData['equipment_id']));
                     throw new RuntimeException('Equipment not found for transaction item.');
                 }
             }
@@ -93,7 +93,7 @@ final class LoanTransactionService
             // Notify user/applicant of issue
             $this->notificationService->notifyLoanIssued($loanApplication->user, $loanApplication, $transaction);
 
-            Log::info(self::LOG_AREA.sprintf('Loan Application ID %d successfully issued via transaction ID %d.', $loanApplication->id, $transaction->id));
+            Log::info(self::LOG_AREA . sprintf('Loan Application ID %d successfully issued via transaction ID %d.', $loanApplication->id, $transaction->id));
 
             return $transaction;
         });
@@ -114,13 +114,13 @@ final class LoanTransactionService
             $transaction->status                         = LoanTransaction::STATUS_ISSUED;
             $transaction->transaction_date               = Carbon::now();
             $transaction->save();
-            Log::info(self::LOG_AREA.sprintf('Loan Transaction ID %d updated and marked as ISSUED.', $transaction->id));
+            Log::info(self::LOG_AREA . sprintf('Loan Transaction ID %d updated and marked as ISSUED.', $transaction->id));
 
             foreach ($loanApplicationItems as $itemData) {
                 $transactionItem = LoanTransactionItem::find($itemData['id']);
 
                 if (! ($transactionItem instanceof LoanTransactionItem)) {
-                    Log::error(self::LOG_AREA.sprintf('Loan Transaction Item ID %d not found during issueLoanTransaction.', $itemData['id']));
+                    Log::error(self::LOG_AREA . sprintf('Loan Transaction Item ID %d not found during issueLoanTransaction.', $itemData['id']));
                     throw new RuntimeException('Loan Transaction Item not found.');
                 }
 
@@ -134,9 +134,9 @@ final class LoanTransactionService
                     $equipment->status = Equipment::STATUS_ON_LOAN;
                     $equipment->setAttribute('current_loan_id', $transaction->id);
                     $equipment->save();
-                    Log::info(self::LOG_AREA.sprintf('Equipment ID %d status set to ON_LOAN during issue transaction.', $equipment->id));
+                    Log::info(self::LOG_AREA . sprintf('Equipment ID %d status set to ON_LOAN during issue transaction.', $equipment->id));
                 } else {
-                    Log::error(self::LOG_AREA.sprintf('Equipment not found for Loan Transaction Item ID %d during issue.', $transactionItem->id));
+                    Log::error(self::LOG_AREA . sprintf('Equipment not found for Loan Transaction Item ID %d during issue.', $transactionItem->id));
                     throw new RuntimeException('Equipment not found for transaction item.');
                 }
             }
@@ -167,13 +167,13 @@ final class LoanTransactionService
             $transaction->transaction_date                = now();
             $transaction->status                          = $this->determineOverallReturnTransactionStatus($loanTransactionItemsData);
             $transaction->save();
-            Log::info(self::LOG_AREA.sprintf('Loan Transaction ID %d updated and marked as %s.', $transaction->id, $transaction->status));
+            Log::info(self::LOG_AREA . sprintf('Loan Transaction ID %d updated and marked as %s.', $transaction->id, $transaction->status));
 
             foreach ($loanTransactionItemsData as $itemData) {
                 $transactionItem = LoanTransactionItem::find($itemData['id']);
 
                 if (! ($transactionItem instanceof LoanTransactionItem)) {
-                    Log::error(self::LOG_AREA.sprintf('Loan Transaction Item ID %d not found during returnLoanTransaction.', $itemData['id']));
+                    Log::error(self::LOG_AREA . sprintf('Loan Transaction Item ID %d not found during returnLoanTransaction.', $itemData['id']));
                     throw new RuntimeException('Loan Transaction Item not found.');
                 }
 
@@ -204,9 +204,9 @@ final class LoanTransactionService
                     }
                     $equipment->setAttribute('current_loan_id', null);
                     $equipment->save();
-                    Log::info(self::LOG_AREA.sprintf('Equipment ID %d status set to %s during return transaction.', $equipment->id, $equipment->status));
+                    Log::info(self::LOG_AREA . sprintf('Equipment ID %d status set to %s during return transaction.', $equipment->id, $equipment->status));
                 } else {
-                    Log::error(self::LOG_AREA.sprintf('Equipment not found for Loan Transaction Item ID %d during return.', $transactionItem->id));
+                    Log::error(self::LOG_AREA . sprintf('Equipment not found for Loan Transaction Item ID %d during return.', $transactionItem->id));
                     throw new RuntimeException('Equipment not found for transaction item.');
                 }
             }
@@ -283,7 +283,7 @@ final class LoanTransactionService
                     }
                     $equipment->setAttribute('current_loan_id', null);
                     $equipment->save();
-                    Log::info(self::LOG_AREA.sprintf('Equipment ID %d status updated during existing return.', $equipment->id));
+                    Log::info(self::LOG_AREA . sprintf('Equipment ID %d status updated during existing return.', $equipment->id));
                 }
             }
 
@@ -303,7 +303,7 @@ final class LoanTransactionService
                 $returnTransaction
             );
 
-            Log::info(self::LOG_AREA.sprintf(
+            Log::info(self::LOG_AREA . sprintf(
                 'Processed return for original transaction ID %d (return transaction ID %d) by user ID %d.',
                 $loanTransaction->id,
                 $returnTransaction->id,

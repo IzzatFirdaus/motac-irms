@@ -60,7 +60,7 @@ class TicketDetail extends Component
             $this->ticket->refresh();
             session()->flash('message', 'Comment added successfully.');
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to add comment: '.$e->getMessage());
+            session()->flash('error', 'Failed to add comment: ' . $e->getMessage());
         }
     }
 

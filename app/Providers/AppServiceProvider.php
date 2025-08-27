@@ -78,7 +78,7 @@ class AppServiceProvider extends ServiceProvider
         try {
             Carbon::setLocale(App::getLocale());
         } catch (\Exception $exception) {
-            Log::error('AppServiceProvider: Failed to set Carbon locale: '.$exception->getMessage());
+            Log::error('AppServiceProvider: Failed to set Carbon locale: ' . $exception->getMessage());
             Carbon::setLocale(config('app.fallback_locale', 'en'));
         }
 

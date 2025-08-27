@@ -24,8 +24,6 @@ class RouteServiceProvider extends ServiceProvider
     /**
      * The controller namespace for the application.
      * This is often commented out in modern Laravel applications that use Fully Qualified Class Names (FQCN) for controllers.
-     *
-     * @var string|null
      */
     // protected $namespace = 'App\\Http\\Controllers'; // Typically not needed with FQCN
 
@@ -65,7 +63,7 @@ class RouteServiceProvider extends ServiceProvider
         RateLimiter::for('login', function (Request $request) {
             // Throttle by a combination of the login identifier (e.g., email) and IP address
             $loginIdentifier = $request->input(config('fortify.username', 'email'), ''); // Get the configured username field (defaults to 'email')
-            $throttleKey     = Str::transliterate(Str::lower($loginIdentifier).'|'.$request->ip());
+            $throttleKey     = Str::transliterate(Str::lower($loginIdentifier) . '|' . $request->ip());
 
             return Limit::perMinute(5)->by($throttleKey); // Corrected to use $throttleKey
         });

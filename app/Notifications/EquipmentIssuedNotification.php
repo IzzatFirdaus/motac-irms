@@ -44,7 +44,7 @@ final class EquipmentIssuedNotification extends Notification implements ShouldQu
         $applicationId = $this->loanApplication->id ?? 'N/A';
         $subject       = __('Peralatan Pinjaman ICT Telah Dikeluarkan (Permohonan #:appId)', ['appId' => $applicationId]);
 
-        return (new MailMessage)
+        return (new MailMessage())
             ->subject($subject)
             ->view('emails.loan-application-issued', [
                 'loanApplication' => $this->loanApplication,
@@ -64,9 +64,9 @@ final class EquipmentIssuedNotification extends Notification implements ShouldQu
             $equipment = $item->equipment;
             if ($equipment) {
                 $assetTypeDisplay = $equipment->asset_type_label ?? __('Peralatan');
-                $brandAndModel    = trim(($equipment->brand ?? '').' '.($equipment->model ?? ''));
+                $brandAndModel    = trim(($equipment->brand ?? '') . ' ' . ($equipment->model ?? ''));
 
-                return $assetTypeDisplay.($brandAndModel !== '' && $brandAndModel !== '0' ? sprintf(' (%s)', $brandAndModel) : '').', Tag: '.($equipment->tag_id ?? '-').', Siri: '.($equipment->serial_number ?? '-').(' - Kuantiti: '.$item->quantity_transacted);
+                return $assetTypeDisplay . ($brandAndModel !== '' && $brandAndModel !== '0' ? sprintf(' (%s)', $brandAndModel) : '') . ', Tag: ' . ($equipment->tag_id ?? '-') . ', Siri: ' . ($equipment->serial_number ?? '-') . (' - Kuantiti: ' . $item->quantity_transacted);
             }
 
             return __('Item ID: :id - Butiran peralatan tidak lengkap.', ['id' => $item->id]);
@@ -78,7 +78,7 @@ final class EquipmentIssuedNotification extends Notification implements ShouldQu
             try {
                 $applicationUrl = route($routeName, ['loan_application' => $applicationId]);
             } catch (\Exception $e) {
-                Log::error('Error generating URL for EquipmentIssuedNotification array: '.$e->getMessage(), ['loan_application_id' => $applicationId]);
+                Log::error('Error generating URL for EquipmentIssuedNotification array: ' . $e->getMessage(), ['loan_application_id' => $applicationId]);
                 $applicationUrl = '#';
             }
         }

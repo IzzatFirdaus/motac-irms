@@ -36,6 +36,12 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string|null                     $two_factor_secret
  * @property string|null                     $two_factor_recovery_codes
  * @property \Illuminate\Support\Carbon|null $deactivated_at
+ * @property string|null                     $mobile_number
+ * @property string|null                     $motac_email
+ * @property string|null                     $jawatan_gred
+ * @property string|null                     $bahagian_unit
+ * @property string|null                     $previous_department_name
+ * @property string|null                     $previous_department_email
  * @property int|null                        $created_by
  * @property int|null                        $updated_by
  * @property int|null                        $deleted_by
@@ -44,6 +50,11 @@ use Spatie\Permission\Traits\HasRoles;
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read string $profile_photo_url
  * @property-read string $full_name
+ * @property string|null                                                                                               $preferred_locale
+ * @property string|null                                                                                               $motac_email
+ * @property \Illuminate\Notifications\DatabaseNotificationCollection|\Illuminate\Notifications\DatabaseNotification[] $unreadNotifications
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder whereHasRole(string $role)
  */
 class User extends Authenticatable
 {
@@ -343,7 +354,7 @@ class User extends Authenticatable
      */
     public function getFullNameAttribute(): string
     {
-        return ($this->title ? (self::$TITLE_OPTIONS[$this->title] ?? $this->title).' ' : '').$this->name;
+        return ($this->title ? (self::$TITLE_OPTIONS[$this->title] ?? $this->title) . ' ' : '') . $this->name;
     }
 
     /**

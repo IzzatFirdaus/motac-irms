@@ -45,7 +45,7 @@ final class ApplicationRejected extends Notification implements ShouldQueue
             try {
                 $viewUrl = route($routeName, $routeParameters);
             } catch (\Exception $e) {
-                Log::error('Error generating URL for ApplicationRejected mail: '.$e->getMessage(), [
+                Log::error('Error generating URL for ApplicationRejected mail: ' . $e->getMessage(), [
                     'application_id' => $this->application->id,
                 ]);
 
@@ -66,7 +66,7 @@ final class ApplicationRejected extends Notification implements ShouldQueue
             'appId'   => $applicationId,
         ]);
 
-        return (new MailMessage)
+        return (new MailMessage())
             ->subject($subject)
             ->view('emails.application-rejected', [
                 'notification' => $this,
@@ -110,7 +110,7 @@ final class ApplicationRejected extends Notification implements ShouldQueue
                     $data['url'] = $generatedUrl;
                 }
             } catch (\Exception $e) {
-                Log::error('Error generating URL for ApplicationRejected toArray: '.$e->getMessage(), [
+                Log::error('Error generating URL for ApplicationRejected toArray: ' . $e->getMessage(), [
                     'application_id'   => $applicationId,
                     'application_type' => $applicationMorphClass,
                     'route_name'       => $routeName,

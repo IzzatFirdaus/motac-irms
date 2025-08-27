@@ -74,7 +74,7 @@ class Kernel extends HttpKernel
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
 
             // API rate limiting
-            \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
+            \Illuminate\Routing\Middleware\ThrottleRequests::class . ':api',
 
             // Route model binding for API routes
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
@@ -148,7 +148,7 @@ class Kernel extends HttpKernel
         'view_approval_tasks' => \App\Http\Middleware\ViewApprovalTasks::class,
 
         // Permission to view approval history
-        'view_approval_history' => \App\Http\Middleware\CheckPermission::class.':view_approval_history',
+        'view_approval_history' => \App\Http\Middleware\CheckPermission::class . ':view_approval_history',
 
         // Optional: Fallback log viewer middleware if needed
         // 'logviewer.auth' => \Opcodes\LogViewer\Http\Middleware\AuthorizeLogViewer::class,

@@ -51,11 +51,11 @@ class UserIndex extends Component
         // Search logic for name, email, IC, or department name.
         if ($this->search !== '' && $this->search !== '0') {
             $query->where(function ($q): void {
-                $q->where('name', 'like', '%'.$this->search.'%')
-                    ->orWhere('email', 'like', '%'.$this->search.'%')
-                    ->orWhere('identification_number', 'like', '%'.$this->search.'%')
+                $q->where('name', 'like', '%' . $this->search . '%')
+                    ->orWhere('email', 'like', '%' . $this->search . '%')
+                    ->orWhere('identification_number', 'like', '%' . $this->search . '%')
                     ->orWhereHas('department', function ($deptQuery): void {
-                        $deptQuery->where('name', 'like', '%'.$this->search.'%');
+                        $deptQuery->where('name', 'like', '%' . $this->search . '%');
                     });
             });
         }
@@ -136,7 +136,7 @@ class UserIndex extends Component
     public function render()
     {
         return view('livewire.resource-management.admin.users.user-index', [
-            'usersList'      => $this->users,
+            'usersList'      => $this->getUsersProperty(),
             'rolesForFilter' => $this->roleOptions,
         ]);
     }

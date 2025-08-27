@@ -62,8 +62,8 @@ class TicketList extends Component
             ->with(['category', 'priority', 'assignedTo'])
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
-                    $q->where('title', 'like', '%'.$this->search.'%')
-                        ->orWhere('description', 'like', '%'.$this->search.'%');
+                    $q->where('title', 'like', '%' . $this->search . '%')
+                        ->orWhere('description', 'like', '%' . $this->search . '%');
                 });
             })
             ->when($this->statusFilter, function ($query) {

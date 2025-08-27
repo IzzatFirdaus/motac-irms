@@ -25,7 +25,8 @@ class UpdateGradeRequest extends FormRequest
      */
     public function rules(): array
     {
-        $gradeId = $this->route('grade')->id;
+        $routeGrade = $this->route('grade');
+        $gradeId    = $routeGrade instanceof Grade ? $routeGrade->id : (int) $routeGrade;
 
         return [
             'name'                  => ['required', 'string', 'max:50', Rule::unique('grades', 'name')->ignore($gradeId)->whereNull('deleted_at')],

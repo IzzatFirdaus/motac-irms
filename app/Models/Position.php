@@ -101,11 +101,11 @@ class Position extends Model
         if ($term === null || $term === '' || $term === '0') {
             return $query;
         }
-        $searchTerm = '%'.$term.'%';
+        $searchTerm = '%' . $term . '%';
 
         return $query->where(function ($subQuery) use ($searchTerm) {
-            $subQuery->where($this->getTable().'.name', 'like', $searchTerm)
-                ->orWhere($this->getTable().'.description', 'like', $searchTerm);
+            $subQuery->where($this->getTable() . '.name', 'like', $searchTerm)
+                ->orWhere($this->getTable() . '.description', 'like', $searchTerm);
         })->orWhereHas('grade', function ($gradeQuery) use ($searchTerm) {
             $gradeQuery->where('name', 'like', $searchTerm);
         });

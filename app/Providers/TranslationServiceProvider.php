@@ -55,7 +55,7 @@ class TranslationServiceProvider extends ServiceProvider
                 return new SuffixedFileLoader($app['files'], $app['path.lang']);
             } catch (\Exception $e) {
                 // Log error and provide fallback
-                Log::error('Failed to initialize translation loader: '.$e->getMessage());
+                Log::error('Failed to initialize translation loader: ' . $e->getMessage());
                 throw new \RuntimeException('Translation system initialization failed. Please check your language files.', 0, $e);
             }
         });
@@ -92,7 +92,7 @@ class TranslationServiceProvider extends ServiceProvider
                 return $translator;
             } catch (\Exception $e) {
                 // Log error and provide emergency fallback
-                Log::error('Failed to initialize suffixed translator: '.$e->getMessage());
+                Log::error('Failed to initialize suffixed translator: ' . $e->getMessage());
                 throw new \RuntimeException('Custom translation system initialization failed.', 0, $e);
             }
         });

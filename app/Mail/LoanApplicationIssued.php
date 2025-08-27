@@ -23,18 +23,24 @@ class LoanApplicationIssued extends Mailable implements ShouldQueue
 
     public LoanApplication $loanApplication;
 
+    /** @var EloquentCollection<int, \App\Models\LoanTransaction> */
     public EloquentCollection $issueTransactions;
 
     public function __construct(LoanApplication $loanApplication)
     {
         $this->loanApplication = $loanApplication->loadMissing([
             'user',
-            'transactions' => function ($query) {
+            'loanTransactions' => function ($query) {
                 $query->where('type', LoanTransaction::TYPE_ISSUE)
                     ->with('loanTransactionItems.equipment');
             },
         ]);
-        $this->issueTransactions = $this->loanApplication->transactions->where('type', LoanTransaction::TYPE_ISSUE);
+        // Ensure we have a concrete collection of issue transactions
+        $this->issueTransactions = $this->loanApplication
+            ->loanTransactions()
+            ->where('type', LoanTransaction::TYPE_ISSUE)
+            ->with('loanTransactionItems.equipment')
+            ->get();
     }
 
     public function envelope(): Envelope

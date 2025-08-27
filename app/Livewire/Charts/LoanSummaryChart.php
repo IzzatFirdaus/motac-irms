@@ -59,7 +59,7 @@ class LoanSummaryChart extends Component
         ];
 
         // Create and build the pie chart
-        $pie = (new PieChartModel)
+        $pie = (new PieChartModel())
             ->setTitle(__('dashboard.loan_stats_title'));
 
         foreach ($stats as $status => $count) {

@@ -19,15 +19,17 @@ class ApplicationStatusUpdatedNotification extends Notification implements Shoul
 
     private LoanApplication $application;
 
-    private User $user;
-
     private string $newStatus;
 
     public function __construct(User $user, LoanApplication $application, string $newStatus)
     {
-        $this->user        = $user;
+        // Preload the relation and optionally ensure the passed $user matches for logging/consistency
         $this->application = $application->loadMissing('user');
-        $this->newStatus   = $newStatus;
+        if ($this->application->user_id === null) {
+            // If missing, associate in-memory for notifications context
+            $this->application->setRelation('user', $user);
+        }
+        $this->newStatus = $newStatus;
     }
 
     public function via(User $notifiable): array
@@ -52,7 +54,7 @@ class ApplicationStatusUpdatedNotification extends Notification implements Shoul
             __('Status terkini: **:newStatus**', ['newStatus' => $newStatusDisplay]),
         ];
 
-        return (new MailMessage)
+        return (new MailMessage())
             ->subject($subject)
             ->view('emails.notifications.motac_default_notification', [
                 'greeting'       => __('Salam Sejahtera'),
@@ -99,7 +101,7 @@ class ApplicationStatusUpdatedNotification extends Notification implements Shoul
             try {
                 return route($routeName, $routeParameters);
             } catch (\Exception $e) {
-                Log::error('Error generating URL for ApplicationStatusUpdatedNotification: '.$e->getMessage());
+                Log::error('Error generating URL for ApplicationStatusUpdatedNotification: ' . $e->getMessage());
             }
         }
 

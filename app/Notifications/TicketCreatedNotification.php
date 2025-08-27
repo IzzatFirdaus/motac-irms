@@ -52,12 +52,12 @@ class TicketCreatedNotification extends Notification implements ShouldQueue
             ? "Your helpdesk ticket **#{$this->ticket->id}** with the subject `{$this->ticket->title}` has been successfully created."
             : "A new helpdesk ticket **#{$this->ticket->id}** has been submitted by `{$this->ticket->applicant->name}` with the subject `{$this->ticket->title}`.";
 
-        return (new MailMessage)
+        return (new MailMessage())
             ->subject($subject)
             ->greeting($greeting)
             ->line($introLine)
             ->line("Description: {$this->ticket->description}")
-            ->action('View Ticket', url('/helpdesk/'.$this->ticket->id))
+            ->action('View Ticket', url('/helpdesk/' . $this->ticket->id))
             ->line('Thank you for using our application!');
     }
 
@@ -75,7 +75,7 @@ class TicketCreatedNotification extends Notification implements ShouldQueue
             'message'   => ($this->recipientType === 'applicant')
                 ? "Your helpdesk ticket #{$this->ticket->id} has been created."
                 : "New helpdesk ticket #{$this->ticket->id} submitted.",
-            'url' => url('/helpdesk/'.$this->ticket->id),
+            'url' => url('/helpdesk/' . $this->ticket->id),
         ];
     }
 }

@@ -107,7 +107,7 @@ class HelpdeskSLAStatusTest extends TestCase
         $priority = \App\Models\HelpdeskPriority::first();
 
         // Use the general NotificationService expected by HelpdeskService
-        $ticket = (new \App\Services\HelpdeskService(new \App\Services\NotificationService))->createTicket([
+        $ticket = (new \App\Services\HelpdeskService(new \App\Services\NotificationService()))->createTicket([
             'title'       => 'SLA Test',
             'description' => 'SLA description',
             'category_id' => $category->id,

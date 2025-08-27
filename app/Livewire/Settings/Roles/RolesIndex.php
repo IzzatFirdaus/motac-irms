@@ -53,7 +53,7 @@ class RolesIndex extends Component
         abort_unless(Auth::user()?->can('manage_roles'), 403, __('Tindakan tidak dibenarkan.'));
         $this->coreRoles   = config('motac.core_roles', ['Admin', 'BPM Staff', 'IT Admin', 'User']);
         $roleModelClass    = config('permission.models.role');
-        $this->editingRole = new $roleModelClass;
+        $this->editingRole = new $roleModelClass();
         $this->loadAllPermissions();
     }
 
@@ -251,7 +251,7 @@ class RolesIndex extends Component
     public function render(): \Illuminate\View\View
     {
         return view('livewire.settings.roles.roles-index', [
-            'roles'                 => $this->roles,
+            'roles'                 => $this->getRolesProperty(),
             'allPermissionsForView' => $this->allPermissionsForView,
             'coreRoles'             => $this->coreRoles,
         ]);
@@ -270,7 +270,7 @@ class RolesIndex extends Component
                 ValidationRule::unique(config('permission.table_names.roles', 'roles'), 'name')->ignore($roleIdToIgnore),
             ],
             'selectedPermissions'   => 'nullable|array',
-            'selectedPermissions.*' => 'exists:'.config('permission.table_names.permissions', 'permissions').',id',
+            'selectedPermissions.*' => 'exists:' . config('permission.table_names.permissions', 'permissions') . ',id',
         ];
     }
 
@@ -282,7 +282,7 @@ class RolesIndex extends Component
         $this->name                = '';
         $this->selectedPermissions = [];
         $roleModelClass            = config('permission.models.role');
-        $this->editingRole         = new $roleModelClass;
+        $this->editingRole         = new $roleModelClass();
         $this->isEditMode          = false;
         $this->resetErrorBag();
     }

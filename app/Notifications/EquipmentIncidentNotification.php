@@ -22,10 +22,16 @@ final class EquipmentIncidentNotification extends Notification implements Should
 
     private LoanApplication $loanApplication;
 
+    /**
+     * @var EloquentCollection<int, LoanTransactionItem>
+     */
     private EloquentCollection $incidentItems;
 
     private string $incidentType;
 
+    /**
+     * @param EloquentCollection<int, LoanTransactionItem> $incidentItems
+     */
     public function __construct(
         LoanApplication $loanApplication,
         EloquentCollection $incidentItems,
@@ -65,10 +71,10 @@ final class EquipmentIncidentNotification extends Notification implements Should
         if ($this->incidentItems->isNotEmpty()) { //
             $introLines[] = '---'; //
             foreach ($this->incidentItems as $item) { //
-                if ($item->equipment instanceof Equipment) { //
+                if ($item instanceof LoanTransactionItem && $item->equipment instanceof Equipment) { //
                     // CORRECTED: Changed assetTypeDisplay to the correct accessor 'asset_type_label'
-                    $details = sprintf('- **%s** (%s %s) - Tag: %s', $item->equipment->asset_type_label, $item->equipment->brand, $item->equipment->model, $item->equipment->tag_id); //
-                    if ($item->item_notes) { //
+                    $details = sprintf('- **%s** (%s %s) - Tag: %s', $item->equipment->getAssetTypeLabelAttribute(), $item->equipment->brand, $item->equipment->model, $item->equipment->tag_id); //
+                    if (! empty($item->item_notes)) { //
                         $details .= sprintf(' | Catatan: *%s*', $item->item_notes); //
                     }
 
@@ -79,7 +85,7 @@ final class EquipmentIncidentNotification extends Notification implements Should
             $introLines[] = '---'; //
         }
 
-        return (new MailMessage) //
+        return (new MailMessage()) //
             ->subject($subject) //
             ->level($this->incidentType === 'lost' ? 'error' : 'warning') //
             ->view('emails.notifications.motac_default_notification', [ //
@@ -98,7 +104,7 @@ final class EquipmentIncidentNotification extends Notification implements Should
             try {
                 return route('loan-applications.show', ['loan_application' => $this->loanApplication->id]); //
             } catch (\Exception $e) {
-                Log::error('Error generating URL for EquipmentIncidentNotification: '.$e->getMessage()); //
+                Log::error('Error generating URL for EquipmentIncidentNotification: ' . $e->getMessage()); //
             }
         }
 
@@ -107,22 +113,42 @@ final class EquipmentIncidentNotification extends Notification implements Should
 
     public function toArray(User $notifiable): array
     {
-        $applicationId        = $this->loanApplication->id          ?? null; //
-        $applicantName        = $this->loanApplication->user?->name ?? 'N/A'; //
-        $incidentItemsDetails = $this->incidentItems->map(function (LoanTransactionItem $item): array {
-            //
-            $equipment = $item->equipment; //
-            $details   = ['transaction_item_id' => $item->id, 'item_notes' => $item->item_notes]; //
-            if ($equipment instanceof Equipment) { //
-                // CORRECTED: Changed assetTypeDisplay to the correct accessor 'asset_type_label'
-                $details = array_merge($details, ['equipment_id' => $equipment->id, 'tag_id' => $equipment->tag_id, 'asset_type' => $equipment->asset_type_label, 'brand_model' => sprintf('%s %s', $equipment->brand, $equipment->model), 'serial_number' => $equipment->serial_number]); //
+        $applicationId = $this->loanApplication->id          ?? null; //
+        $applicantName = $this->loanApplication->user?->name ?? 'N/A'; //
+        /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanTransactionItem> $items */
+        $items                = $this->incidentItems;
+        $incidentItemsDetails = $items->map(function (LoanTransactionItem $item): array {
+            $equipment = $item->equipment;
+            // Provide a uniform array shape, defaulting equipment-related keys to null
+            $brandModel = null;
+            $assetType  = null;
+            $tagId      = null;
+            $serial     = null;
+            if ($item instanceof LoanTransactionItem && $equipment instanceof Equipment) {
+                $brandModel = trim(sprintf('%s %s', (string) ($equipment->brand ?? ''), (string) ($equipment->model ?? '')));
+                if ($brandModel === '') {
+                    $brandModel = __('Peralatan');
+                }
+                $assetType = $equipment->getAssetTypeLabelAttribute();
+                $tagId     = $equipment->tag_id;
+                $serial    = $equipment->serial_number;
             }
 
-            if ($this->incidentType === 'damaged') { //
-                $details['condition_on_return'] = $item->condition_on_return; //
+            $details = [
+                'transaction_item_id' => $item->id,
+                'item_notes'          => $item->item_notes,
+                'equipment_id'        => $equipment instanceof Equipment ? $equipment->id : null,
+                'tag_id'              => $tagId,
+                'asset_type'          => $assetType,
+                'brand_model'         => $brandModel,
+                'serial_number'       => $serial,
+            ];
+
+            if ($this->incidentType === 'damaged') {
+                $details['condition_on_return'] = $item->condition_on_return;
             }
 
-            return $details; //
+            return $details;
         })->toArray();
 
         $subject = '';

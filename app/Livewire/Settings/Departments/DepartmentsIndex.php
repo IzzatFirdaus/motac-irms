@@ -67,7 +67,7 @@ class DepartmentsIndex extends Component
     public function mount(): void
     {
         $this->authorize('viewAny', Department::class);
-        $this->editingDepartment = new Department;
+        $this->editingDepartment = new Department();
         $this->branchTypeOptions = Department::getBranchTypeOptions();
         if (($this->branch_type === '' || $this->branch_type === '0') && $this->branchTypeOptions !== []) {
             $this->branch_type = array_key_first($this->branchTypeOptions);
@@ -97,9 +97,9 @@ class DepartmentsIndex extends Component
         $query = Department::query()
             ->with('headOfDepartment:id,name')
             ->when($this->search, function ($q): void {
-                $q->where('name', 'like', '%'.$this->search.'%')
-                    ->orWhere('code', 'like', '%'.$this->search.'%')
-                    ->orWhere('description', 'like', '%'.$this->search.'%');
+                $q->where('name', 'like', '%' . $this->search . '%')
+                    ->orWhere('code', 'like', '%' . $this->search . '%')
+                    ->orWhere('description', 'like', '%' . $this->search . '%');
             });
 
         if ($this->sortField !== '' && $this->sortField !== '0') {
@@ -262,7 +262,7 @@ class DepartmentsIndex extends Component
         $this->is_active   = true;
         $this->branch_type = $this->branchTypeOptions === [] ? '' : array_key_first($this->branchTypeOptions);
 
-        $this->editingDepartment = new Department;
+        $this->editingDepartment = new Department();
         $this->isEditMode        = false;
         $this->resetErrorBag();
         $this->resetValidation();
@@ -274,7 +274,7 @@ class DepartmentsIndex extends Component
     public function render()
     {
         return view('livewire.settings.departments.departments-index', [
-            'departments'       => $this->departments,
+            'departments'       => $this->getDepartmentsProperty(),
             'branchTypeOptions' => $this->branchTypeOptions,
         ]);
     }

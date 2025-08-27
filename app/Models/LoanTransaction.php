@@ -243,8 +243,12 @@ class LoanTransaction extends Model
         }
         if ($this->loanTransactionItems->isNotEmpty()) {
             $firstItem = $this->loanTransactionItems->first();
-            if ($firstItem?->equipment) {
-                return trim(($firstItem->equipment->brand ?? '').' '.($firstItem->equipment->model ?? __('Item Peralatan')));
+            // Within isNotEmpty() context, $firstItem is guaranteed non-null
+            if ($firstItem->equipment) {
+                $brand = $firstItem->equipment->brand ?? '';
+                $model = $firstItem->equipment->model ?? __('Item Peralatan');
+
+                return trim($brand . ' ' . $model);
             }
 
             return __('Item Tidak Diketahui');

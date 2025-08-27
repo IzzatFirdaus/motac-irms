@@ -78,7 +78,7 @@ class EquipmentController extends Controller
         if (
             $user && method_exists($user, 'hasAnyRole') && ! $user->hasAnyRole(['Admin', 'BPM Staff', 'IT Admin']) && ! $request->filled('status')
         ) {
-            if (defined(Equipment::class.'::STATUS_AVAILABLE')) {
+            if (defined(Equipment::class . '::STATUS_AVAILABLE')) {
                 $filters['status'] = Equipment::STATUS_AVAILABLE;
             } else {
                 Log::warning('Equipment::STATUS_AVAILABLE constant is not defined.');

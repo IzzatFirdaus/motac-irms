@@ -83,9 +83,9 @@ class TicketManagement extends Component
         return HelpdeskTicket::query()
             ->with(['user', 'category', 'priority', 'assignedTo'])
             ->when($this->search, function (Builder $query) {
-                $query->where('title', 'like', '%'.$this->search.'%')
-                    ->orWhere('description', 'like', '%'.$this->search.'%')
-                    ->orWhereHas('user', fn ($q) => $q->where('name', 'like', '%'.$this->search.'%'));
+                $query->where('title', 'like', '%' . $this->search . '%')
+                    ->orWhere('description', 'like', '%' . $this->search . '%')
+                    ->orWhereHas('user', fn ($q) => $q->where('name', 'like', '%' . $this->search . '%'));
             })
             ->when($this->status, fn (Builder $query) => $query->where('status', $this->status))
             ->when($this->category_id, fn (Builder $query) => $query->where('category_id', $this->category_id))
@@ -151,7 +151,7 @@ class TicketManagement extends Component
             $this->showAssignTicketModal = false;
             $this->dispatch('ticketUpdated');
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to assign ticket: '.$e->getMessage());
+            session()->flash('error', 'Failed to assign ticket: ' . $e->getMessage());
         }
     }
 
@@ -186,7 +186,7 @@ class TicketManagement extends Component
             $this->showChangeStatusModal = false;
             $this->dispatch('ticketUpdated');
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to change ticket status: '.$e->getMessage());
+            session()->flash('error', 'Failed to change ticket status: ' . $e->getMessage());
         }
     }
 
@@ -225,7 +225,7 @@ class TicketManagement extends Component
             $this->showAddCommentModal = false;
             $this->dispatch('ticketUpdated');
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to add comment: '.$e->getMessage());
+            session()->flash('error', 'Failed to add comment: ' . $e->getMessage());
         }
     }
 
@@ -260,7 +260,7 @@ class TicketManagement extends Component
             $this->showCloseTicketModal = false;
             $this->dispatch('ticketUpdated');
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to close ticket: '.$e->getMessage());
+            session()->flash('error', 'Failed to close ticket: ' . $e->getMessage());
         }
     }
 

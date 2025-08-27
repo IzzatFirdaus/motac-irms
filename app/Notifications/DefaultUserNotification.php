@@ -77,7 +77,7 @@ final class DefaultUserNotification extends BaseNotification implements ShouldQu
      */
     public function toMail(User $notifiable): MailMessage
     {
-        $mailMessage = (new MailMessage)
+        $mailMessage = (new MailMessage())
             ->subject(__($this->subject)) // Support translation for subject
             ->greeting(__($this->greeting, ['name' => $notifiable->name])); // Personalize greeting
 

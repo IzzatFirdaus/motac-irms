@@ -21,9 +21,9 @@ class SupportPendingApprovalNotification extends Notification
 
     public function toMail($notifiable)
     {
-        return (new \Illuminate\Notifications\Messages\MailMessage)
+        return (new \Illuminate\Notifications\Messages\MailMessage())
             ->subject('Loan Application Pending Support Review')
             ->line('A new loan application requires support officer review.')
-            ->action('View Application', url('/loan-applications/'.$this->loanApplication->id));
+            ->action('View Application', url('/loan-applications/' . $this->loanApplication->id));
     }
 }

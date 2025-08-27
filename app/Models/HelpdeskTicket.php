@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\User|null $user
  * @property-read \App\Models\User|null $assignedTo
  * @property string|null                     $resolution_notes
+ * @property string|null                     $resolution_details
  * @property \Illuminate\Support\Carbon|null $sla_due_at
  * @property int|null                        $closed_by_id
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -76,6 +77,24 @@ class HelpdeskTicket extends Model
         'closed_at'  => 'datetime',
         'sla_due_at' => 'datetime',
     ];
+
+    /**
+     * Backwards-compatible accessor: some templates refer to 'subject'.
+     * Maps to 'title' column.
+     */
+    public function getSubjectAttribute(): string
+    {
+        return (string) ($this->attributes['title'] ?? $this->title ?? '');
+    }
+
+    /**
+     * Backwards-compatible accessor: some UI references 'resolution_details'.
+     * Maps to 'resolution_notes'.
+     */
+    public function getResolutionDetailsAttribute(): ?string
+    {
+        return $this->attributes['resolution_notes'] ?? $this->resolution_notes ?? null;
+    }
 
     /**
      * Category of the ticket.

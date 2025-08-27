@@ -12,6 +12,9 @@ use Livewire\WithPagination;
  *
  * User's own helpdesk tickets (paginated, filterable).
  */
+/**
+ * @property-read \Illuminate\Pagination\LengthAwarePaginator $tickets
+ */
 class MyTicketsIndex extends Component
 {
     use WithPagination;
@@ -61,8 +64,8 @@ class MyTicketsIndex extends Component
             ->with(['category', 'priority', 'assignedTo'])
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
-                    $q->where('title', 'like', '%'.$this->search.'%')
-                        ->orWhere('description', 'like', '%'.$this->search.'%');
+                    $q->where('title', 'like', '%' . $this->search . '%')
+                        ->orWhere('description', 'like', '%' . $this->search . '%');
                 });
             })
             ->when($this->status, function ($query) {

@@ -245,7 +245,9 @@ class LoanTransactionItem extends Model
                     $item->loanApplicationItem->saveQuietly();
                 }
             }
-            $item->loanTransaction?->updateParentLoanApplicationStatus();
+            if ($item->loanTransaction) {
+                $item->loanTransaction->updateParentLoanApplicationStatus();
+            }
         });
 
         // After delete, recalculate as well
@@ -256,7 +258,24 @@ class LoanTransactionItem extends Model
                     $item->loanApplicationItem->saveQuietly();
                 }
             }
-            $item->loanTransaction?->updateParentLoanApplicationStatus();
+            if ($item->loanTransaction) {
+                $item->loanTransaction->updateParentLoanApplicationStatus();
+            }
         });
+    }
+
+    /**
+     * Some components refer to initial condition as 'condition_on_transaction'.
+     * Provide a safe accessor that falls back to condition_on_return when not set.
+     */
+    public function getConditionOnTransactionAttribute(): ?string
+    {
+        $value = $this->getAttribute('condition_on_issue');
+        if ($value) {
+            return (string) $value;
+        }
+        $fallback = $this->getAttribute('condition_on_return');
+
+        return $fallback ? (string) $fallback : null;
     }
 }

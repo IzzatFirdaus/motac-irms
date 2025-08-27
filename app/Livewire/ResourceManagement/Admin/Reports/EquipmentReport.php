@@ -20,6 +20,15 @@ use Livewire\WithPagination;
  */
 #[Layout('layouts.app')]
 #[Title('Laporan Peralatan ICT')]
+/**
+ * @property-read \Illuminate\Pagination\LengthAwarePaginator $reportData
+ * @property-read array $assetTypeOptions
+ * @property-read array $statusOptions
+ * @property-read array $conditionStatusOptions
+ * @property-read \Illuminate\Support\Collection $departmentOptions
+ * @property-read \Illuminate\Support\Collection $locationOptions
+ * @property-read \Illuminate\Support\Collection $categoryOptions
+ */
 class EquipmentReport extends Component
 {
     use AuthorizesRequests;
@@ -73,7 +82,7 @@ class EquipmentReport extends Component
         ]);
 
         if ($this->searchTerm !== '' && $this->searchTerm !== '0') {
-            $search = '%'.strtolower($this->searchTerm).'%';
+            $search = '%' . strtolower($this->searchTerm) . '%';
             $query->where(function ($q) use ($search): void {
                 $q->whereRaw('LOWER(tag_id) LIKE ?', [$search])
                     ->orWhereRaw('LOWER(serial_number) LIKE ?', [$search])
@@ -193,13 +202,13 @@ class EquipmentReport extends Component
     public function render()
     {
         return view('livewire.resource-management.admin.reports.equipment-report', [
-            'reportData'             => $this->reportDataProperty,
-            'assetTypeOptions'       => $this->assetTypeOptionsProperty,
-            'statusOptions'          => $this->statusOptionsProperty,
-            'conditionStatusOptions' => $this->conditionStatusOptionsProperty,
-            'departmentOptions'      => $this->departmentOptionsProperty,
-            'locationOptions'        => $this->locationOptionsProperty,
-            'categoryOptions'        => $this->categoryOptionsProperty,
+            'reportData'             => $this->getReportDataProperty(),
+            'assetTypeOptions'       => $this->getAssetTypeOptionsProperty(),
+            'statusOptions'          => $this->getStatusOptionsProperty(),
+            'conditionStatusOptions' => $this->getConditionStatusOptionsProperty(),
+            'departmentOptions'      => $this->getDepartmentOptionsProperty(),
+            'locationOptions'        => $this->getLocationOptionsProperty(),
+            'categoryOptions'        => $this->getCategoryOptionsProperty(),
         ]);
     }
 }

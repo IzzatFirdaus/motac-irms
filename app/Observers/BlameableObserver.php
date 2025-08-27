@@ -26,10 +26,10 @@ class BlameableObserver
         if (Auth::check()) {
             $userId = Auth::id();
             if ($this->hasBlameableColumn($model, 'created_by')) {
-                $model->created_by = $userId;
+                $model->setAttribute('created_by', $userId);
             }
             if ($this->hasBlameableColumn($model, 'updated_by')) {
-                $model->updated_by = $userId;
+                $model->setAttribute('updated_by', $userId);
             }
         }
     }
@@ -41,7 +41,7 @@ class BlameableObserver
     public function updating(Model $model): void
     {
         if (Auth::check() && $this->hasBlameableColumn($model, 'updated_by')) {
-            $model->updated_by = Auth::id();
+            $model->setAttribute('updated_by', Auth::id());
         }
     }
 
@@ -55,11 +55,12 @@ class BlameableObserver
         if (! in_array(SoftDeletes::class, class_uses_recursive(get_class($model)))) {
             return;
         }
-        if ($model->isForceDeleting()) {
+        // Only call isForceDeleting if available (SoftDeletes trait provides it)
+        if (method_exists($model, 'isForceDeleting') && $model->isForceDeleting()) {
             return;
         }
         if (Auth::check() && $this->hasBlameableColumn($model, 'deleted_by')) {
-            $model->deleted_by = Auth::id();
+            $model->setAttribute('deleted_by', Auth::id());
             $model->save(); // Important: persists the deleted_by update before soft delete.
         }
     }
@@ -74,10 +75,10 @@ class BlameableObserver
             return;
         }
         if ($this->hasBlameableColumn($model, 'deleted_by')) {
-            $model->deleted_by = null;
+            $model->setAttribute('deleted_by', null);
         }
         if (Auth::check() && $this->hasBlameableColumn($model, 'updated_by')) {
-            $model->updated_by = Auth::id();
+            $model->setAttribute('updated_by', Auth::id());
         }
     }
 

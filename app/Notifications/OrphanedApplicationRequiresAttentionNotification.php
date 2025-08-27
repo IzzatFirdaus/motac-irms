@@ -59,7 +59,7 @@ class OrphanedApplicationRequiresAttentionNotification extends Notification impl
             $viewUrl = route('loan-applications.show', $this->application->id);
         }
 
-        return (new MailMessage)
+        return (new MailMessage())
             ->subject(__('Tindakan Diperlukan: :appType ID #:id Memerlukan Penetapan Pelulus', ['appType' => $this->applicationTypeDisplay, 'id' => $applicationId]))
             ->greeting(__('Salam Sejahtera,'))
             ->line(__('Sistem tidak dapat menetapkan pelulus secara automatik untuk :appType ID #:id. Alasan: :reason. Sila ambil tindakan.', ['appType' => $this->applicationTypeDisplay, 'id' => $applicationId, 'reason' => $this->reason]))

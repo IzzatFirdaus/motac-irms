@@ -40,7 +40,7 @@ class NotificationsList extends Component
             ->where('notifiable_id', Auth::id())
             ->where('notifiable_type', Auth::user() ? get_class(Auth::user()) : null)
             ->when($this->search, function ($query) {
-                $query->where('data', 'like', '%'.$this->search.'%');
+                $query->where('data', 'like', '%' . $this->search . '%');
             })
             ->orderByDesc('created_at')
             ->paginate(10);
@@ -70,7 +70,7 @@ class NotificationsList extends Component
     public function render()
     {
         return view('livewire.shared.notifications.notifications-list', [
-            'notifications' => $this->notifications,
+            'notifications' => $this->getNotificationsProperty(),
         ]);
     }
 }

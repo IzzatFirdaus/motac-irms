@@ -63,7 +63,7 @@ class DepartmentController extends Controller
 
         $validatedData = $request->validate([
             'name'                  => 'required|string|max:255',
-            'branch_type'           => 'required|string|in:'.implode(',', array_keys(Department::$BRANCH_TYPE_LABELS)),
+            'branch_type'           => 'required|string|in:' . implode(',', array_keys(Department::$BRANCH_TYPE_LABELS)),
             'code'                  => 'nullable|string|max:50|unique:departments,code',
             'description'           => 'nullable|string|max:500',
             'is_active'             => 'required|boolean',
@@ -123,8 +123,8 @@ class DepartmentController extends Controller
 
         $validatedData = $request->validate([
             'name'                  => 'required|string|max:255',
-            'branch_type'           => 'required|string|in:'.implode(',', array_keys(Department::$BRANCH_TYPE_LABELS)),
-            'code'                  => 'nullable|string|max:50|unique:departments,code,'.$department->id,
+            'branch_type'           => 'required|string|in:' . implode(',', array_keys(Department::$BRANCH_TYPE_LABELS)),
+            'code'                  => 'nullable|string|max:50|unique:departments,code,' . $department->id,
             'description'           => 'nullable|string|max:500',
             'is_active'             => 'required|boolean',
             'head_of_department_id' => 'nullable|exists:users,id',

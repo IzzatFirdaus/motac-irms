@@ -31,7 +31,7 @@ class UpdateLoanApplicationRequest extends FormRequest
         return [
             'purpose'         => ['nullable', 'string', 'min:10', 'max:1000'],
             'location'        => ['nullable', 'string', 'max:255'],
-            'loan_start_date' => ['nullable', 'date_format:Y-m-d H:i:s', 'after_or_equal:'.$today],
+            'loan_start_date' => ['nullable', 'date_format:Y-m-d H:i:s', 'after_or_equal:' . $today],
             'loan_end_date'   => ['nullable', 'date_format:Y-m-d H:i:s', 'after_or_equal:loan_start_date'],
             'return_location' => ['nullable', 'string', 'max:255'],
 

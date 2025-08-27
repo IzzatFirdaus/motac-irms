@@ -250,8 +250,8 @@ class EquipmentIndex extends Component
             Log::warning('Validation failed during equipment creation.', ['errors' => $e->errors()]);
             throw $e;
         } catch (\Exception $e) {
-            session()->flash('error', __('Gagal menambah peralatan ICT: ').$e->getMessage());
-            Log::error('Failed to create equipment: '.$e->getMessage(), ['exception' => $e]);
+            session()->flash('error', __('Gagal menambah peralatan ICT: ') . $e->getMessage());
+            Log::error('Failed to create equipment: ' . $e->getMessage(), ['exception' => $e]);
         }
     }
 
@@ -263,7 +263,7 @@ class EquipmentIndex extends Component
         $this->populateFields();
         $this->showEditModal = true;
         $this->dispatch('open-modal', elementId: '#equipmentFormModal');
-        Log::info('Opened edit equipment modal for ID: '.$equipment->id);
+        Log::info('Opened edit equipment modal for ID: ' . $equipment->id);
     }
 
     public function updateEquipment(): void
@@ -290,8 +290,8 @@ class EquipmentIndex extends Component
             Log::warning('Validation failed during equipment update.', ['errors' => $e->errors(), 'equipment_id' => $this->editingEquipment->id]);
             throw $e;
         } catch (\Exception $e) {
-            session()->flash('error', __('Gagal mengemaskini maklumat peralatan ICT: ').$e->getMessage());
-            Log::error('Failed to update equipment ID: '.$this->editingEquipment->id.' error: '.$e->getMessage(), ['exception' => $e]);
+            session()->flash('error', __('Gagal mengemaskini maklumat peralatan ICT: ') . $e->getMessage());
+            Log::error('Failed to update equipment ID: ' . $this->editingEquipment->id . ' error: ' . $e->getMessage(), ['exception' => $e]);
         }
     }
 
@@ -301,7 +301,7 @@ class EquipmentIndex extends Component
         $this->deletingEquipment = $equipment;
         $this->showDeleteModal   = true;
         $this->dispatch('open-modal', elementId: '#deleteConfirmationModal');
-        Log::info('Opened delete confirmation modal for equipment ID: '.$equipment->id);
+        Log::info('Opened delete confirmation modal for equipment ID: ' . $equipment->id);
     }
 
     public function deleteEquipment(): void
@@ -323,8 +323,8 @@ class EquipmentIndex extends Component
             Log::info('Equipment deleted successfully.', ['equipment_id' => $this->deletingEquipment->id]);
             $this->closeModals();
         } catch (\Exception $e) {
-            session()->flash('error', __('Gagal memadam peralatan ICT: ').$e->getMessage());
-            Log::error('Failed to delete equipment ID: '.$this->deletingEquipment->id.' error: '.$e->getMessage(), ['exception' => $e]);
+            session()->flash('error', __('Gagal memadam peralatan ICT: ') . $e->getMessage());
+            Log::error('Failed to delete equipment ID: ' . $this->deletingEquipment->id . ' error: ' . $e->getMessage(), ['exception' => $e]);
         }
     }
 
@@ -334,7 +334,7 @@ class EquipmentIndex extends Component
         $this->viewingEquipment = $equipment;
         $this->showViewModal    = true;
         $this->dispatch('open-modal', elementId: '#viewEquipmentModal');
-        Log::info('Opened view equipment modal for ID: '.$equipment->id);
+        Log::info('Opened view equipment modal for ID: ' . $equipment->id);
     }
 
     /**
@@ -418,7 +418,7 @@ class EquipmentIndex extends Component
     public function render(): View
     {
         return view('livewire.resource-management.admin.equipment.equipment-index', [
-            'equipmentList' => $this->equipmentList,
+            'equipmentList' => $this->getEquipmentListProperty(),
             'departments'   => $this->departmentOptions,
         ]);
     }

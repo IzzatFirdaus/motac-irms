@@ -57,11 +57,11 @@ class UsersIndex extends Component
 
         if ($this->search !== '' && $this->search !== '0') {
             $query->where(function ($q): void {
-                $q->where('name', 'like', '%'.$this->search.'%')
-                    ->orWhere('email', 'like', '%'.$this->search.'%')
-                    ->orWhere('identification_number', 'like', '%'.$this->search.'%')
+                $q->where('name', 'like', '%' . $this->search . '%')
+                    ->orWhere('email', 'like', '%' . $this->search . '%')
+                    ->orWhere('identification_number', 'like', '%' . $this->search . '%')
                     ->orWhereHas('department', function ($deptQuery): void {
-                        $deptQuery->where('name', 'like', '%'.$this->search.'%');
+                        $deptQuery->where('name', 'like', '%' . $this->search . '%');
                     });
             });
         }
@@ -120,7 +120,7 @@ class UsersIndex extends Component
 
         $this->dispatch('open-delete-modal', [
             'id'              => $userId,
-            'itemDescription' => __('pengguna').' '.$userName,
+            'itemDescription' => __('pengguna') . ' ' . $userName,
             'deleteMethod'    => 'deleteUser',
             'modelClass'      => User::class,
         ]);
@@ -152,7 +152,7 @@ class UsersIndex extends Component
     public function render()
     {
         return view('livewire.settings.users.users-index', [
-            'usersList'      => $this->usersList,
+            'usersList'      => $this->getUsersListProperty(),
             'rolesForFilter' => $this->rolesForFilter,
             'statusOptions'  => $this->statusOptions,
         ]);

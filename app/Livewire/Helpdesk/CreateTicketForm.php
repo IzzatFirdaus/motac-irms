@@ -76,7 +76,7 @@ class CreateTicketForm extends Component
 
             return redirect()->route('helpdesk.show', $ticket->id);
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to create ticket: '.$e->getMessage());
+            session()->flash('error', 'Failed to create ticket: ' . $e->getMessage());
         }
     }
 

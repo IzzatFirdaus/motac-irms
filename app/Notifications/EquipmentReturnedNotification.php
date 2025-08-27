@@ -67,7 +67,7 @@ class EquipmentReturnedNotification extends Notification implements ShouldQueue
                     'equipment_id'        => $equipment->id,
                     // CORRECTED: Uses the asset_type_label accessor from the Equipment model.
                     'asset_type'        => $equipment->asset_type_label ?? __('Peralatan Tidak Dikenali'),
-                    'brand_model'       => trim(($equipment->brand ?? '').' '.($equipment->model ?? '')),
+                    'brand_model'       => trim(($equipment->brand ?? '') . ' ' . ($equipment->model ?? '')),
                     'tag_id'            => $equipment->tag_id,
                     'serial_number'     => $equipment->serial_number,
                     'quantity_returned' => $txItem->quantity_transacted,
@@ -89,7 +89,7 @@ class EquipmentReturnedNotification extends Notification implements ShouldQueue
             try {
                 $applicationUrl = route($routeName, ['loan_application' => $loanAppId]);
             } catch (\Exception $e) {
-                Log::error('Error generating URL for EquipmentReturnedNotification toArray: '.$e->getMessage(), ['loan_application_id' => $loanAppId]);
+                Log::error('Error generating URL for EquipmentReturnedNotification toArray: ' . $e->getMessage(), ['loan_application_id' => $loanAppId]);
                 $applicationUrl = '#';
             }
         }

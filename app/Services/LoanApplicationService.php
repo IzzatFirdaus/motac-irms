@@ -70,7 +70,7 @@ final class LoanApplicationService
         return DB::transaction(function () use ($data, $actingUser, $isDraft, $existingApplication) {
             // Debug: capture the incoming payload early to trace missing 'items' in tests
             try {
-                Log::debug(self::LOG_AREA.'createAndSubmitApplication received payload', [
+                Log::debug(self::LOG_AREA . 'createAndSubmitApplication received payload', [
                     'data_keys'         => is_array($data) ? array_keys($data) : null,
                     'has_items'         => Arr::has($data, 'items'),
                     'has_legacy_items'  => Arr::has($data, 'loan_application_items'),
@@ -78,7 +78,7 @@ final class LoanApplicationService
                 ]);
             } catch (\Throwable $e) {
                 // best-effort logging, do not block execution
-                Log::debug(self::LOG_AREA.'Failed to log payload debug info: '.$e->getMessage());
+                Log::debug(self::LOG_AREA . 'Failed to log payload debug info: ' . $e->getMessage());
             }
 
             $applicationData = $this->prepareApplicationData($data, $actingUser, $isDraft);
@@ -88,10 +88,10 @@ final class LoanApplicationService
             if ($existingApplication) {
                 $existingApplication->update($applicationData);
                 $application = $existingApplication;
-                Log::info(self::LOG_AREA."Updating application ID: {$application->id}", ['is_draft' => $isDraft]);
+                Log::info(self::LOG_AREA . "Updating application ID: {$application->id}", ['is_draft' => $isDraft]);
             } else {
                 $application = LoanApplication::create($applicationData);
-                Log::info(self::LOG_AREA.'Creating new application.', ['user_id' => $actingUser->id, 'is_draft' => $isDraft]);
+                Log::info(self::LOG_AREA . 'Creating new application.', ['user_id' => $actingUser->id, 'is_draft' => $isDraft]);
             }
 
             $this->syncLoanApplicationItems($application, $itemsData);
@@ -104,7 +104,7 @@ final class LoanApplicationService
             try {
                 $application->load('loanApplicationItems');
             } catch (\Throwable $e) {
-                Log::debug(self::LOG_AREA.'Failed to eager-load loanApplicationItems: '.$e->getMessage());
+                Log::debug(self::LOG_AREA . 'Failed to eager-load loanApplicationItems: ' . $e->getMessage());
             }
 
             return $application;
@@ -151,7 +151,7 @@ final class LoanApplicationService
         try {
             $this->notificationService->notifyUser($application->user, new \App\Notifications\ApplicationSubmitted($application));
         } catch (\Throwable $e) {
-            Log::error(self::LOG_AREA.sprintf('Failed to notify applicant for Loan Application ID %d: %s', $application->id, $e->getMessage()));
+            Log::error(self::LOG_AREA . sprintf('Failed to notify applicant for Loan Application ID %d: %s', $application->id, $e->getMessage()));
         }
 
         // Use the dedicated method to handle approval logic
@@ -207,7 +207,7 @@ final class LoanApplicationService
         $loanApplication = LoanApplication::with($relationsToLoad)->find($id);
 
         if (! $loanApplication) {
-            Log::warning(self::LOG_AREA.sprintf('Loan application with ID %d not found.', $id));
+            Log::warning(self::LOG_AREA . sprintf('Loan application with ID %d not found.', $id));
             throw new ModelNotFoundException(sprintf('Loan application with ID %d not found.', $id));
         }
 
@@ -244,7 +244,7 @@ final class LoanApplicationService
      */
     private function syncLoanApplicationItems(LoanApplication $application, array $itemsData): void
     {
-        Log::debug(self::LOG_AREA.'syncLoanApplicationItems called', ['application_id' => $application->id, 'items_count' => is_countable($itemsData) ? count($itemsData) : 'not_countable', 'items_preview' => array_slice($itemsData, 0, 5)]);
+        Log::debug(self::LOG_AREA . 'syncLoanApplicationItems called', ['application_id' => $application->id, 'items_count' => is_countable($itemsData) ? count($itemsData) : 'not_countable', 'items_preview' => array_slice($itemsData, 0, 5)]);
         $existingItemIds      = $application->loanApplicationItems->pluck('id')->toArray();
         $processedItemIds     = [];
         $itemPayloadsToCreate = [];
@@ -281,7 +281,7 @@ final class LoanApplicationService
         $idsToDelete = array_diff($existingItemIds, $processedItemIds);
         if (! empty($idsToDelete)) {
             $application->loanApplicationItems()->whereIn('id', $idsToDelete)->delete();
-            Log::info(self::LOG_AREA.'Removed items no longer in submission.', ['deleted_ids' => $idsToDelete, 'application_id' => $application->id]);
+            Log::info(self::LOG_AREA . 'Removed items no longer in submission.', ['deleted_ids' => $idsToDelete, 'application_id' => $application->id]);
         }
     }
 
@@ -290,7 +290,7 @@ final class LoanApplicationService
      */
     private function processInitialApproval(LoanApplication $loanApplication): void
     {
-        Log::info(self::LOG_AREA.sprintf('Initiating approval process for Loan Application ID %d.', $loanApplication->id));
+        Log::info(self::LOG_AREA . sprintf('Initiating approval process for Loan Application ID %d.', $loanApplication->id));
 
         // This is now called from submitApplicationForApproval to ensure status is set correctly.
         // Create an Approval record for the supporting officer if possible
@@ -308,14 +308,14 @@ final class LoanApplicationService
                 // Notify the assigned supporting officer directly that action is needed
                 $this->notificationService->notifyUser($approval->officer, new \App\Notifications\ApplicationNeedsAction($approval));
             } catch (\Throwable $e) {
-                Log::error(self::LOG_AREA.sprintf('Failed to create approval for Loan Application ID %d: %s', $loanApplication->id, $e->getMessage()));
+                Log::error(self::LOG_AREA . sprintf('Failed to create approval for Loan Application ID %d: %s', $loanApplication->id, $e->getMessage()));
             }
         }
 
         // Notify role-based supporting officers as a fallback
         $this->notificationService->notifySupportOfPendingApproval($loanApplication);
 
-        Log::info(self::LOG_AREA.sprintf('Loan Application ID %d status set to %s and support notified.', $loanApplication->id, $loanApplication->status));
+        Log::info(self::LOG_AREA . sprintf('Loan Application ID %d status set to %s and support notified.', $loanApplication->id, $loanApplication->status));
     }
 
     /**
@@ -344,7 +344,7 @@ final class LoanApplicationService
             }
 
             // Optionally, log the deletion for audit purposes
-            Log::info(self::LOG_AREA.sprintf(
+            Log::info(self::LOG_AREA . sprintf(
                 'Loan application ID %d and its related records soft-deleted by User ID %d.',
                 $loanApplication->id,
                 $actingUser->id
