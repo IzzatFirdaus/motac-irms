@@ -57,7 +57,7 @@ class HelpdeskEscalationPolicyTest extends TestCase
         // Simulate running a command that checks for overdue tickets
         // You would need to create this Artisan command (e.g., `php artisan helpdesk:check-overdue-tickets`)
         // For testing, we'll manually call the service method that the command would use.
-        $service = new TicketNotificationService; // Get the real service instance
+        $service = new TicketNotificationService(); // Get the real service instance
         // Assuming your command calls a method like this on the service for each overdue ticket found:
         $service->notifyTicketEscalated($overdueTicket);
 
@@ -91,7 +91,7 @@ class HelpdeskEscalationPolicyTest extends TestCase
         $mockNotificationService->shouldReceive('notifyTicketCreated'); // Prevent calls from factory
 
         // Simulate the check for overdue tickets
-        $service = new TicketNotificationService;
+        $service = new TicketNotificationService();
         // This is a simplified check, ideally, your cron job/command would filter this out.
         // But if it still calls the method, the method itself should handle it.
         // For this test, we assert that the _notification_ is not sent if the status is closed

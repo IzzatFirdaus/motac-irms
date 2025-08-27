@@ -24,6 +24,9 @@ use Livewire\Component;
  *
  * @last_update 2025-08-10
  */
+/**
+ * @property-read array $inquiryTypes
+ */
 class ContactUs extends Component
 {
     // Form fields (typed properties)

@@ -36,7 +36,7 @@ class LoanApplicationReadyForIssuanceNotification extends Notification implement
     {
         $loanApplicationId = $this->loanApplication->id ?? 'N/A';
 
-        return (new MailMessage)
+        return (new MailMessage())
             ->subject(__('Tindakan Diperlukan: Permohonan Pinjaman Sedia Untuk Pengeluaran (#:id)', ['id' => $loanApplicationId]))
             ->view('emails.loan_application_ready_for_issuance', ['loanApplication' => $this->loanApplication]);
     }
@@ -60,12 +60,12 @@ class LoanApplicationReadyForIssuanceNotification extends Notification implement
                 $applicationUrl = route('loan-applications.issue.form', $loanApplicationId);
             } catch (\Exception $e) {
                 // The original error logging is good practice and remains unchanged.
-                Log::error('Error generating URL for LoanApplicationReadyForIssuanceNotification array: '.$e->getMessage(), ['loan_application_id' => $loanApplicationId]);
+                Log::error('Error generating URL for LoanApplicationReadyForIssuanceNotification array: ' . $e->getMessage(), ['loan_application_id' => $loanApplicationId]);
             }
         }
 
         $itemDetails = $loanApp->loanApplicationItems->map(function ($item): string {
-            return $item->equipment_type.' (Kuantiti: '.($item->quantity_approved ?? $item->quantity_requested).')';
+            return $item->equipment_type . ' (Kuantiti: ' . ($item->quantity_approved ?? $item->quantity_requested) . ')';
         })->toArray();
 
         // The returned array now includes the corrected URL.

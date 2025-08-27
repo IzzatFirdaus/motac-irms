@@ -90,12 +90,12 @@ class EquipmentController extends Controller
             return redirect()->route('equipment.index')
                 ->with('success', __('Peralatan ICT berjaya ditambah.'));
         } catch (\Exception $exception) {
-            Log::error('Error creating equipment by admin: '.$exception->getMessage(), [
+            Log::error('Error creating equipment by admin: ' . $exception->getMessage(), [
                 'exception_class' => get_class($exception),
                 'trace_snippet'   => substr($exception->getTraceAsString(), 0, 500),
             ]);
 
-            return back()->with('error', __('Gagal menambah peralatan ICT: ').$exception->getMessage())
+            return back()->with('error', __('Gagal menambah peralatan ICT: ') . $exception->getMessage())
                 ->withInput();
         }
     }
@@ -154,12 +154,12 @@ class EquipmentController extends Controller
             return redirect()->route('equipment.index')
                 ->with('success', __('Peralatan ICT berjaya dikemaskini.'));
         } catch (\Exception $exception) {
-            Log::error(sprintf('Error updating equipment ID %d by admin: ', $equipment->id).$exception->getMessage(), [
+            Log::error(sprintf('Error updating equipment ID %d by admin: ', $equipment->id) . $exception->getMessage(), [
                 'exception_class' => get_class($exception),
                 'trace_snippet'   => substr($exception->getTraceAsString(), 0, 500),
             ]);
 
-            return back()->with('error', __('Gagal mengemaskini peralatan ICT: ').$exception->getMessage())
+            return back()->with('error', __('Gagal mengemaskini peralatan ICT: ') . $exception->getMessage())
                 ->withInput();
         }
     }
@@ -184,12 +184,12 @@ class EquipmentController extends Controller
             return redirect()->route('equipment.index')
                 ->with('success', __('Peralatan ICT berjaya dipadam.'));
         } catch (\Exception $exception) {
-            Log::error(sprintf('Error deleting equipment ID %d by admin: ', $equipment->id).$exception->getMessage(), [
+            Log::error(sprintf('Error deleting equipment ID %d by admin: ', $equipment->id) . $exception->getMessage(), [
                 'exception_class' => get_class($exception),
                 'trace_snippet'   => substr($exception->getTraceAsString(), 0, 500),
             ]);
 
-            return back()->with('error', __('Gagal memadam peralatan ICT: ').$exception->getMessage());
+            return back()->with('error', __('Gagal memadam peralatan ICT: ') . $exception->getMessage());
         }
     }
 
@@ -212,12 +212,12 @@ class EquipmentController extends Controller
 
             return back()->with('error', __('Gagal mengemaskini status keadaan fizikal peralatan.'));
         } catch (\Exception $exception) {
-            Log::error(sprintf('Error updating condition for equipment ID %d: ', $equipment->id).$exception->getMessage(), [
+            Log::error(sprintf('Error updating condition for equipment ID %d: ', $equipment->id) . $exception->getMessage(), [
                 'exception_class' => get_class($exception),
                 'trace_snippet'   => substr($exception->getTraceAsString(), 0, 500),
             ]);
 
-            return back()->with('error', __('Gagal mengemaskini status keadaan fizikal peralatan: ').$exception->getMessage());
+            return back()->with('error', __('Gagal mengemaskini status keadaan fizikal peralatan: ') . $exception->getMessage());
         }
     }
 }

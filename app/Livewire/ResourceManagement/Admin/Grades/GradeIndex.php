@@ -15,6 +15,10 @@ use Livewire\WithPagination;
  * Handles listing, searching, creating, editing, and deleting of job grades (gred jawatan).
  */
 #[Layout('layouts.app')]
+/**
+ * @property-read \Illuminate\Pagination\LengthAwarePaginator $grades
+ * @property-read \Illuminate\Support\Collection $availableGradesForDropdown
+ */
 class GradeIndex extends Component
 {
     use AuthorizesRequests;
@@ -49,7 +53,7 @@ class GradeIndex extends Component
     public function mount(): void
     {
         $this->authorize('viewAny', Grade::class);
-        $this->editingGrade      = new Grade; // For form binding on create
+        $this->editingGrade      = new Grade(); // For form binding on create
         $this->is_approver_grade = false; // Default for new grade
     }
 
@@ -64,8 +68,8 @@ class GradeIndex extends Component
 
         if ($this->searchTerm !== '' && $this->searchTerm !== '0') {
             $query->where(function ($q) {
-                $q->where('name', 'like', '%'.$this->searchTerm.'%')
-                    ->orWhere('level', 'like', '%'.$this->searchTerm.'%');
+                $q->where('name', 'like', '%' . $this->searchTerm . '%')
+                    ->orWhere('level', 'like', '%' . $this->searchTerm . '%');
             });
         }
 
@@ -184,7 +188,7 @@ class GradeIndex extends Component
                 $this->dispatch('toastr', type: 'error', message: __('Gred ini tidak boleh dipadam kerana digunakan oleh rekod lain (cth: Pengguna, Jawatan, atau sebagai Gred Kelulusan Minimum).'));
             } else {
                 $this->dispatch('toastr', type: 'error', message: __('Gagal memadam gred: Sila hubungi pentadbir.'));
-                \Illuminate\Support\Facades\Log::error('Error deleting grade: '.$queryException->getMessage());
+                \Illuminate\Support\Facades\Log::error('Error deleting grade: ' . $queryException->getMessage());
             }
         }
 
@@ -217,8 +221,8 @@ class GradeIndex extends Component
     public function render(): View
     {
         return view('livewire.resource-management.admin.grades.grade-index', [
-            'gradesList'                 => $this->grades,
-            'availableGradesForDropdown' => $this->availableGradesForDropdown,
+            'gradesList'                 => $this->getGradesProperty(),
+            'availableGradesForDropdown' => $this->getAvailableGradesForDropdownProperty(),
         ]);
     }
 
@@ -246,7 +250,7 @@ class GradeIndex extends Component
         $this->level                 = null;
         $this->min_approval_grade_id = null;
         $this->is_approver_grade     = false;
-        $this->editingGrade          = new Grade;
+        $this->editingGrade          = new Grade();
         $this->deletingGrade         = null;
     }
 }

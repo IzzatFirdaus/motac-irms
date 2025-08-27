@@ -49,7 +49,9 @@ final class Helpers
 
         // Check if the current route is one of the listed routes to apply 'layout-without-menu'
         $bodyClasses = [];
-        if (in_array(Request::route()->getName(), ['resource-management.equipment-admin.show', 'some.other.route'])) {
+        $route       = Request::route();
+        $routeName   = (is_object($route) && method_exists($route, 'getName')) ? (string) $route->getName() : null;
+        if ($routeName && in_array($routeName, ['resource-management.equipment-admin.show', 'some.other.route'], true)) {
             $bodyClasses[] = 'layout-without-menu';
         }
 
@@ -159,7 +161,7 @@ final class Helpers
         $pow   = min($pow, count($units) - 1);
         $bytes /= (1 << (10 * $pow));
 
-        return round($bytes, $precision).' '.$units[$pow];
+        return round($bytes, $precision) . ' ' . $units[$pow];
     }
 
     /**
@@ -183,9 +185,14 @@ final class Helpers
         try {
             return Carbon::parse($dateValue)->translatedFormat($format);
         } catch (\Exception $exception) {
-            Log::error('Error parsing date: '.(is_object($dateValue) ? get_class($dateValue) : (string) $dateValue).sprintf(' with format key: %s. Error: ', $formatKey).$exception->getMessage());
+            // Use structured logging to keep lines short and provide context
+            Log::error('Error parsing date', [
+                'date'      => $dateValue,
+                'formatKey' => $formatKey,
+                'error'     => $exception->getMessage(),
+            ]);
 
-            return $default; // Return default or null on error
+            return $default;
         }
     }
 
@@ -194,13 +201,14 @@ final class Helpers
      */
     public static function isActiveRoute(string $route, array $params = []): string
     {
-        if (Request::routeIs($route)) {
+        if (Request::routeIs($route) === true) {
             if (empty($params)) {
                 return 'active';
             }
-            $currentParams = Request::route()->parameters();
+            $routeObj      = Request::route();
+            $currentParams = (is_object($routeObj) && method_exists($routeObj, 'parameters')) ? (array) $routeObj->parameters() : [];
             foreach ($params as $key => $value) {
-                if (! isset($currentParams[$key]) || $currentParams[$key] !== $value) {
+                if (! array_key_exists($key, $currentParams) || $currentParams[$key] !== $value) {
                     return '';
                 }
             }
@@ -216,7 +224,7 @@ final class Helpers
      */
     public static function getActiveUrl($route): string
     {
-        if (Request::routeIs($route)) {
+        if (Request::routeIs($route) === true) {
             return 'active';
         }
 
@@ -228,7 +236,7 @@ final class Helpers
      */
     public static function getOpenClass($route): string
     {
-        if (Request::routeIs($route)) {
+        if (Request::routeIs($route) === true) {
             return 'open';
         }
 
@@ -249,7 +257,7 @@ final class Helpers
     public static function isMenuOpen($routeNames): string
     {
         foreach ($routeNames as $routeName) {
-            if (Request::routeIs($routeName)) {
+            if (Request::routeIs($routeName) === true) {
                 return 'open';
             }
         }
@@ -263,7 +271,7 @@ final class Helpers
     public static function isMenuActive($routeNames): string
     {
         foreach ($routeNames as $routeName) {
-            if (Request::routeIs($routeName)) {
+            if (Request::routeIs($routeName) === true) {
                 return 'active';
             }
         }
@@ -278,7 +286,7 @@ final class Helpers
     {
         // Merge the provided configs into the current config for the request
         foreach ($pageConfigs as $key => $value) {
-            Config::set('custom.custom.'.$key, $value);
+            Config::set('custom.custom.' . $key, $value);
         }
     }
 }

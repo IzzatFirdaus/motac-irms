@@ -40,7 +40,7 @@ class ApplicationSubmittedNotification extends Mailable implements ShouldQueue
 
     public function envelope(): Envelope
     {
-        $subject = __('Tindakan Diperlukan: Permohonan Pinjaman Peralatan ICT Baru Dihantar').' (#'.$this->application->id.')';
+        $subject = __('Tindakan Diperlukan: Permohonan Pinjaman Peralatan ICT Baru Dihantar') . ' (#' . $this->application->id . ')';
 
         return new Envelope(
             subject: $subject,

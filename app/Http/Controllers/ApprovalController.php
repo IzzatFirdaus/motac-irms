@@ -78,7 +78,7 @@ class ApprovalController extends Controller
         try {
             $this->authorize('view', $approval);
         } catch (AuthorizationException $e) {
-            Log::warning("ApprovalController@show: Authorization failed for Approval ID {$approval->id}. User ID: ".Auth::id().". Error: {$e->getMessage()}"); //
+            Log::warning("ApprovalController@show: Authorization failed for Approval ID {$approval->id}. User ID: " . Auth::id() . ". Error: {$e->getMessage()}"); //
 
             return redirect()->route('approvals.index')->with('error', __('Anda tidak mempunyai kebenaran untuk melihat tugasan kelulusan ini.'));
         }

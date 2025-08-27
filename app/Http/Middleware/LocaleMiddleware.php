@@ -61,9 +61,8 @@ class LocaleMiddleware
             } else {
                 Log::debug("LocaleMiddleware: User's preferred locale '{$userPreferredLocale}' is not in allowed locales. Using fallback.");
             }
-        }
-        // Priority 2: Check session locale (if user preference not available or invalid)
-        elseif (Session::has('locale')) {
+        } elseif (Session::has('locale')) {
+            // Priority 2: Check session locale (if user preference not available or invalid)
             $sessionLocale = Session::get('locale');
             if ($sessionLocale && in_array($sessionLocale, $allowedLocaleKeys, true)) {
                 $finalLocale = $sessionLocale;
@@ -72,9 +71,8 @@ class LocaleMiddleware
                 // Clean up invalid session locale
                 Session::put('locale', $fallbackLocale);
             }
-        }
-        // Priority 3: Use application default locale if valid
-        else {
+        } else {
+            // Priority 3: Use application default locale if valid
             $defaultLocale = Config::get('app.locale', $fallbackLocale);
             if (in_array($defaultLocale, $allowedLocaleKeys, true)) {
                 $finalLocale = $defaultLocale;
@@ -91,7 +89,7 @@ class LocaleMiddleware
 
         // Optional: Log locale changes for debugging (remove in production)
         if (Config::get('app.debug')) {
-            Log::debug("LocaleMiddleware: Set application locale to '{$finalLocale}' for user: ".(Auth::check() ? Auth::user()->name : 'guest'));
+            Log::debug("LocaleMiddleware: Set application locale to '{$finalLocale}' for user: " . (Auth::check() ? Auth::user()->name : 'guest'));
         }
 
         return $next($request);
@@ -119,10 +117,10 @@ class LocaleMiddleware
             'two-factor-challenge',
         ];
 
-        $authViewsPath = resource_path('views/auth');
+        $authViewsPath = \resource_path('views/auth');
         foreach ($viewMap as $view) {
-            $originalPath = $authViewsPath."/{$view}.blade.php";
-            $renamedPath  = $authViewsPath."/{$view}-page.blade.php";
+            $originalPath = $authViewsPath . "/{$view}.blade.php";
+            $renamedPath  = $authViewsPath . "/{$view}-page.blade.php";
 
             // Only create the link if the renamed exists and the original does not
             if (! file_exists($originalPath) && file_exists($renamedPath)) {
@@ -137,7 +135,7 @@ class LocaleMiddleware
                     }
                 } catch (\Throwable $e) {
                     // If symlink or copy fails, ignore and let the missing view error show as fallback
-                    Log::warning("LocaleMiddleware: Could not create alias for auth view '{$view}': ".$e->getMessage());
+                    Log::warning("LocaleMiddleware: Could not create alias for auth view '{$view}': " . $e->getMessage());
                 }
             }
         }

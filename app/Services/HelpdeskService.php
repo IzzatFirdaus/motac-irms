@@ -38,7 +38,7 @@ class HelpdeskService
     public function createTicket(array $data, User $applicant, array $attachments = []): HelpdeskTicket
     {
         return DB::transaction(function () use ($data, $applicant, $attachments) {
-            $ticket = new HelpdeskTicket;
+            $ticket = new HelpdeskTicket();
             $ticket->fill($data);
             $ticket->user_id = $applicant->id;
             $ticket->status  = HelpdeskTicket::STATUS_OPEN;
@@ -64,7 +64,7 @@ class HelpdeskService
     public function addComment(HelpdeskTicket $ticket, string $commentText, User $user, array $attachments = [], bool $isInternal = false): HelpdeskComment
     {
         return DB::transaction(function () use ($ticket, $commentText, $user, $attachments, $isInternal) {
-            $comment = new HelpdeskComment;
+            $comment = new HelpdeskComment();
             // Comment model uses 'ticket_id' as FK
             $comment->ticket_id   = $ticket->id;
             $comment->user_id     = $user->id;

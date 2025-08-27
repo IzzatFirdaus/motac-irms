@@ -10,6 +10,7 @@ use App\Models\HelpdeskComment;
 use App\Models\HelpdeskTicket;
 use App\Models\LoanApplication;
 use App\Models\LoanTransaction;
+use App\Models\LoanTransactionItem;
 use App\Models\User;
 use App\Notifications\ApplicationApproved;
 use App\Notifications\ApplicationNeedsAction;
@@ -162,9 +163,15 @@ class NotificationService
      */
     public function notifyEquipmentIncident(User $recipient, LoanApplication $loanApplication, Equipment $equipment, string $incidentType, ?string $notes = null): void
     {
-        // Ensure we pass an Eloquent Collection as required by the notification constructor
-        $collection = Equipment::whereIn('id', [$equipment->id])->get();
-        $this->notifyUser($recipient, new EquipmentIncidentNotification($loanApplication, $collection, $incidentType));
+        // Build a collection of LoanTransactionItem(s) related to the equipment
+        // Prefer the most recent transaction item for this equipment
+        $items = LoanTransactionItem::query()
+            ->where('equipment_id', $equipment->id)
+            ->latest('id')
+            ->take(1)
+            ->get();
+
+        $this->notifyUser($recipient, new EquipmentIncidentNotification($loanApplication, $items, $incidentType));
     }
 
     /**

@@ -48,7 +48,7 @@ class ApplicationNeedsAction extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         $application = $this->approvalTask->approvable;
-        $subject     = __('Tindakan Diperlukan: Permohonan Pinjaman ICT #').($application->id ?? 'N/A');
+        $subject     = __('Tindakan Diperlukan: Permohonan Pinjaman ICT #') . ($application->id ?? 'N/A');
 
         return new Envelope(
             subject: $subject,

@@ -68,9 +68,9 @@ class GradeController extends Controller
             return redirect()->route('settings.grades.index')
                 ->with('success', __('Gred berjaya ditambah.'));
         } catch (\Exception $exception) {
-            Log::error('Error storing grade by admin: '.$exception->getMessage(), ['exception_class' => get_class($exception), 'trace_snippet' => substr($exception->getTraceAsString(), 0, 250)]);
+            Log::error('Error storing grade by admin: ' . $exception->getMessage(), ['exception_class' => get_class($exception), 'trace_snippet' => substr($exception->getTraceAsString(), 0, 250)]);
 
-            return back()->with('error', __('Gagal menambah gred: ').$exception->getMessage())->withInput();
+            return back()->with('error', __('Gagal menambah gred: ') . $exception->getMessage())->withInput();
         }
     }
 
@@ -117,9 +117,9 @@ class GradeController extends Controller
             return redirect()->route('settings.grades.index')
                 ->with('success', __('Butiran gred berjaya dikemaskini.'));
         } catch (\Exception $exception) {
-            Log::error(sprintf('Error updating grade ID %d by admin: ', $grade->id).$exception->getMessage(), ['exception_class' => get_class($exception), 'trace_snippet' => substr($exception->getTraceAsString(), 0, 250)]);
+            Log::error(sprintf('Error updating grade ID %d by admin: ', $grade->id) . $exception->getMessage(), ['exception_class' => get_class($exception), 'trace_snippet' => substr($exception->getTraceAsString(), 0, 250)]);
 
-            return back()->with('error', __('Gagal mengemaskini gred: ').$exception->getMessage())->withInput();
+            return back()->with('error', __('Gagal mengemaskini gred: ') . $exception->getMessage())->withInput();
         }
     }
 
@@ -142,9 +142,9 @@ class GradeController extends Controller
             return redirect()->route('settings.grades.index')
                 ->with('success', __('Gred berjaya dipadam.'));
         } catch (\Exception $exception) {
-            Log::error(sprintf('Error deleting grade ID %d by admin: ', $grade->id).$exception->getMessage(), ['exception_class' => get_class($exception), 'trace_snippet' => substr($exception->getTraceAsString(), 0, 250)]);
+            Log::error(sprintf('Error deleting grade ID %d by admin: ', $grade->id) . $exception->getMessage(), ['exception_class' => get_class($exception), 'trace_snippet' => substr($exception->getTraceAsString(), 0, 250)]);
 
-            return back()->with('error', __('Gagal memadam gred: ').$exception->getMessage());
+            return back()->with('error', __('Gagal memadam gred: ') . $exception->getMessage());
         }
     }
 }

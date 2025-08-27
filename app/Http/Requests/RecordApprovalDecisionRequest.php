@@ -108,15 +108,15 @@ class RecordApprovalDecisionRequest extends FormRequest
                 if ($loanAppItem && $loanAppItem->equipment_type) {
                     $itemTypeDisplay = optional(\App\Models\Equipment::getAssetTypeOptions())[$loanAppItem->equipment_type] ?? $loanAppItem->equipment_type; //
                 } elseif ($loanApplicationItemId !== 0 && ($loanApplicationItemId !== '' && $loanApplicationItemId !== '0')) {
-                    $itemTypeDisplay = 'Item ID '.$loanApplicationItemId; //
+                    $itemTypeDisplay = 'Item ID ' . $loanApplicationItemId; //
                 }
 
                 $maxQty = $loanAppItem ? $loanAppItem->quantity_requested : 0; //
 
-                $messages['items_approved.'.$loanApplicationItemId.'.quantity_approved.required'] = __('Kuantiti diluluskan untuk :itemType wajib diisi.', ['itemType' => $itemTypeDisplay]); //
-                $messages['items_approved.'.$loanApplicationItemId.'.quantity_approved.integer']  = __('Kuantiti diluluskan untuk :itemType mesti nombor bulat.', ['itemType' => $itemTypeDisplay]); //
-                $messages['items_approved.'.$loanApplicationItemId.'.quantity_approved.min']      = __('Kuantiti diluluskan untuk :itemType tidak boleh kurang dari 0.', ['itemType' => $itemTypeDisplay]); //
-                $messages['items_approved.'.$loanApplicationItemId.'.quantity_approved.max']      = __('Kuantiti diluluskan untuk :itemType tidak boleh melebihi kuantiti dipohon (:max).', ['itemType' => $itemTypeDisplay, 'max' => $maxQty]); //
+                $messages['items_approved.' . $loanApplicationItemId . '.quantity_approved.required'] = __('Kuantiti diluluskan untuk :itemType wajib diisi.', ['itemType' => $itemTypeDisplay]); //
+                $messages['items_approved.' . $loanApplicationItemId . '.quantity_approved.integer']  = __('Kuantiti diluluskan untuk :itemType mesti nombor bulat.', ['itemType' => $itemTypeDisplay]); //
+                $messages['items_approved.' . $loanApplicationItemId . '.quantity_approved.min']      = __('Kuantiti diluluskan untuk :itemType tidak boleh kurang dari 0.', ['itemType' => $itemTypeDisplay]); //
+                $messages['items_approved.' . $loanApplicationItemId . '.quantity_approved.max']      = __('Kuantiti diluluskan untuk :itemType tidak boleh melebihi kuantiti dipohon (:max).', ['itemType' => $itemTypeDisplay, 'max' => $maxQty]); //
             }
         }
         // Removed the conditional block for EmailApplication as per the refactoring plan.

@@ -24,7 +24,7 @@ class EnsureTestDatabaseExists extends Command
             $pdo->exec("CREATE DATABASE IF NOT EXISTS `$testDbName` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;");
             $this->info("Test database '$testDbName' ensured.");
         } catch (\Exception $e) {
-            $this->error('Failed to create test database: '.$e->getMessage());
+            $this->error('Failed to create test database: ' . $e->getMessage());
 
             return 1;
         }

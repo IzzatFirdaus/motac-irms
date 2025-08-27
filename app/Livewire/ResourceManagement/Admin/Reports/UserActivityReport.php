@@ -17,6 +17,11 @@ use Spatie\Permission\Models\Role;
  */
 #[Layout('layouts.app')]
 #[Title('Laporan Aktiviti Pengguna')]
+/**
+ * @property-read \Illuminate\Pagination\LengthAwarePaginator $reportData
+ * @property-read \Illuminate\Support\Collection $departmentOptions
+ * @property-read \Illuminate\Support\Collection $roleOptions
+ */
 class UserActivityReport extends Component
 {
     use AuthorizesRequests;
@@ -59,8 +64,8 @@ class UserActivityReport extends Component
             ->with(['department', 'roles'])
             ->when($this->searchTerm, function ($q) {
                 $q->where(function ($subQuery) {
-                    $subQuery->where('name', 'like', '%'.$this->searchTerm.'%')
-                        ->orWhere('email', 'like', '%'.$this->searchTerm.'%');
+                    $subQuery->where('name', 'like', '%' . $this->searchTerm . '%')
+                        ->orWhere('email', 'like', '%' . $this->searchTerm . '%');
                 });
             })
             ->when($this->filterDepartmentId, function ($q) {
@@ -129,9 +134,9 @@ class UserActivityReport extends Component
     public function render()
     {
         return view('livewire.resource-management.admin.reports.user-activity-report', [
-            'reportData'        => $this->reportData,
-            'departmentOptions' => $this->departmentOptions,
-            'roleOptions'       => $this->roleOptions,
+            'reportData'        => $this->getReportDataProperty(),
+            'departmentOptions' => $this->getDepartmentOptionsProperty(),
+            'roleOptions'       => $this->getRoleOptionsProperty(),
         ]);
     }
 }

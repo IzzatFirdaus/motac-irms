@@ -21,7 +21,6 @@ declare(strict_types=1);
 */
 
 use App\Http\Controllers\ApprovalController;
-
 // --------------------------------------------------
 // Controller Imports (for public/static/some controller routes)
 // --------------------------------------------------
@@ -33,7 +32,6 @@ use App\Http\Controllers\MiscErrorController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ReportController;
 use App\Livewire\Charts\LoanSummaryChart;
-
 // --------------------------------------------------
 // Livewire Component Imports (for all Livewire-based UI)
 // --------------------------------------------------

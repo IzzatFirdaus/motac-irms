@@ -3,12 +3,11 @@
 namespace App\Livewire\HumanResource\Structure;
 
 use App\Models\Department;
-use App\Models\Employee;
 use App\Models\Position;
-use App\Models\Timeline;
 use App\Models\User;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
@@ -27,8 +26,10 @@ class EmployeeInfo extends Component
 
     public $positions;
 
-    // public $employee; // Type-hinted
-    // public $timeline = null; // current timeline
+    public ?User $employee = null; // current employee
+
+    public ?Model $timeline = null; // current timeline (generic Eloquent model)
+
     public $employeeTimelines;
 
     public array $employeeTimelineInfo = [];
@@ -67,10 +68,13 @@ class EmployeeInfo extends Component
      */
     public function toggleStatus(): void
     {
-        $presentTimeline = $this->employee
-            ->timelines()
-            ->orderBy('start_date', 'desc')
-            ->first();
+        $presentTimeline = null;
+        if ($this->employee && method_exists($this->employee, 'timelines')) {
+            /** @phpstan-ignore-next-line dynamic relation may exist on User model */
+            $presentTimeline = $this->employee->timelines()
+                ->orderBy('start_date', 'desc')
+                ->first();
+        }
 
         if ($this->employee->status === User::STATUS_ACTIVE) {
             $this->employee->status = User::STATUS_INACTIVE;
@@ -85,7 +89,7 @@ class EmployeeInfo extends Component
         }
 
         $this->employee->save();
-        if ($presentTimeline) {
+        if ($presentTimeline instanceof Model) {
             $presentTimeline->save();
         }
 
@@ -141,24 +145,14 @@ class EmployeeInfo extends Component
         try {
             // Logic to end previous timeline and add new entry would go here.
             // Uncomment and implement as needed.
-            /*
-            Timeline::create([
-                'employee_id' => $this->employee->id,
-                'center_id' => $this->selectedCenter,
-                'department_id' => $this->selectedDepartment,
-                'position_id' => $this->selectedPosition,
-                'start_date' => $this->employeeTimelineInfo['startDate'],
-                'end_date' => $this->employeeTimelineInfo['endDate'] ?? null,
-                'is_sequent' => $this->employeeTimelineInfo['is_sequent'],
-                'notes' => $this->employeeTimelineInfo['notes'] ?? null,
-            ]);
-            */
+            // NOTE: Timeline model is not present in this codebase at the moment.
+            // If/when introduced, create a new timeline record here.
             $this->dispatch('closeModal', elementId: '#timelineModal');
             session()->flash('toastr', ['type' => 'success', 'message' => __('Rekod sejarah pekerjaan berjaya ditambah.')]);
             DB::commit();
         } catch (Exception $exception) {
             DB::rollBack();
-            Log::error('Error storing timeline: '.$exception->getMessage(), ['exception' => $exception]);
+            Log::error('Error storing timeline: ' . $exception->getMessage(), ['exception' => $exception]);
             session()->flash('toastr', ['type' => 'error', 'message' => __('Gagal menyimpan rekod sejarah pekerjaan.')]);
         }
 
@@ -170,7 +164,7 @@ class EmployeeInfo extends Component
      */
     public function updateTimeline(): void
     {
-        if (! $this->timeline) {
+        if (! $this->timeline instanceof Model) {
             session()->flash('toastr', ['type' => 'error', 'message' => __('Rekod sejarah tidak ditemui.')]);
 
             return;

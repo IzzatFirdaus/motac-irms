@@ -39,7 +39,7 @@ class SuffixedFileLoader extends FileLoader
     public function load($locale, $group, $namespace = null)
     {
         // Debug log to trace loader calls and parameters
-        Log::debug("[SuffixedFileLoader] load() called: locale={$locale}, group={$group}, namespace=".($namespace ?? 'null'));
+        Log::debug("[SuffixedFileLoader] load() called: locale={$locale}, group={$group}, namespace=" . ($namespace ?? 'null'));
 
         // Attempt to load suffixed translation file
         $lines = $this->loadSuffixed($locale, $group, $namespace);

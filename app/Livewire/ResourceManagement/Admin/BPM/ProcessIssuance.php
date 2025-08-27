@@ -157,8 +157,8 @@ class ProcessIssuance extends Component
 
             return $this->redirectRoute('loan-applications.show', ['loan_application' => $this->loanApplication->id], navigate: true);
         } catch (Throwable $throwable) {
-            Log::error('Error in ProcessIssuance@submitIssue: '.$throwable->getMessage(), ['exception' => $throwable]);
-            session()->flash('error', __('Gagal merekodkan pengeluaran disebabkan ralat sistem: ').$throwable->getMessage());
+            Log::error('Error in ProcessIssuance@submitIssue: ' . $throwable->getMessage(), ['exception' => $throwable]);
+            session()->flash('error', __('Gagal merekodkan pengeluaran disebabkan ralat sistem: ') . $throwable->getMessage());
         }
 
         return null;

@@ -98,9 +98,9 @@ final class LoanTransactionController extends Controller
             return redirect()->route('loan-applications.show', $loanApplication->id)
                 ->with('success', __('Pengeluaran peralatan berjaya direkodkan.'));
         } catch (Throwable $throwable) {
-            Log::error('Error in LoanTransactionController@storeIssue: '.$throwable->getMessage(), ['exception' => $throwable]);
+            Log::error('Error in LoanTransactionController@storeIssue: ' . $throwable->getMessage(), ['exception' => $throwable]);
 
-            return redirect()->back()->withInput()->with('error', __('Gagal merekodkan pengeluaran peralatan: ').$throwable->getMessage());
+            return redirect()->back()->withInput()->with('error', __('Gagal merekodkan pengeluaran peralatan: ') . $throwable->getMessage());
         }
     }
 
@@ -193,9 +193,9 @@ final class LoanTransactionController extends Controller
             return redirect()->route('loan-applications.show', $loanTransaction->loan_application_id)
                 ->with('success', __('Peralatan telah berjaya direkodkan pemulangannya.'));
         } catch (Throwable $throwable) {
-            Log::error('Error in LoanTransactionController@storeReturn: '.$throwable->getMessage(), ['exception' => $throwable]);
+            Log::error('Error in LoanTransactionController@storeReturn: ' . $throwable->getMessage(), ['exception' => $throwable]);
 
-            return redirect()->back()->withInput()->with('error', __('Gagal merekodkan pemulangan: ').$throwable->getMessage());
+            return redirect()->back()->withInput()->with('error', __('Gagal merekodkan pemulangan: ') . $throwable->getMessage());
         }
     }
 }

@@ -81,7 +81,7 @@ class TicketController extends Controller
                 'error'   => $e->getMessage(),
             ]);
 
-            return back()->with('error', __('Gagal menghantar tiket bantuan: ').$e->getMessage())
+            return back()->with('error', __('Gagal menghantar tiket bantuan: ') . $e->getMessage())
                 ->withInput();
         }
     }
@@ -146,7 +146,7 @@ class TicketController extends Controller
                 'error'     => $e->getMessage(),
             ]);
 
-            return back()->with('error', __('Gagal mengemaskini tiket: ').$e->getMessage())
+            return back()->with('error', __('Gagal mengemaskini tiket: ') . $e->getMessage())
                 ->withInput();
         }
     }
@@ -175,7 +175,7 @@ class TicketController extends Controller
                 'error'     => $e->getMessage(),
             ]);
 
-            return back()->with('error', __('Gagal memadam tiket: ').$e->getMessage());
+            return back()->with('error', __('Gagal memadam tiket: ') . $e->getMessage());
         }
     }
 }

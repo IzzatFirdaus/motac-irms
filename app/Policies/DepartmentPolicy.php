@@ -27,8 +27,6 @@ class DepartmentPolicy
 
     /**
      * Determine whether the user can view the list of departments.
-     *
-     * @return \Illuminate\Auth\Access\Response|bool
      */
     public function viewAny(User $user): Response
     {
@@ -41,8 +39,6 @@ class DepartmentPolicy
 
     /**
      * Determine whether the user can view a specific department.
-     *
-     * @return \Illuminate\Auth\Access\Response|bool
      */
     public function view(User $user, Department $department): Response
     {
@@ -55,8 +51,6 @@ class DepartmentPolicy
 
     /**
      * Determine whether the user can create new departments.
-     *
-     * @return \Illuminate\Auth\Access\Response|bool
      */
     public function create(User $user): Response
     {
@@ -67,8 +61,6 @@ class DepartmentPolicy
 
     /**
      * Determine whether the user can update a department.
-     *
-     * @return \Illuminate\Auth\Access\Response|bool
      */
     public function update(User $user, Department $department): Response
     {
@@ -81,8 +73,6 @@ class DepartmentPolicy
 
     /**
      * Determine whether the user can delete a department.
-     *
-     * @return \Illuminate\Auth\Access\Response|bool
      */
     public function delete(User $user, Department $department): Response
     {
@@ -92,8 +82,6 @@ class DepartmentPolicy
 
     /**
      * Determine whether the user can restore a soft-deleted department.
-     *
-     * @return \Illuminate\Auth\Access\Response|bool
      */
     public function restore(User $user, Department $department): Response
     {
@@ -103,8 +91,6 @@ class DepartmentPolicy
 
     /**
      * Determine whether the user can permanently delete a department.
-     *
-     * @return \Illuminate\Auth\Access\Response|bool
      */
     public function forceDelete(User $user, Department $department): Response
     {

@@ -268,7 +268,7 @@ class LoanRequestForm extends Component
             $this->dispatch('swal:error', ['message' => 'Sila semak semula borang.']);
             throw $e;
         } catch (Throwable $e) {
-            $this->dispatch('swal:error', ['message' => 'Gagal menghantar permohonan pinjaman: '.$e->getMessage()]);
+            $this->dispatch('swal:error', ['message' => 'Gagal menghantar permohonan pinjaman: ' . $e->getMessage()]);
         }
 
         return redirect()->route('loan-applications.index');
@@ -312,19 +312,5 @@ class LoanRequestForm extends Component
         $this->applicant_confirmation = (bool) $this->loanApplication->applicant_confirmation_timestamp;
     }
 
-    /**
-     * Helper to determine submission status, not used directly anymore as status handled in service.
-     * Left here for possible future use.
-     */
-    private function determineSubmissionStatus(bool $isFinalButtonClicked): string
-    {
-        $currentUser = Auth::user();
-        if (
-            $this->isEdit && $this->loanApplication instanceof LoanApplication && $this->loanApplication->status !== LoanApplication::STATUS_DRAFT && ! $currentUser->hasRole('Admin')
-        ) {
-            return $this->loanApplication->status;
-        }
-
-        return $isFinalButtonClicked ? LoanApplication::STATUS_PENDING_SUPPORT : LoanApplication::STATUS_DRAFT;
-    }
+    // determineSubmissionStatus method removed (unused)
 }

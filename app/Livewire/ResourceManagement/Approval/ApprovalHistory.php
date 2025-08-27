@@ -116,7 +116,7 @@ class ApprovalHistory extends Component
             })
             // Advanced search functionality
             ->when($this->search, function ($query) {
-                $searchTerm = '%'.strtolower($this->search).'%';
+                $searchTerm = '%' . strtolower($this->search) . '%';
                 $query->where(function ($q) use ($searchTerm) {
                     // Search within the polymorphic approvable relationship
                     $q->whereHasMorph(
@@ -256,9 +256,9 @@ class ApprovalHistory extends Component
     public function render(): View
     {
         return view('livewire.resource-management.approval.approval-history', [
-            'approvals'              => $this->approvals, // Use the computed property
-            'applicationTypeOptions' => $this->applicationTypeOptions,
-            'decisionOptions'        => $this->decisionOptions,
+            'approvals'              => $this->getApprovalsProperty(),
+            'applicationTypeOptions' => $this->getApplicationTypeOptionsProperty(),
+            'decisionOptions'        => $this->getDecisionOptionsProperty(),
         ]);
     }
 }

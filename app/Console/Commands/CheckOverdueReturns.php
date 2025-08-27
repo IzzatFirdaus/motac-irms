@@ -63,7 +63,7 @@ class CheckOverdueReturns extends Command
             $latestIssueTransaction = $application->latestIssueTransaction; // Get the latest issue transaction
 
             if (! $user) {
-                Log::warning('Overdue loan application (ID: '.$application->id.') has no associated user. Skipping notification.', [
+                Log::warning('Overdue loan application (ID: ' . $application->id . ') has no associated user. Skipping notification.', [
                     'loan_application_id' => $application->id,
                 ]);
 
@@ -71,7 +71,7 @@ class CheckOverdueReturns extends Command
             }
 
             if (! $latestIssueTransaction) {
-                Log::warning('Overdue loan application (ID: '.$application->id.') has no issue transaction. Skipping notification.', [
+                Log::warning('Overdue loan application (ID: ' . $application->id . ') has no issue transaction. Skipping notification.', [
                     'loan_application_id' => $application->id,
                     'user_id'             => $user->id,
                 ]);
@@ -96,7 +96,7 @@ class CheckOverdueReturns extends Command
             // $this->notificationService->notifySupervisorOfOverdue($application);
         }
 
-        $this->info('Overdue applications processed: '.$overdueApplications->count());
+        $this->info('Overdue applications processed: ' . $overdueApplications->count());
 
         return \Symfony\Component\Console\Command\Command::SUCCESS;
     }

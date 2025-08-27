@@ -60,12 +60,12 @@ class TicketCommentAddedNotification extends Notification implements ShouldQueue
             $messageLine = "An internal comment has been added to ticket **#{$ticket->id}** (`{$ticket->title}`) by `{$commenterName}`.";
         }
 
-        return (new MailMessage)
+        return (new MailMessage())
             ->subject($subject)
             ->greeting($greeting)
             ->line($messageLine)
             ->line("Comment: \"{$this->comment->comment}\"")
-            ->action('View Ticket', url('/helpdesk/'.$ticket->id))
+            ->action('View Ticket', url('/helpdesk/' . $ticket->id))
             ->line('Thank you.');
     }
 
@@ -81,7 +81,7 @@ class TicketCommentAddedNotification extends Notification implements ShouldQueue
             'comment_id'     => $this->comment->id,
             'commenter_name' => $this->commenter->name,
             'message'        => "New comment on ticket #{$this->comment->ticket_id}.",
-            'url'            => url('/helpdesk/'.$this->comment->ticket_id),
+            'url'            => url('/helpdesk/' . $this->comment->ticket_id),
         ];
     }
 }

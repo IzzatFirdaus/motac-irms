@@ -87,6 +87,21 @@ class ApprovalService
     }
 
     /**
+     * Compatibility wrapper for older callers named `processApprovalDecision`.
+     * Keeps existing behavior by delegating to recordApprovalDecision.
+     *
+     * @param Approval $approval
+     * @param string $decision
+     * @param string|null $notes
+     * @param array $approvalItems
+     */
+    public function processApprovalDecision(Approval $approval, string $decision, ?User $actor = null, ?string $notes = null, ?array $approvalItems = null): void
+    {
+        // Allow older callers (without $actor) and newer callers (with $actor) seamlessly
+        $this->recordApprovalDecision($approval, $decision, $notes, $approvalItems ?? []);
+    }
+
+    /**
      * Handles the logic after an approval decision is approved.
      *
      * @param Approval        $approval        The approval record that was approved.
@@ -100,7 +115,7 @@ class ApprovalService
         DB::transaction(function () use ($approval, $loanApplication, $comments): void {
             // Update the current approval record
             $approval->status      = Approval::STATUS_APPROVED;
-            $approval->comments    = $comments;
+            $approval->notes       = $comments;
             $approval->approved_at = now();
             $approval->save();
 
@@ -161,7 +176,7 @@ class ApprovalService
         DB::transaction(function () use ($approval, $loanApplication, $reason): void {
             // Update the approval record
             $approval->status      = Approval::STATUS_REJECTED;
-            $approval->comments    = $reason;
+            $approval->notes       = $reason;
             $approval->rejected_at = now();
             $approval->save();
 

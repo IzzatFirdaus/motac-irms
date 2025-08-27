@@ -39,9 +39,9 @@ class EquipmentReport extends Component
 
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('tag_id', 'like', '%'.$this->search.'%')
-                    ->orWhere('brand', 'like', '%'.$this->search.'%')
-                    ->orWhere('model', 'like', '%'.$this->search.'%');
+                $q->where('tag_id', 'like', '%' . $this->search . '%')
+                    ->orWhere('brand', 'like', '%' . $this->search . '%')
+                    ->orWhere('model', 'like', '%' . $this->search . '%');
             });
         }
         if ($this->filterStatus) {
@@ -89,7 +89,7 @@ class EquipmentReport extends Component
         ];
 
         return view('livewire.resource-management.reports.equipment-report', [
-            'equipmentList' => $this->equipmentList,
+            'equipmentList' => $this->getEquipmentListProperty(),
             'departments'   => $departments,
             'statusOptions' => $statusOptions,
         ]);

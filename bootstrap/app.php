@@ -6,10 +6,10 @@ use Illuminate\Foundation\Configuration\Middleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__.'/../routes/web.php', // Confirmed usage for all web routes
-        api: __DIR__.'/../routes/api.php', // Confirmed usage for API routes
-        commands: __DIR__.'/../routes/console.php',
-        channels: __DIR__.'/../routes/channels.php', // Confirmed usage for broadcasting
+        web: __DIR__ . '/../routes/web.php', // Confirmed usage for all web routes
+        api: __DIR__ . '/../routes/api.php', // Confirmed usage for API routes
+        commands: __DIR__ . '/../routes/console.php',
+        channels: __DIR__ . '/../routes/channels.php', // Confirmed usage for broadcasting
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {

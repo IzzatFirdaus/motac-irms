@@ -38,8 +38,8 @@ class LoanApplicationsReport extends Component
 
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('application_number', 'like', '%'.$this->search.'%')
-                    ->orWhere('purpose', 'like', '%'.$this->search.'%');
+                $q->where('application_number', 'like', '%' . $this->search . '%')
+                    ->orWhere('purpose', 'like', '%' . $this->search . '%');
             });
         }
         if ($this->filterStatus) {
@@ -90,7 +90,7 @@ class LoanApplicationsReport extends Component
         ];
 
         return view('livewire.resource-management.reports.loan-applications-report', [
-            'loanApplications' => $this->loanApplications,
+            'loanApplications' => $this->getLoanApplicationsProperty(),
             'departments'      => $departments,
             'statusOptions'    => $statusOptions,
         ]);

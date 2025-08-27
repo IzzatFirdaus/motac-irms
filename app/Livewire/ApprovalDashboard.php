@@ -108,7 +108,7 @@ class ApprovalDashboard extends Component
 
         // Search
         if ($this->searchTerm !== '') {
-            $searchTerm = '%'.trim($this->searchTerm).'%';
+            $searchTerm = '%' . trim($this->searchTerm) . '%';
             $query->where(function (Builder $q) use ($searchTerm): void {
                 $q->whereHasMorph('approvable', [LoanApplication::class], function (Builder $morphQuery) use ($searchTerm): void {
                     $morphQuery->where('application_no', 'like', $searchTerm)
@@ -182,25 +182,30 @@ class ApprovalDashboard extends Component
     {
         $this->validate();
 
+        $user = Auth::user();
         try {
-            $user = Auth::user();
             if (! $this->selectedApproval || ! $user) {
                 throw new \Exception('No approval selected or user not authenticated.');
             }
 
             $this->authorize('approveOrReject', $this->selectedApproval);
 
+            $approvable = $this->selectedApproval->approvable;
+            if (! ($approvable instanceof LoanApplication)) {
+                throw new \Exception('Jenis permohonan tidak disokong untuk tindakan kelulusan.');
+            }
+
             if ($this->decision === Approval::STATUS_APPROVED) {
                 $this->approvalService->handleApprovedDecision(
                     $this->selectedApproval,
-                    $this->selectedApproval->approvable,
+                    $approvable,
                     $this->comments
                 );
                 $this->dispatch('toastr', type: 'success', message: __('Keputusan Lulus berjaya direkodkan.'));
             } elseif ($this->decision === Approval::STATUS_REJECTED) {
                 $this->approvalService->handleRejectedDecision(
                     $this->selectedApproval,
-                    $this->selectedApproval->approvable,
+                    $approvable,
                     $this->comments
                 );
                 $this->dispatch('toastr', type: 'success', message: __('Keputusan Tolak berjaya direkodkan.'));
@@ -211,11 +216,11 @@ class ApprovalDashboard extends Component
             $this->closeModal();
             $this->refreshDataEvent();
         } catch (AuthorizationException $e) {
-            Log::error('ApprovalDashboard: Authorization error on submitDecision.', ['message' => $e->getMessage(), 'user_id' => $user->id]);
+            Log::error('ApprovalDashboard: Authorization error on submitDecision.', ['message' => $e->getMessage(), 'user_id' => $user?->id]);
             $this->dispatch('toastr', type: 'error', message: __('Anda tidak dibenarkan untuk tindakan ini.'));
         } catch (Throwable $e) {
-            Log::error('ApprovalDashboard: Error submitting decision.', ['exception' => $e, 'user_id' => $user->id]);
-            $this->dispatch('toastr', type: 'error', message: __('Gagal merekodkan keputusan: ').$e->getMessage());
+            Log::error('ApprovalDashboard: Error submitting decision.', ['exception' => $e, 'user_id' => $user?->id]);
+            $this->dispatch('toastr', type: 'error', message: __('Gagal merekodkan keputusan: ') . $e->getMessage());
         }
     }
 

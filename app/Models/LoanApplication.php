@@ -9,6 +9,7 @@ use Database\Factories\LoanApplicationFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
@@ -177,6 +178,21 @@ class LoanApplication extends Model
         return $this->hasMany(LoanTransaction::class, 'loan_application_id');
     }
 
+    /**
+     * Convenience relation: all equipment linked via application items.
+     */
+    public function equipment(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Equipment::class,
+            LoanApplicationItem::class,
+            'loan_application_id', // Foreign key on LoanApplicationItem...
+            'id',                  // Foreign key on Equipment (primary key)
+            'id',                  // Local key on LoanApplication
+            'equipment_id'         // Local key on LoanApplicationItem
+        );
+    }
+
     public function approvals(): MorphMany
     {
         return $this->morphMany(Approval::class, 'approvable');
@@ -311,6 +327,17 @@ class LoanApplication extends Model
     public function getLatestIssueTransactionAttribute(): ?LoanTransaction
     {
         return $this->loanTransactions()->where('type', 'issue')->latest('transaction_date')->first();
+    }
+
+    /**
+     * Backwards-compatibility: allow `$loanApplication->transactions` to access the loanTransactions collection.
+     * Returns a Collection, loading the relation if necessary.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanTransaction>
+     */
+    public function getTransactionsAttribute()
+    {
+        return $this->getRelationValue('loanTransactions');
     }
 
     // Scopes

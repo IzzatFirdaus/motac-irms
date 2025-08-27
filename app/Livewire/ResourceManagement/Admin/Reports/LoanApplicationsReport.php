@@ -15,6 +15,10 @@ use Livewire\WithPagination;
 /**
  * LoanApplicationsReport Livewire component.
  * Generates a report of loan applications with search, filtering, and sorting.
+ *
+ * @property-read \Illuminate\Pagination\LengthAwarePaginator $reportData
+ * @property-read array $statusOptions
+ * @property-read \Illuminate\Support\Collection $departmentOptions
  */
 #[Layout('layouts.app')]
 class LoanApplicationsReport extends Component
@@ -57,7 +61,7 @@ class LoanApplicationsReport extends Component
      */
     public function mount(): void
     {
-        Log::info('Livewire\\LoanApplicationsReport: Component mounted by Admin User ID: '.(Auth::id() ?? 'Guest'), [
+        Log::info('Livewire\\LoanApplicationsReport: Component mounted by Admin User ID: ' . (Auth::id() ?? 'Guest'), [
             'ip_address' => request()->ip(),
         ]);
     }
@@ -74,7 +78,7 @@ class LoanApplicationsReport extends Component
         ]);
 
         if ($this->searchTerm !== '' && $this->searchTerm !== '0') {
-            $search = '%'.strtolower($this->searchTerm).'%';
+            $search = '%' . strtolower($this->searchTerm) . '%';
             $query->where(function ($q) use ($search): void {
                 $q->where('id', 'like', $search)
                     ->orWhereRaw('LOWER(purpose) LIKE ?', [$search])
@@ -118,8 +122,7 @@ class LoanApplicationsReport extends Component
     // Options for filter dropdowns
     public function getStatusOptionsProperty(): array
     {
-        // Assuming LoanApplication model has $STATUS_OPTIONS static array
-        return LoanApplication::$STATUS_OPTIONS ?? [];
+        return LoanApplication::getStatusOptions();
     }
 
     public function getDepartmentOptionsProperty(): \Illuminate\Support\Collection
