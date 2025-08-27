@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Schema;
 /**
  * Migration for storing webhook calls and their payloads/results.
  */
+
 return new class extends Migration
 {
     /**

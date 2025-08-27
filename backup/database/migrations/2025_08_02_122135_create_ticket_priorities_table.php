@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
  * Creates the 'ticket_priorities' table for generic helpdesk/ticketing.
  * E.g., Low, Medium, High, Critical.
  */
+
 return new class extends Migration
 {
     public function up(): void

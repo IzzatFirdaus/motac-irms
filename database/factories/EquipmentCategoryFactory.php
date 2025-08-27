@@ -49,7 +49,7 @@ class EquipmentCategoryFactory extends Factory
         ];
 
         return [
-            'name'        => $this->faker->unique()->randomElement($categoryNames).' '.$this->faker->unique()->word(),
+            'name'        => $this->faker->unique()->randomElement($categoryNames) . ' ' . $this->faker->unique()->word(),
             'description' => $msFaker->optional(0.8)->sentence(),
             'is_active'   => $this->faker->boolean(90),
             'created_by'  => $auditUserId,

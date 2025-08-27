@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
  * Creates the 'users' table for authentication.
  * Standard Laravel structure, extended by other migrations for custom columns.
  */
+
 return new class extends Migration
 {
     public function up(): void

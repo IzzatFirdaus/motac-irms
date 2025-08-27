@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Schema;
 /**
  * Creates the 'settings' table for application-wide settings.
  */
+
 return new class extends Migration
 {
     public function up(): void

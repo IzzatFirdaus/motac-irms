@@ -10,7 +10,9 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Schema; // Your custom Notification model as per Revision 3
+use Illuminate\Support\Facades\Schema;
+
+// Your custom Notification model as per Revision 3
 
 class NotificationSeeder extends Seeder
 {
@@ -35,7 +37,7 @@ class NotificationSeeder extends Seeder
             return;
         }
 
-        Log::info('Found '.User::count().' Users for potential notification assignment.');
+        Log::info('Found ' . User::count() . ' Users for potential notification assignment.');
 
         $adminUserForAudit = User::orderBy('id')->first();
         $auditUserId       = $adminUserForAudit?->id;

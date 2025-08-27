@@ -6,7 +6,9 @@ use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\ServiceProvider; // Import the QueryExecuted event
+use Illuminate\Support\ServiceProvider;
+
+// Import the QueryExecuted event
 
 class QueryLogServiceProvider extends ServiceProvider // Corrected class name
 {

@@ -14,7 +14,8 @@ use Illuminate\Queue\SerializesModels;
 
 class TicketAssignedNotification extends Mailable implements ShouldQueue
 {
-    use Queueable, SerializesModels;
+    use Queueable;
+    use SerializesModels;
 
     public HelpdeskTicket $ticket;
 

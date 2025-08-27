@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
  * Migration for the locations table.
  * Represents physical offices, branches, or asset locations.
  */
+
 return new class extends Migration
 {
     public function up(): void

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Schema;
 /**
  * Creates the 'tickets' table for generic helpdesk/ticketing.
  */
+
 return new class extends Migration
 {
     public function up(): void

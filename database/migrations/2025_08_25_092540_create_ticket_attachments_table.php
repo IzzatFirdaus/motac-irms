@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
  * Creates the 'ticket_attachments' table for the legacy ticket system.
  * Attachments are linked to tickets and (optionally) comments. Polymorphic avoided for simpler model mapping.
  */
+
 return new class extends Migration
 {
     public function up(): void

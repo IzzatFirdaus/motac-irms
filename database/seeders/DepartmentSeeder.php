@@ -129,7 +129,7 @@ class DepartmentSeeder extends Seeder
             ]);
         }
 
-        Log::info('Created '.count($motacDepartments).' predefined MOTAC departments.');
+        Log::info('Created ' . count($motacDepartments) . ' predefined MOTAC departments.');
     }
 
     /**

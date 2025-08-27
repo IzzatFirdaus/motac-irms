@@ -43,7 +43,9 @@ use Illuminate\Support\Str;
  */
 class LoanTransaction extends Model
 {
-    use Blameable, HasFactory, SoftDeletes;
+    use Blameable;
+    use HasFactory;
+    use SoftDeletes;
 
     // Transaction types
     public const TYPE_ISSUE = 'issue';

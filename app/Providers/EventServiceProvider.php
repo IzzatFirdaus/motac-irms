@@ -28,7 +28,6 @@ use App\Models\Setting;
 use App\Models\SubCategory as EquipmentSubCategory;
 use App\Models\User;
 use App\Observers\BlameableObserver;
-
 // Laravel Events & Listeners
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;

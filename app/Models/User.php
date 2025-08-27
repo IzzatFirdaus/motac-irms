@@ -47,7 +47,14 @@ use Spatie\Permission\Traits\HasRoles;
  */
 class User extends Authenticatable
 {
-    use Blameable, HasApiTokens, HasFactory, HasProfilePhoto, HasRoles, Notifiable, SoftDeletes, TwoFactorAuthenticatable;
+    use Blameable;
+    use HasApiTokens;
+    use HasFactory;
+    use HasProfilePhoto;
+    use HasRoles;
+    use Notifiable;
+    use SoftDeletes;
+    use TwoFactorAuthenticatable;
 
     // --- TITLE CONSTANTS ---
     public const TITLE_ENCIK = 'encik';

@@ -35,7 +35,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class EquipmentCategory extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
 
     protected $table = 'equipment_categories';
 

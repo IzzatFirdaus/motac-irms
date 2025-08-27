@@ -48,7 +48,8 @@ use Illuminate\Support\Facades\Schema;
  */
 class Setting extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
 
     protected const SETTINGS_CACHE_KEY = 'application_settings';
 

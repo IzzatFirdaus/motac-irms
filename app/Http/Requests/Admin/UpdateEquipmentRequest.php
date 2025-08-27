@@ -8,7 +8,9 @@ use App\Models\EquipmentCategory;
 use App\Models\Location;
 use App\Models\SubCategory;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule; // Ensure this model exists and is imported
+use Illuminate\Validation\Rule;
+
+// Ensure this model exists and is imported
 
 class UpdateEquipmentRequest extends FormRequest
 {

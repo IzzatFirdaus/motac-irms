@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
  * Migration for loan_transaction_items table.
  * Stores each item transacted (issued/returned) as part of a loan transaction.
  */
+
 return new class extends Migration
 {
     public function up(): void
@@ -31,7 +32,9 @@ return new class extends Migration
         ];
 
         Schema::create('loan_transaction_items', function (Blueprint $table) use (
-            $itemStatuses, $defaultStatus, $conditionStatuses
+            $itemStatuses,
+            $defaultStatus,
+            $conditionStatuses
         ): void {
             $table->id();
             $table->foreignId('loan_transaction_id')->constrained('loan_transactions')->cascadeOnDelete();

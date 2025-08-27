@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Schema;
 /**
  * Adds MOTAC-specific columns to the users table, including personal, organizational, and employment details.
  */
+
 return new class extends Migration
 {
     public function up(): void
@@ -68,7 +69,7 @@ return new class extends Migration
                 Log::error('Status enum values could not be determined reliably from User model constants. Using hardcoded fallback in migration. PLEASE CHECK User.php CONSTANTS.');
                 $statusEnumValues = ['active', 'inactive', 'pending'];
             }
-            $defaultUserStatus = defined(User::class.'::STATUS_ACTIVE') ? User::STATUS_ACTIVE : $statusEnumValues[0];
+            $defaultUserStatus = defined(User::class . '::STATUS_ACTIVE') ? User::STATUS_ACTIVE : $statusEnumValues[0];
             $table->enum('status', $statusEnumValues)->default($defaultUserStatus)->after('previous_department_email');
 
             // Boolean flags (prefer Spatie roles, but included for legacy)
@@ -106,19 +107,19 @@ return new class extends Migration
                         $table->dropForeign('users_employee_id_foreign');
                     }
                 } catch (\Exception $e) {
-                    Log::warning('Could not automatically drop foreign key for employee_id on users table: '.$e->getMessage().'. Manual check might be needed if schema differs.');
+                    Log::warning('Could not automatically drop foreign key for employee_id on users table: ' . $e->getMessage() . '. Manual check might be needed if schema differs.');
                 }
             }
 
             foreach ($foreignKeysToDrop as $fkColumn) {
                 if (Schema::hasColumn('users', $fkColumn)) {
                     try {
-                        $foreignKeyName = 'users_'.$fkColumn.'_foreign';
+                        $foreignKeyName = 'users_' . $fkColumn . '_foreign';
                         if (collect(Schema::getConnection()->getDoctrineSchemaManager()->listTableForeignKeys('users'))->pluck('name')->contains($foreignKeyName)) {
                             $table->dropForeign($foreignKeyName);
                         }
                     } catch (\Exception $e) {
-                        Log::warning(sprintf('Could not drop foreign key for %s on users table: ', $fkColumn).$e->getMessage());
+                        Log::warning(sprintf('Could not drop foreign key for %s on users table: ', $fkColumn) . $e->getMessage());
                     }
                 }
             }

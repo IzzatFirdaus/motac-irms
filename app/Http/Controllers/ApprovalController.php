@@ -33,7 +33,8 @@ class ApprovalController extends Controller
         $pendingApprovals = Approval::where('officer_id', $user->id)
             ->where('status', Approval::STATUS_PENDING)
             ->with([ //
-                'approvable' => function ($morphTo) { //
+                'approvable' => function ($morphTo) {
+                    //
                     $morphTo->morphWith([ //
                         EmailApplication::class => ['user:id,name'], //
                         LoanApplication::class  => ['user:id,name'], //
@@ -56,7 +57,8 @@ class ApprovalController extends Controller
         $completedApprovals = Approval::where('officer_id', $user->id)
             ->whereIn('status', [Approval::STATUS_APPROVED, Approval::STATUS_REJECTED])
             ->with([ //
-                'approvable' => function ($morphTo) { //
+                'approvable' => function ($morphTo) {
+                    //
                     $morphTo->morphWith([ //
                         EmailApplication::class => ['user:id,name'], //
                         LoanApplication::class  => ['user:id,name'], //
@@ -125,16 +127,18 @@ class ApprovalController extends Controller
         $processingUser = $request->user();
         $validatedData  = $request->validated();
 
-        Log::info("ApprovalController@recordDecision: User ID {$processingUser->id} recording decision for Approval Task ID {$approval->id}.", //
+        Log::info(
+            "ApprovalController@recordDecision: User ID {$processingUser->id} recording decision for Approval Task ID {$approval->id}.", //
             ['decision' => $validatedData['decision'], 'has_comments' => ! empty($validatedData['comments'])]
         );
 
         $itemQuantitiesForService = null;
 
-        if ($approval->approvable_type === LoanApplication::class && // Ensures quantity adjustment is typically done at the supporting officer stage,
+        if (
+            $approval->approvable_type === LoanApplication::class && // Ensures quantity adjustment is typically done at the supporting officer stage,
             // or adjust this condition if other stages also adjust quantities.
-            $approval->stage === Approval::STAGE_LOAN_SUPPORT_REVIEW && $validatedData['decision'] === Approval::STATUS_APPROVED && isset($validatedData['items_approved']) && is_array($validatedData['items_approved'])) {
-
+            $approval->stage === Approval::STAGE_LOAN_SUPPORT_REVIEW && $validatedData['decision'] === Approval::STATUS_APPROVED && isset($validatedData['items_approved']) && is_array($validatedData['items_approved'])
+        ) {
             $itemQuantitiesForService = [];
             foreach ($validatedData['items_approved'] as $loanApplicationItemId => $itemData) {
                 if (isset($itemData['quantity_approved'])) { // Ensure the specific key exists
@@ -167,7 +171,6 @@ class ApprovalController extends Controller
             }
 
             return redirect()->route('approvals.dashboard')->with('success', $message); // Fallback redirect
-
         } catch (AuthorizationException $e) { //
             Log::error("ApprovalController@recordDecision: Authorization error for Approval ID {$approval->id}. User ID: {$processingUser->id}.", ['error' => $e->getMessage()]); //
 

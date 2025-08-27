@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Schema;
 /**
  * Adds position_id foreign key and unique index to the grades table.
  */
+
 return new class extends Migration
 {
     public function up(): void

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
  * Creates the 'ticket_priorities' table used by the legacy ticketing system.
  * Adds is_active and blameable fields; includes level for sorting.
  */
+
 return new class extends Migration
 {
     public function up(): void

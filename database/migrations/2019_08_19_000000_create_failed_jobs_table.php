@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
  * Migration to create the failed_jobs table.
  * Stores queue jobs that have failed for retry or inspection.
  */
+
 return new class extends Migration
 {
     /**

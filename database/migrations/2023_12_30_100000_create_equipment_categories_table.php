@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Schema;
 /**
  * Creates the 'equipment_categories' table for ICT asset classification.
  */
+
 return new class extends Migration
 {
     public function up(): void

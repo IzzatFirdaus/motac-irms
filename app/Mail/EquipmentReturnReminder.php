@@ -15,7 +15,8 @@ use Illuminate\Queue\SerializesModels;
  */
 class EquipmentReturnReminder extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable;
+    use SerializesModels;
 
     public LoanApplication $loanApplication;
 

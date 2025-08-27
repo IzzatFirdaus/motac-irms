@@ -78,14 +78,14 @@ class LoanTransactionSeeder extends Seeder
             ->get()
             ->keyBy('id');
 
-        $issuedTransactions = new EloquentCollection;
+        $issuedTransactions = new EloquentCollection();
 
         Log::info(sprintf("Creating 'Issued' Loan Transactions for %s applications...", $approvedApplications->count()));
 
         foreach ($approvedApplications as $application) {
             // If there are items to issue but no equipment left, stop early to avoid empty loops
             if ($availableEquipment->isEmpty() && $application->loanApplicationItems()->exists()) {
-                Log::warning('No more available equipment to issue for application ID: '.$application->id);
+                Log::warning('No more available equipment to issue for application ID: ' . $application->id);
                 break;
             }
 
@@ -105,7 +105,7 @@ class LoanTransactionSeeder extends Seeder
 
                 for ($i = 0; $i < $quantityToIssue; $i++) {
                     if ($availableEquipment->isEmpty()) {
-                        Log::warning('Ran out of equipment for application ID: '.$application->id);
+                        Log::warning('Ran out of equipment for application ID: ' . $application->id);
                         break 2; // Break out of both loops
                     }
 

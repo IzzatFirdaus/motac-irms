@@ -9,13 +9,14 @@ use Illuminate\Support\Facades\Schema;
 /**
  * Creates the 'equipment' table for ICT asset inventory.
  */
+
 return new class extends Migration
 {
     public function up(): void
     {
-        $defaultAssetType = class_exists(Equipment::class) && defined(Equipment::class.'::ASSET_TYPE_OTHER_ICT') ? Equipment::ASSET_TYPE_OTHER_ICT : 'other_ict';
-        $defaultStatus    = class_exists(Equipment::class)    && defined(Equipment::class.'::STATUS_AVAILABLE') ? Equipment::STATUS_AVAILABLE : 'available';
-        $defaultCondition = class_exists(Equipment::class) && defined(Equipment::class.'::CONDITION_GOOD') ? Equipment::CONDITION_GOOD : 'good';
+        $defaultAssetType = class_exists(Equipment::class) && defined(Equipment::class . '::ASSET_TYPE_OTHER_ICT') ? Equipment::ASSET_TYPE_OTHER_ICT : 'other_ict';
+        $defaultStatus    = class_exists(Equipment::class)    && defined(Equipment::class . '::STATUS_AVAILABLE') ? Equipment::STATUS_AVAILABLE : 'available';
+        $defaultCondition = class_exists(Equipment::class) && defined(Equipment::class . '::CONDITION_GOOD') ? Equipment::CONDITION_GOOD : 'good';
 
         Schema::create('equipment', function (Blueprint $table) use ($defaultAssetType, $defaultStatus, $defaultCondition): void {
             $table->id();
@@ -73,7 +74,7 @@ return new class extends Migration
                     try {
                         $table->dropForeign([$column]);
                     } catch (\Exception $e) {
-                        Log::warning(sprintf("Could not drop foreign key for column '%s' on 'equipment' table during migration rollback: ", $column).$e->getMessage());
+                        Log::warning(sprintf("Could not drop foreign key for column '%s' on 'equipment' table during migration rollback: ", $column) . $e->getMessage());
                     }
                 }
             }

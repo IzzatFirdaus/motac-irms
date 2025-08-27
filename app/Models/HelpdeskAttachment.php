@@ -24,7 +24,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class HelpdeskAttachment extends Model
 {
-    use CreatedUpdatedDeletedBy, HasFactory, SoftDeletes;
+    use CreatedUpdatedDeletedBy;
+    use HasFactory;
+    use SoftDeletes;
 
     protected $fillable = [
         'attachable_type',

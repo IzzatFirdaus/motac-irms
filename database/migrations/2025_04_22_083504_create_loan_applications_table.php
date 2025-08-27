@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
 /**
  * Creates the 'loan_applications' table for ICT equipment loan requests.
  */
+
 return new class extends Migration
 {
     public function up(): void
@@ -78,7 +79,7 @@ return new class extends Migration
                     try {
                         $table->dropForeign([$key]);
                     } catch (\Exception $e) {
-                        Log::warning(sprintf('Failed to drop FK %s on loan_applications during down migration: ', $key).$e->getMessage());
+                        Log::warning(sprintf('Failed to drop FK %s on loan_applications during down migration: ', $key) . $e->getMessage());
                     }
                 }
             }

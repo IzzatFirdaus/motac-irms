@@ -35,7 +35,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class HelpdeskTicket extends Model
 {
-    use CreatedUpdatedDeletedBy, HasFactory, SoftDeletes;
+    use CreatedUpdatedDeletedBy;
+    use HasFactory;
+    use SoftDeletes;
 
     // Status constants for strict status management
     public const STATUS_OPEN = 'open';

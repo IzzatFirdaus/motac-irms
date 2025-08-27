@@ -144,8 +144,13 @@ class AdminUserSeeder extends Seeder
                 Log::info("AdminUserSeeder: Ensured {$user->email} has both Admin and BPM Staff roles.");
             }
 
-            Log::info(sprintf("AdminUserSeeder: Processed user '%s' (%s). Assigned Role: '%s'. Assigned Grade Level: %s.",
-                $user->name, $user->email, $data['role_name'], $user->grade?->level));
+            Log::info(sprintf(
+                "AdminUserSeeder: Processed user '%s' (%s). Assigned Role: '%s'. Assigned Grade Level: %s.",
+                $user->name,
+                $user->email,
+                $data['role_name'],
+                $user->grade?->level
+            ));
         }
 
         Log::info('AdminUserSeeder: Seeding of critical roles and administrative users has been completed successfully.');

@@ -59,7 +59,8 @@ final class EquipmentIssuedNotification extends Notification implements ShouldQu
         $applicantName = $this->loanApplication->user?->name ?? __('Pemohon');
         $transactionId = $this->issueTransaction->id         ?? null;
 
-        $itemsDetails = $this->issueTransaction?->loanTransactionItems->map(function ($item) { // Handle nullable
+        $itemsDetails = $this->issueTransaction?->loanTransactionItems->map(function ($item) {
+            // Handle nullable
             $equipment = $item->equipment;
             if ($equipment) {
                 $assetTypeDisplay = $equipment->asset_type_label ?? __('Peralatan');

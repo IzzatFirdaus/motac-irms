@@ -49,7 +49,9 @@ use Illuminate\Support\Str;
  */
 class LoanApplication extends Model
 {
-    use Blameable, \Illuminate\Database\Eloquent\Factories\HasFactory, SoftDeletes;
+    use Blameable;
+    use \Illuminate\Database\Eloquent\Factories\HasFactory;
+    use SoftDeletes;
 
     // Loan application status constants for workflow
     public const STATUS_PROCESSING = 'processing';

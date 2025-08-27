@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
  * Creates the 'helpdesk_comments' table for Helpdesk system.
  * Stores comments on tickets (can be internal/external).
  */
+
 return new class extends Migration
 {
     public function up(): void

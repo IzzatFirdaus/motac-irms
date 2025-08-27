@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
  * Creates the 'helpdesk_tickets' table for Helpdesk system.
  * Main table for all Helpdesk tickets.
  */
+
 return new class extends Migration
 {
     public function up(): void

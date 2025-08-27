@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Schema;
 /**
  * Migration for sub_categories, linked to equipment_categories.
  */
+
 return new class extends Migration
 {
     public function up(): void

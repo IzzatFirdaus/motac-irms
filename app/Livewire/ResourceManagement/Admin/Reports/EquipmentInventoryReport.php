@@ -123,10 +123,12 @@ class EquipmentInventoryReport extends Component
      */
     public function updating($property): void
     {
-        if (in_array($property, [
-            'filterAssetType', 'filterStatus', 'filterCondition',
-            'filterDepartmentId', 'filterLocationId', 'filterCategoryId', 'searchTerm',
-        ])) {
+        if (
+            in_array($property, [
+                'filterAssetType', 'filterStatus', 'filterCondition',
+                'filterDepartmentId', 'filterLocationId', 'filterCategoryId', 'searchTerm',
+            ])
+        ) {
             $this->resetPage();
         }
     }

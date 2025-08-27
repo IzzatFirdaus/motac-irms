@@ -50,7 +50,7 @@ class Dashboard extends Component
         // Check roles for both guards
         $webUser            = \Auth::guard('web')->user();
         $sanctumUser        = \Auth::guard('sanctum')->user();
-        $webRoles           = $webUser         && $webUser->roles ? $webUser->roles->pluck('name') : collect();
+        $webRoles           = $webUser     && $webUser->roles ? $webUser->roles->pluck('name') : collect();
         $sanctumRoles       = $sanctumUser && $sanctumUser->roles ? $sanctumUser->roles->pluck('name') : collect();
         $allRoles           = $webRoles->merge($sanctumRoles)->unique();
         $this->isNormalUser = ($allRoles->count() === 1 && $allRoles->first() === 'User');
@@ -89,7 +89,7 @@ class Dashboard extends Component
         // Check roles for both guards
         $webUser      = \Auth::guard('web')->user();
         $sanctumUser  = \Auth::guard('sanctum')->user();
-        $webRoles     = $webUser         && $webUser->roles ? $webUser->roles->pluck('name') : collect();
+        $webRoles     = $webUser     && $webUser->roles ? $webUser->roles->pluck('name') : collect();
         $sanctumRoles = $sanctumUser && $sanctumUser->roles ? $sanctumUser->roles->pluck('name') : collect();
         $allRoles     = $webRoles->merge($sanctumRoles)->unique();
         if ($allRoles->contains('Admin')) {

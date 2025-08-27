@@ -8,6 +8,7 @@ use Laravel\Fortify\Fortify;
 /**
  * Migration to add two-factor authentication columns to the users table.
  */
+
 return new class extends Migration
 {
     /**

@@ -30,7 +30,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Position extends Model
 {
-    use Blameable, HasFactory, SoftDeletes;
+    use Blameable;
+    use HasFactory;
+    use SoftDeletes;
 
     protected $table = 'positions';
 

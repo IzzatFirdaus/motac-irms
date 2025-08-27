@@ -75,6 +75,6 @@ class HelpdeskPrioritySeeder extends Seeder
             );
         }
 
-        Log::info('HelpdeskPriority seeding complete. Created/verified '.count($priorities).' priorities.');
+        Log::info('HelpdeskPriority seeding complete. Created/verified ' . count($priorities) . ' priorities.');
     }
 }

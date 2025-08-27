@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
  * Creates the 'ticket_categories' table used by the legacy ticketing system.
  * Adds is_active and blameable fields to align with the rest of the system.
  */
+
 return new class extends Migration
 {
     public function up(): void

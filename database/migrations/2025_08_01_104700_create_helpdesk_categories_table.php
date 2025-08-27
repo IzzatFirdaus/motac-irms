@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
  * Creates the 'helpdesk_categories' table for Helpdesk ticketing module.
  * E.g., Hardware, Software, Network, etc.
  */
+
 return new class extends Migration
 {
     public function up(): void
