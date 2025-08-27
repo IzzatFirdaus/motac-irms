@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Schema;
 /**
  * Migration for Spatie Laravel Permission package (roles, permissions, pivots).
  */
+
 return new class extends Migration
 {
     public function up(): void

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Schema;
 /**
  * Creates the 'positions' table (Jawatan).
  */
+
 return new class extends Migration
 {
     public function up(): void

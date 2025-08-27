@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Schema;
 /**
  * Migration for the categories table, used for generic classification (e.g., inventory, tickets, etc.).
  */
+
 return new class extends Migration
 {
     public function up(): void

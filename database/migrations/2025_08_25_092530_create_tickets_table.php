@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
  * Creates the 'tickets' table for the legacy ticket system.
  * Aligned with App\Models\Ticket: includes blameable fields and soft deletes.
  */
+
 return new class extends Migration
 {
     public function up(): void

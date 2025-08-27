@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
  * Creates the 'ticket_comments' table for the legacy ticket system.
  * Comments can be internal (agent-only) or external.
  */
+
 return new class extends Migration
 {
     public function up(): void

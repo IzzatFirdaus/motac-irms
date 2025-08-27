@@ -96,6 +96,6 @@ class HelpdeskCategorySeeder extends Seeder
             );
         }
 
-        Log::info('HelpdeskCategory seeding complete. Created/verified '.count($categories).' categories.');
+        Log::info('HelpdeskCategory seeding complete. Created/verified ' . count($categories) . ' categories.');
     }
 }

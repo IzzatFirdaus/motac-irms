@@ -52,7 +52,7 @@ class SubCategoryFactory extends Factory
 
         return [
             'equipment_category_id' => $equipmentCategoryId,
-            'name'                  => $msFaker->unique()->words(2, true).' Sub-Kategori',
+            'name'                  => $msFaker->unique()->words(2, true) . ' Sub-Kategori',
             'description'           => $msFaker->optional(0.7)->sentence,
             'is_active'             => $this->faker->boolean(95),
             'created_by'            => $auditUserId,

@@ -44,7 +44,7 @@ class LocationFactory extends Factory
 
         return [
             // Example: 'Aras 3, Sayap Kanan, Menara A'
-            'name' => 'Aras '.$this->faker->numberBetween(1, 20).', '.
+            'name' => 'Aras ' . $this->faker->numberBetween(1, 20) . ', ' .
                 $this->faker->randomElement(['Sayap Kiri', 'Sayap Kanan', 'Menara', 'Blok', 'Pejabat', 'Bilik', 'Unit']),
             'description' => $msFaker->optional(0.7)->sentence(10),
             'address'     => $msFaker->optional(0.8)->streetAddress,

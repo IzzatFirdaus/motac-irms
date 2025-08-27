@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
  * Creates the 'departments' table.
  * Represents MOTAC HQ/State/Bahagian/Unit.
  */
+
 return new class extends Migration
 {
     public function up(): void

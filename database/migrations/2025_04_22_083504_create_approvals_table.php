@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Schema;
  * This version supports a richer workflow with multiple status values and action timestamps.
  * Uses polymorphic 'approvable' relationship for reusability.
  */
+
 return new class extends Migration
 {
     public function up(): void

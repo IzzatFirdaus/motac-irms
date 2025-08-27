@@ -44,25 +44,25 @@ class GradeFactory extends Factory
         } elseif ($level >= 68) {
             $name = 'Timbalan Menteri (Ujian)';
         } elseif ($level >= 66) {
-            $name = 'TURUS I ('.$level.')';
+            $name = 'TURUS I (' . $level . ')';
         } elseif ($level >= 64) {
-            $name = 'TURUS II ('.$level.')';
+            $name = 'TURUS II (' . $level . ')';
         } elseif ($level >= 62) {
-            $name = 'TURUS III ('.$level.')';
+            $name = 'TURUS III (' . $level . ')';
         } elseif ($level >= 60) {
-            $name = 'JUSA A ('.$level.')';
+            $name = 'JUSA A (' . $level . ')';
         } elseif ($level >= 58) {
-            $name = 'JUSA B ('.$level.')';
+            $name = 'JUSA B (' . $level . ')';
         } elseif ($level >= 56) {
-            $name = 'JUSA C ('.$level.')';
+            $name = 'JUSA C (' . $level . ')';
         } elseif ($level >= 41) {
             // P&P grades like N41, F41, etc.
             $prefix = $this->faker->randomElement(['N', 'F', 'M', 'E', 'W', 'S', 'J', 'DG']);
-            $name   = $prefix.$level;
+            $name   = $prefix . $level;
         } else {
             // Support staff grades like N19, FT19, etc.
             $prefix = $this->faker->randomElement(['N', 'FT', 'W', 'H', 'KP', 'U', 'C']);
-            $name   = $prefix.$level;
+            $name   = $prefix . $level;
         }
 
         $createdAt = Carbon::parse($this->faker->dateTimeBetween('-5 years', 'now'));
@@ -97,7 +97,7 @@ class GradeFactory extends Factory
 
             return [
                 'level'             => $level,
-                'name'              => $prefix.$level,
+                'name'              => $prefix . $level,
                 'is_approver_grade' => true,
             ];
         });
@@ -114,7 +114,7 @@ class GradeFactory extends Factory
 
             return [
                 'level'             => $level,
-                'name'              => $prefix.$level,
+                'name'              => $prefix . $level,
                 'is_approver_grade' => false,
             ];
         });

@@ -222,8 +222,8 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'deleted_at'            => now(),
-            'email'                 => 'deleted-'.($attributes['email'] ?? Str::uuid().'@deleted.local'),
-            'identification_number' => 'deleted-'.($attributes['identification_number'] ?? Str::random(12)),
+            'email'                 => 'deleted-' . ($attributes['email'] ?? Str::uuid() . '@deleted.local'),
+            'identification_number' => 'deleted-' . ($attributes['identification_number'] ?? Str::random(12)),
         ]);
     }
 }

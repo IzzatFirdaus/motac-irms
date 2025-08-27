@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Schema;
 /**
  * Creates the 'grades' table for job grades.
  */
+
 return new class extends Migration
 {
     public function up(): void

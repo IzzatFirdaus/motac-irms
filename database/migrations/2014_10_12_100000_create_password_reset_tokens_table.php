@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
  * Migration to create the password_reset_tokens table.
  * Stores one-time tokens for password reset functionality.
  */
+
 return new class extends Migration
 {
     /**

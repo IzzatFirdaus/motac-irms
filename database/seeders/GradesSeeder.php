@@ -181,7 +181,7 @@ class GradesSeeder extends Seeder
         // This programmatically removes the duplicate entry ('8 (40)' for position_id 40)
         // and guards against any other potential duplicates.
         $uniqueGrades = collect($grades)->unique(function (array $item): string {
-            return $item['name'].'-'.$item['position_id'];
+            return $item['name'] . '-' . $item['position_id'];
         });
 
         $dataToInsert = [];
@@ -204,7 +204,7 @@ class GradesSeeder extends Seeder
             Grade::insert($chunk);
         }
 
-        Log::info('Finished seeding '.count($dataToInsert).' unique grades.');
+        Log::info('Finished seeding ' . count($dataToInsert) . ' unique grades.');
     }
 
     /**

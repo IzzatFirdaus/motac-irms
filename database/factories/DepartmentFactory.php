@@ -55,7 +55,7 @@ class DepartmentFactory extends Factory
 
         return [
             // Department name: randomly choose "Jabatan", "Bahagian", or "Unit" + a unique word
-            'name'                  => $this->faker->randomElement(['Jabatan', 'Bahagian', 'Unit']).' '.$this->faker->unique()->word(),
+            'name'                  => $this->faker->randomElement(['Jabatan', 'Bahagian', 'Unit']) . ' ' . $this->faker->unique()->word(),
             'description'           => $msFaker->optional(0.7)->sentence(10, true),
             'branch_type'           => $this->faker->randomElement([$branchTypeHq, $branchTypeState]),
             'code'                  => strtoupper($this->faker->unique()->bothify('???###')),

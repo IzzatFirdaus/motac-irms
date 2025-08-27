@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
  * Creates the 'helpdesk_attachments' table for Helpdesk system.
  * Stores files attached to helpdesk tickets/comments (polymorphic).
  */
+
 return new class extends Migration
 {
     public function up(): void

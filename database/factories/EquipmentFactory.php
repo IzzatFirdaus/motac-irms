@@ -81,12 +81,12 @@ class EquipmentFactory extends Factory
         $itemCode   = $localFaker->unique()->bothify('ITEM-????-#####');
         $tagIdRaw   = $localFaker->optional(0.9)->unique();
         $tagId      = $tagIdRaw
-            ? $tagIdRaw->numerify('MOTAC/ICT/'.now()->year.'######')
-            : 'MOTAC/ICT/'.now()->year.mt_rand(100000, 999999);
+            ? $tagIdRaw->numerify('MOTAC/ICT/' . now()->year . '######')
+            : 'MOTAC/ICT/' . now()->year . mt_rand(100000, 999999);
         $serialNumberRaw = $localFaker->optional(0.95)->unique();
         $serialNumber    = $serialNumberRaw
             ? $serialNumberRaw->bothify('SN-########????')
-            : 'SN-'.mt_rand(10000000, 99999999).strtoupper(Str::random(4));
+            : 'SN-' . mt_rand(10000000, 99999999) . strtoupper(Str::random(4));
 
         // Enumerate asset type, status, and condition options from Equipment model
         $assetType = $this->faker->randomElement([
@@ -133,7 +133,7 @@ class EquipmentFactory extends Factory
             'serial_number'         => $serialNumber,
             'asset_type'            => $assetType,
             'brand'                 => $this->faker->randomElement(['Dell', 'HP', 'Lenovo', 'Acer', 'Apple', 'Canon', 'Epson', 'Samsung']),
-            'model'                 => Str::title($this->faker->words(mt_rand(1, 2), true)).' '.$this->faker->bothify('##??X'),
+            'model'                 => Str::title($this->faker->words(mt_rand(1, 2), true)) . ' ' . $this->faker->bothify('##??X'),
             'description'           => $msFaker->optional(0.7)->paragraph(2),
             'purchase_price'        => $purchaseDate ? $this->faker->randomFloat(2, 100, 5000) : null,
             'purchase_date'         => $purchaseDate ? $purchaseDate->format('Y-m-d') : null,

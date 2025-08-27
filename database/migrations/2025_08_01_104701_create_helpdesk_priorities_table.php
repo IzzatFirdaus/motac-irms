@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
  * Creates the 'helpdesk_priorities' table for Helpdesk ticketing module.
  * Priority levels like Low, Medium, High.
  */
+
 return new class extends Migration
 {
     public function up(): void

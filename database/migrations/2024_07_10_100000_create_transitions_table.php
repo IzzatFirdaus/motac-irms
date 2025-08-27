@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
  * Migration for the transitions table.
  * Used to log handover/return of equipment to employees.
  */
+
 return new class extends Migration
 {
     public function up(): void

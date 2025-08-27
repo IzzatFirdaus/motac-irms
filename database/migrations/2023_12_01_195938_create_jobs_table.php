@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Schema;
 /**
  * Migration for the jobs table, which is used by Laravel's queue system.
  */
+
 return new class extends Migration
 {
     public function up(): void

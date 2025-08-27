@@ -44,7 +44,7 @@ class SettingFactory extends Factory
 
         return [
             // General site/application settings
-            'site_name'        => $msFaker->company.' RMS',
+            'site_name'        => $msFaker->company . ' RMS',
             'site_logo_path'   => '/images/motac_default_logo.png',
             'application_name' => 'MOTAC Integrated Resource Management System',
 

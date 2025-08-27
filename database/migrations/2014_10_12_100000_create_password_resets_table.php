@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
  * Migration to create the password_resets table.
  * Alternative table for password reset functionality used by Laravel.
  */
+
 return new class extends Migration
 {
     /**

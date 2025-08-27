@@ -104,6 +104,6 @@ class PositionSeeder extends Seeder
 
         // Use insert for better performance with a large array.
         Position::insert($positions);
-        Log::info('Finished seeding '.count($positions).' positions.');
+        Log::info('Finished seeding ' . count($positions) . ' positions.');
     }
 }

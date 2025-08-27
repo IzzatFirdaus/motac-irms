@@ -153,6 +153,6 @@ class ApprovalSeeder extends Seeder
             Approval::insert($chunk);
         }
 
-        Log::info('ApprovalSeeder: Inserted '.count($batch).' approval tasks in batch.');
+        Log::info('ApprovalSeeder: Inserted ' . count($batch) . ' approval tasks in batch.');
     }
 }

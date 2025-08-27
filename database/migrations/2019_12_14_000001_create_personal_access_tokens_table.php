@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
  * Migration to create the personal_access_tokens table.
  * Used by Laravel Sanctum for API token management.
  */
+
 return new class extends Migration
 {
     /**

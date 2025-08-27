@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Schema;
  * Migration for loan_application_items table.
  * Stores requested/approved/issued/returned quantities for each equipment type in a loan application.
  */
+
 return new class extends Migration
 {
     public function up(): void
@@ -53,7 +54,7 @@ return new class extends Migration
                     try {
                         $table->dropForeign([$key]);
                     } catch (\Exception $e) {
-                        Log::warning(sprintf('Could not drop foreign key for %s on loan_application_items table: ', $key).$e->getMessage());
+                        Log::warning(sprintf('Could not drop foreign key for %s on loan_application_items table: ', $key) . $e->getMessage());
                     }
                 }
             }

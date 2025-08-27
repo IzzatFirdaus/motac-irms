@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
  * Migration to create the sessions table.
  * Tracks user sessions for the web application.
  */
+
 return new class extends Migration
 {
     /**

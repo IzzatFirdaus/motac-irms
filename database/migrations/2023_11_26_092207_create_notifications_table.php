@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
  * Migration for notifications table.
  * Stores all notifications for notifiable models with audit fields and soft deletes.
  */
+
 return new class extends Migration
 {
     public function up(): void
