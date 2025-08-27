@@ -110,7 +110,6 @@ class EquipmentChecklist extends Component
             if ($loanTransactionId !== null && $loanTransactionId !== 0) {
                 $this->loadExistingTransaction($loanTransactionId);
             }
-
         } catch (Throwable $e) {
             Log::error('EquipmentChecklist: Error during component mount.', [
                 'error'             => $e->getMessage(),
@@ -347,7 +346,6 @@ class EquipmentChecklist extends Component
             $this->dispatch('swal:success', ['message' => $message]);
 
             $this->redirectAfterSave();
-
         } catch (ValidationException $e) {
             Log::warning('EquipmentChecklist: Validation failed.', [
                 'errors'          => $e->errors(),

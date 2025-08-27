@@ -90,7 +90,6 @@ class TranslationServiceProvider extends ServiceProvider
                 }
 
                 return $translator;
-
             } catch (\Exception $e) {
                 // Log error and provide emergency fallback
                 Log::error('Failed to initialize suffixed translator: '.$e->getMessage());

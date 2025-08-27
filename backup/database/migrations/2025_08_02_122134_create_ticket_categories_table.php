@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
  * Creates the 'ticket_categories' table for generic helpdesk/ticketing.
  * E.g., Hardware, Software, Facilities, etc.
  */
+
 return new class extends Migration
 {
     public function up(): void

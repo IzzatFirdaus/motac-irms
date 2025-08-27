@@ -35,7 +35,8 @@ use Illuminate\Support\Str;
  */
 class Department extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
 
     public const BRANCH_TYPE_STATE = 'state';
 

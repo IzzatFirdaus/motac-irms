@@ -36,15 +36,16 @@ class NotificationService
     /**
      * Send a notification instance to a user.
      *
-     * @param \Illuminate\Notifications\Notification $notification
+    * @param User $user
+    * @param Notification $notification
      */
-    public function notifyUser(User $user, $notification): void
+    public function notifyUser(User $user, Notification $notification): void
     {
         try {
             $user->notify($notification);
             Log::info("Notification sent to user {$user->id}.");
         } catch (Exception $e) {
-            Log::error("Failed to send notification to user {$user->id}: ".$e->getMessage(), ['exception' => $e]);
+            Log::error("Failed to send notification to user {$user->id}: " . $e->getMessage(), ['exception' => $e]);
         }
     }
 
@@ -97,11 +98,17 @@ class NotificationService
             }
         }
 
-        // Create the notification with proper type hints to make IDE happy
+        // If we still don't have a User, bail out safely (shouldn't happen in normal setups)
+        if (! $rejecter instanceof User) {
+            Log::warning('No rejecter available when notifying application rejection; skipping notification.', ['loan_application_id' => $loanApplication->id ?? null]);
+            return;
+        }
+
+        // Create the notification (now that $rejecter is guaranteed to be User)
         $notification = new ApplicationRejected(
-            $loanApplication,   // First argument: LoanApplication
-            $rejecter,          // Second argument: User
-            $rejectionReason    // Third argument: string
+            $loanApplication,
+            $rejecter,
+            $rejectionReason
         );
 
         // Send notification to recipient
@@ -173,8 +180,15 @@ class NotificationService
      */
     public function notifyEquipmentOverdue(User $recipient, LoanTransaction $loanTransaction, int $overdueDays): void
     {
+        $loanApplication = $loanTransaction->loanApplication;
+
+        if (! $loanApplication instanceof LoanApplication) {
+            Log::warning('LoanTransaction missing loanApplication when sending overdue notification', ['loan_transaction_id' => $loanTransaction->id ?? null]);
+            return;
+        }
+
         $this->notifyUser($recipient, new EquipmentOverdueNotification(
-            $loanTransaction->loanApplication,
+            $loanApplication,
             $overdueDays
         ));
     }

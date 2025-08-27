@@ -159,13 +159,11 @@ class LoanRequestForm extends Component
                 'string', 'max:255',
             ],
             'manual_responsible_officer_jawatan_gred' => [
-                Rule::requiredIf(fn (): bool => ! $this->isApplicantResponsible && ($this->manual_responsible_officer_name !== null && $this->manual_responsible_officer_name !== '' && $this->manual_responsible_officer_name !== '0') && $isFinalSubmission
-                ),
+                Rule::requiredIf(fn (): bool => ! $this->isApplicantResponsible && ($this->manual_responsible_officer_name !== null && $this->manual_responsible_officer_name !== '' && $this->manual_responsible_officer_name !== '0') && $isFinalSubmission),
                 'nullable', 'string', 'max:255',
             ],
             'manual_responsible_officer_mobile' => [
-                Rule::requiredIf(fn (): bool => ! $this->isApplicantResponsible && ($this->manual_responsible_officer_name !== null && $this->manual_responsible_officer_name !== '' && $this->manual_responsible_officer_name !== '0') && $isFinalSubmission
-                ),
+                Rule::requiredIf(fn (): bool => ! $this->isApplicantResponsible && ($this->manual_responsible_officer_name !== null && $this->manual_responsible_officer_name !== '' && $this->manual_responsible_officer_name !== '0') && $isFinalSubmission),
                 'nullable', 'string', 'regex:/^[0-9\-\+\s\(\)]*$/', 'min:9', 'max:20',
             ],
             'items'                      => ['required', 'array', 'min:1'],
@@ -249,12 +247,16 @@ class LoanRequestForm extends Component
                 if ($this->isEdit && $this->loanApplication) {
                     $this->authorize('update', $this->loanApplication);
                     $this->loanApplication = $this->loanApplicationService->updateApplication(
-                        $this->loanApplication, $payload, $user
+                        $this->loanApplication,
+                        $payload,
+                        $user
                     );
                     $message = 'Permohonan pinjaman berjaya dikemaskini!';
                 } else {
                     $this->loanApplication = $this->loanApplicationService->createAndSubmitApplication(
-                        $payload, $user, ! $isFinalButtonClicked
+                        $payload,
+                        $user,
+                        ! $isFinalButtonClicked
                     );
                     $message = 'Permohonan pinjaman berjaya dihantar!';
                 }

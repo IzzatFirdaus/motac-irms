@@ -151,7 +151,6 @@ class ProcessReturn extends Component
             session()->flash('success', 'Rekod pemulangan peralatan telah berjaya disimpan.');
 
             return $this->redirectRoute('loan-applications.show', ['loan_application' => $this->loanApplication->id], navigate: true);
-
         } catch (Throwable $throwable) {
             Log::error('Error in ProcessReturn@submitReturn: '.$throwable->getMessage(), ['exception' => $throwable]);
             session()->flash('error', __('Gagal merekodkan pemulangan: ').$throwable->getMessage());

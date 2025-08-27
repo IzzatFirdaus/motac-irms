@@ -6,7 +6,9 @@ use Illuminate\Support\Facades\Config; // Import Config facade
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
-use stdClass; // Ensures stdClass can be used for default empty object
+use stdClass;
+
+// Ensures stdClass can be used for default empty object
 
 class MenuServiceProvider extends ServiceProvider
 {

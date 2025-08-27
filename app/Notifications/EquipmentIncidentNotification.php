@@ -109,7 +109,8 @@ final class EquipmentIncidentNotification extends Notification implements Should
     {
         $applicationId        = $this->loanApplication->id          ?? null; //
         $applicantName        = $this->loanApplication->user?->name ?? 'N/A'; //
-        $incidentItemsDetails = $this->incidentItems->map(function (LoanTransactionItem $item): array { //
+        $incidentItemsDetails = $this->incidentItems->map(function (LoanTransactionItem $item): array {
+            //
             $equipment = $item->equipment; //
             $details   = ['transaction_item_id' => $item->id, 'item_notes' => $item->item_notes]; //
             if ($equipment instanceof Equipment) { //

@@ -20,7 +20,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class HelpdeskPriority extends Model
 {
-    use CreatedUpdatedDeletedBy, HasFactory, SoftDeletes;
+    use CreatedUpdatedDeletedBy;
+    use HasFactory;
+    use SoftDeletes;
 
     protected $fillable = [
         'name',

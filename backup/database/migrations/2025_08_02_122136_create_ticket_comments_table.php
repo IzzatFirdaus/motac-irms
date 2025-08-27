@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
  * Creates the 'ticket_comments' table for generic helpdesk/ticketing.
  * Stores comments and internal notes.
  */
+
 return new class extends Migration
 {
     public function up(): void

@@ -27,7 +27,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Import extends Model
 {
-    use CreatedUpdatedDeletedBy, HasFactory, SoftDeletes;
+    use CreatedUpdatedDeletedBy;
+    use HasFactory;
+    use SoftDeletes;
 
     protected $fillable = [
         'file_name',

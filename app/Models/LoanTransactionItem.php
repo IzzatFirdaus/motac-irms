@@ -44,7 +44,8 @@ use Illuminate\Support\Str;
  */
 class LoanTransactionItem extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
 
     // ---- STATUS CONSTANTS (should match migration and business logic) ----
     public const STATUS_ITEM_ISSUED = 'issued';

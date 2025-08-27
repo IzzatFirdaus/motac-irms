@@ -20,7 +20,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class HelpdeskCategory extends Model
 {
-    use CreatedUpdatedDeletedBy, HasFactory, SoftDeletes;
+    use CreatedUpdatedDeletedBy;
+    use HasFactory;
+    use SoftDeletes;
 
     protected $fillable = [
         'name',

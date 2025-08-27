@@ -55,7 +55,8 @@ use Illuminate\Support\Str;
 #[ObservedBy(BlameableObserver::class)]
 class Equipment extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
 
     // Fillable properties must match the schema for mass-assignment and seeding
     protected $fillable = [

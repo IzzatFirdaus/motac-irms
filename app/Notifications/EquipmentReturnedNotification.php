@@ -58,7 +58,8 @@ class EquipmentReturnedNotification extends Notification implements ShouldQueue
     // EDITED: Made minor corrections to ensure data consistency.
     public function toArray(User $notifiable): array
     {
-        $itemsDetails = $this->returnTransaction?->loanTransactionItems->map(function (LoanTransactionItem $txItem): array { // Handle nullable
+        $itemsDetails = $this->returnTransaction?->loanTransactionItems->map(function (LoanTransactionItem $txItem): array {
+            // Handle nullable
             $equipment = $txItem->equipment;
             if ($equipment instanceof Equipment) {
                 return [

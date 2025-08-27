@@ -13,7 +13,8 @@ use Illuminate\Queue\SerializesModels;
 
 class TicketClosedNotification extends Mailable implements ShouldQueue
 {
-    use Queueable, SerializesModels;
+    use Queueable;
+    use SerializesModels;
 
     public HelpdeskTicket $ticket;
 

@@ -26,7 +26,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class TicketComment extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
 
     protected $fillable = [
         'ticket_id',

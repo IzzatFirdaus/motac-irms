@@ -23,7 +23,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class HelpdeskComment extends Model
 {
-    use CreatedUpdatedDeletedBy, HasFactory, SoftDeletes;
+    use CreatedUpdatedDeletedBy;
+    use HasFactory;
+    use SoftDeletes;
 
     protected $fillable = [
         'ticket_id',

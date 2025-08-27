@@ -41,21 +41,25 @@ class RecordApprovalDecisionRequest extends FormRequest
         /** @var Approval|null $approval */
         $approval = $this->route('approval'); //
 
-        if ($approval                                        && //
+        if (
+            $approval                                        && //
             $approval->approvable instanceof LoanApplication && //
             // Only require quantity adjustments if the stage is relevant (e.g., support review)
             // and decision is approved. Adjust sta
-            $this->input('decision') === Approval::STATUS_APPROVED) { //
+            $this->input('decision') === Approval::STATUS_APPROVED
+        ) { //
             $rules['items_approved']                            = ['required', 'array', 'min:1']; //
             $rules['items_approved.*.loan_application_item_id'] = [ //
                 'required', 'integer',
-                Rule::exists('loan_application_items', 'id')->where(function ($query) use ($approval) { //
+                Rule::exists('loan_application_items', 'id')->where(function ($query) use ($approval) {
+                    //
                     $query->where('loan_application_id', $approval->approvable_id); //
                 }),
             ];
             $rules['items_approved.*.quantity_approved'] = [ //
                 'required', 'integer', 'min:0',
-                function ($attribute, $value, $fail) use ($approval) { //
+                function ($attribute, $value, $fail) use ($approval) {
+                    //
                     $index                 = explode('.', $attribute)[1]; // Get the array index
                     $loanApplicationItemId = $this->input("items_approved.{$index}.loan_application_item_id"); //
                     $loanAppItem           = $approval->approvable->loanApplicationItems->find($loanApplicationItemId); //

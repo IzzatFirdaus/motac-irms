@@ -18,7 +18,8 @@ use Illuminate\Queue\SerializesModels;
  */
 class LoanApplicationIssued extends Mailable implements ShouldQueue
 {
-    use Queueable, SerializesModels;
+    use Queueable;
+    use SerializesModels;
 
     public LoanApplication $loanApplication;
 

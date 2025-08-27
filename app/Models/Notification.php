@@ -38,7 +38,8 @@ use Illuminate\Support\Str;
  */
 final class Notification extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
 
     public $incrementing = false;
 

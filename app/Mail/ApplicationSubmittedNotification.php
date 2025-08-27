@@ -17,7 +17,8 @@ use Illuminate\Support\Facades\Log;
  */
 class ApplicationSubmittedNotification extends Mailable implements ShouldQueue
 {
-    use Queueable, SerializesModels;
+    use Queueable;
+    use SerializesModels;
 
     public LoanApplication $application;
 

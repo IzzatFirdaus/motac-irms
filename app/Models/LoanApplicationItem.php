@@ -36,7 +36,8 @@ use Illuminate\Support\Str;
  */
 class LoanApplicationItem extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
 
     // Status constants for item approval and issuance/return workflow
     public const STATUS_PENDING_APPROVAL = 'pending_approval';

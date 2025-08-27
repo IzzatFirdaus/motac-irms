@@ -5,7 +5,9 @@ namespace App\Notifications;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Notification; // Consider uncommenting if you want to queue this notification
+use Illuminate\Notifications\Notification;
+
+// Consider uncommenting if you want to queue this notification
 
 class DefaultNotification extends Notification // implements ShouldQueue
 {

@@ -133,9 +133,11 @@ class LoanApplicationsReport extends Component
      */
     public function updating($property): void
     {
-        if (in_array($property, [
-            'filterStatus', 'filterDepartmentId', 'filterDateFrom', 'filterDateTo', 'searchTerm', 'perPage',
-        ])) {
+        if (
+            in_array($property, [
+                'filterStatus', 'filterDepartmentId', 'filterDateFrom', 'filterDateTo', 'searchTerm', 'perPage',
+            ])
+        ) {
             $this->resetPage();
         }
     }

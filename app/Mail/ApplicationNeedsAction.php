@@ -19,7 +19,8 @@ use Illuminate\Support\Facades\Log;
  */
 class ApplicationNeedsAction extends Mailable implements ShouldQueue
 {
-    use Queueable, SerializesModels;
+    use Queueable;
+    use SerializesModels;
 
     public Approval $approvalTask;
 

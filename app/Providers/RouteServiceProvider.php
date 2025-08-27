@@ -7,7 +7,9 @@ use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvi
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Str; // Added import for the Str facade
+use Illuminate\Support\Str;
+
+// Added import for the Str facade
 
 class RouteServiceProvider extends ServiceProvider
 {
