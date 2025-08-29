@@ -170,11 +170,9 @@ class TicketNotificationService
     {
         $itAdmins = User::role('IT Admin')->get();
 
-        // Implement a specific notification class for escalation if needed
-        // Notification::send($itAdmins, new TicketEscalatedNotification($ticket));
+        // Send escalation notification to IT Admins and keep a log entry
+        Notification::send($itAdmins, new \App\Notifications\TicketEscalatedNotification($ticket));
 
-        Log::warning(
-            "Ticket Escalated: Ticket ID {$ticket->id} is overdue."
-        );
+        Log::warning("Ticket Escalated: Ticket ID {$ticket->id} is overdue.");
     }
 }

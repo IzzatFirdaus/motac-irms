@@ -2356,7 +2356,7 @@ function sliceEvents(props, allDay) {
     return (0,_internal_common_js__WEBPACK_IMPORTED_MODULE_0__.ad)(props.eventStore, props.eventUiBases, props.dateProfile.activeRange, allDay ? props.nextDayThreshold : null).fg;
 }
 
-const version = '6.1.17';
+const version = '6.1.18';
 
 
 
@@ -4345,6 +4345,25 @@ function compareObjs(oldProps, newProps, equalityFuncs = {}) {
     if (oldProps === newProps) {
         return true;
     }
+    // if (debug) {
+    //   for (let key in newProps) {
+    //     if (key in oldProps && isObjValsEqual(oldProps[key], newProps[key], equalityFuncs[key])) {
+    //       // equal
+    //     } else {
+    //       if (debug) {
+    //         console.log('prop difference', key, oldProps[key], newProps[key])
+    //       }
+    //     }
+    //   }
+    //   // check for props that were omitted in the new
+    //   for (let key in oldProps) {
+    //     if (!(key in newProps)) {
+    //       if (debug) {
+    //         console.log('prop absent', key)
+    //       }
+    //     }
+    //   }
+    // }
     for (let key in newProps) {
         if (key in oldProps && isObjValsEqual(oldProps[key], newProps[key], equalityFuncs[key])) ;
         else {
@@ -4935,13 +4954,14 @@ function buildViewContext(viewSpec, viewApi, viewOptions, dateProfileGenerator, 
 
 /* eslint max-classes-per-file: off */
 class PureComponent extends preact__WEBPACK_IMPORTED_MODULE_0__.Component {
+    // debug: boolean
     shouldComponentUpdate(nextProps, nextState) {
-        if (this.debug) {
-            // eslint-disable-next-line no-console
-            console.log(getUnequalProps(nextProps, this.props), getUnequalProps(nextState, this.state));
-        }
-        return !compareObjs(this.props, nextProps, this.propEquality) ||
-            !compareObjs(this.state, nextState, this.stateEquality);
+        const shouldUpdate = !compareObjs(this.props, nextProps, this.propEquality /*, this.debug */) ||
+            !compareObjs(this.state, nextState, this.stateEquality /*, this.debug */);
+        // if (this.debug && shouldUpdate) {
+        //   console.log('shouldUpdate!')
+        // }
+        return shouldUpdate;
     }
     // HACK for freakin' React StrictMode
     safeSetState(newState) {
@@ -5181,10 +5201,10 @@ class ViewContainer extends BaseComponent {
         let { props, context } = this;
         let { options } = context;
         let renderProps = { view: context.viewApi };
-        return ((0,preact__WEBPACK_IMPORTED_MODULE_0__.createElement)(ContentContainer, Object.assign({}, props, { elTag: props.elTag || 'div', elClasses: [
+        return ((0,preact__WEBPACK_IMPORTED_MODULE_0__.createElement)(ContentContainer, { elRef: props.elRef, elTag: props.elTag || 'div', elAttrs: props.elAttrs, elClasses: [
                 ...buildViewClassNames(props.viewSpec),
                 ...(props.elClasses || []),
-            ], renderProps: renderProps, classNameGenerator: options.viewClassNames, generatorName: undefined, didMount: options.viewDidMount, willUnmount: options.viewWillUnmount }), () => props.children));
+            ], elStyle: props.elStyle, renderProps: renderProps, classNameGenerator: options.viewClassNames, generatorName: undefined, didMount: options.viewDidMount, willUnmount: options.viewWillUnmount }, () => props.children));
     }
 }
 function buildViewClassNames(viewSpec) {
@@ -9639,8 +9659,11 @@ function getSectionByKey(sections, key) {
 class EventContainer extends BaseComponent {
     constructor() {
         super(...arguments);
+        // memo
+        this.buildPublicEvent = memoize((context, eventDef, eventInstance) => new EventImpl(context, eventDef, eventInstance));
         this.handleEl = (el) => {
             this.el = el;
+            setRef(this.props.elRef, el);
             if (el) {
                 setElSeg(el, this.props.seg);
             }
@@ -9653,7 +9676,7 @@ class EventContainer extends BaseComponent {
         const { eventRange } = seg;
         const { ui } = eventRange;
         const renderProps = {
-            event: new EventImpl(context, eventRange.def, eventRange.instance),
+            event: this.buildPublicEvent(context, eventRange.def, eventRange.instance),
             view: context.viewApi,
             timeText: props.timeText,
             textColor: ui.textColor,
@@ -9672,11 +9695,11 @@ class EventContainer extends BaseComponent {
             isDragging: Boolean(props.isDragging),
             isResizing: Boolean(props.isResizing),
         };
-        return ((0,preact__WEBPACK_IMPORTED_MODULE_0__.createElement)(ContentContainer, Object.assign({}, props /* contains children */, { elRef: this.handleEl, elClasses: [
+        return ((0,preact__WEBPACK_IMPORTED_MODULE_0__.createElement)(ContentContainer, { elRef: this.handleEl, elTag: props.elTag, elAttrs: props.elAttrs, elClasses: [
                 ...getEventClassNames(renderProps),
                 ...seg.eventRange.ui.classNames,
                 ...(props.elClasses || []),
-            ], renderProps: renderProps, generatorName: "eventContent", customGenerator: options.eventContent, defaultGenerator: props.defaultGenerator, classNameGenerator: options.eventClassNames, didMount: options.eventDidMount, willUnmount: options.eventWillUnmount })));
+            ], elStyle: props.elStyle, renderProps: renderProps, generatorName: "eventContent", customGenerator: options.eventContent, defaultGenerator: props.defaultGenerator, classNameGenerator: options.eventClassNames, didMount: options.eventDidMount, willUnmount: options.eventWillUnmount }, props.children));
     }
     componentDidUpdate(prevProps) {
         if (this.el && this.props.seg !== prevProps.seg) {
@@ -9703,6 +9726,9 @@ class StandardEvent extends BaseComponent {
             Boolean(eventContentArg.isEndResizable) && ((0,preact__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", { className: "fc-event-resizer fc-event-resizer-end" }))))));
     }
 }
+StandardEvent.addPropsEquality({
+    seg: isPropsEqual,
+});
 function renderInnerContent$1(innerProps) {
     return ((0,preact__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", { className: "fc-event-main-frame" },
         innerProps.timeText && ((0,preact__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", { className: "fc-event-time" }, innerProps.timeText)),
@@ -9717,7 +9743,7 @@ const NowIndicatorContainer = (props) => ((0,preact__WEBPACK_IMPORTED_MODULE_0__
         date: context.dateEnv.toDate(props.date),
         view: context.viewApi,
     };
-    return ((0,preact__WEBPACK_IMPORTED_MODULE_0__.createElement)(ContentContainer, Object.assign({}, props /* includes children */, { elTag: props.elTag || 'div', renderProps: renderProps, generatorName: "nowIndicatorContent", customGenerator: options.nowIndicatorContent, classNameGenerator: options.nowIndicatorClassNames, didMount: options.nowIndicatorDidMount, willUnmount: options.nowIndicatorWillUnmount })));
+    return ((0,preact__WEBPACK_IMPORTED_MODULE_0__.createElement)(ContentContainer, { elRef: props.elRef, elTag: props.elTag || 'div', elAttrs: props.elAttrs, elClasses: props.elClasses, elStyle: props.elStyle, renderProps: renderProps, generatorName: "nowIndicatorContent", customGenerator: options.nowIndicatorContent, classNameGenerator: options.nowIndicatorClassNames, didMount: options.nowIndicatorDidMount, willUnmount: options.nowIndicatorWillUnmount }, props.children));
 }));
 
 const DAY_NUM_FORMAT = createFormatter({ day: 'numeric' });
@@ -9740,12 +9766,12 @@ class DayCellContainer extends BaseComponent {
             dateEnv: context.dateEnv,
             monthStartFormat: options.monthStartFormat,
         });
-        return ((0,preact__WEBPACK_IMPORTED_MODULE_0__.createElement)(ContentContainer, Object.assign({}, props /* includes children */, { elClasses: [
+        return ((0,preact__WEBPACK_IMPORTED_MODULE_0__.createElement)(ContentContainer, { elRef: props.elRef, elTag: props.elTag, elAttrs: Object.assign(Object.assign({}, props.elAttrs), (renderProps.isDisabled ? {} : { 'data-date': formatDayString(props.date) })), elClasses: [
                 ...getDayClassNames(renderProps, context.theme),
                 ...(props.elClasses || []),
-            ], elAttrs: Object.assign(Object.assign({}, props.elAttrs), (renderProps.isDisabled ? {} : { 'data-date': formatDayString(props.date) })), renderProps: renderProps, generatorName: "dayCellContent", customGenerator: options.dayCellContent, defaultGenerator: props.defaultGenerator, classNameGenerator: 
+            ], elStyle: props.elStyle, renderProps: renderProps, generatorName: "dayCellContent", customGenerator: options.dayCellContent, defaultGenerator: props.defaultGenerator, classNameGenerator: 
             // don't use custom classNames if disabled
-            renderProps.isDisabled ? undefined : options.dayCellClassNames, didMount: options.dayCellDidMount, willUnmount: options.dayCellWillUnmount })));
+            renderProps.isDisabled ? undefined : options.dayCellClassNames, didMount: options.dayCellDidMount, willUnmount: options.dayCellWillUnmount }, props.children));
     }
 }
 function hasCustomDayCellContent(options) {
@@ -9782,7 +9808,7 @@ const WeekNumberContainer = (props) => ((0,preact__WEBPACK_IMPORTED_MODULE_0__.c
     let text = dateEnv.format(date, format);
     let renderProps = { num, text, date };
     return ((0,preact__WEBPACK_IMPORTED_MODULE_0__.createElement)(ContentContainer // why isn't WeekNumberContentArg being auto-detected?
-    , Object.assign({}, props /* includes children */, { renderProps: renderProps, generatorName: "weekNumberContent", customGenerator: options.weekNumberContent, defaultGenerator: renderInner, classNameGenerator: options.weekNumberClassNames, didMount: options.weekNumberDidMount, willUnmount: options.weekNumberWillUnmount })));
+    , { elRef: props.elRef, elTag: props.elTag, elAttrs: props.elAttrs, elClasses: props.elClasses, elStyle: props.elStyle, renderProps: renderProps, generatorName: "weekNumberContent", customGenerator: options.weekNumberContent, defaultGenerator: renderInner, classNameGenerator: options.weekNumberClassNames, didMount: options.weekNumberDidMount, willUnmount: options.weekNumberWillUnmount }, props.children));
 }));
 function renderInner(innerProps) {
     return innerProps.text;
@@ -10871,7 +10897,7 @@ class TableRows extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_
     constructor() {
         super(...arguments);
         this.splitBusinessHourSegs = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.z)(splitSegsByRow);
-        this.splitBgEventSegs = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.z)(splitSegsByRow);
+        this.splitBgEventSegs = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.z)(splitAllDaySegsByRow);
         this.splitFgEventSegs = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.z)(splitSegsByRow);
         this.splitDateSelectionSegs = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.z)(splitSegsByRow);
         this.splitEventDrag = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.z)(splitInteractionByRow);
@@ -10895,7 +10921,7 @@ class TableRows extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_
         return ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.a6, { unit: "day" }, (nowDate, todayRange) => ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.Fragment, null, props.cells.map((cells, row) => ((0,_fullcalendar_core_preact_js__WEBPACK_IMPORTED_MODULE_1__.createElement)(TableRow, { ref: this.rowRefs.createRef(row), key: cells.length
                 ? cells[0].date.toISOString() /* best? or put key on cell? or use diff formatter? */
                 : row // in case there are no cells (like when resource view is loading)
-            , showDayNumbers: rowCnt > 1, showWeekNumbers: props.showWeekNumbers, todayRange: todayRange, dateProfile: props.dateProfile, cells: cells, renderIntro: props.renderRowIntro, businessHourSegs: businessHourSegsByRow[row], eventSelection: props.eventSelection, bgEventSegs: bgEventSegsByRow[row].filter(isSegAllDay) /* hack */, fgEventSegs: fgEventSegsByRow[row], dateSelectionSegs: dateSelectionSegsByRow[row], eventDrag: eventDragByRow[row], eventResize: eventResizeByRow[row], dayMaxEvents: props.dayMaxEvents, dayMaxEventRows: props.dayMaxEventRows, clientWidth: props.clientWidth, clientHeight: props.clientHeight, cellMinHeight: cellMinHeight, forPrint: props.forPrint })))))));
+            , showDayNumbers: rowCnt > 1, showWeekNumbers: props.showWeekNumbers, todayRange: todayRange, dateProfile: props.dateProfile, cells: cells, renderIntro: props.renderRowIntro, businessHourSegs: businessHourSegsByRow[row], eventSelection: props.eventSelection, bgEventSegs: bgEventSegsByRow[row], fgEventSegs: fgEventSegsByRow[row], dateSelectionSegs: dateSelectionSegsByRow[row], eventDrag: eventDragByRow[row], eventResize: eventResizeByRow[row], dayMaxEvents: props.dayMaxEvents, dayMaxEventRows: props.dayMaxEventRows, clientWidth: props.clientWidth, clientHeight: props.clientHeight, cellMinHeight: cellMinHeight, forPrint: props.forPrint })))))));
     }
     componentDidMount() {
         this.registerInteractiveComponent();
@@ -10963,6 +10989,9 @@ class TableRows extends _fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_
         let end = (0,_fullcalendar_core_internal_js__WEBPACK_IMPORTED_MODULE_0__.t)(start, 1);
         return { start, end };
     }
+}
+function splitAllDaySegsByRow(segs, rowCnt) {
+    return splitSegsByRow(segs.filter(isSegAllDay), rowCnt);
 }
 function isSegAllDay(seg) {
     return seg.eventRange.def.allDay;

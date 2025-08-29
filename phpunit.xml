@@ -8,7 +8,6 @@
 <phpunit
     bootstrap="vendor/autoload.php"
     colors="true"
-    verbose="true"
     stopOnFailure="false"
     failOnRisky="true"
     failOnWarning="true"
@@ -28,12 +27,9 @@
         <env name="CACHE_DRIVER" value="array"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
-        <env name="DB_CONNECTION" value="mysql"/>
-        <env name="DB_DATABASE" value="motac_irms_test"/>
-        <env name="DB_HOST" value="127.0.0.1"/>
-        <env name="DB_PORT" value="3306"/>
-        <env name="DB_USERNAME" value="root"/>
-        <env name="DB_PASSWORD" value=""/>
+    <!-- Use in-memory SQLite for running tests locally without a MySQL server -->
+    <env name="DB_CONNECTION" value="sqlite"/>
+    <env name="DB_DATABASE" value=":memory:"/>
         <!-- Use log mailer to disable sending real emails during tests -->
         <env name="MAIL_MAILER" value="log"/>
         <env name="MAIL_FROM_ADDRESS" value="noreply@motac.gov.my"/>
@@ -65,32 +61,5 @@
       Exclude certain directories from code coverage.
       Adjust as needed if using code coverage analysis.
     -->
-    <coverage processUncoveredFiles="true">
-        <include>
-            <directory suffix=".php">./app</directory>
-        </include>
-        <exclude>
-            <directory suffix=".php">./app/Console</directory>
-            <directory suffix=".php">./app/Exceptions</directory>
-            <directory suffix=".php">./app/Providers</directory>
-            <directory>./tests</directory>
-            <directory>./database</directory>
-        </exclude>
-        <report>
-            <clover outputFile="build/logs/clover.xml"/>
-            <html outputDirectory="build/coverage"/>
-            <text outputFile="build/logs/coverage.txt"/>
-        </report>
-    </coverage>
-
-    <!--
-      Logging and test result output.
-      These files are useful for CI/CD and debugging.
-    -->
-    <logging>
-        <log type="junit" target="build/logs/junit.xml"/>
-        <log type="teamcity" target="build/logs/teamcity.txt"/>
-        <log type="testdox-html" target="build/logs/testdox.html"/>
-        <log type="testdox-text" target="build/logs/testdox.txt"/>
-    </logging>
+    <!-- Coverage and logging removed from local phpunit.xml to avoid schema validation warnings on this PHPUnit version. -->
 </phpunit>
