@@ -15,7 +15,7 @@
 @extends('layouts.commonMaster')
 
 @section('layoutContent')
-    <div class="layout-wrapper layout-content-navbar">
+    <div class="layout-wrapper layout-content-navbar" role="document">
         <div class="layout-container">
 
             {{-- Sidebar / Menu --}}
@@ -29,15 +29,15 @@
                 ])
 
                 {{-- Main Page Content --}}
-                <div class="content-wrapper" id="main-content">
-                    <div class="{{ $container }} flex-grow-1 container-p-y">
+                <div class="content-wrapper">
+                    <main id="main-content" class="{{ $container }} flex-grow-1 container-p-y" role="main" aria-label="{{ __('Kandungan Utama') }}">
                         {{-- Blade slot or view content --}}
                         @isset($slot)
                             {{ $slot }}
                         @else
                             @yield('content')
                         @endisset
-                    </div>
+                    </main>
 
                     {{-- Footer --}}
                     @livewire('sections.footer.footer')
@@ -48,7 +48,7 @@
         </div>
 
         {{-- Menu Overlay for mobile/overlay states --}}
-        <div class="layout-overlay layout-menu-toggle"></div>
+    <div class="layout-overlay layout-menu-toggle" aria-hidden="true"></div>
         <div class="drag-target"></div>
     </div>
 @endsection

@@ -6,7 +6,7 @@
   - Includes logo, system name, ministry, legal, important links, version, and last update date
 --}}
 <div>
-    <footer class="content-footer bg-footer-alt" aria-label="{{ __('Pengaki Laman') }}">
+    <footer class="content-footer bg-footer-alt" aria-label="{{ __('Pengaki Laman') }}" role="contentinfo">
         <div class="{{ $containerClass ?? 'container-fluid' }} footer-alt-container">
             {{-- Left: Logo and Ministry Info --}}
             <div>
@@ -33,9 +33,15 @@
 
             {{-- Center: Useful Links --}}
             <nav class="footer-links" aria-label="{{ __('Pautan Penting') }}">
-                <a href="{{ route('terms') }}" class="footer-link">{{ __('Terma Perkhidmatan') }}</a>
-                <a href="{{ route('policy') }}" class="footer-link">{{ __('Dasar Privasi') }}</a>
-                <a href="{{ route('contact-us') }}" class="footer-link">{{ __('Hubungi ICT') }}</a>
+                @if (Route::has('terms') || Route::has('terms.show'))
+                    <a href="{{ Route::has('terms') ? route('terms') : route('terms.show') }}" class="footer-link">{{ __('Terma Perkhidmatan') }}</a>
+                @endif
+                @if (Route::has('policy') || Route::has('policy.show'))
+                    <a href="{{ Route::has('policy') ? route('policy') : route('policy.show') }}" class="footer-link">{{ __('Dasar Privasi') }}</a>
+                @endif
+                @if (Route::has('contact-us'))
+                    <a href="{{ route('contact-us') }}" class="footer-link">{{ __('Hubungi ICT') }}</a>
+                @endif
                 {{-- Add more links as necessary --}}
             </nav>
 
