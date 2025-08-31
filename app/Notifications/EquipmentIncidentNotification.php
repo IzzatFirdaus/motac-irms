@@ -85,7 +85,7 @@ final class EquipmentIncidentNotification extends Notification implements Should
             $introLines[] = '---'; //
         }
 
-        return (new MailMessage()) //
+        return (new MailMessage) //
             ->subject($subject) //
             ->level($this->incidentType === 'lost' ? 'error' : 'warning') //
             ->view('emails.notifications.motac_default_notification', [ //
@@ -104,7 +104,7 @@ final class EquipmentIncidentNotification extends Notification implements Should
             try {
                 return route('loan-applications.show', ['loan_application' => $this->loanApplication->id]); //
             } catch (\Exception $e) {
-                Log::error('Error generating URL for EquipmentIncidentNotification: ' . $e->getMessage()); //
+                Log::error('Error generating URL for EquipmentIncidentNotification: '.$e->getMessage()); //
             }
         }
 

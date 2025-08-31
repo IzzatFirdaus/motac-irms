@@ -100,7 +100,7 @@ class LoanApplicationController extends Controller
 
             return redirect()->back()->withInput()->withErrors($e->errors())
                 ->with('error', __('Sila semak semula borang permohonan. Terdapat maklumat yang tidak sah.'));
-        } catch (\RuntimeException | \InvalidArgumentException | ModelNotFoundException $e) {
+        } catch (\RuntimeException|\InvalidArgumentException|ModelNotFoundException $e) {
             Log::error(sprintf('Error creating and submitting loan application for User ID: %d (traditional form).', $user->id), [
                 'error'           => $e->getMessage(),
                 'exception_class' => get_class($e),
@@ -130,7 +130,7 @@ class LoanApplicationController extends Controller
     public function show(LoanApplication $loanApplication): View
     {
         $this->authorize('view', $loanApplication);
-        Log::info('LoanApplicationController@show: User ID ' . Auth::id() . sprintf(' viewing LoanApplication ID %d.', $loanApplication->id));
+        Log::info('LoanApplicationController@show: User ID '.Auth::id().sprintf(' viewing LoanApplication ID %d.', $loanApplication->id));
 
         // Eager load all relationships needed for display
         $loanApplication->loadMissing([
@@ -178,7 +178,7 @@ class LoanApplicationController extends Controller
     public function printPdf(LoanApplication $loanApplication): Response
     {
         $this->authorize('view', $loanApplication);
-        Log::info('LoanApplicationController@printPdf: User ID ' . Auth::id() . sprintf(' generating PDF for LoanApplication ID %d.', $loanApplication->id));
+        Log::info('LoanApplicationController@printPdf: User ID '.Auth::id().sprintf(' generating PDF for LoanApplication ID %d.', $loanApplication->id));
 
         // Eager load all necessary relations for PDF generation
         $loanApplication->loadMissing([
@@ -202,7 +202,7 @@ class LoanApplicationController extends Controller
 
         $pdf->setPaper('A4', 'portrait');
 
-        return $pdf->stream('borang-pinjaman-ict-' . $loanApplication->id . '.pdf');
+        return $pdf->stream('borang-pinjaman-ict-'.$loanApplication->id.'.pdf');
     }
 
     /**
@@ -227,7 +227,7 @@ class LoanApplicationController extends Controller
             return redirect()
                 ->route('loan-applications.show', $updatedApplication)
                 ->with('success', __('Permohonan pinjaman berjaya dikemaskini.'));
-        } catch (\RuntimeException | \InvalidArgumentException | ModelNotFoundException $throwable) {
+        } catch (\RuntimeException|\InvalidArgumentException|ModelNotFoundException $throwable) {
             Log::error(sprintf('Error updating LoanApplication ID %d by User ID %s (traditional form).', $loanApplication->id, $user->id), [
                 'error'           => $throwable->getMessage(),
                 'exception_class' => get_class($throwable),
