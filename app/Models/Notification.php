@@ -16,7 +16,7 @@ use Illuminate\Support\Str;
 
 /**
  * Notification Model.
- * 
+ *
  * Stores notification records for notifiable entities (users, etc).
  *
  * @property string                          $id
@@ -35,17 +35,19 @@ use Illuminate\Support\Str;
  * @property-read \App\Models\User|null $creator
  * @property-read \App\Models\User|null $updater
  * @property-read \App\Models\User|null $deleter
- * @method static Builder<static>|Notification byNotifiable(\Illuminate\Database\Eloquent\Model $notifiableModel)
- * @method static Builder<static>|Notification byType(array|string $type)
+ *
+ * @method static Builder<static>|Notification            byNotifiable(\Illuminate\Database\Eloquent\Model $notifiableModel)
+ * @method static Builder<static>|Notification            byType(array|string $type)
  * @method static \Database\Factories\NotificationFactory factory($count = null, $state = [])
- * @method static Builder<static>|Notification newModelQuery()
- * @method static Builder<static>|Notification newQuery()
- * @method static Builder<static>|Notification onlyTrashed()
- * @method static Builder<static>|Notification query()
- * @method static Builder<static>|Notification read()
- * @method static Builder<static>|Notification unread()
- * @method static Builder<static>|Notification withTrashed(bool $withTrashed = true)
- * @method static Builder<static>|Notification withoutTrashed()
+ * @method static Builder<static>|Notification            newModelQuery()
+ * @method static Builder<static>|Notification            newQuery()
+ * @method static Builder<static>|Notification            onlyTrashed()
+ * @method static Builder<static>|Notification            query()
+ * @method static Builder<static>|Notification            read()
+ * @method static Builder<static>|Notification            unread()
+ * @method static Builder<static>|Notification            withTrashed(bool $withTrashed = true)
+ * @method static Builder<static>|Notification            withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 final class Notification extends Model

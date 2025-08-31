@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * SubCategory Model.
- * 
+ *
  * Defines sub-categories for ICT equipment, linked to EquipmentCategory.
  *
  * @property int                             $id
@@ -33,10 +33,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read int|null $equipment_count
  * @property-read \App\Models\EquipmentCategory $equipmentCategory
  * @property-read \App\Models\User|null $updater
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory active()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory byCategory(int $categoryId)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory byName(string $name)
- * @method static \Database\Factories\SubCategoryFactory factory($count = null, $state = [])
+ * @method static \Database\Factories\SubCategoryFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory onlyTrashed()
@@ -54,6 +55,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class SubCategory extends Model
@@ -128,6 +130,6 @@ class SubCategory extends Model
 
     public function scopeByName($query, string $name)
     {
-        return $query->where('name', 'LIKE', '%' . $name . '%');
+        return $query->where('name', 'LIKE', '%'.$name.'%');
     }
 }

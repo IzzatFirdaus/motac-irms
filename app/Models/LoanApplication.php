@@ -18,7 +18,7 @@ use Illuminate\Support\Str;
 
 /**
  * LoanApplication Model.
- * 
+ *
  * Represents a loan application for ICT equipment.
  *
  * @property int                             $id
@@ -47,9 +47,9 @@ use Illuminate\Support\Str;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
+ * @property int|null                        $created_by
+ * @property int|null                        $updated_by
+ * @property int|null                        $deleted_by
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Approval> $approvals
  * @property-read int|null $approvals_count
  * @property-read \App\Models\User|null $approvedBy
@@ -75,9 +75,10 @@ use Illuminate\Support\Str;
  * @property-read \App\Models\User|null $supportingOfficer
  * @property-read \App\Models\User|null $updater
  * @property-read \App\Models\User $user
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication active()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication dueInDays(int $days)
- * @method static \Database\Factories\LoanApplicationFactory factory($count = null, $state = [])
+ * @method static \Database\Factories\LoanApplicationFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication onlyTrashed()
@@ -113,6 +114,7 @@ use Illuminate\Support\Str;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereUserId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class LoanApplication extends Model

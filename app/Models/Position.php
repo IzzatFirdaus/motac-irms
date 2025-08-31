@@ -30,7 +30,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\User|null $creator
  * @property-read \App\Models\User|null $deleter
  * @property-read \App\Models\User|null $updater
- * @method static \Database\Factories\PositionFactory factory($count = null, $state = [])
+ *
+ * @method static \Database\Factories\PositionFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Position newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Position newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Position onlyTrashed()
@@ -49,6 +50,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Position whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Position withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Position withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class Position extends Model
@@ -124,11 +126,11 @@ class Position extends Model
         if ($term === null || $term === '' || $term === '0') {
             return $query;
         }
-        $searchTerm = '%' . $term . '%';
+        $searchTerm = '%'.$term.'%';
 
         return $query->where(function ($subQuery) use ($searchTerm) {
-            $subQuery->where($this->getTable() . '.name', 'like', $searchTerm)
-                ->orWhere($this->getTable() . '.description', 'like', $searchTerm);
+            $subQuery->where($this->getTable().'.name', 'like', $searchTerm)
+                ->orWhere($this->getTable().'.description', 'like', $searchTerm);
         })->orWhereHas('grade', function ($gradeQuery) use ($searchTerm) {
             $gradeQuery->where('name', 'like', $searchTerm);
         });

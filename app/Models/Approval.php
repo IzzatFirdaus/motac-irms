@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
 
 /**
  * Approval Model.
- * 
+ *
  * Represents an approval task for a polymorphic "approvable" (e.g., LoanApplication).
  * This model is aligned with the updated approvals table which supports richer workflow:
  * - status as string (pending, approved, rejected, canceled, forwarded)
@@ -46,10 +46,13 @@ use Illuminate\Support\Str;
  * @property-read \App\Models\User|null $creator
  * @property-read \App\Models\User|null $updater
  * @property-read \App\Models\User|null $deleter
+ *
  * @method static \Database\Factories\ApprovalFactory factory($count = null, $state = [])
+ *
  * @property-read string $stage_label
  * @property-read string $status_color
  * @property-read string $status_label
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval approved()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval byOfficer(int $officerId)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval canceled()
@@ -80,6 +83,7 @@ use Illuminate\Support\Str;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class Approval extends Model

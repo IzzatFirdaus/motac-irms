@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 
 /**
  * LoanTransactionItem Model.
- * 
+ *
  * Represents a specific equipment item within a loan transaction (either an issue or a return).
  * Each record links a transaction (issue/return) with a specific equipment asset,
  * and may be associated with a LoanApplicationItem for workflow tracking.
@@ -45,13 +45,15 @@ use Illuminate\Support\Str;
  * @property-read string|null $condition_on_transaction
  * @property-read string $status_label
  * @property-read string $status_translated
- * @method static \Database\Factories\LoanTransactionItemFactory factory($count = null, $state = [])
+ *
+ * @method static \Database\Factories\LoanTransactionItemFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class LoanTransactionItem extends Model
