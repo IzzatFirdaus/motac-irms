@@ -61,9 +61,9 @@ class SuffixedTranslator extends Translator
     /**
      * Log missing translation key (once per request cycle).
      */
-    protected function handleMissingTranslation($key, $locale)
+    protected function handleMissingTranslation(string $key, string $locale)
     {
-        $missingKeyId = $key . '.' . $locale;
+        $missingKeyId = $key.'.'.$locale;
         if (! in_array($missingKeyId, $this->missingKeys)) {
             $this->missingKeys[] = $missingKeyId;
             if (config('translation.log_missing_keys', true)) {
@@ -80,23 +80,23 @@ class SuffixedTranslator extends Translator
     /**
      * Generate a cache key for the translation request.
      */
-    protected function generateCacheKey($key, $locale, array $replace)
+    protected function generateCacheKey(string $key, string $locale, array $replace): string
     {
-        $replaceHash = ! empty($replace) ? md5(serialize($replace)) : 'no_replace';
+        $replaceHash = $replace === [] ? 'no_replace' : md5(serialize($replace));
 
-        return self::CACHE_PREFIX . md5($key . '.' . $locale . '.' . $replaceHash);
+        return self::CACHE_PREFIX.md5($key.'.'.$locale.'.'.$replaceHash);
     }
 
     /**
      * Should translation caching be used?
      */
-    protected function shouldUseCache()
+    protected function shouldUseCache(): bool
     {
         return config('translation.cache_translations', true) && ! app()->environment('local') && extension_loaded('redis');
     }
 
     /** Get translation performance metrics for debugging. */
-    public function getMetrics()
+    public function getMetrics(): array
     {
         return array_merge($this->metrics, [
             'cache_hit_rate' => $this->metrics['total_requests'] > 0
@@ -112,10 +112,10 @@ class SuffixedTranslator extends Translator
     }
 
     /** Clear translation cache. */
-    public function clearCache()
+    public function clearCache(): bool
     {
         try {
-            $pattern = self::CACHE_PREFIX . '*';
+            $pattern = self::CACHE_PREFIX.'*';
             // Use cache store to access Redis connection when available
             $store = Cache::store();
             if (method_exists($store, 'getRedis')) {
@@ -137,19 +137,19 @@ class SuffixedTranslator extends Translator
             Log::info('Translation cache clear skipped: Redis store not available.');
 
             return true;
-        } catch (\Exception $e) {
-            Log::error('Failed to clear translation cache: ' . $e->getMessage());
+        } catch (\Exception $exception) {
+            Log::error('Failed to clear translation cache: '.$exception->getMessage());
 
             return false;
         }
     }
 
-    public function getMissingKeys()
+    public function getMissingKeys(): array
     {
         return $this->missingKeys;
     }
 
-    public function resetMetrics()
+    public function resetMetrics(): void
     {
         $this->metrics = [
             'total_requests' => 0,

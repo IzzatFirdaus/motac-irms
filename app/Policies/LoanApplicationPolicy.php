@@ -190,9 +190,9 @@ class LoanApplicationPolicy
     public function processIssuance(User $user, LoanApplication $loanApplication): Response|bool
     {
         $canProcess = $user->hasRole('BPM Staff') && in_array($loanApplication->status, [
-              LoanApplication::STATUS_APPROVED,
-              LoanApplication::STATUS_PARTIALLY_ISSUED,
-          ]);
+            LoanApplication::STATUS_APPROVED,
+            LoanApplication::STATUS_PARTIALLY_ISSUED,
+        ]);
 
         return $canProcess
           ? Response::allow()
@@ -205,11 +205,11 @@ class LoanApplicationPolicy
     public function processReturn(User $user, LoanApplication $loanApplication): Response|bool
     {
         $canProcess = $user->hasRole('BPM Staff') && in_array($loanApplication->status, [
-              LoanApplication::STATUS_ISSUED,
-              LoanApplication::STATUS_PARTIALLY_ISSUED,
-              LoanApplication::STATUS_OVERDUE,
-              LoanApplication::STATUS_PARTIALLY_RETURNED_PENDING_INSPECTION,
-          ]);
+            LoanApplication::STATUS_ISSUED,
+            LoanApplication::STATUS_PARTIALLY_ISSUED,
+            LoanApplication::STATUS_OVERDUE,
+            LoanApplication::STATUS_PARTIALLY_RETURNED_PENDING_INSPECTION,
+        ]);
 
         return $canProcess
           ? Response::allow()

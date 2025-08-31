@@ -16,10 +16,17 @@ abstract class TestCase extends BaseTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        // Ensure at least one user, helpdesk category, and priority exist for factories
+        // Ensure at least one user exists for factories
         \App\Models\User::factory()->create();
-        \App\Models\HelpdeskCategory::factory()->create();
-        \App\Models\HelpdeskPriority::factory()->create();
+
+        // Only create default helpdesk categories/priorities when they do not already exist
+        if (\App\Models\HelpdeskCategory::count() === 0) {
+            \App\Models\HelpdeskCategory::factory()->create(['name' => 'General']);
+        }
+
+        if (\App\Models\HelpdeskPriority::count() === 0) {
+            \App\Models\HelpdeskPriority::factory()->create(['name' => 'Low', 'level' => 1]);
+        }
 
             // Ensure required roles and permissions exist for the 'web' guard
             $roles = ['BPM', 'BPM Staff', 'IT Admin', 'Admin', 'Approver', 'Regular User'];

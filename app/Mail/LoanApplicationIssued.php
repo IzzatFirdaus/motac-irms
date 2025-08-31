@@ -30,7 +30,7 @@ class LoanApplicationIssued extends Mailable implements ShouldQueue
     {
         $this->loanApplication = $loanApplication->loadMissing([
             'user',
-            'loanTransactions' => function ($query) {
+            'loanTransactions' => function ($query): void {
                 $query->where('type', LoanTransaction::TYPE_ISSUE)
                     ->with('loanTransactionItems.equipment');
             },

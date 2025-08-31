@@ -34,7 +34,7 @@ class LoanApplicationOverdueReminder extends Mailable implements ShouldQueue
 
     private function calculateOverdueItems(): Collection
     {
-        $overdue = new Collection();
+        $overdue = new Collection;
         foreach ($this->loanApplication->loanTransactions as $transaction) {
             if ($transaction->type === LoanTransaction::TYPE_ISSUE) {
                 foreach ($transaction->loanTransactionItems as $item) {
