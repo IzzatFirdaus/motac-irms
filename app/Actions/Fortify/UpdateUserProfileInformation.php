@@ -16,7 +16,6 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
      */
     public function update(User $user, array $input): void
     {
-        /** @var \App\Models\User $user */
         Validator::make($input, [
             'name'  => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
@@ -26,10 +25,7 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
 
         // Only update the profile photo if it's an uploaded file
         if (isset($input['profile_photo_path']) && $input['profile_photo_path'] instanceof UploadedFile) {
-            // Method provided by Laravel Jetstream's HasProfilePhoto trait
-            if (method_exists($user, 'updateProfilePhoto')) {
-                $user->updateProfilePhoto($input['profile_photo_path']);
-            }
+            $user->updateProfilePhoto($input['profile_photo_path']);
         }
 
         // Update other profile fields
