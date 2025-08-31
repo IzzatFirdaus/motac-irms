@@ -40,8 +40,8 @@ class LocaleMiddleware
         $finalLocale       = $fallbackLocale; // Default to fallback locale
 
         // Ensure configured locales is a valid array
-        if (! is_array($configuredLocales) || empty($configuredLocales)) {
-            Log::warning("LocaleMiddleware: config('app.available_locales') is missing, empty, or not an array. Using fallback locale: {$fallbackLocale}");
+        if (! is_array($configuredLocales) || $configuredLocales === []) {
+            Log::warning('LocaleMiddleware: config(\'app.available_locales\') is missing, empty, or not an array. Using fallback locale: '.$fallbackLocale);
             App::setLocale($fallbackLocale);
             $this->registerAuthViewHints(); // Register view hints even if locale is not set
 
@@ -59,7 +59,7 @@ class LocaleMiddleware
                 // Update session to match user preference
                 Session::put('locale', $finalLocale);
             } else {
-                Log::debug("LocaleMiddleware: User's preferred locale '{$userPreferredLocale}' is not in allowed locales. Using fallback.");
+                Log::debug(sprintf("LocaleMiddleware: User's preferred locale '%s' is not in allowed locales. Using fallback.", $userPreferredLocale));
             }
         } elseif (Session::has('locale')) {
             // Priority 2: Check session locale (if user preference not available or invalid)
@@ -67,7 +67,7 @@ class LocaleMiddleware
             if ($sessionLocale && in_array($sessionLocale, $allowedLocaleKeys, true)) {
                 $finalLocale = $sessionLocale;
             } else {
-                Log::debug("LocaleMiddleware: Session locale '{$sessionLocale}' is invalid or not allowed. Using fallback: {$fallbackLocale}");
+                Log::debug(sprintf("LocaleMiddleware: Session locale '%s' is invalid or not allowed. Using fallback: %s", $sessionLocale, $fallbackLocale));
                 // Clean up invalid session locale
                 Session::put('locale', $fallbackLocale);
             }
@@ -77,6 +77,7 @@ class LocaleMiddleware
             if (in_array($defaultLocale, $allowedLocaleKeys, true)) {
                 $finalLocale = $defaultLocale;
             }
+
             // Set session for consistency
             Session::put('locale', $finalLocale);
         }
@@ -89,7 +90,7 @@ class LocaleMiddleware
 
         // Optional: Log locale changes for debugging (remove in production)
         if (Config::get('app.debug')) {
-            Log::debug("LocaleMiddleware: Set application locale to '{$finalLocale}' for user: ".(Auth::check() ? Auth::user()->name : 'guest'));
+            Log::debug(sprintf("LocaleMiddleware: Set application locale to '%s' for user: ", $finalLocale).(Auth::check() ? Auth::user()->name : 'guest'));
         }
 
         return $next($request);
@@ -119,8 +120,8 @@ class LocaleMiddleware
 
         $authViewsPath = \resource_path('views/auth');
         foreach ($viewMap as $view) {
-            $originalPath = $authViewsPath."/{$view}.blade.php";
-            $renamedPath  = $authViewsPath."/{$view}-page.blade.php";
+            $originalPath = $authViewsPath.sprintf('/%s.blade.php', $view);
+            $renamedPath  = $authViewsPath.sprintf('/%s-page.blade.php', $view);
 
             // Only create the link if the renamed exists and the original does not
             if (! file_exists($originalPath) && file_exists($renamedPath)) {
@@ -135,7 +136,7 @@ class LocaleMiddleware
                     }
                 } catch (\Throwable $e) {
                     // If symlink or copy fails, ignore and let the missing view error show as fallback
-                    Log::warning("LocaleMiddleware: Could not create alias for auth view '{$view}': ".$e->getMessage());
+                    Log::warning(sprintf("LocaleMiddleware: Could not create alias for auth view '%s': ", $view).$e->getMessage());
                 }
             }
         }

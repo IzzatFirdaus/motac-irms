@@ -14,17 +14,15 @@ class SuffixedFileLoader extends FileLoader
 {
     /**
      * The base path to the language files.
-     *
-     * @var string
      */
-    protected $basePath;
+    protected array|string $basePath;
 
     /**
      * Constructor for SuffixedFileLoader.
      *
      * @param string $path
      */
-    public function __construct(Filesystem $files, $path)
+    public function __construct(Filesystem $files, array|string $path)
     {
         parent::__construct($files, $path);
         $this->basePath = $path; // Store the language path for internal use.
@@ -39,17 +37,17 @@ class SuffixedFileLoader extends FileLoader
     public function load($locale, $group, $namespace = null)
     {
         // Debug log to trace loader calls and parameters
-        Log::debug("[SuffixedFileLoader] load() called: locale={$locale}, group={$group}, namespace=".($namespace ?? 'null'));
+        Log::debug(sprintf('[SuffixedFileLoader] load() called: locale=%s, group=%s, namespace=', $locale, $group).($namespace ?? 'null'));
 
         // Attempt to load suffixed translation file
         $lines = $this->loadSuffixed($locale, $group, $namespace);
 
         if (is_null($lines)) {
-            Log::debug("[SuffixedFileLoader] Fallback to default for group: '{$group}', locale: '{$locale}'");
+            Log::debug(sprintf("[SuffixedFileLoader] Fallback to default for group: '%s', locale: '%s'", $group, $locale));
             // Fallback to standard file if suffixed file not found
             $lines = parent::load($locale, $group, $namespace);
         } else {
-            Log::debug("[SuffixedFileLoader] Found suffixed file for group: '{$group}', locale: '{$locale}'");
+            Log::debug(sprintf("[SuffixedFileLoader] Found suffixed file for group: '%s', locale: '%s'", $group, $locale));
         }
 
         return $lines ?? [];
@@ -72,15 +70,16 @@ class SuffixedFileLoader extends FileLoader
         }
 
         // Construct expected suffixed filename
-        $file = "{$path}/{$locale}/{$group}_{$locale}.php";
-        Log::debug("[SuffixedFileLoader] Attempting to load file: {$file}");
+        $file = sprintf('%s/%s/%s_%s.php', $path, $locale, $group, $locale);
+        Log::debug('[SuffixedFileLoader] Attempting to load file: '.$file);
 
         if ($this->files->exists($file)) {
-            Log::debug("[SuffixedFileLoader] File exists: {$file}");
+            Log::debug('[SuffixedFileLoader] File exists: '.$file);
 
             return $this->files->getRequire($file);
         }
-        Log::debug("[SuffixedFileLoader] File does not exist: {$file}");
+
+        Log::debug('[SuffixedFileLoader] File does not exist: '.$file);
 
         return null;
     }

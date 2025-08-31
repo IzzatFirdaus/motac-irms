@@ -131,8 +131,7 @@ class GradeFactory extends Factory
         if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-
-        $deleterId = empty($userIds) ? null : Arr::random($userIds);
+        $deleterId = ! empty($userIds) ? Arr::random($userIds) : null;
 
         return $this->state(fn (array $attributes): array => [
             'deleted_at' => now(),

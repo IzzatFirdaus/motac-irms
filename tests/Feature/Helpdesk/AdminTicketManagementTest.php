@@ -6,6 +6,7 @@ use App\Models\HelpdeskCategory;
 use App\Models\HelpdeskPriority;
 use App\Models\HelpdeskTicket;
 use App\Models\User;
+use Laravel\Sanctum\Sanctum;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
@@ -40,35 +41,16 @@ class AdminTicketManagementTest extends TestCase
         $user = User::factory()->create(['email_verified_at' => now()]);
         $user->assignRole('User');
 
-        // Admin (use session guard for web routes)
-        $this->actingAs($admin, 'web');
-        $this->assertAuthenticatedAs($admin, 'web');
-        $response = $this->get(route('helpdesk.admin.tickets'));
-        if ($response->status() !== 200) {
-            // Dump headers and body to help diagnose redirects
-            $response->dumpHeaders();
-            $response->dump();
-        }
-        $response->assertOk();
+        Sanctum::actingAs($admin);
+        $this->get(route('helpdesk.admin.tickets'))->assertOk();
 
-        // IT Admin
-        $this->actingAs($itAdmin, 'web');
-        $response = $this->get(route('helpdesk.admin.tickets'));
-        if ($response->status() !== 200) {
-            $response->dumpHeaders();
-            $response->dump();
-        }
-        $response->assertOk();
+        Sanctum::actingAs($itAdmin);
+        $this->get(route('helpdesk.admin.tickets'))->assertOk();
 
-        // Regular user should be forbidden
-        $this->actingAs($user, 'web');
-        $response = $this->get(route('helpdesk.admin.tickets'));
-        if ($response->status() !== 403) {
-            $response->dumpHeaders();
-            $response->dump();
-        }
-        $response->assertForbidden(); // Users cannot access
+        Sanctum::actingAs($user);
+        $this->get(route('helpdesk.admin.tickets'))->assertForbidden(); // Users cannot access
     }
+
 
     /** @test */
     public function it_admin_can_update_ticket_status_and_assignment(): void

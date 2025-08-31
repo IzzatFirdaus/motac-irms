@@ -26,13 +26,29 @@ class HelpdeskTicketFactory extends Factory
     {
         // --- Static caches for related IDs ---
         static $userIds, $categoryIds, $priorityIds;
-        // Always create owner and assigned users.
-        // Prefer existing categories and priorities when available to avoid UNIQUE constraint failures
-        // in tests that explicitly create fixtures (e.g. TestCase setUp).
-        $userId           = User::factory()->create()->id;
+        // Prefer existing related records to avoid UNIQUE constraint collisions in tests.
+        // Create users for ticket ownership/assignment (safe to create multiple users).
+        $userId = User::factory()->create()->id;
         $assignedToUserId = User::factory()->create()->id;
-        $categoryId       = HelpdeskCategory::inRandomOrder()->value('id') ?? HelpdeskCategory::factory()->create()->id;
-        $priorityId       = HelpdeskPriority::inRandomOrder()->value('id') ?? HelpdeskPriority::factory()->create()->id;
+
+        // For categories and priorities, prefer selecting an existing record if present.
+        $categoryIds = HelpdeskCategory::pluck('id')->all();
+        if (! empty($categoryIds)) {
+            $categoryId = Arr::random($categoryIds);
+        } else {
+            // Use firstOrCreate to avoid race conditions causing UNIQUE constraint errors in tests
+            $category = HelpdeskCategory::firstOrCreate(['name' => 'General'], ['is_active' => 1, 'created_by' => 1, 'updated_by' => 1]);
+            $categoryId = $category->id;
+        }
+
+        $priorityIds = HelpdeskPriority::pluck('id')->all();
+        if (! empty($priorityIds)) {
+            $priorityId = Arr::random($priorityIds);
+        } else {
+            // Use firstOrCreate to avoid duplicate priority name inserts under race conditions
+            $priority = HelpdeskPriority::firstOrCreate(['name' => 'Low'], ['level' => 1, 'is_active' => 1, 'created_by' => 1, 'updated_by' => 1]);
+            $priorityId = $priority->id;
+        }
 
         // Use a static Malaysian faker for performance and realism
         static $msFaker;

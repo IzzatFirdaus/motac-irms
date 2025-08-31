@@ -18,12 +18,14 @@ abstract class TestCase extends BaseTestCase
         parent::setUp();
         // Ensure at least one user exists for factories
         \App\Models\User::factory()->create();
-        // Create a helpdesk category and priority only if none exist to avoid unique constraint collisions
-        if (! \App\Models\HelpdeskCategory::query()->exists()) {
-            \App\Models\HelpdeskCategory::factory()->create();
+
+        // Only create default helpdesk categories/priorities when they do not already exist
+        if (\App\Models\HelpdeskCategory::count() === 0) {
+            \App\Models\HelpdeskCategory::firstOrCreate(['name' => 'General'], ['is_active' => 1, 'created_by' => 1, 'updated_by' => 1]);
         }
-        if (! \App\Models\HelpdeskPriority::query()->exists()) {
-            \App\Models\HelpdeskPriority::factory()->create();
+
+        if (\App\Models\HelpdeskPriority::count() === 0) {
+            \App\Models\HelpdeskPriority::firstOrCreate(['name' => 'Low'], ['level' => 1, 'is_active' => 1, 'created_by' => 1, 'updated_by' => 1]);
         }
 
         // Ensure required roles and permissions exist for the 'web' guard

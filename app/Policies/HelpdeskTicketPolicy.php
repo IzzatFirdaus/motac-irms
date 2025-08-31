@@ -19,7 +19,14 @@ class HelpdeskTicketPolicy
     public function viewAny(User $user): bool
     {
         // Grant access to ticket listing for admins and users with explicit permission
-        return $user->hasRole('Admin') || $user->hasRole('IT Admin') || $user->hasPermissionTo('view helpdesk tickets');
+        if ($user->hasRole('Admin')) {
+            return true;
+        }
+        if ($user->hasRole('IT Admin')) {
+            return true;
+        }
+
+        return $user->hasPermissionTo('view helpdesk tickets');
     }
 
     /**
@@ -29,7 +36,17 @@ class HelpdeskTicketPolicy
     public function view(User $user, HelpdeskTicket $helpdeskTicket): bool
     {
         // Allow viewing if user is admin, IT admin, the ticket's applicant, or assigned agent
-        return $user->hasRole('Admin') || $user->hasRole('IT Admin') || $user->id === $helpdeskTicket->user_id || ($helpdeskTicket->assigned_to_user_id && $user->id === $helpdeskTicket->assigned_to_user_id);
+        if ($user->hasRole('Admin')) {
+            return true;
+        }
+        if ($user->hasRole('IT Admin')) {
+            return true;
+        }
+        if ($user->id === $helpdeskTicket->user_id) {
+            return true;
+        }
+
+        return $helpdeskTicket->assigned_to_user_id && $user->id === $helpdeskTicket->assigned_to_user_id;
     }
 
     /**
@@ -48,8 +65,18 @@ class HelpdeskTicketPolicy
      */
     public function update(User $user, HelpdeskTicket $helpdeskTicket): bool
     {
-        // Permit update if user is Admin or IT Admin, or the assigned agent and ticket is not closed
-        return $user->hasRole('Admin') || $user->hasRole('IT Admin') || ($helpdeskTicket->assigned_to_user_id && $user->id === $helpdeskTicket->assigned_to_user_id && $helpdeskTicket->status !== HelpdeskTicket::STATUS_CLOSED);
+        // Admin can always update
+        if ($user->hasRole('Admin')) {
+            return true;
+        }
+
+        // IT Admin can update but not when the ticket is closed
+        if ($user->hasRole('IT Admin')) {
+            return $helpdeskTicket->status !== HelpdeskTicket::STATUS_CLOSED;
+        }
+
+        // Assigned agent may update if ticket is not closed
+        return $helpdeskTicket->assigned_to_user_id && $user->id === $helpdeskTicket->assigned_to_user_id && $helpdeskTicket->status !== HelpdeskTicket::STATUS_CLOSED;
     }
 
     /**
@@ -85,7 +112,17 @@ class HelpdeskTicketPolicy
      */
     public function addComment(User $user, HelpdeskTicket $helpdeskTicket): bool
     {
-        return $user->id === $helpdeskTicket->user_id || ($helpdeskTicket->assigned_to_user_id && $user->id === $helpdeskTicket->assigned_to_user_id) || $user->hasRole('IT Admin') || $user->hasRole('Admin');
+        // Applicant can always add comments to their own ticket
+        if ($user->id === $helpdeskTicket->user_id) {
+            return true;
+        }
+
+        // Assigned agent, IT Admin, or Admin can add comments
+        if ($user->hasRole('IT Admin')) {
+            return true;
+        }
+
+        return $user->hasRole('Admin') || ($helpdeskTicket->assigned_to_user_id && $user->id === $helpdeskTicket->assigned_to_user_id);
     }
 
     /**
@@ -94,6 +131,13 @@ class HelpdeskTicketPolicy
      */
     public function close(User $user, HelpdeskTicket $helpdeskTicket): bool
     {
-        return $user->hasRole('Admin') || $user->hasRole('IT Admin') || ($helpdeskTicket->assigned_to_user_id && $user->id === $helpdeskTicket->assigned_to_user_id && $helpdeskTicket->status !== HelpdeskTicket::STATUS_CLOSED);
+        if ($user->hasRole('Admin')) {
+            return true;
+        }
+        if ($user->hasRole('IT Admin')) {
+            return true;
+        }
+
+        return $helpdeskTicket->assigned_to_user_id && $user->id === $helpdeskTicket->assigned_to_user_id && $helpdeskTicket->status !== HelpdeskTicket::STATUS_CLOSED;
     }
 }

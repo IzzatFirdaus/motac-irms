@@ -24,10 +24,11 @@ class SyncAppWithGithub extends ProcessWebhookJob
         info("Start deploy process - Running 'git pull'");
 
         $alreadyUpToDate = false;
-        $process->run(function ($type, $buffer) use (&$alreadyUpToDate): void {
+        $process->run(function ($type, string $buffer) use (&$alreadyUpToDate): void {
             if ($buffer === "Already up to date.\n") {
                 $alreadyUpToDate = true;
             }
+
             // Optional: Log buffer for debug
             info('Deploy Output: '.$buffer);
         });

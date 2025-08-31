@@ -58,7 +58,7 @@ class HelpdeskCategoryFactory extends Factory
         static $usedNames = [];
         $name             = null;
         $available        = array_diff($defaultCategories, $usedNames);
-        if ($available !== []) {
+        if (! empty($available)) {
             $name = $this->faker->randomElement($available);
         } else {
             // If all default names are used, generate a unique name
@@ -108,8 +108,7 @@ class HelpdeskCategoryFactory extends Factory
         if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-
-        $deleterId = empty($userIds) ? null : Arr::random($userIds);
+        $deleterId = ! empty($userIds) ? Arr::random($userIds) : null;
 
         return $this->state([
             'deleted_at' => now(),

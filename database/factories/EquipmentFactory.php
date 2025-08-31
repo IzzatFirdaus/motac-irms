@@ -35,28 +35,24 @@ class EquipmentFactory extends Factory
                 $userIds = [User::factory()->create()->id];
             }
         }
-
         if (! isset($departmentIds)) {
             $departmentIds = Department::pluck('id')->all();
             if (empty($departmentIds)) {
                 $departmentIds = [\App\Models\Department::factory()->create()->id];
             }
         }
-
         if (! isset($equipmentCategoryIds)) {
             $equipmentCategoryIds = EquipmentCategory::pluck('id')->all();
             if (empty($equipmentCategoryIds)) {
                 $equipmentCategoryIds = [\App\Models\EquipmentCategory::factory()->create()->id];
             }
         }
-
         if (! isset($locationIds)) {
             $locationIds = Location::pluck('id')->all();
             if (empty($locationIds)) {
                 $locationIds = [\App\Models\Location::factory()->create()->id];
             }
         }
-
         if (! isset($subCategoryIdsByCat)) {
             // Map EquipmentCategory ID => array of SubCategory IDs
             $subCategoryIdsByCat = [];
@@ -73,10 +69,10 @@ class EquipmentFactory extends Factory
         }
 
         // Choose random IDs from cached arrays (or null if not available)
-        $auditUserId         = empty($userIds) ? null : Arr::random($userIds);
-        $departmentId        = empty($departmentIds) ? null : Arr::random($departmentIds);
-        $equipmentCategoryId = empty($equipmentCategoryIds) ? null : Arr::random($equipmentCategoryIds);
-        $locationId          = empty($locationIds) ? null : Arr::random($locationIds);
+        $auditUserId         = ! empty($userIds) ? Arr::random($userIds) : null;
+        $departmentId        = ! empty($departmentIds) ? Arr::random($departmentIds) : null;
+        $equipmentCategoryId = ! empty($equipmentCategoryIds) ? Arr::random($equipmentCategoryIds) : null;
+        $locationId          = ! empty($locationIds) ? Arr::random($locationIds) : null;
 
         // Pick a subcategory belonging to the selected equipment category
         $subCategoryId = null;
@@ -93,7 +89,7 @@ class EquipmentFactory extends Factory
         // Generate dates
         $purchaseDateRaw    = $this->faker->optional(0.8)->dateTimeBetween('-5 years', '-3 months');
         $purchaseDate       = $purchaseDateRaw ? Carbon::instance($purchaseDateRaw) : null;
-        $warrantyExpiryDate = $purchaseDate instanceof \Illuminate\Support\Carbon ? $purchaseDate->copy()->addYears($this->faker->numberBetween(1, 3)) : null;
+        $warrantyExpiryDate = $purchaseDate ? $purchaseDate->copy()->addYears($this->faker->numberBetween(1, 3)) : null;
 
         $createdAt = $purchaseDate ?? Carbon::parse($this->faker->dateTimeThisDecade('-2 years'));
         $updatedAt = Carbon::parse($this->faker->dateTimeBetween($createdAt->toDateTimeString(), 'now'));
@@ -158,8 +154,8 @@ class EquipmentFactory extends Factory
             'brand'                 => $this->faker->randomElement(['Dell', 'HP', 'Lenovo', 'Acer', 'Apple', 'Canon', 'Epson', 'Samsung']),
             'model'                 => Str::title($this->faker->words(mt_rand(1, 2), true)).' '.$this->faker->bothify('##??X'),
             'description'           => $msFaker->optional(0.7)->paragraph(2),
-            'purchase_price'        => $purchaseDate instanceof \Illuminate\Support\Carbon ? $this->faker->randomFloat(2, 100, 5000) : null,
-            'purchase_date'         => $purchaseDate instanceof \Illuminate\Support\Carbon ? $purchaseDate->format('Y-m-d') : null,
+            'purchase_price'        => $purchaseDate ? $this->faker->randomFloat(2, 100, 5000) : null,
+            'purchase_date'         => $purchaseDate ? $purchaseDate->format('Y-m-d') : null,
             'warranty_expiry_date'  => $warrantyExpiryDate ? $warrantyExpiryDate->format('Y-m-d') : null,
             'status'                => $status,
             'condition_status'      => $conditionStatus,
@@ -285,8 +281,7 @@ class EquipmentFactory extends Factory
         if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-
-        $deleterId = empty($userIds) ? null : Arr::random($userIds);
+        $deleterId = ! empty($userIds) ? Arr::random($userIds) : null;
 
         return $this->state([
             'deleted_at' => now(),

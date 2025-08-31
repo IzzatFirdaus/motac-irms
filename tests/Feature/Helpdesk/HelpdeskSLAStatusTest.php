@@ -19,9 +19,9 @@ class HelpdeskSLAStatusTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        // Ensure necessary data exists for ticket creation
-        $this->category = \App\Models\HelpdeskCategory::factory()->create(['name' => 'General']);
-        $this->priority = \App\Models\HelpdeskPriority::factory()->create(['name' => 'Medium', 'level' => 2]);
+    // Ensure necessary data exists for ticket creation (idempotent)
+    $this->category = \App\Models\HelpdeskCategory::firstOrCreate(['name' => 'General'], ['is_active' => 1, 'created_by' => 1, 'updated_by' => 1]);
+    $this->priority = \App\Models\HelpdeskPriority::firstOrCreate(['name' => 'Medium'], ['level' => 2, 'is_active' => 1, 'created_by' => 1, 'updated_by' => 1]);
     }
 
     /** @test */

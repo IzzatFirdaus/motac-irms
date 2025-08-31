@@ -20,9 +20,9 @@ class HelpdeskEscalationPolicyTest extends TestCase
         parent::setUp();
         Notification::fake(); // Prevent actual notifications from being sent
         Role::firstOrCreate(['name' => 'IT Admin']);
-        // Ensure necessary data exists for ticket creation
-        \App\Models\HelpdeskCategory::factory()->create(['name' => 'General']);
-        \App\Models\HelpdeskPriority::factory()->create(['name' => 'High', 'level' => 3]);
+    // Ensure necessary data exists for ticket creation (idempotent)
+    \App\Models\HelpdeskCategory::firstOrCreate(['name' => 'General'], ['is_active' => 1, 'created_by' => 1, 'updated_by' => 1]);
+    \App\Models\HelpdeskPriority::firstOrCreate(['name' => 'High'], ['level' => 3, 'is_active' => 1, 'created_by' => 1, 'updated_by' => 1]);
     }
 
     /** @test */

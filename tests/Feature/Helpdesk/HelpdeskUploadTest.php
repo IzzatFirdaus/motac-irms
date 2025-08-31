@@ -18,8 +18,8 @@ class HelpdeskUploadTest extends TestCase
     {
         parent::setUp();
         Storage::fake('public'); // Mock the storage
-        \App\Models\HelpdeskCategory::factory()->create(['name' => 'General']);
-        \App\Models\HelpdeskPriority::factory()->create(['name' => 'Low', 'level' => 1]);
+    \App\Models\HelpdeskCategory::firstOrCreate(['name' => 'General'], ['is_active' => 1, 'created_by' => 1, 'updated_by' => 1]);
+    \App\Models\HelpdeskPriority::firstOrCreate(['name' => 'Low'], ['level' => 1, 'is_active' => 1, 'created_by' => 1, 'updated_by' => 1]);
     }
 
     /** @test */
