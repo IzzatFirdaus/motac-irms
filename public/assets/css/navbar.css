@@ -5,9 +5,24 @@
    - Updated: 2025-08-25 03:08:55 UTC by IzzatFirdaus
 */
 
-/* This file expects design tokens to be provided by `variables.css` which
-  must be loaded before any component CSS. Navbar tokens are centralized
-  in `public/assets/css/variables.css` to ensure a single source of truth. */
+/* Import central variables (public copy). Ensure this file is loaded after variables.css in production builds if using concatenation. */
+@import url("./variables.css");
+
+/* Accessibility helpers: variables are provided by variables.css - avoid duplicate :root declarations */
+/* Prefer keyboard focus-visible state for clearer outlines */
+:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Reduce motion for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 
 /* Main navbar container - MYDS compliant */
 .motac-navbar-alt {
@@ -250,18 +265,25 @@
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  /* IE fallback for object-fit */
+  border: 2px solid var(--motac-navbar-accent);
+  background-color: var(--motac-navbar-accent-bg);
+  overflow: hidden; /* ensure contained img does not overflow */
+  display: inline-block;
+}
+
+/* Prefer using an img inside the avatar for modern browsers */
+.motac-navbar-alt .navbar-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* For legacy builds that still set background-image on the container, keep the cover fallback */
+.motac-navbar-alt .navbar-avatar[style] {
   background-size: cover;
   background-position: 50% 50%;
   background-repeat: no-repeat;
-  border: 2px solid var(--motac-navbar-accent);
-  background-color: var(--motac-navbar-accent-bg);
-}
-
-/* Modern browsers with object-fit support */
-.motac-navbar-alt .navbar-avatar[src] {
-  -o-object-fit: cover;
-  object-fit: cover;
 }
 
 /* Notification badge - MYDS tag component style */
