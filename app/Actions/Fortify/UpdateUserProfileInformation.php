@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Actions\Fortify;
 
+use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\UpdatesUserProfileInformation;
@@ -10,10 +13,8 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
 {
     /**
      * Update the given user's profile information.
-     *
-     * @param \App\Models\User $user
      */
-    public function update($user, array $input)
+    public function update(User $user, array $input): void
     {
         /** @var \App\Models\User $user */
         Validator::make($input, [
