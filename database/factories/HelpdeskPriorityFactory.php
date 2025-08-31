@@ -22,12 +22,13 @@ class HelpdeskPriorityFactory extends Factory
 
     public function definition(): array
     {
-        // Static cache for User IDs (for blameable columns)
-        static $userIds;
-        if (! isset($userIds)) {
-            $userIds = User::pluck('id')->all();
+        // Always ensure at least one user exists for blameable columns
+        $userIds = User::pluck('id')->all();
+        if (empty($userIds)) {
+            $newUser = User::factory()->create();
+            $userIds = [$newUser->id];
         }
-        $auditUserId = ! empty($userIds) ? Arr::random($userIds) : null;
+        $auditUserId = Arr::random($userIds);
 
         // Typical helpdesk priorities for consistency in testing
         $priorityPresets = [
@@ -36,11 +37,26 @@ class HelpdeskPriorityFactory extends Factory
             ['name' => 'High',     'level' => 30, 'color_code' => '#ffc107'], // Yellow/Orange
             ['name' => 'Critical', 'level' => 40, 'color_code' => '#dc3545'], // Red
         ];
-        $priority = $this->faker->randomElement($priorityPresets);
+        static $usedNames = [];
+        $priority = null;
+        $available = array_filter($priorityPresets, function($preset) use ($usedNames) {
+            return !in_array($preset['name'], $usedNames);
+        });
+        if (!empty($available)) {
+            $priority = $this->faker->randomElement($available);
+        } else {
+            // If all default names are used, generate a unique name
+            $priority = [
+                'name' => $this->faker->unique()->word . '_' . $this->faker->unique()->randomNumber(5),
+                'level' => $this->faker->unique()->numberBetween(41, 100),
+                'color_code' => $this->faker->hexColor,
+            ];
+        }
+        $usedNames[] = $priority['name'];
 
         // Use a static Malaysian faker for realism and speed
         static $msFaker;
-        if (! $msFaker) {
+        if (!$msFaker) {
             $msFaker = \Faker\Factory::create('ms_MY');
         }
 
@@ -50,15 +66,15 @@ class HelpdeskPriorityFactory extends Factory
         $deletedAt = $isDeleted ? Carbon::parse($this->faker->dateTimeBetween($updatedAt, 'now')) : null;
 
         return [
-            'name'       => $priority['name'],
-            'level'      => $priority['level'],
-            'color_code' => $priority['color_code'],
-            'created_by' => $auditUserId,
-            'updated_by' => $auditUserId,
-            'deleted_by' => $isDeleted ? $auditUserId : null,
-            'created_at' => $createdAt,
-            'updated_at' => $updatedAt,
-            'deleted_at' => $deletedAt,
+            'name'        => $priority['name'],
+            'level'       => $priority['level'],
+            'color_code'  => $priority['color_code'],
+            'created_by'  => $auditUserId,
+            'updated_by'  => $auditUserId,
+            'deleted_by'  => $isDeleted ? $auditUserId : null,
+            'created_at'  => $createdAt,
+            'updated_at'  => $updatedAt,
+            'deleted_at'  => $deletedAt,
         ];
     }
 
@@ -68,11 +84,10 @@ class HelpdeskPriorityFactory extends Factory
     public function deleted(): static
     {
         static $userIds;
-        if (! isset($userIds)) {
+        if (!isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $deleterId = ! empty($userIds) ? Arr::random($userIds) : null;
-
+        $deleterId = !empty($userIds) ? Arr::random($userIds) : null;
         return $this->state([
             'deleted_at' => now(),
             'deleted_by' => $deleterId,

@@ -227,7 +227,7 @@ class LoanTransactionSeeder extends Seeder
             ->where('status', LoanApplication::STATUS_ISSUED)
             ->whereDate('loan_end_date', '<', Carbon::now()->toDateString())
             ->limit(5)
-            ->get();
+            ->get(); // Ensure this retrieves LoanApplication model instances
 
         Log::info(sprintf('Marking %s applications as overdue...', $appsToMarkOverdue->count()));
 

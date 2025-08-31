@@ -12,93 +12,41 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * HelpdeskTicket Model.
- * 
+ *
  * Main ticket model for the Helpdesk system.
  *
- * @property int                             $id
- * @property string                          $title
- * @property string                          $description
- * @property int                             $category_id
- * @property string                          $status
- * @property int                             $priority_id
- * @property int                             $user_id
- * @property int|null                        $assigned_to_user_id
+ * @property int $id
+ * @property string $title
+ * @property string $description
+ * @property int $category_id
+ * @property string $status
+ * @property int $priority_id
+ * @property int $user_id
+ * @property int|null $assigned_to_user_id
  * @property \Illuminate\Support\Carbon|null $closed_at
- * @property-read \App\Models\User|null $user
- * @property-read \App\Models\User|null $assignedTo
- * @property string|null                     $resolution_notes
- * @property string|null                     $resolution_details
+ * @property string|null $resolution_notes
  * @property \Illuminate\Support\Carbon|null $sla_due_at
- * @property int|null                        $closed_by_id
+ * @property int|null $closed_by_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
- * @property-read \App\Models\User $applicant
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\HelpdeskAttachment> $attachments
- * @property-read int|null $attachments_count
- * @property-read \App\Models\HelpdeskCategory $category
- * @property-read \App\Models\User|null $closedBy
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\HelpdeskComment> $comments
- * @property-read int|null $comments_count
- * @property-read bool $is_overdue
- * @property-read string $status_label
- * @property-read string $subject
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\HelpdeskComment> $latestComment
- * @property-read int|null $latest_comment_count
- * @property-read \App\Models\HelpdeskPriority $priority
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket closed()
- * @method static \Database\Factories\HelpdeskTicketFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket open()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereAssignedToUserId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereCategoryId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereClosedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereClosedById($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereCreatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereDeletedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereDescription($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket wherePriorityId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereResolutionNotes($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereSlaDueAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereTitle($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereUpdatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereUserId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket withTrashed(bool $withTrashed = true)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket withoutTrashed()
- * @mixin \Eloquent
  */
 class HelpdeskTicket extends Model
 {
-    use CreatedUpdatedDeletedBy;
-    use HasFactory;
-    use SoftDeletes;
+    use HasFactory, CreatedUpdatedDeletedBy, SoftDeletes;
 
     // Status constants for strict status management
     public const STATUS_OPEN = 'open';
-
     public const STATUS_IN_PROGRESS = 'in_progress';
-
     public const STATUS_RESOLVED = 'resolved';
-
     public const STATUS_CLOSED = 'closed';
 
     // Status options for UI and validation
     public const STATUS_OPTIONS = [
-        self::STATUS_OPEN        => 'Open',
+        self::STATUS_OPEN => 'Open',
         self::STATUS_IN_PROGRESS => 'In Progress',
-        self::STATUS_RESOLVED    => 'Resolved',
-        self::STATUS_CLOSED      => 'Closed',
+        self::STATUS_RESOLVED => 'Resolved',
+        self::STATUS_CLOSED => 'Closed',
     ];
 
     // Mass assignable attributes
@@ -118,26 +66,16 @@ class HelpdeskTicket extends Model
 
     // Casting attributes to appropriate data types
     protected $casts = [
-        'closed_at'  => 'datetime',
+        'closed_at' => 'datetime',
         'sla_due_at' => 'datetime',
     ];
 
     /**
-     * Backwards-compatible accessor: some templates refer to 'subject'.
-     * Maps to 'title' column.
+     * Alias for applicant (user who created the ticket).
      */
-    public function getSubjectAttribute(): string
+    public function user(): BelongsTo
     {
-        return (string) ($this->attributes['title'] ?? $this->title ?? '');
-    }
-
-    /**
-     * Backwards-compatible accessor: some UI references 'resolution_details'.
-     * Maps to 'resolution_notes'.
-     */
-    public function getResolutionDetailsAttribute(): ?string
-    {
-        return $this->attributes['resolution_notes'] ?? $this->resolution_notes ?? null;
+        return $this->applicant();
     }
 
     /**
@@ -163,6 +101,10 @@ class HelpdeskTicket extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    /**
+     * Alias for applicant (user who created the ticket).
+     */
 
     /**
      * The user assigned to resolve the ticket.
@@ -202,14 +144,6 @@ class HelpdeskTicket extends Model
     public function latestComment(): HasMany
     {
         return $this->hasMany(HelpdeskComment::class, 'ticket_id')->latest();
-    }
-
-    /**
-     * Backwards-compatible alias used throughout services.
-     */
-    public function user(): BelongsTo
-    {
-        return $this->applicant();
     }
 
     /**

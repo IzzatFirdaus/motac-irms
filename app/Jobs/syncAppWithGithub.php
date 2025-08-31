@@ -11,11 +11,18 @@ use Symfony\Component\Process\Process;
  */
 class SyncAppWithGithub extends ProcessWebhookJob
 {
+    /**
+     * Handle the webhook and run 'git pull' to update the app code.
+     *
+     * @return void
+     */
     public function handle(): void
     {
         // $this->webhookCall contains an instance of WebhookCall
 
+        // Create a process to run 'git pull' to fetch any new changes from GitHub.
         $process = new Process(['git', 'pull']);
+
         info("Start deploy process - Running 'git pull'");
 
         $alreadyUpToDate = false;
