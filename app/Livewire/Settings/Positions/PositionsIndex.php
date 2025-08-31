@@ -75,6 +75,7 @@ class PositionsIndex extends Component
         } else {
             $this->sortDirection = 'asc';
         }
+
         $this->sortField = $field;
         $this->resetPage();
     }
@@ -85,9 +86,9 @@ class PositionsIndex extends Component
     public function getPositionsProperty()
     {
         $query = Position::with('grade:id,name')
-            ->when($this->search, function ($q) {
+            ->when($this->search, function ($q): void {
                 $q->where('name', 'like', '%' . $this->search . '%')
-                    ->orWhereHas('grade', function ($q) {
+                    ->orWhereHas('grade', function ($q): void {
                         $q->where('name', 'like', '%' . $this->search . '%');
                     });
             });
@@ -180,6 +181,7 @@ class PositionsIndex extends Component
 
                 return;
             }
+
             $this->positionIdToDelete          = $id;
             $this->positionNameToDelete        = $position->name;
             $this->showDeleteConfirmationModal = true;
@@ -207,6 +209,7 @@ class PositionsIndex extends Component
             $position->delete();
             session()->flash('message', __('Jawatan :name berjaya dipadam.', ['name' => $this->positionNameToDelete]));
         }
+
         $this->closeDeleteConfirmationModal();
     }
 

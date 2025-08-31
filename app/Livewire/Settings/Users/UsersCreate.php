@@ -90,9 +90,11 @@ class UsersCreate extends Component
         if (($this->title === '' || $this->title === '0') && $this->titleOptions !== []) {
             $this->title = array_key_first($this->titleOptions);
         }
+
         if (($this->service_status === '' || $this->service_status === '0') && $this->serviceStatusOptions !== []) {
             $this->service_status = array_key_first($this->serviceStatusOptions);
         }
+
         if (($this->appointment_type === '' || $this->appointment_type === '0') && $this->appointmentTypeOptions !== []) {
             $this->appointment_type = array_key_first($this->appointmentTypeOptions);
         }
@@ -174,12 +176,15 @@ class UsersCreate extends Component
         if ($this->titleOptions !== []) {
             $this->title = array_key_first($this->titleOptions);
         }
+
         if ($this->serviceStatusOptions !== []) {
             $this->service_status = array_key_first($this->serviceStatusOptions);
         }
+
         if ($this->appointmentTypeOptions !== []) {
             $this->appointment_type = array_key_first($this->appointmentTypeOptions);
         }
+
         $this->selectedRoles = [];
     }
 

@@ -26,7 +26,7 @@ class UserDashboard extends Component
 
     public $recent_applications;
 
-    public function mount()
+    public function mount(): void
     {
         $user                  = Auth::user();
         $this->displayUserName = $user->name ?? '';

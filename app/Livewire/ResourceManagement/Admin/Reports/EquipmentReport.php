@@ -92,22 +92,27 @@ class EquipmentReport extends Component
             });
         }
 
-        if ($this->filterAssetType) {
+        if ($this->filterAssetType !== null && $this->filterAssetType !== '' && $this->filterAssetType !== '0') {
             $query->where('asset_type', $this->filterAssetType);
         }
-        if ($this->filterStatus) {
+
+        if ($this->filterStatus !== null && $this->filterStatus !== '' && $this->filterStatus !== '0') {
             $query->where('status', $this->filterStatus);
         }
-        if ($this->filterCondition) {
+
+        if ($this->filterCondition !== null && $this->filterCondition !== '' && $this->filterCondition !== '0') {
             $query->where('condition_status', $this->filterCondition);
         }
-        if ($this->filterDepartmentId) {
+
+        if ($this->filterDepartmentId !== null && $this->filterDepartmentId !== 0) {
             $query->where('department_id', $this->filterDepartmentId);
         }
-        if ($this->filterLocationId) {
+
+        if ($this->filterLocationId !== null && $this->filterLocationId !== 0) {
             $query->where('location_id', $this->filterLocationId);
         }
-        if ($this->filterCategoryId) {
+
+        if ($this->filterCategoryId !== null && $this->filterCategoryId !== 0) {
             $query->where('category_id', $this->filterCategoryId);
         }
 

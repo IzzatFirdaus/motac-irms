@@ -164,11 +164,11 @@ class LoanApplicationForm extends Component
             $this->applicant_confirmation           = ! is_null($application->applicant_confirmation_timestamp);
 
             $this->loan_application_items = $application->loanApplicationItems->map(fn ($item) => $item->only(['id', 'equipment_type', 'quantity_requested', 'notes']))->toArray();
-            if (empty($this->loan_application_items)) {
+            if ($this->loan_application_items === []) {
                 $this->addLoanItem();
             }
-        } catch (Throwable $e) {
-            Log::error('Error loading existing loan application: ' . $e->getMessage());
+        } catch (Throwable $throwable) {
+            Log::error('Error loading existing loan application: ' . $throwable->getMessage());
             session()->flash('error', __('messages.system_error'));
             $this->redirectRoute('dashboard', navigate: true);
         }

@@ -106,15 +106,15 @@ class AdminDashboard extends Component
             LoanApplication::STATUS_OVERDUE          => '#6610f2',
         ];
 
-        $filtered = array_filter($stats, fn ($v, $k) => isset($labels[$k]), ARRAY_FILTER_USE_BOTH);
+        $filtered = array_filter($stats, fn ($v, $k): bool => isset($labels[$k]), ARRAY_FILTER_USE_BOTH);
 
         $this->loan_status_chart_data = [
             'labels'   => array_map(fn ($key) => $labels[$key], array_keys($filtered)),
             'datasets' => [[
                 'label'           => __('dashboard.loan_stats_title'),
                 'data'            => array_values($filtered),
-                'backgroundColor' => array_map(fn ($key) => $colors[$key], array_keys($filtered)),
-                'borderColor'     => array_map(fn ($key) => $colors[$key], array_keys($filtered)),
+                'backgroundColor' => array_map(fn ($key): string => $colors[$key], array_keys($filtered)),
+                'borderColor'     => array_map(fn ($key): string => $colors[$key], array_keys($filtered)),
                 'borderWidth'     => 1,
             ]],
         ];

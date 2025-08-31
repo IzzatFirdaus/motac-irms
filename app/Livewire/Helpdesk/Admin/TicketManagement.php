@@ -66,10 +66,12 @@ class TicketManagement extends Component
 
     // Backwards-compat properties expected by tests
     public ?string $statusFilter = null; // proxy to $status
+
     public ?int $categoryFilter = null;  // proxy to $category_id
 
     // Edit modal compatibility properties expected by tests
     public ?string $editStatus = null;
+
     public ?int $editAssignedTo = null;
 
     protected $listeners = ['ticketUpdated' => '$refresh']; // Refresh list after ticket update
@@ -77,7 +79,7 @@ class TicketManagement extends Component
     /**
      * Inject HelpdeskService.
      */
-    public function boot(HelpdeskService $helpdeskService)
+    public function boot(HelpdeskService $helpdeskService): void
     {
         $this->helpdeskService = $helpdeskService;
     }
@@ -90,7 +92,7 @@ class TicketManagement extends Component
     {
         return HelpdeskTicket::query()
             ->with(['user', 'category', 'priority', 'assignedTo'])
-            ->when($this->search, function (Builder $query) {
+            ->when($this->search, function (Builder $query): void {
                 $query->where('title', 'like', '%' . $this->search . '%')
                     ->orWhere('description', 'like', '%' . $this->search . '%')
                     ->orWhereHas('user', fn ($q) => $q->where('name', 'like', '%' . $this->search . '%'));
@@ -122,20 +124,20 @@ class TicketManagement extends Component
         return User::role('BPM Staff')->orderBy('name')->get();
     }
 
-    public function viewTicketDetails(HelpdeskTicket $ticket)
+    public function viewTicketDetails(HelpdeskTicket $ticket): void
     {
         $this->selectedTicket         = $ticket;
         $this->showTicketDetailsModal = true;
     }
 
-    public function openAssignTicketModal(HelpdeskTicket $ticket)
+    public function openAssignTicketModal(HelpdeskTicket $ticket): void
     {
         $this->selectedTicket        = $ticket;
         $this->assigneeId            = $ticket->assigned_to_user_id;
         $this->showAssignTicketModal = true;
     }
 
-    public function assignTicket()
+    public function assignTicket(): void
     {
         $this->validate([
             'assigneeId' => 'nullable|exists:users,id',
@@ -158,12 +160,12 @@ class TicketManagement extends Component
             session()->flash('success', 'Ticket assigned successfully.');
             $this->showAssignTicketModal = false;
             $this->dispatch('ticketUpdated');
-        } catch (\Exception $e) {
-            session()->flash('error', 'Failed to assign ticket: ' . $e->getMessage());
+        } catch (\Exception $exception) {
+            session()->flash('error', 'Failed to assign ticket: ' . $exception->getMessage());
         }
     }
 
-    public function openChangeStatusModal(HelpdeskTicket $ticket)
+    public function openChangeStatusModal(HelpdeskTicket $ticket): void
     {
         $this->selectedTicket        = $ticket;
         $this->newStatus             = $ticket->status;
@@ -171,15 +173,15 @@ class TicketManagement extends Component
     }
 
     // Compatibility method: open edit modal and preload fields (expected by tests)
-    public function openEditModal(HelpdeskTicket $ticket)
+    public function openEditModal(HelpdeskTicket $ticket): void
     {
-        $this->selectedTicket = $ticket;
-        $this->editStatus = $ticket->status;
-        $this->editAssignedTo = $ticket->assigned_to_user_id;
+        $this->selectedTicket        = $ticket;
+        $this->editStatus            = $ticket->status;
+        $this->editAssignedTo        = $ticket->assigned_to_user_id;
         $this->showChangeStatusModal = true;
     }
 
-    public function changeTicketStatus()
+    public function changeTicketStatus(): void
     {
         $this->validate([
             'newStatus' => 'required|string|in:open,in_progress,on_hold,resolved,closed,reopened,pending_user_feedback',
@@ -202,12 +204,12 @@ class TicketManagement extends Component
             session()->flash('success', 'Ticket status updated successfully.');
             $this->showChangeStatusModal = false;
             $this->dispatch('ticketUpdated');
-        } catch (\Exception $e) {
-            session()->flash('error', 'Failed to change ticket status: ' . $e->getMessage());
+        } catch (\Exception $exception) {
+            session()->flash('error', 'Failed to change ticket status: ' . $exception->getMessage());
         }
     }
 
-    public function openAddCommentModal(HelpdeskTicket $ticket)
+    public function openAddCommentModal(HelpdeskTicket $ticket): void
     {
         $this->selectedTicket      = $ticket;
         $this->commentText         = '';
@@ -215,7 +217,7 @@ class TicketManagement extends Component
         $this->showAddCommentModal = true;
     }
 
-    public function addComment()
+    public function addComment(): void
     {
         $this->validate([
             'commentText'       => 'required|string|min:5',
@@ -241,19 +243,19 @@ class TicketManagement extends Component
             session()->flash('success', 'Comment added successfully.');
             $this->showAddCommentModal = false;
             $this->dispatch('ticketUpdated');
-        } catch (\Exception $e) {
-            session()->flash('error', 'Failed to add comment: ' . $e->getMessage());
+        } catch (\Exception $exception) {
+            session()->flash('error', 'Failed to add comment: ' . $exception->getMessage());
         }
     }
 
-    public function openCloseTicketModal(HelpdeskTicket $ticket)
+    public function openCloseTicketModal(HelpdeskTicket $ticket): void
     {
         $this->selectedTicket       = $ticket;
         $this->resolutionDetails    = $ticket->resolution_details;
         $this->showCloseTicketModal = true;
     }
 
-    public function closeTicket()
+    public function closeTicket(): void
     {
         $this->validate([
             'resolutionDetails' => 'required|string|min:10',
@@ -276,8 +278,8 @@ class TicketManagement extends Component
             session()->flash('success', 'Ticket closed successfully.');
             $this->showCloseTicketModal = false;
             $this->dispatch('ticketUpdated');
-        } catch (\Exception $e) {
-            session()->flash('error', 'Failed to close ticket: ' . $e->getMessage());
+        } catch (\Exception $exception) {
+            session()->flash('error', 'Failed to close ticket: ' . $exception->getMessage());
         }
     }
 
@@ -287,24 +289,27 @@ class TicketManagement extends Component
         if ($this->statusFilter !== null) {
             $this->status = $this->statusFilter;
         }
+
         if ($this->categoryFilter !== null) {
             $this->category_id = $this->categoryFilter;
         }
+
         return view('livewire.helpdesk.admin.ticket-management');
     }
 
     // Compatibility method: update ticket using edit fields
-    public function updateTicket()
+    public function updateTicket(): void
     {
         $this->validate([
-            'editStatus' => 'nullable|string|in:open,in_progress,on_hold,resolved,closed,reopened,pending_user_feedback',
+            'editStatus'     => 'nullable|string|in:open,in_progress,on_hold,resolved,closed,reopened,pending_user_feedback',
             'editAssignedTo' => 'nullable|integer|exists:users,id',
         ]);
 
         try {
             $updater = Auth::user();
-            if (!$updater) {
+            if (! $updater) {
                 session()->flash('error', 'Authentication required to update ticket.');
+
                 return;
             }
 
@@ -312,6 +317,7 @@ class TicketManagement extends Component
             if ($this->editStatus !== null) {
                 $data['status'] = $this->editStatus;
             }
+
             if ($this->editAssignedTo !== null) {
                 $data['assigned_to_user_id'] = $this->editAssignedTo;
             }
@@ -335,8 +341,8 @@ class TicketManagement extends Component
             session()->flash('success', 'Ticket updated successfully.');
             $this->showChangeStatusModal = false;
             $this->dispatch('ticketUpdated');
-        } catch (\Exception $e) {
-            session()->flash('error', 'Failed to update ticket: ' . $e->getMessage());
+        } catch (\Exception $exception) {
+            session()->flash('error', 'Failed to update ticket: ' . $exception->getMessage());
         }
     }
 }

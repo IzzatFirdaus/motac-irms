@@ -34,7 +34,7 @@ class TicketForm extends Component
     /**
      * Called on component boot; inject HelpdeskService for ticket creation.
      */
-    public function boot(HelpdeskService $helpdeskService)
+    public function boot(HelpdeskService $helpdeskService): void
     {
         $this->helpdeskService = $helpdeskService;
     }
@@ -42,7 +42,7 @@ class TicketForm extends Component
     /**
      * Define validation rules for ticket creation.
      */
-    protected function rules()
+    protected function rules(): array
     {
         return [
             'title'         => 'required|string|max:255',
@@ -77,9 +77,10 @@ class TicketForm extends Component
 
             // Redirect to the ticket's show page (route name according to convention)
             return redirect()->route('helpdesk.tickets.show', $ticket->id);
-        } catch (\Exception $e) {
-            session()->flash('error', __('Gagal menghantar tiket: ') . $e->getMessage());
+        } catch (\Exception $exception) {
+            session()->flash('error', __('Gagal menghantar tiket: ') . $exception->getMessage());
         }
+        return null;
     }
 
     /**

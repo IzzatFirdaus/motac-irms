@@ -26,7 +26,7 @@ class NotificationsList extends Component
     /**
      * Reset pagination when search changes.
      */
-    public function updatingSearch()
+    public function updatingSearch(): void
     {
         $this->resetPage();
     }
@@ -36,14 +36,17 @@ class NotificationsList extends Component
      */
     public function getNotificationsProperty()
     {
-        return Notification::query()
-            ->where('notifiable_id', Auth::id())
-            ->where('notifiable_type', Auth::user() ? get_class(Auth::user()) : null)
-            ->when($this->search, function ($query) {
-                $query->where('data', 'like', '%' . $this->search . '%');
-            })
-            ->orderByDesc('created_at')
-            ->paginate(10);
+        /** @var \Illuminate\Database\Eloquent\Builder $query */
+        $query = \App\Models\Notification::query();
+
+        $query->where('notifiable_id', Auth::id())
+            ->where('notifiable_type', Auth::user() ? get_class(Auth::user()) : null);
+
+        if ($this->search !== '' && $this->search !== '0') {
+            $query->where('data', 'like', '%' . $this->search . '%');
+        }
+
+        return $query->orderByDesc('created_at')->paginate(10);
     }
 
     /**
@@ -51,7 +54,7 @@ class NotificationsList extends Component
      *
      * @param int|string $notificationId
      */
-    public function markAsRead($notificationId)
+    public function markAsRead($notificationId): void
     {
         $notification = Notification::where('id', $notificationId)
             ->where('notifiable_id', Auth::id())

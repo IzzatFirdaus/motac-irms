@@ -203,7 +203,7 @@ class RolesIndex extends Component
     {
         $this->authorize('delete', config('permission.models.role'));
 
-        if ($this->roleIdToDelete) {
+        if ($this->roleIdToDelete !== null && $this->roleIdToDelete !== 0) {
             $roleModelClass = config('permission.models.role');
             $role           = $roleModelClass::findById($this->roleIdToDelete, 'web');
 

@@ -86,7 +86,7 @@ class LoanRequestForm extends Component
     {
         $this->loanApplicationService           = $loanApplicationService;
         $this->equipmentTypeOptions             = collect(Equipment::$ASSET_TYPES_LABELS);
-        $this->systemUsersForResponsibleOfficer = User::whereHas('roles', function ($query) {
+        $this->systemUsersForResponsibleOfficer = User::whereHas('roles', function ($query): void {
             $query->whereIn('name', ['Admin', 'Support']);
         })->get(['id', 'name', 'jawatan_gred']);
     }
@@ -219,6 +219,7 @@ class LoanRequestForm extends Component
             } else {
                 $this->rules()['applicant_confirmation'] = ['boolean'];
             }
+
             $this->validate($this->rules());
 
             $user = Auth::user();
@@ -244,7 +245,7 @@ class LoanRequestForm extends Component
 
             DB::transaction(function () use ($isFinalButtonClicked, $user, $payload): void {
                 // If editing, update application; otherwise, create new
-                if ($this->isEdit && $this->loanApplication) {
+                if ($this->isEdit && $this->loanApplication instanceof \App\Models\LoanApplication) {
                     $this->authorize('update', $this->loanApplication);
                     $this->loanApplication = $this->loanApplicationService->updateApplication(
                         $this->loanApplication,
@@ -279,7 +280,7 @@ class LoanRequestForm extends Component
      */
     private function fillFormWithLoanApplicationData(): void
     {
-        if (! $this->loanApplication) {
+        if (!$this->loanApplication instanceof \App\Models\LoanApplication) {
             return;
         }
 
@@ -299,6 +300,7 @@ class LoanRequestForm extends Component
         if (! $this->isApplicantResponsible && $this->loanApplication->responsibleOfficer) {
             $this->responsible_officer_id = $this->loanApplication->responsible_officer_id;
         }
+
         // Fill items
         $this->items = $this->loanApplication->loanApplicationItems->map(function ($item): array {
             return [

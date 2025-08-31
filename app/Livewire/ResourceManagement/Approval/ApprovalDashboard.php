@@ -103,16 +103,17 @@ class ApprovalDashboard extends Component
             if ($this->filterType === 'loan_application') {
                 $query->whereMorphedTo('approvable', LoanApplication::class);
             }
+
             // If you support helpdesk_ticket, add logic for that model
             // elseif ($this->filterType === 'helpdesk_ticket') { ... }
         }
 
         // Search filter (searches applicant name/email for loan applications)
-        if ($this->searchTerm) {
+        if ($this->searchTerm !== '' && $this->searchTerm !== '0') {
             $searchTermLower = strtolower($this->searchTerm);
-            $query->where(function ($q) use ($searchTermLower) {
-                $q->whereHasMorph('approvable', [LoanApplication::class], function ($morphQuery) use ($searchTermLower) {
-                    $morphQuery->whereHas('user', function ($userQuery) use ($searchTermLower) {
+            $query->where(function ($q) use ($searchTermLower): void {
+                $q->whereHasMorph('approvable', [LoanApplication::class], function ($morphQuery) use ($searchTermLower): void {
+                    $morphQuery->whereHas('user', function ($userQuery) use ($searchTermLower): void {
                         $userQuery->whereRaw('LOWER(name) LIKE ?', ['%' . $searchTermLower . '%'])
                             ->orWhereRaw('LOWER(email) LIKE ?', ['%' . $searchTermLower . '%']);
                     });
@@ -200,7 +201,7 @@ class ApprovalDashboard extends Component
         try {
             $this->validateApprovalInputs();
 
-            if (! $this->currentApprovalId || ! $this->currentApprovalTask) {
+            if ($this->currentApprovalId === null || $this->currentApprovalId === 0 || ! $this->currentApprovalTask instanceof \App\Models\Approval) {
                 throw new \RuntimeException('Tiada tugas kelulusan aktif.');
             }
 

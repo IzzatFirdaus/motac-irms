@@ -88,21 +88,21 @@ class LoanApplicationsReport extends Component
             });
         }
 
-        if ($this->filterStatus) {
+        if ($this->filterStatus !== null && $this->filterStatus !== '' && $this->filterStatus !== '0') {
             $query->where('status', $this->filterStatus);
         }
 
-        if ($this->filterDepartmentId) {
+        if ($this->filterDepartmentId !== null && $this->filterDepartmentId !== 0) {
             $query->whereHas('user.department', function ($deptQuery): void {
                 $deptQuery->where('id', $this->filterDepartmentId);
             });
         }
 
-        if ($this->filterDateFrom) {
+        if ($this->filterDateFrom !== null && $this->filterDateFrom !== '' && $this->filterDateFrom !== '0') {
             $query->whereDate('created_at', '>=', $this->filterDateFrom);
         }
 
-        if ($this->filterDateTo) {
+        if ($this->filterDateTo !== null && $this->filterDateTo !== '' && $this->filterDateTo !== '0') {
             $query->whereDate('created_at', '<=', $this->filterDateTo);
         }
 

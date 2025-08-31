@@ -322,9 +322,9 @@ class EquipmentIndex extends Component
             session()->flash('success', __('Peralatan ICT berjaya dipadam.'));
             Log::info('Equipment deleted successfully.', ['equipment_id' => $this->deletingEquipment->id]);
             $this->closeModals();
-        } catch (\Exception $e) {
-            session()->flash('error', __('Gagal memadam peralatan ICT: ') . $e->getMessage());
-            Log::error('Failed to delete equipment ID: ' . $this->deletingEquipment->id . ' error: ' . $e->getMessage(), ['exception' => $e]);
+        } catch (\Exception $exception) {
+            session()->flash('error', __('Gagal memadam peralatan ICT: ') . $exception->getMessage());
+            Log::error('Failed to delete equipment ID: ' . $this->deletingEquipment->id . ' error: ' . $exception->getMessage(), ['exception' => $exception]);
         }
     }
 
@@ -342,7 +342,7 @@ class EquipmentIndex extends Component
      */
     private function populateFields(): void
     {
-        if ($this->editingEquipment) {
+        if ($this->editingEquipment instanceof \App\Models\Equipment) {
             $this->asset_type           = $this->editingEquipment->asset_type;
             $this->brand                = $this->editingEquipment->brand;
             $this->model_name           = $this->editingEquipment->model;

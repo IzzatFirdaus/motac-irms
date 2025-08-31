@@ -37,17 +37,19 @@ class EquipmentReport extends Component
             ->with(['department'])
             ->orderBy('tag_id', 'asc');
 
-        if ($this->search) {
-            $query->where(function ($q) {
+        if ($this->search !== '' && $this->search !== '0') {
+            $query->where(function ($q): void {
                 $q->where('tag_id', 'like', '%' . $this->search . '%')
                     ->orWhere('brand', 'like', '%' . $this->search . '%')
                     ->orWhere('model', 'like', '%' . $this->search . '%');
             });
         }
-        if ($this->filterStatus) {
+
+        if ($this->filterStatus !== '' && $this->filterStatus !== '0') {
             $query->where('status', $this->filterStatus);
         }
-        if ($this->filterDepartment) {
+
+        if ($this->filterDepartment !== '' && $this->filterDepartment !== '0') {
             $query->where('department_id', $this->filterDepartment);
         }
 
@@ -57,17 +59,17 @@ class EquipmentReport extends Component
     /**
      * Reset pagination when filters or search are updated.
      */
-    public function updatingSearch()
+    public function updatingSearch(): void
     {
         $this->resetPage();
     }
 
-    public function updatedFilterStatus()
+    public function updatedFilterStatus(): void
     {
         $this->resetPage();
     }
 
-    public function updatedFilterDepartment()
+    public function updatedFilterDepartment(): void
     {
         $this->resetPage();
     }

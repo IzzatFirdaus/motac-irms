@@ -206,7 +206,7 @@ class Departments extends Component
     /**
      * Example for member count (if needed).
      */
-    public function getMembersCount($department_id)
+    public function getMembersCount($department_id): int
     {
         // Implement with your own logic if you want to show number of users in a department.
         // return \App\Models\User::where('department_id', $department_id)->count();

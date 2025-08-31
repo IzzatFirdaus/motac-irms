@@ -114,6 +114,7 @@ class PermissionsIndex extends Component
 
                 return;
             }
+
             $this->permissionIdToDelete        = $id;
             $this->permissionNameToDelete      = $permission->name;
             $this->showDeleteConfirmationModal = true;

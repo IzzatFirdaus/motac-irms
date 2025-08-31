@@ -96,28 +96,29 @@ class ApprovalHistory extends Component
                 'approvable.user', // Load the applicant's user details for display
             ])
             // Filter by application type (loan_application only since email is removed)
-            ->when($this->filterType !== 'all', function ($query) {
+            ->when($this->filterType !== 'all', function ($query): void {
                 if ($this->filterType === 'loan_application') {
                     $query->where('approvable_type', LoanApplication::class);
                 }
+
                 // Additional types can be added here in the future
             })
             // Filter by approval decision (approved, rejected, pending)
-            ->when($this->filterDecision !== 'all', function ($query) {
+            ->when($this->filterDecision !== 'all', function ($query): void {
                 $query->where('decision', $this->filterDecision);
             })
             // Filter by date range - start date
-            ->when($this->dateFrom, function ($query) {
+            ->when($this->dateFrom, function ($query): void {
                 $query->whereDate('created_at', '>=', Carbon::parse($this->dateFrom)->startOfDay());
             })
             // Filter by date range - end date
-            ->when($this->dateTo, function ($query) {
+            ->when($this->dateTo, function ($query): void {
                 $query->whereDate('created_at', '<=', Carbon::parse($this->dateTo)->endOfDay());
             })
             // Advanced search functionality
-            ->when($this->search, function ($query) {
+            ->when($this->search, function ($query): void {
                 $searchTerm = '%' . strtolower($this->search) . '%';
-                $query->where(function ($q) use ($searchTerm) {
+                $query->where(function ($q) use ($searchTerm): void {
                     // Search within the polymorphic approvable relationship
                     $q->whereHasMorph(
                         'approvable',

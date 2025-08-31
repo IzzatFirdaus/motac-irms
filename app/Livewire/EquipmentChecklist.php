@@ -121,10 +121,10 @@ class EquipmentChecklist extends Component
             if ($loanTransactionId !== null && $loanTransactionId !== 0) {
                 $this->loadExistingTransaction($loanTransactionId);
             }
-        } catch (Throwable $e) {
+        } catch (Throwable $throwable) {
             Log::error('EquipmentChecklist: Error during component mount.', [
-                'error'             => $e->getMessage(),
-                'trace'             => $e->getTraceAsString(),
+                'error'             => $throwable->getMessage(),
+                'trace'             => $throwable->getTraceAsString(),
                 'loanApplicationId' => $loanApplicationId,
                 'loanTransactionId' => $loanTransactionId,
             ]);
@@ -151,15 +151,6 @@ class EquipmentChecklist extends Component
                 'loanTransactions.returnAcceptingOfficer',
             ]
         );
-
-        if (! $this->loanApplication instanceof LoanApplication) {
-            Log::warning('EquipmentChecklist: Loan application not found.', [
-                'loanApplicationId' => $this->loanApplicationId,
-            ]);
-            throw new ModelNotFoundException(
-                sprintf('Permohonan pinjaman ID %s tidak ditemui.', $this->loanApplicationId)
-            );
-        }
     }
 
     /**
@@ -196,9 +187,10 @@ class EquipmentChecklist extends Component
      */
     private function populateFormFromTransaction(): void
     {
-        if (! $this->loanTransaction) {
+        if (!$this->loanTransaction instanceof \App\Models\LoanTransaction) {
             return;
         }
+
         // Get equipment IDs from transaction items
         $this->selectedEquipmentIds = $this->loanTransaction->loanTransactionItems
             ->pluck('equipment_id')
@@ -233,13 +225,13 @@ class EquipmentChecklist extends Component
     #[Computed]
     public function getAvailableEquipmentProperty(): Collection
     {
-        if (! $this->loanApplication || $this->transactionType !== 'issue') {
+        if (! $this->loanApplication instanceof \App\Models\LoanApplication || $this->transactionType !== 'issue') {
             return new Collection();
         }
 
         // Get equipment types requested in the application
         $requestedTypes = $this->loanApplication->loanApplicationItems
-            ->filter(function ($item) {
+            ->filter(function ($item): bool {
                 return ($item->quantity_approved ?? 0) > ($item->quantity_issued ?? 0);
             })
             ->pluck('equipment_type')
@@ -259,13 +251,13 @@ class EquipmentChecklist extends Component
     #[Computed]
     public function getOnLoanEquipmentProperty(): Collection
     {
-        if (! $this->loanApplication || $this->transactionType !== 'return') {
+        if (! $this->loanApplication instanceof \App\Models\LoanApplication || $this->transactionType !== 'return') {
             return new Collection();
         }
 
         // Get equipment currently on loan for this application
-        return Equipment::whereHas('loanTransactionItems', function ($query) {
-            $query->whereHas('loanTransaction', function ($subQuery) {
+        return Equipment::whereHas('loanTransactionItems', function ($query): void {
+            $query->whereHas('loanTransaction', function ($subQuery): void {
                 $subQuery->where('loan_application_id', $this->loanApplicationId)
                     ->where('type', LoanTransaction::TYPE_ISSUE)
                     ->whereNull('return_timestamp');
@@ -336,14 +328,15 @@ class EquipmentChecklist extends Component
         $this->validate();
 
         try {
-            DB::transaction(function () {
+            DB::transaction(function (): void {
                 if ($this->transactionType === 'issue') {
                     $this->processIssueTransaction();
                 } elseif ($this->transactionType === 'return') {
                     $this->processReturnTransaction();
                 }
+
                 // After transaction, update the loan application overall status
-                if ($this->loanApplication) {
+                if ($this->loanApplication instanceof \App\Models\LoanApplication) {
                     $this->loanApplication->updateOverallStatusAfterTransaction();
                 }
             });
@@ -399,7 +392,7 @@ class EquipmentChecklist extends Component
             'status'                         => LoanTransaction::STATUS_COMPLETED,
         ];
 
-        if ($this->loanTransaction) {
+        if ($this->loanTransaction instanceof \App\Models\LoanTransaction) {
             $this->loanTransaction->update($transactionData);
             $transaction = $this->loanTransaction;
         } else {
@@ -449,7 +442,7 @@ class EquipmentChecklist extends Component
         ]);
 
         // Find or create return transaction
-        if ($this->loanTransaction && $this->loanTransaction->type === LoanTransaction::TYPE_ISSUE) {
+        if ($this->loanTransaction instanceof \App\Models\LoanTransaction && $this->loanTransaction->type === LoanTransaction::TYPE_ISSUE) {
             $this->loanTransaction->update([
                 'return_timestamp'                => now(),
                 'return_accepting_officer_id'     => Auth::id(),
@@ -536,7 +529,7 @@ class EquipmentChecklist extends Component
      */
     private function redirectAfterSave(): void
     {
-        if ($this->loanApplication) {
+        if ($this->loanApplication instanceof \App\Models\LoanApplication) {
             $this->redirect(
                 route('loan-applications.show', $this->loanApplication->id),
                 navigate: true

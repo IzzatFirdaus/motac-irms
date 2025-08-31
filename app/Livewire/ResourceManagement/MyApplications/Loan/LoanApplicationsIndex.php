@@ -86,14 +86,14 @@ class LoanApplicationsIndex extends Component
             ->with(['approvals', 'user'])
             ->orderBy('created_at', 'desc');
 
-        if ($this->searchTerm) {
-            $query->where(function ($q) {
+        if ($this->searchTerm !== '' && $this->searchTerm !== '0') {
+            $query->where(function ($q): void {
                 $q->where('application_number', 'like', '%' . $this->searchTerm . '%')
                     ->orWhere('purpose', 'like', '%' . $this->searchTerm . '%');
             });
         }
 
-        if ($this->filterStatus) {
+        if ($this->filterStatus !== '' && $this->filterStatus !== '0') {
             $query->where('status', $this->filterStatus);
         }
 
@@ -135,11 +135,7 @@ class LoanApplicationsIndex extends Component
         $this->resetValidation();
 
         // Set required validation for rejection, optional otherwise
-        if ($this->approvalActionType === 'reject') {
-            $this->rules['approvalComments'] = 'required|string|min:10';
-        } else {
-            $this->rules['approvalComments'] = 'nullable|string';
-        }
+        $this->rules['approvalComments'] = $this->approvalActionType === 'reject' ? 'required|string|min:10' : 'nullable|string';
 
         $this->showApprovalActionModal = true;
         $this->dispatch('openModal', elementId: 'approvalActionModal');

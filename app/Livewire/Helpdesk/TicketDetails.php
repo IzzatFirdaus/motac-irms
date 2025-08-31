@@ -32,18 +32,18 @@ class TicketDetails extends Component
         'commentAttachments.*' => 'nullable|file|max:2048|mimes:jpg,png,pdf,docx,txt,xlsx',
     ];
 
-    public function mount(HelpdeskTicket $ticket)
+    public function mount(HelpdeskTicket $ticket): void
     {
         $this->ticket = $ticket;
         $this->authorize('view', $this->ticket);
     }
 
-    public function boot(HelpdeskService $helpdeskService)
+    public function boot(HelpdeskService $helpdeskService): void
     {
         $this->helpdeskService = $helpdeskService;
     }
 
-    public function addComment()
+    public function addComment(): void
     {
         $this->validate();
 
@@ -59,8 +59,8 @@ class TicketDetails extends Component
             $this->reset(['newComment', 'commentAttachments', 'isInternalComment']);
             $this->ticket->refresh();
             session()->flash('message', 'Comment added successfully.');
-        } catch (\Exception $e) {
-            session()->flash('error', 'Failed to add comment: ' . $e->getMessage());
+        } catch (\Exception $exception) {
+            session()->flash('error', 'Failed to add comment: ' . $exception->getMessage());
         }
     }
 

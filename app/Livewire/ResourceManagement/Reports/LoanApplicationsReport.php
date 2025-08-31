@@ -36,17 +36,19 @@ class LoanApplicationsReport extends Component
             ->with(['user', 'user.department'])
             ->orderByDesc('created_at');
 
-        if ($this->search) {
-            $query->where(function ($q) {
+        if ($this->search !== '' && $this->search !== '0') {
+            $query->where(function ($q): void {
                 $q->where('application_number', 'like', '%' . $this->search . '%')
                     ->orWhere('purpose', 'like', '%' . $this->search . '%');
             });
         }
-        if ($this->filterStatus) {
+
+        if ($this->filterStatus !== '' && $this->filterStatus !== '0') {
             $query->where('status', $this->filterStatus);
         }
-        if ($this->filterDepartment) {
-            $query->whereHas('user.department', function ($q) {
+
+        if ($this->filterDepartment !== '' && $this->filterDepartment !== '0') {
+            $query->whereHas('user.department', function ($q): void {
                 $q->where('id', $this->filterDepartment);
             });
         }
@@ -54,17 +56,17 @@ class LoanApplicationsReport extends Component
         return $query->paginate($this->perPage);
     }
 
-    public function updatingSearch()
+    public function updatingSearch(): void
     {
         $this->resetPage();
     }
 
-    public function updatedFilterStatus()
+    public function updatedFilterStatus(): void
     {
         $this->resetPage();
     }
 
-    public function updatedFilterDepartment()
+    public function updatedFilterDepartment(): void
     {
         $this->resetPage();
     }

@@ -84,7 +84,7 @@ class ProcessReturn extends Component
 
         // Initialize returnItems with issued items
         $this->returnItems = $this->issueTransaction->loanTransactionItems
-            ->map(function ($item) {
+            ->map(function ($item): array {
                 $isIssued = $item->status === LoanTransaction::STATUS_ISSUED;
 
                 return [
@@ -118,8 +118,8 @@ class ProcessReturn extends Component
         $returnAcceptingOfficer = User::findOrFail($validatedData['returning_officer_id']);
 
         $itemsPayload = collect($validatedData['returnItems'])
-            ->filter(fn ($item) => $item['is_returning'])
-            ->map(function ($item) {
+            ->filter(fn ($item): mixed => $item['is_returning'])
+            ->map(function (array $item): array {
                 return [
                     'loan_transaction_item_id' => $item['loan_transaction_item_id'],
                     'equipment_id'             => $item['equipment_id'],

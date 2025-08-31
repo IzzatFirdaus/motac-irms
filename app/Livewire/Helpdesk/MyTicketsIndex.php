@@ -34,22 +34,22 @@ class MyTicketsIndex extends Component
         'category' => ['except' => ''],
     ];
 
-    public function updatingSearch()
+    public function updatingSearch(): void
     {
         $this->resetPage();
     }
 
-    public function updatingStatus()
+    public function updatingStatus(): void
     {
         $this->resetPage();
     }
 
-    public function updatingPriority()
+    public function updatingPriority(): void
     {
         $this->resetPage();
     }
 
-    public function updatingCategory()
+    public function updatingCategory(): void
     {
         $this->resetPage();
     }
@@ -62,19 +62,19 @@ class MyTicketsIndex extends Component
         return HelpdeskTicket::query()
             ->where('user_id', Auth::id())
             ->with(['category', 'priority', 'assignedTo'])
-            ->when($this->search, function ($query) {
-                $query->where(function ($q) {
+            ->when($this->search, function ($query): void {
+                $query->where(function ($q): void {
                     $q->where('title', 'like', '%' . $this->search . '%')
                         ->orWhere('description', 'like', '%' . $this->search . '%');
                 });
             })
-            ->when($this->status, function ($query) {
+            ->when($this->status, function ($query): void {
                 $query->where('status', $this->status);
             })
-            ->when($this->priority, function ($query) {
+            ->when($this->priority, function ($query): void {
                 $query->where('priority_id', $this->priority);
             })
-            ->when($this->category, function ($query) {
+            ->when($this->category, function ($query): void {
                 $query->where('category_id', $this->category);
             })
             ->latest()

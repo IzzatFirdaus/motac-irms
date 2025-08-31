@@ -20,7 +20,7 @@ class LoanSummaryChart extends Component
      * Mount method for initializing the component.
      * Not strictly necessary as we use the computed property below, but kept for reference.
      */
-    public function mount()
+    public function mount(): void
     {
         // NO state is set here; chart data is handled via the chartModel property below.
     }

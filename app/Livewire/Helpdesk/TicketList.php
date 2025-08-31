@@ -35,22 +35,22 @@ class TicketList extends Component
     ];
 
     // Reset pagination when filters/search changes
-    public function updatingSearch()
+    public function updatingSearch(): void
     {
         $this->resetPage();
     }
 
-    public function updatingStatusFilter()
+    public function updatingStatusFilter(): void
     {
         $this->resetPage();
     }
 
-    public function updatingPriorityFilter()
+    public function updatingPriorityFilter(): void
     {
         $this->resetPage();
     }
 
-    public function updatingCategoryFilter()
+    public function updatingCategoryFilter(): void
     {
         $this->resetPage();
     }
@@ -60,19 +60,19 @@ class TicketList extends Component
         $tickets = HelpdeskTicket::query()
             ->where('user_id', Auth::id())
             ->with(['category', 'priority', 'assignedTo'])
-            ->when($this->search, function ($query) {
-                $query->where(function ($q) {
+            ->when($this->search, function ($query): void {
+                $query->where(function ($q): void {
                     $q->where('title', 'like', '%' . $this->search . '%')
                         ->orWhere('description', 'like', '%' . $this->search . '%');
                 });
             })
-            ->when($this->statusFilter, function ($query) {
+            ->when($this->statusFilter, function ($query): void {
                 $query->where('status', $this->statusFilter);
             })
-            ->when($this->priorityFilter, function ($query) {
+            ->when($this->priorityFilter, function ($query): void {
                 $query->where('priority_id', $this->priorityFilter);
             })
-            ->when($this->categoryFilter, function ($query) {
+            ->when($this->categoryFilter, function ($query): void {
                 $query->where('category_id', $this->categoryFilter);
             })
             ->latest()

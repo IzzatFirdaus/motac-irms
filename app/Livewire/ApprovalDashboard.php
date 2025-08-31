@@ -184,7 +184,7 @@ class ApprovalDashboard extends Component
 
         $user = Auth::user();
         try {
-            if (! $this->selectedApproval || ! $user) {
+            if (! $this->selectedApproval instanceof \App\Models\Approval || ! $user) {
                 throw new \Exception('No approval selected or user not authenticated.');
             }
 
@@ -246,9 +246,10 @@ class ApprovalDashboard extends Component
      */
     public function getViewApplicationRouteForSelected(): ?string
     {
-        if (! $this->selectedApproval || ! $this->selectedApproval->approvable) {
+        if (! $this->selectedApproval instanceof \App\Models\Approval || ! $this->selectedApproval->approvable) {
             return null;
         }
+
         $approvable = $this->selectedApproval->approvable;
         if ($approvable instanceof LoanApplication) {
             return route('loan-applications.show', $approvable->id);

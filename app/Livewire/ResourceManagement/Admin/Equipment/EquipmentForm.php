@@ -101,7 +101,7 @@ class EquipmentForm extends Component
         $this->locationOptions   = Location::orderBy('name')->pluck('name', 'id')->all();
         $this->departmentOptions = Department::orderBy('name')->pluck('name', 'id')->all();
 
-        if ($equipmentId) {
+        if ($equipmentId !== null && $equipmentId !== 0) {
             $this->equipmentInstance = Equipment::findOrFail($equipmentId);
             $this->isEditMode        = true;
             $this->fillForm();
@@ -115,7 +115,7 @@ class EquipmentForm extends Component
      */
     public function fillForm(): void
     {
-        if ($this->equipmentInstance) {
+        if ($this->equipmentInstance instanceof \App\Models\Equipment) {
             $this->tag_id            = $this->equipmentInstance->tag_id;
             $this->asset_type        = $this->equipmentInstance->asset_type;
             $this->brand             = $this->equipmentInstance->brand;
@@ -151,7 +151,7 @@ class EquipmentForm extends Component
             'notes'             => $this->notes,
         ];
 
-        if ($this->isEditMode && $this->equipmentInstance) {
+        if ($this->isEditMode && $this->equipmentInstance instanceof \App\Models\Equipment) {
             $this->equipmentInstance->update($data);
             session()->flash('success', __('Peralatan berjaya dikemaskini.'));
         } else {

@@ -49,10 +49,11 @@ class TicketReport extends Component
 
         $query = HelpdeskTicket::query();
 
-        if ($this->startDate) {
+        if ($this->startDate !== null && $this->startDate !== '' && $this->startDate !== '0') {
             $query->whereDate('created_at', '>=', $this->startDate);
         }
-        if ($this->endDate) {
+
+        if ($this->endDate !== null && $this->endDate !== '' && $this->endDate !== '0') {
             $query->whereDate('created_at', '<=', $this->endDate);
         }
 

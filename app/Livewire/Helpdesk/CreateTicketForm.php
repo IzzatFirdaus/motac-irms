@@ -34,7 +34,7 @@ class CreateTicketForm extends Component
     /**
      * Inject HelpdeskService.
      */
-    public function boot(HelpdeskService $helpdeskService)
+    public function boot(HelpdeskService $helpdeskService): void
     {
         $this->helpdeskService = $helpdeskService;
     }
@@ -42,7 +42,7 @@ class CreateTicketForm extends Component
     /**
      * Validation rules for new ticket.
      */
-    protected function rules()
+    protected function rules(): array
     {
         return [
             'title'         => 'required|string|max:255',
@@ -75,9 +75,10 @@ class CreateTicketForm extends Component
             session()->flash('message', 'Ticket created successfully!');
 
             return redirect()->route('helpdesk.show', $ticket->id);
-        } catch (\Exception $e) {
-            session()->flash('error', 'Failed to create ticket: ' . $e->getMessage());
+        } catch (\Exception $exception) {
+            session()->flash('error', 'Failed to create ticket: ' . $exception->getMessage());
         }
+        return null;
     }
 
     public function render()

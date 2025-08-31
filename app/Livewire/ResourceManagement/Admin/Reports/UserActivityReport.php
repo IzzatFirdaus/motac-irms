@@ -62,17 +62,17 @@ class UserActivityReport extends Component
             'approvalsMade',
         ])
             ->with(['department', 'roles'])
-            ->when($this->searchTerm, function ($q) {
-                $q->where(function ($subQuery) {
+            ->when($this->searchTerm, function ($q): void {
+                $q->where(function ($subQuery): void {
                     $subQuery->where('name', 'like', '%' . $this->searchTerm . '%')
                         ->orWhere('email', 'like', '%' . $this->searchTerm . '%');
                 });
             })
-            ->when($this->filterDepartmentId, function ($q) {
+            ->when($this->filterDepartmentId, function ($q): void {
                 $q->where('department_id', $this->filterDepartmentId);
             })
-            ->when($this->filterRoleName, function ($q) {
-                $q->whereHas('roles', function ($subQuery) {
+            ->when($this->filterRoleName, function ($q): void {
+                $q->whereHas('roles', function ($subQuery): void {
                     $subQuery->where('name', $this->filterRoleName);
                 });
             })
@@ -125,6 +125,7 @@ class UserActivityReport extends Component
             $this->sortBy        = $column;
             $this->sortDirection = 'asc';
         }
+
         $this->resetPage();
     }
 

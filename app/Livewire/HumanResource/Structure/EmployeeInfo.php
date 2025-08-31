@@ -69,7 +69,7 @@ class EmployeeInfo extends Component
     public function toggleStatus(): void
     {
         $presentTimeline = null;
-        if ($this->employee && method_exists($this->employee, 'timelines')) {
+        if ($this->employee instanceof \App\Models\User && method_exists($this->employee, 'timelines')) {
             /** @phpstan-ignore-next-line dynamic relation may exist on User model */
             $presentTimeline = $this->employee->timelines()
                 ->orderBy('start_date', 'desc')

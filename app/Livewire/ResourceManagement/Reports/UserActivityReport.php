@@ -40,8 +40,8 @@ class UserActivityReport extends Component
                 'loanApplicationsAsApplicant',
                 'approvalsAsApprover',
             ])
-            ->when($this->search, function ($query) {
-                $query->where(function ($q) {
+            ->when($this->search, function ($query): void {
+                $query->where(function ($q): void {
                     $q->where('name', 'like', '%' . $this->search . '%')
                         ->orWhere('email', 'like', '%' . $this->search . '%');
                 });
@@ -53,7 +53,7 @@ class UserActivityReport extends Component
     /**
      * Reset pagination when search input changes.
      */
-    public function updatingSearch()
+    public function updatingSearch(): void
     {
         $this->resetPage();
     }

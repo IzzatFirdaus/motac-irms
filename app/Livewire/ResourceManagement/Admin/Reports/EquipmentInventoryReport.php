@@ -82,8 +82,8 @@ class EquipmentInventoryReport extends Component
             ->when($this->filterDepartmentId, fn ($q) => $q->where('department_id', $this->filterDepartmentId))
             ->when($this->filterLocationId, fn ($q) => $q->where('location_id', $this->filterLocationId)) // Corrected field to 'location_id'
             ->when($this->filterCategoryId, fn ($q) => $q->where('category_id', $this->filterCategoryId))
-            ->when($this->searchTerm, function ($q) {
-                $q->where(function ($subQuery) {
+            ->when($this->searchTerm, function ($q): void {
+                $q->where(function ($subQuery): void {
                     $subQuery->where('tag_id', 'like', '%' . $this->searchTerm . '%')
                         ->orWhere('serial_number', 'like', '%' . $this->searchTerm . '%')
                         ->orWhere('model', 'like', '%' . $this->searchTerm . '%')
