@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * HelpdeskAttachment Model.
- * 
+ *
  * Stores files attached to helpdesk tickets or comments (polymorphic).
  *
  * @property int                             $id
@@ -24,12 +24,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read Model|\Eloquent $attachable
  * @property-read string $file_url
  * @property-read string $readable_file_size
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class HelpdeskAttachment extends Model
@@ -74,15 +76,15 @@ class HelpdeskAttachment extends Model
     {
         $bytes = $this->file_size;
         if ($bytes >= 1073741824) {
-            $bytes = number_format($bytes / 1073741824, 2) . ' GB';
+            $bytes = number_format($bytes / 1073741824, 2).' GB';
         } elseif ($bytes >= 1048576) {
-            $bytes = number_format($bytes / 1048576, 2) . ' MB';
+            $bytes = number_format($bytes / 1048576, 2).' MB';
         } elseif ($bytes >= 1024) {
-            $bytes = number_format($bytes / 1024, 2) . ' KB';
+            $bytes = number_format($bytes / 1024, 2).' KB';
         } elseif ($bytes > 1) {
-            $bytes = $bytes . ' bytes';
+            $bytes = $bytes.' bytes';
         } elseif ($bytes == 1) {
-            $bytes = $bytes . ' byte';
+            $bytes = $bytes.' byte';
         } else {
             $bytes = '0 bytes';
         }

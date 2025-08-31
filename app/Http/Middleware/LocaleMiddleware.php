@@ -89,7 +89,7 @@ class LocaleMiddleware
 
         // Optional: Log locale changes for debugging (remove in production)
         if (Config::get('app.debug')) {
-            Log::debug("LocaleMiddleware: Set application locale to '{$finalLocale}' for user: " . (Auth::check() ? Auth::user()->name : 'guest'));
+            Log::debug("LocaleMiddleware: Set application locale to '{$finalLocale}' for user: ".(Auth::check() ? Auth::user()->name : 'guest'));
         }
 
         return $next($request);
@@ -119,8 +119,8 @@ class LocaleMiddleware
 
         $authViewsPath = \resource_path('views/auth');
         foreach ($viewMap as $view) {
-            $originalPath = $authViewsPath . "/{$view}.blade.php";
-            $renamedPath  = $authViewsPath . "/{$view}-page.blade.php";
+            $originalPath = $authViewsPath."/{$view}.blade.php";
+            $renamedPath  = $authViewsPath."/{$view}-page.blade.php";
 
             // Only create the link if the renamed exists and the original does not
             if (! file_exists($originalPath) && file_exists($renamedPath)) {
@@ -135,7 +135,7 @@ class LocaleMiddleware
                     }
                 } catch (\Throwable $e) {
                     // If symlink or copy fails, ignore and let the missing view error show as fallback
-                    Log::warning("LocaleMiddleware: Could not create alias for auth view '{$view}': " . $e->getMessage());
+                    Log::warning("LocaleMiddleware: Could not create alias for auth view '{$view}': ".$e->getMessage());
                 }
             }
         }

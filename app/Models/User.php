@@ -53,16 +53,18 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string|null                                                                                               $preferred_locale
  * @property string|null                                                                                               $motac_email
  * @property \Illuminate\Notifications\DatabaseNotificationCollection|\Illuminate\Notifications\DatabaseNotification[] $unreadNotifications
+ *
  * @method static \Illuminate\Database\Eloquent\Builder whereHasRole(string $role)
- * @property string|null $level For "Aras" or floor level, as string
- * @property string|null $personal_email If distinct from login email
- * @property string|null $user_id_assigned Assigned User ID if different from email
- * @property string|null $service_status Taraf Perkhidmatan. Keys defined in User model.
- * @property string|null $appointment_type Pelantikan. Keys defined in User model.
- * @property int $is_admin Consider using Spatie roles exclusively.
- * @property int $is_bpm_staff Consider using Spatie roles exclusively.
+ *
+ * @property string|null $level                   For "Aras" or floor level, as string
+ * @property string|null $personal_email          If distinct from login email
+ * @property string|null $user_id_assigned        Assigned User ID if different from email
+ * @property string|null $service_status          Taraf Perkhidmatan. Keys defined in User model.
+ * @property string|null $appointment_type        Pelantikan. Keys defined in User model.
+ * @property int         $is_admin                Consider using Spatie roles exclusively.
+ * @property int         $is_bpm_staff            Consider using Spatie roles exclusively.
  * @property string|null $profile_photo_path
- * @property int|null $employee_id
+ * @property int|null    $employee_id
  * @property string|null $two_factor_confirmed_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Approval> $approvalsAsApprover
  * @property-read int|null $approvals_as_approver_count
@@ -96,7 +98,8 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
  * @property-read int|null $tokens_count
  * @property-read User|null $updater
- * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
+ *
+ * @method static \Database\Factories\UserFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User onlyTrashed()
@@ -142,6 +145,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutPermission($permissions)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutRole($roles, $guard = null)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class User extends Authenticatable
@@ -442,7 +446,7 @@ class User extends Authenticatable
      */
     public function getFullNameAttribute(): string
     {
-        return ($this->title ? (self::$TITLE_OPTIONS[$this->title] ?? $this->title) . ' ' : '') . $this->name;
+        return ($this->title ? (self::$TITLE_OPTIONS[$this->title] ?? $this->title).' ' : '').$this->name;
     }
 
     /**

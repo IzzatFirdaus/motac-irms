@@ -10,23 +10,24 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * HelpdeskCategory Model.
- * 
+ *
  * Represents categories for helpdesk tickets.
  *
- * @property int         $id
- * @property string      $name
- * @property string|null $description
- * @property bool        $is_active
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
+ * @property int                             $id
+ * @property string                          $name
+ * @property string|null                     $description
+ * @property bool                            $is_active
+ * @property int|null                        $created_by
+ * @property int|null                        $updated_by
+ * @property int|null                        $deleted_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\HelpdeskTicket> $tickets
  * @property-read int|null $tickets_count
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskCategory active()
- * @method static \Database\Factories\HelpdeskCategoryFactory factory($count = null, $state = [])
+ * @method static \Database\Factories\HelpdeskCategoryFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskCategory newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskCategory newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskCategory onlyTrashed()
@@ -43,6 +44,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskCategory whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskCategory withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskCategory withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class HelpdeskCategory extends Model

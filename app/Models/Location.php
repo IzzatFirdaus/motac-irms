@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Location Model.
- * 
+ *
  * Represents a physical location or branch for assets/equipment.
  *
  * @property int                             $id
@@ -36,16 +36,18 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Equipment> $equipment
  * @property-read int|null $equipment_count
  * @property-read \App\Models\User|null $updater
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Location active()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Location byCity(string $city)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Location byCountry(string $country)
- * @method static \Database\Factories\LocationFactory factory($count = null, $state = [])
+ * @method static \Database\Factories\LocationFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Location newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Location newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Location onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Location query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Location withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Location withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class Location extends Model

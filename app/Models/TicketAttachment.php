@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * TicketAttachment Model (Helpdesk Ticket Attachment).
- * 
+ *
  * Represents file attachments for helpdesk tickets and comments.
  *
  * @property int                             $id
@@ -30,12 +30,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\Ticket $ticket
  * @property-read \App\Models\TicketComment|null $comment
  * @property-read \App\Models\User $user
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class TicketAttachment extends Model

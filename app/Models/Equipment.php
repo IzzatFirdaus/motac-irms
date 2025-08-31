@@ -16,7 +16,7 @@ use Illuminate\Support\Str;
 
 /**
  * Equipment model for ICT inventory.
- * 
+ *
  * Represents an equipment asset, including all core details and relationships.
  *
  * @property int                             $id
@@ -68,7 +68,8 @@ use Illuminate\Support\Str;
  * @property-read int|null $loan_transaction_items_count
  * @property-read \App\Models\Location|null $location
  * @property-read \App\Models\SubCategory|null $subCategory
- * @method static \Database\Factories\EquipmentFactory factory($count = null, $state = [])
+ *
+ * @method static \Database\Factories\EquipmentFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment onlyTrashed()
@@ -105,6 +106,7 @@ use Illuminate\Support\Str;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereWarrantyExpiryDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 #[ObservedBy(BlameableObserver::class)]
@@ -522,7 +524,7 @@ class Equipment extends Model
         }
 
         return $query->where(function ($q) use ($term) {
-            $like = '%' . $term . '%';
+            $like = '%'.$term.'%';
             $q->where('tag_id', 'like', $like)
                 ->orWhere('serial_number', 'like', $like)
                 ->orWhere('brand', 'like', $like)

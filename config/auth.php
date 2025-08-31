@@ -14,7 +14,7 @@ return [
     */
 
     'defaults' => [
-        'guard' => 'web',
+        'guard'     => 'web',
         'passwords' => 'users',
     ],
 
@@ -37,7 +37,7 @@ return [
 
     'guards' => [
         'web' => [
-            'driver' => 'session',
+            'driver'   => 'session',
             'provider' => 'users',
         ],
 
@@ -45,7 +45,7 @@ return [
         // If you use Laravel Sanctum for API authentication and have roles
         // with guard_name = 'sanctum', this guard needs to be defined.
         'sanctum' => [
-            'driver' => 'sanctum', // Use 'sanctum' driver for token-based auth
+            'driver'   => 'sanctum', // Use 'sanctum' driver for token-based auth
             'provider' => 'users', // Typically uses the same 'users' provider
             // unless you have a separate user model/table for API users.
         ],
@@ -71,7 +71,7 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => App\Models\User::class,
+            'model'  => App\Models\User::class,
         ],
 
         // 'users' => [
@@ -90,8 +90,8 @@ return [
         'users' => [
             'provider' => 'users',
             // Standard Laravel table name used by the framework's migrations
-            'table' => 'password_resets',
-            'expire' => 60,
+            'table'    => 'password_resets',
+            'expire'   => 60,
             'throttle' => 60,
         ],
     ],

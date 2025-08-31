@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Schema;
 
 /**
  * Setting Model.
- * 
+ *
  * Manages application-wide settings, typically as a single row in the database.
  *
  * @property int                             $id
@@ -45,7 +45,8 @@ use Illuminate\Support\Facades\Schema;
  * @property-read \App\Models\User|null $creator
  * @property-read \App\Models\User|null $updater
  * @property-read \App\Models\User|null $deleter
- * @method static \Database\Factories\SettingFactory factory($count = null, $state = [])
+ *
+ * @method static \Database\Factories\SettingFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting onlyTrashed()
@@ -75,6 +76,7 @@ use Illuminate\Support\Facades\Schema;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class Setting extends Model
@@ -165,7 +167,7 @@ class Setting extends Model
             return $saved;
         } catch (\Throwable $throwable) {
             DB::rollBack();
-            Log::error(sprintf("Error setting setting '%s': ", $key) . $throwable->getMessage(), ['exception' => $throwable, 'key' => $key, 'value' => $value]);
+            Log::error(sprintf("Error setting setting '%s': ", $key).$throwable->getMessage(), ['exception' => $throwable, 'key' => $key, 'value' => $value]);
             throw $throwable;
         }
     }
@@ -182,7 +184,7 @@ class Setting extends Model
             return false;
         }
         if (! in_array($key, $settings->getFillable()) && ! Schema::hasColumn($settings->getTable(), $key)) {
-            Log::warning('Attempted to forget unknown or non-fillable/non-column setting key: ' . $key);
+            Log::warning('Attempted to forget unknown or non-fillable/non-column setting key: '.$key);
 
             return false;
         }

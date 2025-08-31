@@ -8,8 +8,6 @@ class AddUserProfileFieldsToUsersTable extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
     public function up()
     {
@@ -35,8 +33,6 @@ class AddUserProfileFieldsToUsersTable extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
     public function down()
     {

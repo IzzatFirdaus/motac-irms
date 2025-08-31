@@ -78,7 +78,7 @@ return new class extends Migration
                     try {
                         $table->dropForeign([$key]);
                     } catch (\Exception $e) {
-                        Log::warning(sprintf('Failed to drop FK %s on loan_transactions: ', $key) . $e->getMessage());
+                        Log::warning(sprintf('Failed to drop FK %s on loan_transactions: ', $key).$e->getMessage());
                     }
                 }
             }

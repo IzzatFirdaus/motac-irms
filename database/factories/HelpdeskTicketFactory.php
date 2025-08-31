@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\HelpdeskTicket;
 use App\Models\HelpdeskCategory;
 use App\Models\HelpdeskPriority;
+use App\Models\HelpdeskTicket;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Arr;
@@ -26,15 +26,15 @@ class HelpdeskTicketFactory extends Factory
     {
         // --- Static caches for related IDs ---
         static $userIds, $categoryIds, $priorityIds;
-    // Always create a user, category, and priority for each ticket to guarantee valid FKs and uniqueness
-    $userId = User::factory()->create()->id;
-    $assignedToUserId = User::factory()->create()->id;
-    $categoryId = HelpdeskCategory::factory()->create()->id;
-    $priorityId = HelpdeskPriority::factory()->create()->id;
+        // Always create a user, category, and priority for each ticket to guarantee valid FKs and uniqueness
+        $userId           = User::factory()->create()->id;
+        $assignedToUserId = User::factory()->create()->id;
+        $categoryId       = HelpdeskCategory::factory()->create()->id;
+        $priorityId       = HelpdeskPriority::factory()->create()->id;
 
         // Use a static Malaysian faker for performance and realism
         static $msFaker;
-        if (!$msFaker) {
+        if (! $msFaker) {
             $msFaker = \Faker\Factory::create('ms_MY');
         }
 
@@ -53,7 +53,7 @@ class HelpdeskTicketFactory extends Factory
 
         // Closed fields only set if status is closed. Make sure closed_by references a valid user.
         $closedById = null;
-        $closedAt = null;
+        $closedAt   = null;
         if ($status === HelpdeskTicket::STATUS_CLOSED) {
             // prefer assigned user as the closer, otherwise fall back to the ticket owner
             $closedById = $assignedToUserId ?? $userId;
@@ -82,25 +82,25 @@ class HelpdeskTicketFactory extends Factory
 
         // Returned attributes
         return [
-            'title'              => $msFaker->sentence(6),
-            'description'        => $msFaker->paragraph(3),
-            'category_id'        => $categoryId,
-            'status'             => $status,
-            'priority_id'        => $priorityId,
-            'user_id'            => $userId,
-            'assigned_to_user_id'=> $assignedToUserId,
+            'title'               => $msFaker->sentence(6),
+            'description'         => $msFaker->paragraph(3),
+            'category_id'         => $categoryId,
+            'status'              => $status,
+            'priority_id'         => $priorityId,
+            'user_id'             => $userId,
+            'assigned_to_user_id' => $assignedToUserId,
             // Only set closed_by_id when the factory chose a closed status; otherwise null.
             // closed_by_id will be set in an afterCreating callback to respect any overrides provided by tests
-            'closed_by_id'       => null,
-            'closed_at'          => $status === HelpdeskTicket::STATUS_CLOSED ? $closedAt : null,
-            'resolution_notes'   => $resolutionNotes,
-            'sla_due_at'         => $slaDueAt,
-            'created_by'         => $userId,
-            'updated_by'         => $userId,
-            'deleted_by'         => $deletedBy,
-            'created_at'         => $createdAt,
-            'updated_at'         => $updatedAt,
-            'deleted_at'         => $deletedAt,
+            'closed_by_id'     => null,
+            'closed_at'        => $status === HelpdeskTicket::STATUS_CLOSED ? $closedAt : null,
+            'resolution_notes' => $resolutionNotes,
+            'sla_due_at'       => $slaDueAt,
+            'created_by'       => $userId,
+            'updated_by'       => $userId,
+            'deleted_by'       => $deletedBy,
+            'created_at'       => $createdAt,
+            'updated_at'       => $updatedAt,
+            'deleted_at'       => $deletedAt,
         ];
     }
 
@@ -109,7 +109,7 @@ class HelpdeskTicketFactory extends Factory
         return $this->afterCreating(function (HelpdeskTicket $ticket, $attributes = null) {
             // If the ticket is closed but closed_by_id was not provided, set it based on assigned or user
             if ($ticket->status === HelpdeskTicket::STATUS_CLOSED && empty($ticket->closed_by_id)) {
-                $closer = $ticket->assigned_to_user_id ?? $ticket->user_id ?? User::factory()->create()->id;
+                $closer               = $ticket->assigned_to_user_id ?? $ticket->user_id ?? User::factory()->create()->id;
                 $ticket->closed_by_id = $closer;
                 if (empty($ticket->closed_at)) {
                     $ticket->closed_at = now();
@@ -125,9 +125,9 @@ class HelpdeskTicketFactory extends Factory
     public function open(): static
     {
         return $this->state([
-            'status' => HelpdeskTicket::STATUS_OPEN,
-            'closed_by_id' => null,
-            'closed_at' => null,
+            'status'           => HelpdeskTicket::STATUS_OPEN,
+            'closed_by_id'     => null,
+            'closed_at'        => null,
             'resolution_notes' => null,
         ]);
     }
@@ -138,9 +138,9 @@ class HelpdeskTicketFactory extends Factory
     public function inProgress(): static
     {
         return $this->state([
-            'status' => HelpdeskTicket::STATUS_IN_PROGRESS,
-            'closed_by_id' => null,
-            'closed_at' => null,
+            'status'           => HelpdeskTicket::STATUS_IN_PROGRESS,
+            'closed_by_id'     => null,
+            'closed_at'        => null,
             'resolution_notes' => null,
         ]);
     }
@@ -151,14 +151,15 @@ class HelpdeskTicketFactory extends Factory
     public function resolved(): static
     {
         static $msFaker;
-        if (!$msFaker) {
+        if (! $msFaker) {
             $msFaker = \Faker\Factory::create('ms_MY');
         }
+
         return $this->state([
-            'status' => HelpdeskTicket::STATUS_RESOLVED,
+            'status'           => HelpdeskTicket::STATUS_RESOLVED,
             'resolution_notes' => $msFaker->sentence(8),
-            'closed_by_id' => null,
-            'closed_at' => null,
+            'closed_by_id'     => null,
+            'closed_at'        => null,
         ]);
     }
 
@@ -168,18 +169,19 @@ class HelpdeskTicketFactory extends Factory
     public function closed(): static
     {
         static $userIds;
-        if (!isset($userIds)) {
+        if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $userId = !empty($userIds) ? Arr::random($userIds) : null;
+        $userId = ! empty($userIds) ? Arr::random($userIds) : null;
         static $msFaker;
-        if (!$msFaker) {
+        if (! $msFaker) {
             $msFaker = \Faker\Factory::create('ms_MY');
         }
+
         return $this->state([
-            'status' => HelpdeskTicket::STATUS_CLOSED,
-            'closed_by_id' => $userId,
-            'closed_at' => now(),
+            'status'           => HelpdeskTicket::STATUS_CLOSED,
+            'closed_by_id'     => $userId,
+            'closed_at'        => now(),
             'resolution_notes' => $msFaker->sentence(8),
         ]);
     }
@@ -190,6 +192,7 @@ class HelpdeskTicketFactory extends Factory
     public function assignedTo(User|int $user): static
     {
         $userId = $user instanceof User ? $user->id : $user;
+
         return $this->state([
             'assigned_to_user_id' => $userId,
         ]);
@@ -201,6 +204,7 @@ class HelpdeskTicketFactory extends Factory
     public function forCategory(HelpdeskCategory|int $category): static
     {
         $categoryId = $category instanceof HelpdeskCategory ? $category->id : $category;
+
         return $this->state([
             'category_id' => $categoryId,
         ]);
@@ -212,6 +216,7 @@ class HelpdeskTicketFactory extends Factory
     public function withPriority(HelpdeskPriority|int $priority): static
     {
         $priorityId = $priority instanceof HelpdeskPriority ? $priority->id : $priority;
+
         return $this->state([
             'priority_id' => $priorityId,
         ]);
@@ -223,10 +228,11 @@ class HelpdeskTicketFactory extends Factory
     public function deleted(): static
     {
         static $userIds;
-        if (!isset($userIds)) {
+        if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $deleterId = !empty($userIds) ? Arr::random($userIds) : null;
+        $deleterId = ! empty($userIds) ? Arr::random($userIds) : null;
+
         return $this->state([
             'deleted_at' => now(),
             'deleted_by' => $deleterId,

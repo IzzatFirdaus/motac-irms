@@ -63,7 +63,7 @@ class SuffixedTranslator extends Translator
      */
     protected function handleMissingTranslation($key, $locale)
     {
-        $missingKeyId = $key . '.' . $locale;
+        $missingKeyId = $key.'.'.$locale;
         if (! in_array($missingKeyId, $this->missingKeys)) {
             $this->missingKeys[] = $missingKeyId;
             if (config('translation.log_missing_keys', true)) {
@@ -84,7 +84,7 @@ class SuffixedTranslator extends Translator
     {
         $replaceHash = ! empty($replace) ? md5(serialize($replace)) : 'no_replace';
 
-        return self::CACHE_PREFIX . md5($key . '.' . $locale . '.' . $replaceHash);
+        return self::CACHE_PREFIX.md5($key.'.'.$locale.'.'.$replaceHash);
     }
 
     /**
@@ -115,7 +115,7 @@ class SuffixedTranslator extends Translator
     public function clearCache()
     {
         try {
-            $pattern = self::CACHE_PREFIX . '*';
+            $pattern = self::CACHE_PREFIX.'*';
             // Use cache store to access Redis connection when available
             $store = Cache::store();
             if (method_exists($store, 'getRedis')) {
@@ -138,7 +138,7 @@ class SuffixedTranslator extends Translator
 
             return true;
         } catch (\Exception $e) {
-            Log::error('Failed to clear translation cache: ' . $e->getMessage());
+            Log::error('Failed to clear translation cache: '.$e->getMessage());
 
             return false;
         }

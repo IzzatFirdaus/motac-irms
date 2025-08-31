@@ -9,7 +9,7 @@ use Spatie\Permission\Models\Role as SpatieRole;
 
 /**
  * Role Model.
- * 
+ *
  * Extends Spatie Role for the system, adds custom logic for user relationships.
  *
  * @property int                             $id
@@ -21,11 +21,13 @@ use Spatie\Permission\Models\Role as SpatieRole;
  * @property-read int|null $permissions_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
  * @property-read int|null $users_count
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Role newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Role newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Role permission($permissions, $without = false)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Role query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Role withoutPermission($permissions)
+ *
  * @mixin \Eloquent
  */
 class Role extends SpatieRole
@@ -53,7 +55,7 @@ class Role extends SpatieRole
         $currentRoleGuardNameAttribute  = $this->attributes['guard_name'] ?? null;
         $guardNameToUse                 = $currentRoleGuardNameAttribute ?: $defaultGuardNameForStaticClass;
         if (empty($guardNameToUse)) {
-            $errorMessage = 'Guard name could not be determined for Role ID: ' . ($this->id ?? 'N/A') . '.';
+            $errorMessage = 'Guard name could not be determined for Role ID: '.($this->id ?? 'N/A').'.';
             Log::error($errorMessage, [
                 'role_id'                      => $this->id ?? 'N/A',
                 'role_attributes'              => $this->attributes,
@@ -64,15 +66,15 @@ class Role extends SpatieRole
         }
         $userModelClass = Guard::getModelForGuard((string) $guardNameToUse);
         if (is_null($userModelClass)) {
-            $errorMessage = sprintf("Could not determine the User model class for guard '%s' (Role ID: ", $guardNameToUse) . ($this->id ?? 'N/A') . ').';
+            $errorMessage = sprintf("Could not determine the User model class for guard '%s' (Role ID: ", $guardNameToUse).($this->id ?? 'N/A').').';
             Log::error($errorMessage, [
                 'role_id'                    => $this->id ?? 'N/A',
                 'role_guard_name_attribute'  => $currentRoleGuardNameAttribute,
                 'resolved_guard_name_used'   => $guardNameToUse,
                 'auth_config_defaults_guard' => config('auth.defaults.guard'),
-                'auth_config_guard_details'  => config('auth.guards.' . $guardNameToUse),
-                'provider_for_guard'         => config('auth.guards.' . $guardNameToUse . '.provider'),
-                'model_for_provider'         => config('auth.providers.' . (config('auth.guards.' . $guardNameToUse . '.provider')) . '.model'),
+                'auth_config_guard_details'  => config('auth.guards.'.$guardNameToUse),
+                'provider_for_guard'         => config('auth.guards.'.$guardNameToUse.'.provider'),
+                'model_for_provider'         => config('auth.providers.'.(config('auth.guards.'.$guardNameToUse.'.provider')).'.model'),
             ]);
             throw new \Exception($errorMessage);
         }

@@ -34,7 +34,8 @@ use Illuminate\Support\Str;
  * @property-read int|null $users_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Ticket> $tickets
  * @property-read int|null $tickets_count
- * @method static \Database\Factories\DepartmentFactory factory($count = null, $state = [])
+ *
+ * @method static \Database\Factories\DepartmentFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Department newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Department newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Department onlyTrashed()
@@ -54,6 +55,7 @@ use Illuminate\Support\Str;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Department whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Department withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Department withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class Department extends Model
