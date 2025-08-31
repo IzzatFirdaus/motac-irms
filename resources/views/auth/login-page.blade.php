@@ -4,7 +4,7 @@
     $customizerHidden = 'customizer-hide'; // Theme-specific variable
 @endphp
 
-@extends('layouts/blankLayout') {{-- Extends the MOTAC blank layout --}}
+@extends('layouts.layout-blank') {{-- Extends the MOTAC blank layout --}}
 
 @section('title', __('Log Masuk Sistem')) {{-- Sets the page title --}}
 

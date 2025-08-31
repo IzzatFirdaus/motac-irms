@@ -5,7 +5,7 @@
     $configData = App\Helpers\Helpers::appClasses();
 @endphp
 
-@extends('layouts/blankLayout')
+@extends('layouts.layout-blank')
 
 @section('title', __('Sahkan Alamat E-mel'))
 
