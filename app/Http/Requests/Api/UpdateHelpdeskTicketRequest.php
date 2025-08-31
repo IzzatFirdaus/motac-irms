@@ -44,6 +44,7 @@ class UpdateHelpdeskTicketRequest extends FormRequest
         if (! isset($data['title']) && isset($data['subject'])) {
             $data['title'] = $data['subject'];
         }
+
         if (! isset($data['resolution_notes']) && isset($data['resolution_details'])) {
             $data['resolution_notes'] = $data['resolution_details'];
         }
@@ -101,7 +102,7 @@ class UpdateHelpdeskTicketRequest extends FormRequest
                 'nullable',
                 'string',
                 'max:2000',
-                Rule::requiredIf(function () {
+                Rule::requiredIf(function (): bool {
                     $status = $this->input('status');
 
                     return in_array($status, [HelpdeskTicket::STATUS_RESOLVED, HelpdeskTicket::STATUS_CLOSED], true);

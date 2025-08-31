@@ -51,24 +51,31 @@ class EquipmentController extends Controller
         if ($request->filled('asset_type') && $request->asset_type !== 'all') {
             $filters['asset_type'] = $request->asset_type;
         }
+
         if ($request->filled('status') && $request->status !== 'all') {
             $filters['status'] = $request->status;
         }
+
         if ($request->filled('condition_status') && $request->condition_status !== 'all') {
             $filters['condition_status'] = $request->condition_status;
         }
+
         if ($request->filled('classification') && $request->classification !== 'all') {
             $filters['classification'] = $request->classification;
         }
+
         if ($request->filled('equipment_category_id') && $request->equipment_category_id !== 'all') {
             $filters['equipment_category_id'] = $request->equipment_category_id;
         }
+
         if ($request->filled('sub_category_id') && $request->sub_category_id !== 'all') {
             $filters['sub_category_id'] = $request->sub_category_id;
         }
+
         if ($request->filled('location_id') && $request->location_id !== 'all') {
             $filters['location_id'] = $request->location_id;
         }
+
         if ($request->filled('search')) {
             $filters['search'] = $request->search;
         }
@@ -78,7 +85,7 @@ class EquipmentController extends Controller
         if (
             $user && method_exists($user, 'hasAnyRole') && ! $user->hasAnyRole(['Admin', 'BPM Staff', 'IT Admin']) && ! $request->filled('status')
         ) {
-            if (defined(Equipment::class . '::STATUS_AVAILABLE')) {
+            if (defined(Equipment::class.'::STATUS_AVAILABLE')) {
                 $filters['status'] = Equipment::STATUS_AVAILABLE;
             } else {
                 Log::warning('Equipment::STATUS_AVAILABLE constant is not defined.');
@@ -101,7 +108,7 @@ class EquipmentController extends Controller
         // Fetch all active equipment categories and their subcategories for filtering
         $equipmentCategories = EquipmentCategory::active()
             ->orderBy('name')
-            ->with(['subCategories' => function ($q) {
+            ->with(['subCategories' => function ($q): void {
                 $q->where('is_active', true)->orderBy('name');
             }])
             ->get(['id', 'name']);

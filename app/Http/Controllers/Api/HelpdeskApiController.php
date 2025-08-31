@@ -56,11 +56,11 @@ class HelpdeskApiController extends Controller
 
             return response()->json(['message' => 'Ticket created successfully', 'ticket_id' => $ticket->id], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::warning('API Ticket Creation Validation Error: ' . $e->getMessage(), ['errors' => $e->errors(), 'request' => $request->all()]);
+            Log::warning('API Ticket Creation Validation Error: '.$e->getMessage(), ['errors' => $e->errors(), 'request' => $request->all()]);
 
             return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);
         } catch (\Exception $e) {
-            Log::error('API Ticket Creation Error: ' . $e->getMessage(), ['exception_class' => get_class($e), 'request' => $request->all()]);
+            Log::error('API Ticket Creation Error: '.$e->getMessage(), ['exception_class' => get_class($e), 'request' => $request->all()]);
 
             return response()->json(['message' => 'Failed to create ticket', 'error' => $e->getMessage()], 500);
         }
@@ -83,13 +83,13 @@ class HelpdeskApiController extends Controller
             Log::info(sprintf('API Ticket Update Success: Ticket ID %d updated by User ID %d.', $ticket->id, $updater->id));
 
             return response()->json(['message' => 'Ticket updated successfully', 'ticket_id' => $ticket->id]);
-        } catch (\Exception $e) {
-            Log::error(sprintf('API Ticket Update Error for Ticket ID %d: ', $ticket->id) . $e->getMessage(), [
-                'exception_class' => get_class($e),
+        } catch (\Exception $exception) {
+            Log::error(sprintf('API Ticket Update Error for Ticket ID %d: ', $ticket->id).$exception->getMessage(), [
+                'exception_class' => get_class($exception),
                 'request'         => $request->all(),
             ]);
 
-            return response()->json(['message' => 'Failed to update ticket', 'error' => $e->getMessage()], 500);
+            return response()->json(['message' => 'Failed to update ticket', 'error' => $exception->getMessage()], 500);
         }
     }
 
@@ -110,13 +110,13 @@ class HelpdeskApiController extends Controller
             Log::info(sprintf('API Ticket Closure Success: Ticket ID %d closed by User ID %d.', $ticket->id, $closer->id));
 
             return response()->json(['message' => 'Ticket closed successfully', 'ticket_id' => $ticket->id]);
-        } catch (\Exception $e) {
-            Log::error(sprintf('API Ticket Closure Error for Ticket ID %d: ', $ticket->id) . $e->getMessage(), [
-                'exception_class' => get_class($e),
+        } catch (\Exception $exception) {
+            Log::error(sprintf('API Ticket Closure Error for Ticket ID %d: ', $ticket->id).$exception->getMessage(), [
+                'exception_class' => get_class($exception),
                 'request'         => $request->all(),
             ]);
 
-            return response()->json(['message' => 'Failed to close ticket', 'error' => $e->getMessage()], 500);
+            return response()->json(['message' => 'Failed to close ticket', 'error' => $exception->getMessage()], 500);
         }
     }
 }

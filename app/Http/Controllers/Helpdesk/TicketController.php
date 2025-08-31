@@ -75,13 +75,13 @@ class TicketController extends Controller
 
             return redirect()->route('helpdesk.tickets.show', $ticket)
                 ->with('success', __('Tiket bantuan berjaya dihantar.'));
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             Log::error('Helpdesk Web: Failed to create ticket.', [
                 'user_id' => $user->id,
-                'error'   => $e->getMessage(),
+                'error'   => $exception->getMessage(),
             ]);
 
-            return back()->with('error', __('Gagal menghantar tiket bantuan: ') . $e->getMessage())
+            return back()->with('error', __('Gagal menghantar tiket bantuan: ').$exception->getMessage())
                 ->withInput();
         }
     }
@@ -96,7 +96,7 @@ class TicketController extends Controller
         // Optionally eager load relations for display, e.g. category, priority, comments
         $ticket->load(['category', 'priority', 'applicant', 'assignedTo', 'comments', 'attachments']);
 
-        return view('helpdesk.show', compact('ticket'));
+        return view('helpdesk.show', ['ticket' => $ticket]);
     }
 
     /**
@@ -109,7 +109,7 @@ class TicketController extends Controller
         // Optionally eager load for form display
         $ticket->load(['category', 'priority', 'assignedTo']);
 
-        return view('helpdesk.edit', compact('ticket'));
+        return view('helpdesk.edit', ['ticket' => $ticket]);
     }
 
     /**
@@ -139,14 +139,14 @@ class TicketController extends Controller
 
             return redirect()->route('helpdesk.tickets.show', $ticket)
                 ->with('success', __('Tiket berjaya dikemaskini.'));
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             Log::error('Helpdesk Web: Failed to update ticket.', [
                 'ticket_id' => $ticket->id,
                 'user_id'   => $user->id,
-                'error'     => $e->getMessage(),
+                'error'     => $exception->getMessage(),
             ]);
 
-            return back()->with('error', __('Gagal mengemaskini tiket: ') . $e->getMessage())
+            return back()->with('error', __('Gagal mengemaskini tiket: ').$exception->getMessage())
                 ->withInput();
         }
     }
@@ -168,14 +168,14 @@ class TicketController extends Controller
 
             return redirect()->route('helpdesk.tickets.index')
                 ->with('success', __('Tiket berjaya dipadam.'));
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             Log::error('Helpdesk Web: Failed to delete ticket.', [
                 'ticket_id' => $ticket->id,
                 'user_id'   => Auth::id(),
-                'error'     => $e->getMessage(),
+                'error'     => $exception->getMessage(),
             ]);
 
-            return back()->with('error', __('Gagal memadam tiket: ') . $e->getMessage());
+            return back()->with('error', __('Gagal memadam tiket: ').$exception->getMessage());
         }
     }
 }

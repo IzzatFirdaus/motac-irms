@@ -80,7 +80,7 @@ class DashboardController extends Controller
                 LoanApplication::STATUS_APPROVED,
                 LoanApplication::STATUS_PARTIALLY_ISSUED,
             ])->count(),
-            'loan_applications_due_today_count' => LoanApplication::whereHas('loanTransactions', function ($query) {
+            'loan_applications_due_today_count' => LoanApplication::whereHas('loanTransactions', function ($query): void {
                 $query->whereDate('due_date', today());
             })->count(),
             // EmailApplication data removed as per system update

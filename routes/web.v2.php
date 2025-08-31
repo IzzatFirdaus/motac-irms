@@ -146,7 +146,7 @@ Route::get('lang/{lang}', [LanguageController::class, 'swap'])
 // === TEST ROUTE FOR TRANSLATION LOADING ===
 // --------------------------------------------------
 // Debugging route for translation system testing
-Route::get('/test-lang', function () {
+Route::get('/test-lang', function (): array {
     return [
         'loaded_file_ms'  => file_exists(resource_path('lang/ms/app_ms.php')),
         'loaded_file_en'  => file_exists(resource_path('lang/en/app_en.php')),
@@ -165,7 +165,7 @@ Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',
-])->group(function () {
+])->group(function (): void {
 
     // -------------------------
     // Dashboard Routes (Livewire)
@@ -207,7 +207,7 @@ Route::middleware([
     // -------------------------
     // ICT Equipment Loan Application Routes (mixed Livewire/controller)
     // -------------------------
-    Route::prefix('loan-applications')->name('loan-applications.')->group(function () {
+    Route::prefix('loan-applications')->name('loan-applications.')->group(function (): void {
         // Livewire routes for UI
         Route::get('/create', LoanApplicationFormLW::class)->name('create');
         Route::get('/my-applications', MyLoanApplicationsIndexLW::class)->name('my-applications.index');
@@ -254,7 +254,7 @@ Route::middleware([
     // -------------------------
     // Approval Workflow System (Livewire)
     // -------------------------
-    Route::prefix('approvals')->name('approvals.')->group(function () {
+    Route::prefix('approvals')->name('approvals.')->group(function (): void {
         // Livewire dashboard and history views
         Route::get('/', ApprovalDashboardLW::class)
             ->name('dashboard')
@@ -277,7 +277,7 @@ Route::middleware([
     // -------------------------
     // Admin Resource Management (Livewire-centric)
     // -------------------------
-    Route::prefix('admin')->name('admin.')->middleware(['role:Admin|IT Admin'])->group(function () {
+    Route::prefix('admin')->name('admin.')->middleware(['role:Admin|IT Admin'])->group(function (): void {
         // Equipment - Livewire UI
         Route::get('equipment-items', AdminEquipmentIndexLW::class)->name('equipment-items.index');
         Route::get('equipment-form', AdminEquipmentFormLW::class)->name('equipment-items.form');
@@ -304,7 +304,7 @@ Route::middleware([
     // -------------------------
     // Reports Module (Livewire + controller for legacy reports)
     // -------------------------
-    Route::prefix('reports')->name('reports.')->group(function () {
+    Route::prefix('reports')->name('reports.')->group(function (): void {
         // Livewire report UI components
         Route::get('/', ReportsIndexLW::class)->name('index');
         Route::get('/equipment-inventory', EquipmentReportLW::class)->name('equipment-inventory');
@@ -321,9 +321,9 @@ Route::middleware([
     // -------------------------
     // Helpdesk Module (Livewire)
     // -------------------------
-    Route::prefix('helpdesk')->name('helpdesk.')->group(function () {
+    Route::prefix('helpdesk')->name('helpdesk.')->group(function (): void {
         // Admin routes (must come before the catch-all route)
-        Route::middleware(['role:Admin|IT Admin|Helpdesk Agent'])->group(function () {
+        Route::middleware(['role:Admin|IT Admin|Helpdesk Agent'])->group(function (): void {
             Route::get('/admin/tickets', AdminTicketManagementLW::class)->name('admin.index');
         });
 
@@ -338,7 +338,7 @@ Route::middleware([
     // -------------------------
     // Helpdesk TicketController Web Routes (for tests & legacy web flows)
     // -------------------------
-    Route::prefix('helpdesk')->name('helpdesk.tickets.')->group(function () {
+    Route::prefix('helpdesk')->name('helpdesk.tickets.')->group(function (): void {
         // Index and create views
         Route::get('/tickets', [\App\Http\Controllers\Helpdesk\TicketController::class, 'index'])->name('index');
         Route::get('/tickets/create', [\App\Http\Controllers\Helpdesk\TicketController::class, 'create'])->name('create');
@@ -360,7 +360,7 @@ Route::middleware([
     // -------------------------
     // Human Resource Management (Optional Livewire module)
     // -------------------------
-    Route::prefix('hr')->name('hr.')->middleware(['role:Admin|HR Admin'])->group(function () {
+    Route::prefix('hr')->name('hr.')->middleware(['role:Admin|HR Admin'])->group(function (): void {
         Route::get('/departments', HRDepartmentsLW::class)->name('departments.index');
         Route::get('/positions', HRPositionsLW::class)->name('positions.index');
         Route::get('/employees', HREmployeeInfoLW::class)->name('employees.index');
@@ -369,7 +369,7 @@ Route::middleware([
     // -------------------------
     // System Settings Panel (Livewire)
     // -------------------------
-    Route::prefix('settings')->name('settings.')->middleware(['role:Admin'])->group(function () {
+    Route::prefix('settings')->name('settings.')->middleware(['role:Admin'])->group(function (): void {
         // Default settings index
         Route::get('/', SettingsUsersIndexLW::class)->name('index');
 
@@ -397,7 +397,7 @@ Route::middleware([
     // -------------------------
     // Transaction Management (controller for operations)
     // -------------------------
-    Route::prefix('loan-transactions')->name('loan-transactions.')->group(function () {
+    Route::prefix('loan-transactions')->name('loan-transactions.')->group(function (): void {
         Route::get('/', [LoanTransactionController::class, 'index'])->name('index');
         Route::get('/{loanTransaction}', [LoanTransactionController::class, 'show'])
             ->name('show')

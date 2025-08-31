@@ -53,18 +53,21 @@ class ReportController extends Controller
         // Filters
         if ($request->filled('search')) {
             $searchTerm = $request->input('search');
-            $query->where(function ($q) use ($searchTerm) {
-                $q->where('tag_id', 'like', "%{$searchTerm}%")
-                    ->orWhere('brand', 'like', "%{$searchTerm}%")
-                    ->orWhere('model', 'like', "%{$searchTerm}%");
+            $query->where(function ($q) use ($searchTerm): void {
+                $q->where('tag_id', 'like', sprintf('%%%s%%', $searchTerm))
+                    ->orWhere('brand', 'like', sprintf('%%%s%%', $searchTerm))
+                    ->orWhere('model', 'like', sprintf('%%%s%%', $searchTerm));
             });
         }
+
         if ($request->filled('status') && $request->input('status') !== '') {
             $query->where('status', $request->input('status'));
         }
+
         if ($request->filled('asset_type') && $request->input('asset_type') !== '') {
             $query->where('asset_type', $request->input('asset_type'));
         }
+
         if ($request->filled('department_id') && $request->input('department_id') !== '') {
             $query->where('department_id', $request->input('department_id'));
         }
@@ -78,12 +81,12 @@ class ReportController extends Controller
         $departments = Department::orderBy('name')->pluck('name', 'id')->toArray();
 
         if ($request->filled('export') && $request->input('export') === 'pdf') {
-            $pdf = Pdf::loadView('reports.equipment-inventory-report', compact('equipmentList', 'assetTypes', 'statuses', 'departments'));
+            $pdf = Pdf::loadView('reports.equipment-inventory-report', ['equipmentList' => $equipmentList, 'assetTypes' => $assetTypes, 'statuses' => $statuses, 'departments' => $departments]);
 
             return $pdf->download('equipment-inventory.pdf');
         }
 
-        return view('reports.equipment-inventory-report', compact('equipmentList', 'assetTypes', 'statuses', 'departments'));
+        return view('reports.equipment-inventory-report', ['equipmentList' => $equipmentList, 'assetTypes' => $assetTypes, 'statuses' => $statuses, 'departments' => $departments]);
     }
 
     /**
@@ -99,22 +102,26 @@ class ReportController extends Controller
         // Filters
         if ($request->filled('search')) {
             $searchTerm = $request->input('search');
-            $query->where(function ($q) use ($searchTerm) {
-                $q->where('id', 'like', "%{$searchTerm}%")
-                    ->orWhere('purpose', 'like', "%{$searchTerm}%");
+            $query->where(function ($q) use ($searchTerm): void {
+                $q->where('id', 'like', sprintf('%%%s%%', $searchTerm))
+                    ->orWhere('purpose', 'like', sprintf('%%%s%%', $searchTerm));
             });
         }
+
         if ($request->filled('status') && $request->input('status') !== '') {
             $query->where('status', $request->input('status'));
         }
+
         if ($request->filled('department_id') && $request->input('department_id') !== '') {
-            $query->whereHas('user.department', function ($q) use ($request) {
+            $query->whereHas('user.department', function ($q) use ($request): void {
                 $q->where('id', $request->input('department_id'));
             });
         }
+
         if ($request->filled('date_from')) {
             $query->whereDate('created_at', '>=', $request->input('date_from'));
         }
+
         if ($request->filled('date_to')) {
             $query->whereDate('created_at', '<=', $request->input('date_to'));
         }
@@ -126,12 +133,12 @@ class ReportController extends Controller
         $departmentOptions = Department::orderBy('name')->pluck('name', 'id')->toArray();
 
         if ($request->filled('export') && $request->input('export') === 'pdf') {
-            $pdf = Pdf::loadView('reports.loan-applications-report', compact('loanApplications', 'statusOptions', 'departmentOptions'));
+            $pdf = Pdf::loadView('reports.loan-applications-report', ['loanApplications' => $loanApplications, 'statusOptions' => $statusOptions, 'departmentOptions' => $departmentOptions]);
 
             return $pdf->download('loan-applications.pdf');
         }
 
-        return view('reports.loan-applications-report', compact('loanApplications', 'statusOptions', 'departmentOptions'));
+        return view('reports.loan-applications-report', ['loanApplications' => $loanApplications, 'statusOptions' => $statusOptions, 'departmentOptions' => $departmentOptions]);
     }
 
     /**
@@ -148,16 +155,19 @@ class ReportController extends Controller
 
         // Filters
         if ($request->filled('user_id') && $request->input('user_id') !== '') {
-            $query->whereHas('loanApplication.user', function ($q) use ($request) {
+            $query->whereHas('loanApplication.user', function ($q) use ($request): void {
                 $q->where('id', $request->input('user_id'));
             });
         }
+
         if ($request->filled('type') && $request->input('type') !== '') {
             $query->where('type', $request->input('type'));
         }
+
         if ($request->filled('date_from')) {
             $query->whereDate('transaction_date', '>=', $request->input('date_from'));
         }
+
         if ($request->filled('date_to')) {
             $query->whereDate('transaction_date', '<=', $request->input('date_to'));
         }
@@ -172,12 +182,12 @@ class ReportController extends Controller
         ];
 
         if ($request->filled('export') && $request->input('export') === 'pdf') {
-            $pdf = Pdf::loadView('reports.loan-history-report', compact('loanTransactions', 'usersFilter', 'transactionTypes', 'request'));
+            $pdf = Pdf::loadView('reports.loan-history-report', ['loanTransactions' => $loanTransactions, 'usersFilter' => $usersFilter, 'transactionTypes' => $transactionTypes, 'request' => $request]);
 
             return $pdf->download('loan-history.pdf');
         }
 
-        return view('reports.loan-history-report', compact('loanTransactions', 'usersFilter', 'transactionTypes', 'request'));
+        return view('reports.loan-history-report', ['loanTransactions' => $loanTransactions, 'usersFilter' => $usersFilter, 'transactionTypes' => $transactionTypes, 'request' => $request]);
     }
 
     /**
@@ -218,12 +228,12 @@ class ReportController extends Controller
         $utilizationRate = Equipment::getUtilizationRate();
 
         if ($request->filled('export') && $request->input('export') === 'pdf') {
-            $pdf = Pdf::loadView('reports.utilization-report', compact('summary', 'utilizationRate'));
+            $pdf = Pdf::loadView('reports.utilization-report', ['summary' => $summary, 'utilizationRate' => $utilizationRate]);
 
             return $pdf->download('utilization-report.pdf');
         }
 
-        return view('reports.utilization-report', compact('summary', 'utilizationRate'));
+        return view('reports.utilization-report', ['summary' => $summary, 'utilizationRate' => $utilizationRate]);
     }
 
     /**
@@ -240,7 +250,7 @@ class ReportController extends Controller
 
         $pageTitle = __('reports.user_activity.title');
 
-        return view('reports.user-activity-log-report', compact('users', 'pageTitle'));
+        return view('reports.user-activity-log-report', ['users' => $users, 'pageTitle' => $pageTitle]);
     }
 
     /**

@@ -36,7 +36,7 @@ class LanguageController extends Controller
 
         // Validate requested locale
         if (! is_array($availableLocales) || ! array_key_exists($lang, $availableLocales)) {
-            Log::warning("LanguageController: Attempted to switch to unsupported locale '{$lang}'. Using fallback: {$fallbackLocale}");
+            Log::warning(sprintf("LanguageController: Attempted to switch to unsupported locale '%s'. Using fallback: %s", $lang, $fallbackLocale));
             $lang = $fallbackLocale;
         }
 
@@ -58,20 +58,20 @@ class LanguageController extends Controller
                 // Only update if different to avoid unnecessary DB updates
                 if ($user->preferred_locale !== $lang) {
                     $user->update(['preferred_locale' => $lang]);
-                    Log::info("LanguageController: Updated user preference to '{$lang}' for user: " . $user->name);
+                    Log::info(sprintf("LanguageController: Updated user preference to '%s' for user: ", $lang).$user->name);
                 }
             } catch (\Exception $e) {
-                Log::error('LanguageController: Failed to update user locale preference: ' . $e->getMessage());
+                Log::error('LanguageController: Failed to update user locale preference: '.$e->getMessage());
             }
         }
 
         // Flash a success message using the newly selected language
         // Uses translation key: 'app.language_switched_{locale}'
-        session()->flash('success', __('app.language_switched_' . $lang));
+        session()->flash('success', __('app.language_switched_'.$lang));
 
         // Log the language switch for debugging
         if (Config::get('app.debug')) {
-            Log::debug("LanguageController: Language switched to '{$lang}' by " . (Auth::check() ? Auth::user()->name : 'guest user'));
+            Log::debug(sprintf("LanguageController: Language switched to '%s' by ", $lang).(Auth::check() ? Auth::user()->name : 'guest user'));
         }
 
         // Redirect back to the previous page, add a flag for frontend if needed

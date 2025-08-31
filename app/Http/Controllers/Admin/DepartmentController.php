@@ -31,14 +31,14 @@ class DepartmentController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->input('search');
-            $query->where('name', 'like', "%{$search}%")
-                ->orWhere('branch_type', 'like', "%{$search}%")
-                ->orWhere('code', 'like', "%{$search}%");
+            $query->where('name', 'like', sprintf('%%%s%%', $search))
+                ->orWhere('branch_type', 'like', sprintf('%%%s%%', $search))
+                ->orWhere('code', 'like', sprintf('%%%s%%', $search));
         }
 
         $departments = $query->orderBy('name')->paginate(config('pagination.default_size', 15));
 
-        return view('admin.departments.index', compact('departments'));
+        return view('admin.departments.index', ['departments' => $departments]);
     }
 
     /**
@@ -51,7 +51,7 @@ class DepartmentController extends Controller
         $branchTypes = Department::getBranchTypeOptions();
         $users       = User::orderBy('name')->get(['id', 'name']); // Fetch all users for the Head of Department dropdown
 
-        return view('admin.departments.create', compact('branchTypes', 'users'));
+        return view('admin.departments.create', ['branchTypes' => $branchTypes, 'users' => $users]);
     }
 
     /**
@@ -63,7 +63,7 @@ class DepartmentController extends Controller
 
         $validatedData = $request->validate([
             'name'                  => 'required|string|max:255',
-            'branch_type'           => 'required|string|in:' . implode(',', array_keys(Department::$BRANCH_TYPE_LABELS)),
+            'branch_type'           => 'required|string|in:'.implode(',', array_keys(Department::$BRANCH_TYPE_LABELS)),
             'code'                  => 'nullable|string|max:50|unique:departments,code',
             'description'           => 'nullable|string|max:500',
             'is_active'             => 'required|boolean',
@@ -98,7 +98,7 @@ class DepartmentController extends Controller
         // Load related data for better insights
         $department->load(['headOfDepartment', 'users']);
 
-        return view('admin.departments.show', compact('department'));
+        return view('admin.departments.show', ['department' => $department]);
     }
 
     /**
@@ -111,7 +111,7 @@ class DepartmentController extends Controller
         $branchTypes = Department::getBranchTypeOptions();
         $users       = User::orderBy('name')->get(['id', 'name']); // Fetch all users for the Head of Department dropdown
 
-        return view('admin.departments.edit', compact('department', 'branchTypes', 'users'));
+        return view('admin.departments.edit', ['department' => $department, 'branchTypes' => $branchTypes, 'users' => $users]);
     }
 
     /**
@@ -123,8 +123,8 @@ class DepartmentController extends Controller
 
         $validatedData = $request->validate([
             'name'                  => 'required|string|max:255',
-            'branch_type'           => 'required|string|in:' . implode(',', array_keys(Department::$BRANCH_TYPE_LABELS)),
-            'code'                  => 'nullable|string|max:50|unique:departments,code,' . $department->id,
+            'branch_type'           => 'required|string|in:'.implode(',', array_keys(Department::$BRANCH_TYPE_LABELS)),
+            'code'                  => 'nullable|string|max:50|unique:departments,code,'.$department->id,
             'description'           => 'nullable|string|max:500',
             'is_active'             => 'required|boolean',
             'head_of_department_id' => 'nullable|exists:users,id',
