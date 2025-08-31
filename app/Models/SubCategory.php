@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * SubCategory Model.
- *
+ * 
  * Defines sub-categories for ICT equipment, linked to EquipmentCategory.
  *
  * @property int                             $id
@@ -27,6 +27,34 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \App\Models\User|null $creator
+ * @property-read \App\Models\User|null $deleter
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Equipment> $equipment
+ * @property-read int|null $equipment_count
+ * @property-read \App\Models\EquipmentCategory $equipmentCategory
+ * @property-read \App\Models\User|null $updater
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory active()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory byCategory(int $categoryId)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory byName(string $name)
+ * @method static \Database\Factories\SubCategoryFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory whereEquipmentCategoryId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory withoutTrashed()
+ * @mixin \Eloquent
  */
 class SubCategory extends Model
 {

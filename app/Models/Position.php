@@ -27,6 +27,29 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\Grade|null $grade
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
  * @property-read int|null $users_count
+ * @property-read \App\Models\User|null $creator
+ * @property-read \App\Models\User|null $deleter
+ * @property-read \App\Models\User|null $updater
+ * @method static \Database\Factories\PositionFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position search(?string $term)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position whereGradeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position withoutTrashed()
+ * @mixin \Eloquent
  */
 class Position extends Model
 {
