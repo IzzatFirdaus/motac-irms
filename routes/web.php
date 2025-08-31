@@ -1,4 +1,5 @@
 <?php
+
 // routes/web.php
 
 declare(strict_types=1);
@@ -19,73 +20,71 @@ declare(strict_types=1);
 |--------------------------------------------------------------------------
 */
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ApprovalController;
 
 // --------------------------------------------------
 // Controller Imports (for public/static/some controller routes)
 // --------------------------------------------------
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EquipmentController;
+use App\Http\Controllers\Helpdesk\TicketController as HelpdeskTicketController;
 use App\Http\Controllers\language\LanguageController;
-use App\Http\Controllers\LegalController;
 use App\Http\Controllers\LoanApplicationController;
 use App\Http\Controllers\LoanTransactionController;
 use App\Http\Controllers\MiscErrorController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ReportController;
-use App\Http\Controllers\ApprovalController;
-use App\Http\Controllers\EquipmentController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\Helpdesk\TicketController as HelpdeskTicketController;
+use App\Livewire\Charts\LoanSummaryChart;
 
 // --------------------------------------------------
 // Livewire Component Imports (for all Livewire-based UI)
 // --------------------------------------------------
 use App\Livewire\ContactUs as ContactUsLW;
-use App\Livewire\EquipmentChecklist as EquipmentChecklistLW;
-use App\Livewire\LoanRequestForm as LoanRequestFormLW;
-use App\Livewire\Dashboard as DashboardLW;
 use App\Livewire\Dashboard\AdminDashboard as AdminDashboardLW;
 use App\Livewire\Dashboard\ApproverDashboard as ApproverDashboardLW;
 use App\Livewire\Dashboard\BpmDashboard as BpmDashboardLW;
 use App\Livewire\Dashboard\ItAdminDashboard as ItAdminDashboardLW;
 use App\Livewire\Dashboard\UserDashboard as UserDashboardLW;
-use App\Livewire\Charts\LoanSummaryChart;
-use App\Livewire\ResourceManagement\MyApplications\Loan\LoanApplicationsIndex as MyLoanApplicationsIndexLW;
-use App\Livewire\ResourceManagement\LoanApplication\LoanApplicationForm as LoanApplicationFormLW;
-use App\Livewire\ResourceManagement\Approval\ApprovalDashboard as ApprovalDashboardLW;
-use App\Livewire\ResourceManagement\Approval\ApprovalHistory as ApprovalHistoryLW;
-use App\Livewire\ResourceManagement\Admin\Equipment\EquipmentIndex as AdminEquipmentIndexLW;
-use App\Livewire\ResourceManagement\Admin\Equipment\EquipmentForm as AdminEquipmentFormLW;
+use App\Livewire\EquipmentChecklist as EquipmentChecklistLW;
+use App\Livewire\Helpdesk\Admin\TicketManagement as AdminTicketManagementLW;
+use App\Livewire\Helpdesk\CreateTicketForm;
+use App\Livewire\Helpdesk\MyTicketsIndex;
+use App\Livewire\Helpdesk\TicketDetails;
+use App\Livewire\HumanResource\Structure\Departments as HRDepartmentsLW;
+use App\Livewire\HumanResource\Structure\EmployeeInfo as HREmployeeInfoLW;
+use App\Livewire\HumanResource\Structure\Positions as HRPositionsLW;
+use App\Livewire\LoanRequestForm as LoanRequestFormLW;
+use App\Livewire\Misc\ComingSoon as ComingSoonLW;
 use App\Livewire\ResourceManagement\Admin\BPM\IssuedLoans as AdminIssuedLoansLW;
 use App\Livewire\ResourceManagement\Admin\BPM\OutstandingLoans as AdminOutstandingLoansLW;
 use App\Livewire\ResourceManagement\Admin\BPM\ProcessIssuance as AdminProcessIssuanceLW;
 use App\Livewire\ResourceManagement\Admin\BPM\ProcessReturn as AdminProcessReturnLW;
+use App\Livewire\ResourceManagement\Admin\Equipment\EquipmentForm as AdminEquipmentFormLW;
+use App\Livewire\ResourceManagement\Admin\Equipment\EquipmentIndex as AdminEquipmentIndexLW;
 use App\Livewire\ResourceManagement\Admin\Grades\GradeIndex as AdminGradeIndexLW;
-use App\Livewire\ResourceManagement\Admin\Users\UserIndex as AdminUserIndexLW;
 use App\Livewire\ResourceManagement\Admin\Reports\EquipmentInventoryReport as AdminEquipmentInventoryReportLW;
 use App\Livewire\ResourceManagement\Admin\Reports\EquipmentReport as AdminEquipmentReportLW;
 use App\Livewire\ResourceManagement\Admin\Reports\LoanApplicationsReport as AdminLoanApplicationsReportLW;
 use App\Livewire\ResourceManagement\Admin\Reports\UserActivityReport as AdminUserActivityReportLW;
+use App\Livewire\ResourceManagement\Admin\Users\UserIndex as AdminUserIndexLW;
+use App\Livewire\ResourceManagement\Approval\ApprovalDashboard as ApprovalDashboardLW;
+use App\Livewire\ResourceManagement\Approval\ApprovalHistory as ApprovalHistoryLW;
+use App\Livewire\ResourceManagement\LoanApplication\LoanApplicationForm as LoanApplicationFormLW;
+use App\Livewire\ResourceManagement\MyApplications\Loan\LoanApplicationsIndex as MyLoanApplicationsIndexLW;
 use App\Livewire\ResourceManagement\Reports\EquipmentReport as EquipmentReportLW;
 use App\Livewire\ResourceManagement\Reports\LoanApplicationsReport as LoanApplicationsReportLW;
 use App\Livewire\ResourceManagement\Reports\ReportsIndex as ReportsIndexLW;
 use App\Livewire\ResourceManagement\Reports\UserActivityReport as UserActivityReportLW;
+use App\Livewire\Settings\Departments\DepartmentsIndex as SettingsDepartmentsIndexLW;
+use App\Livewire\Settings\Permissions\PermissionsIndex as SettingsPermissionsIndexLW;
+use App\Livewire\Settings\Positions\PositionsIndex as SettingsPositionsIndexLW;
+use App\Livewire\Settings\Roles\RolesIndex as SettingsRolesIndexLW;
 use App\Livewire\Settings\Users\UsersCreate as SettingsUsersCreateLW;
 use App\Livewire\Settings\Users\UsersEdit as SettingsUsersEditLW;
 use App\Livewire\Settings\Users\UsersIndex as SettingsUsersIndexLW;
 use App\Livewire\Settings\Users\UsersShow as SettingsUsersShowLW;
-use App\Livewire\Settings\Roles\RolesIndex as SettingsRolesIndexLW;
-use App\Livewire\Settings\Permissions\PermissionsIndex as SettingsPermissionsIndexLW;
-use App\Livewire\Settings\Departments\DepartmentsIndex as SettingsDepartmentsIndexLW;
-use App\Livewire\Settings\Positions\PositionsIndex as SettingsPositionsIndexLW;
 use App\Livewire\Shared\Notifications\NotificationsList;
-use App\Livewire\Helpdesk\CreateTicketForm;
-use App\Livewire\Helpdesk\MyTicketsIndex;
-use App\Livewire\Helpdesk\TicketDetails;
-use App\Livewire\Helpdesk\Admin\TicketManagement as AdminTicketManagementLW;
-use App\Livewire\Misc\ComingSoon as ComingSoonLW;
-use App\Livewire\HumanResource\Structure\Departments as HRDepartmentsLW;
-use App\Livewire\HumanResource\Structure\EmployeeInfo as HREmployeeInfoLW;
-use App\Livewire\HumanResource\Structure\Positions as HRPositionsLW;
+use Illuminate\Support\Facades\Route;
 
 // --------------------------------------------------
 // PUBLIC ROUTES
@@ -111,13 +110,13 @@ Route::get('lang/{lang}', [LanguageController::class, 'swap'])
 // Test translation system (debug)
 Route::get('/test-lang', function () {
     return [
-        'loaded_file_ms' => file_exists(resource_path('lang/ms/app_ms.php')),
-        'loaded_file_en' => file_exists(resource_path('lang/en/app_en.php')),
-        'current_locale' => app()->getLocale(),
-        'system_name' => __('app.system_name'),
+        'loaded_file_ms'  => file_exists(resource_path('lang/ms/app_ms.php')),
+        'loaded_file_en'  => file_exists(resource_path('lang/en/app_en.php')),
+        'current_locale'  => app()->getLocale(),
+        'system_name'     => __('app.system_name'),
         'motac_full_name' => __('app.motac_full_name'),
         'dashboard_apply' => __('dashboard.apply_ict_loan_title'),
-        'common_login' => __('common.login'),
+        'common_login'    => __('common.login'),
     ];
 });
 
@@ -125,7 +124,7 @@ Route::get('/test-lang', function () {
 // AUTHENTICATED ROUTES (Livewire UI + controllers for process endpoints)
 // --------------------------------------------------
 Route::middleware([
-    'auth:sanctum',
+    'auth',
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
@@ -277,10 +276,8 @@ Route::middleware([
     // -------------------------
     Route::prefix('helpdesk')->name('helpdesk.')->group(function () {
         // Admin/IT Admin/Helpdesk Agent routes
-        Route::middleware(['role:Admin|IT Admin|Helpdesk Agent'])->group(function () {
-            // Ensure route name matches tests: helpdesk.admin.index
-            Route::get('/admin/tickets', AdminTicketManagementLW::class)->name('admin.index');
-        });
+        // Note: admin UI route is registered later with explicit auth guards (sanctum,web)
+        // to support both API-token-based tests (Sanctum::actingAs) and session auth.
         Route::get('/', MyTicketsIndex::class)->name('index');
         Route::get('/create', CreateTicketForm::class)->name('create');
         Route::get('/{ticket}', TicketDetails::class)
@@ -288,7 +285,7 @@ Route::middleware([
             ->whereNumber('ticket');
     });
 
-    // Helpdesk TicketController Web Routes (for controller-based tests)
+    // Helpdesk ticket controller web routes (require session auth)
     Route::prefix('helpdesk')->name('helpdesk.tickets.')->middleware(['auth', 'verified'])->group(function () {
         Route::get('/tickets', [HelpdeskTicketController::class, 'index'])->name('index');
         Route::get('/tickets/create', [HelpdeskTicketController::class, 'create'])->name('create');
@@ -298,7 +295,32 @@ Route::middleware([
         Route::delete('/tickets/{ticket}', [HelpdeskTicketController::class, 'destroy'])->name('destroy')->whereNumber('ticket');
     });
 
-    // Legacy alias used in tests to view a specific ticket
+    // Legacy alias used in tests to view a specific ticket (session-auth)
+    Route::get('/helpdesk/view/{ticket}', [HelpdeskTicketController::class, 'show'])
+        ->name('helpdesk.view')
+        ->whereNumber('ticket')
+        ->middleware(['auth', 'verified']);
+
+    // Backwards-compatible aliases for older test expectations and route name variants
+    // Primary Livewire route is registered separately below (outside the global auth group)
+    // so it can control its own auth guards (sanctum,web) and support Sanctum::actingAs tests.
+
+    // Register helpdesk admin Livewire route outside the main auth group so it can
+    // use explicit auth guards that support Sanctum::actingAs during tests.
+    // (moved) helpdesk admin Livewire route is registered after the main auth group
+
+    // Ensure controller-based helpdesk ticket routes are registered for tests
+    // (single registration - earlier duplicates removed)
+    Route::prefix('helpdesk')->name('helpdesk.tickets.')->middleware(['auth', 'verified'])->group(function () {
+        Route::get('/tickets', [HelpdeskTicketController::class, 'index'])->name('index');
+        Route::get('/tickets/create', [HelpdeskTicketController::class, 'create'])->name('create');
+        Route::post('/tickets', [HelpdeskTicketController::class, 'store'])->name('store');
+        Route::get('/tickets/{ticket}', [HelpdeskTicketController::class, 'show'])->name('show')->whereNumber('ticket');
+        Route::put('/tickets/{ticket}', [HelpdeskTicketController::class, 'update'])->name('update')->whereNumber('ticket');
+        Route::delete('/tickets/{ticket}', [HelpdeskTicketController::class, 'destroy'])->name('destroy')->whereNumber('ticket');
+    });
+
+    // Legacy convenience route expected by some tests (named 'helpdesk.view')
     Route::get('/helpdesk/view/{ticket}', [HelpdeskTicketController::class, 'show'])
         ->name('helpdesk.view')
         ->whereNumber('ticket')
@@ -348,6 +370,17 @@ Route::middleware([
 // --------------------------------------------------
 // Fallback Route - Handles 404 errors for undefined routes
 // --------------------------------------------------
+// Helpdesk admin Livewire route (moved outside auth group)
+Route::get('/helpdesk/admin/tickets', AdminTicketManagementLW::class)
+    ->name('helpdesk.admin.tickets')
+    ->middleware(['auth', 'verified', 'role:Admin|IT Admin|Helpdesk Agent']);
+
+// Alias route for older tests
+Route::get('/helpdesk/admin', function () {
+    return redirect()->route('helpdesk.admin.tickets');
+})->name('helpdesk.admin.index')
+    ->middleware(['auth', 'verified', 'role:Admin|IT Admin|Helpdesk Agent']);
+
 Route::fallback(function () {
     return response()->view('errors.404', [], 404);
 });

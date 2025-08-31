@@ -211,7 +211,7 @@ Route::prefix('api')->name('api.')->group(function () {
 // Authenticated Routes (protected by Jetstream/Sanctum/verified middleware)
 // --------------------------------------------------
 Route::middleware([
-    'auth:sanctum',
+    'auth',
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
@@ -479,7 +479,7 @@ Route::middleware([
 // --------------------------------------------------
 
 // ApprovalController standard routes (for approval officers)
-Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])
+Route::middleware(['auth:sanctum,web', config('jetstream.auth_session'), 'verified'])
     ->prefix('approvals')
     ->name('approvals.')
     ->group(function () {
@@ -497,7 +497,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     });
 
 // Traditional transaction listing and detail routes (LoanTransactionController)
-Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])
+Route::middleware(['auth:sanctum,web', config('jetstream.auth_session'), 'verified'])
     ->prefix('loan-transactions')
     ->name('loan-transactions.')
     ->group(function () {
@@ -511,7 +511,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
 // --------------------------------------------------
 // Dashboard Controller Routes (Traditional MVC, if still needed)
 // --------------------------------------------------
-Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])
+Route::middleware(['auth:sanctum,web', config('jetstream.auth_session'), 'verified'])
     ->group(function () {
         // Alternative dashboard routes using controller (if Livewire components are not preferred)
         Route::get('/dashboard-controller', [DashboardController::class, 'index'])->name('dashboard.controller');
