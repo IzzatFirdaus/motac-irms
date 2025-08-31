@@ -176,6 +176,13 @@ class VerticalMenu extends Component
             return false;
         }
 
+        // Explicit policy: IT Admins should not see the Resource Inventory menu unless they also
+        // hold Admin or BPM Staff roles. This prevents IT Admin users (who manage helpdesk) from
+        // seeing inventory management UI in the sidebar.
+        if (isset($item->name) && $item->name === 'menu.resource_inventory.title' && in_array('IT Admin', $userRoles) && ! in_array('Admin', $userRoles) && ! in_array('BPM Staff', $userRoles)) {
+            return false;
+        }
+
         return array_intersect($userRoles, $itemRoles) !== [];
     }
 
