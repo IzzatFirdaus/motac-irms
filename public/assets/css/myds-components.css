@@ -1,0 +1,524 @@
+/**
+ * MYDS Components Stylesheet
+ * Malaysia Government Design System (MYDS) & MyGOVEA Compliant Components
+ *
+ * This file contains styling for MYDS-compliant components following:
+ * - MYDS Design System standards
+ * - MyGOVEA citizen-centric principles
+ * - WCAG 2.1 accessibility guidelines
+ * - Malaysian government digital service standards
+ */
+
+/* ============================================================================
+   MYDS COLOR TOKENS
+   ============================================================================ */
+
+:root {
+    /* MYDS Typography */
+    --myds-font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+    --myds-font-heading: 'Poppins', system-ui, -apple-system, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+
+    /* MYDS Primary Colors */
+    --myds-blue: #2563EB;
+    --myds-primary: var(--myds-blue);
+
+    /* MYDS Semantic Colors */
+    --myds-success: #16A34A;
+    --myds-danger: #DC2626;
+    --myds-warning: #D97706;
+    --myds-info: #0284C7;
+
+    /* MYDS Gray Scale */
+    --myds-white: #FFFFFF;
+    --myds-gray-50: #F8FAFC;
+    --myds-gray-100: #F1F5F9;
+    --myds-gray-200: #E2E8F0;
+    --myds-gray-300: #CBD5E1;
+    --myds-gray-400: #94A3B8;
+    --myds-gray-500: #64748B;
+    --myds-gray-600: #475569;
+    --myds-gray-700: #334155;
+    --myds-gray-800: #1E293B;
+    --myds-gray-900: #0F172A;
+
+    /* MYDS Background Tokens */
+    --myds-bg-primary: var(--myds-white);
+    --myds-bg-secondary: var(--myds-gray-50);
+    --myds-bg-muted: var(--myds-gray-100);
+
+    /* MYDS Text Tokens */
+    --myds-txt-primary: var(--myds-gray-900);
+    --myds-txt-secondary: var(--myds-gray-700);
+    --myds-txt-muted: var(--myds-gray-500);
+
+    /* MYDS Focus Ring */
+    --myds-focus-ring: var(--myds-blue);
+
+    /* MYDS Grid System */
+    --myds-grid-gap-desktop: 24px;
+    --myds-grid-gap-tablet: 24px;
+    --myds-grid-gap-mobile: 18px;
+    --myds-container-max-width: 1280px;
+
+    /* MYDS Border Radius */
+    --myds-radius-sm: 4px;
+    --myds-radius-md: 8px;
+    --myds-radius-lg: 12px;
+    --myds-radius-xl: 16px;
+
+    /* MYDS Shadows */
+    --myds-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --myds-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --myds-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Dark mode color tokens */
+[data-bs-theme="dark"] {
+    --myds-bg-primary: var(--myds-gray-900);
+    --myds-bg-secondary: var(--myds-gray-800);
+    --myds-bg-muted: var(--myds-gray-700);
+    --myds-txt-primary: var(--myds-gray-50);
+    --myds-txt-secondary: var(--myds-gray-200);
+    --myds-txt-muted: var(--myds-gray-400);
+
+    --myds-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --myds-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+    --myds-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+}
+
+/* ============================================================================
+   MYDS TYPOGRAPHY SYSTEM
+   ============================================================================ */
+
+body {
+    font-family: var(--myds-font-body);
+    color: var(--myds-txt-primary);
+    background-color: var(--myds-bg-primary);
+    line-height: 1.5;
+}
+
+h1, h2, h3, h4, h5, h6,
+.myds-heading {
+    font-family: var(--myds-font-heading);
+    color: var(--myds-txt-primary);
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+/* MYDS Heading Scale */
+h1, .myds-h1 { font-size: 2.25rem; line-height: 2.75rem; } /* 36px */
+h2, .myds-h2 { font-size: 1.875rem; line-height: 2.375rem; } /* 30px */
+h3, .myds-h3 { font-size: 1.5rem; line-height: 2rem; } /* 24px */
+h4, .myds-h4 { font-size: 1.25rem; line-height: 1.75rem; } /* 20px */
+h5, .myds-h5 { font-size: 1rem; line-height: 1.5rem; } /* 16px */
+h6, .myds-h6 { font-size: 0.875rem; line-height: 1.25rem; } /* 14px */
+
+/* MYDS Body Text Scale */
+.myds-body-large { font-size: 1.125rem; line-height: 1.625rem; } /* 18px */
+.myds-body-medium, .myds-body { font-size: 1rem; line-height: 1.5rem; } /* 16px */
+.myds-body-small { font-size: 0.875rem; line-height: 1.25rem; } /* 14px */
+
+/* ============================================================================
+   MYDS GRID SYSTEM
+   ============================================================================ */
+
+.myds-container {
+    max-width: var(--myds-container-max-width);
+    margin: 0 auto;
+    padding: 0 var(--myds-grid-gap-desktop);
+}
+
+@media (max-width: 1023px) {
+    .myds-container {
+        padding: 0 var(--myds-grid-gap-tablet);
+    }
+}
+
+@media (max-width: 767px) {
+    .myds-container {
+        padding: 0 var(--myds-grid-gap-mobile);
+    }
+}
+
+/* ============================================================================
+   MYDS BUTTON COMPONENTS
+   ============================================================================ */
+
+.btn-myds-primary {
+    background-color: var(--myds-primary);
+    border-color: var(--myds-primary);
+    color: var(--myds-white);
+    font-family: var(--myds-font-body);
+    font-weight: 500;
+    padding: 12px 24px;
+    border-radius: var(--myds-radius-md);
+    transition: all 0.2s ease;
+    min-height: 48px; /* WCAG touch target */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 2px solid var(--myds-primary);
+}
+
+.btn-myds-primary:hover,
+.btn-myds-primary:focus {
+    background-color: #1d4ed8;
+    border-color: #1d4ed8;
+    color: var(--myds-white);
+    transform: translateY(-1px);
+    box-shadow: var(--myds-shadow-lg);
+}
+
+.btn-myds-primary:active {
+    background-color: #1e40af;
+    border-color: #1e40af;
+    transform: translateY(0);
+    box-shadow: var(--myds-shadow-md);
+}
+
+.btn-myds-primary:disabled,
+.btn-myds-primary.disabled {
+    background-color: var(--myds-gray-300);
+    border-color: var(--myds-gray-300);
+    color: var(--myds-gray-500);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-myds-secondary {
+    background-color: transparent;
+    border-color: var(--myds-primary);
+    color: var(--myds-primary);
+    font-family: var(--myds-font-body);
+    font-weight: 500;
+    padding: 12px 24px;
+    border-radius: var(--myds-radius-md);
+    transition: all 0.2s ease;
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 2px solid var(--myds-primary);
+}
+
+.btn-myds-secondary:hover,
+.btn-myds-secondary:focus {
+    background-color: var(--myds-primary);
+    border-color: var(--myds-primary);
+    color: var(--myds-white);
+    transform: translateY(-1px);
+    box-shadow: var(--myds-shadow-lg);
+}
+
+/* Button sizes */
+.btn-myds-sm {
+    min-height: 40px;
+    padding: 8px 16px;
+    font-size: 0.875rem;
+}
+
+.btn-myds-lg {
+    min-height: 56px;
+    padding: 16px 32px;
+    font-size: 1.125rem;
+}
+
+/* ============================================================================
+   MYDS FORM COMPONENTS
+   ============================================================================ */
+
+.myds-form-control {
+    font-family: var(--myds-font-body);
+    border: 2px solid var(--myds-gray-300);
+    border-radius: var(--myds-radius-md);
+    padding: 12px 16px;
+    min-height: 48px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    background-color: var(--myds-bg-primary);
+    color: var(--myds-txt-primary);
+}
+
+.myds-form-control:focus {
+    border-color: var(--myds-primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    outline: none;
+}
+
+.myds-form-control:disabled {
+    background-color: var(--myds-gray-100);
+    color: var(--myds-gray-500);
+    cursor: not-allowed;
+}
+
+.myds-form-label {
+    font-family: var(--myds-font-body);
+    font-weight: 500;
+    color: var(--myds-txt-primary);
+    margin-bottom: 8px;
+    display: block;
+}
+
+.myds-form-text {
+    font-family: var(--myds-font-body);
+    font-size: 0.875rem;
+    color: var(--myds-txt-muted);
+    margin-top: 4px;
+}
+
+.myds-form-error {
+    font-family: var(--myds-font-body);
+    font-size: 0.875rem;
+    color: var(--myds-danger);
+    margin-top: 4px;
+}
+
+/* ============================================================================
+   MYDS CARD COMPONENTS
+   ============================================================================ */
+
+.myds-card {
+    background-color: var(--myds-bg-primary);
+    border: 1px solid var(--myds-gray-200);
+    border-radius: var(--myds-radius-lg);
+    box-shadow: var(--myds-shadow-sm);
+    transition: all 0.3s ease;
+}
+
+.myds-card:hover {
+    box-shadow: var(--myds-shadow-md);
+    transform: translateY(-2px);
+}
+
+.myds-card-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--myds-gray-200);
+}
+
+.myds-card-body {
+    padding: 24px;
+}
+
+.myds-card-footer {
+    padding: 16px 24px 20px;
+    border-top: 1px solid var(--myds-gray-200);
+    background-color: var(--myds-bg-secondary);
+}
+
+/* ============================================================================
+   MYDS NAVIGATION COMPONENTS
+   ============================================================================ */
+
+.myds-navbar {
+    background-color: var(--myds-bg-primary);
+    border-bottom: 1px solid var(--myds-gray-200);
+    box-shadow: var(--myds-shadow-sm);
+    padding: 12px 0;
+}
+
+.myds-navbar-brand {
+    font-family: var(--myds-font-heading);
+    font-weight: 600;
+    color: var(--myds-primary);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.myds-navbar-link {
+    font-family: var(--myds-font-body);
+    font-weight: 500;
+    color: var(--myds-txt-secondary);
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: var(--myds-radius-md);
+    transition: all 0.2s ease;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+}
+
+.myds-navbar-link:hover,
+.myds-navbar-link:focus {
+    color: var(--myds-primary);
+    background-color: var(--myds-bg-muted);
+}
+
+.myds-navbar-link.active {
+    color: var(--myds-primary);
+    background-color: var(--myds-bg-muted);
+    font-weight: 600;
+}
+
+/* ============================================================================
+   MYDS ACCESSIBILITY UTILITIES
+   ============================================================================ */
+
+/* MyGOVEA Citizen-Centric: Minimum touch targets */
+.mygovea-accessible {
+    min-height: 48px !important;
+    min-width: 48px !important;
+}
+
+/* WCAG 2.1 Skip Links */
+.myds-skip-link {
+    position: absolute;
+    top: -40px;
+    left: 6px;
+    background: var(--myds-gray-900);
+    color: var(--myds-white);
+    padding: 8px 16px;
+    text-decoration: none;
+    border-radius: var(--myds-radius-md);
+    font-weight: 600;
+    z-index: 1000;
+    transition: top 0.3s;
+}
+
+.myds-skip-link:focus {
+    top: 6px;
+}
+
+/* WCAG 2.1 Focus Indicators */
+.myds-focus-visible:focus-visible,
+*:focus-visible {
+    outline: 3px solid var(--myds-focus-ring);
+    outline-offset: 2px;
+}
+
+/* Screen reader only text */
+.myds-sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+/* ============================================================================
+   MYDS UTILITY CLASSES
+   ============================================================================ */
+
+/* Spacing utilities */
+.myds-space-sm { margin: 8px; }
+.myds-space-md { margin: 16px; }
+.myds-space-lg { margin: 24px; }
+.myds-space-xl { margin: 32px; }
+
+.myds-space-x-sm { margin-left: 8px; margin-right: 8px; }
+.myds-space-x-md { margin-left: 16px; margin-right: 16px; }
+.myds-space-x-lg { margin-left: 24px; margin-right: 24px; }
+
+.myds-space-y-sm { margin-top: 8px; margin-bottom: 8px; }
+.myds-space-y-md { margin-top: 16px; margin-bottom: 16px; }
+.myds-space-y-lg { margin-top: 24px; margin-bottom: 24px; }
+
+/* Text utilities */
+.myds-text-primary { color: var(--myds-txt-primary) !important; }
+.myds-text-secondary { color: var(--myds-txt-secondary) !important; }
+.myds-text-muted { color: var(--myds-txt-muted) !important; }
+.myds-text-success { color: var(--myds-success) !important; }
+.myds-text-danger { color: var(--myds-danger) !important; }
+.myds-text-warning { color: var(--myds-warning) !important; }
+.myds-text-info { color: var(--myds-info) !important; }
+
+/* Background utilities */
+.myds-bg-primary { background-color: var(--myds-bg-primary) !important; }
+.myds-bg-secondary { background-color: var(--myds-bg-secondary) !important; }
+.myds-bg-muted { background-color: var(--myds-bg-muted) !important; }
+
+/* Border utilities */
+.myds-border { border: 1px solid var(--myds-gray-200) !important; }
+.myds-border-primary { border-color: var(--myds-primary) !important; }
+.myds-border-success { border-color: var(--myds-success) !important; }
+.myds-border-danger { border-color: var(--myds-danger) !important; }
+
+/* Radius utilities */
+.myds-rounded-sm { border-radius: var(--myds-radius-sm) !important; }
+.myds-rounded { border-radius: var(--myds-radius-md) !important; }
+.myds-rounded-lg { border-radius: var(--myds-radius-lg) !important; }
+.myds-rounded-xl { border-radius: var(--myds-radius-xl) !important; }
+
+/* Shadow utilities */
+.myds-shadow-sm { box-shadow: var(--myds-shadow-sm) !important; }
+.myds-shadow { box-shadow: var(--myds-shadow-md) !important; }
+.myds-shadow-lg { box-shadow: var(--myds-shadow-lg) !important; }
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
+
+/* Mobile-first responsive breakpoints following MYDS 12-8-4 grid */
+@media (max-width: 767px) {
+    /* Mobile: 4-column grid */
+    h1, .myds-h1 { font-size: 1.875rem; line-height: 2.25rem; }
+    h2, .myds-h2 { font-size: 1.5rem; line-height: 2rem; }
+
+    .myds-container {
+        padding: 0 18px;
+    }
+
+    .btn-myds-lg {
+        min-height: 48px;
+        padding: 12px 24px;
+        font-size: 1rem;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+    /* Tablet: 8-column grid */
+    .myds-container {
+        padding: 0 24px;
+    }
+}
+
+@media (min-width: 1024px) {
+    /* Desktop: 12-column grid */
+    .myds-container {
+        padding: 0 24px;
+    }
+}
+
+/* RTL Support for Arabic/Jawi languages */
+[dir="rtl"] .myds-container {
+    text-align: right;
+}
+
+[dir="rtl"] .myds-navbar-brand {
+    flex-direction: row-reverse;
+}
+
+/* ============================================================================
+   PRINT STYLES
+   ============================================================================ */
+
+@media print {
+    .myds-navbar,
+    .myds-skip-link,
+    .btn,
+    .myds-card:hover {
+        box-shadow: none !important;
+        transform: none !important;
+    }
+
+    .myds-card {
+        border: 1px solid #000 !important;
+        page-break-inside: avoid; /* Fallback for older browsers */
+        break-inside: avoid; /* Modern browsers */
+        -moz-break-inside: avoid; /* Firefox */
+    }
+
+    a[href]:after {
+        content: " (" attr(href) ")";
+        font-size: 0.8em;
+        color: #666;
+    }
+}
