@@ -11,7 +11,7 @@ class EnsureTestDatabaseExists extends Command
 
     protected $description = 'Create the test database if it does not exist';
 
-    public function handle()
+    public function handle(): int
     {
         $testDbName = Config::get('database.connections.mysql_test.database', 'motac_irms_test');
         $host       = Config::get('database.connections.mysql_test.host', '127.0.0.1');
@@ -20,11 +20,11 @@ class EnsureTestDatabaseExists extends Command
         $port       = Config::get('database.connections.mysql_test.port', 3306);
 
         try {
-            $pdo = new \PDO("mysql:host=$host;port=$port", $username, $password);
-            $pdo->exec("CREATE DATABASE IF NOT EXISTS `$testDbName` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;");
-            $this->info("Test database '$testDbName' ensured.");
-        } catch (\Exception $e) {
-            $this->error('Failed to create test database: ' . $e->getMessage());
+            $pdo = new \PDO(sprintf('mysql:host=%s;port=%s', $host, $port), $username, $password);
+            $pdo->exec(sprintf('CREATE DATABASE IF NOT EXISTS `%s` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;', $testDbName));
+            $this->info(sprintf("Test database '%s' ensured.", $testDbName));
+        } catch (\Exception $exception) {
+            $this->error('Failed to create test database: '.$exception->getMessage());
 
             return 1;
         }

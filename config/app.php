@@ -125,7 +125,7 @@ return [
     */
     'providers' => collect(ServiceProvider::defaultProviders()->toArray())
         // Remove the default Laravel translation provider so our custom provider works.
-        ->reject(fn ($provider) => $provider === Illuminate\Translation\TranslationServiceProvider::class)
+        ->reject(fn ($provider): bool => $provider === Illuminate\Translation\TranslationServiceProvider::class)
         ->merge([
             Livewire\LivewireServiceProvider::class,
             App\Providers\AppServiceProvider::class,
