@@ -82480,7 +82480,7 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! jquery */ "jquery");
 /* harmony import */ var datatables_net__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! datatables.net */ "./node_modules/datatables.net/js/dataTables.mjs");
-/*! FixedHeader 4.0.2
+/*! FixedHeader 4.0.3
  * © SpryMedia Ltd - datatables.net/license
  */
 
@@ -82495,7 +82495,7 @@ let $ = jquery__WEBPACK_IMPORTED_MODULE_0__;
  * @summary     FixedHeader
  * @description Fix a table's header or footer, so it is always visible while
  *              scrolling
- * @version     4.0.2
+ * @version     4.0.3
  * @author      SpryMedia Ltd
  * @contact     datatables.net
  *
@@ -82563,20 +82563,41 @@ var FixedHeader = function (dt, config) {
 		tfoot: $(dt.table().footer()),
 		header: {
 			host: null,
+			scrollAdjust: null,
 			floating: null,
-			floatingParent: $('<div class="dtfh-floatingparent"><div></div></div>'),
+			floatingParent: $(
+				'<div class="dtfh-floatingparent">' + // location
+					'<div class="dtfh-floating-limiter">' + // hidden overflow / scrolling
+						'<div></div>' + // adjustment for scrollbar (padding)
+					'</div>' + 
+				'</div>'),
+			limiter: null,
 			placeholder: null
 		},
 		footer: {
 			host: null,
+			scrollAdjust: null,
 			floating: null,
-			floatingParent: $('<div class="dtfh-floatingparent"><div></div></div>'),
+			floatingParent: $(
+				'<div class="dtfh-floatingparent">' +
+					'<div class="dtfh-floating-limiter">' +
+						'<div></div>' +
+					'</div>' + 
+				'</div>'),
+			limiter: null,
 			placeholder: null
 		}
 	};
 
-	this.dom.header.host = this.dom.thead.parent();
-	this.dom.footer.host = this.dom.tfoot.parent();
+	var dom = this.dom;
+
+	dom.header.host = dom.thead.parent();
+	dom.header.limiter = dom.header.floatingParent.children();
+	dom.header.scrollAdjust = dom.header.limiter.children();
+
+	dom.footer.host = dom.tfoot.parent();
+	dom.footer.limiter = dom.footer.floatingParent.children();
+	dom.footer.scrollAdjust = dom.footer.limiter.children();
 
 	var dtSettings = dt.settings()[0];
 	if (dtSettings._fixedHeader) {
@@ -82807,7 +82828,6 @@ $.extend(FixedHeader.prototype, {
 					itemDom.placeholder.remove();
 				}
 
-				itemDom.floating.children().detach();
 				itemDom.floating.remove();
 			}
 
@@ -82826,8 +82846,6 @@ $.extend(FixedHeader.prototype, {
 			itemDom.floatingParent
 				.css({
 					width: scrollBody[0].offsetWidth,
-					overflow: 'hidden',
-					height: 'fit-content',
 					position: 'fixed',
 					left: scrollEnabled
 						? tableNode.offset().left + scrollBody.scrollLeft()
@@ -82851,7 +82869,16 @@ $.extend(FixedHeader.prototype, {
 				)
 				.appendTo('body')
 				.children()
-				.eq(0)
+				.eq(0);
+
+			itemDom.limiter
+				.css({
+					width: '100%',
+					overflow: 'hidden',
+					height: 'fit-content'
+			});
+
+			itemDom.scrollAdjust
 				.append(itemDom.floating);
 
 			this._stickyPosition(itemDom.floating, '-');
@@ -82859,7 +82886,7 @@ $.extend(FixedHeader.prototype, {
 			var scrollLeftUpdate = function () {
 				var scrollLeft = scrollBody.scrollLeft();
 				that.s.scrollLeft = { footer: scrollLeft, header: scrollLeft };
-				itemDom.floatingParent.scrollLeft(that.s.scrollLeft.header);
+				itemDom.limiter.scrollLeft(that.s.scrollLeft.header);
 			};
 
 			scrollLeftUpdate();
@@ -82867,7 +82894,7 @@ $.extend(FixedHeader.prototype, {
 
 			// Need padding on the header's container to allow for a scrollbar,
 			// just like how DataTables handles it
-			itemDom.floatingParent.children().css({
+			itemDom.scrollAdjust.css({
 				width: 'fit-content',
 				paddingRight: that.s.dt.settings()[0].oBrowser.barWidth
 			});
@@ -82978,6 +83005,7 @@ $.extend(FixedHeader.prototype, {
 	 * @private
 	 */
 	_modeChange: function (mode, item, forceChange) {
+		var dt = this.s.dt;
 		var itemDom = this.dom[item];
 		var position = this.s.position;
 
@@ -83130,6 +83158,8 @@ $.extend(FixedHeader.prototype, {
 		this.s.scrollLeft.header = -1;
 		this.s.scrollLeft.footer = -1;
 		this.s[item + 'Mode'] = mode;
+
+		dt.trigger('fixedheader-mode', [mode, item]);
 	},
 
 	/**
@@ -83502,7 +83532,7 @@ $.extend(FixedHeader.prototype, {
  * @type {String}
  * @static
  */
-FixedHeader.version = '4.0.2';
+FixedHeader.version = '4.0.3';
 
 /**
  * Defaults
@@ -85240,7 +85270,7 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! jquery */ "jquery");
 /* harmony import */ var datatables_net__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! datatables.net */ "./node_modules/datatables.net/js/dataTables.mjs");
-/*! RowGroup 1.5.1
+/*! RowGroup 1.5.2
  * © SpryMedia Ltd - datatables.net/license
  */
 
@@ -85254,7 +85284,7 @@ let $ = jquery__WEBPACK_IMPORTED_MODULE_0__;
 /**
  * @summary     RowGroup
  * @description RowGrouping for DataTables
- * @version     1.5.1
+ * @version     1.5.2
  * @author      SpryMedia Ltd (www.sprymedia.co.uk)
  * @contact     datatables.net
  * @copyright   SpryMedia Ltd.
@@ -85358,10 +85388,17 @@ $.extend(RowGroup.prototype, {
 		var that = this;
 		var dt = this.s.dt;
 		var hostSettings = dt.settings()[0];
+		var scroller = $('div.dt-scroll-body', dt.table().container());
 
 		dt.on('draw.dtrg', function (e, s) {
 			if (that.c.enable && hostSettings === s) {
 				that._draw();
+
+				// Restore scrolling position if set and paging wasn't reset
+				if (scrollTop && scroller.scrollTop()) {
+					scroller.scrollTop(scrollTop);
+					scrollTop = null;
+				}
 			}
 		});
 
@@ -85372,6 +85409,20 @@ $.extend(RowGroup.prototype, {
 		dt.on('destroy', function () {
 			dt.off('.dtrg');
 		});
+
+		// When scrolling is enabled, when adding grouping rows above the scrolling view
+		// port, the browser (both FF and Chrome) will put the element in and adjust the
+		// scrollTop so that it doesn't move the current viewport. This isn't what we
+		// want since prior to the draw the grouping elements were in place, but they then
+		// are removed and reinserted. So we need to shift the scrollTop back to what it
+		// was!
+		var scrollTop = null;
+
+		if (scroller.length) {
+			dt.on('preDraw', function () {
+				scrollTop = scroller.scrollTop();
+			});
+		}
 	},
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -85620,7 +85671,7 @@ RowGroup.defaults = {
 	}
 };
 
-RowGroup.version = '1.5.1';
+RowGroup.version = '1.5.2';
 
 $.fn.dataTable.RowGroup = RowGroup;
 $.fn.DataTable.RowGroup = RowGroup;
@@ -87723,7 +87774,7 @@ $(document).on('i18n.dt.dtSelect preInit.dt.dtSelect', function (e, ctx) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! jquery */ "jquery");
-/*! DataTables 2.3.1
+/*! DataTables 2.3.2
  * © SpryMedia Ltd - datatables.net/license
  */
 
@@ -87802,7 +87853,7 @@ var DataTable = function ( selector, options )
 		_fnCamelToHungarian( defaults.column, defaults.column, true );
 		
 		/* Setting up the initialisation object */
-		_fnCamelToHungarian( defaults, $.extend( oInit, $this.data() ), true );
+		_fnCamelToHungarian( defaults, $.extend( oInit, _fnEscapeObject($this.data()) ), true );
 		
 		
 		
@@ -88232,6 +88283,11 @@ DataTable.ext = _ext = {
 	 */
 	errMode: "alert",
 
+	/** HTML entity escaping */
+	escape: {
+		/** When reading data-* attributes for initialisation options */
+		attributes: false
+	},
 
 	/**
 	 * Legacy so v1 plug-ins don't throw js errors on load
@@ -91703,7 +91759,7 @@ function _fnDetectHeader ( settings, thead, write )
 				if ( write ) {
 					if (unique) {
 						// Allow column options to be set from HTML attributes
-						_fnColumnOptions( settings, shifted, jqCell.data() );
+						_fnColumnOptions( settings, shifted, _fnEscapeObject(jqCell.data()) );
 						
 						// Get the width for the column. This can be defined from the
 						// width attribute, style attribute or `columns.width` option
@@ -91949,7 +92005,7 @@ function _fnBuildAjax( oSettings, data, fn )
 		// to the object for the callback.
 		var empty = {};
 
-		DataTable.util.set(ajax.dataSrc)(empty, []);
+		_fnAjaxDataSrc(oSettings, empty, []);
 		callback(empty);
 	}
 	else {
@@ -93477,9 +93533,11 @@ function _fnSortAttachListener(settings, node, selector, column, callback) {
 		var run = false;
 		var columns = column === undefined
 			? _fnColumnsFromHeader( e.target )
-			: Array.isArray(column)
-				? column
-				: [column];
+			: typeof column === 'function'
+				? column()
+				: Array.isArray(column)
+					? column
+					: [column];
 
 		if ( columns.length ) {
 			for ( var i=0, ien=columns.length ; i<ien ; i++ ) {
@@ -94542,6 +94600,19 @@ function _fnListener(that, name, src) {
 	for (i=0 ; i<src.length ; i++) {
 		that.on(name + '.dt', src[i]);
 	}
+}
+
+/**
+ * Escape HTML entities in strings, in an object
+ */
+function _fnEscapeObject(obj) {
+	if (DataTable.ext.escape.attributes) {
+		$.each(obj, function (key, val) {
+			obj[key] = _escapeHtml(val);
+		})
+	}
+
+	return obj;
 }
 
 
@@ -97889,7 +97960,7 @@ function cleanHeader(node, className) {
  *  @type string
  *  @default Version number
  */
-DataTable.version = "2.3.1";
+DataTable.version = "2.3.2";
 
 /**
  * Private data store, containing all of the settings objects that are

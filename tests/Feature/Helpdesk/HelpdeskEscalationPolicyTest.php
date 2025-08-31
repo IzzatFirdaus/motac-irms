@@ -9,7 +9,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Notification;
-use Mockery;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -42,10 +41,11 @@ class HelpdeskEscalationPolicyTest extends TestCase
             'sla_due_at' => Carbon::now()->subHours(1), // Set SLA due in the past
         ]);
 
-        // Mock the notification service to assert calls
-        $mockNotificationService = Mockery::mock(TicketNotificationService::class);
-        $this->app->instance(TicketNotificationService::class, $mockNotificationService);
+    // Use the real service to perform the escalation so Notification::fake can assert the notification
+    $service = new TicketNotificationService();
+    $service->notifyTicketEscalated($overdueTicket);
 
+<<<<<<< HEAD
         // Expect the escalation notification to be called for the overdue ticket
         $mockNotificationService->shouldReceive('notifyTicketEscalated')
             ->once()
@@ -67,6 +67,9 @@ class HelpdeskEscalationPolicyTest extends TestCase
             // For now, we'll check if a general notification was sent to IT Admin
             return true; // Simplified for now, assumes any notification to IT Admin is for escalation
         });
+=======
+    Notification::assertSentTo($itAdmin, \App\Notifications\TicketEscalatedNotification::class);
+>>>>>>> origin/release/v4.0
     }
 
     /** @test */
@@ -83,6 +86,7 @@ class HelpdeskEscalationPolicyTest extends TestCase
             'sla_due_at' => Carbon::now()->subHours(1),
         ]);
 
+<<<<<<< HEAD
         $mockNotificationService = Mockery::mock(TicketNotificationService::class);
         $this->app->instance(TicketNotificationService::class, $mockNotificationService);
 
@@ -92,6 +96,10 @@ class HelpdeskEscalationPolicyTest extends TestCase
 
         // Simulate the check for overdue tickets
         $service = new TicketNotificationService();
+=======
+    // Use the real service; ensure escalation isn't triggered for closed tickets
+    $service = new TicketNotificationService();
+>>>>>>> origin/release/v4.0
         // This is a simplified check, ideally, your cron job/command would filter this out.
         // But if it still calls the method, the method itself should handle it.
         // For this test, we assert that the _notification_ is not sent if the status is closed
@@ -100,7 +108,7 @@ class HelpdeskEscalationPolicyTest extends TestCase
             $service->notifyTicketEscalated($closedOverdueTicket);
         }
 
-        Notification::assertNotSentTo($itAdmin, \App\Notifications\TicketEscalatedNotification::class); // If you have this specific notification
+    Notification::assertNotSentTo($itAdmin, \App\Notifications\TicketEscalatedNotification::class);
         // Or more generally, ensure no unexpected notifications are sent.
     }
 }
