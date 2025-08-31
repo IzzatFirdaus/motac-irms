@@ -41,10 +41,10 @@ class UserController extends Controller
         // Example Search Functionality
         if ($request->filled('search')) {
             $search = $request->input('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('identification_number', 'like', "%{$search}%");
+            $query->where(function ($q) use ($search): void {
+                $q->where('name', 'like', sprintf('%%%s%%', $search))
+                    ->orWhere('email', 'like', sprintf('%%%s%%', $search))
+                    ->orWhere('identification_number', 'like', sprintf('%%%s%%', $search));
                 // Removed 'motac_email' as per refactoring plan.
             });
         }
@@ -53,15 +53,19 @@ class UserController extends Controller
         if ($request->filled('department_id')) {
             $query->where('department_id', $request->input('department_id'));
         }
+
         if ($request->filled('position_id')) {
             $query->where('position_id', $request->input('position_id'));
         }
+
         if ($request->filled('grade_id')) {
             $query->where('grade_id', $request->input('grade_id'));
         }
+
         if ($request->filled('role')) {
             $query->role($request->input('role')); // Assuming role scope is defined in User model
         }
+
         // Removed filtering by 'status' as per refactoring plan, relying on 'is_active' boolean
         // if ($request->filled('status')) {
         //     $query->where('status', $request->input('status'));
@@ -74,7 +78,7 @@ class UserController extends Controller
         $grades      = Grade::orderBy('name', 'asc')->get();
         $roles       = Role::orderBy('name', 'asc')->get();
 
-        return view('admin.users.index', compact('users', 'departments', 'positions', 'grades', 'roles'));
+        return view('admin.users.index', ['users' => $users, 'departments' => $departments, 'positions' => $positions, 'grades' => $grades, 'roles' => $roles]);
     }
 
     /**
@@ -88,7 +92,7 @@ class UserController extends Controller
         $grades      = Grade::orderBy('name', 'asc')->get();
         $roles       = Role::orderBy('name', 'asc')->get();
 
-        return view('admin.users.create', compact('departments', 'positions', 'grades', 'roles'));
+        return view('admin.users.create', ['departments' => $departments, 'positions' => $positions, 'grades' => $grades, 'roles' => $roles]);
     }
 
     /**
@@ -123,6 +127,7 @@ class UserController extends Controller
         if ($request->filled('roles')) {
             $user->assignRole($validatedData['roles']);
         }
+
         Log::info(sprintf('User ID: %d created successfully.', $user->id), ['admin_user_id' => Auth::id()]);
 
         return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
@@ -136,7 +141,7 @@ class UserController extends Controller
         Log::info(sprintf('Admin UserController@show: Displaying user ID: %d.', $user->id), ['admin_user_id' => Auth::id()]);
         $user->load(['department', 'position', 'grade', 'roles']); // Eager load relationships
 
-        return view('admin.users.show', compact('user'));
+        return view('admin.users.show', ['user' => $user]);
     }
 
     /**
@@ -153,7 +158,7 @@ class UserController extends Controller
         // Load current roles for the user
         $userRoles = $user->roles->pluck('name')->toArray();
 
-        return view('admin.users.edit', compact('user', 'departments', 'positions', 'grades', 'roles', 'userRoles'));
+        return view('admin.users.edit', ['user' => $user, 'departments' => $departments, 'positions' => $positions, 'grades' => $grades, 'roles' => $roles, 'userRoles' => $userRoles]);
     }
 
     /**
@@ -188,6 +193,7 @@ class UserController extends Controller
         } else {
             $user->syncRoles([]); // Remove all roles if none are provided
         }
+
         Log::info(sprintf('User ID: %d updated successfully.', $user->id), ['admin_user_id' => Auth::id()]);
 
         return redirect()->route('admin.users.show', $user)->with('success', 'User updated successfully.');

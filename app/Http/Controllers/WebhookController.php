@@ -46,10 +46,10 @@ class WebhookController extends Controller
             ]);
 
             return response()->json(['message' => 'Webhook call stored.', 'id' => $callId], 201);
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             Log::error('Failed to store webhook call.', [
-                'error'   => $e->getMessage(),
-                'trace'   => substr($e->getTraceAsString(), 0, 500),
+                'error'   => $throwable->getMessage(),
+                'trace'   => substr($throwable->getTraceAsString(), 0, 500),
                 'payload' => $payload,
             ]);
 

@@ -61,6 +61,7 @@ class UpdateHelpdeskTicketRequest extends FormRequest
         if (isset($input['subject']) && ! isset($input['title'])) {
             $input['title'] = $input['subject'];
         }
+
         if (isset($input['resolution_details']) && ! isset($input['resolution_notes'])) {
             $input['resolution_notes'] = $input['resolution_details'];
         }

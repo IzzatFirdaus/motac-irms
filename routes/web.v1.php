@@ -177,7 +177,7 @@ Route::get('lang/{lang}', [LanguageController::class, 'swap'])
 // specific translation keys for the current locale and return them as JSON.
 // Used to verify that the SuffixedFileLoader and SuffixedTranslator are working
 // and that translation files are being found correctly.
-Route::get('/test-lang', function () {
+Route::get('/test-lang', function (): array {
     return [
         // Checks if the file exists (for Malay locale)
         'loaded_file_ms' => file_exists(resource_path('lang/ms/app_ms.php')),
@@ -196,9 +196,9 @@ Route::get('/test-lang', function () {
 // --------------------------------------------------
 // API Routes (for external integrations and AJAX calls)
 // --------------------------------------------------
-Route::prefix('api')->name('api.')->group(function () {
+Route::prefix('api')->name('api.')->group(function (): void {
     // Helpdesk API routes (for AJAX operations, real-time updates, etc.)
-    Route::middleware(['auth:sanctum'])->group(function () {
+    Route::middleware(['auth:sanctum'])->group(function (): void {
         Route::get('/helpdesk/tickets', [HelpdeskApiController::class, 'index'])->name('helpdesk.tickets.index');
         Route::post('/helpdesk/tickets', [HelpdeskApiController::class, 'store'])->name('helpdesk.tickets.store');
         Route::get('/helpdesk/tickets/{ticket}', [HelpdeskApiController::class, 'show'])->name('helpdesk.tickets.show');
@@ -214,7 +214,7 @@ Route::middleware([
     'auth',
     config('jetstream.auth_session'),
     'verified',
-])->group(function () {
+])->group(function (): void {
 
     // -------------------------
     // Dashboard Routes (role-specific dashboards)
@@ -259,7 +259,7 @@ Route::middleware([
     // -------------------------
     // ICT Equipment Loan Application Routes
     // -------------------------
-    Route::prefix('loan-applications')->name('loan-applications.')->group(function () {
+    Route::prefix('loan-applications')->name('loan-applications.')->group(function (): void {
         // Static routes first (to avoid conflicts with dynamic routes)
         Route::get('/create', LoanApplicationFormLW::class)->name('create');
         Route::get('/my-applications', MyLoanApplicationsIndexLW::class)->name('my-applications.index');
@@ -309,7 +309,7 @@ Route::middleware([
     // -------------------------
     // Approval Workflow System
     // -------------------------
-    Route::prefix('approvals')->name('approvals.')->group(function () {
+    Route::prefix('approvals')->name('approvals.')->group(function (): void {
         Route::get('/', ApprovalDashboardLW::class)
             ->name('dashboard')
             ->middleware(['view_approval_tasks']);
@@ -322,7 +322,7 @@ Route::middleware([
     // -------------------------
     // Admin Resource Management (Restricted Access)
     // -------------------------
-    Route::prefix('admin')->name('admin.')->middleware(['role:Admin|IT Admin'])->group(function () {
+    Route::prefix('admin')->name('admin.')->middleware(['role:Admin|IT Admin'])->group(function (): void {
 
         // Equipment management (full CRUD for admins via controllers)
         Route::resource('equipment', AdminEquipmentController::class)->except(['show']);
@@ -361,7 +361,7 @@ Route::middleware([
     // -------------------------
     // Reports Module (Livewire components + legacy controller reports)
     // -------------------------
-    Route::prefix('reports')->name('reports.')->group(function () {
+    Route::prefix('reports')->name('reports.')->group(function (): void {
         // Livewire report components
         Route::get('/', ReportsIndexLW::class)->name('index');
         Route::get('/equipment-inventory', EquipmentReportLW::class)->name('equipment-inventory');
@@ -378,9 +378,9 @@ Route::middleware([
     // -------------------------
     // Helpdesk Module (Support Ticket System)
     // -------------------------
-    Route::prefix('helpdesk')->name('helpdesk.')->group(function () {
+    Route::prefix('helpdesk')->name('helpdesk.')->group(function (): void {
         // Admin/IT Admin/Helpdesk Agent routes (must come before catch-all routes)
-        Route::middleware(['role:Admin|IT Admin|Helpdesk Agent'])->group(function () {
+        Route::middleware(['role:Admin|IT Admin|Helpdesk Agent'])->group(function (): void {
             Route::get('/admin/tickets', AdminTicketManagementLW::class)->name('admin.index');
             // Traditional controller routes for ticket management
             Route::resource('/admin/tickets-controller', HelpdeskTicketController::class)
@@ -408,7 +408,7 @@ Route::middleware([
     // -------------------------
     // Human Resource Management (Optional - Alternative to Settings)
     // -------------------------
-    Route::prefix('hr')->name('hr.')->middleware(['role:Admin|HR Admin'])->group(function () {
+    Route::prefix('hr')->name('hr.')->middleware(['role:Admin|HR Admin'])->group(function (): void {
         Route::get('/departments', HRDepartmentsLW::class)->name('departments.index');
         Route::get('/positions', HRPositionsLW::class)->name('positions.index');
         Route::get('/employees', HREmployeeInfoLW::class)->name('employees.index');
@@ -417,7 +417,7 @@ Route::middleware([
     // -------------------------
     // System Settings Panel (Admin Only Access)
     // -------------------------
-    Route::prefix('settings')->name('settings.')->middleware(['role:Admin'])->group(function () {
+    Route::prefix('settings')->name('settings.')->middleware(['role:Admin'])->group(function (): void {
         // Default settings page
         Route::get('/', SettingsUsersIndexLW::class)->name('index');
 
@@ -466,7 +466,7 @@ Route::middleware([
     // -------------------------
     // API Webhook Routes (for external integrations)
     // -------------------------
-    Route::prefix('webhooks')->name('webhooks.')->middleware(['validate.webhook.signature'])->group(function () {
+    Route::prefix('webhooks')->name('webhooks.')->middleware(['validate.webhook.signature'])->group(function (): void {
         // Webhook endpoints for external system integrations
         Route::post('/equipment-update', [WebhookController::class, 'equipmentUpdate'])->name('equipment.update');
         Route::post('/loan-status-update', [WebhookController::class, 'loanStatusUpdate'])->name('loan.status.update');
@@ -482,7 +482,7 @@ Route::middleware([
 Route::middleware(['auth:sanctum,web', config('jetstream.auth_session'), 'verified'])
     ->prefix('approvals')
     ->name('approvals.')
-    ->group(function () {
+    ->group(function (): void {
         // Static routes first
         Route::get('/tasks', [ApprovalController::class, 'index'])->name('tasks');
 
@@ -500,7 +500,7 @@ Route::middleware(['auth:sanctum,web', config('jetstream.auth_session'), 'verifi
 Route::middleware(['auth:sanctum,web', config('jetstream.auth_session'), 'verified'])
     ->prefix('loan-transactions')
     ->name('loan-transactions.')
-    ->group(function () {
+    ->group(function (): void {
         Route::get('/', [LoanTransactionController::class, 'index'])->name('index');
 
         Route::get('/{loanTransaction}', [LoanTransactionController::class, 'show'])
@@ -511,8 +511,8 @@ Route::middleware(['auth:sanctum,web', config('jetstream.auth_session'), 'verifi
 // --------------------------------------------------
 // Dashboard Controller Routes (Traditional MVC, if still needed)
 // --------------------------------------------------
-Route::middleware(['auth:sanctum,web', config('jetstream.auth_session'), 'verified'])
-    ->group(function () {
+Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])
+    ->group(function (): void {
         // Alternative dashboard routes using controller (if Livewire components are not preferred)
         Route::get('/dashboard-controller', [DashboardController::class, 'index'])->name('dashboard.controller');
         Route::get('/dashboard-controller/admin', [DashboardController::class, 'admin'])

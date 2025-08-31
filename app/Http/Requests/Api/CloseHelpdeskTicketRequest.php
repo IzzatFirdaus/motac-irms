@@ -52,11 +52,9 @@ class CloseHelpdeskTicketRequest extends FormRequest
         // Ensure status is present; controller/service expects an explicit "closed" status
         if (! isset($data['status'])) {
             $data['status'] = HelpdeskTicket::STATUS_CLOSED;
-        } else {
+        } elseif (is_string($data['status'])) {
             // Normalize case to match constants
-            if (is_string($data['status'])) {
-                $data['status'] = strtolower(trim($data['status']));
-            }
+            $data['status'] = strtolower(trim($data['status']));
         }
 
         $this->replace($data);

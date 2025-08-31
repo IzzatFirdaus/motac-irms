@@ -51,17 +51,17 @@ class RecordApprovalDecisionRequest extends FormRequest
             $rules['items_approved']                            = ['required', 'array', 'min:1']; //
             $rules['items_approved.*.loan_application_item_id'] = [ //
                 'required', 'integer',
-                Rule::exists('loan_application_items', 'id')->where(function ($query) use ($approval) {
+                Rule::exists('loan_application_items', 'id')->where(function ($query) use ($approval): void {
                     //
                     $query->where('loan_application_id', $approval->approvable_id); //
                 }),
             ];
             $rules['items_approved.*.quantity_approved'] = [ //
                 'required', 'integer', 'min:0',
-                function ($attribute, $value, $fail) use ($approval) {
+                function ($attribute, $value, $fail) use ($approval): void {
                     //
                     $index                 = explode('.', $attribute)[1]; // Get the array index
-                    $loanApplicationItemId = $this->input("items_approved.{$index}.loan_application_item_id"); //
+                    $loanApplicationItemId = $this->input(sprintf('items_approved.%s.loan_application_item_id', $index)); //
                     $loanAppItem           = $approval->approvable->loanApplicationItems->find($loanApplicationItemId); //
 
                     if ($loanAppItem && $value > $loanAppItem->quantity_requested) { //
@@ -97,7 +97,7 @@ class RecordApprovalDecisionRequest extends FormRequest
         $approval = $this->route('approval');
 
         if ($approval && $approval->approvable instanceof LoanApplication) {
-            foreach ($this->input('items_approved', []) as $index => $item) {
+            foreach ($this->input('items_approved', []) as $item) {
                 $loanApplicationItemId = $item['loan_application_item_id'] ?? null;
                 $loanAppItem           = null;
                 if ($loanApplicationItemId) {
@@ -119,6 +119,7 @@ class RecordApprovalDecisionRequest extends FormRequest
                 $messages['items_approved.'.$loanApplicationItemId.'.quantity_approved.max']      = __('Kuantiti diluluskan untuk :itemType tidak boleh melebihi kuantiti dipohon (:max).', ['itemType' => $itemTypeDisplay, 'max' => $maxQty]); //
             }
         }
+
         // Removed the conditional block for EmailApplication as per the refactoring plan.
         /*
         // Original code snippet from your file (to be removed)

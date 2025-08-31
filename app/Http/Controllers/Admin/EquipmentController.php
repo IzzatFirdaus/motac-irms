@@ -64,13 +64,7 @@ class EquipmentController extends Controller
         $locations         = Location::all(['id', 'name']);
         $departments       = Department::all(['id', 'name']);
 
-        return view('resource-management.equipment-admin.create', compact(
-            'assetTypes',
-            'statuses',
-            'conditionStatuses',
-            'locations',
-            'departments'
-        ));
+        return view('resource-management.equipment-admin.create', ['assetTypes' => $assetTypes, 'statuses' => $statuses, 'conditionStatuses' => $conditionStatuses, 'locations' => $locations, 'departments' => $departments]);
     }
 
     /**
@@ -110,7 +104,7 @@ class EquipmentController extends Controller
         // Load relationships for detailed view
         $equipment->load(['location', 'department', 'currentLoanItem']);
 
-        return view('resource-management.equipment-admin.show', compact('equipment'));
+        return view('resource-management.equipment-admin.show', ['equipment' => $equipment]);
     }
 
     /**
@@ -127,14 +121,7 @@ class EquipmentController extends Controller
         $locations         = Location::all(['id', 'name']);
         $departments       = Department::all(['id', 'name']);
 
-        return view('resource-management.equipment-admin.edit', compact(
-            'equipment',
-            'assetTypes',
-            'statuses',
-            'conditionStatuses',
-            'locations',
-            'departments'
-        ));
+        return view('resource-management.equipment-admin.edit', ['equipment' => $equipment, 'assetTypes' => $assetTypes, 'statuses' => $statuses, 'conditionStatuses' => $conditionStatuses, 'locations' => $locations, 'departments' => $departments]);
     }
 
     /**

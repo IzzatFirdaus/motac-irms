@@ -47,6 +47,7 @@ class StoreHelpdeskTicketRequest extends FormRequest
         if (isset($input['title'])) {
             $input['title'] = trim($input['title']);
         }
+
         if (isset($input['description'])) {
             $input['description'] = trim($input['description']);
         }

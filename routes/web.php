@@ -21,7 +21,6 @@ declare(strict_types=1);
 */
 
 use App\Http\Controllers\ApprovalController;
-
 // --------------------------------------------------
 // Controller Imports (for public/static/some controller routes)
 // --------------------------------------------------
@@ -35,7 +34,6 @@ use App\Http\Controllers\MiscErrorController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ReportController;
 use App\Livewire\Charts\LoanSummaryChart;
-
 // --------------------------------------------------
 // Livewire Component Imports (for all Livewire-based UI)
 // --------------------------------------------------
@@ -108,7 +106,7 @@ Route::get('lang/{lang}', [LanguageController::class, 'swap'])
     ->name('language.swap');
 
 // Test translation system (debug)
-Route::get('/test-lang', function () {
+Route::get('/test-lang', function (): array {
     return [
         'loaded_file_ms'  => file_exists(resource_path('lang/ms/app_ms.php')),
         'loaded_file_en'  => file_exists(resource_path('lang/en/app_en.php')),
@@ -127,7 +125,7 @@ Route::middleware([
     'auth',
     config('jetstream.auth_session'),
     'verified',
-])->group(function () {
+])->group(function (): void {
 
     // -------------------------
     // Dashboard Routes (role-based)
@@ -165,7 +163,7 @@ Route::middleware([
     // -------------------------
     // Loan Applications (Livewire + controller for process/print)
     // -------------------------
-    Route::prefix('loan-applications')->name('loan-applications.')->group(function () {
+    Route::prefix('loan-applications')->name('loan-applications.')->group(function (): void {
         // Store new application (traditional form flow)
         Route::post('/', [LoanApplicationController::class, 'store'])->name('store');
         Route::get('/create', LoanApplicationFormLW::class)->name('create');
@@ -206,7 +204,7 @@ Route::middleware([
     // -------------------------
     // Approval Workflows (Livewire + process endpoints)
     // -------------------------
-    Route::prefix('approvals')->name('approvals.')->group(function () {
+    Route::prefix('approvals')->name('approvals.')->group(function (): void {
         // Use Spatie's built-in permission middleware to avoid alias resolution issues.
         // This ensures the route is accessible only to users with the 'view approval tasks' permission.
         Route::get('/', ApprovalDashboardLW::class)
@@ -236,7 +234,7 @@ Route::middleware([
     // -------------------------
     // ADMIN RESOURCE MANAGEMENT (Livewire only)
     // -------------------------
-    Route::prefix('admin')->name('admin.')->middleware(['role:Admin|IT Admin|BPM Staff'])->group(function () {
+    Route::prefix('admin')->name('admin.')->middleware(['role:Admin|IT Admin|BPM Staff'])->group(function (): void {
         // Equipment management (Livewire)
         Route::get('equipment-items', AdminEquipmentIndexLW::class)->name('equipment.index');
         Route::get('equipment-form', AdminEquipmentFormLW::class)->name('equipment.form');
@@ -259,7 +257,7 @@ Route::middleware([
     // -------------------------
     // Reports (Livewire + legacy controller)
     // -------------------------
-    Route::prefix('reports')->name('reports.')->group(function () {
+    Route::prefix('reports')->name('reports.')->group(function (): void {
         Route::get('/', ReportsIndexLW::class)->name('index');
         Route::get('/equipment-inventory', EquipmentReportLW::class)->name('equipment-inventory');
         Route::get('/loan-applications', LoanApplicationsReportLW::class)->name('loan-applications');
@@ -274,10 +272,12 @@ Route::middleware([
     // -------------------------
     // Helpdesk (Livewire)
     // -------------------------
-    Route::prefix('helpdesk')->name('helpdesk.')->group(function () {
+    Route::prefix('helpdesk')->name('helpdesk.')->group(function (): void {
         // Admin/IT Admin/Helpdesk Agent routes
-        // Note: admin UI route is registered later with explicit auth guards (sanctum,web)
-        // to support both API-token-based tests (Sanctum::actingAs) and session auth.
+        Route::middleware(['role:Admin|IT Admin|Helpdesk Agent'])->group(function (): void {
+            // Ensure route name matches tests: helpdesk.admin.index
+            Route::get('/admin/tickets', AdminTicketManagementLW::class)->name('admin.index');
+        });
         Route::get('/', MyTicketsIndex::class)->name('index');
         Route::get('/create', CreateTicketForm::class)->name('create');
         Route::get('/{ticket}', TicketDetails::class)
@@ -285,8 +285,8 @@ Route::middleware([
             ->whereNumber('ticket');
     });
 
-    // Helpdesk ticket controller web routes (require session auth)
-    Route::prefix('helpdesk')->name('helpdesk.tickets.')->middleware(['auth', 'verified'])->group(function () {
+    // Helpdesk TicketController Web Routes (for controller-based tests)
+    Route::prefix('helpdesk')->name('helpdesk.tickets.')->middleware(['auth', 'verified'])->group(function (): void {
         Route::get('/tickets', [HelpdeskTicketController::class, 'index'])->name('index');
         Route::get('/tickets/create', [HelpdeskTicketController::class, 'create'])->name('create');
         Route::post('/tickets', [HelpdeskTicketController::class, 'store'])->name('store');
@@ -329,7 +329,7 @@ Route::middleware([
     // -------------------------
     // Human Resource (Livewire, optional)
     // -------------------------
-    Route::prefix('hr')->name('hr.')->middleware(['role:Admin|HR Admin'])->group(function () {
+    Route::prefix('hr')->name('hr.')->middleware(['role:Admin|HR Admin'])->group(function (): void {
         Route::get('/departments', HRDepartmentsLW::class)->name('departments.index');
         Route::get('/positions', HRPositionsLW::class)->name('positions.index');
         Route::get('/employees', HREmployeeInfoLW::class)->name('employees.index');
@@ -338,7 +338,7 @@ Route::middleware([
     // -------------------------
     // System Settings (Livewire)
     // -------------------------
-    Route::prefix('settings')->name('settings.')->middleware(['role:Admin'])->group(function () {
+    Route::prefix('settings')->name('settings.')->middleware(['role:Admin'])->group(function (): void {
         Route::get('/', SettingsUsersIndexLW::class)->name('index');
         Route::get('/users', SettingsUsersIndexLW::class)->name('users.index');
         Route::get('/users/create', SettingsUsersCreateLW::class)->name('users.create');
