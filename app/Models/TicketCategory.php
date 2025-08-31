@@ -22,6 +22,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Ticket> $tickets
+ * @property-read int|null $tickets_count
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketCategory newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketCategory newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketCategory query()
+ * @mixin \Eloquent
  */
 class TicketCategory extends Model
 {

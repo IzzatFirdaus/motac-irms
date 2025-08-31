@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Grade Model (Gred Perkhidmatan).
- *
+ * 
  * Represents job grades in the system. Used for user profiles, positions, and approval levels.
  *
  * @property int                             $id
@@ -36,6 +36,28 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\User|null $creator
  * @property-read \App\Models\User|null $updater
  * @property-read \App\Models\User|null $deleter
+ * @method static \Database\Factories\GradeFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade whereIsApproverGrade($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade whereLevel($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade whereMinApprovalGradeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade wherePositionId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade whereServiceScheme($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade withoutTrashed()
+ * @mixin \Eloquent
  */
 class Grade extends Model
 {

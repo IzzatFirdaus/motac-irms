@@ -16,7 +16,7 @@ use Illuminate\Support\Str;
 
 /**
  * Equipment model for ICT inventory.
- *
+ * 
  * Represents an equipment asset, including all core details and relationships.
  *
  * @property int                             $id
@@ -56,6 +56,56 @@ use Illuminate\Support\Str;
  * @property-read \App\Models\EquipmentCategory|null $category
  * @property-read \Illuminate\Support\Carbon|null $warranty_end_date
  * @property-read string|null $specifications
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanTransactionItem> $currentLoanItem
+ * @property-read int|null $current_loan_item_count
+ * @property-read \App\Models\Location|null $definedLocation
+ * @property-read \App\Models\Department|null $department
+ * @property-read \App\Models\EquipmentCategory|null $equipmentCategory
+ * @property-read string $asset_type_label
+ * @property-read string $condition_status_label
+ * @property-read string $status_label
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanTransactionItem> $loanTransactionItems
+ * @property-read int|null $loan_transaction_items_count
+ * @property-read \App\Models\Location|null $location
+ * @property-read \App\Models\SubCategory|null $subCategory
+ * @method static \Database\Factories\EquipmentFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment search(string $term)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereAcquisitionType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereAssetType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereBrand($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereClassification($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereConditionStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereCurrentLocation($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereDepartmentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereEquipmentCategoryId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereFundedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereItemCode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereLocationId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereModel($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereNotes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment wherePurchaseDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment wherePurchasePrice($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereSerialNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereSubCategoryId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereSupplierName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereTagId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereWarrantyExpiryDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment withoutTrashed()
+ * @mixin \Eloquent
  */
 #[ObservedBy(BlameableObserver::class)]
 class Equipment extends Model

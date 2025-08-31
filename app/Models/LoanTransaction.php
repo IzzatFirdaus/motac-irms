@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
 
 /**
  * LoanTransaction Model.
- *
+ * 
  * Represents an equipment issue or return record for a loan application.
  *
  * @property int                              $id
@@ -40,6 +40,32 @@ use Illuminate\Support\Str;
  * @property \Illuminate\Support\Carbon|null  $updated_at
  * @property \Illuminate\Support\Carbon|null  $deleted_at
  * @property \App\Models\LoanApplication|null $loanApplication
+ * @property-read \App\Models\User|null $creator
+ * @property-read \App\Models\User|null $deleter
+ * @property-read string $item_name
+ * @property-read int $quantity
+ * @property-read string $status_color_class
+ * @property-read string $status_label
+ * @property-read string $type_color_class
+ * @property-read string $type_label
+ * @property-read \App\Models\User|null $issuingOfficer
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanTransactionItem> $items
+ * @property-read int|null $items_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanTransactionItem> $loanTransactionItems
+ * @property-read int|null $loan_transaction_items_count
+ * @property-read \App\Models\User|null $receivingOfficer
+ * @property-read LoanTransaction|null $relatedIssueTransaction
+ * @property-read \App\Models\User|null $returnAcceptingOfficer
+ * @property-read \App\Models\User|null $returningOfficer
+ * @property-read \App\Models\User|null $updater
+ * @method static \Database\Factories\LoanTransactionFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction withoutTrashed()
+ * @mixin \Eloquent
  */
 class LoanTransaction extends Model
 {

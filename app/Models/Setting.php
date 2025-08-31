@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Schema;
 
 /**
  * Setting Model.
- *
+ * 
  * Manages application-wide settings, typically as a single row in the database.
  *
  * @property int                             $id
@@ -45,6 +45,37 @@ use Illuminate\Support\Facades\Schema;
  * @property-read \App\Models\User|null $creator
  * @property-read \App\Models\User|null $updater
  * @property-read \App\Models\User|null $deleter
+ * @method static \Database\Factories\SettingFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereApplicationName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereContactUsEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereDefaultLoanPeriodDays($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereDefaultNotificationEmailFrom($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereDefaultNotificationEmailName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereDefaultSystemEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereMaxLoanItemsPerApplication($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereSiteLogoPath($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereSiteName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereSmsApiPassword($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereSmsApiSender($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereSmsApiUsername($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereSystemMaintenanceMessage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereSystemMaintenanceMode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereTermsAndConditionsEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereTermsAndConditionsLoan($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting withoutTrashed()
+ * @mixin \Eloquent
  */
 class Setting extends Model
 {

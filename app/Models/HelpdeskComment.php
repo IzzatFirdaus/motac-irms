@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * HelpdeskComment Model.
- *
+ * 
  * Stores comments on HelpdeskTicket, can be internal or external.
  *
  * @property int    $id
@@ -20,6 +20,18 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int    $user_id
  * @property string $comment
  * @property bool   $is_internal
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\HelpdeskAttachment> $attachments
+ * @property-read int|null $attachments_count
+ * @property-read string $preview
+ * @property-read \App\Models\HelpdeskTicket|null $ticket
+ * @property-read \App\Models\User|null $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment withoutTrashed()
+ * @mixin \Eloquent
  */
 class HelpdeskComment extends Model
 {

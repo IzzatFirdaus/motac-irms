@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * HelpdeskAttachment Model.
- *
+ * 
  * Stores files attached to helpdesk tickets or comments (polymorphic).
  *
  * @property int                             $id
@@ -21,6 +21,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int                             $file_size
  * @property string                          $file_type
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read Model|\Eloquent $attachable
+ * @property-read string $file_url
+ * @property-read string $readable_file_size
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment withoutTrashed()
+ * @mixin \Eloquent
  */
 class HelpdeskAttachment extends Model
 {

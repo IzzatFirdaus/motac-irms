@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * HelpdeskTicket Model.
- *
+ * 
  * Main ticket model for the Helpdesk system.
  *
  * @property int                             $id
@@ -33,6 +33,50 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property int|null $created_by
+ * @property int|null $updated_by
+ * @property int|null $deleted_by
+ * @property-read \App\Models\User $applicant
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\HelpdeskAttachment> $attachments
+ * @property-read int|null $attachments_count
+ * @property-read \App\Models\HelpdeskCategory $category
+ * @property-read \App\Models\User|null $closedBy
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\HelpdeskComment> $comments
+ * @property-read int|null $comments_count
+ * @property-read bool $is_overdue
+ * @property-read string $status_label
+ * @property-read string $subject
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\HelpdeskComment> $latestComment
+ * @property-read int|null $latest_comment_count
+ * @property-read \App\Models\HelpdeskPriority $priority
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket closed()
+ * @method static \Database\Factories\HelpdeskTicketFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket open()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereAssignedToUserId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereCategoryId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereClosedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereClosedById($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket wherePriorityId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereResolutionNotes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereSlaDueAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket whereUserId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket withoutTrashed()
+ * @mixin \Eloquent
  */
 class HelpdeskTicket extends Model
 {
