@@ -89,11 +89,6 @@ class ApprovalService
     /**
      * Compatibility wrapper for older callers named `processApprovalDecision`.
      * Keeps existing behavior by delegating to recordApprovalDecision.
-     *
-     * @param Approval $approval
-     * @param string $decision
-     * @param string|null $notes
-     * @param array $approvalItems
      */
     public function processApprovalDecision(Approval $approval, string $decision, ?User $actor = null, ?string $notes = null, ?array $approvalItems = null): void
     {

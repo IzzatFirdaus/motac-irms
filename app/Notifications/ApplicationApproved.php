@@ -25,7 +25,7 @@ final class ApplicationApproved extends Notification implements ShouldQueue
     {
         $this->application = $application;
         $this->application->loadMissing('user');
-        Log::info('ApplicationApproved notification created for ' . $application::class . sprintf(' ID: %d.', $application->id));
+        Log::info('ApplicationApproved notification created for '.$application::class.sprintf(' ID: %d.', $application->id));
     }
 
     public function getApplication(): LoanApplication // Updated return type
@@ -60,16 +60,16 @@ final class ApplicationApproved extends Notification implements ShouldQueue
 
         $subject = __('Permohonan :appType Anda Diluluskan (#:appId)', ['appType' => $applicationTypeDisplay, 'appId' => $applicationId]);
 
-        return (new MailMessage())
+        return (new MailMessage)
             ->subject($subject)
             ->greeting(__('Assalamualaikum / Salam Sejahtera, :name,', ['name' => $applicantName]))
             ->line(__('Permohonan :appType anda dengan ID #:appId telah **diluluskan** oleh pihak kami.', ['appType' => $applicationTypeDisplay, 'appId' => $applicationId]))
             ->line(__('Butiran permohonan:'))
             ->line(new \Illuminate\Support\HtmlString('<ul>
-                <li><strong>Tujuan:</strong> ' . ($this->application->purpose ?? __('Tidak dinyatakan')) . '</li>
-                <li><strong>Lokasi Penggunaan:</strong> ' . ($this->application->location ?? __('Tidak dinyatakan')) . '</li>
-                <li><strong>Tarikh Pinjaman:</strong> ' . $this->formatDate($this->application->loan_start_date) . '</li>
-                <li><strong>Tarikh Pemulangan:</strong> ' . $this->formatDate($this->application->loan_end_date) . '</li>
+                <li><strong>Tujuan:</strong> '.($this->application->purpose ?? __('Tidak dinyatakan')).'</li>
+                <li><strong>Lokasi Penggunaan:</strong> '.($this->application->location ?? __('Tidak dinyatakan')).'</li>
+                <li><strong>Tarikh Pinjaman:</strong> '.$this->formatDate($this->application->loan_start_date).'</li>
+                <li><strong>Tarikh Pemulangan:</strong> '.$this->formatDate($this->application->loan_end_date).'</li>
             </ul>'))
             ->action(__('Lihat Permohonan Anda'), $this->getActionUrl())
             ->line(__('Sila hubungi Bahagian Pengurusan Maklumat untuk urusan pengambilan peralatan.'));
@@ -101,7 +101,7 @@ final class ApplicationApproved extends Notification implements ShouldQueue
                 try {
                     $applicationUrl = route($routeName, $routeParameters);
                 } catch (\Exception $e) {
-                    Log::error('Error generating URL for ApplicationApproved toArray: ' . $e->getMessage(), [
+                    Log::error('Error generating URL for ApplicationApproved toArray: '.$e->getMessage(), [
                         'exception'        => $e,
                         'application_id'   => $applicationId,
                         'application_type' => $applicationMorphClass,
@@ -133,7 +133,7 @@ final class ApplicationApproved extends Notification implements ShouldQueue
             try {
                 $viewUrl = route($routeName, $routeParameters);
             } catch (\Exception $e) {
-                Log::error('Error generating URL for ApplicationApproved mail: ' . $e->getMessage(), [
+                Log::error('Error generating URL for ApplicationApproved mail: '.$e->getMessage(), [
                     'application_id'   => $this->application->id,
                     'application_type' => $this->application->getMorphClass(),
                 ]);
