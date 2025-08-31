@@ -161,7 +161,7 @@ final class Helpers
         $pow   = min($pow, count($units) - 1);
         $bytes /= (1 << (10 * $pow));
 
-        return round($bytes, $precision) . ' ' . $units[$pow];
+        return round($bytes, $precision).' '.$units[$pow];
     }
 
     /**
@@ -286,7 +286,7 @@ final class Helpers
     {
         // Merge the provided configs into the current config for the request
         foreach ($pageConfigs as $key => $value) {
-            Config::set('custom.custom.' . $key, $value);
+            Config::set('custom.custom.'.$key, $value);
         }
     }
 }

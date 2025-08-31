@@ -36,9 +36,6 @@ class NotificationService
 {
     /**
      * Send a notification instance to a user.
-     *
-    * @param User $user
-    * @param Notification $notification
      */
     public function notifyUser(User $user, Notification $notification): void
     {
@@ -46,7 +43,7 @@ class NotificationService
             $user->notify($notification);
             Log::info("Notification sent to user {$user->id}.");
         } catch (Exception $e) {
-            Log::error("Failed to send notification to user {$user->id}: " . $e->getMessage(), ['exception' => $e]);
+            Log::error("Failed to send notification to user {$user->id}: ".$e->getMessage(), ['exception' => $e]);
         }
     }
 
@@ -102,6 +99,7 @@ class NotificationService
         // If we still don't have a User, bail out safely (shouldn't happen in normal setups)
         if (! $rejecter instanceof User) {
             Log::warning('No rejecter available when notifying application rejection; skipping notification.', ['loan_application_id' => $loanApplication->id ?? null]);
+
             return;
         }
 
@@ -191,6 +189,7 @@ class NotificationService
 
         if (! $loanApplication instanceof LoanApplication) {
             Log::warning('LoanTransaction missing loanApplication when sending overdue notification', ['loan_transaction_id' => $loanTransaction->id ?? null]);
+
             return;
         }
 
