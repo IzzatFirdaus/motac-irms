@@ -71,7 +71,7 @@ final class EquipmentIncidentNotification extends Notification implements Should
         if ($this->incidentItems->isNotEmpty()) { //
             $introLines[] = '---'; //
             foreach ($this->incidentItems as $item) { //
-                if ($item instanceof LoanTransactionItem && $item->equipment instanceof Equipment) { //
+                if ($item->equipment instanceof Equipment) { //
                     // CORRECTED: Changed assetTypeDisplay to the correct accessor 'asset_type_label'
                     $details = sprintf('- **%s** (%s %s) - Tag: %s', $item->equipment->getAssetTypeLabelAttribute(), $item->equipment->brand, $item->equipment->model, $item->equipment->tag_id); //
                     if (! empty($item->item_notes)) { //
@@ -85,7 +85,7 @@ final class EquipmentIncidentNotification extends Notification implements Should
             $introLines[] = '---'; //
         }
 
-        return (new MailMessage()) //
+        return (new MailMessage) //
             ->subject($subject) //
             ->level($this->incidentType === 'lost' ? 'error' : 'warning') //
             ->view('emails.notifications.motac_default_notification', [ //
@@ -104,7 +104,7 @@ final class EquipmentIncidentNotification extends Notification implements Should
             try {
                 return route('loan-applications.show', ['loan_application' => $this->loanApplication->id]); //
             } catch (\Exception $e) {
-                Log::error('Error generating URL for EquipmentIncidentNotification: ' . $e->getMessage()); //
+                Log::error('Error generating URL for EquipmentIncidentNotification: '.$e->getMessage()); //
             }
         }
 
@@ -124,11 +124,12 @@ final class EquipmentIncidentNotification extends Notification implements Should
             $assetType  = null;
             $tagId      = null;
             $serial     = null;
-            if ($item instanceof LoanTransactionItem && $equipment instanceof Equipment) {
+            if ($equipment instanceof Equipment) {
                 $brandModel = trim(sprintf('%s %s', (string) ($equipment->brand ?? ''), (string) ($equipment->model ?? '')));
                 if ($brandModel === '') {
                     $brandModel = __('Peralatan');
                 }
+
                 $assetType = $equipment->getAssetTypeLabelAttribute();
                 $tagId     = $equipment->tag_id;
                 $serial    = $equipment->serial_number;

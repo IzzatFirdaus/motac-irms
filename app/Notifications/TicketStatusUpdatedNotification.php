@@ -44,25 +44,27 @@ class TicketStatusUpdatedNotification extends Notification implements ShouldQueu
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $subject     = "Helpdesk Ticket #{$this->ticket->id} Status Updated to '{$this->ticket->status}'";
-        $greeting    = "Dear {$notifiable->name},";
+        $subject     = sprintf("Helpdesk Ticket #%d Status Updated to '%s'", $this->ticket->id, $this->ticket->status);
+        $greeting    = sprintf('Dear %s,', $notifiable->name);
         $updaterName = $this->updater->name;
 
         $message = '';
         if ($this->recipientType === 'applicant') {
-            $message = "The status of your helpdesk ticket **#{$this->ticket->id}** (`{$this->ticket->title}`) has been updated to **'{$this->ticket->status}'** by `{$updaterName}`.";
+            $message = sprintf("The status of your helpdesk ticket **#%d** (`%s`) has been updated to **'%s'** by `%s`.", $this->ticket->id, $this->ticket->title, $this->ticket->status, $updaterName);
             if ($this->ticket->status === 'closed' && $this->ticket->resolution_notes) {
-                $message .= "\n\nResolution Notes: {$this->ticket->resolution_notes}";
+                $message .= '
+
+Resolution Notes: '.$this->ticket->resolution_notes;
             }
         } elseif ($this->recipientType === 'agent') {
-            $message = "The status of ticket **#{$this->ticket->id}** (`{$this->ticket->title}`) has been updated to **'{$this->ticket->status}'** by `{$updaterName}`.";
+            $message = sprintf("The status of ticket **#%d** (`%s`) has been updated to **'%s'** by `%s`.", $this->ticket->id, $this->ticket->title, $this->ticket->status, $updaterName);
         }
 
-        return (new MailMessage())
+        return (new MailMessage)
             ->subject($subject)
             ->greeting($greeting)
             ->line($message)
-            ->action('View Ticket', url('/helpdesk/' . $this->ticket->id))
+            ->action('View Ticket', url('/helpdesk/'.$this->ticket->id))
             ->line('Thank you.');
     }
 
@@ -78,8 +80,8 @@ class TicketStatusUpdatedNotification extends Notification implements ShouldQueu
             'title'      => $this->ticket->title,
             'status'     => $this->ticket->status,
             'updated_by' => $this->updater->name,
-            'message'    => "Ticket #{$this->ticket->id} status updated to '{$this->ticket->status}'.",
-            'url'        => url('/helpdesk/' . $this->ticket->id),
+            'message'    => sprintf("Ticket #%d status updated to '%s'.", $this->ticket->id, $this->ticket->status),
+            'url'        => url('/helpdesk/'.$this->ticket->id),
         ];
     }
 }

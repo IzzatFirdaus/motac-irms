@@ -44,7 +44,7 @@ class AppServiceProvider extends ServiceProvider
          * Register the SuffixedTranslator as the default translator.
          * This enables support for language files like forms_en.php, forms_ms.php, etc.
          */
-        $this->app->singleton('translator', function ($app) {
+        $this->app->singleton('translator', function (array $app): \App\Translation\SuffixedTranslator {
             $loader = $app['translation.loader'];
             $locale = $app['config']['app.locale'];
 
@@ -78,7 +78,7 @@ class AppServiceProvider extends ServiceProvider
         try {
             Carbon::setLocale(App::getLocale());
         } catch (\Exception $exception) {
-            Log::error('AppServiceProvider: Failed to set Carbon locale: ' . $exception->getMessage());
+            Log::error('AppServiceProvider: Failed to set Carbon locale: '.$exception->getMessage());
             Carbon::setLocale(config('app.fallback_locale', 'en'));
         }
 

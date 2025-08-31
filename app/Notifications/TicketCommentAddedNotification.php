@@ -47,25 +47,25 @@ class TicketCommentAddedNotification extends Notification implements ShouldQueue
         $ticket        = $this->comment->ticket;
         $commenterName = $this->commenter->name;
 
-        $subject     = "New Comment on Helpdesk Ticket #{$ticket->id}";
-        $greeting    = "Dear {$notifiable->name},";
+        $subject     = 'New Comment on Helpdesk Ticket #'.$ticket->id;
+        $greeting    = sprintf('Dear %s,', $notifiable->name);
         $messageLine = '';
 
         if ($this->recipientType === 'applicant') {
-            $messageLine = "A new comment has been added to your helpdesk ticket **#{$ticket->id}** (`{$ticket->title}`) by `{$commenterName}`.";
+            $messageLine = sprintf('A new comment has been added to your helpdesk ticket **#%d** (`%s`) by `%s`.', $ticket->id, $ticket->title, $commenterName);
         } elseif ($this->recipientType === 'agent') {
-            $messageLine = "A new comment has been added to ticket **#{$ticket->id}** (`{$ticket->title}`) by `{$commenterName}`.";
+            $messageLine = sprintf('A new comment has been added to ticket **#%d** (`%s`) by `%s`.', $ticket->id, $ticket->title, $commenterName);
         } elseif ($this->recipientType === 'internal_admin') {
-            $subject     = "Internal Comment on Helpdesk Ticket #{$ticket->id}";
-            $messageLine = "An internal comment has been added to ticket **#{$ticket->id}** (`{$ticket->title}`) by `{$commenterName}`.";
+            $subject     = 'Internal Comment on Helpdesk Ticket #'.$ticket->id;
+            $messageLine = sprintf('An internal comment has been added to ticket **#%d** (`%s`) by `%s`.', $ticket->id, $ticket->title, $commenterName);
         }
 
-        return (new MailMessage())
+        return (new MailMessage)
             ->subject($subject)
             ->greeting($greeting)
             ->line($messageLine)
-            ->line("Comment: \"{$this->comment->comment}\"")
-            ->action('View Ticket', url('/helpdesk/' . $ticket->id))
+            ->line(sprintf('Comment: "%s"', $this->comment->comment))
+            ->action('View Ticket', url('/helpdesk/'.$ticket->id))
             ->line('Thank you.');
     }
 
@@ -80,8 +80,8 @@ class TicketCommentAddedNotification extends Notification implements ShouldQueue
             'ticket_id'      => $this->comment->ticket_id,
             'comment_id'     => $this->comment->id,
             'commenter_name' => $this->commenter->name,
-            'message'        => "New comment on ticket #{$this->comment->ticket_id}.",
-            'url'            => url('/helpdesk/' . $this->comment->ticket_id),
+            'message'        => sprintf('New comment on ticket #%d.', $this->comment->ticket_id),
+            'url'            => url('/helpdesk/'.$this->comment->ticket_id),
         ];
     }
 }
