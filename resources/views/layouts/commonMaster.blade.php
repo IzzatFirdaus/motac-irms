@@ -17,6 +17,8 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport"
+    {{-- Skip link for keyboard and assistive technology users (WCAG / MYDS) --}}
+    <a class="myds-skip-link" href="#main-content">{{ __('Langkau ke kandungan utama') }}</a>
         content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
     <meta name="color-scheme" content="light dark" />
 

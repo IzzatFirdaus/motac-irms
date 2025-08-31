@@ -44,11 +44,21 @@
     $finalClasses = trim("{$baseClasses} {$variantClasses} {$sizeClasses}");
 @endphp
 
-<button {{ $attributes->merge([
-    'type' => 'submit',
-    'class' => $finalClasses,
-    'style' => 'min-height: 48px; border-radius: 8px;'
-]) }}>
+@php
+    // Ensure disabled state is reflected for assistive tech
+    $isDisabled = $attributes->get('disabled') ?? false;
+    $buttonAttributes = $attributes->except(['variant', 'size'])->merge([
+        'type' => $attributes->get('type', 'submit'),
+        'class' => $finalClasses,
+        'style' => ($attributes->get('style', '') ? $attributes->get('style') . ';' : '') . 'min-height: 48px; border-radius: 8px;'
+    ]);
+
+    if ($isDisabled) {
+        $buttonAttributes = $buttonAttributes->merge(['aria-disabled' => 'true']);
+    }
+@endphp
+
+<button {{ $buttonAttributes }}>
     {{ $slot }}
 </button>
 
