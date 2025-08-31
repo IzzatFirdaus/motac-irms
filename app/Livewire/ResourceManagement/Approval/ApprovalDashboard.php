@@ -114,8 +114,8 @@ class ApprovalDashboard extends Component
             $query->where(function ($q) use ($searchTermLower): void {
                 $q->whereHasMorph('approvable', [LoanApplication::class], function ($morphQuery) use ($searchTermLower): void {
                     $morphQuery->whereHas('user', function ($userQuery) use ($searchTermLower): void {
-                        $userQuery->whereRaw('LOWER(name) LIKE ?', ['%' . $searchTermLower . '%'])
-                            ->orWhereRaw('LOWER(email) LIKE ?', ['%' . $searchTermLower . '%']);
+                        $userQuery->whereRaw('LOWER(name) LIKE ?', ['%'.$searchTermLower.'%'])
+                            ->orWhereRaw('LOWER(email) LIKE ?', ['%'.$searchTermLower.'%']);
                     });
                 });
                 // Extend this block if you add search for helpdesk_ticket
@@ -124,9 +124,9 @@ class ApprovalDashboard extends Component
 
         // Order: latest pending first
         $query->orderByRaw("CASE
-            WHEN status = '" . Approval::STATUS_PENDING . "' THEN 1
-            WHEN status = '" . Approval::STATUS_APPROVED . "' THEN 2
-            WHEN status = '" . Approval::STATUS_REJECTED . "' THEN 3
+            WHEN status = '".Approval::STATUS_PENDING."' THEN 1
+            WHEN status = '".Approval::STATUS_APPROVED."' THEN 2
+            WHEN status = '".Approval::STATUS_REJECTED."' THEN 3
             ELSE 4
         END")
             ->orderBy('created_at', 'desc');
@@ -160,8 +160,8 @@ class ApprovalDashboard extends Component
             if ($approvalTask->approvable instanceof LoanApplication) {
                 foreach ($approvalTask->approvable->loanApplicationItems as $item) {
                     $equipmentName = $item->equipment
-                        ? trim(($item->equipment->brand ?? '') . ' ' . ($item->equipment->model ?? '')) . (
-                            $item->equipment->tag_id ? ' (' . $item->equipment->tag_id . ')' : ''
+                        ? trim(($item->equipment->brand ?? '').' '.($item->equipment->model ?? '')).(
+                            $item->equipment->tag_id ? ' ('.$item->equipment->tag_id.')' : ''
                         )
                         : ($item->equipment_type ? $item->equipment_type : 'Item');
 
@@ -258,11 +258,11 @@ class ApprovalDashboard extends Component
         if ($this->approvalDecision === Approval::STATUS_APPROVED && $this->currentApprovalTask?->approvable instanceof LoanApplication) {
             foreach ($this->approvalItems as $index => $item) {
                 $maxQty                                              = $item['requested_quantity'];
-                $rules['approvalItems.' . $index . '.quantity_approved'] = [
+                $rules['approvalItems.'.$index.'.quantity_approved'] = [
                     'required',
                     'integer',
                     'min:0',
-                    'max:' . $maxQty,
+                    'max:'.$maxQty,
                 ];
             }
         }
@@ -287,10 +287,10 @@ class ApprovalDashboard extends Component
             foreach ($this->approvalItems as $index => $item) {
                 $itemTypeDisplay                                                 = $item['equipment_name'] ?? 'Item';
                 $maxQty                                                          = $item['requested_quantity'];
-                $messages['approvalItems.' . $index . '.quantity_approved.required'] = __('approvals.validation.quantity_required', ['itemType' => $itemTypeDisplay]);
-                $messages['approvalItems.' . $index . '.quantity_approved.integer']  = __('approvals.validation.quantity_integer', ['itemType' => $itemTypeDisplay]);
-                $messages['approvalItems.' . $index . '.quantity_approved.min']      = __('approvals.validation.quantity_min', ['itemType' => $itemTypeDisplay]);
-                $messages['approvalItems.' . $index . '.quantity_approved.max']      = __('approvals.validation.quantity_max', ['itemType' => $itemTypeDisplay, 'max' => $maxQty]);
+                $messages['approvalItems.'.$index.'.quantity_approved.required'] = __('approvals.validation.quantity_required', ['itemType' => $itemTypeDisplay]);
+                $messages['approvalItems.'.$index.'.quantity_approved.integer']  = __('approvals.validation.quantity_integer', ['itemType' => $itemTypeDisplay]);
+                $messages['approvalItems.'.$index.'.quantity_approved.min']      = __('approvals.validation.quantity_min', ['itemType' => $itemTypeDisplay]);
+                $messages['approvalItems.'.$index.'.quantity_approved.max']      = __('approvals.validation.quantity_max', ['itemType' => $itemTypeDisplay, 'max' => $maxQty]);
             }
         }
 
@@ -319,7 +319,7 @@ class ApprovalDashboard extends Component
             try {
                 return route($routeName, $routeParams);
             } catch (\Exception $e) {
-                Log::error('Error generating getViewApplicationRoute: ' . $e->getMessage(), ['routeName' => $routeName, 'params' => $routeParams]);
+                Log::error('Error generating getViewApplicationRoute: '.$e->getMessage(), ['routeName' => $routeName, 'params' => $routeParams]);
 
                 return null;
             }

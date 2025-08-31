@@ -65,7 +65,7 @@ class OutstandingLoans extends Component
             ->where('status', LoanApplication::STATUS_APPROVED);
 
         if ($this->searchTerm !== '' && $this->searchTerm !== '0') {
-            $searchTerm = '%' . $this->searchTerm . '%';
+            $searchTerm = '%'.$this->searchTerm.'%';
             $query->where(function ($subQuery) use ($searchTerm): void {
                 $subQuery->where('id', 'like', $searchTerm)
                     ->orWhere('purpose', 'like', $searchTerm)

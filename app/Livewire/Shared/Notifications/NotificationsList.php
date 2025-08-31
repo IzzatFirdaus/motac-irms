@@ -43,7 +43,7 @@ class NotificationsList extends Component
             ->where('notifiable_type', Auth::user() ? get_class(Auth::user()) : null);
 
         if ($this->search !== '' && $this->search !== '0') {
-            $query->where('data', 'like', '%' . $this->search . '%');
+            $query->where('data', 'like', '%'.$this->search.'%');
         }
 
         return $query->orderByDesc('created_at')->paginate(10);

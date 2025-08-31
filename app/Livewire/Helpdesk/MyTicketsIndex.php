@@ -64,8 +64,8 @@ class MyTicketsIndex extends Component
             ->with(['category', 'priority', 'assignedTo'])
             ->when($this->search, function ($query): void {
                 $query->where(function ($q): void {
-                    $q->where('title', 'like', '%' . $this->search . '%')
-                        ->orWhere('description', 'like', '%' . $this->search . '%');
+                    $q->where('title', 'like', '%'.$this->search.'%')
+                        ->orWhere('description', 'like', '%'.$this->search.'%');
                 });
             })
             ->when($this->status, function ($query): void {

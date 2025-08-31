@@ -64,8 +64,8 @@ class UserActivityReport extends Component
             ->with(['department', 'roles'])
             ->when($this->searchTerm, function ($q): void {
                 $q->where(function ($subQuery): void {
-                    $subQuery->where('name', 'like', '%' . $this->searchTerm . '%')
-                        ->orWhere('email', 'like', '%' . $this->searchTerm . '%');
+                    $subQuery->where('name', 'like', '%'.$this->searchTerm.'%')
+                        ->orWhere('email', 'like', '%'.$this->searchTerm.'%');
                 });
             })
             ->when($this->filterDepartmentId, function ($q): void {

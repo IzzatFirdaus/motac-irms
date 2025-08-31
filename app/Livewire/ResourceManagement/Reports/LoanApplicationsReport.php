@@ -38,8 +38,8 @@ class LoanApplicationsReport extends Component
 
         if ($this->search !== '' && $this->search !== '0') {
             $query->where(function ($q): void {
-                $q->where('application_number', 'like', '%' . $this->search . '%')
-                    ->orWhere('purpose', 'like', '%' . $this->search . '%');
+                $q->where('application_number', 'like', '%'.$this->search.'%')
+                    ->orWhere('purpose', 'like', '%'.$this->search.'%');
             });
         }
 

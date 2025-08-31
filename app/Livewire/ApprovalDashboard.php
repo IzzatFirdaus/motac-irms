@@ -108,7 +108,7 @@ class ApprovalDashboard extends Component
 
         // Search
         if ($this->searchTerm !== '') {
-            $searchTerm = '%' . trim($this->searchTerm) . '%';
+            $searchTerm = '%'.trim($this->searchTerm).'%';
             $query->where(function (Builder $q) use ($searchTerm): void {
                 $q->whereHasMorph('approvable', [LoanApplication::class], function (Builder $morphQuery) use ($searchTerm): void {
                     $morphQuery->where('application_no', 'like', $searchTerm)
@@ -220,7 +220,7 @@ class ApprovalDashboard extends Component
             $this->dispatch('toastr', type: 'error', message: __('Anda tidak dibenarkan untuk tindakan ini.'));
         } catch (Throwable $e) {
             Log::error('ApprovalDashboard: Error submitting decision.', ['exception' => $e, 'user_id' => $user?->id]);
-            $this->dispatch('toastr', type: 'error', message: __('Gagal merekodkan keputusan: ') . $e->getMessage());
+            $this->dispatch('toastr', type: 'error', message: __('Gagal merekodkan keputusan: ').$e->getMessage());
         }
     }
 

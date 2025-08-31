@@ -39,9 +39,9 @@ class EquipmentReport extends Component
 
         if ($this->search !== '' && $this->search !== '0') {
             $query->where(function ($q): void {
-                $q->where('tag_id', 'like', '%' . $this->search . '%')
-                    ->orWhere('brand', 'like', '%' . $this->search . '%')
-                    ->orWhere('model', 'like', '%' . $this->search . '%');
+                $q->where('tag_id', 'like', '%'.$this->search.'%')
+                    ->orWhere('brand', 'like', '%'.$this->search.'%')
+                    ->orWhere('model', 'like', '%'.$this->search.'%');
             });
         }
 

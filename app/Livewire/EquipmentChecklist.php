@@ -187,7 +187,7 @@ class EquipmentChecklist extends Component
      */
     private function populateFormFromTransaction(): void
     {
-        if (!$this->loanTransaction instanceof \App\Models\LoanTransaction) {
+        if (! $this->loanTransaction instanceof \App\Models\LoanTransaction) {
             return;
         }
 
@@ -226,7 +226,7 @@ class EquipmentChecklist extends Component
     public function getAvailableEquipmentProperty(): Collection
     {
         if (! $this->loanApplication instanceof \App\Models\LoanApplication || $this->transactionType !== 'issue') {
-            return new Collection();
+            return new Collection;
         }
 
         // Get equipment types requested in the application
@@ -252,7 +252,7 @@ class EquipmentChecklist extends Component
     public function getOnLoanEquipmentProperty(): Collection
     {
         if (! $this->loanApplication instanceof \App\Models\LoanApplication || $this->transactionType !== 'return') {
-            return new Collection();
+            return new Collection;
         }
 
         // Get equipment currently on loan for this application
@@ -364,7 +364,7 @@ class EquipmentChecklist extends Component
                 'loanApplicationId' => $this->loanApplicationId,
             ]);
 
-            $errorMessage = __('Gagal menyimpan transaksi: ') . $e->getMessage();
+            $errorMessage = __('Gagal menyimpan transaksi: ').$e->getMessage();
             session()->flash('error', $errorMessage);
             $this->dispatch('swal:error', ['message' => $errorMessage]);
         }

@@ -82,7 +82,7 @@ class EquipmentReport extends Component
         ]);
 
         if ($this->searchTerm !== '' && $this->searchTerm !== '0') {
-            $search = '%' . strtolower($this->searchTerm) . '%';
+            $search = '%'.strtolower($this->searchTerm).'%';
             $query->where(function ($q) use ($search): void {
                 $q->whereRaw('LOWER(tag_id) LIKE ?', [$search])
                     ->orWhereRaw('LOWER(serial_number) LIKE ?', [$search])

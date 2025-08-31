@@ -68,7 +68,7 @@ class IssuedLoans extends Component
 
         // Search by application ID, applicant name, tag ID, or serial number.
         if ($this->searchTerm !== '' && $this->searchTerm !== '0') {
-            $search = '%' . strtolower($this->searchTerm) . '%';
+            $search = '%'.strtolower($this->searchTerm).'%';
             $query->where(function ($q) use ($search): void {
                 $q->where('id', 'like', $search)
                     ->orWhereHas('user', function ($sq) use ($search): void {

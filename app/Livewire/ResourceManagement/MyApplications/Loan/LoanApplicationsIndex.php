@@ -88,8 +88,8 @@ class LoanApplicationsIndex extends Component
 
         if ($this->searchTerm !== '' && $this->searchTerm !== '0') {
             $query->where(function ($q): void {
-                $q->where('application_number', 'like', '%' . $this->searchTerm . '%')
-                    ->orWhere('purpose', 'like', '%' . $this->searchTerm . '%');
+                $q->where('application_number', 'like', '%'.$this->searchTerm.'%')
+                    ->orWhere('purpose', 'like', '%'.$this->searchTerm.'%');
             });
         }
 
@@ -174,14 +174,14 @@ class LoanApplicationsIndex extends Component
             $this->closeApprovalActionModal();
             $this->resetPage();
         } catch (AuthorizationException $e) {
-            Log::error('Authorization error performing approval action: ' . $e->getMessage(), [
+            Log::error('Authorization error performing approval action: '.$e->getMessage(), [
                 'user_id'        => Auth::id(),
                 'application_id' => $this->selectedApplicationId,
                 'action_type'    => $this->approvalActionType,
             ]);
             $this->dispatch('toastr', type: 'error', message: 'Anda tidak mempunyai kebenaran untuk melakukan tindakan ini.');
         } catch (Throwable $e) {
-            Log::error('Error performing approval action for loan application: ' . $e->getMessage(), [
+            Log::error('Error performing approval action for loan application: '.$e->getMessage(), [
                 'user_id'        => Auth::id(),
                 'application_id' => $this->selectedApplicationId,
                 'action_type'    => $this->approvalActionType,
@@ -215,11 +215,11 @@ class LoanApplicationsIndex extends Component
             $this->authorize('delete', $application);
             $application->delete();
 
-            $this->dispatch('toastr', type: 'success', message: 'Permohonan draf #' . $id . ' telah berjaya dipadam.');
+            $this->dispatch('toastr', type: 'success', message: 'Permohonan draf #'.$id.' telah berjaya dipadam.');
         } catch (AuthorizationException $e) {
             $this->dispatch('toastr', type: 'error', message: 'Anda tidak mempunyai kebenaran untuk memadam permohonan ini.');
         } catch (\Exception $e) {
-            Log::error('Failed to delete loan application: ' . $e->getMessage());
+            Log::error('Failed to delete loan application: '.$e->getMessage());
             $this->dispatch('toastr', type: 'error', message: 'Gagal memadam permohonan tersebut.');
         }
     }

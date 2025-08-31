@@ -117,7 +117,7 @@ class ApprovalHistory extends Component
             })
             // Advanced search functionality
             ->when($this->search, function ($query): void {
-                $searchTerm = '%' . strtolower($this->search) . '%';
+                $searchTerm = '%'.strtolower($this->search).'%';
                 $query->where(function ($q) use ($searchTerm): void {
                     // Search within the polymorphic approvable relationship
                     $q->whereHasMorph(

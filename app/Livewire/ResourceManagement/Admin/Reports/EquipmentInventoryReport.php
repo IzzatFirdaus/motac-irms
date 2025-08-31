@@ -84,11 +84,11 @@ class EquipmentInventoryReport extends Component
             ->when($this->filterCategoryId, fn ($q) => $q->where('category_id', $this->filterCategoryId))
             ->when($this->searchTerm, function ($q): void {
                 $q->where(function ($subQuery): void {
-                    $subQuery->where('tag_id', 'like', '%' . $this->searchTerm . '%')
-                        ->orWhere('serial_number', 'like', '%' . $this->searchTerm . '%')
-                        ->orWhere('model', 'like', '%' . $this->searchTerm . '%')
-                        ->orWhere('brand', 'like', '%' . $this->searchTerm . '%')
-                        ->orWhere('item_code', 'like', '%' . $this->searchTerm . '%');
+                    $subQuery->where('tag_id', 'like', '%'.$this->searchTerm.'%')
+                        ->orWhere('serial_number', 'like', '%'.$this->searchTerm.'%')
+                        ->orWhere('model', 'like', '%'.$this->searchTerm.'%')
+                        ->orWhere('brand', 'like', '%'.$this->searchTerm.'%')
+                        ->orWhere('item_code', 'like', '%'.$this->searchTerm.'%');
                 });
             })
             ->orderBy($this->sortBy, $this->sortDirection);

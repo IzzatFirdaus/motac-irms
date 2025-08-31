@@ -152,7 +152,7 @@ class EmployeeInfo extends Component
             DB::commit();
         } catch (Exception $exception) {
             DB::rollBack();
-            Log::error('Error storing timeline: ' . $exception->getMessage(), ['exception' => $exception]);
+            Log::error('Error storing timeline: '.$exception->getMessage(), ['exception' => $exception]);
             session()->flash('toastr', ['type' => 'error', 'message' => __('Gagal menyimpan rekod sejarah pekerjaan.')]);
         }
 

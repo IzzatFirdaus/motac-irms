@@ -269,7 +269,7 @@ class LoanRequestForm extends Component
             $this->dispatch('swal:error', ['message' => 'Sila semak semula borang.']);
             throw $e;
         } catch (Throwable $e) {
-            $this->dispatch('swal:error', ['message' => 'Gagal menghantar permohonan pinjaman: ' . $e->getMessage()]);
+            $this->dispatch('swal:error', ['message' => 'Gagal menghantar permohonan pinjaman: '.$e->getMessage()]);
         }
 
         return redirect()->route('loan-applications.index');
@@ -280,7 +280,7 @@ class LoanRequestForm extends Component
      */
     private function fillFormWithLoanApplicationData(): void
     {
-        if (!$this->loanApplication instanceof \App\Models\LoanApplication) {
+        if (! $this->loanApplication instanceof \App\Models\LoanApplication) {
             return;
         }
 

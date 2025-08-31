@@ -62,7 +62,7 @@ class PositionsIndex extends Component
     {
         $this->authorize('viewAny', Position::class);
         $this->gradeOptions    = Grade::orderBy('name')->pluck('name', 'id')->all();
-        $this->editingPosition = new Position();
+        $this->editingPosition = new Position;
     }
 
     /**
@@ -87,9 +87,9 @@ class PositionsIndex extends Component
     {
         $query = Position::with('grade:id,name')
             ->when($this->search, function ($q): void {
-                $q->where('name', 'like', '%' . $this->search . '%')
+                $q->where('name', 'like', '%'.$this->search.'%')
                     ->orWhereHas('grade', function ($q): void {
-                        $q->where('name', 'like', '%' . $this->search . '%');
+                        $q->where('name', 'like', '%'.$this->search.'%');
                     });
             });
 
@@ -249,7 +249,7 @@ class PositionsIndex extends Component
         $this->grade_id        = null;
         $this->description     = '';
         $this->is_active       = true;
-        $this->editingPosition = new Position();
+        $this->editingPosition = new Position;
         $this->isEditMode      = false;
         $this->resetErrorBag();
         $this->resetValidation();
