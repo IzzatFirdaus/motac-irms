@@ -138,10 +138,12 @@ class AdminUserSeeder extends Seeder
                 if (! $user->hasRole('Admin')) {
                     $user->assignRole('Admin');
                 }
+
                 if (! $user->hasRole('BPM Staff')) {
                     $user->assignRole('BPM Staff');
                 }
-                Log::info("AdminUserSeeder: Ensured {$user->email} has both Admin and BPM Staff roles.");
+
+                Log::info(sprintf('AdminUserSeeder: Ensured %s has both Admin and BPM Staff roles.', $user->email));
             }
 
             Log::info(sprintf(

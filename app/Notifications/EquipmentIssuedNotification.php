@@ -49,7 +49,7 @@ final class EquipmentIssuedNotification extends Notification implements ShouldQu
             ->view('emails.loan-application-issued', [
                 'loanApplication' => $this->loanApplication,
                 // The view expects a collection of transactions, so we wrap our single transaction.
-                'issueTransactions' => $this->issueTransaction ? collect([$this->issueTransaction]) : collect([]), // Handle nullable
+                'issueTransactions' => $this->issueTransaction instanceof \App\Models\LoanTransaction ? collect([$this->issueTransaction]) : collect([]), // Handle nullable
             ]);
     }
 

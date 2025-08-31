@@ -48,8 +48,6 @@ class EquipmentStatusBadge extends Component
                 $this->badgeClass = 'text-bg-danger';
                 break;
             case Equipment::STATUS_RETIRED:
-                $this->badgeClass = 'text-bg-secondary';
-                break;
             default:
                 $this->badgeClass = 'text-bg-secondary';
                 break;

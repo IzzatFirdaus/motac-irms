@@ -7,14 +7,14 @@ use Illuminate\Notifications\Notification;
 
 class SupportPendingApprovalNotification extends Notification
 {
-    protected $loanApplication;
+    protected \App\Models\LoanApplication $loanApplication;
 
     public function __construct(LoanApplication $loanApplication)
     {
         $this->loanApplication = $loanApplication;
     }
 
-    public function via($notifiable)
+    public function via($notifiable): array
     {
         return ['mail', 'database'];
     }

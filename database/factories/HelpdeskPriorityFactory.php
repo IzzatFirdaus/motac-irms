@@ -28,6 +28,7 @@ class HelpdeskPriorityFactory extends Factory
             $newUser = User::factory()->create();
             $userIds = [$newUser->id];
         }
+
         $auditUserId = Arr::random($userIds);
 
         // Typical helpdesk priorities for consistency in testing
@@ -39,10 +40,10 @@ class HelpdeskPriorityFactory extends Factory
         ];
         static $usedNames = [];
         $priority         = null;
-        $available        = array_filter($priorityPresets, function ($preset) use ($usedNames) {
+        $available        = array_filter($priorityPresets, function (array $preset) use ($usedNames): bool {
             return ! in_array($preset['name'], $usedNames);
         });
-        if (! empty($available)) {
+        if ($available !== []) {
             $priority = $this->faker->randomElement($available);
         } else {
             // If all default names are used, generate a unique name
@@ -52,6 +53,7 @@ class HelpdeskPriorityFactory extends Factory
                 'color_code' => $this->faker->hexColor,
             ];
         }
+
         $usedNames[] = $priority['name'];
 
         // Use a static Malaysian faker for realism and speed
@@ -87,7 +89,8 @@ class HelpdeskPriorityFactory extends Factory
         if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $deleterId = ! empty($userIds) ? Arr::random($userIds) : null;
+
+        $deleterId = empty($userIds) ? null : Arr::random($userIds);
 
         return $this->state([
             'deleted_at' => now(),

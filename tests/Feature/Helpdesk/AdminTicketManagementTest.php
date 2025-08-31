@@ -29,7 +29,7 @@ class AdminTicketManagementTest extends TestCase
     }
 
     /** @test */
-    public function only_it_admins_or_admins_can_view_ticket_management_page()
+    public function only_it_admins_or_admins_can_view_ticket_management_page(): void
     {
         $admin = User::factory()->create(['email_verified_at' => now()]);
         $admin->assignRole('Admin');
@@ -71,7 +71,7 @@ class AdminTicketManagementTest extends TestCase
     }
 
     /** @test */
-    public function it_admin_can_update_ticket_status_and_assignment()
+    public function it_admin_can_update_ticket_status_and_assignment(): void
     {
         $itAdmin = User::factory()->create();
         $itAdmin->assignRole('IT Admin');
@@ -105,7 +105,7 @@ class AdminTicketManagementTest extends TestCase
     }
 
     /** @test */
-    public function assigned_agent_can_update_their_assigned_ticket_status()
+    public function assigned_agent_can_update_their_assigned_ticket_status(): void
     {
         $applicant = User::factory()->create();
         $agent     = User::factory()->create();
@@ -136,7 +136,7 @@ class AdminTicketManagementTest extends TestCase
     }
 
     /** @test */
-    public function it_admin_can_filter_tickets()
+    public function it_admin_can_filter_tickets(): void
     {
         $itAdmin = User::factory()->create();
         $itAdmin->assignRole('IT Admin');

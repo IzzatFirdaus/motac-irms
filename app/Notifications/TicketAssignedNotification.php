@@ -42,11 +42,11 @@ class TicketAssignedNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject("Helpdesk Ticket #{$this->ticket->id} Assigned to You")
-            ->greeting("Dear {$notifiable->name},")
-            ->line("Helpdesk ticket **#{$this->ticket->id}** (`{$this->ticket->title}`) has been assigned to you by `{$this->assigner->name}`.")
-            ->line("Applicant: {$this->ticket->applicant->name}")
-            ->line("Current Status: {$this->ticket->status}")
+            ->subject(sprintf('Helpdesk Ticket #%d Assigned to You', $this->ticket->id))
+            ->greeting(sprintf('Dear %s,', $notifiable->name))
+            ->line(sprintf('Helpdesk ticket **#%d** (`%s`) has been assigned to you by `%s`.', $this->ticket->id, $this->ticket->title, $this->assigner->name))
+            ->line('Applicant: '.$this->ticket->applicant->name)
+            ->line('Current Status: '.$this->ticket->status)
             ->action('View Ticket', url('/helpdesk/'.$this->ticket->id))
             ->line('Please review the ticket and take necessary action.');
     }
@@ -62,7 +62,7 @@ class TicketAssignedNotification extends Notification implements ShouldQueue
             'ticket_id'   => $this->ticket->id,
             'title'       => $this->ticket->title,
             'assigned_by' => $this->assigner->name,
-            'message'     => "Ticket #{$this->ticket->id} assigned to you.",
+            'message'     => sprintf('Ticket #%d assigned to you.', $this->ticket->id),
             'url'         => url('/helpdesk/'.$this->ticket->id),
         ];
     }

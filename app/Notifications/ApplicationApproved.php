@@ -45,9 +45,10 @@ final class ApplicationApproved extends Notification implements ShouldQueue
         if ($date instanceof Carbon) {
             return $date->format($defaultFormat);
         }
+
         try {
             return Carbon::parse((string) $date)->format($defaultFormat);
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             return __('Tarikh tidak sah');
         }
     }
@@ -82,11 +83,11 @@ final class ApplicationApproved extends Notification implements ShouldQueue
      */
     public function toArray(User $notifiable): array
     {
-        $applicationId          = $this->application->id ?? null;
-        $applicationMorphClass  = $this->application->getMorphClass();
-        $applicationTypeDisplay = __('Permohonan Pinjaman Peralatan ICT'); // Simplified
+        $applicationId         = $this->application->id ?? null;
+        $applicationMorphClass = $this->application->getMorphClass();
+        __('Permohonan Pinjaman Peralatan ICT'); // Simplified
 
-        $applicantName = $this->application->user?->name ?? __('Pemohon');
+        $this->application->user?->name ?? __('Pemohon');
 
         $applicationUrl  = '#';
         $routeName       = '';

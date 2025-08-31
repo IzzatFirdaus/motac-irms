@@ -26,11 +26,13 @@ class HelpdeskTicketFactory extends Factory
     {
         // --- Static caches for related IDs ---
         static $userIds, $categoryIds, $priorityIds;
-        // Always create a user, category, and priority for each ticket to guarantee valid FKs and uniqueness
+        // Always create owner and assigned users.
+        // Prefer existing categories and priorities when available to avoid UNIQUE constraint failures
+        // in tests that explicitly create fixtures (e.g. TestCase setUp).
         $userId           = User::factory()->create()->id;
         $assignedToUserId = User::factory()->create()->id;
-        $categoryId       = HelpdeskCategory::factory()->create()->id;
-        $priorityId       = HelpdeskPriority::factory()->create()->id;
+        $categoryId       = HelpdeskCategory::inRandomOrder()->value('id') ?? HelpdeskCategory::factory()->create()->id;
+        $priorityId       = HelpdeskPriority::inRandomOrder()->value('id') ?? HelpdeskPriority::factory()->create()->id;
 
         // Use a static Malaysian faker for performance and realism
         static $msFaker;

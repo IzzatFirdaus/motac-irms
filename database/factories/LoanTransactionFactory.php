@@ -29,14 +29,15 @@ class LoanTransactionFactory extends Factory
         if (! isset($loanApplicationIds)) {
             $loanApplicationIds = LoanApplication::pluck('id')->all();
         }
+
         if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
 
         // Pick related IDs or null if none exist (should be ensured by seeder)
-        $loanApplicationId = ! empty($loanApplicationIds) ? Arr::random($loanApplicationIds) : null;
-        $officerId         = ! empty($userIds) ? Arr::random($userIds) : null;
-        $otherOfficerId    = ! empty($userIds) ? Arr::random($userIds) : null;
+        $loanApplicationId = empty($loanApplicationIds) ? null : Arr::random($loanApplicationIds);
+        $officerId         = empty($userIds) ? null : Arr::random($userIds);
+        $otherOfficerId    = empty($userIds) ? null : Arr::random($userIds);
 
         // Use a static Malaysian faker for speed and realism
         static $msFaker;
@@ -140,10 +141,11 @@ class LoanTransactionFactory extends Factory
         if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $officerId       = ! empty($userIds) ? Arr::random($userIds) : null;
+
+        $officerId       = empty($userIds) ? null : Arr::random($userIds);
         $accessoriesList = config('motac.loan_accessories_list', ['Adapter Kuasa', 'Tetikus', 'Beg Komputer Riba']);
 
-        return $this->state(function (array $attributes) use ($officerId, $accessoriesList) {
+        return $this->state(function (array $attributes) use ($officerId, $accessoriesList): array {
             $transactionDate = $attributes['transaction_date'] ?? now();
 
             return [
@@ -173,10 +175,11 @@ class LoanTransactionFactory extends Factory
         if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $officerId       = ! empty($userIds) ? Arr::random($userIds) : null;
+
+        $officerId       = empty($userIds) ? null : Arr::random($userIds);
         $accessoriesList = config('motac.loan_accessories_list', ['Adapter Kuasa', 'Tetikus', 'Beg Komputer Riba']);
 
-        return $this->state(function (array $attributes) use ($officerId, $accessoriesList) {
+        return $this->state(function (array $attributes) use ($officerId, $accessoriesList): array {
             $transactionDate = $attributes['transaction_date'] ?? now();
 
             return [
@@ -206,7 +209,8 @@ class LoanTransactionFactory extends Factory
         if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $officerId = ! empty($userIds) ? Arr::random($userIds) : null;
+
+        $officerId = empty($userIds) ? null : Arr::random($userIds);
 
         return $this->state([
             'deleted_at' => now(),

@@ -217,6 +217,7 @@ class GradesSeeder extends Seeder
         if (str_contains($name, 'Menteri')) {
             return 90;
         }
+
         // Arbitrary high level for political appointees
         if (str_contains($name, 'Timbalan Menteri')) {
             return 80;

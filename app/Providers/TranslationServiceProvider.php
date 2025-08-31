@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
 use App\Translation\SuffixedFileLoader;
@@ -32,7 +34,7 @@ class TranslationServiceProvider extends ServiceProvider
      * This method sets up the translation system to use suffixed language files
      * while maintaining compatibility with Laravel's translation features.
      */
-    public function register()
+    public function register(): void
     {
         // Register the custom translation file loader that supports suffixed files
         $this->registerTranslationLoader();
@@ -47,16 +49,19 @@ class TranslationServiceProvider extends ServiceProvider
      * This FileLoader will attempt to load files using the suffixed convention (e.g. app_en.php)
      * and gracefully fallback to the standard convention (e.g. app.php) if the suffixed file is not found.
      */
-    protected function registerTranslationLoader()
+    protected function registerTranslationLoader(): void
     {
-        $this->app->singleton('translation.loader', function ($app) {
+        $this->app->singleton('translation.loader', function (): \App\Translation\SuffixedFileLoader {
             try {
                 // Use our custom loader which supports suffixed files
-                return new SuffixedFileLoader($app['files'], $app['path.lang']);
-            } catch (\Exception $e) {
+                $files    = $this->app['files'];
+                $langPath = $this->app['path.lang'];
+
+                return new SuffixedFileLoader($files, $langPath);
+            } catch (\Exception $exception) {
                 // Log error and provide fallback
-                Log::error('Failed to initialize translation loader: '.$e->getMessage());
-                throw new \RuntimeException('Translation system initialization failed. Please check your language files.', 0, $e);
+                Log::error('Failed to initialize translation loader: '.$exception->getMessage());
+                throw new \RuntimeException('Translation system initialization failed. Please check your language files.', 0, $exception);
             }
         });
     }
@@ -67,33 +72,27 @@ class TranslationServiceProvider extends ServiceProvider
      * The SuffixedTranslator extends Laravel's default translator to support
      * automatic locale suffix appending and enhanced fallback behavior.
      */
-    protected function registerSuffixedTranslator()
+    protected function registerSuffixedTranslator(): void
     {
-        $this->app->singleton('translator', function ($app) {
+        $this->app->singleton('translator', function (): \App\Translation\SuffixedTranslator {
             try {
-                $loader = $app['translation.loader'];
-                $locale = $app['config']['app.locale'];
-
-                // Validate locale configuration
-                if (empty($locale)) {
-                    Log::warning('App locale is not configured. Falling back to default.');
-                    $locale = 'en';
-                }
+                $loader = $this->app['translation.loader'];
+                $locale = config('app.locale') ?: 'en';
 
                 // Create and configure the custom translator
                 $translator = new SuffixedTranslator($loader, $locale);
 
                 // Set the fallback locale
-                $fallbackLocale = $app['config']['app.fallback_locale'];
+                $fallbackLocale = config('app.fallback_locale');
                 if (! empty($fallbackLocale)) {
                     $translator->setFallback($fallbackLocale);
                 }
 
                 return $translator;
-            } catch (\Exception $e) {
+            } catch (\Exception $exception) {
                 // Log error and provide emergency fallback
-                Log::error('Failed to initialize suffixed translator: '.$e->getMessage());
-                throw new \RuntimeException('Custom translation system initialization failed.', 0, $e);
+                Log::error('Failed to initialize suffixed translator: '.$exception->getMessage());
+                throw new \RuntimeException('Custom translation system initialization failed.', 0, $exception);
             }
         });
     }
@@ -104,7 +103,7 @@ class TranslationServiceProvider extends ServiceProvider
      * This method is called after all service providers have been registered.
      * It performs any additional setup required for the translation system.
      */
-    public function boot()
+    public function boot(): void
     {
         // Log successful initialization
         if (config('translation.log_missing_keys', true)) {
@@ -129,10 +128,8 @@ class TranslationServiceProvider extends ServiceProvider
 
     /**
      * Get the services provided by the provider.
-     *
-     * @return array
      */
-    public function provides()
+    public function provides(): array
     {
         return [
             'translator',

@@ -32,12 +32,15 @@ return new class extends Migration
             if (Schema::hasColumn('positions', 'grade_id')) {
                 $table->dropForeign(['grade_id']);
             }
+
             if (Schema::hasColumn('positions', 'created_by')) {
                 $table->dropForeign(['created_by']);
             }
+
             if (Schema::hasColumn('positions', 'updated_by')) {
                 $table->dropForeign(['updated_by']);
             }
+
             if (Schema::hasColumn('positions', 'deleted_by')) {
                 $table->dropForeign(['deleted_by']);
             }

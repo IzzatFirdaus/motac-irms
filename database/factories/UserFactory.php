@@ -34,9 +34,11 @@ class UserFactory extends Factory
         if (! isset($departmentIds)) {
             $departmentIds = Department::pluck('id')->all();
         }
+
         if (! isset($gradeIds)) {
             $gradeIds = Grade::pluck('id')->all();
         }
+
         if (! isset($positionIds)) {
             $positionIds = Position::pluck('id')->all();
         }
@@ -55,9 +57,9 @@ class UserFactory extends Factory
         }
 
         // Pick random IDs from cached arrays, fallback to null if empty
-        $departmentId = ! empty($departmentIds) ? Arr::random($departmentIds) : null;
-        $gradeId      = ! empty($gradeIds) ? Arr::random($gradeIds) : null;
-        $positionId   = ! empty($positionIds) ? Arr::random($positionIds) : null;
+        $departmentId = empty($departmentIds) ? null : Arr::random($departmentIds);
+        $gradeId      = empty($gradeIds) ? null : Arr::random($gradeIds);
+        $positionId   = empty($positionIds) ? null : Arr::random($positionIds);
 
         // Use $msFaker for Malaysian names
         $name = $msFaker->name();
@@ -71,23 +73,15 @@ class UserFactory extends Factory
                 // In rare cases optional()->unique() may yield null; ensure a non-null value
                 $passportNumber = \Faker\Factory::create()->bothify('??########');
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             $passportNumber = \Faker\Factory::create()->bothify('??########');
         }
 
         // Safe access to User title options with fallback
-        $titleOptions = defined('App\Models\User::TITLE_ENCIK') ?
+        $titleOptions = defined(\App\Models\User::class.'::TITLE_ENCIK') ?
             (User::$TITLE_OPTIONS ?? [User::TITLE_ENCIK => 'Encik']) :
             ['encik' => 'Encik', 'puan' => 'Puan', 'cik' => 'Cik', 'tuan' => 'Tuan'];
         $titleKey = $faker->randomElement(array_keys($titleOptions));
-
-        // Safe access to User status constants with fallback
-        $statusOptions = [
-            defined('App\Models\User::STATUS_ACTIVE') ? User::STATUS_ACTIVE : 'active',
-            defined('App\Models\User::STATUS_INACTIVE') ? User::STATUS_INACTIVE : 'inactive',
-            defined('App\Models\User::STATUS_SUSPENDED') ? User::STATUS_SUSPENDED : 'suspended',
-            defined('App\Models\User::STATUS_PENDING') ? User::STATUS_PENDING : 'pending',
-        ];
 
         return [
             // Core authentication columns
@@ -128,12 +122,10 @@ class UserFactory extends Factory
     {
         return $this->afterCreating(function (User $user): void {
             // Check if Spatie Permission package is available and user has assignRole method
-            if (class_exists(\Spatie\Permission\Models\Role::class) && method_exists($user, 'assignRole')) {
-                if ($user->roles->isEmpty()) {
-                    $userRole = \Spatie\Permission\Models\Role::where('name', 'User')->first();
-                    if ($userRole) {
-                        $user->assignRole($userRole);
-                    }
+            if (class_exists(\Spatie\Permission\Models\Role::class) && method_exists($user, 'assignRole') && $user->roles->isEmpty()) {
+                $userRole = \Spatie\Permission\Models\Role::where('name', 'User')->first();
+                if ($userRole) {
+                    $user->assignRole($userRole);
                 }
             }
         });
@@ -144,7 +136,7 @@ class UserFactory extends Factory
      */
     public function pending(): static
     {
-        $pendingStatus = defined('App\Models\User::STATUS_PENDING') ? User::STATUS_PENDING : 'pending';
+        $pendingStatus = defined(\App\Models\User::class.'::STATUS_PENDING') ? User::STATUS_PENDING : 'pending';
 
         return $this->state(fn (array $attributes): array => [
             'status' => $pendingStatus,
@@ -156,7 +148,7 @@ class UserFactory extends Factory
      */
     public function asAdmin(): static
     {
-        return $this->afterCreating(function (User $user) {
+        return $this->afterCreating(function (User $user): void {
             if (method_exists($user, 'assignRole')) {
                 $user->assignRole('Admin');
             }
@@ -168,7 +160,7 @@ class UserFactory extends Factory
      */
     public function asBpmStaff(): static
     {
-        return $this->afterCreating(function (User $user) {
+        return $this->afterCreating(function (User $user): void {
             if (method_exists($user, 'assignRole')) {
                 $user->assignRole('BPM Staff');
             }
@@ -180,7 +172,7 @@ class UserFactory extends Factory
      */
     public function asItAdmin(): static
     {
-        return $this->afterCreating(function (User $user) {
+        return $this->afterCreating(function (User $user): void {
             if (method_exists($user, 'assignRole')) {
                 $user->assignRole('IT Admin');
             }
@@ -192,7 +184,7 @@ class UserFactory extends Factory
      */
     public function asApprover(): static
     {
-        return $this->afterCreating(function (User $user) {
+        return $this->afterCreating(function (User $user): void {
             if (method_exists($user, 'assignRole')) {
                 $user->assignRole('Approver');
             }

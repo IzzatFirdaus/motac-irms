@@ -29,6 +29,7 @@ class ApplicationStatusUpdatedNotification extends Notification implements Shoul
             // If missing, associate in-memory for notifications context
             $this->application->setRelation('user', $user);
         }
+
         $this->newStatus = $newStatus;
     }
 

@@ -33,9 +33,11 @@ return new class extends Migration
             if (Schema::hasColumn('notifications', 'created_by')) {
                 $table->dropForeign(['created_by']);
             }
+
             if (Schema::hasColumn('notifications', 'updated_by')) {
                 $table->dropForeign(['updated_by']);
             }
+
             if (Schema::hasColumn('notifications', 'deleted_by')) {
                 $table->dropForeign(['deleted_by']);
             }

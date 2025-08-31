@@ -26,7 +26,7 @@ class HelpdeskEscalationPolicyTest extends TestCase
     }
 
     /** @test */
-    public function overdue_tickets_trigger_escalation_notification_to_it_admins()
+    public function overdue_tickets_trigger_escalation_notification_to_it_admins(): void
     {
         // Create an IT Admin to receive notifications
         $itAdmin = User::factory()->create();
@@ -49,7 +49,7 @@ class HelpdeskEscalationPolicyTest extends TestCase
     }
 
     /** @test */
-    public function closed_tickets_do_not_trigger_escalation()
+    public function closed_tickets_do_not_trigger_escalation(): void
     {
         $itAdmin = User::factory()->create();
         $itAdmin->assignRole('IT Admin');

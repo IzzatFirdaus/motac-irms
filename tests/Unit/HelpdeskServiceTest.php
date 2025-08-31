@@ -46,7 +46,7 @@ class HelpdeskServiceTest extends TestCase
     }
 
     /** @test */
-    public function it_can_create_a_ticket_and_send_notification()
+    public function it_can_create_a_ticket_and_send_notification(): void
     {
         $user     = User::factory()->create();
         $category = HelpdeskCategory::first();
@@ -83,7 +83,7 @@ class HelpdeskServiceTest extends TestCase
     }
 
     /** @test */
-    public function it_can_add_a_comment_and_send_notifications()
+    public function it_can_add_a_comment_and_send_notifications(): void
     {
         $user        = User::factory()->create();
         $ticket      = HelpdeskTicket::factory()->create(['user_id' => $user->id]);
@@ -114,7 +114,7 @@ class HelpdeskServiceTest extends TestCase
     }
 
     /** @test */
-    public function it_can_add_an_internal_comment_and_send_notifications()
+    public function it_can_add_an_internal_comment_and_send_notifications(): void
     {
         $user        = User::factory()->create();
         $ticket      = HelpdeskTicket::factory()->create(['user_id' => $user->id]);
@@ -135,7 +135,7 @@ class HelpdeskServiceTest extends TestCase
     }
 
     /** @test */
-    public function it_can_update_a_ticket_and_send_notifications_on_status_and_assignment_change()
+    public function it_can_update_a_ticket_and_send_notifications_on_status_and_assignment_change(): void
     {
         $user     = User::factory()->create();
         $assignee = User::factory()->create();
@@ -177,7 +177,7 @@ class HelpdeskServiceTest extends TestCase
     }
 
     /** @test */
-    public function it_sets_closed_at_when_status_becomes_closed_and_notifies()
+    public function it_sets_closed_at_when_status_becomes_closed_and_notifies(): void
     {
         $user   = User::factory()->create();
         $ticket = HelpdeskTicket::factory()->create([
@@ -205,7 +205,7 @@ class HelpdeskServiceTest extends TestCase
     }
 
     /** @test */
-    public function it_nullifies_closed_at_when_status_changes_from_closed_and_notifies()
+    public function it_nullifies_closed_at_when_status_changes_from_closed_and_notifies(): void
     {
         $user   = User::factory()->create();
         $ticket = HelpdeskTicket::factory()->create([
@@ -231,7 +231,7 @@ class HelpdeskServiceTest extends TestCase
     }
 
     /** @test */
-    public function it_can_close_a_ticket_and_send_notification()
+    public function it_can_close_a_ticket_and_send_notification(): void
     {
         $user   = User::factory()->create();
         $ticket = HelpdeskTicket::factory()->create([

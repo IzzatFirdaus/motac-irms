@@ -29,7 +29,7 @@ class NotificationFactory extends Factory
         }
 
         // Pick a random user as notifiable (or null if none exist)
-        $notifiableUserId = ! empty($userIds) ? Arr::random($userIds) : null;
+        $notifiableUserId = empty($userIds) ? null : Arr::random($userIds);
 
         // Use a static Malaysian faker for realism and speed
         static $msFaker;
@@ -146,7 +146,8 @@ class NotificationFactory extends Factory
         if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $deleterId = ! empty($userIds) ? Arr::random($userIds) : null;
+
+        $deleterId = empty($userIds) ? null : Arr::random($userIds);
 
         return $this->state([
             'deleted_at' => now(),

@@ -9,10 +9,10 @@ class AddDeletedAtToUsersTable extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         if (! Schema::hasColumn('users', 'deleted_at')) {
-            Schema::table('users', function (Blueprint $table) {
+            Schema::table('users', function (Blueprint $table): void {
                 $table->softDeletes();
             });
         }
@@ -21,10 +21,10 @@ class AddDeletedAtToUsersTable extends Migration
     /**
      * Reverse the migrations.
      */
-    public function down()
+    public function down(): void
     {
         if (Schema::hasColumn('users', 'deleted_at')) {
-            Schema::table('users', function (Blueprint $table) {
+            Schema::table('users', function (Blueprint $table): void {
                 $table->dropSoftDeletes();
             });
         }

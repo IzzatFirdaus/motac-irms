@@ -41,22 +41,22 @@ class TicketCreatedNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $subject = ($this->recipientType === 'applicant')
-            ? "Your Helpdesk Ticket #{$this->ticket->id} Has Been Created"
-            : "New Helpdesk Ticket #{$this->ticket->id} Created";
+            ? sprintf('Your Helpdesk Ticket #%d Has Been Created', $this->ticket->id)
+            : sprintf('New Helpdesk Ticket #%d Created', $this->ticket->id);
 
         $greeting = ($this->recipientType === 'applicant')
-            ? "Dear {$notifiable->name},"
+            ? sprintf('Dear %s,', $notifiable->name)
             : 'Hello,';
 
         $introLine = ($this->recipientType === 'applicant')
-            ? "Your helpdesk ticket **#{$this->ticket->id}** with the subject `{$this->ticket->title}` has been successfully created."
-            : "A new helpdesk ticket **#{$this->ticket->id}** has been submitted by `{$this->ticket->applicant->name}` with the subject `{$this->ticket->title}`.";
+            ? sprintf('Your helpdesk ticket **#%d** with the subject `%s` has been successfully created.', $this->ticket->id, $this->ticket->title)
+            : sprintf('A new helpdesk ticket **#%d** has been submitted by `%s` with the subject `%s`.', $this->ticket->id, $this->ticket->applicant->name, $this->ticket->title);
 
         return (new MailMessage)
             ->subject($subject)
             ->greeting($greeting)
             ->line($introLine)
-            ->line("Description: {$this->ticket->description}")
+            ->line('Description: '.$this->ticket->description)
             ->action('View Ticket', url('/helpdesk/'.$this->ticket->id))
             ->line('Thank you for using our application!');
     }
@@ -73,8 +73,8 @@ class TicketCreatedNotification extends Notification implements ShouldQueue
             'title'     => $this->ticket->title,
             'status'    => $this->ticket->status,
             'message'   => ($this->recipientType === 'applicant')
-                ? "Your helpdesk ticket #{$this->ticket->id} has been created."
-                : "New helpdesk ticket #{$this->ticket->id} submitted.",
+                ? sprintf('Your helpdesk ticket #%d has been created.', $this->ticket->id)
+                : sprintf('New helpdesk ticket #%d submitted.', $this->ticket->id),
             'url' => url('/helpdesk/'.$this->ticket->id),
         ];
     }

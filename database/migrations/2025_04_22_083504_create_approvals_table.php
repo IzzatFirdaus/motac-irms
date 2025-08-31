@@ -53,12 +53,15 @@ return new class extends Migration
             if (Schema::hasColumn('approvals', 'officer_id')) {
                 $table->dropForeign(['officer_id']);
             }
+
             if (Schema::hasColumn('approvals', 'created_by')) {
                 $table->dropForeign(['created_by']);
             }
+
             if (Schema::hasColumn('approvals', 'updated_by')) {
                 $table->dropForeign(['updated_by']);
             }
+
             if (Schema::hasColumn('approvals', 'deleted_by')) {
                 $table->dropForeign(['deleted_by']);
             }

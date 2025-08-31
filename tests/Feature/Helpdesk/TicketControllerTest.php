@@ -32,14 +32,14 @@ class TicketControllerTest extends TestCase
     }
 
     /** @test */
-    public function guest_cannot_access_ticket_routes()
+    public function guest_cannot_access_ticket_routes(): void
     {
         $response = $this->get(route('helpdesk.tickets.index'));
         $response->assertRedirect(route('login'));
     }
 
     /** @test */
-    public function user_can_view_ticket_list()
+    public function user_can_view_ticket_list(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -50,7 +50,7 @@ class TicketControllerTest extends TestCase
     }
 
     /** @test */
-    public function user_can_view_ticket_create_form()
+    public function user_can_view_ticket_create_form(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -61,7 +61,7 @@ class TicketControllerTest extends TestCase
     }
 
     /** @test */
-    public function user_can_create_a_ticket()
+    public function user_can_create_a_ticket(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -91,7 +91,7 @@ class TicketControllerTest extends TestCase
     }
 
     /** @test */
-    public function user_can_view_ticket_details()
+    public function user_can_view_ticket_details(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -104,7 +104,7 @@ class TicketControllerTest extends TestCase
     }
 
     /** @test */
-    public function user_can_update_own_ticket()
+    public function user_can_update_own_ticket(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -131,7 +131,7 @@ class TicketControllerTest extends TestCase
     }
 
     /** @test */
-    public function user_can_delete_own_ticket()
+    public function user_can_delete_own_ticket(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -146,7 +146,7 @@ class TicketControllerTest extends TestCase
     }
 
     /** @test */
-    public function user_cannot_update_others_ticket()
+    public function user_cannot_update_others_ticket(): void
     {
         $user      = User::factory()->create();
         $otherUser = User::factory()->create();
@@ -160,7 +160,7 @@ class TicketControllerTest extends TestCase
     }
 
     /** @test */
-    public function user_cannot_delete_others_ticket()
+    public function user_cannot_delete_others_ticket(): void
     {
         $user      = User::factory()->create();
         $otherUser = User::factory()->create();

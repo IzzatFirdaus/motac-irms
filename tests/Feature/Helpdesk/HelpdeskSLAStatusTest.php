@@ -25,7 +25,7 @@ class HelpdeskSLAStatusTest extends TestCase
     }
 
     /** @test */
-    public function ticket_is_not_overdue_if_sla_due_date_is_in_future()
+    public function ticket_is_not_overdue_if_sla_due_date_is_in_future(): void
     {
         $user   = User::factory()->create();
         $ticket = HelpdeskTicket::factory()->create([
@@ -43,7 +43,7 @@ class HelpdeskSLAStatusTest extends TestCase
     }
 
     /** @test */
-    public function ticket_is_overdue_if_sla_due_date_has_passed_and_status_is_not_closed()
+    public function ticket_is_overdue_if_sla_due_date_has_passed_and_status_is_not_closed(): void
     {
         $user   = User::factory()->create();
         $ticket = HelpdeskTicket::factory()->create([
@@ -64,7 +64,7 @@ class HelpdeskSLAStatusTest extends TestCase
     }
 
     /** @test */
-    public function ticket_is_not_overdue_if_status_is_closed_even_if_sla_due_date_passed()
+    public function ticket_is_not_overdue_if_status_is_closed_even_if_sla_due_date_passed(): void
     {
         $user   = User::factory()->create();
         $ticket = HelpdeskTicket::factory()->create([
@@ -82,7 +82,7 @@ class HelpdeskSLAStatusTest extends TestCase
     }
 
     /** @test */
-    public function ticket_is_not_overdue_if_sla_due_at_is_null()
+    public function ticket_is_not_overdue_if_sla_due_at_is_null(): void
     {
         $user   = User::factory()->create();
         $ticket = HelpdeskTicket::factory()->create([
@@ -100,7 +100,7 @@ class HelpdeskSLAStatusTest extends TestCase
     }
 
     /** @test */
-    public function sla_due_at_is_set_on_ticket_creation()
+    public function sla_due_at_is_set_on_ticket_creation(): void
     {
         $user     = User::factory()->create();
         $category = \App\Models\HelpdeskCategory::first();

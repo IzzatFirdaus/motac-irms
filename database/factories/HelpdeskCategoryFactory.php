@@ -28,6 +28,7 @@ class HelpdeskCategoryFactory extends Factory
             $newUser = User::factory()->create();
             $userIds = [$newUser->id];
         }
+
         $auditUserId = Arr::random($userIds);
 
         // Use static Malaysian faker for realism and speed
@@ -57,7 +58,7 @@ class HelpdeskCategoryFactory extends Factory
         static $usedNames = [];
         $name             = null;
         $available        = array_diff($defaultCategories, $usedNames);
-        if (! empty($available)) {
+        if ($available !== []) {
             $name = $this->faker->randomElement($available);
         } else {
             // If all default names are used, generate a unique name
@@ -65,6 +66,7 @@ class HelpdeskCategoryFactory extends Factory
                 $name = $this->faker->unique()->word.'_'.$this->faker->unique()->randomNumber(5);
             } while (in_array($name, $usedNames));
         }
+
         $usedNames[] = $name;
 
         return [
@@ -106,7 +108,8 @@ class HelpdeskCategoryFactory extends Factory
         if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $deleterId = ! empty($userIds) ? Arr::random($userIds) : null;
+
+        $deleterId = empty($userIds) ? null : Arr::random($userIds);
 
         return $this->state([
             'deleted_at' => now(),

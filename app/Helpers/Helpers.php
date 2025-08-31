@@ -7,7 +7,6 @@ namespace App\Helpers;
 // Model imports for status constants
 use App\Models\Equipment;
 use App\Models\LoanApplication;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
@@ -26,7 +25,6 @@ final class Helpers
         $defaultLocale     = Config::get('app.locale', 'ms');
         $locale            = $isConsole ? $defaultLocale : (Session::has('locale') ? Session::get('locale') : $defaultLocale);
         App::setLocale($locale);
-        $textDirection      = $locale === 'ar' ? 'rtl' : 'ltr';
         $myLayout           = $themeCustomConfig['myLayout']           ?? 'vertical';
         $myTheme            = $themeCustomConfig['myTheme']            ?? 'theme-motac';
         $myStyle            = $themeCustomConfig['myStyle']            ?? 'light';
@@ -169,7 +167,7 @@ final class Helpers
      */
     public static function formattedDate(?string $dateValue, string $formatKey = 'default', string $default = '-'): string
     {
-        if (empty($dateValue)) {
+        if ($dateValue === null || $dateValue === '' || $dateValue === '0') {
             return $default;
         }
 
@@ -183,7 +181,7 @@ final class Helpers
         $format = $formatTemplates[$formatKey] ?? $formatTemplates['default'];
 
         try {
-            return Carbon::parse($dateValue)->translatedFormat($format);
+            return \Carbon\Carbon::parse($dateValue)->translatedFormat($format);
         } catch (\Exception $exception) {
             // Use structured logging to keep lines short and provide context
             Log::error('Error parsing date', [
@@ -202,9 +200,10 @@ final class Helpers
     public static function isActiveRoute(string $route, array $params = []): string
     {
         if (Request::routeIs($route) === true) {
-            if (empty($params)) {
+            if ($params === []) {
                 return 'active';
             }
+
             $routeObj      = Request::route();
             $currentParams = (is_object($routeObj) && method_exists($routeObj, 'parameters')) ? (array) $routeObj->parameters() : [];
             foreach ($params as $key => $value) {

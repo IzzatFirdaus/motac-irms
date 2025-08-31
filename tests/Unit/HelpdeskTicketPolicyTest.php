@@ -22,34 +22,37 @@ class HelpdeskTicketPolicyTest extends TestCase
     }
 
     /** @test */
-    public function admin_can_view_any_tickets()
+    public function admin_can_view_any_tickets(): void
     {
         $admin = User::factory()->create();
         $admin->assignRole('Admin');
+
         $policy = new HelpdeskTicketPolicy;
         $this->assertTrue($policy->viewAny($admin));
     }
 
     /** @test */
-    public function it_admin_can_view_any_tickets()
+    public function it_admin_can_view_any_tickets(): void
     {
         $itAdmin = User::factory()->create();
         $itAdmin->assignRole('IT Admin');
+
         $policy = new HelpdeskTicketPolicy;
         $this->assertTrue($policy->viewAny($itAdmin));
     }
 
     /** @test */
-    public function regular_user_cannot_view_any_tickets_globally()
+    public function regular_user_cannot_view_any_tickets_globally(): void
     {
         $user = User::factory()->create();
         $user->assignRole('User');
+
         $policy = new HelpdeskTicketPolicy;
         $this->assertFalse($policy->viewAny($user));
     }
 
     /** @test */
-    public function applicant_can_view_their_own_ticket()
+    public function applicant_can_view_their_own_ticket(): void
     {
         $user   = User::factory()->create();
         $ticket = HelpdeskTicket::factory()->create(['user_id' => $user->id]);
@@ -58,7 +61,7 @@ class HelpdeskTicketPolicyTest extends TestCase
     }
 
     /** @test */
-    public function user_cannot_view_other_users_ticket()
+    public function user_cannot_view_other_users_ticket(): void
     {
         $user1  = User::factory()->create();
         $user2  = User::factory()->create();
@@ -68,10 +71,11 @@ class HelpdeskTicketPolicyTest extends TestCase
     }
 
     /** @test */
-    public function admin_can_view_any_ticket()
+    public function admin_can_view_any_ticket(): void
     {
         $admin = User::factory()->create();
         $admin->assignRole('Admin');
+
         $user   = User::factory()->create();
         $ticket = HelpdeskTicket::factory()->create(['user_id' => $user->id]);
         $policy = new HelpdeskTicketPolicy;
@@ -79,10 +83,11 @@ class HelpdeskTicketPolicyTest extends TestCase
     }
 
     /** @test */
-    public function it_admin_can_view_any_ticket()
+    public function it_admin_can_view_any_ticket(): void
     {
         $itAdmin = User::factory()->create();
         $itAdmin->assignRole('IT Admin');
+
         $user   = User::factory()->create();
         $ticket = HelpdeskTicket::factory()->create(['user_id' => $user->id]);
         $policy = new HelpdeskTicketPolicy;
@@ -90,7 +95,7 @@ class HelpdeskTicketPolicyTest extends TestCase
     }
 
     /** @test */
-    public function any_user_can_create_a_ticket()
+    public function any_user_can_create_a_ticket(): void
     {
         $user   = User::factory()->create();
         $policy = new HelpdeskTicketPolicy;
@@ -98,10 +103,11 @@ class HelpdeskTicketPolicyTest extends TestCase
     }
 
     /** @test */
-    public function it_admin_can_update_a_ticket()
+    public function it_admin_can_update_a_ticket(): void
     {
         $itAdmin = User::factory()->create();
         $itAdmin->assignRole('IT Admin');
+
         $user   = User::factory()->create();
         $ticket = HelpdeskTicket::factory()->create(['user_id' => $user->id, 'status' => 'open']);
         $policy = new HelpdeskTicketPolicy;
@@ -109,10 +115,11 @@ class HelpdeskTicketPolicyTest extends TestCase
     }
 
     /** @test */
-    public function assigned_agent_can_update_their_assigned_ticket_if_not_closed()
+    public function assigned_agent_can_update_their_assigned_ticket_if_not_closed(): void
     {
         $agent = User::factory()->create();
         $agent->assignRole('IT Admin');
+
         $user   = User::factory()->create();
         $ticket = HelpdeskTicket::factory()->create(['user_id' => $user->id, 'assigned_to_user_id' => $agent->id, 'status' => 'open']);
         $policy = new HelpdeskTicketPolicy;
@@ -120,10 +127,11 @@ class HelpdeskTicketPolicyTest extends TestCase
     }
 
     /** @test */
-    public function assigned_agent_cannot_update_a_closed_ticket()
+    public function assigned_agent_cannot_update_a_closed_ticket(): void
     {
         $agent = User::factory()->create();
         $agent->assignRole('IT Admin');
+
         $user   = User::factory()->create();
         $ticket = HelpdeskTicket::factory()->create(['user_id' => $user->id, 'assigned_to_user_id' => $agent->id, 'status' => 'closed']);
         $policy = new HelpdeskTicketPolicy;
@@ -131,7 +139,7 @@ class HelpdeskTicketPolicyTest extends TestCase
     }
 
     /** @test */
-    public function applicant_cannot_update_their_own_ticket()
+    public function applicant_cannot_update_their_own_ticket(): void
     {
         $user   = User::factory()->create();
         $ticket = HelpdeskTicket::factory()->create(['user_id' => $user->id]);
@@ -140,27 +148,29 @@ class HelpdeskTicketPolicyTest extends TestCase
     }
 
     /** @test */
-    public function admin_can_delete_a_ticket()
+    public function admin_can_delete_a_ticket(): void
     {
         $admin = User::factory()->create();
         $admin->assignRole('Admin');
+
         $ticket = HelpdeskTicket::factory()->create();
         $policy = new HelpdeskTicketPolicy;
         $this->assertTrue($policy->delete($admin, $ticket));
     }
 
     /** @test */
-    public function it_admin_cannot_delete_a_ticket()
+    public function it_admin_cannot_delete_a_ticket(): void
     {
         $itAdmin = User::factory()->create();
         $itAdmin->assignRole('IT Admin');
+
         $ticket = HelpdeskTicket::factory()->create();
         $policy = new HelpdeskTicketPolicy;
         $this->assertFalse($policy->delete($itAdmin, $ticket));
     }
 
     /** @test */
-    public function applicant_can_add_comment_to_their_own_ticket()
+    public function applicant_can_add_comment_to_their_own_ticket(): void
     {
         $user   = User::factory()->create();
         $ticket = HelpdeskTicket::factory()->create(['user_id' => $user->id]);
@@ -169,10 +179,11 @@ class HelpdeskTicketPolicyTest extends TestCase
     }
 
     /** @test */
-    public function assigned_agent_can_add_comment_to_ticket()
+    public function assigned_agent_can_add_comment_to_ticket(): void
     {
         $agent = User::factory()->create();
         $agent->assignRole('IT Admin');
+
         $user   = User::factory()->create();
         $ticket = HelpdeskTicket::factory()->create(['user_id' => $user->id, 'assigned_to_user_id' => $agent->id]);
         $policy = new HelpdeskTicketPolicy;
@@ -180,10 +191,11 @@ class HelpdeskTicketPolicyTest extends TestCase
     }
 
     /** @test */
-    public function it_admin_can_add_comment_to_any_ticket()
+    public function it_admin_can_add_comment_to_any_ticket(): void
     {
         $itAdmin = User::factory()->create();
         $itAdmin->assignRole('IT Admin');
+
         $user   = User::factory()->create();
         $ticket = HelpdeskTicket::factory()->create(['user_id' => $user->id]);
         $policy = new HelpdeskTicketPolicy;

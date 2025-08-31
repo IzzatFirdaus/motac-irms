@@ -22,9 +22,8 @@ class LoanApplicationFactory extends Factory
     public function definition(): array
     {
         // Always ensure at least one user exists for all foreign key columns
-        $user      = User::first() ?: User::factory()->create();
-        $userId    = $user->id;
-        $officerId = $user->id;
+        $user   = User::first() ?: User::factory()->create();
+        $userId = $user->id;
 
         // Use a static Malaysian faker for realism and speed
         static $msFaker;
@@ -107,7 +106,7 @@ class LoanApplicationFactory extends Factory
      */
     public function approved(): static
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes): array {
             return [
                 'status'      => LoanApplication::STATUS_APPROVED ?? 'approved',
                 'approved_at' => now(),
@@ -165,7 +164,7 @@ class LoanApplicationFactory extends Factory
      */
     public function deleted(): static
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes): array {
             return [
                 'deleted_at' => now(),
                 'deleted_by' => $attributes['created_by'] ?? null,
@@ -239,7 +238,7 @@ class LoanApplicationFactory extends Factory
      */
     public function withItems(int $count = 1): static
     {
-        return $this->afterCreating(function (LoanApplication $application) use ($count) {
+        return $this->afterCreating(function (LoanApplication $application) use ($count): void {
             // Ensure related LoanApplicationItemFactory is optimized for bulk if needed
             \App\Models\LoanApplicationItem::factory()
                 ->count($count)

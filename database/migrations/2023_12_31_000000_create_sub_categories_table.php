@@ -20,6 +20,7 @@ return new class extends Migration
                 $table->unsignedBigInteger('equipment_category_id');
                 \Illuminate\Support\Facades\Log::warning('sub_categories table created without equipment_category_id foreign key due to missing equipment_categories table.');
             }
+
             $table->string('name');
             $table->text('description')->nullable();
             $table->boolean('is_active')->default(true);
@@ -37,12 +38,15 @@ return new class extends Migration
             if (Schema::hasColumn('sub_categories', 'equipment_category_id') && Schema::hasTable('equipment_categories')) {
                 $table->dropForeign(['equipment_category_id']);
             }
+
             if (Schema::hasColumn('sub_categories', 'created_by')) {
                 $table->dropForeign(['created_by']);
             }
+
             if (Schema::hasColumn('sub_categories', 'updated_by')) {
                 $table->dropForeign(['updated_by']);
             }
+
             if (Schema::hasColumn('sub_categories', 'deleted_by')) {
                 $table->dropForeign(['deleted_by']);
             }
