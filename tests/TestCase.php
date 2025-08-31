@@ -5,9 +5,9 @@ namespace Tests;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 /**
- * @property \Illuminate\Foundation\Application $app
+ * @property \Illuminate\Foundation\Application   $app
  * @property \Illuminate\Contracts\Console\Kernel $artisan
- * @property string $baseUrl
+ * @property string                               $baseUrl
  */
 abstract class TestCase extends BaseTestCase
 {
@@ -21,30 +21,30 @@ abstract class TestCase extends BaseTestCase
 
         // Only create default helpdesk categories/priorities when they do not already exist
         if (\App\Models\HelpdeskCategory::count() === 0) {
-            \App\Models\HelpdeskCategory::factory()->create(['name' => 'General']);
+            \App\Models\HelpdeskCategory::firstOrCreate(['name' => 'General'], ['is_active' => 1, 'created_by' => 1, 'updated_by' => 1]);
         }
 
         if (\App\Models\HelpdeskPriority::count() === 0) {
-            \App\Models\HelpdeskPriority::factory()->create(['name' => 'Low', 'level' => 1]);
+            \App\Models\HelpdeskPriority::firstOrCreate(['name' => 'Low'], ['level' => 1, 'is_active' => 1, 'created_by' => 1, 'updated_by' => 1]);
         }
 
-            // Ensure required roles and permissions exist for the 'web' guard
-            $roles = ['BPM', 'BPM Staff', 'IT Admin', 'Admin', 'Approver', 'Regular User'];
-            foreach ($roles as $role) {
-                foreach (['web', 'sanctum'] as $guard) {
-                    if (!\Spatie\Permission\Models\Role::where('name', $role)->where('guard_name', $guard)->exists()) {
-                        \Spatie\Permission\Models\Role::create(['name' => $role, 'guard_name' => $guard]);
-                    }
+        // Ensure required roles and permissions exist for the 'web' guard
+        $roles = ['BPM', 'BPM Staff', 'IT Admin', 'Admin', 'Approver', 'Regular User'];
+        foreach ($roles as $role) {
+            foreach (['web', 'sanctum'] as $guard) {
+                if (! \Spatie\Permission\Models\Role::where('name', $role)->where('guard_name', $guard)->exists()) {
+                    \Spatie\Permission\Models\Role::create(['name' => $role, 'guard_name' => $guard]);
                 }
             }
+        }
 
-            $permissions = ['viewAny', 'view helpdesk tickets', 'view settings', 'view reports', 'view loan management', 'App\\Models\\HelpdeskTicket'];
-            foreach ($permissions as $permission) {
-                foreach (['web', 'sanctum'] as $guard) {
-                    if (!\Spatie\Permission\Models\Permission::where('name', $permission)->where('guard_name', $guard)->exists()) {
-                        \Spatie\Permission\Models\Permission::create(['name' => $permission, 'guard_name' => $guard]);
-                    }
+        $permissions = ['viewAny', 'view helpdesk tickets', 'view settings', 'view reports', 'view loan management', 'App\\Models\\HelpdeskTicket'];
+        foreach ($permissions as $permission) {
+            foreach (['web', 'sanctum'] as $guard) {
+                if (! \Spatie\Permission\Models\Permission::where('name', $permission)->where('guard_name', $guard)->exists()) {
+                    \Spatie\Permission\Models\Permission::create(['name' => $permission, 'guard_name' => $guard]);
                 }
             }
+        }
     }
 }

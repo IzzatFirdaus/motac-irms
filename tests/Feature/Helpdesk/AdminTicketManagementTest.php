@@ -6,6 +6,7 @@ use App\Models\HelpdeskCategory;
 use App\Models\HelpdeskPriority;
 use App\Models\HelpdeskTicket;
 use App\Models\User;
+use Laravel\Sanctum\Sanctum;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
@@ -31,19 +32,25 @@ class AdminTicketManagementTest extends TestCase
     /** @test */
     public function only_it_admins_or_admins_can_view_ticket_management_page()
     {
-        $admin = User::factory()->create();
+        $admin = User::factory()->create(['email_verified_at' => now()]);
         $admin->assignRole('Admin');
 
-        $itAdmin = User::factory()->create();
+        $itAdmin = User::factory()->create(['email_verified_at' => now()]);
         $itAdmin->assignRole('IT Admin');
 
-        $user = User::factory()->create();
+        $user = User::factory()->create(['email_verified_at' => now()]);
         $user->assignRole('User');
 
-        $this->actingAs($admin)->get(route('helpdesk.admin.index'))->assertOk();
-        $this->actingAs($itAdmin)->get(route('helpdesk.admin.index'))->assertOk();
-        $this->actingAs($user)->get(route('helpdesk.admin.index'))->assertForbidden(); // Users cannot access
+        Sanctum::actingAs($admin);
+        $this->get(route('helpdesk.admin.tickets'))->assertOk();
+
+        Sanctum::actingAs($itAdmin);
+        $this->get(route('helpdesk.admin.tickets'))->assertOk();
+
+        Sanctum::actingAs($user);
+        $this->get(route('helpdesk.admin.tickets'))->assertForbidden(); // Users cannot access
     }
+
 
     /** @test */
     public function it_admin_can_update_ticket_status_and_assignment()

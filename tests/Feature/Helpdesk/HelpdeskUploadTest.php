@@ -18,8 +18,8 @@ class HelpdeskUploadTest extends TestCase
     {
         parent::setUp();
         Storage::fake('public'); // Mock the storage
-        \App\Models\HelpdeskCategory::factory()->create(['name' => 'General']);
-        \App\Models\HelpdeskPriority::factory()->create(['name' => 'Low', 'level' => 1]);
+    \App\Models\HelpdeskCategory::firstOrCreate(['name' => 'General'], ['is_active' => 1, 'created_by' => 1, 'updated_by' => 1]);
+    \App\Models\HelpdeskPriority::firstOrCreate(['name' => 'Low'], ['level' => 1, 'is_active' => 1, 'created_by' => 1, 'updated_by' => 1]);
     }
 
     /** @test */
@@ -43,7 +43,7 @@ class HelpdeskUploadTest extends TestCase
             ->assertHasErrors(['attachments.0' => 'max']); // Check for max size error on first attachment
 
         $this->assertDatabaseMissing('helpdesk_tickets', ['title' => 'Large File Test']);
-        Storage::disk('public')->assertMissing('helpdesk_attachments/' . $largeFile->hashName());
+        Storage::disk('public')->assertMissing('helpdesk_attachments/'.$largeFile->hashName());
     }
 
     /** @test */
@@ -67,7 +67,7 @@ class HelpdeskUploadTest extends TestCase
             ->assertHasErrors(['attachments.0' => 'mimes']); // Check for mime type error on first attachment
 
         $this->assertDatabaseMissing('helpdesk_tickets', ['title' => 'Unsupported File Test']);
-        Storage::disk('public')->assertMissing('helpdesk_attachments/' . $unsupportedFile->hashName());
+        Storage::disk('public')->assertMissing('helpdesk_attachments/'.$unsupportedFile->hashName());
     }
 
     /** @test */
@@ -86,6 +86,6 @@ class HelpdeskUploadTest extends TestCase
             ->assertHasErrors(['commentAttachments.0' => 'max']);
 
         $this->assertCount(0, $ticket->comments()->where('comment', 'Adding a large attachment.')->get());
-        Storage::disk('public')->assertMissing('helpdesk_attachments/' . $largeFile->hashName());
+        Storage::disk('public')->assertMissing('helpdesk_attachments/'.$largeFile->hashName());
     }
 }
