@@ -18,7 +18,7 @@ use Illuminate\Support\Str;
 
 /**
  * LoanApplication Model.
- *
+ * 
  * Represents a loan application for ICT equipment.
  *
  * @property int                             $id
@@ -47,6 +47,73 @@ use Illuminate\Support\Str;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property int|null $created_by
+ * @property int|null $updated_by
+ * @property int|null $deleted_by
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Approval> $approvals
+ * @property-read int|null $approvals_count
+ * @property-read \App\Models\User|null $approvedBy
+ * @property-read \App\Models\User|null $cancelledBy
+ * @property-read \App\Models\User|null $creator
+ * @property-read \App\Models\User|null $currentApprovalOfficer
+ * @property-read \App\Models\User|null $deleter
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Equipment> $equipment
+ * @property-read int|null $equipment_count
+ * @property-read string|null $effective_return_location
+ * @property-read \App\Models\LoanTransaction|null $latest_issue_transaction
+ * @property-read string $status_color_class
+ * @property-read string $status_label
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanTransaction> $transactions
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanApplicationItem> $items
+ * @property-read int|null $items_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanApplicationItem> $loanApplicationItems
+ * @property-read int|null $loan_application_items_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanTransaction> $loanTransactions
+ * @property-read int|null $loan_transactions_count
+ * @property-read \App\Models\User|null $rejectedBy
+ * @property-read \App\Models\User|null $responsibleOfficer
+ * @property-read \App\Models\User|null $supportingOfficer
+ * @property-read \App\Models\User|null $updater
+ * @property-read \App\Models\User $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication active()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication dueInDays(int $days)
+ * @method static \Database\Factories\LoanApplicationFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication overdue()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereAdminNotes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereApplicantConfirmationTimestamp($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereApprovedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereApprovedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereCancelledAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereCancelledBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereCurrentApprovalOfficerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereCurrentApprovalStage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereLoanEndDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereLoanStartDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereLocation($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication wherePurpose($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereRejectedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereRejectedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereRejectionReason($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereResponsibleOfficerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereReturnLocation($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereSubmittedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereSupportingOfficerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereUserId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication withoutTrashed()
+ * @mixin \Eloquent
  */
 class LoanApplication extends Model
 {

@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * EquipmentCategory Model.
- *
+ * 
  * Represents a type/category of ICT equipment. Used for organizing equipment and subcategories.
  *
  * @property int                             $id
@@ -32,6 +32,25 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\User|null $creator
  * @property-read \App\Models\User|null $updater
  * @property-read \App\Models\User|null $deleter
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EquipmentCategory active()
+ * @method static \Database\Factories\EquipmentCategoryFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EquipmentCategory newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EquipmentCategory newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EquipmentCategory onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EquipmentCategory query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EquipmentCategory whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EquipmentCategory whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EquipmentCategory whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EquipmentCategory whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EquipmentCategory whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EquipmentCategory whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EquipmentCategory whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EquipmentCategory whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EquipmentCategory whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EquipmentCategory whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EquipmentCategory withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EquipmentCategory withoutTrashed()
+ * @mixin \Eloquent
  */
 class EquipmentCategory extends Model
 {

@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Ticket Model (Helpdesk Ticket).
- *
+ * 
  * Represents a helpdesk ticket submitted by users for ICT support.
  *
  * @property int                             $id
@@ -38,6 +38,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\User|null $resolver
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TicketComment> $comments
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TicketAttachment> $attachments
+ * @property-read int|null $attachments_count
+ * @property-read int|null $comments_count
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket withoutTrashed()
+ * @mixin \Eloquent
  */
 class Ticket extends Model
 {
