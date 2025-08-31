@@ -4,7 +4,7 @@
     $customizerHidden = 'customizer-hide';
 @endphp
 
-@extends('layouts.layout-blank')
+@extends('layouts/blankLayout')
 
 @section('title', __('Daftar Akaun Baru'))
 

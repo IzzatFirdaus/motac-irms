@@ -12,196 +12,154 @@
 <!--
   IMPORTANT: Livewire components must have ONE root HTML element.
   This <nav> is the root for this component.
-  MYDS & MyGOVEA Compliant Navigation Bar with improved accessibility
 -->
-<nav class="layout-navbar navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme {{ $containerNav }} {{ $navbarDetachedClass }}"
-     id="layout-navbar"
-     aria-label="{{ __('Navigasi Utama') }}"
-     role="navigation">
-
-    <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
-        <button class="nav-item nav-link px-0 me-xl-4 mygovea-accessible"
-                type="button"
-                aria-label="{{ __('Buka Menu Sisi') }}"
-                title="{{ __('Buka Menu Sisi') }}"
-                aria-expanded="false"
-                aria-controls="layout-menu">
-            <i class="ti ti-menu-2 ti-sm"></i>
+<nav class="myds-navbar-alt {{ $containerNav }} {{ $navbarDetachedClass }}" id="layout-navbar" aria-label="@lang('common.main_title')">
+    <div class="myds-navbar-left">
+        {{-- Hamburger menu for mobile view --}}
+        <button class="myds-navbar-hamburger" aria-label="@lang('common.toggle_sidebar')" title="@lang('common.toggle_sidebar')">
+            <i class="bi bi-list"></i>
         </button>
+        {{-- Brand/Logo --}}
+        <a href="{{ url('/') }}" class="myds-navbar-brand text-decoration-none">
+            <span class="myds-navbar-logo">
+                <img src="{{ asset('assets/img/logo/motac-logo.svg') }}" alt="Logo MOTAC">
+            </span>
+            <span class="heading-xsmall">motac-irms</span>
+            <span class="myds-navbar-ministry d-none d-lg-inline">
+                {{ __('Kementerian Pelancongan, Seni dan Budaya Malaysia') }}
+            </span>
+        </a>
     </div>
-
-    <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
-        {{-- Search --}}
-        <div class="navbar-nav align-items-center">
-            <div class="nav-item navbar-search-wrapper">
-                <label for="navbar-search" class="visually-hidden">{{ __('Cari') }}</label>
-                <input type="search"
-                       class="form-control search-input border-0 mygovea-accessible"
-                       placeholder="{{ __('Cari...') }}"
-                       aria-label="{{ __('Medan Carian') }}"
-                       id="navbar-search"
-                       name="search">
-                <i class="ti ti-search ti-sm search-toggler cursor-pointer"
-                   aria-hidden="true"></i>
+    {{-- Main navigation links (center) --}}
+    <div class="myds-navbar-links d-none d-lg-flex">
+        {{-- Link to My Loan Applications --}}
+        <a href="{{ route('loan-applications.my-applications.index') }}" class="myds-navbar-link">
+            {{ __('Permohonan Pinjaman Saya') }}
+        </a>
+        {{-- Link to Reports --}}
+        <a href="{{ route('reports.index') }}" class="myds-navbar-link">
+            {{ __('Laporan') }}
+        </a>
+    </div>
+    <div class="myds-navbar-right">
+        {{-- Language Switcher Dropdown --}}
+        @if (count($availableLocales) > 1)
+            <div class="myds-navbar-action" tabindex="0">
+                <a href="#" aria-haspopup="true" aria-expanded="false" aria-label="@lang('common.language_selector')" title="@lang('common.language_selector')">
+                    <span class="bi bi-translate"></span>
+                </a>
+                <div class="myds-navbar-dropdown">
+                    @foreach ($availableLocales as $localeKey => $localeData)
+                        <a href="{{ route('language.swap', ['lang' => $localeKey]) }}"
+                           rel="nofollow"
+                           hreflang="{{ $localeKey }}"
+                           class="d-flex align-items-center"
+                           @if(app()->getLocale() === $localeKey) aria-current="true" @endif>
+                            <span class="flag-icon flag-icon-{{ $localeData['flag_code'] }}"></span>
+                            {{ $localeKey === 'ms' ? 'Bahasa Melayu' : 'English' }}
+                            @if(app()->getLocale() === $localeKey)
+                                <i class="bi bi-check-lg ms-2 text-success"></i>
+                            @endif
+                        </a>
+                    @endforeach
+                </div>
             </div>
+        @endif
+
+        {{-- Theme Switcher (toggle icon, not dropdown) --}}
+    <div class="myds-navbar-action" tabindex="0" x-data="{
+                theme: localStorage.getItem('theme') || 'light',
+                toggleTheme() {
+                    this.theme = this.theme === 'light' ? 'dark' : 'light';
+                    localStorage.setItem('theme', this.theme);
+                    document.documentElement.setAttribute('data-bs-theme', this.theme);
+                }
+            }"
+            x-init="document.documentElement.setAttribute('data-bs-theme', theme)">
+            <button type="button"
+                aria-label="@lang('common.toggle_theme')"
+                title="@lang('common.toggle_theme')"
+                @click="toggleTheme()"
+                style="background: none; border: none; padding: 7px 10px; font-size: 1.21em; color: var(--myds-navbar-text);">
+                <i class="bi bi-moon-stars-fill" x-show="theme === 'light'"></i>
+                <i class="bi bi-sun-fill" x-show="theme === 'dark'"></i>
+            </button>
         </div>
-        {{-- /Search --}}
 
-        <ul class="navbar-nav flex-row align-items-center ms-auto">
-            {{-- Language Switcher --}}
-            @if (count($availableLocales) > 1)
-                <li class="nav-item dropdown-language dropdown me-2 me-xl-0">
-                    <button class="nav-link dropdown-toggle hide-arrow mygovea-accessible"
-                            type="button"
-                            data-bs-toggle="dropdown"
-                            aria-haspopup="true"
-                            aria-expanded="false"
-                            aria-label="{{ __('Pilih Bahasa') }}"
-                            title="{{ __('Pilih Bahasa') }}">
-                        <i class='ti ti-language rounded-2 ti-md'></i>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end" role="menu" aria-label="{{ __('Senarai Bahasa') }}">
-                        @foreach ($availableLocales as $localeKey => $localeData)
-                            <li>
-                                <a class="dropdown-item d-flex align-items-center {{ app()->getLocale() === $localeKey ? 'active' : '' }}"
-                                   href="{{ route('language.swap', ['lang' => $localeKey]) }}"
-                                   rel="nofollow"
-                                   hreflang="{{ $localeKey }}"
-                                   role="menuitem"
-                                   @if(app()->getLocale() === $localeKey) aria-current="true" @endif>
-                                    <span class="flag-icon flag-icon-{{ $localeData['flag_code'] }} me-2"></span>
-                                    <span>{{ $localeKey === 'ms' ? 'Bahasa Melayu' : 'English' }}</span>
-                                    @if(app()->getLocale() === $localeKey)
-                                        <i class="ti ti-check ms-auto text-success" aria-hidden="true"></i>
-                                    @endif
-                                </a>
-                            </li>
-                        @endforeach
-                    </ul>
-                </li>
-            @endif
+        {{-- Notifications Dropdown (Livewire component) --}}
+        @auth
+            @livewire('sections.navbar.notifications-dropdown')
+        @endauth
 
-            {{-- Theme Switcher --}}
-            <li class="nav-item me-2 me-xl-0">
-                <button type="button"
-                        class="nav-link btn btn-text-secondary rounded-pill btn-icon mygovea-accessible"
-                        id="theme-toggle"
-                        aria-label="{{ __('Tukar Tema') }}"
-                        title="{{ __('Tukar Tema') }}"
-                        onclick="window.toggleAppTheme && window.toggleAppTheme()">
-                    <i class='ti ti-sun-high ti-md' data-theme-icon="light"></i>
-                    <i class='ti ti-moon ti-md d-none' data-theme-icon="dark"></i>
-                </button>
-            </li>
-
-            {{-- Notifications --}}
-            @auth
-                @livewire('sections.navbar.notifications-dropdown')
-            @endauth
-
-            {{-- User Profile Dropdown --}}
-            @auth
-                @php
-                    $currentUser = Auth::user();
-                @endphp
-                <li class="nav-item navbar-dropdown dropdown-user dropdown">
-                    <button class="nav-link dropdown-toggle hide-arrow p-0 mygovea-accessible"
-                            type="button"
-                            data-bs-toggle="dropdown"
-                            aria-haspopup="true"
-                            aria-expanded="false"
-                            aria-label="{{ __('Menu Pengguna') }} - {{ $currentUser->name }}"
-                            title="{{ __('Menu Pengguna') }}">
-                        <div class="avatar avatar-online">
+        {{-- User Profile Dropdown - inlined to avoid missing partial --}}
+        @auth
+            @php
+                $currentUser = Auth::user();
+            @endphp
+            <div class="myds-navbar-action" tabindex="0">
+                <a href="#" aria-haspopup="true" aria-expanded="false" aria-label="{{ __('User Menu') }}">
+                    <img src="{{ $currentUser->profile_photo_url }}"
+                        alt="Avatar {{ $currentUser->name }}"
+                        class="myds-navbar-avatar">
+                </a>
+                <div class="myds-navbar-dropdown">
+                    <div style="padding: 16px 22px 10px 22px; border-bottom:1px solid #e6e6e6;">
+                        <div style="display:flex;align-items:center;gap:12px;">
                             <img src="{{ $currentUser->profile_photo_url }}"
-                                 alt="Avatar {{ $currentUser->name }}"
-                                 class="h-auto rounded-circle"
-                                 loading="lazy">
-                        </div>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end" role="menu" aria-label="{{ __('Menu Pengguna') }}">
-                        <li>
-                            <div class="dropdown-item" role="presentation">
-                                <div class="d-flex">
-                                    <div class="flex-shrink-0 me-3">
-                                        <div class="avatar avatar-online">
-                                            <img src="{{ $currentUser->profile_photo_url }}"
-                                                 alt="Avatar {{ $currentUser->name }}"
-                                                 class="h-auto rounded-circle"
-                                                 loading="lazy">
-                                        </div>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <h6 class="mb-0">{{ $currentUser->name }}</h6>
-                                        <small class="text-muted">
-                                            {{ Str::title($currentUser->getRoleNames()->first() ?? __('Pengguna')) }}
-                                        </small>
-                                    </div>
-                                </div>
+                                alt="Avatar {{ $currentUser->name }}"
+                                class="myds-navbar-avatar">
+                            <div>
+                                <strong>{{ $currentUser->name }}</strong><br>
+                                <small class="text-muted" style="font-size: 0.97em;">
+                                    {{ Str::title($currentUser->getRoleNames()->first() ?? __('User')) }}
+                                </small>
                             </div>
-                        </li>
-                        <li>
-                            <div class="dropdown-divider" role="separator"></div>
-                        </li>
-                        <li>
-                            <a class="dropdown-item"
-                               href="{{ route('profile.show') }}"
-                               role="menuitem">
-                                <i class='ti ti-user ti-md me-3'></i>
-                                <span>{{ __('Profil Saya') }}</span>
-                            </a>
-                        </li>
-                        @can('view-settings-admin')
-                            <li>
-                                <a class="dropdown-item"
-                                   href="{{ route('settings.users.index') }}"
-                                   role="menuitem">
-                                    <i class='ti ti-settings ti-md me-3'></i>
-                                    <span>{{ __('Tetapan Sistem') }}</span>
-                                </a>
-                            </li>
-                        @endcan
-                        <li>
-                            <a class="dropdown-item"
-                               href="#"
-                               role="menuitem">
-                                <i class='ti ti-help ti-md me-3'></i>
-                                <span>{{ __('Bantuan') }}</span>
-                            </a>
-                        </li>
-                        <li>
-                            <div class="dropdown-divider" role="separator"></div>
-                        </li>
-                        <li>
-                            <form id="logout-form" method="POST" action="{{ route('logout') }}" class="d-none">
-                                @csrf
-                            </form>
-                            <a class="dropdown-item"
-                               href="{{ route('logout') }}"
-                               role="menuitem"
-                               onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                <i class='ti ti-power ti-md me-3'></i>
-                                <span>{{ __('Log Keluar') }}</span>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-            @else
-                <li class="nav-item">
-                    <a class="nav-link mygovea-accessible"
-                       href="{{ route('login') }}"
-                       title="{{ __('Log Masuk') }}"
-                       aria-label="{{ __('Log Masuk ke Sistem') }}">
-                        <i class="ti ti-login ti-md me-2"></i>
-                        <span class="d-none d-md-inline">{{ __('Log Masuk') }}</span>
+                        </div>
+                    </div>
+                    <a href="{{ route('profile.show') }}"><i class="bi bi-person-circle"></i> {{ __('Profil Saya') }}</a>
+                    @can('view-settings-admin')
+                        <a href="{{ route('settings.users.index') }}"><i class="bi bi-gear"></i> {{ __('Tetapan Sistem') }}</a>
+                    @endcan
+                    <a href="#"><i class="bi bi-question-circle"></i> {{ __('Bantuan') }}</a>
+                    <div style="border-top:1px solid #e6e6e6;"></div>
+                    <form id="logout-form" method="POST" action="{{ route('logout') }}" class="d-none">
+                        @csrf
+                    </form>
+                    <a href="{{ route('logout') }}"
+                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                        <i class="bi bi-box-arrow-right"></i> {{ __('Log Keluar') }}
                     </a>
-                </li>
-            @endauth
-        </ul>
+                </div>
+            </div>
+        @else
+            <div class="myds-navbar-action" tabindex="0">
+                <a class="myds-navbar-link" href="{{ route('login') }}" title="@lang('common.login')">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    <span class="d-none d-md-inline">@lang('common.login')</span>
+                </a>
+            </div>
+        @endauth
     </div>
-
-    {{-- Search Overlay for Mobile --}}
-    <div class="navbar-search-suggestion d-none">
-        <div class="suggestion-list"></div>
-    </div>
+    {{-- Navbar CSS now recommended to be moved to a dedicated file for maintainability. --}}
+    <link rel="stylesheet" href="{{ asset('assets/css/navbar.css') }}">
+    {{-- Simple JS for dropdowns (keep for compatibility, see improvement plan to consolidate) --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function(){
+            document.querySelectorAll('.navbar-action > a, .navbar-action > button').forEach(function(trigger){
+                trigger.addEventListener('click', function(e){
+                    e.preventDefault();
+                    var parent = trigger.parentNode;
+                    document.querySelectorAll('.navbar-action.show').forEach(function(a){
+                        if (a !== parent) a.classList.remove('show');
+                    });
+                    parent.classList.toggle('show');
+                });
+            });
+            document.addEventListener('click', function(e){
+                if (!e.target.closest('.navbar-action')) {
+                    document.querySelectorAll('.navbar-action.show').forEach(function(a){ a.classList.remove('show'); });
+                }
+            });
+        });
+    </script>
 </nav>

@@ -57,10 +57,10 @@
     <meta name="keywords" content="@yield('keywords', config('variables.templateKeyword', 'motac, bpm, sistem dalaman'))" />
     <link rel="icon" type="image/x-icon" href="{{ asset('assets/img/favicon/favicon-motac.ico') }}" />
 
-    {{-- Fonts (MYDS: Inter for body, Poppins for headings) --}}
+    {{-- Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700&display=swap" rel="stylesheet" />
 
     {{-- Bootstrap Icons --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -90,18 +90,9 @@
 
     {{-- Stack for page-level style overrides --}}
     @stack('page-style')
-    <style>
-        :root { --myds-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; --myds-font-heading: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; }
-        body { font-family: var(--myds-font-body); }
-        h1, h2, h3, h4, h5, h6 { font-family: var(--myds-font-heading); }
-        .visually-hidden-focusable:not(:focus):not(:active) { position:absolute!important; height:1px;width:1px; overflow:hidden; clip:rect(1px,1px,1px,1px); white-space:nowrap; }
-        .visually-hidden-focusable:focus { position: static !important; height: auto; width: auto; padding: 6px 10px; background: #111827; color: #fff; border-radius: 6px; }
-        :focus-visible { outline: 3px solid #2563EB; outline-offset: 2px; }
-    </style>
 </head>
 
 <body>
-    <a href="#main-content" class="visually-hidden-focusable">{{ __('Langkau ke Kandungan Utama') }}</a>
     {{-- Main Layout Wrapper --}}
     <div class="layout-wrapper layout-content-navbar {{ $isNavbar ? '' : 'layout-without-navbar' }}">
         <div class="layout-container">
@@ -128,13 +119,13 @@
                     ])
                 @endif
 
-                <div class="content-wrapper">
+                <div class="content-wrapper" id="main-content">
                     @if ($isFlex)
                         {{-- Flexible container for full-height layouts --}}
-                        <main id="main-content" class="{{ $container }} d-flex align-items-stretch flex-grow-1 p-0" role="main" aria-label="{{ __('Kandungan Utama') }}">
+                        <div class="{{ $container }} d-flex align-items-stretch flex-grow-1 p-0">
                     @else
                         {{-- Default container with padding --}}
-                        <main id="main-content" class="{{ $container }} flex-grow-1 container-p-y" role="main" aria-label="{{ __('Kandungan Utama') }}">
+                        <div class="{{ $container }} flex-grow-1 container-p-y">
                     @endif
 
                         {{-- System-wide general alerts (e.g., success/error messages) --}}
@@ -146,7 +137,7 @@
                         @else
                             @yield('content')
                         @endif
-                    </main>
+                    </div>
 
                     @if ($isFooter)
                         {{-- Footer section - now using the correct Blade partial --}}

@@ -61,16 +61,16 @@
                 @endif
 
                 {{-- Main Content Wrapper --}}
-                <div class="content-wrapper">
+                <div class="content-wrapper" id="main-content">
                     @if ($isFlex)
-                        <main id="main-content" class="{{ $container }} d-flex align-items-stretch flex-grow-1 p-0" role="main" aria-label="{{ __('Kandungan Utama') }}">
+                        <div class="{{ $container }} d-flex align-items-stretch flex-grow-1 p-0">
                     @else
-                        <main id="main-content" class="{{ $container }} flex-grow-1 container-p-y" role="main" aria-label="{{ __('Kandungan Utama') }}">
+                        <div class="{{ $container }} flex-grow-1 container-p-y">
                     @endif
 
                     @yield('content')
 
-                    </main>
+                    </div>
                 </div>
 
                 {{-- Footer --}}
@@ -83,7 +83,7 @@
         </div>
 
         @if ($isMenu)
-            <div class="layout-overlay layout-menu-toggle" aria-hidden="true"></div>
+            <div class="layout-overlay layout-menu-toggle"></div>
         @endif
 
         <div class="drag-target"></div>

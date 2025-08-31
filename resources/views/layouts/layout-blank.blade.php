@@ -16,9 +16,9 @@
 
 @section('layoutContent')
     {{-- The ID here is changed to "main-content" to match the skip link in commonMaster.blade.php --}}
-    <main class="authentication-wrapper authentication-basic px-4" id="main-content" role="main" aria-label="{{ __('Kandungan Utama') }}">
+    <div class="authentication-wrapper authentication-basic px-4" id="main-content">
         <div class="authentication-inner py-4">
             @yield('content')
         </div>
-    </main>
+    </div>
 @endsection

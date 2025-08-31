@@ -5,7 +5,7 @@
     $configData = App\Helpers\Helpers::appClasses();
 @endphp
 
-@extends('layouts.layout-blank')
+@extends('layouts/blankLayout')
 
 @section('title', __('Tetapkan Semula Kata Laluan'))
 

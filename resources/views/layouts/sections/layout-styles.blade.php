@@ -13,12 +13,14 @@
     $styleSuffix = $currentStyle !== 'light' ? '-' . $currentStyle : '';
 @endphp
 
-{{-- Google Fonts (MYDS typography: Inter for body, Poppins for headings) --}}
+{{-- Google Fonts --}}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+<link
+    href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
+    rel="stylesheet">
 @if (($configData['textDirection'] ?? 'ltr') === 'rtl' && ($configData['myRTLSupport'] ?? false))
-    {{-- RTL language specific font (Arabic/Jawi support) --}}
+    {{-- RTL language specific font --}}
     <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@100..900&display=swap" rel="stylesheet">
 @endif
 
@@ -51,7 +53,6 @@
 {{-- Custom styles for MOTAC System --}}
 {{-- Central tokens must load before component CSS --}}
 <link rel="stylesheet" href="{{ asset('assets/css/variables.css') }}" />
-<link rel="stylesheet" href="{{ asset('assets/css/myds-components.css') }}" />
 <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}" />
 
 @yield('vendor-style')

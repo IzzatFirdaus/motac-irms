@@ -10,7 +10,7 @@
     - Fallback: If no menu, show login link (for guest) or "No menu available" (for authenticated).
 --}}
 
-<aside id="layout-menu" class="myds-vertical-menu" aria-label="Navigasi Sistem" role="navigation">
+<aside id="layout-menu" class="myds-vertical-menu" aria-label="Navigasi Sistem">
     <div class="myds-sidebar-header">
         <span class="myds-sidebar-logo">
             <img src="{{ asset($configData['appLogo'] ?? 'assets/img/logo/motac-logo.svg') }}"
@@ -20,7 +20,7 @@
         {{-- Ministry name commented out as per requirements --}}
     </div>
 
-    <ul class="myds-sidebar-menu" role="menubar" aria-label="{{ __('Menu Utama') }}">
+    <ul class="myds-sidebar-menu">
         {{-- Render menu if menuData and its 'menu' property exist and are a non-empty array --}}
         @if (isset($menuData) && property_exists($menuData, 'menu') && is_array($menuData->menu) && count($menuData->menu))
             {{-- Use the unified, recursive partial for all submenus --}}
