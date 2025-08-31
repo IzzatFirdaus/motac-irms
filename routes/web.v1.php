@@ -211,7 +211,7 @@ Route::prefix('api')->name('api.')->group(function () {
 // Authenticated Routes (protected by Jetstream/Sanctum/verified middleware)
 // --------------------------------------------------
 Route::middleware([
-    'auth:sanctum',
+    'auth',
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
