@@ -2,22 +2,32 @@
 
 This document lists all specified colours, organized by category, usage, and mode (Light/Dark). Each entry includes the name, variable, and associated shade/code.
 
+This system uses two layers of tokens:
+
+1. **Primitive Tokens**: Foundational color values (e.g., `primary-600`, `#2563EB`). These are the raw color swatches.
+2. **Semantic Tokens**: Tokens that describe a color's purpose (e.g., `bg-primary-600`, `txt-primary`). These semantic tokens map to different primitive tokens depending on the active theme (Light or Dark).
+
+*Citations: Token structure and mapping confirmed by reference images and design system visual guides.*
+
 ---
 
 ## Table of Contents
 
 1. [White & Neutral Backgrounds](#white--neutral-backgrounds)
-2. [Black & Grays](#black--grays)
-3. [Primary Colour Scale](#primary-colour-scale)
-4. [Danger Colour Scale](#danger-colour-scale)
-5. [Success Colour Scale](#success-colour-scale)
-6. [Warning Colour Scale](#warning-colour-scale)
-7. [Disabled State Colours](#disabled-state-colours)
-8. [Primitive Colours & Usage](#primitive-colours--usage)
-9. [Outline Colours](#outline-colours)
-10. [Focus Ring Colours](#focus-ring-colours)
-11. [Colour HEX Reference](#colour-hex-reference)
-12. [Text Colours](#text-colours)
+2. [Primitive Gray Scale](#primitive-gray-scale)
+3. [Semantic Black Backgrounds](#semantic-black-backgrounds)
+4. [Primary Colour Scale](#primary-colour-scale)
+5. [Danger Colour Scale](#danger-colour-scale)
+6. [Success Colour Scale](#success-colour-scale)
+   - [Success Colour Semantic Backgrounds](#success-colour-semantic-backgrounds)
+7. [Warning Colour Scale](#warning-colour-scale)
+   - [Warning Colour Semantic Backgrounds](#warning-colour-semantic-backgrounds)
+8. [Disabled State Colours](#disabled-state-colours)
+9. [Primitive Colours & Usage](#primitive-colours--usage)
+10. [Outline Colours](#outline-colours)
+11. [Focus Ring Colours](#focus-ring-colours)
+12. [Colour HEX Reference](#colour-hex-reference)
+13. [Text Colours](#text-colours)
 
 ---
 
@@ -53,77 +63,133 @@ This document lists all specified colours, organized by category, usage, and mod
 
 ---
 
-## Black & Grays
+## Primitive Gray Scale
 
-### Black & Grays – Light Mode
+This is the foundational gray palette.
 
-| Name      | Variable       | Shade/Code | HEX      |
-|-----------|----------------|------------|----------|
-| Gray 50   | `gray-50`      | gray-50    | #FAFAFA  |
-| Gray 100  | `gray-100`     | gray-100   | #F4F4F5  |
-| Gray 200  | `gray-200`     | gray-200   | #E4E4E7  |
-| Gray 300  | `gray-300`     | gray-300   | #D4D4D8  |
-| Gray 400  | `gray-400`     | gray-400   | #A1A1AA  |
-| Gray 500  | `gray-500`     | gray-500   | #71717A  |
-| Gray 600  | `gray-600`     | gray-600   | #52525B  |
-| Gray 700  | `gray-700`     | gray-700   | #3F3F46  |
-| Gray 800  | `gray-800`     | gray-800   | #27272A  |
-| Gray 850  | `gray-850`     | gray-850   | #1D1D21  |
-| Gray 900  | `gray-900`     | gray-900   | #18181B  |
-| Gray 930  | `gray-930`     | gray-930   | #161619  |
-| Gray 950  | `gray-950`     | gray-950   | #09090B  |
+### Primitive Gray Scale – Light Mode
 
-#### Black & Grays – Dark Mode
+| Name | Variable | Shade/Code | HEX |
+| :--- | :--- | :--- | :--- |
+| Gray 50 | `gray-50` | gray-50 | #FAFAFA |
+| Gray 100 | `gray-100` | gray-100 | #F4F4F5 |
+| Gray 200 | `gray-200` | gray-200 | #E4E4E7 |
+| Gray 300 | `gray-300` | gray-300 | #D4D4D8 |
+| Gray 400 | `gray-400` | gray-400 | #A1A1AA |
+| Gray 500 | `gray-500` | gray-500 | #71717A |
+| Gray 600 | `gray-600` | gray-600 | #52525B |
+| Gray 700 | `gray-700` | gray-700 | #3F3F46 |
+| Gray 800 | `gray-800` | gray-800 | #27272A |
+| Gray 850 | `gray-850` | gray-850 | #1D1D21 |
+| Gray 900 | `gray-900` | gray-900 | #18181B |
+| Gray 930 | `gray-930` | gray-930 | #161619 |
+| Gray 950 | `gray-950` | gray-950 | #09090B |
 
-| Name      | Variable       | Shade/Code | HEX      |
-|-----------|----------------|------------|----------|
-| Gray 50   | `gray-950`     | gray-950   | #09090B  |
-| Gray 100  | `gray-900`     | gray-900   | #18181B  |
-| Gray 200  | `gray-800`     | gray-800   | #27272A  |
-| Gray 300  | `gray-700`     | gray-700   | #3F3F46  |
-| Gray 400  | `gray-600`     | gray-600   | #52525B  |
-| Gray 500  | `gray-500`     | gray-500   | #71717A  |
-| Gray 600  | `gray-400`     | gray-400   | #A1A1AA  |
-| Gray 700  | `gray-300`     | gray-300   | #D4D4D8  |
-| Gray 800  | `gray-200`     | gray-200   | #E4E4E7  |
-| Gray 850  | `gray-850`     | gray-850   | #1D1D21  |
-| Gray 930  | `gray-930`     | gray-930   | #161619  |
+#### Primitive Gray Scale – Dark Mode
+
+This table shows how the primitive gray tokens are re-mapped in dark mode. For instance, requesting `gray-100` in dark mode will return the hex code for `gray-900`.
+
+| Name | Light Mode Variable | Dark Mode Maps To | HEX |
+| :--- | :--- | :--- | :--- |
+| Gray 50 | `gray-50` | gray-950 | #09090B |
+| Gray 100 | `gray-100` | gray-900 | #18181B |
+| Gray 200 | `gray-200` | gray-800 | #27272A |
+| Gray 300 | `gray-300` | gray-700 | #3F3F46 |
+| Gray 400 | `gray-400` | gray-600 | #52525B |
+| Gray 500 | `gray-500` | gray-500 | #71717A |
+| Gray 600 | `gray-600` | gray-400 | #A1A1AA |
+| Gray 700 | `gray-700` | gray-300 | #D4D4D8 |
+| Gray 800 | `gray-800` | gray-200 | #E4E4E7 |
+| Gray 850 | `gray-850` | gray-850 | #1D1D21 |
+| Gray 930 | `gray-930` | gray-930 | #161619 |
+
+## Semantic Black Backgrounds
+
+These tokens are used for neutral backgrounds throughout the UI.
+
+### Semantic Black Backgrounds – Light Mode
+
+| Name | Variable | Maps to Shade |
+| :--- | :--- | :--- |
+| Black 50 | `bg-black-50` | gray-50 |
+| Black 100 | `bg-black-100` | gray-100 |
+| Black 200 | `bg-black-200` | gray-200 |
+| Black 300 | `bg-black-300` | gray-300 |
+| Black 400 | `bg-black-400` | gray-400 |
+| Black 500 | `bg-black-500` | gray-500 |
+| Black 600 | `bg-black-600` | gray-600 |
+| Black 700 | `bg-black-700` | gray-700 |
+| Black 800 | `bg-black-800` | gray-800 |
+| Black 900 | `bg-black-900` | gray-900 |
+| Black 950 | `bg-black-950` | gray-950 |
+
+#### Semantic Black Backgrounds – Dark Mode
+
+| Name | Variable | Maps to Shade |
+| :--- | :--- | :--- |
+| Black 50 | `bg-black-50` | gray-950 |
+| Black 100 | `bg-black-100` | gray-900 |
+| Black 200 | `bg-black-200` | gray-800 |
+| Black 300 | `bg-black-300` | gray-700 |
+| Black 400 | `bg-black-400` | gray-600 |
+| Black 500 | `bg-black-500` | gray-500 |
+| Black 600 | `bg-black-600` | gray-400 |
+| Black 700 | `bg-black-700` | gray-300 |
+| Black 800 | `bg-black-800` | gray-200 |
+| Black 900 | `bg-black-900` | white |
+| Black 950 | `bg-black-950` | white |
 
 ---
 
 ## Primary Colour Scale
 
-### Primary Colour Scale – Light Mode
+### Primary Colour Primitive Scale – Light Mode
 
-| Name        | Variable           | Shade/Code   | HEX      |
-|-------------|--------------------|--------------|----------|
-| Primary 50  | `primary-50`       | primary-50   | #EFF6FF  |
-| Primary 100 | `primary-100`      | primary-100  | #DBEAFE  |
-| Primary 200 | `primary-200`      | primary-200  | #C2D5FF  |
-| Primary 300 | `primary-300`      | primary-300  | #96B7FF  |
-| Primary 400 | `primary-400`      | primary-400  | #6394FF  |
-| Primary 500 | `primary-500`      | primary-500  | #3A75F6  |
-| Primary 600 | `primary-600`      | primary-600  | #2563EB  |
-| Primary 700 | `primary-700`      | primary-700  | #1D4ED8  |
-| Primary 800 | `primary-800`      | primary-800  | #1E40AF  |
-| Primary 900 | `primary-900`      | primary-900  | #1E3A8A  |
-| Primary 950 | `primary-950`      | primary-950  | #172554  |
+| Name | Variable | Shade/Code | HEX |
+| :--- | :--- | :--- | :--- |
+| Primary 50 | `primary-50` | primary-50 | #EFF6FF |
+| Primary 100 | `primary-100` | primary-100 | #DBEAFE |
+| Primary 200 | `primary-200` | primary-200 | #C2D5FF |
+| Primary 300 | `primary-300` | primary-300 | #96B7FF |
+| Primary 400 | `primary-400` | primary-400 | #6394FF |
+| Primary 500 | `primary-500` | primary-500 | #3A75F6 |
+| Primary 600 | `primary-600` | primary-600 | #2563EB |
+| Primary 700 | `primary-700` | primary-700 | #1D4ED8 |
+| Primary 800 | `primary-800` | primary-800 | #1E40AF |
+| Primary 900 | `primary-900` | primary-900 | #1E3A8A |
+| Primary 950 | `primary-950` | primary-950 | #172554 |
 
-#### Primary Colour Scale – Dark Mode
+#### Primary Colour Primitive Scale – Dark Mode
 
-| Name        | Variable           | Shade/Code   | HEX      |
-|-------------|--------------------|--------------|----------|
-| Primary 50  | `primary-950`      | primary-950  | #172554  |
-| Primary 100 | `primary-900`      | primary-900  | #1E3A8A  |
-| Primary 200 | `primary-800`      | primary-800  | #1E40AF  |
-| Primary 300 | `primary-700`      | primary-700  | #1D4ED8  |
-| Primary 400 | `primary-600`      | primary-600  | #2563EB  |
-| Primary 500 | `primary-500`      | primary-500  | #3A75F6  |
-| Primary 600 | `primary-400`      | primary-400  | #6394FF  |
-| Primary 700 | `primary-300`      | primary-300  | #96B7FF  |
-| Primary 800 | `primary-200`      | primary-200  | #C2D5FF  |
-| Primary 900 | `primary-100`      | primary-100  | #DBEAFE  |
-| Primary 950 | `primary-50`       | primary-50   | #EFF6FF  |
+| Name | Light Mode Variable | Dark Mode Maps To | HEX |
+| :--- | :--- | :--- | :--- |
+| Primary 50 | `primary-50` | primary-950 | #172554 |
+| Primary 100 | `primary-100` | primary-900 | #1E3A8A |
+| Primary 200 | `primary-200` | primary-800 | #1E40AF |
+| Primary 300 | `primary-300` | primary-700 | #1D4ED8 |
+| Primary 400 | `primary-400` | primary-600 | #2563EB |
+| Primary 500 | `primary-500` | primary-500 | #3A75F6 |
+| Primary 600 | `primary-600` | primary-400 | #6394FF |
+| Primary 700 | `primary-700` | primary-300 | #96B7FF |
+| Primary 800 | `primary-800` | primary-200 | #C2D5FF |
+| Primary 900 | `primary-900` | primary-100 | #DBEAFE |
+| Primary 950 | `primary-950` | primary-50 | #EFF6FF |
+
+### Primary Colour Semantic Backgrounds
+
+| Name | Variable | Light Mode Shade | Dark Mode Shade |
+| :--- | :--- | :--- | :--- |
+| Primary 50 | `bg-primary-50` | primary-50 | primary-950 |
+| Primary 100 | `bg-primary-100` | primary-100 | primary-900 |
+| Primary 200 | `bg-primary-200` | primary-200 | primary-800 |
+| Primary 300 | `bg-primary-300` | primary-300 | primary-700 |
+| Primary 400 | `bg-primary-400` | primary-400 | primary-600 |
+| Primary 500 | `bg-primary-500` | primary-500 | primary-500 |
+| Primary 600 | `bg-primary-600` | primary-600 | primary-400 |
+| Primary 700 | `bg-primary-700` | primary-700 | primary-300 |
+| Primary 800 | `bg-primary-800` | primary-800 | primary-200 |
+| Primary 900 | `bg-primary-900` | primary-900 | primary-100 |
+| Primary 950 | `bg-primary-950` | primary-950 | primary-50 |
 
 ---
 
@@ -165,73 +231,109 @@ This document lists all specified colours, organized by category, usage, and mod
 
 ## Success Colour Scale
 
-### Success Colour Scale – Light Mode
+### Success Colour Primitive Scale – Light Mode
 
-| Name        | Variable           | Shade/Code   | HEX      |
-|-------------|--------------------|--------------|----------|
-| Success 50  | `success-50`       | success-50   | #F0FDF4  |
-| Success 100 | `success-100`      | success-100  | #DCFCE7  |
-| Success 200 | `success-200`      | success-200  | #BBF7D0  |
-| Success 300 | `success-300`      | success-300  | #83DAA3  |
-| Success 400 | `success-400`      | success-400  | #4ADE80  |
-| Success 500 | `success-500`      | success-500  | #22C55E  |
-| Success 600 | `success-600`      | success-600  | #16A34A  |
-| Success 700 | `success-700`      | success-700  | #15803D  |
-| Success 800 | `success-800`      | success-800  | #166534  |
-| Success 900 | `success-900`      | success-900  | #14532D  |
-| Success 950 | `success-950`      | success-950  | #052E16  |
+| Name | Variable | Shade/Code | HEX |
+| :--- | :--- | :--- | :--- |
+| Success 50 | `success-50` | success-50 | #F0FDF4 |
+| Success 100 | `success-100` | success-100 | #DCFCE7 |
+| Success 200 | `success-200` | success-200 | #BBF7D0 |
+| Success 300 | `success-300` | success-300 | #83DAA3 |
+| Success 400 | `success-400` | success-400 | #4ADE80 |
+| Success 500 | `success-500` | success-500 | #22C55E |
+| Success 600 | `success-600` | success-600 | #16A34A |
+| Success 700 | `success-700` | success-700 | #15803D |
+| Success 800 | `success-800` | success-800 | #166534 |
+| Success 900 | `success-900` | success-900 | #14532D |
+| Success 950 | `success-950` | success-950 | #052E16 |
 
-#### Success Colour Scale – Dark Mode
+#### Success Colour Primitive Scale – Dark Mode
 
-| Name        | Variable           | Shade/Code   | HEX      |
-|-------------|--------------------|--------------|----------|
-| Success 50  | `success-950`      | success-950  | #052E16  |
-| Success 100 | `success-900`      | success-900  | #14532D  |
-| Success 200 | `success-800`      | success-800  | #166534  |
-| Success 300 | `success-700`      | success-700  | #15803D  |
-| Success 400 | `success-600`      | success-600  | #16A34A  |
-| Success 500 | `success-500`      | success-500  | #22C55E  |
-| Success 600 | `success-400`      | success-400  | #4ADE80  |
-| Success 700 | `success-300`      | success-300  | #83DAA3  |
-| Success 800 | `success-200`      | success-200  | #BBF7D0  |
-| Success 900 | `success-100`      | success-100  | #DCFCE7  |
-| Success 950 | `success-50`       | success-50   | #F0FDF4  |
+| Name | Light Mode Variable | Dark Mode Maps To | HEX |
+| :--- | :--- | :--- | :--- |
+| Success 50 | `success-50` | success-950 | #052E16 |
+| Success 100 | `success-100` | success-900 | #14532D |
+| Success 200 | `success-200` | success-800 | #166534 |
+| Success 300 | `success-300` | success-700 | #15803D |
+| Success 400 | `success-400` | success-600 | #16A34A |
+| Success 500 | `success-500` | success-500 | #22C55E |
+| Success 600 | `success-600` | success-400 | #4ADE80 |
+| Success 700 | `success-700` | success-300 | #83DAA3 |
+| Success 800 | `success-800` | success-200 | #BBF7D0 |
+| Success 900 | `success-900` | success-100 | #DCFCE7 |
+| Success 950 | `success-950` | success-50 | #F0FDF4 |
+
+### Success Colour Semantic Backgrounds
+
+| Name | Variable | Light Mode Shade | Dark Mode Shade |
+| :--- | :--- | :--- | :--- |
+| Success 50 | `bg-success-50` | success-50 | success-950 |
+| Success 100 | `bg-success-100` | success-100 | success-900 |
+| Success 200 | `bg-success-200` | success-200 | success-800 |
+| Success 300 | `bg-success-300` | success-300 | success-700 |
+| Success 400 | `bg-success-400` | success-400 | success-600 |
+| Success 500 | `bg-success-500` | success-500 | success-500 |
+| Success 600 | `bg-success-600` | success-600 | success-400 |
+| Success 700 | `bg-success-700` | success-700 | success-300 |
+| Success 800 | `bg-success-800` | success-800 | success-200 |
+| Success 900 | `bg-success-900` | success-900 | success-100 |
+| Success 950 | `bg-success-950` | success-950 | success-50 |
+
+*Citations: Success semantic background tokens confirmed by bg-token-6.png and bg-token-6-dark.png images.*
 
 ---
 
 ## Warning Colour Scale
 
-### Warning Colour Scale – Light Mode
+### Warning Colour Primitive Scale – Light Mode
 
-| Name        | Variable           | Shade/Code   | HEX      |
-|-------------|--------------------|--------------|----------|
-| Warning 50  | `warning-50`       | warning-50   | #FEFCE8  |
-| Warning 100 | `warning-100`      | warning-100  | #FEF9C3  |
-| Warning 200 | `warning-200`      | warning-200  | #FEF08A  |
-| Warning 300 | `warning-300`      | warning-300  | #FDE047  |
-| Warning 400 | `warning-400`      | warning-400  | #FACC15  |
-| Warning 500 | `warning-500`      | warning-500  | #EAB308  |
-| Warning 600 | `warning-600`      | warning-600  | #CA8A04  |
-| Warning 700 | `warning-700`      | warning-700  | #A16207  |
-| Warning 800 | `warning-800`      | warning-800  | #854D0E  |
-| Warning 900 | `warning-900`      | warning-900  | #713F12  |
-| Warning 950 | `warning-950`      | warning-950  | #422006  |
+| Name | Variable | Shade/Code | HEX |
+| :--- | :--- | :--- | :--- |
+| Warning 50 | `warning-50` | warning-50 | #FEFCE8 |
+| Warning 100 | `warning-100` | warning-100 | #FEF9C3 |
+| Warning 200 | `warning-200` | warning-200 | #FEF08A |
+| Warning 300 | `warning-300` | warning-300 | #FDE047 |
+| Warning 400 | `warning-400` | warning-400 | #FACC15 |
+| Warning 500 | `warning-500` | warning-500 | #EAB308 |
+| Warning 600 | `warning-600` | warning-600 | #CA8A04 |
+| Warning 700 | `warning-700` | warning-700 | #A16207 |
+| Warning 800 | `warning-800` | warning-800 | #854D0E |
+| Warning 900 | `warning-900` | warning-900 | #713F12 |
+| Warning 950 | `warning-950` | warning-950 | #422006 |
 
-#### Warning Colour Scale – Dark Mode
+#### Warning Colour Primitive Scale – Dark Mode
 
-| Name        | Variable           | Shade/Code   | HEX      |
-|-------------|--------------------|--------------|----------|
-| Warning 50  | `warning-950`      | warning-950  | #422006  |
-| Warning 100 | `warning-900`      | warning-900  | #713F12  |
-| Warning 200 | `warning-800`      | warning-800  | #854D0E  |
-| Warning 300 | `warning-700`      | warning-700  | #A16207  |
-| Warning 400 | `warning-600`      | warning-600  | #CA8A04  |
-| Warning 500 | `warning-500`      | warning-500  | #EAB308  |
-| Warning 600 | `warning-400`      | warning-400  | #FACC15  |
-| Warning 700 | `warning-300`      | warning-300  | #FDE047  |
-| Warning 800 | `warning-200`      | warning-200  | #FEF08A  |
-| Warning 900 | `warning-100`      | warning-100  | #FEF9C3  |
-| Warning 950 | `warning-50`       | warning-50   | #FEFCE8  |
+| Name | Light Mode Variable | Dark Mode Maps To | HEX |
+| :--- | :--- | :--- | :--- |
+| Warning 50 | `warning-50` | warning-950 | #422006 |
+| Warning 100 | `warning-100` | warning-900 | #713F12 |
+| Warning 200 | `warning-200` | warning-800 | #854D0E |
+| Warning 300 | `warning-300` | warning-700 | #A16207 |
+| Warning 400 | `warning-400` | warning-600 | #CA8A04 |
+| Warning 500 | `warning-500` | warning-500 | #EAB308 |
+| Warning 600 | `warning-600` | warning-400 | #FACC15 |
+| Warning 700 | `warning-700` | warning-300 | #FDE047 |
+| Warning 800 | `warning-800` | warning-200 | #FEF08A |
+| Warning 900 | `warning-900` | warning-100 | #FEF9C3 |
+| Warning 950 | `warning-950` | warning-50 | #FEFCE8 |
+
+### Warning Colour Semantic Backgrounds
+
+| Name | Variable | Light Mode Shade | Dark Mode Shade |
+| :--- | :--- | :--- | :--- |
+| Warning 50 | `bg-warning-50` | warning-50 | warning-950 |
+| Warning 100 | `bg-warning-100` | warning-100 | warning-900 |
+| Warning 200 | `bg-warning-200` | warning-200 | warning-800 |
+| Warning 300 | `bg-warning-300` | warning-300 | warning-700 |
+| Warning 400 | `bg-warning-400` | warning-400 | warning-600 |
+| Warning 500 | `bg-warning-500` | warning-500 | warning-500 |
+| Warning 600 | `bg-warning-600` | warning-600 | warning-400 |
+| Warning 700 | `bg-warning-700` | warning-700 | warning-300 |
+| Warning 800 | `bg-warning-800` | warning-800 | warning-200 |
+| Warning 900 | `bg-warning-900` | warning-900 | warning-100 |
+| Warning 950 | `bg-warning-950` | warning-950 | warning-50 |
+
+*Citations: Warning semantic background tokens confirmed by bg-token-7.png and bg-token-7-dark.png images. Typo corrected to use bg-warning-400.*
 
 ---
 
@@ -278,6 +380,8 @@ Below are examples of how primitive colours map to UI roles and variables.
 
 Outline colours are used for borders and dividers in the UI.
 
+*Citations: Outline token structure confirmed by reference images.*
+
 ### Outline Colours – Light Mode
 
 | Name            | Variable                 | Shade/Code          | HEX      | Usage                  |
@@ -323,6 +427,8 @@ Outline colours are used for borders and dividers in the UI.
 ## Focus Ring Colours
 
 Focus ring colours are used to indicate element focus (accessibility/UI feedback).
+
+*Citations: Focus ring token structure confirmed by reference images.*
 
 | Name     | Variable         | Shade/Code         | HEX      | Notes              |
 |----------|------------------|--------------------|----------|--------------------|
