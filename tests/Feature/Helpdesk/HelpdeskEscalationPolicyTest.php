@@ -45,31 +45,8 @@ class HelpdeskEscalationPolicyTest extends TestCase
     $service = new TicketNotificationService();
     $service->notifyTicketEscalated($overdueTicket);
 
-<<<<<<< HEAD
-        // Expect the escalation notification to be called for the overdue ticket
-        $mockNotificationService->shouldReceive('notifyTicketEscalated')
-            ->once()
-            ->with(Mockery::on(function ($ticket) use ($overdueTicket) {
-                return $ticket->id === $overdueTicket->id;
-            }));
-        $mockNotificationService->shouldReceive('notifyTicketCreated'); // Prevent calls from factory
-
-        // Simulate running a command that checks for overdue tickets
-        // You would need to create this Artisan command (e.g., `php artisan helpdesk:check-overdue-tickets`)
-        // For testing, we'll manually call the service method that the command would use.
-        $service = new TicketNotificationService(); // Get the real service instance
-        // Assuming your command calls a method like this on the service for each overdue ticket found:
-        $service->notifyTicketEscalated($overdueTicket);
-
-        Notification::assertSentTo($itAdmin, function (\Illuminate\Notifications\Notification $notification) {
-            // Assert it's the correct type of notification and contains the ticket ID
-            // Note: You would need a TicketEscalatedNotification class for this to work precisely.
-            // For now, we'll check if a general notification was sent to IT Admin
-            return true; // Simplified for now, assumes any notification to IT Admin is for escalation
-        });
-=======
+    // Assert that the escalation notification was sent to the IT Admin role
     Notification::assertSentTo($itAdmin, \App\Notifications\TicketEscalatedNotification::class);
->>>>>>> origin/release/v4.0
     }
 
     /** @test */
@@ -86,20 +63,8 @@ class HelpdeskEscalationPolicyTest extends TestCase
             'sla_due_at' => Carbon::now()->subHours(1),
         ]);
 
-<<<<<<< HEAD
-        $mockNotificationService = Mockery::mock(TicketNotificationService::class);
-        $this->app->instance(TicketNotificationService::class, $mockNotificationService);
-
-        // Expect notifyTicketEscalated NOT to be called
-        $mockNotificationService->shouldNotReceive('notifyTicketEscalated');
-        $mockNotificationService->shouldReceive('notifyTicketCreated'); // Prevent calls from factory
-
-        // Simulate the check for overdue tickets
-        $service = new TicketNotificationService();
-=======
     // Use the real service; ensure escalation isn't triggered for closed tickets
     $service = new TicketNotificationService();
->>>>>>> origin/release/v4.0
         // This is a simplified check, ideally, your cron job/command would filter this out.
         // But if it still calls the method, the method itself should handle it.
         // For this test, we assert that the _notification_ is not sent if the status is closed
