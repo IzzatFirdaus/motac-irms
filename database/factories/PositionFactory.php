@@ -53,16 +53,18 @@ class PositionFactory extends Factory
         if (! isset($gradeIds)) {
             $gradeIds = Grade::pluck('id')->all();
         }
+
         if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
+
         if (! isset($msFaker)) {
             $msFaker = \Faker\Factory::create('ms_MY');
         }
 
         // Pick random grade/user IDs if available
-        $gradeId     = ! empty($gradeIds) ? Arr::random($gradeIds) : null;
-        $auditUserId = ! empty($userIds) ? Arr::random($userIds) : null;
+        $gradeId     = empty($gradeIds) ? null : Arr::random($gradeIds);
+        $auditUserId = empty($userIds) ? null : Arr::random($userIds);
 
         $createdAt = Carbon::parse($this->faker->dateTimeBetween('-3 years', 'now'));
         $updatedAt = Carbon::parse($this->faker->dateTimeBetween($createdAt, 'now'));
@@ -111,7 +113,8 @@ class PositionFactory extends Factory
         if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $deleterId = ! empty($userIds) ? Arr::random($userIds) : null;
+
+        $deleterId = empty($userIds) ? null : Arr::random($userIds);
 
         return $this->state([
             'deleted_at' => now(),

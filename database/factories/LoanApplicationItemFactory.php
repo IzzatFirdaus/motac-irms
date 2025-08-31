@@ -29,6 +29,7 @@ class LoanApplicationItemFactory extends Factory
         if (! isset($loanApplicationIds)) {
             $loanApplicationIds = LoanApplication::pluck('id')->all();
         }
+
         $loanApplicationId = $loanApplicationIds ? Arr::random($loanApplicationIds) : null;
 
         // Static cache for User IDs for audit fields
@@ -36,6 +37,7 @@ class LoanApplicationItemFactory extends Factory
         if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
+
         $auditUserId = $userIds ? Arr::random($userIds) : null;
 
         // Static cache for available equipment types (asset_type column)
@@ -43,9 +45,10 @@ class LoanApplicationItemFactory extends Factory
         if (! isset($assetTypes)) {
             $assetTypes = Equipment::query()->distinct()->pluck('asset_type')->all();
         }
-        $equipmentType = ! empty($assetTypes)
-            ? Arr::random($assetTypes)
-            : $this->faker->randomElement(['laptop', 'projector', 'printer', 'monitor', 'tablet', 'desktop']);
+
+        $equipmentType = empty($assetTypes)
+            ? $this->faker->randomElement(['laptop', 'projector', 'printer', 'monitor', 'tablet', 'desktop'])
+            : Arr::random($assetTypes);
 
         // Quantity logic
         $quantityRequested = $this->faker->numberBetween(1, 5);
@@ -86,7 +89,7 @@ class LoanApplicationItemFactory extends Factory
      */
     public function fullyApproved(): static
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes): array {
             return [
                 'quantity_approved' => $attributes['quantity_requested'] ?? 1,
             ];
@@ -122,6 +125,7 @@ class LoanApplicationItemFactory extends Factory
         if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
+
         $deleterId = $userIds ? Arr::random($userIds) : null;
 
         return $this->state([

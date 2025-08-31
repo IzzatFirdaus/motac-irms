@@ -23,7 +23,7 @@ class HelpdeskUploadTest extends TestCase
     }
 
     /** @test */
-    public function it_rejects_files_over_max_size_on_ticket_creation()
+    public function it_rejects_files_over_max_size_on_ticket_creation(): void
     {
         $user     = User::factory()->create();
         $category = \App\Models\HelpdeskCategory::first();
@@ -43,11 +43,11 @@ class HelpdeskUploadTest extends TestCase
             ->assertHasErrors(['attachments.0' => 'max']); // Check for max size error on first attachment
 
         $this->assertDatabaseMissing('helpdesk_tickets', ['title' => 'Large File Test']);
-        Storage::disk('public')->assertMissing('helpdesk_attachments/' . $largeFile->hashName());
+        Storage::disk('public')->assertMissing('helpdesk_attachments/'.$largeFile->hashName());
     }
 
     /** @test */
-    public function it_rejects_unsupported_mime_types_on_ticket_creation()
+    public function it_rejects_unsupported_mime_types_on_ticket_creation(): void
     {
         $user     = User::factory()->create();
         $category = \App\Models\HelpdeskCategory::first();
@@ -67,11 +67,11 @@ class HelpdeskUploadTest extends TestCase
             ->assertHasErrors(['attachments.0' => 'mimes']); // Check for mime type error on first attachment
 
         $this->assertDatabaseMissing('helpdesk_tickets', ['title' => 'Unsupported File Test']);
-        Storage::disk('public')->assertMissing('helpdesk_attachments/' . $unsupportedFile->hashName());
+        Storage::disk('public')->assertMissing('helpdesk_attachments/'.$unsupportedFile->hashName());
     }
 
     /** @test */
-    public function it_rejects_files_over_max_size_on_comment_addition()
+    public function it_rejects_files_over_max_size_on_comment_addition(): void
     {
         $user   = User::factory()->create();
         $ticket = HelpdeskTicket::factory()->create(['user_id' => $user->id]);
@@ -86,6 +86,6 @@ class HelpdeskUploadTest extends TestCase
             ->assertHasErrors(['commentAttachments.0' => 'max']);
 
         $this->assertCount(0, $ticket->comments()->where('comment', 'Adding a large attachment.')->get());
-        Storage::disk('public')->assertMissing('helpdesk_attachments/' . $largeFile->hashName());
+        Storage::disk('public')->assertMissing('helpdesk_attachments/'.$largeFile->hashName());
     }
 }

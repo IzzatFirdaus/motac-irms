@@ -29,7 +29,7 @@ class UserSeeder extends Seeder
         $coreRoles = ['User', 'BPM Staff', 'IT Admin', 'Approver', 'HOD'];
         foreach ($coreRoles as $roleName) {
             if (Role::where('name', $roleName)->doesntExist()) {
-                Log::error("Core role '{$roleName}' not found. Please run RoleAndPermissionSeeder first. Aborting UserSeeder.");
+                Log::error(sprintf("Core role '%s' not found. Please run RoleAndPermissionSeeder first. Aborting UserSeeder.", $roleName));
 
                 return;
             }
@@ -49,7 +49,7 @@ class UserSeeder extends Seeder
         // Don't create duplicate admin user (skip if exists)
         $adminEmail = config('app.admin_email', 'admin@motac.gov.my');
         if (User::where('email', $adminEmail)->exists()) {
-            Log::info("Admin user ($adminEmail) already exists. UserSeeder will only create additional users.");
+            Log::info(sprintf('Admin user (%s) already exists. UserSeeder will only create additional users.', $adminEmail));
         }
 
         // Define proportions for each role
@@ -103,9 +103,10 @@ class UserSeeder extends Seeder
                 $user  = User::create($userData);
                 $ids[] = $user->id;
                 // Keep track of role to user id mapping
-                $userRole                   = $usersToCreate[array_search($userData, $userRecords)]['role'] ?? 'User';
+                $userRole                   = $usersToCreate[array_search($userData, $userRecords, true)]['role'] ?? 'User';
                 $roleToUserIds[$userRole][] = $user->id;
             }
+
             $insertedIds = array_merge($insertedIds, $ids);
         }
 
@@ -138,6 +139,6 @@ class UserSeeder extends Seeder
             ->pending()
             ->create();
 
-        Log::info("Optimized User seeding complete. Created approximately $numberOfUsers active users, plus $deletedUsersCount deleted and $pendingUsersCount pending users.");
+        Log::info(sprintf('Optimized User seeding complete. Created approximately %d active users, plus %d deleted and %d pending users.', $numberOfUsers, $deletedUsersCount, $pendingUsersCount));
     }
 }

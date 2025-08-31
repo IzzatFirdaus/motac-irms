@@ -5,7 +5,6 @@ namespace Database\Factories;
 use App\Models\LoanApplication;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 
 /**
@@ -23,45 +22,44 @@ class LoanApplicationFactory extends Factory
     public function definition(): array
     {
         // Always ensure at least one user exists for all foreign key columns
-        $user = User::first() ?: User::factory()->create();
+        $user   = User::first() ?: User::factory()->create();
         $userId = $user->id;
-        $officerId = $user->id;
 
         // Use a static Malaysian faker for realism and speed
         static $msFaker;
-        if (!$msFaker) {
+        if (! $msFaker) {
             $msFaker = \Faker\Factory::create('ms_MY');
         }
 
         // Date logic
         $applicationDate = Carbon::parse($this->faker->dateTimeBetween('-6 months', 'now'));
-        $loanStartDate = (clone $applicationDate)->addDays($this->faker->numberBetween(1, 10));
-        $loanEndDate = (clone $loanStartDate)->addDays($this->faker->numberBetween(3, 14));
-        $approvalDate = (clone $applicationDate)->addDays($this->faker->numberBetween(0, 5));
+        $loanStartDate   = (clone $applicationDate)->addDays($this->faker->numberBetween(1, 10));
+        $loanEndDate     = (clone $loanStartDate)->addDays($this->faker->numberBetween(3, 14));
+        $approvalDate    = (clone $applicationDate)->addDays($this->faker->numberBetween(0, 5));
 
         // Status options (fallback to string if constants missing)
         $statuses = [
-            LoanApplication::STATUS_DRAFT ?? 'draft',
-            LoanApplication::STATUS_PROCESSING ?? 'processing',
-            LoanApplication::STATUS_PENDING_SUPPORT ?? 'pending_support',
-            LoanApplication::STATUS_PENDING_APPROVER_REVIEW ?? 'pending_approver_review',
-            LoanApplication::STATUS_PENDING_BPM_REVIEW ?? 'pending_bpm_review',
-            LoanApplication::STATUS_APPROVED ?? 'approved',
-            LoanApplication::STATUS_REJECTED ?? 'rejected',
-            LoanApplication::STATUS_PARTIALLY_ISSUED ?? 'partially_issued',
-            LoanApplication::STATUS_ISSUED ?? 'issued',
-            LoanApplication::STATUS_RETURNED ?? 'returned',
-            LoanApplication::STATUS_OVERDUE ?? 'overdue',
-            LoanApplication::STATUS_CANCELLED ?? 'cancelled',
+            LoanApplication::STATUS_DRAFT                                 ?? 'draft',
+            LoanApplication::STATUS_PROCESSING                            ?? 'processing',
+            LoanApplication::STATUS_PENDING_SUPPORT                       ?? 'pending_support',
+            LoanApplication::STATUS_PENDING_APPROVER_REVIEW               ?? 'pending_approver_review',
+            LoanApplication::STATUS_PENDING_BPM_REVIEW                    ?? 'pending_bpm_review',
+            LoanApplication::STATUS_APPROVED                              ?? 'approved',
+            LoanApplication::STATUS_REJECTED                              ?? 'rejected',
+            LoanApplication::STATUS_PARTIALLY_ISSUED                      ?? 'partially_issued',
+            LoanApplication::STATUS_ISSUED                                ?? 'issued',
+            LoanApplication::STATUS_RETURNED                              ?? 'returned',
+            LoanApplication::STATUS_OVERDUE                               ?? 'overdue',
+            LoanApplication::STATUS_CANCELLED                             ?? 'cancelled',
             LoanApplication::STATUS_PARTIALLY_RETURNED_PENDING_INSPECTION ?? 'partially_returned_pending_inspection',
-            LoanApplication::STATUS_COMPLETED ?? 'completed',
+            LoanApplication::STATUS_COMPLETED                             ?? 'completed',
         ];
         $status = $this->faker->randomElement($statuses);
 
         // For audit columns (created_by, updated_by, etc.)
         $auditUserId = $userId;
-        $isDeleted = $this->faker->boolean(2); // ~2% soft deleted
-        $deletedAt = $isDeleted ? Carbon::parse($this->faker->dateTimeBetween($loanEndDate, 'now')) : null;
+        $isDeleted   = $this->faker->boolean(2); // ~2% soft deleted
+        $deletedAt   = $isDeleted ? Carbon::parse($this->faker->dateTimeBetween($loanEndDate, 'now')) : null;
 
         // Return location (fixed or random)
         $returnLocation = $this->faker->optional(0.8)->randomElement([
@@ -72,34 +70,34 @@ class LoanApplicationFactory extends Factory
         ]);
 
         return [
-            'user_id'                => $userId,
+            'user_id' => $userId,
             // Default to null to avoid FK constraint errors in tests that don't seed officers.
-            'responsible_officer_id' => null,
-            'supporting_officer_id'  => null, // Optional, can be filled if needed
-            'purpose'                => $msFaker->sentence(8), // Reason for application
-            'location'               => $msFaker->city,
-            'return_location'        => $returnLocation,
-            'loan_start_date'        => $loanStartDate,
-            'loan_end_date'          => $loanEndDate,
-            'status'                 => $status,
-            'rejection_reason'       => null,
+            'responsible_officer_id'           => null,
+            'supporting_officer_id'            => null, // Optional, can be filled if needed
+            'purpose'                          => $msFaker->sentence(8), // Reason for application
+            'location'                         => $msFaker->city,
+            'return_location'                  => $returnLocation,
+            'loan_start_date'                  => $loanStartDate,
+            'loan_end_date'                    => $loanEndDate,
+            'status'                           => $status,
+            'rejection_reason'                 => null,
             'applicant_confirmation_timestamp' => null,
-            'submitted_at'           => null,
-            'approved_by'            => null,
-            'approved_at'            => $approvalDate,
-            'rejected_by'            => null,
-            'rejected_at'            => null,
-            'cancelled_by'           => null,
-            'cancelled_at'           => null,
-            'admin_notes'            => $msFaker->optional(0.3)->sentence(10),
-            'current_approval_officer_id' => null,
-            'current_approval_stage'      => null,
-            'created_by'             => $auditUserId,
-            'updated_by'             => $auditUserId,
-            'deleted_by'             => $isDeleted ? $auditUserId : null,
-            'created_at'             => $applicationDate,
-            'updated_at'             => $approvalDate,
-            'deleted_at'             => $deletedAt,
+            'submitted_at'                     => null,
+            'approved_by'                      => null,
+            'approved_at'                      => $approvalDate,
+            'rejected_by'                      => null,
+            'rejected_at'                      => null,
+            'cancelled_by'                     => null,
+            'cancelled_at'                     => null,
+            'admin_notes'                      => $msFaker->optional(0.3)->sentence(10),
+            'current_approval_officer_id'      => null,
+            'current_approval_stage'           => null,
+            'created_by'                       => $auditUserId,
+            'updated_by'                       => $auditUserId,
+            'deleted_by'                       => $isDeleted ? $auditUserId : null,
+            'created_at'                       => $applicationDate,
+            'updated_at'                       => $approvalDate,
+            'deleted_at'                       => $deletedAt,
         ];
     }
 
@@ -108,9 +106,9 @@ class LoanApplicationFactory extends Factory
      */
     public function approved(): static
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes): array {
             return [
-                'status' => LoanApplication::STATUS_APPROVED ?? 'approved',
+                'status'      => LoanApplication::STATUS_APPROVED ?? 'approved',
                 'approved_at' => now(),
                 'approved_by' => $attributes['responsible_officer_id'] ?? null,
             ];
@@ -123,7 +121,7 @@ class LoanApplicationFactory extends Factory
     public function draft(): static
     {
         return $this->state([
-            'status' => LoanApplication::STATUS_DRAFT ?? 'draft',
+            'status'      => LoanApplication::STATUS_DRAFT ?? 'draft',
             'approved_at' => null,
             'approved_by' => null,
         ]);
@@ -135,7 +133,7 @@ class LoanApplicationFactory extends Factory
     public function rejected(): static
     {
         return $this->state([
-            'status' => LoanApplication::STATUS_REJECTED ?? 'rejected',
+            'status'      => LoanApplication::STATUS_REJECTED ?? 'rejected',
             'rejected_at' => now(),
             'rejected_by' => null,
         ]);
@@ -166,7 +164,7 @@ class LoanApplicationFactory extends Factory
      */
     public function deleted(): static
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes): array {
             return [
                 'deleted_at' => now(),
                 'deleted_by' => $attributes['created_by'] ?? null,
@@ -180,8 +178,9 @@ class LoanApplicationFactory extends Factory
     public function forUser(User|int $user): static
     {
         $userId = $user instanceof User ? $user->id : $user;
+
         return $this->state([
-            'user_id' => $userId,
+            'user_id'    => $userId,
             'created_by' => $userId,
             'updated_by' => $userId,
         ]);
@@ -204,9 +203,10 @@ class LoanApplicationFactory extends Factory
     public function certified(): static
     {
         $now = now();
+
         return $this->state([
             'applicant_confirmation_timestamp' => $now,
-            'submitted_at' => $now,
+            'submitted_at'                     => $now,
         ]);
     }
 
@@ -226,7 +226,7 @@ class LoanApplicationFactory extends Factory
     public function cancelled(): static
     {
         return $this->state([
-            'status' => LoanApplication::STATUS_CANCELLED ?? 'cancelled',
+            'status'       => LoanApplication::STATUS_CANCELLED ?? 'cancelled',
             'cancelled_at' => now(),
             'cancelled_by' => null,
         ]);
@@ -234,11 +234,11 @@ class LoanApplicationFactory extends Factory
 
     /**
      * After-creation: Attach N items to this application.
-     * Usage: ->withItems(2)
+     * Usage: ->withItems(2).
      */
     public function withItems(int $count = 1): static
     {
-        return $this->afterCreating(function (LoanApplication $application) use ($count) {
+        return $this->afterCreating(function (LoanApplication $application) use ($count): void {
             // Ensure related LoanApplicationItemFactory is optimized for bulk if needed
             \App\Models\LoanApplicationItem::factory()
                 ->count($count)

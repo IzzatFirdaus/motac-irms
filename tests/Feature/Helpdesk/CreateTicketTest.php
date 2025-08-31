@@ -26,7 +26,7 @@ class CreateTicketTest extends TestCase
     }
 
     /** @test */
-    public function a_user_can_create_a_helpdesk_ticket()
+    public function a_user_can_create_a_helpdesk_ticket(): void
     {
         $user     = User::factory()->create();
         $category = HelpdeskCategory::first();
@@ -55,7 +55,7 @@ class CreateTicketTest extends TestCase
     }
 
     /** @test */
-    public function a_user_can_upload_attachments_when_creating_a_ticket()
+    public function a_user_can_upload_attachments_when_creating_a_ticket(): void
     {
         $user     = User::factory()->create();
         $category = HelpdeskCategory::first();
@@ -79,13 +79,13 @@ class CreateTicketTest extends TestCase
     }
 
     /** @test */
-    public function guests_cannot_create_a_helpdesk_ticket()
+    public function guests_cannot_create_a_helpdesk_ticket(): void
     {
         $this->get(route('helpdesk.create'))->assertRedirect(route('login'));
     }
 
     /** @test */
-    public function it_requires_title_description_category_and_priority()
+    public function it_requires_title_description_category_and_priority(): void
     {
         $user = User::factory()->create();
         Livewire::actingAs($user)

@@ -26,7 +26,7 @@ class ApprovalSeeder extends Seeder
         $auditUser = User::orderBy('id')->first() ?? User::factory()->create(['name' => 'Audit User Fallback (ApprovalSeeder)']);
 
         // Get all eligible officers (by role) once, as a flat array of IDs.
-        $officerIds = User::whereHas('roles', function ($q) {
+        $officerIds = User::whereHas('roles', function ($q): void {
             $q->whereIn('name', [
                 'Admin', 'BPM Staff', 'IT Admin', 'HOD', 'Approver',
             ]);
@@ -49,7 +49,7 @@ class ApprovalSeeder extends Seeder
         $batch = [];
 
         // Helper: returns a full approval array with all columns, filling unused with null
-        $approvalArray = function ($overrides = []) use ($auditUser, $now) {
+        $approvalArray = function ($overrides = []) use ($auditUser, $now): array {
             return array_merge([
                 'approvable_type' => $overrides['approvable_type'] ?? null,
                 'approvable_id'   => $overrides['approvable_id']   ?? null,
@@ -121,6 +121,7 @@ class ApprovalSeeder extends Seeder
                 'notes'           => 'Dibatalkan oleh pemohon.',
             ]);
         }
+
         foreach ($loanApplications->shuffle()->take(2) as $application) {
             $batch[] = $approvalArray([
                 'approvable_type' => get_class($application),
@@ -153,6 +154,6 @@ class ApprovalSeeder extends Seeder
             Approval::insert($chunk);
         }
 
-        Log::info('ApprovalSeeder: Inserted ' . count($batch) . ' approval tasks in batch.');
+        Log::info('ApprovalSeeder: Inserted '.count($batch).' approval tasks in batch.');
     }
 }

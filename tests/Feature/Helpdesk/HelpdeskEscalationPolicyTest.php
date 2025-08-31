@@ -7,7 +7,6 @@ use App\Models\User;
 use App\Services\TicketNotificationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
@@ -27,7 +26,7 @@ class HelpdeskEscalationPolicyTest extends TestCase
     }
 
     /** @test */
-    public function overdue_tickets_trigger_escalation_notification_to_it_admins()
+    public function overdue_tickets_trigger_escalation_notification_to_it_admins(): void
     {
         // Create an IT Admin to receive notifications
         $itAdmin = User::factory()->create();
@@ -41,16 +40,16 @@ class HelpdeskEscalationPolicyTest extends TestCase
             'sla_due_at' => Carbon::now()->subHours(1), // Set SLA due in the past
         ]);
 
-    // Use the real service to perform the escalation so Notification::fake can assert the notification
-    $service = new TicketNotificationService();
-    $service->notifyTicketEscalated($overdueTicket);
+        // Use the real service to perform the escalation so Notification::fake can assert the notification
+        $service = new TicketNotificationService;
+        $service->notifyTicketEscalated($overdueTicket);
 
-    // Assert that the escalation notification was sent to the IT Admin role
-    Notification::assertSentTo($itAdmin, \App\Notifications\TicketEscalatedNotification::class);
+        // Assert that the escalation notification was sent to the IT Admin role
+        Notification::assertSentTo($itAdmin, \App\Notifications\TicketEscalatedNotification::class);
     }
 
     /** @test */
-    public function closed_tickets_do_not_trigger_escalation()
+    public function closed_tickets_do_not_trigger_escalation(): void
     {
         $itAdmin = User::factory()->create();
         $itAdmin->assignRole('IT Admin');
@@ -63,8 +62,8 @@ class HelpdeskEscalationPolicyTest extends TestCase
             'sla_due_at' => Carbon::now()->subHours(1),
         ]);
 
-    // Use the real service; ensure escalation isn't triggered for closed tickets
-    $service = new TicketNotificationService();
+        // Use the real service; ensure escalation isn't triggered for closed tickets
+        $service = new TicketNotificationService;
         // This is a simplified check, ideally, your cron job/command would filter this out.
         // But if it still calls the method, the method itself should handle it.
         // For this test, we assert that the _notification_ is not sent if the status is closed
@@ -73,7 +72,7 @@ class HelpdeskEscalationPolicyTest extends TestCase
             $service->notifyTicketEscalated($closedOverdueTicket);
         }
 
-    Notification::assertNotSentTo($itAdmin, \App\Notifications\TicketEscalatedNotification::class);
+        Notification::assertNotSentTo($itAdmin, \App\Notifications\TicketEscalatedNotification::class);
         // Or more generally, ensure no unexpected notifications are sent.
     }
 }

@@ -36,8 +36,8 @@ class SubCategoryFactory extends Factory
         }
 
         // Pick random related IDs or null if none exist
-        $equipmentCategoryId = ! empty($categoryIds) ? Arr::random($categoryIds) : null;
-        $auditUserId         = ! empty($userIds) ? Arr::random($userIds) : null;
+        $equipmentCategoryId = empty($categoryIds) ? null : Arr::random($categoryIds);
+        $auditUserId         = empty($userIds) ? null : Arr::random($userIds);
 
         // Use a static Malaysian faker for realism and speed
         static $msFaker;
@@ -52,7 +52,7 @@ class SubCategoryFactory extends Factory
 
         return [
             'equipment_category_id' => $equipmentCategoryId,
-            'name'                  => $msFaker->unique()->words(2, true) . ' Sub-Kategori',
+            'name'                  => $msFaker->unique()->words(2, true).' Sub-Kategori',
             'description'           => $msFaker->optional(0.7)->sentence,
             'is_active'             => $this->faker->boolean(95),
             'created_by'            => $auditUserId,
@@ -81,7 +81,8 @@ class SubCategoryFactory extends Factory
         if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $deleterId = ! empty($userIds) ? Arr::random($userIds) : null;
+
+        $deleterId = empty($userIds) ? null : Arr::random($userIds);
 
         return $this->state([
             'deleted_at' => now(),

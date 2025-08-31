@@ -57,7 +57,7 @@ return new class extends Migration
             Schema::table('tickets', function (Blueprint $table): void {
                 try {
                     $table->foreign('category_id')->references('id')->on('ticket_categories')->onDelete('set null');
-                } catch (\Throwable $e) {
+                } catch (\Throwable $throwable) {
                     // ignore if cannot create FK now
                 }
             });
@@ -67,7 +67,7 @@ return new class extends Migration
             Schema::table('tickets', function (Blueprint $table): void {
                 try {
                     $table->foreign('priority_id')->references('id')->on('ticket_priorities')->onDelete('set null');
-                } catch (\Throwable $e) {
+                } catch (\Throwable $throwable) {
                     // ignore if cannot create FK now
                 }
             });

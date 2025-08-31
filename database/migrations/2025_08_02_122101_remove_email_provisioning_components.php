@@ -15,7 +15,7 @@ return new class extends Migration
     public function up(): void
     {
         // Clean up approvals related to EmailApplication (polymorphic)
-        DB::table('approvals')->where('approvable_type', 'App\\Models\\EmailApplication')->delete();
+        DB::table('approvals')->where('approvable_type', \App\Models\EmailApplication::class)->delete();
 
         // Drop the deprecated email_applications table
         Schema::dropIfExists('email_applications');
@@ -25,7 +25,7 @@ return new class extends Migration
         if (Schema::getConnection()->getDriverName() === 'sqlite') {
             Log::info('Skipping dropping user columns on sqlite (unsupported)');
         } else {
-            Schema::table('users', function (Blueprint $table) {
+            Schema::table('users', function (Blueprint $table): void {
                 if (Schema::hasColumn('users', 'motac_email')) {
                     try {
                         $sm      = Schema::getConnection()->getDoctrineSchemaManager();
@@ -34,10 +34,12 @@ return new class extends Migration
                             $table->dropUnique(['motac_email']);
                         }
                     } catch (\Exception $e) {
-                        Log::warning('Could not check or drop unique index for motac_email: ' . $e->getMessage());
+                        Log::warning('Could not check or drop unique index for motac_email: '.$e->getMessage());
                     }
+
                     $table->dropColumn('motac_email');
                 }
+
                 if (Schema::hasColumn('users', 'user_id_assigned')) {
                     try {
                         $sm      = Schema::getConnection()->getDoctrineSchemaManager();
@@ -46,19 +48,24 @@ return new class extends Migration
                             $table->dropUnique(['user_id_assigned']);
                         }
                     } catch (\Exception $e) {
-                        Log::warning('Could not check or drop unique index for user_id_assigned: ' . $e->getMessage());
+                        Log::warning('Could not check or drop unique index for user_id_assigned: '.$e->getMessage());
                     }
+
                     $table->dropColumn('user_id_assigned');
                 }
+
                 if (Schema::hasColumn('users', 'previous_department_name')) {
                     $table->dropColumn('previous_department_name');
                 }
+
                 if (Schema::hasColumn('users', 'previous_department_email')) {
                     $table->dropColumn('previous_department_email');
                 }
+
                 if (Schema::hasColumn('users', 'service_status')) {
                     $table->dropColumn('service_status');
                 }
+
                 if (Schema::hasColumn('users', 'appointment_type')) {
                     $table->dropColumn('appointment_type');
                 }
@@ -69,7 +76,7 @@ return new class extends Migration
     public function down(): void
     {
         // Recreate the email_applications table (basic rollback, may need adjustment if structure changes)
-        Schema::create('email_applications', function (Blueprint $table) {
+        Schema::create('email_applications', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('application_type'); // e.g., 'new_email', 'reset_password'
@@ -84,7 +91,7 @@ return new class extends Migration
         });
 
         // Add back columns to users table
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->string('motac_email')->unique()->nullable()->after('email');
             $table->string('user_id_assigned')->unique()->nullable()->after('motac_email');
             $table->string('previous_department_name')->nullable()->after('user_id_assigned');

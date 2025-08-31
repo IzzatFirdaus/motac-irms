@@ -33,7 +33,8 @@ class ApprovalFactory extends Factory
         if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $officerId = ! empty($userIds) ? Arr::random($userIds) : null;
+
+        $officerId = empty($userIds) ? null : Arr::random($userIds);
 
         // Static faker for Malay locale
         static $msFaker;
@@ -45,7 +46,7 @@ class ApprovalFactory extends Factory
         $stageKeys = method_exists(Approval::class, 'getStageKeys')
             ? Approval::getStageKeys()
             : array_keys(Approval::$STAGES_LABELS ?? [Approval::STAGE_SUPPORT_REVIEW => 'Support Review']);
-        $stage = $this->faker->randomElement($stageKeys ?: [Approval::STAGE_SUPPORT_REVIEW]);
+        $stage = $this->faker->randomElement($stageKeys !== [] ? $stageKeys : [Approval::STAGE_SUPPORT_REVIEW]);
 
         $statusKeys = method_exists(Approval::class, 'getStatusKeys')
             ? Approval::getStatusKeys()
@@ -99,6 +100,7 @@ class ApprovalFactory extends Factory
             if (! $msFaker) {
                 $msFaker = \Faker\Factory::create('ms_MY');
             }
+
             $data = [
                 'status' => $statusValue,
             ];
@@ -175,7 +177,7 @@ class ApprovalFactory extends Factory
         $validStages = method_exists(Approval::class, 'getStageKeys')
             ? Approval::getStageKeys()
             : array_keys(Approval::$STAGES_LABELS ?? []);
-        if (! in_array($stage, $validStages) && ! empty($validStages)) {
+        if (! in_array($stage, $validStages) && $validStages !== []) {
             // Optionally log a warning here
         }
 
@@ -191,7 +193,8 @@ class ApprovalFactory extends Factory
         if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $deleterId = ! empty($userIds) ? Arr::random($userIds) : null;
+
+        $deleterId = empty($userIds) ? null : Arr::random($userIds);
 
         return $this->state([
             'deleted_at' => now(),

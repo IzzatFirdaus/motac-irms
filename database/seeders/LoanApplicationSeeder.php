@@ -58,7 +58,7 @@ class LoanApplicationSeeder extends Seeder
                     return array_pop($userIds) ?? User::inRandomOrder()->value('id');
                 },
             ]);
-        Log::info("Created {$counts['draft']} draft loan applications.");
+        Log::info(sprintf('Created %d draft loan applications.', $counts['draft']));
 
         // 2. Certified & pending support (batch create, combine states)
         LoanApplication::factory()
@@ -72,7 +72,7 @@ class LoanApplicationSeeder extends Seeder
                     return array_pop($userIds) ?? User::inRandomOrder()->value('id');
                 },
             ]);
-        Log::info("Created {$counts['certified_pending_support']} certified & pending support loan applications.");
+        Log::info(sprintf('Created %d certified & pending support loan applications.', $counts['certified_pending_support']));
 
         // 3. Approved applications with items (must use afterCreating for withItems)
         LoanApplication::factory()
@@ -86,7 +86,7 @@ class LoanApplicationSeeder extends Seeder
                     return array_pop($userIds) ?? User::inRandomOrder()->value('id');
                 },
             ]);
-        Log::info("Created {$counts['approved_with_items']} approved loan applications with items.");
+        Log::info(sprintf('Created %d approved loan applications with items.', $counts['approved_with_items']));
 
         // 4. Issued applications with items (must use afterCreating for withItems)
         LoanApplication::factory()
@@ -100,7 +100,7 @@ class LoanApplicationSeeder extends Seeder
                     return array_pop($userIds) ?? User::inRandomOrder()->value('id');
                 },
             ]);
-        Log::info("Created {$counts['issued_with_items']} issued loan applications with items.");
+        Log::info(sprintf('Created %d issued loan applications with items.', $counts['issued_with_items']));
 
         // 5. Returned applications with items (must use afterCreating for withItems)
         LoanApplication::factory()
@@ -114,7 +114,7 @@ class LoanApplicationSeeder extends Seeder
                     return array_pop($userIds) ?? User::inRandomOrder()->value('id');
                 },
             ]);
-        Log::info("Created {$counts['returned_with_items']} returned loan applications with items.");
+        Log::info(sprintf('Created %d returned loan applications with items.', $counts['returned_with_items']));
 
         // 6. Rejected applications (batch create, no after-creation hooks)
         LoanApplication::factory()
@@ -127,7 +127,7 @@ class LoanApplicationSeeder extends Seeder
                     return array_pop($userIds) ?? User::inRandomOrder()->value('id');
                 },
             ]);
-        Log::info("Created {$counts['rejected']} rejected loan applications.");
+        Log::info(sprintf('Created %d rejected loan applications.', $counts['rejected']));
 
         // 7. Cancelled applications (batch create, no after-creation hooks)
         LoanApplication::factory()
@@ -140,7 +140,7 @@ class LoanApplicationSeeder extends Seeder
                     return array_pop($userIds) ?? User::inRandomOrder()->value('id');
                 },
             ]);
-        Log::info("Created {$counts['cancelled']} cancelled loan applications.");
+        Log::info(sprintf('Created %d cancelled loan applications.', $counts['cancelled']));
 
         // 8. Soft-deleted applications (batch create)
         LoanApplication::factory()
@@ -154,7 +154,7 @@ class LoanApplicationSeeder extends Seeder
                     return array_pop($userIds) ?? User::inRandomOrder()->value('id');
                 },
             ]);
-        Log::info("Created {$counts['deleted']} deleted loan applications.");
+        Log::info(sprintf('Created %d deleted loan applications.', $counts['deleted']));
 
         Log::info('Loan Application seeding complete (Optimized).');
     }

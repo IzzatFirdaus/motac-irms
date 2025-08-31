@@ -30,21 +30,24 @@ class LoanTransactionItemFactory extends Factory
         if (! isset($transactionIds)) {
             $transactionIds = LoanTransaction::pluck('id')->all();
         }
+
         if (! isset($equipmentIds)) {
             $equipmentIds = Equipment::pluck('id')->all();
         }
+
         if (! isset($loanAppItemIds)) {
             $loanAppItemIds = LoanApplicationItem::pluck('id')->all();
         }
+
         if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
 
         // Pick random related IDs or null if none exist
-        $loanTransactionId = ! empty($transactionIds) ? Arr::random($transactionIds) : null;
-        $equipmentId       = ! empty($equipmentIds) ? Arr::random($equipmentIds) : null;
-        $loanAppItemId     = ! empty($loanAppItemIds) ? Arr::random($loanAppItemIds) : null;
-        $auditUserId       = ! empty($userIds) ? Arr::random($userIds) : null;
+        $loanTransactionId = empty($transactionIds) ? null : Arr::random($transactionIds);
+        $equipmentId       = empty($equipmentIds) ? null : Arr::random($equipmentIds);
+        $loanAppItemId     = empty($loanAppItemIds) ? null : Arr::random($loanAppItemIds);
+        $auditUserId       = empty($userIds) ? null : Arr::random($userIds);
 
         // Status options from model constants (fallback if not defined)
         $itemStatuses = [
@@ -124,7 +127,7 @@ class LoanTransactionItemFactory extends Factory
     {
         $accessories = config('motac.loan_accessories_list', ['Adapter Kuasa', 'Tetikus', 'Beg Komputer Riba']);
 
-        return $this->state(function (array $attributes) use ($accessories) {
+        return $this->state(function (array $attributes) use ($accessories): array {
             return [
                 'status'                       => LoanTransactionItem::STATUS_ITEM_RETURNED_GOOD ?? 'returned_good',
                 'condition_on_return'          => Equipment::CONDITION_GOOD                      ?? 'good',
@@ -154,7 +157,7 @@ class LoanTransactionItemFactory extends Factory
             $msFaker = \Faker\Factory::create('ms_MY');
         }
 
-        return $this->state(function (array $attributes) use ($msFaker, $accessories, $damageStatuses, $damageConditions) {
+        return $this->state(function (array $attributes) use ($msFaker, $accessories, $damageStatuses, $damageConditions): array {
             return [
                 'status'                       => Arr::random($damageStatuses),
                 'condition_on_return'          => Arr::random($damageConditions),
@@ -203,7 +206,8 @@ class LoanTransactionItemFactory extends Factory
         if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $deleterId = ! empty($userIds) ? Arr::random($userIds) : null;
+
+        $deleterId = empty($userIds) ? null : Arr::random($userIds);
 
         return $this->state([
             'deleted_at' => now(),

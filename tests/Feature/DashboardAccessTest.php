@@ -39,10 +39,10 @@ class DashboardAccessTest extends TestCase
         }
 
         // Create users and assign roles for both guards
-        $this->adminUser = User::factory()->create();
+        $this->adminUser    = User::factory()->create();
         $this->bpmStaffUser = User::factory()->create();
-        $this->itAdminUser = User::factory()->create();
-        $this->regularUser = User::factory()->create();
+        $this->itAdminUser  = User::factory()->create();
+        $this->regularUser  = User::factory()->create();
         $this->approverUser = User::factory()->create();
 
         foreach ($guards as $guard) {
@@ -58,26 +58,26 @@ class DashboardAccessTest extends TestCase
 
     public function test_admin_sees_admin_dashboard(): void
     {
-    $response = $this->actingAs($this->adminUser, 'web')->get('/dashboard');
-    $response->assertOk();
-    $response->assertViewIs('dashboard.admin');
-    $response->assertSeeText('Admin Dashboard');
+        $response = $this->actingAs($this->adminUser, 'web')->get('/dashboard');
+        $response->assertOk();
+        $response->assertViewIs('dashboard.admin');
+        $response->assertSeeText('Admin Dashboard');
     }
 
     public function test_bpm_staff_sees_bpm_dashboard(): void
     {
-    $response = $this->actingAs($this->bpmStaffUser, 'web')->get('/dashboard');
-    $response->assertOk();
-    $response->assertViewIs('dashboard.bpm-staff');
-    $response->assertSeeText('BPM Staff Dashboard');
+        $response = $this->actingAs($this->bpmStaffUser, 'web')->get('/dashboard');
+        $response->assertOk();
+        $response->assertViewIs('dashboard.bpm-staff');
+        $response->assertSeeText('BPM Staff Dashboard');
     }
 
     public function test_it_admin_sees_it_admin_dashboard(): void
     {
-    $response = $this->actingAs($this->itAdminUser, 'web')->get('/dashboard');
-    $response->assertOk();
-    $response->assertViewIs('dashboard.it-admin');
-    $response->assertSeeText('IT Admin Dashboard');
+        $response = $this->actingAs($this->itAdminUser, 'web')->get('/dashboard');
+        $response->assertOk();
+        $response->assertViewIs('dashboard.it-admin');
+        $response->assertSeeText('IT Admin Dashboard');
     }
 
     public function test_approver_sees_approver_dashboard(): void
@@ -85,41 +85,41 @@ class DashboardAccessTest extends TestCase
         // Create a pending loan application for the approver to see
         $loanApplication = LoanApplication::factory()->create(['status' => 'pending_support']);
         Approval::factory()->create([
-            'approvable_id' => $loanApplication->id,
+            'approvable_id'   => $loanApplication->id,
             'approvable_type' => LoanApplication::class,
-            'officer_id' => $this->approverUser->id,
-            'status' => 'pending',
+            'officer_id'      => $this->approverUser->id,
+            'status'          => 'pending',
         ]);
 
-    $response = $this->actingAs($this->approverUser, 'web')->get('/dashboard');
-    $response->assertOk();
-    $response->assertViewIs('dashboard.approver');
-    $response->assertSeeText('Your Approval Tasks');
+        $response = $this->actingAs($this->approverUser, 'web')->get('/dashboard');
+        $response->assertOk();
+        $response->assertViewIs('dashboard.approver');
+        $response->assertSeeText('Your Approval Tasks');
     }
 
     public function test_regular_user_sees_user_dashboard(): void
     {
-    $response = $this->actingAs($this->regularUser, 'web')->get('/dashboard');
-    $response->assertOk();
-    $response->assertViewIs('dashboard.user');
-    $response->assertSeeText(sprintf('Welcome, %s!', $this->regularUser->name));
+        $response = $this->actingAs($this->regularUser, 'web')->get('/dashboard');
+        $response->assertOk();
+        $response->assertViewIs('dashboard.user');
+        $response->assertSeeText(sprintf('Welcome, %s!', $this->regularUser->name));
     }
 
     public function test_regular_user_cannot_access_admin_equipment_page(): void
     {
-    $response = $this->actingAs($this->regularUser, 'web')->get(route('admin.equipment.index'));
-    $response->assertStatus(403);
+        $response = $this->actingAs($this->regularUser, 'web')->get(route('admin.equipment.index'));
+        $response->assertStatus(403);
     }
 
     public function test_bpm_staff_can_access_admin_equipment_page(): void
     {
-    $response = $this->actingAs($this->bpmStaffUser, 'web')->get(route('admin.equipment.index'));
-    $response->assertOk();
+        $response = $this->actingAs($this->bpmStaffUser, 'web')->get(route('admin.equipment.index'));
+        $response->assertOk();
     }
 
     public function test_regular_user_cannot_access_settings(): void
     {
-    $response = $this->actingAs($this->regularUser, 'web')->get(route('settings.index'));
-    $response->assertStatus(403);
+        $response = $this->actingAs($this->regularUser, 'web')->get(route('settings.index'));
+        $response->assertStatus(403);
     }
 }

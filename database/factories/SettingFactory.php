@@ -27,7 +27,8 @@ class SettingFactory extends Factory
         if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $auditUserId = ! empty($userIds) ? Arr::random($userIds) : null;
+
+        $auditUserId = empty($userIds) ? null : Arr::random($userIds);
 
         // Use static Malaysian faker for performance and consistency
         static $msFaker;
@@ -44,7 +45,7 @@ class SettingFactory extends Factory
 
         return [
             // General site/application settings
-            'site_name'        => $msFaker->company . ' RMS',
+            'site_name'        => $msFaker->company.' RMS',
             'site_logo_path'   => '/images/motac_default_logo.png',
             'application_name' => 'MOTAC Integrated Resource Management System',
 
@@ -92,7 +93,8 @@ class SettingFactory extends Factory
         if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $auditUserId = ! empty($userIds) ? Arr::random($userIds) : null;
+
+        $auditUserId = empty($userIds) ? null : Arr::random($userIds);
 
         return $this->state(function (array $attributes) use ($auditUserId): array {
             return [
@@ -131,7 +133,8 @@ class SettingFactory extends Factory
         if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $deleterId = ! empty($userIds) ? Arr::random($userIds) : null;
+
+        $deleterId = empty($userIds) ? null : Arr::random($userIds);
 
         return $this->state([
             'deleted_at' => now(),

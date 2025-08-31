@@ -21,6 +21,7 @@ return new class extends Migration
         if (empty($tableNames)) {
             throw new \Exception('Error: config/permission.php not loaded. Run [php artisan config:clear] and try again.');
         }
+
         if ($teams && empty($columnNames['team_foreign_key'] ?? null)) {
             throw new \Exception('Error: team_foreign_key on config/permission.php not loaded. Run [php artisan config:clear] and try again.');
         }
@@ -41,6 +42,7 @@ return new class extends Migration
                 $table->unsignedBigInteger($columnNames['team_foreign_key'])->nullable();
                 $table->index($columnNames['team_foreign_key'], 'roles_team_foreign_key_index');
             }
+
             $table->string('name');
             $table->string('guard_name');
             $table->timestamps();
@@ -104,6 +106,7 @@ return new class extends Migration
         if (empty($tableNames)) {
             throw new \Exception('Error: config/permission.php not found. Please publish the package config or drop tables manually.');
         }
+
         Schema::drop($tableNames['role_has_permissions']);
         Schema::drop($tableNames['model_has_roles']);
         Schema::drop($tableNames['model_has_permissions']);

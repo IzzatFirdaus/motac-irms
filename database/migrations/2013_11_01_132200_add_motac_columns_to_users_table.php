@@ -11,7 +11,7 @@ class AddMotacColumnsToUsersTable extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             // Add foreign key columns
             $table->string('employee_id')->nullable()->after('id');
             $table->unsignedBigInteger('department_id')->nullable()->after('employee_id');
@@ -41,7 +41,7 @@ class AddMotacColumnsToUsersTable extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             // Define columns to drop
             $columnsToDrop = [
                 'employee_id', 'department_id', 'position_id', 'grade_id',
@@ -67,7 +67,7 @@ class AddMotacColumnsToUsersTable extends Migration
             foreach (['department_id', 'position_id', 'grade_id', 'created_by', 'updated_by', 'deleted_by'] as $column) {
                 if (Schema::hasColumn('users', $column)) {
                     try {
-                        $table->dropForeign(['users_' . $column . '_foreign']);
+                        $table->dropForeign(['users_'.$column.'_foreign']);
                     } catch (\Exception $e) {
                         // Foreign key may not exist, continue
                     }

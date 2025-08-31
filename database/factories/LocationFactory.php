@@ -29,7 +29,7 @@ class LocationFactory extends Factory
         }
 
         // Pick random user IDs or null if none exist
-        $auditUserId = ! empty($userIds) ? Arr::random($userIds) : null;
+        $auditUserId = empty($userIds) ? null : Arr::random($userIds);
 
         // Use a static Malaysian faker for address realism and speed
         static $msFaker;
@@ -44,7 +44,7 @@ class LocationFactory extends Factory
 
         return [
             // Example: 'Aras 3, Sayap Kanan, Menara A'
-            'name' => 'Aras ' . $this->faker->numberBetween(1, 20) . ', ' .
+            'name' => 'Aras '.$this->faker->numberBetween(1, 20).', '.
                 $this->faker->randomElement(['Sayap Kiri', 'Sayap Kanan', 'Menara', 'Blok', 'Pejabat', 'Bilik', 'Unit']),
             'description' => $msFaker->optional(0.7)->sentence(10),
             'address'     => $msFaker->optional(0.8)->streetAddress,
@@ -87,7 +87,8 @@ class LocationFactory extends Factory
         if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $deleterId = ! empty($userIds) ? Arr::random($userIds) : null;
+
+        $deleterId = empty($userIds) ? null : Arr::random($userIds);
 
         return $this->state([
             'deleted_at' => now(),

@@ -31,9 +31,11 @@ return new class extends Migration
             if (Schema::hasColumn('equipment_categories', 'created_by')) {
                 $table->dropForeign(['created_by']);
             }
+
             if (Schema::hasColumn('equipment_categories', 'updated_by')) {
                 $table->dropForeign(['updated_by']);
             }
+
             if (Schema::hasColumn('equipment_categories', 'deleted_by')) {
                 $table->dropForeign(['deleted_by']);
             }
