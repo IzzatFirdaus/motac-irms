@@ -23,26 +23,51 @@ class AdminTicketManagementTest extends TestCase
         Role::firstOrCreate(['name' => 'IT Admin']);
         Role::firstOrCreate(['name' => 'User']);
 
-        // Create necessary categories and priorities
-        HelpdeskCategory::factory()->create(['name' => 'Software']);
-        HelpdeskPriority::factory()->create(['name' => 'High', 'level' => 3]);
+        // Create necessary categories and priorities (idempotent)
+        HelpdeskCategory::firstOrCreate(['name' => 'Software'], ['is_active' => 1, 'created_by' => 1, 'updated_by' => 1]);
+        HelpdeskPriority::firstOrCreate(['name' => 'High'], ['level' => 3, 'is_active' => 1, 'created_by' => 1, 'updated_by' => 1]);
     }
 
     /** @test */
     public function only_it_admins_or_admins_can_view_ticket_management_page()
     {
-        $admin = User::factory()->create();
+        $admin = User::factory()->create(['email_verified_at' => now()]);
         $admin->assignRole('Admin');
 
-        $itAdmin = User::factory()->create();
+        $itAdmin = User::factory()->create(['email_verified_at' => now()]);
         $itAdmin->assignRole('IT Admin');
 
-        $user = User::factory()->create();
+        $user = User::factory()->create(['email_verified_at' => now()]);
         $user->assignRole('User');
 
-        $this->actingAs($admin)->get(route('helpdesk.admin.index'))->assertOk();
-        $this->actingAs($itAdmin)->get(route('helpdesk.admin.index'))->assertOk();
-        $this->actingAs($user)->get(route('helpdesk.admin.index'))->assertForbidden(); // Users cannot access
+        // Admin (use session guard for web routes)
+        $this->actingAs($admin, 'web');
+        $this->assertAuthenticatedAs($admin, 'web');
+        $response = $this->get(route('helpdesk.admin.tickets'));
+        if ($response->status() !== 200) {
+            // Dump headers and body to help diagnose redirects
+            $response->dumpHeaders();
+            $response->dump();
+        }
+        $response->assertOk();
+
+        // IT Admin
+        $this->actingAs($itAdmin, 'web');
+        $response = $this->get(route('helpdesk.admin.tickets'));
+        if ($response->status() !== 200) {
+            $response->dumpHeaders();
+            $response->dump();
+        }
+        $response->assertOk();
+
+        // Regular user should be forbidden
+        $this->actingAs($user, 'web');
+        $response = $this->get(route('helpdesk.admin.tickets'));
+        if ($response->status() !== 403) {
+            $response->dumpHeaders();
+            $response->dump();
+        }
+        $response->assertForbidden(); // Users cannot access
     }
 
     /** @test */

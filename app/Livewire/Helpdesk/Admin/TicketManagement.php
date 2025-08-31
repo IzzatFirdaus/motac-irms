@@ -121,7 +121,9 @@ class TicketManagement extends Component
     public function staffUsers()
     {
         // Get all staff users that can be assigned tickets
-        return User::role('BPM Staff')->orderBy('name')->get();
+        // Force the 'web' guard when resolving roles to avoid issues when the
+        // current default guard is 'sanctum' (tests may run with different guards).
+        return User::role('BPM Staff', 'web')->orderBy('name')->get();
     }
 
     public function viewTicketDetails(HelpdeskTicket $ticket): void
@@ -328,12 +330,12 @@ class TicketManagement extends Component
                 $updater
             );
 
-            // If resolved status implies closure in domain, set closed_at via service close
+            // If resolved status implies the ticket is effectively closed, set closed_at
+            // but keep the status as 'resolved' to preserve domain semantics expected by tests.
             if (($this->editStatus ?? '') === HelpdeskTicket::STATUS_RESOLVED) {
-                // Ensure closed_at is set when resolved or explicitly closed
                 $this->helpdeskService->updateTicket(
                     $this->selectedTicket->fresh(),
-                    ['status' => HelpdeskTicket::STATUS_CLOSED],
+                    ['closed_at' => now(), 'closed_by_id' => $updater->id],
                     $updater
                 );
             }

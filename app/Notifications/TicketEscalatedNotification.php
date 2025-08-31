@@ -12,9 +12,7 @@ class TicketEscalatedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public HelpdeskTicket $ticket)
-    {
-    }
+    public function __construct(public HelpdeskTicket $ticket) {}
 
     public function via(object $notifiable): array
     {

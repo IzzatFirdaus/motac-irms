@@ -8,18 +8,15 @@ use App\Models\User;
 use App\Notifications\TicketAssignedNotification;
 use App\Notifications\TicketCommentAddedNotification;
 use App\Notifications\TicketCreatedNotification;
-use App\Notifications\TicketStatusUpdatedNotification;
 use App\Notifications\TicketEscalatedNotification;
-use Illuminate\Support\Facades\Notification;
+use App\Notifications\TicketStatusUpdatedNotification;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 class TicketNotificationService
 {
     /**
      * Notify when a new ticket is created.
-     *
-     * @param HelpdeskTicket $ticket
-     * @return void
      */
     public function notifyTicketCreated(HelpdeskTicket $ticket): void
     {
@@ -35,10 +32,6 @@ class TicketNotificationService
 
     /**
      * Notify when a ticket is assigned.
-     *
-     * @param HelpdeskTicket $ticket
-     * @param User $assigner
-     * @return void
      */
     public function notifyTicketAssigned(HelpdeskTicket $ticket, User $assigner): void
     {
@@ -50,10 +43,6 @@ class TicketNotificationService
 
     /**
      * Notify when a ticket's status is updated.
-     *
-     * @param HelpdeskTicket $ticket
-     * @param User $updater
-     * @return void
      */
     public function notifyTicketStatusUpdated(HelpdeskTicket $ticket, User $updater): void
     {
@@ -70,17 +59,13 @@ class TicketNotificationService
 
     /**
      * Notify when a comment is added to a ticket.
-     *
-     * @param HelpdeskComment $comment
-     * @param User $commenter
-     * @return void
      */
     public function notifyTicketCommentAdded(HelpdeskComment $comment, User $commenter): void
     {
         $ticket = $comment->ticket;
 
         // Notify applicant if comment is not internal OR if internal and applicant needs to see (less common)
-        if (!$comment->is_internal && $ticket->applicant->id !== $commenter->id) {
+        if (! $comment->is_internal && $ticket->applicant->id !== $commenter->id) {
             $ticket->applicant->notify(new TicketCommentAddedNotification($comment, $commenter, 'applicant'));
         }
 
@@ -92,8 +77,8 @@ class TicketNotificationService
         // If an internal comment, notify other IT Admins
         if ($comment->is_internal) {
             $itAdmins = User::role('IT Admin')
-                            ->where('id', '!=', $commenter->id) // Don't notify the commenter themselves
-                            ->get();
+                ->where('id', '!=', $commenter->id) // Don't notify the commenter themselves
+                ->get();
             Notification::send($itAdmins, new TicketCommentAddedNotification($comment, $commenter, 'internal_admin'));
         }
 
@@ -103,14 +88,11 @@ class TicketNotificationService
     /**
      * Handle escalation notification for overdue tickets.
      * This method might be called by a scheduled command.
-     *
-     * @param HelpdeskTicket $ticket
-     * @return void
      */
     public function notifyTicketEscalated(HelpdeskTicket $ticket): void
     {
         $itAdmins = User::role('IT Admin')->get();
-    Notification::send($itAdmins, new TicketEscalatedNotification($ticket));
-    Log::warning("Ticket Escalated: Ticket ID {$ticket->id} is overdue.");
+        Notification::send($itAdmins, new TicketEscalatedNotification($ticket));
+        Log::warning("Ticket Escalated: Ticket ID {$ticket->id} is overdue.");
     }
 }
