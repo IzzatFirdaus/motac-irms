@@ -37,7 +37,7 @@ class NotificationSeeder extends Seeder
             return;
         }
 
-        Log::info('Found ' . User::count() . ' Users for potential notification assignment.');
+        Log::info('Found '.User::count().' Users for potential notification assignment.');
 
         $adminUserForAudit = User::orderBy('id')->first();
         $auditUserId       = $adminUserForAudit?->id;

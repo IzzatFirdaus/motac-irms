@@ -67,7 +67,7 @@ class AddMotacColumnsToUsersTable extends Migration
             foreach (['department_id', 'position_id', 'grade_id', 'created_by', 'updated_by', 'deleted_by'] as $column) {
                 if (Schema::hasColumn('users', $column)) {
                     try {
-                        $table->dropForeign(['users_' . $column . '_foreign']);
+                        $table->dropForeign(['users_'.$column.'_foreign']);
                     } catch (\Exception $e) {
                         // Foreign key may not exist, continue
                     }

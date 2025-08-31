@@ -34,7 +34,7 @@ return new class extends Migration
                             $table->dropUnique(['motac_email']);
                         }
                     } catch (\Exception $e) {
-                        Log::warning('Could not check or drop unique index for motac_email: ' . $e->getMessage());
+                        Log::warning('Could not check or drop unique index for motac_email: '.$e->getMessage());
                     }
                     $table->dropColumn('motac_email');
                 }
@@ -46,7 +46,7 @@ return new class extends Migration
                             $table->dropUnique(['user_id_assigned']);
                         }
                     } catch (\Exception $e) {
-                        Log::warning('Could not check or drop unique index for user_id_assigned: ' . $e->getMessage());
+                        Log::warning('Could not check or drop unique index for user_id_assigned: '.$e->getMessage());
                     }
                     $table->dropColumn('user_id_assigned');
                 }
