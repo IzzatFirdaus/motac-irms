@@ -66,9 +66,9 @@ class GradePolicy
         $canManage = $user->hasRole('Admin') || $user->hasPermissionTo('manage_grades');
 
         if (! $canManage) {
-
             return Response::deny('Anda tidak mempunyai kebenaran untuk memadam gred ini.');
         }
+
         // Design Ref (Rev. 3.5): Section 4.1 (users.grade_id[cite: 70], positions.grade_id [cite: 73])
         if (method_exists($grade, 'users') && $grade->users()->exists()) {
             return Response::deny('Gred ini tidak boleh dipadam kerana ia sedang digunakan oleh pengguna.');
@@ -98,9 +98,9 @@ class GradePolicy
     public function forceDelete(User $user, Grade $grade): Response|bool
     {
         if (! $user->hasRole('Admin')) {
-
             return Response::deny('Anda tidak mempunyai kebenaran untuk memadam gred ini secara kekal.');
         }
+
         // Design Ref (Rev. 3.5): Section 4.1 (users.grade_id[cite: 70], positions.grade_id [cite: 73])
         if (method_exists($grade, 'users') && $grade->users()->exists()) {
             return Response::deny('Gred ini tidak boleh dipadam secara kekal kerana ia sedang digunakan oleh pengguna.');

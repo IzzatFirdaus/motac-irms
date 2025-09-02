@@ -19,7 +19,7 @@ class RecordApprovalDecisionRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $items = $this->input('items_approved');
-        if (! is_array($items) || empty($items)) {
+        if (! is_array($items) || $items === []) {
             return;
         }
 
@@ -35,13 +35,14 @@ class RecordApprovalDecisionRequest extends FormRequest
                 // Skip invalid payloads; validation rules will catch issues
                 continue;
             }
+
             $normalized[] = array_merge(
                 ['loan_application_item_id' => (int) $itemId],
                 $payload
             );
         }
 
-        if (! empty($normalized)) {
+        if ($normalized !== []) {
             $this->merge(['items_approved' => $normalized]);
         }
     }
@@ -76,16 +77,18 @@ class RecordApprovalDecisionRequest extends FormRequest
         /** @var Approval|null $approval */
         $approval = $this->route('approval'); //
 
-        if (! (
-            $approval                                        && //
-            $approval->approvable instanceof LoanApplication && //
-            // Only require quantity adjustments if the stage is relevant (e.g., support review)
-            // and decision is approved. Adjust sta
-            $this->input('decision') === Approval::STATUS_APPROVED
-        )) {
-
+        if (
+            ! (
+                $approval                                        && //
+                $approval->approvable instanceof LoanApplication && //
+                // Only require quantity adjustments if the stage is relevant (e.g., support review)
+                // and decision is approved. Adjust sta
+                $this->input('decision') === Approval::STATUS_APPROVED
+            )
+        ) {
             return $rules; //
-        }  //
+        }
+        //
         $rules['items_approved']                            = ['required', 'array', 'min:1']; //
         $rules['items_approved.*.loan_application_item_id'] = [ //
             'required', 'integer',
@@ -134,7 +137,6 @@ class RecordApprovalDecisionRequest extends FormRequest
         $approval = $this->route('approval');
 
         if (! ($approval && $approval->approvable instanceof LoanApplication)) {
-
             // Removed the conditional block for EmailApplication as per the refactoring plan.
             /*
             // Original code snippet from your file (to be removed)
@@ -145,6 +147,7 @@ class RecordApprovalDecisionRequest extends FormRequest
 
             return $messages; //
         }
+
         foreach ($this->input('items_approved', []) as $item) {
             $loanApplicationItemId = $item['loan_application_item_id'] ?? null;
             $loanAppItem           = null;

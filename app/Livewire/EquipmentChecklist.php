@@ -166,15 +166,15 @@ class EquipmentChecklist extends Component
             'returnAcceptingOfficer',
         ])->find($loanTransactionId);
 
-        if (! (
-            ! $this->loanTransaction || (int) $this->loanTransaction->loan_application_id !== (int) $this->loanApplicationId
-        )) {
-
+        if (
+            $this->loanTransaction && (int) $this->loanTransaction->loan_application_id === (int) $this->loanApplicationId
+        ) {
             // Populate form fields from existing transaction
             $this->populateFormFromTransaction();
 
             return;
         }
+
         Log::warning('EquipmentChecklist: Transaction not found or mismatched.', [
             'loanTransactionId' => $loanTransactionId,
             'loanApplicationId' => $this->loanApplicationId,

@@ -1,35 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Jobs;
 
 use Spatie\WebhookClient\Jobs\ProcessWebhookJob;
 use Symfony\Component\Process\Process;
 
-/**
- * Handles deployment synchronization with Github push events.
- * Runs 'git pull' as a background process.
- */
 class SyncAppWithGithub extends ProcessWebhookJob
 {
-    /**
-     * Handle the webhook and run 'git pull' to update the app code.
-     */
     public function handle(): void
     {
-        // $this->webhookCall contains an instance of WebhookCall
-
-        // Create a process to run 'git pull' to fetch any new changes from GitHub.
         $process = new Process(['git', 'pull']);
 
         info("Start deploy process - Running 'git pull'");
 
         $alreadyUpToDate = false;
-        $process->run(function ($type, string $buffer) use (&$alreadyUpToDate): void {
-            if ($buffer === "Already up to date.\n") {
+
+        $process->run(function (string $type, string $buffer) use (&$alreadyUpToDate): void {
+            if (trim($buffer) === 'Already up to date.') {
                 $alreadyUpToDate = true;
             }
 
-            // Optional: Log buffer for debug
             info('Deploy Output: '.$buffer);
         });
 

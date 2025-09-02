@@ -69,7 +69,6 @@ final class EquipmentIncidentNotification extends Notification implements Should
         }
 
         if (! $this->incidentItems->isNotEmpty()) {
-
             return (new MailMessage) //
                 ->subject($subject) //
                 ->level($this->incidentType === 'lost' ? 'error' : 'warning') //
@@ -81,7 +80,8 @@ final class EquipmentIncidentNotification extends Notification implements Should
                     'actionText'     => __('Lihat Butiran Pinjaman'), //
                     'actionUrl'      => $this->getActionUrl(), //
                 ]);
-        }  //
+        }
+        //
         $introLines[] = '---'; //
         foreach ($this->incidentItems as $item) { //
             if (! $item->equipment instanceof Equipment) {
@@ -94,7 +94,6 @@ final class EquipmentIncidentNotification extends Notification implements Should
             }
 
             $introLines[] = $details; //
-
         }
 
         $introLines[] = '---'; //
@@ -115,13 +114,13 @@ final class EquipmentIncidentNotification extends Notification implements Should
     public function getActionUrl(): string
     {
         if (! ($this->loanApplication->id && Route::has('loan-applications.show'))) {
-
             return '#'; //
-        }  //
+        }
+        //
         try {
             return route('loan-applications.show', ['loan_application' => $this->loanApplication->id]); //
-        } catch (\Exception $e) {
-            Log::error('Error generating URL for EquipmentIncidentNotification: '.$e->getMessage()); //
+        } catch (\Exception $exception) {
+            Log::error('Error generating URL for EquipmentIncidentNotification: '.$exception->getMessage()); //
         }
 
         return '#'; //

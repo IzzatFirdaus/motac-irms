@@ -27,7 +27,7 @@ class TicketNotificationService
         $itAdmins = User::role('IT Admin')->get(); // Assuming 'IT Admin' is the role for support staff
         Notification::send($itAdmins, new TicketCreatedNotification($ticket, 'admin'));
 
-        Log::info("Ticket Created Notification sent for Ticket ID: {$ticket->id}");
+        Log::info('Ticket Created Notification sent for Ticket ID: '.$ticket->id);
     }
 
     /**
@@ -37,7 +37,7 @@ class TicketNotificationService
     {
         if ($ticket->assignedTo) {
             $ticket->assignedTo->notify(new TicketAssignedNotification($ticket, $assigner));
-            Log::info("Ticket Assigned Notification sent for Ticket ID: {$ticket->id} to Agent: {$ticket->assignedTo->email}");
+            Log::info(sprintf('Ticket Assigned Notification sent for Ticket ID: %d to Agent: %s', $ticket->id, $ticket->assignedTo->email));
         }
     }
 
@@ -54,7 +54,7 @@ class TicketNotificationService
             $ticket->assignedTo->notify(new TicketStatusUpdatedNotification($ticket, $updater, 'agent'));
         }
 
-        Log::info("Ticket Status Updated Notification sent for Ticket ID: {$ticket->id}");
+        Log::info('Ticket Status Updated Notification sent for Ticket ID: '.$ticket->id);
     }
 
     /**
@@ -82,7 +82,7 @@ class TicketNotificationService
             Notification::send($itAdmins, new TicketCommentAddedNotification($comment, $commenter, 'internal_admin'));
         }
 
-        Log::info("Ticket Comment Added Notification sent for Ticket ID: {$ticket->id} by User: {$commenter->email}");
+        Log::info(sprintf('Ticket Comment Added Notification sent for Ticket ID: %d by User: %s', $ticket->id, $commenter->email));
     }
 
     /**
@@ -93,6 +93,6 @@ class TicketNotificationService
     {
         $itAdmins = User::role('IT Admin')->get();
         Notification::send($itAdmins, new TicketEscalatedNotification($ticket));
-        Log::warning("Ticket Escalated: Ticket ID {$ticket->id} is overdue.");
+        Log::warning(sprintf('Ticket Escalated: Ticket ID %d is overdue.', $ticket->id));
     }
 }

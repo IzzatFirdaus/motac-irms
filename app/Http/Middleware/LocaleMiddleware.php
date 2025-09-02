@@ -41,7 +41,7 @@ class LocaleMiddleware
 
         // Ensure configured locales is a valid array
         if (! is_array($configuredLocales) || $configuredLocales === []) {
-            Log::warning('LocaleMiddleware: config(\'app.available_locales\') is missing, empty, or not an array. Using fallback locale: '.$fallbackLocale);
+            Log::warning("LocaleMiddleware: config('app.available_locales') is missing, empty, or not an array. Using fallback locale: ".$fallbackLocale);
             App::setLocale($fallbackLocale);
             $this->registerAuthViewHints(); // Register view hints even if locale is not set
 
@@ -127,6 +127,7 @@ class LocaleMiddleware
             if (! (! file_exists($originalPath) && file_exists($renamedPath))) {
                 continue;
             }
+
             // Try to create a symlink for the view (preferred for dev), fallback to copy
             try {
                 // On some systems, symlink requires elevated privileges; fallback to copy if fails
@@ -140,7 +141,6 @@ class LocaleMiddleware
                 // If symlink or copy fails, ignore and let the missing view error show as fallback
                 Log::warning(sprintf("LocaleMiddleware: Could not create alias for auth view '%s': ", $view).$e->getMessage());
             }
-
         }
     }
 }

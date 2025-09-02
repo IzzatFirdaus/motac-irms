@@ -41,9 +41,9 @@ class NotificationService
     {
         try {
             $user->notify($notification);
-            Log::info("Notification sent to user {$user->id}.");
-        } catch (Exception $e) {
-            Log::error("Failed to send notification to user {$user->id}: ".$e->getMessage(), ['exception' => $e]);
+            Log::info(sprintf('Notification sent to user %d.', $user->id));
+        } catch (Exception $exception) {
+            Log::error(sprintf('Failed to send notification to user %d: ', $user->id).$exception->getMessage(), ['exception' => $exception]);
         }
     }
 
@@ -86,7 +86,7 @@ class NotificationService
     public function notifyApplicationRejected(User $recipient, LoanApplication $loanApplication, string $rejectionReason, ?User $rejecter = null): void
     {
         // If rejecter is not provided, use the currently authenticated user
-        if ($rejecter === null) {
+        if (! $rejecter instanceof \App\Models\User) {
             // Safely handle the case when there might not be an authenticated user
             if (Auth::check()) {
                 $rejecter = Auth::user();

@@ -62,7 +62,6 @@ class EquipmentReturnedNotification extends Notification implements ShouldQueue
             // Handle nullable
             $equipment = $txItem->equipment;
             if (! $equipment instanceof Equipment) {
-
                 return ['transaction_item_id' => $txItem->id, 'error' => __('Butiran peralatan tidak lengkap.')];
             }
 

@@ -196,11 +196,11 @@ class PositionsIndex extends Component
     public function deletePosition(): void
     {
         if (! ($this->positionIdToDelete !== null && $this->positionIdToDelete !== 0)) {
-
             $this->closeDeleteConfirmationModal();
 
             return;
         }
+
         $position = Position::findOrFail($this->positionIdToDelete);
         $this->authorize('delete', $position);
 

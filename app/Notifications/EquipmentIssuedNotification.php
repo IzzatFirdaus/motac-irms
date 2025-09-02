@@ -63,9 +63,9 @@ final class EquipmentIssuedNotification extends Notification implements ShouldQu
             // Handle nullable
             $equipment = $item->equipment;
             if (! $equipment) {
-
                 return __('Item ID: :id - Butiran peralatan tidak lengkap.', ['id' => $item->id]);
             }
+
             $assetTypeDisplay = $equipment->asset_type_label ?? __('Peralatan');
             $brandAndModel    = trim(($equipment->brand ?? '').' '.($equipment->model ?? ''));
 

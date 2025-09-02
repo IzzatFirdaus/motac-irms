@@ -4,7 +4,6 @@ namespace App\Livewire\ResourceManagement\Approval;
 
 use App\Models\Approval;
 use App\Models\LoanApplication;
-use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -136,12 +135,12 @@ class ApprovalHistory extends Component
                             if ($type !== LoanApplication::class) {
                                 return;
                             }
+
                             $morphQ->orWhereHas('loanApplicationItems.equipment', function ($itemQ) use ($searchTerm): void {
                                 $itemQ->where('tag_id', 'like', $searchTerm)
                                     ->orWhere('model', 'like', $searchTerm)
                                     ->orWhere('brand', 'like', $searchTerm);
                             });
-
                         }
                     );
                 });
@@ -179,13 +178,13 @@ class ApprovalHistory extends Component
         if (! in_array($propertyName, $filterProperties)) {
             return;
         }
+
         $this->resetPage();
         Log::debug('ApprovalHistory: Filter updated and pagination reset.', [
             'property'  => $propertyName,
             'new_value' => $this->$propertyName,
             'user_id'   => Auth::id(),
         ]);
-
     }
 
     /**

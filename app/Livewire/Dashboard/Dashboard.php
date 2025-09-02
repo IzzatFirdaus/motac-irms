@@ -40,6 +40,7 @@ class Dashboard extends Component
         if (! $this->isNormalUser) {
             return;
         }
+
         $this->pending_loans_count = LoanApplication::where('user_id', $user->id)
             ->where('status', LoanApplication::STATUS_PENDING_SUPPORT)->count();
         $this->approved_loans_count = LoanApplication::where('user_id', $user->id)
@@ -54,7 +55,6 @@ class Dashboard extends Component
             ->latest()
             ->take(5)
             ->get();
-
     }
 
     public function render()

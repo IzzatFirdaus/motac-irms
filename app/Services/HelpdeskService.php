@@ -7,7 +7,6 @@ namespace App\Services;
 use App\Models\HelpdeskComment;
 use App\Models\HelpdeskTicket;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -37,9 +36,10 @@ class HelpdeskService
      */
     public function createTicket(array $data, User $applicant, array $attachments = []): HelpdeskTicket
     {
-        return DB::transaction(function () use ($data, $applicant, $attachments) {
+        return DB::transaction(function () use ($data, $applicant, $attachments): \App\Models\HelpdeskTicket {
             $ticket = new HelpdeskTicket;
             $ticket->fill($data);
+
             $ticket->user_id = $applicant->id;
             $ticket->status  = HelpdeskTicket::STATUS_OPEN;
 
@@ -63,7 +63,7 @@ class HelpdeskService
      */
     public function addComment(HelpdeskTicket $ticket, string $commentText, User $user, array $attachments = [], bool $isInternal = false): HelpdeskComment
     {
-        return DB::transaction(function () use ($ticket, $commentText, $user, $attachments, $isInternal) {
+        return DB::transaction(function () use ($ticket, $commentText, $user, $attachments, $isInternal): \App\Models\HelpdeskComment {
             $comment = new HelpdeskComment;
             // Comment model uses 'ticket_id' as FK
             $comment->ticket_id   = $ticket->id;
@@ -81,6 +81,7 @@ class HelpdeskService
             if ($ticket->user instanceof User) {
                 $this->notificationService->notifyTicketCommentAdded($ticket->user, $comment, $user, 'applicant');
             }
+
             if ($ticket->assignedTo instanceof User && $ticket->assignedTo->id !== $user->id) {
                 $this->notificationService->notifyTicketCommentAdded($ticket->assignedTo, $comment, $user, 'assignee');
             }
@@ -96,7 +97,7 @@ class HelpdeskService
      */
     public function updateTicket(HelpdeskTicket $ticket, array $data, User $updater, array $attachments = []): HelpdeskTicket
     {
-        return DB::transaction(function () use ($ticket, $data, $updater, $attachments) {
+        return DB::transaction(function () use ($ticket, $data, $updater, $attachments): \App\Models\HelpdeskTicket {
             $oldStatus           = $ticket->status;
             $oldAssignedToUserId = $ticket->assigned_to_user_id;
 
@@ -109,6 +110,7 @@ class HelpdeskService
                 $fillableData['title'] = $fillableData['subject'];
                 unset($fillableData['subject']);
             }
+
             if (isset($fillableData['resolution_details']) && ! isset($fillableData['resolution_notes'])) {
                 $fillableData['resolution_notes'] = $fillableData['resolution_details'];
                 unset($fillableData['resolution_details']);
@@ -136,6 +138,7 @@ class HelpdeskService
                 if ($ticket->user instanceof User) {
                     $this->notificationService->notifyTicketStatusUpdated($ticket->user, $ticket, $updater, 'applicant');
                 }
+
                 if ($ticket->assignedTo instanceof User) {
                     $this->notificationService->notifyTicketStatusUpdated($ticket->assignedTo, $ticket, $updater, 'assignee');
                 }
@@ -163,7 +166,7 @@ class HelpdeskService
      */
     public function closeTicket(HelpdeskTicket $ticket, array $data, User $closer): HelpdeskTicket
     {
-        return DB::transaction(function () use ($ticket, $data, $closer) {
+        return DB::transaction(function () use ($ticket, $data, $closer): \App\Models\HelpdeskTicket {
             $oldStatus = $ticket->status;
 
             $ticket->status = HelpdeskTicket::STATUS_CLOSED;
@@ -175,7 +178,6 @@ class HelpdeskService
 
             // Notify parties only if status actually changed to closed
             if ($oldStatus === HelpdeskTicket::STATUS_CLOSED) {
-
                 Log::info(sprintf('Helpdesk Ticket ID %d closed by User ID %d.', $ticket->id, $closer->id), [
                     'ticket_id' => $ticket->id,
                     'closed_by' => $closer->id,
@@ -183,9 +185,11 @@ class HelpdeskService
 
                 return $ticket;
             }
+
             if ($ticket->user instanceof User) {
                 $this->notificationService->notifyTicketStatusUpdated($ticket->user, $ticket, $closer, 'applicant');
             }
+
             if ($ticket->assignedTo instanceof User) {
                 $this->notificationService->notifyTicketStatusUpdated($ticket->assignedTo, $ticket, $closer, 'assignee');
             }
@@ -202,7 +206,7 @@ class HelpdeskService
     /**
      * Handles file attachments for tickets or comments.
      *
-     * @param mixed $attachable Accepts Eloquent models that implement attachments().
+    * @param object $attachable Accepts Eloquent models (or objects) that implement attachments().
      */
     protected function handleAttachments($attachable, array $attachments): void
     {
@@ -214,6 +218,7 @@ class HelpdeskService
             if (! ($attachment instanceof UploadedFile && $attachment->isValid())) {
                 continue;
             }
+
             $path = $attachment->store('helpdesk_attachments', 'public');
 
             $attachable->attachments()->create([
@@ -222,7 +227,6 @@ class HelpdeskService
                 'file_size' => $attachment->getSize(),
                 'file_type' => $attachment->getMimeType(),
             ]);
-
         }
     }
 }

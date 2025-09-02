@@ -30,7 +30,7 @@ final class UserService
      * Blameable fields (created_by, updated_by) are expected to be handled by
      * the CreatedUpdatedDeletedBy trait or a BlameableObserver on the User model.
      *
-     * @param array<string, mixed> $data User data including 'password'.
+        * @param array $data User data including 'password'.
      *
      * @throws InvalidArgumentException If essential data like password is missing.
      * @throws RuntimeException         If user creation fails at the database level.
@@ -56,7 +56,7 @@ final class UserService
      * Blameable field (updated_by) is expected to be handled by User model's trait/observer.
      *
      * @param User                 $user The User instance to update.
-     * @param array<string, mixed> $data Data to update.
+        * @param array $data Data to update.
      *
      * @throws RuntimeException If user update fails due to an exception.
      *
@@ -107,7 +107,7 @@ final class UserService
     /**
      * Retrieves all users, optionally with eager loaded relationships.
      *
-     * @param array<int, string> $with Relationships to eager load.
+     * @param string[] $with Relationships to eager load.
      *
      * @return EloquentCollection<int, User>
      */
@@ -214,9 +214,9 @@ final class UserService
      *
      * @template T
      *
-     * @param \Closure(): T        $callback          The database operation to execute.
-     * @param string               $actionDescription A description of the action for logging.
-     * @param array<string, mixed> $logContext        Additional context for logging.
+     * @param \Closure(): T $callback          The database operation to execute.
+     * @param string        $actionDescription A description of the action for logging.
+     * @param array         $logContext        Additional context for logging (values may be of various types).
      *
      * @throws RuntimeException If the transaction fails.
      *
@@ -245,11 +245,11 @@ final class UserService
     /**
      * Prepares user data for creation: hashes password and sets default status.
      *
-     * @param array<string, mixed> $data
+    * @param array $data
      *
      * @throws InvalidArgumentException if password is not provided or invalid.
      *
-     * @return array<string, mixed>
+        * @return array
      */
     private function prepareUserDataForCreation(array $data): array
     {
@@ -278,16 +278,16 @@ final class UserService
     /**
      * Prepares password for update: hashes if provided and non-empty, unsets if key exists but value is empty.
      *
-     * @param array<string, mixed> $data
-     *
-     * @return array<string, mixed>
+    * @param array $data
+    *
+    * @return array
      */
     private function preparePasswordForUpdate(array $data): array
     {
         if (! array_key_exists('password', $data)) {
-
             return $data;
         }
+
         if (! empty($data['password']) && is_string($data['password'])) {
             $data['password'] = Hash::make($data['password']);
         } else {
@@ -307,6 +307,7 @@ final class UserService
         if (! (Auth::check() && $userToDelete->id === Auth::id())) {
             return;
         }
+
         Log::warning(self::LOG_AREA.' Attempt to delete own account prevented.', [
             'user_id' => $userToDelete->id,
         ]);

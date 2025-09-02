@@ -42,13 +42,13 @@ final class ApplicationRejected extends Notification implements ShouldQueue
         $routeParameters = ['loan_application' => $this->application->id];
 
         if (! Route::has($routeName)) {
-
             return $viewUrl;
         }
+
         try {
             $viewUrl = route($routeName, $routeParameters);
-        } catch (\Exception $e) {
-            Log::error('Error generating URL for ApplicationRejected mail: '.$e->getMessage(), [
+        } catch (\Exception $exception) {
+            Log::error('Error generating URL for ApplicationRejected mail: '.$exception->getMessage(), [
                 'application_id' => $this->application->id,
             ]);
 
@@ -106,16 +106,16 @@ final class ApplicationRejected extends Notification implements ShouldQueue
         $routeParameters = ['loan_application' => $applicationId];
 
         if (! ($applicationId !== null && Route::has($routeName))) {
-
             return $data;
         }
+
         try {
             $generatedUrl = route($routeName, $routeParameters);
             if (filter_var($generatedUrl, FILTER_VALIDATE_URL)) {
                 $data['url'] = $generatedUrl;
             }
-        } catch (\Exception $e) {
-            Log::error('Error generating URL for ApplicationRejected toArray: '.$e->getMessage(), [
+        } catch (\Exception $exception) {
+            Log::error('Error generating URL for ApplicationRejected toArray: '.$exception->getMessage(), [
                 'application_id'   => $applicationId,
                 'application_type' => $applicationMorphClass,
                 'route_name'       => $routeName,

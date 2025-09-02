@@ -49,12 +49,12 @@ class NotificationsDropdown extends Component
         if (! $notification) {
             return;
         }
+
         $notification->markAsRead();
         $this->mount(); // Refresh the list
         if (isset($notification->data['url'])) {
             $this->redirect($notification->data['url']);
         }
-
     }
 
     /**

@@ -150,9 +150,9 @@ class LoanApplicationPolicy
             ->first();
 
         if (! $pendingApprovalTask) {
-
             return Response::deny(__('Anda tidak ditetapkan sebagai pegawai pelulus untuk permohonan ini pada peringkat semasa atau tiada tugasan kelulusan aktif untuk anda.'));
         }
+
         if ($currentStageKey === Approval::STAGE_LOAN_SUPPORT_REVIEW) {
             $minSupportGradeLevel = (int) config('motac.approval.min_loan_support_grade_level', 41);
             if (! $user->grade || (int) $user->grade->level < $minSupportGradeLevel) {

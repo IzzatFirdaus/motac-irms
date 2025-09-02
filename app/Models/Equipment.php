@@ -523,7 +523,7 @@ class Equipment extends Model
             return $query;
         }
 
-        return $query->where(function ($q) use ($term) {
+        return $query->where(function ($q) use ($term): void {
             $like = '%'.$term.'%';
             $q->where('tag_id', 'like', $like)
                 ->orWhere('serial_number', 'like', $like)
@@ -551,7 +551,7 @@ class Equipment extends Model
     public static function getUtilizationRate(): float
     {
         $totalEquipment  = self::count();
-        $onLoanEquipment = self::where(function ($query) {
+        $onLoanEquipment = self::where(function ($query): void {
             $query->where('status', self::STATUS_ON_LOAN)
                 ->orWhere('status', self::STATUS_UNDER_MAINTENANCE);
         })->count();

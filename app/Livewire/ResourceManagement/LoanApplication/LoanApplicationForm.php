@@ -112,6 +112,7 @@ class LoanApplicationForm extends Component
         if ($this->isEditMode) {
             return;
         }
+
         $this->purpose                          = $cachedData['purpose']                          ?? '';
         $this->location                         = $cachedData['location']                         ?? '';
         $this->return_location                  = $cachedData['return_location']                  ?? null;
@@ -122,7 +123,6 @@ class LoanApplicationForm extends Component
         $this->responsible_officer_id           = $cachedData['responsible_officer_id']           ?? null;
         $this->supporting_officer_id            = $cachedData['supporting_officer_id']            ?? null;
         $this->loan_application_items           = $cachedData['loan_application_items']           ?? [['equipment_type' => '', 'quantity_requested' => 1, 'notes' => '']];
-
     }
 
     /**

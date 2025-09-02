@@ -22,6 +22,7 @@ class HelpdeskTicketPolicy
         if ($user->hasRole('Admin')) {
             return true;
         }
+
         if ($user->hasRole('IT Admin')) {
             return true;
         }
@@ -39,9 +40,11 @@ class HelpdeskTicketPolicy
         if ($user->hasRole('Admin')) {
             return true;
         }
+
         if ($user->hasRole('IT Admin')) {
             return true;
         }
+
         if ($user->id === $helpdeskTicket->user_id) {
             return true;
         }
@@ -96,11 +99,7 @@ class HelpdeskTicketPolicy
         }
 
         // Allow applicant to delete their own ticket (soft delete) regardless of status
-        if ($user->id === $helpdeskTicket->user_id) {
-            return true;
-        }
-
-        return false;
+        return $user->id === $helpdeskTicket->user_id;
     }
 
     /**
@@ -136,8 +135,11 @@ class HelpdeskTicketPolicy
         if ($user->hasRole('IT Admin')) {
             return true;
         }
+        if ($user->hasRole('Admin')) {
+            return true;
+        }
 
-        return $user->hasRole('Admin') || ($helpdeskTicket->assigned_to_user_id && $user->id === $helpdeskTicket->assigned_to_user_id);
+        return $helpdeskTicket->assigned_to_user_id && $user->id === $helpdeskTicket->assigned_to_user_id;
     }
 
     /**
@@ -149,6 +151,7 @@ class HelpdeskTicketPolicy
         if ($user->hasRole('Admin')) {
             return true;
         }
+
         if ($user->hasRole('IT Admin')) {
             return true;
         }

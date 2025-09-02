@@ -67,9 +67,9 @@ class GradeIndex extends Component
             ->orderBy('name', 'asc');
 
         if (! ($this->searchTerm !== '' && $this->searchTerm !== '0')) {
-
             return $query->paginate(10);
         }
+
         $query->where(function ($q): void {
             $q->where('name', 'like', '%'.$this->searchTerm.'%')
                 ->orWhere('level', 'like', '%'.$this->searchTerm.'%');

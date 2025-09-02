@@ -4,7 +4,6 @@ namespace App\Notifications;
 
 use App\Models\User;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
 // Consider uncommenting if you want to queue this notification
@@ -66,7 +65,7 @@ class DefaultNotification extends Notification // implements ShouldQueue
      *
      * @param User $notifiable The user receiving the notification
      *
-     * @return array<string, mixed>
+    * @return array
      */
     public function toArray(User $notifiable): array
     {

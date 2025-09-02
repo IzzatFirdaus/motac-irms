@@ -99,7 +99,7 @@ final class DefaultUserNotification extends BaseNotification implements ShouldQu
      *
      * @param User $notifiable The user receiving the notification
      *
-     * @return array<string, mixed>
+    * @return array
      */
     public function toArray(User $notifiable): array
     {

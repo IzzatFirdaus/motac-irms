@@ -30,11 +30,11 @@ class DepartmentController extends Controller
         $query = Department::query();
 
         if (! $request->filled('search')) {
-
             $departments = $query->orderBy('name')->paginate(config('pagination.default_size', 15));
 
             return view('admin.departments.index', ['departments' => $departments]);
         }
+
         $search = $request->input('search');
         $query->where('name', 'like', sprintf('%%%s%%', $search))
             ->orWhere('branch_type', 'like', sprintf('%%%s%%', $search))

@@ -470,7 +470,7 @@ class User extends Authenticatable
      */
     public static function getRoleBadgeClass(?string $role): string
     {
-        if (! $role) {
+        if ($role === null || $role === '' || $role === '0') {
             return 'bg-secondary';
         }
 

@@ -45,13 +45,13 @@ class EquipmentReturnReminderNotification extends Notification implements Should
     {
         $routeName = 'resource-management.my-applications.loan.show';
         if (! ($this->loanApplication->id && Route::has($routeName))) {
-
             return '#';
         }
+
         try {
             return route($routeName, ['loan_application' => $this->loanApplication->id]);
-        } catch (\Exception $e) {
-            Log::error('Error generating URL for EquipmentReturnReminderNotification: '.$e->getMessage());
+        } catch (\Exception $exception) {
+            Log::error('Error generating URL for EquipmentReturnReminderNotification: '.$exception->getMessage());
         }
 
         return '#';

@@ -58,18 +58,18 @@ class NotificationController extends Controller
         if ((string) $notification->notifiable_id !== (string) $user->id || $notification->notifiable_type !== $user->getMorphClass()) {
             Log::warning(sprintf('User %d attempted to act on notification ID %s not belonging to them.', $user->id, $notification->id));
 
-            return redirect()->back()->with('error', __('Anda tidak mempunyai kebenaran untuk mengubah notifikasi ini.'));
+            return redirect()->back()->with('error', __('messages.notification_no_permission_modify'));
         }
 
         // Only mark as read if currently unread
         if (! $notification->unread()) {
-
-            return redirect()->back()->with('info', __('Notifikasi ini telahpun dibaca.'));
-        }  // Uses is_null(read_at)
+            return redirect()->back()->with('info', __('messages.notification_already_read'));
+        }
+        // Uses is_null(read_at)
         $notification->markAsRead(); // Sets read_at timestamp
         Log::info(sprintf('Notification ID %s marked as read by User ID %d.', $notification->id, $user->id));
 
-        return redirect()->back()->with('success', __('Notifikasi telah ditanda sebagai dibaca.'));
+        return redirect()->back()->with('success', __('messages.notification_marked_read'));
     }
 
     /**
@@ -83,12 +83,12 @@ class NotificationController extends Controller
         $unreadNotifications = $user->unreadNotifications(); // Query builder
 
         if ($unreadNotifications->count() <= 0) {
-
-            return redirect()->back()->with('info', __('Tiada notifikasi baru untuk ditanda sebagai dibaca.'));
+            return redirect()->back()->with('info', __('messages.notification_none_to_mark'));
         }
+
         $unreadNotifications->update(['read_at' => now()]);
         Log::info(sprintf('All unread notifications marked as read for User ID %d.', $user->id));
 
-        return redirect()->back()->with('success', __('Semua notifikasi telah ditanda sebagai dibaca.'));
+        return redirect()->back()->with('success', __('messages.notification_all_marked_read'));
     }
 }

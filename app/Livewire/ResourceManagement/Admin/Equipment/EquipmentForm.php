@@ -118,6 +118,7 @@ class EquipmentForm extends Component
         if (! $this->equipmentInstance instanceof \App\Models\Equipment) {
             return;
         }
+
         $this->tag_id            = $this->equipmentInstance->tag_id;
         $this->asset_type        = $this->equipmentInstance->asset_type;
         $this->brand             = $this->equipmentInstance->brand;
@@ -129,7 +130,6 @@ class EquipmentForm extends Component
         $this->location_id       = $this->equipmentInstance->location_id;
         $this->department_id     = $this->equipmentInstance->department_id;
         $this->notes             = $this->equipmentInstance->notes;
-
     }
 
     /**

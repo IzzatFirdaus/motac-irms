@@ -41,7 +41,9 @@ use Illuminate\Support\Str;
  */
 class LoanTransaction extends Model
 {
-    use Blameable, HasFactory, SoftDeletes;
+    use Blameable;
+    use HasFactory;
+    use SoftDeletes;
 
     // Transaction types
     public const TYPE_ISSUE = 'issue';
@@ -237,12 +239,13 @@ class LoanTransaction extends Model
         if (! $this->relationLoaded('loanTransactionItems')) {
             $this->load('loanTransactionItems.equipment:id,brand,model');
         }
-        if (! $this->loanTransactionItems->isNotEmpty()) {
 
+        if (! $this->loanTransactionItems->isNotEmpty()) {
             return __('Tiada Item');
         }
+
         $firstItem = $this->loanTransactionItems->first();
-        if ($firstItem?->equipment) {
+        if ($firstItem->equipment) {
             return trim(($firstItem->equipment->brand ?? '').' '.($firstItem->equipment->model ?? __('Item Peralatan')));
         }
 

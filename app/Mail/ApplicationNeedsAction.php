@@ -3,7 +3,6 @@
 namespace App\Mail;
 
 use App\Models\Approval;
-use App\Models\LoanApplication;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
