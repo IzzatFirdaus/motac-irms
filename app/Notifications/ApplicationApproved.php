@@ -93,30 +93,34 @@ final class ApplicationApproved extends Notification implements ShouldQueue
         $routeName       = '';
         $routeParameters = [];
 
-        if ($applicationId) {
-            // Only LoanApplication is supported
-            $routeName       = 'resource-management.my-applications.loan.show';
-            $routeParameters = ['loan_application' => $applicationId];
+        if (! $applicationId) {
 
-            if (Route::has($routeName)) {
-                try {
-                    $applicationUrl = route($routeName, $routeParameters);
-                } catch (\Exception $e) {
-                    Log::error('Error generating URL for ApplicationApproved toArray: '.$e->getMessage(), [
-                        'exception'        => $e,
-                        'application_id'   => $applicationId,
-                        'application_type' => $applicationMorphClass,
-                        'route_name'       => $routeName,
-                    ]);
-                    $applicationUrl = '#';
-                }
-            } else {
-                Log::warning('Route not found for in-app ApplicationApproved notification.', [
+            $data['url'] = ($applicationUrl !== '#' && filter_var($applicationUrl, FILTER_VALIDATE_URL)) ? $applicationUrl : null;
+
+            return $data;
+        }
+        // Only LoanApplication is supported
+        $routeName       = 'resource-management.my-applications.loan.show';
+        $routeParameters = ['loan_application' => $applicationId];
+
+        if (Route::has($routeName)) {
+            try {
+                $applicationUrl = route($routeName, $routeParameters);
+            } catch (\Exception $e) {
+                Log::error('Error generating URL for ApplicationApproved toArray: '.$e->getMessage(), [
+                    'exception'        => $e,
                     'application_id'   => $applicationId,
                     'application_type' => $applicationMorphClass,
                     'route_name'       => $routeName,
                 ]);
+                $applicationUrl = '#';
             }
+        } else {
+            Log::warning('Route not found for in-app ApplicationApproved notification.', [
+                'application_id'   => $applicationId,
+                'application_type' => $applicationMorphClass,
+                'route_name'       => $routeName,
+            ]);
         }
 
         $data['url'] = ($applicationUrl !== '#' && filter_var($applicationUrl, FILTER_VALIDATE_URL)) ? $applicationUrl : null;
@@ -130,15 +134,17 @@ final class ApplicationApproved extends Notification implements ShouldQueue
         $routeName       = 'resource-management.my-applications.loan.show';
         $routeParameters = ['loan_application' => $this->application->id];
 
-        if (Route::has($routeName)) {
-            try {
-                $viewUrl = route($routeName, $routeParameters);
-            } catch (\Exception $e) {
-                Log::error('Error generating URL for ApplicationApproved mail: '.$e->getMessage(), [
-                    'application_id'   => $this->application->id,
-                    'application_type' => $this->application->getMorphClass(),
-                ]);
-            }
+        if (! Route::has($routeName)) {
+
+            return $viewUrl;
+        }
+        try {
+            $viewUrl = route($routeName, $routeParameters);
+        } catch (\Exception $e) {
+            Log::error('Error generating URL for ApplicationApproved mail: '.$e->getMessage(), [
+                'application_id'   => $this->application->id,
+                'application_type' => $this->application->getMorphClass(),
+            ]);
         }
 
         return $viewUrl;

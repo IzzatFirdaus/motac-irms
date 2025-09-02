@@ -106,22 +106,24 @@ final class Notification extends Model
             }
         });
 
-        if (in_array(SoftDeletes::class, class_uses_recursive(self::class), true)) {
-            self::deleting(function (self $model): void {
-                if (Auth::check()) {
-                    $user              = Auth::user();
-                    $model->deleted_by = $user->id;
-                }
-            });
-
-            self::restoring(function (self $model): void {
-                $model->deleted_by = null;
-                if (Auth::check()) {
-                    $user              = Auth::user();
-                    $model->updated_by = $user->id;
-                }
-            });
+        if (! in_array(SoftDeletes::class, class_uses_recursive(self::class), true)) {
+            return;
         }
+        self::deleting(function (self $model): void {
+            if (Auth::check()) {
+                $user              = Auth::user();
+                $model->deleted_by = $user->id;
+            }
+        });
+
+        self::restoring(function (self $model): void {
+            $model->deleted_by = null;
+            if (Auth::check()) {
+                $user              = Auth::user();
+                $model->updated_by = $user->id;
+            }
+        });
+
     }
 
     protected static function newFactory(): NotificationFactory

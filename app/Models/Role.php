@@ -65,20 +65,20 @@ class Role extends SpatieRole
             throw new \Exception($errorMessage);
         }
         $userModelClass = Guard::getModelForGuard((string) $guardNameToUse);
-        if (is_null($userModelClass)) {
-            $errorMessage = sprintf("Could not determine the User model class for guard '%s' (Role ID: ", $guardNameToUse).($this->id ?? 'N/A').').';
-            Log::error($errorMessage, [
-                'role_id'                    => $this->id ?? 'N/A',
-                'role_guard_name_attribute'  => $currentRoleGuardNameAttribute,
-                'resolved_guard_name_used'   => $guardNameToUse,
-                'auth_config_defaults_guard' => config('auth.defaults.guard'),
-                'auth_config_guard_details'  => config('auth.guards.'.$guardNameToUse),
-                'provider_for_guard'         => config('auth.guards.'.$guardNameToUse.'.provider'),
-                'model_for_provider'         => config('auth.providers.'.(config('auth.guards.'.$guardNameToUse.'.provider')).'.model'),
-            ]);
-            throw new \Exception($errorMessage);
-        }
+        if (! is_null($userModelClass)) {
 
-        return $userModelClass;
+            return $userModelClass;
+        }
+        $errorMessage = sprintf("Could not determine the User model class for guard '%s' (Role ID: ", $guardNameToUse).($this->id ?? 'N/A').').';
+        Log::error($errorMessage, [
+            'role_id'                    => $this->id ?? 'N/A',
+            'role_guard_name_attribute'  => $currentRoleGuardNameAttribute,
+            'resolved_guard_name_used'   => $guardNameToUse,
+            'auth_config_defaults_guard' => config('auth.defaults.guard'),
+            'auth_config_guard_details'  => config('auth.guards.'.$guardNameToUse),
+            'provider_for_guard'         => config('auth.guards.'.$guardNameToUse.'.provider'),
+            'model_for_provider'         => config('auth.providers.'.(config('auth.guards.'.$guardNameToUse.'.provider')).'.model'),
+        ]);
+        throw new \Exception($errorMessage);
     }
 }

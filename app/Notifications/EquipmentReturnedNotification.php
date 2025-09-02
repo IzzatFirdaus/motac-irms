@@ -61,23 +61,24 @@ class EquipmentReturnedNotification extends Notification implements ShouldQueue
         $itemsDetails = $this->returnTransaction?->loanTransactionItems->map(function (LoanTransactionItem $txItem): array {
             // Handle nullable
             $equipment = $txItem->equipment;
-            if ($equipment instanceof Equipment) {
-                return [
-                    'transaction_item_id' => $txItem->id,
-                    'equipment_id'        => $equipment->id,
-                    // CORRECTED: Uses the asset_type_label accessor from the Equipment model.
-                    'asset_type'        => $equipment->asset_type_label ?? __('Peralatan Tidak Dikenali'),
-                    'brand_model'       => trim(($equipment->brand ?? '').' '.($equipment->model ?? '')),
-                    'tag_id'            => $equipment->tag_id,
-                    'serial_number'     => $equipment->serial_number,
-                    'quantity_returned' => $txItem->quantity_transacted,
-                    // CORRECTED: Uses the condition_on_return_translated accessor for consistency.
-                    'condition_on_return' => $txItem->condition_on_return_translated ?? __('Tidak dinyatakan'),
-                    'item_notes'          => $txItem->item_notes,
-                ];
+            if (! $equipment instanceof Equipment) {
+
+                return ['transaction_item_id' => $txItem->id, 'error' => __('Butiran peralatan tidak lengkap.')];
             }
 
-            return ['transaction_item_id' => $txItem->id, 'error' => __('Butiran peralatan tidak lengkap.')];
+            return [
+                'transaction_item_id' => $txItem->id,
+                'equipment_id'        => $equipment->id,
+                // CORRECTED: Uses the asset_type_label accessor from the Equipment model.
+                'asset_type'        => $equipment->asset_type_label ?? __('Peralatan Tidak Dikenali'),
+                'brand_model'       => trim(($equipment->brand ?? '').' '.($equipment->model ?? '')),
+                'tag_id'            => $equipment->tag_id,
+                'serial_number'     => $equipment->serial_number,
+                'quantity_returned' => $txItem->quantity_transacted,
+                // CORRECTED: Uses the condition_on_return_translated accessor for consistency.
+                'condition_on_return' => $txItem->condition_on_return_translated ?? __('Tidak dinyatakan'),
+                'item_notes'          => $txItem->item_notes,
+            ];
         })->toArray() ?? []; // Handle nullable
 
         $loanAppId     = $this->loanApplication->id;

@@ -99,6 +99,13 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read int|null $tokens_count
  * @property-read User|null $updater
  *
+ * Instance helpers from Spatie\Permission HasRoles/HasPermissions
+ *
+ * @method        bool                                               hasRole(string|array $roles, string|null $guard = null)
+ * @method        bool                                               hasAnyRole(string|array $roles, string|null $guard = null)
+ * @method        bool                                               hasAllRoles(string|array $roles, string|null $guard = null)
+ * @method        bool                                               hasPermissionTo(string|\Spatie\Permission\Contracts\Permission $permission, string|null $guard = null)
+ * @method        \Illuminate\Support\Collection                     getRoleNames()
  * @method static \Database\Factories\UserFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newQuery()

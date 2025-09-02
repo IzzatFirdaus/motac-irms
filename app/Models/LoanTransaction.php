@@ -237,16 +237,16 @@ class LoanTransaction extends Model
         if (! $this->relationLoaded('loanTransactionItems')) {
             $this->load('loanTransactionItems.equipment:id,brand,model');
         }
-        if ($this->loanTransactionItems->isNotEmpty()) {
-            $firstItem = $this->loanTransactionItems->first();
-            if ($firstItem?->equipment) {
-                return trim(($firstItem->equipment->brand ?? '').' '.($firstItem->equipment->model ?? __('Item Peralatan')));
-            }
+        if (! $this->loanTransactionItems->isNotEmpty()) {
 
-            return __('Item Tidak Diketahui');
+            return __('Tiada Item');
+        }
+        $firstItem = $this->loanTransactionItems->first();
+        if ($firstItem?->equipment) {
+            return trim(($firstItem->equipment->brand ?? '').' '.($firstItem->equipment->model ?? __('Item Peralatan')));
         }
 
-        return __('Tiada Item');
+        return __('Item Tidak Diketahui');
     }
 
     /**

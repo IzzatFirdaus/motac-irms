@@ -36,16 +36,18 @@ class LoanApplicationOverdueReminder extends Mailable implements ShouldQueue
     {
         $overdue = new Collection;
         foreach ($this->loanApplication->loanTransactions as $transaction) {
-            if ($transaction->type === LoanTransaction::TYPE_ISSUE) {
-                foreach ($transaction->loanTransactionItems as $item) {
-                    if (
-                        (property_exists($item, 'is_returned') && ! $item->is_returned)
-                        && property_exists($item, 'due_date') && $item->due_date && $item->due_date->isPast()
-                    ) {
-                        $overdue->push($item);
-                    }
+            if ($transaction->type !== LoanTransaction::TYPE_ISSUE) {
+                continue;
+            }
+            foreach ($transaction->loanTransactionItems as $item) {
+                if (
+                    (property_exists($item, 'is_returned') && ! $item->is_returned)
+                    && property_exists($item, 'due_date') && $item->due_date && $item->due_date->isPast()
+                ) {
+                    $overdue->push($item);
                 }
             }
+
         }
 
         return $overdue;

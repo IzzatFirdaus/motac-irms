@@ -68,22 +68,36 @@ final class EquipmentIncidentNotification extends Notification implements Should
             $outroLines[] = __('BPM akan menghubungi anda untuk tindakan lanjut jika perlu.'); //
         }
 
-        if ($this->incidentItems->isNotEmpty()) { //
-            $introLines[] = '---'; //
-            foreach ($this->incidentItems as $item) { //
-                if ($item->equipment instanceof Equipment) { //
-                    // CORRECTED: Changed assetTypeDisplay to the correct accessor 'asset_type_label'
-                    $details = sprintf('- **%s** (%s %s) - Tag: %s', $item->equipment->getAssetTypeLabelAttribute(), $item->equipment->brand, $item->equipment->model, $item->equipment->tag_id); //
-                    if (! empty($item->item_notes)) { //
-                        $details .= sprintf(' | Catatan: *%s*', $item->item_notes); //
-                    }
+        if (! $this->incidentItems->isNotEmpty()) {
 
-                    $introLines[] = $details; //
-                }
+            return (new MailMessage) //
+                ->subject($subject) //
+                ->level($this->incidentType === 'lost' ? 'error' : 'warning') //
+                ->view('emails.notifications.motac_default_notification', [ //
+                    'greeting'       => __('Salam Sejahtera'), //
+                    'notifiableName' => $notifiable->name, //
+                    'introLines'     => $introLines, //
+                    'outroLines'     => $outroLines, //
+                    'actionText'     => __('Lihat Butiran Pinjaman'), //
+                    'actionUrl'      => $this->getActionUrl(), //
+                ]);
+        }  //
+        $introLines[] = '---'; //
+        foreach ($this->incidentItems as $item) { //
+            if (! $item->equipment instanceof Equipment) {
+                continue;
+            }  //
+            // CORRECTED: Changed assetTypeDisplay to the correct accessor 'asset_type_label'
+            $details = sprintf('- **%s** (%s %s) - Tag: %s', $item->equipment->getAssetTypeLabelAttribute(), $item->equipment->brand, $item->equipment->model, $item->equipment->tag_id); //
+            if (! empty($item->item_notes)) { //
+                $details .= sprintf(' | Catatan: *%s*', $item->item_notes); //
             }
 
-            $introLines[] = '---'; //
+            $introLines[] = $details; //
+
         }
+
+        $introLines[] = '---'; //
 
         return (new MailMessage) //
             ->subject($subject) //
@@ -100,12 +114,14 @@ final class EquipmentIncidentNotification extends Notification implements Should
 
     public function getActionUrl(): string
     {
-        if ($this->loanApplication->id && Route::has('loan-applications.show')) { //
-            try {
-                return route('loan-applications.show', ['loan_application' => $this->loanApplication->id]); //
-            } catch (\Exception $e) {
-                Log::error('Error generating URL for EquipmentIncidentNotification: '.$e->getMessage()); //
-            }
+        if (! ($this->loanApplication->id && Route::has('loan-applications.show'))) {
+
+            return '#'; //
+        }  //
+        try {
+            return route('loan-applications.show', ['loan_application' => $this->loanApplication->id]); //
+        } catch (\Exception $e) {
+            Log::error('Error generating URL for EquipmentIncidentNotification: '.$e->getMessage()); //
         }
 
         return '#'; //

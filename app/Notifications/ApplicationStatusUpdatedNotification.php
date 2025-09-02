@@ -98,12 +98,14 @@ class ApplicationStatusUpdatedNotification extends Notification implements Shoul
         $routeName       = 'resource-management.my-applications.loan.show';
         $routeParameters = ['loan_application' => $this->application->id];
 
-        if (Route::has($routeName)) {
-            try {
-                return route($routeName, $routeParameters);
-            } catch (\Exception $e) {
-                Log::error('Error generating URL for ApplicationStatusUpdatedNotification: '.$e->getMessage());
-            }
+        if (! Route::has($routeName)) {
+
+            return '#';
+        }
+        try {
+            return route($routeName, $routeParameters);
+        } catch (\Exception $e) {
+            Log::error('Error generating URL for ApplicationStatusUpdatedNotification: '.$e->getMessage());
         }
 
         return '#';

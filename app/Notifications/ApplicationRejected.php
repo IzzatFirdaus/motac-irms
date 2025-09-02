@@ -41,16 +41,18 @@ final class ApplicationRejected extends Notification implements ShouldQueue
         $routeName       = 'resource-management.my-applications.loan.show';
         $routeParameters = ['loan_application' => $this->application->id];
 
-        if (Route::has($routeName)) {
-            try {
-                $viewUrl = route($routeName, $routeParameters);
-            } catch (\Exception $e) {
-                Log::error('Error generating URL for ApplicationRejected mail: '.$e->getMessage(), [
-                    'application_id' => $this->application->id,
-                ]);
+        if (! Route::has($routeName)) {
 
-                return '#';
-            }
+            return $viewUrl;
+        }
+        try {
+            $viewUrl = route($routeName, $routeParameters);
+        } catch (\Exception $e) {
+            Log::error('Error generating URL for ApplicationRejected mail: '.$e->getMessage(), [
+                'application_id' => $this->application->id,
+            ]);
+
+            return '#';
         }
 
         return $viewUrl;
@@ -103,20 +105,22 @@ final class ApplicationRejected extends Notification implements ShouldQueue
         $routeName       = 'resource-management.my-applications.loan.show';
         $routeParameters = ['loan_application' => $applicationId];
 
-        if ($applicationId !== null && Route::has($routeName)) {
-            try {
-                $generatedUrl = route($routeName, $routeParameters);
-                if (filter_var($generatedUrl, FILTER_VALIDATE_URL)) {
-                    $data['url'] = $generatedUrl;
-                }
-            } catch (\Exception $e) {
-                Log::error('Error generating URL for ApplicationRejected toArray: '.$e->getMessage(), [
-                    'application_id'   => $applicationId,
-                    'application_type' => $applicationMorphClass,
-                    'route_name'       => $routeName,
-                ]);
-                $data['url'] = null;
+        if (! ($applicationId !== null && Route::has($routeName))) {
+
+            return $data;
+        }
+        try {
+            $generatedUrl = route($routeName, $routeParameters);
+            if (filter_var($generatedUrl, FILTER_VALIDATE_URL)) {
+                $data['url'] = $generatedUrl;
             }
+        } catch (\Exception $e) {
+            Log::error('Error generating URL for ApplicationRejected toArray: '.$e->getMessage(), [
+                'application_id'   => $applicationId,
+                'application_type' => $applicationMorphClass,
+                'route_name'       => $routeName,
+            ]);
+            $data['url'] = null;
         }
 
         return $data;
