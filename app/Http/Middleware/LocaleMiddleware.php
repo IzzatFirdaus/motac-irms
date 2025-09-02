@@ -124,21 +124,23 @@ class LocaleMiddleware
             $renamedPath  = $authViewsPath.sprintf('/%s-page.blade.php', $view);
 
             // Only create the link if the renamed exists and the original does not
-            if (! file_exists($originalPath) && file_exists($renamedPath)) {
-                // Try to create a symlink for the view (preferred for dev), fallback to copy
-                try {
-                    // On some systems, symlink requires elevated privileges; fallback to copy if fails
-                    if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-                        // On Windows, symlink for files is not always enabled, try copy
-                        copy($renamedPath, $originalPath);
-                    } else {
-                        symlink($renamedPath, $originalPath);
-                    }
-                } catch (\Throwable $e) {
-                    // If symlink or copy fails, ignore and let the missing view error show as fallback
-                    Log::warning(sprintf("LocaleMiddleware: Could not create alias for auth view '%s': ", $view).$e->getMessage());
-                }
+            if (! (! file_exists($originalPath) && file_exists($renamedPath))) {
+                continue;
             }
+            // Try to create a symlink for the view (preferred for dev), fallback to copy
+            try {
+                // On some systems, symlink requires elevated privileges; fallback to copy if fails
+                if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+                    // On Windows, symlink for files is not always enabled, try copy
+                    copy($renamedPath, $originalPath);
+                } else {
+                    symlink($renamedPath, $originalPath);
+                }
+            } catch (\Throwable $e) {
+                // If symlink or copy fails, ignore and let the missing view error show as fallback
+                Log::warning(sprintf("LocaleMiddleware: Could not create alias for auth view '%s': ", $view).$e->getMessage());
+            }
+
         }
     }
 }

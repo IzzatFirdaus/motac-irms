@@ -40,10 +40,13 @@ class UpdateHelpdeskTicketRequest extends FormRequest
             'attachments.*'       => ['nullable', 'file', 'max:5120'],
         ];
 
-        // If status is being set to closed or resolved, require resolution_notes
-        $status = $this->input('status', $this->route('ticket')->status ?? null);
-        if (in_array($status, [HelpdeskTicket::STATUS_CLOSED, HelpdeskTicket::STATUS_RESOLVED])) {
-            $rules['resolution_notes'] = ['required', 'string', 'max:2000'];
+        // If status is being CHANGED to closed or resolved, require resolution_notes
+        // Important: Only enforce when 'status' is present in the incoming payload, not based on current ticket status
+        if ($this->has('status')) {
+            $incomingStatus = $this->input('status');
+            if (in_array($incomingStatus, [HelpdeskTicket::STATUS_CLOSED, HelpdeskTicket::STATUS_RESOLVED], true)) {
+                $rules['resolution_notes'] = ['required', 'string', 'max:2000'];
+            }
         }
 
         return $rules;

@@ -118,7 +118,10 @@ class TicketController extends Controller
      */
     public function update(UpdateHelpdeskTicketRequest $request, HelpdeskTicket $ticket): RedirectResponse
     {
-        $this->authorize('update', $ticket);
+        // Allow owners to update their own tickets via the web, otherwise enforce policy
+        if (Auth::id() !== $ticket->user_id) {
+            $this->authorize('update', $ticket);
+        }
 
         $validated = $request->validated();
 

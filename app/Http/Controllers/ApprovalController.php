@@ -136,21 +136,23 @@ class ApprovalController extends Controller
         $itemQuantitiesForService = null;
 
         if (
-            $approval->approvable_type === LoanApplication::class && // Ensures quantity adjustment is typically done at the supporting officer stage,
-            // or adjust this condition if other stages also adjust quantities.
-            $approval->stage === Approval::STAGE_LOAN_SUPPORT_REVIEW && $validatedData['decision'] === Approval::STATUS_APPROVED && isset($validatedData['items_approved']) && is_array($validatedData['items_approved'])
+            $approval->approvable_type === LoanApplication::class && $approval->stage === Approval::STAGE_LOAN_SUPPORT_REVIEW && $validatedData['decision'] === Approval::STATUS_APPROVED && isset($validatedData['items_approved']) && is_array($validatedData['items_approved'])
         ) {
             $itemQuantitiesForService = [];
-            foreach ($validatedData['items_approved'] as $loanApplicationItemId => $itemData) {
-                if (isset($itemData['quantity_approved'])) { // Ensure the specific key exists
+            foreach ($validatedData['items_approved'] as $key => $itemData) {
+                // Support both keyed-by-ID and normalized array with explicit loan_application_item_id
+                $itemId = isset($itemData['loan_application_item_id']) ? (int) $itemData['loan_application_item_id'] : (int) $key;
+                if ($itemId > 0 && isset($itemData['quantity_approved'])) {
                     $itemQuantitiesForService[] = [
-                        'loan_application_item_id' => (int) $loanApplicationItemId,
+                        'loan_application_item_id' => $itemId,
                         'quantity_approved'        => (int) $itemData['quantity_approved'],
                     ];
                 }
             }
 
-            Log::info(sprintf('ApprovalController@recordDecision: Transformed item quantities for LoanApplication ID %d.', $approval->approvable_id), ['transformed_quantities_count' => count($itemQuantitiesForService)]); //
+            Log::info(
+                sprintf('ApprovalController@recordDecision: Transformed %d item quantities for LoanApplication ID %d.', count($itemQuantitiesForService), $approval->approvable_id)
+            );
         }
 
         try {
@@ -178,19 +180,13 @@ class ApprovalController extends Controller
 
             return redirect()->back()->withInput()->with('error', __('Anda tidak mempunyai kebenaran untuk membuat keputusan ini.')); //
         } catch (Throwable $e) { //
-            // EDIT: Temporarily throw the exception during testing to see the real error message.
-            // Remember to change this back to the redirect after debugging.
-            throw $e;
-
-            /*
-            Log::error("ApprovalController@recordDecision: Error processing approval for ID {$approval->id}. User ID: {$processingUser->id}.", [ //
-                'error' => $e->getMessage(), //
-                'trace' => substr($e->getTraceAsString(), 0, 500), //
-                'request_data' => $request->except(['_token', '_method']), //
+            Log::error("ApprovalController@recordDecision: Error processing approval for ID {$approval->id}. User ID: {$processingUser->id}.", [
+                'error'        => $e->getMessage(),
+                'trace'        => substr($e->getTraceAsString(), 0, 500),
+                'request_data' => $request->except(['_token', '_method']),
             ]);
 
-            return redirect()->back()->withInput()->with('error', __('Gagal merekod keputusan disebabkan oleh ralat sistem: ').$e->getMessage()); //
-            */
+            return redirect()->back()->withInput()->with('error', __('Gagal merekod keputusan disebabkan oleh ralat sistem: ').$e->getMessage());
         }
     }
 }

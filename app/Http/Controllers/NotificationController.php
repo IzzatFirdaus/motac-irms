@@ -62,14 +62,14 @@ class NotificationController extends Controller
         }
 
         // Only mark as read if currently unread
-        if ($notification->unread()) { // Uses is_null(read_at)
-            $notification->markAsRead(); // Sets read_at timestamp
-            Log::info(sprintf('Notification ID %s marked as read by User ID %d.', $notification->id, $user->id));
+        if (! $notification->unread()) {
 
-            return redirect()->back()->with('success', __('Notifikasi telah ditanda sebagai dibaca.'));
-        }
+            return redirect()->back()->with('info', __('Notifikasi ini telahpun dibaca.'));
+        }  // Uses is_null(read_at)
+        $notification->markAsRead(); // Sets read_at timestamp
+        Log::info(sprintf('Notification ID %s marked as read by User ID %d.', $notification->id, $user->id));
 
-        return redirect()->back()->with('info', __('Notifikasi ini telahpun dibaca.'));
+        return redirect()->back()->with('success', __('Notifikasi telah ditanda sebagai dibaca.'));
     }
 
     /**
@@ -82,13 +82,13 @@ class NotificationController extends Controller
         $user                = Auth::user();
         $unreadNotifications = $user->unreadNotifications(); // Query builder
 
-        if ($unreadNotifications->count() > 0) {
-            $unreadNotifications->update(['read_at' => now()]);
-            Log::info(sprintf('All unread notifications marked as read for User ID %d.', $user->id));
+        if ($unreadNotifications->count() <= 0) {
 
-            return redirect()->back()->with('success', __('Semua notifikasi telah ditanda sebagai dibaca.'));
+            return redirect()->back()->with('info', __('Tiada notifikasi baru untuk ditanda sebagai dibaca.'));
         }
+        $unreadNotifications->update(['read_at' => now()]);
+        Log::info(sprintf('All unread notifications marked as read for User ID %d.', $user->id));
 
-        return redirect()->back()->with('info', __('Tiada notifikasi baru untuk ditanda sebagai dibaca.'));
+        return redirect()->back()->with('success', __('Semua notifikasi telah ditanda sebagai dibaca.'));
     }
 }

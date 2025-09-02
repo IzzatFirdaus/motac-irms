@@ -97,15 +97,17 @@ final class IssueEquipmentRequest extends FormRequest
                     $quantityApprovedForItem = (int) ($appItem->quantity_approved ?? $appItem->quantity_requested);
                     $maxAllowedToIssueNow    = $quantityApprovedForItem - $alreadySuccessfullyIssued;
 
-                    if ((int) $value > $maxAllowedToIssueNow) {
-                        $fail(__('Kuantiti untuk dikeluarkan (:value) bagi item #:item_num melebihi baki yang boleh dikeluarkan (:can_issue) daripada kuantiti diluluskan (:approved). Telah dikeluarkan sebelum ini: :already_issued.', [
-                            'value'          => $value,
-                            'item_num'       => ((int) $index) + 1,
-                            'can_issue'      => max(0, $maxAllowedToIssueNow),
-                            'approved'       => $quantityApprovedForItem,
-                            'already_issued' => $alreadySuccessfullyIssued,
-                        ]));
+                    if ((int) $value <= $maxAllowedToIssueNow) {
+                        return;
                     }
+                    $fail(__('Kuantiti untuk dikeluarkan (:value) bagi item #:item_num melebihi baki yang boleh dikeluarkan (:can_issue) daripada kuantiti diluluskan (:approved). Telah dikeluarkan sebelum ini: :already_issued.', [
+                        'value'          => $value,
+                        'item_num'       => ((int) $index) + 1,
+                        'can_issue'      => max(0, $maxAllowedToIssueNow),
+                        'approved'       => $quantityApprovedForItem,
+                        'already_issued' => $alreadySuccessfullyIssued,
+                    ]));
+
                 },
             ],
             'items.*.issue_item_notes'             => ['nullable', 'string', 'max:1000'],

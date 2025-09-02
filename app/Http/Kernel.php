@@ -89,6 +89,11 @@ class Kernel extends HttpKernel
      * These middleware can be assigned to routes individually.
      */
     protected $middlewareAliases = [
+        /**
+         * @middleware-aliases
+         * This docblock helps static analyzers resolve middleware aliases to classes.
+         * view_logs => \App\Http\Middleware\ViewLogs::class
+         */
         // --------------------------------------------------
         // Laravel Built-in Middleware
         // --------------------------------------------------

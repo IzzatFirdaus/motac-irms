@@ -29,12 +29,16 @@ class DepartmentController extends Controller
         // Filter departments if search query is provided
         $query = Department::query();
 
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('name', 'like', sprintf('%%%s%%', $search))
-                ->orWhere('branch_type', 'like', sprintf('%%%s%%', $search))
-                ->orWhere('code', 'like', sprintf('%%%s%%', $search));
+        if (! $request->filled('search')) {
+
+            $departments = $query->orderBy('name')->paginate(config('pagination.default_size', 15));
+
+            return view('admin.departments.index', ['departments' => $departments]);
         }
+        $search = $request->input('search');
+        $query->where('name', 'like', sprintf('%%%s%%', $search))
+            ->orWhere('branch_type', 'like', sprintf('%%%s%%', $search))
+            ->orWhere('code', 'like', sprintf('%%%s%%', $search));
 
         $departments = $query->orderBy('name')->paginate(config('pagination.default_size', 15));
 

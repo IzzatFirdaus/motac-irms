@@ -31,8 +31,8 @@ class DashboardController extends Controller
             return $this->showAdminDashboard();
         }
 
-        // Route to BPM Staff dashboard if user has BPM Staff role
-        if ($user->hasRole('BPM Staff')) {
+        // Route to BPM Staff dashboard if user has BPM Staff or BPM role
+        if ($user->hasAnyRole(['BPM Staff', 'BPM'])) {
             return $this->showBpmDashboard();
         }
 
@@ -86,7 +86,8 @@ class DashboardController extends Controller
             // EmailApplication data removed as per system update
         ];
 
-        return view('dashboard.bpm', $data);
+        // Tests expect the alias view name 'dashboard.bpm-staff'
+        return view('dashboard.bpm-staff', $data);
     }
 
     /**
@@ -101,7 +102,8 @@ class DashboardController extends Controller
             // EmailApplication data removed as per system update
         ];
 
-        return view('dashboard.itadmin', $data);
+        // Tests expect the alias view name 'dashboard.it-admin'
+        return view('dashboard.it-admin', $data);
     }
 
     /**

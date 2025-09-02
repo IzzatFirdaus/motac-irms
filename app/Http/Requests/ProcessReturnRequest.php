@@ -110,7 +110,8 @@ final class ProcessReturnRequest extends FormRequest
                     }
                 },
             ],
-            'items.*.condition_on_return' => ['required', 'string', Rule::in(Equipment::getConditionStatusesList())], //
+            // Accept condition keys like 'good', 'damaged', etc. Use the keys of the list, not the translated labels
+            'items.*.condition_on_return' => ['required', 'string', Rule::in(array_keys(Equipment::getConditionStatusesList()))], //
             // item_status_on_return will be derived by the service or ProcessReturn Livewire component.
             // If you want to validate it here, ensure it's submitted and add:
             // 'items.*.item_status_on_return' => ['required', 'string', Rule::in(LoanTransactionItem::getReturnApplicableStatuses())],

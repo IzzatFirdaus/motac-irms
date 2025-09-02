@@ -22,28 +22,28 @@ class AllowAdminDuringMaintenance
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (app()->isDownForMaintenance()) {
-            if (! Auth::check()) {
-                // If not logged in during maintenance, redirect to login
-                // Ensure your login route is accessible or explicitly allowed.
-                return redirect()->route('login'); // Assuming 'login' is your named login route
-            }
+        if (! app()->isDownForMaintenance()) {
 
-            /** @var User $user */
-            $user = Auth::user();
-
-            // Allow users with 'Admin' role or other designated roles/permissions
-            // System Design 8.1 (Standardized role names)
-            // The check for 'HR Payroll' by name is fragile; prefer roles or permissions.
-            // For MOTAC, 'Admin' should suffice unless other specific roles need bypass access.
-            if ($user && $user->hasRole('Admin')) { // Adjust roles as per MOTAC requirements
-                return $next($request);
-            }
-
-            // If user is logged in but not authorized, throw 503
-            throw new HttpException(503, __('Perkhidmatan Tidak Tersedia. Sistem sedang dalam penyelenggaraan.'));
+            return $next($request);
+        }
+        if (! Auth::check()) {
+            // If not logged in during maintenance, redirect to login
+            // Ensure your login route is accessible or explicitly allowed.
+            return redirect()->route('login'); // Assuming 'login' is your named login route
         }
 
-        return $next($request);
+        /** @var User $user */
+        $user = Auth::user();
+
+        // Allow users with 'Admin' role or other designated roles/permissions
+        // System Design 8.1 (Standardized role names)
+        // The check for 'HR Payroll' by name is fragile; prefer roles or permissions.
+        // For MOTAC, 'Admin' should suffice unless other specific roles need bypass access.
+        if ($user && $user->hasRole('Admin')) { // Adjust roles as per MOTAC requirements
+            return $next($request);
+        }
+
+        // If user is logged in but not authorized, throw 503
+        throw new HttpException(503, __('Perkhidmatan Tidak Tersedia. Sistem sedang dalam penyelenggaraan.'));
     }
 }
