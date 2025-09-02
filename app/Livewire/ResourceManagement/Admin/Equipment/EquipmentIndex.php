@@ -432,8 +432,8 @@ class EquipmentIndex extends Component
     public function render(): View
     {
         return view('livewire.resource-management.admin.equipment.equipment-index', [
-            'equipmentList' => $this->getEquipmentListProperty(),
-            'departments'   => $this->departmentOptions,
+            'equipmentList'   => $this->getEquipmentListProperty(),
+            'departments'     => $this->departmentOptions,
             'locationOptions' => $this->locationOptions,
         ]);
     }

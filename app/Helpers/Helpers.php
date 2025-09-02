@@ -199,23 +199,23 @@ final class Helpers
      */
     public static function isActiveRoute(string $route, array $params = []): string
     {
-        if (Request::routeIs($route) === true) {
-            if ($params === []) {
-                return 'active';
-            }
+        if (Request::routeIs($route) !== true) {
 
-            $routeObj      = Request::route();
-            $currentParams = (is_object($routeObj) && method_exists($routeObj, 'parameters')) ? (array) $routeObj->parameters() : [];
-            foreach ($params as $key => $value) {
-                if (! array_key_exists($key, $currentParams) || $currentParams[$key] !== $value) {
-                    return '';
-                }
-            }
-
+            return '';
+        }
+        if ($params === []) {
             return 'active';
         }
 
-        return '';
+        $routeObj      = Request::route();
+        $currentParams = (is_object($routeObj) && method_exists($routeObj, 'parameters')) ? (array) $routeObj->parameters() : [];
+        foreach ($params as $key => $value) {
+            if (! array_key_exists($key, $currentParams) || $currentParams[$key] !== $value) {
+                return '';
+            }
+        }
+
+        return 'active';
     }
 
     /**
