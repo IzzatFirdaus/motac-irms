@@ -93,16 +93,20 @@ class EquipmentCategorySeeder extends Seeder
         }
 
         $needed = $targetCount - EquipmentCategory::count();
-        if ($needed > 0) {
-            EquipmentCategory::factory()
-                ->count($needed)
-                ->create([
-                    'created_by' => $auditUserId,
-                    'updated_by' => $auditUserId,
-                    'is_active'  => true,
-                ]);
-            Log::info(sprintf('Created %s additional equipment categories using factory.', $needed));
+        if ($needed <= 0) {
+
+            Log::info('EquipmentCategory seeding complete (Revision 3).');
+
+            return;
         }
+        EquipmentCategory::factory()
+            ->count($needed)
+            ->create([
+                'created_by' => $auditUserId,
+                'updated_by' => $auditUserId,
+                'is_active'  => true,
+            ]);
+        Log::info(sprintf('Created %s additional equipment categories using factory.', $needed));
 
         Log::info('EquipmentCategory seeding complete (Revision 3).');
     }

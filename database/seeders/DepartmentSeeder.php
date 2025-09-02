@@ -66,24 +66,26 @@ class DepartmentSeeder extends Seeder
      */
     private function ensureAuditUserExists(): void
     {
-        if (User::count() === 0) {
-            Log::info('No users found. Creating audit user for department seeding...');
-
-            // Create a simple audit user without complex relationships.
-            // Use only valid enum value for 'status' (e.g. 'inactive').
-            User::create([
-                'name'                  => 'Audit User (DeptSeeder)',
-                'email'                 => 'audit-deptseeder@motac.local',
-                'email_verified_at'     => now(),
-                'password'              => bcrypt('password'),
-                'title'                 => 'tuan',
-                'identification_number' => '999999999999',
-                'passport_number'       => strtoupper(fake()->bothify('??########')),
-                'status'                => 'inactive', // Use a valid ENUM value for status!
-            ]);
-
-            Log::info('Audit user created successfully.');
+        if (User::count() !== 0) {
+            return;
         }
+        Log::info('No users found. Creating audit user for department seeding...');
+
+        // Create a simple audit user without complex relationships.
+        // Use only valid enum value for 'status' (e.g. 'inactive').
+        User::create([
+            'name'                  => 'Audit User (DeptSeeder)',
+            'email'                 => 'audit-deptseeder@motac.local',
+            'email_verified_at'     => now(),
+            'password'              => bcrypt('password'),
+            'title'                 => 'tuan',
+            'identification_number' => '999999999999',
+            'passport_number'       => strtoupper(fake()->bothify('??########')),
+            'status'                => 'inactive', // Use a valid ENUM value for status!
+        ]);
+
+        Log::info('Audit user created successfully.');
+
     }
 
     /**

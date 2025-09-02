@@ -110,31 +110,35 @@ class LocationSeeder extends Seeder
         $currentCount = Location::count();
 
         // If we have fewer than the target, create more using a factory
-        if ($currentCount < $targetCount) {
-            $needed = $targetCount - $currentCount;
-            Log::info(sprintf('Attempting to create %s additional random locations using a factory...', $needed));
+        if ($currentCount >= $targetCount) {
 
-            $createdCount = 0;
-            // Loop to create the exact number of needed locations
-            for ($i = 0; $i < $needed; $i++) {
-                try {
-                    // Use the factory to generate a new, unique location
-                    // The unique() method on the faker instance in your factory is key here
-                    Location::factory()->create([
-                        'created_by' => $auditUserId,
-                        'updated_by' => $auditUserId,
-                        'is_active'  => true,
-                    ]);
-                    $createdCount++;
-                } catch (UniqueConstraintViolationException $e) {
-                    // If the factory generates a duplicate name despite our efforts, log it and try again.
-                    Log::warning('Location factory generated a duplicate name. Retrying with a new entry.');
-                    $i--; // Decrement the counter to ensure we still create the target number of locations.
-                }
-            }
+            Log::info('Locations seeding complete (Revision 4 - Patched).');
 
-            Log::info(sprintf('Successfully created %d new random locations.', $createdCount));
+            return;
         }
+        $needed = $targetCount - $currentCount;
+        Log::info(sprintf('Attempting to create %s additional random locations using a factory...', $needed));
+
+        $createdCount = 0;
+        // Loop to create the exact number of needed locations
+        for ($i = 0; $i < $needed; $i++) {
+            try {
+                // Use the factory to generate a new, unique location
+                // The unique() method on the faker instance in your factory is key here
+                Location::factory()->create([
+                    'created_by' => $auditUserId,
+                    'updated_by' => $auditUserId,
+                    'is_active'  => true,
+                ]);
+                $createdCount++;
+            } catch (UniqueConstraintViolationException $e) {
+                // If the factory generates a duplicate name despite our efforts, log it and try again.
+                Log::warning('Location factory generated a duplicate name. Retrying with a new entry.');
+                $i--; // Decrement the counter to ensure we still create the target number of locations.
+            }
+        }
+
+        Log::info(sprintf('Successfully created %d new random locations.', $createdCount));
 
         Log::info('Locations seeding complete (Revision 4 - Patched).');
     }

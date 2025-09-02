@@ -197,12 +197,14 @@ class UserFactory extends Factory
     public function asHod(): static
     {
         return $this->afterCreating(function (User $user): void {
-            if (method_exists($user, 'assignRole')) {
-                $user->assignRole('HOD');
-                if (method_exists($user, 'hasRole') && ! $user->hasRole('Approver')) {
-                    $user->assignRole('Approver');
-                }
+            if (! method_exists($user, 'assignRole')) {
+                return;
             }
+            $user->assignRole('HOD');
+            if (method_exists($user, 'hasRole') && ! $user->hasRole('Approver')) {
+                $user->assignRole('Approver');
+            }
+
         });
     }
 

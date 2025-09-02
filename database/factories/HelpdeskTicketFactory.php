@@ -29,15 +29,16 @@ class HelpdeskTicketFactory extends Factory
         // Prefer existing related records to avoid UNIQUE constraint collisions in tests.
         // Create users for ticket ownership/assignment (safe to create multiple users).
         $userId = User::factory()->create()->id;
-        $assignedToUserId = User::factory()->create()->id;
+        // By default, do NOT assign an agent; tests assume no assignee unless explicitly set
+        $assignedToUserId = null;
 
         // For categories and priorities, prefer selecting an existing record if present.
         $categoryIds = HelpdeskCategory::pluck('id')->all();
         if (! empty($categoryIds)) {
             $categoryId = Arr::random($categoryIds);
         } else {
-            // Use firstOrCreate to avoid race conditions causing UNIQUE constraint errors in tests
-            $category = HelpdeskCategory::firstOrCreate(['name' => 'General'], ['is_active' => 1, 'created_by' => 1, 'updated_by' => 1]);
+            // Create a fresh category via factory (avoid fixed name collisions)
+            $category   = HelpdeskCategory::factory()->create();
             $categoryId = $category->id;
         }
 
@@ -45,8 +46,8 @@ class HelpdeskTicketFactory extends Factory
         if (! empty($priorityIds)) {
             $priorityId = Arr::random($priorityIds);
         } else {
-            // Use firstOrCreate to avoid duplicate priority name inserts under race conditions
-            $priority = HelpdeskPriority::firstOrCreate(['name' => 'Low'], ['level' => 1, 'is_active' => 1, 'created_by' => 1, 'updated_by' => 1]);
+            // Create a fresh priority via factory (no unsupported columns)
+            $priority   = HelpdeskPriority::factory()->create();
             $priorityId = $priority->id;
         }
 
@@ -126,14 +127,16 @@ class HelpdeskTicketFactory extends Factory
     {
         return $this->afterCreating(function (HelpdeskTicket $ticket, $attributes = null) {
             // If the ticket is closed but closed_by_id was not provided, set it based on assigned or user
-            if ($ticket->status === HelpdeskTicket::STATUS_CLOSED && empty($ticket->closed_by_id)) {
-                $closer               = $ticket->assigned_to_user_id ?? $ticket->user_id ?? User::factory()->create()->id;
-                $ticket->closed_by_id = $closer;
-                if (empty($ticket->closed_at)) {
-                    $ticket->closed_at = now();
-                }
-                $ticket->save();
+            if (! ($ticket->status === HelpdeskTicket::STATUS_CLOSED && empty($ticket->closed_by_id))) {
+                return;
             }
+            $closer               = $ticket->assigned_to_user_id ?? $ticket->user_id ?? User::factory()->create()->id;
+            $ticket->closed_by_id = $closer;
+            if (empty($ticket->closed_at)) {
+                $ticket->closed_at = now();
+            }
+            $ticket->save();
+
         });
     }
 

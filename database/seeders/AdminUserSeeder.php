@@ -134,17 +134,27 @@ class AdminUserSeeder extends Seeder
             }
 
             // Ensure seeded admin/dev/maintainer always have both 'Admin' and 'BPM Staff' roles
-            if (in_array($user->email, $seededAdminEmails, true)) {
-                if (! $user->hasRole('Admin')) {
-                    $user->assignRole('Admin');
-                }
+            if (! in_array($user->email, $seededAdminEmails, true)) {
 
-                if (! $user->hasRole('BPM Staff')) {
-                    $user->assignRole('BPM Staff');
-                }
+                Log::info(sprintf(
+                    "AdminUserSeeder: Processed user '%s' (%s). Assigned Role: '%s'. Assigned Grade Level: %s.",
+                    $user->name,
+                    $user->email,
+                    $data['role_name'],
+                    $user->grade?->level
+                ));
 
-                Log::info(sprintf('AdminUserSeeder: Ensured %s has both Admin and BPM Staff roles.', $user->email));
+                continue;
             }
+            if (! $user->hasRole('Admin')) {
+                $user->assignRole('Admin');
+            }
+
+            if (! $user->hasRole('BPM Staff')) {
+                $user->assignRole('BPM Staff');
+            }
+
+            Log::info(sprintf('AdminUserSeeder: Ensured %s has both Admin and BPM Staff roles.', $user->email));
 
             Log::info(sprintf(
                 "AdminUserSeeder: Processed user '%s' (%s). Assigned Role: '%s'. Assigned Grade Level: %s.",
