@@ -1,7 +1,7 @@
-
 # MOTAC IRMS Directory Review
 
-Here is a review of the directories/subdirectories from `DIRECTORY.md` that have **not been explicitly checked or discussed yet** in this Copilot Space:
+Here is a review of the directories/subdirectories from `DIRECTORY.md` that have **not been
+explicitly checked or discussed yet** in this Copilot Space:
 
 ## Not Yet Checked Directories (with Description & File Listing)
 
@@ -9,8 +9,9 @@ Here is a review of the directories/subdirectories from `DIRECTORY.md` that have
 
 #### /app/Models
 
-**Description:**
-Contains all Eloquent models representing database tables/entities for users, departments, positions, grades, equipment, applications, transactions, approvals, notifications, and settings.
+**Description:** Contains all Eloquent models representing database tables/entities for users,
+departments, positions, grades, equipment, applications, transactions, approvals, notifications, and
+settings.
 
 **Files:**
 
@@ -31,13 +32,12 @@ Contains all Eloquent models representing database tables/entities for users, de
 - ~~Notification.php~~
 - ~~Setting.php~~
 
-> **Status:**
-> All files in `/app/Models` have now been checked or discussed.
+> **Status:** All files in `/app/Models` have now been checked or discussed.
 
 #### /app/Http/Controllers
 
-**Description:**
-Holds all HTTP controller classes responsible for handling requests, business logic, and returning responses/views for web and API endpoints.
+**Description:** Holds all HTTP controller classes responsible for handling requests, business
+logic, and returning responses/views for web and API endpoints.
 
 **Files:**
 
@@ -67,8 +67,8 @@ Holds all HTTP controller classes responsible for handling requests, business lo
 
 #### /app/Services
 
-**Description:**
-Service classes encapsulate business logic for various modules, enabling code reuse and separation of concerns.
+**Description:** Service classes encapsulate business logic for various modules, enabling code reuse
+and separation of concerns.
 
 **Files:**
 
@@ -82,8 +82,8 @@ Service classes encapsulate business logic for various modules, enabling code re
 
 #### /app/Policies
 
-**Description:**
-Policy classes define authorization logic for models, determining which user roles can perform actions on resources.
+**Description:** Policy classes define authorization logic for models, determining which user roles
+can perform actions on resources.
 
 **Files:**
 
@@ -96,8 +96,8 @@ Policy classes define authorization logic for models, determining which user rol
 
 #### /app/Observers
 
-**Description:**
-Model observers for automating common actions (such as tracking who created/updated a record).
+**Description:** Model observers for automating common actions (such as tracking who created/updated
+a record).
 
 **Files:**
 
@@ -105,8 +105,8 @@ Model observers for automating common actions (such as tracking who created/upda
 
 #### /app/Livewire
 
-**Description:**
-Livewire components for reactive user interfaces, especially for resource management (applications, approvals), settings, and admin functions.
+**Description:** Livewire components for reactive user interfaces, especially for resource
+management (applications, approvals), settings, and admin functions.
 
 **Files:**
 
@@ -123,8 +123,8 @@ Livewire components for reactive user interfaces, especially for resource manage
 
 #### /app/Notifications
 
-**Description:**
-Notification classes for sending alerts on application status changes, equipment events, provisioning results, etc.
+**Description:** Notification classes for sending alerts on application status changes, equipment
+events, provisioning results, etc.
 
 **Files:**
 
@@ -145,8 +145,7 @@ Notification classes for sending alerts on application status changes, equipment
 
 #### /app/Helpers
 
-**Description:**
-Utility/helper classes for commonly used functions across the app.
+**Description:** Utility/helper classes for commonly used functions across the app.
 
 **Files:**
 
@@ -156,8 +155,7 @@ Utility/helper classes for commonly used functions across the app.
 
 #### /database/migrations
 
-**Description:**
-Migration files for creating/updating database tables as per Laravel conventions.
+**Description:** Migration files for creating/updating database tables as per Laravel conventions.
 
 **Files:**
 
@@ -178,13 +176,11 @@ Migration files for creating/updating database tables as per Laravel conventions
 - ~~create_notifications_table.php~~
 - ~~create_settings_table.php~~
 
-> **Status:**
-> All files in `/database/migrations` have now been checked or discussed.
+> **Status:** All files in `/database/migrations` have now been checked or discussed.
 
 #### /database/seeders
 
-**Description:**
-Seeder files for populating tables with initial/demo data.
+**Description:** Seeder files for populating tables with initial/demo data.
 
 **Files:**
 
@@ -206,8 +202,7 @@ Seeder files for populating tables with initial/demo data.
 
 #### /database/factories
 
-**Description:**
-Factory files for generating fake/test data for models.
+**Description:** Factory files for generating fake/test data for models.
 
 **Files:**
 
@@ -228,8 +223,8 @@ Factory files for generating fake/test data for models.
 
 #### /resources/views
 
-**Description:**
-Blade template files for the system's user interface, including all page layouts, Livewire component views, partials, emails, and print forms.
+**Description:** Blade template files for the system's user interface, including all page layouts,
+Livewire component views, partials, emails, and print forms.
 
 **Files:**
 
@@ -274,13 +269,11 @@ Blade template files for the system's user interface, including all page layouts
 - policy.blade.php (checked/created for hybrid markdown localization)
 - terms.blade.php (checked/created for hybrid markdown localization)
 
-> **Status:**
-> All files in `/resources/views` (including emails) have now been checked or discussed.
+> **Status:** All files in `/resources/views` (including emails) have now been checked or discussed.
 
 #### /resources/lang
 
-**Description:**
-Language translation files for English and Bahasa Melayu (ms).
+**Description:** Language translation files for English and Bahasa Melayu (ms).
 
 **Files:**
 
@@ -294,22 +287,21 @@ Language translation files for English and Bahasa Melayu (ms).
 
 ### /docs
 
-**Description:**
-Documentation files for system design, technical details, data tables, process flows, and feature implementation.
+**Description:** Documentation files for system design, technical details, data tables, process
+flows, and feature implementation.
 
 **Files:**
 
 - System_Design_Rev_3.6.md
 - Technical_Documentation_MOTAC_IRMS_Rev_1.md
-- Core_User_&_Organizational_Data_Tables_Mk_2.md
+- Core*User*&\_Organizational_Data_Tables_Mk_2.md
 - Loan_System_Flow_Mk_2.md
 - Email_Feature_Implementation.md
 - Design_Document_Mk_2_MOTAC_IRMS.md
 
 ### /public
 
-**Description:**
-Publicly accessible assets such as icons, images, CSS, and JS.
+**Description:** Publicly accessible assets such as icons, images, CSS, and JS.
 
 **Files:**
 
@@ -319,8 +311,7 @@ Publicly accessible assets such as icons, images, CSS, and JS.
 
 ### /storage
 
-**Description:**
-Storage directory for file uploads, logs, cache, and framework-generated files.
+**Description:** Storage directory for file uploads, logs, cache, and framework-generated files.
 
 **Files:**
 
@@ -328,8 +319,7 @@ Storage directory for file uploads, logs, cache, and framework-generated files.
 
 ### /.github
 
-**Description:**
-GitHub-specific configuration for issues, workflows, and CI/CD.
+**Description:** GitHub-specific configuration for issues, workflows, and CI/CD.
 
 **Files:**
 
@@ -340,7 +330,10 @@ GitHub-specific configuration for issues, workflows, and CI/CD.
 
 **Note:**
 
-Some files/directories (like config, routes) have already been checked and/or updated. If you want to check any of the above directories in detail (for example, to remove legacy EmailApplication code or add Helpdesk features), please specify which directory or files you want to review or update next.
+Some files/directories (like config, routes) have already been checked and/or updated. If you want
+to check any of the above directories in detail (for example, to remove legacy EmailApplication code
+or add Helpdesk features), please specify which directory or files you want to review or update
+next.
 
 ---
 
@@ -375,4 +368,5 @@ Some files/directories (like config, routes) have already been checked and/or up
 - `/storage`
 - `/.github`
 
-**This checklist will be updated as more directories and files are explicitly reviewed, modified, or discussed.**
+**This checklist will be updated as more directories and files are explicitly reviewed, modified, or
+discussed.**

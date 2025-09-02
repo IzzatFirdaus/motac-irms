@@ -1,6 +1,7 @@
 # Sistem Pengurusan Sumber Terintegrasi MOTAC
 
 Dokumentasi Bahasa Reka Bentuk Versi 5.0 | Untuk Bahagian Pengurusan Maklumat (BPM)
+
 <!-- Dokumen ini mematuhi Malaysia Government Design System (MYDS) dan 18 Prinsip MyGOVEA -->
 
 ---
@@ -9,17 +10,23 @@ Dokumentasi Bahasa Reka Bentuk Versi 5.0 | Untuk Bahagian Pengurusan Maklumat (B
 
 ### 1.1 Pematuhan MYDS (Malaysia Government Design System)
 
-- **Standard Kerajaan:** Aplikasi ini menggunakan MYDS sebagai asas reka bentuk untuk memastikan konsistensi dengan platform kerajaan lain.
-- **Komponen Standard:** Menggunakan komponen UI MYDS untuk butang, borang, navigasi dan elemen antara muka.
+- **Standard Kerajaan:** Aplikasi ini menggunakan MYDS sebagai asas reka bentuk untuk memastikan
+  konsistensi dengan platform kerajaan lain.
+- **Komponen Standard:** Menggunakan komponen UI MYDS untuk butang, borang, navigasi dan elemen
+  antara muka.
 - **Kebolehcapaian:** Mematuhi WCAG 2.1 AA untuk memastikan akses kepada semua pengguna.
 - **Responsif:** Menggunakan sistem grid 12-8-4 MYDS untuk desktop, tablet dan mobile.
 
 ### 1.2 Berpaksikan Rakyat (Mesra Pengguna & Jelas)
 
-- **Akses Rakyat:** Reka bentuk aplikasi menempatkan keperluan dan kehendak pengguna sebagai fokus utama.
-- **Bahasa Melayu Utama:** Bahasa utama antara muka ialah Bahasa Melayu, dengan pilihan dwibahasa mengikut keperluan.
-- **Penglibatan Pengguna:** Pengguna dilibatkan dalam setiap fasa pembangunan untuk memastikan aplikasi memenuhi keperluan.
-- **Kemudahan Navigasi:** Maksimum 3 klik untuk mencapai fungsi utama, medan wajib ditandakan dengan asterisk merah (*).
+- **Akses Rakyat:** Reka bentuk aplikasi menempatkan keperluan dan kehendak pengguna sebagai fokus
+  utama.
+- **Bahasa Melayu Utama:** Bahasa utama antara muka ialah Bahasa Melayu, dengan pilihan dwibahasa
+  mengikut keperluan.
+- **Penglibatan Pengguna:** Pengguna dilibatkan dalam setiap fasa pembangunan untuk memastikan
+  aplikasi memenuhi keperluan.
+- **Kemudahan Navigasi:** Maksimum 3 klik untuk mencapai fungsi utama, medan wajib ditandakan dengan
+  asterisk merah (\*).
 
 ### 1.3 Berpacukan Data
 
@@ -39,32 +46,32 @@ Dokumentasi Bahasa Reka Bentuk Versi 5.0 | Untuk Bahagian Pengurusan Maklumat (B
 
 ### 2.1 Palet Warna Utama (Mengikut MYDS)
 
-| Peranan          | Token MYDS           | Nilai Hex    | Penggunaan MOTAC                                    |
-|------------------|---------------------|--------------|-----------------------------------------------------|
-| **Primary**      | `primary-600`       | #2563EB      | Butang utama, pautan aktif, navigasi utama         |
-| **Primary Light**| `primary-300`       | #96B7FF      | Hover states, latar belakang butang sekunder       |
-| **Primary Dark** | `primary-700`       | #1D4ED8      | Butang tekan, keadaan fokus                        |
-| **MOTAC Brand**  | Custom              | #0055A4      | Logo, header jenama (custom overlay pada primary)  |
-| **BPM Accent**   | Custom              | #E60000      | Ikon BPM, notifikasi kritikal                      |
+| Peranan           | Token MYDS    | Nilai Hex | Penggunaan MOTAC                                  |
+| ----------------- | ------------- | --------- | ------------------------------------------------- |
+| **Primary**       | `primary-600` | #2563EB   | Butang utama, pautan aktif, navigasi utama        |
+| **Primary Light** | `primary-300` | #96B7FF   | Hover states, latar belakang butang sekunder      |
+| **Primary Dark**  | `primary-700` | #1D4ED8   | Butang tekan, keadaan fokus                       |
+| **MOTAC Brand**   | Custom        | #0055A4   | Logo, header jenama (custom overlay pada primary) |
+| **BPM Accent**    | Custom        | #E60000   | Ikon BPM, notifikasi kritikal                     |
 
 ### 2.2 Warna Semantik (MYDS Standard)
 
-| Status           | Token MYDS           | Nilai Hex    | Penggunaan                                          |
-|------------------|---------------------|--------------|-----------------------------------------------------|
-| **Success**      | `success-600`       | #16A34A      | Mesej kejayaan, status diluluskan                  |
-| **Warning**      | `warning-600`       | #CA8A04      | Amaran, status menunggu                            |
-| **Danger**       | `danger-600`        | #DC2626      | Ralat, tindakan hapus, status ditolak              |
-| **Info**         | `primary-500`       | #3A75F6      | Maklumat tambahan, petua                           |
+| Status      | Token MYDS    | Nilai Hex | Penggunaan                            |
+| ----------- | ------------- | --------- | ------------------------------------- |
+| **Success** | `success-600` | #16A34A   | Mesej kejayaan, status diluluskan     |
+| **Warning** | `warning-600` | #CA8A04   | Amaran, status menunggu               |
+| **Danger**  | `danger-600`  | #DC2626   | Ralat, tindakan hapus, status ditolak |
+| **Info**    | `primary-500` | #3A75F6   | Maklumat tambahan, petua              |
 
 ### 2.3 Warna Neutral (MYDS Standard)
 
-| Elemen           | Token MYDS (Light)   | Token MYDS (Dark)    | Penggunaan                    |
-|------------------|---------------------|---------------------|-------------------------------|
-| **Background**   | `bg-white`          | `bg-gray-900`       | Latar utama aplikasi          |
-| **Surface**      | `bg-gray-50`        | `bg-gray-850`       | Kad, panel, modal             |
-| **Border**       | `otl-gray-200`      | `otl-gray-800`      | Sempadan elemen               |
-| **Text Primary** | `txt-black-900`     | `txt-white`         | Teks utama                    |
-| **Text Secondary**| `txt-black-500`    | `txt-black-500`     | Teks sokongan                 |
+| Elemen             | Token MYDS (Light) | Token MYDS (Dark) | Penggunaan           |
+| ------------------ | ------------------ | ----------------- | -------------------- |
+| **Background**     | `bg-white`         | `bg-gray-900`     | Latar utama aplikasi |
+| **Surface**        | `bg-gray-50`       | `bg-gray-850`     | Kad, panel, modal    |
+| **Border**         | `otl-gray-200`     | `otl-gray-800`    | Sempadan elemen      |
+| **Text Primary**   | `txt-black-900`    | `txt-white`       | Teks utama           |
+| **Text Secondary** | `txt-black-500`    | `txt-black-500`   | Teks sokongan        |
 
 ---
 
@@ -72,16 +79,16 @@ Dokumentasi Bahasa Reka Bentuk Versi 5.0 | Untuk Bahagian Pengurusan Maklumat (B
 
 ### 3.1 Hierarki Teks
 
-| Elemen           | Saiz MYDS            | Font Weight  | Penggunaan MOTAC                          |
-|------------------|---------------------|--------------|-------------------------------------------|
-| **Heading 1**    | 36px (2.25rem)      | 600          | Tajuk halaman utama                       |
-| **Heading 2**    | 30px (1.875rem)     | 600          | Tajuk seksyen                             |
-| **Heading 3**    | 24px (1.5rem)       | 600          | Tajuk sub-seksyen                         |
-| **Heading 4**    | 20px (1.25rem)      | 600          | Tajuk kad, panel                          |
-| **Body Large**   | 18px (1.125rem)     | 400          | Teks pengenalan, kandungan penting        |
-| **Body Medium**  | 16px (1rem)         | 400          | Teks badan standard                       |
-| **Body Small**   | 14px (0.875rem)     | 400          | Label, teks bantuan                       |
-| **Caption**      | 12px (0.75rem)      | 400          | Metadata, cap waktu                       |
+| Elemen          | Saiz MYDS       | Font Weight | Penggunaan MOTAC                   |
+| --------------- | --------------- | ----------- | ---------------------------------- |
+| **Heading 1**   | 36px (2.25rem)  | 600         | Tajuk halaman utama                |
+| **Heading 2**   | 30px (1.875rem) | 600         | Tajuk seksyen                      |
+| **Heading 3**   | 24px (1.5rem)   | 600         | Tajuk sub-seksyen                  |
+| **Heading 4**   | 20px (1.25rem)  | 600         | Tajuk kad, panel                   |
+| **Body Large**  | 18px (1.125rem) | 400         | Teks pengenalan, kandungan penting |
+| **Body Medium** | 16px (1rem)     | 400         | Teks badan standard                |
+| **Body Small**  | 14px (0.875rem) | 400         | Label, teks bantuan                |
+| **Caption**     | 12px (0.75rem)  | 400         | Metadata, cap waktu                |
 
 ### 3.2 Keluarga Font
 
@@ -98,9 +105,7 @@ Dokumentasi Bahasa Reka Bentuk Versi 5.0 | Untuk Bahagian Pengurusan Maklumat (B
 
 ```html
 <!-- Butang Utama -->
-<button class="myds-button myds-button--primary myds-button--medium">
-  Hantar Permohonan
-</button>
+<button class="myds-button myds-button--primary myds-button--medium">Hantar Permohonan</button>
 
 <!-- Butang Sekunder -->
 <button class="myds-button myds-button--secondary myds-button--medium">
@@ -120,21 +125,14 @@ Dokumentasi Bahasa Reka Bentuk Versi 5.0 | Untuk Bahagian Pengurusan Maklumat (B
 ```html
 <!-- Input Text dengan Label -->
 <div class="myds-form-group">
-  <label for="nama" class="myds-label">
-    Nama Penuh <span class="text-danger">*</span>
-  </label>
-  <input type="text" id="nama" class="myds-input" 
-         placeholder="Masukkan nama penuh anda" required>
-  <div class="myds-hint-text">
-    Seperti dalam kad pengenalan
-  </div>
+  <label for="nama" class="myds-label"> Nama Penuh <span class="text-danger">*</span> </label>
+  <input type="text" id="nama" class="myds-input" placeholder="Masukkan nama penuh anda" required />
+  <div class="myds-hint-text">Seperti dalam kad pengenalan</div>
 </div>
 
 <!-- Select Dropdown -->
 <div class="myds-form-group">
-  <label for="jabatan" class="myds-label">
-    Jabatan <span class="text-danger">*</span>
-  </label>
+  <label for="jabatan" class="myds-label"> Jabatan <span class="text-danger">*</span> </label>
   <select id="jabatan" class="myds-select" required>
     <option value="">Pilih jabatan</option>
     <option value="bpm">Bahagian Pengurusan Maklumat</option>
@@ -163,9 +161,7 @@ Dokumentasi Bahasa Reka Bentuk Versi 5.0 | Untuk Bahagian Pengurusan Maklumat (B
     <i class="bi-exclamation-triangle"></i>
     Tiket Dalam Tindakan
   </div>
-  <div class="myds-panel-content">
-    Tiket #HD2024-001 sedang diproses oleh Unit IT
-  </div>
+  <div class="myds-panel-content">Tiket #HD2024-001 sedang diproses oleh Unit IT</div>
 </div>
 ```
 
@@ -175,7 +171,7 @@ Dokumentasi Bahasa Reka Bentuk Versi 5.0 | Untuk Bahagian Pengurusan Maklumat (B
 <!-- Navigasi Sisi Menggunakan MYDS -->
 <nav class="myds-sidebar" aria-label="Navigasi utama">
   <div class="myds-sidebar-header">
-    <img src="/assets/logo-motac.svg" alt="MOTAC" height="40">
+    <img src="/assets/logo-motac.svg" alt="MOTAC" height="40" />
   </div>
   <ul class="myds-sidebar-menu">
     <li class="myds-sidebar-item">
@@ -216,7 +212,7 @@ Dokumentasi Bahasa Reka Bentuk Versi 5.0 | Untuk Bahagian Pengurusan Maklumat (B
         <!-- Navigasi content -->
       </nav>
     </div>
-    
+
     <!-- Main Content (9 columns) -->
     <div class="myds-col-12 myds-col-md-9">
       <main class="myds-main-content">
@@ -239,11 +235,11 @@ Dokumentasi Bahasa Reka Bentuk Versi 5.0 | Untuk Bahagian Pengurusan Maklumat (B
 
 ### 5.2 Breakpoints MYDS
 
-| Peranti    | Saiz Skrin     | Grid Columns | Gap    | Max Width  |
-|------------|---------------|--------------|--------|------------|
-| **Mobile** | ≤ 767px       | 4            | 18px   | 100%       |
-| **Tablet** | 768px-1023px  | 8            | 24px   | 100%       |
-| **Desktop**| ≥ 1024px      | 12           | 24px   | 1280px     |
+| Peranti     | Saiz Skrin   | Grid Columns | Gap  | Max Width |
+| ----------- | ------------ | ------------ | ---- | --------- |
+| **Mobile**  | ≤ 767px      | 4            | 18px | 100%      |
+| **Tablet**  | 768px-1023px | 8            | 24px | 100%      |
+| **Desktop** | ≥ 1024px     | 12           | 24px | 1280px    |
 
 ---
 
@@ -294,7 +290,7 @@ Dokumentasi Bahasa Reka Bentuk Versi 5.0 | Untuk Bahagian Pengurusan Maklumat (B
       <p>12 Ogos 2025, 2:30 PM</p>
     </div>
   </div>
-  
+
   <div class="myds-stepper-item myds-stepper-item--active">
     <div class="myds-stepper-icon">
       <i class="bi-person-check"></i>
@@ -304,7 +300,7 @@ Dokumentasi Bahasa Reka Bentuk Versi 5.0 | Untuk Bahagian Pengurusan Maklumat (B
       <p>Status semasa</p>
     </div>
   </div>
-  
+
   <div class="myds-stepper-item">
     <div class="myds-stepper-icon">
       <i class="bi-laptop"></i>
@@ -327,36 +323,36 @@ Dokumentasi Bahasa Reka Bentuk Versi 5.0 | Untuk Bahagian Pengurusan Maklumat (B
     <h1>Borang Permohonan Pinjaman Peralatan ICT</h1>
     <p class="myds-form-reference">Rujukan: PK.(S).MOTAC.07.(L3)</p>
   </div>
-  
+
   <!-- Bahagian 1: Maklumat Pemohon -->
   <div class="myds-form-section">
     <h2>BAHAGIAN 1: MAKLUMAT PEMOHON</h2>
-    
+
     <div class="myds-row">
       <div class="myds-col-12 myds-col-md-6">
         <div class="myds-form-group">
           <label for="nama_penuh" class="myds-label">
             Nama Penuh <span class="text-danger">*</span>
           </label>
-          <input type="text" id="nama_penuh" class="myds-input" required>
+          <input type="text" id="nama_penuh" class="myds-input" required />
         </div>
       </div>
-      
+
       <div class="myds-col-12 myds-col-md-6">
         <div class="myds-form-group">
           <label for="no_pekerja" class="myds-label">
             No. Pekerja <span class="text-danger">*</span>
           </label>
-          <input type="text" id="no_pekerja" class="myds-input" required>
+          <input type="text" id="no_pekerja" class="myds-input" required />
         </div>
       </div>
     </div>
   </div>
-  
+
   <!-- Bahagian 2: Peralatan Diperlukan -->
   <div class="myds-form-section">
     <h2>BAHAGIAN 2: PERALATAN DIPERLUKAN</h2>
-    
+
     <div class="myds-form-group">
       <label for="jenis_peralatan" class="myds-label">
         Jenis Peralatan <span class="text-danger">*</span>
@@ -369,15 +365,11 @@ Dokumentasi Bahasa Reka Bentuk Versi 5.0 | Untuk Bahagian Pengurusan Maklumat (B
       </select>
     </div>
   </div>
-  
+
   <!-- Butang Tindakan -->
   <div class="myds-form-actions">
-    <button type="button" class="myds-button myds-button--secondary">
-      Simpan Draf
-    </button>
-    <button type="submit" class="myds-button myds-button--primary">
-      Hantar Permohonan
-    </button>
+    <button type="button" class="myds-button myds-button--secondary">Simpan Draf</button>
+    <button type="submit" class="myds-button myds-button--primary">Hantar Permohonan</button>
   </div>
 </form>
 ```
@@ -392,42 +384,38 @@ Dokumentasi Bahasa Reka Bentuk Versi 5.0 | Untuk Bahagian Pengurusan Maklumat (B
 <!-- Contoh implementasi kebolehcapaian -->
 
 <!-- Skip Link untuk navigasi papan kekunci -->
-<a href="#main-content" class="myds-skip-link">
-  Langkau ke kandungan utama
-</a>
+<a href="#main-content" class="myds-skip-link"> Langkau ke kandungan utama </a>
 
 <!-- Navigation dengan ARIA labels -->
 <nav class="myds-sidebar" aria-label="Navigasi utama" role="navigation">
   <ul class="myds-sidebar-menu">
     <li>
-      <a href="/dashboard" 
-         class="myds-sidebar-link" 
-         aria-current="page"
-         aria-describedby="dashboard-desc">
+      <a
+        href="/dashboard"
+        class="myds-sidebar-link"
+        aria-current="page"
+        aria-describedby="dashboard-desc"
+      >
         <i class="bi-house-door" aria-hidden="true"></i>
         <span>Papan Pemuka</span>
       </a>
-      <span id="dashboard-desc" class="sr-only">
-        Halaman utama dengan ringkasan aktiviti
-      </span>
+      <span id="dashboard-desc" class="sr-only"> Halaman utama dengan ringkasan aktiviti </span>
     </li>
   </ul>
 </nav>
 
 <!-- Form dengan label dan error handling -->
 <div class="myds-form-group">
-  <label for="email" class="myds-label">
-    Alamat E-mel <span class="text-danger">*</span>
-  </label>
-  <input type="email" 
-         id="email" 
-         class="myds-input"
-         aria-describedby="email-help email-error"
-         aria-invalid="false"
-         required>
-  <div id="email-help" class="myds-hint-text">
-    Gunakan e-mel rasmi organisasi
-  </div>
+  <label for="email" class="myds-label"> Alamat E-mel <span class="text-danger">*</span> </label>
+  <input
+    type="email"
+    id="email"
+    class="myds-input"
+    aria-describedby="email-help email-error"
+    aria-invalid="false"
+    required
+  />
+  <div id="email-help" class="myds-hint-text">Gunakan e-mel rasmi organisasi</div>
   <div id="email-error" class="myds-error-text" role="alert" aria-live="polite">
     <!-- Error message akan dipaparkan di sini -->
   </div>
@@ -469,17 +457,19 @@ Dokumentasi Bahasa Reka Bentuk Versi 5.0 | Untuk Bahagian Pengurusan Maklumat (B
 ```html
 <!-- Hamburger menu untuk mobile -->
 <header class="myds-header">
-  <button class="myds-menu-toggle myds-button--ghost" 
-          aria-expanded="false"
-          aria-controls="main-nav"
-          aria-label="Buka menu navigasi">
+  <button
+    class="myds-menu-toggle myds-button--ghost"
+    aria-expanded="false"
+    aria-controls="main-nav"
+    aria-label="Buka menu navigasi"
+  >
     <i class="bi-list"></i>
   </button>
-  
+
   <div class="myds-header-brand">
-    <img src="/assets/logo-motac-mobile.svg" alt="MOTAC" height="32">
+    <img src="/assets/logo-motac-mobile.svg" alt="MOTAC" height="32" />
   </div>
-  
+
   <div class="myds-header-actions">
     <button class="myds-button--ghost" aria-label="Notifikasi">
       <i class="bi-bell"></i>
@@ -495,10 +485,7 @@ Dokumentasi Bahasa Reka Bentuk Versi 5.0 | Untuk Bahagian Pengurusan Maklumat (B
       Tarikh Pinjaman <span class="text-danger">*</span>
     </label>
     <!-- Date picker optimized for mobile -->
-    <input type="date" 
-           id="tarikh_pinjaman" 
-           class="myds-input myds-input--mobile"
-           required>
+    <input type="date" id="tarikh_pinjaman" class="myds-input myds-input--mobile" required />
   </div>
 </div>
 ```
@@ -524,11 +511,11 @@ Dokumentasi Bahasa Reka Bentuk Versi 5.0 | Untuk Bahagian Pengurusan Maklumat (B
   .myds-form-group {
     margin-bottom: 24px;
   }
-  
+
   .myds-card {
     margin-bottom: 16px;
   }
-  
+
   .myds-button {
     width: 100%;
     margin-bottom: 12px;
@@ -545,73 +532,84 @@ Dokumentasi Bahasa Reka Bentuk Versi 5.0 | Untuk Bahagian Pengurusan Maklumat (B
 ```html
 <!DOCTYPE html>
 <html lang="ms">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Notifikasi MOTAC IRMS</title>
-</head>
-<body style="margin: 0; padding: 0; font-family: Inter, sans-serif;">
-  <!-- Header dengan logo MOTAC -->
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #2563EB;">
-    <tr>
-      <td style="padding: 20px; text-align: center;">
-        <img src="https://irms.motac.gov.my/assets/logo-motac-white.png" 
-             alt="MOTAC" 
-             width="120" 
-             style="height: auto;">
-      </td>
-    </tr>
-  </table>
-  
-  <!-- Kandungan utama -->
-  <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto;">
-    <tr>
-      <td style="padding: 40px 20px;">
-        <h1 style="color: #18181B; font-size: 24px; margin-bottom: 16px;">
-          Permohonan Pinjaman ICT Diluluskan
-        </h1>
-        
-        <p style="color: #3F3F46; font-size: 16px; line-height: 1.5; margin-bottom: 24px;">
-          Yang dihormati En./Pn. [NAMA_PEMOHON],
-        </p>
-        
-        <p style="color: #3F3F46; font-size: 16px; line-height: 1.5; margin-bottom: 24px;">
-          Permohonan pinjaman peralatan ICT anda telah diluluskan. 
-          Sila ambil peralatan di Bahagian Pengurusan Maklumat dalam masa 3 hari bekerja.
-        </p>
-        
-        <!-- Call-to-action button -->
-        <table cellpadding="0" cellspacing="0">
-          <tr>
-            <td style="background-color: #2563EB; border-radius: 6px;">
-              <a href="[LINK_SISTEM]" 
-                 style="display: inline-block; padding: 12px 24px; 
-                        color: white; text-decoration: none; font-weight: 500;">
-                Lihat Butiran Permohonan
-              </a>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-  
-  <!-- Footer -->
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #F8F9FA; margin-top: 40px;">
-    <tr>
-      <td style="padding: 20px; text-align: center;">
-        <img src="https://irms.motac.gov.my/assets/logo-bpm.png" 
-             alt="Bahagian Pengurusan Maklumat" 
-             width="80" 
-             style="height: auto; margin-bottom: 8px;">
-        <p style="color: #71717A; font-size: 12px; margin: 0;">
-          Bahagian Pengurusan Maklumat<br>
-          Kementerian Pelancongan, Seni dan Budaya Malaysia
-        </p>
-      </td>
-    </tr>
-  </table>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Notifikasi MOTAC IRMS</title>
+  </head>
+  <body style="margin: 0; padding: 0; font-family: Inter, sans-serif;">
+    <!-- Header dengan logo MOTAC -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #2563EB;">
+      <tr>
+        <td style="padding: 20px; text-align: center;">
+          <img
+            src="https://irms.motac.gov.my/assets/logo-motac-white.png"
+            alt="MOTAC"
+            width="120"
+            style="height: auto;"
+          />
+        </td>
+      </tr>
+    </table>
+
+    <!-- Kandungan utama -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto;">
+      <tr>
+        <td style="padding: 40px 20px;">
+          <h1 style="color: #18181B; font-size: 24px; margin-bottom: 16px;">
+            Permohonan Pinjaman ICT Diluluskan
+          </h1>
+
+          <p style="color: #3F3F46; font-size: 16px; line-height: 1.5; margin-bottom: 24px;">
+            Yang dihormati En./Pn. [NAMA_PEMOHON],
+          </p>
+
+          <p style="color: #3F3F46; font-size: 16px; line-height: 1.5; margin-bottom: 24px;">
+            Permohonan pinjaman peralatan ICT anda telah diluluskan. Sila ambil peralatan di
+            Bahagian Pengurusan Maklumat dalam masa 3 hari bekerja.
+          </p>
+
+          <!-- Call-to-action button -->
+          <table cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="background-color: #2563EB; border-radius: 6px;">
+                <a
+                  href="[LINK_SISTEM]"
+                  style="display: inline-block; padding: 12px 24px; 
+                        color: white; text-decoration: none; font-weight: 500;"
+                >
+                  Lihat Butiran Permohonan
+                </a>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+
+    <!-- Footer -->
+    <table
+      width="100%"
+      cellpadding="0"
+      cellspacing="0"
+      style="background-color: #F8F9FA; margin-top: 40px;"
+    >
+      <tr>
+        <td style="padding: 20px; text-align: center;">
+          <img
+            src="https://irms.motac.gov.my/assets/logo-bpm.png"
+            alt="Bahagian Pengurusan Maklumat"
+            width="80"
+            style="height: auto; margin-bottom: 8px;"
+          />
+          <p style="color: #71717A; font-size: 12px; margin: 0;">
+            Bahagian Pengurusan Maklumat<br />
+            Kementerian Pelancongan, Seni dan Budaya Malaysia
+          </p>
+        </td>
+      </tr>
+    </table>
+  </body>
 </html>
 ```
 
@@ -632,14 +630,14 @@ Dokumentasi Bahasa Reka Bentuk Versi 5.0 | Untuk Bahagian Pengurusan Maklumat (B
 
 ### 10.2 Browser Support
 
-| Browser        | Versi Minimum | Status Support |
-|----------------|---------------|----------------|
-| Chrome         | 90+           | ✅ Penuh      |
-| Firefox        | 88+           | ✅ Penuh      |
-| Safari         | 14+           | ✅ Penuh      |
-| Edge           | 90+           | ✅ Penuh      |
-| Mobile Safari  | iOS 14+       | ✅ Penuh      |
-| Chrome Mobile  | 90+           | ✅ Penuh      |
+| Browser       | Versi Minimum | Status Support |
+| ------------- | ------------- | -------------- |
+| Chrome        | 90+           | ✅ Penuh       |
+| Firefox       | 88+           | ✅ Penuh       |
+| Safari        | 14+           | ✅ Penuh       |
+| Edge          | 90+           | ✅ Penuh       |
+| Mobile Safari | iOS 14+       | ✅ Penuh       |
+| Chrome Mobile | 90+           | ✅ Penuh       |
 
 ---
 
@@ -668,14 +666,15 @@ Semua keputusan reka bentuk dalam dokumen ini mematuhi 18 Prinsip Reka Bentuk My
 
 ---
 
-*Dokumen diselenggara oleh Pejabat Reka Bentuk BPM*  
-*Kemaskini terakhir: 14 Ogos 2025*  
-*Versi: 5.0 (MYDS Compliant)*
+_Dokumen diselenggara oleh Pejabat Reka Bentuk BPM_  
+_Kemaskini terakhir: 14 Ogos 2025_  
+_Versi: 5.0 (MYDS Compliant)_
 
 ## Key Changes Made
 
 1. **MYDS Compliance**: Updated color palette, typography, and components to follow MYDS standards
-2. **Color Tokens**: Replaced custom colors with MYDS token system while preserving MOTAC brand colors as custom overlays
+2. **Color Tokens**: Replaced custom colors with MYDS token system while preserving MOTAC brand
+   colors as custom overlays
 3. **Typography**: Updated to use Inter font and MYDS text hierarchy
 4. **Components**: Added proper MYDS component usage examples with HTML/CSS
 5. **Grid System**: Implemented MYDS 12-8-4 responsive grid system
@@ -685,4 +684,5 @@ Semua keputusan reka bentuk dalam dokumen ini mematuhi 18 Prinsip Reka Bentuk My
 9. **Quality Assurance**: Added MYDS compliance checklist
 10. **Documentation**: Better structure following MYDS documentation patterns
 
-The documentation now properly aligns with Malaysia's official design system while maintaining MOTAC's specific branding and workflow requirements.
+The documentation now properly aligns with Malaysia's official design system while maintaining
+MOTAC's specific branding and workflow requirements.

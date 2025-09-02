@@ -3,64 +3,98 @@
 **Versi Dokumen:** 4.0  
 **Tarikh Semakan:** 12 Ogos 2025  
 **Penulis:** IzzatFirdaus  
-**Berdasarkan:** BORANG PINJAMAN PERALATAN ICT 2024 SEWAAN C, keperluan helpdesk dalaman, dan struktur kod yang telah disahkan dari templat amralsaleeh/HRMS.
+**Berdasarkan:** BORANG PINJAMAN PERALATAN ICT 2024 SEWAAN C, keperluan helpdesk dalaman, dan
+struktur kod yang telah disahkan dari templat amralsaleeh/HRMS.
+
 <!-- Nota: Dokumen ini telah disemak untuk pematuhan kepada 18 Prinsip MyGOVEA. -->
 
 ---
 
 ## 1. Gambaran Umum
 
-Sistem Pengurusan Sumber Terintegrasi MOTAC (v4.0) ialah platform yang telah diperbaharui dan difokuskan untuk menggabungkan dua bidang operasi utama:
+Sistem Pengurusan Sumber Terintegrasi MOTAC (v4.0) ialah platform yang telah diperbaharui dan
+difokuskan untuk menggabungkan dua bidang operasi utama:
 
-- **Pengurusan Pinjaman Peralatan ICT:** Memudahkan permintaan, kelulusan, pengeluaran dan pemulangan peralatan ICT (laptop, projektor, dan lain-lain) untuk tujuan rasmi.
-- **Pengurusan Helpdesk & Sokongan ICT:** Sistem tiket menyeluruh untuk mengurus permintaan sokongan IT, isu teknikal, dan operasi helpdesk.
+- **Pengurusan Pinjaman Peralatan ICT:** Memudahkan permintaan, kelulusan, pengeluaran dan
+  pemulangan peralatan ICT (laptop, projektor, dan lain-lain) untuk tujuan rasmi.
+- **Pengurusan Helpdesk & Sokongan ICT:** Sistem tiket menyeluruh untuk mengurus permintaan sokongan
+  IT, isu teknikal, dan operasi helpdesk.
 
-**Nota:** Versi ini menghapuskan modul legasi Provisioning Email/ID Pengguna untuk menumpukan kepada platform yang lebih cekap, selamat dan terfokus bagi pengurusan aset ICT fizikal dan perkhidmatan sokongan.
+**Nota:** Versi ini menghapuskan modul legasi Provisioning Email/ID Pengguna untuk menumpukan kepada
+platform yang lebih cekap, selamat dan terfokus bagi pengurusan aset ICT fizikal dan perkhidmatan
+sokongan.
 
-Sistem ini menyediakan platform berasaskan Laravel yang menyatukan aliran kerja, menguatkuasakan peraturan perniagaan, dan memberikan pengalaman pengguna yang konsisten di seluruh pengurusan sumber fizikal dan operasi sokongan IT. Reka bentuk ini menggabungkan keperluan daripada borang rasmi permohonan dan mencerminkan struktur projek yang dioptimumkan untuk keperluan operasi teras MOTAC.
+Sistem ini menyediakan platform berasaskan Laravel yang menyatukan aliran kerja, menguatkuasakan
+peraturan perniagaan, dan memberikan pengalaman pengguna yang konsisten di seluruh pengurusan sumber
+fizikal dan operasi sokongan IT. Reka bentuk ini menggabungkan keperluan daripada borang rasmi
+permohonan dan mencerminkan struktur projek yang dioptimumkan untuk keperluan operasi teras MOTAC.
 
 ---
 
 ## 2. Objektif Sistem
 
-- **Pengurusan Data Bersatu:** Menyatukan data pengguna, permohonan pinjaman, tiket helpdesk, kelulusan dan notifikasi dalam satu pangkalan data MySQL.
-- **Aliran Kerja Automatik & Standard:** Mengautomasi dan menstandardkan proses untuk pinjaman peralatan ICT dan sokongan helpdesk, mematuhi prosedur organisasi yang telah ditetapkan.
-- **Akses Berdasarkan Peranan & Keselamatan:** Memastikan pengguna, penyokong, staf BPM dan Agen IT mempunyai tahap akses yang betul dengan langkah keselamatan yang kukuh, termasuk logik kelulusan berdasarkan gred dan polisi kebenaran yang terperinci.
-- **Laporan & Notifikasi Masa Sebenar:** Membolehkan laporan masa sebenar mengenai penggunaan sumber dan prestasi sokongan serta memaklumkan pengguna tentang kejadian kritikal melalui e-mel dan notifikasi dalam aplikasi.
-- **Seni Bina Modular & Boleh Skala:** Membina sistem menggunakan rangka kerja Laravel MVC dengan pemisahan fungsi yang jelas, menggunakan Livewire untuk antara muka dinamik dan lapisan servis yang tersusun.
-- **Sokongan Operasi Diperhebat:** Menyediakan pengurusan tiket sokongan IT yang komprehensif dengan fungsi penugasan, penjejakan, eskalasi dan penyelesaian.
+- **Pengurusan Data Bersatu:** Menyatukan data pengguna, permohonan pinjaman, tiket helpdesk,
+  kelulusan dan notifikasi dalam satu pangkalan data MySQL.
+- **Aliran Kerja Automatik & Standard:** Mengautomasi dan menstandardkan proses untuk pinjaman
+  peralatan ICT dan sokongan helpdesk, mematuhi prosedur organisasi yang telah ditetapkan.
+- **Akses Berdasarkan Peranan & Keselamatan:** Memastikan pengguna, penyokong, staf BPM dan Agen IT
+  mempunyai tahap akses yang betul dengan langkah keselamatan yang kukuh, termasuk logik kelulusan
+  berdasarkan gred dan polisi kebenaran yang terperinci.
+- **Laporan & Notifikasi Masa Sebenar:** Membolehkan laporan masa sebenar mengenai penggunaan sumber
+  dan prestasi sokongan serta memaklumkan pengguna tentang kejadian kritikal melalui e-mel dan
+  notifikasi dalam aplikasi.
+- **Seni Bina Modular & Boleh Skala:** Membina sistem menggunakan rangka kerja Laravel MVC dengan
+  pemisahan fungsi yang jelas, menggunakan Livewire untuk antara muka dinamik dan lapisan servis
+  yang tersusun.
+- **Sokongan Operasi Diperhebat:** Menyediakan pengurusan tiket sokongan IT yang komprehensif dengan
+  fungsi penugasan, penjejakan, eskalasi dan penyelesaian.
 
 ---
 
 ## 3. Seni Bina Tahap Tinggi
 
-Sistem ini dibina menggunakan rangka kerja Laravel, mengaplikasikan corak Model-View-Controller (MVC) yang dipertingkatkan dengan Livewire untuk antara muka pengguna dinamik.
+Sistem ini dibina menggunakan rangka kerja Laravel, mengaplikasikan corak Model-View-Controller
+(MVC) yang dipertingkatkan dengan Livewire untuk antara muka pengguna dinamik.
 
 ### 3.1 Corak MVC Laravel/Livewire
 
 #### Pengawal (Controllers)
 
-Pengawal PHP tradisional mengendalikan permintaan HTTP backend, interaksi API, dan tindakan yang tidak sepenuhnya dikendalikan oleh komponen dinamik front-end. Banyak interaksi antara muka pengguna dikendalikan oleh komponen Livewire untuk pengalaman pengguna yang lebih kaya.
+Pengawal PHP tradisional mengendalikan permintaan HTTP backend, interaksi API, dan tindakan yang
+tidak sepenuhnya dikendalikan oleh komponen dinamik front-end. Banyak interaksi antara muka pengguna
+dikendalikan oleh komponen Livewire untuk pengalaman pengguna yang lebih kaya.
 
 **Pengawal aktif utama termasuk:**
 
 - `App\Http\Controllers\language\LanguageController.php`: Mengurus penukaran bahasa aplikasi.
-- `App\Http\Controllers\WebhookController.php`: Mengendalikan webhook GitHub untuk pencetus deployment, dilindungi oleh pengesahan tandatangan.
-- `App\Http\Controllers\ApprovalController.php`: Mengurus interaksi pengguna dengan tugas kelulusan (senarai kelulusan tertunda, sejarah, paparan perincian, pencatatan keputusan).
-- `App\Http\Controllers\EquipmentController.php`: Membenarkan pengguna umum melihat senarai peralatan dan perincian.
-- `App\Http\Controllers\LoanApplicationController.php`: Mengurus logik backend untuk permohonan pinjaman ICT; termasuk penjanaan PDF untuk borang pinjaman.
-- `App\Http\Controllers\LoanTransactionController.php`: Mengendalikan pemprosesan backend untuk pengeluaran dan pemulangan peralatan.
-- `App\Http\Controllers\Helpdesk\TicketController.php`: Mengurus operasi tiket helpdesk, penugasan dan kemas kini status.
-- `App\Http\Controllers\NotificationController.php`: Membolehkan pengguna melihat dan mengurus notifikasi sistem mereka.
-- `App\Http\Controllers\ReportController.php`: Mengandungi kaedah untuk mendapatkan data pelbagai laporan termasuk analitik pinjaman dan helpdesk.
+- `App\Http\Controllers\WebhookController.php`: Mengendalikan webhook GitHub untuk pencetus
+  deployment, dilindungi oleh pengesahan tandatangan.
+- `App\Http\Controllers\ApprovalController.php`: Mengurus interaksi pengguna dengan tugas kelulusan
+  (senarai kelulusan tertunda, sejarah, paparan perincian, pencatatan keputusan).
+- `App\Http\Controllers\EquipmentController.php`: Membenarkan pengguna umum melihat senarai
+  peralatan dan perincian.
+- `App\Http\Controllers\LoanApplicationController.php`: Mengurus logik backend untuk permohonan
+  pinjaman ICT; termasuk penjanaan PDF untuk borang pinjaman.
+- `App\Http\Controllers\LoanTransactionController.php`: Mengendalikan pemprosesan backend untuk
+  pengeluaran dan pemulangan peralatan.
+- `App\Http\Controllers\Helpdesk\TicketController.php`: Mengurus operasi tiket helpdesk, penugasan
+  dan kemas kini status.
+- `App\Http\Controllers\NotificationController.php`: Membolehkan pengguna melihat dan mengurus
+  notifikasi sistem mereka.
+- `App\Http\Controllers\ReportController.php`: Mengandungi kaedah untuk mendapatkan data pelbagai
+  laporan termasuk analitik pinjaman dan helpdesk.
 - `App\Http\Controllers\Admin\GradeController.php`: Mengurus operasi CRUD untuk gred organisasi.
-- `App\Http\Controllers\Admin\EquipmentController.php`: Mengurus operasi CRUD untuk inventori peralatan.
-- `App\Http\Controllers\Admin\HelpdeskCategoryController.php`: Mengurus kategori dan keutamaan tiket helpdesk.
-- **Pengawal asas:** Fungsi asas melalui `Controller.php` dan pengawal autentikasi (Fortify/Jetstream).
+- `App\Http\Controllers\Admin\EquipmentController.php`: Mengurus operasi CRUD untuk inventori
+  peralatan.
+- `App\Http\Controllers\Admin\HelpdeskCategoryController.php`: Mengurus kategori dan keutamaan tiket
+  helpdesk.
+- **Pengawal asas:** Fungsi asas melalui `Controller.php` dan pengawal autentikasi
+  (Fortify/Jetstream).
 
 #### Model
 
-Mewakili dan mengurus data menggunakan Eloquent ORM, termasuk hubungan polimorfik untuk kelulusan dan jejak audit automatik.
+Mewakili dan mengurus data menggunakan Eloquent ORM, termasuk hubungan polimorfik untuk kelulusan
+dan jejak audit automatik.
 
 **Model teras:**
 
@@ -85,7 +119,8 @@ Mewakili dan mengurus data menggunakan Eloquent ORM, termasuk hubungan polimorfi
 
 #### Paparan (Views)
 
-Templat Blade merender antara muka pengguna, termasuk komponen Livewire untuk seksyen dinamik. Terletak di `resources/views/` dan `resources/views/livewire/`.
+Templat Blade merender antara muka pengguna, termasuk komponen Livewire untuk seksyen dinamik.
+Terletak di `resources/views/` dan `resources/views/livewire/`.
 
 **Direktori paparan utama:**
 
@@ -148,7 +183,8 @@ Mendefinisikan logik kebenaran untuk tindakan ke atas model tertentu. Terletak d
 
 #### Pemerhati (Observers)
 
-- `BlameableObserver`: Mengisi medan audit (`created_by`, `updated_by`, `deleted_by`) secara automatik pada model tertentu
+- `BlameableObserver`: Mengisi medan audit (`created_by`, `updated_by`, `deleted_by`) secara
+  automatik pada model tertentu
 
 ---
 
@@ -158,20 +194,24 @@ Mendefinisikan logik kebenaran untuk tindakan ke atas model tertentu. Terletak d
 - **Persekitaran Staging:** Persekitaran pelayan berasingan untuk ujian dan pengesahan
 - **Integrasi Mailtrap:** Ujian e-mel semasa fasa pembangunan
 - **Version Control & CI/CD:** Git untuk kawalan versi dengan deploymen automatik melalui webhook
-- **Persekitaran Pengeluaran:** Deploymen boleh skala dengan strategi pemantauan dan sandaran yang betul
+- **Persekitaran Pengeluaran:** Deploymen boleh skala dengan strategi pemantauan dan sandaran yang
+  betul
 
 ---
 
 ### 3.3 Penyedia Teras dan Konfigurasi
 
-- **AppServiceProvider:** Mendaftar servis teras (LoanApplicationService, HelpdeskService, dsb.), composer paparan, tetapan lokaliti
+- **AppServiceProvider:** Mendaftar servis teras (LoanApplicationService, HelpdeskService, dsb.),
+  composer paparan, tetapan lokaliti
 - **AuthServiceProvider:** Mendaftar semua polisi model dan override kebenaran admin
 - **EventServiceProvider:** Mendaftar pemerhati model (BlameableObserver) dan pendengar event
-- **FortifyServiceProvider / JetstreamServiceProvider:** Konfigurasi aliran autentikasi dan ciri pengurusan pengguna
+- **FortifyServiceProvider / JetstreamServiceProvider:** Konfigurasi aliran autentikasi dan ciri
+  pengurusan pengguna
 - **MenuServiceProvider:** Memuat dan berkongsi data menu navigasi di seluruh aplikasi
 - **RouteServiceProvider:** Konfigurasi corak routing, rate limiting, dan route model binding
 - **Fail Konfigurasi:**
-  - `config/motac.php`: Tetapan aplikasi khusus (gred kelulusan, senarai aksesori pinjaman, tetapan helpdesk)
+  - `config/motac.php`: Tetapan aplikasi khusus (gred kelulusan, senarai aksesori pinjaman, tetapan
+    helpdesk)
   - `config/mail.php` dan `.env`: Konfigurasi e-mel untuk notifikasi
   - `config/app.php`: Tetapan lalai aplikasi termasuk format tarikh/masa
 
@@ -179,13 +219,16 @@ Mendefinisikan logik kebenaran untuk tindakan ke atas model tertentu. Terletak d
 
 ## 4. Reka Bentuk Pangkalan Data
 
-Sistem menggunakan skema pangkalan data MySQL bersatu yang dioptimumkan untuk pengurusan pinjaman peralatan ICT dan operasi helpdesk. Semua jadual yang boleh diaudit mengandungi medan `created_by`, `updated_by`, dan `deleted_by` yang diuruskan secara automatik oleh BlameableObserver.
+Sistem menggunakan skema pangkalan data MySQL bersatu yang dioptimumkan untuk pengurusan pinjaman
+peralatan ICT dan operasi helpdesk. Semua jadual yang boleh diaudit mengandungi medan `created_by`,
+`updated_by`, dan `deleted_by` yang diuruskan secara automatik oleh BlameableObserver.
 
 ### 4.1 Data Pengguna & Organisasi
 
 #### `users`
 
-Jadual pengguna utama menyimpan semua pengguna sistem termasuk pemohon, penyokong, staf BPM dan agen IT.
+Jadual pengguna utama menyimpan semua pengguna sistem termasuk pemohon, penyokong, staf BPM dan agen
+IT.
 
 **Medan:**
 
@@ -346,7 +389,8 @@ Permohonan pinjaman peralatan ICT yang dihantar oleh pengguna.
 - `return_location`: Lokasi pemulangan dirancang
 - `loan_start_date`: Tarikh mula pinjaman
 - `loan_end_date`: Tarikh tamat pinjaman
-- `status`: Status permohonan (draft, pending_support, approved, rejected, issued, returned, completed)
+- `status`: Status permohonan (draft, pending_support, approved, rejected, issued, returned,
+  completed)
 - `rejection_reason`: Sebab penolakan jika berkenaan
 - `applicant_confirmation_timestamp`: Masa pemohon mengesahkan permohonan
 - `submitted_at`: Masa penghantaran permohonan
@@ -509,7 +553,8 @@ Notifikasi sistem untuk pengguna.
 
 1. Pengguna mengakses borang permohonan pinjaman melalui antaramuka IRMS
 2. Penyampaian borang dinamik dengan paparan medan bersyarat berdasarkan pilihan pengguna
-3. Penyelesaian borang berbilang seksyen mengikut struktur borang kertas rasmi (BAHAGIAN 1, BAHAGIAN 2, dll.)
+3. Penyelesaian borang berbilang seksyen mengikut struktur borang kertas rasmi (BAHAGIAN 1, BAHAGIAN
+   2, dll.)
 4. Pemilihan peralatan dengan spesifikasi kuantiti
 5. Penetapan tujuan dan tempoh pinjaman
 6. Pengesahan pemohon dan pengakuan ketepatan maklumat
@@ -529,7 +574,8 @@ Notifikasi sistem untuk pengguna.
 
 **Aliran Proses:**
 
-1. Permohonan secara automatik dirujuk kepada pegawai penyokong yang sesuai berdasarkan keperluan gred
+1. Permohonan secara automatik dirujuk kepada pegawai penyokong yang sesuai berdasarkan keperluan
+   gred
 2. Pegawai menerima notifikasi permohonan tertunda
 3. Pegawai menyemak perincian permohonan, permintaan peralatan dan tujuan
 4. Pegawai boleh meluluskan, menolak atau minta pindaan
@@ -544,7 +590,8 @@ Notifikasi sistem untuk pengguna.
 - **UI:** `App\Livewire\ResourceManagement\Approval\Dashboard`
 - **Logik Backend:** `ApprovalService::processDecision()`
 - **Perubahan Data:** Rekod `Approval` dicipta, status `LoanApplication` dikemas kini
-- **Notifikasi:** `ApplicationApproved`/`ApplicationRejected` kepada pemohon, `LoanApplicationReadyForIssuanceNotification` kepada staf BPM
+- **Notifikasi:** `ApplicationApproved`/`ApplicationRejected` kepada pemohon,
+  `LoanApplicationReadyForIssuanceNotification` kepada staf BPM
 
 #### Pengeluaran Peralatan
 
@@ -567,7 +614,8 @@ Notifikasi sistem untuk pengguna.
 
 - **UI:** `App\Livewire\ResourceManagement\Admin\BPM\ProcessIssuance`
 - **Logik Backend:** `LoanTransactionService::processNewIssue()`
-- **Perubahan Data:** `LoanTransaction` dengan jenis 'issue', rekod `LoanTransactionItem`, kemas kini status peralatan
+- **Perubahan Data:** `LoanTransaction` dengan jenis 'issue', rekod `LoanTransactionItem`, kemas
+  kini status peralatan
 - **Notifikasi:** `EquipmentIssuedNotification` kepada pemohon
 
 #### Proses Pemulangan Peralatan
@@ -590,7 +638,8 @@ Notifikasi sistem untuk pengguna.
 - **UI:** `App\Livewire\ResourceManagement\Admin\BPM\ProcessReturn`
 - **Logik Backend:** `LoanTransactionService::processExistingReturn()`
 - **Perubahan Data:** Transaksi pemulangan, kemas kini status peralatan, penyelesaian permohonan
-- **Notifikasi:** `EquipmentReturnedNotification`, `EquipmentReturnReminderNotification`, `EquipmentOverdueNotification`
+- **Notifikasi:** `EquipmentReturnedNotification`, `EquipmentReturnReminderNotification`,
+  `EquipmentOverdueNotification`
 
 ### 5.2 Aliran Kerja Tiket Helpdesk
 
@@ -684,7 +733,10 @@ Notifikasi sistem untuk pengguna.
 
 ### 6.1 Penjenamaan dan Susun Atur
 
-Sistem mengekalkan penjenamaan MOTAC yang konsisten di semua antara muka dengan prinsip reka bentuk responsif bagi memastikan kebolehcapaian di desktop, tablet dan peranti mudah alih. Antara muka menggunakan skema warna rasmi MOTAC dan garis panduan tipografi seperti yang dinyatakan dalam Dokumen Reka Bentuk v4.0.
+Sistem mengekalkan penjenamaan MOTAC yang konsisten di semua antara muka dengan prinsip reka bentuk
+responsif bagi memastikan kebolehcapaian di desktop, tablet dan peranti mudah alih. Antara muka
+menggunakan skema warna rasmi MOTAC dan garis panduan tipografi seperti yang dinyatakan dalam
+Dokumen Reka Bentuk v4.0.
 
 **Elemen Reka Bentuk Utama:**
 
@@ -695,7 +747,8 @@ Sistem mengekalkan penjenamaan MOTAC yang konsisten di semua antara muka dengan 
 
 ### 6.2 Dashboard Berdasarkan Peranan
 
-Setiap peranan pengguna mempunyai antara muka dashboard yang dioptimumkan untuk tugas dan tanggungjawab mereka:
+Setiap peranan pengguna mempunyai antara muka dashboard yang dioptimumkan untuk tugas dan
+tanggungjawab mereka:
 
 #### Dashboard Pemohon
 
@@ -1130,19 +1183,35 @@ Sistem menggunakan komponen Livewire untuk mempertingkat pengalaman pengguna:
 
 ## 12. Penutup
 
-Sistem Pengurusan Sumber Terintegrasi MOTAC (Versi 4.0) mewakili platform moden dan fokus yang direka khusus untuk operasi pengurusan pinjaman peralatan ICT dan sokongan helpdesk. Dengan menghapuskan modul provisioning email legasi dan memperkenalkan sistem tiket menyeluruh, aplikasi ini menyediakan penyelesaian yang cekap, selamat, dan efisien yang disesuaikan dengan keperluan operasi teras MOTAC.
+Sistem Pengurusan Sumber Terintegrasi MOTAC (Versi 4.0) mewakili platform moden dan fokus yang
+direka khusus untuk operasi pengurusan pinjaman peralatan ICT dan sokongan helpdesk. Dengan
+menghapuskan modul provisioning email legasi dan memperkenalkan sistem tiket menyeluruh, aplikasi
+ini menyediakan penyelesaian yang cekap, selamat, dan efisien yang disesuaikan dengan keperluan
+operasi teras MOTAC.
 
-Seni bina modular sistem, dibina atas rangka kerja Laravel yang mantap dengan penambahbaikan Livewire, memastikan skalabiliti, kemudahan penyelenggaraan dan pengalaman pengguna yang unggul. Proses aliran kerja yang menyeluruh, kawalan akses berasaskan peranan, dan sistem notifikasi berintegrasi menyokong operasi yang efisien sambil mengekalkan keperluan keselamatan dan audit yang penting untuk operasi kerajaan.
+Seni bina modular sistem, dibina atas rangka kerja Laravel yang mantap dengan penambahbaikan
+Livewire, memastikan skalabiliti, kemudahan penyelenggaraan dan pengalaman pengguna yang unggul.
+Proses aliran kerja yang menyeluruh, kawalan akses berasaskan peranan, dan sistem notifikasi
+berintegrasi menyokong operasi yang efisien sambil mengekalkan keperluan keselamatan dan audit yang
+penting untuk operasi kerajaan.
 
 Manfaat utama Versi 4.0 termasuk:
 
-- **Fokus Fungsi:** Penumpuan kepada operasi ICT teras (pinjaman peralatan dan sokongan) mengurangkan kerumitan sambil meningkatkan keberkesanan
-- **Pengalaman Pengguna Dipertingkat:** Antara muka moden, responsif dengan dashboard khusus peranan mengoptimumkan produktiviti semua jenis pengguna
-- **Jejak Audit Menyeluruh:** Penjejakan lengkap semua operasi memastikan akauntabiliti dan pematuhan kepada piawaian kerajaan
-- **Seni Bina Boleh Skala:** Reka bentuk modular membolehkan penambahbaikan masa depan dan integrasi dengan sistem MOTAC lain
-- **Keselamatan Mantap:** Langkah keselamatan berlapis melindungi data sensitif dan memastikan kawalan akses yang sesuai
+- **Fokus Fungsi:** Penumpuan kepada operasi ICT teras (pinjaman peralatan dan sokongan)
+  mengurangkan kerumitan sambil meningkatkan keberkesanan
+- **Pengalaman Pengguna Dipertingkat:** Antara muka moden, responsif dengan dashboard khusus peranan
+  mengoptimumkan produktiviti semua jenis pengguna
+- **Jejak Audit Menyeluruh:** Penjejakan lengkap semua operasi memastikan akauntabiliti dan
+  pematuhan kepada piawaian kerajaan
+- **Seni Bina Boleh Skala:** Reka bentuk modular membolehkan penambahbaikan masa depan dan integrasi
+  dengan sistem MOTAC lain
+- **Keselamatan Mantap:** Langkah keselamatan berlapis melindungi data sensitif dan memastikan
+  kawalan akses yang sesuai
 
-Pelaksanaan reka bentuk ini akan meningkatkan keupayaan MOTAC untuk mengurus sumber ICT dengan cekap sambil menyediakan perkhidmatan sokongan yang cemerlang kepada semua warga kerja. Fleksibiliti dan kebolehkembangan sistem memastikan ia boleh berubah mengikut keperluan organisasi yang sentiasa berubah sambil mengekalkan keberkesanan terasnya.
+Pelaksanaan reka bentuk ini akan meningkatkan keupayaan MOTAC untuk mengurus sumber ICT dengan cekap
+sambil menyediakan perkhidmatan sokongan yang cemerlang kepada semua warga kerja. Fleksibiliti dan
+kebolehkembangan sistem memastikan ia boleh berubah mengikut keperluan organisasi yang sentiasa
+berubah sambil mengekalkan keberkesanan terasnya.
 
 ---
 

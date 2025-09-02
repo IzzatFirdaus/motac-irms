@@ -1,188 +1,9 @@
- # Project Directory Structure
+# Key Application Directory Index (Quick Reference)
 
-This document provides a cleaned, lint-friendly index of key application directories and representative files. Use it as a quick reference; run `git ls-files` for a full inventory.
----
-
-## Controller Classes (app/Http/Controllers)
-
-```text
-app/Http/Controllers/
-├── Admin/
-│   ├── DepartmentController.php
-│   ├── EquipmentController.php
-│   ├── GradeController.php
-│   ├── PositionController.php
-│   └── UserController.php
-├── Api/
-│   └── HelpdeskApiController.php
-├── Helpdesk/
-│   └── TicketController.php
-├── language/
-│   └── LanguageController.php
-├── ApprovalController.php
-├── Controller.php
-├── DashboardController.php
-├── EquipmentController.php
-├── LegalController.php
-├── LoanApplicationController.php
-├── LoanTransactionController.php
-├── MiscErrorController.php
-├── NotificationController.php
-├── ReportController.php
-└── WebhookController.php
-```
-
----
-
-## Livewire Component Classes (app/Livewire)
-
-```text
-app/Livewire/
-├── Charts/
-│   └── LoanSummaryChart.php
-├── ContactUs.php
-├── Dashboard/
-│   ├── AdminDashboard.php
-│   ├── ApproverDashboard.php
-│   ├── BpmDashboard.php
-│   ├── Dashboard.php
-│   ├── ItAdminDashboard.php
-│   └── UserDashboard.php
-├── EquipmentChecklist.php
-├── Helpdesk/
-│   ├── Admin/
-│   │   ├── TicketManagement.php
-│   │   └── TicketReport.php
-│   ├── CreateTicketForm.php
-│   ├── MyTicketsIndex.php
-│   ├── TicketDetail.php
-│   ├── TicketDetails.php
-│   ├── TicketForm.php
-│   └── TicketList.php
-├── HumanResource/
-│   └── Structure/
-│       ├── Departments.php
-│       ├── EmployeeInfo.php
-│       └── Positions.php
-├── LoanRequestForm.php
-├── Misc/
-│   └── ComingSoon.php
-├── ResourceManagement/
-│   ├── Admin/
-│   │   ├── BPM/
-│   │   │   ├── IssuedLoans.php
-+│   │   │   ├── OutstandingLoans.php
-│   │   │   ├── ProcessIssuance.php
-│   │   │   └── ProcessReturn.php
-│   │   ├── Equipment/
-│   │   │   ├── EquipmentForm.php
-│   │   │   └── EquipmentIndex.php
-│   │   ├── Grades/
-│   │   │   └── GradeIndex.php
-│   │   ├── Reports/
-│   │   │   ├── EquipmentInventoryReport.php
-│   │   │   ├── EquipmentReport.php
-│   │   │   ├── LoanApplicationsReport.php
-│   │   │   └── UserActivityReport.php
-│   │   └── Users/
-│   │       └── UserIndex.php
-│   ├── Approval/
-│   │   ├── ApprovalDashboard.php
-│   │   └── ApprovalHistory.php
-│   ├── LoanApplication/
-│   │   └── LoanApplicationForm.php
-│   ├── MyApplications/
-│   │   └── Loan/
-│   │       └── LoanApplicationsIndex.php
-│   └── Reports/
-│       ├── EquipmentReport.php
-│       ├── LoanApplicationsReport.php
-│       ├── ReportsIndex.php
-│       └── UserActivityReport.php
-├── Sections/
-│   ├── Footer/
-│   │   └── Footer.php
-│   ├── Menu/
-│   │   └── VerticalMenu.php
-│   └── Navbar/
-│       ├── Navbar.php
-│       └── NotificationsDropdown.php
-├── Settings/
-│   ├── Departments/
-│   │   └── DepartmentsIndex.php
-│   ├── Permissions/
-│   │   └── PermissionsIndex.php
-│   ├── Roles/
-│   │   └── RolesIndex.php
-│   └── Users/
-│       ├── UsersCreate.php
-│       ├── UsersEdit.php
-│       ├── UsersIndex.php
-│       └── UsersShow.php
-└── Shared/
-	├── Notifications/
-	│   └── NotificationsList.php
-	└── TableFilters.php
-```
-
----
-
-## Blade View Files (resources/views)
-
-This is a representative top-level layout of `resources/views`. Use the real project tree for exact filenames.
-
-```text
-resources/views/
-├── _partials/
-│   ├── _alerts/
-│   │   └── alert-general.blade.php
-│   ├── _modals/
-│   │   ├── modal-category-info.blade.php
-│   │   ├── modal-category.blade.php
-│   │   ├── modal-department.blade.php
-│   │   ├── modal-import.blade.php
-│   │   ├── modal-leave-with-employee.blade.php
-│   │   ├── modal-motac-generic.blade.php
-│   │   ├── modal-position.blade.php
-│   │   └── modal-sub-category.blade.php
-│   ├── macros.blade.php
-│   ├── rocket.blade.php
-│   └── stat-card.blade.php
-├── admin/
-│   ├── departments/
-│   ├── equipment/
-│   ├── grades/
-│   ├── positions/
-│   ├── profiles/
-│   └── users/
-├── auth/
-├── components/
-├── dashboard/
-├── emails/
-├── equipment/
-├── errors/
-├── helpdesk/
-├── layouts/
-├── loan-applications/
-├── loan-transactions/
-├── notifications/
-├── pages/
-├── partials/
-├── profile/
-├── reports/
-├── transactions/
-├── users/
-└── welcome.blade.php
-```
-
----
-
-Notes
-- This file is intended as a quick index for maintainers. For a full file list, run `git ls-files` or inspect the repository in your IDE.
-- If you want, I can add a small script or a README in `_documentation/` that auto-lists files and links into this index.
-# Project Directory Structure
-
-This document lists all key PHP Controller files in `app/Http/Controllers`, all Livewire PHP component files in `app/Livewire`, and all Blade view files in `resources/views` (including Livewire views), organized by their respective directories and subdirectories.
+This index provides a concise overview of the most important directories and representative files in
+this Laravel project.  
+Use as a quick reference for maintainers, contributors, and reviewers.  
+Refer to `git ls-files` for a complete inventory.
 
 ---
 
@@ -240,69 +61,75 @@ app/Livewire/
 │   ├── MyTicketsIndex.php
 │   ├── TicketDetail.php
 │   ├── TicketDetails.php
- # Project Directory Structure
-
-This document is a compact, lint-compliant index of key project directories and representative files.
-
-## Controllers (app/Http/Controllers)
-
-Example contents:
-
-```text
-app/Http/Controllers/
-├── Admin/
-│   ├── DepartmentController.php
-│   └── UserController.php
-├── DashboardController.php
-├── LoanApplicationController.php
-└── WebhookController.php
-```
-
-## Livewire components (app/Livewire)
-
-Example contents:
-
-```text
-app/Livewire/
-├── Dashboard/
-│   ├── AdminDashboard.php
-│   └── UserDashboard.php
-├── Helpdesk/
-│   ├── CreateTicketForm.php
+│   ├── TicketForm.php
 │   └── TicketList.php
-└── Settings/
-	└── UsersIndex.php
+├── HumanResource/
+│   └── Structure/
+│       ├── Departments.php
+│       ├── EmployeeInfo.php
+│       └── Positions.php
+├── LoanRequestForm.php
+├── Misc/
+│   └── ComingSoon.php
+├── ResourceManagement/
+│   ├── Admin/
+│   │   ├── BPM/
+│   │   │   ├── IssuedLoans.php
+│   │   │   ├── OutstandingLoans.php
+│   │   │   ├── ProcessIssuance.php
+│   │   │   └── ProcessReturn.php
+│   │   ├── Equipment/
+│   │   │   ├── EquipmentForm.php
+│   │   │   └── EquipmentIndex.php
+│   │   ├── Grades/
+│   │   │   └── GradeIndex.php
+│   │   ├── Reports/
+│   │   │   ├── EquipmentInventoryReport.php
+│   │   │   ├── EquipmentReport.php
+│   │   │   ├── LoanApplicationsReport.php
+│   │   │   └── UserActivityReport.php
+│   │   └── Users/
+│   │       └── UserIndex.php
+│   ├── Approval/
+│   │   ├── ApprovalDashboard.php
+│   │   └── ApprovalHistory.php
+│   ├── LoanApplication/
+│   │   └── LoanApplicationForm.php
+│   ├── MyApplications/
+│   │   └── Loan/
+│   │       └── LoanApplicationsIndex.php
+│   └── Reports/
+│       ├── EquipmentReport.php
+│       ├── LoanApplicationsReport.php
+│       ├── ReportsIndex.php
+│       └── UserActivityReport.php
+├── Sections/
+│   ├── Footer/
+│   │   └── Footer.php
+│   ├── Menu/
+│   │   └── VerticalMenu.php
+│   └── Navbar/
+│       ├── Navbar.php
+│       └── NotificationsDropdown.php
+├── Settings/
+│   ├── Departments/
+│   │   └── DepartmentsIndex.php
+│   ├── Permissions/
+│   │   └── PermissionsIndex.php
+│   ├── Roles/
+│   │   └── RolesIndex.php
+│   └── Users/
+│       ├── UsersCreate.php
+│       ├── UsersEdit.php
+│       ├── UsersIndex.php
+│       └── UsersShow.php
+└── Shared/
+    ├── Notifications/
+    │   └── NotificationsList.php
+    └── TableFilters.php
 ```
-
-## Views (resources/views)
-
-Representative layout:
-
-```text
-resources/views/
-├── _partials/
-├── admin/
-├── auth/
-├── dashboard/
-└── welcome.blade.php
-```
-
-## Notes
-
-- This file is a human-friendly index, not an exhaustive file list.
-- To generate a full inventory, run `git ls-files` at the repository root.
-- All lists use spaces only; there are no hard tabs and headings follow a single H1 rule.
-
 
 ---
-├── \_partials/
-│   ├── \_alerts/
-│   │   └── alert-general.blade.php
-│   ├── \_modals/
-│   │   ├── modal-category-info.blade.php
-│   │   ├── modal-category.blade.php
-│   │   ├── modal-department.blade.php
-│   │   ├── modal-import.blade.php
 
 ## 3. Blade View Files (`resources/views`)
 
@@ -355,14 +182,6 @@ resources/views/
 │       ├── user-edit.blade.php
 │       ├── user-index.blade.php
 │       └── user-show.blade.php
-├── api/
-│   ├── api-token-manager-index.blade.php
-│   └── api-token-manager-page.blade.php
-├── approvals/
-│   ├── approvals-history.blade.php
-│   ├── approvals-index.blade.php
-│   ├── approvals-show.blade.php
-│   └── comments.blade.php
 ├── auth/
 │   ├── confirm-password-page.blade.php
 │   ├── confirm-password.blade.php
@@ -379,8 +198,6 @@ resources/views/
 │   ├── verify-email-page.blade.php
 │   └── verify-email.blade.php
 ├── components/
-│   ├── report/
-│   │   └── report-card.blade.php
 │   ├── action-message.blade.php
 │   ├── action-section.blade.php
 │   ├── alert.blade.php
@@ -412,6 +229,8 @@ resources/views/
 │   ├── loan-transaction-status-badge.blade.php
 │   ├── modal.blade.php
 │   ├── nav-link.blade.php
+│   ├── report/
+│   │   └── report-card.blade.php
 │   ├── resource-status-panel.blade.php
 │   ├── responsive-nav-link.blade.php
 │   ├── secondary-button.blade.php
@@ -422,8 +241,6 @@ resources/views/
 │   ├── user-info-card.blade.php
 │   ├── user-status-badge.blade.php
 │   └── validation-errors.blade.php
-├── content/
-│   └── pages-misc-error-page.blade.php
 ├── dashboard/
 │   ├── admin-dashboard.blade.php
 │   ├── approver-dashboard.blade.php
@@ -501,368 +318,42 @@ resources/views/
 │   ├── loan-transaction-index.blade.php
 │   ├── loan-transaction-issue.blade.php
 │   ├── loan-transaction-issued-list.blade.php
-```markdown
-# Project Directory Structure
-
-This document provides a single, cleaned reference of key application directories and notable files. It lists main controller classes in `app/Http/Controllers`, Livewire component namespaces in `app/Livewire`, and the top-level organization of Blade views in `resources/views`.
-
-Where possible this file documents directory trees and representative files — use it as a quick index, not a complete file inventory.
-
----
-
-## 1. Controller Classes (`app/Http/Controllers`)
-
-```text
-app/Http/Controllers/
-├── Admin/
-│   ├── DepartmentController.php
-│   ├── EquipmentController.php
-│   ├── GradeController.php
-│   ├── PositionController.php
-│   └── UserController.php
-├── Api/
-│   └── HelpdeskApiController.php
-├── Helpdesk/
-│   └── TicketController.php
-├── language/
-│   └── LanguageController.php
-├── ApprovalController.php
-├── Controller.php
-├── DashboardController.php
-├── EquipmentController.php
-├── LegalController.php
-├── LoanApplicationController.php
-├── LoanTransactionController.php
-├── MiscErrorController.php
-├── NotificationController.php
-├── ReportController.php
-└── WebhookController.php
-```
-
----
-
-## 2. Livewire Component Classes (`app/Livewire`)
-
-```text
-app/Livewire/
-├── Charts/
-│   └── LoanSummaryChart.php
-├── ContactUs.php
-├── Dashboard/
-│   ├── AdminDashboard.php
-│   ├── ApproverDashboard.php
-│   ├── BpmDashboard.php
-│   ├── Dashboard.php
-│   ├── ItAdminDashboard.php
-│   └── UserDashboard.php
-├── EquipmentChecklist.php
-├── Helpdesk/
-│   ├── Admin/
-│   │   ├── TicketManagement.php
-│   │   └── TicketReport.php
-│   ├── CreateTicketForm.php
-│   ├── MyTicketsIndex.php
-│   ├── TicketDetail.php
-│   ├── TicketDetails.php
-│   ├── TicketForm.php
-│   └── TicketList.php
-├── HumanResource/
-│   └── Structure/
-│       ├── Departments.php
-│       ├── EmployeeInfo.php
-│       └── Positions.php
-├── LoanRequestForm.php
-├── Misc/
-│   └── ComingSoon.php
-├── ResourceManagement/
-│   ├── Admin/
-│   │   ├── BPM/
-│   │   │   ├── IssuedLoans.php
-│   │   │   ├── OutstandingLoans.php
-│   │   │   ├── ProcessIssuance.php
-│   │   │   └── ProcessReturn.php
-│   │   ├── Equipment/
-│   │   │   ├── EquipmentForm.php
-│   │   │   └── EquipmentIndex.php
-│   │   ├── Grades/
-│   │   │   └── GradeIndex.php
-│   │   ├── Reports/
-│   │   │   ├── EquipmentInventoryReport.php
-│   │   │   ├── EquipmentReport.php
-│   │   │   ├── LoanApplicationsReport.php
-│   │   │   └── UserActivityReport.php
-│   │   └── Users/
-│   │       └── UserIndex.php
-│   ├── Approval/
-│   │   ├── ApprovalDashboard.php
-│   │   └── ApprovalHistory.php
-│   ├── LoanApplication/
-│   │   └── LoanApplicationForm.php
-│   ├── MyApplications/
-│   │   └── Loan/
-│   │       └── LoanApplicationsIndex.php
-│   └── Reports/
-│       ├── EquipmentReport.php
-│       ├── LoanApplicationsReport.php
-│       ├── ReportsIndex.php
-│       └── UserActivityReport.php
-├── Sections/
-│   ├── Footer/
-│   │   └── Footer.php
-│   ├── Menu/
-│   │   └── VerticalMenu.php
-│   └── Navbar/
-│       ├── Navbar.php
-│       └── NotificationsDropdown.php
-├── Settings/
-│   ├── Departments/
-│   │   └── DepartmentsIndex.php
-│   ├── Permissions/
-│   │   └── PermissionsIndex.php
-│   ├── Roles/
-│   │   └── RolesIndex.php
-│   └── Users/
-│       ├── UsersCreate.php
-│       ├── UsersEdit.php
-│       ├── UsersIndex.php
-│       └── UsersShow.php
-└── Shared/
-	├── Notifications/
-	│   └── NotificationsList.php
-	└── TableFilters.php
-```
-
----
-
-## 3. Blade View Files (`resources/views`)
-
-This is a representative top-level layout of `resources/views`. Use the real project tree for exact filenames.
-
-```text
-resources/views/
-├── _partials/
-│   ├── _alerts/
-│   │   └── alert-general.blade.php
-│   ├── _modals/
-│   │   ├── modal-category-info.blade.php
-│   │   ├── modal-category.blade.php
-│   │   ├── modal-department.blade.php
-│   │   ├── modal-import.blade.php
-│   │   ├── modal-leave-with-employee.blade.php
-│   │   ├── modal-motac-generic.blade.php
-│   │   ├── modal-position.blade.php
-+│   │   └── modal-sub-category.blade.php
-├── admin/
-│   ├── departments/
-│   ├── equipment/
-│   ├── grades/
-│   ├── positions/
-│   ├── profiles/
-│   └── users/
-├── auth/
-├── components/
-├── dashboard/
-├── emails/
-├── equipment/
-├── errors/
-├── helpdesk/
-├── layouts/
-├── loan-applications/
-├── loan-transactions/
+│   └── loan-transaction-show.blade.php
 ├── notifications/
+│   └── motac-default-notification.blade.php
 ├── pages/
-├── partials/
+│   └── contact-us.blade.php
 ├── profile/
+│   ├── show-profile.blade.php
+│   ├── update-password-form-profile.blade.php
+│   ├── update-profile-information-form-profile.blade.php
+│   └── two-factor-authentication-form-profile.blade.php
 ├── reports/
+│   ├── activity-log-report.blade.php
+│   ├── equipment-inventory-report.blade.php
+│   ├── helpdesk-tickets.blade.php
+│   ├── loan-applications-report.blade.php
+│   ├── loan-history-report.blade.php
+│   ├── loan-status-summary-report.blade.php
+│   ├── reports-index.blade.php
+│   ├── user-activity-log-report.blade.php
+│   ├── user-activity-report.blade.php
+│   └── utilization-report.blade.php
 ├── transactions/
+│   ├── transaction-issue.blade.php
+│   └── transaction-return.blade.php
 ├── users/
+│   ├── user-index.blade.php
+│   └── user-show.blade.php
 └── welcome.blade.php
 ```
 
 ---
 
-Notes
-- This file is intended as a quick index for maintainers. For a full file list, run `git ls-files` or inspect the repository in your IDE.
-# Project Directory Structure
+## Notes
 
-This document provides a cleaned, lint-friendly index of key application directories and representative files. Use it as a quick reference; run `git ls-files` for a full inventory.
-
----
-
-## 1. Controller Classes (`app/Http/Controllers`)
-
-```text
-app/Http/Controllers/
-├── Admin/
-│   ├── DepartmentController.php
-│   ├── EquipmentController.php
-│   ├── GradeController.php
-│   ├── PositionController.php
-│   └── UserController.php
-├── Api/
-│   └── HelpdeskApiController.php
-├── Helpdesk/
-│   └── TicketController.php
-├── language/
-│   └── LanguageController.php
-├── ApprovalController.php
-├── Controller.php
-├── DashboardController.php
-├── EquipmentController.php
-├── LegalController.php
-├── LoanApplicationController.php
-├── LoanTransactionController.php
-├── MiscErrorController.php
-├── NotificationController.php
-├── ReportController.php
-└── WebhookController.php
-```
-
----
-
-## 2. Livewire Component Classes (`app/Livewire`)
-
-```text
-app/Livewire/
-├── Charts/
-│   └── LoanSummaryChart.php
-├── ContactUs.php
-├── Dashboard/
-│   ├── AdminDashboard.php
-│   ├── ApproverDashboard.php
-│   ├── BpmDashboard.php
-│   ├── Dashboard.php
-│   ├── ItAdminDashboard.php
-│   └── UserDashboard.php
-├── EquipmentChecklist.php
-├── Helpdesk/
-│   ├── Admin/
-│   │   ├── TicketManagement.php
-│   │   └── TicketReport.php
-│   ├── CreateTicketForm.php
-│   ├── MyTicketsIndex.php
-│   ├── TicketDetail.php
-│   ├── TicketDetails.php
-│   ├── TicketForm.php
-│   └── TicketList.php
-├── HumanResource/
-│   └── Structure/
-│       ├── Departments.php
-│       ├── EmployeeInfo.php
-│       └── Positions.php
-├── LoanRequestForm.php
-├── Misc/
-│   └── ComingSoon.php
-├── ResourceManagement/
-│   ├── Admin/
-│   │   ├── BPM/
-│   │   │   ├── IssuedLoans.php
-│   │   │   ├── OutstandingLoans.php
-│   │   │   ├── ProcessIssuance.php
-│   │   │   └── ProcessReturn.php
-│   │   ├── Equipment/
-│   │   │   ├── EquipmentForm.php
-│   │   │   └── EquipmentIndex.php
-│   │   ├── Grades/
-│   │   │   └── GradeIndex.php
-│   │   ├── Reports/
-│   │   │   ├── EquipmentInventoryReport.php
-│   │   │   ├── EquipmentReport.php
-│   │   │   ├── LoanApplicationsReport.php
-│   │   │   └── UserActivityReport.php
-│   │   └── Users/
-│   │       └── UserIndex.php
-│   ├── Approval/
-│   │   ├── ApprovalDashboard.php
-│   │   └── ApprovalHistory.php
-│   ├── LoanApplication/
-│   │   └── LoanApplicationForm.php
-│   ├── MyApplications/
-│   │   └── Loan/
-│   │       └── LoanApplicationsIndex.php
-│   └── Reports/
-│       ├── EquipmentReport.php
-│       ├── LoanApplicationsReport.php
-│       ├── ReportsIndex.php
-│       └── UserActivityReport.php
-├── Sections/
-│   ├── Footer/
-│   │   └── Footer.php
-│   ├── Menu/
-│   │   └── VerticalMenu.php
-│   └── Navbar/
-│       ├── Navbar.php
-│       └── NotificationsDropdown.php
-├── Settings/
-│   ├── Departments/
-│   │   └── DepartmentsIndex.php
-│   ├── Permissions/
-│   │   └── PermissionsIndex.php
-│   ├── Roles/
-│   │   └── RolesIndex.php
-│   └── Users/
-│       ├── UsersCreate.php
-│       ├── UsersEdit.php
-│       ├── UsersIndex.php
-│       └── UsersShow.php
-└── Shared/
-	├── Notifications/
-	│   └── NotificationsList.php
-	└── TableFilters.php
-```
-
----
-
-## 3. Blade View Files (`resources/views`)
-
-This is a representative top-level layout of `resources/views`. Use the real project tree for exact filenames.
-
-```text
-resources/views/
-├── _partials/
-│   ├── _alerts/
-│   │   └── alert-general.blade.php
-│   ├── _modals/
-│   │   ├── modal-category-info.blade.php
-│   │   ├── modal-category.blade.php
-│   │   ├── modal-department.blade.php
-│   │   ├── modal-import.blade.php
-│   │   ├── modal-leave-with-employee.blade.php
-│   │   ├── modal-motac-generic.blade.php
-│   │   ├── modal-position.blade.php
-│   │   └── modal-sub-category.blade.php
-│   ├── macros.blade.php
-│   ├── rocket.blade.php
-│   └── stat-card.blade.php
-├── admin/
-│   ├── departments/
-│   ├── equipment/
-│   ├── grades/
-│   ├── positions/
-│   ├── profiles/
-│   └── users/
-├── auth/
-├── components/
-├── dashboard/
-├── emails/
-├── equipment/
-├── errors/
-├── helpdesk/
-├── layouts/
-├── loan-applications/
-├── loan-transactions/
-├── notifications/
-├── pages/
-├── partials/
-├── profile/
-├── reports/
-├── transactions/
-├── users/
-└── welcome.blade.php
-```
-
----
-
-Notes
-- This file is intended as a quick index for maintainers. For a full file list, run `git ls-files` or inspect the repository in your IDE.
-- If you want, I can add a small script or a README in `_documentation/` that auto-lists files and links into this index.
+- This file is a quick index for maintainers.
+- All lists use spaces for indentation; headings follow a single H1 rule for lint compliance.
+- For a full file list, run `git ls-files` at the repository root or inspect in your IDE.
+- For MYDS compliance, ensure all Blade views and UI components use accessible markup and pre-built
+  MYDS components where possible.

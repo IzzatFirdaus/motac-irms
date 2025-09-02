@@ -4,7 +4,8 @@
 
 ## MYDS Design System: Core Guidelines
 
-Malaysia's official design system for government digital services, ensuring **accessibility**, **consistency**, and **user-centricity**.
+Malaysia's official design system for government digital services, ensuring **accessibility**,
+**consistency**, and **user-centricity**.
 
 ---
 
@@ -19,70 +20,74 @@ Malaysia's official design system for government digital services, ensuring **ac
 
 ### B. Typography
 
-A clear standard for font style, size, and spacing to ensure readability and consistency across government platforms, supporting accessible and user-friendly text presentation.
+A clear standard for font style, size, and spacing to ensure readability and consistency across
+government platforms, supporting accessible and user-friendly text presentation.
 
 #### Heading
 
-- **Font Family:**  
-  - `Poppins` is used for home page section titles, page headers, and important text elements to create a clear visual hierarchy and improve user navigation.  
+- **Font Family:**
+  - `Poppins` is used for home page section titles, page headers, and important text elements to
+    create a clear visual hierarchy and improve user navigation.
   - Not applicable for rich-text.
 
-- **Font Sizes and Weights:**  
+- **Font Sizes and Weights:**
   - All sizes include weights: Regular (400), Medium (500), Semibold (600).
 
-| Name                   | HTML Tag | Font Size     | Line Height     |
-|------------------------|----------|---------------|-----------------|
-| Heading Extra Large    |          | 60px (3.75rem)| 72px (4.5rem)   |
-| Heading Large          |          | 48px (3rem)   | 60px (3.75rem)  |
-| Heading Medium         | `<h1>`   | 36px (2.25rem)| 44px (2.75rem)  |
-| Heading Small          | `<h2>`   | 30px (1.875rem)| 38px (2.375rem)|
-| Heading Extra Small    | `<h3>`   | 24px (1.5rem) | 32px (2rem)     |
-| Heading 2X Small       | `<h4>`   | 20px (1.25rem)| 28px (1.75rem)  |
-| Heading 3X Small       | `<h5>`   | 16px (1rem)   | 24px (1.5rem)   |
-| Heading 4X Small       | `<h6>`   | 14px (0.875rem)| 20px (1.25rem) |
+| Name                | HTML Tag | Font Size       | Line Height     |
+| ------------------- | -------- | --------------- | --------------- |
+| Heading Extra Large |          | 60px (3.75rem)  | 72px (4.5rem)   |
+| Heading Large       |          | 48px (3rem)     | 60px (3.75rem)  |
+| Heading Medium      | `<h1>`   | 36px (2.25rem)  | 44px (2.75rem)  |
+| Heading Small       | `<h2>`   | 30px (1.875rem) | 38px (2.375rem) |
+| Heading Extra Small | `<h3>`   | 24px (1.5rem)   | 32px (2rem)     |
+| Heading 2X Small    | `<h4>`   | 20px (1.25rem)  | 28px (1.75rem)  |
+| Heading 3X Small    | `<h5>`   | 16px (1rem)     | 24px (1.5rem)   |
+| Heading 4X Small    | `<h6>`   | 14px (0.875rem) | 20px (1.25rem)  |
 
 #### Body
 
-- **Font Family:**  
-  - `Inter` is used for paragraphs, descriptions, and general content to provide a comfortable reading experience for users.
+- **Font Family:**
+  - `Inter` is used for paragraphs, descriptions, and general content to provide a comfortable
+    reading experience for users.
 
-- **Font Sizes and Weights:**  
+- **Font Sizes and Weights:**
   - All sizes include weights: Regular (400), Medium (500), Semibold (600).
 
-| Name           | Font Size       | Line Height       | List Spacing     | Paragraph Spacing   |
-|----------------|-----------------|-------------------|------------------|---------------------|
-| Body 6X Large  | 60px (3.75rem)  | 72px (4.5rem)     | 6px (0.375rem)   | 12px (0.75rem)      |
-| Body 5X Large  | 48px (3rem)     | 60px (3.75rem)    | 6px (0.375rem)   | 12px (0.75rem)      |
-| Body 4X Large  | 36px (2.25rem)  | 44px (2.75rem)    | 6px (0.375rem)   | 12px (0.75rem)      |
-| Body 3X Large  | 30px (1.875rem) | 38px (2.375rem)   | 6px (0.375rem)   | 12px (0.75rem)      |
-| Body 2X Large  | 24px (1.5rem)   | 32px (2rem)       | 6px (0.375rem)   | 12px (0.75rem)      |
-| Body Extra Large| 20px (1.25rem) | 28px (1.75rem)    | 6px (0.375rem)   | 12px (0.75rem)      |
-| Body Large     | 18px (1.125rem) | 26px (1.625rem)   | 6px (0.375rem)   | 12px (0.75rem)      |
-| Body Medium    | 16px (1rem)     | 24px (1.5rem)     | 6px (0.375rem)   | 12px (0.75rem)      |
-| Body Small     | 14px (0.875rem) | 20px (1.25rem)    | 6px (0.375rem)   | 12px (0.75rem)      |
-| Body Extra Small| 12px (0.75rem) | 18px (1.125rem)   | 6px (0.375rem)   | 12px (0.75rem)      |
-| Body 2X Small  | 10px (0.625rem) | 12px (0.75rem)    | 6px (0.375rem)   | 12px (0.75rem)      |
+| Name             | Font Size       | Line Height     | List Spacing   | Paragraph Spacing |
+| ---------------- | --------------- | --------------- | -------------- | ----------------- |
+| Body 6X Large    | 60px (3.75rem)  | 72px (4.5rem)   | 6px (0.375rem) | 12px (0.75rem)    |
+| Body 5X Large    | 48px (3rem)     | 60px (3.75rem)  | 6px (0.375rem) | 12px (0.75rem)    |
+| Body 4X Large    | 36px (2.25rem)  | 44px (2.75rem)  | 6px (0.375rem) | 12px (0.75rem)    |
+| Body 3X Large    | 30px (1.875rem) | 38px (2.375rem) | 6px (0.375rem) | 12px (0.75rem)    |
+| Body 2X Large    | 24px (1.5rem)   | 32px (2rem)     | 6px (0.375rem) | 12px (0.75rem)    |
+| Body Extra Large | 20px (1.25rem)  | 28px (1.75rem)  | 6px (0.375rem) | 12px (0.75rem)    |
+| Body Large       | 18px (1.125rem) | 26px (1.625rem) | 6px (0.375rem) | 12px (0.75rem)    |
+| Body Medium      | 16px (1rem)     | 24px (1.5rem)   | 6px (0.375rem) | 12px (0.75rem)    |
+| Body Small       | 14px (0.875rem) | 20px (1.25rem)  | 6px (0.375rem) | 12px (0.75rem)    |
+| Body Extra Small | 12px (0.75rem)  | 18px (1.125rem) | 6px (0.375rem) | 12px (0.75rem)    |
+| Body 2X Small    | 10px (0.625rem) | 12px (0.75rem)  | 6px (0.375rem) | 12px (0.75rem)    |
 
 #### Rich Text Format (RTF)
 
-- **Font Family:**  
+- **Font Family:**
   - `Inter` is used for styling long form content such as an article.
 
-- **Note:**  
-  - The H1 tag in RTF differs from the standard H1 Heading tag and is intended only for formatting content within an article section.
+- **Note:**
+  - The H1 tag in RTF differs from the standard H1 Heading tag and is intended only for formatting
+    content within an article section.
 
-- **Font Sizes and Weights:**  
+- **Font Sizes and Weights:**
   - All sizes include weights: Regular (400) and Semibold (600).
 
-| Name        | HTML Tag | Font Size       | Line Height       | List Spacing     | Paragraph Spacing   |
-|-------------|----------|-----------------|-------------------|------------------|---------------------|
-| Heading 1   | `<h1>`   | 30px (1.875rem) | 38px (2.375rem)   | 6px (0.375rem)   | 12px (0.75rem)      |
-| Heading 2   | `<h2>`   | 24px (1.5rem)   | 32px (2rem)       | 6px (0.375rem)   | 12px (0.75rem)      |
-| Heading 3   | `<h3>`   | 20px (1.25rem)  | 28px (1.75rem)    | 6px (0.375rem)   | 12px (0.75rem)      |
-| Heading 4   | `<h4>`   | 18px (1.125rem) | 26px (1.625rem)   | 6px (0.375rem)   | 12px (0.75rem)      |
-| Heading 5   | `<h5>`   | 16px (1rem)     | 24px (1.5rem)     | 6px (0.375rem)   | 12px (0.75rem)      |
-| Heading 6   | `<h6>`   | 14px (0.875rem) | 20px (1.25rem)    | 6px (0.375rem)   | 12px (0.75rem)      |
-| Paragraph   | `<p>`    | 16px (1rem)     | 28px (1.75rem)    | 6px (0.375rem)   | 28px (1.75rem)      |
+| Name      | HTML Tag | Font Size       | Line Height     | List Spacing   | Paragraph Spacing |
+| --------- | -------- | --------------- | --------------- | -------------- | ----------------- |
+| Heading 1 | `<h1>`   | 30px (1.875rem) | 38px (2.375rem) | 6px (0.375rem) | 12px (0.75rem)    |
+| Heading 2 | `<h2>`   | 24px (1.5rem)   | 32px (2rem)     | 6px (0.375rem) | 12px (0.75rem)    |
+| Heading 3 | `<h3>`   | 20px (1.25rem)  | 28px (1.75rem)  | 6px (0.375rem) | 12px (0.75rem)    |
+| Heading 4 | `<h4>`   | 18px (1.125rem) | 26px (1.625rem) | 6px (0.375rem) | 12px (0.75rem)    |
+| Heading 5 | `<h5>`   | 16px (1rem)     | 24px (1.5rem)   | 6px (0.375rem) | 12px (0.75rem)    |
+| Heading 6 | `<h6>`   | 14px (0.875rem) | 20px (1.25rem)  | 6px (0.375rem) | 12px (0.75rem)    |
+| Paragraph | `<p>`    | 16px (1rem)     | 28px (1.75rem)  | 6px (0.375rem) | 28px (1.75rem)    |
 
 ---
 
@@ -140,14 +145,15 @@ A clear standard for font style, size, and spacing to ensure readability and con
 
 ## 5. Resources
 
-- **Figma Kit:** Download components directly from [MYDS Figma](https://www.figma.com/design/svmWSPZarzWrJ116CQ8zpV/MYDS--Beta-).
+- **Figma Kit:** Download components directly from
+  [MYDS Figma](https://www.figma.com/design/svmWSPZarzWrJ116CQ8zpV/MYDS--Beta-).
 - **Icons:** SVG-based `MYDS Icons` library (e.g., "download", "search").
 
 ---
 
 ## 6. Compliance & Governance
 
-- **Alignment with MyGovEA:** Adheres to *Prinsip Reka Bentuk* (e.g., citizen-centricity).
+- **Alignment with MyGovEA:** Adheres to _Prinsip Reka Bentuk_ (e.g., citizen-centricity).
 - **Legal:** Follows PDPA (data privacy) and WCAG 2.1 standards.
 
 ---
@@ -158,23 +164,33 @@ A clear standard for font style, size, and spacing to ensure readability and con
 
 MYDS consists of several key elements:
 
-- **Components:** Pre-built UI elements like buttons, forms, and navigation bars that help create consistent interfaces for government websites.
-- **Theme Customizer:** A tool to adjust colors and styles to match an agency's branding, while maintaining a unified look and feel.
-- **Patterns:** Ready-to-use layouts and design patterns for common interface scenarios, such as login screens and data forms.
-- **Design File:** A comprehensive file containing all assets, components, and guidelines, helping designers prototype and build efficiently in line with MYDS standards.
+- **Components:** Pre-built UI elements like buttons, forms, and navigation bars that help create
+  consistent interfaces for government websites.
+- **Theme Customizer:** A tool to adjust colors and styles to match an agency's branding, while
+  maintaining a unified look and feel.
+- **Patterns:** Ready-to-use layouts and design patterns for common interface scenarios, such as
+  login screens and data forms.
+- **Design File:** A comprehensive file containing all assets, components, and guidelines, helping
+  designers prototype and build efficiently in line with MYDS standards.
 
 ### Why Use MYDS?
 
-- **Consistency:** Ensures all government digital platforms have a cohesive visual identity, fostering trust and recognition among citizens.
-- **Rapid Development:** Streamlines design and development with reusable components and clear guidelines.
-- **Focus on User Experience:** Allows teams to spend less time on styling and more on improving user experience.
+- **Consistency:** Ensures all government digital platforms have a cohesive visual identity,
+  fostering trust and recognition among citizens.
+- **Rapid Development:** Streamlines design and development with reusable components and clear
+  guidelines.
+- **Focus on User Experience:** Allows teams to spend less time on styling and more on improving
+  user experience.
 - **Scalability:** Components can be customized to meet specific project needs.
-- **Accessibility for All:** Adheres to WCAG standards to ensure inclusivity, making services accessible to all citizens.
+- **Accessibility for All:** Adheres to WCAG standards to ensure inclusivity, making services
+  accessible to all citizens.
 
 ### Use Cases for MYDS
 
-- **Government Agency Websites:** Informational sites about policies, regulations, profiles, activities, achievements, announcements, media, and more.
-- **Dashboards and Portals:** Interactive platforms for visualizing key metrics and providing citizens with access to various government services.
+- **Government Agency Websites:** Informational sites about policies, regulations, profiles,
+  activities, achievements, announcements, media, and more.
+- **Dashboards and Portals:** Interactive platforms for visualizing key metrics and providing
+  citizens with access to various government services.
 
 ### Resources
 
@@ -184,61 +200,74 @@ MYDS consists of several key elements:
 
 ## 12-8-4 Grid System
 
-The **12-8-4 grid system** provides a flexible, responsive layout structure that encourages adaptable design across all screen sizes. This grid ensures content remains consistently aligned and visually balanced, making designs polished and accessible on any device, from desktop to mobile.
+The **12-8-4 grid system** provides a flexible, responsive layout structure that encourages
+adaptable design across all screen sizes. This grid ensures content remains consistently aligned and
+visually balanced, making designs polished and accessible on any device, from desktop to mobile.
 
 ### Container Types
 
 - **Content:** The main container for arranging content in various layouts.
-- **Article:** Used for long-form content, such as articles. Its width is narrowed to a maximum of 640px for optimal reading comfort.
-- **Images and Interactive Charts:** These can span the full width of the article container (640px) or extend to a maximum width of 740px for greater visual impact.
+- **Article:** Used for long-form content, such as articles. Its width is narrowed to a maximum of
+  640px for optimal reading comfort.
+- **Images and Interactive Charts:** These can span the full width of the article container (640px)
+  or extend to a maximum width of 740px for greater visual impact.
 
 ### Breakpoints
 
 Breakpoints help websites adjust their layout for different devices.
 
-| Device   | Width Range      | Grid Columns | Column Gap | Edge Padding | Max Width |
-|----------|------------------|-------------|------------|--------------|-----------|
-| Desktop  | ≥ 1024px         | 12          | 24px       | 24px         | 1280px    |
-| Tablet   | 768px - 1023px   | 8           | 24px       | 24px         | —         |
-| Mobile   | ≤ 767px          | 4           | 18px       | 18px         | —         |
+| Device  | Width Range    | Grid Columns | Column Gap | Edge Padding | Max Width |
+| ------- | -------------- | ------------ | ---------- | ------------ | --------- |
+| Desktop | ≥ 1024px       | 12           | 24px       | 24px         | 1280px    |
+| Tablet  | 768px - 1023px | 8            | 24px       | 24px         | —         |
+| Mobile  | ≤ 767px        | 4            | 18px       | 18px         | —         |
 
 #### Desktop
 
 - **Grid:** 12 columns
 - **Column gap & padding:** 24px
 - **Max content width:** 1280px
-- This layout offers maximum flexibility for arranging content on large screens, supporting complex designs while maintaining alignment and avoiding clutter.
+- This layout offers maximum flexibility for arranging content on large screens, supporting complex
+  designs while maintaining alignment and avoiding clutter.
 
 #### Tablet
 
 - **Grid:** 8 columns
 - **Column gap & padding:** 24px
-- Designed for medium-sized screens, the 8-column layout keeps layouts clean and organized, improving readability and usability.
+- Designed for medium-sized screens, the 8-column layout keeps layouts clean and organized,
+  improving readability and usability.
 
 #### Mobile
 
 - **Grid:** 4 columns
 - **Column gap & padding:** 18px
-- On small screens, the 4-column layout provides ample space for content, focusing on essential elements for fast and comfortable navigation.
+- On small screens, the 4-column layout provides ample space for content, focusing on essential
+  elements for fast and comfortable navigation.
 
 ### Usage Examples
 
 #### Content Section
 
-- **Desktop:** Example - Ministry of Digital website uses an image slider section where the title spans 3 columns and the image spans 6 columns, with 1-column spaces on either side and a 1-column gap for separation.
+- **Desktop:** Example - Ministry of Digital website uses an image slider section where the title
+  spans 3 columns and the image spans 6 columns, with 1-column spaces on either side and a 1-column
+  gap for separation.
 - **Tablet:** Title and image fill available space for optimal viewing.
 - **Mobile:** Title and image stack vertically instead of side by side.
 
 #### Article Page
 
-- The article page uses a maximum container width of 640px for paragraphs, ensuring easy reading without line fatigue.
-- Images and interactive charts are displayed with a max width of 740px, helping them stand out while maintaining a balanced layout.
+- The article page uses a maximum container width of 640px for paragraphs, ensuring easy reading
+  without line fatigue.
+- Images and interactive charts are displayed with a max width of 740px, helping them stand out
+  while maintaining a balanced layout.
 
 ---
 
 ## Colour
 
-Colour forms a fundamental part of MYDS, defining the primary, danger, success, warning, and gray palettes. These guidelines ensure contrast, readability, and consistency for backgrounds, buttons, and text across all interfaces.
+Colour forms a fundamental part of MYDS, defining the primary, danger, success, warning, and gray
+palettes. These guidelines ensure contrast, readability, and consistency for backgrounds, buttons,
+and text across all interfaces.
 
 MYDS divides colour palettes into two categories:
 
@@ -247,24 +276,28 @@ MYDS divides colour palettes into two categories:
 
 ### Primitive Colour
 
-Primitive colours are the foundational colours used throughout the design system and do not have dark mode variants. For adaptive colour usage in dark mode, use the Colour Tokens set.
+Primitive colours are the foundational colours used throughout the design system and do not have
+dark mode variants. For adaptive colour usage in dark mode, use the Colour Tokens set.
 
 ### Primitive Colour Preview Table
 
-| Primitive Colour Name | Primitive Colour HEX Value | Usage Example |
-|----------------------|---------------------------|---------------|
-| White                | #FFFFFF (Example)         | Backgrounds   |
-| Gray                 | #6B7280 (Example)         | Headings, text, backgrounds, placeholders, dividers, outlines |
-| Primary              | #2563EB (MYDS Blue)       | Selected links, tabs, primary buttons, highlighted elements |
-| Danger               | #D32F2F (Example)         | Error messages, delete buttons, urgent alerts |
-| Success              | #388E3C (Example)         | Success messages, confirmations, progress indicators |
-| Warning              | #FFA000 (Example)         | Warning banners, notification badges, alert icons |
+| Primitive Colour Name | Primitive Colour HEX Value | Usage Example                                                 |
+| --------------------- | -------------------------- | ------------------------------------------------------------- |
+| White                 | #FFFFFF (Example)          | Backgrounds                                                   |
+| Gray                  | #6B7280 (Example)          | Headings, text, backgrounds, placeholders, dividers, outlines |
+| Primary               | #2563EB (MYDS Blue)        | Selected links, tabs, primary buttons, highlighted elements   |
+| Danger                | #D32F2F (Example)          | Error messages, delete buttons, urgent alerts                 |
+| Success               | #388E3C (Example)          | Success messages, confirmations, progress indicators          |
+| Warning               | #FFA000 (Example)          | Warning banners, notification badges, alert icons             |
 
-> **Note:** If your product does not use the primary blue as the main colour, consider creating a separate colour palette.
+> **Note:** If your product does not use the primary blue as the main colour, consider creating a
+> separate colour palette.
 
 ### Colour Tokens
 
-Colour tokens are dynamic styles intended for accessibility and theme adaptation. They reference primitive colours and are optimized for both light and dark modes. Token naming follows this convention:
+Colour tokens are dynamic styles intended for accessibility and theme adaptation. They reference
+primitive colours and are optimized for both light and dark modes. Token naming follows this
+convention:
 
 - `bg-`: Background
 - `txt-`: Text
@@ -273,18 +306,21 @@ Colour tokens are dynamic styles intended for accessibility and theme adaptation
 
 #### Light Mode
 
-Colour tokens for light mode provide high contrast for readability and follow WCAG 2.1 contrast ratio guidelines. They support accessible design for all users.
+Colour tokens for light mode provide high contrast for readability and follow WCAG 2.1 contrast
+ratio guidelines. They support accessible design for all users.
 
 **Examples of Light Mode Tokens:**
 
-- **Background:** Provides foundational colours for surfaces and containers, ensuring proper contrast and hierarchy.
+- **Background:** Provides foundational colours for surfaces and containers, ensuring proper
+  contrast and hierarchy.
 - **Text:** Ensures text legibility and accessibility in all states.
 - **Outline:** Colours for borders and outlines, defining UI component separation and accents.
 - **Focus Ring:** Highlights interactive elements when receiving keyboard focus.
 
 #### Dark Mode
 
-Colour tokens for dark mode are optimized for readability and accessibility in darker interfaces. They maintain high contrast ratios and support seamless theme switching.
+Colour tokens for dark mode are optimized for readability and accessibility in darker interfaces.
+They maintain high contrast ratios and support seamless theme switching.
 
 **Examples of Dark Mode Tokens:**
 
@@ -297,13 +333,16 @@ Colour tokens for dark mode are optimized for readability and accessibility in d
 
 ## Typography
 
-[See above for detailed standards, font families, sizes, and usage for headings, body, and rich text formatting.]
+[See above for detailed standards, font families, sizes, and usage for headings, body, and rich text
+formatting.]
 
 ---
 
 ## Icon
 
-Icons are visual symbols that communicate meaning quickly, guiding users through actions, statuses, and categories. They are crafted with consistent proportions, line weights, and styling to ensure a cohesive look across all components.
+Icons are visual symbols that communicate meaning quickly, guiding users through actions, statuses,
+and categories. They are crafted with consistent proportions, line weights, and styling to ensure a
+cohesive look across all components.
 
 ### Icon Set Types
 
@@ -319,30 +358,32 @@ There are 4 types of icon sets:
   Icons used to link to social media platforms.
 
 - **Media Icon:**  
-  Icons that represent file types (e.g., PPTX, Excel, DOCX, PDF), often used in file uploaders or previews.
+  Icons that represent file types (e.g., PPTX, Excel, DOCX, PDF), often used in file uploaders or
+  previews.
 
 ### Icon Design Guidelines
 
 #### Grid Size
 
-- Icons are designed within a **20x20 grid** as the base size, ensuring consistency.  
+- Icons are designed within a **20x20 grid** as the base size, ensuring consistency.
 - Icons can be resized to fit any situation while keeping proportions.
 
 #### Stroke Width
 
-- All icons preserve a **1.5px stroke width** (at 20x20), even after export as SVG, giving developers flexibility for scaling in code.
+- All icons preserve a **1.5px stroke width** (at 20x20), even after export as SVG, giving
+  developers flexibility for scaling in code.
 
 #### Sizes
 
 - Maintain visual balance and consistency by adjusting stroke width proportionally with icon size.
 
-| Size (px) | Where to Use?         |
-|-----------|----------------------|
-| 16x16     | Small button         |
-| 20x20     | Medium button        |
-| 24x24     | Large button         |
-| 32x32     | Alert dialog         |
-| 42x42     | Alert dialog         |
+| Size (px) | Where to Use? |
+| --------- | ------------- |
+| 16x16     | Small button  |
+| 20x20     | Medium button |
+| 24x24     | Large button  |
+| 32x32     | Alert dialog  |
+| 42x42     | Alert dialog  |
 
 #### Generic Icon
 
@@ -376,7 +417,8 @@ There are 4 types of icon sets:
 
 ## Motion
 
-Transform static elements in digital interfaces through purposeful movement and interaction with clear user feedback.
+Transform static elements in digital interfaces through purposeful movement and interaction with
+clear user feedback.
 
 ### Principle
 
@@ -397,38 +439,43 @@ Transform static elements in digital interfaces through purposeful movement and 
   `cubic-bezier(0, 0, 1, 1)`
 
 - **Ease-Out:**  
-  A smooth, natural curve moving directly to the target without overshooting. Ensures clarity and precision.  
-  **Use Cases:** Functional interfaces requiring minimal distraction, such as charts, UI state transitions, background fade-out.  
+  A smooth, natural curve moving directly to the target without overshooting. Ensures clarity and
+  precision.  
+  **Use Cases:** Functional interfaces requiring minimal distraction, such as charts, UI state
+  transitions, background fade-out.  
   **Token name:** `easeout`  
   `cubic-bezier(0, 0, 0.58, 1)`
 
 - **Ease-Out-Back (Custom):**  
-  A dynamic, spring-like motion that overshoots the target before settling. Creates energy and adds personality.  
+  A dynamic, spring-like motion that overshoots the target before settling. Creates energy and adds
+  personality.  
   **Use Cases:** Playful or attention-grabbing elements, like success animations or buttons.  
   **Token name:** `easeoutback`  
   `cubic-bezier(0.4, 1.4, 0.2, 1)`
 
 ### Transition Duration
 
-| Token Variable | Duration | Use Case |
-|---------------|----------|----------|
-| short         | 200ms    | Small-size UI (buttons, dropdowns, micro-interactions) |
-| medium        | 400ms    | Medium-size UI (callouts, alert dialogs, toasts) |
-| long          | 600ms    | Large-size UI (page, section transitions) |
+| Token Variable | Duration | Use Case                                               |
+| -------------- | -------- | ------------------------------------------------------ |
+| short          | 200ms    | Small-size UI (buttons, dropdowns, micro-interactions) |
+| medium         | 400ms    | Medium-size UI (callouts, alert dialogs, toasts)       |
+| long           | 600ms    | Large-size UI (page, section transitions)              |
 
 ### Motion Tokens
 
 Predefined values used to manage UI state transitions consistently.
 
-Developers can customize the token name using the format `[motion-type].[transition]`. By default, transition durations are predefined as short, medium, and long, but can be replaced with custom values in rounded numbers for different speed durations.
+Developers can customize the token name using the format `[motion-type].[transition]`. By default,
+transition durations are predefined as short, medium, and long, but can be replaced with custom
+values in rounded numbers for different speed durations.
 
-| Token Variable        | CSS Code Example                                                    |
-|----------------------|---------------------------------------------------------------------|
-| easeoutback.short    | `.btn:hover { transition: 200ms cubic-bezier(0.4, 1.4, 0.2, 1); }`  |
-| easeoutback.medium   | `.alert-dialog { transition: 400ms cubic-bezier(0.4, 1.4, 0.2, 1); }`|
-| easeout.long         | `.slides { transition: 600ms cubic-bezier(0, 0, 0.58, 1); /* OR 600ms ease-out */ }` |
-| easeout.1000         | `.circle { transition: 1000ms cubic-bezier(0, 0, 0.58, 1); /* OR 1000ms ease-out */ }`|
-| easeoutback.1000     | `.circle { transition: 1000ms cubic-bezier(0.4, 1.4, 0.2, 1); }`    |
+| Token Variable     | CSS Code Example                                                                       |
+| ------------------ | -------------------------------------------------------------------------------------- |
+| easeoutback.short  | `.btn:hover { transition: 200ms cubic-bezier(0.4, 1.4, 0.2, 1); }`                     |
+| easeoutback.medium | `.alert-dialog { transition: 400ms cubic-bezier(0.4, 1.4, 0.2, 1); }`                  |
+| easeout.long       | `.slides { transition: 600ms cubic-bezier(0, 0, 0.58, 1); /* OR 600ms ease-out */ }`   |
+| easeout.1000       | `.circle { transition: 1000ms cubic-bezier(0, 0, 0.58, 1); /* OR 1000ms ease-out */ }` |
+| easeoutback.1000   | `.circle { transition: 1000ms cubic-bezier(0.4, 1.4, 0.2, 1); }`                       |
 
 ### Checkbox Usage Examples
 
@@ -446,13 +493,15 @@ It features three animations:
   Speed: 400ms (medium)
 
 - **Delay Start / Progress Bar Start:**  
-  After "Toast Enter" animation ends, a visual indicator (bar) counts down for about 3000ms, showing how long the Toast will remain visible before exiting.  
+  After "Toast Enter" animation ends, a visual indicator (bar) counts down for about 3000ms, showing
+  how long the Toast will remain visible before exiting.  
   Token: `linear.3000`  
   Motion type: `linear`  
   Speed: 3000ms
 
 - **Progress Bar End / Toast Exit:**  
-  After 3000ms "Progress bar" animation ends, the Toast disappears gracefully by sliding out to the bottom of the screen.  
+  After 3000ms "Progress bar" animation ends, the Toast disappears gracefully by sliding out to the
+  bottom of the screen.  
   Token: `easeoutback.medium`  
   Motion type: `easeoutback`  
   Speed: 400ms (medium)
@@ -461,56 +510,60 @@ It features three animations:
 
 ## Radius
 
-A unified corner radius creates a smooth, modern aesthetic that enhances user experience through visual consistency. It softens element appearances, making them more approachable and easier to interact with.
+A unified corner radius creates a smooth, modern aesthetic that enhances user experience through
+visual consistency. It softens element appearances, making them more approachable and easier to
+interact with.
 
 ![radius-preview.png](radius-preview.png) <!-- Add image for documentation and visual reference. -->
 
 ### Radius Specification
 
-| Name         | Size   | Radius | Example (image)                | Where to use?                   |
-|--------------|--------|--------|--------------------------------|---------------------------------|
-| Extra Small  | 4px    | radius-xs-dark.png   | Context Menu Item                | Extra small radius for compact UI elements |
-| Small        | 6px    | radius-s-dark.png    | Small Button                     | Small radius for compact buttons |
-| Medium       | 8px    | radius-m-dark.png    | Button, CTA, Context Menu        | Medium radius for buttons and context menus |
-| Large        | 12px   | radius-l-dark.png    | Content Card                     | Large radius for cards and containers |
-| Extra Large  | 14px   | radius-xl-dark.png   | Context Menu with Search field   | Extra large radius for wide context menus |
-| Full         | 9999px | radius-full-dark.png | Fully rounded (e.g., avatars)    | Full radius for circular elements |
+| Name        | Size   | Radius               | Example (image)                | Where to use?                               |
+| ----------- | ------ | -------------------- | ------------------------------ | ------------------------------------------- |
+| Extra Small | 4px    | radius-xs-dark.png   | Context Menu Item              | Extra small radius for compact UI elements  |
+| Small       | 6px    | radius-s-dark.png    | Small Button                   | Small radius for compact buttons            |
+| Medium      | 8px    | radius-m-dark.png    | Button, CTA, Context Menu      | Medium radius for buttons and context menus |
+| Large       | 12px   | radius-l-dark.png    | Content Card                   | Large radius for cards and containers       |
+| Extra Large | 14px   | radius-xl-dark.png   | Context Menu with Search field | Extra large radius for wide context menus   |
+| Full        | 9999px | radius-full-dark.png | Fully rounded (e.g., avatars)  | Full radius for circular elements           |
 
 ---
 
 ## Shadow
 
-Shadow adds depth and dimension to UI components, offering a sense of layering and hierarchy in digital interfaces.
+Shadow adds depth and dimension to UI components, offering a sense of layering and hierarchy in
+digital interfaces.
 
 ![shadow-preview.png](shadow-preview.png) <!-- Visual reference for shadow specifications. -->
 
 ### Specification
 
-| Name          | Shadow                    | CSS Code Example                                                                 |
-|---------------|---------------------------|----------------------------------------------------------------------------------|
-| None          | shadow-none-dark.png      | -                                                                                |
-| Button        | shadow-button-dark.png    | `box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.07);`                               |
-| Card          | shadow-card-dark.png      | `box-shadow: 0px 2px 6px 0px rgba(0, 0, 0, 0.05), 0px 6px 24px 0px rgba(0, 0, 0, 0.05);` |
-| Context Menu  | shadow-context-menu-dark.png | `box-shadow: 0px 2px 6px 0px rgba(0, 0, 0, 0.05), 0px 12px 50px 0px rgba(0, 0, 0, 0.10);` |
+| Name         | Shadow                       | CSS Code Example                                                                          |
+| ------------ | ---------------------------- | ----------------------------------------------------------------------------------------- |
+| None         | shadow-none-dark.png         | -                                                                                         |
+| Button       | shadow-button-dark.png       | `box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.07);`                                        |
+| Card         | shadow-card-dark.png         | `box-shadow: 0px 2px 6px 0px rgba(0, 0, 0, 0.05), 0px 6px 24px 0px rgba(0, 0, 0, 0.05);`  |
+| Context Menu | shadow-context-menu-dark.png | `box-shadow: 0px 2px 6px 0px rgba(0, 0, 0, 0.05), 0px 12px 50px 0px rgba(0, 0, 0, 0.10);` |
 
 ---
 
 ## Spacing
 
-The spacing guidelines define the consistent use of margins and paddings across all components, ensuring a harmonious and visually appealing layout.
+The spacing guidelines define the consistent use of margins and paddings across all components,
+ensuring a harmonious and visually appealing layout.
 
-| Size  | Preview Image        | Where to use?                                   |
-|-------|----------------------|-------------------------------------------------|
-| 4px   | space-4-dark.png     |                                                 |
-| 8px   | space-8-dark.png     | Gap in buttons group, fields and labels         |
-| 12px  | space-12-dark.png    |                                                 |
-| 16px  | space-16-dark.png    |                                                 |
-| 20px  | space-20-dark.png    |                                                 |
-| 24px  | space-24-dark.png    | Gap between sub sections, cards                 |
-| 32px  | space-32-dark.png    | Gap between main sections                       |
-| 40px  | space-40-dark.png    |                                                 |
-| 48px  | space-48-dark.png    |                                                 |
-| 64px  | space-64-dark.png    |                                                 |
+| Size | Preview Image     | Where to use?                           |
+| ---- | ----------------- | --------------------------------------- |
+| 4px  | space-4-dark.png  |                                         |
+| 8px  | space-8-dark.png  | Gap in buttons group, fields and labels |
+| 12px | space-12-dark.png |                                         |
+| 16px | space-16-dark.png |                                         |
+| 20px | space-20-dark.png |                                         |
+| 24px | space-24-dark.png | Gap between sub sections, cards         |
+| 32px | space-32-dark.png | Gap between main sections               |
+| 40px | space-40-dark.png |                                         |
+| 48px | space-48-dark.png |                                         |
+| 64px | space-64-dark.png |                                         |
 
 ---
 
@@ -526,29 +579,35 @@ The key elements that define an Accordion’s structure and function:
 
 - **Header text:** The main title or label for the accordion section.
 - **Body text:** The content that expands or collapses within the accordion.
-- **Chevron Down (Default):** The default icon, displayed at a rotation of 0 degrees, indicating that the section is closed.
+- **Chevron Down (Default):** The default icon, displayed at a rotation of 0 degrees, indicating
+  that the section is closed.
 - **Chevron Down (Expanded):** The icon rotates to 180 degrees to indicate the section is open.
 
 ### State
 
 ![accordion-variation.png](accordion-variation.png) <!-- Accordion state visual reference -->
 
-Defines how an Accordion visually responds to user actions like hover, focus, or click, providing feedback and enhancing usability.
+Defines how an Accordion visually responds to user actions like hover, focus, or click, providing
+feedback and enhancing usability.
 
-- **Click trigger area (Header):** The clickable area on the header expands or collapses the accordion, toggling access to the body content.
+- **Click trigger area (Header):** The clickable area on the header expands or collapses the
+  accordion, toggling access to the body content.
 - **Hover state:** Underline the Header text for interactive feedback.
 - **Closed state (Default):** Body text is hidden (Opacity: 0%).
 - **Opened state:** Click the trigger area (Header) to expand and show Body text.
 
 ### Demo
 
-The example video below demonstrates the Accordion’s interaction and intended functionality in action.
+The example video below demonstrates the Accordion’s interaction and intended functionality in
+action.
 
 ---
 
 ## Alert Dialog
 
-A modal pop-up designed to capture user attention for important actions or messages. It consists of three main components: Header, Content, and Footer. These elements together form a flexible and cohesive dialog structure that can accommodate different types of alerts or forms.
+A modal pop-up designed to capture user attention for important actions or messages. It consists of
+three main components: Header, Content, and Footer. These elements together form a flexible and
+cohesive dialog structure that can accommodate different types of alerts or forms.
 
 ### Anatomy
 
@@ -563,7 +622,7 @@ import {
   AlertDialogTrigger,
   AlertDialogAction,
   AlertDialogClose,
-} from "@govtechmy/myds-react/alert-dialog";
+} from '@govtechmy/myds-react/alert-dialog';
 ```
 
 **Component Structure Example:**
@@ -597,11 +656,13 @@ export default () => (
 
 #### AlertDialog Variant
 
-Set the `variant` prop to theme the alert dialog. Defaults to `default`. Available variants: `info`, `success`, `warning`, `danger`.
+Set the `variant` prop to theme the alert dialog. Defaults to `default`. Available variants: `info`,
+`success`, `warning`, `danger`.
 
 #### Trigger
 
-Wrap the `AlertDialogTrigger` around the element that opens the dialog. Multiple triggers can open the same dialog.
+Wrap the `AlertDialogTrigger` around the element that opens the dialog. Multiple triggers can open
+the same dialog.
 
 #### Dialog State Management
 
@@ -626,32 +687,34 @@ Utilize the `action` prop on `DialogAction` to add special actions.
 
 #### AlertDialog
 
-| Prop         | Type                      | Default   |
-|--------------|---------------------------|-----------|
-| variant      | enum                      | success   |
-| open         | boolean                   | false     |
-| defaultOpen  | boolean                   | false     |
-| onOpenChange | (open: boolean) => void   | -         |
+| Prop         | Type                    | Default |
+| ------------ | ----------------------- | ------- |
+| variant      | enum                    | success |
+| open         | boolean                 | false   |
+| defaultOpen  | boolean                 | false   |
+| onOpenChange | (open: boolean) => void | -       |
 
 #### AlertDialogContent
 
-| Prop         | Type        | Default   |
-|--------------|-------------|-----------|
-| dismissible  | boolean     | true      |
-| onDismiss    | () => void  | -         |
+| Prop        | Type       | Default |
+| ----------- | ---------- | ------- |
+| dismissible | boolean    | true    |
+| onDismiss   | () => void | -       |
 
 #### AlertDialogAction
 
-| Prop         | Type                  | Default   |
-|--------------|-----------------------|-----------|
-| align        | start \| end \| full  | end       |
-| action       | ReactNode             | -         |
+| Prop   | Type                 | Default |
+| ------ | -------------------- | ------- |
+| align  | start \| end \| full | end     |
+| action | ReactNode            | -       |
 
 ---
 
 ## Announce Bar
 
-Informs users about the service's development stage and includes a link for submitting feedback. The phase banner is typically placed below the navigation menu to display the current status of the service, such as Alpha, Beta, or Maintenance.
+Informs users about the service's development stage and includes a link for submitting feedback. The
+phase banner is typically placed below the navigation menu to display the current status of the
+service, such as Alpha, Beta, or Maintenance.
 
 ### Anatomy & Usage (Cookie Banner)
 
@@ -662,7 +725,7 @@ import {
   AnnounceBar,
   AnnounceBarTag,
   AnnounceBarDescription,
-} from "@govtechmy/myds-react/announce-bar";
+} from '@govtechmy/myds-react/announce-bar';
 ```
 
 **Component Structure Example:**
@@ -684,7 +747,7 @@ Use the `variant` prop to change the Announce Bar style.
 
 ```jsx
 <AnnounceBar>
-  <AnnounceBarTag variant="alpha" />
+  <AnnounceBarTag variant='alpha' />
   <AnnounceBarDescription>
     This is a new service. Help us improve it. Send us your feedback here.
   </AnnounceBarDescription>
@@ -695,29 +758,30 @@ Use the `variant` prop to change the Announce Bar style.
 
 #### AnnounceBar
 
-| Prop    | Type      | Default |
-|---------|-----------|---------|
-| border  | boolean   | true    |
-| children| ReactNode | -       |
+| Prop     | Type      | Default |
+| -------- | --------- | ------- |
+| border   | boolean   | true    |
+| children | ReactNode | -       |
 
 #### AnnounceBarTag
 
-| Prop    | Type   | Default |
-|---------|--------|---------|
-| variant | enum   | default |
-| children| ReactNode | -    |
+| Prop     | Type      | Default |
+| -------- | --------- | ------- |
+| variant  | enum      | default |
+| children | ReactNode | -       |
 
 #### AnnounceBarDescription
 
-| Prop    | Type      | Default |
-|---------|-----------|---------|
-| children| ReactNode | -       |
+| Prop     | Type      | Default |
+| -------- | --------- | ------- |
+| children | ReactNode | -       |
 
 ---
 
 ## Breadcrumb
 
-A navigation aid that helps users understand their current location within a website or application and allows them to easily navigate back to previous levels.
+A navigation aid that helps users understand their current location within a website or application
+and allows them to easily navigate back to previous levels.
 
 ### Anatomy & Usage (Data Table)
 
@@ -730,7 +794,7 @@ import {
   BreadcrumbLink,
   BreadcrumbSeparator,
   BreadcrumbPage,
-} from "@govtechmy/myds-react/breadcrumb";
+} from '@govtechmy/myds-react/breadcrumb';
 ```
 
 **Component Structure Example:**
@@ -771,26 +835,23 @@ Use the `variant` prop to change the breadcrumb style.
 
 #### Breadcrumb Component Props
 
-| Prop    | Type   | Default |
-|---------|--------|---------|
-| variant | enum   | default |
+| Prop    | Type | Default |
+| ------- | ---- | ------- |
+| variant | enum | default |
 
 ---
 
 ## Button
 
-A fundamental UI element used to trigger actions or events. It ensures consistency, accessibility, and a clear call to action.
+A fundamental UI element used to trigger actions or events. It ensures consistency, accessibility,
+and a clear call to action.
 
 ### Data Table Component Anatomy & Usage
 
 **Imports:**
 
 ```javascript
-import {
-  Button,
-  ButtonIcon,
-  ButtonCounter,
-} from "@govtechmy/myds-react/button";
+import { Button, ButtonIcon, ButtonCounter } from '@govtechmy/myds-react/button';
 ```
 
 **Component Structure Example:**
@@ -866,7 +927,7 @@ Add a numeric counter using `<ButtonCounter>`.
 #### Button Component Props
 
 | Prop      | Type      | Default         |
-|-----------|-----------|-----------------|
+| --------- | --------- | --------------- |
 | variant   | enum      | default-outline |
 | size      | enum      | small           |
 | iconOnly  | boolean   | false           |
@@ -876,14 +937,14 @@ Add a numeric counter using `<ButtonCounter>`.
 #### ButtonIcon
 
 | Prop      | Type      | Default |
-|-----------|-----------|---------|
+| --------- | --------- | ------- |
 | children  | ReactNode | -       |
 | className | string    | -       |
 
 #### ButtonCounter
 
 | Prop      | Type      | Default |
-|-----------|-----------|---------|
+| --------- | --------- | ------- |
 | children  | ReactNode | -       |
 | className | string    | -       |
 
@@ -891,7 +952,9 @@ Add a numeric counter using `<ButtonCounter>`.
 
 ## Callout
 
-Notifies users about important information related to their actions inside Forms. Callouts can indicate success, warnings, errors, or provide additional information depending on the context inside a form.
+Notifies users about important information related to their actions inside Forms. Callouts can
+indicate success, warnings, errors, or provide additional information depending on the context
+inside a form.
 
 ### Anatomy & Implementation
 
@@ -903,7 +966,7 @@ import {
   CalloutAction,
   CalloutTitle,
   CalloutContent,
-} from "@govtechmy/myds-react/callout";
+} from '@govtechmy/myds-react/callout';
 ```
 
 **Component Structure Example:**
@@ -931,7 +994,7 @@ export default () => (
 Use the `variant` prop to change the callout style (e.g., info, success, warning, error).
 
 ```jsx
-<Callout variant="success">
+<Callout variant='success'>
   <CalloutTitle>Success</CalloutTitle>
   <CalloutContent>Operation completed successfully.</CalloutContent>
 </Callout>
@@ -946,30 +1009,32 @@ Use the `variant` prop to change the callout style (e.g., info, success, warning
 
 - To make the callout dismissible, use the `dismissible` prop.
 - Attach `onDismiss` to capture the dismiss event (e.g., log to console).
-- To dismiss via event listener, wrap the target element with `<CalloutClose />`; it also triggers `onDismiss` if defined.
+- To dismiss via event listener, wrap the target element with `<CalloutClose />`; it also triggers
+  `onDismiss` if defined.
 
 ### Callout Props
 
 #### Callout Component Props
 
-| Prop        | Type      | Default |
-|-------------|-----------|---------|
-| variant     | enum      | info    |
-| dismissible | boolean   | -       |
-| onDismiss   | () => void| -       |
+| Prop        | Type       | Default |
+| ----------- | ---------- | ------- |
+| variant     | enum       | info    |
+| dismissible | boolean    | -       |
+| onDismiss   | () => void | -       |
 
 ---
 
 ## Checkbox
 
-Allows users to make a binary choice, such as selecting or not selecting an option. Commonly used in forms, settings, and filters to capture user input and preferences.
+Allows users to make a binary choice, such as selecting or not selecting an option. Commonly used in
+forms, settings, and filters to capture user input and preferences.
 
 ### Data Table Anatomy & Usage
 
 **Imports:**
 
 ```javascript
-import { Checkbox } from "@govtechmy/myds-react/checkbox";
+import { Checkbox } from '@govtechmy/myds-react/checkbox';
 ```
 
 **Component Structure Example:**
@@ -1013,28 +1078,31 @@ Set the `disabled` prop to `true` to make the checkbox non-interactive.
 
 #### Indeterminate
 
-Use the `checked={indeterminate}` or `defaultChecked={indeterminate}` to indicate a partial selection, commonly used for parent checkboxes in groups.
+Use the `checked={indeterminate}` or `defaultChecked={indeterminate}` to indicate a partial
+selection, commonly used for parent checkboxes in groups.
 
 ```jsx
-<Checkbox checked="indeterminate" />
+<Checkbox checked='indeterminate' />
 ```
 
 ### Checkbox Props
 
 #### Checkbox Component Props
 
-| Prop            | Type                           | Default        |
-|-----------------|--------------------------------|----------------|
-| size            | enum                           | small          |
-| defaultChecked  | boolean \| indeterminate       | false          |
-| checked         | boolean \| indeterminate       | false          |
-| onCheckedChange | (checked: boolean \| indeterminate) => void | false          |
+| Prop            | Type                                        | Default |
+| --------------- | ------------------------------------------- | ------- |
+| size            | enum                                        | small   |
+| defaultChecked  | boolean \| indeterminate                    | false   |
+| checked         | boolean \| indeterminate                    | false   |
+| onCheckedChange | (checked: boolean \| indeterminate) => void | false   |
 
 ---
 
 ## Cookies Banner
 
-Notifies users that the website uses cookies to improve their experience and gives them the option to manage their consent preferences through cookie settings. The banner typically appears when a user lands on the website for the first time.
+Notifies users that the website uses cookies to improve their experience and gives them the option
+to manage their consent preferences through cookie settings. The banner typically appears when a
+user lands on the website for the first time.
 
 ### Anatomy & Usage (Cookies Banner)
 
@@ -1049,7 +1117,7 @@ import {
   CookieBannerPreferences,
   CookieBannerTitle,
   CookieBannerPreferencesTrigger,
-} from "@govtechmy/myds-react/cookie-banner";
+} from '@govtechmy/myds-react/cookie-banner';
 ```
 
 **Component Structure Example:**
@@ -1080,74 +1148,79 @@ export default () => (
 - **Uncontrolled:** Use the `defaultOpen` prop to define the initial state.
 - **Controlled:** Use `open` and `onOpenChange` props to manage the banner's state programmatically.
 
-> **Note:** It is recommended to keep `CookieBanner` as an uncontrolled component (via `defaultOpen`). Use client-side storage APIs (e.g., `localStorage` or `sessionStorage`) to store and retrieve the state when the user revisits the website.
+> **Note:** It is recommended to keep `CookieBanner` as an uncontrolled component (via
+> `defaultOpen`). Use client-side storage APIs (e.g., `localStorage` or `sessionStorage`) to store
+> and retrieve the state when the user revisits the website.
 
 #### Preference Call-to-Action (CTA)
 
-- For letting users choose their cookie preferences, pass the `preferences` prop to `CookieBannerAction` to display preference CTAs.
+- For letting users choose their cookie preferences, pass the `preferences` prop to
+  `CookieBannerAction` to display preference CTAs.
 - Use `CookieBannerPreferencesTrigger` to toggle visibility of cookie preference options.
 
 ### CookieBanner Props
 
 #### CookieBanner
 
-| Prop         | Type                   | Default |
-|--------------|------------------------|---------|
-| defaultOpen  | boolean                | false   |
-| open         | boolean                | false   |
-| onOpenChange | (value: boolean) => void | -     |
+| Prop         | Type                     | Default |
+| ------------ | ------------------------ | ------- |
+| defaultOpen  | boolean                  | false   |
+| open         | boolean                  | false   |
+| onOpenChange | (value: boolean) => void | -       |
 
 #### CookieBannerTitle
 
-| Prop      | Type      | Default |
-|-----------|-----------|---------|
-| children  | ReactNode | -       |
+| Prop     | Type      | Default |
+| -------- | --------- | ------- |
+| children | ReactNode | -       |
 
 #### CookieBannerDescription
 
-| Prop      | Type      | Default |
-|-----------|-----------|---------|
-| children  | ReactNode | -       |
+| Prop     | Type      | Default |
+| -------- | --------- | ------- |
+| children | ReactNode | -       |
 
 #### CookieBannerPreferences
 
-| Prop      | Type      | Default |
-|-----------|-----------|---------|
-| children  | ReactNode | -       |
+| Prop     | Type      | Default |
+| -------- | --------- | ------- |
+| children | ReactNode | -       |
 
 #### CookieBannerPreferencesTrigger
 
-| Prop      | Type      | Default |
-|-----------|-----------|---------|
-| asChild   | boolean   | -       |
-| children  | ReactNode | -       |
+| Prop     | Type      | Default |
+| -------- | --------- | ------- |
+| asChild  | boolean   | -       |
+| children | ReactNode | -       |
 
 #### CookieBannerAction
 
 | Prop        | Type      | Default |
-|-------------|-----------|---------|
+| ----------- | --------- | ------- |
 | preferences | boolean   | -       |
 | children    | ReactNode | -       |
 
 #### CookieBannerClose
 
-| Prop      | Type      | Default |
-|-----------|-----------|---------|
-| asChild   | boolean   | -       |
-| children  | ReactNode | -       |
+| Prop     | Type      | Default |
+| -------- | --------- | ------- |
+| asChild  | boolean   | -       |
+| children | ReactNode | -       |
 
 ---
 
 ## Data Table
 
-Organizes information into rows and columns for easy readability. Accommodates various data types, including text, numbers, codes, call-to-action elements, and links, enabling efficient presentation and comparison.
+Organizes information into rows and columns for easy readability. Accommodates various data types,
+including text, numbers, codes, call-to-action elements, and links, enabling efficient presentation
+and comparison.
 
 ### Component Anatomy & Usage
 
 **Imports:**
 
 ```javascript
-import { DataTable } from "@govtechmy/myds-react/data-table";
+import { DataTable } from '@govtechmy/myds-react/data-table';
 ```
 
 **Component Structure Example:**
@@ -1165,36 +1238,41 @@ export default () => <DataTable />;
 
 #### Expanding Columns
 
-Set the `expandable` property to `true` in the `meta` object of the column definition to allow the cell's content to expand.  
-Example:  
+Set the `expandable` property to `true` in the `meta` object of the column definition to allow the
+cell's content to expand.  
+Example:
 
 - Expand icon appears on expandable columns (e.g., Name and Position).
 
 #### Tooltip on Column Headers
 
-Set the `tooltip` property in the `meta` object of the column definition to display a tooltip on column headers.  
-Example:  
+Set the `tooltip` property in the `meta` object of the column definition to display a tooltip on
+column headers.  
+Example:
 
 - Hover over Age or Position column headers to view their tooltips.
 
 #### Sorting
 
-Set the `sortable` property to `true` in the `meta` object of the column definition to enable sorting for a column.  
-Example:  
+Set the `sortable` property to `true` in the `meta` object of the column definition to enable
+sorting for a column.  
+Example:
 
 - Click the sort icon on the Position column to toggle sorting.
 
 #### Skeleton Loading
 
-Enable the `loading` prop to display skeleton loading state for the table while data is being fetched.
+Enable the `loading` prop to display skeleton loading state for the table while data is being
+fetched.
 
 #### Empty Table
 
-Passing an empty array to the `data` prop will render an empty state with "No data available" message.
+Passing an empty array to the `data` prop will render an empty state with "No data available"
+message.
 
 #### Row Selection
 
-Enable selection mode by passing a `selection` prop to the DataTable.  
+Enable selection mode by passing a `selection` prop to the DataTable.
 
 - `mode`: Can be either `checkbox` or `radio`.
 - `onSelectionChange`: Callback triggered on selection change.
@@ -1202,17 +1280,18 @@ Enable selection mode by passing a `selection` prop to the DataTable.
 
 #### Grouped Header
 
-Group columns together by setting the `columns` property to an array of `ColumnGroupDef` objects.  
+Group columns together by setting the `columns` property to an array of `ColumnGroupDef` objects.
 
 - Each `ColumnGroupDef` represents a group of columns.
 
 #### Fixed/Sticky Header
 
-Table header is sticky by default. To demonstrate, set a fixed height using the `className` prop (e.g., `max-h-[300px]`).
+Table header is sticky by default. To demonstrate, set a fixed height using the `className` prop
+(e.g., `max-h-[300px]`).
 
 #### Nested Rows
 
-DataTable can nest rows.  
+DataTable can nest rows.
 
 - `data`: Contains a nested array object matching the `id_by` key in the `nest` object.
 - `columns`: Use `Cell.Expand` for the column that expands/collapses nested rows.
@@ -1220,7 +1299,7 @@ DataTable can nest rows.
 
 #### Pinned Columns
 
-Pin columns to the left or right by setting the `pin` prop:  
+Pin columns to the left or right by setting the `pin` prop:
 
 - `left`: Array of column IDs to pin left.
 - `right`: Array of column IDs to pin right.
@@ -1233,27 +1312,27 @@ Add a footer per column by setting the `footer` property in the `ColumnDef` of a
 
 #### DataTable
 
-| Prop     | Type                                    | Default |
-|----------|-----------------------------------------|---------|
-| columns  | ColumnDef                               | -       |
-| data     | Array<T = {}>                           | -       |
-| nest     | { id_by: string }                       | -       |
-| pin      | `{ left: Array&lt;string&gt;, right: Array&lt;string&gt; }` | - |
+| Prop    | Type                                                        | Default |
+| ------- | ----------------------------------------------------------- | ------- |
+| columns | ColumnDef                                                   | -       |
+| data    | Array<T = {}>                                               | -       |
+| nest    | { id_by: string }                                           | -       |
+| pin     | `{ left: Array&lt;string&gt;, right: Array&lt;string&gt; }` | -       |
 
 #### DataTable ColumnDef
 
-| Prop            | Type                                      | Default   |
-|-----------------|-------------------------------------------|-----------|
-| id              | string                                    | -         |
-| accessorKey     | string                                    | -         |
-| accessorFn      | (row) => any                              | -         |
-| header          | string \| (context) => ReactNode          | -         |
-| footer          | string \| (context) => ReactNode          | -         |
-| size            | number                                    | -         |
-| cell            | (context) => ReactNode                    | -         |
-| meta.expandable | boolean                                   | -         |
-| meta.sortable   | boolean                                   | -         |
-| meta.tooltip    | ReactNode                                 | -         |
+| Prop            | Type                             | Default |
+| --------------- | -------------------------------- | ------- |
+| id              | string                           | -       |
+| accessorKey     | string                           | -       |
+| accessorFn      | (row) => any                     | -       |
+| header          | string \| (context) => ReactNode | -       |
+| footer          | string \| (context) => ReactNode | -       |
+| size            | number                           | -       |
+| cell            | (context) => ReactNode           | -       |
+| meta.expandable | boolean                          | -       |
+| meta.sortable   | boolean                          | -       |
+| meta.tooltip    | ReactNode                        | -       |
 
 ---
 
@@ -1266,7 +1345,7 @@ Allows users to input a date in a structured format using separate fields for da
 **Imports:**
 
 ```javascript
-import { DateField } from "@govtechmy/myds-react/date-field";
+import { DateField } from '@govtechmy/myds-react/date-field';
 ```
 
 **Component Structure Example:**
@@ -1299,6 +1378,7 @@ Use the `size` prop to change the date field size.
 // Controlled
 <DateField value={dateValue} onChange={setDateValue} />
 ```
+
 <!--
 The uncontrolled example will allow the component to manage its own value.
 The controlled example will require you to manage the value in your app state.
@@ -1324,14 +1404,14 @@ Set the `invalid` prop to `true` to indicate validation failure or an error stat
 
 #### DateField Component Props
 
-| Prop         | Type                       | Default |
-|--------------|----------------------------|---------|
-| size         | enum                       | small   |
-| defaultValue | string                     | -       |
-| value        | string                     | -       |
-| onChange     | (date: string) => void     | -       |
-| disabled     | boolean                    | false   |
-| invalid      | boolean                    | false   |
+| Prop         | Type                   | Default |
+| ------------ | ---------------------- | ------- |
+| size         | enum                   | small   |
+| defaultValue | string                 | -       |
+| value        | string                 | -       |
+| onChange     | (date: string) => void | -       |
+| disabled     | boolean                | false   |
+| invalid      | boolean                | false   |
 
 ---
 
@@ -1344,7 +1424,7 @@ Allows users to select a date from an interactive calendar.
 **Imports:**
 
 ```javascript
-import { DatePicker } from "@govtechmy/myds-react/date-picker";
+import { DatePicker } from '@govtechmy/myds-react/date-picker';
 ```
 
 **Component Structure Example:**
@@ -1378,6 +1458,7 @@ Use the `size` prop to change the date picker size.
 // Controlled
 <DatePicker value={selectedDate} onValueChange={setSelectedDate} />
 ```
+
 <!--
 The uncontrolled example lets the component manage its own value.
 The controlled example lets your app manage the selected date.
@@ -1386,7 +1467,8 @@ The controlled example lets your app manage the selected date.
 #### DatePicker Disabled
 
 - **Entirely Disabled:** Set the `disabled` prop to `true` to make the picker non-interactive.
-- **Custom Disabled Dates:** Pass a Matcher or Matcher[] to the `disabled` prop to disable specific dates or ranges.
+- **Custom Disabled Dates:** Pass a Matcher or Matcher[] to the `disabled` prop to disable specific
+  dates or ranges.
 
 ```jsx
 // Disable all dates
@@ -1407,6 +1489,7 @@ The controlled example lets your app manage the selected date.
 // Disable every 13th of the month
 <DatePicker disabled={date => date.getDate() === 13} />
 ```
+
 <!--
 You can disable the entire picker or specific dates using matchers or callback functions.
 -->
@@ -1428,6 +1511,7 @@ Set the sorting order of years in the dropdown with the `yearOrder` prop.
 <DatePicker yearOrder="asc" /> // Ascending order
 <DatePicker yearOrder="desc" /> // Descending order
 ```
+
 <!--
 Controls whether the year dropdown sorts years ascending or descending.
 -->
@@ -1441,6 +1525,7 @@ Default is English (`en`). For Bahasa Melayu, use `ms`.
 <DatePicker locale="en" />
 <DatePicker locale="ms" />
 ```
+
 <!--
 Locale changes the language/format of the calendar.
 -->
@@ -1449,18 +1534,18 @@ Locale changes the language/format of the calendar.
 
 #### DatePicker Component Props
 
-| Prop        | Type                             | Default         |
-|-------------|----------------------------------|-----------------|
-| size        | enum                             | small           |
-| defaultValue| Date                             | -               |
-| value       | Date                             | -               |
-| onValueChange| (date: Date) => void            | -               |
-| placeholder | string                           | dd / mm / yyyy  |
-| disabled    | boolean \| Matcher \| Matcher[]  | false           |
-| maxYear     | number                           | 2099            |
-| minYear     | number                           | 1900            |
-| yearOrder   | asc \| desc                      | asc             |
-| locale      | en \| ms                         | en              |
+| Prop          | Type                            | Default        |
+| ------------- | ------------------------------- | -------------- |
+| size          | enum                            | small          |
+| defaultValue  | Date                            | -              |
+| value         | Date                            | -              |
+| onValueChange | (date: Date) => void            | -              |
+| placeholder   | string                          | dd / mm / yyyy |
+| disabled      | boolean \| Matcher \| Matcher[] | false          |
+| maxYear       | number                          | 2099           |
+| minYear       | number                          | 1900           |
+| yearOrder     | asc \| desc                     | asc            |
+| locale        | en \| ms                        | en             |
 
 ---
 
@@ -1473,7 +1558,7 @@ Allows users to select a date range from an interactive calendar.
 **Imports:**
 
 ```javascript
-import { DateRangePicker } from "@govtechmy/myds-react/date-picker";
+import { DateRangePicker } from '@govtechmy/myds-react/date-picker';
 ```
 
 **Component Structure Example:**
@@ -1494,6 +1579,7 @@ Use the `size` prop to change the date range picker size.
 <DateRangePicker size="medium" />
 <DateRangePicker size="large" />
 ```
+
 <!--
 Choose the visual size of the date range picker to fit your layout.
 -->
@@ -1510,6 +1596,7 @@ Choose the visual size of the date range picker to fit your layout.
 // Controlled
 <DateRangePicker value={dateRange} onValueChange={setDateRange} />
 ```
+
 <!--
 Uncontrolled lets the picker manage its own range. Controlled lets you manage the range in your app state.
 -->
@@ -1538,6 +1625,7 @@ Uncontrolled lets the picker manage its own range. Controlled lets you manage th
 // Disable every 13th of the month
 <DateRangePicker disabled={date => date.getDate() === 13} />
 ```
+
 <!--
 You can disable all, ranges, or custom rules using callback functions.
 -->
@@ -1559,6 +1647,7 @@ Set the sorting order of years with the `yearOrder` prop.
 <DateRangePicker yearOrder="asc" /> // Ascending years
 <DateRangePicker yearOrder="desc" /> // Descending years
 ```
+
 <!--
 Controls the sort order for year dropdowns.
 -->
@@ -1572,6 +1661,7 @@ Default is English (`en`). For Bahasa Melayu, use `ms`.
 <DateRangePicker locale="en" />
 <DateRangePicker locale="ms" />
 ```
+
 <!--
 Locale changes the language and formatting of the calendar.
 -->
@@ -1580,24 +1670,25 @@ Locale changes the language and formatting of the calendar.
 
 #### DateRangePicker Component Props
 
-| Prop         | Type                                 | Default         |
-|--------------|--------------------------------------|-----------------|
-| size         | enum                                 | small           |
-| defaultValue | { from: Date, to: Date }             | -               |
-| value        | { from: Date, to: Date }             | -               |
-| onValueChange| (range: { from: Date, to: Date }) => void | -          |
-| placeholder  | string                               | dd / mm / yyyy  |
-| disabled     | boolean \| Matcher \| Matcher[]      | false           |
-| maxYear      | number                               | 2099            |
-| minYear      | number                               | 1900            |
-| yearOrder    | asc \| desc                          | asc             |
-| locale       | en \| ms                             | en              |
+| Prop          | Type                                      | Default        |
+| ------------- | ----------------------------------------- | -------------- |
+| size          | enum                                      | small          |
+| defaultValue  | { from: Date, to: Date }                  | -              |
+| value         | { from: Date, to: Date }                  | -              |
+| onValueChange | (range: { from: Date, to: Date }) => void | -              |
+| placeholder   | string                                    | dd / mm / yyyy |
+| disabled      | boolean \| Matcher \| Matcher[]           | false          |
+| maxYear       | number                                    | 2099           |
+| minYear       | number                                    | 1900           |
+| yearOrder     | asc \| desc                               | asc            |
+| locale        | en \| ms                                  | en             |
 
 ---
 
 ## Dialog
 
-A modal pop-up designed to capture user attention for important actions or messages. It consists of three main components: Header, Content, and Footer.
+A modal pop-up designed to capture user attention for important actions or messages. It consists of
+three main components: Header, Content, and Footer.
 
 ### Anatomy & Usage (Dropdown)
 
@@ -1614,7 +1705,7 @@ import {
   DialogTrigger,
   DialogFooter,
   DialogClose,
-} from "@govtechmy/myds-react/dialog";
+} from '@govtechmy/myds-react/dialog';
 ```
 
 **Component Structure Example:**
@@ -1656,6 +1747,7 @@ You can use multiple triggers to open the same dialog.
   {/* ...dialog body here... */}
 </Dialog>
 ```
+
 <!--
 Multiple triggers can be used to open a single dialog instance.
 -->
@@ -1672,6 +1764,7 @@ Multiple triggers can be used to open a single dialog instance.
 // Controlled
 <Dialog open={isOpen} onOpenChange={setIsOpen} />
 ```
+
 <!--
 Uncontrolled lets the component manage its own open/close state.
 Controlled lets you manage state in your app.
@@ -1684,8 +1777,14 @@ Controlled lets you manage state in your app.
 - You can handle the dismiss event with the `onDismiss` prop.
 
 ```jsx
-<DialogBody dismissible={false} onDismiss={() => { /* handle close */ }} />
+<DialogBody
+  dismissible={false}
+  onDismiss={() => {
+    /* handle close */
+  }}
+/>
 ```
+
 <!--
 Set dismissible to false to make the dialog not closable by the user.
 -->
@@ -1698,6 +1797,7 @@ Add a border to the `DialogHeader` and `DialogFooter` by setting their `border` 
 <DialogHeader border={true}>...</DialogHeader>
 <DialogFooter border={true}>...</DialogFooter>
 ```
+
 <!--
 Borders help visually separate header and footer from content.
 -->
@@ -1711,6 +1811,7 @@ Set the `align` prop on `DialogFooter` to control alignment of its children.
 <DialogFooter align="full">...</DialogFooter>
 <DialogFooter align="end">...</DialogFooter>
 ```
+
 <!--
 Use "start", "full", or "end" to choose left, full-width, or right alignment.
 -->
@@ -1722,6 +1823,7 @@ Add special actions to the dialog by passing elements to the `action` prop of `D
 ```jsx
 <DialogFooter action={<Button>Save Changes</Button>}>...</DialogFooter>
 ```
+
 <!--
 You can add custom actions (e.g., Save, Cancel) in the footer.
 -->
@@ -1730,33 +1832,33 @@ You can add custom actions (e.g., Save, Cancel) in the footer.
 
 #### Dialog Component Props
 
-| Prop         | Type                       | Default |
-|--------------|----------------------------|---------|
-| open         | boolean                    | false   |
-| defaultOpen  | boolean                    | false   |
-| onOpenChange | (open: boolean) => void    | -       |
+| Prop         | Type                    | Default |
+| ------------ | ----------------------- | ------- |
+| open         | boolean                 | false   |
+| defaultOpen  | boolean                 | false   |
+| onOpenChange | (open: boolean) => void | -       |
 
 #### DialogBody
 
-| Prop         | Type           | Default |
-|--------------|----------------|---------|
-| dismissible  | boolean        | true    |
-| hideClose    | boolean        | false   |
-| onDismiss    | () => void     | -       |
+| Prop        | Type       | Default |
+| ----------- | ---------- | ------- |
+| dismissible | boolean    | true    |
+| hideClose   | boolean    | false   |
+| onDismiss   | () => void | -       |
 
 #### DialogHeader
 
-| Prop         | Type           | Default |
-|--------------|----------------|---------|
-| border       | boolean        | false   |
+| Prop   | Type    | Default |
+| ------ | ------- | ------- |
+| border | boolean | false   |
 
 #### DialogFooter
 
-| Prop         | Type                   | Default |
-|--------------|------------------------|---------|
-| border       | boolean                | false   |
-| align        | start \| end \| full   | end     |
-| action       | ReactNode              | -       |
+| Prop   | Type                 | Default |
+| ------ | -------------------- | ------- |
+| border | boolean              | false   |
+| align  | start \| end \| full | end     |
+| action | ReactNode            | -       |
 
 ---
 
@@ -1775,7 +1877,7 @@ import {
   DropdownItem,
   DropdownItemIcon,
   DropdownTrigger,
-} from "@govtechmy/myds-react/dropdown";
+} from '@govtechmy/myds-react/dropdown';
 ```
 
 **Component Structure Example:**
@@ -1809,6 +1911,7 @@ Wrap the `DropdownTrigger` around the element (e.g., button) that opens the drop
   {/* ...dropdown content here... */}
 </Dropdown>
 ```
+
 <!--
 The trigger element can be any clickable UI element.
 -->
@@ -1825,6 +1928,7 @@ The trigger element can be any clickable UI element.
 // Controlled
 <Dropdown open={isOpen} onOpenChange={setIsOpen} />
 ```
+
 <!--
 Uncontrolled lets the dropdown manage open/close state on its own.
 Controlled lets your app manage the dropdown state.
@@ -1837,11 +1941,12 @@ Add an icon to `DropdownItem` using the `DropdownItemIcon` component to provide 
 ```jsx
 <DropdownItem>
   <DropdownItemIcon>
-    <Icon name="edit" />
+    <Icon name='edit' />
   </DropdownItemIcon>
   Edit
 </DropdownItem>
 ```
+
 <!--
 Icons help users quickly recognize actions in dropdown menus.
 -->
@@ -1851,42 +1956,47 @@ Icons help users quickly recognize actions in dropdown menus.
 Set the `variant` prop to `danger` on `DropdownItem` to indicate destructive actions.
 
 ```jsx
-<DropdownItem variant="danger">
+<DropdownItem variant='danger'>
   <DropdownItemIcon>
-    <Icon name="delete" />
+    <Icon name='delete' />
   </DropdownItemIcon>
   Delete
 </DropdownItem>
 ```
+
 <!--
 "danger" variant visually distinguishes destructive actions.
 -->
 
 #### Dropdown Item Disabled
 
-Disable a dropdown item by setting its `disabled` prop to `true`. Disabled items are non-interactive.
+Disable a dropdown item by setting its `disabled` prop to `true`. Disabled items are
+non-interactive.
 
 ```jsx
 <DropdownItem disabled>
   <DropdownItemIcon>
-    <Icon name="lock" />
+    <Icon name='lock' />
   </DropdownItemIcon>
   Locked Item
 </DropdownItem>
 ```
+
 <!--
 Disabled items appear faded and cannot be selected.
 -->
 
 #### Dropdown Alignment
 
-Set the `align` prop on `DropdownContent` to control where the dropdown content aligns relative to the trigger element.
+Set the `align` prop on `DropdownContent` to control where the dropdown content aligns relative to
+the trigger element.
 
 ```jsx
 <DropdownContent align="start">...</DropdownContent>
 <DropdownContent align="center">...</DropdownContent>
 <DropdownContent align="end">...</DropdownContent>
 ```
+
 <!--
 Choose from "start", "center", or "end" for alignment.
 -->
@@ -1901,6 +2011,7 @@ Set the `side` prop on `DropdownContent` to position the dropdown content relati
 <DropdownContent side="left">...</DropdownContent>
 <DropdownContent side="right">...</DropdownContent>
 ```
+
 <!--
 Position dropdown content above, below, or beside the trigger element.
 -->
@@ -1909,32 +2020,32 @@ Position dropdown content above, below, or beside the trigger element.
 
 #### Dropdown Component Props
 
-| Prop         | Type                       | Default |
-|--------------|----------------------------|---------|
-| open         | boolean                    | false   |
-| defaultOpen  | boolean                    | false   |
-| onOpenChange | (open: boolean) => void    | -       |
+| Prop         | Type                    | Default |
+| ------------ | ----------------------- | ------- |
+| open         | boolean                 | false   |
+| defaultOpen  | boolean                 | false   |
+| onOpenChange | (open: boolean) => void | -       |
 
 #### DropdownTrigger
 
-| Prop         | Type           | Default |
-|--------------|----------------|---------|
-| asChild      | boolean        | false   |
+| Prop    | Type    | Default |
+| ------- | ------- | ------- |
+| asChild | boolean | false   |
 
 #### DropdownContent
 
-| Prop         | Type           | Default |
-|--------------|----------------|---------|
-| align        | enum           | end     |
-| side         | enum           | bottom  |
+| Prop  | Type | Default |
+| ----- | ---- | ------- |
+| align | enum | end     |
+| side  | enum | bottom  |
 
 #### DropdownItem
 
-| Prop         | Type                      | Default |
-|--------------|---------------------------|---------|
-| disabled     | boolean                   | false   |
-| variant      | default \| danger         | default |
-| onSelect     | (event: Event) => void    | -       |
+| Prop     | Type                   | Default |
+| -------- | ---------------------- | ------- |
+| disabled | boolean                | false   |
+| variant  | default \| danger      | default |
+| onSelect | (event: Event) => void | -       |
 
 ---
 
@@ -1954,8 +2065,9 @@ import {
   SiteLinkGroup,
   SiteLink,
   FooterLogo,
-} from "@govtechmy/myds-react/footer";
+} from '@govtechmy/myds-react/footer';
 ```
+
 <!--
 Imports all necessary subcomponents to build a government-standard footer.
 -->
@@ -1982,44 +2094,47 @@ export default () => (
 
 #### Footer Layout Section
 
-`FooterSection` is a grid-based layout container that organizes and partitions footer content and provides responsive behavior.
+`FooterSection` is a grid-based layout container that organizes and partitions footer content and
+provides responsive behavior.
 
 ```jsx
 <Footer>
   <FooterSection>
-    All Rights Reserved © 2025
-    |
-    <SiteLink>Disclaimer</SiteLink>
+    All Rights Reserved © 2025 |<SiteLink>Disclaimer</SiteLink>
     <SiteLink>Privacy Policy</SiteLink>
     Last updated: 11th March 2025
   </FooterSection>
 </Footer>
 ```
+
 <!--
 Use FooterSection for legal, copyright, and policy info.
 -->
 
 #### Footer SiteInfo
 
-`SiteInfo` is an aside HTML component designed to contain brand information, contact details, and social media links in the footer.
+`SiteInfo` is an aside HTML component designed to contain brand information, contact details, and
+social media links in the footer.
 
 ```jsx
 <SiteInfo>
-  <FooterLogo logoTitle="Kementerian Digital" />
-  Aras 13, 14 & 15, Blok Menara, Menara Usahawan, No. 18, Persiaran Perdana, Presint 2, Pusat Pentadbiran Kerajaan Persekutuan, 62000 Putrajaya, Malaysia
-  Follow us
+  <FooterLogo logoTitle='Kementerian Digital' />
+  Aras 13, 14 & 15, Blok Menara, Menara Usahawan, No. 18, Persiaran Perdana, Presint 2, Pusat
+  Pentadbiran Kerajaan Persekutuan, 62000 Putrajaya, Malaysia Follow us
 </SiteInfo>
 ```
+
 <!--
 SiteInfo is ideal for address, contact, and social links.
 -->
 
 #### Footer SiteLinkGroup
 
-`SiteLinkGroup` structures a collection of links (`SiteLink`) into a titled group with responsive column layout.
+`SiteLinkGroup` structures a collection of links (`SiteLink`) into a titled group with responsive
+column layout.
 
 ```jsx
-<SiteLinkGroup groupTitle="Super long title" linkCount={8}>
+<SiteLinkGroup groupTitle='Super long title' linkCount={8}>
   <SiteLink>Link 1 super super long super super long long long long</SiteLink>
   <SiteLink>Link 2</SiteLink>
   <SiteLink>Link 3</SiteLink>
@@ -2030,6 +2145,7 @@ SiteInfo is ideal for address, contact, and social links.
   <SiteLink>Link 8</SiteLink>
 </SiteLinkGroup>
 ```
+
 <!--
 SiteLinkGroup is used for grouped navigation or resource links.
 -->
@@ -2039,28 +2155,28 @@ SiteLinkGroup is used for grouped navigation or resource links.
 #### Footer Component Props
 
 | Prop      | Type      | Default |
-|-----------|-----------|---------|
+| --------- | --------- | ------- |
 | children  | ReactNode | -       |
 | className | string    | -       |
 
 #### FooterSection Component Props
 
 | Prop      | Type      | Default |
-|-----------|-----------|---------|
+| --------- | --------- | ------- |
 | children  | ReactNode | -       |
 | className | string    | -       |
 
 #### SiteInfo Component Props
 
 | Prop      | Type      | Default |
-|-----------|-----------|---------|
+| --------- | --------- | ------- |
 | children  | ReactNode | -       |
 | className | string    | -       |
 
 #### SiteLinkGroup Component Props
 
 | Prop       | Type      | Default |
-|------------|-----------|---------|
+| ---------- | --------- | ------- |
 | children   | ReactNode | -       |
 | className  | string    | -       |
 | groupTitle | ReactNode | -       |
@@ -2069,7 +2185,7 @@ SiteLinkGroup is used for grouped navigation or resource links.
 #### FooterLogo Component Props
 
 | Prop      | Type      | Default |
-|-----------|-----------|---------|
+| --------- | --------- | ------- |
 | className | string    | -       |
 | logoTitle | ReactNode | -       |
 | logo      | ReactNode | -       |
@@ -2077,7 +2193,7 @@ SiteLinkGroup is used for grouped navigation or resource links.
 #### SiteLink Component Props
 
 | Prop      | Type      | Default |
-|-----------|-----------|---------|
+| --------- | --------- | ------- |
 | className | string    | -       |
 | children  | ReactNode | -       |
 | asChild   | boolean   | false   |
@@ -2086,15 +2202,17 @@ SiteLinkGroup is used for grouped navigation or resource links.
 
 ## Input
 
-The input component provides a basic text input field for users to enter text. It supports various sizes, states, icons, and addons for flexible form designs.
+The input component provides a basic text input field for users to enter text. It supports various
+sizes, states, icons, and addons for flexible form designs.
 
 ### Anatomy & Usage (Input)
 
 **Imports:**
 
 ```javascript
-import { Input } from "@govtechmy/myds-react/input";
+import { Input } from '@govtechmy/myds-react/input';
 ```
+
 <!--
 Import the core Input component for text fields in forms.
 -->
@@ -2117,6 +2235,7 @@ Use the `size` prop to change the size of the input field. The default size is `
 <Input size="medium" placeholder="Medium" />
 <Input size="large" placeholder="Large" />
 ```
+
 <!--
 Choose input size for different UI layouts.
 -->
@@ -2126,8 +2245,9 @@ Choose input size for different UI layouts.
 Disable the input by setting the `disabled` prop to `true`.
 
 ```jsx
-<Input disabled placeholder="Disabled" />
+<Input disabled placeholder='Disabled' />
 ```
+
 <!--
 The input field is non-interactive when disabled.
 -->
@@ -2135,7 +2255,8 @@ The input field is non-interactive when disabled.
 #### Input State Management (Uncontrolled vs Controlled)
 
 - **Uncontrolled:** Use the `defaultValue` prop to set the initial value.
-- **Controlled:** Use the `value` prop and `onChange` handler to manage the input state programmatically.
+- **Controlled:** Use the `value` prop and `onChange` handler to manage the input state
+  programmatically.
 
 ```jsx
 // Uncontrolled
@@ -2144,13 +2265,15 @@ The input field is non-interactive when disabled.
 // Controlled
 <Input value={inputValue} onChange={setInputValue} />
 ```
+
 <!--
 Uncontrolled input manages its own value; controlled input is managed by your app.
 -->
 
 #### Input with Icon
 
-Add icons to the input field using the `InputIcon` component. Icons can be positioned to the left, right, or both sides.
+Add icons to the input field using the `InputIcon` component. Icons can be positioned to the left,
+right, or both sides.
 
 ```jsx
 <Input>
@@ -2174,13 +2297,15 @@ Add icons to the input field using the `InputIcon` component. Icons can be posit
   </InputIcon>
 </Input>
 ```
+
 <!--
 Icons provide visual cues for input fields (e.g., search, visibility).
 -->
 
 #### Input with Addon
 
-Use the `InputAddon` component to append or prepend controls, such as currency symbols or buttons, to the input field.
+Use the `InputAddon` component to append or prepend controls, such as currency symbols or buttons,
+to the input field.
 
 ```jsx
 <Input>
@@ -2197,6 +2322,7 @@ Use the `InputAddon` component to append or prepend controls, such as currency s
   </InputAddon>
 </Input>
 ```
+
 <!--
 Addons extend input functionality with extra controls or information.
 -->
@@ -2205,41 +2331,44 @@ Addons extend input functionality with extra controls or information.
 
 #### Input Component Props
 
-| Prop         | Type      | Default |
-|--------------|-----------|---------|
-| size         | enum      | small   |
-| placeholder  | string    | -       |
-| defaultValue | string    | -       |
-| value        | string    | -       |
-| onChange     | function  | -       |
-| disabled     | boolean   | false   |
+| Prop         | Type     | Default |
+| ------------ | -------- | ------- |
+| size         | enum     | small   |
+| placeholder  | string   | -       |
+| defaultValue | string   | -       |
+| value        | string   | -       |
+| onChange     | function | -       |
+| disabled     | boolean  | false   |
 
 #### InputIcon Component Props
 
-| Prop      | Type               | Default |
-|-----------|--------------------|---------|
-| position  | left \| right      | -       |
-| children  | ReactNode          | -       |
+| Prop     | Type          | Default |
+| -------- | ------------- | ------- |
+| position | left \| right | -       |
+| children | ReactNode     | -       |
 
 #### InputAddon Component Props
 
-| Prop      | Type      | Default |
-|-----------|-----------|---------|
-| children  | ReactNode | -       |
+| Prop     | Type      | Default |
+| -------- | --------- | ------- |
+| children | ReactNode | -       |
 
 ---
 
 ## Input OTP
 
-The Input OTP (One-Time Password) component enables users to enter a code (typically sent to email or phone) for verifying identity. Common use cases include two-factor authentication (2FA) and account recovery.
+The Input OTP (One-Time Password) component enables users to enter a code (typically sent to email
+or phone) for verifying identity. Common use cases include two-factor authentication (2FA) and
+account recovery.
 
 ### Anatomy & Usage (Input OTP)
 
 **Imports:**
 
 ```javascript
-import { InputOTP, InputOTPSlot } from "@/components/myds";
+import { InputOTP, InputOTPSlot } from '@/components/myds';
 ```
+
 <!--
 Imports the InputOTP and InputOTPSlot components for building OTP input forms.
 -->
@@ -2270,6 +2399,7 @@ Set the `invalid` prop to `true` to mark the entire OTP input as invalid.
   <InputOTPSlot index={3} />
 </InputOTP>
 ```
+
 <!--
 Indicates an incorrect or failed OTP entry.
 -->
@@ -2286,6 +2416,7 @@ Disable the OTP input by setting the `disabled` prop to `true`.
   <InputOTPSlot index={3} />
 </InputOTP>
 ```
+
 <!--
 Prevents user interaction when OTP entry is not allowed.
 -->
@@ -2296,15 +2427,16 @@ Control the OTP value using `value` and `onChange` props.
 In this example, the value is managed in state and converted to uppercase on change.
 
 ```jsx
-const [otp, setOtp] = useState("");
+const [otp, setOtp] = useState('');
 
 <InputOTP value={otp} onChange={val => setOtp(val.toUpperCase())} maxLength={4}>
   <InputOTPSlot index={0} />
   <InputOTPSlot index={1} />
   <InputOTPSlot index={2} />
   <InputOTPSlot index={3} />
-</InputOTP>
+</InputOTP>;
 ```
+
 <!--
 Controlled OTP input supports custom value handling (e.g. uppercase).
 -->
@@ -2315,13 +2447,14 @@ Use the `pattern` prop to restrict OTP input to a specific regex pattern.
 For example, only allow numeric OTP:
 
 ```jsx
-<InputOTP pattern="\d*" maxLength={4}>
+<InputOTP pattern='\d*' maxLength={4}>
   <InputOTPSlot index={0} />
   <InputOTPSlot index={1} />
   <InputOTPSlot index={2} />
   <InputOTPSlot index={3} />
 </InputOTP>
 ```
+
 <!--
 Pattern prop ensures OTP consists only of numbers (or other custom formats).
 -->
@@ -2330,37 +2463,40 @@ Pattern prop ensures OTP consists only of numbers (or other custom formats).
 
 #### InputOTP Component Props
 
-| Prop        | Type      | Default |
-|-------------|-----------|---------|
-| maxLength   | number    | -       |
-| defaultValue| string    | -       |
-| value       | string    | -       |
-| onChange    | function  | -       |
-| disabled    | boolean   | false   |
-| invalid     | boolean   | false   |
-| pattern     | string    | -       |
+| Prop         | Type     | Default |
+| ------------ | -------- | ------- |
+| maxLength    | number   | -       |
+| defaultValue | string   | -       |
+| value        | string   | -       |
+| onChange     | function | -       |
+| disabled     | boolean  | false   |
+| invalid      | boolean  | false   |
+| pattern      | string   | -       |
 
 #### InputOTPSlot Component Props
 
 | Prop  | Type   | Default |
-|-------|--------|---------|
+| ----- | ------ | ------- |
 | index | number | -       |
 
 ---
 
 ## Label
 
-The Label component is a standardized form element used to associate descriptive text with controls such as checkboxes and toggles. It ensures accessibility and consistent styling for Malaysian government websites.
+The Label component is a standardized form element used to associate descriptive text with controls
+such as checkboxes and toggles. It ensures accessibility and consistent styling for Malaysian
+government websites.
 
 ### Anatomy & Usage (Label)
 
 **Imports:**
 
 ```javascript
-import { Label } from "@govtechmy/myds-react/label";
-import { Checkbox } from "@govtechmy/myds-react/checkbox";
-import { Toggle, ToggleThumb } from "@govtechmy/myds-react/toggle";
+import { Label } from '@govtechmy/myds-react/label';
+import { Checkbox } from '@govtechmy/myds-react/checkbox';
+import { Toggle, ToggleThumb } from '@govtechmy/myds-react/toggle';
 ```
+
 <!--
 Import Label for form text, Checkbox for selection, and Toggle for switch controls.
 -->
@@ -2370,13 +2506,13 @@ Import Label for form text, Checkbox for selection, and Toggle for switch contro
 ```jsx
 export default () => (
   <>
-    <div className="flex items-center justify-between">
-      <Label htmlFor="checkbox">Auto-delete notifications</Label>
-      <Checkbox id="checkbox" />
+    <div className='flex items-center justify-between'>
+      <Label htmlFor='checkbox'>Auto-delete notifications</Label>
+      <Checkbox id='checkbox' />
     </div>
-    <div className="flex items-center justify-between">
-      <Label htmlFor="toggle">Enable 2FA security?</Label>
-      <Toggle id="toggle">
+    <div className='flex items-center justify-between'>
+      <Label htmlFor='toggle'>Enable 2FA security?</Label>
+      <Toggle id='toggle'>
         <ToggleThumb />
       </Toggle>
     </div>
@@ -2396,6 +2532,7 @@ Use the `size` prop to change the label size. The default size is `medium`.
 <Label size="medium" htmlFor="toggle">Enable 2FA security?</Label>
 <Label size="large" htmlFor="toggle">Enable 2FA security?</Label>
 ```
+
 <!--
 Choose label size for different form layouts.
 -->
@@ -2406,9 +2543,10 @@ Use the `asChild` prop to render the label using the Slot component for custom r
 
 ```jsx
 <Label asChild>
-  <span className="custom-label">Custom Rendered Label</span>
+  <span className='custom-label'>Custom Rendered Label</span>
 </Label>
 ```
+
 <!--
 Renders label as a different HTML element for advanced use cases.
 -->
@@ -2417,25 +2555,27 @@ Renders label as a different HTML element for advanced use cases.
 
 #### LabelProps Component Props
 
-| Prop      | Type      | Default |
-|-----------|-----------|---------|
-| asChild   | boolean   | false   |
-| size      | enum      | medium  |
-| className | string    | -       |
+| Prop      | Type    | Default |
+| --------- | ------- | ------- |
+| asChild   | boolean | false   |
+| size      | enum    | medium  |
+| className | string  | -       |
 
 ---
 
 ## Link
 
-The Link component extends the `<a>` HTML anchor element and is used to display hyperlinks with standardized styling for Malaysian government websites.
+The Link component extends the `<a>` HTML anchor element and is used to display hyperlinks with
+standardized styling for Malaysian government websites.
 
 ### Anatomy & Usage (Link)
 
 **Imports:**
 
 ```javascript
-import { Link } from "@govtechmy/myds-react/link";
+import { Link } from '@govtechmy/myds-react/link';
 ```
+
 <!--
 Imports the Link component for creating styled hyperlinks.
 -->
@@ -2444,7 +2584,7 @@ Imports the Link component for creating styled hyperlinks.
 
 ```jsx
 export default () => (
-  <Link href="/" primary>
+  <Link href='/' primary>
     {/* The link's destination should be indicated here. */}
     Malaysia's Official Design System
   </Link>
@@ -2456,19 +2596,21 @@ export default () => (
 
 #### Link Using asChild for Custom Links
 
-If you need to use the Link component provided by a different package (e.g., Next.js), use the `asChild` prop and wrap the component.
+If you need to use the Link component provided by a different package (e.g., Next.js), use the
+`asChild` prop and wrap the component.
 
 ```jsx
-import { Link as LinkPrimitive } from "@govtechmy/myds-react/link";
-import NextLink from "next/link";
+import { Link as LinkPrimitive } from '@govtechmy/myds-react/link';
+import NextLink from 'next/link';
 
-export const Link = (props) => (
+export const Link = props => (
   <LinkPrimitive asChild>
     <NextLink {...props} />
   </LinkPrimitive>
 );
 // This allows you to use Next.js's <Link> with MYDS styling.
 ```
+
 <!--
 Use asChild to wrap another link component and inherit MYDS styling.
 -->
@@ -2478,15 +2620,18 @@ Use asChild to wrap another link component and inherit MYDS styling.
 Open the link in a new tab by setting `newTab` or `target="_blank"`.
 
 ```jsx
-<Link href="https://digital.gov.my" newTab>
+<Link href='https://digital.gov.my' newTab>
   Ministry of Digital
 </Link>
 ```
+
 <!--
 Links with newTab open in a new browser tab or window.
 -->
+
 > **Note:**  
-> All current versions of major browsers automatically use the behaviour of `rel="noopener"` for any links with `target="_blank"`.
+> All current versions of major browsers automatically use the behaviour of `rel="noopener"` for any
+> links with `target="_blank"`.
 
 #### Link Primary Style
 
@@ -2500,6 +2645,7 @@ Use the `primary` prop to toggle the link text colour.
   Inherit from parent (default)
 </Link>
 ```
+
 <!--
 Primary links use a distinct color to highlight important navigation.
 -->
@@ -2519,6 +2665,7 @@ Control when the link should have an underline using the `underline` prop.
   None
 </Link>
 ```
+
 <!--
 Underline options: always, hover (default), or none.
 -->
@@ -2527,19 +2674,20 @@ Underline options: always, hover (default), or none.
 
 #### Link Component Props
 
-| Prop      | Type      | Default |
-|-----------|-----------|---------|
-| asChild   | boolean   | -       |
-| href      | string    | -       |
-| newTab    | boolean   | false   |
-| primary   | boolean   | false   |
-| underline | enum      | hover   |
+| Prop      | Type    | Default |
+| --------- | ------- | ------- |
+| asChild   | boolean | -       |
+| href      | string  | -       |
+| newTab    | boolean | false   |
+| primary   | boolean | false   |
+| underline | enum    | hover   |
 
 ---
 
 ## Masthead
 
-The Masthead component is a standardized header for Malaysian government websites, providing consistent branding and navigation at the top of the page.
+The Masthead component is a standardized header for Malaysian government websites, providing
+consistent branding and navigation at the top of the page.
 
 ### Anatomy & Usage (Masthead)
 
@@ -2553,8 +2701,9 @@ import {
   MastheadTitle,
   MastheadTrigger,
   MastheadSection,
-} from "@govtechmy/myds-react/masthead";
+} from '@govtechmy/myds-react/masthead';
 ```
+
 <!--
 Imports all necessary subcomponents for building a government-standard masthead.
 -->
@@ -2569,7 +2718,7 @@ export default () => (
       <MastheadTrigger />
     </MastheadHeader>
     <MastheadContent>
-      <MastheadSection title="Important Updates" icon={<Icon name="info" />}>
+      <MastheadSection title='Important Updates' icon={<Icon name='info' />}>
         {/* Content or navigation goes here */}
       </MastheadSection>
     </MastheadContent>
@@ -2582,47 +2731,49 @@ export default () => (
 
 #### Masthead Component Props
 
-| Prop      | Type      | Default |
-|-----------|-----------|---------|
-| children  | ReactNode | -       |
+| Prop     | Type      | Default |
+| -------- | --------- | ------- |
+| children | ReactNode | -       |
 
 #### MastheadHeader Component Props
 
-| Prop      | Type      | Default |
-|-----------|-----------|---------|
-| children  | ReactNode | -       |
+| Prop     | Type      | Default |
+| -------- | --------- | ------- |
+| children | ReactNode | -       |
 
 #### MastheadTitle Component Props
 
-| Prop      | Type      | Default |
-|-----------|-----------|---------|
-| children  | ReactNode | -       |
+| Prop     | Type      | Default |
+| -------- | --------- | ------- |
+| children | ReactNode | -       |
 
 #### MastheadTrigger Component Props
 
-| Prop      | Type      | Default |
-|-----------|-----------|---------|
-| children  | ReactNode | -       |
+| Prop     | Type      | Default |
+| -------- | --------- | ------- |
+| children | ReactNode | -       |
 
 #### MastheadContent Component Props
 
-| Prop      | Type      | Default |
-|-----------|-----------|---------|
-| children  | ReactNode | -       |
+| Prop     | Type      | Default |
+| -------- | --------- | ------- |
+| children | ReactNode | -       |
 
 #### MastheadSection Component Props
 
-| Prop      | Type      | Default |
-|-----------|-----------|---------|
-| title     | ReactNode | -       |
-| icon      | ReactNode | -       |
-| children  | ReactNode | -       |
+| Prop     | Type      | Default |
+| -------- | --------- | ------- |
+| title    | ReactNode | -       |
+| icon     | ReactNode | -       |
+| children | ReactNode | -       |
 
 ---
 
 ## Navbar
 
-The Navbar component establishes a clear navigation menu for users to browse the site. It provides site branding, navigation links, dropdown menus, and action controls in a standardized header for Malaysian government websites.
+The Navbar component establishes a clear navigation menu for users to browse the site. It provides
+site branding, navigation links, dropdown menus, and action controls in a standardized header for
+Malaysian government websites.
 
 ### Anatomy & Usage (Navbar)
 
@@ -2636,8 +2787,9 @@ import {
   NavbarMenuItem,
   NavbarMenuDropdown,
   NavbarAction,
-} from "@govtechmy/myds-react/navbar";
+} from '@govtechmy/myds-react/navbar';
 ```
+
 <!--
 Imports all necessary subcomponents for building a government-standard navigation bar.
 -->
@@ -2648,19 +2800,17 @@ Imports all necessary subcomponents for building a government-standard navigatio
 export default () => {
   return (
     <Navbar>
-      <NavbarLogo src="/logo.png" alt="MYDS" href="/" />
+      <NavbarLogo src='/logo.png' alt='MYDS' href='/' />
       {/* Displays the site logo as a link to the homepage */}
       <NavbarMenu>
-        <NavbarMenuItem href="/menu1">Menu 1</NavbarMenuItem>
-        <NavbarMenuItem href="/menu2">Menu 2</NavbarMenuItem>
+        <NavbarMenuItem href='/menu1'>Menu 1</NavbarMenuItem>
+        <NavbarMenuItem href='/menu2'>Menu 2</NavbarMenuItem>
         {/* Menu dropdown for sub-navigation */}
-        <NavbarMenuDropdown title="More">
-          <NavbarMenuItem href="/menu3">Menu 3</NavbarMenuItem>
+        <NavbarMenuDropdown title='More'>
+          <NavbarMenuItem href='/menu3'>Menu 3</NavbarMenuItem>
         </NavbarMenuDropdown>
       </NavbarMenu>
-      <NavbarAction>
-        {/* Place action buttons or links here, e.g., login/logout */}
-      </NavbarAction>
+      <NavbarAction>{/* Place action buttons or links here, e.g., login/logout */}</NavbarAction>
     </Navbar>
   );
 };
@@ -2674,25 +2824,28 @@ export default () => {
 The logo section displays site branding, typically linking to the homepage.
 
 ```jsx
-<NavbarLogo src="/logo.png" alt="MYDS" href="/" />
+<NavbarLogo src='/logo.png' alt='MYDS' href='/' />
 ```
+
 <!--
 Use NavbarLogo for official site branding. The src and alt props define logo image and accessibility text.
 -->
 
 #### Navbar Menu Example
 
-Menu items provide primary navigation links. Use `NavbarMenuItem` for standard links and `NavbarMenuDropdown` for grouped or sub-menu links.
+Menu items provide primary navigation links. Use `NavbarMenuItem` for standard links and
+`NavbarMenuDropdown` for grouped or sub-menu links.
 
 ```jsx
 <NavbarMenu>
-  <NavbarMenuItem href="/menu1">Menu 1</NavbarMenuItem>
-  <NavbarMenuItem href="/menu2">Menu 2</NavbarMenuItem>
-  <NavbarMenuDropdown title="More">
-    <NavbarMenuItem href="/menu3">Menu 3</NavbarMenuItem>
+  <NavbarMenuItem href='/menu1'>Menu 1</NavbarMenuItem>
+  <NavbarMenuItem href='/menu2'>Menu 2</NavbarMenuItem>
+  <NavbarMenuDropdown title='More'>
+    <NavbarMenuItem href='/menu3'>Menu 3</NavbarMenuItem>
   </NavbarMenuDropdown>
 </NavbarMenu>
 ```
+
 <!--
 Menu items and dropdowns organize navigation in a clear, accessible manner.
 -->
@@ -2706,6 +2859,7 @@ Action controls (e.g., login, profile, language selector) can be placed in the a
   <Button>Login</Button>
 </NavbarAction>
 ```
+
 <!--
 Use NavbarAction for user actions or controls at the end of the Navbar.
 -->
@@ -2715,29 +2869,29 @@ Use NavbarAction for user actions or controls at the end of the Navbar.
 #### Navbar Component Props
 
 | Prop      | Type      | Default |
-|-----------|-----------|---------|
+| --------- | --------- | ------- |
 | children  | ReactNode | -       |
 | className | string    | -       |
 
 #### NavbarLogo Component Props
 
-| Prop      | Type      | Default |
-|-----------|-----------|---------|
-| children  | ReactNode | -       |
-| href      | string    | -       |
-| src       | string    | -       |
-| alt       | string    | -       |
+| Prop     | Type      | Default |
+| -------- | --------- | ------- |
+| children | ReactNode | -       |
+| href     | string    | -       |
+| src      | string    | -       |
+| alt      | string    | -       |
 
 #### NavbarMenu Component Props
 
-| Prop      | Type      | Default |
-|-----------|-----------|---------|
-| children  | string    | -       |
+| Prop     | Type   | Default |
+| -------- | ------ | ------- |
+| children | string | -       |
 
 #### NavbarMenuItem Component Props
 
 | Prop      | Type      | Default |
-|-----------|-----------|---------|
+| --------- | --------- | ------- |
 | children  | ReactNode | -       |
 | href      | string    | -       |
 | className | string    | -       |
@@ -2745,34 +2899,38 @@ Use NavbarAction for user actions or controls at the end of the Navbar.
 #### NavbarMenuDropdown Component Props
 
 | Prop      | Type      | Default |
-|-----------|-----------|---------|
+| --------- | --------- | ------- |
 | children  | ReactNode | -       |
 | title     | string    | -       |
 | className | boolean   | -       |
 
 #### NavbarAction Component Props
 
-| Prop      | Type      | Default |
-|-----------|-----------|---------|
-| children  | ReactNode | -       |
+| Prop     | Type      | Default |
+| -------- | --------- | ------- |
+| children | ReactNode | -       |
 
 ---
 
 ## Pagination
 
-The Pagination component allows users to navigate through a large set of content divided into discrete pages. It provides both simple and advanced configurations for flexible navigation experiences.
+The Pagination component allows users to navigate through a large set of content divided into
+discrete pages. It provides both simple and advanced configurations for flexible navigation
+experiences.
 
 ### Anatomy & Usage (Pagination)
 
 #### AutoPagination (Simple Usage)
 
-For most cases, `AutoPagination` can be used directly. It is a pre-assembled component that handles common pagination use cases such as page navigation, page count display, and different layout types.
+For most cases, `AutoPagination` can be used directly. It is a pre-assembled component that handles
+common pagination use cases such as page navigation, page count display, and different layout types.
 
 **Imports:**
 
 ```javascript
-import { AutoPagination } from "@govtechmy/myds-react/pagination";
+import { AutoPagination } from '@govtechmy/myds-react/pagination';
 ```
+
 <!--
 AutoPagination is the easiest way to add page navigation. Just configure page, count, limit, and type.
 -->
@@ -2780,13 +2938,14 @@ AutoPagination is the easiest way to add page navigation. Just configure page, c
 **Component Structure Example:**
 
 ```jsx
-<AutoPagination count={20} limit={5} page={2} type="default" />
+<AutoPagination count={20} limit={5} page={2} type='default' />
 // Renders a paginated navigation bar with 20 pages, showing 5 per view, starting on page 2.
 ```
 
 #### Manual Pagination (Advanced Usage)
 
-For more advanced scenarios, you can assemble the pagination manually using subcomponents. This allows full customization of layout and navigation.
+For more advanced scenarios, you can assemble the pagination manually using subcomponents. This
+allows full customization of layout and navigation.
 
 **Imports:**
 
@@ -2800,8 +2959,9 @@ import {
   PaginationNext,
   PaginationNumber,
   PaginationPrevious,
-} from "@/components/myds";
+} from '@/components/myds';
 ```
+
 <!--
 Manual assembly provides low-level control for custom layouts, labels, and navigation handling.
 -->
@@ -2843,13 +3003,15 @@ Use the `type` prop to change the AutoPagination layout:
 <AutoPagination type="simple" count={20} page={2} />
 <AutoPagination type="full" count={20} page={2} fullText="Page 2 of 20" />
 ```
+
 <!--
 Choose the type that best fits your navigation needs and content size.
 -->
 
 #### Pagination Configuration Example
 
-Configure page, limit, and count for both AutoPagination and manual assembly. These props control the visible page, number of items per page, and total item count.
+Configure page, limit, and count for both AutoPagination and manual assembly. These props control
+the visible page, number of items per page, and total item count.
 
 ```jsx
 // AutoPagination example
@@ -2862,6 +3024,7 @@ Configure page, limit, and count for both AutoPagination and manual assembly. Th
   </PaginationContent>
 </Pagination>
 ```
+
 <!--
 Configuring these props ensures the pagination controls match your data set.
 -->
@@ -2870,27 +3033,27 @@ Configuring these props ensures the pagination controls match your data set.
 
 #### AutoPagination Component Props
 
-| Prop        | Type       | Default |
-|-------------|------------|---------|
-| count       | number     | -       |
-| limit       | number     | -       |
-| page        | number     | -       |
-| maxDisplay  | number     | 4       |
-| type        | enum       | default |
-| onPageChange| function   | -       |
-| fullText    | string     | -       |
-| next        | ReactNode  | -       |
-| previous    | ReactNode  | -       |
+| Prop         | Type      | Default |
+| ------------ | --------- | ------- |
+| count        | number    | -       |
+| limit        | number    | -       |
+| page         | number    | -       |
+| maxDisplay   | number    | 4       |
+| type         | enum      | default |
+| onPageChange | function  | -       |
+| fullText     | string    | -       |
+| next         | ReactNode | -       |
+| previous     | ReactNode | -       |
 
 #### Pagination Component Props
 
-| Prop        | Type       | Default |
-|-------------|------------|---------|
-| count       | number     | -       |
-| limit       | number     | -       |
-| page        | number     | -       |
-| type        | enum       | default |
-| onPageChange| function   | -       |
+| Prop         | Type     | Default |
+| ------------ | -------- | ------- |
+| count        | number   | -       |
+| limit        | number   | -       |
+| page         | number   | -       |
+| type         | enum     | default |
+| onPageChange | function | -       |
 
 #### PaginationContent Component
 
@@ -2912,9 +3075,9 @@ Configuring these props ensures the pagination controls match your data set.
 
 #### PaginationLabel Component Props
 
-| Prop    | Type     | Default |
-|---------|----------|---------|
-| content | string   | -       |
+| Prop    | Type   | Default |
+| ------- | ------ | ------- |
+| content | string | -       |
 
 #### PaginationEllipsis Component
 
@@ -2924,15 +3087,17 @@ Configuring these props ensures the pagination controls match your data set.
 
 ## Pill
 
-The Pill component represents tags or categories in a textfield, UI, or form. Pills can contain text and may include a trailing "x" button for easy removal.
+The Pill component represents tags or categories in a textfield, UI, or form. Pills can contain text
+and may include a trailing "x" button for easy removal.
 
 ### Anatomy & Usage (Pill)
 
 **Imports:**
 
 ```javascript
-import { Pill } from "@govtechmy/myds-react/pill";
+import { Pill } from '@govtechmy/myds-react/pill';
 ```
+
 <!--
 Import the Pill component to display tags or categories with optional remove functionality.
 -->
@@ -2955,17 +3120,20 @@ Use the `size` prop to change the pill size. The default size is `small`.
 <Pill size="medium">Trending</Pill>
 <Pill size="large">Popular</Pill>
 ```
+
 <!--
 Choose pill size for visual hierarchy or layout needs.
 -->
 
 #### Pill with Trailing "x" Button Example
 
-Pass a callback function to the `onDismiss` prop to show a trailing "x" button. Clicking the button removes the pill.
+Pass a callback function to the `onDismiss` prop to show a trailing "x" button. Clicking the button
+removes the pill.
 
 ```jsx
 <Pill onDismiss={() => alert('Removed!')}>With trailing "x" button</Pill>
 ```
+
 <!--
 The "x" button appears to allow users to remove the pill. The callback handles the remove action.
 -->
@@ -2973,12 +3141,13 @@ The "x" button appears to allow users to remove the pill. The callback handles t
 #### Pill Disabled State Example
 
 Set the `disabled` prop to `true` to make the pill non-interactive.  
-*Note: If `onDismiss` is set, the "x" button will be hidden when disabled.*
+_Note: If `onDismiss` is set, the "x" button will be hidden when disabled._
 
 ```jsx
 <Pill>Enabled</Pill>
 <Pill disabled>Disabled</Pill>
 ```
+
 <!--
 Disabled pills do not respond to user actions and cannot be dismissed.
 -->
@@ -2987,17 +3156,18 @@ Disabled pills do not respond to user actions and cannot be dismissed.
 
 #### Pill Component Props
 
-| Prop      | Type      | Default |
-|-----------|-----------|---------|
-| size      | enum      | small   |
-| disabled  | boolean   | false   |
-| onDismiss | function  | -       |
+| Prop      | Type     | Default |
+| --------- | -------- | ------- |
+| size      | enum     | small   |
+| disabled  | boolean  | false   |
+| onDismiss | function | -       |
 
 ---
 
 ## Radio
 
-Radio buttons allow users to select exactly one choice from a group. They are commonly used in forms and settings where a single option must be chosen.
+Radio buttons allow users to select exactly one choice from a group. They are commonly used in forms
+and settings where a single option must be chosen.
 
 ### Anatomy & Usage (Radio)
 
@@ -3010,8 +3180,9 @@ import {
   RadioHintText,
   RadioItem,
   RadioLabel,
-} from "@govtechmy/myds-react/radio";
+} from '@govtechmy/myds-react/radio';
 ```
+
 <!--
 Import all radio subcomponents for building radio groups with hints and labels.
 -->
@@ -3021,14 +3192,14 @@ Import all radio subcomponents for building radio groups with hints and labels.
 ```jsx
 <Radio>
   <RadioItem>
-    <RadioButton value="apple" id="apple" />
-    <RadioLabel htmlFor="apple">Apple</RadioLabel>
+    <RadioButton value='apple' id='apple' />
+    <RadioLabel htmlFor='apple'>Apple</RadioLabel>
   </RadioItem>
   <RadioItem>
-    <RadioButton value="banana" id="banana" />
+    <RadioButton value='banana' id='banana' />
     <div>
-      <RadioLabel htmlFor="banana">Banana</RadioLabel>
-      <RadioHintText htmlFor="banana">Comes pre-packaged.</RadioHintText>
+      <RadioLabel htmlFor='banana'>Banana</RadioLabel>
+      <RadioHintText htmlFor='banana'>Comes pre-packaged.</RadioHintText>
     </div>
   </RadioItem>
 </Radio>
@@ -3042,23 +3213,24 @@ Import all radio subcomponents for building radio groups with hints and labels.
 Change the size of radio buttons using the `size` prop on the Radio component.
 
 ```jsx
-<Radio size="small">
+<Radio size='small'>
   <RadioItem>
-    <RadioButton value="email" id="email" />
-    <RadioLabel htmlFor="email">Email</RadioLabel>
-    <RadioHintText htmlFor="email">
+    <RadioButton value='email' id='email' />
+    <RadioLabel htmlFor='email'>Email</RadioLabel>
+    <RadioHintText htmlFor='email'>
       We will send notifications to your registered email address.
     </RadioHintText>
   </RadioItem>
   <RadioItem>
-    <RadioButton value="phone" id="phone" />
-    <RadioLabel htmlFor="phone">Phone Call</RadioLabel>
-    <RadioHintText htmlFor="phone">
+    <RadioButton value='phone' id='phone' />
+    <RadioLabel htmlFor='phone'>Phone Call</RadioLabel>
+    <RadioHintText htmlFor='phone'>
       Our representative will call you on your provided phone number.
     </RadioHintText>
   </RadioItem>
 </Radio>
 ```
+
 <!--
 Use size="small", "medium", or "large" to adjust radio visuals.
 -->
@@ -3070,21 +3242,22 @@ Disable all radio items by setting the `disabled` prop to `true` on the Radio co
 ```jsx
 <Radio disabled>
   <RadioItem>
-    <RadioButton value="email" id="email" />
-    <RadioLabel htmlFor="email">Email</RadioLabel>
-    <RadioHintText htmlFor="email">
+    <RadioButton value='email' id='email' />
+    <RadioLabel htmlFor='email'>Email</RadioLabel>
+    <RadioHintText htmlFor='email'>
       We will send notifications to your registered email address.
     </RadioHintText>
   </RadioItem>
   <RadioItem>
-    <RadioButton value="phone" id="phone" />
-    <RadioLabel htmlFor="phone">Phone Call</RadioLabel>
-    <RadioHintText htmlFor="phone">
+    <RadioButton value='phone' id='phone' />
+    <RadioLabel htmlFor='phone'>Phone Call</RadioLabel>
+    <RadioHintText htmlFor='phone'>
       Our representative will call you on your provided phone number.
     </RadioHintText>
   </RadioItem>
 </Radio>
 ```
+
 <!--
 Disables all items in the radio group.
 -->
@@ -3094,21 +3267,20 @@ Disable individual radio items by setting the `disabled` prop to `true` on the R
 ```jsx
 <Radio>
   <RadioItem>
-    <RadioButton value="email" id="email" />
-    <RadioLabel htmlFor="email">Email</RadioLabel>
-    <RadioHintText htmlFor="email">
+    <RadioButton value='email' id='email' />
+    <RadioLabel htmlFor='email'>Email</RadioLabel>
+    <RadioHintText htmlFor='email'>
       We will send notifications to your registered email address.
     </RadioHintText>
   </RadioItem>
   <RadioItem disabled>
-    <RadioButton value="postal" id="postal" />
-    <RadioLabel htmlFor="postal">Postal Mail</RadioLabel>
-    <RadioHintText htmlFor="postal">
-      Not available at the moment.
-    </RadioHintText>
+    <RadioButton value='postal' id='postal' />
+    <RadioLabel htmlFor='postal'>Postal Mail</RadioLabel>
+    <RadioHintText htmlFor='postal'>Not available at the moment.</RadioHintText>
   </RadioItem>
 </Radio>
 ```
+
 <!--
 Only disables specified item, others remain enabled.
 -->
@@ -3118,25 +3290,26 @@ Only disables specified item, others remain enabled.
 To use Radio as a controlled component, set the `value` and `onValueChange` props.
 
 ```jsx
-const [value, setValue] = useState("");
+const [value, setValue] = useState('');
 
 <Radio value={value} onValueChange={setValue}>
   <RadioItem>
-    <RadioButton value="email" id="email" />
-    <RadioLabel htmlFor="email">Email</RadioLabel>
-    <RadioHintText htmlFor="email">
+    <RadioButton value='email' id='email' />
+    <RadioLabel htmlFor='email'>Email</RadioLabel>
+    <RadioHintText htmlFor='email'>
       We will send notifications to your registered email address.
     </RadioHintText>
   </RadioItem>
   <RadioItem>
-    <RadioButton value="phone" id="phone" />
-    <RadioLabel htmlFor="phone">Phone Call</RadioLabel>
-    <RadioHintText htmlFor="phone">
+    <RadioButton value='phone' id='phone' />
+    <RadioLabel htmlFor='phone'>Phone Call</RadioLabel>
+    <RadioHintText htmlFor='phone'>
       Our representative will call you on your provided phone number.
     </RadioHintText>
   </RadioItem>
-</Radio>
+</Radio>;
 ```
+
 <!--
 Controlled radio group lets you manage selected value in your app state.
 -->
@@ -3145,12 +3318,12 @@ Controlled radio group lets you manage selected value in your app state.
 
 #### Radio Component Props
 
-| Prop         | Type      | Default |
-|--------------|-----------|---------|
-| value        | string    | -       |
-| onValueChange| function  | -       |
-| size         | enum      | medium  |
-| disabled     | boolean   | false   |
+| Prop          | Type     | Default |
+| ------------- | -------- | ------- |
+| value         | string   | -       |
+| onValueChange | function | -       |
+| size          | enum     | medium  |
+| disabled      | boolean  | false   |
 
 #### RadioButton Component Props
 
@@ -3158,9 +3331,9 @@ Controlled radio group lets you manage selected value in your app state.
 
 #### RadioItem Component Props
 
-| Prop      | Type      | Default |
-|-----------|-----------|---------|
-| disabled  | boolean   | false   |
+| Prop     | Type    | Default |
+| -------- | ------- | ------- |
+| disabled | boolean | false   |
 
 #### RadioHintText Component Props
 
@@ -3174,7 +3347,8 @@ Controlled radio group lets you manage selected value in your app state.
 
 ## Search Bar
 
-The Search Bar component allows users to enter a query or keyword to search through content within a website. It supports search suggestions, result grouping, hints, and a clear button for improved UX.
+The Search Bar component allows users to enter a query or keyword to search through content within a
+website. It supports search suggestions, result grouping, hints, and a clear button for improved UX.
 
 ### Anatomy & Usage (Search Bar)
 
@@ -3191,8 +3365,9 @@ import {
   SearchBarResultsItem,
   SearchBarClearButton,
   SearchBarHint,
-} from "@govtechmy/myds-react/search-bar";
+} from '@govtechmy/myds-react/search-bar';
 ```
+
 <!--
 Imports all subcomponents required for building a feature-rich search bar.
 -->
@@ -3200,21 +3375,21 @@ Imports all subcomponents required for building a feature-rich search bar.
 **Component Structure Example:**
 
 ```jsx
-<SearchBar size="large">
+<SearchBar size='large'>
   <SearchBarInputContainer>
     <SearchBarInput value={query} onValueChange={setQuery} />
     <SearchBarHint>
-      Press <Pill size="small">/</Pill> to search
+      Press <Pill size='small'>/</Pill> to search
     </SearchBarHint>
     <SearchBarClearButton />
     <SearchBarSearchButton />
   </SearchBarInputContainer>
   <SearchBarResults open={true}>
     <SearchBarResultsList>
-      <SearchBarResultsItem value="foo" onSelect={() => {}}>
+      <SearchBarResultsItem value='foo' onSelect={() => {}}>
         Foo
       </SearchBarResultsItem>
-      <SearchBarResultsItem value="bar" onSelect={() => {}}>
+      <SearchBarResultsItem value='bar' onSelect={() => {}}>
         Bar
       </SearchBarResultsItem>
     </SearchBarResultsList>
@@ -3240,6 +3415,7 @@ Use the `size` prop to change the search bar's size. The default size is `medium
   <SearchBarInput placeholder="Search by name" />
 </SearchBar>
 ```
+
 <!--
 Select small, medium, or large for different layouts.
 -->
@@ -3256,6 +3432,7 @@ The `SearchBarClearButton` shows a button to clear the search input.
   </SearchBarInputContainer>
 </SearchBar>
 ```
+
 <!--
 Clear button lets users quickly reset their search query.
 -->
@@ -3267,20 +3444,22 @@ Show a hint with `SearchBarHint` to guide users on using the search bar.
 ```jsx
 <SearchBar>
   <SearchBarInputContainer>
-    <SearchBarInput placeholder="Search by name" />
+    <SearchBarInput placeholder='Search by name' />
     <SearchBarHint>
-      Press <Pill size="small">/</Pill> to search
+      Press <Pill size='small'>/</Pill> to search
     </SearchBarHint>
   </SearchBarInputContainer>
 </SearchBar>
 ```
+
 <!--
 Hints improve discoverability of keyboard shortcuts and search functionality.
 -->
 
 #### Search Bar Results and Suggestions Example
 
-Display search results or suggestions with `SearchBarResults`, `SearchBarResultsList` and `SearchBarResultsItem`.
+Display search results or suggestions with `SearchBarResults`, `SearchBarResultsList` and
+`SearchBarResultsItem`.
 
 ```jsx
 <SearchBar>
@@ -3289,16 +3468,21 @@ Display search results or suggestions with `SearchBarResults`, `SearchBarResults
   </SearchBarInputContainer>
   <SearchBarResults open={true}>
     <SearchBarResultsList>
-      <SearchBarResultsItem value="michelle-yeoh" onSelect={() => {}}>
-        Michelle Yeoh<br />Internationally acclaimed actress
+      <SearchBarResultsItem value='michelle-yeoh' onSelect={() => {}}>
+        Michelle Yeoh
+        <br />
+        Internationally acclaimed actress
       </SearchBarResultsItem>
-      <SearchBarResultsItem value="p-ramlee" onSelect={() => {}}>
-        P. Ramlee<br />Iconic actor, director, and musician
+      <SearchBarResultsItem value='p-ramlee' onSelect={() => {}}>
+        P. Ramlee
+        <br />
+        Iconic actor, director, and musician
       </SearchBarResultsItem>
     </SearchBarResultsList>
   </SearchBarResults>
 </SearchBar>
 ```
+
 <!--
 Results list provides instant feedback or suggestions as users type.
 -->
@@ -3313,26 +3497,33 @@ Group search results with `SearchBarResultsGroup` for better organization.
     <SearchBarInput value={query} onValueChange={setQuery} />
   </SearchBarInputContainer>
   <SearchBarResults open={true}>
-    <SearchBarResultsGroup heading="Arts">
+    <SearchBarResultsGroup heading='Arts'>
       <SearchBarResultsList>
-        <SearchBarResultsItem value="michelle-yeoh" onSelect={() => {}}>
-          Michelle Yeoh<br />Internationally acclaimed actress
+        <SearchBarResultsItem value='michelle-yeoh' onSelect={() => {}}>
+          Michelle Yeoh
+          <br />
+          Internationally acclaimed actress
         </SearchBarResultsItem>
-        <SearchBarResultsItem value="harith-iskander" onSelect={() => {}}>
-          Harith Iskander<br />Comedian and actor
+        <SearchBarResultsItem value='harith-iskander' onSelect={() => {}}>
+          Harith Iskander
+          <br />
+          Comedian and actor
         </SearchBarResultsItem>
       </SearchBarResultsList>
     </SearchBarResultsGroup>
-    <SearchBarResultsGroup heading="Business">
+    <SearchBarResultsGroup heading='Business'>
       <SearchBarResultsList>
-        <SearchBarResultsItem value="tony-fernandes" onSelect={() => {}}>
-          Tony Fernandes<br />Founder of AirAsia
+        <SearchBarResultsItem value='tony-fernandes' onSelect={() => {}}>
+          Tony Fernandes
+          <br />
+          Founder of AirAsia
         </SearchBarResultsItem>
       </SearchBarResultsList>
     </SearchBarResultsGroup>
   </SearchBarResults>
 </SearchBar>
 ```
+
 <!--
 Grouping makes it easier to browse results by category.
 -->
@@ -3346,7 +3537,7 @@ Control the search bar using props:
 - Track focus state for more refined behavior
 
 ```jsx
-const [query, setQuery] = useState("");
+const [query, setQuery] = useState('');
 const [hasFocus, setHasFocus] = useState(false);
 
 <SearchBar>
@@ -3358,7 +3549,7 @@ const [hasFocus, setHasFocus] = useState(false);
       onBlur={() => setHasFocus(false)}
     />
     <SearchBarHint>
-      Press <Pill size="small">/</Pill> to search
+      Press <Pill size='small'>/</Pill> to search
     </SearchBarHint>
     <SearchBarClearButton />
     <SearchBarSearchButton />
@@ -3366,8 +3557,9 @@ const [hasFocus, setHasFocus] = useState(false);
   <SearchBarResults open={query.length > 0 && hasFocus}>
     {/* ...results here... */}
   </SearchBarResults>
-</SearchBar>
+</SearchBar>;
 ```
+
 <!--
 Controlled usage enables advanced features like dynamic opening/closing of results.
 -->
@@ -3377,13 +3569,13 @@ Controlled usage enables advanced features like dynamic opening/closing of resul
 #### SearchBar Component Props
 
 | Prop | Type | Default |
-|------|------|---------|
+| ---- | ---- | ------- |
 | size | enum | medium  |
 
 #### SearchBarInput Component Props
 
 | Prop          | Type     | Default |
-|---------------|----------|---------|
+| ------------- | -------- | ------- |
 | value         | string   | -       |
 | onValueChange | function | -       |
 
@@ -3406,7 +3598,7 @@ Controlled usage enables advanced features like dynamic opening/closing of resul
 #### SearchBarResults Component Props
 
 | Prop | Type    | Default |
-|------|---------|---------|
+| ---- | ------- | ------- |
 | open | boolean | -       |
 
 #### SearchBarResultsList Component
@@ -3425,7 +3617,8 @@ Controlled usage enables advanced features like dynamic opening/closing of resul
 
 ## Select
 
-The Select component allows users to choose from a list of options. It typically appears as a popup menu that expands when the user clicks the select button, showing a list of options for selection.
+The Select component allows users to choose from a list of options. It typically appears as a popup
+menu that expands when the user clicks the select button, showing a list of options for selection.
 
 ### Anatomy & Usage (Select)
 
@@ -3444,8 +3637,9 @@ import {
   SelectFooter,
   SelectItem,
   SelectSeparator,
-} from "@govtechmy/myds-react/select";
+} from '@govtechmy/myds-react/select';
 ```
+
 <!--
 Imports all subcomponents for building flexible and accessible select menus.
 -->
@@ -3476,25 +3670,29 @@ export default () => (
 
 #### Select Size Example
 
-Use the `size` prop to change the select size. Available sizes are `small`, `medium`, and `large`. The default size is `small`.
+Use the `size` prop to change the select size. Available sizes are `small`, `medium`, and `large`.
+The default size is `small`.
 
 ```jsx
 <Select size="small" />
 <Select size="medium" />
 <Select size="large" />
 ```
+
 <!--
 Choose select size for different interface densities or layouts.
 -->
 
 #### Select Variant Example
 
-Use the `variant` prop to change the select style. Available variants are `outline` and `ghost`. The default variant is `outline`.
+Use the `variant` prop to change the select style. Available variants are `outline` and `ghost`. The
+default variant is `outline`.
 
 ```jsx
 <Select variant="outline" />
 <Select variant="ghost" />
 ```
+
 <!--
 Variants control border and background styling of the select menu.
 -->
@@ -3512,11 +3710,14 @@ Disable individual options by setting the `disabled` prop to `true` on `SelectIt
 ```jsx
 <Select>
   <SelectContent>
-    <SelectItem value="option1">Option 1</SelectItem>
-    <SelectItem value="option2" disabled>Option 2 (disabled)</SelectItem>
+    <SelectItem value='option1'>Option 1</SelectItem>
+    <SelectItem value='option2' disabled>
+      Option 2 (disabled)
+    </SelectItem>
   </SelectContent>
 </Select>
 ```
+
 <!--
 Disabling prevents selection or interaction as needed.
 -->
@@ -3530,18 +3731,19 @@ Group related options for better structure using `SelectGroup` and `SelectGroupT
   <SelectContent>
     <SelectGroup>
       <SelectGroupTitle>Fruits</SelectGroupTitle>
-      <SelectItem value="apple">Apple</SelectItem>
-      <SelectItem value="banana">Banana</SelectItem>
+      <SelectItem value='apple'>Apple</SelectItem>
+      <SelectItem value='banana'>Banana</SelectItem>
     </SelectGroup>
     <SelectSeparator />
     <SelectGroup>
       <SelectGroupTitle>Vegetables</SelectGroupTitle>
-      <SelectItem value="carrot">Carrot</SelectItem>
-      <SelectItem value="spinach">Spinach</SelectItem>
+      <SelectItem value='carrot'>Carrot</SelectItem>
+      <SelectItem value='spinach'>Spinach</SelectItem>
     </SelectGroup>
   </SelectContent>
 </Select>
 ```
+
 <!--
 Grouping improves navigation and organization for long lists.
 -->
@@ -3554,11 +3756,12 @@ Add a header to provide extra context or instructions:
 <Select>
   <SelectContent>
     <SelectHeader>Choose your favorite</SelectHeader>
-    <SelectItem value="apple">Apple</SelectItem>
-    <SelectItem value="banana">Banana</SelectItem>
+    <SelectItem value='apple'>Apple</SelectItem>
+    <SelectItem value='banana'>Banana</SelectItem>
   </SelectContent>
 </Select>
 ```
+
 <!--
 Headers can display instructions or information above the option list.
 -->
@@ -3570,11 +3773,12 @@ Add a footer to show additional info or actions:
 ```jsx
 <Select>
   <SelectContent>
-    <SelectItem value="apple">Apple</SelectItem>
+    <SelectItem value='apple'>Apple</SelectItem>
     <SelectFooter>More options coming soon!</SelectFooter>
   </SelectContent>
 </Select>
 ```
+
 <!--
 Footers are useful for extra details or links at the bottom of the select menu.
 -->
@@ -3586,12 +3790,13 @@ Enable multiple selection by setting the `multiple` prop to `true`:
 ```jsx
 <Select multiple>
   <SelectContent>
-    <SelectItem value="apple">Apple</SelectItem>
-    <SelectItem value="banana">Banana</SelectItem>
-    <SelectItem value="carrot">Carrot</SelectItem>
+    <SelectItem value='apple'>Apple</SelectItem>
+    <SelectItem value='banana'>Banana</SelectItem>
+    <SelectItem value='carrot'>Carrot</SelectItem>
   </SelectContent>
 </Select>
 ```
+
 <!--
 Multiple select allows users to choose more than one option.
 -->
@@ -3604,15 +3809,16 @@ Customize how selected values are displayed using the `SelectValue` component:
 <Select>
   <SelectTrigger>
     <SelectValue>
-      {value => <span>Selected: {Array.isArray(value) ? value.join(", ") : value}</span>}
+      {value => <span>Selected: {Array.isArray(value) ? value.join(', ') : value}</span>}
     </SelectValue>
   </SelectTrigger>
   <SelectContent>
-    <SelectItem value="apple">Apple</SelectItem>
-    <SelectItem value="banana">Banana</SelectItem>
+    <SelectItem value='apple'>Apple</SelectItem>
+    <SelectItem value='banana'>Banana</SelectItem>
   </SelectContent>
 </Select>
 ```
+
 <!--
 Custom value display can show selected items in any format you want.
 -->
@@ -3621,28 +3827,28 @@ Custom value display can show selected items in any format you want.
 
 #### Select Component Props
 
-| Prop         | Type                    | Default |
-|--------------|-------------------------|---------|
-| multiple     | boolean                 | false   |
-| size         | enum                    | small   |
-| variant      | enum                    | outline |
-| defaultValue | string \| string[]      | false   |
-| value        | string \| string[]      | false   |
-| onValueChange| (value: string \| string[]) => void | -       |
-| disabled     | boolean                 | false   |
+| Prop          | Type                                | Default |
+| ------------- | ----------------------------------- | ------- |
+| multiple      | boolean                             | false   |
+| size          | enum                                | small   |
+| variant       | enum                                | outline |
+| defaultValue  | string \| string[]                  | false   |
+| value         | string \| string[]                  | false   |
+| onValueChange | (value: string \| string[]) => void | -       |
+| disabled      | boolean                             | false   |
 
 #### SelectValue Component Props
 
-| Prop        | Type                                   | Default |
-|-------------|----------------------------------------|---------|
-| label       | string                                 | -       |
-| children    | (value: string \| string[]) => ReactNode | -     |
-| placeholder | ReactNode                              | -       |
+| Prop        | Type                                     | Default |
+| ----------- | ---------------------------------------- | ------- |
+| label       | string                                   | -       |
+| children    | (value: string \| string[]) => ReactNode | -       |
+| placeholder | ReactNode                                | -       |
 
 #### SelectItem Component Props
 
 | Prop     | Type    | Default |
-|----------|---------|---------|
+| -------- | ------- | ------- |
 | value    | string  | string  |
 | disabled | boolean | false   |
 
@@ -3650,15 +3856,18 @@ Custom value display can show selected items in any format you want.
 
 ## Skiplink Example
 
-The Skiplink component enables users to bypass repetitive navigation links and jump directly to the main content. It improves accessibility for keyboard and screen reader users by allowing efficient navigation—especially on sites with large menus or complex layouts.
+The Skiplink component enables users to bypass repetitive navigation links and jump directly to the
+main content. It improves accessibility for keyboard and screen reader users by allowing efficient
+navigation—especially on sites with large menus or complex layouts.
 
 ### Anatomy & Usage (Skiplink) – Example
 
 **Imports:**
 
 ```javascript
-import { Skiplink } from "@govtechmy/myds-react/skiplink";
+import { Skiplink } from '@govtechmy/myds-react/skiplink';
 ```
+
 <!--
 Import the Skiplink component to provide an accessible way for users to skip navigation and reach the main content quickly.
 -->
@@ -3669,14 +3878,12 @@ Import the Skiplink component to provide an accessible way for users to skip nav
 export default () => (
   <>
     {/* Skiplink is typically hidden until focused via Tab key */}
-    <Skiplink href="#main-content">
+    <Skiplink href='#main-content'>
       <span>Skip to main content</span>
     </Skiplink>
     {/* Main content should have a matching id for skiplink to jump to */}
-    <main id="main-content">
-      <span className="text-slate-600">
-        Main content here
-      </span>
+    <main id='main-content'>
+      <span className='text-slate-600'>Main content here</span>
     </main>
   </>
 );
@@ -3688,29 +3895,33 @@ export default () => (
 - After clicking on the page, press the **Tab** key.
 - The skip link will appear at the top of the viewport, overlapping the navigation/menu bar.
 - Press **Enter** while the skip link is focused to jump directly to the main content area.
-- Especially useful for keyboard navigation and screen readers to avoid repeatedly tabbing through navigation menus.
+- Especially useful for keyboard navigation and screen readers to avoid repeatedly tabbing through
+  navigation menus.
 
 ### Skiplink Example Props
 
 #### Skiplink Example Component Props
 
 | Prop | Type   | Default |
-|------|--------|---------|
+| ---- | ------ | ------- |
 | href | string | -       |
 
 ---
 
 ## Skiplink
 
-The Skiplink component enables users to bypass repetitive navigation links and jump directly to the main content. It improves accessibility for keyboard and screen reader users by allowing efficient navigation—especially on sites with large menus or complex layouts.
+The Skiplink component enables users to bypass repetitive navigation links and jump directly to the
+main content. It improves accessibility for keyboard and screen reader users by allowing efficient
+navigation—especially on sites with large menus or complex layouts.
 
 ### Anatomy & Usage (Skiplink)
 
 **Imports:**
 
 ```javascript
-import { Skiplink } from "@govtechmy/myds-react/skiplink";
+import { Skiplink } from '@govtechmy/myds-react/skiplink';
 ```
+
 <!--
 Import the Skiplink component to provide an accessible way for users to skip navigation and reach the main content quickly.
 -->
@@ -3721,14 +3932,12 @@ Import the Skiplink component to provide an accessible way for users to skip nav
 export default () => (
   <>
     {/* Skiplink is typically hidden until focused via Tab key */}
-    <Skiplink href="#main-content">
+    <Skiplink href='#main-content'>
       <span>Skip to main content</span>
     </Skiplink>
     {/* Main content should have a matching id for skiplink to jump to */}
-    <main id="main-content">
-      <span className="text-slate-600">
-        Main content here
-      </span>
+    <main id='main-content'>
+      <span className='text-slate-600'>Main content here</span>
     </main>
   </>
 );
@@ -3740,29 +3949,32 @@ export default () => (
 - After clicking on the page, press the **Tab** key.
 - The skip link will appear at the top of the viewport, overlapping the navigation/menu bar.
 - Press **Enter** while the skip link is focused to jump directly to the main content area.
-- Especially useful for keyboard navigation and screen readers to avoid repeatedly tabbing through navigation menus.
+- Especially useful for keyboard navigation and screen readers to avoid repeatedly tabbing through
+  navigation menus.
 
 ### Skiplink Props
 
 #### Skiplink Component Props
 
 | Prop | Type   | Default |
-|------|--------|---------|
+| ---- | ------ | ------- |
 | href | string | -       |
 
 ---
 
 ## Spinner
 
-The Spinner component is a customizable loading indicator used to provide visual feedback for loading states in your application.
+The Spinner component is a customizable loading indicator used to provide visual feedback for
+loading states in your application.
 
 ### Anatomy & Usage (Spinner)
 
 **Imports:**
 
 ```javascript
-import { Spinner } from "@govtechmy/myds-react/spinner";
+import { Spinner } from '@govtechmy/myds-react/spinner';
 ```
+
 <!--
 Import the Spinner component to display a loading indicator anywhere in your app.
 -->
@@ -3779,7 +3991,8 @@ export default () => <Spinner />;
 #### Spinner Variant Example
 
 Use the `color` prop to change the spinner style.  
-Available colors: e.g., `gray` (default), `primary`, `success`, `warning`, `danger` (check your library for supported colors).
+Available colors: e.g., `gray` (default), `primary`, `success`, `warning`, `danger` (check your
+library for supported colors).
 
 ```jsx
 <Spinner color="gray" />
@@ -3788,6 +4001,7 @@ Available colors: e.g., `gray` (default), `primary`, `success`, `warning`, `dang
 <Spinner color="warning" />
 <Spinner color="danger" />
 ```
+
 <!--
 Change color to reflect different loading contexts or states.
 -->
@@ -3802,6 +4016,7 @@ Available sizes: `small` (default), `medium`, `large`.
 <Spinner size="medium" />
 <Spinner size="large" />
 ```
+
 <!--
 Choose the spinner size that best fits your UI layout.
 -->
@@ -3814,6 +4029,7 @@ Use the `show` prop to control spinner visibility.
 <Spinner show={true} />  {/* Spinner is visible */}
 <Spinner show={false} /> {/* Spinner is hidden */}
 ```
+
 <!--
 Control visibility for conditional loading states.
 -->
@@ -3822,17 +4038,19 @@ Control visibility for conditional loading states.
 
 #### Spinner Component Props
 
-| Prop | Type   | Default |
-|------|--------|---------|
-| color| enum   | gray    |
-| size | enum   | small   |
-| show | boolean| true    |
+| Prop  | Type    | Default |
+| ----- | ------- | ------- |
+| color | enum    | gray    |
+| size  | enum    | small   |
+| show  | boolean | true    |
 
 ---
 
 ## Summary List
 
-The Summary List component displays information in a structured key-value format, making it ideal for presenting form summaries, application details, or any data that needs to be reviewed. It supports headers, action buttons, and custom styling for enhanced usability and accessibility.
+The Summary List component displays information in a structured key-value format, making it ideal
+for presenting form summaries, application details, or any data that needs to be reviewed. It
+supports headers, action buttons, and custom styling for enhanced usability and accessibility.
 
 ### Anatomy & Usage (Summary List)
 
@@ -3848,8 +4066,9 @@ import {
   SummaryListDetail,
   SummaryListRow,
   SummaryListAddition,
-} from "@govtechmy/myds-react/summary-list";
+} from '@govtechmy/myds-react/summary-list';
 ```
+
 <!--
 Import all subcomponents to build structured summary tables and rows.
 -->
@@ -3883,14 +4102,14 @@ export default () => (
 
 #### Main Wrapper: SummaryList
 
-The `SummaryList` is the primary container for presenting a summary of items in a structured and visually consistent format.  
+The `SummaryList` is the primary container for presenting a summary of items in a structured and
+visually consistent format.  
 It serves as the parent component, wrapping all subcomponents.
 
 ```jsx
-<SummaryList>
-  {/* Subcomponents go here */}
-</SummaryList>
+<SummaryList>{/* Subcomponents go here */}</SummaryList>
 ```
+
 <!--
 Use SummaryList to wrap all summary rows and headers.
 -->
@@ -3902,19 +4121,20 @@ Displays the title of the summary list.
 ```jsx
 <SummaryListHeader>Government Subsidy Application</SummaryListHeader>
 ```
+
 <!--
 Header provides context or a label for the summary table.
 -->
 
 #### SummaryListBody
 
-Wrapper for the tabular data within the SummaryList. It contains multiple or single `SummaryListRow` components.
+Wrapper for the tabular data within the SummaryList. It contains multiple or single `SummaryListRow`
+components.
 
 ```jsx
-<SummaryListBody>
-  {/* SummaryListRow components */}
-</SummaryListBody>
+<SummaryListBody>{/* SummaryListRow components */}</SummaryListBody>
 ```
+
 <!--
 Body organizes all rows in the summary list.
 -->
@@ -3924,10 +4144,9 @@ Body organizes all rows in the summary list.
 Defines individual rows within the table, grouping terms, details, actions, and additions.
 
 ```jsx
-<SummaryListRow>
-  {/* Term, Detail, Action, Addition */}
-</SummaryListRow>
+<SummaryListRow>{/* Term, Detail, Action, Addition */}</SummaryListRow>
 ```
+
 <!--
 Each row represents a key-value pair and optional action/addition.
 -->
@@ -3939,6 +4158,7 @@ Represents the term or label in the row.
 ```jsx
 <SummaryListTerm>Application ID</SummaryListTerm>
 ```
+
 <!--
 Label for the row, e.g., field name.
 -->
@@ -3950,6 +4170,7 @@ Displays the detailed information corresponding to the term.
 ```jsx
 <SummaryListDetail>SUB12345</SummaryListDetail>
 ```
+
 <!--
 Value for the row, e.g., field data.
 -->
@@ -3963,6 +4184,7 @@ For adding actions (e.g., buttons or links) associated with a row.
   <button>View</button>
 </SummaryListAction>
 ```
+
 <!--
 Add actions such as edit, view, or delete per row.
 -->
@@ -3974,6 +4196,7 @@ Provides extra information or actions in the row.
 ```jsx
 <SummaryListAddition>Additional Info</SummaryListAddition>
 ```
+
 <!--
 Use for supplementary details or controls in a row.
 -->
@@ -3983,56 +4206,56 @@ Use for supplementary details or controls in a row.
 #### SummaryList Component Props
 
 | Prop      | Type      | Default |
-|-----------|-----------|---------|
+| --------- | --------- | ------- |
 | className | string    | -       |
 | children  | ReactNode | -       |
 
 #### SummaryListHeader Component Props
 
 | Prop      | Type      | Default |
-|-----------|-----------|---------|
+| --------- | --------- | ------- |
 | className | string    | -       |
 | children  | ReactNode | -       |
 
 #### SummaryListBody Component Props
 
 | Prop      | Type      | Default |
-|-----------|-----------|---------|
+| --------- | --------- | ------- |
 | className | string    | -       |
 | children  | ReactNode | -       |
 
 #### SummaryListRow Component Props
 
 | Prop      | Type      | Default |
-|-----------|-----------|---------|
+| --------- | --------- | ------- |
 | className | string    | -       |
 | children  | ReactNode | -       |
 
 #### SummaryListTerm Component Props
 
 | Prop      | Type      | Default |
-|-----------|-----------|---------|
+| --------- | --------- | ------- |
 | className | string    | -       |
 | children  | ReactNode | -       |
 
 #### SummaryListDetail Component Props
 
 | Prop      | Type      | Default |
-|-----------|-----------|---------|
+| --------- | --------- | ------- |
 | className | string    | -       |
 | children  | ReactNode | -       |
 
 #### SummaryListAction Component Props
 
 | Prop      | Type      | Default |
-|-----------|-----------|---------|
+| --------- | --------- | ------- |
 | className | string    | -       |
 | children  | ReactNode | -       |
 
 #### SummaryListAddition Component Props
 
 | Prop      | Type      | Default |
-|-----------|-----------|---------|
+| --------- | --------- | ------- |
 | className | string    | -       |
 | children  | ReactNode | -       |
 
@@ -4040,7 +4263,9 @@ Use for supplementary details or controls in a row.
 
 ## Table
 
-The Table component organizes information into rows and columns for easy readability. It accommodates various data types, including text, numbers, code, call-to-action, and links, enabling efficient presentation and comparison.
+The Table component organizes information into rows and columns for easy readability. It
+accommodates various data types, including text, numbers, code, call-to-action, and links, enabling
+efficient presentation and comparison.
 
 ### Anatomy & Usage (Table)
 
@@ -4058,8 +4283,9 @@ import {
   TableRow,
   TableSkeleton,
   TableEmpty,
-} from "@govtechmy/myds-react/table";
+} from '@govtechmy/myds-react/table';
 ```
+
 <!--
 Imports all necessary subcomponents for building structured tables with headers, rows, cells, captions, footers, skeleton loading, and empty states.
 -->
@@ -4094,7 +4320,8 @@ export default () => (
 
 #### Basic Table Example
 
-Create a basic table with headers, rows, and cells using Table, TableHeader, TableRow, TableHead, TableBody, and TableCell.
+Create a basic table with headers, rows, and cells using Table, TableHeader, TableRow, TableHead,
+TableBody, and TableCell.
 
 ```jsx
 <Table>
@@ -4115,6 +4342,7 @@ Create a basic table with headers, rows, and cells using Table, TableHeader, Tab
   </TableBody>
 </Table>
 ```
+
 <!--
 Use TableHead for column headers and TableCell for data cells.
 -->
@@ -4151,6 +4379,7 @@ Use `rowSpan` and `colSpan` attributes to merge cells across rows or columns.
   </TableBody>
 </Table>
 ```
+
 <!--
 Merge cells for clearer data grouping and summaries.
 -->
@@ -4170,6 +4399,7 @@ Add a footer to the table using the TableFooter component for summary or totals.
   </TableFooter>
 </Table>
 ```
+
 <!--
 Footer is useful for displaying totals or aggregate info.
 -->
@@ -4182,6 +4412,7 @@ Show a skeleton loading state while data is being fetched with TableSkeleton.
 <TableSkeleton />
 // Renders a placeholder skeleton for loading state.
 ```
+
 <!--
 Use TableSkeleton to indicate that data is loading.
 -->
@@ -4202,6 +4433,7 @@ Show an empty state when there is no data using TableEmpty.
   <TableEmpty>No data available</TableEmpty>
 </Table>
 ```
+
 <!--
 Use TableEmpty to inform users when there's no content to display.
 -->
@@ -4210,25 +4442,27 @@ Use TableEmpty to inform users when there's no content to display.
 
 #### TableHead Component Props
 
-| Prop    | Type                                      | Default |
-|---------|-------------------------------------------|---------|
-| rowSpan | boolean                                   | false   |
-| colSpan | boolean                                   | false   |
-| scope   | "col" \| "row" \| "colgroup" \| "rowgroup"| -       |
+| Prop    | Type                                       | Default |
+| ------- | ------------------------------------------ | ------- |
+| rowSpan | boolean                                    | false   |
+| colSpan | boolean                                    | false   |
+| scope   | "col" \| "row" \| "colgroup" \| "rowgroup" | -       |
 
 #### TableCell Component Props
 
-| Prop    | Type                                      | Default |
-|---------|-------------------------------------------|---------|
-| rowSpan | boolean                                   | false   |
-| colSpan | boolean                                   | false   |
-| scope   | "col" \| "row" \| "colgroup" \| "rowgroup"| -       |
+| Prop    | Type                                       | Default |
+| ------- | ------------------------------------------ | ------- |
+| rowSpan | boolean                                    | false   |
+| colSpan | boolean                                    | false   |
+| scope   | "col" \| "row" \| "colgroup" \| "rowgroup" | -       |
 
 ---
 
 ## Tabs
 
-The Tabs component allows users to navigate between different views or content sections within the same context by clicking on a tab. It supports multiple visual styles, sizes, icons, and counters for enhanced organization and usability.
+The Tabs component allows users to navigate between different views or content sections within the
+same context by clicking on a tab. It supports multiple visual styles, sizes, icons, and counters
+for enhanced organization and usability.
 
 ### Anatomy & Usage (Tabs)
 
@@ -4242,8 +4476,9 @@ import {
   TabsContent,
   TabsIcon,
   TabsCounter,
-} from "@govtechmy/myds-react/tabs";
+} from '@govtechmy/myds-react/tabs';
 ```
+
 <!--
 Import all subcomponents to build interactive and accessible tab navigation.
 -->
@@ -4252,15 +4487,18 @@ Import all subcomponents to build interactive and accessible tab navigation.
 
 ```jsx
 export default () => (
-  <Tabs variant="line" size="small">
+  <Tabs variant='line' size='small'>
     <TabsList>
-      <TabsTrigger value="novel">Novel</TabsTrigger>
-      <TabsTrigger value="short-story">Short Story</TabsTrigger>
-      <TabsTrigger value="poetry">Poetry</TabsTrigger>
-      <TabsTrigger value="drama">Drama</TabsTrigger>
+      <TabsTrigger value='novel'>Novel</TabsTrigger>
+      <TabsTrigger value='short-story'>Short Story</TabsTrigger>
+      <TabsTrigger value='poetry'>Poetry</TabsTrigger>
+      <TabsTrigger value='drama'>Drama</TabsTrigger>
     </TabsList>
-    <TabsContent value="novel">
-      A novel is a long work of fiction that presents a complete story with characters, plot, and setting. It typically encompasses various themes such as love, family, life struggles, and societal challenges. Novels allow readers to immerse themselves in new worlds through the author's imagination.
+    <TabsContent value='novel'>
+      A novel is a long work of fiction that presents a complete story with characters, plot, and
+      setting. It typically encompasses various themes such as love, family, life struggles, and
+      societal challenges. Novels allow readers to immerse themselves in new worlds through the
+      author's imagination.
     </TabsContent>
     {/* Add more TabsContent for each trigger */}
   </Tabs>
@@ -4283,6 +4521,7 @@ Use the `variant` prop to change the tabs' style. There are three visual variant
 <Tabs variant="enclosed">...</Tabs>
 <Tabs variant="line">...</Tabs>
 ```
+
 <!--
 Choose a variant that matches your design and user experience needs.
 -->
@@ -4298,6 +4537,7 @@ Use the `size` prop to change the size of the tabs for different contexts:
 <Tabs size="small">...</Tabs>
 <Tabs size="medium">...</Tabs>
 ```
+
 <!--
 Size variants change tab and icon dimensions for different device sizes.
 -->
@@ -4309,11 +4549,11 @@ Use `TabsIcon` inside `TabsTrigger` to add visual indicators at the start (or en
 ```jsx
 <Tabs>
   <TabsList>
-    <TabsTrigger value="novel">
+    <TabsTrigger value='novel'>
       <TabsIcon>{/* <BookIcon /> */}</TabsIcon>
       Novel
     </TabsTrigger>
-    <TabsTrigger value="short-story">
+    <TabsTrigger value='short-story'>
       <TabsIcon>{/* <StoryIcon /> */}</TabsIcon>
       Short Story
     </TabsTrigger>
@@ -4322,6 +4562,7 @@ Use `TabsIcon` inside `TabsTrigger` to add visual indicators at the start (or en
   {/* ... */}
 </Tabs>
 ```
+
 <!--
 Icons help users quickly recognize tab categories.
 -->
@@ -4333,16 +4574,17 @@ Add `TabsCounter` inside `TabsTrigger` to display the number of items in each ca
 ```jsx
 <Tabs>
   <TabsList>
-    <TabsTrigger value="novel">
+    <TabsTrigger value='novel'>
       Novel <TabsCounter>1</TabsCounter>
     </TabsTrigger>
-    <TabsTrigger value="short-story">
+    <TabsTrigger value='short-story'>
       Short Story <TabsCounter>2</TabsCounter>
     </TabsTrigger>
   </TabsList>
   {/* ... */}
 </Tabs>
 ```
+
 <!--
 Counters provide at-a-glance information about item counts per tab.
 -->
@@ -4351,15 +4593,15 @@ Counters provide at-a-glance information about item counts per tab.
 
 #### Tabs Component Props
 
-| Prop    | Type  | Default |
-|---------|-------|---------|
-| variant | enum  | line    |
-| size    | enum  | small   |
+| Prop    | Type | Default |
+| ------- | ---- | ------- |
+| variant | enum | line    |
+| size    | enum | small   |
 
 #### TabsList Component Props
 
 | Prop  | Type | Default |
-|-------|------|---------|
+| ----- | ---- | ------- |
 | width | enum | fit     |
 
 #### TabsTrigger Component
@@ -4372,25 +4614,30 @@ Counters provide at-a-glance information about item counts per tab.
 
 #### TabsIcon Component
 
-- Wrapper for icons within `TabsTrigger`, applies consistent styling and sizing based on context (`small` or `medium` variants).
+- Wrapper for icons within `TabsTrigger`, applies consistent styling and sizing based on context
+  (`small` or `medium` variants).
 
 #### TabsCounter Component
 
-- Displays numerical indicators or badges within `TabsTrigger`, adapts text size based on parent tabs' context.
+- Displays numerical indicators or badges within `TabsTrigger`, adapts text size based on parent
+  tabs' context.
 
 ---
 
 ## Tag
 
-The Tag component is a visual indicator used to display the current state or status of an item, process, or entity. Tags help communicate statuses at a glance and come in multiple styles, sizes, and modes. They can optionally display a status dot for additional emphasis.
+The Tag component is a visual indicator used to display the current state or status of an item,
+process, or entity. Tags help communicate statuses at a glance and come in multiple styles, sizes,
+and modes. They can optionally display a status dot for additional emphasis.
 
 ### Anatomy & Usage (Tag)
 
 **Imports:**
 
 ```javascript
-import { Tag } from "@govtechmy/myds-react/tag";
+import { Tag } from '@govtechmy/myds-react/tag';
 ```
+
 <!--
 Import the Tag component to visually indicate status, state, or categorization in your UI.
 -->
@@ -4426,6 +4673,7 @@ Supported variants: `default`, `primary`, `success`, `danger`, `warning`.
 <Tag variant="danger">Danger</Tag>
 <Tag variant="warning">Warning</Tag>
 ```
+
 <!--
 Variants communicate different states or statuses at a glance.
 -->
@@ -4440,6 +4688,7 @@ Supported sizes: `small`, `medium`, `large`.
 <Tag size="medium">Medium</Tag>
 <Tag size="large">Large</Tag>
 ```
+
 <!--
 Choose tag size for visual hierarchy or layout needs.
 -->
@@ -4455,6 +4704,7 @@ Use the `mode` prop to change the tag's shape:
 <Tag mode="default">Default</Tag>
 <Tag mode="pill">Pill</Tag>
 ```
+
 <!--
 Mode adjusts the tag's border radius for different design aesthetics.
 -->
@@ -4468,6 +4718,7 @@ The dot acts as a visual indicator for the current state.
 <Tag dot={false}>No Dot</Tag>
 <Tag dot={true}>Dot</Tag>
 ```
+
 <!--
 Dots are useful for representing live, active, or status indicators.
 -->
@@ -4476,26 +4727,29 @@ Dots are useful for representing live, active, or status indicators.
 
 #### Tag Component Props
 
-| Prop    | Type    | Default   |
-|---------|---------|-----------|
-| variant | enum    | default   |
-| size    | enum    | small     |
-| dot     | boolean | false     |
-| mode    | enum    | pill      |
+| Prop    | Type    | Default |
+| ------- | ------- | ------- |
+| variant | enum    | default |
+| size    | enum    | small   |
+| dot     | boolean | false   |
+| mode    | enum    | pill    |
 
 ---
 
 ## Text Area
 
-The Text Area component is a multi-line text input designed for longer form content. Unlike the Input component—which is limited to a single line—the Text Area expands vertically to accommodate multiple lines of text, making it ideal for comments, messages, or any large textual input.
+The Text Area component is a multi-line text input designed for longer form content. Unlike the
+Input component—which is limited to a single line—the Text Area expands vertically to accommodate
+multiple lines of text, making it ideal for comments, messages, or any large textual input.
 
 ### Anatomy & Usage (Text Area)
 
 **Imports:**
 
 ```javascript
-import { TextArea } from "@govtechmy/myds-react/textarea";
+import { TextArea } from '@govtechmy/myds-react/textarea';
 ```
+
 <!--
 Import the TextArea component for multi-line text input in forms.
 -->
@@ -4505,8 +4759,8 @@ Import the TextArea component for multi-line text input in forms.
 ```jsx
 export default () => (
   <TextArea
-    placeholder="Placeholder text displayed when the text area is empty."
-    size="small"
+    placeholder='Placeholder text displayed when the text area is empty.'
+    size='small'
     disabled={false}
   />
 );
@@ -4525,17 +4779,20 @@ Supported sizes: `small`, `medium`, `large`. The default is `medium`.
 <TextArea size="medium" placeholder="Enter your text for your medium TextArea." />
 <TextArea size="large" placeholder="Enter your text for your large TextArea." />
 ```
+
 <!--
 Choose size to fit different layouts or UI density requirements.
 -->
 
 #### Text Area Disabled Example
 
-Set the `disabled` prop to `true` to prevent user input and apply a visual styling that indicates the field cannot be edited.
+Set the `disabled` prop to `true` to prevent user input and apply a visual styling that indicates
+the field cannot be edited.
 
 ```jsx
-<TextArea disabled placeholder="The TextArea has been disabled." />
+<TextArea disabled placeholder='The TextArea has been disabled.' />
 ```
+
 <!--
 Disabled state greys out the field and makes it non-interactive.
 -->
@@ -4544,26 +4801,28 @@ Disabled state greys out the field and makes it non-interactive.
 
 #### TextArea Component Props
 
-| Prop        | Type     | Default   |
-|-------------|----------|-----------|
-| size        | enum     | medium    |
-| disabled    | boolean  | false     |
-| placeholder | string   | -         |
+| Prop        | Type    | Default |
+| ----------- | ------- | ------- |
+| size        | enum    | medium  |
+| disabled    | boolean | false   |
+| placeholder | string  | -       |
 
 ---
 
 ## Theme Switch
 
-The Theme Switch component allows users to dynamically switch the application's theme (e.g., light, dark, or custom themes) for improved accessibility and personalized experience.
+The Theme Switch component allows users to dynamically switch the application's theme (e.g., light,
+dark, or custom themes) for improved accessibility and personalized experience.
 
 ### Anatomy & Usage (Theme Switch)
 
 **Imports:**
 
 ```javascript
-import { ThemeProvider } from "@govtechmy/myds-react/hooks";
-import { ThemeSwitch } from "@govtechmy/myds-react/theme-switch";
+import { ThemeProvider } from '@govtechmy/myds-react/hooks';
+import { ThemeSwitch } from '@govtechmy/myds-react/theme-switch';
 ```
+
 <!--
 Import ThemeProvider to manage theme context, and ThemeSwitch to provide user controls for changing themes.
 -->
@@ -4584,26 +4843,30 @@ export default () => (
 
 #### Theme Switch as Toggle Example
 
-By default, `ThemeSwitch` will appear as a toggle button, allowing users to switch between light and dark modes.
+By default, `ThemeSwitch` will appear as a toggle button, allowing users to switch between light and
+dark modes.
 
 ```jsx
 <ThemeProvider>
   <ThemeSwitch />
 </ThemeProvider>
 ```
+
 <!--
 Toggle mode lets users switch between two primary themes: light and dark.
 -->
 
 #### Theme Switch as Select Example
 
-You can render `ThemeSwitch` as a select dropdown, so users can choose from a list of available themes.
+You can render `ThemeSwitch` as a select dropdown, so users can choose from a list of available
+themes.
 
 ```jsx
 <ThemeProvider>
-  <ThemeSwitch as="select" />
+  <ThemeSwitch as='select' />
 </ThemeProvider>
 ```
+
 <!--
 Select mode presents all theme options in a dropdown menu.
 -->
@@ -4613,18 +4876,19 @@ Select mode presents all theme options in a dropdown menu.
 Extend the available themes by providing the `themes` prop with custom labels, values, and icons.
 
 ```jsx
-import { SunIcon, MoonIcon, SystemIcon } from "./icons";
+import { SunIcon, MoonIcon, SystemIcon } from './icons';
 
 const customThemes = [
-  { label: "Light", value: "light", icon: <SunIcon /> },
-  { label: "Dark", value: "dark", icon: <MoonIcon /> },
-  { label: "System", value: "system", icon: <SystemIcon /> }
+  { label: 'Light', value: 'light', icon: <SunIcon /> },
+  { label: 'Dark', value: 'dark', icon: <MoonIcon /> },
+  { label: 'System', value: 'system', icon: <SystemIcon /> },
 ];
 
 <ThemeProvider>
   <ThemeSwitch themes={customThemes} />
-</ThemeProvider>
+</ThemeProvider>;
 ```
+
 <!--
 Pass your own theme options for more flexibility and branding.
 -->
@@ -4638,32 +4902,32 @@ Pass your own theme options for more flexibility and branding.
 
 #### ThemeSwitch Component Props
 
-| Prop   | Type    | Default |
-|--------|---------|---------|
-| as     | enum    | toggle  |
+| Prop   | Type    | Default   |
+| ------ | ------- | --------- |
+| as     | enum    | toggle    |
 | themes | Theme[] | See below |
 
 Default `themes` value:
 
 ```jsx
 [
-  { 
-    label: "Light",
-    value: "light", 
-    icon: <SunIcon /> 
+  {
+    label: 'Light',
+    value: 'light',
+    icon: <SunIcon />,
   },
-  { 
-    label: "Dark",
-    value: "dark", 
-    icon: <MoonIcon /> 
-  }
-]
+  {
+    label: 'Dark',
+    value: 'dark',
+    icon: <MoonIcon />,
+  },
+];
 ```
 
 #### ThemeProvider Component Props (useTheme)
 
 | Prop         | Type      | Default |
-|--------------|-----------|---------|
+| ------------ | --------- | ------- |
 | defaultTheme | string    | light   |
 | children     | ReactNode | -       |
 
@@ -4671,7 +4935,9 @@ Default `themes` value:
 
 ## Toast Component
 
-The Toast component provides non-intrusive notifications that temporarily appear on the screen to give feedback or alert users of an event. Toasts are ideal for showing messages, confirmations, warnings, errors, or informational updates without interrupting user workflows.
+The Toast component provides non-intrusive notifications that temporarily appear on the screen to
+give feedback or alert users of an event. Toasts are ideal for showing messages, confirmations,
+warnings, errors, or informational updates without interrupting user workflows.
 
 ### Anatomy & Usage (Toast)
 
@@ -4681,11 +4947,12 @@ For most cases, `AutoToast` can be used directly.
 It is a pre-assembled, simplified version that handles common notification use cases.
 
 ```javascript
-import { AutoToast } from "@govtechmy/myds-react/toast";
+import { AutoToast } from '@govtechmy/myds-react/toast';
 
 // Place AutoToast high up in the DOM tree (e.g., in your layout component)
 <AutoToast />;
 ```
+
 <!--
 AutoToast listens globally for toast events and displays notifications as needed.
 -->
@@ -4695,7 +4962,7 @@ AutoToast listens globally for toast events and displays notifications as needed
 Use the `useToast` hook to publish or emit new toast events.
 
 ```javascript
-import { useToast } from "@govtechmy/myds-react/hooks";
+import { useToast } from '@govtechmy/myds-react/hooks';
 
 export default () => {
   const { toast } = useToast();
@@ -4703,9 +4970,9 @@ export default () => {
     <button
       onClick={() => {
         toast({
-          variant: "message",
-          title: "Hello, world!",
-          description: "this is a message toast description",
+          variant: 'message',
+          title: 'Hello, world!',
+          description: 'this is a message toast description',
         });
       }}
     >
@@ -4731,22 +4998,16 @@ import {
   ToastTitle,
   ToastDescription,
   ToastClose,
-} from "@govtechmy/myds-react/toast";
+} from '@govtechmy/myds-react/toast';
 
 export default () => (
   <ToastProvider>
     {toasts.map((toast, index) => (
-      <ToastRoot
-        key={toast.id || index}
-        variant={toast.variant || "message"}
-        {...toast}
-      >
+      <ToastRoot key={toast.id || index} variant={toast.variant || 'message'} {...toast}>
         <ToastIcon />
-        <div className="space-y-1">
+        <div className='space-y-1'>
           <ToastTitle>{toast.title}</ToastTitle>
-          {toast.description && (
-            <ToastDescription>{toast.description}</ToastDescription>
-          )}
+          {toast.description && <ToastDescription>{toast.description}</ToastDescription>}
         </div>
         <ToastClose />
         <ToastProgress />
@@ -4771,11 +5032,24 @@ There are five supported toast variants:
 - **error:** Notifies users of issues that require resolution.
 
 ```jsx
-toast({ variant: "success", title: "Saved!", description: "Your form was submitted successfully." });
-toast({ variant: "warning", title: "Reminder", description: "Don't forget to update your profile." });
-toast({ variant: "info", title: "Heads up!", description: "New updates are available." });
-toast({ variant: "error", title: "Error!", description: "Please resolve errors before proceeding." });
+toast({
+  variant: 'success',
+  title: 'Saved!',
+  description: 'Your form was submitted successfully.',
+});
+toast({
+  variant: 'warning',
+  title: 'Reminder',
+  description: "Don't forget to update your profile.",
+});
+toast({ variant: 'info', title: 'Heads up!', description: 'New updates are available.' });
+toast({
+  variant: 'error',
+  title: 'Error!',
+  description: 'Please resolve errors before proceeding.',
+});
 ```
+
 <!--
 Choose the variant that matches your notification type.
 -->
@@ -4792,10 +5066,10 @@ Choose the variant that matches your notification type.
 
 #### ToastRoot Component Props
 
-| Prop     | Type   | Default  |
-|----------|--------|----------|
-| variant  | enum   | message  |
-| duration | number | 5000     |
+| Prop     | Type   | Default |
+| -------- | ------ | ------- |
+| variant  | enum   | message |
+| duration | number | 5000    |
 
 #### ToastTitle Component
 
@@ -4803,7 +5077,8 @@ Choose the variant that matches your notification type.
 
 #### ToastDescription Component
 
-- Shows additional details or context for the notification. Abstracted from Radix UI's ToastDescription.
+- Shows additional details or context for the notification. Abstracted from Radix UI's
+  ToastDescription.
 
 #### ToastClose Component
 
@@ -4813,15 +5088,18 @@ Choose the variant that matches your notification type.
 
 ## Toggle
 
-The Toggle component is a versatile switch that allows users to toggle between two states (e.g., on/off, enabled/disabled). It is commonly used for settings, preferences, and other binary options in forms or user interfaces.
+The Toggle component is a versatile switch that allows users to toggle between two states (e.g.,
+on/off, enabled/disabled). It is commonly used for settings, preferences, and other binary options
+in forms or user interfaces.
 
 ### Anatomy & Usage (Toggle)
 
 **Imports:**
 
 ```javascript
-import { Toggle, ToggleThumb } from "@govtechmy/myds-react/toggle";
+import { Toggle, ToggleThumb } from '@govtechmy/myds-react/toggle';
 ```
+
 <!--
 Import Toggle and ToggleThumb to create a switch control for binary states.
 -->
@@ -4855,19 +5133,22 @@ Supported sizes: `small`, `medium`, `large` (default is `medium`).
   <ToggleThumb />
 </Toggle>
 ```
+
 <!--
 Choose the size that best fits your layout and design requirements.
 -->
 
 #### Toggle Disabled Example
 
-Set the `disabled` prop to `true` to make the toggle non-interactive and visually indicate its disabled state.
+Set the `disabled` prop to `true` to make the toggle non-interactive and visually indicate its
+disabled state.
 
 ```jsx
 <Toggle disabled>
   <ToggleThumb />
 </Toggle>
 ```
+
 <!--
 Disabled toggles cannot be changed by the user and have a faded appearance.
 -->
@@ -4881,8 +5162,9 @@ const [checked, setChecked] = useState(false);
 
 <Toggle checked={checked} onCheckedChange={setChecked}>
   <ToggleThumb />
-</Toggle>
+</Toggle>;
 ```
+
 <!--
 Controlled toggles allow you to synchronize state with your application logic.
 -->
@@ -4896,6 +5178,7 @@ Allow the toggle to manage its own state internally by omitting the `checked` pr
   <ToggleThumb />
 </Toggle>
 ```
+
 <!--
 Uncontrolled toggles manage their state automatically and are useful for simple use cases.
 -->
@@ -4905,7 +5188,7 @@ Uncontrolled toggles manage their state automatically and are useful for simple 
 #### Toggle Component Props
 
 | Prop     | Type    | Default |
-|----------|---------|---------|
+| -------- | ------- | ------- |
 | size     | enum    | medium  |
 | disabled | boolean | false   |
 
@@ -4913,19 +5196,18 @@ Uncontrolled toggles manage their state automatically and are useful for simple 
 
 ## Tooltip
 
-The Tooltip component provides brief, contextual information when users hover or focus on an element, enhancing clarity without cluttering the interface. Tooltips are ideal for explaining icons, buttons, or any interactive elements where the meaning might not be immediately clear.
+The Tooltip component provides brief, contextual information when users hover or focus on an
+element, enhancing clarity without cluttering the interface. Tooltips are ideal for explaining
+icons, buttons, or any interactive elements where the meaning might not be immediately clear.
 
 ### Anatomy & Usage (Tooltip)
 
 **Imports:**
 
 ```javascript
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@govtechmy/myds-react/tooltip";
+import { Tooltip, TooltipTrigger, TooltipContent } from '@govtechmy/myds-react/tooltip';
 ```
+
 <!--
 Import Tooltip components to add contextual info to interactive UI elements.
 -->
@@ -4935,11 +5217,9 @@ Import Tooltip components to add contextual info to interactive UI elements.
 ```jsx
 <Tooltip>
   <TooltipTrigger>
-    <button aria-label="Info">i</button>
+    <button aria-label='Info'>i</button>
   </TooltipTrigger>
-  <TooltipContent>
-    This is a helpful description.
-  </TooltipContent>
+  <TooltipContent>This is a helpful description.</TooltipContent>
 </Tooltip>
 // Tooltip wraps the trigger and content, showing the bubble when triggered.
 ```
@@ -4974,14 +5254,15 @@ const [isOpen, setIsOpen] = useState(false);
   </TooltipContent>
 </Tooltip>
 ```
+
 <!--
 Controlled approach allows external control of tooltip visibility. Uncontrolled manages its own state.
 -->
 
 #### Tooltip Content Placement Example
 
-You can manually adjust the placement of the TooltipContent bubble using the `side` prop.
-Accepted values: `left`, `right`, `top`, `bottom`.
+You can manually adjust the placement of the TooltipContent bubble using the `side` prop. Accepted
+values: `left`, `right`, `top`, `bottom`.
 
 ```jsx
 <Tooltip>
@@ -5017,6 +5298,7 @@ Accepted values: `left`, `right`, `top`, `bottom`.
   </TooltipContent>
 </Tooltip>
 ```
+
 <!--
 Choose placement for best readability and UX.
 -->
@@ -5025,22 +5307,22 @@ Choose placement for best readability and UX.
 
 #### Tooltip Component Props
 
-| Prop                  | Type      | Default    |
-|-----------------------|-----------|------------|
-| defaultOpen           | boolean   | -          |
-| open                  | boolean   | -          |
-| onOpenChange          | function  | -          |
-| delayDuration         | number    | 700        |
-| disableHoverableContent| boolean  | -          |
+| Prop                    | Type     | Default |
+| ----------------------- | -------- | ------- |
+| defaultOpen             | boolean  | -       |
+| open                    | boolean  | -       |
+| onOpenChange            | function | -       |
+| delayDuration           | number   | 700     |
+| disableHoverableContent | boolean  | -       |
 
 #### TooltipContent Component Props
 
-| Prop          | Type        | Default         |
-|---------------|-------------|-----------------|
-| container     | HTMLElement | document.body   |
-| arrowPadding  | number      | -               |
-| align         | enum        | center          |
-| side          | enum        | top             |
+| Prop         | Type        | Default       |
+| ------------ | ----------- | ------------- |
+| container    | HTMLElement | document.body |
+| arrowPadding | number      | -             |
+| align        | enum        | center        |
+| side         | enum        | top           |
 
 #### TooltipTrigger Component
 
@@ -5050,15 +5332,18 @@ Choose placement for best readability and UX.
 
 ## usePagination
 
-The `usePagination` hook manages pagination state and actions for lists and tables. It provides the necessary logic for self-assembled pagination components, making it easy to display paginated content with navigation controls.
+The `usePagination` hook manages pagination state and actions for lists and tables. It provides the
+necessary logic for self-assembled pagination components, making it easy to display paginated
+content with navigation controls.
 
 ### Anatomy & Usage (usePagination)
 
 **Imports:**
 
 ```javascript
-import { usePagination } from "@govtechmy/myds-react/hooks";
+import { usePagination } from '@govtechmy/myds-react/hooks';
 ```
+
 <!--
 Import the usePagination hook to manage page navigation, visible page numbers, and related logic in your list or table components.
 -->
@@ -5073,11 +5358,12 @@ const { visiblePages, max } = usePagination({ count: 10, page: 1, limit: 10, max
 
 ### Self-Assembled Pagination Component Example
 
-The `usePagination` hook provides handlers and state needed to build a custom pagination component.  
+The `usePagination` hook provides handlers and state needed to build a custom pagination
+component.  
 Below is an example of how to use it with MYDS Pagination primitives:
 
 ```jsx
-import { usePagination } from "@govtechmy/myds-react/hooks";
+import { usePagination } from '@govtechmy/myds-react/hooks';
 
 // Inside your component
 const { visiblePages } = usePagination({ count: 50, page: 3, limit: 10, maxDisplay: 4 });
@@ -5092,10 +5378,12 @@ const { visiblePages } = usePagination({ count: 50, page: 3, limit: 10, maxDispl
     {/* Render visible page numbers and ellipsis */}
     {visiblePages.map((page, index) => (
       <PaginationItem key={page}>
-        {page === "..."
-          ? <PaginationEllipsis /> // Shows an ellipsis for skipped pages
-          : typeof page === "number"
-              && <PaginationNumber number={page} /> // Shows a numbered page button
+        {
+          page === '...' ? (
+            <PaginationEllipsis /> // Shows an ellipsis for skipped pages
+          ) : (
+            typeof page === 'number' && <PaginationNumber number={page} />
+          ) // Shows a numbered page button
         }
       </PaginationItem>
     ))}
@@ -5104,8 +5392,9 @@ const { visiblePages } = usePagination({ count: 50, page: 3, limit: 10, maxDispl
       <PaginationNext />
     </PaginationItem>
   </PaginationContent>
-</Pagination>
+</Pagination>;
 ```
+
 <!--
 This example builds a paginated navigation bar with dynamic visible pages, previous/next, and ellipsis as needed.
 -->
@@ -5114,12 +5403,12 @@ This example builds a paginated navigation bar with dynamic visible pages, previ
 
 #### usePagination Arguments
 
-| Prop        | Type                     | Default |
-|-------------|--------------------------|---------|
-| count       | number                   | -       |
-| page        | number                   | -       |
-| limit       | number                   | -       |
-| maxDisplay  | number                   | -       |
+| Prop       | Type   | Default |
+| ---------- | ------ | ------- |
+| count      | number | -       |
+| page       | number | -       |
+| limit      | number | -       |
+| maxDisplay | number | -       |
 
 - `count`: Total number of items in the dataset.
 - `page`: Current active page number.
@@ -5128,10 +5417,10 @@ This example builds a paginated navigation bar with dynamic visible pages, previ
 
 #### usePagination Return Values
 
-| Prop         | Type                  | Default |
-|--------------|-----------------------|---------|
+| Prop         | Type                   | Default |
+| ------------ | ---------------------- | ------- |
 | visiblePages | Array<number \| "..."> | -       |
-| max          | number                | -       |
+| max          | number                 | -       |
 
 - `visiblePages`: Array of page numbers and/or "..." (ellipsis) for rendering pagination controls.
 - `max`: The total number of pages available.
@@ -5140,15 +5429,18 @@ This example builds a paginated navigation bar with dynamic visible pages, previ
 
 ## useTheme
 
-The `useTheme` hook provides access to the current theme and a method to switch themes dynamically within your application. It is essential for implementing user-selectable light/dark modes or custom themes in your UI.
+The `useTheme` hook provides access to the current theme and a method to switch themes dynamically
+within your application. It is essential for implementing user-selectable light/dark modes or custom
+themes in your UI.
 
 ### Anatomy & Usage (useTheme)
 
 **Imports:**
 
 ```javascript
-import { useTheme } from "@govtechmy/myds-react/hooks";
+import { useTheme } from '@govtechmy/myds-react/hooks';
 ```
+
 <!--
 Import useTheme to read and change the theme anywhere in your component tree.
 -->
@@ -5164,7 +5456,8 @@ const { theme, setTheme } = useTheme();
 ### ThemeProvider Usage Notes
 
 - **ThemeProvider is required:**  
-  Always wrap your application with `ThemeProvider` to utilise the theme context and API provided by `useTheme`.
+  Always wrap your application with `ThemeProvider` to utilise the theme context and API provided by
+  `useTheme`.
 - The context ensures all child components can read and update the theme.
 
 ### Example: Building a Theme Switch Component
@@ -5172,7 +5465,7 @@ const { theme, setTheme } = useTheme();
 The following component uses `useTheme` to toggle between light and dark modes:
 
 ```javascript
-import { useTheme } from "@govtechmy/myds-react/hooks";
+import { useTheme } from '@govtechmy/myds-react/hooks';
 
 // Simple toggle button to switch between light and dark themes
 const ThemeToggle = () => {
@@ -5180,14 +5473,15 @@ const ThemeToggle = () => {
 
   // Switches the theme on button click
   return (
-    <button onClick={() => setTheme(theme === "light" ? "dark" : "light")}>
-      Switch to {theme === "light" ? "dark" : "light"} mode
+    <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
+      Switch to {theme === 'light' ? 'dark' : 'light'} mode
     </button>
   );
 };
 
 export { ThemeToggle };
 ```
+
 <!--
 This button toggles the app theme between light and dark.
 -->
@@ -5197,16 +5491,16 @@ This button toggles the app theme between light and dark.
 You can also build a dropdown menu to select from multiple themes:
 
 ```javascript
-import { useTheme } from "@govtechmy/myds-react/hooks";
+import { useTheme } from '@govtechmy/myds-react/hooks';
 
 const ThemeSelect = () => {
   const { theme, setTheme } = useTheme();
 
   return (
     <select value={theme} onChange={e => setTheme(e.target.value)}>
-      <option value="light">Light</option>
-      <option value="dark">Dark</option>
-      <option value="system">System</option>
+      <option value='light'>Light</option>
+      <option value='dark'>Dark</option>
+      <option value='system'>System</option>
       {/* Add more theme options as needed */}
     </select>
   );
@@ -5214,13 +5508,15 @@ const ThemeSelect = () => {
 
 export { ThemeSelect };
 ```
+
 <!--
 Dropdown menus allow users to pick from more than two theme choices.
 -->
 
 ### Declaring a Globally Accessible ThemeProvider
 
-Wrap your entire application layout with `ThemeProvider` to make the theme context available everywhere:
+Wrap your entire application layout with `ThemeProvider` to make the theme context available
+everywhere:
 
 ```javascript
 import type { ReactNode } from "react";
@@ -5239,6 +5535,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 }
 // ThemeProvider should wrap the whole app to enable global theme control.
 ```
+
 <!--
 This ensures all components have access to theme state and can call setTheme.
 -->
@@ -5247,35 +5544,38 @@ This ensures all components have access to theme state and can call setTheme.
 
 #### useTheme Return Values
 
-| Prop     | Type                      | Default |
-|----------|---------------------------|---------|
-| theme    | string                    | "light" |
-| setTheme | (theme: string) => void   | -       |
+| Prop     | Type                    | Default |
+| -------- | ----------------------- | ------- |
+| theme    | string                  | "light" |
+| setTheme | (theme: string) => void | -       |
 
 - `theme`: Current theme value (e.g., "light", "dark", "system", or custom).
 - `setTheme`: Function to update the current theme.
 
 #### ThemeProvider Component Props
 
-| Prop         | Type                      | Default |
-|--------------|---------------------------|---------|
-| defaultTheme | string                    | "light" |
-| setTheme     | (theme: string) => void   | -       |
-| children     | ReactNode                 | -       |
+| Prop         | Type                    | Default |
+| ------------ | ----------------------- | ------- |
+| defaultTheme | string                  | "light" |
+| setTheme     | (theme: string) => void | -       |
+| children     | ReactNode               | -       |
 
 ---
 
 ## useToast
 
-The `useToast` hook allows you to manage toast lifecycle events dynamically from anywhere inside your app. It provides methods to trigger toast notifications, subscribe/unsubscribe to toast events, and access currently active toasts.
+The `useToast` hook allows you to manage toast lifecycle events dynamically from anywhere inside
+your app. It provides methods to trigger toast notifications, subscribe/unsubscribe to toast events,
+and access currently active toasts.
 
 ### Anatomy & Usage (useToast)
 
 **Imports:**
 
 ```javascript
-import { useToast } from "@govtechmy/myds-react/hooks";
+import { useToast } from '@govtechmy/myds-react/hooks';
 ```
+
 <!--
 Import useToast to trigger notifications, manage toast events, and access active toasts in your app.
 -->
@@ -5288,19 +5588,21 @@ const { toast } = useToast();
 // Function to trigger a toast notification
 const handleClick = () => {
   toast({
-    variant: "message",
-    title: "Hello, world!",
-    description: "This is a description",
+    variant: 'message',
+    title: 'Hello, world!',
+    description: 'This is a description',
   });
 };
 ```
+
 <!--
 Call toast() with a ToastEvent object to display a toast notification.
 -->
 
 ### Important Usage Notes
 
-- Ensure you have `<AutoToast />` or a self-assembled Toast component defined somewhere in your application for toast notifications to be displayed.
+- Ensure you have `<AutoToast />` or a self-assembled Toast component defined somewhere in your
+  application for toast notifications to be displayed.
 
 ### Example: Trigger a Toast Event
 
@@ -5308,29 +5610,31 @@ You can trigger a toast event by calling the `toast` method provided by the hook
 Define a ToastEvent object with required properties and pass it to `toast`.
 
 ```javascript
-import { useToast } from "@govtechmy/myds-react/hooks";
+import { useToast } from '@govtechmy/myds-react/hooks';
 
 // Inside your component
 const { toast } = useToast();
 
 // Trigger a default message toast (variants: "success", "info", "warning", "error")
 toast({
-  variant: "message",
-  title: "Hello, world!",
-  description: "This is a description",
+  variant: 'message',
+  title: 'Hello, world!',
+  description: 'This is a description',
 });
 ```
+
 <!--
 Variants allow you to show different types of notifications.
 -->
 
 ### Example: Building a Self-Assembled Toast Listener
 
-The `useToast` hook provides methods to subscribe and unsubscribe to toast events, which is useful for custom toast implementations or advanced use cases.
+The `useToast` hook provides methods to subscribe and unsubscribe to toast events, which is useful
+for custom toast implementations or advanced use cases.
 
 ```javascript
-import { useEffect } from "react";
-import { useToast } from "@govtechmy/myds-react/hooks";
+import { useEffect } from 'react';
+import { useToast } from '@govtechmy/myds-react/hooks';
 
 // Inside your component
 const { subscribe, unsubscribe } = useToast();
@@ -5342,20 +5646,23 @@ useEffect(() => {
   };
 }, []);
 ```
+
 <!--
 Subscribing allows your component to listen for toast events and manage custom notifications.
 -->
 
 ### Example: Accessing Active Toasts
 
-You can access the current array of active toast events using the `toasts` object provided by the hook.
+You can access the current array of active toast events using the `toasts` object provided by the
+hook.
 
 ```javascript
-import { useToast } from "@govtechmy/myds-react/hooks";
+import { useToast } from '@govtechmy/myds-react/hooks';
 
 const { toasts } = useToast();
 console.log(toasts); // Logs the array of currently active toast events
 ```
+
 <!--
 Useful for debugging or custom toast rendering logic.
 -->
@@ -5364,12 +5671,12 @@ Useful for debugging or custom toast rendering logic.
 
 #### useToast Return Values
 
-| Prop        | Type                           | Default |
-|-------------|--------------------------------|---------|
-| toast       | (props: ToastEvent) => void    | -       |
-| toasts      | ToastEvent[]                   | -       |
-| subscribe   | () => void                     | -       |
-| unsubscribe | () => void                     | -       |
+| Prop        | Type                        | Default |
+| ----------- | --------------------------- | ------- |
+| toast       | (props: ToastEvent) => void | -       |
+| toasts      | ToastEvent[]                | -       |
+| subscribe   | () => void                  | -       |
+| unsubscribe | () => void                  | -       |
 
 - `toast`: Function to trigger a toast notification.
 - `toasts`: Array of currently active toast events.

@@ -1,17 +1,22 @@
 # Jadual Data Pengguna & Organisasi Teras (v4.0)
 
-Dokumen ini menyediakan gambaran keseluruhan tahap tinggi mengenai jadual pangkalan data teras dalam MOTAC IRMS v4.0, komponen Laravel yang berkaitan, serta tujuan penggunaannya dalam sistem. Penambahbaikan selaras dengan PRINSIP REKA BENTUK MYGOVEA (18 Prinsip).
+Dokumen ini menyediakan gambaran keseluruhan tahap tinggi mengenai jadual pangkalan data teras dalam
+MOTAC IRMS v4.0, komponen Laravel yang berkaitan, serta tujuan penggunaannya dalam sistem.
+Penambahbaikan selaras dengan PRINSIP REKA BENTUK MYGOVEA (18 Prinsip).
+
 <!-- Nota: Pemetaan prinsip MyGOVEA disediakan di bahagian akhir untuk verifikasi pematuhan. -->
 
 ---
 
 ## 1. Jadual Data Pengguna & Organisasi Teras
 
-Jadual-jadual ini mendasari pengurusan pengguna, peranan, dan struktur organisasi, sejajar dengan prinsip Berpaksikan Rakyat, Komunikasi, Struktur Hierarki dan Tipografi.
+Jadual-jadual ini mendasari pengurusan pengguna, peranan, dan struktur organisasi, sejajar dengan
+prinsip Berpaksikan Rakyat, Komunikasi, Struktur Hierarki dan Tipografi.
 
 ### 1.1 `users` (Pengguna)
 
-Menyimpan maklumat semua pengguna sistem. Versi v4.0 telah diperkemas untuk menghapuskan medan modul legasi (termasuk email provisioning).
+Menyimpan maklumat semua pengguna sistem. Versi v4.0 telah diperkemas untuk menghapuskan medan modul
+legasi (termasuk email provisioning).
 
 - **Model:** `app/Models/User.php`
 - **Controller:** `app/Http/Controllers/UserController.php`, pelbagai pengawal autentikasi
@@ -27,7 +32,9 @@ Menyimpan maklumat semua pengguna sistem. Versi v4.0 telah diperkemas untuk meng
 
 ### 1.2 `roles`, `permissions`, `model_has_roles`, dsb
 
-Jadual ini diurus oleh pakej [spatie/laravel-permission](https://github.com/spatie/laravel-permission) dan mendefinisikan kawalan akses terperinci.
+Jadual ini diurus oleh pakej
+[spatie/laravel-permission](https://github.com/spatie/laravel-permission) dan mendefinisikan kawalan
+akses terperinci.
 
 - **Model:** `Spatie\Permission\Models\Role`, `Spatie\Permission\Models\Permission`
 - **Seeder:** `Database\Seeders\RoleAndPermissionSeeder.php`
@@ -45,7 +52,8 @@ Jadual ini menyimpan struktur organisasi MOTAC.
 
 - **Model:** `app/Models/Department.php`, `app/Models/Position.php`, `app/Models/Grade.php`
 - **Controller:** `app/Http/Controllers/Admin/DepartmentController.php`, dsb.
-- **Seeder:** `Database\Seeders\DepartmentSeeder.php`, `Database\Seeders\PositionSeeder.php`, `Database\Seeders\GradesSeeder.php`
+- **Seeder:** `Database\Seeders\DepartmentSeeder.php`, `Database\Seeders\PositionSeeder.php`,
+  `Database\Seeders\GradesSeeder.php`
 
 #### Prinsip Berkaitan Organisasi
 
@@ -56,7 +64,8 @@ Jadual ini menyimpan struktur organisasi MOTAC.
 
 ## 2. Jadual Peralatan ICT & Lokasi
 
-Jadual ini khusus untuk pengurusan aset fizikal ICT dan lokasinya, selaras dengan prinsip Teknologi Bersesuaian, Fleksibel, Kandungan Terancang dan Seragam.
+Jadual ini khusus untuk pengurusan aset fizikal ICT dan lokasinya, selaras dengan prinsip Teknologi
+Bersesuaian, Fleksibel, Kandungan Terancang dan Seragam.
 
 ### 2.1 `equipment_categories` & `sub_categories`
 
@@ -64,7 +73,8 @@ Mengatur peralatan dalam struktur hierarki.
 
 - **Model:** `app/Models/EquipmentCategory.php`, `app/Models/SubCategory.php`
 - **Controller:** `app/Http/Controllers/Admin/EquipmentCategoryController.php`
-- **Seeder:** `Database\Seeders\EquipmentCategorySeeder.php`, `Database\Seeders\SubCategoriesSeeder.php`
+- **Seeder:** `Database\Seeders\EquipmentCategorySeeder.php`,
+  `Database\Seeders\SubCategoriesSeeder.php`
 
 ---
 
@@ -95,7 +105,8 @@ Mengurus lokasi fizikal peralatan boleh disimpan atau digunakan.
 
 ## 3. Jadual Modul Pinjaman ICT
 
-Jadual ini khusus untuk fungsi pinjaman peralatan ICT, menepati prinsip Kawalan Pengguna, Fleksibel dan Pencegahan Ralat.
+Jadual ini khusus untuk fungsi pinjaman peralatan ICT, menepati prinsip Kawalan Pengguna, Fleksibel
+dan Pencegahan Ralat.
 
 ### 3.1 `loan_applications` & `loan_application_items`
 
@@ -124,7 +135,8 @@ Merekod pengeluaran dan pemulangan item peralatan yang dipinjam.
 
 ## 4. Jadual Modul Helpdesk & Sokongan ICT
 
-Jadual baru untuk menyokong sistem helpdesk dan pengurusan tiket dalam v4.0, berteraskan prinsip Komunikasi, Kawalan Pengguna dan Panduan
+Jadual baru untuk menyokong sistem helpdesk dan pengurusan tiket dalam v4.0, berteraskan prinsip
+Komunikasi, Kawalan Pengguna dan Panduan
 
 ### 4.1 `tickets`
 
@@ -132,7 +144,8 @@ Menyimpan maklumat teras setiap tiket sokongan yang dihantar pengguna.
 
 - **Model:** `app/Models/Ticket.php`
 - **Controller:** `app/Http/Controllers/Helpdesk/TicketController.php`
-- **Livewire:** `App\Livewire\Helpdesk\CreateTicketForm.php`, `MyTicketsIndex.php`, `TicketDetails.php`, `Admin/TicketManagement.php`, `Admin/TicketReport.php`
+- **Livewire:** `App\Livewire\Helpdesk\CreateTicketForm.php`, `MyTicketsIndex.php`,
+  `TicketDetails.php`, `Admin/TicketManagement.php`, `Admin/TicketReport.php`
 - **Factory:** `Database\Factories\TicketFactory.php`
 - **Seeder:** `Database\Seeders\TicketSeeder.php`
 
@@ -156,7 +169,8 @@ Menentukan keutamaan tiket helpdesk.
 
 ### 4.4 `ticket_comments`
 
-Menyimpan komen dan respons berangkai bagi setiap tiket helpdesk untuk komunikasi antara pengguna dan agen IT.
+Menyimpan komen dan respons berangkai bagi setiap tiket helpdesk untuk komunikasi antara pengguna
+dan agen IT.
 
 - **Model:** `app/Models/TicketComment.php`
 - **Controller:** Diurus dalam `app/Http/Controllers/Helpdesk/TicketController.php`
@@ -183,12 +197,15 @@ Menyimpan fail lampiran untuk tiket dan komen.
 
 ## 5. Jadual Aliran Kerja & Utiliti Berkongsi
 
-Menyokong aliran kerja dan fungsi sistem yang digunakan oleh pelbagai modul, menepati prinsip Struktur Hierarki, Kawalan Pengguna, Komunikasi dan Realistik.
+Menyokong aliran kerja dan fungsi sistem yang digunakan oleh pelbagai modul, menepati prinsip
+Struktur Hierarki, Kawalan Pengguna, Komunikasi dan Realistik.
+
 <!-- Pembetulan: "Struktural Hierarki" diperbetulkan kepada "Struktur Hierarki" untuk sepadan dengan senarai prinsip dalam prinsip-reka-bentuk-mygovea.md -->
 
 ### 5.1 `approvals`
 
-Jadual polimorfik untuk menyimpan maklumat kelulusan pelbagai proses seperti permohonan pinjaman ICT dan tiket helpdesk.
+Jadual polimorfik untuk menyimpan maklumat kelulusan pelbagai proses seperti permohonan pinjaman ICT
+dan tiket helpdesk.
 
 - **Model:** `app/Models/Approval.php`
 - **Controller:** `app/Http/Controllers/ApprovalController.php`

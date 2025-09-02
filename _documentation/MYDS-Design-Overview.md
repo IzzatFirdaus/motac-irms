@@ -2,18 +2,26 @@
 
 ## Introduction to MYDS
 
-As digital government services become more widely used, maintaining high-quality, accessible platforms is essential. The **Malaysia Government Design System (MYDS)** supports this goal by providing standard tools, templates, and guidelines that enable agencies to build fast, user-friendly, and consistent digital services.
+As digital government services become more widely used, maintaining high-quality, accessible
+platforms is essential. The **Malaysia Government Design System (MYDS)** supports this goal by
+providing standard tools, templates, and guidelines that enable agencies to build fast,
+user-friendly, and consistent digital services.
 
 ---
 
 ## What is MYDS?
 
-MYDS is a comprehensive design system for Malaysian government websites and digital platforms. It includes:
+MYDS is a comprehensive design system for Malaysian government websites and digital platforms. It
+includes:
 
-- Components: Pre-built UI elements (such as buttons, forms, navigation bars) that promote consistency and accelerate interface development.
-- Theme Customizer: A tool for tailoring colours and styles to match agency branding while preserving a unified visual identity.
-- Patterns: Ready-made layouts and design patterns for common scenarios (e.g., login screens, data forms) that ensure usability and best practices.
-- Design File: An all-in-one design asset library for prototyping and building according to MYDS standards.
+- Components: Pre-built UI elements (such as buttons, forms, navigation bars) that promote
+  consistency and accelerate interface development.
+- Theme Customizer: A tool for tailoring colours and styles to match agency branding while
+  preserving a unified visual identity.
+- Patterns: Ready-made layouts and design patterns for common scenarios (e.g., login screens, data
+  forms) that ensure usability and best practices.
+- Design File: An all-in-one design asset library for prototyping and building according to MYDS
+  standards.
 
 ---
 
@@ -21,24 +29,31 @@ MYDS is a comprehensive design system for Malaysian government websites and digi
 
 Adopting MYDS offers several advantages:
 
-- Consistency: Ensures all government digital platforms share a cohesive look and feel, promoting trust and recognition.
-- Rapid Development: Facilitates efficient design and development using reusable components and clear guidelines.
-- User Experience: Allows designers and developers to focus more on improving user experience rather than manual styling.
+- Consistency: Ensures all government digital platforms share a cohesive look and feel, promoting
+  trust and recognition.
+- Rapid Development: Facilitates efficient design and development using reusable components and
+  clear guidelines.
+- User Experience: Allows designers and developers to focus more on improving user experience rather
+  than manual styling.
 - Scalability: Components can be customized for specific needs without sacrificing consistency.
-- Accessibility: Follows WCAG (Web Content Accessibility Guidelines) to ensure inclusivity for all users, regardless of ability.
+- Accessibility: Follows WCAG (Web Content Accessibility Guidelines) to ensure inclusivity for all
+  users, regardless of ability.
 
 ---
 
 ## Use Cases for MYDS
 
-- Government Agency Websites: Platforms that disseminate information about policies, regulations, ministry profiles, activities, achievements, announcements, and media.
-- Dashboards and Portals: Interactive dashboards for key metrics and user-friendly portals for citizens to access/manage government services.
+- Government Agency Websites: Platforms that disseminate information about policies, regulations,
+  ministry profiles, activities, achievements, announcements, and media.
+- Dashboards and Portals: Interactive dashboards for key metrics and user-friendly portals for
+  citizens to access/manage government services.
 
 ---
 
 ## Resources for MYDS
 
-- Figma: Interactive design canvas featuring MYDS components, templates, and guidelines, supporting efficient prototyping and collaboration.
+- Figma: Interactive design canvas featuring MYDS components, templates, and guidelines, supporting
+  efficient prototyping and collaboration.
 
 ---
 
@@ -46,13 +61,17 @@ Adopting MYDS offers several advantages:
 
 ### Grid System Overview
 
-The 12-8-4 grid system in MYDS provides a flexible, responsive layout structure for adaptable design across all screen sizes. This grid system ensures content remains consistently aligned and visually balanced, making designs polished and accessible on any device—from desktop to mobile.
+The 12-8-4 grid system in MYDS provides a flexible, responsive layout structure for adaptable design
+across all screen sizes. This grid system ensures content remains consistently aligned and visually
+balanced, making designs polished and accessible on any device—from desktop to mobile.
 
 ### Grid System Containers and Content Types
 
 - Content Container: Main area for arranging content in various layouts.
-- Article Container: Designed for long-form content, with a maximum width of 640px for optimal readability.
-- Images & Interactive Charts: Can span the full article container width (640px) or extend to a maximum width of 740px for visual impact.
+- Article Container: Designed for long-form content, with a maximum width of 640px for optimal
+  readability.
+- Images & Interactive Charts: Can span the full article container width (640px) or extend to a
+  maximum width of 740px for visual impact.
 
 ### Grid System Breakpoints
 
@@ -63,7 +82,8 @@ Breakpoints allow layouts to adjust for different device sizes:
   - 24px column gaps and edge padding
   - Maximum content width: 1280px
 
-  The 12-column layout offers maximum flexibility for arranging content on larger screens, enabling complex layouts while keeping elements aligned and uncluttered.
+  The 12-column layout offers maximum flexibility for arranging content on larger screens, enabling
+  complex layouts while keeping elements aligned and uncluttered.
 
 - Tablet (768px - 1023px):
   - 8-column grid
@@ -75,7 +95,8 @@ Breakpoints allow layouts to adjust for different device sizes:
   - 4-column grid
   - 18px gap and edge padding
 
-  The 4-column layout is ideal for small screens, focusing on essential elements for quick and comfortable access.
+  The 4-column layout is ideal for small screens, focusing on essential elements for quick and
+  comfortable access.
 
 ### Grid System Usage Examples
 
@@ -83,15 +104,18 @@ Breakpoints allow layouts to adjust for different device sizes:
 
 On the Ministry of Digital website, a content image slider section uses the grid as follows:
 
-- Desktop: Title spans 3 columns, image spans 6 columns, with a 1-column space on each side and a 1-column gap between them for separation.
+- Desktop: Title spans 3 columns, image spans 6 columns, with a 1-column space on each side and a
+  1-column gap between them for separation.
 - Tablet: Title and image fill available space for optimal viewing.
 - Mobile: Title and image are stacked vertically instead of side by side.
 
 #### Grid System Example: Article Page Layout
 
-The article page design prioritizes readability by using a maximum paragraph container width of 640px, ensuring easy reading without line fatigue.
+The article page design prioritizes readability by using a maximum paragraph container width of
+640px, ensuring easy reading without line fatigue.
 
-- Images and Interactive Charts: Displayed at a maximum width of 740px to stand out while maintaining balanced content presentation.
+- Images and Interactive Charts: Displayed at a maximum width of 740px to stand out while
+  maintaining balanced content presentation.
 
 ---
 
@@ -99,7 +123,8 @@ The article page design prioritizes readability by using a maximum paragraph con
 
 ### Colour System Overview
 
-Colour in MYDS defines primary, danger, success, warning, and gray palettes, with guidelines for their use in backgrounds, buttons, and text to ensure contrast, readability, and consistency.
+Colour in MYDS defines primary, danger, success, warning, and gray palettes, with guidelines for
+their use in backgrounds, buttons, and text to ensure contrast, readability, and consistency.
 
 MYDS divides colour palettes into two categories:
 
@@ -108,21 +133,26 @@ MYDS divides colour palettes into two categories:
 
 ### Colour System: Primitive Colours
 
-Primitive colours are base colours used throughout the design system and do not have corresponding dark mode variants. For adaptive dark mode usage, refer to the Colour Tokens set.
+Primitive colours are base colours used throughout the design system and do not have corresponding
+dark mode variants. For adaptive dark mode usage, refer to the Colour Tokens set.
 
 Primitive Colours Include:
 
 - White: Used for backgrounds that provide clarity.
-- Gray: Base colour for headings, text, and backgrounds. Also used for placeholders, descriptions, dividers, outlines, and backgrounds with subtle effects.
-- Primary: Used for selected links, tabs, primary buttons, and highlighted elements.
-  Note: If the main product colour is not primary blue, create a custom palette.
-- Danger: Indicates critical issues or errors, perfect for error messages, delete buttons, and urgent alerts.
-- Success: Signals successful actions or outcomes, for confirmation messages, pop-ups, and progress indicators.
+- Gray: Base colour for headings, text, and backgrounds. Also used for placeholders, descriptions,
+  dividers, outlines, and backgrounds with subtle effects.
+- Primary: Used for selected links, tabs, primary buttons, and highlighted elements. Note: If the
+  main product colour is not primary blue, create a custom palette.
+- Danger: Indicates critical issues or errors, perfect for error messages, delete buttons, and
+  urgent alerts.
+- Success: Signals successful actions or outcomes, for confirmation messages, pop-ups, and progress
+  indicators.
 - Warning: Used for cautionary messages and alerts, suitable for banners, badges, and alert icons.
 
 ### Colour System: Colour Tokens Light Mode
 
-Colour tokens provide purposeful styles optimized for high contrast and accessibility in both light and dark modes. They adhere to WCAG 2.1 contrast ratio guidelines.
+Colour tokens provide purposeful styles optimized for high contrast and accessibility in both light
+and dark modes. They adhere to WCAG 2.1 contrast ratio guidelines.
 
 Token Prefixes:
 
@@ -133,14 +163,16 @@ Token Prefixes:
 
 #### Colour System Example: Light Mode Tokens
 
-- Background Tokens: Define foundational colours for surfaces and containers, maintaining contrast and hierarchy.
+- Background Tokens: Define foundational colours for surfaces and containers, maintaining contrast
+  and hierarchy.
 - Text Tokens: Used for all text elements, optimized for readability in various states.
 - Outline Tokens: Set border and outline colours for clear separation and accents.
 - Focus Ring Tokens: Emphasize interactive elements on keyboard focus.
 
 ### Colour System: Colour Tokens Dark Mode
 
-Colour tokens also support dark interfaces, ensuring high contrast and readability, and maintaining accessibility.
+Colour tokens also support dark interfaces, ensuring high contrast and readability, and maintaining
+accessibility.
 
 #### Colour System Example: Dark Mode Tokens
 
@@ -157,62 +189,66 @@ Colour tokens also support dark interfaces, ensuring high contrast and readabili
 
 ### Typography System Overview
 
-MYDS typography provides clear standards for font style, size, and spacing, ensuring readability and consistency across government platforms. This supports accessible and user-friendly text presentation.
+MYDS typography provides clear standards for font style, size, and spacing, ensuring readability and
+consistency across government platforms. This supports accessible and user-friendly text
+presentation.
 
 ### Typography System: Headings
 
-The Poppins font family is used for home page section titles, page headers, and important text elements to create a clear visual hierarchy and improve user navigation.
-Note: Not applicable for rich-text content.
+The Poppins font family is used for home page section titles, page headers, and important text
+elements to create a clear visual hierarchy and improve user navigation. Note: Not applicable for
+rich-text content.
 
 #### Typography System Example: Heading Sizes and Weights
 
-| Name                | HTML Tag | Font Size      | Line Height     | Font Weight     |
-|---------------------|----------|----------------|-----------------|-----------------|
-| Heading Extra Large |          | 60px (3.75rem) | 72px (4.5rem)   | 400 / 500 / 600 |
-| Heading Large       |          | 48px (3rem)    | 60px (3.75rem)  | 400 / 500 / 600 |
-| Heading Medium      | `h1`     | 36px (2.25rem) | 44px (2.75rem)  | 400 / 500 / 600 |
-| Heading Small       | `h2`     | 30px (1.875rem)| 38px (2.375rem) | 400 / 500 / 600 |
-| Heading Extra Small | `h3`     | 24px (1.5rem)  | 32px (2rem)     | 400 / 500 / 600 |
-| Heading 2X Small    | `h4`     | 20px (1.25rem) | 28px (1.75rem)  | 400 / 500 / 600 |
-| Heading 3X Small    | `h5`     | 16px (1rem)    | 24px (1.5rem)   | 400 / 500 / 600 |
-| Heading 4X Small    | `h6`     | 14px (0.875rem)| 20px (1.25rem)  | 400 / 500 / 600 |
+| Name                | HTML Tag | Font Size       | Line Height     | Font Weight     |
+| ------------------- | -------- | --------------- | --------------- | --------------- |
+| Heading Extra Large |          | 60px (3.75rem)  | 72px (4.5rem)   | 400 / 500 / 600 |
+| Heading Large       |          | 48px (3rem)     | 60px (3.75rem)  | 400 / 500 / 600 |
+| Heading Medium      | `h1`     | 36px (2.25rem)  | 44px (2.75rem)  | 400 / 500 / 600 |
+| Heading Small       | `h2`     | 30px (1.875rem) | 38px (2.375rem) | 400 / 500 / 600 |
+| Heading Extra Small | `h3`     | 24px (1.5rem)   | 32px (2rem)     | 400 / 500 / 600 |
+| Heading 2X Small    | `h4`     | 20px (1.25rem)  | 28px (1.75rem)  | 400 / 500 / 600 |
+| Heading 3X Small    | `h5`     | 16px (1rem)     | 24px (1.5rem)   | 400 / 500 / 600 |
+| Heading 4X Small    | `h6`     | 14px (0.875rem) | 20px (1.25rem)  | 400 / 500 / 600 |
 
 ### Typography System: Body Text
 
-The Inter font family is used for paragraphs, descriptions, and general content to provide a comfortable reading experience.
+The Inter font family is used for paragraphs, descriptions, and general content to provide a
+comfortable reading experience.
 
 #### Typography System Example: Body Text Sizes and Spacing
 
-| Name             | Font Size      | Line Height     | List Spacing    | Paragraph Spacing | Font Weight     |
-|------------------|----------------|-----------------|-----------------|-------------------|-----------------|
-| Body 6X Large    | 60px (3.75rem) | 72px (4.5rem)   | 6px (0.375rem)  | 12px (0.75rem)    | 400 / 500 / 600 |
-| Body 5X Large    | 48px (3rem)    | 60px (3.75rem)  | 6px (0.375rem)  | 12px (0.75rem)    | 400 / 500 / 600 |
-| Body 4X Large    | 36px (2.25rem) | 44px (2.75rem)  | 6px (0.375rem)  | 12px (0.75rem)    | 400 / 500 / 600 |
-| Body 3X Large    | 30px (1.875rem)| 38px (2.375rem) | 6px (0.375rem)  | 12px (0.75rem)    | 400 / 500 / 600 |
-| Body 2X Large    | 24px (1.5rem)  | 32px (2rem)     | 6px (0.375rem)  | 12px (0.75rem)    | 400 / 500 / 600 |
-| Body Extra Large | 20px (1.25rem) | 28px (1.75rem)  | 6px (0.375rem)  | 12px (0.75rem)    | 400 / 500 / 600 |
-| Body Large       | 18px (1.125rem)| 26px (1.625rem) | 6px (0.375rem)  | 12px (0.75rem)    | 400 / 500 / 600 |
-| Body Medium      | 16px (1rem)    | 24px (1.5rem)   | 6px (0.375rem)  | 12px (0.75rem)    | 400 / 500 / 600 |
-| Body Small       | 14px (0.875rem)| 20px (1.25rem)  | 6px (0.375rem)  | 12px (0.75rem)    | 400 / 500 / 600 |
-| Body Extra Small | 12px (0.75rem) | 18px (1.125rem) | 6px (0.375rem)  | 12px (0.75rem)    | 400 / 500 / 600 |
-| Body 2X Small    | 10px (0.625rem)| 12px (0.75rem)  | 6px (0.375rem)  | 12px (0.75rem)    | 400 / 500 / 600 |
+| Name             | Font Size       | Line Height     | List Spacing   | Paragraph Spacing | Font Weight     |
+| ---------------- | --------------- | --------------- | -------------- | ----------------- | --------------- |
+| Body 6X Large    | 60px (3.75rem)  | 72px (4.5rem)   | 6px (0.375rem) | 12px (0.75rem)    | 400 / 500 / 600 |
+| Body 5X Large    | 48px (3rem)     | 60px (3.75rem)  | 6px (0.375rem) | 12px (0.75rem)    | 400 / 500 / 600 |
+| Body 4X Large    | 36px (2.25rem)  | 44px (2.75rem)  | 6px (0.375rem) | 12px (0.75rem)    | 400 / 500 / 600 |
+| Body 3X Large    | 30px (1.875rem) | 38px (2.375rem) | 6px (0.375rem) | 12px (0.75rem)    | 400 / 500 / 600 |
+| Body 2X Large    | 24px (1.5rem)   | 32px (2rem)     | 6px (0.375rem) | 12px (0.75rem)    | 400 / 500 / 600 |
+| Body Extra Large | 20px (1.25rem)  | 28px (1.75rem)  | 6px (0.375rem) | 12px (0.75rem)    | 400 / 500 / 600 |
+| Body Large       | 18px (1.125rem) | 26px (1.625rem) | 6px (0.375rem) | 12px (0.75rem)    | 400 / 500 / 600 |
+| Body Medium      | 16px (1rem)     | 24px (1.5rem)   | 6px (0.375rem) | 12px (0.75rem)    | 400 / 500 / 600 |
+| Body Small       | 14px (0.875rem) | 20px (1.25rem)  | 6px (0.375rem) | 12px (0.75rem)    | 400 / 500 / 600 |
+| Body Extra Small | 12px (0.75rem)  | 18px (1.125rem) | 6px (0.375rem) | 12px (0.75rem)    | 400 / 500 / 600 |
+| Body 2X Small    | 10px (0.625rem) | 12px (0.75rem)  | 6px (0.375rem) | 12px (0.75rem)    | 400 / 500 / 600 |
 
 ### Typography System: Rich Text Format (RTF)
 
-The Inter font family is also used for styling long-form content such as articles.
-Note: The `h1` tag in RTF differs from the standard Heading Medium `h1` and is used only for article content.
+The Inter font family is also used for styling long-form content such as articles. Note: The `h1`
+tag in RTF differs from the standard Heading Medium `h1` and is used only for article content.
 
 #### Typography System Example: Rich Text Format Sizes
 
-| Name      | HTML Tag | Font Size      | Line Height     | List Spacing    | Paragraph Spacing | Font Weight |
-|-----------|----------|----------------|-----------------|-----------------|-------------------|-------------|
-| Heading 1 | `h1`     | 30px (1.875rem)| 38px (2.375rem) | 6px (0.375rem)  | 12px (0.75rem)    | 400 / 600   |
-| Heading 2 | `h2`     | 24px (1.5rem)  | 32px (2rem)     | 6px (0.375rem)  | 12px (0.75rem)    | 400 / 600   |
-| Heading 3 | `h3`     | 20px (1.25rem) | 28px (1.75rem)  | 6px (0.375rem)  | 12px (0.75rem)    | 400 / 600   |
-| Heading 4 | `h4`     | 18px (1.125rem)| 26px (1.625rem) | 6px (0.375rem)  | 12px (0.75rem)    | 400 / 600   |
-| Heading 5 | `h5`     | 16px (1rem)    | 24px (1.5rem)   | 6px (0.375rem)  | 12px (0.75rem)    | 400 / 600   |
-| Heading 6 | `h6`     | 14px (0.875rem)| 20px (1.25rem)  | 6px (0.375rem)  | 12px (0.75rem)    | 400 / 600   |
-| Paragraph | `p`      | 16px (1rem)    | 28px (1.75rem)  | 6px (0.375rem)  | 28px (1.75rem)    | 400 / 600   |
+| Name      | HTML Tag | Font Size       | Line Height     | List Spacing   | Paragraph Spacing | Font Weight |
+| --------- | -------- | --------------- | --------------- | -------------- | ----------------- | ----------- |
+| Heading 1 | `h1`     | 30px (1.875rem) | 38px (2.375rem) | 6px (0.375rem) | 12px (0.75rem)    | 400 / 600   |
+| Heading 2 | `h2`     | 24px (1.5rem)   | 32px (2rem)     | 6px (0.375rem) | 12px (0.75rem)    | 400 / 600   |
+| Heading 3 | `h3`     | 20px (1.25rem)  | 28px (1.75rem)  | 6px (0.375rem) | 12px (0.75rem)    | 400 / 600   |
+| Heading 4 | `h4`     | 18px (1.125rem) | 26px (1.625rem) | 6px (0.375rem) | 12px (0.75rem)    | 400 / 600   |
+| Heading 5 | `h5`     | 16px (1rem)     | 24px (1.5rem)   | 6px (0.375rem) | 12px (0.75rem)    | 400 / 600   |
+| Heading 6 | `h6`     | 14px (0.875rem) | 20px (1.25rem)  | 6px (0.375rem) | 12px (0.75rem)    | 400 / 600   |
+| Paragraph | `p`      | 16px (1rem)     | 28px (1.75rem)  | 6px (0.375rem) | 28px (1.75rem)    | 400 / 600   |
 
 ---
 
@@ -220,7 +256,9 @@ Note: The `h1` tag in RTF differs from the standard Heading Medium `h1` and is u
 
 ### Icon System Overview
 
-Icons are visual symbols that communicate meaning quickly, guiding users through actions, statuses, and categories. They are crafted with consistent proportions, line weights, and styling to ensure a cohesive look across all components.
+Icons are visual symbols that communicate meaning quickly, guiding users through actions, statuses,
+and categories. They are crafted with consistent proportions, line weights, and styling to ensure a
+cohesive look across all components.
 
 ### Icon System: Types of Icons
 
@@ -228,25 +266,29 @@ MYDS provides four main icon sets:
 
 - Generic Icons: Simple, universal icons for common functions (search, add, edit, remove, settings).
 - WYSIWYG Icons: Icons for text editor tools, representing formatting actions.
-- Social Media Icons: Used to link to social media platforms, typically in footers or navigation bars.
-- Media Icons: Represent file types (PPTX, Excel, DOCX, PDF), commonly used in file uploaders or previews.
+- Social Media Icons: Used to link to social media platforms, typically in footers or navigation
+  bars.
+- Media Icons: Represent file types (PPTX, Excel, DOCX, PDF), commonly used in file uploaders or
+  previews.
 
 ### Icon System: Design Guidelines
 
 #### Icon System Grid Size
 
-- Icons are designed on a 20x20 grid as the base size. They can be resized to fit various UI scenarios.
+- Icons are designed on a 20x20 grid as the base size. They can be resized to fit various UI
+  scenarios.
 
 #### Icon System Stroke Width
 
-- Standard stroke width is 1.5px at 20x20 size. This remains consistent after SVG export for easy adjustment in code.
+- Standard stroke width is 1.5px at 20x20 size. This remains consistent after SVG export for easy
+  adjustment in code.
 
 #### Icon System Sizes & Usage
 
 Stroke width should adjust proportionally with icon size for visual consistency.
 
 | Size (px) | Recommended Usage |
-|-----------|-------------------|
+| --------- | ----------------- |
 | 16x16     | Small button      |
 | 20x20     | Medium button     |
 | 24x24     | Large button      |
@@ -260,7 +302,8 @@ Stroke width should adjust proportionally with icon size for visual consistency.
 
 #### Icon System Example: Usage in UI
 
-Icons are used in buttons, text fields, alerts, and other UI elements to clarify actions and improve usability.
+Icons are used in buttons, text fields, alerts, and other UI elements to clarify actions and improve
+usability.
 
 ---
 
@@ -268,7 +311,8 @@ Icons are used in buttons, text fields, alerts, and other UI elements to clarify
 
 ### Motion System Overview
 
-Motion brings interfaces to life, transforming static elements through purposeful movement and interaction. It provides clear user feedback and enhances usability.
+Motion brings interfaces to life, transforming static elements through purposeful movement and
+interaction. It provides clear user feedback and enhances usability.
 
 ### Motion System: Principles
 
@@ -306,19 +350,19 @@ Motion brings interfaces to life, transforming static elements through purposefu
 
 ### Motion System: Transition Duration
 
-| Token Variable | Duration | Recommended Usage                                  |
-|----------------|----------|---------------------------------------------------|
+| Token Variable | Duration | Recommended Usage                                 |
+| -------------- | -------- | ------------------------------------------------- |
 | short          | 200ms    | Small UI (buttons, dropdowns, micro-interactions) |
 | medium         | 400ms    | Medium UI (callouts, alert dialogs, toast)        |
 | long           | 600ms    | Large UI (page, section transitions)              |
 
 ### Motion System: Motion Tokens
 
-Motion tokens are predefined values for managing UI state transitions.
-Token naming follows [motion-type].[transition] format.
+Motion tokens are predefined values for managing UI state transitions. Token naming follows
+[motion-type].[transition] format.
 
-| Token Variable     | Example CSS                                                   |
-|--------------------|---------------------------------------------------------------|
+| Token Variable     | Example CSS                                                         |
+| ------------------ | ------------------------------------------------------------------- |
 | easeoutback.short  | .btn:hover { transition: 200ms cubic-bezier(0.4, 1.4, 0.2, 1); }    |
 | easeoutback.medium | .alert-dialog { transition: 400ms cubic-bezier(0.4, 1.4, 0.2, 1); } |
 | easeout.long       | .slides { transition: 600ms cubic-bezier(0, 0, 0.58, 1); }          |
@@ -344,18 +388,20 @@ A Toast demonstrates motion effects for smooth, dynamic UI interactions:
 
 ### Radius System Overview
 
-A unified corner radius creates a smooth, modern aesthetic that enhances user experience through visual consistency. It softens element appearances, making them more approachable and easier to interact with.
+A unified corner radius creates a smooth, modern aesthetic that enhances user experience through
+visual consistency. It softens element appearances, making them more approachable and easier to
+interact with.
 
 ### Radius System: Specification
 
-| Name        | Size  | Radius      | Recommended Usage                          |
-|-------------|-------|-------------|--------------------------------------------|
-| Extra Small | 4px   | radius-xs   | Context Menu Item                          |
-| Small       | 6px   | radius-s    | Small Button                               |
-| Medium      | 8px   | radius-m    | Button, CTA, Context Menu                  |
-| Large       | 12px  | radius-l    | Content Card                               |
-| Extra Large | 14px  | radius-xl   | Context Menu with Search field             |
-| Full        | 9999px| radius-full | Fully rounded elements (e.g. avatars, chips)|
+| Name        | Size   | Radius      | Recommended Usage                            |
+| ----------- | ------ | ----------- | -------------------------------------------- |
+| Extra Small | 4px    | radius-xs   | Context Menu Item                            |
+| Small       | 6px    | radius-s    | Small Button                                 |
+| Medium      | 8px    | radius-m    | Button, CTA, Context Menu                    |
+| Large       | 12px   | radius-l    | Content Card                                 |
+| Extra Large | 14px   | radius-xl   | Context Menu with Search field               |
+| Full        | 9999px | radius-full | Fully rounded elements (e.g. avatars, chips) |
 
 ---
 
@@ -363,16 +409,17 @@ A unified corner radius creates a smooth, modern aesthetic that enhances user ex
 
 ### Shadow System Overview
 
-Shadow adds depth and dimension to UI components, offering a sense of layering and hierarchy in digital interfaces.
+Shadow adds depth and dimension to UI components, offering a sense of layering and hierarchy in
+digital interfaces.
 
 ### Shadow System: Specification
 
-| Name         | Preview                 | CSS                                                                                         | Recommended Usage |
-|--------------|-------------------------|----------------------------------------------------------------------------------------------|-------------------|
-| None         | shadow-none.png         | -                                                                                            | No shadow         |
-| Button       | shadow-button.png       | box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.07);                                             | Buttons           |
-| Card         | shadow-card.png         | box-shadow: 0px 2px 6px 0px rgba(0, 0, 0, 0.05), 0px 6px 24px 0px rgba(0, 0, 0, 0.05);       | Cards             |
-| Context Menu | shadow-context-menu.png | box-shadow: 0px 2px 6px 0px rgba(0, 0, 0, 0.05), 0px 12px 50px 0px rgba(0, 0, 0, 0.10);       | Context Menus     |
+| Name         | Preview                 | CSS                                                                                     | Recommended Usage |
+| ------------ | ----------------------- | --------------------------------------------------------------------------------------- | ----------------- |
+| None         | shadow-none.png         | -                                                                                       | No shadow         |
+| Button       | shadow-button.png       | box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.07);                                        | Buttons           |
+| Card         | shadow-card.png         | box-shadow: 0px 2px 6px 0px rgba(0, 0, 0, 0.05), 0px 6px 24px 0px rgba(0, 0, 0, 0.05);  | Cards             |
+| Context Menu | shadow-context-menu.png | box-shadow: 0px 2px 6px 0px rgba(0, 0, 0, 0.05), 0px 12px 50px 0px rgba(0, 0, 0, 0.10); | Context Menus     |
 
 ---
 
@@ -380,22 +427,23 @@ Shadow adds depth and dimension to UI components, offering a sense of layering a
 
 ### Spacing System Overview
 
-The spacing guidelines define the consistent use of margins and paddings across all components, ensuring a harmonious and visually appealing layout.
+The spacing guidelines define the consistent use of margins and paddings across all components,
+ensuring a harmonious and visually appealing layout.
 
 ### Spacing System: Specification
 
-| Size | Preview       | Recommended Usage                         |
-|------|---------------|-------------------------------------------|
-| 4px  | space-4.png   | Micro spacing                             |
-| 8px  | space-8.png   | Gap in button groups, fields, labels      |
-| 12px | space-12.png  | General component spacing                 |
-| 16px | space-16.png  | General component spacing                 |
-| 20px | space-20.png  | General component spacing                 |
-| 24px | space-24.png  | Gap between sub-sections, cards           |
-| 32px | space-32.png  | Gap between main sections                 |
-| 40px | space-40.png  | Large blocks, outer margins               |
-| 48px | space-48.png  | Extra large blocks, outer margins         |
-| 64px | space-64.png  | Page-level or major section separation    |
+| Size | Preview      | Recommended Usage                      |
+| ---- | ------------ | -------------------------------------- |
+| 4px  | space-4.png  | Micro spacing                          |
+| 8px  | space-8.png  | Gap in button groups, fields, labels   |
+| 12px | space-12.png | General component spacing              |
+| 16px | space-16.png | General component spacing              |
+| 20px | space-20.png | General component spacing              |
+| 24px | space-24.png | Gap between sub-sections, cards        |
+| 32px | space-32.png | Gap between main sections              |
+| 40px | space-40.png | Large blocks, outer margins            |
+| 48px | space-48.png | Extra large blocks, outer margins      |
+| 64px | space-64.png | Page-level or major section separation |
 
 ---
 
@@ -403,7 +451,8 @@ The spacing guidelines define the consistent use of margins and paddings across 
 
 ### Accordion Component Overview
 
-The Accordion component organizes and displays content in a compact, collapsible format—commonly used for FAQ sections or to streamline lengthy documentation.
+The Accordion component organizes and displays content in a compact, collapsible format—commonly
+used for FAQ sections or to streamline lengthy documentation.
 
 ### Accordion Component Anatomy
 
@@ -414,7 +463,8 @@ The Accordion component organizes and displays content in a compact, collapsible
 
 ### Accordion Component State and Interaction
 
-- Click Trigger Area: The header is clickable; clicking expands or collapses the accordion to reveal or hide the body text.
+- Click Trigger Area: The header is clickable; clicking expands or collapses the accordion to reveal
+  or hide the body text.
 - Hover State: Header text is underlined to signify interactivity.
 - Closed State (Default): Body text is hidden (opacity: 0%).
 - Opened State: Clicking the header shows the body text (opacity: 100%).
@@ -427,7 +477,8 @@ A demo showcases the Accordion's interaction:
 - Hover: Header underlined.
 - Opened: Chevron at 180°, body text visible.
 
-Accordion is ideal for managing large content sections, improving readability and navigation by allowing users to expand only what they need.
+Accordion is ideal for managing large content sections, improving readability and navigation by
+allowing users to expand only what they need.
 
 ---
 
@@ -435,15 +486,20 @@ Accordion is ideal for managing large content sections, improving readability an
 
 ### Alert Dialog Component Overview
 
-An Alert Dialog is a modal pop-up designed to capture user attention for important actions or messages. It consists of three main components—Header, Content, and Footer—forming a flexible, cohesive structure for alerts or forms.
+An Alert Dialog is a modal pop-up designed to capture user attention for important actions or
+messages. It consists of three main components—Header, Content, and Footer—forming a flexible,
+cohesive structure for alerts or forms.
 
 ### Alert Dialog Component Anatomy
 
-- Header: Sticky top section with a title, leading icon, and optional elements (close icon or last updated status). Includes a divider below.
+- Header: Sticky top section with a title, leading icon, and optional elements (close icon or last
+  updated status). Includes a divider below.
 - Content: Main area for forms, messages, or other information.
-- Footer: Sticky bottom section with action buttons for user decisions: primary action, secondary actions, and optional disclaimer.
+- Footer: Sticky bottom section with action buttons for user decisions: primary action, secondary
+  actions, and optional disclaimer.
 - Callout: Displays error messages if form validation fails.
-- Background Overlay: 50% black opacity overlay behind the dialog to focus attention and block background interaction.
+- Background Overlay: 50% black opacity overlay behind the dialog to focus attention and block
+  background interaction.
 
 ### Alert Dialog Component Size
 
@@ -462,7 +518,8 @@ An Alert Dialog is a modal pop-up designed to capture user attention for importa
 #### Alert Dialog Section: Header
 
 - Sticky header for long, scrollable modals.
-- Includes title, optional last updated status, optional tab navigation, optional close icon, divider.
+- Includes title, optional last updated status, optional tab navigation, optional close icon,
+  divider.
 
 #### Alert Dialog Section: Footer
 
@@ -471,7 +528,8 @@ An Alert Dialog is a modal pop-up designed to capture user attention for importa
   - Action 1: Secondary, next to primary (left).
   - Cancel Action: Next to Action 1, cancels the primary action.
   - Action 2: Far left, for additional actions (e.g., Delete Draft).
-  - Disclaimer: Shown before primary action (e.g., By submitting, you agree to Terms of Use and Privacy Policy).
+  - Disclaimer: Shown before primary action (e.g., By submitting, you agree to Terms of Use and
+    Privacy Policy).
 
 #### Alert Dialog Section: Footer Layout
 
@@ -496,7 +554,8 @@ An Alert Dialog is a modal pop-up designed to capture user attention for importa
 - Warning: Alerts for issues needing attention.
 - Destructive: For irreversible actions (e.g., deletion).
 
-Alert Dialog is crucial for key actions, feedback, and confirmations, improving user experience and safety.
+Alert Dialog is crucial for key actions, feedback, and confirmations, improving user experience and
+safety.
 
 ---
 
@@ -504,13 +563,16 @@ Alert Dialog is crucial for key actions, feedback, and confirmations, improving 
 
 ### Backlink Component Overview
 
-The Backlink component helps users return to the previous page in a multi-page flow. Contextual backlinks also improve internal linking, which assists search engines in crawling and indexing your site more effectively—distributing link equity and improving overall SEO.
+The Backlink component helps users return to the previous page in a multi-page flow. Contextual
+backlinks also improve internal linking, which assists search engines in crawling and indexing your
+site more effectively—distributing link equity and improving overall SEO.
 
 ### Backlink Component State and Usage
 
 - Backlink Format: Contextual backlink should follow the format: <- Back to Page title.
 - Hover State: The backlink displays an underline on hover to indicate it's clickable.
-- Usage Example: Used at the top of forms, dialogs, or any multi-step navigation to allow users to return to the previous step or overview.
+- Usage Example: Used at the top of forms, dialogs, or any multi-step navigation to allow users to
+  return to the previous step or overview.
 
 Backlink is essential for guiding users through complex flows and improving navigation efficiency.
 
@@ -520,24 +582,31 @@ Backlink is essential for guiding users through complex flows and improving navi
 
 ### Breadcrumb Component Overview
 
-The Breadcrumb component is a navigation aid that helps users understand their current location within a website or application, and allows easy navigation back to previous levels.
+The Breadcrumb component is a navigation aid that helps users understand their current location
+within a website or application, and allows easy navigation back to previous levels.
 
 ### Breadcrumb Component Anatomy
 
-- Parent Page: Link to the preceding page or section, helping users navigate back through the hierarchy.
-- Current Page: Indicates the user’s current location in the navigation path (typically not clickable).
+- Parent Page: Link to the preceding page or section, helping users navigate back through the
+  hierarchy.
+- Current Page: Indicates the user’s current location in the navigation path (typically not
+  clickable).
 - Wrapper: Container holding the breadcrumb trail for consistent spacing and alignment.
 
 ### Breadcrumb Component State and Interaction
 
-- Trigger Area: Parent page links are clickable and receive underline on hover to indicate interactivity.
+- Trigger Area: Parent page links are clickable and receive underline on hover to indicate
+  interactivity.
 - Wrapper Appearance: Can be default (no wrapper) or with a visual wrapper for layout consistency.
 
 ### Breadcrumb Component Title Length Management
 
-- Limit Title Length: The current page title should have a maximum width of 200px. If the title exceeds this, display an ellipsis (e.g., Long Page Title...) to maintain a clean, organized layout.
+- Limit Title Length: The current page title should have a maximum width of 200px. If the title
+  exceeds this, display an ellipsis (e.g., Long Page Title...) to maintain a clean, organized
+  layout.
 
-Breadcrumb improves navigation, orientation, and access to higher levels of the site or app hierarchy.
+Breadcrumb improves navigation, orientation, and access to higher levels of the site or app
+hierarchy.
 
 ---
 
@@ -545,7 +614,8 @@ Breadcrumb improves navigation, orientation, and access to higher levels of the 
 
 ### Button Component Overview
 
-A Button is a core UI element used to trigger actions or events. It provides consistency, accessibility, and a clear call to action across platforms.
+A Button is a core UI element used to trigger actions or events. It provides consistency,
+accessibility, and a clear call to action across platforms.
 
 ### Button Component Types
 
@@ -562,13 +632,14 @@ MYDS provides several button types for various contexts:
 
 ### Button Component Sizes
 
-Each button size is designed to fit different forms or actions, optimizing readability and accessibility:
+Each button size is designed to fit different forms or actions, optimizing readability and
+accessibility:
 
-| Size Name | Usage Example                    |
-|-----------|----------------------------------|
+| Size Name | Usage Example                      |
+| --------- | ---------------------------------- |
 | Small     | Compact UI, toolbars, inline forms |
-| Medium    | Standard forms, dialogs, pages   |
-| Large     | Prominent CTAs, hero sections    |
+| Medium    | Standard forms, dialogs, pages     |
+| Large     | Prominent CTAs, hero sections      |
 
 ### Button Component Appearance States
 
@@ -586,7 +657,8 @@ Buttons visually respond to user interaction and accessibility needs:
 
 ### Button Component Counter
 
-A counter is a small numeric indicator within a button, showing a related quantity (e.g., number of notifications, items, filters).
+A counter is a small numeric indicator within a button, showing a related quantity (e.g., number of
+notifications, items, filters).
 
 ### Button Component Icon Only
 
@@ -596,7 +668,8 @@ Some buttons contain only an icon (no text), clearly indicating the action:
 
 ### Button Component Demo Notes
 
-When clicked, a button may visually move down by 0.5px for tactile feedback, enhancing the sense of interaction.
+When clicked, a button may visually move down by 0.5px for tactile feedback, enhancing the sense of
+interaction.
 
 ---
 
@@ -604,7 +677,9 @@ When clicked, a button may visually move down by 0.5px for tactile feedback, enh
 
 ### Callout Component Overview
 
-The Callout component notifies users about important information related to their actions, especially inside forms. Callouts can indicate success, warnings, errors, or provide additional information based on context.
+The Callout component notifies users about important information related to their actions,
+especially inside forms. Callouts can indicate success, warnings, errors, or provide additional
+information based on context.
 
 ### Callout Component Anatomy
 
@@ -617,8 +692,8 @@ The Callout component notifies users about important information related to thei
 
 ### Callout Component Types
 
-| Type        | Purpose / Example                               |
-|-------------|--------------------------------------------------|
+| Type        | Purpose / Example                                   |
+| ----------- | --------------------------------------------------- |
 | Success     | User action completed successfully (Form submitted) |
 | Warning     | Reminders or important notes (Session will expire)  |
 | Information | Non-critical helpful info (Updates available)       |
@@ -654,23 +729,31 @@ The Callout component notifies users about important information related to thei
 
 ### Character Count Component Overview
 
-The Character Count component tracks the number of characters in a text area, providing real-time feedback to help users stay within a set limit. It displays warnings near the limit and errors when exceeded, improving form usability and compliance.
+The Character Count component tracks the number of characters in a text area, providing real-time
+feedback to help users stay within a set limit. It displays warnings near the limit and errors when
+exceeded, improving form usability and compliance.
 
 ### Character Count Component Anatomy
 
-- Text Area Input: Character count is integrated below the Text Area Input, displaying the character limit as a hint.
+- Text Area Input: Character count is integrated below the Text Area Input, displaying the character
+  limit as a hint.
 - Hint Under: Dynamic hint text shows the remaining character count below the input.
-- Counter: The counter begins with the maximum allowed value and decrements as the user types, showing the remaining characters (e.g., 200, 199...0).
+- Counter: The counter begins with the maximum allowed value and decrements as the user types,
+  showing the remaining characters (e.g., 200, 199...0).
 
 ### Character Count Component States
 
-- Default: Displays remaining characters in descending order as the user types (e.g., 200 characters remaining).
-- Warning: When the user is close to the limit, the counter changes colour (yellow) and message (e.g., 10 characters left).
-- Error: If the user exceeds the limit, the counter shows negative numbers (e.g., -100 characters over the limit) and prevents form submission due to validation failure.
+- Default: Displays remaining characters in descending order as the user types (e.g., 200 characters
+  remaining).
+- Warning: When the user is close to the limit, the counter changes colour (yellow) and message
+  (e.g., 10 characters left).
+- Error: If the user exceeds the limit, the counter shows negative numbers (e.g., -100 characters
+  over the limit) and prevents form submission due to validation failure.
 
 ### Character Count Component Usage Example
 
-- Form Integration: Character count is typically shown within forms, especially for text area inputs with limits.
+- Form Integration: Character count is typically shown within forms, especially for text area inputs
+  with limits.
 - Validation: Prevents submission if character count exceeds the limit.
 - Accessibility: Provides clear feedback for users to adjust their input.
 
@@ -680,7 +763,8 @@ The Character Count component tracks the number of characters in a text area, pr
 
 ### Checkbox Component Overview
 
-The Checkbox component allows users to make a binary choice, such as selecting or not selecting an option. It is used in forms, settings, and filters to capture user input and preferences.
+The Checkbox component allows users to make a binary choice, such as selecting or not selecting an
+option. It is used in forms, settings, and filters to capture user input and preferences.
 
 ### Checkbox Component Size
 
@@ -727,7 +811,8 @@ Hint text below the checkbox label provides extra information or guidance about 
 ### Checkbox Component Usage
 
 - Use checkboxes in forms, settings pages, and filter options.
-- Use indeterminate state for parent checkboxes in hierarchical lists when only some children are selected.
+- Use indeterminate state for parent checkboxes in hierarchical lists when only some children are
+  selected.
 - Add hint text to clarify the consequence or meaning of an option.
 - Ensure trigger area is large enough for accessibility.
 
@@ -737,11 +822,14 @@ Hint text below the checkbox label provides extra information or guidance about 
 
 ### Cookies Banner Component Overview
 
-The Cookies Banner notifies users that the website uses cookies to improve their experience and offers options to manage consent preferences. It appears when a user lands on the website for the first time.
+The Cookies Banner notifies users that the website uses cookies to improve their experience and
+offers options to manage consent preferences. It appears when a user lands on the website for the
+first time.
 
 ### Cookies Banner Component Anatomy
 
-- Description: Message informing users about the website's use of cookies. Example: Cookies on {website}.gov.my.
+- Description: Message informing users about the website's use of cookies. Example: Cookies on
+  {website}.gov.my.
 - Accept or Reject Cookies Button: Lets users accept all cookies or reject cookies.
 - Customize Button: Opens cookie settings so users can choose preferences.
 - Close Icon: Allows users to manually dismiss the banner.
@@ -754,7 +842,8 @@ The Cookies Banner notifies users that the website uses cookies to improve their
 ### Cookies Banner Component State
 
 - Default: Banner appears with description and options to Accept All, Reject all, or Customize.
-- Customize: User can select/deselect Analytics/Performance cookies (all cookies checked by default except Necessary, which is always checked). Preferences save immediately when changed.
+- Customize: User can select/deselect Analytics/Performance cookies (all cookies checked by default
+  except Necessary, which is always checked). Preferences save immediately when changed.
 
 ### Cookies Banner Component Mobile View
 
@@ -778,11 +867,13 @@ The Cookies Banner notifies users that the website uses cookies to improve their
 
 ### Date Field Component Overview
 
-The Date Field component allows users to input a date in a structured format using separate fields for day, month, and year. This ensures clarity, proper validation, and a user-friendly experience.
+The Date Field component allows users to input a date in a structured format using separate fields
+for day, month, and year. This ensures clarity, proper validation, and a user-friendly experience.
 
 ### Date Field Component Anatomy
 
-- Leading Icon (Calendar): A calendar icon placed before input fields, signaling the field is for date entry.
+- Leading Icon (Calendar): A calendar icon placed before input fields, signaling the field is for
+  date entry.
 - Day Field (dd): 2-digit field, accepts values from 1–31.
 - Month Field (mm): 2-digit field, accepts values from 1–12.
 - Year Field (yyyy): 4-digit field, accepts year values.
@@ -829,7 +920,9 @@ The Date Field component allows users to input a date in a structured format usi
 
 ### Date Picker Component Overview
 
-The Date Picker component allows users to select a date from an interactive calendar, supporting both single date and range selection. It enhances user experience for date entry, filtering, and planning tasks.
+The Date Picker component allows users to select a date from an interactive calendar, supporting
+both single date and range selection. It enhances user experience for date entry, filtering, and
+planning tasks.
 
 ### Date Picker Component Anatomy
 
@@ -903,7 +996,9 @@ How to navigate:
 
 ### Details Component Overview
 
-The Details component provides additional information or explanations that users can reveal by expanding the section. It is used in forms, modals, pages, or articles to display more details without cluttering the interface.
+The Details component provides additional information or explanations that users can reveal by
+expanding the section. It is used in forms, modals, pages, or articles to display more details
+without cluttering the interface.
 
 ### Details Component Anatomy
 
@@ -933,13 +1028,16 @@ The Details component provides additional information or explanations that users
 
 ### File Upload Component Overview
 
-The File Upload component allows users to upload and preview files. It features a title, upload guidelines, an upload button, and a list displaying uploaded items, with built-in error handling for file uploads.
+The File Upload component allows users to upload and preview files. It features a title, upload
+guidelines, an upload button, and a list displaying uploaded items, with built-in error handling for
+file uploads.
 
 ### File Upload Component Preview
 
 When a file is uploaded, its details are previewed, including:
 
-- Thumbnail/Icon: Displays a thumbnail for images/videos, or an icon for other file types (PDF, DOCX, PPTX, XLSX, etc.).
+- Thumbnail/Icon: Displays a thumbnail for images/videos, or an icon for other file types (PDF,
+  DOCX, PPTX, XLSX, etc.).
 - File Name: Name of the uploaded file, truncated if too long.
 - File Extension: Displayed at the end of the file name (e.g., .pdf, .jpeg, .docx).
 - Trailing Icon: Close icon to allow the user to remove the uploaded file.
@@ -983,7 +1081,8 @@ Typically used in forms requiring single or multiple file uploads. Key elements:
 
 ### File Upload Component Usage Example
 
-- Location: Used in forms or modals where documents/files are required (e.g., applications, support tickets).
+- Location: Used in forms or modals where documents/files are required (e.g., applications, support
+  tickets).
 - Width: Full width of container (form/modal) for adaptability.
 
 ![file-upload-usage-example.png](file-upload-usage-example.png)
@@ -998,7 +1097,9 @@ Typically used in forms requiring single or multiple file uploads. Key elements:
 
 ### Inset Text Component Overview
 
-The Inset Text component highlights key information—such as quotes or important messages—by indenting content and adding a distinct visual boundary. It is ideal for emphasizing content while maintaining a clean, readable layout.
+The Inset Text component highlights key information—such as quotes or important messages—by
+indenting content and adding a distinct visual boundary. It is ideal for emphasizing content while
+maintaining a clean, readable layout.
 
 ### Inset Text Component Anatomy
 
@@ -1010,18 +1111,24 @@ The Inset Text component highlights key information—such as quotes or importan
 
 ### Inset Text Component Types
 
-- Inset Text: Used to highlight key information or call out specific details within the main content; stands out due to indentation.
-- Block Quote: Used to quote text from a source or author, often formatted with an indent and author attribution.
+- Inset Text: Used to highlight key information or call out specific details within the main
+  content; stands out due to indentation.
+- Block Quote: Used to quote text from a source or author, often formatted with an indent and author
+  attribution.
 
 ![inset-text-type.png](inset-text-type.png)
 
 ### Inset Text Component Usage Examples
 
-- Forms and Instructions: Place inset text in forms to highlight important instructions, deadlines, requirements, or clarifications. Guides users without interrupting form flow.
-- Documentation and Guidelines: Use inset text for key takeaways, essential rules, or important information in documentation, helping users locate critical points quickly.
-- Articles or Blog Posts: Call out quotes, statistics, or main ideas, ensuring readers notice important content without needing to read the entire section.
+- Forms and Instructions: Place inset text in forms to highlight important instructions, deadlines,
+  requirements, or clarifications. Guides users without interrupting form flow.
+- Documentation and Guidelines: Use inset text for key takeaways, essential rules, or important
+  information in documentation, helping users locate critical points quickly.
+- Articles or Blog Posts: Call out quotes, statistics, or main ideas, ensuring readers notice
+  important content without needing to read the entire section.
 
-By using inset text in these scenarios, you improve readability, emphasize important content, and enhance overall user experience.
+By using inset text in these scenarios, you improve readability, emphasize important content, and
+enhance overall user experience.
 
 ![inset-text-usage-example.png](inset-text-usage-example.png)
 
@@ -1031,15 +1138,18 @@ By using inset text in these scenarios, you improve readability, emphasize impor
 
 ### Pagination Component Overview
 
-The Pagination component allows users to navigate through a large set of content divided into discrete pages, improving usability and access to information.
+The Pagination component allows users to navigate through a large set of content divided into
+discrete pages, improving usability and access to information.
 
 ### Pagination Component Types
 
 ![pagination-type.png](pagination-type.png)
 
-- Type 1: Ideal for cases where users want to jump to a specific page within a large number of pages.
+- Type 1: Ideal for cases where users want to jump to a specific page within a large number of
+  pages.
 - Type 2: Designed for simpler navigation, mainly for moving forward or backward.
-- Type 3: Displays the current page and total pages on the left, with navigation buttons on the far right.
+- Type 3: Displays the current page and total pages on the left, with navigation buttons on the far
+  right.
 
 ### Pagination Component Previous & Next Button
 
@@ -1064,7 +1174,8 @@ The Pagination component allows users to navigate through a large set of content
 
 ### Pagination Component Usage
 
-- Use pagination for tables, lists, search results, or any content requiring navigation across multiple pages.
+- Use pagination for tables, lists, search results, or any content requiring navigation across
+  multiple pages.
 - Choose the appropriate type based on user needs and content volume.
 
 ---
@@ -1073,11 +1184,14 @@ The Pagination component allows users to navigate through a large set of content
 
 ### Panel Component Overview
 
-The Panel component is a visible container designed to emphasize important content, typically placed at the top section of confirmation or results pages. Its primary purpose is to ensure key information stands out clearly for users.
+The Panel component is a visible container designed to emphasize important content, typically placed
+at the top section of confirmation or results pages. Its primary purpose is to ensure key
+information stands out clearly for users.
 
 ### Panel Component Anatomy
 
-- Panel Title: A clear, concise heading summarizing the panel's content, helping users quickly understand its purpose and importance.
+- Panel Title: A clear, concise heading summarizing the panel's content, helping users quickly
+  understand its purpose and importance.
 - Placeholder Description: Main body text, typically styled as Body/M/400.
 - Detail Section: Additional details displayed in Body/XL/600 for enhanced emphasis.
 
@@ -1137,7 +1251,9 @@ Panels use colour to visually indicate the status or category of the information
 
 ### Password Input Component Overview
 
-The Password Input component provides a secure field for users to enter passwords, masking the characters to ensure privacy. It typically includes an option to toggle password visibility for easier input verification.
+The Password Input component provides a secure field for users to enter passwords, masking the
+characters to ensure privacy. It typically includes an option to toggle password visibility for
+easier input verification.
 
 ### Password Input Component Anatomy
 
@@ -1156,7 +1272,8 @@ The Password Input component provides a secure field for users to enter password
 
 ### Password Input Component Show/Hide Icon Trigger Area
 
-- The trigger area for the Show/Hide icon should be increased to match the input field's height, ensuring easy and accessible clicking/tapping.
+- The trigger area for the Show/Hide icon should be increased to match the input field's height,
+  ensuring easy and accessible clicking/tapping.
 - Tooltip should display Show password when hidden, and Hide password when visible.
 
 ### Password Input Component State
@@ -1174,7 +1291,8 @@ The Password Input component provides a secure field for users to enter password
 
 ### Password Input Component Size
 
-- Multiple sizes are available to suit different form requirements and optimize readability and usability.
+- Multiple sizes are available to suit different form requirements and optimize readability and
+  usability.
 
 ![password-input-size.png](password-input-size.png)
 
@@ -1184,7 +1302,9 @@ The Password Input component provides a secure field for users to enter password
 
 ### Phase Banner Component Overview
 
-The Phase Banner informs users about the service’s development stage (e.g., Alpha, Beta, Maintenance) and provides a link to submit feedback. It is typically placed below the navigation menu to communicate the current status of the service.
+The Phase Banner informs users about the service’s development stage (e.g., Alpha, Beta,
+Maintenance) and provides a link to submit feedback. It is typically placed below the navigation
+menu to communicate the current status of the service.
 
 ### Phase Banner Component Anatomy
 
@@ -1210,11 +1330,13 @@ The Phase Banner informs users about the service’s development stage (e.g., Al
 
 #### Phase Banner Usage Example: Status Types
 
-Use the phase banner to communicate the service’s development stage and encourage appropriate user actions:
+Use the phase banner to communicate the service’s development stage and encourage appropriate user
+actions:
 
 - Alpha: Introduces a new service and encourages early feedback to improve the experience.
 - Beta: Indicates the service is nearly complete and requests user input for final adjustments.
-- Public Beta: Shows the service is available for wider use; invites all users to test and share feedback.
+- Public Beta: Shows the service is available for wider use; invites all users to test and share
+  feedback.
 - Maintenance: Indicates the service is temporarily impacted due to updates or fixes.
 - Retired: Communicates that the service is no longer active.
 
@@ -1222,12 +1344,15 @@ Use the phase banner to communicate the service’s development stage and encour
 
 ### Phase Banner Component Placement
 
-- Primary placement is directly below the navigation menu to ensure users immediately understand the service status.
-- Alternatively, place in another prominent area where visibility is high and contextually appropriate.
+- Primary placement is directly below the navigation menu to ensure users immediately understand the
+  service status.
+- Alternatively, place in another prominent area where visibility is high and contextually
+  appropriate.
 
 ### Phase Banner Component Scroll Behaviour
 
-- The phase banner is not sticky and should scroll off the screen with page content. This ensures it remains informative yet non-intrusive as users navigate.
+- The phase banner is not sticky and should scroll off the screen with page content. This ensures it
+  remains informative yet non-intrusive as users navigate.
 
 ---
 
@@ -1235,23 +1360,27 @@ Use the phase banner to communicate the service’s development stage and encour
 
 ### Pill Component Overview
 
-Pills represent tags or categories within a text field. They can contain text and may include an "x" button to allow for easy removal, making them ideal for filtering or selection tasks.
+Pills represent tags or categories within a text field. They can contain text and may include an "x"
+button to allow for easy removal, making them ideal for filtering or selection tasks.
 
 ### Pill Component Size
 
-Size properties ensure that pills are appropriately proportioned and visually consistent with other UI elements in the form or interface.
+Size properties ensure that pills are appropriately proportioned and visually consistent with other
+UI elements in the form or interface.
 
 ![pills-size.png](pills-size.png)
 
 ### Pill Component Disabled State
 
-When a pill is disabled, the "x" or remove icon is hidden to indicate that it is not interactive. This is useful for displaying tags that cannot be removed by the user.
+When a pill is disabled, the "x" or remove icon is hidden to indicate that it is not interactive.
+This is useful for displaying tags that cannot be removed by the user.
 
 ![pills-disabled.png](pills-disabled.png)
 
 ### Pill Component Trailing Icon
 
-A trailing icon (typically a close 'x' icon) is an optional button within the pill that allows users to remove it from the text field or selection.
+A trailing icon (typically a close 'x' icon) is an optional button within the pill that allows users
+to remove it from the text field or selection.
 
 ![pills-trailing-icon.png](pills-trailing-icon.png)
 
@@ -1261,7 +1390,8 @@ A trailing icon (typically a close 'x' icon) is an optional button within the pi
 
 ### Radio Component Overview
 
-Radio buttons allow users to select exactly one choice from a group of options, ensuring clear, mutually exclusive selections in forms and interfaces.
+Radio buttons allow users to select exactly one choice from a group of options, ensuring clear,
+mutually exclusive selections in forms and interfaces.
 
 ### Radio Component Size
 
@@ -1278,7 +1408,8 @@ Radio buttons provide visual cues based on user interaction and accessibility:
 
 - **Default:** The initial state before any interaction.
 - **Hover:** Subtle border colour change when hovered, indicating interactivity.
-- **Focused:** Highlighted when navigated via keyboard or clicked with mouse, supporting accessibility.
+- **Focused:** Highlighted when navigated via keyboard or clicked with mouse, supporting
+  accessibility.
 - **Disabled:** The radio button is unavailable for interaction.
 
 ![radio-size-state.png](radio-size-state.png)
@@ -1296,17 +1427,20 @@ Indicates whether the radio button is selected:
 
 #### Radio Group Overview
 
-Radio buttons are typically grouped together to present multiple options, allowing users to select only one.
+Radio buttons are typically grouped together to present multiple options, allowing users to select
+only one.
 
 #### Radio Group Label Size
 
-Each group and its label can be sized to fit form requirements, ensuring readability and consistency.
+Each group and its label can be sized to fit form requirements, ensuring readability and
+consistency.
 
 ![radio-group-label-size.png](radio-group-label-size.png)
 
 #### Radio Group Hint Text
 
-Hint text provides additional information or context about the radio options, assisting users in making informed choices.
+Hint text provides additional information or context about the radio options, assisting users in
+making informed choices.
 
 ![radio-group-hint-text.png](radio-group-hint-text.png)
 
@@ -1326,7 +1460,9 @@ Each radio button in a group visually reflects its current status and interactio
 
 ### Search Bar Component Overview
 
-The Search Bar allows users to enter a query or keyword to search through content within a website or application. It is a critical component for improving navigation and discoverability of information.
+The Search Bar allows users to enter a query or keyword to search through content within a website
+or application. It is a critical component for improving navigation and discoverability of
+information.
 
 ### Search Bar Component Size
 
@@ -1334,7 +1470,8 @@ The Search Bar is available in multiple sizes to fit different UI contexts:
 
 - **Small:** Used in section headers alongside small buttons and tabs for compact layouts.
 - **Medium:** Used in section headers with medium buttons and tabs for balanced layouts.
-- **Large:** Used in hero sections or main areas where search is a primary action, prominently centered.
+- **Large:** Used in hero sections or main areas where search is a primary action, prominently
+  centered.
 
 ![search-size.png](search-size.png)
 
@@ -1342,23 +1479,31 @@ The Search Bar is available in multiple sizes to fit different UI contexts:
 
 The Search Bar provides clear visual feedback for different user interactions:
 
-- **Default (Empty Field):** Shows shortcut hint (e.g., “Press / to search”). Placeholder and button at 20% opacity.
+- **Default (Empty Field):** Shows shortcut hint (e.g., “Press / to search”). Placeholder and button
+  at 20% opacity.
 - **Hover:** Border colour changes to `otl-gray-300` to indicate interactivity.
-- **Filled:** Entered text displayed in `txt-black-900` for strong readability; shortcut hint hidden and “Clear” or “X” symbol appears for easy clearing of input.
-- **Focused:** Shows a focused ring when activated (e.g., after pressing “/” or clicking into the field).
-- **Clear Action:** Clicking the “Clear” or “X” icon removes the text and restores the default state.
+- **Filled:** Entered text displayed in `txt-black-900` for strong readability; shortcut hint hidden
+  and “Clear” or “X” symbol appears for easy clearing of input.
+- **Focused:** Shows a focused ring when activated (e.g., after pressing “/” or clicking into the
+  field).
+- **Clear Action:** Clicking the “Clear” or “X” icon removes the text and restores the default
+  state.
 
 ![search-states.png](search-states.png)
 
 ### Search Bar Component Search Result Dropdown
 
-When users type in the Search Bar, a dropdown displays relevant results, categories, and highlights matching text:
+When users type in the Search Bar, a dropdown displays relevant results, categories, and highlights
+matching text:
 
 - **Focus Ring:** Visible while the input is focused; hidden when not focused.
 - **Search Result Hover State:** Hovering on a result highlights it with `bg-washed`.
-- **Category Label:** Results are grouped by category; from the second item onwards, each category label has 16px padding-top for separation.
-- **Inline Text Highlight:** Matching query text in results is highlighted with the default brand colour and `semibold` font weight.
-- **Max Height:** Dropdown is scrollable with a maximum height of 400px to accommodate many results without overwhelming the view.
+- **Category Label:** Results are grouped by category; from the second item onwards, each category
+  label has 16px padding-top for separation.
+- **Inline Text Highlight:** Matching query text in results is highlighted with the default brand
+  colour and `semibold` font weight.
+- **Max Height:** Dropdown is scrollable with a maximum height of 400px to accommodate many results
+  without overwhelming the view.
 
 ![search-dropdown.png](search-dropdown.png)
 
@@ -1368,7 +1513,9 @@ When users type in the Search Bar, a dropdown displays relevant results, categor
 
 ### Select Component Overview
 
-The Select component enables users to choose from a list of options. It typically appears as a popup menu when the user clicks a select button, revealing a list of choices. This is commonly used for filtering, selecting items, or performing actions in forms and toolbars.
+The Select component enables users to choose from a list of options. It typically appears as a popup
+menu when the user clicks a select button, revealing a list of choices. This is commonly used for
+filtering, selecting items, or performing actions in forms and toolbars.
 
 ### Select Component Button Types
 
@@ -1384,7 +1531,8 @@ The Select button supports multiple visual types for various use cases:
 
 ### Select Component Button Sizes
 
-Each select button size is designed to fit different form or action requirements, ensuring optimal readability and user experience.
+Each select button size is designed to fit different form or action requirements, ensuring optimal
+readability and user experience.
 
 ![select-button-size.png](select-button-size.png)
 
@@ -1401,7 +1549,8 @@ Select buttons provide clear feedback for user interaction:
 
 ### Select Component Counter
 
-A counter is a small numeric indicator displayed within the select button. It provides a visual cue about the count related to the button’s function, such as:
+A counter is a small numeric indicator displayed within the select button. It provides a visual cue
+about the count related to the button’s function, such as:
 
 - Number of selected filters.
 - Number of notifications.
@@ -1411,7 +1560,8 @@ A counter is a small numeric indicator displayed within the select button. It pr
 
 ### Select Component Icon Only
 
-Some select buttons use only an icon, clearly indicating the action or function without text (e.g., three-dots for more options, plus icon for adding items).
+Some select buttons use only an icon, clearly indicating the action or function without text (e.g.,
+three-dots for more options, plus icon for adding items).
 
 ![select-button-icon-only.png](select-button-icon-only.png)
 
@@ -1443,13 +1593,15 @@ Each menu option provides feedback based on interaction:
 
 - **"More" Option Menu:** Provides additional actions.
 - **Search Function:** Can be placed at the top or bottom of the menu for filtering options.
-- **Clear Button:** In multi-select context menus, a "Clear" button appears overlapped at the bottom when at least one option is selected. It is hidden when no options are selected.
+- **Clear Button:** In multi-select context menus, a "Clear" button appears overlapped at the bottom
+  when at least one option is selected. It is hidden when no options are selected.
 
 ![context-menu-type.png](context-menu-type.png)
 
 #### Grouped Context Menu Items
 
-Menu items can be organized into groups for better navigation. Each group is separated and titled for clarity.
+Menu items can be organized into groups for better navigation. Each group is separated and titled
+for clarity.
 
 ![grouped-context-menu-items.png](grouped-context-menu-items.png)
 
@@ -1461,7 +1613,8 @@ Context menus come in different sizes to match form needs and optimize readabili
 
 ### Select Component Demo
 
-A demo should showcase interaction states, grouped items, search filtering, counter updates, and clear button behavior.
+A demo should showcase interaction states, grouped items, search filtering, counter updates, and
+clear button behavior.
 
 ---
 
@@ -1469,7 +1622,9 @@ A demo should showcase interaction states, grouped items, search filtering, coun
 
 ### Skip Link Component Overview
 
-The Skip Link component allows users to bypass repetitive navigation links and jump directly to the main content of a page, greatly enhancing accessibility for keyboard and screen reader users. It is typically hidden until focused and provides a fast way to reach the main section.
+The Skip Link component allows users to bypass repetitive navigation links and jump directly to the
+main content of a page, greatly enhancing accessibility for keyboard and screen reader users. It is
+typically hidden until focused and provides a fast way to reach the main section.
 
 ### Skip Link Component Usage Placement
 
@@ -1487,18 +1642,16 @@ Example HTML:
 <body>
   <!-- Cookie banner -->
   <cookie-banner />
-  
+
   <!-- 1. Place skip link here -->
-  <a href="#main-content" class="myds-skip-link">
-    Skip to main content
-  </a>
-  
+  <a href="#main-content" class="myds-skip-link"> Skip to main content </a>
+
   <masthead />
   <nav />
-  
+
   <!-- 2. Main content -->
   <div id="main-content" class="container">
-    <input class="myds-search-bar" tabindex="0">
+    <input class="myds-search-bar" tabindex="0" />
   </div>
 </body>
 ```
@@ -1524,9 +1677,11 @@ Example HTML:
 - **Press TAB:**  
   The Skip Link appears and receives focus.
 - **Press ENTER:**  
-  The Skip Link hides, the page scrolls to the main content section, and focus moves to the first focusable element (e.g., input, button) in the main content.
+  The Skip Link hides, the page scrolls to the main content section, and focus moves to the first
+  focusable element (e.g., input, button) in the main content.
 - **Press TAB Again:**  
-  Focus moves sequentially to the next interactive elements on the page, following the natural tab order.
+  Focus moves sequentially to the next interactive elements on the page, following the natural tab
+  order.
 
 Example:
 
@@ -1539,7 +1694,8 @@ Example:
 
 ### Skip Link Component Accessibility
 
-- The Skip Link is essential for accessibility and should be implemented on all government web pages.
+- The Skip Link is essential for accessibility and should be implemented on all government web
+  pages.
 - It improves navigation efficiency for users relying on keyboards and assistive technologies.
 
 ---
@@ -1548,27 +1704,36 @@ Example:
 
 ### Summary List Component Overview
 
-The Summary List component presents a concise overview of key information as a collection of key-value pairs, making it ideal for reviewing user responses or form data before completion or submission. Its style and structure are borrowed from the Table component for clarity and consistency.
+The Summary List component presents a concise overview of key information as a collection of
+key-value pairs, making it ideal for reviewing user responses or form data before completion or
+submission. Its style and structure are borrowed from the Table component for clarity and
+consistency.
 
 ### Summary List Component Anatomy
 
 - **Key (`<dt>`):**  
-  The first column displays the item or attribute being described. It acts as a label or identifier for the value in the next column.
+  The first column displays the item or attribute being described. It acts as a label or identifier
+  for the value in the next column.
 - **Value (`<dd>`):**  
-  The second column contains the corresponding data or details for each key. This is the main information that the summary list highlights.
+  The second column contains the corresponding data or details for each key. This is the main
+  information that the summary list highlights.
 - **Actions (optional) (`<dd>`):**  
-  The third column, if present, provides interaction options (such as edit or delete), allowing users to take action on specific items in the list.
+  The third column, if present, provides interaction options (such as edit or delete), allowing
+  users to take action on specific items in the list.
 
 ![summary-list-anatomy.png](summary-list-anatomy.png)
 
 ### Summary List Component Usage Examples
 
 - **Subsidy Application Review:**  
-  Summarizes details of a citizen's subsidy application, including personal information, submitted documents, and application status, before final submission.
+  Summarizes details of a citizen's subsidy application, including personal information, submitted
+  documents, and application status, before final submission.
 - **Tax Filing Summary:**  
-  Provides a summary of a citizen’s tax filing, including income details, deductions, and tax amount owed or refunded, for review before filing.
+  Provides a summary of a citizen’s tax filing, including income details, deductions, and tax amount
+  owed or refunded, for review before filing.
 - **Permit Application Overview:**  
-  Displays key information related to a government permit application, such as applicant details, permit type, and application fee, before proceeding to payment or approval.
+  Displays key information related to a government permit application, such as applicant details,
+  permit type, and application fee, before proceeding to payment or approval.
 
 ![summary-list-usage.png](summary-list-usage.png)
 
@@ -1578,7 +1743,8 @@ The Summary List component presents a concise overview of key information as a c
 
 ### Switch Component Overview
 
-The Switch component allows users to toggle between two states, such as ON or OFF, providing an intuitive control for settings, features, and preferences in forms and interfaces.
+The Switch component allows users to toggle between two states, such as ON or OFF, providing an
+intuitive control for settings, features, and preferences in forms and interfaces.
 
 ### Switch Component Size
 
@@ -1611,11 +1777,13 @@ Indicates whether the switch is ON or OFF:
 
 ### Switch Component Group
 
-Switches can be paired with a setting label on the left, providing simple and intuitive control for toggling settings.
+Switches can be paired with a setting label on the left, providing simple and intuitive control for
+toggling settings.
 
 ### Switch Component Label Size
 
-The dimensions of the toggle and its label can be adjusted to fit different form sizes, maintaining readability and consistency across layouts.
+The dimensions of the toggle and its label can be adjusted to fit different form sizes, maintaining
+readability and consistency across layouts.
 
 ![toggle-label-size.png](toggle-label-size.png)
 
@@ -1625,26 +1793,32 @@ The dimensions of the toggle and its label can be adjusted to fit different form
 
 ### Table Component Overview
 
-The Table component organizes information into rows and columns for easy readability and comparison. It accommodates various data types, including text, numbers, codes, call-to-action buttons, and links, enabling efficient presentation and analysis.
+The Table component organizes information into rows and columns for easy readability and comparison.
+It accommodates various data types, including text, numbers, codes, call-to-action buttons, and
+links, enabling efficient presentation and analysis.
 
 ### Table Component Anatomy
 
 - **Header:**  
   The title of each column, providing clear context for the data beneath.
 - **Expand Column Button:**  
-  Hidden by default, appears when the user hovers over a column. Clicking expands the column horizontally to reveal longer descriptions for improved readability.
+  Hidden by default, appears when the user hovers over a column. Clicking expands the column
+  horizontally to reveal longer descriptions for improved readability.
 - **Tooltip:**  
   Hovering on the tooltip icon shows explanatory text for the column’s purpose or data role.
 - **Sort Column Button:**  
-  Hidden by default, appears on hover. Clicking toggles sorting between ascending and descending order.
+  Hidden by default, appears on hover. Clicking toggles sorting between ascending and descending
+  order.
 - **Cell for Text:**  
   Left-aligned by default for easy scanning.
 - **Cell for Button:**  
   Contains action buttons aligned left, allowing users to take specific actions per row.
 - **Cell for Status Pill:**  
-  Displays a colour-coded status indicator (pill), providing a quick visual reference of each row’s status.
+  Displays a colour-coded status indicator (pill), providing a quick visual reference of each row’s
+  status.
 - **Skeleton Loader:**  
-  An animated placeholder element that mimics the table layout while data is loading. This improves perceived loading time and reduces abrupt content transitions.
+  An animated placeholder element that mimics the table layout while data is loading. This improves
+  perceived loading time and reduces abrupt content transitions.
 
 ![table-anatomy.png](table-anatomy.png)
 
@@ -1653,9 +1827,11 @@ The Table component organizes information into rows and columns for easy readabi
 - **Cell with Text Aligned Center:**  
   Used for headings or key information for visual balance and emphasis.
 - **Cell with Numbers Aligned Right:**  
-  Right-aligns numerical data for easy comparison and ensures decimal points line up, especially in financial or statistical tables.
+  Right-aligns numerical data for easy comparison and ensures decimal points line up, especially in
+  financial or statistical tables.
 - **Cell with Row Span:**  
-  Occupies two or more rows vertically, consolidating related data and reducing redundancy. Useful for representing information relevant to multiple rows and improving clarity.
+  Occupies two or more rows vertically, consolidating related data and reducing redundancy. Useful
+  for representing information relevant to multiple rows and improving clarity.
 
 ![table-usage.png](table-usage.png)
 
@@ -1678,7 +1854,9 @@ The Table component organizes information into rows and columns for easy readabi
 
 ### Tabs Component Overview
 
-The Tabs component enables users to navigate between different views or sections within the same context by clicking or tapping on a tab. It improves organization and user experience by grouping related content and providing a clear, interactive way to switch between panels.
+The Tabs component enables users to navigate between different views or sections within the same
+context by clicking or tapping on a tab. It improves organization and user experience by grouping
+related content and providing a clear, interactive way to switch between panels.
 
 ### Tabs Component Type
 
@@ -1687,7 +1865,8 @@ Tabs are available in several visual styles to suit different contexts and brand
 - **Pill:**  
   Features a pill-shaped design. The active tab is highlighted for clear selection.
 - **Enclosed:**  
-  Encases the entire tab group in a container, with the active tab highlighted using a distinct pill style.
+  Encases the entire tab group in a container, with the active tab highlighted using a distinct pill
+  style.
 - **Line:**  
   Uses a line beneath the active tab, typically in a brand color, to indicate which tab is selected.
 
@@ -1711,7 +1890,8 @@ Tabs provide visual cues based on user interaction, accessibility, and selection
 - **Default:**  
   The initial state, ready for user action but not currently interacted with.
 - **Focused:**  
-  Indicates the tab is selected or active, usually via keyboard navigation (TAB) or mouse click. This state is vital for accessibility.
+  Indicates the tab is selected or active, usually via keyboard navigation (TAB) or mouse click.
+  This state is vital for accessibility.
 - **Hover:**  
   Visual feedback when the mouse pointer moves over a tab, highlighting its interactivity.
 - **Active:**  
@@ -1723,7 +1903,8 @@ Tabs provide visual cues based on user interaction, accessibility, and selection
 
 ### Tabs Component Leading Icon
 
-A leading icon can be placed before the text inside a tab, visually enhancing the button and indicating the tab's purpose at a glance.
+A leading icon can be placed before the text inside a tab, visually enhancing the button and
+indicating the tab's purpose at a glance.
 
 - Common examples: Table icon, Profile icon, Settings icon, List icon
 
@@ -1731,7 +1912,8 @@ A leading icon can be placed before the text inside a tab, visually enhancing th
 
 ### Tabs Component Counter
 
-A counter can be positioned after the text within a tab. It typically displays the number of new or current items in that tab, such as unread messages or items in a list.
+A counter can be positioned after the text within a tab. It typically displays the number of new or
+current items in that tab, such as unread messages or items in a list.
 
 ![tabs-counter.png](tabs-counter.png)
 
@@ -1741,7 +1923,9 @@ A counter can be positioned after the text within a tab. It typically displays t
 
 ### Tag Component Overview
 
-A Tag is used to display the current state or status of an item, process, or entity. Tags are visually distinct elements that help users quickly identify information such as status, category, or type within lists, cards, and interfaces.
+A Tag is used to display the current state or status of an item, process, or entity. Tags are
+visually distinct elements that help users quickly identify information such as status, category, or
+type within lists, cards, and interfaces.
 
 ### Tag Component Status Types
 
@@ -1760,9 +1944,11 @@ Tags are available in various status types to communicate different states:
 Tags provide two distinct styles for flexible placement in different UI scenarios:
 
 - **Style 1:**  
-  Used to display a status independently, often positioned absolutely on an image or container. Features a fully rounded border radius (`9999px`) for a "pill" appearance.
+  Used to display a status independently, often positioned absolutely on an image or container.
+  Features a fully rounded border radius (`9999px`) for a "pill" appearance.
 - **Style 2:**  
-  Used to display a status inline, positioned side-by-side with text. Features a slightly rounded border radius (`6px`), blending into text or lists.
+  Used to display a status inline, positioned side-by-side with text. Features a slightly rounded
+  border radius (`6px`), blending into text or lists.
 
 ![tag-style.png](tag-style.png)
 
@@ -1778,7 +1964,8 @@ Tags come in multiple sizes to suit different components and device contexts:
 
 ### Tag Component Status Dot (Optional)
 
-An optional status dot provides a compact visual indicator of the current state or status of an item. The dot size adjusts according to the tag size:
+An optional status dot provides a compact visual indicator of the current state or status of an
+item. The dot size adjusts according to the tag size:
 
 - **Small:** 6x6px
 - **Medium:** 8x8px
@@ -1792,7 +1979,9 @@ An optional status dot provides a compact visual indicator of the current state 
 
 ### Task List Component Overview
 
-The Task List component presents information or calls to action in a structured format, making it easy to distinguish between completed and pending tasks. It enables users to track progress and prioritize actions efficiently.
+The Task List component presents information or calls to action in a structured format, making it
+easy to distinguish between completed and pending tasks. It enables users to track progress and
+prioritize actions efficiently.
 
 ### Task List Component Anatomy
 
@@ -1820,11 +2009,15 @@ Tasks in the list provide interactive visual feedback:
 
 ### Task List Component Usage Example
 
-The Task List is suitable for presenting user actions, step-by-step processes, or requirements on a page. Each item can be marked as completed or pending using the Tag component for clear progress tracking.
+The Task List is suitable for presenting user actions, step-by-step processes, or requirements on a
+page. Each item can be marked as completed or pending using the Tag component for clear progress
+tracking.
 
 ### Task List Component Grouping Tasks
 
-When multiple tasks are present, grouping them helps users better understand and plan their next steps. Organize related tasks into separate task lists, each with a clear and concise heading that explains the task group.
+When multiple tasks are present, grouping them helps users better understand and plan their next
+steps. Organize related tasks into separate task lists, each with a clear and concise heading that
+explains the task group.
 
 ![task-list-usage.png](task-list-usage.png)
 
@@ -1834,7 +2027,9 @@ When multiple tasks are present, grouping them helps users better understand and
 
 ### Toast Component Overview
 
-The Toast component provides non-intrusive notifications that appear temporarily on the screen to give feedback or alert users about events. Toasts enhance user experience by delivering timely information without disrupting workflow.
+The Toast component provides non-intrusive notifications that appear temporarily on the screen to
+give feedback or alert users about events. Toasts enhance user experience by delivering timely
+information without disrupting workflow.
 
 ### Toast Component Anatomy
 
@@ -1845,7 +2040,8 @@ The Toast component provides non-intrusive notifications that appear temporarily
 - **Description:**  
   Additional context or details about the event.
 - **Progress Bar:**  
-  A visual indicator that defaults to a 3-second duration, showing how long before the toast auto-dismisses.
+  A visual indicator that defaults to a 3-second duration, showing how long before the toast
+  auto-dismisses.
 - **Optional Close Icon:**  
   Allows users to manually dismiss the toast.
 
@@ -1878,9 +2074,11 @@ Toasts can represent different types of notifications:
 ### Toast Component Location
 
 - **Desktop/Tablet:**  
-  Toasts are fixed at the bottom right of the screen, with a 24px margin. Minimum width is 300px, maximum width is 600px.
+  Toasts are fixed at the bottom right of the screen, with a 24px margin. Minimum width is 300px,
+  maximum width is 600px.
 - **Mobile:**  
-  Toasts are centered at the bottom of the screen, with 18px margins on both sides, stretching to fit screen width.
+  Toasts are centered at the bottom of the screen, with 18px margins on both sides, stretching to
+  fit screen width.
 
 ![toast-location.png](toast-location.png)
 
@@ -1889,7 +2087,8 @@ Toasts can represent different types of notifications:
 - **Progress Bar Animation:**  
   For successful scenarios, a progress bar appears with a 200ms ease-in-out slide up animation.
   - The loading bar animates from 100% to 0% width over 3 seconds.
-  - The toast auto-dismisses after 3 seconds with a 200ms ease-in-out slide down animation, along with the progress bar.
+  - The toast auto-dismisses after 3 seconds with a 200ms ease-in-out slide down animation, along
+    with the progress bar.
 
 ![toast-progress-bar.png](toast-progress-bar.png)
 
@@ -1899,23 +2098,29 @@ Toasts can represent different types of notifications:
 
 ### Tooltip Component Overview
 
-The Tooltip component provides brief, contextual information when users hover or focus on an element, enhancing clarity without cluttering the interface. Tooltips are typically used to explain icons, buttons, or any interactive elements whose meaning might not be immediately clear.
+The Tooltip component provides brief, contextual information when users hover or focus on an
+element, enhancing clarity without cluttering the interface. Tooltips are typically used to explain
+icons, buttons, or any interactive elements whose meaning might not be immediately clear.
 
 ### Tooltip Component Anatomy
 
 - **Trigger Area:**  
-  The region that activates the tooltip when hovered or focused. It is recommended to widen the trigger space for easier user interaction.
+  The region that activates the tooltip when hovered or focused. It is recommended to widen the
+  trigger space for easier user interaction.
 - **Tooltip:**  
-  Displays additional context or guidance, helping users understand the function or meaning of an element.
+  Displays additional context or guidance, helping users understand the function or meaning of an
+  element.
 
 ![tooltip-anatomy.png](tooltip-anatomy.png)
 
 ### Tooltip Component Minimum Trigger Size
 
 - **Small Trigger Area (Don't):**  
-  Avoid using a small trigger area, as it makes accessing the tooltip difficult and negatively affects user experience.
+  Avoid using a small trigger area, as it makes accessing the tooltip difficult and negatively
+  affects user experience.
 - **Large Trigger Area (Do):**  
-  Use a larger trigger area to improve usability, making it easier for users to hover and access the tooltip content.
+  Use a larger trigger area to improve usability, making it easier for users to hover and access the
+  tooltip content.
 
 ![tooltip-trigger-size.png](tooltip-trigger-size.png)
 
@@ -1929,7 +2134,7 @@ Tooltips can appear in different directions relative to the trigger area:
 - **Right**
 
 Always choose the direction that ensures the tooltip remains visible on the screen.  
-*Note: The blue outline in illustrations shows the trigger area. Remove it in the actual UI.*
+_Note: The blue outline in illustrations shows the trigger area. Remove it in the actual UI._
 
 ![tooltip-direction.png](tooltip-direction.png)
 
@@ -1945,15 +2150,16 @@ Tooltip alignment ensures content stays within the visible screen area:
   When the trigger is at the right edge, keeps the tooltip visible.
 
 Always select an alignment that maintains visibility within the screen boundaries.  
-*Note: The blue outline is for demo purposes only.*
+_Note: The blue outline is for demo purposes only._
 
 ![tooltip-alignment.png](tooltip-alignment.png)
 
 ### Tooltip Component Description Length
 
-- The tooltip's maximum description length is **250px** to prevent overflow and maintain readability.
+- The tooltip's maximum description length is **250px** to prevent overflow and maintain
+  readability.
 - Always ensure the tooltip remains visible within the screen area.
-- *Note: The blue outline is used to illustrate the trigger area in diagrams only.*
+- _Note: The blue outline is used to illustrate the trigger area in diagrams only._
 
 ![tooltip-description.png](tooltip-description.png)
 
@@ -1966,4 +2172,5 @@ Always select an alignment that maintains visibility within the screen boundarie
 
 ---
 
-> By following MYDS, agencies can deliver digital services that embody transparency, inclusivity, and efficiency, ultimately improving access and experience for all Malaysians.
+> By following MYDS, agencies can deliver digital services that embody transparency, inclusivity,
+> and efficiency, ultimately improving access and experience for all Malaysians.

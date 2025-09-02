@@ -14,7 +14,9 @@
 
 ## KETERANGAN DOKUMEN
 
-Dokumen ini menerangkan spesifikasi keperluan sistem IRMS secara lengkap, merangkumi keperluan fungsi dan bukan fungsi, model data, pemodelan proses, pematuhan MYDS & MyGovEA, serta input untuk fasa pembangunan dan pelaksanaan.
+Dokumen ini menerangkan spesifikasi keperluan sistem IRMS secara lengkap, merangkumi keperluan
+fungsi dan bukan fungsi, model data, pemodelan proses, pematuhan MYDS & MyGovEA, serta input untuk
+fasa pembangunan dan pelaksanaan.
 
 ---
 
@@ -22,22 +24,22 @@ Dokumen ini menerangkan spesifikasi keperluan sistem IRMS secara lengkap, merang
 
 ### Disemak Oleh
 
-| Disemak Oleh     | Jawatan           | Tandatangan | Tarikh |
-|------------------|-------------------|-------------|--------|
-| [Nama Penyemak]  | [Jawatan Penyemak]|             | [Tarikh] |
+| Disemak Oleh    | Jawatan            | Tandatangan | Tarikh   |
+| --------------- | ------------------ | ----------- | -------- |
+| [Nama Penyemak] | [Jawatan Penyemak] |             | [Tarikh] |
 
 ### Disahkan Oleh
 
-| Disahkan Oleh    | Jawatan           | Tandatangan | Tarikh |
-|------------------|-------------------|-------------|--------|
-| [Nama Pengesah]  | [Jawatan Pengesah]|             | [Tarikh] |
+| Disahkan Oleh   | Jawatan            | Tandatangan | Tarikh   |
+| --------------- | ------------------ | ----------- | -------- |
+| [Nama Pengesah] | [Jawatan Pengesah] |             | [Tarikh] |
 
 ---
 
 ## KAWALAN DOKUMEN
 
 | No. Versi | Tarikh     | Ringkasan Pindaan | Penyedia        |
-|-----------|------------|-------------------|-----------------|
+| --------- | ---------- | ----------------- | --------------- |
 | 1.0       | 2025-08-14 | Draf Awal         | [Nama Penyedia] |
 
 ---
@@ -62,23 +64,23 @@ Dokumen ini menerangkan spesifikasi keperluan sistem IRMS secara lengkap, merang
 
 ## 1. AKRONIM & DEFINISI
 
-| Akronim | Keterangan                              |
-|---------|-----------------------------------------|
-| SRS     | Spesifikasi Keperluan Sistem            |
-| IRMS    | Integrated Resource Management System   |
-| MYDS    | Malaysia Government Design System       |
-| BPM     | Bahagian Pengurusan Maklumat            |
-| DFD     | Data Flow Diagram                      |
-| ERD     | Entity Relationship Diagram             |
-| API     | Application Programming Interface       |
+| Akronim | Keterangan                            |
+| ------- | ------------------------------------- |
+| SRS     | Spesifikasi Keperluan Sistem          |
+| IRMS    | Integrated Resource Management System |
+| MYDS    | Malaysia Government Design System     |
+| BPM     | Bahagian Pengurusan Maklumat          |
+| DFD     | Data Flow Diagram                     |
+| ERD     | Entity Relationship Diagram           |
+| API     | Application Programming Interface     |
 
-| Terma/Istilah  | Definisi                          |
-|----------------|-----------------------------------|
+| Terma/Istilah  | Definisi                                |
+| -------------- | --------------------------------------- |
 | Aktor          | Peranan yang berinteraksi dengan sistem |
-| Entiti         | Objek data utama dalam sistem     |
-| Tiket Helpdesk | Permohonan sokongan ICT           |
-| Kelulusan      | Proses pengesahan permohonan      |
-| Notifikasi     | Komunikasi automatik sistem       |
+| Entiti         | Objek data utama dalam sistem           |
+| Tiket Helpdesk | Permohonan sokongan ICT                 |
+| Kelulusan      | Proses pengesahan permohonan            |
+| Notifikasi     | Komunikasi automatik sistem             |
 
 ---
 
@@ -97,7 +99,9 @@ Dokumen ini menerangkan spesifikasi keperluan sistem IRMS secara lengkap, merang
 
 ### 3.1 Tujuan Sistem
 
-Sistem IRMS membolehkan pengurusan digital untuk pinjaman peralatan ICT dan permohonan sokongan IT, menggantikan proses manual dan menyatukan data serta workflow dalam satu platform selamat dan modular.
+Sistem IRMS membolehkan pengurusan digital untuk pinjaman peralatan ICT dan permohonan sokongan IT,
+menggantikan proses manual dan menyatukan data serta workflow dalam satu platform selamat dan
+modular.
 
 ### 3.2 Skop Sistem
 
@@ -109,13 +113,13 @@ Sistem IRMS membolehkan pengurusan digital untuk pinjaman peralatan ICT dan perm
 
 ## 4. AKTOR & PERANAN
 
-| Aktor               | Peranan / Keterangan                                      |
-|---------------------|----------------------------------------------------------|
-| Pemohon             | Staf memohon pinjaman peralatan/tiket ICT                |
-| Pegawai Penyokong   | Pegawai kelulusan, logik gred organisasi                 |
-| Staf BPM            | Pengurusan pengeluaran/pemulangan aset                   |
-| Agen IT             | Pengurusan tiket & sokongan ICT                          |
-| Pentadbir Sistem    | Pengurusan tetapan, audit, laporan                       |
+| Aktor             | Peranan / Keterangan                      |
+| ----------------- | ----------------------------------------- |
+| Pemohon           | Staf memohon pinjaman peralatan/tiket ICT |
+| Pegawai Penyokong | Pegawai kelulusan, logik gred organisasi  |
+| Staf BPM          | Pengurusan pengeluaran/pemulangan aset    |
+| Agen IT           | Pengurusan tiket & sokongan ICT           |
+| Pentadbir Sistem  | Pengurusan tetapan, audit, laporan        |
 
 <!--
 Setiap aktor dihubungkan kepada fungsi dan proses dalam sistem. Rujuk jadual pemadanan aktor dengan fungsi sistem di seksyen proses.
@@ -149,7 +153,8 @@ Setiap aktor dihubungkan kepada fungsi dan proses dalam sistem. Rujuk jadual pem
 ## 6. KEHENDAK BUKAN FUNGSI (NON-FUNCTIONAL)
 
 - **Kebolehcapaian:** Pematuhan WCAG 2.1 AA, ARIA, skip link, tab order.
-- **Keselamatan:** Autentikasi Fortify/Jetstream, kebenaran Spatie Permission, audit log, validasi input, perlindungan CSRF.
+- **Keselamatan:** Autentikasi Fortify/Jetstream, kebenaran Spatie Permission, audit log, validasi
+  input, perlindungan CSRF.
 - **Prestasi:** Masa loading < 3s, caching, optimisasi database, Docker, CI/CD.
 - **Responsif:** MYDS grid 12-8-4, mobile-first, touch target 48px min.
 - **Browser & Peranti:** Chrome 90+, Firefox 88+, Safari 14+, Edge 90+, Mobile Safari iOS 14+.
@@ -163,7 +168,8 @@ Setiap aktor dihubungkan kepada fungsi dan proses dalam sistem. Rujuk jadual pem
 
 - **Pengguna:** users, roles, permissions, departments, positions, grades.
 - **Peralatan ICT:** equipment, equipment_categories, sub_categories, locations.
-- **Pinjaman ICT:** loan_applications, loan_application_items, loan_transactions, loan_transaction_items.
+- **Pinjaman ICT:** loan_applications, loan_application_items, loan_transactions,
+  loan_transaction_items.
 - **Helpdesk:** helpdesk_tickets, helpdesk_categories, helpdesk_comments.
 - **Kelulusan & Notifikasi:** approvals, notifications, settings.
 
@@ -201,21 +207,21 @@ Placeholder: Rajah konteks sistem, DFD aliran permohonan pinjaman, kelulusan, pe
 
 ### 9.1 Modul Pinjaman Peralatan ICT
 
-| Use Case ID | Nama Use Case             | Aktor           | Keterangan/Proses                |
-|-------------|--------------------------|-----------------|----------------------------------|
-| UC-01       | Permohonan Pinjaman      | Pemohon         | Isi borang, simpan draf, hantar  |
-| UC-02       | Kelulusan Permohonan     | Pegawai Penyokong| Semak, lulus/tolak, komen        |
-| UC-03       | Pengeluaran Peralatan    | Staf BPM        | Pilih item, audit, serah         |
-| UC-04       | Pemulangan Peralatan     | Pemohon, BPM    | Hantar balik, semak, audit       |
+| Use Case ID | Nama Use Case         | Aktor             | Keterangan/Proses               |
+| ----------- | --------------------- | ----------------- | ------------------------------- |
+| UC-01       | Permohonan Pinjaman   | Pemohon           | Isi borang, simpan draf, hantar |
+| UC-02       | Kelulusan Permohonan  | Pegawai Penyokong | Semak, lulus/tolak, komen       |
+| UC-03       | Pengeluaran Peralatan | Staf BPM          | Pilih item, audit, serah        |
+| UC-04       | Pemulangan Peralatan  | Pemohon, BPM      | Hantar balik, semak, audit      |
 
 ### 9.2 Modul Helpdesk ICT
 
-| Use Case ID | Nama Use Case        | Aktor        | Keterangan/Proses         |
-|-------------|---------------------|--------------|---------------------------|
-| UC-05       | Cipta Tiket         | Pemohon      | Borang, kategori, lampiran|
-| UC-06       | Penugasan Tiket     | Admin IT     | Triage, assign, SLA       |
-| UC-07       | Penyelesaian Tiket  | Agen IT      | Komen, status, notifikasi |
-| UC-08       | Penutupan Tiket     | Agen IT      | Tutup, arkib, laporan     |
+| Use Case ID | Nama Use Case      | Aktor    | Keterangan/Proses          |
+| ----------- | ------------------ | -------- | -------------------------- |
+| UC-05       | Cipta Tiket        | Pemohon  | Borang, kategori, lampiran |
+| UC-06       | Penugasan Tiket    | Admin IT | Triage, assign, SLA        |
+| UC-07       | Penyelesaian Tiket | Agen IT  | Komen, status, notifikasi  |
+| UC-08       | Penutupan Tiket    | Agen IT  | Tutup, arkib, laporan      |
 
 <!--
 Sisipkan rajah use case untuk setiap modul.
@@ -286,7 +292,8 @@ Sisipkan diagram aliran notifikasi untuk setiap proses utama.
 ---
 
 > **Nota:**  
-> Dokumen ini disusun mengikut templat rasmi KRISA, mematuhi prinsip reka bentuk MyGovEA dan panduan MYDS untuk pembangunan sistem kerajaan digital MOTAC.
+> Dokumen ini disusun mengikut templat rasmi KRISA, mematuhi prinsip reka bentuk MyGovEA dan panduan
+> MYDS untuk pembangunan sistem kerajaan digital MOTAC.
 
 <!--
 Setiap seksyen skeleton ini boleh diisi/diupdate dengan maklumat, rajah, jadual dan rujukan yang diambil daripada file dokumentasi sistem, reka bentuk, aliran kerja, jadual data, dan prinsip MyGovEA yang telah dikongsi.

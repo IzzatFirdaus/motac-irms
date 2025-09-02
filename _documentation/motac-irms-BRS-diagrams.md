@@ -1,8 +1,11 @@
-# Sistem Pengurusan Sumber Terintegrasi MOTAC (IRMS)  
+# Sistem Pengurusan Sumber Terintegrasi MOTAC (IRMS)
+
 ## Senarai & Rajah Gambaran Sistem (BRS)
 
-Dokumen ini menyenaraikan dan membekalkan kod mermaid untuk setiap rajah utama dalam BRS IRMS, merangkumi hierarki fungsi, use case, aliran kerja, entiti data, dan konteks sistem.  
-Setiap rajah disediakan dalam format mermaid untuk mudah diolah/dimasukkan ke dalam markdown, dokumentasi online, atau alat seperti Draw.io/Mermaid Live Editor.
+Dokumen ini menyenaraikan dan membekalkan kod mermaid untuk setiap rajah utama dalam BRS IRMS,
+merangkumi hierarki fungsi, use case, aliran kerja, entiti data, dan konteks sistem.  
+Setiap rajah disediakan dalam format mermaid untuk mudah diolah/dimasukkan ke dalam markdown,
+dokumentasi online, atau alat seperti Draw.io/Mermaid Live Editor.
 
 ---
 
@@ -27,6 +30,7 @@ graph TD
     Helpdesk --> TiketPenyelesaian["Penyelesaian Tiket"]
     Helpdesk --> TiketPenutupan["Penutupan Tiket"]
 ```
+
 _Komen: Struktur sistem IRMS, pecahan modul dan fungsi utama._
 
 ---
@@ -47,6 +51,7 @@ flowchart LR
     IRMS -->|Notifikasi| ITAdmin
     IRMS -->|Notifikasi| ITAgent
 ```
+
 _Komen: Hubungan antara entiti utama dan modul IRMS._
 
 ---
@@ -66,6 +71,7 @@ usecase
     BPM --> (Terima Pemulangan Peralatan)
     Pemohon --> (Pemulangan Peralatan)
 ```
+
 _Komen: Use case utama untuk modul Pinjaman ICT._
 
 ---
@@ -85,6 +91,7 @@ usecase
     ITAgent --> (Tutup Tiket)
     StafMOTAC --> (Terima Notifikasi Penyelesaian)
 ```
+
 _Komen: Use case dan interaksi utama modul Helpdesk._
 
 ---
@@ -107,6 +114,7 @@ usecase
     ITAgent --> (Terima Notifikasi Penugasan Tiket)
     PentadbirSistem --> (Jana Laporan Analitik)
 ```
+
 _Komen: Gambaran ringkas interaksi notifikasi dan laporan._
 
 ---
@@ -126,6 +134,7 @@ flowchart TD
     Penggunaan --> Pemulangan("Pemulangan Peralatan")
     Pemulangan --> Tamat
 ```
+
 _Komen: Aliran penuh proses pinjaman ICT._
 
 ---
@@ -142,6 +151,7 @@ flowchart TD
     Selesaikan --> Penutupan("Penutupan Tiket")
     Penutupan --> Tamat("Tamat Proses")
 ```
+
 _Komen: Aliran proses dari ciptaan hingga penutupan tiket._
 
 ---
@@ -158,6 +168,7 @@ flowchart TD
     SemakPermohonan -->|Tolak| Tolak("Permohonan Ditolak")
     Eskalasi --> SemakPermohonan
 ```
+
 _Komen: Aliran kelulusan berhierarki._
 
 ---
@@ -182,6 +193,7 @@ erDiagram
     APPROVALS }|--|| LOAN_APPLICATIONS : "untuk aplikasi"
     APPROVALS }|--|| HELP_DESK_TICKETS : "untuk tiket"
 ```
+
 _Komen: Hubungan entiti utama sistem IRMS._
 
 ---
@@ -215,6 +227,7 @@ graph LR
     Notif --> Users
     Settings --> Users
 ```
+
 _Komen: Gambaran aliran data dan hubungan jadual utama._
 
 ---
@@ -240,6 +253,7 @@ flowchart LR
     IRMS --> ExternalMail
     IRMS --> Analytics
 ```
+
 _Komen: Batas sistem IRMS dan integrasi luaran._
 
 ---
@@ -253,6 +267,7 @@ graph TD
     IRMS --> Reporting["Reporting/BI Tool"]
     IRMS --> ExternalAPI["API Luaran (contoh: HRMS)"]
 ```
+
 _Komen: Integrasi utama IRMS dengan sistem luaran._
 
 ---
@@ -272,6 +287,7 @@ sequenceDiagram
     NotificationService->>EmailServer: Hantar E-mel
     EmailServer->>User: Terima E-mel Notifikasi
 ```
+
 _Komen: Pipeline notifikasi dari event hingga dashboard/email._
 
 ---
@@ -291,6 +307,7 @@ graph TD
     UI --> Tabs["Tab Navigasi"]
     UI --> Pagination["Paginasi"]
 ```
+
 _Komen: Senarai komponen MYDS yang digunakan dalam IRMS._
 
 ---
@@ -355,11 +372,13 @@ flowchart LR
     ralat --- pinjaman
     panduan --- admin
 ```
+
 _Komen: Matriks pemetaan prinsip MyGovEA ke modul IRMS._
 
 ---
 
 > **Nota:**  
-> Semua kod mermaid boleh dimasukkan terus ke dalam markdown, GitHub, Notion, atau mana-mana alat dokumentasi yang menyokong diagram berasaskan teks.  
+> Semua kod mermaid boleh dimasukkan terus ke dalam markdown, GitHub, Notion, atau mana-mana alat
+> dokumentasi yang menyokong diagram berasaskan teks.  
 > Untuk dokumentasi rasmi, setiap rajah perlu dinomborkan dan dirujuk dalam seksyen berkaitan BRS.  
 > Rajah boleh diolah/diperkaya mengikut keperluan semasa fasa rekaan atau pelaksanaan.
