@@ -39,7 +39,11 @@ class CheckUserGrade
         }
 
         // If a specific grade property is required (e.g., is_approver_grade === true)
-        if ($requiredProperty && (! isset($user->grade->{$requiredProperty}) || ! $user->grade->{$requiredProperty})) {
+        if (!($requiredProperty && (! isset($user->grade->{$requiredProperty}) || ! $user->grade->{$requiredProperty}))){
+
+        // All checks passed; continue to the request
+        return $next($request);
+    } 
             Log::warning('CheckUserGrade: User grade does not meet required property.', [
                 'user_id'           => $user->id,
                 'grade_id'          => $user->grade->id ?? null,
@@ -48,7 +52,7 @@ class CheckUserGrade
                 'route_name'        => $request->route()?->getName(),
             ]);
             abort(403, sprintf('Akses Ditolak. Gred anda tidak memenuhi kriteria yang diperlukan (%s).', $requiredProperty));
-        }
+        
 
         // All checks passed; continue to the request
         return $next($request);

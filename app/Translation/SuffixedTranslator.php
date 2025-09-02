@@ -69,14 +69,15 @@ class SuffixedTranslator extends Translator
         }
 
         $this->missingKeys[] = $missingKeyId;
-        if (config('translation.log_missing_keys', true)) {
+        if (!config('translation.log_missing_keys', true)){
+    return;} 
             Log::warning('Missing translation key detected', [
                 'key'         => $key,
                 'locale'      => $locale,
                 'request_url' => request()->url()       ?? 'N/A',
                 'user_agent'  => request()->userAgent() ?? 'N/A',
             ]);
-        }
+        
     }
 
     /**

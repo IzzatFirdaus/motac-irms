@@ -18,7 +18,7 @@ use Illuminate\Support\Carbon;
 
 /**
  * Equipment model for ICT inventory.
- * 
+ *
  * Represents an equipment asset, including all core details and relationships.
  *
  * @property int                             $id

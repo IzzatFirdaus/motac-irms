@@ -12,11 +12,10 @@ use App\Http\Requests\Admin\StoreUserRequest;
 use App\Http\Requests\Admin\UpdateUserRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log; // For assigning roles
-use Illuminate\Validation\Rules\Password; // Added for logging
+use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Role;
 
-// Explicitly import Auth facade
+
 
 class UserController extends Controller
 {

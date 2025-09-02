@@ -73,15 +73,15 @@ final class LoanTransactionService
                 $transactionItem = $transaction->loanTransactionItems()->create($itemData);
 
                 $equipment = Equipment::find($itemData['equipment_id']);
-                if ($equipment instanceof Equipment) {
+                if (!$equipment instanceof Equipment) {
+                    Log::error(self::LOG_AREA . sprintf('Equipment ID %d not found for transaction item creation.', $itemData['equipment_id']));
+                    throw new RuntimeException('Equipment not found for transaction item.');
+                }
                     $equipment->status = Equipment::STATUS_ON_LOAN;
                     $equipment->setAttribute('current_loan_id', $transaction->id);
                     $equipment->save();
                     Log::info(self::LOG_AREA . sprintf('Equipment ID %d status set to ON_LOAN for transaction ID %d.', $equipment->id, $transaction->id));
-                } else {
-                    Log::error(self::LOG_AREA . sprintf('Equipment ID %d not found for transaction item creation.', $itemData['equipment_id']));
-                    throw new RuntimeException('Equipment not found for transaction item.');
-                }
+                
             }
 
             // Update loan application status and issued_at timestamp
@@ -129,15 +129,15 @@ final class LoanTransactionService
                 $transactionItem->save();
 
                 $equipment = $transactionItem->equipment;
-                if ($equipment instanceof Equipment) {
+                if (!$equipment instanceof Equipment) {
+                    Log::error(self::LOG_AREA . sprintf('Equipment not found for Loan Transaction Item ID %d during issue.', $transactionItem->id));
+                    throw new RuntimeException('Equipment not found for transaction item.');
+                }
                     $equipment->status = Equipment::STATUS_ON_LOAN;
                     $equipment->setAttribute('current_loan_id', $transaction->id);
                     $equipment->save();
                     Log::info(self::LOG_AREA . sprintf('Equipment ID %d status set to ON_LOAN during issue transaction.', $equipment->id));
-                } else {
-                    Log::error(self::LOG_AREA . sprintf('Equipment not found for Loan Transaction Item ID %d during issue.', $transactionItem->id));
-                    throw new RuntimeException('Equipment not found for transaction item.');
-                }
+                
             }
 
             $transaction->loanApplication->updateOverallStatusAfterTransaction();
@@ -184,7 +184,10 @@ final class LoanTransactionService
                 $transactionItem->save();
 
                 $equipment = $transactionItem->equipment;
-                if ($equipment instanceof Equipment) {
+                if (!$equipment instanceof Equipment) {
+                    Log::error(self::LOG_AREA . sprintf('Equipment not found for Loan Transaction Item ID %d during return.', $transactionItem->id));
+                    throw new RuntimeException('Equipment not found for transaction item.');
+                }
                     switch ((string) $transactionItem->getAttribute('condition_on_return')) {
                         case Equipment::CONDITION_GOOD:
                         default:
@@ -203,10 +206,7 @@ final class LoanTransactionService
                     $equipment->setAttribute('current_loan_id', null);
                     $equipment->save();
                     Log::info(self::LOG_AREA . sprintf('Equipment ID %d status set to %s during return transaction.', $equipment->id, $equipment->status));
-                } else {
-                    Log::error(self::LOG_AREA . sprintf('Equipment not found for Loan Transaction Item ID %d during return.', $transactionItem->id));
-                    throw new RuntimeException('Equipment not found for transaction item.');
-                }
+                
             }
 
             $transaction->loanApplication->updateOverallStatusAfterTransaction();
@@ -262,7 +262,8 @@ final class LoanTransactionService
                 ]);
 
                 $equipment = Equipment::find($item['equipment_id']);
-                if ($equipment instanceof Equipment) {
+                if (!$equipment instanceof Equipment){
+            continue;} 
                     // Set equipment status based on return condition
                     switch ($item['condition_on_return'] ?? Equipment::CONDITION_GOOD) {
                         case Equipment::CONDITION_GOOD:
@@ -282,7 +283,7 @@ final class LoanTransactionService
                     $equipment->setAttribute('current_loan_id', null);
                     $equipment->save();
                     Log::info(self::LOG_AREA . sprintf('Equipment ID %d status updated during existing return.', $equipment->id));
-                }
+                
             }
 
             // Optionally update the original transaction status
