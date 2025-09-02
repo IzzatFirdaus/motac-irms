@@ -1,3 +1,4 @@
+
 {{-- resources/views/dashboard/admin-dashboard.blade.php --}}
 {{-- Admin Dashboard for MOTAC IRMS --}}
 
@@ -25,7 +26,7 @@
                             <div class="h5 mb-0 fw-bold text-dark">{{ $users_count ?? '0' }}</div>
                         </div>
                         <div class="col-auto">
-                            <i class="bi bi-people-fill fs-2 text-gray-300"></i>
+                            <i class="bi bi-people-fill fs-2 text-muted" aria-hidden="true"></i>
                         </div>
                     </div>
                     @if (Route::has('settings.users.index'))
@@ -46,7 +47,7 @@
                             <div class="h5 mb-0 fw-bold text-dark">{{ $pending_approvals_count ?? '0' }}</div>
                         </div>
                         <div class="col-auto">
-                            <i class="bi bi-hourglass-split fs-2 text-gray-300"></i>
+                            <i class="bi bi-hourglass-split fs-2 text-muted" aria-hidden="true"></i>
                         </div>
                     </div>
                     @if (Route::has('approvals.dashboard'))
@@ -67,7 +68,7 @@
                             <div class="h5 mb-0 fw-bold text-dark">{{ $equipment_available_count ?? '0' }}</div>
                         </div>
                         <div class="col-auto">
-                            <i class="bi bi-box-seam-fill fs-2 text-gray-300"></i>
+                            <i class="bi bi-box-seam-fill fs-2 text-muted" aria-hidden="true"></i>
                         </div>
                     </div>
                      @if (Route::has('resource-management.equipment-admin.index'))
@@ -88,7 +89,7 @@
                             <div class="h5 mb-0 fw-bold text-dark">{{ $equipment_on_loan_count ?? '0' }}</div>
                         </div>
                         <div class="col-auto">
-                            <i class="bi bi-truck fs-2 text-gray-300"></i>
+                            <i class="bi bi-truck fs-2 text-muted" aria-hidden="true"></i>
                         </div>
                     </div>
                     @if (Route::has('resource-management.bpm.issued-loans'))
@@ -105,13 +106,13 @@
         <div class="col-lg-12 mb-4">
             <div class="motac-card shadow-sm h-100">
                 <div class="motac-card-header py-3 d-flex align-items-center">
-                    <i class="bi bi-laptop-fill me-2 text-primary"></i>
+                    <i class="bi bi-laptop-fill me-2 text-primary" aria-hidden="true"></i>
                     <h6 class="m-0 fw-bold text-primary">{{ __('dashboard.loan_stats_title') }}</h6>
                 </div>
                 <div class="motac-card-body">
-                    <p class="mb-2 d-flex justify-content-between"><span><i class="bi bi-truck me-2 text-info"></i>{{ __('common.on_loan') }}</span> <strong class="text-dark">{{ $loan_issued_count ?? 0 }}</strong></p>
-                    <p class="mb-2 d-flex justify-content-between"><span><i class="bi bi-patch-check-fill me-2 text-primary"></i>{{ __('common.approved_pending_issuance') }}</span> <strong class="text-dark">{{ $loan_approved_pending_issuance_count ?? 0 }}</strong></p>
-                    <p class="mb-0 d-flex justify-content-between"><span><i class="bi bi-box-arrow-in-left me-2 text-success"></i>{{ __('common.returned') }}</span> <strong class="text-dark">{{ $loan_returned_count ?? 0 }}</strong></p>
+                    <p class="mb-2 d-flex justify-content-between"><span><i class="bi bi-truck me-2 text-info" aria-hidden="true"></i>{{ __('common.on_loan') }}</span> <strong class="text-dark">{{ $loan_issued_count ?? 0 }}</strong></p>
+                    <p class="mb-2 d-flex justify-content-between"><span><i class="bi bi-patch-check-fill me-2 text-primary" aria-hidden="true"></i>{{ __('common.approved_pending_issuance') }}</span> <strong class="text-dark">{{ $loan_approved_pending_issuance_count ?? 0 }}</strong></p>
+                    <p class="mb-0 d-flex justify-content-between"><span><i class="bi bi-box-arrow-in-left me-2 text-success" aria-hidden="true"></i>{{ __('common.returned') }}</span> <strong class="text-dark">{{ $loan_returned_count ?? 0 }}</strong></p>
                 </div>
             </div>
         </div>
@@ -123,7 +124,7 @@
             <div class="motac-card shadow-sm mb-4">
                 <div class="motac-card-header py-3 d-flex flex-row align-items-center justify-content-between">
                     <h6 class="m-0 fw-bold text-primary d-flex align-items-center">
-                        <i class="bi bi-list-check me-2"></i>{{ __('dashboard.latest_tasks_title') }}
+                        <i class="bi bi-list-check me-2" aria-hidden="true"></i>{{ __('dashboard.latest_tasks_title') }}
                     </h6>
                     @if (Route::has('approvals.dashboard'))
                         <a href="{{route('approvals.dashboard')}}" class="motac-btn-outline btn-sm">{{__('dashboard.view_all_tasks')}}</a>
