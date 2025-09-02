@@ -67,19 +67,24 @@ class IssuedLoans extends Component
             ]);
 
         // Search by application ID, applicant name, tag ID, or serial number.
-        if ($this->searchTerm !== '' && $this->searchTerm !== '0') {
-            $search = '%'.strtolower($this->searchTerm).'%';
-            $query->where(function ($q) use ($search): void {
-                $q->where('id', 'like', $search)
-                    ->orWhereHas('user', function ($sq) use ($search): void {
-                        $sq->whereRaw('LOWER(name) LIKE ?', [$search]);
-                    })
-                    ->orWhereHas('loanApplicationItems.loanTransactionItems.equipment', function ($sq) use ($search): void {
-                        $sq->whereRaw('LOWER(tag_id) LIKE ?', [$search])
-                            ->orWhereRaw('LOWER(serial_number) LIKE ?', [$search]);
-                    });
-            });
+        if (! ($this->searchTerm !== '' && $this->searchTerm !== '0')) {
+
+            // Sort: overdue/soonest due first.
+            return $query->orderBy('loan_end_date', 'asc')
+                ->orderBy('id', 'desc')
+                ->paginate($this->perPage);
         }
+        $search = '%'.strtolower($this->searchTerm).'%';
+        $query->where(function ($q) use ($search): void {
+            $q->where('id', 'like', $search)
+                ->orWhereHas('user', function ($sq) use ($search): void {
+                    $sq->whereRaw('LOWER(name) LIKE ?', [$search]);
+                })
+                ->orWhereHas('loanApplicationItems.loanTransactionItems.equipment', function ($sq) use ($search): void {
+                    $sq->whereRaw('LOWER(tag_id) LIKE ?', [$search])
+                        ->orWhereRaw('LOWER(serial_number) LIKE ?', [$search]);
+                });
+        });
 
         // Sort: overdue/soonest due first.
         return $query->orderBy('loan_end_date', 'asc')

@@ -115,19 +115,21 @@ class EquipmentForm extends Component
      */
     public function fillForm(): void
     {
-        if ($this->equipmentInstance instanceof \App\Models\Equipment) {
-            $this->tag_id            = $this->equipmentInstance->tag_id;
-            $this->asset_type        = $this->equipmentInstance->asset_type;
-            $this->brand             = $this->equipmentInstance->brand;
-            $this->model             = $this->equipmentInstance->model;
-            $this->serial_number     = $this->equipmentInstance->serial_number;
-            $this->purchase_date     = $this->equipmentInstance->purchase_date?->format('Y-m-d');
-            $this->warranty_end_date = $this->equipmentInstance->warranty_end_date?->format('Y-m-d');
-            $this->status            = $this->equipmentInstance->status;
-            $this->location_id       = $this->equipmentInstance->location_id;
-            $this->department_id     = $this->equipmentInstance->department_id;
-            $this->notes             = $this->equipmentInstance->notes;
+        if (! $this->equipmentInstance instanceof \App\Models\Equipment) {
+            return;
         }
+        $this->tag_id            = $this->equipmentInstance->tag_id;
+        $this->asset_type        = $this->equipmentInstance->asset_type;
+        $this->brand             = $this->equipmentInstance->brand;
+        $this->model             = $this->equipmentInstance->model;
+        $this->serial_number     = $this->equipmentInstance->serial_number;
+        $this->purchase_date     = $this->equipmentInstance->purchase_date?->format('Y-m-d');
+        $this->warranty_end_date = $this->equipmentInstance->warranty_end_date?->format('Y-m-d');
+        $this->status            = $this->equipmentInstance->status;
+        $this->location_id       = $this->equipmentInstance->location_id;
+        $this->department_id     = $this->equipmentInstance->department_id;
+        $this->notes             = $this->equipmentInstance->notes;
+
     }
 
     /**

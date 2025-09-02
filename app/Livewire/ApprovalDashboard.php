@@ -107,17 +107,21 @@ class ApprovalDashboard extends Component
         }
 
         // Search
-        if ($this->searchTerm !== '') {
-            $searchTerm = '%'.trim($this->searchTerm).'%';
-            $query->where(function (Builder $q) use ($searchTerm): void {
-                $q->whereHasMorph('approvable', [LoanApplication::class], function (Builder $morphQuery) use ($searchTerm): void {
-                    $morphQuery->where('application_no', 'like', $searchTerm)
-                        ->orWhereHas('user', function (Builder $userQuery) use ($searchTerm): void {
-                            $userQuery->where('name', 'like', $searchTerm);
-                        });
-                });
-            });
+        if ($this->searchTerm === '') {
+
+            $query->orderBy('created_at', 'desc');
+
+            return $query->paginate(10);
         }
+        $searchTerm = '%'.trim($this->searchTerm).'%';
+        $query->where(function (Builder $q) use ($searchTerm): void {
+            $q->whereHasMorph('approvable', [LoanApplication::class], function (Builder $morphQuery) use ($searchTerm): void {
+                $morphQuery->where('application_no', 'like', $searchTerm)
+                    ->orWhereHas('user', function (Builder $userQuery) use ($searchTerm): void {
+                        $userQuery->where('name', 'like', $searchTerm);
+                    });
+            });
+        });
 
         $query->orderBy('created_at', 'desc');
 

@@ -108,22 +108,24 @@ class VerticalMenu extends Component
         }
 
         // If the item has submenus, filter them recursively
-        if (isset($item->submenu) && is_array($item->submenu)) {
-            $filteredSubmenu = \collect($item->submenu)->map(function ($subItem) use ($userRoles) {
-                return $this->filterMenuItem($subItem, $userRoles);
-            })->filter(function ($subItem): bool {
-                return $subItem !== null;
-            })->toArray();
+        if (! (isset($item->submenu) && is_array($item->submenu))) {
 
-            // If all submenu items are filtered out, hide the parent menu
-            if (empty($filteredSubmenu)) {
-                return null;
-            }
-
-            // Update the item with filtered submenu
-            $item          = clone $item;
-            $item->submenu = $filteredSubmenu;
+            return $item;
         }
+        $filteredSubmenu = \collect($item->submenu)->map(function ($subItem) use ($userRoles) {
+            return $this->filterMenuItem($subItem, $userRoles);
+        })->filter(function ($subItem): bool {
+            return $subItem !== null;
+        })->toArray();
+
+        // If all submenu items are filtered out, hide the parent menu
+        if (empty($filteredSubmenu)) {
+            return null;
+        }
+
+        // Update the item with filtered submenu
+        $item          = clone $item;
+        $item->submenu = $filteredSubmenu;
 
         return $item;
     }

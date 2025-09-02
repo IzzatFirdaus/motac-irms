@@ -109,18 +109,20 @@ class LoanApplicationForm extends Component
     public function loadStateFromCache(array $cachedData): void
     {
         // Only load from cache if we are creating a new application
-        if (! $this->isEditMode) {
-            $this->purpose                          = $cachedData['purpose']                          ?? '';
-            $this->location                         = $cachedData['location']                         ?? '';
-            $this->return_location                  = $cachedData['return_location']                  ?? null;
-            $this->loan_start_date                  = $cachedData['loan_start_date']                  ?? null;
-            $this->loan_end_date                    = $cachedData['loan_end_date']                    ?? null;
-            $this->applicant_phone                  = $cachedData['applicant_phone']                  ?? '';
-            $this->applicant_is_responsible_officer = $cachedData['applicant_is_responsible_officer'] ?? true;
-            $this->responsible_officer_id           = $cachedData['responsible_officer_id']           ?? null;
-            $this->supporting_officer_id            = $cachedData['supporting_officer_id']            ?? null;
-            $this->loan_application_items           = $cachedData['loan_application_items']           ?? [['equipment_type' => '', 'quantity_requested' => 1, 'notes' => '']];
+        if ($this->isEditMode) {
+            return;
         }
+        $this->purpose                          = $cachedData['purpose']                          ?? '';
+        $this->location                         = $cachedData['location']                         ?? '';
+        $this->return_location                  = $cachedData['return_location']                  ?? null;
+        $this->loan_start_date                  = $cachedData['loan_start_date']                  ?? null;
+        $this->loan_end_date                    = $cachedData['loan_end_date']                    ?? null;
+        $this->applicant_phone                  = $cachedData['applicant_phone']                  ?? '';
+        $this->applicant_is_responsible_officer = $cachedData['applicant_is_responsible_officer'] ?? true;
+        $this->responsible_officer_id           = $cachedData['responsible_officer_id']           ?? null;
+        $this->supporting_officer_id            = $cachedData['supporting_officer_id']            ?? null;
+        $this->loan_application_items           = $cachedData['loan_application_items']           ?? [['equipment_type' => '', 'quantity_requested' => 1, 'notes' => '']];
+
     }
 
     /**

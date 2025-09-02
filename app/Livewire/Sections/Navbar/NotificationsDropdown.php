@@ -46,13 +46,15 @@ class NotificationsDropdown extends Component
     {
         $user         = Auth::user();
         $notification = $user ? $user->notifications()->find($notificationId) : null;
-        if ($notification) {
-            $notification->markAsRead();
-            $this->mount(); // Refresh the list
-            if (isset($notification->data['url'])) {
-                $this->redirect($notification->data['url']);
-            }
+        if (! $notification) {
+            return;
         }
+        $notification->markAsRead();
+        $this->mount(); // Refresh the list
+        if (isset($notification->data['url'])) {
+            $this->redirect($notification->data['url']);
+        }
+
     }
 
     /**

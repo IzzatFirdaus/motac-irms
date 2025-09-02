@@ -55,25 +55,27 @@ class Dashboard extends Component
         $allRoles           = $webRoles->merge($sanctumRoles)->unique();
         $this->isNormalUser = ($allRoles->count() === 1 && $allRoles->first() === 'User');
 
-        if ($this->isNormalUser) {
-            // Stat Card: Pending loan applications
-            $this->pendingUserLoanApplicationsCount = LoanApplication::where('user_id', $user->id)
-                ->whereIn('status', [
-                    LoanApplication::STATUS_DRAFT,
-                    LoanApplication::STATUS_PENDING_SUPPORT,
-                    LoanApplication::STATUS_PENDING_APPROVER_REVIEW,
-                    LoanApplication::STATUS_PENDING_BPM_REVIEW,
-                    LoanApplication::STATUS_APPROVED,
-                ])
-                ->count();
-
-            // Table: Recent loan applications
-            $this->userRecentLoanApplications = LoanApplication::where('user_id', $user->id)
-                ->with(['user:id,name'])
-                ->latest('updated_at')
-                ->limit(5)
-                ->get();
+        if (! $this->isNormalUser) {
+            return;
         }
+        // Stat Card: Pending loan applications
+        $this->pendingUserLoanApplicationsCount = LoanApplication::where('user_id', $user->id)
+            ->whereIn('status', [
+                LoanApplication::STATUS_DRAFT,
+                LoanApplication::STATUS_PENDING_SUPPORT,
+                LoanApplication::STATUS_PENDING_APPROVER_REVIEW,
+                LoanApplication::STATUS_PENDING_BPM_REVIEW,
+                LoanApplication::STATUS_APPROVED,
+            ])
+            ->count();
+
+        // Table: Recent loan applications
+        $this->userRecentLoanApplications = LoanApplication::where('user_id', $user->id)
+            ->with(['user:id,name'])
+            ->latest('updated_at')
+            ->limit(5)
+            ->get();
+
     }
 
     /**

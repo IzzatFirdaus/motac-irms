@@ -1,7 +1,9 @@
 {{-- resources/views/livewire/resource-management/admin/equipment/equipment-form.blade.php --}}
 <div>
     <h3 class="mb-4">
-        {{ $isEditMode ? __('Kemaskini Peralatan ICT') . ' #' . $equipmentInstance->id . ' (Tag: ' . ($equipmentInstance->tag_id ?? __('N/A')) . ')' : __('Tambah Peralatan ICT Baru') }}
+        {{ ($isEditMode ?? false) && ($editingEquipment ?? null)
+            ? __('Kemaskini Peralatan ICT') . ' #' . ($editingEquipment->id ?? '') . ' (Tag: ' . (($editingEquipment->tag_id ?? null) ?? __('N/A')) . ')'
+            : __('Tambah Peralatan ICT Baru') }}
     </h3>
 
     {{-- Success/Error Alerts --}}
@@ -159,17 +161,17 @@
         </x-card>
 
         <div class="text-center mt-4">
-            <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="saveEquipment">
+        <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="saveEquipment,storeEquipment,updateEquipment">
                 <span wire:loading.remove>
-                    <i class="bi {{ $isEditMode ? 'bi-save-fill' : 'bi-plus-circle-fill' }} me-1"></i>
-                    {{ $isEditMode ? __('Kemaskini Peralatan') : __('Simpan Peralatan Baru') }}
+            <i class="bi {{ ($isEditMode ?? false) ? 'bi-save-fill' : 'bi-plus-circle-fill' }} me-1"></i>
+            {{ ($isEditMode ?? false) ? __('Kemaskini Peralatan') : __('Simpan Peralatan Baru') }}
                 </span>
                 <span wire:loading class="d-inline-flex align-items-center">
                     <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                     {{ __('Memproses...') }}
                 </span>
             </button>
-            <a href="{{ route('resource-management.admin.equipment.equipment-index') }}"
+            <a href="{{ route('admin.equipment.index') }}"
                 class="btn btn-outline-secondary ms-2">
                 <i class="bi bi-x-circle me-1"></i>
                 {{ __('Batal') }}

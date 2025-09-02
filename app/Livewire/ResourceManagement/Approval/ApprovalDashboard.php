@@ -99,28 +99,45 @@ class ApprovalDashboard extends Component
         }
 
         // Apply type filter (matches Blade: 'loan_application', 'helpdesk_ticket')
-        if ($this->filterType && $this->filterType !== 'all') {
-            if ($this->filterType === 'loan_application') {
-                $query->whereMorphedTo('approvable', LoanApplication::class);
-            }
+        if ($this->filterType && $this->filterType !== 'all' && $this->filterType === 'loan_application') {
+            $query->whereMorphedTo('approvable', LoanApplication::class);
 
             // If you support helpdesk_ticket, add logic for that model
             // elseif ($this->filterType === 'helpdesk_ticket') { ... }
         }
 
         // Search filter (searches applicant name/email for loan applications)
-        if ($this->searchTerm !== '' && $this->searchTerm !== '0') {
-            $searchTermLower = strtolower($this->searchTerm);
-            $query->where(function ($q) use ($searchTermLower): void {
-                $q->whereHasMorph('approvable', [LoanApplication::class], function ($morphQuery) use ($searchTermLower): void {
-                    $morphQuery->whereHas('user', function ($userQuery) use ($searchTermLower): void {
-                        $userQuery->whereRaw('LOWER(name) LIKE ?', ['%'.$searchTermLower.'%'])
-                            ->orWhereRaw('LOWER(email) LIKE ?', ['%'.$searchTermLower.'%']);
-                    });
-                });
-                // Extend this block if you add search for helpdesk_ticket
-            });
+        if (! ($this->searchTerm !== '' && $this->searchTerm !== '0')) {
+
+            // Order: latest pending first
+            $query->orderByRaw("CASE
+            WHEN status = '".Approval::STATUS_PENDING."' THEN 1
+            WHEN status = '".Approval::STATUS_APPROVED."' THEN 2
+            WHEN status = '".Approval::STATUS_REJECTED."' THEN 3
+            ELSE 4
+        END")
+                ->orderBy('created_at', 'desc');
+
+            $tasks = $query->paginate(10);
+
+            Log::info(sprintf('Livewire\Approval\ApprovalDashboard: Fetched %d approval tasks for user %d.', $tasks->total(), $approver->id), [
+                'filterStatus' => $this->filterStatus,
+                'filterType'   => $this->filterType,
+                'searchTerm'   => $this->searchTerm,
+            ]);
+
+            return $tasks;
         }
+        $searchTermLower = strtolower($this->searchTerm);
+        $query->where(function ($q) use ($searchTermLower): void {
+            $q->whereHasMorph('approvable', [LoanApplication::class], function ($morphQuery) use ($searchTermLower): void {
+                $morphQuery->whereHas('user', function ($userQuery) use ($searchTermLower): void {
+                    $userQuery->whereRaw('LOWER(name) LIKE ?', ['%'.$searchTermLower.'%'])
+                        ->orWhereRaw('LOWER(email) LIKE ?', ['%'.$searchTermLower.'%']);
+                });
+            });
+            // Extend this block if you add search for helpdesk_ticket
+        });
 
         // Order: latest pending first
         $query->orderByRaw("CASE
@@ -283,15 +300,17 @@ class ApprovalDashboard extends Component
             'approvalItems.array' => __('approvals.validation.items_array'),
         ];
 
-        if ($this->approvalDecision === Approval::STATUS_APPROVED && $this->currentApprovalTask?->approvable instanceof LoanApplication) {
-            foreach ($this->approvalItems as $index => $item) {
-                $itemTypeDisplay                                                 = $item['equipment_name'] ?? 'Item';
-                $maxQty                                                          = $item['requested_quantity'];
-                $messages['approvalItems.'.$index.'.quantity_approved.required'] = __('approvals.validation.quantity_required', ['itemType' => $itemTypeDisplay]);
-                $messages['approvalItems.'.$index.'.quantity_approved.integer']  = __('approvals.validation.quantity_integer', ['itemType' => $itemTypeDisplay]);
-                $messages['approvalItems.'.$index.'.quantity_approved.min']      = __('approvals.validation.quantity_min', ['itemType' => $itemTypeDisplay]);
-                $messages['approvalItems.'.$index.'.quantity_approved.max']      = __('approvals.validation.quantity_max', ['itemType' => $itemTypeDisplay, 'max' => $maxQty]);
-            }
+        if (! ($this->approvalDecision === Approval::STATUS_APPROVED && $this->currentApprovalTask?->approvable instanceof LoanApplication)) {
+
+            return $messages;
+        }
+        foreach ($this->approvalItems as $index => $item) {
+            $itemTypeDisplay                                                 = $item['equipment_name'] ?? 'Item';
+            $maxQty                                                          = $item['requested_quantity'];
+            $messages['approvalItems.'.$index.'.quantity_approved.required'] = __('approvals.validation.quantity_required', ['itemType' => $itemTypeDisplay]);
+            $messages['approvalItems.'.$index.'.quantity_approved.integer']  = __('approvals.validation.quantity_integer', ['itemType' => $itemTypeDisplay]);
+            $messages['approvalItems.'.$index.'.quantity_approved.min']      = __('approvals.validation.quantity_min', ['itemType' => $itemTypeDisplay]);
+            $messages['approvalItems.'.$index.'.quantity_approved.max']      = __('approvals.validation.quantity_max', ['itemType' => $itemTypeDisplay, 'max' => $maxQty]);
         }
 
         return $messages;
@@ -315,14 +334,16 @@ class ApprovalDashboard extends Component
             $routeParams = ['loanApplication' => $approvable->id];
         }
 
-        if ($routeName && Route::has($routeName)) {
-            try {
-                return route($routeName, $routeParams);
-            } catch (\Exception $e) {
-                Log::error('Error generating getViewApplicationRoute: '.$e->getMessage(), ['routeName' => $routeName, 'params' => $routeParams]);
+        if (! ($routeName && Route::has($routeName))) {
 
-                return null;
-            }
+            return null;
+        }
+        try {
+            return route($routeName, $routeParams);
+        } catch (\Exception $e) {
+            Log::error('Error generating getViewApplicationRoute: '.$e->getMessage(), ['routeName' => $routeName, 'params' => $routeParams]);
+
+            return null;
         }
 
         return null;

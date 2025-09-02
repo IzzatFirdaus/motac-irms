@@ -12,6 +12,7 @@
                 </button>
             </div>
             <div class="modal-body myds-modal-body py-24 px-24">
+                @php($equipmentInstance = $deletingEquipment ?? $editingEquipment ?? $viewingEquipment ?? null)
                 @if ($equipmentInstance)
                     <p class="heading-xsmall">{{ __('Adakah anda pasti ingin memadam peralatan') }} <strong>#{{ $equipmentInstance->tag_id }}</strong>?</p>
                     <p class="text-danger-500 fw-semibold heading-xsmall">{{ __('Tindakan ini tidak boleh diundur.') }}</p>

@@ -195,20 +195,24 @@ class PositionsIndex extends Component
      */
     public function deletePosition(): void
     {
-        if ($this->positionIdToDelete !== null && $this->positionIdToDelete !== 0) {
-            $position = Position::findOrFail($this->positionIdToDelete);
-            $this->authorize('delete', $position);
+        if (! ($this->positionIdToDelete !== null && $this->positionIdToDelete !== 0)) {
 
-            if ($position->users()->count() > 0) {
-                session()->flash('error', __('Jawatan ":name" tidak boleh dipadam kerana ia telah ditugaskan kepada pengguna.', ['name' => $position->name]));
-                $this->closeDeleteConfirmationModal();
+            $this->closeDeleteConfirmationModal();
 
-                return;
-            }
-
-            $position->delete();
-            session()->flash('message', __('Jawatan :name berjaya dipadam.', ['name' => $this->positionNameToDelete]));
+            return;
         }
+        $position = Position::findOrFail($this->positionIdToDelete);
+        $this->authorize('delete', $position);
+
+        if ($position->users()->count() > 0) {
+            session()->flash('error', __('Jawatan ":name" tidak boleh dipadam kerana ia telah ditugaskan kepada pengguna.', ['name' => $position->name]));
+            $this->closeDeleteConfirmationModal();
+
+            return;
+        }
+
+        $position->delete();
+        session()->flash('message', __('Jawatan :name berjaya dipadam.', ['name' => $this->positionNameToDelete]));
 
         $this->closeDeleteConfirmationModal();
     }

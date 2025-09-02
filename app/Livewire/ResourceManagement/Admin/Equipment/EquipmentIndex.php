@@ -73,6 +73,8 @@ class EquipmentIndex extends Component
 
     public ?string $current_location = null;
 
+    public ?int $location_id = null;
+
     public ?string $notes = null;
 
     public string $condition_status = '';
@@ -108,6 +110,8 @@ class EquipmentIndex extends Component
 
     public array $classificationOptions = [];
 
+    public array $locationOptions = [];
+
     /**
      * Mount component, set up options and reset form.
      */
@@ -122,6 +126,14 @@ class EquipmentIndex extends Component
         $this->acquisitionTypeOptions = Equipment::getAcquisitionTypeOptions();
         $this->classificationOptions  = Equipment::getClassificationOptions();
         $this->departmentOptions      = Department::orderBy('name')->pluck('name', 'id')->toArray();
+        // Populate location dropdown options if Location model/table exists
+        if (class_exists(\App\Models\Location::class)) {
+            $this->locationOptions = \App\Models\Location::query()
+                ->active()
+                ->orderBy('name')
+                ->pluck('name', 'id')
+                ->toArray();
+        }
 
         $this->resetForm();
     }
@@ -342,28 +354,30 @@ class EquipmentIndex extends Component
      */
     private function populateFields(): void
     {
-        if ($this->editingEquipment instanceof \App\Models\Equipment) {
-            $this->asset_type           = $this->editingEquipment->asset_type;
-            $this->brand                = $this->editingEquipment->brand;
-            $this->model_name           = $this->editingEquipment->model;
-            $this->serial_number        = $this->editingEquipment->serial_number;
-            $this->tag_id               = $this->editingEquipment->tag_id;
-            $this->purchase_date        = $this->editingEquipment->purchase_date?->format('Y-m-d');
-            $this->warranty_expiry_date = $this->editingEquipment->warranty_end_date?->format('Y-m-d');
-            $this->status               = $this->editingEquipment->status;
-            $this->current_location     = $this->editingEquipment->current_location;
-            $this->notes                = $this->editingEquipment->notes;
-            $this->condition_status     = $this->editingEquipment->condition_status;
-            $this->department_id        = $this->editingEquipment->department_id;
-            $this->item_code            = $this->editingEquipment->item_code;
-            $this->description          = $this->editingEquipment->description;
-            $this->purchase_price       = $this->editingEquipment->purchase_price;
-            $this->acquisition_type     = $this->editingEquipment->acquisition_type;
-            $this->classification       = $this->editingEquipment->classification;
-            $this->funded_by            = $this->editingEquipment->funded_by;
-            $this->supplier_name        = $this->editingEquipment->supplier_name;
-            $this->specifications       = $this->editingEquipment->specifications ? json_decode($this->editingEquipment->specifications, true) : null;
+        if (! $this->editingEquipment instanceof \App\Models\Equipment) {
+            return;
         }
+        $this->asset_type           = $this->editingEquipment->asset_type;
+        $this->brand                = $this->editingEquipment->brand;
+        $this->model_name           = $this->editingEquipment->model;
+        $this->serial_number        = $this->editingEquipment->serial_number;
+        $this->tag_id               = $this->editingEquipment->tag_id;
+        $this->purchase_date        = $this->editingEquipment->purchase_date?->format('Y-m-d');
+        $this->warranty_expiry_date = $this->editingEquipment->warranty_end_date?->format('Y-m-d');
+        $this->status               = $this->editingEquipment->status;
+        $this->current_location     = $this->editingEquipment->current_location;
+        $this->notes                = $this->editingEquipment->notes;
+        $this->condition_status     = $this->editingEquipment->condition_status;
+        $this->department_id        = $this->editingEquipment->department_id;
+        $this->item_code            = $this->editingEquipment->item_code;
+        $this->description          = $this->editingEquipment->description;
+        $this->purchase_price       = $this->editingEquipment->purchase_price;
+        $this->acquisition_type     = $this->editingEquipment->acquisition_type;
+        $this->classification       = $this->editingEquipment->classification;
+        $this->funded_by            = $this->editingEquipment->funded_by;
+        $this->supplier_name        = $this->editingEquipment->supplier_name;
+        $this->specifications       = $this->editingEquipment->specifications ? json_decode($this->editingEquipment->specifications, true) : null;
+
     }
 
     /**
@@ -420,6 +434,7 @@ class EquipmentIndex extends Component
         return view('livewire.resource-management.admin.equipment.equipment-index', [
             'equipmentList' => $this->getEquipmentListProperty(),
             'departments'   => $this->departmentOptions,
+            'locationOptions' => $this->locationOptions,
         ]);
     }
 }

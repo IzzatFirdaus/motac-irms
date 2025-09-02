@@ -12,6 +12,7 @@
                 </button>
             </div>
             <div class="modal-body myds-modal-body py-24 px-24">
+                @php($equipmentInstance = $viewingEquipment ?? $editingEquipment ?? null)
                 @if ($equipmentInstance)
                     <dl class="row g-2 heading-xsmall">
                         <dt class="col-sm-4 fw-semibold text-muted">{{ __('No. Tag Aset') }}</dt>

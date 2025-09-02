@@ -100,16 +100,18 @@ class ProcessIssuance extends Component
         // Prepopulate issue items for the form (one per item to be issued)
         foreach ($this->loanApplication->loanApplicationItems as $approvedItem) {
             $balanceToIssue = ($approvedItem->quantity_approved ?? 0) - ($approvedItem->quantity_issued ?? 0);
-            if ($balanceToIssue > 0) {
-                for ($i = 0; $i < $balanceToIssue; $i++) {
-                    $this->issueItems[] = [
-                        'loan_application_item_id' => $approvedItem->id,
-                        'equipment_type'           => $approvedItem->equipment_type,
-                        'equipment_id'             => null,
-                        'accessories_checklist'    => [],
-                    ];
-                }
+            if ($balanceToIssue <= 0) {
+                continue;
             }
+            for ($i = 0; $i < $balanceToIssue; $i++) {
+                $this->issueItems[] = [
+                    'loan_application_item_id' => $approvedItem->id,
+                    'equipment_type'           => $approvedItem->equipment_type,
+                    'equipment_id'             => null,
+                    'accessories_checklist'    => [],
+                ];
+            }
+
         }
     }
 

@@ -203,20 +203,25 @@ class RolesIndex extends Component
     {
         $this->authorize('delete', config('permission.models.role'));
 
-        if ($this->roleIdToDelete !== null && $this->roleIdToDelete !== 0) {
-            $roleModelClass = config('permission.models.role');
-            $role           = $roleModelClass::findById($this->roleIdToDelete, 'web');
+        if (! ($this->roleIdToDelete !== null && $this->roleIdToDelete !== 0)) {
 
-            if ($role) {
-                if ($role->users()->exists() || in_array($role->name, $this->coreRoles, true)) {
-                    $this->dispatch('toastr', type: 'error', message: __('Tidak boleh memadam peranan sistem atau peranan yang mempunyai pengguna bersekutu.'));
-                } else {
-                    $role->delete();
-                    $this->dispatch('toastr', type: 'success', message: __('Peranan berjaya dipadam!'));
-                }
+            $this->closeDeleteConfirmationModal();
+            $this->resetPage();
+
+            return;
+        }
+        $roleModelClass = config('permission.models.role');
+        $role           = $roleModelClass::findById($this->roleIdToDelete, 'web');
+
+        if ($role) {
+            if ($role->users()->exists() || in_array($role->name, $this->coreRoles, true)) {
+                $this->dispatch('toastr', type: 'error', message: __('Tidak boleh memadam peranan sistem atau peranan yang mempunyai pengguna bersekutu.'));
             } else {
-                $this->dispatch('toastr', type: 'error', message: __('Peranan tidak ditemui.'));
+                $role->delete();
+                $this->dispatch('toastr', type: 'success', message: __('Peranan berjaya dipadam!'));
             }
+        } else {
+            $this->dispatch('toastr', type: 'error', message: __('Peranan tidak ditemui.'));
         }
 
         $this->closeDeleteConfirmationModal();

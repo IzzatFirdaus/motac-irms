@@ -133,13 +133,15 @@ class ApprovalHistory extends Component
                                 });
 
                             // Additional search for loan-specific items
-                            if ($type === LoanApplication::class) {
-                                $morphQ->orWhereHas('loanApplicationItems.equipment', function ($itemQ) use ($searchTerm): void {
-                                    $itemQ->where('tag_id', 'like', $searchTerm)
-                                        ->orWhere('model', 'like', $searchTerm)
-                                        ->orWhere('brand', 'like', $searchTerm);
-                                });
+                            if ($type !== LoanApplication::class) {
+                                return;
                             }
+                            $morphQ->orWhereHas('loanApplicationItems.equipment', function ($itemQ) use ($searchTerm): void {
+                                $itemQ->where('tag_id', 'like', $searchTerm)
+                                    ->orWhere('model', 'like', $searchTerm)
+                                    ->orWhere('brand', 'like', $searchTerm);
+                            });
+
                         }
                     );
                 });
@@ -174,14 +176,16 @@ class ApprovalHistory extends Component
         // List of properties that should trigger pagination reset
         $filterProperties = ['filterType', 'filterDecision', 'dateFrom', 'dateTo', 'search'];
 
-        if (in_array($propertyName, $filterProperties)) {
-            $this->resetPage();
-            Log::debug('ApprovalHistory: Filter updated and pagination reset.', [
-                'property'  => $propertyName,
-                'new_value' => $this->$propertyName,
-                'user_id'   => Auth::id(),
-            ]);
+        if (! in_array($propertyName, $filterProperties)) {
+            return;
         }
+        $this->resetPage();
+        Log::debug('ApprovalHistory: Filter updated and pagination reset.', [
+            'property'  => $propertyName,
+            'new_value' => $this->$propertyName,
+            'user_id'   => Auth::id(),
+        ]);
+
     }
 
     /**

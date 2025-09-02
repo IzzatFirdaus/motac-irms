@@ -8,7 +8,8 @@
     <div class="container-fluid py-4">
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <h1 class="h3 mb-0 text-dark fw-bold">
-                {{ __('dashboard.welcome_user', ['userName' => Auth::user()?->name ?? __('User')]) }}</h1>
+                {{ __('dashboard.welcome_user', ['userName' => Auth::user()?->name ?? __('User')]) }}
+            </h1>
         </div>
 
         <div class="row">

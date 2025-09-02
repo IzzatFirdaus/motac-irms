@@ -129,19 +129,23 @@ class PermissionsIndex extends Component
     public function deletePermission(): void
     {
         abort_unless(Auth::user()?->can('manage_permissions'), 403, __('Tindakan tidak dibenarkan.'));
-        if ($this->permissionIdToDelete !== null && $this->permissionIdToDelete !== 0) {
-            $permission = Permission::findOrFail($this->permissionIdToDelete);
+        if (! ($this->permissionIdToDelete !== null && $this->permissionIdToDelete !== 0)) {
 
-            if ($permission->roles()->count() > 0) {
-                session()->flash('error', __('Kebenaran ":name" tidak boleh dipadam kerana ia telah ditugaskan kepada peranan.', ['name' => $permission->name]));
-                $this->closeDeleteConfirmationModal();
+            $this->closeDeleteConfirmationModal();
 
-                return;
-            }
-
-            $permission->delete();
-            session()->flash('message', __('Kebenaran :name berjaya dipadam.', ['name' => $this->permissionNameToDelete]));
+            return;
         }
+        $permission = Permission::findOrFail($this->permissionIdToDelete);
+
+        if ($permission->roles()->count() > 0) {
+            session()->flash('error', __('Kebenaran ":name" tidak boleh dipadam kerana ia telah ditugaskan kepada peranan.', ['name' => $permission->name]));
+            $this->closeDeleteConfirmationModal();
+
+            return;
+        }
+
+        $permission->delete();
+        session()->flash('message', __('Kebenaran :name berjaya dipadam.', ['name' => $this->permissionNameToDelete]));
 
         $this->closeDeleteConfirmationModal();
     }

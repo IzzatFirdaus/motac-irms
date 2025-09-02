@@ -205,20 +205,24 @@ class DepartmentsIndex extends Component
      */
     public function deleteDepartment(): void
     {
-        if ($this->departmentIdToDelete !== null && $this->departmentIdToDelete !== 0) {
-            $department = Department::findOrFail($this->departmentIdToDelete);
-            $this->authorize('delete', $department);
+        if (! ($this->departmentIdToDelete !== null && $this->departmentIdToDelete !== 0)) {
 
-            if ($department->users()->count() > 0) {
-                session()->flash('error', __('Jabatan ":name" tidak boleh dipadam kerana ia telah ditugaskan kepada pengguna.', ['name' => $department->name]));
-                $this->closeDeleteConfirmationModal();
+            $this->closeDeleteConfirmationModal();
 
-                return;
-            }
-
-            $department->delete();
-            session()->flash('success', __('Jabatan :name berjaya dipadam.', ['name' => $this->departmentNameToDelete]));
+            return;
         }
+        $department = Department::findOrFail($this->departmentIdToDelete);
+        $this->authorize('delete', $department);
+
+        if ($department->users()->count() > 0) {
+            session()->flash('error', __('Jabatan ":name" tidak boleh dipadam kerana ia telah ditugaskan kepada pengguna.', ['name' => $department->name]));
+            $this->closeDeleteConfirmationModal();
+
+            return;
+        }
+
+        $department->delete();
+        session()->flash('success', __('Jabatan :name berjaya dipadam.', ['name' => $this->departmentNameToDelete]));
 
         $this->closeDeleteConfirmationModal();
     }

@@ -37,22 +37,24 @@ class Dashboard extends Component
         // Determine if user is a "normal user" (i.e., not admin, BPM, IT, etc.)
         $this->isNormalUser = ! $user->hasAnyRole(['Admin', 'IT Admin', 'BPM Staff', 'Approver']);
 
-        if ($this->isNormalUser) {
-            $this->pending_loans_count = LoanApplication::where('user_id', $user->id)
-                ->where('status', LoanApplication::STATUS_PENDING_SUPPORT)->count();
-            $this->approved_loans_count = LoanApplication::where('user_id', $user->id)
-                ->where('status', LoanApplication::STATUS_APPROVED)->count();
-            $this->rejected_loans_count = LoanApplication::where('user_id', $user->id)
-                ->where('status', LoanApplication::STATUS_REJECTED)->count();
-            $this->total_loans_count = LoanApplication::where('user_id', $user->id)->count();
-
-            // Show the 5 most recent applications
-            $this->recent_applications = LoanApplication::with('equipment')
-                ->where('user_id', $user->id)
-                ->latest()
-                ->take(5)
-                ->get();
+        if (! $this->isNormalUser) {
+            return;
         }
+        $this->pending_loans_count = LoanApplication::where('user_id', $user->id)
+            ->where('status', LoanApplication::STATUS_PENDING_SUPPORT)->count();
+        $this->approved_loans_count = LoanApplication::where('user_id', $user->id)
+            ->where('status', LoanApplication::STATUS_APPROVED)->count();
+        $this->rejected_loans_count = LoanApplication::where('user_id', $user->id)
+            ->where('status', LoanApplication::STATUS_REJECTED)->count();
+        $this->total_loans_count = LoanApplication::where('user_id', $user->id)->count();
+
+        // Show the 5 most recent applications
+        $this->recent_applications = LoanApplication::with('equipment')
+            ->where('user_id', $user->id)
+            ->latest()
+            ->take(5)
+            ->get();
+
     }
 
     public function render()

@@ -166,20 +166,22 @@ class EquipmentChecklist extends Component
             'returnAcceptingOfficer',
         ])->find($loanTransactionId);
 
-        if (
+        if (! (
             ! $this->loanTransaction || (int) $this->loanTransaction->loan_application_id !== (int) $this->loanApplicationId
-        ) {
-            Log::warning('EquipmentChecklist: Transaction not found or mismatched.', [
-                'loanTransactionId' => $loanTransactionId,
-                'loanApplicationId' => $this->loanApplicationId,
-            ]);
-            throw new ModelNotFoundException(
-                sprintf('Transaksi pinjaman ID %s tidak ditemui untuk permohonan ini.', $loanTransactionId)
-            );
-        }
+        )) {
 
-        // Populate form fields from existing transaction
-        $this->populateFormFromTransaction();
+            // Populate form fields from existing transaction
+            $this->populateFormFromTransaction();
+
+            return;
+        }
+        Log::warning('EquipmentChecklist: Transaction not found or mismatched.', [
+            'loanTransactionId' => $loanTransactionId,
+            'loanApplicationId' => $this->loanApplicationId,
+        ]);
+        throw new ModelNotFoundException(
+            sprintf('Transaksi pinjaman ID %s tidak ditemui untuk permohonan ini.', $loanTransactionId)
+        );
     }
 
     /**
