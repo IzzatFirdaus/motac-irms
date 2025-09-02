@@ -6,8 +6,8 @@ use App\Models\HelpdeskCategory;
 use App\Models\HelpdeskPriority;
 use App\Models\HelpdeskTicket;
 use App\Models\User;
-use Laravel\Sanctum\Sanctum;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
@@ -50,7 +50,6 @@ class AdminTicketManagementTest extends TestCase
         Sanctum::actingAs($user);
         $this->get(route('helpdesk.admin.tickets'))->assertForbidden(); // Users cannot access
     }
-
 
     /** @test */
     public function it_admin_can_update_ticket_status_and_assignment(): void

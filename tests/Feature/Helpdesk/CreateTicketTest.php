@@ -20,9 +20,9 @@ class CreateTicketTest extends TestCase
     {
         parent::setUp();
         Storage::fake('public'); // Fake the storage for file uploads
-    // Create necessary categories and priorities for tests (idempotent)
-    HelpdeskCategory::firstOrCreate(['name' => 'Hardware'], ['is_active' => 1, 'created_by' => 1, 'updated_by' => 1]);
-    HelpdeskPriority::firstOrCreate(['name' => 'Medium'], ['level' => 2, 'is_active' => 1, 'created_by' => 1, 'updated_by' => 1]);
+        // Create necessary categories and priorities for tests (idempotent)
+        HelpdeskCategory::firstOrCreate(['name' => 'Hardware'], ['is_active' => 1, 'created_by' => 1, 'updated_by' => 1]);
+        HelpdeskPriority::firstOrCreate(['name' => 'Medium'], ['level' => 2, 'is_active' => 1, 'created_by' => 1, 'updated_by' => 1]);
     }
 
     /** @test */

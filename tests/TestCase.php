@@ -16,17 +16,20 @@ abstract class TestCase extends BaseTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        // Ensure at least one user exists for factories
-        \App\Models\User::factory()->create();
-
-        // Only create default helpdesk categories/priorities when they do not already exist
-        if (\App\Models\HelpdeskCategory::count() === 0) {
-            \App\Models\HelpdeskCategory::firstOrCreate(['name' => 'General'], ['is_active' => 1, 'created_by' => 1, 'updated_by' => 1]);
+        // Ensure base tables exist before attempting to seed (in-memory sqlite runs migrations lazily)
+        if (\Illuminate\Support\Facades\Schema::hasTable('users')) {
+            // Ensure at least one user exists for factories
+            if (! \App\Models\User::query()->exists()) {
+                \App\Models\User::factory()->create();
+            }
+        } else {
+            return; // Migrations not yet run for this test; skip global seeding
         }
 
-        if (\App\Models\HelpdeskPriority::count() === 0) {
-            \App\Models\HelpdeskPriority::firstOrCreate(['name' => 'Low'], ['level' => 1, 'is_active' => 1, 'created_by' => 1, 'updated_by' => 1]);
-        }
+        // Do not globally pre-seed helpdesk categories/priorities here to avoid
+        // unique constraint conflicts with tests which explicitly create them.
+        // Individual tests will create the categories/priorities they require
+        // via factory() or firstOrCreate().
 
         // Ensure required roles and permissions exist for the 'web' guard
         $roles = ['BPM', 'BPM Staff', 'IT Admin', 'Admin', 'Approver', 'Regular User'];
@@ -38,7 +41,7 @@ abstract class TestCase extends BaseTestCase
             }
         }
 
-        $permissions = ['viewAny', 'view helpdesk tickets', 'view settings', 'view reports', 'view loan management', 'App\\Models\\HelpdeskTicket'];
+        $permissions = ['viewAny', 'view helpdesk tickets', 'view settings', 'view reports', 'view loan management', \App\Models\HelpdeskTicket::class];
         foreach ($permissions as $permission) {
             foreach (['web', 'sanctum'] as $guard) {
                 if (! \Spatie\Permission\Models\Permission::where('name', $permission)->where('guard_name', $guard)->exists()) {

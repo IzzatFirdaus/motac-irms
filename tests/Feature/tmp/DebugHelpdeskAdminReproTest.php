@@ -16,6 +16,9 @@ class DebugHelpdeskAdminReproTest extends TestCase
 
     public function test_reproduce_admin_route_and_dump_response()
     {
+        $this->markTestSkipped('Temporary debug test disabled');
+
+        return;
         // mimic the AdminTicketManagementTest setUp
         Role::firstOrCreate(['name' => 'Admin']);
         Role::firstOrCreate(['name' => 'IT Admin']);

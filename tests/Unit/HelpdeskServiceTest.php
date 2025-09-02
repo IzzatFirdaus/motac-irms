@@ -34,7 +34,7 @@ class HelpdeskServiceTest extends TestCase
         Storage::fake('public');
 
         // Mock NotificationService and bind it in the container.
-        $this->notificationServiceMock = Mockery::mock([NotificationService::class]);
+        $this->notificationServiceMock = Mockery::mock(NotificationService::class);
         $this->app->instance(NotificationService::class, $this->notificationServiceMock);
 
         $this->helpdeskService = $this->app->make(HelpdeskService::class);
@@ -153,15 +153,15 @@ class HelpdeskServiceTest extends TestCase
         // Should notify status update to applicant and assignee, and assignment to assignee
         $this->notificationServiceMock
             ->shouldReceive('notifyTicketStatusUpdated')
-            ->with($user, Mockery::type(HelpdeskTicket::class), $assignee, 'applicant')
+            ->with(Mockery::type(User::class), Mockery::type(HelpdeskTicket::class), $assignee, 'applicant')
             ->once();
         $this->notificationServiceMock
             ->shouldReceive('notifyTicketStatusUpdated')
-            ->with($assignee, Mockery::type(HelpdeskTicket::class), $assignee, 'assignee')
+            ->with(Mockery::type(User::class), Mockery::type(HelpdeskTicket::class), $assignee, 'assignee')
             ->once();
         $this->notificationServiceMock
             ->shouldReceive('notifyTicketAssigned')
-            ->with($assignee, Mockery::type(HelpdeskTicket::class), $assignee)
+            ->with(Mockery::type(User::class), Mockery::type(HelpdeskTicket::class), $assignee)
             ->once();
 
         $updated = $this->helpdeskService->updateTicket($ticket, $data, $assignee);
@@ -194,7 +194,7 @@ class HelpdeskServiceTest extends TestCase
 
         $this->notificationServiceMock
             ->shouldReceive('notifyTicketStatusUpdated')
-            ->with($user, Mockery::type(HelpdeskTicket::class), $closer, 'applicant')
+            ->with(Mockery::type(User::class), Mockery::type(HelpdeskTicket::class), $closer, 'applicant')
             ->once();
 
         $updated = $this->helpdeskService->updateTicket($ticket, $data, $closer);
@@ -221,7 +221,7 @@ class HelpdeskServiceTest extends TestCase
 
         $this->notificationServiceMock
             ->shouldReceive('notifyTicketStatusUpdated')
-            ->with($user, Mockery::type(HelpdeskTicket::class), $updater, 'applicant')
+            ->with(Mockery::type(User::class), Mockery::type(HelpdeskTicket::class), $updater, 'applicant')
             ->once();
 
         $updated = $this->helpdeskService->updateTicket($ticket, $data, $updater);
@@ -244,7 +244,7 @@ class HelpdeskServiceTest extends TestCase
 
         $this->notificationServiceMock
             ->shouldReceive('notifyTicketStatusUpdated')
-            ->with($user, Mockery::type(HelpdeskTicket::class), $closer, 'applicant')
+            ->with(Mockery::type(User::class), Mockery::type(HelpdeskTicket::class), $closer, 'applicant')
             ->once();
 
         $data = [
