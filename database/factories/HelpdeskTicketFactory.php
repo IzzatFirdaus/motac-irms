@@ -80,6 +80,7 @@ class HelpdeskTicketFactory extends Factory
             if (is_null($closedById)) {
                 $closedById = User::factory()->create()->id;
             }
+
             $closedAt = Carbon::parse($this->faker->dateTimeBetween($updatedAt, 'now'));
         }
 
@@ -125,18 +126,19 @@ class HelpdeskTicketFactory extends Factory
 
     public function configure(): static
     {
-        return $this->afterCreating(function (HelpdeskTicket $ticket, $attributes = null) {
+        return $this->afterCreating(function (HelpdeskTicket $ticket, $attributes = null): void {
             // If the ticket is closed but closed_by_id was not provided, set it based on assigned or user
             if (! ($ticket->status === HelpdeskTicket::STATUS_CLOSED && empty($ticket->closed_by_id))) {
                 return;
             }
+
             $closer               = $ticket->assigned_to_user_id ?? $ticket->user_id ?? User::factory()->create()->id;
             $ticket->closed_by_id = $closer;
             if (empty($ticket->closed_at)) {
                 $ticket->closed_at = now();
             }
-            $ticket->save();
 
+            $ticket->save();
         });
     }
 
@@ -193,7 +195,8 @@ class HelpdeskTicketFactory extends Factory
         if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $userId = ! empty($userIds) ? Arr::random($userIds) : null;
+
+        $userId = empty($userIds) ? null : Arr::random($userIds);
         static $msFaker;
         if (! $msFaker) {
             $msFaker = \Faker\Factory::create('ms_MY');
@@ -252,7 +255,8 @@ class HelpdeskTicketFactory extends Factory
         if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $deleterId = ! empty($userIds) ? Arr::random($userIds) : null;
+
+        $deleterId = empty($userIds) ? null : Arr::random($userIds);
 
         return $this->state([
             'deleted_at' => now(),

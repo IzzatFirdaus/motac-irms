@@ -30,7 +30,7 @@ final class UserService
      * Blameable fields (created_by, updated_by) are expected to be handled by
      * the CreatedUpdatedDeletedBy trait or a BlameableObserver on the User model.
      *
-        * @param array $data User data including 'password'.
+     * @param array $data User data including 'password'.
      *
      * @throws InvalidArgumentException If essential data like password is missing.
      * @throws RuntimeException         If user creation fails at the database level.
@@ -55,8 +55,8 @@ final class UserService
      * If 'password' key exists in $data but its value is empty, it's ignored (password not changed).
      * Blameable field (updated_by) is expected to be handled by User model's trait/observer.
      *
-     * @param User                 $user The User instance to update.
-        * @param array $data Data to update.
+     * @param User  $user The User instance to update.
+     * @param array $data Data to update.
      *
      * @throws RuntimeException If user update fails due to an exception.
      *
@@ -245,11 +245,8 @@ final class UserService
     /**
      * Prepares user data for creation: hashes password and sets default status.
      *
-    * @param array $data
      *
      * @throws InvalidArgumentException if password is not provided or invalid.
-     *
-        * @return array
      */
     private function prepareUserDataForCreation(array $data): array
     {
@@ -277,10 +274,6 @@ final class UserService
 
     /**
      * Prepares password for update: hashes if provided and non-empty, unsets if key exists but value is empty.
-     *
-    * @param array $data
-    *
-    * @return array
      */
     private function preparePasswordForUpdate(array $data): array
     {

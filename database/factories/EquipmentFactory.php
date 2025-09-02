@@ -36,12 +36,15 @@ class EquipmentFactory extends Factory
         if (empty($userIds)) {
             $userIds = [User::factory()->create()->id];
         }
+
         if (empty($departmentIds)) {
             $departmentIds = [Department::factory()->create()->id];
         }
+
         if (empty($equipmentCategoryIds)) {
             $equipmentCategoryIds = [EquipmentCategory::factory()->create()->id];
         }
+
         if (empty($locationIds)) {
             $locationIds = [Location::factory()->create()->id];
         }
@@ -56,6 +59,7 @@ class EquipmentFactory extends Factory
         if (! $subCategory) {
             $subCategory = SubCategory::factory()->create(['equipment_category_id' => $equipmentCategoryId]);
         }
+
         $subCategoryId = $subCategory->id;
 
         // Use static Faker for ms_MY locale
@@ -67,7 +71,7 @@ class EquipmentFactory extends Factory
         // Generate dates
         $purchaseDateRaw    = $this->faker->optional(0.8)->dateTimeBetween('-5 years', '-3 months');
         $purchaseDate       = $purchaseDateRaw ? Carbon::instance($purchaseDateRaw) : null;
-        $warrantyExpiryDate = $purchaseDate ? $purchaseDate->copy()->addYears($this->faker->numberBetween(1, 3)) : null;
+        $warrantyExpiryDate = $purchaseDate instanceof \Illuminate\Support\Carbon ? $purchaseDate->copy()->addYears($this->faker->numberBetween(1, 3)) : null;
 
         $createdAt = $purchaseDate ?? Carbon::parse($this->faker->dateTimeThisDecade('-2 years'));
         $updatedAt = Carbon::parse($this->faker->dateTimeBetween($createdAt->toDateTimeString(), 'now'));
@@ -132,8 +136,8 @@ class EquipmentFactory extends Factory
             'brand'                 => $this->faker->randomElement(['Dell', 'HP', 'Lenovo', 'Acer', 'Apple', 'Canon', 'Epson', 'Samsung']),
             'model'                 => Str::title($this->faker->words(mt_rand(1, 2), true)).' '.$this->faker->bothify('##??X'),
             'description'           => $msFaker->optional(0.7)->paragraph(2),
-            'purchase_price'        => $purchaseDate ? $this->faker->randomFloat(2, 100, 5000) : null,
-            'purchase_date'         => $purchaseDate ? $purchaseDate->format('Y-m-d') : null,
+            'purchase_price'        => $purchaseDate instanceof \Illuminate\Support\Carbon ? $this->faker->randomFloat(2, 100, 5000) : null,
+            'purchase_date'         => $purchaseDate instanceof \Illuminate\Support\Carbon ? $purchaseDate->format('Y-m-d') : null,
             'warranty_expiry_date'  => $warrantyExpiryDate ? $warrantyExpiryDate->format('Y-m-d') : null,
             'status'                => $status,
             'condition_status'      => $conditionStatus,
@@ -259,7 +263,8 @@ class EquipmentFactory extends Factory
         if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $deleterId = ! empty($userIds) ? Arr::random($userIds) : null;
+
+        $deleterId = empty($userIds) ? null : Arr::random($userIds);
 
         return $this->state([
             'deleted_at' => now(),

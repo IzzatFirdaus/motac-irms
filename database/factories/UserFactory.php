@@ -200,11 +200,11 @@ class UserFactory extends Factory
             if (! method_exists($user, 'assignRole')) {
                 return;
             }
+
             $user->assignRole('HOD');
             if (method_exists($user, 'hasRole') && ! $user->hasRole('Approver')) {
                 $user->assignRole('Approver');
             }
-
         });
     }
 

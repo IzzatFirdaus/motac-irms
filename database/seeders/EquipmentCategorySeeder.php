@@ -94,11 +94,11 @@ class EquipmentCategorySeeder extends Seeder
 
         $needed = $targetCount - EquipmentCategory::count();
         if ($needed <= 0) {
-
             Log::info('EquipmentCategory seeding complete (Revision 3).');
 
             return;
         }
+
         EquipmentCategory::factory()
             ->count($needed)
             ->create([

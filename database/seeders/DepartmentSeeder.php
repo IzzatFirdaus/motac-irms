@@ -69,6 +69,7 @@ class DepartmentSeeder extends Seeder
         if (User::count() !== 0) {
             return;
         }
+
         Log::info('No users found. Creating audit user for department seeding...');
 
         // Create a simple audit user without complex relationships.
@@ -85,7 +86,6 @@ class DepartmentSeeder extends Seeder
         ]);
 
         Log::info('Audit user created successfully.');
-
     }
 
     /**

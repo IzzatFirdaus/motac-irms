@@ -64,8 +64,6 @@ class DefaultNotification extends Notification // implements ShouldQueue
      * Get the array representation of the notification.
      *
      * @param User $notifiable The user receiving the notification
-     *
-    * @return array
      */
     public function toArray(User $notifiable): array
     {

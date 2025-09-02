@@ -32,9 +32,6 @@ final class IssueEquipmentRequest extends FormRequest
         return $loanApplication instanceof LoanApplication && $user->can('processIssuance', $loanApplication);
     }
 
-    /**
-    * @return array
-     */
     public function rules(): array
     {
         /** @var LoanApplication|null $loanApplicationFromRoute */

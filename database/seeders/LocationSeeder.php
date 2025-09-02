@@ -111,11 +111,11 @@ class LocationSeeder extends Seeder
 
         // If we have fewer than the target, create more using a factory
         if ($currentCount >= $targetCount) {
-
             Log::info('Locations seeding complete (Revision 4 - Patched).');
 
             return;
         }
+
         $needed = $targetCount - $currentCount;
         Log::info(sprintf('Attempting to create %s additional random locations using a factory...', $needed));
 

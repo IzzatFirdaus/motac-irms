@@ -44,8 +44,8 @@ class DepartmentFactory extends Factory
         $deletedAt = $isDeleted ? Carbon::parse($this->faker->dateTimeBetween($updatedAt, 'now')) : null;
 
         // Safe access to Department constants with fallbacks
-        $branchTypeHq    = defined('App\Models\Department::BRANCH_TYPE_HQ') ? Department::BRANCH_TYPE_HQ : 'headquarters';
-        $branchTypeState = defined('App\Models\Department::BRANCH_TYPE_STATE') ? Department::BRANCH_TYPE_STATE : 'state';
+        $branchTypeHq    = defined(\App\Models\Department::class.'::BRANCH_TYPE_HQ') ? Department::BRANCH_TYPE_HQ : 'headquarters';
+        $branchTypeState = defined(\App\Models\Department::class.'::BRANCH_TYPE_STATE') ? Department::BRANCH_TYPE_STATE : 'state';
 
         return [
             // Department name: randomly choose "Jabatan", "Bahagian", or "Unit" + a unique word
@@ -69,7 +69,7 @@ class DepartmentFactory extends Factory
      */
     public function hq(): static
     {
-        $branchTypeHq = defined('App\Models\Department::BRANCH_TYPE_HQ') ? Department::BRANCH_TYPE_HQ : 'headquarters';
+        $branchTypeHq = defined(\App\Models\Department::class.'::BRANCH_TYPE_HQ') ? Department::BRANCH_TYPE_HQ : 'headquarters';
 
         return $this->state(fn (array $attributes): array => [
             'branch_type' => $branchTypeHq,
@@ -81,7 +81,7 @@ class DepartmentFactory extends Factory
      */
     public function stateBranch(): static
     {
-        $branchTypeState = defined('App\Models\Department::BRANCH_TYPE_STATE') ? Department::BRANCH_TYPE_STATE : 'state';
+        $branchTypeState = defined(\App\Models\Department::class.'::BRANCH_TYPE_STATE') ? Department::BRANCH_TYPE_STATE : 'state';
 
         return $this->state(fn (array $attributes): array => [
             'branch_type' => $branchTypeState,
@@ -123,7 +123,8 @@ class DepartmentFactory extends Factory
         if (! isset($userIds)) {
             $userIds = User::pluck('id')->all();
         }
-        $deleterId = ! empty($userIds) ? Arr::random($userIds) : null;
+
+        $deleterId = empty($userIds) ? null : Arr::random($userIds);
 
         return $this->state([
             'deleted_at' => now(),

@@ -206,7 +206,7 @@ class HelpdeskService
     /**
      * Handles file attachments for tickets or comments.
      *
-    * @param object $attachable Accepts Eloquent models (or objects) that implement attachments().
+     * @param object $attachable Accepts Eloquent models (or objects) that implement attachments().
      */
     protected function handleAttachments($attachable, array $attachments): void
     {

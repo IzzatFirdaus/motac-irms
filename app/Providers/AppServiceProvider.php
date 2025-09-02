@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+
 // Translator is intentionally not referenced directly; using SuffixedTranslator wrapper instead.
 
 class AppServiceProvider extends ServiceProvider

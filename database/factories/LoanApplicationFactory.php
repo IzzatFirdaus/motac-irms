@@ -22,9 +22,8 @@ class LoanApplicationFactory extends Factory
     public function definition(): array
     {
         // Always ensure at least one user exists for all foreign key columns
-        $user      = User::first() ?: User::factory()->create();
-        $userId    = $user->id;
-        $officerId = $user->id;
+        $user   = User::first() ?: User::factory()->create();
+        $userId = $user->id;
 
         // Use a static Malaysian faker for realism and speed
         static $msFaker;

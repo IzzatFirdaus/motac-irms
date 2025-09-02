@@ -26,11 +26,11 @@ final class EquipmentService
     /**
      * Get all equipment with optional filters and eager loading.
      *
-    * @param array $filters       Available filters: 'status', 'condition_status', 'asset_type', 'search', 'location_id', 'department_id', 'classification', 'acquisition_type'.
-     * @param array<int, string>   $with          Relationships to eager load.
-     * @param int                  $perPage       Items per page. Use -1 for all results (returns EloquentCollection).
-     * @param string               $sortBy        Column to sort by.
-     * @param string               $sortDirection Sort direction ('asc' or 'desc').
+     * @param array              $filters       Available filters: 'status', 'condition_status', 'asset_type', 'search', 'location_id', 'department_id', 'classification', 'acquisition_type'.
+     * @param array<int, string> $with          Relationships to eager load.
+     * @param int                $perPage       Items per page. Use -1 for all results (returns EloquentCollection).
+     * @param string             $sortBy        Column to sort by.
+     * @param string             $sortDirection Sort direction ('asc' or 'desc').
      *
      * @return LengthAwarePaginator<Equipment>|EloquentCollection<int, Equipment>
      */
@@ -172,7 +172,7 @@ final class EquipmentService
      * Create a new equipment item.
      * Assumes BlameableObserver handles created_by/updated_by via Auth::user().
      *
-    * @param array $data Validated data for creating equipment.
+     * @param array $data Validated data for creating equipment.
      *
      * @throws RuntimeException If creation fails.
      *
@@ -200,8 +200,8 @@ final class EquipmentService
      * Update an existing equipment item.
      * Assumes BlameableObserver handles updated_by via Auth::user().
      *
-     * @param Equipment            $equipment The equipment model instance to update.
-    * @param array $data      Validated data for updating equipment.
+     * @param Equipment $equipment The equipment model instance to update.
+     * @param array     $data      Validated data for updating equipment.
      *
      * @throws RuntimeException If update fails.
      *

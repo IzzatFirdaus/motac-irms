@@ -98,8 +98,6 @@ final class DefaultUserNotification extends BaseNotification implements ShouldQu
      * Get the array representation of the notification (for database storage).
      *
      * @param User $notifiable The user receiving the notification
-     *
-    * @return array
      */
     public function toArray(User $notifiable): array
     {
