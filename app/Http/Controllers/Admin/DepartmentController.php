@@ -7,6 +7,8 @@ use App\Models\Department;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\Admin\StoreDepartmentRequest;
+use App\Http\Requests\Admin\UpdateDepartmentRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
@@ -26,21 +28,10 @@ class DepartmentController extends Controller
     {
         Log::info('Admin\\DepartmentController@index: Fetching department list.', ['admin_user_id' => Auth::id()]);
 
-        // Filter departments if search query is provided
-        $query = Department::query();
-
-        if (! $request->filled('search')) {
-            $departments = $query->orderBy('name')->paginate(config('pagination.default_size', 15));
-
-            return view('admin.departments.index', ['departments' => $departments]);
-        }
-
-        $search = $request->input('search');
-        $query->where('name', 'like', sprintf('%%%s%%', $search))
-            ->orWhere('branch_type', 'like', sprintf('%%%s%%', $search))
-            ->orWhere('code', 'like', sprintf('%%%s%%', $search));
-
-        $departments = $query->orderBy('name')->paginate(config('pagination.default_size', 15));
+        $departments = Department::query()
+            ->search($request->string('search')->toString())
+            ->orderBy('name')
+            ->paginate(config('pagination.default_size', 15));
 
         return view('admin.departments.index', ['departments' => $departments]);
     }
@@ -61,18 +52,11 @@ class DepartmentController extends Controller
     /**
      * Store a newly created department in storage.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(StoreDepartmentRequest $request): RedirectResponse
     {
         Log::info('Admin\\DepartmentController@store: Attempting to create a new department.', ['admin_user_id' => Auth::id()]);
 
-        $validatedData = $request->validate([
-            'name'                  => 'required|string|max:255',
-            'branch_type'           => 'required|string|in:'.implode(',', array_keys(Department::$BRANCH_TYPE_LABELS)),
-            'code'                  => 'nullable|string|max:50|unique:departments,code',
-            'description'           => 'nullable|string|max:500',
-            'is_active'             => 'required|boolean',
-            'head_of_department_id' => 'nullable|exists:users,id',
-        ]);
+    $validatedData = $request->validated();
 
         try {
             $validatedData['created_by'] = Auth::id();
@@ -121,18 +105,11 @@ class DepartmentController extends Controller
     /**
      * Update the specified department in storage.
      */
-    public function update(Request $request, Department $department): RedirectResponse
+    public function update(UpdateDepartmentRequest $request, Department $department): RedirectResponse
     {
         Log::info(sprintf('Admin\\DepartmentController@update: Attempting to update department ID: %d.', $department->id), ['admin_user_id' => Auth::id()]);
 
-        $validatedData = $request->validate([
-            'name'                  => 'required|string|max:255',
-            'branch_type'           => 'required|string|in:'.implode(',', array_keys(Department::$BRANCH_TYPE_LABELS)),
-            'code'                  => 'nullable|string|max:50|unique:departments,code,'.$department->id,
-            'description'           => 'nullable|string|max:500',
-            'is_active'             => 'required|boolean',
-            'head_of_department_id' => 'nullable|exists:users,id',
-        ]);
+    $validatedData = $request->validated();
 
         try {
             $validatedData['updated_by'] = Auth::id();

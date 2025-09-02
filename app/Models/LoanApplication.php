@@ -18,7 +18,7 @@ use Illuminate\Support\Str;
 
 /**
  * LoanApplication Model.
- *
+ * 
  * Represents a loan application for ICT equipment.
  *
  * @property int                             $id
@@ -75,7 +75,6 @@ use Illuminate\Support\Str;
  * @property-read \App\Models\User|null $supportingOfficer
  * @property-read \App\Models\User|null $updater
  * @property-read \App\Models\User $user
- *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication active()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication dueInDays(int $days)
  * @method static \Database\Factories\LoanApplicationFactory                    factory($count = null, $state = [])
@@ -114,8 +113,12 @@ use Illuminate\Support\Str;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereUserId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication withoutTrashed()
- *
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication filterCreatedBetween(?string $dateFrom, ?string $dateTo)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication filterDepartment(?int $departmentId)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication filterStatus(?string $status)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication search(?string $term)
  * @mixin \Eloquent
+ * @mixin IdeHelperLoanApplication
  */
 class LoanApplication extends Model
 {
@@ -439,5 +442,52 @@ class LoanApplication extends Model
                 self::STATUS_PARTIALLY_ISSUED,
             ])
             ->whereDate('loan_end_date', '=', now()->addDays($days)->toDateString());
+    }
+
+    // Report-oriented scopes
+    public function scopeSearch($query, ?string $term)
+    {
+        $term = trim((string) $term);
+        if ($term === '') {
+            return $query;
+        }
+
+        $like = '%'.$term.'%';
+        return $query->where(function ($q) use ($like): void {
+            $q->where('id', 'like', $like)
+                ->orWhere('purpose', 'like', $like);
+        });
+    }
+
+    public function scopeFilterStatus($query, ?string $status)
+    {
+        if ($status !== null && $status !== '') {
+            $query->where('status', $status);
+        }
+
+        return $query;
+    }
+
+    public function scopeFilterDepartment($query, ?int $departmentId)
+    {
+        if ($departmentId) {
+            $query->whereHas('user.department', function ($q) use ($departmentId): void {
+                $q->where('id', $departmentId);
+            });
+        }
+
+        return $query;
+    }
+
+    public function scopeFilterCreatedBetween($query, ?string $dateFrom, ?string $dateTo)
+    {
+        if ($dateFrom) {
+            $query->whereDate('created_at', '>=', $dateFrom);
+        }
+        if ($dateTo) {
+            $query->whereDate('created_at', '<=', $dateTo);
+        }
+
+        return $query;
     }
 }

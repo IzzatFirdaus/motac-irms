@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
 
 /**
  * LoanApplicationItem Model.
- *
+ * 
  * Represents a requested equipment type/quantity in a loan application.
  * Each item records the type of equipment, amount requested/approved/issued/returned,
  * and status within the application's approval and issuance workflow.
@@ -42,7 +42,6 @@ use Illuminate\Support\Str;
  * @property-read \App\Models\LoanApplication|null $loanApplication
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanTransactionItem> $loanTransactionItems
  * @property-read int|null $loan_transaction_items_count
- *
  * @method static \Database\Factories\LoanApplicationItemFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem newQuery()
@@ -66,8 +65,8 @@ use Illuminate\Support\Str;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem withoutTrashed()
- *
  * @mixin \Eloquent
+ * @mixin IdeHelperLoanApplicationItem
  */
 class LoanApplicationItem extends Model
 {

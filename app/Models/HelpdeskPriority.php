@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * HelpdeskPriority Model.
- *
+ * 
  * Represents priority levels for helpdesk tickets.
  *
  * @property int                             $id
@@ -27,7 +27,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read string $label
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\HelpdeskTicket> $tickets
  * @property-read int|null $tickets_count
- *
  * @method static \Database\Factories\HelpdeskPriorityFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskPriority newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskPriority newQuery()
@@ -45,8 +44,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskPriority whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskPriority withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskPriority withoutTrashed()
- *
  * @mixin \Eloquent
+ * @mixin IdeHelperHelpdeskPriority
  */
 class HelpdeskPriority extends Model
 {

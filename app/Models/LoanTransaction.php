@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
 
 /**
  * LoanTransaction Model.
- *
+ * 
  * Represents an equipment issue or return record for a loan application.
  *
  * @property int                             $id
@@ -38,6 +38,63 @@ use Illuminate\Support\Str;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property int|null $created_by
+ * @property int|null $updated_by
+ * @property int|null $deleted_by
+ * @property-read \App\Models\User|null $creator
+ * @property-read \App\Models\User|null $deleter
+ * @property-read string $item_name
+ * @property-read int $quantity
+ * @property-read string $status_color_class
+ * @property-read string $status_label
+ * @property-read string $type_color_class
+ * @property-read string $type_label
+ * @property-read \App\Models\User|null $issuingOfficer
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanTransactionItem> $items
+ * @property-read int|null $items_count
+ * @property-read \App\Models\LoanApplication $loanApplication
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanTransactionItem> $loanTransactionItems
+ * @property-read int|null $loan_transaction_items_count
+ * @property-read \App\Models\User|null $receivingOfficer
+ * @property-read LoanTransaction|null $relatedIssueTransaction
+ * @property-read \App\Models\User|null $returnAcceptingOfficer
+ * @property-read \App\Models\User|null $returningOfficer
+ * @property-read \App\Models\User|null $updater
+ * @method static \Database\Factories\LoanTransactionFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction filterDateBetween(?string $dateFrom, ?string $dateTo)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction filterType(?string $type)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction filterUser(?int $userId)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereAccessoriesChecklistOnIssue($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereAccessoriesChecklistOnReturn($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereDueDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereIssueNotes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereIssueTimestamp($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereIssuingOfficerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereLoanApplicationId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereReceivingOfficerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereRelatedTransactionId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereReturnAcceptingOfficerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereReturnNotes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereReturnTimestamp($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereReturningOfficerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereTransactionDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction withoutTrashed()
+ * @mixin \Eloquent
+ * @mixin IdeHelperLoanTransaction
  */
 class LoanTransaction extends Model
 {
@@ -403,5 +460,38 @@ class LoanTransaction extends Model
         $totalQuantityReturned = LoanTransactionItem::whereIn('loan_transaction_id', $returnTransactionIds)->sum('quantity_transacted');
 
         return $totalQuantityReturned >= $totalQuantityIssued;
+    }
+
+    // Report-oriented scopes
+    public function scopeFilterUser($query, ?int $userId)
+    {
+        if ($userId) {
+            $query->whereHas('loanApplication.user', function ($q) use ($userId): void {
+                $q->where('id', $userId);
+            });
+        }
+
+        return $query;
+    }
+
+    public function scopeFilterType($query, ?string $type)
+    {
+        if ($type !== null && $type !== '') {
+            $query->where('type', $type);
+        }
+
+        return $query;
+    }
+
+    public function scopeFilterDateBetween($query, ?string $dateFrom, ?string $dateTo)
+    {
+        if ($dateFrom) {
+            $query->whereDate('transaction_date', '>=', $dateFrom);
+        }
+        if ($dateTo) {
+            $query->whereDate('transaction_date', '<=', $dateTo);
+        }
+
+        return $query;
     }
 }

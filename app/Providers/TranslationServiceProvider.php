@@ -54,13 +54,13 @@ class TranslationServiceProvider extends ServiceProvider
         $this->app->singleton('translation.loader', function (): \App\Translation\SuffixedFileLoader {
             try {
                 // Use our custom loader which supports suffixed files
-                $files    = $this->app['files'];
+                $files = $this->app['files'];
                 $langPath = $this->app['path.lang'];
 
                 return new SuffixedFileLoader($files, $langPath);
             } catch (\Exception $exception) {
                 // Log error and provide fallback
-                Log::error('Failed to initialize translation loader: '.$exception->getMessage());
+                Log::error('Failed to initialize translation loader: ' . $exception->getMessage());
                 throw new \RuntimeException('Translation system initialization failed. Please check your language files.', 0, $exception);
             }
         });
@@ -91,7 +91,7 @@ class TranslationServiceProvider extends ServiceProvider
                 return $translator;
             } catch (\Exception $exception) {
                 // Log error and provide emergency fallback
-                Log::error('Failed to initialize suffixed translator: '.$exception->getMessage());
+                Log::error('Failed to initialize suffixed translator: ' . $exception->getMessage());
                 throw new \RuntimeException('Custom translation system initialization failed.', 0, $exception);
             }
         });
@@ -128,6 +128,8 @@ class TranslationServiceProvider extends ServiceProvider
 
     /**
      * Get the services provided by the provider.
+     *
+     * @return array
      */
     public function provides(): array
     {

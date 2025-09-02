@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * TicketComment Model (Helpdesk Ticket Comment).
- *
+ * 
  * Represents comments left on helpdesk tickets.
  *
  * @property int                             $id
@@ -29,15 +29,26 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\User $user
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\TicketAttachment[] $attachments
  * @property-read int|null $attachments_count
- *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketComment newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketComment newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketComment onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketComment query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketComment withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketComment withoutTrashed()
- *
+ * @property int $is_internal
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketComment whereComment($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketComment whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketComment whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketComment whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketComment whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketComment whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketComment whereIsInternal($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketComment whereTicketId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketComment whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketComment whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketComment whereUserId($value)
  * @mixin \Eloquent
+ * @mixin IdeHelperTicketComment
  */
 class TicketComment extends Model
 {

@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Ticket Model (Helpdesk Ticket).
- *
+ * 
  * Represents a helpdesk ticket submitted by users for ICT support.
  *
  * @property int                             $id
@@ -40,15 +40,35 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TicketAttachment> $attachments
  * @property-read int|null $attachments_count
  * @property-read int|null $comments_count
- *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket withoutTrashed()
- *
+ * @property string|null $sla_due_at SLA due date
+ * @property string|null $resolution_notes
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket whereAssignedTo($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket whereCategoryId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket whereDepartmentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket wherePriorityId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket whereResolutionNotes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket whereResolvedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket whereResolvedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket whereSlaDueAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket whereSubject($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket whereUserId($value)
  * @mixin \Eloquent
+ * @mixin IdeHelperTicket
  */
 class Ticket extends Model
 {

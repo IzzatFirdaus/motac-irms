@@ -34,7 +34,6 @@ use Illuminate\Support\Str;
  * @property-read int|null $users_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Ticket> $tickets
  * @property-read int|null $tickets_count
- *
  * @method static \Database\Factories\DepartmentFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Department newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Department newQuery()
@@ -55,8 +54,9 @@ use Illuminate\Support\Str;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Department whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Department withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Department withoutTrashed()
- *
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Department search(?string $term)
  * @mixin \Eloquent
+ * @mixin IdeHelperDepartment
  */
 class Department extends Model
 {
@@ -155,5 +155,21 @@ class Department extends Model
     public function tickets(): HasMany
     {
         return $this->hasMany(Ticket::class, 'department_id');
+    }
+
+    // --- Scopes ---
+    public function scopeSearch($query, ?string $term)
+    {
+        $term = trim((string) $term);
+        if ($term === '') {
+            return $query;
+        }
+
+        $like = '%'.$term.'%';
+        return $query->where(function ($q) use ($like): void {
+            $q->where('name', 'like', $like)
+                ->orWhere('branch_type', 'like', $like)
+                ->orWhere('code', 'like', $like);
+        });
     }
 }

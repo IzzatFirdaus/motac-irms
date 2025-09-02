@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * HelpdeskAttachment Model.
- *
+ * 
  * Stores files attached to helpdesk tickets or comments (polymorphic).
  *
  * @property int                             $id
@@ -24,15 +24,32 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read Model|\Eloquent $attachable
  * @property-read string $file_url
  * @property-read string $readable_file_size
- *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment withoutTrashed()
- *
+ * @property int|null $created_by
+ * @property int|null $updated_by
+ * @property int|null $deleted_by
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment whereAttachableId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment whereAttachableType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment whereFileName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment whereFilePath($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment whereFileSize($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment whereFileType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment whereUpdatedBy($value)
  * @mixin \Eloquent
+ * @mixin IdeHelperHelpdeskAttachment
  */
 class HelpdeskAttachment extends Model
 {

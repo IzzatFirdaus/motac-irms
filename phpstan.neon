@@ -28,7 +28,6 @@ parameters:
     # Use IDE helper as PHPStan stub file to provide model docblocks safely
     stubFiles:
     - _ide_helper_models.php
-    - _phpstan_eloquent_stub.php
 
     # MOTAC IRMS-specific ignore patterns (documented for onboarding):
     ignoreErrors:

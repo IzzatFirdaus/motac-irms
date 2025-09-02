@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * HelpdeskComment Model.
- *
+ * 
  * Stores comments on HelpdeskTicket, can be internal or external.
  *
  * @property int    $id
@@ -25,15 +25,31 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read string $preview
  * @property-read \App\Models\HelpdeskTicket|null $ticket
  * @property-read \App\Models\User|null $user
- *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment withoutTrashed()
- *
+ * @property int|null $created_by
+ * @property int|null $updated_by
+ * @property int|null $deleted_by
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment whereComment($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment whereIsInternal($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment whereTicketId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment whereUserId($value)
  * @mixin \Eloquent
+ * @mixin IdeHelperHelpdeskComment
  */
 class HelpdeskComment extends Model
 {
