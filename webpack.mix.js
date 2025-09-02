@@ -18,8 +18,8 @@ const path = require('path');
 // -----------------------------------------------------------------------------
 mix.options({
   resourceRoot: process.env.ASSET_URL || '/', // Base for assets; use CDN/base if needed
-  processCssUrls: false,                      // Don't process/replace css url()s
-  postCss: [require('autoprefixer')]
+  processCssUrls: false, // Don't process/replace css url()s
+  postCss: [require('autoprefixer')],
 });
 
 // -----------------------------------------------------------------------------
@@ -28,21 +28,21 @@ mix.options({
 mix.webpackConfig({
   output: {
     publicPath: process.env.ASSET_URL ? `${process.env.ASSET_URL}/` : '/', // For correct asset loading
-    libraryTarget: 'umd'
+    libraryTarget: 'umd',
   },
   plugins: [
     // Ignore premium or non-npm vendor plugins
     new IgnorePlugin({
       checkResource(resource, context) {
-        return [
-          path.join(__dirname, 'resources/assets/vendor/libs/@form-validation')
-        ].some(pathToIgnore => resource.startsWith(pathToIgnore));
-      }
+        return [path.join(__dirname, 'resources/assets/vendor/libs/@form-validation')].some(
+          pathToIgnore => resource.startsWith(pathToIgnore)
+        );
+      },
     }),
     // Inject BASE_URL into frontend scripts
     new EnvironmentPlugin({
-      BASE_URL: process.env.ASSET_URL ? `${process.env.ASSET_URL}/` : '/'
-    })
+      BASE_URL: process.env.ASSET_URL ? `${process.env.ASSET_URL}/` : '/',
+    }),
   ],
   module: {
     rules: [
@@ -52,7 +52,7 @@ mix.webpackConfig({
         include: [
           path.join(__dirname, 'node_modules/bootstrap/'),
           path.join(__dirname, 'node_modules/popper.js/'),
-          path.join(__dirname, 'node_modules/shepherd.js/')
+          path.join(__dirname, 'node_modules/shepherd.js/'),
         ],
         loader: 'babel-loader',
         options: {
@@ -60,12 +60,12 @@ mix.webpackConfig({
           plugins: [
             '@babel/plugin-transform-destructuring',
             '@babel/plugin-proposal-object-rest-spread',
-            '@babel/plugin-transform-template-literals'
+            '@babel/plugin-transform-template-literals',
           ],
-          babelrc: false
-        }
-      }
-    ]
+          babelrc: false,
+        },
+      },
+    ],
   },
   // Some vendor libraries are expected globally (no need to bundle again)
   externals: {
@@ -79,8 +79,8 @@ mix.webpackConfig({
     'popper.js': 'Popper',
     './blueimp-helper': 'jQuery',
     './blueimp-gallery': 'blueimpGallery',
-    './blueimp-gallery-video': 'blueimpGallery'
-  }
+    './blueimp-gallery-video': 'blueimpGallery',
+  },
 });
 
 // -----------------------------------------------------------------------------
@@ -97,7 +97,7 @@ function mixAssetsDir(query, cb) {
 // SASS Compilation Options (for MOTAC theme precision)
 // -----------------------------------------------------------------------------
 const sassOptions = {
-  precision: 5
+  precision: 5,
 };
 
 // -----------------------------------------------------------------------------
@@ -106,7 +106,9 @@ const sassOptions = {
 
 // Core theme SCSS to CSS
 mixAssetsDir('vendor/scss/**/!(_)*.scss', (src, dest) =>
-  mix.sass(src, dest.replace(/(\\|\/)scss(\\|\/)/, '$1css$2').replace(/\.scss$/, '.css'), { sassOptions })
+  mix.sass(src, dest.replace(/(\\|\/)scss(\\|\/)/, '$1css$2').replace(/\.scss$/, '.css'), {
+    sassOptions,
+  })
 );
 
 // Core theme JS (ES6 or plain)
@@ -125,7 +127,9 @@ mixAssetsDir('vendor/libs/@form-validation/umd', (src, dest) => mix.copyDirector
 // Fonts (custom and vendor)
 mixAssetsDir('vendor/fonts/*/*', (src, dest) => mix.copy(src, dest));
 mixAssetsDir('vendor/fonts/!(_)*.scss', (src, dest) =>
-  mix.sass(src, dest.replace(/(\\|\/)scss(\\|\/)/, '$1css$2').replace(/\.scss$/, '.css'), { sassOptions })
+  mix.sass(src, dest.replace(/(\\|\/)scss(\\|\/)/, '$1css$2').replace(/\.scss$/, '.css'), {
+    sassOptions,
+  })
 );
 
 // -----------------------------------------------------------------------------
@@ -144,7 +148,10 @@ mix.js('resources/js/laravel-user-management.js', 'public/js/');
 // -----------------------------------------------------------------------------
 mix.copy('node_modules/flag-icons/flags/1x1/*', 'public/assets/vendor/fonts/flags/1x1');
 mix.copy('node_modules/flag-icons/flags/4x3/*', 'public/assets/vendor/fonts/flags/4x3');
-mix.copy('node_modules/@fortawesome/fontawesome-free/webfonts/*', 'public/assets/vendor/fonts/fontawesome');
+mix.copy(
+  'node_modules/@fortawesome/fontawesome-free/webfonts/*',
+  'public/assets/vendor/fonts/fontawesome'
+);
 mix.copy('node_modules/katex/dist/fonts/*', 'public/assets/vendor/libs/quill/fonts');
 
 // -----------------------------------------------------------------------------

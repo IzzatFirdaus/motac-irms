@@ -14,7 +14,7 @@ class DebugHelpdeskAdminMatrixTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_matrix_access_levels()
+    public function test_matrix_access_levels(): void
     {
         Role::firstOrCreate(['name' => 'Admin']);
         Role::firstOrCreate(['name' => 'IT Admin']);
