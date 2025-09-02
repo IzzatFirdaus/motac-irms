@@ -135,6 +135,23 @@ return [
     // === Units (used in inventory/stock) ===
     'units' => 'units',
 
+    // === Frequently used common actions/status labels surfaced in audit ===
+    'approve'          => 'Approve',
+    'approved'         => 'Approved',
+    'reject'           => 'Reject',
+    'rejected'         => 'Rejected',
+    'reset'            => 'Reset',
+    'print'            => 'Print',
+    'loading'          => 'Loading...',
+    'optional'         => 'Optional',
+    'unknown'          => 'Unknown',
+    'view_action'      => 'View',
+    'all_statuses'     => 'All Statuses',
+    'all_types'        => 'All Types',
+    'helpdesk_ticket'  => 'Helpdesk Ticket',
+    'loan_application' => 'Loan Application',
+    'pending'          => 'Pending',
+
     // === Helpdesk module fields ===
     'helpdesk'                => 'Helpdesk',
     'ticket'                  => 'Ticket',
@@ -200,4 +217,29 @@ return [
     // === Miscellaneous/Extra translations for UI parity ===
     'system_public_name'        => 'MOTAC Integrated Resource Management System',
     'system_public_description' => 'Internal Integrated Resource Management System for the Information Management Division, Ministry of Tourism, Arts and Culture Malaysia.',
+
+    // === Grouped statuses used in UI (nested) ===
+    'statuses' => [
+        'completed'                     => 'Completed',
+        'available'                     => 'Available',
+        'on_loan'                       => 'On Loan',
+        'under_maintenance'             => 'Under Maintenance',
+        'disposed'                      => 'Disposed',
+        'lost'                          => 'Lost',
+        'damaged'                       => 'Damaged',
+        'damaged_needs_repair'          => 'Damaged (Needs Repair)',
+        'issued'                        => 'Issued',
+        'returned'                      => 'Returned',
+        'partially_returned'            => 'Partially Returned',
+        'returned_pending_inspection'   => 'Returned (Pending Inspection)',
+        'returned_good'                 => 'Returned (Good)',
+        'returned_damaged'              => 'Returned (Damaged)',
+        'items_reported_lost'           => 'Items Reported Lost',
+        'returned_with_loss'            => 'Returned (Lost)',
+        'returned_with_damage_and_loss' => 'Returned (Damaged & Lost)',
+        'cancelled'                     => 'Cancelled',
+        'overdue'                       => 'Overdue',
+        'pending'                       => 'Pending',
+        'retired'                       => 'Retired',
+    ],
 ];

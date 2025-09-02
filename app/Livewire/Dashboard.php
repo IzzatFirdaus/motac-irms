@@ -58,6 +58,7 @@ class Dashboard extends Component
         if (! $this->isNormalUser) {
             return;
         }
+
         // Stat Card: Pending loan applications
         $this->pendingUserLoanApplicationsCount = LoanApplication::where('user_id', $user->id)
             ->whereIn('status', [
@@ -75,7 +76,6 @@ class Dashboard extends Component
             ->latest('updated_at')
             ->limit(5)
             ->get();
-
     }
 
     /**

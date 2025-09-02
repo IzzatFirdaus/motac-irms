@@ -22,13 +22,10 @@ final class LoanTransactionService
 {
     private const LOG_AREA = 'LoanTransactionService: ';
 
-    private EquipmentService $equipmentService;
-
     private NotificationService $notificationService;
 
     public function __construct(EquipmentService $equipmentService, NotificationService $notificationService)
     {
-        $this->equipmentService    = $equipmentService;
         $this->notificationService = $notificationService;
         // Touch dependencies for static analysis (no runtime effect)
         $this->markDependenciesAsRead();
@@ -49,7 +46,7 @@ final class LoanTransactionService
         ]);
 
         // Normalize incoming item payload (IssueEquipmentRequest keys)
-        $itemDataForTransaction = array_map(function ($item) {
+        $itemDataForTransaction = array_map(function ($item): array {
             return [
                 'equipment_id'             => $item['equipment_id'],
                 'loan_application_item_id' => $item['loan_application_item_id'] ?? null,
@@ -87,10 +84,10 @@ final class LoanTransactionService
                     Log::error(self::LOG_AREA.sprintf('Equipment ID %d not found for transaction item creation.', $itemData['equipment_id']));
                     throw new RuntimeException('Equipment not found for transaction item.');
                 }
+
                 $equipment->status = Equipment::STATUS_ON_LOAN;
                 $equipment->save();
                 Log::info(self::LOG_AREA.sprintf('Equipment ID %d status set to ON_LOAN for transaction ID %d.', $equipment->id, $transaction->id));
-
             }
 
             // Update loan application status
@@ -115,7 +112,7 @@ final class LoanTransactionService
         array $accessories,
         ?string $notes
     ): void {
-        DB::transaction(function () use ($transaction, $loanApplicationItems, $accessories, $notes) {
+        DB::transaction(function () use ($transaction, $loanApplicationItems, $accessories, $notes): void {
             $transaction->issue_notes                    = $notes;
             $transaction->accessories_checklist_on_issue = $accessories;
             $transaction->status                         = LoanTransaction::STATUS_ISSUED;
@@ -141,10 +138,10 @@ final class LoanTransactionService
                     Log::error(self::LOG_AREA.sprintf('Equipment not found for Loan Transaction Item ID %d during issue.', $transactionItem->id));
                     throw new RuntimeException('Equipment not found for transaction item.');
                 }
+
                 $equipment->status = Equipment::STATUS_ON_LOAN;
                 $equipment->save();
                 Log::info(self::LOG_AREA.sprintf('Equipment ID %d status set to ON_LOAN during issue transaction.', $equipment->id));
-
             }
 
             $transaction->loanApplication->updateOverallStatusAfterTransaction();
@@ -167,7 +164,7 @@ final class LoanTransactionService
         array $accessories,
         ?string $notes
     ): void {
-        DB::transaction(function () use ($transaction, $loanTransactionItemsData, $accessories, $notes) {
+        DB::transaction(function () use ($transaction, $loanTransactionItemsData, $accessories, $notes): void {
             $transaction->return_notes                    = $notes;
             $transaction->accessories_checklist_on_return = $accessories;
             $transaction->transaction_date                = Carbon::now();
@@ -195,8 +192,10 @@ final class LoanTransactionService
                     Log::error(self::LOG_AREA.sprintf('Equipment not found for Loan Transaction Item ID %d during return.', $transactionItem->id));
                     throw new RuntimeException('Equipment not found for transaction item.');
                 }
+
                 switch ((string) $transactionItem->getAttribute('condition_on_return')) {
                     case Equipment::CONDITION_GOOD:
+                    default:
                         $equipment->status = Equipment::STATUS_AVAILABLE;
                         break;
                     case Equipment::CONDITION_MINOR_DAMAGE:
@@ -207,13 +206,10 @@ final class LoanTransactionService
                     case Equipment::CONDITION_LOST:
                         $equipment->status = Equipment::STATUS_LOST;
                         break;
-                    default:
-                        $equipment->status = Equipment::STATUS_AVAILABLE;
-                        break;
                 }
+
                 $equipment->save();
                 Log::info(self::LOG_AREA.sprintf('Equipment ID %d status set to %s during return transaction.', $equipment->id, $equipment->status));
-
             }
 
             $transaction->loanApplication->updateOverallStatusAfterTransaction();
@@ -241,7 +237,7 @@ final class LoanTransactionService
         User $returnAcceptingOfficer,
         array $details = []
     ): void {
-        DB::transaction(function () use ($loanTransaction, $items, $returnAcceptingOfficer, $details) {
+        DB::transaction(function () use ($loanTransaction, $items, $returnAcceptingOfficer, $details): void {
             // Create a new LoanTransaction of type 'return'
             $returnTransaction                              = $loanTransaction->replicate();
             $returnTransaction->type                        = LoanTransaction::TYPE_RETURN;
@@ -255,6 +251,7 @@ final class LoanTransactionService
             if (isset($details['return_notes'])) {
                 $returnTransaction->return_notes = $details['return_notes'];
             }
+
             $returnTransaction->save();
 
             // Save returned items and update equipment status
@@ -288,9 +285,11 @@ final class LoanTransactionService
                 if (! $equipment instanceof Equipment) {
                     continue;
                 }
+
                 // Set equipment status based on return condition
                 switch ($item['condition_on_return'] ?? Equipment::CONDITION_GOOD) {
                     case Equipment::CONDITION_GOOD:
+                    default:
                         $equipment->status = Equipment::STATUS_AVAILABLE;
                         break;
                     case Equipment::CONDITION_MINOR_DAMAGE:
@@ -301,13 +300,10 @@ final class LoanTransactionService
                     case Equipment::CONDITION_LOST:
                         $equipment->status = Equipment::STATUS_LOST;
                         break;
-                    default:
-                        $equipment->status = Equipment::STATUS_AVAILABLE;
-                        break;
                 }
+
                 $equipment->save();
                 Log::info(self::LOG_AREA.sprintf('Equipment ID %d status updated during existing return.', $equipment->id));
-
             }
 
             // Optionally update the original transaction status
@@ -364,6 +360,7 @@ final class LoanTransactionService
                 $hasLost         = true;
                 $allReturnedGood = false;
             }
+
             if (in_array($condition, [Equipment::CONDITION_MINOR_DAMAGE, Equipment::CONDITION_MAJOR_DAMAGE, Equipment::CONDITION_UNSERVICEABLE])) {
                 $hasDamage       = true;
                 $allReturnedGood = false;
@@ -393,10 +390,5 @@ final class LoanTransactionService
      * Helper to satisfy static analysis: touch dependencies so they're considered read.
      * No runtime effect.
      */
-    private function markDependenciesAsRead(): void
-    {
-        // Use noop ternary to read properties without causing unreachable-code warnings
-        $void1 = $this->equipmentService    ?? null;
-        $void2 = $this->notificationService ?? null;
-    }
+    private function markDependenciesAsRead(): void {}
 }

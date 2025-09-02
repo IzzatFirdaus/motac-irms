@@ -142,6 +142,7 @@ class LoanApplicationItem extends Model
             if (empty($item->status)) {
                 $item->status = self::STATUS_PENDING_APPROVAL;
             }
+
             $item->quantity_issued   = $item->quantity_issued   ?? 0;
             $item->quantity_returned = $item->quantity_returned ?? 0;
         });

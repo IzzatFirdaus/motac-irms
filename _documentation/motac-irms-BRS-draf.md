@@ -4,18 +4,21 @@
 
 ### Modul: [Nama Modul] _(Isi jika BRS untuk modul tertentu)_
 
-|                      |                                      |
-|----------------------|--------------------------------------|
-| **NAMA AGENSI**      | Kementerian Pelancongan, Seni dan Budaya (MOTAC) |
-| **NAMA AGENSI INDUK**| [Isi jika ada]                       |
-| **TARIKH DOKUMEN**   | 2025-08-14                           |
-| **VERSI DOKUMEN**    | 1.0                                  |
+|                       |                                                  |
+| --------------------- | ------------------------------------------------ |
+| **NAMA AGENSI**       | Kementerian Pelancongan, Seni dan Budaya (MOTAC) |
+| **NAMA AGENSI INDUK** | [Isi jika ada]                                   |
+| **TARIKH DOKUMEN**    | 2025-08-14                                       |
+| **VERSI DOKUMEN**     | 1.0                                              |
 
 ---
 
 ## KETERANGAN DOKUMEN
 
-Dokumen ini menerangkan keperluan bisnes dan pengguna bagi pembangunan Sistem Pengurusan Sumber Terintegrasi MOTAC (IRMS). Ia merangkumi skop bisnes, gambaran keseluruhan sistem, pemegang taruh, keperluan pengurusan bisnes, keperluan pengoperasian bisnes, pematuhan kepada MYDS & Prinsip MyGovEA, serta input untuk SRS.
+Dokumen ini menerangkan keperluan bisnes dan pengguna bagi pembangunan Sistem Pengurusan Sumber
+Terintegrasi MOTAC (IRMS). Ia merangkumi skop bisnes, gambaran keseluruhan sistem, pemegang taruh,
+keperluan pengurusan bisnes, keperluan pengoperasian bisnes, pematuhan kepada MYDS & Prinsip
+MyGovEA, serta input untuk SRS.
 
 ---
 
@@ -23,25 +26,25 @@ Dokumen ini menerangkan keperluan bisnes dan pengguna bagi pembangunan Sistem Pe
 
 ### Semakan Dokumen
 
-| Disemak Oleh            | Jawatan      | Tandatangan | Tarikh Semakan |
-|-------------------------|--------------|-------------|----------------|
-| [Nama Pengurus Projek]  | [Jawatan]    |             | [Tarikh]       |
-| [Nama SME]              | [Jawatan]    |             | [Tarikh]       |
+| Disemak Oleh           | Jawatan   | Tandatangan | Tarikh Semakan |
+| ---------------------- | --------- | ----------- | -------------- |
+| [Nama Pengurus Projek] | [Jawatan] |             | [Tarikh]       |
+| [Nama SME]             | [Jawatan] |             | [Tarikh]       |
 
 ### Pengesahan Dokumen
 
-| Disahkan Oleh           | Jawatan      | Tandatangan | Tarikh Semakan |
-|------------------------|--------------|-------------|----------------|
-| [Nama Penasihat Projek]| [Jawatan]    |             | [Tarikh]       |
-| [Nama Pemilik Projek]  | [Jawatan]    |             | [Tarikh]       |
+| Disahkan Oleh           | Jawatan   | Tandatangan | Tarikh Semakan |
+| ----------------------- | --------- | ----------- | -------------- |
+| [Nama Penasihat Projek] | [Jawatan] |             | [Tarikh]       |
+| [Nama Pemilik Projek]   | [Jawatan] |             | [Tarikh]       |
 
 ---
 
 ## KAWALAN DOKUMEN
 
-| No. Versi | Tarikh     | Ringkasan Pindaan                | Penyedia         |
-|-----------|------------|----------------------------------|------------------|
-| 1.0       | 2025-08-14 | Dokumen versi pertama            | [Nama Penyedia]  |
+| No. Versi | Tarikh     | Ringkasan Pindaan     | Penyedia        |
+| --------- | ---------- | --------------------- | --------------- |
+| 1.0       | 2025-08-14 | Dokumen versi pertama | [Nama Penyedia] |
 
 ---
 
@@ -74,24 +77,24 @@ Dokumen ini menerangkan keperluan bisnes dan pengguna bagi pembangunan Sistem Pe
 
 ## AKRONIM
 
-| Akronim | Keterangan                              |
-|---------|-----------------------------------------|
-| BRS     | Business Requirement Specification      |
-| SME     | Subject Matter Expert                   |
-| IRMS    | Integrated Resource Management System   |
-| MOTAC   | Ministry of Tourism, Arts and Culture   |
-| MYDS    | Malaysia Government Design System       |
-| BPM     | Bahagian Pengurusan Maklumat            |
+| Akronim | Keterangan                            |
+| ------- | ------------------------------------- |
+| BRS     | Business Requirement Specification    |
+| SME     | Subject Matter Expert                 |
+| IRMS    | Integrated Resource Management System |
+| MOTAC   | Ministry of Tourism, Arts and Culture |
+| MYDS    | Malaysia Government Design System     |
+| BPM     | Bahagian Pengurusan Maklumat          |
 
 ---
 
 ## SUMBER RUJUKAN
 
-- Pekeliling Am Bilangan 2 Tahun 2012  
-- Manual Prosedur Kerja Pengurusan Sumber ICT  
-- Dokumentasi MYDS & MyGovEA  
-- Dokumentasi Sistem MOTAC IRMS v4.0 dan v5.0  
-- Borang Pinjaman Peralatan ICT MOTAC  
+- Pekeliling Am Bilangan 2 Tahun 2012
+- Manual Prosedur Kerja Pengurusan Sumber ICT
+- Dokumentasi MYDS & MyGovEA
+- Dokumentasi Sistem MOTAC IRMS v4.0 dan v5.0
+- Borang Pinjaman Peralatan ICT MOTAC
 - Dokumentasi Flow Pinjaman & Helpdesk
 
 ---
@@ -100,7 +103,8 @@ Dokumen ini menerangkan keperluan bisnes dan pengguna bagi pembangunan Sistem Pe
 
 ## 1.1 Tujuan Bisnes
 
-Sistem IRMS menyediakan platform digital untuk pengurusan pinjaman peralatan ICT dan sokongan helpdesk ICT, menggantikan proses manual dan modul legasi.
+Sistem IRMS menyediakan platform digital untuk pengurusan pinjaman peralatan ICT dan sokongan
+helpdesk ICT, menggantikan proses manual dan modul legasi.
 
 ## 1.2 Skop Bisnes
 
@@ -110,17 +114,18 @@ Sistem IRMS menyediakan platform digital untuk pengurusan pinjaman peralatan ICT
 
 ## 1.3 Gambaran Keseluruhan Bisnes
 
-Platform Laravel modular, berasaskan workflow automatik, dashboard berdasarkan peranan pengguna, notifikasi masa sebenar, pematuhan audit & privasi.
+Platform Laravel modular, berasaskan workflow automatik, dashboard berdasarkan peranan pengguna,
+notifikasi masa sebenar, pematuhan audit & privasi.
 
 ## 1.4 Senarai Pemegang Taruh
 
-| Pemegang Taruh           | Keterangan                                              |
-|--------------------------|--------------------------------------------------------|
-| Pemohon                  | Staf yang memohon pinjaman/perkhidmatan ICT            |
-| Pegawai Penyokong        | Pegawai kelulusan mengikut gred organisasi             |
-| Staf BPM                 | Pengurusan pengeluaran/pemulangan aset                 |
-| Agen IT                  | Pengurusan tiket & sokongan ICT                        |
-| Pentadbir Sistem         | Pengurusan tetapan, audit, dan laporan                 |
+| Pemegang Taruh    | Keterangan                                  |
+| ----------------- | ------------------------------------------- |
+| Pemohon           | Staf yang memohon pinjaman/perkhidmatan ICT |
+| Pegawai Penyokong | Pegawai kelulusan mengikut gred organisasi  |
+| Staf BPM          | Pengurusan pengeluaran/pemulangan aset      |
+| Agen IT           | Pengurusan tiket & sokongan ICT             |
+| Pentadbir Sistem  | Pengurusan tetapan, audit, dan laporan      |
 
 ---
 
@@ -217,7 +222,8 @@ Platform Laravel modular, berasaskan workflow automatik, dashboard berdasarkan p
 
 - Pengguna (users), jabatan (departments), jawatan (positions), gred (grades)
 - Peralatan ICT (equipment, equipment_categories, sub_categories, locations)
-- Pinjaman ICT (loan_applications, loan_application_items, loan_transactions, loan_transaction_items)
+- Pinjaman ICT (loan_applications, loan_application_items, loan_transactions,
+  loan_transaction_items)
 - Helpdesk (helpdesk_tickets, helpdesk_categories, helpdesk_comments)
 - Kelulusan (approvals), notifikasi (notifications), tetapan (settings)
 
@@ -268,7 +274,8 @@ Platform Laravel modular, berasaskan workflow automatik, dashboard berdasarkan p
 ---
 
 > **Nota:**  
-> Dokumen ini disusun mengikut templat rasmi KRISA, mematuhi prinsip reka bentuk MyGovEA dan panduan MYDS untuk pembangunan sistem kerajaan digital MOTAC.
+> Dokumen ini disusun mengikut templat rasmi KRISA, mematuhi prinsip reka bentuk MyGovEA dan panduan
+> MYDS untuk pembangunan sistem kerajaan digital MOTAC.
 
 <!--
 Setiap seksyen skeleton ini boleh diisi/diupdate dengan maklumat, rajah, jadual dan rujukan yang diambil daripada file dokumentasi sistem, reka bentuk, aliran kerja, jadual data, dan prinsip MyGovEA yang telah dikongsi.

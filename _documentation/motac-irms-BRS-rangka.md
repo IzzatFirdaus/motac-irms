@@ -4,40 +4,43 @@
 
 ### Modul: [Nama Modul] _(isi jika BRS untuk modul tertentu)_
 
-| | |
-| --- | --- |
-| **NAMA AGENSI** | Kementerian Pelancongan, Seni dan Budaya (MOTAC) |
-| **NAMA AGENSI INDUK** | [Isi jika ada] |
-| **TARIKH DOKUMEN** | 2025-08-14 |
-| **VERSI DOKUMEN** | 1.0 |
+|                       |                                                  |
+| --------------------- | ------------------------------------------------ |
+| **NAMA AGENSI**       | Kementerian Pelancongan, Seni dan Budaya (MOTAC) |
+| **NAMA AGENSI INDUK** | [Isi jika ada]                                   |
+| **TARIKH DOKUMEN**    | 2025-08-14                                       |
+| **VERSI DOKUMEN**     | 1.0                                              |
 
 ---
 
 ### **KETERANGAN DOKUMEN**
 
-Dokumen ini menerangkan keperluan bisnes dan pengguna bagi pembangunan Sistem Pengurusan Tempahan Bilik Mesyuarat MOTAC (IRMS). Kandungannya merangkumi skop bisnes, gambaran keseluruhan sistem, pemegang taruh, keperluan pengurusan bisnes dan proses bisnes. Dokumen ini akan menjadi input kepada penyediaan Spesifikasi Keperluan Sistem (SRS).
+Dokumen ini menerangkan keperluan bisnes dan pengguna bagi pembangunan Sistem Pengurusan Tempahan
+Bilik Mesyuarat MOTAC (IRMS). Kandungannya merangkumi skop bisnes, gambaran keseluruhan sistem,
+pemegang taruh, keperluan pengurusan bisnes dan proses bisnes. Dokumen ini akan menjadi input kepada
+penyediaan Spesifikasi Keperluan Sistem (SRS).
 
 ### **SEMAKAN DAN PENGESAHAN DOKUMEN**
 
 #### Semakan Dokumen
 
-| Disemak Oleh | Jawatan | Tandatangan | Tarikh Semakan |
-| :--- | :--- | :--- | :--- |
-| [Nama Pengurus Projek] | [Jawatan] | | [Tarikh] |
-| [Nama SME] | [Jawatan] | | [Tarikh] |
+| Disemak Oleh           | Jawatan   | Tandatangan | Tarikh Semakan |
+| :--------------------- | :-------- | :---------- | :------------- |
+| [Nama Pengurus Projek] | [Jawatan] |             | [Tarikh]       |
+| [Nama SME]             | [Jawatan] |             | [Tarikh]       |
 
 #### Pengesahan Dokumen
 
-| Disahkan Oleh | Jawatan | Tandatangan | Tarikh Semakan |
-| :--- | :--- | :--- | :--- |
-| [Nama Penasihat Projek] | [Jawatan] | | [Tarikh] |
-| [Nama Pemilik Projek] | [Jawatan] | | [Tarikh] |
+| Disahkan Oleh           | Jawatan   | Tandatangan | Tarikh Semakan |
+| :---------------------- | :-------- | :---------- | :------------- |
+| [Nama Penasihat Projek] | [Jawatan] |             | [Tarikh]       |
+| [Nama Pemilik Projek]   | [Jawatan] |             | [Tarikh]       |
 
 ### **KAWALAN DOKUMEN**
 
-| No. Versi | Tarikh | Ringkasan Pindaan | Penyedia |
-| :--- | :--- | :--- | :--- |
-| 1.0 | 2025-08-14 | Dokumen versi pertama | [Nama Penyedia] |
+| No. Versi | Tarikh     | Ringkasan Pindaan     | Penyedia        |
+| :-------- | :--------- | :-------------------- | :-------------- |
+| 1.0       | 2025-08-14 | Dokumen versi pertama | [Nama Penyedia] |
 
 ---
 
@@ -59,12 +62,12 @@ Senaraikan jadual dan muka surat bila dokumen lengkap.
 
 ### **AKRONIM**
 
-| Akronim | Keterangan |
-| :--- | :--- |
-| BRS | Business Requirement Specification |
-| SME | Subject Matter Expert |
-| IRMS | Integrated Room Management System |
-| MOTAC | Ministry of Tourism, Arts and Culture |
+| Akronim | Keterangan                            |
+| :------ | :------------------------------------ |
+| BRS     | Business Requirement Specification    |
+| SME     | Subject Matter Expert                 |
+| IRMS    | Integrated Room Management System     |
+| MOTAC   | Ministry of Tourism, Arts and Culture |
 
 ### **SUMBER RUJUKAN**
 
@@ -82,19 +85,21 @@ Terangkan latarbelakang, objektif dan manfaat IRMS kepada agensi.
 
 ### **1.2 Skop Bisnes**
 
-Senaraikan skop urusan pengurusan bilik mesyuarat, permohonan, kelulusan, pembatalan, pelaporan kerosakan, interaksi dengan unit lain dsb.
+Senaraikan skop urusan pengurusan bilik mesyuarat, permohonan, kelulusan, pembatalan, pelaporan
+kerosakan, interaksi dengan unit lain dsb.
 
 ### **1.3 Gambaran Keseluruhan Bisnes**
 
-Gambarkan struktur organisasi, fungsi utama dan hubungkait dengan entiti luar. Sertakan rajah organisasi bila siap.
+Gambarkan struktur organisasi, fungsi utama dan hubungkait dengan entiti luar. Sertakan rajah
+organisasi bila siap.
 
 ### **1.4 Senarai Pemegang Taruh**
 
-| Pemegang Taruh | Keterangan |
-| :--- | :--- |
-| Pengurusan Tertinggi | ... |
-| Bahagian Khidmat Pengurusan | ... |
-| Warga Agensi | ... |
+| Pemegang Taruh              | Keterangan |
+| :-------------------------- | :--------- |
+| Pengurusan Tertinggi        | ...        |
+| Bahagian Khidmat Pengurusan | ...        |
+| Warga Agensi                | ...        |
 
 ---
 
@@ -161,4 +166,5 @@ Dokumen sokongan seperti pekeliling, minit mesyuarat, borang, dan lain-lain.
 ---
 
 > **Nota:**  
-> Dokumen ini disusun mengikut templat rasmi KRISA dan mematuhi prinsip reka bentuk MyGovEA serta panduan MYDS untuk pembangunan sistem kerajaan.
+> Dokumen ini disusun mengikut templat rasmi KRISA dan mematuhi prinsip reka bentuk MyGovEA serta
+> panduan MYDS untuk pembangunan sistem kerajaan.

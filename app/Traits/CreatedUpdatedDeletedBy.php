@@ -17,18 +17,19 @@ trait CreatedUpdatedDeletedBy
     public static function bootCreatedUpdatedDeletedBy(): void
     {
         // Set created_by and updated_by on creation
-        static::creating(function ($model) {
+        static::creating(function ($model): void {
             $userId = Auth::check() ? Auth::id() : null;
             if (is_null($model->created_by)) {
                 $model->created_by = $userId;
             }
+
             if (is_null($model->updated_by)) {
                 $model->updated_by = $userId;
             }
         });
 
         // Set updated_by on update
-        static::updating(function ($model) {
+        static::updating(function ($model): void {
             $userId = Auth::check() ? Auth::id() : null;
             if (! $model->isDirty('updated_by')) {
                 $model->updated_by = $userId;
@@ -39,21 +40,22 @@ trait CreatedUpdatedDeletedBy
         if (! in_array(SoftDeletes::class, class_uses_recursive(static::class))) {
             return;
         }
-        static::deleting(function ($model) {
+
+        static::deleting(function ($model): void {
             $userId = Auth::check() ? Auth::id() : null;
             if (! $model->isDirty('deleted_by')) {
                 $model->deleted_by = $userId;
             }
+
             // No need for explicit save, Eloquent will persist on delete
         });
 
-        static::restoring(function ($model) {
+        static::restoring(function ($model): void {
             $userId            = Auth::check() ? Auth::id() : null;
             $model->deleted_by = null;
             if (! $model->isDirty('updated_by')) {
                 $model->updated_by = $userId;
             }
         });
-
     }
 }

@@ -11,13 +11,20 @@
  */
 
 return [
+    // Alias peringkat atas yang dirujuk oleh sesetengah paparan
+    'applicant'          => 'Pemohon',
+    'loan_apps_title'    => 'Laporan Permohonan Pinjaman',
+    'loan_apps_list'     => 'Senarai Permohonan Pinjaman',
+    'loan_dates'         => 'Tempoh Pinjaman',
+    'no_loan_apps_found' => 'Tiada permohonan pinjaman ditemui.',
 
     // === Tajuk Utama & Navigasi Laporan ===
     // Main Report Titles & Navigation
-    'page_title'   => 'Laporan Sistem',
-    'page_header'  => 'Laporan Sistem Yang Tersedia',
-    'view_report'  => 'Lihat Laporan', // Used on report-card components
-    'back_to_list' => 'Kembali ke Senarai Laporan',
+    'page_title'      => 'Laporan Sistem',
+    'page_header'     => 'Laporan Sistem Yang Tersedia',
+    'view_report'     => 'Lihat Laporan', // Used on report-card components
+    'back_to_list'    => 'Kembali ke Senarai Laporan',
+    'back_to_reports' => 'Kembali ke Laporan',
 
     // === Penapis / Filters Umum untuk Semua Laporan ===
     // Common Filters for All Reports
@@ -93,10 +100,12 @@ return [
     // === Laporan Permohonan Pinjaman ICT ===
     // Loan Applications Reports
     'loan_applications' => [
-        'title'       => 'Laporan Permohonan Pinjaman Peralatan ICT',
-        'description' => 'Semak laporan status dan sejarah permohonan pinjaman peralatan ICT.',
-        'no_results'  => 'Tiada permohonan pinjaman ditemui.',
-        'table'       => [
+        'title'              => 'Laporan Permohonan Pinjaman Peralatan ICT',
+        'description'        => 'Semak laporan status dan sejarah permohonan pinjaman peralatan ICT.',
+        'no_results'         => 'Tiada permohonan pinjaman ditemui.',
+        'search_placeholder' => 'Cari Pemohon atau ID Permohonan...',
+        'applicant'          => 'Pemohon',
+        'table'              => [
             'applicant'   => 'Pemohon',
             'department'  => 'Jabatan',
             'loan_dates'  => 'Tempoh Pinjaman',

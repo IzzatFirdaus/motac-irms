@@ -23,9 +23,9 @@ class AllowAdminDuringMaintenance
     public function handle(Request $request, Closure $next): Response
     {
         if (! app()->isDownForMaintenance()) {
-
             return $next($request);
         }
+
         if (! Auth::check()) {
             // If not logged in during maintenance, redirect to login
             // Ensure your login route is accessible or explicitly allowed.

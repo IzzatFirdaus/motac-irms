@@ -29,6 +29,7 @@ class QueryLogServiceProvider extends ServiceProvider // Corrected class name
         if (! App::environment('local')) {
             return;
         }
+
         // Optionally enable logging of all queries in local environment for debugging
         // DB::enableQueryLog();
 
@@ -57,6 +58,5 @@ class QueryLogServiceProvider extends ServiceProvider // Corrected class name
                 ]
             );
         });
-
     }
 }

@@ -4,39 +4,51 @@
 
 ## Siapa yang Perlu Baca Panduan Ini?
 
-Panduan ini khas untuk semua warga kerja MOTAC. Ia menerangkan sistem baharu ini secara mudah, supaya anda faham apa fungsinya, mengapa ia berguna, dan bagaimana ia memudahkan kerja harian kita.
+Panduan ini khas untuk semua warga kerja MOTAC. Ia menerangkan sistem baharu ini secara mudah,
+supaya anda faham apa fungsinya, mengapa ia berguna, dan bagaimana ia memudahkan kerja harian kita.
 
 ---
 
 ## 1. Apakah MOTAC IRMS?
 
 IRMS ialah pusat digital untuk mengurus permohonan ICT staf MOTAC.  
-Daripada menggunakan borang kertas atau e-mel untuk urusan ICT, kini anda hanya perlu gunakan laman web moden ini.
+Daripada menggunakan borang kertas atau e-mel untuk urusan ICT, kini anda hanya perlu gunakan laman
+web moden ini.
 
 **Versi 4.0 mengurus dua perkara utama:**
 
-- **Pinjaman Peralatan ICT:** Permohonan untuk meminjam laptop, projektor, atau peralatan ICT lain untuk tugasan rasmi.
-- **Permohonan Bantuan ICT (Helpdesk):** Laporan masalah teknikal seperti komputer bermasalah atau isu rangkaian, dengan sistem tiket sokongan.
+- **Pinjaman Peralatan ICT:** Permohonan untuk meminjam laptop, projektor, atau peralatan ICT lain
+  untuk tugasan rasmi.
+- **Permohonan Bantuan ICT (Helpdesk):** Laporan masalah teknikal seperti komputer bermasalah atau
+  isu rangkaian, dengan sistem tiket sokongan.
 
-Matlamatnya ialah mempercepatkan proses, memudahkan pengesanan, dan menjadikan urusan ICT lebih teratur.
+Matlamatnya ialah mempercepatkan proses, memudahkan pengesanan, dan menjadikan urusan ICT lebih
+teratur.
 
 ---
 
 ## 2. Masalah yang Diselesaikan IRMS
 
-IRMS direka untuk mengatasi masalah lazim serta mempertingkatkan cara kita bekerja, selaras dengan prinsip **Berpaksikan Rakyat**, **Kandungan Terancang** dan **Komunikasi**.
+IRMS direka untuk mengatasi masalah lazim serta mempertingkatkan cara kita bekerja, selaras dengan
+prinsip **Berpaksikan Rakyat**, **Kandungan Terancang** dan **Komunikasi**.
 
-- **Semua Dalam Satu Tempat:** Tidak perlu lagi mencari borang atau emel yang betul. Semua permohonan dan statusnya boleh dicapai dalam satu sistem selamat.
-- **Borang Pintar dan Cepat:** Borang atas talian hanya paparkan soalan yang relevan, mengurangkan kesilapan dan menjimatkan masa.
-- **Langkah Automatik dan Jelas:** Sistem akan hantar permohonan anda kepada pegawai yang betul tanpa anda perlu meneka langkah seterusnya.
-- **Kemaskini Segera dan Laporan Automatik:** Anda boleh semak status permohonan atau tiket bila-bila masa. Pengurus juga boleh dapatkan laporan pantas.
-- **Akses Mengikut Peranan:** Setiap pengguna (pemohon, penyokong, pentadbir IT) mendapat paparan dashboard yang sesuai dengan tugas mereka; selamat dan mudah.
+- **Semua Dalam Satu Tempat:** Tidak perlu lagi mencari borang atau emel yang betul. Semua
+  permohonan dan statusnya boleh dicapai dalam satu sistem selamat.
+- **Borang Pintar dan Cepat:** Borang atas talian hanya paparkan soalan yang relevan, mengurangkan
+  kesilapan dan menjimatkan masa.
+- **Langkah Automatik dan Jelas:** Sistem akan hantar permohonan anda kepada pegawai yang betul
+  tanpa anda perlu meneka langkah seterusnya.
+- **Kemaskini Segera dan Laporan Automatik:** Anda boleh semak status permohonan atau tiket
+  bila-bila masa. Pengurus juga boleh dapatkan laporan pantas.
+- **Akses Mengikut Peranan:** Setiap pengguna (pemohon, penyokong, pentadbir IT) mendapat paparan
+  dashboard yang sesuai dengan tugas mereka; selamat dan mudah.
 
 ---
 
 ## 3. Pengenalan Aliran Permohonan
 
-Mari lihat bagaimana satu permohonan bergerak dalam sistem. Proses pinjaman peralatan dan permohonan bantuan mengikuti aliran mudah yang seragam (**Seragam**, **Paparan/Menu Jelas**).
+Mari lihat bagaimana satu permohonan bergerak dalam sistem. Proses pinjaman peralatan dan permohonan
+bantuan mengikuti aliran mudah yang seragam (**Seragam**, **Paparan/Menu Jelas**).
 
 ### Senario A: Pinjaman Laptop
 
@@ -50,18 +62,21 @@ Sistem akan maklumkan pegawai penyokong. Mereka akan semak dan luluskan secara a
 Anda terima notifikasi keputusan pegawai.
 
 **Langkah 4: Pengambilan Peralatan**  
-Jika lulus, staf BPM akan diberitahu. Laptop disediakan dan anda akan dimaklumkan untuk ambil. Selepas dipulangkan, rekod sistem dikemas kini dan status pinjaman ditutup.
+Jika lulus, staf BPM akan diberitahu. Laptop disediakan dan anda akan dimaklumkan untuk ambil.
+Selepas dipulangkan, rekod sistem dikemas kini dan status pinjaman ditutup.
 
 ### Senario B: Tiket Helpdesk
 
 **Langkah 1: Cipta Tiket Aduan**  
-Log masuk IRMS, pilih "Helpdesk", dan terangkan masalah ICT anda. Kategori dan keutamaan boleh dipilih.
+Log masuk IRMS, pilih "Helpdesk", dan terangkan masalah ICT anda. Kategori dan keutamaan boleh
+dipilih.
 
 **Langkah 2: Tiket Diberikan**  
 Sistem akan maklumkan kepada pasukan IT. Agen IT akan ditugaskan untuk isu anda.
 
 **Langkah 3: Masalah Diselesaikan**  
-Agen IT akan berkomunikasi melalui komen dalam tiket. Status boleh dipantau secara atas talian. Setelah selesai, tiket akan ditutup.
+Agen IT akan berkomunikasi melalui komen dalam tiket. Status boleh dipantau secara atas talian.
+Setelah selesai, tiket akan ditutup.
 
 **Langkah 4: Sejarah Disimpan**  
 Anda akan dimaklumkan bila masalah selesai dan tiket ditutup. Sejarah penuh disimpan untuk rujukan.
@@ -72,10 +87,12 @@ Anda akan dimaklumkan bila masalah selesai dan tiket ditutup. Sejarah penuh disi
 
 ## 4. Maklumat yang Disimpan dalam Sistem
 
-Untuk semua fungsi ini, sistem perlu menyimpan maklumat secara selamat (**Berpacukan Data**, **Teknologi Bersesuaian**, **Keselamatan & Privasi**).
+Untuk semua fungsi ini, sistem perlu menyimpan maklumat secara selamat (**Berpacukan Data**,
+**Teknologi Bersesuaian**, **Keselamatan & Privasi**).
 
 - **Profil Pengguna:** Nama, jawatan, gred, jabatan. Memudahkan auto-isi borang.
-- **Inventori Peralatan:** Senarai lengkap peralatan ICT, model, nombor siri, status (cth: Sedia, Sedang Dipinjam).
+- **Inventori Peralatan:** Senarai lengkap peralatan ICT, model, nombor siri, status (cth: Sedia,
+  Sedang Dipinjam).
 - **Rekod Permohonan Pinjaman:** Simpanan semua permohonan pinjaman anda.
 - **Sejarah Tiket Helpdesk:** Log semua permohonan bantuan dan penyelesaiannya.
 - **Sejarah Kelulusan:** Log siapa meluluskan permohonan dan bila, sebagai jejak digital.
@@ -84,7 +101,8 @@ Untuk semua fungsi ini, sistem perlu menyimpan maklumat secara selamat (**Berpac
 
 ## 5. Ciri Utama yang Anda Akan Guna
 
-Selaras dengan prinsip **Antara Muka Minimalis dan Mudah**, **Kawalan Pengguna**, **Tetapan Lalai** dan **Pencegahan Ralat**.
+Selaras dengan prinsip **Antara Muka Minimalis dan Mudah**, **Kawalan Pengguna**, **Tetapan Lalai**
+dan **Pencegahan Ralat**.
 
 - **Dashboard Peribadi:** Paparan ringkas status permohonan, tiket, dan notifikasi terkini.
 - **Borang Interaktif:** Borang yang membimbing pengguna secara langkah demi langkah.
@@ -121,31 +139,42 @@ Selaras dengan prinsip **Antara Muka Minimalis dan Mudah**, **Kawalan Pengguna**
 
 **Versi Dokumen:** 4.0  
 **Tarikh Semakan:** 12 Ogos 2025  
-**Berdasarkan:** BORANG PINJAMAN PERALATAN ICT 2024 SEWAAN C, keperluan helpdesk dalaman, dan struktur kod template amralsaleeh/HRMS.
+**Berdasarkan:** BORANG PINJAMAN PERALATAN ICT 2024 SEWAAN C, keperluan helpdesk dalaman, dan
+struktur kod template amralsaleeh/HRMS.
 
 ---
 
 ## 1. Pengenalan Sistem
 
-Sistem Pengurusan Sumber Terintegrasi MOTAC (v4.0) ialah platform yang diperkemas untuk menggabungkan dua operasi utama:
+Sistem Pengurusan Sumber Terintegrasi MOTAC (v4.0) ialah platform yang diperkemas untuk
+menggabungkan dua operasi utama:
 
-- **Pengurusan Pinjaman Peralatan ICT:** Memudahkan permohonan, kelulusan, pengeluaran dan pemulangan peralatan ICT.
-- **Pengurusan Helpdesk & Sokongan ICT:** Modul baharu untuk cipta, urus dan selesaikan tiket sokongan ICT.
+- **Pengurusan Pinjaman Peralatan ICT:** Memudahkan permohonan, kelulusan, pengeluaran dan
+  pemulangan peralatan ICT.
+- **Pengurusan Helpdesk & Sokongan ICT:** Modul baharu untuk cipta, urus dan selesaikan tiket
+  sokongan ICT.
 
 > **Nota:**  
-> Versi ini telah membuang modul legasi Email/Provisioning untuk memberi tumpuan kepada pengurusan aset ICT fizikal dan sokongan yang lebih cekap dan selamat.
+> Versi ini telah membuang modul legasi Email/Provisioning untuk memberi tumpuan kepada pengurusan
+> aset ICT fizikal dan sokongan yang lebih cekap dan selamat.
 
 ---
 
 ## 2. Objektif Sistem
 
-Merangkumi prinsip **Kandungan Terancang**, **Teknologi Bersesuaian**, **Struktur Hierarki**, **Seragam** dan **Fleksibel**.
+Merangkumi prinsip **Kandungan Terancang**, **Teknologi Bersesuaian**, **Struktur Hierarki**,
+**Seragam** dan **Fleksibel**.
 
-- **Pengurusan Data Bersatu:** Data pengguna, permohonan pinjaman, tiket helpdesk, kelulusan dan notifikasi disatukan dalam pangkalan data MySQL.
-- **Aliran Kerja Automatik & Standard:** Proses pinjaman dan sokongan ICT yang seragam dan automatik.
-- **Akses & Keselamatan Berdasarkan Peranan:** Pengguna, penyokong, staf BPM dan pentadbir IT mendapat tahap akses yang sesuai dan selamat.
-- **Laporan & Notifikasi Masa Sebenar:** Insight serta-merta terhadap penggunaan sumber dan prestasi sokongan.
-- **Seni Bina Modular & Boleh Skala:** Menggunakan rangka kerja Laravel MVC dan Livewire untuk antara muka dinamik.
+- **Pengurusan Data Bersatu:** Data pengguna, permohonan pinjaman, tiket helpdesk, kelulusan dan
+  notifikasi disatukan dalam pangkalan data MySQL.
+- **Aliran Kerja Automatik & Standard:** Proses pinjaman dan sokongan ICT yang seragam dan
+  automatik.
+- **Akses & Keselamatan Berdasarkan Peranan:** Pengguna, penyokong, staf BPM dan pentadbir IT
+  mendapat tahap akses yang sesuai dan selamat.
+- **Laporan & Notifikasi Masa Sebenar:** Insight serta-merta terhadap penggunaan sumber dan prestasi
+  sokongan.
+- **Seni Bina Modular & Boleh Skala:** Menggunakan rangka kerja Laravel MVC dan Livewire untuk
+  antara muka dinamik.
 
 ---
 
@@ -181,7 +210,8 @@ Menggunakan Laravel (MVC) dan Livewire (**Teknologi Bersesuaian**, **Komponen UI
 
 **Servis:**
 
-- `app/Services/`: `ApprovalService`, `LoanApplicationService`, `LoanTransactionService`, `EquipmentService`, `HelpdeskService`, `NotificationService`
+- `app/Services/`: `ApprovalService`, `LoanApplicationService`, `LoanTransactionService`,
+  `EquipmentService`, `HelpdeskService`, `NotificationService`
 
 **Middleware:**
 
@@ -190,11 +220,13 @@ Menggunakan Laravel (MVC) dan Livewire (**Teknologi Bersesuaian**, **Komponen UI
 
 **Komponen Livewire:**
 
-- Contoh: `ResourceManagement\LoanApplication\ApplicationForm`, `Helpdesk\CreateTicketForm`, `Admin\BPM\ProcessIssuance`, `Admin\Helpdesk\TicketManagement`
+- Contoh: `ResourceManagement\LoanApplication\ApplicationForm`, `Helpdesk\CreateTicketForm`,
+  `Admin\BPM\ProcessIssuance`, `Admin\Helpdesk\TicketManagement`
 
 **Polisi:**
 
-- Logik kebenaran untuk model (`app/Policies/`), cth: `UserPolicy`, `LoanApplicationPolicy`, `HelpdeskTicketPolicy`, didaftarkan dalam `AuthServiceProvider`.
+- Logik kebenaran untuk model (`app/Policies/`), cth: `UserPolicy`, `LoanApplicationPolicy`,
+  `HelpdeskTicketPolicy`, didaftarkan dalam `AuthServiceProvider`.
 
 **Pemerhati (Observers):**
 
@@ -206,29 +238,41 @@ Menggunakan Laravel (MVC) dan Livewire (**Teknologi Bersesuaian**, **Komponen UI
 
 ### 4.1 Data Pengguna & Organisasi
 
-- **users:** `id`, `name`, `identification_number`, `position_id`, `grade_id`, `department_id`, `mobile_number`, `email`, `password`, `status`, audit stamps, `timestamps`.
+- **users:** `id`, `name`, `identification_number`, `position_id`, `grade_id`, `department_id`,
+  `mobile_number`, `email`, `password`, `status`, audit stamps, `timestamps`.
 - **departments:** `id`, `name`, `branch_type`, `code`, `description`, audit stamps, `timestamps`.
 - **positions:** `id`, `name`, `grade_id`, `description`, audit stamps, `timestamps`.
 - **grades:** `id`, `name`, `level`, audit stamps, `timestamps`.
 
 ### 4.2 Modul Pinjaman Peralatan ICT
 
-- **equipment:** `id`, `asset_type`, `brand`, `model`, `serial_number`, `status`, `department_id`, `equipment_category_id`, audit stamps, `timestamps`.
-- **loan_applications:** `id`, `user_id`, `responsible_officer_id`, `purpose`, `loan_start_date`, `loan_end_date`, `status`, audit stamps, `timestamps`.
-- **loan_application_items:** `id`, `loan_application_id`, `equipment_type`, `quantity_requested`, `quantity_approved`, `quantity_issued`, `quantity_returned`, audit stamps, `timestamps`.
-- **loan_transactions:** `id`, `loan_application_id`, `type` (issue, return), `transaction_date`, `issuing_officer_id`, `receiving_officer_id`, `accessories_checklist_on_issue` (json), audit stamps, `timestamps`.
-- **loan_transaction_items:** `id`, `loan_transaction_id`, `equipment_id`, `status`, audit stamps, `timestamps`.
+- **equipment:** `id`, `asset_type`, `brand`, `model`, `serial_number`, `status`, `department_id`,
+  `equipment_category_id`, audit stamps, `timestamps`.
+- **loan_applications:** `id`, `user_id`, `responsible_officer_id`, `purpose`, `loan_start_date`,
+  `loan_end_date`, `status`, audit stamps, `timestamps`.
+- **loan_application_items:** `id`, `loan_application_id`, `equipment_type`, `quantity_requested`,
+  `quantity_approved`, `quantity_issued`, `quantity_returned`, audit stamps, `timestamps`.
+- **loan_transactions:** `id`, `loan_application_id`, `type` (issue, return), `transaction_date`,
+  `issuing_officer_id`, `receiving_officer_id`, `accessories_checklist_on_issue` (json), audit
+  stamps, `timestamps`.
+- **loan_transaction_items:** `id`, `loan_transaction_id`, `equipment_id`, `status`, audit stamps,
+  `timestamps`.
 
 ### 4.3 Modul Helpdesk & Sokongan ICT
 
-- **helpdesk_tickets:** `id`, `user_id` (pelapor), `assigned_to_user_id` (agen), `category_id`, `subject`, `description`, `status` (open, in_progress, resolved, closed), `priority`, `resolution_notes`, `closed_at`, audit stamps, `timestamps`.
+- **helpdesk_tickets:** `id`, `user_id` (pelapor), `assigned_to_user_id` (agen), `category_id`,
+  `subject`, `description`, `status` (open, in_progress, resolved, closed), `priority`,
+  `resolution_notes`, `closed_at`, audit stamps, `timestamps`.
 - **helpdesk_categories:** `id`, `name`, `description`, `is_active`, audit stamps, `timestamps`.
-- **helpdesk_comments:** `id`, `ticket_id`, `user_id`, `comment`, `is_internal` (nota agen sahaja), audit stamps, `timestamps`.
+- **helpdesk_comments:** `id`, `ticket_id`, `user_id`, `comment`, `is_internal` (nota agen sahaja),
+  audit stamps, `timestamps`.
 
 ### 4.4 Kelulusan & Notifikasi
 
-- **approvals:** `id`, `approvable_type`, `approvable_id`, `officer_id`, `status`, `comments`, `approval_timestamp`, audit stamps, `timestamps`.
-- **notifications:** `id` (UUID), `type`, `notifiable_type`, `notifiable_id`, `data`, `read_at`, `timestamps`.
+- **approvals:** `id`, `approvable_type`, `approvable_id`, `officer_id`, `status`, `comments`,
+  `approval_timestamp`, audit stamps, `timestamps`.
+- **notifications:** `id` (UUID), `type`, `notifiable_type`, `notifiable_id`, `data`, `read_at`,
+  `timestamps`.
 
 ---
 
@@ -251,7 +295,8 @@ Menggunakan Laravel (MVC) dan Livewire (**Teknologi Bersesuaian**, **Komponen UI
 **Pengeluaran & Pemulangan Peralatan:**
 
 - **Pelaku:** Staf BPM
-- **UI & Logik:** Komponen `ProcessIssuance` dan `ProcessReturn` urus transaksi dan status peralatan melalui `LoanTransactionService`.
+- **UI & Logik:** Komponen `ProcessIssuance` dan `ProcessReturn` urus transaksi dan status peralatan
+  melalui `LoanTransactionService`.
 
 ### 5.2 Aliran Kerja Tiket Helpdesk
 
@@ -265,7 +310,8 @@ Menggunakan Laravel (MVC) dan Livewire (**Teknologi Bersesuaian**, **Komponen UI
 
 - **Pelaku:** Pentadbir IT/Helpdesk Manager
 - **UI:** `App\Livewire\Helpdesk\Admin\TicketManagement`
-- **Logik:** Tiket ditugaskan kepada agen IT, status jadi `in_progress`. Notifikasi `TicketAssignedNotification` dihantar.
+- **Logik:** Tiket ditugaskan kepada agen IT, status jadi `in_progress`. Notifikasi
+  `TicketAssignedNotification` dihantar.
 
 **Penyelesaian Tiket:**
 
@@ -276,7 +322,8 @@ Menggunakan Laravel (MVC) dan Livewire (**Teknologi Bersesuaian**, **Komponen UI
 **Penutupan Tiket:**
 
 - **Pelaku:** Agen IT/Sistem
-- **Logik:** Selepas diselesaikan, tiket ditutup dan masa `closed_at` direkodkan. Notifikasi `TicketClosedNotification` dihantar.
+- **Logik:** Selepas diselesaikan, tiket ditutup dan masa `closed_at` direkodkan. Notifikasi
+  `TicketClosedNotification` dihantar.
 
 ---
 
@@ -296,7 +343,8 @@ Menggunakan Laravel (MVC) dan Livewire (**Teknologi Bersesuaian**, **Komponen UI
 ### 6.3 Modul Helpdesk & Sokongan ICT
 
 - **Controllers:** Helpdesk\TicketController
-- **UI:** Komponen Livewire (CreateTicketForm, MyTicketsIndex, TicketDetails, Admin\TicketManagement)
+- **UI:** Komponen Livewire (CreateTicketForm, MyTicketsIndex, TicketDetails,
+  Admin\TicketManagement)
 - **Model:** HelpdeskTicket, HelpdeskCategory, HelpdeskComment
 - **Servis:** HelpdeskService
 - **Polisi:** HelpdeskTicketPolicy
@@ -311,8 +359,12 @@ Menggunakan Laravel (MVC) dan Livewire (**Teknologi Bersesuaian**, **Komponen UI
 
 ## 7. Penutup
 
-Sistem Pengurusan Sumber Terintegrasi MOTAC (v4.0) ialah platform moden yang fokus pada pengurusan pinjaman peralatan ICT dan sokongan helpdesk. Dengan menghapus komponen legasi dan memperkenalkan sistem tiket baharu, aplikasi ini menyediakan penyelesaian yang cekap, selamat dan tersusun untuk memenuhi keperluan operasi utama MOTAC.
+Sistem Pengurusan Sumber Terintegrasi MOTAC (v4.0) ialah platform moden yang fokus pada pengurusan
+pinjaman peralatan ICT dan sokongan helpdesk. Dengan menghapus komponen legasi dan memperkenalkan
+sistem tiket baharu, aplikasi ini menyediakan penyelesaian yang cekap, selamat dan tersusun untuk
+memenuhi keperluan operasi utama MOTAC.
 
-Sistem ini dibangunkan selaras dengan **18 Prinsip Reka Bentuk MyGOVEA** untuk memastikan aplikasi kerajaan digital yang mesra pengguna, mudah diakses, selamat, seragam dan boleh dikembangkan.
+Sistem ini dibangunkan selaras dengan **18 Prinsip Reka Bentuk MyGOVEA** untuk memastikan aplikasi
+kerajaan digital yang mesra pengguna, mudah diakses, selamat, seragam dan boleh dikembangkan.
 
 ---

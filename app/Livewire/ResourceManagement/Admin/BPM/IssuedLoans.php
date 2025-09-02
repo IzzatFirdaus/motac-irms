@@ -68,12 +68,12 @@ class IssuedLoans extends Component
 
         // Search by application ID, applicant name, tag ID, or serial number.
         if (! ($this->searchTerm !== '' && $this->searchTerm !== '0')) {
-
             // Sort: overdue/soonest due first.
             return $query->orderBy('loan_end_date', 'asc')
                 ->orderBy('id', 'desc')
                 ->paginate($this->perPage);
         }
+
         $search = '%'.strtolower($this->searchTerm).'%';
         $query->where(function ($q) use ($search): void {
             $q->where('id', 'like', $search)

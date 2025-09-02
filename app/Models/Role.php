@@ -64,11 +64,12 @@ class Role extends SpatieRole
             ]);
             throw new \Exception($errorMessage);
         }
+
         $userModelClass = Guard::getModelForGuard((string) $guardNameToUse);
         if (! is_null($userModelClass)) {
-
             return $userModelClass;
         }
+
         $errorMessage = sprintf("Could not determine the User model class for guard '%s' (Role ID: ", $guardNameToUse).($this->id ?? 'N/A').').';
         Log::error($errorMessage, [
             'role_id'                    => $this->id ?? 'N/A',

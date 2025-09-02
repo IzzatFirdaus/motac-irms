@@ -7,7 +7,7 @@ namespace App\Services;
 use App\Models\Approval;
 use App\Models\LoanApplication;
 use App\Models\LoanApplicationItem;
-use App\Models\LoanTransaction;
+// LoanTransaction import removed as it's referenced via relations, not directly in this service.
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -21,10 +21,6 @@ use RuntimeException;
 final class LoanApplicationService
 {
     private const LOG_AREA = 'LoanApplicationService: ';
-
-    private ApprovalService $approvalService;
-
-    private LoanTransactionService $loanTransactionService;
 
     private NotificationService $notificationService;
 
@@ -49,9 +45,7 @@ final class LoanApplicationService
         LoanTransactionService $loanTransactionService,
         NotificationService $notificationService
     ) {
-        $this->approvalService        = $approvalService;
-        $this->loanTransactionService = $loanTransactionService;
-        $this->notificationService    = $notificationService;
+        $this->notificationService = $notificationService;
         // Touch dependencies for static analysis (no runtime effect)
         $this->markDependenciesAsRead();
     }
@@ -76,19 +70,19 @@ final class LoanApplicationService
                     'has_legacy_items'  => Arr::has($data, 'loan_application_items'),
                     'raw_items_preview' => array_slice(Arr::get($data, 'items', Arr::get($data, 'loan_application_items', [])), 0, 10),
                 ]);
-            } catch (\Throwable $e) {
+            } catch (\Throwable $throwable) {
                 // best-effort logging, do not block execution
-                Log::debug(self::LOG_AREA.'Failed to log payload debug info: '.$e->getMessage());
+                Log::debug(self::LOG_AREA.'Failed to log payload debug info: '.$throwable->getMessage());
             }
 
             $applicationData = $this->prepareApplicationData($data, $actingUser, $isDraft);
             // Support both 'items' and legacy 'loan_application_items' keys, default to empty array
             $itemsData = Arr::get($data, 'items', Arr::get($data, 'loan_application_items', []));
 
-            if ($existingApplication) {
+            if ($existingApplication instanceof \App\Models\LoanApplication) {
                 $existingApplication->update($applicationData);
                 $application = $existingApplication;
-                Log::info(self::LOG_AREA."Updating application ID: {$application->id}", ['is_draft' => $isDraft]);
+                Log::info(self::LOG_AREA.('Updating application ID: '.$application->id), ['is_draft' => $isDraft]);
             } else {
                 $application = LoanApplication::create($applicationData);
                 Log::info(self::LOG_AREA.'Creating new application.', ['user_id' => $actingUser->id, 'is_draft' => $isDraft]);
@@ -103,8 +97,8 @@ final class LoanApplicationService
             // Ensure related items are loaded on the returned model so callers (tests) see newly created items
             try {
                 $application->load('loanApplicationItems');
-            } catch (\Throwable $e) {
-                Log::debug(self::LOG_AREA.'Failed to eager-load loanApplicationItems: '.$e->getMessage());
+            } catch (\Throwable $throwable) {
+                Log::debug(self::LOG_AREA.'Failed to eager-load loanApplicationItems: '.$throwable->getMessage());
             }
 
             return $application;
@@ -133,9 +127,8 @@ final class LoanApplicationService
      * Submits a loan application for the approval process.
      *
      * @param LoanApplication $application The application to submit.
-     * @param User            $actingUser  The user submitting the application.
      */
-    public function submitApplicationForApproval(LoanApplication $application, User $actingUser): LoanApplication
+    public function submitApplicationForApproval(LoanApplication $application): LoanApplication
     {
         // Validate applicant confirmation timestamp exists before submission
         if (empty($application->applicant_confirmation_timestamp)) {
@@ -150,8 +143,8 @@ final class LoanApplicationService
         // Notify the applicant that their application has been submitted
         try {
             $this->notificationService->notifyUser($application->user, new \App\Notifications\ApplicationSubmitted($application));
-        } catch (\Throwable $e) {
-            Log::error(self::LOG_AREA.sprintf('Failed to notify applicant for Loan Application ID %d: %s', $application->id, $e->getMessage()));
+        } catch (\Throwable $throwable) {
+            Log::error(self::LOG_AREA.sprintf('Failed to notify applicant for Loan Application ID %d: %s', $application->id, $throwable->getMessage()));
         }
 
         // Use the dedicated method to handle approval logic
@@ -182,6 +175,7 @@ final class LoanApplicationService
         if (isset($data['loan_start_date']) && ! empty($data['loan_start_date'])) {
             $applicationData['loan_start_date'] = Carbon::parse($data['loan_start_date']);
         }
+
         if (isset($data['loan_end_date']) && ! empty($data['loan_end_date'])) {
             $applicationData['loan_end_date'] = Carbon::parse($data['loan_end_date']);
         }
@@ -271,7 +265,7 @@ final class LoanApplicationService
             }
         }
 
-        if (! empty($itemPayloadsToCreate)) {
+        if ($itemPayloadsToCreate !== []) {
             $createdItems = $application->loanApplicationItems()->createMany($itemPayloadsToCreate);
             foreach ($createdItems as $createdItem) {
                 $processedItemIds[] = $createdItem->id;
@@ -279,7 +273,7 @@ final class LoanApplicationService
         }
 
         $idsToDelete = array_diff($existingItemIds, $processedItemIds);
-        if (! empty($idsToDelete)) {
+        if ($idsToDelete !== []) {
             $application->loanApplicationItems()->whereIn('id', $idsToDelete)->delete();
             Log::info(self::LOG_AREA.'Removed items no longer in submission.', ['deleted_ids' => $idsToDelete, 'application_id' => $application->id]);
         }
@@ -296,7 +290,6 @@ final class LoanApplicationService
         // Create an Approval record for the supporting officer if possible
         $supportingOfficerId = $loanApplication->supporting_officer_id ?? $loanApplication->responsible_officer_id ?? null;
         if (! $supportingOfficerId) {
-
             // Notify role-based supporting officers as a fallback
             $this->notificationService->notifySupportOfPendingApproval($loanApplication);
 
@@ -304,6 +297,7 @@ final class LoanApplicationService
 
             return;
         }
+
         try {
             $approval = Approval::create([
                 'approvable_type' => get_class($loanApplication),
@@ -315,8 +309,8 @@ final class LoanApplicationService
 
             // Notify the assigned supporting officer directly that action is needed
             $this->notificationService->notifyUser($approval->officer, new \App\Notifications\ApplicationNeedsAction($approval));
-        } catch (\Throwable $e) {
-            Log::error(self::LOG_AREA.sprintf('Failed to create approval for Loan Application ID %d: %s', $loanApplication->id, $e->getMessage()));
+        } catch (\Throwable $throwable) {
+            Log::error(self::LOG_AREA.sprintf('Failed to create approval for Loan Application ID %d: %s', $loanApplication->id, $throwable->getMessage()));
         }
 
         // Notify role-based supporting officers as a fallback
@@ -338,7 +332,7 @@ final class LoanApplicationService
             throw new RuntimeException(__('Hanya draf permohonan yang boleh dibuang.'));
         }
 
-        return DB::transaction(function () use ($loanApplication, $actingUser) {
+        return DB::transaction(function () use ($loanApplication, $actingUser): bool {
             // Soft-delete related items if needed (LoanApplicationItem, Approval, LoanTransaction, etc.)
             $loanApplication->loanApplicationItems()->delete();
             $loanApplication->approvals()->delete();
@@ -368,13 +362,5 @@ final class LoanApplicationService
      * Helper to satisfy static analysis: touch dependencies so they're considered read.
      * No runtime effect.
      */
-    private function markDependenciesAsRead(): void
-    {
-        // @phpstan-ignore-next-line
-        $void1 = $this->approvalService ?? null;
-        // @phpstan-ignore-next-line
-        $void2 = $this->loanTransactionService ?? null;
-        // @phpstan-ignore-next-line
-        $void3 = $this->notificationService ?? null;
-    }
+    private function markDependenciesAsRead(): void {}
 }

@@ -577,4 +577,24 @@
   "Your two factor authentication has been enabled.": "Your two factor authentication has been enabled.",
   "Your two factor authentication has been enabled. You may scan the following QR code using your phone's authenticator application.": "Your two factor authentication has been enabled. You may scan the following QR code using your phone's authenticator application.",
   "Your two factor authentication has been enabled. Save these recovery codes in a secure password manager. They will be used to recover access to your account if your two factor authentication device is lost.": "Your two factor authentication has been enabled. Save these recovery codes in a secure password manager. They will be used to recover access to your account if your two factor authentication device is lost."
+  ,
+  "Account": "Account",
+  "Account Settings": "Account Settings",
+  "Approved applications count": "Approved applications count",
+  "Approved pending issuance": "Approved pending issuance",
+  "Assign Equipment": "Assign Equipment",
+  "Back to Login": "Back to Login",
+  "Error": "Error",
+  "In Process": "In Process",
+
+  "Memproses...": "Processing...",
+  "Memuatkan...": "Loading...",
+  "Menyimpan...": "Saving...",
+  "Memadam...": "Deleting...",
+  "Cari...": "Search...",
+  "Carian": "Search",
+  "Carian...": "Search...",
+  "Carian Umum": "General Search"
+  ,
+  "Choose...": "Choose..."
 }

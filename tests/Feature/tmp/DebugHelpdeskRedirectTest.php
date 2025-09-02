@@ -11,7 +11,7 @@ class DebugHelpdeskRedirectTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_debug_helpdesk_redirect()
+    public function test_debug_helpdesk_redirect(): void
     {
         $admin = User::factory()->create(['email_verified_at' => now()]);
         $admin->assignRole('Admin');

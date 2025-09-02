@@ -200,9 +200,9 @@ final class Helpers
     public static function isActiveRoute(string $route, array $params = []): string
     {
         if (Request::routeIs($route) !== true) {
-
             return '';
         }
+
         if ($params === []) {
             return 'active';
         }

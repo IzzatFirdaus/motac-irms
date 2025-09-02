@@ -1,6 +1,8 @@
 # MOTAC_ICT_LOAN_HRMS — File & Directory Structure
 
-This directory listing is based on the architecture and references in the provided documentation, especially **System_Design_Rev_3.6.md**, **Technical_Documentation_MOTAC_IRMS_Rev_1.md**, and related markdown files.
+This directory listing is based on the architecture and references in the provided documentation,
+especially **System_Design_Rev_3.6.md**, **Technical_Documentation_MOTAC_IRMS_Rev_1.md**, and
+related markdown files.
 
 ---
 
@@ -23,6 +25,7 @@ This directory listing is based on the architecture and references in the provid
 ## /app
 
 ### /app/Models
+
 - User.php
 - Department.php
 - Position.php
@@ -41,6 +44,7 @@ This directory listing is based on the architecture and references in the provid
 - Setting.php
 
 ### /app/Http/Controllers
+
 - Controller.php (base)
 - language/LanguageController.php
 - WebhookController.php
@@ -62,6 +66,7 @@ This directory listing is based on the architecture and references in the provid
 - Admin/SettingsController.php
 
 ### /app/Services
+
 - ApprovalService.php
 - EmailApplicationService.php
 - EmailProvisioningService.php
@@ -71,6 +76,7 @@ This directory listing is based on the architecture and references in the provid
 - NotificationService.php
 
 ### /app/Policies
+
 - UserPolicy.php
 - GradePolicy.php
 - EquipmentPolicy.php
@@ -79,9 +85,11 @@ This directory listing is based on the architecture and references in the provid
 - ApprovalPolicy.php
 
 ### /app/Observers
+
 - BlameableObserver.php
 
 ### /app/Livewire
+
 - ResourceManagement/
   - EmailAccount/ApplicationForm.php
   - LoanApplication/ApplicationForm.php
@@ -94,6 +102,7 @@ This directory listing is based on the architecture and references in the provid
   - Users/Index.php
 
 ### /app/Notifications
+
 - ApplicationSubmitted.php
 - ApplicationNeedsAction.php
 - ApplicationApproved.php
@@ -110,6 +119,7 @@ This directory listing is based on the architecture and references in the provid
 - EmailProvisionedNotification.php
 
 ### /app/Helpers
+
 - Helpers.php
 
 ---
@@ -117,6 +127,7 @@ This directory listing is based on the architecture and references in the provid
 ## /database
 
 ### /database/migrations
+
 - [All migration files for tables referenced in System_Design_Rev_3.6.md:]
   - create_users_table.php
   - create_departments_table.php
@@ -136,6 +147,7 @@ This directory listing is based on the architecture and references in the provid
   - create_settings_table.php
 
 ### /database/seeders
+
 - UserSeeder.php
 - AdminUserSeeder.php
 - DepartmentSeeder.php
@@ -153,6 +165,7 @@ This directory listing is based on the architecture and references in the provid
 - RoleAndPermissionSeeder.php
 
 ### /database/factories
+
 - UserFactory.php
 - EquipmentCategoryFactory.php
 - SubCategoryFactory.php
@@ -171,6 +184,7 @@ This directory listing is based on the architecture and references in the provid
 ## /resources
 
 ### /resources/views
+
 - welcome.blade.php
 - dashboard.blade.php
 - layouts/
@@ -252,7 +266,7 @@ This directory listing is based on the architecture and references in the provid
 
 - System_Design_Rev_3.6.md
 - Technical_Documentation_MOTAC_IRMS_Rev_1.md
-- Core_User_&_Organizational_Data_Tables_Mk_2.md
+- Core*User*&\_Organizational_Data_Tables_Mk_2.md
 - Loan_System_Flow_Mk_2.md
 - Email_Feature_Implementation.md
 - Design_Document_Mk_2_MOTAC_IRMS.md
@@ -274,11 +288,15 @@ This directory listing is based on the architecture and references in the provid
 
 ## Notes
 
-- All table, model, controller, seeder, and factory files are named and organized as per Laravel conventions and the referenced documentation.
-- If any module is extended (e.g., reporting, user settings), expect additional controllers, views, or Livewire components in their respective directories.
-- Dropdown values and options for select fields are referenced in supplementary markdown files and populated via seeders or enums.
+- All table, model, controller, seeder, and factory files are named and organized as per Laravel
+  conventions and the referenced documentation.
+- If any module is extended (e.g., reporting, user settings), expect additional controllers, views,
+  or Livewire components in their respective directories.
+- Dropdown values and options for select fields are referenced in supplementary markdown files and
+  populated via seeders or enums.
 - For PDF export, see print-form.blade.php under loan-applications/pdf/.
 
 ---
 
-**This structure reflects the current MOTAC IRMS system and is updated to match the latest shared documentation (August 2025).**
+**This structure reflects the current MOTAC IRMS system and is updated to match the latest shared
+documentation (August 2025).**

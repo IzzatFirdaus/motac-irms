@@ -92,6 +92,7 @@ final class Notification extends Model
             if (empty($model->{$model->getKeyName()})) {
                 $model->{$model->getKeyName()} = Str::uuid()->toString();
             }
+
             if (Auth::check()) {
                 $user = Auth::user();
                 $model->created_by ??= $user->id;
@@ -109,6 +110,7 @@ final class Notification extends Model
         if (! in_array(SoftDeletes::class, class_uses_recursive(self::class), true)) {
             return;
         }
+
         self::deleting(function (self $model): void {
             if (Auth::check()) {
                 $user              = Auth::user();
@@ -123,7 +125,6 @@ final class Notification extends Model
                 $model->updated_by = $user->id;
             }
         });
-
     }
 
     protected static function newFactory(): NotificationFactory

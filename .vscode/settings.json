@@ -29,6 +29,13 @@
     "**/public/assets/vendor/**": true,
     "**/backup/**": true,
     "**/_documentation/backup/**": true
+  },
+  "chat.mcp.serverSampling": {
+    "motac-irms/.vscode/mcp.json: laravel-boost": {
+      "allowedModels": [
+        "copilot/gpt-4.1"
+      ]
+    }
   }
 
   // If CSS diagnostics from other extensions still surface for vendor files,

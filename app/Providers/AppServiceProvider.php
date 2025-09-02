@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Translation\Translator;
+// Translator is intentionally not referenced directly; using SuffixedTranslator wrapper instead.
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -86,6 +86,7 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             return;
         }
+
         View::composer('*', function (\Illuminate\View\View $view): void {
             try {
                 $configData = class_exists(Helpers::class) ? Helpers::appClasses() : [];
@@ -97,6 +98,5 @@ class AppServiceProvider extends ServiceProvider
             $view->with('appClasses', $configData);
         });
         View::share('appName', config('variables.templateName', __('Sistem Pengurusan Sumber MOTAC')));
-
     }
 }

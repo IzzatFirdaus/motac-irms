@@ -357,6 +357,7 @@ class EquipmentIndex extends Component
         if (! $this->editingEquipment instanceof \App\Models\Equipment) {
             return;
         }
+
         $this->asset_type           = $this->editingEquipment->asset_type;
         $this->brand                = $this->editingEquipment->brand;
         $this->model_name           = $this->editingEquipment->model;
@@ -377,7 +378,6 @@ class EquipmentIndex extends Component
         $this->funded_by            = $this->editingEquipment->funded_by;
         $this->supplier_name        = $this->editingEquipment->supplier_name;
         $this->specifications       = $this->editingEquipment->specifications ? json_decode($this->editingEquipment->specifications, true) : null;
-
     }
 
     /**

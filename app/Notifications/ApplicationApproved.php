@@ -79,7 +79,7 @@ final class ApplicationApproved extends Notification implements ShouldQueue
     /**
      * Get the array representation of the notification.
      *
-     * @return array<string, mixed>
+     * @return array
      */
     public function toArray(User $notifiable): array
     {
@@ -94,11 +94,11 @@ final class ApplicationApproved extends Notification implements ShouldQueue
         $routeParameters = [];
 
         if (! $applicationId) {
-
-            $data['url'] = ($applicationUrl !== '#' && filter_var($applicationUrl, FILTER_VALIDATE_URL)) ? $applicationUrl : null;
+            $data['url'] = null;
 
             return $data;
         }
+
         // Only LoanApplication is supported
         $routeName       = 'resource-management.my-applications.loan.show';
         $routeParameters = ['loan_application' => $applicationId];
@@ -123,7 +123,7 @@ final class ApplicationApproved extends Notification implements ShouldQueue
             ]);
         }
 
-        $data['url'] = ($applicationUrl !== '#' && filter_var($applicationUrl, FILTER_VALIDATE_URL)) ? $applicationUrl : null;
+        $data['url'] = filter_var($applicationUrl, FILTER_VALIDATE_URL) ? $applicationUrl : null;
 
         return $data;
     }
@@ -135,13 +135,13 @@ final class ApplicationApproved extends Notification implements ShouldQueue
         $routeParameters = ['loan_application' => $this->application->id];
 
         if (! Route::has($routeName)) {
-
             return $viewUrl;
         }
+
         try {
             $viewUrl = route($routeName, $routeParameters);
-        } catch (\Exception $e) {
-            Log::error('Error generating URL for ApplicationApproved mail: '.$e->getMessage(), [
+        } catch (\Exception $exception) {
+            Log::error('Error generating URL for ApplicationApproved mail: '.$exception->getMessage(), [
                 'application_id'   => $this->application->id,
                 'application_type' => $this->application->getMorphClass(),
             ]);

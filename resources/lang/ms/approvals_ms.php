@@ -4,6 +4,9 @@
 // Disusun mengikut kategori untuk memudahkan penyelenggaraan dan rujukan
 
 return [
+    // === Teks bantuan aras atas ===
+    'loading_text' => 'Memuatkan...',
+    'no_tasks'     => 'Tiada tugasan kelulusan untuk dipaparkan.',
     // === Tajuk Utama Papan Pemuka Kelulusan ===
     'title' => 'Papan Pemuka Kelulusan',
 
@@ -29,23 +32,32 @@ return [
 
     // === Tindakan Modul Kelulusan ===
     'actions' => [
-        'review'          => 'Semak',
-        'view_details'    => 'Lihat Butiran',
-        'view_task'       => 'Lihat Tugasan',
-        'view_full_app'   => 'Lihat Permohonan Penuh',
-        'submit_decision' => 'Hantar Keputusan',
-        'no_permission'   => 'Tiada kebenaran',
+        'review'               => 'Semak',
+        'view_details'         => 'Lihat Butiran',
+        'view_task'            => 'Lihat Tugasan',
+        'view_full_app'        => 'Lihat Permohonan Penuh',
+        'submit_decision'      => 'Hantar Keputusan',
+        'no_permission'        => 'Tiada kebenaran',
+        'approve_option'       => 'Luluskan',
+        'reject_option'        => 'Tolak',
+        'return_for_amendment' => 'Pulangkan untuk Pindaan',
+        'transfer_to_officer'  => 'Pindah ke Pegawai Lain',
+        'select_officer'       => 'Pilih Pegawai',
     ],
 
     // === Popup/Modals & Dialog - Semakan Tugasan Kelulusan ===
     'modal' => [
         'title'                      => 'Semak Tugasan Kelulusan',
+        'details'                    => 'Butiran',
         'app_details'                => 'Butiran Permohonan',
         'app_type'                   => 'Jenis Permohonan',
+        'application_type'           => 'Jenis Permohonan',
         'applicant'                  => 'Pemohon',
         'submission_date'            => 'Tarikh Permohonan',
         'current_status'             => 'Status Semasa',
+        'current_approval_stage'     => 'Peringkat Kelulusan Semasa',
         'applied_items'              => 'Item Dipohon',
+        'stage'                      => 'Peringkat',
         'quantity'                   => 'Kuantiti',
         'purpose'                    => 'Tujuan',
         'loan_period'                => 'Tempoh Pinjaman',
@@ -57,6 +69,8 @@ return [
         'approval_decision'          => 'Keputusan Kelulusan',
         'decision'                   => 'Keputusan',
         'comments'                   => 'Ulasan (Wajib untuk Penolakan)',
+        'notes'                      => 'Catatan',
+        'notes_placeholder'          => 'Masukkan catatan anda di sini...',
         'approve_option'             => 'Luluskan',
         'reject_option'              => 'Tolak',
         'return_for_amendment'       => 'Pulangkan untuk Pindaan',
@@ -66,6 +80,11 @@ return [
         'processing_message'         => 'Memproses keputusan anda...',
         'success_message'            => 'Keputusan anda telah berjaya direkodkan.',
         'error_message'              => 'Gagal merekodkan keputusan anda.',
+        'status'                     => 'Status',
+        'select_task_to_view'        => 'Pilih tugasan untuk melihat butiran',
+        'task_already_processed'     => 'Tugasan ini telah diproses.',
+        'no_details_available'       => 'Tiada butiran untuk tugasan ini.',
+        'received_on'                => 'Diterima Pada',
     ],
 
     // === Mesej Sistem: Status, Ralat, Pengesahan, dll ===
@@ -81,6 +100,8 @@ return [
 
     // === Validasi Input Borang Kelulusan ===
     'validation' => [
+        'items_array'       => 'Item mesti dihantar dalam bentuk jujukan (array).',
+        'notes_max'         => 'Ulasan tidak boleh melebihi :max aksara.',
         'decision_required' => 'Sila pilih keputusan.',
         'decision_invalid'  => 'Keputusan tidak sah.',
         'comments_required' => 'Ulasan diperlukan untuk penolakan.',

@@ -130,11 +130,11 @@ class PermissionsIndex extends Component
     {
         abort_unless(Auth::user()?->can('manage_permissions'), 403, __('Tindakan tidak dibenarkan.'));
         if (! ($this->permissionIdToDelete !== null && $this->permissionIdToDelete !== 0)) {
-
             $this->closeDeleteConfirmationModal();
 
             return;
         }
+
         $permission = Permission::findOrFail($this->permissionIdToDelete);
 
         if ($permission->roles()->count() > 0) {

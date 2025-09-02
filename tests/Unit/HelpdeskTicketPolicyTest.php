@@ -26,6 +26,7 @@ class HelpdeskTicketPolicyTest extends TestCase
     {
         $admin = User::factory()->create();
         $admin->assignRole('Admin');
+
         $policy = new HelpdeskTicketPolicy;
         $this->assertTrue($policy->viewAny($admin));
     }
@@ -35,6 +36,7 @@ class HelpdeskTicketPolicyTest extends TestCase
     {
         $itAdmin = User::factory()->create();
         $itAdmin->assignRole('IT Admin');
+
         $policy = new HelpdeskTicketPolicy;
         $this->assertTrue($policy->viewAny($itAdmin));
     }
@@ -44,6 +46,7 @@ class HelpdeskTicketPolicyTest extends TestCase
     {
         $user = User::factory()->create();
         $user->assignRole('User');
+
         $policy = new HelpdeskTicketPolicy;
         $this->assertFalse($policy->viewAny($user));
     }

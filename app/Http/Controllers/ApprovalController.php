@@ -180,7 +180,7 @@ class ApprovalController extends Controller
 
             return redirect()->back()->withInput()->with('error', __('Anda tidak mempunyai kebenaran untuk membuat keputusan ini.')); //
         } catch (Throwable $e) { //
-            Log::error("ApprovalController@recordDecision: Error processing approval for ID {$approval->id}. User ID: {$processingUser->id}.", [
+            Log::error(sprintf('ApprovalController@recordDecision: Error processing approval for ID %d. User ID: %d.', $approval->id, $processingUser->id), [
                 'error'        => $e->getMessage(),
                 'trace'        => substr($e->getTraceAsString(), 0, 500),
                 'request_data' => $request->except(['_token', '_method']),

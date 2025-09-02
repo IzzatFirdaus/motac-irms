@@ -30,7 +30,7 @@ class ApprovalService
      */
     public function createApproval(LoanApplication $loanApplication, User $approver, string $level): Approval
     {
-        return DB::transaction(function () use ($loanApplication, $approver, $level) {
+        return DB::transaction(function () use ($loanApplication, $approver, $level): \App\Models\Approval {
             $approval = new Approval([
                 'loan_application_id' => $loanApplication->id,
                 'approver_id'         => $approver->id,
@@ -58,7 +58,7 @@ class ApprovalService
      */
     public function recordApprovalDecision(Approval $approval, string $decision, ?string $notes = null, array $approvalItems = []): void
     {
-        DB::transaction(function () use ($approval, $decision, $notes, $approvalItems) {
+        DB::transaction(function () use ($approval, $decision, $notes, $approvalItems): void {
             // Set status and timestamps based on decision
             $approval->status = $decision;
             $approval->notes  = $notes;
@@ -104,6 +104,7 @@ class ApprovalService
             } elseif ($decision === Approval::STATUS_CANCELED) {
                 $approval->canceled_at = now();
             }
+
             $approval->save();
 
             // 2) If the approvable is a LoanApplication, update its state and any item quantities
@@ -124,6 +125,7 @@ class ApprovalService
                                 if ($qtyApproved > 0) {
                                     $approvalItemRow->status = \App\Models\LoanApplicationItem::STATUS_AWAITING_ISSUANCE;
                                 }
+
                                 $approvalItemRow->save();
                             }
                         }

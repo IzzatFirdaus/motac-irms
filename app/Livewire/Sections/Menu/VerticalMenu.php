@@ -109,9 +109,9 @@ class VerticalMenu extends Component
 
         // If the item has submenus, filter them recursively
         if (! (isset($item->submenu) && is_array($item->submenu))) {
-
             return $item;
         }
+
         $filteredSubmenu = \collect($item->submenu)->map(function ($subItem) use ($userRoles) {
             return $this->filterMenuItem($subItem, $userRoles);
         })->filter(function ($subItem): bool {

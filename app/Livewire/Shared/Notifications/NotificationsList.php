@@ -3,7 +3,10 @@
 namespace App\Livewire\Shared\Notifications;
 
 use App\Models\Notification;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -12,6 +15,9 @@ use Livewire\WithPagination;
  *
  * Displays a paginated, searchable list of notifications for the authenticated user,
  * and allows marking notifications as read.
+ */
+/**
+ * @method void resetPage()
  */
 class NotificationsList extends Component
 {
@@ -34,13 +40,20 @@ class NotificationsList extends Component
     /**
      * Computed property to get paginated notifications for the authenticated user.
      */
-    public function getNotificationsProperty()
+    public function getNotificationsProperty(): LengthAwarePaginator
     {
-        /** @var \Illuminate\Database\Eloquent\Builder $query */
-        $query = \App\Models\Notification::query();
+        /**
+         * @var \Illuminate\Database\Eloquent\Builder $query
+         */
+        $query = Notification::query();
+
+        $notifiableType = null;
+        if (Auth::check() && Auth::user()) {
+            $notifiableType = get_class(Auth::user());
+        }
 
         $query->where('notifiable_id', Auth::id())
-            ->where('notifiable_type', Auth::user() ? get_class(Auth::user()) : null);
+            ->where('notifiable_type', $notifiableType);
 
         if ($this->search !== '' && $this->search !== '0') {
             $query->where('data', 'like', '%'.$this->search.'%');
@@ -61,8 +74,16 @@ class NotificationsList extends Component
             ->first();
 
         if ($notification && is_null($notification->read_at)) {
-            $notification->markAsRead();
-            session()->flash('success', __('Notifikasi telah ditanda sebagai dibaca.'));
+            // Use the built-in markAsRead method if available; otherwise, manually set read_at
+            if (method_exists($notification, 'markAsRead')) {
+                $notification->markAsRead();
+            } else {
+                $notification->read_at = Carbon::now();
+                $notification->save();
+            }
+
+            // Correct session flash usage
+            Session::flash('success', __('messages.notification_marked_read'));
             $this->resetPage();
         }
     }

@@ -33,7 +33,7 @@ final class IssueEquipmentRequest extends FormRequest
     }
 
     /**
-     * @return array<string, mixed>
+    * @return array
      */
     public function rules(): array
     {
@@ -100,6 +100,7 @@ final class IssueEquipmentRequest extends FormRequest
                     if ((int) $value <= $maxAllowedToIssueNow) {
                         return;
                     }
+
                     $fail(__('Kuantiti untuk dikeluarkan (:value) bagi item #:item_num melebihi baki yang boleh dikeluarkan (:can_issue) daripada kuantiti diluluskan (:approved). Telah dikeluarkan sebelum ini: :already_issued.', [
                         'value'          => $value,
                         'item_num'       => ((int) $index) + 1,
@@ -107,7 +108,6 @@ final class IssueEquipmentRequest extends FormRequest
                         'approved'       => $quantityApprovedForItem,
                         'already_issued' => $alreadySuccessfullyIssued,
                     ]));
-
                 },
             ],
             'items.*.issue_item_notes'             => ['nullable', 'string', 'max:1000'],

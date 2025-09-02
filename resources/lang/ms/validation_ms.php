@@ -236,6 +236,9 @@ return [
         'loan_application_items.*.equipment_type' => 'Jenis Peralatan',
         'loan_application_items.*.quantity'       => 'Kuantiti',
         'return_date'                             => 'Tarikh Pemulangan',
+        'return_location'                         => 'Lokasi Pemulangan',
+        'applicant_phone'                         => 'No. Telefon Pemohon',
+        'applicant_confirmation'                  => 'Pengesahan Pemohon',
 
         // === Helpdesk Ticket Fields ===
         'subject'             => 'Subjek Tiket',
@@ -247,8 +250,45 @@ return [
         'file_name'           => 'Nama Fail',
         'file_size'           => 'Saiz Fail',
         'file_type'           => 'Jenis Fail',
+        'attachment'          => 'Lampiran',
+        'is_internal'         => 'Ulasan Dalaman',
+        'resolution_notes'    => 'Catatan Penyelesaian',
 
         // === Custom validation headings/messages ===
         'validation_error_heading' => 'Sila perbetulkan ralat berikut:', // Used for main validation error heading
+
+        // Tambahan: Medan peralatan
+        'operational_status'   => 'Status Operasi',
+        'owner_department'     => 'Jabatan Pemilik',
+        'purchase_date'        => 'Tarikh Pembelian',
+        'warranty_expiry_date' => 'Tarikh Tamat Waranti',
+        'serial_number'        => 'No. Siri',
+        'internal_notes'       => 'Nota Dalaman',
+        'asset_tag'            => 'No. Tag Aset',
+        'asset_type'           => 'Jenis Aset/Peralatan',
+        'brand'                => 'Jenama',
+        'model'                => 'Model',
+        'condition_status'     => 'Status Keadaan',
+        'current_location'     => 'Lokasi Semasa',
+
+        // Tambahan: Profil/akaun
+        'last_login'             => 'Log Masuk Terakhir',
+        'selectedEmployeeId'     => 'Pekerja',
+        'newLeaveInfo.LeaveId'   => 'Jenis Cuti',
+        'newLeaveInfo.fromDate'  => 'Tarikh Mula Cuti',
+        'newLeaveInfo.toDate'    => 'Tarikh Tamat Cuti',
+        'newLeaveInfo.startAt'   => 'Masa Mula Cuti',
+        'newLeaveInfo.endAt'     => 'Masa Tamat Cuti',
+        'newLeaveInfo.leaveDays' => 'Bilangan Hari Cuti',
+        'newLeaveInfo.reason'    => 'Sebab Cuti',
+        'fileUpload'             => 'Muat Naik Fail',
+
+        // Tambahan: Tatasusila struktur data permohonan (variasi camelCase)
+        'loanApplicationItems'                  => 'Item Pinjaman',
+        'applicationItems.*.equipment_type'     => 'Jenis Peralatan',
+        'applicationItems.*.quantity_requested' => 'Kuantiti Dimohon',
+
+        // Tambahan: Helpdesk
+        'closed_at' => 'Ditutup Pada',
     ],
 ];

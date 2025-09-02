@@ -1,9 +1,7 @@
 <?php
 
-// routes/web.php
-
 declare(strict_types=1);
-
+// routes/web.php
 // Note: avoid importing global helper functions with `use function` as PHP
 // raises a 'use statement with non-compound name has no effect' in some
 // environments; call helpers directly instead.
@@ -48,7 +46,6 @@ use App\Http\Controllers\MiscErrorController;
 */
 
 use App\Http\Controllers\NotificationController;
-
 // --------------------------------------------------
 // Controller Imports (for public/static/some controller routes)
 // --------------------------------------------------
@@ -62,7 +59,6 @@ use App\Livewire\Dashboard\ItAdminDashboard as ItAdminDashboardLW;
 use App\Livewire\Dashboard\UserDashboard as UserDashboardLW;
 use App\Livewire\EquipmentChecklist as EquipmentChecklistLW;
 use App\Livewire\Helpdesk\Admin\TicketManagement as AdminTicketManagementLW;
-
 // --------------------------------------------------
 // Livewire Component Imports (for all Livewire-based UI)
 // --------------------------------------------------
@@ -103,9 +99,9 @@ use App\Livewire\Settings\Users\UsersEdit as SettingsUsersEditLW;
 use App\Livewire\Settings\Users\UsersIndex as SettingsUsersIndexLW;
 use App\Livewire\Settings\Users\UsersShow as SettingsUsersShowLW;
 use App\Livewire\Shared\Notifications\NotificationsList;
-
 // helper functions are invoked directly (e.g. config(), file_exists()).
 
+use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Route;
 
 // helper functions are invoked directly (e.g. redirect(), route(), view()).
@@ -133,15 +129,25 @@ Route::get('lang/{lang}', [LanguageController::class, 'swap'])
 
 // Test translation system (debug)
 Route::get('/test-lang', function (): array {
-    return [
-        'loaded_file_ms'  => file_exists(resource_path('lang/ms/app_ms.php')),
-        'loaded_file_en'  => file_exists(resource_path('lang/en/app_en.php')),
-        'current_locale'  => app()->getLocale(),
-        'system_name'     => __('app.system_name'),
-        'motac_full_name' => __('app.motac_full_name'),
-        'dashboard_apply' => __('dashboard.apply_ict_loan_title'),
-        'common_login'    => __('common.login'),
+    $keys = [
+        'app.system_name',
+        'app.motac_full_name',
+        'dashboard.apply_ict_loan_title',
+        'common.login',
     ];
+
+    $report = [
+        'loaded_file_ms' => file_exists(resource_path('lang/ms/app_ms.php')),
+        'loaded_file_en' => file_exists(resource_path('lang/en/app_en.php')),
+        'current_locale' => app()->getLocale(),
+    ];
+
+    foreach ($keys as $key) {
+        $report['has_'.str_replace(['.', '-'], '_', $key)] = Lang::has($key);
+        $report[$key]                                      = __($key);
+    }
+
+    return $report;
 });
 
 // --------------------------------------------------
@@ -306,14 +312,6 @@ Route::middleware([
     // Helpdesk (Livewire)
     // -------------------------
     Route::prefix('helpdesk')->name('helpdesk.')->group(function (): void {
-        // Admin/IT Admin/Helpdesk Agent routes
-        Route::middleware(['role:Admin|IT Admin|Helpdesk Agent'])->group(function (): void {
-            // Ensure route name matches tests: helpdesk.admin.index
-            // Provide both preferred and legacy names so tests can resolve either.
-            Route::get('/admin/tickets', AdminTicketManagementLW::class)->name('admin.tickets');
-            // Legacy alias (explicit) to satisfy older tests expecting 'helpdesk.admin.index'
-            Route::get('/admin/tickets', AdminTicketManagementLW::class)->name('admin.index');
-        });
         Route::get('/', MyTicketsIndex::class)->name('index');
         Route::get('/create', CreateTicketForm::class)->name('create');
         Route::get('/{ticket}', TicketDetails::class)
@@ -345,22 +343,8 @@ Route::middleware([
     // use explicit auth guards that support Sanctum::actingAs during tests.
     // (moved) helpdesk admin Livewire route is registered after the main auth group
 
-    // Ensure controller-based helpdesk ticket routes are registered for tests
-    // (single registration - earlier duplicates removed)
-    Route::prefix('helpdesk')->name('helpdesk.tickets.')->middleware(['auth', 'verified'])->group(function () {
-        Route::get('/tickets', [HelpdeskTicketController::class, 'index'])->name('index');
-        Route::get('/tickets/create', [HelpdeskTicketController::class, 'create'])->name('create');
-        Route::post('/tickets', [HelpdeskTicketController::class, 'store'])->name('store');
-        Route::get('/tickets/{ticket}', [HelpdeskTicketController::class, 'show'])->name('show')->whereNumber('ticket');
-        Route::put('/tickets/{ticket}', [HelpdeskTicketController::class, 'update'])->name('update')->whereNumber('ticket');
-        Route::delete('/tickets/{ticket}', [HelpdeskTicketController::class, 'destroy'])->name('destroy')->whereNumber('ticket');
-    });
-
-    // Legacy convenience route expected by some tests (named 'helpdesk.view')
-    Route::get('/helpdesk/view/{ticket}', [HelpdeskTicketController::class, 'show'])
-        ->name('helpdesk.view')
-        ->whereNumber('ticket')
-        ->middleware(['auth', 'verified']);
+    // (removed duplicate registration of helpdesk ticket controller routes)
+    // (removed duplicate legacy route 'helpdesk.view' within this group)
 
     // Backwards-compatible aliases for older test expectations and route name variants
     // These ensure tests referencing names like `helpdesk.admin.index` and `helpdesk.tickets.*`
@@ -368,22 +352,9 @@ Route::middleware([
     // Primary Livewire route already registered as 'helpdesk.admin.tickets'.
     // Provide a named alias that points to the same URI so tests using the older
     // name `helpdesk.admin.index` resolve correctly during test runs.
-    Route::get('/helpdesk/admin/tickets', AdminTicketManagementLW::class)
-        ->name('helpdesk.admin.tickets')
-        ->middleware(['role:Admin|IT Admin|Helpdesk Agent']);
+    // (removed duplicate helpdesk admin tickets routes inside auth group)
 
-    // Legacy alias for tests expecting 'helpdesk.admin.index' (keeps same URI)
-    Route::get('/helpdesk/admin/tickets', function () {
-        return redirect()->to(url('/helpdesk/admin/tickets'));
-    })->name('helpdesk.admin.index')->middleware(['role:Admin|IT Admin|Helpdesk Agent']);
-
-    // Aliases for controller-based ticket routes (explicit names expected by tests)
-    Route::get('/helpdesk/tickets', [HelpdeskTicketController::class, 'index'])->name('helpdesk.tickets.index');
-    Route::get('/helpdesk/tickets/create', [HelpdeskTicketController::class, 'create'])->name('helpdesk.tickets.create');
-    Route::post('/helpdesk/tickets', [HelpdeskTicketController::class, 'store'])->name('helpdesk.tickets.store');
-    Route::get('/helpdesk/tickets/{ticket}', [HelpdeskTicketController::class, 'show'])->name('helpdesk.tickets.show')->whereNumber('ticket');
-    Route::put('/helpdesk/tickets/{ticket}', [HelpdeskTicketController::class, 'update'])->name('helpdesk.tickets.update')->whereNumber('ticket');
-    Route::delete('/helpdesk/tickets/{ticket}', [HelpdeskTicketController::class, 'destroy'])->name('helpdesk.tickets.destroy')->whereNumber('ticket');
+    // (removed duplicate explicit /helpdesk/tickets alias block; canonical definitions exist above within the group)
 
     // -------------------------
     // Human Resource (Livewire, optional)

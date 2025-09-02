@@ -103,6 +103,7 @@ class ProcessIssuance extends Component
             if ($balanceToIssue <= 0) {
                 continue;
             }
+
             for ($i = 0; $i < $balanceToIssue; $i++) {
                 $this->issueItems[] = [
                     'loan_application_item_id' => $approvedItem->id,
@@ -111,7 +112,6 @@ class ProcessIssuance extends Component
                     'accessories_checklist'    => [],
                 ];
             }
-
         }
     }
 

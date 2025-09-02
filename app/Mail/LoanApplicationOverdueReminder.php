@@ -39,6 +39,7 @@ class LoanApplicationOverdueReminder extends Mailable implements ShouldQueue
             if ($transaction->type !== LoanTransaction::TYPE_ISSUE) {
                 continue;
             }
+
             foreach ($transaction->loanTransactionItems as $item) {
                 if (
                     (property_exists($item, 'is_returned') && ! $item->is_returned)
@@ -47,7 +48,6 @@ class LoanApplicationOverdueReminder extends Mailable implements ShouldQueue
                     $overdue->push($item);
                 }
             }
-
         }
 
         return $overdue;

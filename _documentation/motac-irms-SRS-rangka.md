@@ -14,27 +14,29 @@
 
 ## **KETERANGAN DOKUMEN**
 
-Dokumen ini menerangkan keperluan sistem yang akan dirujuk semasa fasa pembangunan IRMS. Kandungan dokumen merangkumi senarai aktor sistem, hierarki fungsi sistem, rajah use case, model proses sistem dan model maklumat.
+Dokumen ini menerangkan keperluan sistem yang akan dirujuk semasa fasa pembangunan IRMS. Kandungan
+dokumen merangkumi senarai aktor sistem, hierarki fungsi sistem, rajah use case, model proses sistem
+dan model maklumat.
 
 ### **SEMAKAN DAN PENGESAHAN DOKUMEN**
 
 **Disemak Oleh:**
 
-| Disemak Oleh | Jawatan | Tandatangan | Tarikh |
-| :--- | :--- | :--- | :--- |
-| [Nama Penyemak] | [Jawatan Penyemak] | | [Tarikh] |
+| Disemak Oleh    | Jawatan            | Tandatangan | Tarikh   |
+| :-------------- | :----------------- | :---------- | :------- |
+| [Nama Penyemak] | [Jawatan Penyemak] |             | [Tarikh] |
 
 **Disahkan Oleh:**
 
-| Disahkan Oleh | Jawatan | Tandatangan | Tarikh |
-| :--- | :--- | :--- | :--- |
-| [Nama Pengesah] | [Jawatan Pengesah] | | [Tarikh] |
+| Disahkan Oleh   | Jawatan            | Tandatangan | Tarikh   |
+| :-------------- | :----------------- | :---------- | :------- |
+| [Nama Pengesah] | [Jawatan Pengesah] |             | [Tarikh] |
 
 ### **KAWALAN DOKUMEN**
 
-| No. Versi | Tarikh | Ringkasan Pindaan | Penyedia |
-| :--- | :--- | :--- | :--- |
-| 1.0 | 2025-08-14 | Draf Awal | [Nama Penyedia] |
+| No. Versi | Tarikh     | Ringkasan Pindaan | Penyedia        |
+| :-------- | :--------- | :---------------- | :-------------- |
+| 1.0       | 2025-08-14 | Draf Awal         | [Nama Penyedia] |
 
 ---
 
@@ -57,20 +59,20 @@ Dokumen ini menerangkan keperluan sistem yang akan dirujuk semasa fasa pembangun
 
 #### a) Akronim
 
-| Akronim | Keterangan |
-| :--- | :--- |
-| SRS | Spesifikasi Keperluan Sistem |
-| IRMS | Integrated Room Management System |
-| MOTAC | Ministry of Tourism, Arts and Culture |
-| ERD | Entity Relationship Diagram |
-| DFD | Data Flow Diagram |
+| Akronim | Keterangan                            |
+| :------ | :------------------------------------ |
+| SRS     | Spesifikasi Keperluan Sistem          |
+| IRMS    | Integrated Room Management System     |
+| MOTAC   | Ministry of Tourism, Arts and Culture |
+| ERD     | Entity Relationship Diagram           |
+| DFD     | Data Flow Diagram                     |
 
 #### b) Definisi
 
-| Terma/Istilah | Definisi |
-| :--- | :--- |
-| Aktor | Peranan yang dimainkan oleh entiti luar yang berinteraksi dengan sistem. |
-| Entiti | Objek signifikan di mana maklumat mengenainya perlu disimpan. |
+| Terma/Istilah | Definisi                                                                 |
+| :------------ | :----------------------------------------------------------------------- |
+| Aktor         | Peranan yang dimainkan oleh entiti luar yang berinteraksi dengan sistem. |
+| Entiti        | Objek signifikan di mana maklumat mengenainya perlu disimpan.            |
 
 ---
 
@@ -94,8 +96,8 @@ Jelaskan skop sistem aplikasi yang ingin dibangunkan.
 
 ### **1.3. Senarai Aktor Sistem**
 
-| AKTOR | KETERANGAN |
-| :--- | :--- |
+| AKTOR          | KETERANGAN        |
+| :------------- | :---------------- |
 | [Nama Aktor 1] | [Peranan Aktor 1] |
 | [Nama Aktor 2] | [Peranan Aktor 2] |
 
@@ -116,10 +118,10 @@ _(Rajah akan menunjukkan subsistem, modul, submodul dan transaksi utama)_
 
 **Nama Modul: [Nama Modul]**
 
-| Bil. | ID Fungsi Sistem | Nama Transaksi | Aktor Sistem |
-| :--- | :--- | :--- | :--- |
-| 1. | [ID Fungsi] | [Nama Transaksi] | [Nama Aktor] |
-| 2. | [ID Fungsi] | [Nama Transaksi] | [Nama Aktor] |
+| Bil. | ID Fungsi Sistem | Nama Transaksi   | Aktor Sistem |
+| :--- | :--------------- | :--------------- | :----------- |
+| 1.   | [ID Fungsi]      | [Nama Transaksi] | [Nama Aktor] |
+| 2.   | [ID Fungsi]      | [Nama Transaksi] | [Nama Aktor] |
 
 ---
 
@@ -134,12 +136,12 @@ _(Rajah akan menunjukkan subsistem, modul, submodul dan transaksi utama)_
 #### **3.2.1. [Nama Modul]**
 
 **a) Rajah Use Case**  
-_[Sisipkan Rajah Use Case Modul]_  
+_[Sisipkan Rajah Use Case Modul]_
 
 #### b) Keterangan Use Case
 
-| LABEL | NAMA USE CASE | KETERANGAN |
-| :--- | :--- | :--- |
+| LABEL      | NAMA USE CASE   | KETERANGAN                             |
+| :--------- | :-------------- | :------------------------------------- |
 | [UC-ID-01] | [Nama Use Case] | [Keterangan proses untuk Use Case ini] |
 | [UC-ID-02] | [Nama Use Case] | [Keterangan proses untuk Use Case ini] |
 
@@ -153,7 +155,7 @@ Senaraikan notasi yang digunakan untuk model maklumat
 
 ### **4.2. Model Maklumat**
 
-_[Sisipkan Rajah ERD Sistem IRMS]_  
+_[Sisipkan Rajah ERD Sistem IRMS]_
 
 ### **4.3. Definisi Kamus Data**
 
@@ -162,10 +164,10 @@ Keterangan Entiti: [Keterangan ringkas mengenai entiti]
 
 **Atribut:**
 
-| Nama | Pilihan (Y/T) | Format | Saiz | Keterangan |
-| :--- | :--- | :--- | :--- | :--- |
-| id_entiti | T | numerik | 12 | Pengenal unik |
-| nama_atribut | T | alfanumerik | 150 | Nama |
+| Nama         | Pilihan (Y/T) | Format      | Saiz | Keterangan    |
+| :----------- | :------------ | :---------- | :--- | :------------ |
+| id_entiti    | T             | numerik     | 12   | Pengenal unik |
+| nama_atribut | T             | alfanumerik | 150  | Nama          |
 
 **Peraturan Bisnes:**
 
@@ -186,17 +188,17 @@ Keterangan Entiti: [Keterangan ringkas mengenai entiti]
 
 #### **5.2.1. Rajah Konteks**
 
-_[Sisipkan Rajah Konteks Sistem]_  
+_[Sisipkan Rajah Konteks Sistem]_
 
 #### **5.2.2. Aliran Data [Nama Modul]**
 
-_[Sisipkan Rajah Aliran Data Modul]_  
+_[Sisipkan Rajah Aliran Data Modul]_
 
 ### **5.3. Definisi Aliran Data**
 
-| Nama Aliran Data | Sumber | Destinasi | Atribut |
-| :--- | :--- | :--- | :--- |
-| [Nama Aliran] | [Fungsi/Entiti] | [Fungsi/Storan] | [atribut1, atribut2] |
+| Nama Aliran Data | Sumber          | Destinasi       | Atribut              |
+| :--------------- | :-------------- | :-------------- | :------------------- |
+| [Nama Aliran]    | [Fungsi/Entiti] | [Fungsi/Storan] | [atribut1, atribut2] |
 
 ---
 
@@ -204,11 +206,11 @@ _[Sisipkan Rajah Aliran Data Modul]_
 
 ### **6.1. Jadual Ciri-ciri Kualiti Sistem**
 
-| ID | Ciri-ciri Kualiti | Catatan |
-| :--- | :--- | :--- |
-| NF-AS-01 | Interoperability | [Keperluan Interoperability] |
-| NF-AS-02 | Scalability | [Keperluan Skalabiliti] |
-| NF-AS-03 | Response Time | [Keperluan Masa Tindak Balas] |
+| ID       | Ciri-ciri Kualiti | Catatan                       |
+| :------- | :---------------- | :---------------------------- |
+| NF-AS-01 | Interoperability  | [Keperluan Interoperability]  |
+| NF-AS-02 | Scalability       | [Keperluan Skalabiliti]       |
+| NF-AS-03 | Response Time     | [Keperluan Masa Tindak Balas] |
 
 ---
 
@@ -225,4 +227,5 @@ _[Sisipkan Rajah Aliran Data Modul]_
 ---
 
 > **Nota:**  
-> Dokumen ini disusun mengikut templat rasmi KRISA dan mematuhi prinsip reka bentuk MyGovEA serta panduan MYDS untuk pembangunan sistem kerajaan.
+> Dokumen ini disusun mengikut templat rasmi KRISA dan mematuhi prinsip reka bentuk MyGovEA serta
+> panduan MYDS untuk pembangunan sistem kerajaan.

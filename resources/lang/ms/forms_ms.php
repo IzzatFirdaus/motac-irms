@@ -7,18 +7,28 @@ return [
     // ==============================================================================
     // --- LABEL UMUM & BUTANG TINDAKAN ---
     // ==============================================================================
-    'label_required_field'          => '* WAJIB diisi', // Digunakan untuk menandakan medan wajib dalam borang
-    'text_processing'               => 'Memproses...',
-    'button_save_draft'             => 'Simpan Draf Permohonan',
-    'button_update_draft'           => 'Kemaskini Draf',
-    'button_update_and_resubmit'    => 'Kemaskini & Hantar Semula',
-    'label_date'                    => 'Tarikh',
-    'label_name'                    => 'Nama',
-    'label_signature_stamp'         => 'Tandatangan & Cop (jika ada):',
-    'text_document_no'              => 'No. Dokumen:',
-    'text_effective_date'           => 'Tarikh Kuatkuasa:',
-    'button_submit'                 => 'Hantar Permohonan',
-    'helpdesk_button_submit_ticket' => 'Hantar Tiket',
+    'label_required_field'                => '* WAJIB diisi', // Digunakan untuk menandakan medan wajib dalam borang
+    'text_processing'                     => 'Memproses...',
+    'button_save_draft'                   => 'Simpan Draf Permohonan',
+    'button_update_draft'                 => 'Kemaskini Draf',
+    'button_update_and_resubmit'          => 'Kemaskini & Hantar Semula',
+    'button_submit'                       => 'Hantar Permohonan',
+    'button_cancel'                       => 'Batal',
+    'button_close'                        => 'Tutup',
+    'button_back'                         => 'Kembali',
+    'button_next'                         => 'Seterusnya',
+    'button_print'                        => 'Cetak',
+    'label_date'                          => 'Tarikh',
+    'label_name'                          => 'Nama',
+    'label_signature_stamp'               => 'Tandatangan & Cop (jika ada):',
+    'text_document_no'                    => 'No. Dokumen:',
+    'text_effective_date'                 => 'Tarikh Kuatkuasa:',
+    'text_terms_and_conditions'           => 'Terma dan Syarat',
+    'text_i_agree_to_terms'               => 'Saya bersetuju dengan terma dan syarat',
+    'text_application_id'                 => 'ID Permohonan:',
+    'helpdesk_button_submit_ticket'       => 'Hantar Tiket',
+    'helpdesk_label_search_tickets'       => 'Cari Tiket',
+    'helpdesk_placeholder_search_tickets' => 'Cari mengikut ID Tiket, tajuk, pemohon...',
 
     // ==============================================================================
     // --- LABEL MAKLUMAT PEMOHON/PEGAWAI ---
@@ -42,6 +52,8 @@ return [
     'bpm_office_display'              => 'Bahagian Pengurusan Maklumat',
     'date_application_received_label' => 'TARIKH BORANG PERMOHONAN LENGKAP DITERIMA',
     'text_form_ref_no'                => 'No. Rujukan Borang: PK.(S).MOTAC.07.(L3)',
+    'title_view_application_ict'      => 'Lihat Permohonan Pinjaman Peralatan ICT',
+    'label_motac_email'               => 'Emel Rasmi MOTAC',
 
     // Bahagian 1: Maklumat Pemohon
     'section_applicant_info_ict'     => 'BAHAGIAN 1 | MAKLUMAT PEMOHON',
@@ -57,6 +69,13 @@ return [
     'instruction_responsible_officer_different'    => 'Bahagian ini hanya perlu diisi jika Pegawai Bertanggungjawab bukan Pemohon.',
     'label_responsible_officer_name'               => 'Nama Penuh Pegawai Bertanggungjawab',
     'placeholder_select_responsible_officer'       => 'Pilih Pegawai Bertanggungjawab',
+    'checkbox_applicant_is_responsible'            => 'Pemohon adalah Pegawai Bertanggungjawab',
+    'email_app_create_title'                       => 'Permohonan Emel/ID Pengguna MOTAC',
+    'email_app_edit_title'                         => 'Sunting Permohonan Emel/ID Pengguna MOTAC',
+    'label_application_purpose_notes'              => 'Tujuan/Catatan:',
+    'checkbox_info_is_true'                        => 'Semua maklumat dalam permohonan ini adalah benar.',
+    'checkbox_data_usage_agreed'                   => 'Saya bersetuju maklumat ini digunakan oleh BPM untuk memproses permohonan saya.',
+    'checkbox_email_responsibility_agreed'         => 'Saya bertanggungjawab ke atas semua e-mel yang dihantar/diterima melalui akaun emel rasmi saya.',
 
     // Bahagian 3: Maklumat Peralatan
     'section_equipment_details_ict' => 'BAHAGIAN 3 | MAKLUMAT PERALATAN',
@@ -69,10 +88,13 @@ return [
     'placeholder_select_type'       => 'Pilih Jenis',
     'label_quantity'                => 'Kuantiti',
     'text_no_equipment_added'       => 'Sila tambah sekurang-kurangnya satu item peralatan.',
+    'button_add_equipment'          => 'Tambah Item Peralatan',
+    'button_remove_equipment'       => 'Buang Item',
 
     // Bahagian 4: Pengesahan Pemohon
     'section_applicant_confirmation_ict' => 'BAHAGIAN 4 | PENGESAHAN PEMOHON (PEGAWAI BERTANGGUNGJAWAB)',
     'text_applicant_declaration_ict'     => 'Saya dengan ini mengesahkan dan memperakukan bahawa semua peralatan yang dipinjam adalah untuk kegunaan rasmi dan berada di bawah tanggungjawab dan penyeliaan saya sepanjang tempoh tersebut;',
+    'checkbox_applicant_confirmation'    => 'Saya mengesahkan maklumat yang diberikan adalah tepat dan saya menerima terma dan syarat pinjaman peralatan ICT.',
 
     // Bahagian 5: Pengesahan Bahagian/Unit
     'section_section_unit_endorsement'      => 'BAHAGIAN 5 | PENGESAHAN BAHAGIAN / UNIT / SEKSYEN',
@@ -80,6 +102,9 @@ return [
     'label_application_status_endorsement'  => 'Permohonan ini adalah: * DISOKONG/ TIDAK DISOKONG',
     'label_supporting_officer_name'         => 'Nama Pegawai Penyokong',
     'placeholder_select_supporting_officer' => 'Pilih Pegawai Penyokong',
+    'label_endorsement_comments'            => 'Catatan (jika ada):',
+    'label_endorsement_by'                  => 'Disahkan oleh:',
+    'label_endorsement_date'                => 'Tarikh:',
     'text_supporter_grade_requirement'      => 'Pegawai penyokong hendaklah sekurang-kurangnya Gred :grade dan ke atas.',
 
     // Bahagian 6 & 7: Kegunaan BPM
@@ -103,6 +128,40 @@ return [
     'checkbox_hdmi_vga_cable'    => 'Kabel HDMI/VGA',
     'checkbox_remote'            => 'Alat Kawalan Jauh',
     'checkbox_others_specify'    => 'Lain-lain. Nyatakan :',
+
+    // === Borang Permohonan Emel/ID Pengguna (alias digunakan dalam kod) ===
+    'section_applicant_info_email'             => 'Maklumat Pemohon',
+    'section_application_details'              => 'Butiran Permohonan',
+    'section_group_email_info'                 => 'Maklumat Emel Kumpulan',
+    'section_supporting_officer_info'          => 'Maklumat Pegawai Penyokong',
+    'section_applicant_declaration_email'      => 'Pengakuan Pemohon',
+    'text_applicant_declaration_lead_in_email' => 'Dengan ini saya mengisytiharkan perkara berikut:',
+    'text_profile_info_note'                   => 'Pastikan maklumat profil anda terkini sebelum menghantar.',
+    'text_supporter_instruction'               => 'Sila pilih pegawai penyokong sekurang-kurangnya Gred 41 dan ke atas.',
+    'text_all_certifications_required'         => 'Semua pengesahan yang diperlukan mesti disertakan.',
+    'text_contact_person_email_help'           => 'Gunakan emel rasmi MOTAC jika ada.',
+    'text_proposed_email_help'                 => 'Emel yang dicadangkan mesti mematuhi polisi penamaan MOTAC.',
+
+    // Label untuk borang emel
+    'label_service_status'       => 'Taraf Perkhidmatan:*',
+    'label_appointment_type'     => 'Pelantikan:*',
+    'label_contact_person_email' => 'Emel Pegawai/EO/Orang Dihubungi:',
+    'label_contact_person_name'  => 'Nama Pegawai/EO/Orang Dihubungi:',
+    'label_group_email_name'     => 'Nama Emel Kumpulan:',
+    'label_previous_department'  => 'Jabatan Sebelumnya',
+    'label_previous_email'       => 'Emel Rasmi Sebelumnya',
+    'label_proposed_email'       => 'ID Emel Dicadangkan',
+    'label_supporter_full_name'  => 'Nama Pegawai Penyokong',
+    'label_supporter_email'      => 'E-mel',
+    'label_supporter_grade'      => 'Gred',
+    'label_service_start_date'   => 'Tarikh Mula Perkhidmatan',
+    'label_service_end_date'     => 'Tarikh Tamat Perkhidmatan',
+
+    // Placeholder
+    'placeholder_application_purpose' => 'cth. Sokongan acara rasmi, pembentangan, dsb.',
+    'placeholder_proposed_email'      => 'cth. firstname.lastname@motac.gov.my',
+    'placeholder_supporter_email'     => 'cth. officer@motac.gov.my',
+    'placeholder_supporter_name'      => 'cth. Nur Faridah Jasni',
 
     // ==============================================================================
     // --- PILIHAN DROPDOWN (DISUSUN MENGIKUT KATEGORI) ---
@@ -139,13 +198,16 @@ return [
 
     // Pilihan Jenis Peralatan
     'equipment_type_options' => [
-        ''           => 'Pilih Jenis Peralatan',
-        'laptop'     => 'Komputer Riba',
-        'projector'  => 'Projektor',
-        'printer'    => 'Pencetak',
-        'desktop_pc' => 'Komputer Meja',
-        'monitor'    => 'Monitor',
-        'other_ict'  => 'Lain-lain Peralatan ICT',
+        ''                    => 'Pilih Jenis Peralatan',
+        'laptop'              => 'Komputer Riba',
+        'projector'           => 'Projektor',
+        'printer'             => 'Pencetak',
+        'desktop_pc'          => 'Komputer Meja',
+        'monitor'             => 'Monitor',
+        'scanner'             => 'Pengimbas',
+        'external_hard_drive' => 'Pemacu Keras Luaran',
+        'projector_screen'    => 'Skrin Projektor',
+        'other_ict'           => 'Lain-lain Peralatan ICT',
     ],
 
     // Pilihan Aras/Tingkat
@@ -215,6 +277,110 @@ return [
         '21' => 'Perundangan',
         '25' => 'Sekretariat Visit Malaysia',
     ],
+    // Pilihan Kategori Tiket Helpdesk
+    'helpdesk_category_options' => [
+        ''                     => '- Pilih Kategori -',
+        'hardware'             => 'Isu Perkakasan',
+        'software'             => 'Isu Perisian',
+        'network'              => 'Isu Rangkaian',
+        'account'              => 'Akaun & Akses',
+        'peripherals'          => 'Periferal (cth., tetikus, papan kekunci)',
+        'printer_scanner'      => 'Isu Pencetak/Pengimbas',
+        'email'                => 'Isu Berkaitan E-mel',
+        'system_access'        => 'Isu Akses Sistem',
+        'request_new_software' => 'Permintaan Perisian Baharu',
+        'request_new_hardware' => 'Permintaan Perkakasan Baharu',
+        'general_inquiry'      => 'Pertanyaan IT Umum',
+        'other'                => 'Lain-lain',
+    ],
+
+    // Pilihan Keutamaan Tiket Helpdesk
+    'helpdesk_priority_options' => [
+        ''         => '- Pilih Keutamaan -',
+        'low'      => 'Rendah',
+        'medium'   => 'Sederhana',
+        'high'     => 'Tinggi',
+        'critical' => 'Kritikal',
+    ],
+
+    // Pilihan Status Tiket Helpdesk
+    'helpdesk_status_options' => [
+        ''                      => '- Pilih Status -',
+        'open'                  => 'Terbuka',
+        'in_progress'           => 'Dalam Proses',
+        'resolved'              => 'Diselesaikan',
+        'closed'                => 'Ditutup',
+        'on_hold'               => 'Ditangguhkan',
+        'pending_user_response' => 'Menunggu Respons Pengguna',
+    ],
+
+    // Status Kondisi Peralatan
+    'equipment_condition_options' => [
+        ''          => '- Pilih Keadaan -',
+        'excellent' => 'Sangat Baik',
+        'good'      => 'Baik',
+        'fair'      => 'Sederhana',
+        'poor'      => 'Lemah',
+        'damaged'   => 'Rosak',
+    ],
+
+    // Status Operasi Peralatan
+    'equipment_operational_status_options' => [
+        ''                  => '- Pilih Status Operasi -',
+        'operational'       => 'Beroperasi',
+        'under_maintenance' => 'Dalam Penyelenggaraan',
+        'non_operational'   => 'Tidak Beroperasi',
+        'pending_disposal'  => 'Menunggu Pelupusan',
+    ],
+
+    // Label tambahan Helpdesk
+    'helpdesk_label_applicant'              => 'Pemohon',
+    'helpdesk_label_assigned_to'            => 'Diserahkan Kepada',
+    'helpdesk_label_attachments'            => 'Lampiran',
+    'helpdesk_label_category'               => 'Kategori',
+    'helpdesk_label_closed_at'              => 'Ditutup Pada',
+    'helpdesk_label_comment'                => 'Ulasan',
+    'helpdesk_label_title'                  => 'Tajuk',
+    'helpdesk_label_ticket_id'              => 'ID Tiket',
+    'helpdesk_placeholder_title'            => 'Masukkan tajuk ringkas isu anda',
+    'helpdesk_placeholder_description'      => 'Berikan keterangan terperinci masalah atau permintaan anda',
+    'helpdesk_label_created_at'             => 'Dicipta Pada',
+    'helpdesk_label_description'            => 'Keterangan',
+    'helpdesk_label_status'                 => 'Status',
+    'helpdesk_label_priority'               => 'Keutamaan',
+    'helpdesk_label_updated_at'             => 'Dikemaskini Pada',
+    'helpdesk_placeholder_select_category'  => 'Pilih Kategori',
+    'helpdesk_placeholder_select_priority'  => 'Pilih Keutamaan',
+    'helpdesk_label_resolution_notes'       => 'Catatan Penyelesaian',
+    'helpdesk_placeholder_resolution_notes' => 'Masukkan catatan bagaimana isu diselesaikan',
+    'helpdesk_label_is_internal_comment'    => 'Ulasan Dalaman (Hanya untuk kakitangan IT)',
+    'helpdesk_button_add_attachment'        => 'Tambah Lampiran',
+    'helpdesk_button_add_comment'           => 'Tambah Ulasan',
+    'helpdesk_button_assign_ticket'         => 'Serah Tiket',
+    'helpdesk_button_close_ticket'          => 'Tutup Tiket',
+    'helpdesk_button_reopen_ticket'         => 'Buka Semula Tiket',
+    'helpdesk_button_update_ticket'         => 'Kemaskini Tiket',
+    'helpdesk_title_create_ticket'          => 'Cipta Tiket Meja Bantuan Baharu',
+    'helpdesk_title_view_ticket'            => 'Lihat Tiket Meja Bantuan',
+    'helpdesk_title_edit_ticket'            => 'Sunting Tiket Meja Bantuan',
+    'helpdesk_title_manage_tickets'         => 'Urus Tiket Meja Bantuan',
+    'helpdesk_title_my_tickets'             => 'Tiket Meja Bantuan Saya',
+    'helpdesk_text_no_tickets_found'        => 'Tiada tiket meja bantuan ditemui.',
+    'helpdesk_text_file_upload_limit'       => 'Saiz fail maksimum: 2MB. Jenis dibenarkan: JPG, PNG, PDF, DOCX, TXT, XLSX.',
+    'helpdesk_label_sla_due_at'             => 'Tarikh Akhir SLA',
+    'helpdesk_placeholder_add_comment'      => 'Tambah ulasan...',
+
+    // === Mesej Validasi (dikesan oleh audit) ===
+    'validation_applicant_confirmation'       => 'Pengesahan pemohon diperlukan.',
+    'validation_equipment_type_required'      => 'Jenis peralatan diperlukan.',
+    'validation_loan_end_date_after'          => 'Tarikh tamat pinjaman mesti selepas tarikh mula.',
+    'validation_loan_start_date_after'        => 'Tarikh mula pinjaman mesti hari ini atau selepasnya.',
+    'validation_phone_format'                 => 'Sila masukkan format nombor telefon yang sah.',
+    'validation_purpose_required'             => 'Tujuan permohonan diperlukan.',
+    'validation_quantity_required'            => 'Kuantiti diperlukan.',
+    'validation_responsible_officer_required' => 'Pegawai bertanggungjawab diperlukan.',
+    'validation_return_location_different'    => 'Lokasi pemulangan mesti berbeza daripada lokasi penggunaan.',
+    'validation_supporting_officer_required'  => 'Pegawai penyokong diperlukan.',
 
     // Pilihan Jawatan
     'position_options' => [
@@ -585,4 +751,10 @@ return [
     'placeholder_usage_location'     => 'Cth: Bilik Mesyuarat Utama, Aras 10',
     'placeholder_return_location'    => 'Cth: Kaunter BPM (Jika berbeza)',
     'placeholder_equipment_remarks'  => 'Cth: Model spesifik, perisian khas, dll.',
+
+    // --- Mesej umum aliran borang ---
+    'application_submitted_successfully' => 'Permohonan berjaya dihantar.',
+    'draft_saved_successfully'           => 'Draf berjaya disimpan.',
+    'error_submitting_application'       => 'Terdapat ralat semasa menghantar permohonan.',
+    'error_saving_draft'                 => 'Terdapat ralat semasa menyimpan draf.',
 ];

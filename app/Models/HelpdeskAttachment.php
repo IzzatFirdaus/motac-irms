@@ -82,9 +82,9 @@ class HelpdeskAttachment extends Model
         } elseif ($bytes >= 1024) {
             $bytes = number_format($bytes / 1024, 2).' KB';
         } elseif ($bytes > 1) {
-            $bytes = $bytes.' bytes';
+            $bytes .= ' bytes';
         } elseif ($bytes == 1) {
-            $bytes = $bytes.' byte';
+            $bytes .= ' byte';
         } else {
             $bytes = '0 bytes';
         }

@@ -6,7 +6,6 @@ use App\Http\Requests\StoreLoanApplicationRequest;
 use App\Http\Requests\UpdateLoanApplicationRequest;
 use App\Models\Equipment;
 use App\Models\LoanApplication;
-use App\Models\LoanApplicationItem;
 use App\Models\User;
 use App\Services\LoanApplicationService;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -260,7 +259,7 @@ class LoanApplicationController extends Controller
         Log::info(sprintf('LoanApplicationController@submitApplication: User ID %s attempting to submit LoanApplication ID %d (traditional flow).', $user->id, $loanApplication->id));
 
         try {
-            $submittedApplication = $this->loanApplicationService->submitApplicationForApproval($loanApplication);
+            $submittedApplication = $this->loanApplicationService->submitApplicationForApproval($loanApplication, $user);
             Log::info(sprintf('LoanApplication ID %d submitted successfully by User ID %s. Status: %s (traditional flow).', $submittedApplication->id, $user->id, $submittedApplication->status));
 
             return redirect()

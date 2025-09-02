@@ -2,7 +2,6 @@
 
 namespace App\Livewire;
 
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Livewire\Component;

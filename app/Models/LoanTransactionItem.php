@@ -198,6 +198,7 @@ class LoanTransactionItem extends Model
         if (! $this->condition_on_return) {
             return null;
         }
+
         // Use Equipment::getConditionStatusesList() to resolve label
         $conditionList = method_exists(Equipment::class, 'getConditionStatusesList')
             ? Equipment::getConditionStatusesList()
@@ -259,6 +260,7 @@ class LoanTransactionItem extends Model
                     $item->loanApplicationItem->saveQuietly();
                 }
             }
+
             if ($item->loanTransaction) {
                 $item->loanTransaction->updateParentLoanApplicationStatus();
             }
@@ -272,6 +274,7 @@ class LoanTransactionItem extends Model
                     $item->loanApplicationItem->saveQuietly();
                 }
             }
+
             if ($item->loanTransaction) {
                 $item->loanTransaction->updateParentLoanApplicationStatus();
             }
@@ -288,6 +291,7 @@ class LoanTransactionItem extends Model
         if ($value) {
             return (string) $value;
         }
+
         $fallback = $this->getAttribute('condition_on_return');
 
         return $fallback ? (string) $fallback : null;

@@ -51,9 +51,9 @@ class LoanTransactionPolicy
 
         // Design Ref (Rev. 3.5): Section 4.3 (loan_applications.user_id, loan_applications.responsible_officer_id)
         if (! $loanTransaction->loanApplication) {
-
             return Response::deny(__('Anda tidak mempunyai kebenaran untuk melihat transaksi pinjaman ini.'));
         }
+
         if ((int) $user->id === (int) $loanTransaction->loanApplication->user_id) {
             return Response::allow();
         }
@@ -154,10 +154,10 @@ class LoanTransactionPolicy
         // EDITED: This block was changed to use the centralized canBeReturned() method from the LoanApplication model.
         // This ensures the business logic is consistent and not duplicated. It correctly allows returns for 'issued',
         // 'partially_issued', and 'overdue' applications.
-        if (! (! method_exists($loanApplication, 'canBeReturned') || ! $loanApplication->canBeReturned())) {
-
+        if (method_exists($loanApplication, 'canBeReturned') && $loanApplication->canBeReturned()) {
             return Response::allow();
         }
+
         // Defensive check in case the method is removed from the model.
         if (! method_exists($loanApplication, 'canBeReturned')) {
             Log::warning(sprintf('LoanTransactionPolicy: LoanApplication model ID %d is missing canBeReturned() method.', $loanApplication->id));

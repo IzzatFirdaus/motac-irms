@@ -35,6 +35,7 @@ return [
     'equipment_under_maintenance'    => 'Under Maintenance',
     'equipment_disposed'             => 'Disposed',
     'equipment_lost'                 => 'Lost',
+    'equipment_damaged'              => 'Damaged',
     'equipment_damaged_needs_repair' => 'Damaged (Needs Repair)',
     'equipment_in_repair'            => 'In Repair',
 
@@ -85,6 +86,13 @@ return [
     // Attendance / Other Statuses
     // =========================================================================
     'status_present'               => 'Present',
+    'status_absent'                => 'Absent',
+    'status_leave'                 => 'On Leave',
+    'status_sick'                  => 'Sick',
+    'status_active'                => 'Active',
+    'status_inactive'              => 'Inactive',
+    'status_suspended'             => 'Suspended',
+    'status_pending'               => 'Pending',
     'status_absent_without_excuse' => 'Absent without Excuse',
     'status_partial_attendance'    => 'Partial Attendance',
 
@@ -100,6 +108,7 @@ return [
     'ticket_awaiting_user_response' => 'Awaiting User Response',
     'ticket_escalated'              => 'Escalated',
     'ticket_overdue'                => 'Overdue',
+    'ticket_pending_user_feedback'  => 'Pending User Feedback',
 
     // =========================================================================
     // Helpdesk Priority Statuses

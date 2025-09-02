@@ -206,11 +206,11 @@ class DepartmentsIndex extends Component
     public function deleteDepartment(): void
     {
         if (! ($this->departmentIdToDelete !== null && $this->departmentIdToDelete !== 0)) {
-
             $this->closeDeleteConfirmationModal();
 
             return;
         }
+
         $department = Department::findOrFail($this->departmentIdToDelete);
         $this->authorize('delete', $department);
 

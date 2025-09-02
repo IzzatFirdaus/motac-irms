@@ -72,7 +72,7 @@ class TicketCommentAddedNotification extends Notification implements ShouldQueue
     /**
      * Get the array representation of the notification.
      *
-     * @return array<string, mixed>
+    * @return array
      */
     public function toArray(object $notifiable): array
     {

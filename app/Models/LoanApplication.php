@@ -339,6 +339,7 @@ class LoanApplication extends Model
         if (! in_array($this->status, [self::STATUS_ISSUED, self::STATUS_PARTIALLY_ISSUED])) {
             return false;
         }
+
         if ($this->loan_end_date && $this->loan_end_date->isPast()) {
             return $this->loanApplicationItems()->where('quantity_issued', '>', DB::raw('IFNULL(quantity_returned, 0)'))->exists();
         }

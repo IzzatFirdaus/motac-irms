@@ -1,7 +1,11 @@
 # Sistem Pengurusan Sumber Terintegrasi MOTAC (IRMS)
+
 ## Senarai & Rajah Gambaran Sistem (SRS)
 
-Dokumen ini membekalkan kod mermaid untuk setiap rajah utama dalam SRS IRMS, merangkumi konteks sistem, hierarki modul, aktor, use case, aliran kerja, data, integrasi, dan pematuhan. Setiap rajah boleh diolah/dimasukkan ke dalam markdown, dokumentasi online, atau alat visual yang menyokong mermaid.
+Dokumen ini membekalkan kod mermaid untuk setiap rajah utama dalam SRS IRMS, merangkumi konteks
+sistem, hierarki modul, aktor, use case, aliran kerja, data, integrasi, dan pematuhan. Setiap rajah
+boleh diolah/dimasukkan ke dalam markdown, dokumentasi online, atau alat visual yang menyokong
+mermaid.
 
 ---
 
@@ -28,6 +32,7 @@ flowchart LR
     IRMS --> Analytics
     IRMS --> HRMS
 ```
+
 _Komen: Gambaran sistem IRMS dan hubungannya dengan aktor serta sistem luaran._
 
 ---
@@ -53,6 +58,7 @@ graph TD
     Helpdesk --> TiketSelesai
     Helpdesk --> TiketTutup
 ```
+
 _Komen: Struktur modul dan submodul utama IRMS._
 
 ---
@@ -76,6 +82,7 @@ flowchart LR
     ITAgent --- Helpdesk
     Admin --- Admin
 ```
+
 _Komen: Senarai aktor dan pemetaan peranan kepada modul._
 
 ---
@@ -95,6 +102,7 @@ usecase
     BPM --> (Terima Pemulangan)
     Pemohon --> (Pemulangan Peralatan)
 ```
+
 _Komen: Use case utama modul pinjaman ICT._
 
 ---
@@ -114,6 +122,7 @@ usecase
     ITAgent --> (Tutup Tiket)
     StafMOTAC --> (Terima Notifikasi)
 ```
+
 _Komen: Use case utama modul helpdesk._
 
 ---
@@ -136,6 +145,7 @@ usecase
     ITAgent --> (Terima Notifikasi Penugasan)
     Admin --> (Jana Laporan Analitik)
 ```
+
 _Komen: Use case notifikasi dan laporan._
 
 ---
@@ -160,6 +170,7 @@ erDiagram
     APPROVALS }|--|| LOAN_APPLICATIONS : "untuk aplikasi"
     APPROVALS }|--|| HELP_DESK_TICKETS : "untuk tiket"
 ```
+
 _Komen: Hubungan entiti utama dan data._
 
 ---
@@ -193,6 +204,7 @@ flowchart LR
     Notif --> Users
     Settings --> Users
 ```
+
 _Komen: Jadual utama dan hubungan (boleh diganti/ditambah jadual detail dalam markdown)._
 
 ---
@@ -212,6 +224,7 @@ flowchart TD
     Penggunaan --> Pemulangan("Pemulangan Peralatan")
     Pemulangan --> Tamat
 ```
+
 _Komen: Proses lengkap modul pinjaman ICT._
 
 ---
@@ -228,6 +241,7 @@ flowchart TD
     Selesaikan --> Penutupan("Penutupan Tiket")
     Penutupan --> Tamat("Tamat Proses")
 ```
+
 _Komen: Aliran proses tiket helpdesk._
 
 ---
@@ -244,6 +258,7 @@ flowchart TD
     SemakPermohonan -->|Tolak| Tolak("Permohonan Ditolak")
     Eskalasi --> SemakPermohonan
 ```
+
 _Komen: Aliran kelulusan berhierarki dan eskalasi._
 
 ---
@@ -265,6 +280,7 @@ flowchart TD
     Pemulangan -->|Rekod| DB
     Pemulangan -->|Notifikasi| Notif
 ```
+
 _Komen: Aliran data utama modul pinjaman ICT._
 
 ---
@@ -284,6 +300,7 @@ flowchart TD
     ITAgent -->|Notifikasi| NotifHelpdesk
     ITAgent -->|Tutup Tiket| DBHelpdesk
 ```
+
 _Komen: Aliran data utama modul helpdesk._
 
 ---
@@ -297,6 +314,7 @@ graph TD
     IRMS --> BI["Reporting/BI Tool"]
     IRMS --> HRMS["HRMS API (Integrasi)"]
 ```
+
 _Komen: Titik integrasi IRMS ke sistem luaran._
 
 ---
@@ -316,6 +334,7 @@ sequenceDiagram
     NotificationService->>EmailServer: Hantar E-mel
     EmailServer->>User: Terima E-mel Notifikasi
 ```
+
 _Komen: Pipeline proses notifikasi dari event hingga pengguna._
 
 ---
@@ -335,6 +354,7 @@ graph TD
     UI --> Tabs["Tab Navigasi"]
     UI --> Pagination["Paginasi"]
 ```
+
 _Komen: Senarai komponen MYDS yang digunakan dalam UI IRMS._
 
 ---
@@ -399,11 +419,13 @@ flowchart LR
     ralat --- pinjaman
     panduan --- admin
 ```
+
 _Komen: Matriks pemetaan prinsip MyGovEA ke modul IRMS._
 
 ---
 
 > **Nota:**  
-> Semua kod mermaid boleh terus dimasukkan ke dalam markdown, GitHub, Notion, atau mana-mana alat dokumentasi yang menyokong diagram berasaskan teks.  
+> Semua kod mermaid boleh terus dimasukkan ke dalam markdown, GitHub, Notion, atau mana-mana alat
+> dokumentasi yang menyokong diagram berasaskan teks.  
 > Rajah perlu dinomborkan dan dirujuk dalam seksyen berkaitan SRS.  
 > Rajah boleh diolah/diperkaya mengikut keperluan semasa fasa design atau pelaksanaan.

@@ -88,6 +88,32 @@ return [
         'button_cancel'          => 'Batal',
         'button_record_issuance' => 'Rekod Pengeluaran',
     ],
+
+    // ==========================================================================
+    // --- BORANG PROSES PEMULANGAN PERALATAN (PARITI) ---
+    // ==========================================================================
+    'return_form' => [
+        'page_title'                  => 'Proses Pemulangan Peralatan #:id',
+        'header'                      => 'Rekod Pemulangan Peralatan',
+        'for_application'             => 'Untuk Permohonan',
+        'related_application_details' => 'Butiran Permohonan Pinjaman Berkaitan',
+        'applicant'                   => 'Pemohon',
+        'returner'                    => 'Peralatan Dipulangkan Oleh',
+        'return_receiver'             => 'Pemulangan Diterima Oleh (Pegawai BPM)',
+        'loan_date'                   => 'Tarikh Pinjaman',
+        'actual_return_datetime'      => 'Tarikh & Masa Sebenar Pemulangan',
+        'equipment_items'             => 'Item Peralatan Dipulangkan',
+        'equipment_type'              => 'Jenis Peralatan',
+        'tag_id'                      => 'Tag ID',
+        'accessories_returned'        => 'Aksesori Dipulangkan',
+        'findings_on_return'          => 'Penemuan Semasa Pemulangan',
+        'accessories_checklist'       => 'Senarai Semak Aksesori',
+        'no_accessories_configured'   => 'Tiada senarai aksesori dikonfigurasi.',
+        'return_notes'                => 'Catatan Pemulangan (Jika Ada)',
+        'placeholder_return_notes'    => 'cth: Terdapat calar kecil pada badan peralatan.',
+        'button_cancel'               => 'Batal',
+        'button_record_return'        => 'Rekod Pemulangan',
+    ],
 ];
 
 // Penjelasan:

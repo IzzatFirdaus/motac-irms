@@ -154,6 +154,7 @@ class Setting extends Model
 
                 return false;
             }
+
             $settings->{$key} = $value;
             $saved            = $settings->save();
             DB::commit();
@@ -183,11 +184,13 @@ class Setting extends Model
 
             return false;
         }
+
         if (! in_array($key, $settings->getFillable()) && ! Schema::hasColumn($settings->getTable(), $key)) {
             Log::warning('Attempted to forget unknown or non-fillable/non-column setting key: '.$key);
 
             return false;
         }
+
         $settings->{$key} = null;
         $saved            = $settings->save();
         if ($saved) {

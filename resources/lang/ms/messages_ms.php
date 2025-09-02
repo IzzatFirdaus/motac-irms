@@ -138,6 +138,13 @@ return [
     'info'               => 'Makluman',         // Tajuk alert/banner info
     'close'              => 'Tutup',            // Butang tutup alert/banner
 
+    // === Tindakan Notifikasi ===
+    'notification_marked_read'          => 'Notifikasi telah ditanda sebagai dibaca.',
+    'notification_already_read'         => 'Notifikasi ini telahpun dibaca.',
+    'notification_none_to_mark'         => 'Tiada notifikasi baru untuk ditanda sebagai dibaca.',
+    'notification_all_marked_read'      => 'Semua notifikasi telah ditanda sebagai dibaca.',
+    'notification_no_permission_modify' => 'Anda tidak mempunyai kebenaran untuk mengubah notifikasi ini.',
+
     // === Email Notification Specific (untuk templat email) ===
     // Common ticket/email notification words
     'notification_see_ticket'                     => 'Lihat Butiran Tiket',

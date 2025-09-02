@@ -108,7 +108,6 @@ class ApprovalDashboard extends Component
 
         // Search filter (searches applicant name/email for loan applications)
         if (! ($this->searchTerm !== '' && $this->searchTerm !== '0')) {
-
             // Order: latest pending first
             $query->orderByRaw("CASE
             WHEN status = '".Approval::STATUS_PENDING."' THEN 1
@@ -128,6 +127,7 @@ class ApprovalDashboard extends Component
 
             return $tasks;
         }
+
         $searchTermLower = strtolower($this->searchTerm);
         $query->where(function ($q) use ($searchTermLower): void {
             $q->whereHasMorph('approvable', [LoanApplication::class], function ($morphQuery) use ($searchTermLower): void {
@@ -301,9 +301,9 @@ class ApprovalDashboard extends Component
         ];
 
         if (! ($this->approvalDecision === Approval::STATUS_APPROVED && $this->currentApprovalTask?->approvable instanceof LoanApplication)) {
-
             return $messages;
         }
+
         foreach ($this->approvalItems as $index => $item) {
             $itemTypeDisplay                                                 = $item['equipment_name'] ?? 'Item';
             $maxQty                                                          = $item['requested_quantity'];
@@ -335,18 +335,16 @@ class ApprovalDashboard extends Component
         }
 
         if (! ($routeName && Route::has($routeName))) {
-
             return null;
         }
+
         try {
             return route($routeName, $routeParams);
-        } catch (\Exception $e) {
-            Log::error('Error generating getViewApplicationRoute: '.$e->getMessage(), ['routeName' => $routeName, 'params' => $routeParams]);
+        } catch (\Exception $exception) {
+            Log::error('Error generating getViewApplicationRoute: '.$exception->getMessage(), ['routeName' => $routeName, 'params' => $routeParams]);
 
             return null;
         }
-
-        return null;
     }
 
     /**

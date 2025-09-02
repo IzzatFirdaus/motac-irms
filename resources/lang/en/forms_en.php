@@ -18,6 +18,9 @@ return [
     'button_back'                => 'Back',
     'button_next'                => 'Next',
     'button_print'               => 'Print',
+    'text_terms_and_conditions'  => 'Terms and Conditions',
+    'text_i_agree_to_terms'      => 'I agree to the terms and conditions',
+    'text_application_id'        => 'Application ID:',
 
     // --- Shared Applicant/Officer Info Labels ---
     'label_full_name'            => 'Full Name & Title',
@@ -41,7 +44,7 @@ return [
     'bpm_office_display'              => 'Information Management Division',
     'date_application_received_label' => 'DATE COMPLETE APPLICATION FORM RECEIVED',
     'text_form_ref_no'                => 'Form Reference No: PK.(S).MOTAC.07.(L3)',
-    'text_application_id'             => 'Application ID:',
+    // 'text_application_id' is defined above in shared labels
 
     // PART 1 - Applicant Information
     'section_applicant_info_ict'     => 'PART 1 | APPLICANT INFORMATION',
@@ -58,6 +61,12 @@ return [
     'label_responsible_officer_name'               => 'Full Name of Responsible Officer',
     'placeholder_select_responsible_officer'       => 'Select Responsible Officer',
     'checkbox_applicant_is_responsible'            => 'Applicant is the Responsible Officer',
+    'email_app_create_title'                       => 'MOTAC Email/User ID Application',
+    'email_app_edit_title'                         => 'Edit MOTAC Email/User ID Application',
+    'label_application_purpose_notes'              => 'Purpose/Notes:',
+    'checkbox_info_is_true'                        => 'All information provided in this application is true.',
+    'checkbox_data_usage_agreed'                   => 'I agree for Information Management Division to use the information provided to process my application.',
+    'checkbox_email_responsibility_agreed'         => 'I accept responsibility for all emails sent/received via my official email account.',
 
     // PART 3 - Equipment Information
     'section_equipment_details_ict' => 'PART 3 | EQUIPMENT INFORMATION',
@@ -111,6 +120,40 @@ return [
     'checkbox_remote'            => 'Remote',
     'checkbox_others_specify'    => 'Others. Specify:',
 
+    // === Email/User ID Application (aliases used in code) ===
+    'section_applicant_info_email'             => 'Applicant Information',
+    'section_application_details'              => 'Application Details',
+    'section_group_email_info'                 => 'Group Email Information',
+    'section_supporting_officer_info'          => 'Supporting Officer Information',
+    'section_applicant_declaration_email'      => 'Applicant Declaration',
+    'text_applicant_declaration_lead_in_email' => 'I hereby declare the following:',
+    'text_profile_info_note'                   => 'Ensure your profile information is up to date before submitting.',
+    'text_supporter_instruction'               => 'Please select a supporting officer of at least Grade 41 and above.',
+    'text_all_certifications_required'         => 'All required certifications must be provided.',
+    'text_contact_person_email_help'           => 'Use your official MOTAC email if available.',
+    'text_proposed_email_help'                 => 'Proposed email must follow MOTAC naming policy.',
+
+    // Labels for email app
+    'label_service_status'       => 'Service Status:*',
+    'label_appointment_type'     => 'Appointment:*',
+    'label_contact_person_email' => 'Admin/EO/Contact Person Email:',
+    'label_contact_person_name'  => 'Admin/EO/Contact Person Name:',
+    'label_group_email_name'     => 'Group Email Name:',
+    'label_previous_department'  => 'Previous Department',
+    'label_previous_email'       => 'Previous Official Email',
+    'label_proposed_email'       => 'Proposed Email ID',
+    'label_supporter_full_name'  => 'Supporting Officer Name',
+    'label_supporter_email'      => 'Email',
+    'label_supporter_grade'      => 'Grade',
+    'label_service_start_date'   => 'Service Start Date',
+    'label_service_end_date'     => 'Service End Date',
+
+    // Placeholders
+    'placeholder_application_purpose' => 'e.g. Official event support, presentation, etc.',
+    'placeholder_proposed_email'      => 'e.g. firstname.lastname@motac.gov.my',
+    'placeholder_supporter_email'     => 'e.g. officer@motac.gov.my',
+    'placeholder_supporter_name'      => 'e.g. Nur Faridah Jasni',
+
     // ==============================================================================
     // --- HELPDESK MODULE LABELS ---
     // ==============================================================================
@@ -152,6 +195,18 @@ return [
     'helpdesk_placeholder_search_tickets'   => 'Search by Ticket ID, title, applicant...',
     'helpdesk_text_no_tickets_found'        => 'No helpdesk tickets found.',
     'helpdesk_text_file_upload_limit'       => 'Max file size: 2MB. Allowed types: JPG, PNG, PDF, DOCX, TXT, XLSX.',
+
+    // === Validation messages surfaced by audit ===
+    'validation_applicant_confirmation'       => 'Applicant confirmation is required.',
+    'validation_equipment_type_required'      => 'Equipment type is required.',
+    'validation_loan_end_date_after'          => 'The loan end date must be after the start date.',
+    'validation_loan_start_date_after'        => 'The loan start date must be today or later.',
+    'validation_phone_format'                 => 'Please enter a valid phone number format.',
+    'validation_purpose_required'             => 'Purpose of application is required.',
+    'validation_quantity_required'            => 'Quantity is required.',
+    'validation_responsible_officer_required' => 'Responsible officer is required.',
+    'validation_return_location_different'    => 'Return location must be different from usage location.',
+    'validation_supporting_officer_required'  => 'Supporting officer is required.',
 
     // ==============================================================================
     // --- DROPDOWN OPTIONS ---
@@ -697,6 +752,11 @@ return [
     'text_supporter_grade_requirement'      => 'The supporter must be at least Grade :grade or higher.',
     'text_document_no'                      => 'Document No:',
     'text_effective_date'                   => 'Effective Date:',
-    'text_terms_and_conditions'             => 'Terms and Conditions',
-    'text_i_agree_to_terms'                 => 'I agree to the terms and conditions',
+    // duplicates removed: text_terms_and_conditions, text_i_agree_to_terms already defined above
+
+    // --- Common toast/messages used by forms flows ---
+    'application_submitted_successfully' => 'Application submitted successfully.',
+    'draft_saved_successfully'           => 'Draft saved successfully.',
+    'error_submitting_application'       => 'There was an error submitting the application.',
+    'error_saving_draft'                 => 'There was an error saving the draft.',
 ];
