@@ -1,0 +1,1152 @@
+(Peranti ini)
+(Rujuk dokumentasi untuk struktur fail)
+(Wajib jika ditolak)
+* WAJIB diisi
+- Pilih Gred -
+- Sila Pilih -
+- Sila Pilih Gred -
+- Sila Pilih Pegawai -
+- Tiada (Tidak Tertakluk pada Kelulusan Gred Lain) -
+-- Pilih Jenis Cawangan --
+-- Pilih Kategori Induk --
+-- Pilih Pengguna Berdaftar --
+-- Sila Pilih Jenis Cawangan --
+-- Tiada Ketua Jabatan Dipilih --
+401 - Tidak Dibenarkan
+403 - Akses Dihalang
+404 - Halaman Tidak Ditemui
+419 - Sesi Telah Tamat
+422 - Tidak Dapat Diproses
+429 - Terlalu Banyak Permintaan
+500 - Ralat Pelayan Dalaman
+503 - Laman Dalam Selenggaraan
+Adakah anda pasti ingin memadam
+Adakah anda pasti ingin memadam Jabatan
+Adakah anda pasti ingin memadam jawatan
+Adakah anda pasti ingin memadam kebenaran
+Adakah anda pasti ingin memadam peralatan
+Adakah anda pasti ingin memadam peranan
+Adakah anda pasti ingin memadam token API ini?
+Adakah anda pasti ingin meneruskan tindakan ini?
+Adakah anda pasti untuk memadam draf permohonan ini?
+Adakah anda pasti untuk menghantar permohonan ini?
+Adakah ini gred pelulus?
+Add Comment
+Akaun E-mel MOTAC
+Akses Dihalang!
+Akses Tidak Sah!
+Aksesori Dikeluarkan
+Aksesori Dikeluarkan (Tandakan yang berkaitan)
+Aksesori Dikeluarkan:
+Aksesori Dipulangkan Bersama Item Ini
+Aksesori yang Dipulangkan
+Aktif terakhir
+Aktifkan 2FA
+Alamat E-mel
+Alamat E-mel (Login)
+Alamat Group E-mel Dicadang
+Alamat Group E-mel Dicadangkan
+Alamat e-mel anda:
+All Categories
+All Priorities
+All Staff
+All Statuses
+Amaran! Sila semak ralat input berikut:
+Ambil Tindakan
+Anda Pasti Ingin Memadam Gred Ini?
+Anda akan memadam gred:
+Anda boleh menerima jemputan ini dengan menekan butang di bawah:
+Anda pasti ingin membuang draf permohonan ini?
+Are you sure you want to delete this item?
+Asal dikeluarkan: 
+Aset Ditetapkan / Pinjaman ICT
+Assigned To
+Attachments (optional)
+Average Resolution Time (by Category)
+Average Resolution Time by Category
+BAHAGIAN 1 | MAKLUMAT PEMOHON
+BAHAGIAN 2 | MAKLUMAT PEGAWAI BERTANGGUNGJAWAB
+BAHAGIAN 3 | MAKLUMAT PERALATAN DIMOHON
+BAHAGIAN 4 | PENGESAHAN PEMOHON
+BERSETUJU bertanggungjawab atas penggunaan e-mel
+BERSETUJU maklumat diguna pakai untuk pemprosesan
+BUTIRAN PERMOHONAN
+Bahagian Pemilik
+Bahagian Pengurusan Maklumat
+Bahagian Pengurusan Maklumat (BPM)
+Baki boleh dikeluarkan untuk item ini
+Batal Permohonan
+Belum Dibaca
+Belum Diperakui
+Berjaya Disediakan & Dimaklumkan
+Boleh Melulus?
+Borang Maklumat Pengguna
+Borang Maklumat Pengguna Baru
+Borang Permohonan Pinjaman ICT
+Borang Permohonan Pinjaman Peralatan ICT
+Buang Draf
+Buang Foto
+Buang Item Baris Ini
+Buat Permohonan Baru
+Buat Tiket Bantuan
+Buat Tiket Baru
+Buat Tiket Helpdesk Baru
+Buka Tiket Bantuan Baru
+Butang Besar
+Butiran Akaun yang Ditetapkan
+Butiran Asas Peralatan
+Butiran Gred
+Butiran Group E-mel
+Butiran Group E-mel (Jika Berkenaan)
+Butiran Group E-mel:
+Butiran Jabatan/Unit
+Butiran Jawatan
+Butiran Pengguna
+Butiran Peralatan
+Butiran Peralatan ICT
+Butiran Peralatan ICT #
+Butiran Peralatan yang Dikeluarkan
+Butiran Permohonan
+Butiran Permohonan & Transaksi Pengeluaran Asal
+Butiran Permohonan Akaun
+Butiran Permohonan Akaun E-mel / ID Pengguna
+Butiran Permohonan Asal
+Butiran Permohonan E-mel #
+Butiran Permohonan E-mel ICT
+Butiran Permohonan E-mel/ID
+Butiran Permohonan Emel/ID
+Butiran Permohonan Pinjaman
+Butiran Pinjaman
+Butiran Pulangan Peralatan
+Butiran Tambahan Pengguna (MOTAC)
+Butiran Tiket Bantuan
+Butiran Tiket Meja Bantuan
+Butiran Transaksi Pinjaman
+Butiran Tugasan Kelulusan
+Butiran tidak tersedia
+Cadangan E-mel
+Cadangan E-mel (Jika Ada)
+Cadangan E-mel / ID Pemohon
+Cadangan E-mel / ID Pengguna
+Cadangan E-mel Rasmi
+Cadangan E-mel Rasmi (Jika mohon E-mel Individu)
+Cadangan E-mel/ID
+Cadangan ID E-mel / Tujuan / Catatan
+Cadangan ID E-mel / Tujuan / Catatan Tambahan
+Cari Tag/Siri/Jenama/Model/Kod Item
+Carian (ID, Nama, Tujuan)
+Carian (ID, Tujuan)
+Carian (ID, Tujuan, Lokasi)
+Carian (Nama Pengguna, Emel)
+Carian (Nama, Emel)
+Carian (Nama, Tujuan, Tag)
+Carian (Tag, Jenama, Model)
+Carian (Tag, Jenama, Model, Siri)
+Carian Jabatan
+Carian Jawatan
+Carian Nama Gred atau Tahap
+Carian Notifikasi
+Carian Umum
+Carian dan Saringan
+Carian dan Saringan Peralatan
+Catatan IT Admin
+Catatan Isu
+Catatan Keseluruhan Pemulangan
+Catatan Keseluruhan Transaksi Pemulangan
+Catatan Khas untuk Item Ini
+Catatan Pegawai
+Catatan Pegawai:
+Catatan Pengeluaran
+Catatan Penyelesaian
+Catatan Pulangan
+Catatan Pulangan (cth: kerosakan, item hilang)
+Catatan Tambahan
+Change Status
+Cipta Akaun
+Cipta Jawatan Baru
+Cipta Kebenaran
+Cipta Pengguna
+Cipta Peranan
+Cipta Token API
+Cipta akaun di sini
+Confirm Deletion
+Corak Latar Belakang Hiasan
+Create Helpdesk Ticket
+Created At
+Created at:
+Cth: 
+Cth: 0123456789
+Cth: 19, 41, 54
+Cth: 41, 19, 54 (untuk perbandingan)
+Cth: 800101010001
+Cth: 900101010001
+Cth: A12345678
+Cth: Bahagian Kewangan
+Cth: Bilik Server, Aras 10, Blok D
+Cth: Dell, HP, Acer
+Cth: Encik
+Cth: Encik Ahmad Bin Abu
+Cth: Jabatan Teknologi Maklumat
+Cth: KEW, ICT
+Cth: Komputer & Laptop
+Cth: Latitude 5400, ProBook 440 G9
+Cth: MOTAC/ICT/LPT/2024/001
+Cth: MOTAC/LPT/001
+Cth: N41, 41, JUSA C
+Cth: PTM, PTPO
+Cth: Pegawai Teknologi Maklumat
+Cth: Projektor LCD Mudah Alih, Laptop Kegunaan Am
+Cth: Spesifikasi ringkas, warna, atau sebarang maklumat berkaitan
+Cth: Token Servis Saya
+Cth: view_reports, manage_users
+Cuba Sekali Lagi
+Daftar Akaun
+Daftar Akaun Baru
+Daftar Akaun E-mel / ID Pengguna (Pentadbir IT)
+Daftar Akaun E-mel / ID Pengguna Secara Terus
+Daftar Akaun Ini
+Dasar Privasi
+Data Tidak Sah / Tidak Dapat Diproses
+Data has been saved successfully!
+Deskripsi (Pilihan)
+Dibatalkan Pada:
+Dicipta Oleh
+Dicipta Oleh:
+Dicipta Pada
+Dicipta Pada:
+Dihantar Pada
+Dihantar oleh
+Dikeluarkan Oleh:
+Dikeluarkan Pada:
+Dikeluarkan kepada
+Dikemaskini Oleh
+Dikemaskini Pada
+Dikemaskini Terakhir Oleh
+Dikemaskini terakhir
+Diluluskan Pada:
+Dimajukan Kepada:
+Dimajukan Pada:
+Dipinjam Oleh
+Diproses Oleh (Pentadbir IT)
+Diproses Oleh:
+Disahkan pada
+Diterima Oleh
+Diterima Oleh (Pegawai BPM)
+Ditolak Pada:
+Ditugaskan kepada
+Dukacita dimaklumkan bahawa permohonan anda telah
+E-mel (Login):
+E-mel / ID Pengguna
+E-mel Admin/EO/CC
+E-mel Admin/EO/CC Group
+E-mel Jabatan Terdahulu
+E-mel Jabatan Terdahulu (Jika Berkaitan)
+E-mel MOTAC
+E-mel Pegawai Dihubungi (Rasmi MOTAC)
+E-mel Pegawai Penyokong (Manual)
+E-mel Pentadbir Group (EO/CC)
+E-mel Peribadi
+E-mel Peribadi (Login)
+E-mel Peribadi (Untuk Log Masuk)
+E-mel Peribadi (Untuk Notifikasi Alternatif)
+E-mel Rasmi Admin/EO/CC Group
+E-mel Rasmi Ditetapkan
+E-mel Rasmi Jabatan Terdahulu
+E-mel Rasmi MOTAC
+E-mel Rasmi MOTAC (Jika Ada)
+E-mel Rasmi MOTAC Disediakan
+E-mel Rasmi MOTAC yang akan Didaftarkan
+E-mel Utama (Login)
+E-mel untuk log masuk sistem
+Edit Draf
+Edit Pengguna
+Edit Pengguna (Admin)
+Edit Peralatan (Pentadbir)
+Edit Peralatan ICT #
+Edit Permohonan
+Edit Permohonan E-mel ICT
+Edit Profil Saya
+Edit User
+Eksport Data
+Email Address
+Emel (Untuk Login)
+Emel Login
+Emel MOTAC
+Emel Peribadi
+Emel Rasmi MOTAC
+Emel Utama
+End Date
+Export PDF
+Export to PDF
+Foto Profil
+Full Name
+Fungsi Ini Sedang Dibangunkan
+Fungsi penukaran pasukan tidak aktif
+Gagal Disediakan
+Gagal Penyediaan
+Gelaran (Cth: Encik, Puan)
+Go Back
+Gred (Pilihan)
+Gred Berdaftar
+Gred Berkaitan
+Gred Berkaitan (Jika Ada)
+Gred Ini Mempunyai Kuasa Melulus?
+Gred Jawatan:
+Gred Minimum Untuk Meluluskan
+Gred Minimum Untuk Meluluskan Gred Ini (Jika Ada)
+Gred Pegawai Penyokong (Manual)
+Gred Pelulus?
+Gred T/D
+Gred Tidak Diketahui
+Group Email
+Guna kod pemulihan
+Guna kod pengesahan
+Gunakan format snake_case (cth: create_loan_applications)
+Hak Cipta
+Halaman Tidak Ditemui
+Halaman Tidak Ditemui!
+Halaman Utama
+Hantar & Proses
+Hantar Keputusan
+Hantar Pautan Tetapan Semula
+Hantar Permohonan
+Hantar Semula E-mel Pengesahan
+Hantar untuk Kelulusan
+Hapus Akaun Ini
+Hapus Akaun Pengguna
+Helpdesk Reports
+Helpdesk Ticket Management
+Helpdesk Tickets
+Hubungi ICT
+ID Aset / Pinjaman
+ID Kakitangan
+ID Kelulusan
+ID Network/AD jika ada
+ID Pengguna
+ID Pengguna / Network ID (Jika Ada)
+ID Pengguna Ditetapkan
+ID Pengguna Rangkaian
+ID Pengguna Rangkaian (Jika Ada)
+ID Pengguna Sistem
+ID Pengguna Sistem Disediakan (Jika Ada)
+ID Permohonan
+ID Transaksi
+ID Transaksi Pengeluaran:
+ID Tugasan
+ID Tugasan Kelulusan:
+Ilustrasi - Sedang Dibangunkan
+Ilustrasi Akses Dihalang
+Ilustrasi Akses Tidak Dibenarkan
+Ilustrasi Data Tidak Sah
+Ilustrasi Had Permintaan
+Ilustrasi Halaman Tidak Ditemui
+Ilustrasi Laman Dalam Selenggaraan
+Ilustrasi Pengesahan Dua Faktor MOTAC
+Ilustrasi Ralat Server
+Ilustrasi Sahkan Kata Laluan MOTAC
+Ilustrasi Sesi Tamat
+Ilustrasi Tetapan Semula Kata Laluan MOTAC
+Imej Pengguna
+Import Fail
+In Progress
+Informasi Kategori
+Ingat Saya
+Ini adalah permohonan untuk Group E-mel?
+Internal Note (Visible to IT Admin Only)
+Inventori Peralatan
+Item Baris
+Item Diluluskan
+Item Diluluskan (Kuantiti)
+Item Dimohon
+Item Dimohon:
+Item Peralatan untuk Dipulangkan
+Item Tidak Dikenali
+Item ke-
+Jabatan - Struktur Organisasi
+Jabatan Pemilik
+Jabatan Pemilik (Jika ada)
+Jabatan Pemohon
+Jabatan Terdahulu
+Jabatan Terdahulu (Jika Berkaitan)
+Jabatan Terdahulu (Jika Pertukaran)
+Jadikan Jabatan Ini Aktif
+Jadikan Jawatan Ini Aktif
+Jadikan Subkategori Ini Aktif
+Jana Laporan Sistem
+Jana Semula Kod Pemulihan
+Jawatan & Gred
+Jawatan & Gred:
+Jawatan - Struktur Organisasi
+Jawatan Aktif
+Jawatan Berdaftar
+Jawatan Tidak Dinyatakan
+Jemputan Menyertai Pasukan
+Jenama & Model
+Jenis & Model
+Jenis Aset
+Jenis Cawangan
+Jenis Cawangan:
+Jenis Cuti
+Jenis Lantikan
+Jenis Pelantikan
+Jenis Pelantikan (Semasa Permohonan)
+Jenis Peralatan
+Jenis Permohonan
+Jenis Permohonan:
+Jenis Transaksi
+Jika anda sudah mempunyai akaun, anda boleh menerima jemputan ini dengan menekan butang di bawah:
+Jumlah Anggota
+Jumlah Diluluskan:
+Jumlah Ditolak:
+Jumlah Kelulusan
+Jumlah Permohonan
+Kandungan Utama
+Kata Laluan
+Kata Laluan Awal (Pilihan)
+Kata Laluan Baru
+Kata Laluan Baru (Biarkan kosong jika tidak mahu tukar)
+Kata Laluan Semasa
+Kategori / Jenis
+Kategori Baharu
+Kategori Induk Peralatan
+Kategori Peralatan
+Ke Papan Pemuka
+Keadaan Fizikal
+Keadaan Fizikal Awal
+Keadaan Semasa Pulangan
+Kebenaran (boleh pilih lebih dari satu)
+Kebenaran Token API
+Kelulusan Perlu Tindakan
+Kemaskini Butiran Akaun
+Kemaskini Draf
+Kemaskini Gred
+Kemaskini Jabatan
+Kemaskini Jabatan/Unit
+Kemaskini Jabatan/Unit: 
+Kemaskini Jawatan
+Kemaskini Kata Laluan
+Kemaskini Kategori
+Kemaskini Kebenaran
+Kemaskini Oleh Pentadbir
+Kemaskini Pengguna
+Kemaskini Peralatan
+Kemaskini Peralatan ICT
+Kemaskini Peranan
+Kemaskini Permohonan
+Kemaskini Permohonan (Admin)
+Kemaskini Permohonan E-mel / ID Pengguna
+Kemaskini Permohonan Pinjaman
+Kemaskini Permohonan Pinjaman ICT
+Kemaskini Rekod Cuti
+Kemaskini Subkategori
+Kemaskini Terakhir
+Kemaskini Tiket Bantuan
+Kembali ke Butiran Permohonan
+Kembali ke Butiran Tiket
+Kembali ke Halaman Utama
+Kembali ke Laman Utama
+Kembali ke Log Masuk
+Kembali ke Papan Pemuka
+Kembali ke Senarai
+Kembali ke Senarai Awam
+Kembali ke Senarai Gred
+Kembali ke Senarai Jabatan/Unit
+Kembali ke Senarai Jawatan
+Kembali ke Senarai Laporan
+Kembali ke Senarai Pengguna
+Kembali ke Senarai Peralatan Pentadbir
+Kembali ke Senarai Permohonan
+Kembali ke Senarai Tiket
+Kembali ke Senarai Tugasan
+Kementerian Pelancongan, Seni dan Budaya Malaysia
+Kementerian Pelancongan, Seni dan Budaya Malaysia (MOTAC)
+Keputusan Anda
+Keterangan (Pilihan)
+Keterangan Tambahan
+Keterangan tambahan mengenai gred ini
+Keterangan tambahan mengenai jawatan ini
+Ketua Jabatan
+Ketua Jabatan (Pilihan)
+Ketua Jabatan/Unit
+Ketua Jabatan/Unit (Jika Ada)
+Ketua Jabatan/Unit:
+Kod Item
+Kod Jabatan
+Kod Jabatan/Unit
+Kod Jabatan/Unit:
+Kod Jawatan
+Kod Jawatan (Jika Ada)
+Kod Pemulihan
+Kod Pengesahan
+Kod Pengesahan (OTP)
+Kuantiti Dikeluarkan Kali Ini
+Kuantiti Dipulangkan
+Kunci Persediaan (Setup Key)
+LEWAT DIPULANGKAN
+Laman Dalam Selenggaraan
+Laman Utama
+Langkau ke Kandungan Utama
+Laporan Aktiviti Pengguna
+Laporan Inventori Peralatan ICT
+Laporan Permohonan Pinjaman
+Laporan Permohonan Pinjaman Peralatan ICT
+Laporan Sejarah Pinjaman
+Laporan Sistem Yang Tersedia
+Laporan Tiket Helpdesk
+Laporan Tiket Meja Bantuan
+Last updated: Today
+Lihat & Ambil Tindakan
+Lihat Butiran
+Lihat Butiran Kelulusan
+Lihat Butiran Permohonan
+Lihat Butiran Transaksi
+Lihat Detail Permohonan
+Lihat Detail Transaksi Keluar
+Lihat Laporan
+Lihat Peralatan
+Lihat Permohonan
+Lihat Permohonan Asal
+Lihat Permohonan Penuh
+Lihat Profil
+Lihat Profil Pemohon
+Lihat Sahaja
+Lihat Sejarah Kelulusan
+Lihat Semua Permohonan
+Lihat Status Permohonan
+Lihat Tiket Saya
+Lihat Transaksi
+Lihat Tugasan Kelulusan
+Log Keluar
+Log Keluar Sesi Lain
+Log Keluar Sesi Pelayar Imbas Lain
+Log Keluar Sesi Pelayar Lain
+Log Masuk
+Log Masuk Semula
+Log Masuk Sistem
+Log Masuk ke Sistem
+Log masuk di sini
+Logo Aplikasi
+Logo Kementerian MOTAC
+Logo Kementerian Pelancongan, Seni dan Budaya Malaysia
+Logo MOTAC
+Logo MOTAC IRMS
+Lokasi Fizikal
+Lokasi Pemulangan
+Lokasi Penggunaan
+Lokasi Penggunaan:
+Lokasi Semasa
+Lokasi Semasa (Stor/Unit)
+Lokasi Simpanan
+Lupa Kata Laluan
+Lupa Kata Laluan?
+MAKLUMAT PEGAWAI PENYOKONG
+MAKLUMAT PEMOHON
+MAKLUMAT PEMOHON (Akan diambil dari data pengguna jika log masuk)
+MAKLUMAT PENGGUNA
+MAKLUMAT PENYEDIAAN AKAUN
+MOTAC IRMS
+Majukan Kepada
+Maklumat Akaun
+Maklumat Akaun Disediakan
+Maklumat Akaun E-mel Anda:
+Maklumat Am Peralatan
+Maklumat Asas Pengguna
+Maklumat Asas Peralatan
+Maklumat Gred
+Maklumat Group E-mel
+Maklumat Group E-mel / E-mel Agensi Luar
+Maklumat Jawatan
+Maklumat Kakitangan
+Maklumat Kelulusan
+Maklumat Pegawai Penyokong
+Maklumat Pegawai Penyokong (Semasa Permohonan Dihantar)
+Maklumat Pemohon
+Maklumat Pengguna
+Maklumat Peralatan Tidak Sah
+Maklumat Peribadi
+Maklumat Peribadi & Perkhidmatan
+Maklumat Perkhidmatan
+Maklumat Permohonan Group E-mel:
+Maklumat Permohonan Pinjaman
+Maklumat Pinjaman Aktif (Jika Ada)
+Maklumat Profil
+Maklumat Tambahan
+Maklumat Terperinci Permohonan
+Maklumat tidak tersedia
+Mark all as read
+Masa Akhir
+Masa Mula
+Masukkan kata laluan
+Masukkan kata laluan baru
+Masukkan kata laluan semasa anda
+Masukkan keterangan jawatan
+Masukkan kod jawatan (jika ada)
+Masukkan nama jawatan
+Masukkan nama jawatan, cth: Pegawai Teknologi Maklumat
+Masukkan nama penuh
+Masukkan nama penuh anda
+Masukkan nama unik untuk gred
+Masukkan nombor siri unik peralatan
+Medan Wajib
+Merujuk kepada permohonan Akaun E-mel / ID Pengguna ICT MOTAC anda dengan nombor rujukan
+Merujuk kepada permohonan Pinjaman Peralatan ICT anda dengan nombor rujukan
+Merupakan Gred Pelulus?
+Minimum 8 aksara
+Mohon Pinjaman Baru
+Mohon Pinjaman Peralatan ICT
+Muat Semula
+Mula Khidmat
+My Helpdesk Tickets
+Nama Admin/EO/CC
+Nama Admin/EO/CC Group
+Nama Gred
+Nama Gred (Cth: N19, 41, JUSA C)
+Nama Group E-mel / E-mel Rasmi Agensi
+Nama Group E-mel Dicadang
+Nama Group Email
+Nama Jabatan
+Nama Jabatan Terdahulu (Jika Berkaitan)
+Nama Jabatan/Unit
+Nama Jawatan
+Nama Kategori
+Nama Kebenaran
+Nama Paparan
+Nama Paparan Pengguna
+Nama Paparan Sistem
+Nama Pegawai Dihubungi (Admin/EO/CC)
+Nama Pegawai Penyokong (Manual)
+Nama Pelindung
+Nama Pengguna
+Nama Pengguna (Login):
+Nama Pentadbir Group (EO/CC)
+Nama Penuh
+Nama Penuh (Seperti IC/Passport)
+Nama Penuh (seperti dalam IC/Passport)
+Nama Penuh Pegawai Bertanggungjawab
+Nama Penuh Pegawai Penyokong
+Nama Penuh:
+Nama Peranan
+Nama Subkategori
+Nama Token
+Nama penuh rasmi
+Nama untuk paparan sistem
+Nama yang akan dipaparkan dalam sistem
+New Notification
+Nombor Siri
+Nota / Justifikasi Pentadbir
+Nota Keseluruhan Pengeluaran (Pilihan)
+Nota Pentadbir IT (Jika Ada)
+Nota Tambahan
+Nota untuk Item Baris Ini (Pilihan)
+Notifikasi Baru
+Notifikasi MOTAC IRMS
+Notifikasi Pengeluaran Peralatan Pinjaman ICT
+Notifikasi Permohonan Akaun E-mel ICT
+Notifikasi Permohonan Pinjaman Peralatan ICT
+Notifikasi Pulangan Peralatan Pinjaman ICT
+Notifikasi baharu
+Nyahaktifkan 2FA
+On Hold
+Operation completed successfully!
+PENGURUSAN SUMBER ICT
+PERAKUAN PEMOHON
+PERHATIAN: Peralatan Lewat Dipulangkan
+PERMOHONAN SAYA
+Padam Draf
+Padam Gred
+Padam Jawatan
+Padam Pengguna
+Padam Pengguna (Admin)
+Padam Peralatan
+Padam Token API
+Padam tiket ini?
+Panduan Kelulusan
+Papan Pemuka
+Papan Pemuka Kelulusan
+Papan Pemuka Pegawai Pelulus
+Papan Pemuka Sistem Pengurusan Sumber Bersepadu MOTAC
+Pasukan Pentadbir Sistem
+Pautan Pantas
+Pautan Pantas ke Perkhidmatan
+Pautan Penting
+Pegawai Bertanggungjawab
+Pegawai Bertindak
+Pegawai Penerima (Pengguna/Wakil)
+Pegawai Pengeluar
+Pelarasan Kuantiti Kelulusan
+Pemeriksaan Item Semasa Pemulangan
+Pemohon Tidak Dikenali
+Pemohon telah memperakui semua syarat pada:
+Pemulangan Diterima Oleh (Pegawai BPM):
+Penapisan & Carian
+Penapisan & Carian Permohonan
+Pending Admin
+Pending Sokongan
+Pending User Feedback
+Penerangan (Pilihan)
+Pengaki Laman
+Pengeluaran Peralatan
+Pengesahan Dua Faktor
+Pengesahan Dua Faktor (2FA)
+Pengguna & Capaian
+Pengguna Berdaftar
+Pengguna Biasa
+Pengguna Sistem
+Pengguna baru?
+Pengurusan Gred Jawatan
+Pengurusan Jabatan
+Pengurusan Jawatan
+Pengurusan Kebenaran Sistem
+Pengurusan Pengguna Sistem
+Pengurusan Peralatan ICT
+Pengurusan Peranan & Kebenaran
+Pengurusan Peranan Pengguna
+Pengurusan Tiket
+Pengurusan Token API
+Perakuan Pemohon
+Peralatan & Pinjaman
+Peralatan (Tag ID)
+Peralatan Aktif Dipinjam
+Peralatan Dikeluarkan
+Peralatan Dikeluarkan:
+Peralatan Diluluskan:
+Peralatan Dipulangkan Oleh
+Peralatan Dipulangkan Oleh (Pemohon/Wakil)
+Peralatan Pinjaman ICT Telah Dikeluarkan
+Peralatan Pinjaman ICT Telah Dipulangkan
+Peralatan Pinjaman Telah Dipulangkan
+Peralatan Sedang Dipinjam (Menunggu Pemulangan)
+Peralatan Spesifik
+Peralatan untuk Dikeluarkan
+Peralatan yang Masih Belum Dipulangkan
+Peranan (Roles)
+Peranan Pengguna
+Peranan Sistem
+Peranan Sistem:
+Pergi ke Dashboard Utama
+Peringatan Pinjaman Peralatan ICT Lewat Tempoh
+Peringatan Pulangan Peralatan ICT
+Peringatan: Pinjaman Peralatan ICT Lewat Dipulangkan
+Peringatan: Tarikh Akhir Pulangan Hari Ini
+Perkhidmatan Utama
+Permohonan #
+Permohonan Akaun E-mel / ID Pengguna MOTAC
+Permohonan Akaun E-mel ICT Diluluskan
+Permohonan Akaun E-mel ICT Ditolak
+Permohonan Akaun Emel / ID Pengguna MOTAC
+Permohonan Diluluskan
+Permohonan Diluluskan & Sedia Untuk Pengeluaran
+Permohonan Ditolak
+Permohonan Emel
+Permohonan Emel / ID Pengguna MOTAC
+Permohonan Menunggu Tindakan Anda
+Permohonan Pinjaman Anda (Belum Selesai)
+Permohonan Pinjaman ICT
+Permohonan Pinjaman Peralatan ICT
+Permohonan Pinjaman Peralatan ICT Ditolak
+Permohonan Pinjaman Saya
+Permohonan Pinjaman Untuk Diproses
+Permohonan Sedia Untuk Dikeluarkan
+Permohonan Sedia Untuk Pengeluaran
+Permohonan Terkini Anda
+Permohonan Tidak Diketahui
+Persetujuan Penggunaan Data
+Persetujuan Tanggungjawab E-mel
+Pilih Aras
+Pilih Bahagian
+Pilih Foto Baru
+Pilih Gelaran
+Pilih Gred
+Pilih Gred (Pilihan)
+Pilih Item Asal
+Pilih Jabatan
+Pilih Jawatan
+Pilih Jenis
+Pilih Jenis Aset
+Pilih Jenis Pelantikan
+Pilih Kategori Induk
+Pilih Keadaan Fizikal
+Pilih Ketua Jabatan
+Pilih Ketua Jabatan (Pilihan)
+Pilih Kondisi
+Pilih Lokasi
+Pilih Pegawai
+Pilih Pegawai Penerima
+Pilih Pegawai Penyokong
+Pilih Pegawai Penyokong (dari Sistem)
+Pilih Pemulang
+Pilih Pengguna
+Pilih Pengguna Berdaftar
+Pilih Peralatan
+Pilih Peralatan:
+Pilih Pusat
+Pilih Status
+Pilih Status Operasi
+Pilih Taraf Perkhidmatan
+Pinjaman ICT
+Pinjaman Peralatan
+Pinjaman Peralatan ICT
+Posisi T/D
+Posisi Tidak Dinyatakan
+Pratonton Foto Baru
+Profil Pengguna
+Profil Saya
+Proses Pemulangan
+Proses Pemulangan Peralatan
+Proses Pemulangan Peralatan untuk Permohonan #
+Proses Pengeluaran
+Proses Pengeluaran Peralatan
+Proses Penyediaan Akaun
+Proses Penyediaan Akaun (Tindakan Pentadbir IT)
+Proses Pulangan
+Pulangan Peralatan
+Pusat (Jika berkaitan)
+Pusat Pemberitahuan
+Ralat Pelayan Dalaman
+Ralat Pengesahan
+Ralat Pengesahan!
+Ralat Validasi!
+Rekod Aktiviti Pengguna
+Rekod Cuti Baharu
+Rekod Kelulusan
+Rekod Kelulusan Lepas
+Rekod Pemulangan Peralatan
+Rekod Pengeluaran Peralatan
+Rekod Pengguna
+Rekod Permohonan Dikemukakan
+Rekod Pulangan
+Rekod Pulangan Peralatan
+Rekod Pulangan Peralatan untuk Transaksi Pengeluaran #
+Rekod Transaksi
+Rekod Transaksi Pengeluaran
+Rekod kami menunjukkan bahawa peralatan yang dipinjam di bawah permohonan ini telah
+Remove User
+Report Type
+Reset Borang
+Rujuk Item Permohonan Asal
+SEJARAH KELULUSAN & TINDAKAN
+SISTEM MEJA BANTUAN
+Sahkan & Keluarkan Peralatan
+Sahkan & Rekod Pulangan Peralatan
+Sahkan & Simpan Tindakan
+Sahkan Alamat E-mel
+Sahkan Alamat E-mel Anda
+Sahkan Kata Laluan
+Sahkan Kata Laluan Awal
+Sahkan Kata Laluan Baru
+Sahkan Padam Permohonan
+Sahkan Pemadaman
+Sahkan Pemadaman Akaun
+Sahkan Pemadaman Jawatan
+Sahkan Pemadaman Kebenaran
+Sahkan Pemadaman Peralatan
+Sahkan Pemadaman Peranan
+Sahkan Pembatalan
+Sahkan Pemulangan
+Sahkan Pengaktifan
+Sahkan Tindakan
+Sahkan kata laluan
+Salam Sejahtera
+Salam Sejahtera, Staf BPM,
+Salam sejahtera
+Saring Ikut Peranan
+Saring Ikut Status
+Saringan Laporan
+Saringan dan Carian
+Saya bersetuju dengan
+Saya dengan ini mengesahkan bahawa:
+Sebab Kegagalan Penyediaan
+Sebab Penolakan
+Sebab Penolakan / Kegagalan Proses
+Sebab Penolakan/Kegagalan
+Sebab Permohonan Ditolak
+Sebarang nota atau catatan lain
+Sedang Dibangunkan
+Sejarah Jawatan / Garis Masa
+Sejarah Kelulusan
+Sejarah Kelulusan & Tindakan
+Sejarah Kelulusan Saya
+Sejarah Permohonan Pinjaman Anda
+Sejarah Pinjaman
+Sejarah Pinjaman Peralatan Ini
+Selamat Datang!
+Sembunyikan Kata Laluan
+Semua Bahagian/Unit
+Semua Jabatan
+Semua Jenis
+Semua Jenis Cawangan
+Semua Kategori
+Semua Lokasi
+Semua Pengguna
+Semua Peranan
+Semua Status
+Semua Transaksi
+Semua maklumat BENAR
+Semua maklumat yang diisi adalah BENAR
+Senarai Gred Jawatan
+Senarai Gred Jawatan MOTAC
+Senarai Jabatan
+Senarai Jabatan/Unit
+Senarai Jawatan
+Senarai Kebenaran Sedia Ada
+Senarai Menunggu Kelulusan
+Senarai Notifikasi
+Senarai Pemberitahuan Anda
+Senarai Pengguna
+Senarai Pengguna Sistem
+Senarai Peralatan
+Senarai Peralatan ICT
+Senarai Peralatan ICT Tersedia
+Senarai Peralatan Sedang Dipinjam
+Senarai Peranan Sedia Ada
+Senarai Permohonan Pinjaman
+Senarai Permohonan Pinjaman ICT Saya
+Senarai Permohonan Pinjaman Saya
+Senarai Pinjaman Menunggu Pengeluaran
+Senarai Semak Aksesori:
+Senarai Tiket Bantuan
+Senarai Transaksi Pengeluaran Pinjaman
+Senarai Transaksi Pinjaman ICT
+Sertai Sistem Kami
+Sesi Pelayar Imbas Aktif
+Sesi Telah Tamat!
+Set Semula
+Set Semula Borang
+Set Semula Carian & Saringan
+Set Semula Penapis
+Set Semula Saringan
+Set Semula Semua Penapis
+Set Semula Semua Tapisan
+Sila Pilih
+Sila Pilih Jenis Cuti
+Sila Pilih Keadaan
+Sila Pilih Keputusan
+Sila Pilih Pegawai
+Sila Pilih Pekerja
+Sila isikan butiran untuk setiap item yang dipulangkan dari transaksi pengeluaran #
+Sila log masuk untuk akses sistem dalaman
+Sila masukkan butiran akaun yang telah disediakan untuk pemohon
+Sila pastikan peralatan dipulangkan pada atau sebelum tarikh jangkaan pulangan:
+Sila perbetulkan ralat berikut:
+Sila perbetulkan ralat di bawah:
+Sila rujuk e-mel berasingan atau hubungi BPM ICT
+Simpan Draf
+Simpan Gred
+Simpan Jabatan/Unit
+Simpan Jawatan
+Simpan Kata Laluan
+Simpan Pengguna
+Simpan Peralatan
+Simpan Peralatan Baru
+Simpan Perubahan
+Simpan Profil
+Sistem Pengurusan Sumber Bersepadu MOTAC
+Sistem Pengurusan Sumber MOTAC
+Sistem Pinjaman ICT & Meja Bantuan MOTAC
+Start Date
+Statistik Kelulusan Anda (30 Hari Terakhir)
+Status Akaun
+Status Item Dalam Transaksi Ini
+Status Jawatan
+Status Keadaan
+Status Keadaan Fizikal
+Status Kelulusan
+Status Keputusan:
+Status Kondisi
+Status Kondisi Fizikal
+Status Operasi
+Status Operasi Awal
+Status Pengguna
+Status Pengguna:
+Status Penyediaan
+Status Perkhidmatan
+Status Permohonan
+Status Permohonan Pinjaman Saya
+Status Semasa Pulangan
+Status Semasa:
+Status Tidak Diketahui
+Status Tiket
+Status Transaksi
+Struktur Organisasi
+Subjek Tiket
+Submit Comment
+Submit Ticket
+Submit a Helpdesk Ticket
+Submitted by:
+Sudah mempunyai akaun?
+Sukacita dimaklumkan bahawa peralatan berikut telah berjaya
+Sukacita dimaklumkan bahawa peralatan yang diluluskan untuk permohonan anda telah
+Sukacita dimaklumkan bahawa permohonan anda telah
+TETAPAN SISTEM (ADMIN)
+TUGASAN KELULUSAN
+Tag Aset
+Tag ID
+Tag ID Aset
+Tag ID MOTAC
+Tahap (Angka)
+Tahap (Level)
+Tahap Gred (Angka)
+Tahap Numerik (Untuk susunan & perbandingan)
+Taip semula kata laluan
+Taip semula kata laluan baru
+Tamat Khidmat
+Tambah Baharu
+Tambah Baris Peralatan
+Tambah Entri Baharu
+Tambah Gred Baru
+Tambah Item
+Tambah Jabatan
+Tambah Jabatan Baharu
+Tambah Jabatan Baru
+Tambah Jabatan/Unit Baru
+Tambah Jawatan
+Tambah Jawatan Baharu
+Tambah Jawatan Baru
+Tambah Kebenaran Baru
+Tambah Pengguna
+Tambah Pengguna Baru
+Tambah Peralatan Baharu
+Tambah Peralatan Baru
+Tambah Peralatan ICT Baru
+Tambah Peranan Baru
+Tambah Subkategori
+Tambah Subkategori Baharu
+Tanda sebagai dibaca
+Tandakan Semua Telah Dibaca
+Tapis Laporan
+Tapis mengikut Status
+Taraf Perkhidmatan
+Taraf Perkhidmatan (Semasa Permohonan)
+Tarikh & Masa Isu Sebenar
+Tarikh Akhir
+Tarikh Akhir Berkhidmat (Jika Berkaitan)
+Tarikh Akhir Khidmat
+Tarikh Akhir Khidmat (Jika Berkaitan)
+Tarikh Dari
+Tarikh Dicipta
+Tarikh Dijangka Pulang
+Tarikh Dijangka Pulang (Permohonan):
+Tarikh Dikeluarkan
+Tarikh Diluluskan
+Tarikh Diproses
+Tarikh Dipulangkan
+Tarikh Hantar
+Tarikh Hingga
+Tarikh Jangka Pulang
+Tarikh Keluar
+Tarikh Keluar Sebenar
+Tarikh Keputusan
+Tarikh Mohon
+Tarikh Mohon:
+Tarikh Mula
+Tarikh Mula Berkhidmat (Jika Berkaitan)
+Tarikh Mula Khidmat
+Tarikh Mula Khidmat (Jika Berkaitan)
+Tarikh Mula:
+Tarikh Pembelian
+Tarikh Pemulangan
+Tarikh Pemulangan Dijangka
+Tarikh Perakuan
+Tarikh Permohonan
+Tarikh Permohonan Dihantar
+Tarikh Pinjaman
+Tarikh Pulang
+Tarikh Tamat Waranti
+Tarikh Tamat:
+Tarikh Terima / Pinjam
+Tarikh Tindakan
+Tarikh Transaksi
+Tarikh Transaksi Pengeluaran Asal:
+Telah Dikeluarkan
+Tempoh Pinjam:
+Tempoh Pinjaman
+Tempoh Pinjaman:
+Terima Jemputan
+Terlalu Banyak Permintaan
+Terlupa kata laluan anda?
+Terma Perkhidmatan
+Tetapan Keselamatan
+Tetapan Sistem
+Tetapkan Kata Laluan Baru
+Tetapkan Peranan
+Tetapkan Peranan (Pilih satu atau lebih)
+Tetapkan Semasa
+Tetapkan Semula Kata Laluan
+Tetapkan Semula Kata Laluan Anda
+Tiada / Tidak Perlu
+Tiada Aset atau Pinjaman Ditemui
+Tiada Cadangan
+Tiada Gred Ditemui
+Tiada Jabatan
+Tiada Jabatan Ditemui
+Tiada Jawatan
+Tiada Jawatan Ditemui
+Tiada Jenis Cuti Ditemui!
+Tiada Pekerja Aktif Ditemui!
+Tiada Pengguna Ditemui
+Tiada Peranan
+Tiada Peranan Ditetapkan
+Tiada Permohonan Ditemui
+Tiada Sejarah Ditemui
+Tiada Sejarah Kelulusan
+Tiada Tugasan Baru
+Tiada catatan
+Tiada kebenaran
+Tiada peralatan jenis
+Tiada peralatan tersedia untuk jenis yang diminta
+Tiada peranan
+Tiada tindakan
+Ticket Details
+Ticket Status Distribution
+Ticket Volume (Monthly)
+Ticket Volume by Month
+Tidak Aktif
+Tidak Berkaitan
+Tidak Diketahui
+Tidak Dinyatakan
+Tidak Ditetapkan
+Tidak Ditetapkan / Tidak Berkenaan
+Tiket Meja Bantuan
+Tiket Saya
+Tindakan Diperlukan: Permohonan Pinjaman Sedia Untuk Pengeluaran
+Tindakan Kelulusan Diperlukan
+Tindakan Kelulusan untuk Permohonan #
+Tindakan Penyediaan Akaun E-mel/ID
+Tindakan untuk Transaksi #
+Toggle password visibility
+Token API Baru Anda
+Total Tickets
+Transaksi Pengeluaran Asal
+Tugasan Kelulusan Anda
+Tugasan Kelulusan Menunggu Tindakan
+Tugasan Kelulusan Menunggu Tindakan Saya
+Tujuan / Catatan
+Tujuan / Catatan Permohonan
+Tujuan Permohonan
+Tujuan Permohonan / Catatan
+Tujuan Permohonan / Catatan Tambahan
+Tujuan Permohonan:
+Tujuan Pinjaman
+Tujuan Pinjaman:
+Tunjukkan Kata Laluan
+Tunjukkan Kod Pemulihan
+Tunjukkan/Sembunyikan Kata Laluan
+Unit/Pusat Tidak Dinyatakan
+Untuk Kelulusan Oleh:
+Untuk Permohonan
+Untuk Permohonan Pinjaman
+Untuk bukan warganegara
+Urus Token API
+User Information
+User Menu
+Versi Sistem
+View All Notifications
+View Details
+Ya, Batalkan
+Ya, Hapus Akaun Saya
+Ya, Padam
+Ya, Padam Gred Ini
+Yang menjalankan amanah,
+cth: Terdapat calar kecil
+dasar privasi
+terma perkhidmatan
