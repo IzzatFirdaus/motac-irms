@@ -75,6 +75,11 @@ class HelpdeskTicketPolicy
             return $helpdeskTicket->status !== HelpdeskTicket::STATUS_CLOSED;
         }
 
+        // Applicant (owner) cannot update their own ticket (they may comment instead)
+        if ($user->id === $helpdeskTicket->user_id) {
+            return false;
+        }
+
         // Assigned agent may update if ticket is not closed
         return $helpdeskTicket->assigned_to_user_id && $user->id === $helpdeskTicket->assigned_to_user_id && $helpdeskTicket->status !== HelpdeskTicket::STATUS_CLOSED;
     }
@@ -85,7 +90,17 @@ class HelpdeskTicketPolicy
      */
     public function delete(User $user, HelpdeskTicket $helpdeskTicket): bool
     {
-        return $user->hasRole('Admin');
+        // Admin can delete any ticket
+        if ($user->hasRole('Admin')) {
+            return true;
+        }
+
+        // Allow applicant to delete their own ticket (soft delete) regardless of status
+        if ($user->id === $helpdeskTicket->user_id) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

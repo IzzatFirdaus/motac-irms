@@ -26,35 +26,37 @@ class QueryLogServiceProvider extends ServiceProvider // Corrected class name
      */
     public function boot(): void
     {
-        if (App::environment('local')) {
-            // Optionally enable logging of all queries in local environment for debugging
-            // DB::enableQueryLog();
-
-            $longQueryThreshold = config('database.long_query_threshold', 1000); // Default to 1000ms (1s)
-
-            DB::whenQueryingForLongerThan($longQueryThreshold, function ($connection, QueryExecuted $event): void {
-                $url = 'N/A (Console or no request context)';
-                if (! App::runningInConsole()) {
-                    /** @var \Illuminate\Http\Request|null $currentRequest */
-                    $currentRequest = request(); // Global helper
-                    if ($currentRequest && method_exists($currentRequest, 'fullUrl')) {
-                        $url = $currentRequest->fullUrl();
-                    } else {
-                        $url = 'Request object or fullUrl() method not available.';
-                    }
-                }
-
-                Log::warning(
-                    'Long running query detected.',
-                    [
-                        'connection_name' => $connection->getName(),
-                        'query'           => $event->sql,          // SQL from the event
-                        'bindings'        => $event->bindings,   // Bindings from the event
-                        'time_ms'         => $event->time,        // Execution time in milliseconds from the event
-                        'url'             => $url,
-                    ]
-                );
-            });
+        if (! App::environment('local')) {
+            return;
         }
+        // Optionally enable logging of all queries in local environment for debugging
+        // DB::enableQueryLog();
+
+        $longQueryThreshold = config('database.long_query_threshold', 1000); // Default to 1000ms (1s)
+
+        DB::whenQueryingForLongerThan($longQueryThreshold, function ($connection, QueryExecuted $event): void {
+            $url = 'N/A (Console or no request context)';
+            if (! App::runningInConsole()) {
+                /** @var \Illuminate\Http\Request|null $currentRequest */
+                $currentRequest = request(); // Global helper
+                if ($currentRequest && method_exists($currentRequest, 'fullUrl')) {
+                    $url = $currentRequest->fullUrl();
+                } else {
+                    $url = 'Request object or fullUrl() method not available.';
+                }
+            }
+
+            Log::warning(
+                'Long running query detected.',
+                [
+                    'connection_name' => $connection->getName(),
+                    'query'           => $event->sql,          // SQL from the event
+                    'bindings'        => $event->bindings,   // Bindings from the event
+                    'time_ms'         => $event->time,        // Execution time in milliseconds from the event
+                    'url'             => $url,
+                ]
+            );
+        });
+
     }
 }

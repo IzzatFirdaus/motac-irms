@@ -174,13 +174,20 @@ class HelpdeskService
             $ticket->save();
 
             // Notify parties only if status actually changed to closed
-            if ($oldStatus !== HelpdeskTicket::STATUS_CLOSED) {
-                if ($ticket->user instanceof User) {
-                    $this->notificationService->notifyTicketStatusUpdated($ticket->user, $ticket, $closer, 'applicant');
-                }
-                if ($ticket->assignedTo instanceof User) {
-                    $this->notificationService->notifyTicketStatusUpdated($ticket->assignedTo, $ticket, $closer, 'assignee');
-                }
+            if ($oldStatus === HelpdeskTicket::STATUS_CLOSED) {
+
+                Log::info(sprintf('Helpdesk Ticket ID %d closed by User ID %d.', $ticket->id, $closer->id), [
+                    'ticket_id' => $ticket->id,
+                    'closed_by' => $closer->id,
+                ]);
+
+                return $ticket;
+            }
+            if ($ticket->user instanceof User) {
+                $this->notificationService->notifyTicketStatusUpdated($ticket->user, $ticket, $closer, 'applicant');
+            }
+            if ($ticket->assignedTo instanceof User) {
+                $this->notificationService->notifyTicketStatusUpdated($ticket->assignedTo, $ticket, $closer, 'assignee');
             }
 
             Log::info(sprintf('Helpdesk Ticket ID %d closed by User ID %d.', $ticket->id, $closer->id), [
@@ -204,16 +211,18 @@ class HelpdeskService
         }
 
         foreach ($attachments as $attachment) {
-            if ($attachment instanceof UploadedFile && $attachment->isValid()) {
-                $path = $attachment->store('helpdesk_attachments', 'public');
-
-                $attachable->attachments()->create([
-                    'file_path' => $path,
-                    'file_name' => $attachment->getClientOriginalName(),
-                    'file_size' => $attachment->getSize(),
-                    'file_type' => $attachment->getMimeType(),
-                ]);
+            if (! ($attachment instanceof UploadedFile && $attachment->isValid())) {
+                continue;
             }
+            $path = $attachment->store('helpdesk_attachments', 'public');
+
+            $attachable->attachments()->create([
+                'file_path' => $path,
+                'file_name' => $attachment->getClientOriginalName(),
+                'file_size' => $attachment->getSize(),
+                'file_type' => $attachment->getMimeType(),
+            ]);
+
         }
     }
 }

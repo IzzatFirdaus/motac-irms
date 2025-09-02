@@ -23,15 +23,17 @@ class BlameableObserver
      */
     public function creating(Model $model): void
     {
-        if (Auth::check()) {
-            $userId = Auth::id();
-            if ($this->hasBlameableColumn($model, 'created_by')) {
-                $model->setAttribute('created_by', $userId);
-            }
-            if ($this->hasBlameableColumn($model, 'updated_by')) {
-                $model->setAttribute('updated_by', $userId);
-            }
+        if (! Auth::check()) {
+            return;
         }
+        $userId = Auth::id();
+        if ($this->hasBlameableColumn($model, 'created_by')) {
+            $model->setAttribute('created_by', $userId);
+        }
+        if ($this->hasBlameableColumn($model, 'updated_by')) {
+            $model->setAttribute('updated_by', $userId);
+        }
+
     }
 
     /**

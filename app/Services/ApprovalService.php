@@ -92,8 +92,69 @@ class ApprovalService
      */
     public function processApprovalDecision(Approval $approval, string $decision, ?User $actor = null, ?string $notes = null, ?array $approvalItems = null): void
     {
-        // Allow older callers (without $actor) and newer callers (with $actor) seamlessly
-        $this->recordApprovalDecision($approval, $decision, $notes, $approvalItems ?? []);
+        // Apply decision with domain side-effects, especially for LoanApplication approvals
+        DB::transaction(function () use ($approval, $decision, $notes, $approvalItems): void {
+            // 1) Update approval record and timestamps
+            $approval->status = $decision;
+            $approval->notes  = $notes;
+            if ($decision === Approval::STATUS_APPROVED) {
+                $approval->approved_at = now();
+            } elseif ($decision === Approval::STATUS_REJECTED) {
+                $approval->rejected_at = now();
+            } elseif ($decision === Approval::STATUS_CANCELED) {
+                $approval->canceled_at = now();
+            }
+            $approval->save();
+
+            // 2) If the approvable is a LoanApplication, update its state and any item quantities
+            if ($approval->approvable instanceof LoanApplication) {
+                /** @var LoanApplication $loanApplication */
+                $loanApplication = $approval->approvable;
+
+                if ($decision === Approval::STATUS_APPROVED) {
+                    // Apply approved quantities if provided
+                    if (is_array($approvalItems)) {
+                        foreach ($approvalItems as $item) {
+                            $itemId          = (int) ($item['loan_application_item_id'] ?? 0);
+                            $qtyApproved     = (int) ($item['quantity_approved'] ?? 0);
+                            $approvalItemRow = $loanApplication->loanApplicationItems()->whereKey($itemId)->first();
+                            if ($approvalItemRow) {
+                                $approvalItemRow->quantity_approved = $qtyApproved;
+                                // Optional: set item status to awaiting issuance if approved qty > 0
+                                if ($qtyApproved > 0) {
+                                    $approvalItemRow->status = \App\Models\LoanApplicationItem::STATUS_AWAITING_ISSUANCE;
+                                }
+                                $approvalItemRow->save();
+                            }
+                        }
+                    }
+
+                    // Mark loan application approved overall
+                    $loanApplication->status      = LoanApplication::STATUS_APPROVED;
+                    $loanApplication->approved_at = now();
+                    $loanApplication->save();
+
+                    // Notify applicant (and optionally issuing officers)
+                    $this->notificationService->notifyApplicationApproved($loanApplication->user, $loanApplication);
+                } elseif ($decision === Approval::STATUS_REJECTED) {
+                    $loanApplication->status      = LoanApplication::STATUS_REJECTED;
+                    $loanApplication->rejected_at = now();
+                    $loanApplication->save();
+
+                    $this->notificationService->notifyApplicationRejected($loanApplication->user, $loanApplication, $notes ?? '');
+                }
+
+                Log::info(sprintf(
+                    'ApprovalService::processApprovalDecision -> LoanApplication ID %d set to status %s by approval ID %d.',
+                    $loanApplication->id,
+                    $loanApplication->status,
+                    $approval->id
+                ));
+            } else {
+                // For other approvables, keep legacy behavior: no domain state change beyond the approval record
+                Log::info(sprintf('ApprovalService::processApprovalDecision processed non-LoanApplication approvable type: %s (ID: %d).', (string) $approval->approvable_type, (int) $approval->approvable_id));
+            }
+        });
     }
 
     /**

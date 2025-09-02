@@ -34,7 +34,7 @@ class LoanTransactionPolicy
      */
     public function viewAny(User $user): Response
     {
-        return $user->hasAnyRole(['Admin', 'BPM Staff'])
+        return $user->hasAnyRole(['Admin', 'BPM Staff', 'BPM'])
             ? Response::allow()
             : Response::deny(__('Anda tidak mempunyai kebenaran untuk melihat senarai transaksi pinjaman.'));
     }
@@ -45,19 +45,21 @@ class LoanTransactionPolicy
      */
     public function view(User $user, LoanTransaction $loanTransaction): Response
     {
-        if ($user->hasAnyRole(['Admin', 'BPM Staff'])) {
+        if ($user->hasAnyRole(['Admin', 'BPM Staff', 'BPM'])) {
             return Response::allow();
         }
 
         // Design Ref (Rev. 3.5): Section 4.3 (loan_applications.user_id, loan_applications.responsible_officer_id)
-        if ($loanTransaction->loanApplication) {
-            if ((int) $user->id === (int) $loanTransaction->loanApplication->user_id) {
-                return Response::allow();
-            }
+        if (! $loanTransaction->loanApplication) {
 
-            if ($loanTransaction->loanApplication->responsible_officer_id && (int) $user->id === (int) $loanTransaction->loanApplication->responsible_officer_id) {
-                return Response::allow();
-            }
+            return Response::deny(__('Anda tidak mempunyai kebenaran untuk melihat transaksi pinjaman ini.'));
+        }
+        if ((int) $user->id === (int) $loanTransaction->loanApplication->user_id) {
+            return Response::allow();
+        }
+
+        if ($loanTransaction->loanApplication->responsible_officer_id && (int) $user->id === (int) $loanTransaction->loanApplication->responsible_officer_id) {
+            return Response::allow();
         }
 
         return Response::deny(__('Anda tidak mempunyai kebenaran untuk melihat transaksi pinjaman ini.'));
@@ -82,7 +84,7 @@ class LoanTransactionPolicy
             ]);
         }
 
-        if (! $user->hasAnyRole(['Admin', 'BPM Staff'])) {
+        if (! $user->hasAnyRole(['Admin', 'BPM Staff', 'BPM'])) {
             return Response::deny(__('Hanya Admin atau Staf BPM yang boleh memulakan proses pengeluaran.'));
         }
 
@@ -104,7 +106,7 @@ class LoanTransactionPolicy
             return Response::deny(__('Konfigurasi sistem tidak lengkap untuk memproses pemulangan.'));
         }
 
-        if (! $user->hasAnyRole(['Admin', 'BPM Staff'])) {
+        if (! $user->hasAnyRole(['Admin', 'BPM Staff', 'BPM'])) {
             return Response::deny(__('Hanya Admin atau Staf BPM yang boleh memproses pemulangan.'));
         }
 
@@ -134,7 +136,7 @@ class LoanTransactionPolicy
         }
 
         // Only BPM Staff can process returns
-        if (! $user->hasAnyRole(['Admin', 'BPM Staff'])) {
+        if (! $user->hasAnyRole(['Admin', 'BPM Staff', 'BPM'])) {
             return Response::deny(__('Anda tidak mempunyai kebenaran untuk merekodkan pulangan peralatan.'));
         }
 
@@ -152,16 +154,16 @@ class LoanTransactionPolicy
         // EDITED: This block was changed to use the centralized canBeReturned() method from the LoanApplication model.
         // This ensures the business logic is consistent and not duplicated. It correctly allows returns for 'issued',
         // 'partially_issued', and 'overdue' applications.
-        if (! method_exists($loanApplication, 'canBeReturned') || ! $loanApplication->canBeReturned()) {
-            // Defensive check in case the method is removed from the model.
-            if (! method_exists($loanApplication, 'canBeReturned')) {
-                Log::warning(sprintf('LoanTransactionPolicy: LoanApplication model ID %d is missing canBeReturned() method.', $loanApplication->id));
-            }
+        if (! (! method_exists($loanApplication, 'canBeReturned') || ! $loanApplication->canBeReturned())) {
 
-            return Response::deny(__('Status permohonan pinjaman tidak membenarkan proses pemulangan.'));
+            return Response::allow();
+        }
+        // Defensive check in case the method is removed from the model.
+        if (! method_exists($loanApplication, 'canBeReturned')) {
+            Log::warning(sprintf('LoanTransactionPolicy: LoanApplication model ID %d is missing canBeReturned() method.', $loanApplication->id));
         }
 
-        return Response::allow();
+        return Response::deny(__('Status permohonan pinjaman tidak membenarkan proses pemulangan.'));
     }
 
     /**
@@ -216,7 +218,7 @@ class LoanTransactionPolicy
      */
     public function viewAnyIssued(User $user): Response
     {
-        return $user->hasAnyRole(['Admin', 'BPM Staff'])
+        return $user->hasAnyRole(['Admin', 'BPM Staff', 'BPM'])
             ? Response::allow()
             : Response::deny(__('Anda tidak mempunyai kebenaran untuk melihat senarai transaksi pengeluaran.'));
     }

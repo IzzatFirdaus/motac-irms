@@ -149,23 +149,23 @@ class LoanApplicationPolicy
             ->orderBy('created_at', 'desc')
             ->first();
 
-        if ($pendingApprovalTask) {
-            if ($currentStageKey === Approval::STAGE_LOAN_SUPPORT_REVIEW) {
-                $minSupportGradeLevel = (int) config('motac.approval.min_loan_support_grade_level', 41);
-                if (! $user->grade || (int) $user->grade->level < $minSupportGradeLevel) {
-                    return Response::deny(__('Gred anda (:userGrade) tidak memenuhi syarat minima (Gred :minGrade) untuk menyokong permohonan ini.', ['userGrade' => $user->grade?->name ?? 'N/A', 'minGrade' => $minSupportGradeLevel]));
-                }
-            } elseif ($currentStageKey === Approval::STAGE_LOAN_APPROVER_REVIEW) {
-                $minGeneralApproverGradeLevel = (int) config('motac.approval.min_loan_general_approver_grade_level', 41);
-                if (! $user->grade || (int) $user->grade->level < $minGeneralApproverGradeLevel) {
-                    return Response::deny(__('Gred anda (:userGrade) tidak memenuhi syarat minima (Gred :minGrade) untuk peringkat kelulusan ini.', ['userGrade' => $user->grade?->name ?? 'N/A', 'minGrade' => $minGeneralApproverGradeLevel]));
-                }
-            }
+        if (! $pendingApprovalTask) {
 
-            return Response::allow();
+            return Response::deny(__('Anda tidak ditetapkan sebagai pegawai pelulus untuk permohonan ini pada peringkat semasa atau tiada tugasan kelulusan aktif untuk anda.'));
+        }
+        if ($currentStageKey === Approval::STAGE_LOAN_SUPPORT_REVIEW) {
+            $minSupportGradeLevel = (int) config('motac.approval.min_loan_support_grade_level', 41);
+            if (! $user->grade || (int) $user->grade->level < $minSupportGradeLevel) {
+                return Response::deny(__('Gred anda (:userGrade) tidak memenuhi syarat minima (Gred :minGrade) untuk menyokong permohonan ini.', ['userGrade' => $user->grade?->name ?? 'N/A', 'minGrade' => $minSupportGradeLevel]));
+            }
+        } elseif ($currentStageKey === Approval::STAGE_LOAN_APPROVER_REVIEW) {
+            $minGeneralApproverGradeLevel = (int) config('motac.approval.min_loan_general_approver_grade_level', 41);
+            if (! $user->grade || (int) $user->grade->level < $minGeneralApproverGradeLevel) {
+                return Response::deny(__('Gred anda (:userGrade) tidak memenuhi syarat minima (Gred :minGrade) untuk peringkat kelulusan ini.', ['userGrade' => $user->grade?->name ?? 'N/A', 'minGrade' => $minGeneralApproverGradeLevel]));
+            }
         }
 
-        return Response::deny(__('Anda tidak ditetapkan sebagai pegawai pelulus untuk permohonan ini pada peringkat semasa atau tiada tugasan kelulusan aktif untuk anda.'));
+        return Response::allow();
     }
 
     /**

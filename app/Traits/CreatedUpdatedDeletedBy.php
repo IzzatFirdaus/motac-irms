@@ -36,22 +36,24 @@ trait CreatedUpdatedDeletedBy
         });
 
         // If using SoftDeletes, set deleted_by on delete (soft delete only)
-        if (in_array(SoftDeletes::class, class_uses_recursive(static::class))) {
-            static::deleting(function ($model) {
-                $userId = Auth::check() ? Auth::id() : null;
-                if (! $model->isDirty('deleted_by')) {
-                    $model->deleted_by = $userId;
-                }
-                // No need for explicit save, Eloquent will persist on delete
-            });
-
-            static::restoring(function ($model) {
-                $userId            = Auth::check() ? Auth::id() : null;
-                $model->deleted_by = null;
-                if (! $model->isDirty('updated_by')) {
-                    $model->updated_by = $userId;
-                }
-            });
+        if (! in_array(SoftDeletes::class, class_uses_recursive(static::class))) {
+            return;
         }
+        static::deleting(function ($model) {
+            $userId = Auth::check() ? Auth::id() : null;
+            if (! $model->isDirty('deleted_by')) {
+                $model->deleted_by = $userId;
+            }
+            // No need for explicit save, Eloquent will persist on delete
+        });
+
+        static::restoring(function ($model) {
+            $userId            = Auth::check() ? Auth::id() : null;
+            $model->deleted_by = null;
+            if (! $model->isDirty('updated_by')) {
+                $model->updated_by = $userId;
+            }
+        });
+
     }
 }

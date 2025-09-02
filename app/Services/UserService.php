@@ -284,12 +284,14 @@ final class UserService
      */
     private function preparePasswordForUpdate(array $data): array
     {
-        if (array_key_exists('password', $data)) {
-            if (! empty($data['password']) && is_string($data['password'])) {
-                $data['password'] = Hash::make($data['password']);
-            } else {
-                unset($data['password']);
-            }
+        if (! array_key_exists('password', $data)) {
+
+            return $data;
+        }
+        if (! empty($data['password']) && is_string($data['password'])) {
+            $data['password'] = Hash::make($data['password']);
+        } else {
+            unset($data['password']);
         }
 
         return $data;
@@ -302,12 +304,13 @@ final class UserService
      */
     private function ensureNotDeletingAuthenticatedUser(User $userToDelete): void
     {
-        if (Auth::check() && $userToDelete->id === Auth::id()) {
-            Log::warning(self::LOG_AREA.' Attempt to delete own account prevented.', [
-                'user_id' => $userToDelete->id,
-            ]);
-            throw new RuntimeException(__('Anda tidak boleh memadam akaun anda sendiri.'));
+        if (! (Auth::check() && $userToDelete->id === Auth::id())) {
+            return;
         }
+        Log::warning(self::LOG_AREA.' Attempt to delete own account prevented.', [
+            'user_id' => $userToDelete->id,
+        ]);
+        throw new RuntimeException(__('Anda tidak boleh memadam akaun anda sendiri.'));
     }
 
     /**

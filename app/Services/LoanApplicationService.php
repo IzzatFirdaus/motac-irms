@@ -295,21 +295,28 @@ final class LoanApplicationService
         // This is now called from submitApplicationForApproval to ensure status is set correctly.
         // Create an Approval record for the supporting officer if possible
         $supportingOfficerId = $loanApplication->supporting_officer_id ?? $loanApplication->responsible_officer_id ?? null;
-        if ($supportingOfficerId) {
-            try {
-                $approval = Approval::create([
-                    'approvable_type' => get_class($loanApplication),
-                    'approvable_id'   => $loanApplication->id,
-                    'officer_id'      => $supportingOfficerId,
-                    'stage'           => Approval::STAGE_LOAN_SUPPORT_REVIEW,
-                    'status'          => Approval::STATUS_PENDING,
-                ]);
+        if (! $supportingOfficerId) {
 
-                // Notify the assigned supporting officer directly that action is needed
-                $this->notificationService->notifyUser($approval->officer, new \App\Notifications\ApplicationNeedsAction($approval));
-            } catch (\Throwable $e) {
-                Log::error(self::LOG_AREA.sprintf('Failed to create approval for Loan Application ID %d: %s', $loanApplication->id, $e->getMessage()));
-            }
+            // Notify role-based supporting officers as a fallback
+            $this->notificationService->notifySupportOfPendingApproval($loanApplication);
+
+            Log::info(self::LOG_AREA.sprintf('Loan Application ID %d status set to %s and support notified.', $loanApplication->id, $loanApplication->status));
+
+            return;
+        }
+        try {
+            $approval = Approval::create([
+                'approvable_type' => get_class($loanApplication),
+                'approvable_id'   => $loanApplication->id,
+                'officer_id'      => $supportingOfficerId,
+                'stage'           => Approval::STAGE_LOAN_SUPPORT_REVIEW,
+                'status'          => Approval::STATUS_PENDING,
+            ]);
+
+            // Notify the assigned supporting officer directly that action is needed
+            $this->notificationService->notifyUser($approval->officer, new \App\Notifications\ApplicationNeedsAction($approval));
+        } catch (\Throwable $e) {
+            Log::error(self::LOG_AREA.sprintf('Failed to create approval for Loan Application ID %d: %s', $loanApplication->id, $e->getMessage()));
         }
 
         // Notify role-based supporting officers as a fallback

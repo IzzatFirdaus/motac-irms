@@ -29,8 +29,8 @@ class EquipmentPolicy
      */
     public function viewAny(User $user): bool
     {
-        // This is the key fix: Explicitly check if the user has the required role.
-        return $user->hasRole('BPM Staff');
+        // Allow both BPM Staff and BPM roles to access equipment admin listing.
+        return $user->hasAnyRole(['BPM Staff', 'BPM']);
     }
 
     /**
@@ -38,8 +38,8 @@ class EquipmentPolicy
      */
     public function view(User $user, Equipment $equipment): bool
     {
-        // Allows BPM Staff to view details of any equipment.
-        return $user->hasRole('BPM Staff');
+        // Allows BPM Staff and BPM to view details of any equipment.
+        return $user->hasAnyRole(['BPM Staff', 'BPM']);
     }
 
     /**
@@ -47,7 +47,7 @@ class EquipmentPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasRole('BPM Staff');
+        return $user->hasAnyRole(['BPM Staff', 'BPM']);
     }
 
     /**
@@ -60,7 +60,7 @@ class EquipmentPolicy
             return false;
         }
 
-        return $user->hasRole('BPM Staff');
+        return $user->hasAnyRole(['BPM Staff', 'BPM']);
     }
 
     /**
@@ -73,6 +73,6 @@ class EquipmentPolicy
             return false;
         }
 
-        return $user->hasRole('BPM Staff');
+        return $user->hasAnyRole(['BPM Staff', 'BPM']);
     }
 }

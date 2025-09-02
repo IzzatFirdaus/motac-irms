@@ -64,17 +64,19 @@ class SuffixedTranslator extends Translator
     protected function handleMissingTranslation(string $key, string $locale)
     {
         $missingKeyId = $key.'.'.$locale;
-        if (! in_array($missingKeyId, $this->missingKeys)) {
-            $this->missingKeys[] = $missingKeyId;
-            if (config('translation.log_missing_keys', true)) {
-                Log::warning('Missing translation key detected', [
-                    'key'         => $key,
-                    'locale'      => $locale,
-                    'request_url' => request()->url()       ?? 'N/A',
-                    'user_agent'  => request()->userAgent() ?? 'N/A',
-                ]);
-            }
+        if (in_array($missingKeyId, $this->missingKeys)) {
+            return;
         }
+        $this->missingKeys[] = $missingKeyId;
+        if (config('translation.log_missing_keys', true)) {
+            Log::warning('Missing translation key detected', [
+                'key'         => $key,
+                'locale'      => $locale,
+                'request_url' => request()->url()       ?? 'N/A',
+                'user_agent'  => request()->userAgent() ?? 'N/A',
+            ]);
+        }
+
     }
 
     /**

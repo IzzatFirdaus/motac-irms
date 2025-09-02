@@ -83,18 +83,20 @@ class AppServiceProvider extends ServiceProvider
         }
 
         // Share global variables with all views, except during console commands.
-        if (! $this->app->runningInConsole()) {
-            View::composer('*', function (\Illuminate\View\View $view): void {
-                try {
-                    $configData = class_exists(Helpers::class) ? Helpers::appClasses() : [];
-                } catch (\Exception $exception) {
-                    $configData = [];
-                }
-
-                $view->with('configData', $configData);
-                $view->with('appClasses', $configData);
-            });
-            View::share('appName', config('variables.templateName', __('Sistem Pengurusan Sumber MOTAC')));
+        if ($this->app->runningInConsole()) {
+            return;
         }
+        View::composer('*', function (\Illuminate\View\View $view): void {
+            try {
+                $configData = class_exists(Helpers::class) ? Helpers::appClasses() : [];
+            } catch (\Exception $exception) {
+                $configData = [];
+            }
+
+            $view->with('configData', $configData);
+            $view->with('appClasses', $configData);
+        });
+        View::share('appName', config('variables.templateName', __('Sistem Pengurusan Sumber MOTAC')));
+
     }
 }
