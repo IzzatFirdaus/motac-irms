@@ -4,6 +4,33 @@
 
 declare(strict_types=1);
 
+// Note: avoid importing global helper functions with `use function` as PHP
+// raises a 'use statement with non-compound name has no effect' in some
+// environments; call helpers directly instead.
+
+use App\Http\Controllers\ApprovalController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EquipmentController;
+use App\Http\Controllers\Helpdesk\TicketController as HelpdeskTicketController;
+use App\Http\Controllers\language\LanguageController;
+use App\Http\Controllers\LoanApplicationController;
+use App\Http\Controllers\LoanTransactionController;
+use App\Http\Controllers\MiscErrorController;
+
+/**
+ * Middleware alias mapping for static analysis tools (Intelephense/PHPStan).
+ * These aliases mirror entries in app/Http/Kernel.php and are provided
+ * as documentation for language servers so they can resolve middleware names
+ * referenced in route definitions below.
+ *
+ * auth => \App\Http\Middleware\Authenticate::class
+ * verified => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class
+ * role => \Spatie\Permission\Middleware\RoleMiddleware::class
+ * permission => \Spatie\Permission\Middleware\PermissionMiddleware::class
+ * can => \Illuminate\Auth\Middleware\Authorize::class
+ * view_logs => \App\Http\Middleware\ViewLogs::class
+ */
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -20,25 +47,13 @@ declare(strict_types=1);
 |--------------------------------------------------------------------------
 */
 
-use App\Http\Controllers\ApprovalController;
+use App\Http\Controllers\NotificationController;
 
 // --------------------------------------------------
 // Controller Imports (for public/static/some controller routes)
 // --------------------------------------------------
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\EquipmentController;
-use App\Http\Controllers\Helpdesk\TicketController as HelpdeskTicketController;
-use App\Http\Controllers\language\LanguageController;
-use App\Http\Controllers\LoanApplicationController;
-use App\Http\Controllers\LoanTransactionController;
-use App\Http\Controllers\MiscErrorController;
-use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ReportController;
 use App\Livewire\Charts\LoanSummaryChart;
-
-// --------------------------------------------------
-// Livewire Component Imports (for all Livewire-based UI)
-// --------------------------------------------------
 use App\Livewire\ContactUs as ContactUsLW;
 use App\Livewire\Dashboard\AdminDashboard as AdminDashboardLW;
 use App\Livewire\Dashboard\ApproverDashboard as ApproverDashboardLW;
@@ -47,6 +62,10 @@ use App\Livewire\Dashboard\ItAdminDashboard as ItAdminDashboardLW;
 use App\Livewire\Dashboard\UserDashboard as UserDashboardLW;
 use App\Livewire\EquipmentChecklist as EquipmentChecklistLW;
 use App\Livewire\Helpdesk\Admin\TicketManagement as AdminTicketManagementLW;
+
+// --------------------------------------------------
+// Livewire Component Imports (for all Livewire-based UI)
+// --------------------------------------------------
 use App\Livewire\Helpdesk\CreateTicketForm;
 use App\Livewire\Helpdesk\MyTicketsIndex;
 use App\Livewire\Helpdesk\TicketDetails;
@@ -84,7 +103,12 @@ use App\Livewire\Settings\Users\UsersEdit as SettingsUsersEditLW;
 use App\Livewire\Settings\Users\UsersIndex as SettingsUsersIndexLW;
 use App\Livewire\Settings\Users\UsersShow as SettingsUsersShowLW;
 use App\Livewire\Shared\Notifications\NotificationsList;
+
+// helper functions are invoked directly (e.g. config(), file_exists()).
+
 use Illuminate\Support\Facades\Route;
+
+// helper functions are invoked directly (e.g. redirect(), route(), view()).
 
 // --------------------------------------------------
 // PUBLIC ROUTES
@@ -197,6 +221,13 @@ Route::middleware([
             ->whereNumber('loanTransaction')
             ->middleware('can:processReturn,loanTransaction,loanTransaction.loanApplication');
     });
+    // Alias route name expected by some tests: loan-transactions.return.store
+    Route::post('/loan-transactions/{loanTransaction}/return', [LoanTransactionController::class, 'storeReturn'])
+        ->name('loan-transactions.return.store')
+        ->whereNumber('loanTransaction')
+        ->middleware('can:processReturn,loanTransaction,loanTransaction.loanApplication');
+    // Alias for menu/tests expecting loan-applications.index (points to My Applications index)
+    Route::get('/loan-applications', MyLoanApplicationsIndexLW::class)->name('loan-applications.index');
 
     // -------------------------
     // Equipment Management (User: index/show only)
@@ -236,7 +267,7 @@ Route::middleware([
     // -------------------------
     // ADMIN RESOURCE MANAGEMENT (Livewire only)
     // -------------------------
-    Route::prefix('admin')->name('admin.')->middleware(['role:Admin|IT Admin|BPM Staff'])->group(function (): void {
+    Route::prefix('admin')->name('admin.')->middleware(['role:Admin|IT Admin|BPM Staff|BPM'])->group(function (): void {
         // Equipment management (Livewire)
         Route::get('equipment-items', AdminEquipmentIndexLW::class)->name('equipment.index');
         Route::get('equipment-form', AdminEquipmentFormLW::class)->name('equipment.form');
