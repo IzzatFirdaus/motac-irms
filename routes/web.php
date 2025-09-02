@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\ApprovalController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EmailApplicationController;
 use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\Helpdesk\TicketController as HelpdeskTicketController;
 use App\Http\Controllers\language\LanguageController;
@@ -236,6 +237,15 @@ Route::middleware([
     Route::get('/loan-applications', MyLoanApplicationsIndexLW::class)->name('loan-applications.index');
 
     // -------------------------
+    // Email Applications
+    // -------------------------
+    Route::prefix('email-applications')->name('email-applications.')->group(function (): void {
+        Route::get('/{emailApplication}', [EmailApplicationController::class, 'show'])
+            ->name('show')
+            ->whereNumber('emailApplication');
+    });
+
+    // -------------------------
     // Equipment Management (User: index/show only)
     // -------------------------
     Route::resource('equipment', EquipmentController::class)->only(['index', 'show']);
@@ -257,6 +267,7 @@ Route::middleware([
 
         // Officer tasks
         Route::get('/tasks', [ApprovalController::class, 'index'])->name('tasks');
+        Route::get('/index', [ApprovalController::class, 'index'])->name('index');
         Route::get('/{approval}', [ApprovalController::class, 'show'])
             ->name('show')
             ->whereNumber('approval');
