@@ -14,6 +14,7 @@ return [
     'back_to_list'        => 'Kembali ke Senarai',
     'view_details'        => 'Lihat Butiran',
     'equipment_inventory' => 'Inventori Peralatan',
+    'inventory_title'     => 'Inventori Peralatan',
 
     // === Carian dan Tindakan Umum ===
     'search_placeholder' => 'Cari No. Tag, Jenama, Model...',
@@ -82,6 +83,18 @@ return [
     'loan_end_date'      => 'Tarikh Pulang',
     'loan_purpose'       => 'Tujuan',
     'loan_status'        => 'Status Pinjaman',
+    'item_status'        => 'Status Item',
+    'transaction_type'   => 'Jenis Transaksi',
+    'transaction_id'     => 'ID Transaksi',
+    'transaction_date'   => 'Tarikh Transaksi',
+
+    // Status operasi (digunakan dalam borang / penuras)
+    'operational_status'        => 'Status Operasi',
+    'select_operational_status' => 'Pilih Status Operasi',
+
+    // Padam Peralatan (Pengesahan)
+    'delete_equipment' => 'Padam Peralatan',
+    'delete_confirm'   => 'Adakah anda pasti mahu memadam peralatan ini: :tagId? Tindakan ini tidak boleh diundurkan.',
 ];
 
 // Penjelasan:

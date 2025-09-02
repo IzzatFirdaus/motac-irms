@@ -5,6 +5,9 @@
 // (Mirrored to match the updated structure of approvals_ms.php)
 
 return [
+    // === Top-level helper texts ===
+    'loading_text' => 'Loading...',
+    'no_tasks'     => 'No approval tasks to display.',
     // === Main Approval Dashboard Title ===
     'title' => 'Approval Dashboard',
 
@@ -46,11 +49,15 @@ return [
     // === Popup/Modals & Dialog - Approval Task Review ===
     'modal' => [
         'title'                      => 'Review Approval Task',
+        'details'                    => 'Details',
         'app_details'                => 'Application Details',
         'app_type'                   => 'Application Type',
+        'application_type'           => 'Application Type',
         'applicant'                  => 'Applicant',
         'submission_date'            => 'Submission Date',
         'current_status'             => 'Current Status',
+        'current_approval_stage'     => 'Current Approval Stage',
+        'stage'                      => 'Stage',
         'applied_items'              => 'Applied Items',
         'quantity'                   => 'Quantity',
         'purpose'                    => 'Purpose',
@@ -63,6 +70,8 @@ return [
         'approval_decision'          => 'Approval Decision',
         'decision'                   => 'Decision',
         'comments'                   => 'Comments (Required for Rejection)',
+        'notes'                      => 'Notes',
+        'notes_placeholder'          => 'Enter your notes here...',
         'approve_option'             => 'Approve',
         'reject_option'              => 'Reject',
         'return_for_amendment'       => 'Return for Amendment',
@@ -72,6 +81,11 @@ return [
         'processing_message'         => 'Processing your decision...',
         'success_message'            => 'Your decision has been successfully recorded.',
         'error_message'              => 'Failed to record your decision.',
+        'received_on'                => 'Received On',
+        'status'                     => 'Status',
+        'select_task_to_view'        => 'Select a task to view details',
+        'task_already_processed'     => 'This task has already been processed.',
+        'no_details_available'       => 'No details available for this task.',
     ],
 
     // === System Messages: Status, Error, Confirmation, etc. ===
@@ -87,6 +101,8 @@ return [
 
     // === Approval Form Input Validation ===
     'validation' => [
+        'items_array'       => 'Items must be provided as an array.',
+        'notes_max'         => 'Comments must not exceed :max characters.',
         'decision_required' => 'A decision is required.',
         'decision_invalid'  => 'The selected decision is invalid.',
         'comments_required' => 'Comments are required for rejection.',

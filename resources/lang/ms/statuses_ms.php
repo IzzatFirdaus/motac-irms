@@ -4,26 +4,35 @@
 
 return [
     // === Status Permohonan Pinjaman ICT ===
-    'loan_draft'              => 'Draf',
-    'loan_pending_support'    => 'Menunggu Sokongan (Pegawai Penyokong)',
-    'loan_pending_hod_review' => 'Menunggu Semakan Ketua Bahagian',
-    'loan_pending_bpm_review' => 'Menunggu Semakan BPM',
-    'loan_approved'           => 'Diluluskan',
-    'loan_rejected'           => 'Ditolak',
-    'loan_partially_issued'   => 'Dikeluarkan Sebahagian',
-    'loan_issued'             => 'Dikeluarkan',
-    'loan_returned'           => 'Dipulangkan',
-    'loan_overdue'            => 'Tertunggak',
-    'loan_cancelled'          => 'Dibatalkan',
+    'loan_draft'                       => 'Draf',
+    'loan_pending_support'             => 'Menunggu Sokongan (Pegawai Penyokong)',
+    'loan_pending_hod_review'          => 'Menunggu Semakan Ketua Bahagian',
+    'loan_pending_bpm_review'          => 'Menunggu Semakan BPM',
+    'loan_approved'                    => 'Diluluskan',
+    'loan_rejected'                    => 'Ditolak',
+    'loan_partially_issued'            => 'Dikeluarkan Sebahagian',
+    'loan_issued'                      => 'Dikeluarkan',
+    'loan_returned'                    => 'Dipulangkan',
+    'loan_overdue'                     => 'Tertunggak',
+    'loan_cancelled'                   => 'Dibatalkan',
+    'loan_on_loan'                     => 'Sedang Dipinjam',
+    'loan_pending_return'              => 'Menunggu Pemulangan',
+    'loan_partially_returned'          => 'Dipulangkan Sebahagian',
+    'loan_returned_pending_inspection' => 'Dipulangkan (Menunggu Pemeriksaan)',
+    'loan_returned_good'               => 'Dipulangkan (Baik)',
+    'loan_returned_damaged'            => 'Dipulangkan (Rosak)',
+    'loan_returned_lost'               => 'Dipulangkan (Hilang)',
+    'loan_returned_damaged_and_lost'   => 'Dipulangkan (Rosak & Hilang)',
 
     // === Status Peralatan ICT ===
-    'equipment_available'         => 'Tersedia',
-    'equipment_on_loan'           => 'Dalam Pinjaman',
-    'equipment_in_repair'         => 'Dalam Pembaikan',
-    'equipment_disposed'          => 'Dilupuskan',
-    'equipment_lost'              => 'Hilang',
-    'equipment_damaged'           => 'Rosak',
-    'equipment_under_maintenance' => 'Dalam Penyelenggaraan',
+    'equipment_available'            => 'Tersedia',
+    'equipment_on_loan'              => 'Dalam Pinjaman',
+    'equipment_in_repair'            => 'Dalam Pembaikan',
+    'equipment_disposed'             => 'Dilupuskan',
+    'equipment_lost'                 => 'Hilang',
+    'equipment_damaged'              => 'Rosak',
+    'equipment_damaged_needs_repair' => 'Rosak (Perlu Dibaiki)',
+    'equipment_under_maintenance'    => 'Dalam Penyelenggaraan',
 
     // === Jenis Transaksi Pinjaman ===
     'transaction_type_issue'  => 'Pengeluaran',
@@ -57,10 +66,12 @@ return [
     'api_status_inactive' => 'Tidak Aktif',
 
     // === Status Kehadiran Pengguna/Umum ===
-    'status_present' => 'Hadir',
-    'status_absent'  => 'Tidak Hadir',
-    'status_leave'   => 'Cuti',
-    'status_sick'    => 'Sakit',
+    'status_present'               => 'Hadir',
+    'status_absent'                => 'Tidak Hadir',
+    'status_leave'                 => 'Cuti',
+    'status_sick'                  => 'Sakit',
+    'status_absent_without_excuse' => 'Tidak Hadir Tanpa Alasan',
+    'status_partial_attendance'    => 'Kehadiran Separa',
 
     // === Status Pengguna Am (Akaun, Profil, dsb) ===
     'status_active'    => 'Aktif',      // User is active
@@ -75,6 +86,15 @@ return [
     'ticket_resolved'              => 'Diselesaikan',
     'ticket_closed'                => 'Ditutup',
     'ticket_reopened'              => 'Dibuka Semula',
+    // Helpdesk Priority Statuses
+    'priority_low'                  => 'Rendah',
+    'priority_medium'               => 'Sederhana',
+    'priority_high'                 => 'Tinggi',
+    'priority_critical'             => 'Kritikal',
+    'ticket_on_hold'                => 'Ditangguhkan',
+    'ticket_awaiting_user_response' => 'Menunggu Maklum Balas Pengguna',
+    'ticket_escalated'              => 'Ditanggaikan',
+    'ticket_overdue'                => 'Lewat Tempoh',
 ];
 
 // Penjelasan:

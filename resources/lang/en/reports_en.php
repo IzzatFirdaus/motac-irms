@@ -4,12 +4,19 @@
 // This file is kept in sync with reports_ms.php for bilingual consistency and maintainability.
 
 return [
+    // Top-level aliases referenced in some views
+    'applicant'          => 'Applicant',
+    'loan_apps_title'    => 'Loan Applications Report',
+    'loan_apps_list'     => 'Loan Applications List',
+    'loan_dates'         => 'Loan Dates',
+    'no_loan_apps_found' => 'No loan applications found.',
 
     // === Main Report Titles & Navigation ===
-    'page_title'   => 'System Reports',
-    'page_header'  => 'Available System Reports',
-    'view_report'  => 'View Report', // Used on report-card components
-    'back_to_list' => 'Back to Reports List',
+    'page_title'      => 'System Reports',
+    'page_header'     => 'Available System Reports',
+    'back_to_reports' => 'Back to Reports',
+    'view_report'     => 'View Report', // Used on report-card components
+    'back_to_list'    => 'Back to Reports List',
 
     // === Common Filters for All Reports ===
     'filters' => [
@@ -51,6 +58,12 @@ return [
         ],
     ],
 
+    // === Email Applications Report (parity with ms) ===
+    'email_applications' => [
+        'title'       => 'Email Applications Report',
+        'description' => 'Report on status and history of email account applications.',
+    ],
+
     // === Equipment Inventory Reports ===
     'equipment_inventory' => [
         'title'       => 'ICT Equipment Inventory Report',
@@ -77,6 +90,7 @@ return [
         'description'        => 'Check report status and history of ICT equipment loan applications.',
         'no_results'         => 'No loan application data found for these criteria.',
         'search_placeholder' => 'Search Applicant or Application ID...',
+        'applicant'          => 'Applicant',
         'table'              => [
             'applicant'   => 'Applicant',
             'department'  => "Applicant's Department",

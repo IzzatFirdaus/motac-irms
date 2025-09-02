@@ -14,6 +14,7 @@ return [
     'back_to_list'        => 'Back to List',
     'view_details'        => 'View Details',
     'equipment_inventory' => 'Equipment Inventory',
+    'inventory_title'     => 'Equipment Inventory',
 
     // === Search and General Actions ===
     'search_placeholder' => 'Search Tag No., Brand, Model...',
@@ -79,6 +80,7 @@ return [
     'loan_history_title' => 'Loan History for This Equipment',
     'no_loan_history'    => 'No loan history recorded for this equipment.',
     'transaction_id'     => 'Transaction ID',
+    'loan_id'            => 'Loan ID',
     'borrower'           => 'Borrower',
     'loan_start_date'    => 'Loan Date',
     'loan_end_date'      => 'Return Date',

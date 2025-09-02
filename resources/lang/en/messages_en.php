@@ -138,6 +138,13 @@ return [
     'info'               => 'Information',        // Info alert/banner title
     'close'              => 'Close',              // Close button for alert/banner
 
+    // === Notification Actions ===
+    'notification_marked_read'          => 'Notification marked as read.',
+    'notification_already_read'         => 'This notification has already been read.',
+    'notification_none_to_mark'         => 'No new notifications to mark as read.',
+    'notification_all_marked_read'      => 'All notifications have been marked as read.',
+    'notification_no_permission_modify' => 'You do not have permission to modify this notification.',
+
     // === Email Notification Specific (for email templates) ===
     'notification_see_ticket'                     => 'View Ticket Details',
     'notification_ticket_details'                 => 'Ticket Details',

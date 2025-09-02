@@ -15,6 +15,7 @@ return [
     'motac_short'                 => 'MOTAC',
     'motac-irms'                  => 'Sistem MOTAC IRMS', // Short system name for app branding
     'Logo MOTAC IRMS'             => 'Logo MOTAC IRMS', // For logo alt/title
+    'logo_motac_irms'             => 'Logo MOTAC IRMS', // alias used in UI
     // System public name and description for legal/landing pages
     'Sistem Pengurusan Sumber Bersepadu MOTAC'                                                                                                             => 'Sistem Pengurusan Sumber Bersepadu MOTAC',
     'Sistem Dalaman Bersepadu untuk Kementerian Pelancongan, Seni dan Budaya Malaysia (MOTAC) bagi pengurusan permohonan emel dan pinjaman peralatan ICT.' => 'Sistem Dalaman Bersepadu untuk Kementerian Pelancongan, Seni dan Budaya Malaysia (MOTAC) bagi pengurusan permohonan emel dan pinjaman peralatan ICT.',
@@ -29,6 +30,7 @@ return [
     // === Language Switch ===
     'language_switched_en' => 'Bahasa sistem ditukar ke English.',
     'language_switched_ms' => 'Bahasa sistem ditukar ke Bahasa Melayu.',
+    'language_switched_'   => 'Bahasa sistem telah ditukar.',
 
     // === Alert / Flash Titles ===
     'alert_success_title'    => 'Berjaya!',
