@@ -155,8 +155,6 @@ class User extends Authenticatable
 
     public const SERVICE_STATUS_PELAJAR_INDUSTRI = '3';
 
-    public const SERVICE_STATUS_OTHER_AGENCY = '4';
-
     public const APPOINTMENT_TYPE_BAHARU = '1';
 
     public const APPOINTMENT_TYPE_KENAIKAN_PANGKAT_PERTUKARAN = '2';
@@ -191,7 +189,6 @@ class User extends Authenticatable
         self::SERVICE_STATUS_TETAP => 'Tetap',
         self::SERVICE_STATUS_KONTRAK_MYSTEP => 'Lantikan Kontrak / MyStep',
         self::SERVICE_STATUS_PELAJAR_INDUSTRI => 'Pelajar Latihan Industri (Ibu Pejabat Sahaja)',
-        self::SERVICE_STATUS_OTHER_AGENCY => 'E-mel Sandaran (Agensi Lain di MOTAC)',
     ];
 
     public static array $APPOINTMENT_TYPE_LABELS = [

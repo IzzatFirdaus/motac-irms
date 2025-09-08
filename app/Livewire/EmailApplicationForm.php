@@ -263,7 +263,7 @@ final class EmailApplicationForm extends Component
     public function updatedServiceStatus(string $value): void
     {
         $this->showServiceDates = in_array($value, [User::SERVICE_STATUS_KONTRAK_MYSTEP, User::SERVICE_STATUS_PELAJAR_INDUSTRI]);
-        $this->showApplicantJawatanGred = ! in_array($value, [User::SERVICE_STATUS_PELAJAR_INDUSTRI, User::SERVICE_STATUS_OTHER_AGENCY]);
+        $this->showApplicantJawatanGred = ! in_array($value, [User::SERVICE_STATUS_PELAJAR_INDUSTRI]);
     }
 
     public function updatedAppointmentType(string $value): void

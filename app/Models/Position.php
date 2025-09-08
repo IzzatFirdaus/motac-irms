@@ -69,7 +69,6 @@ class Position extends Model
     protected $fillable = [
         'name',
         'description',
-        'grade_id',
         'is_active',
         // 'created_by', // Handled by Blameable trait
         // 'updated_by', // Handled by Blameable trait
@@ -81,7 +80,6 @@ class Position extends Model
      */
     protected $casts = [
         'is_active' => 'boolean',
-        'grade_id' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
@@ -113,11 +111,12 @@ class Position extends Model
     // Relationships
 
     /**
-     * Get the grade associated with the position.
+     * Get the grades associated with this position.
+     * Based on GradesSeeder, each grade has a position_id linking to this position.
      */
-    public function grade(): BelongsTo
+    public function grades(): HasMany
     {
-        return $this->belongsTo(Grade::class, 'grade_id');
+        return $this->hasMany(Grade::class, 'position_id');
     }
 
     /**
@@ -127,31 +126,6 @@ class Position extends Model
     public function users(): HasMany
     {
         return $this->hasMany(User::class, 'position_id');
-    }
-
-    // Blameable relationships (These rely on the blameable fields existing in your 'positions' table)
-    /**
-     * Get the user who created this record.
-     */
-    public function creator(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-
-    /**
-     * Get the user who last updated this record.
-     */
-    public function updater(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'updated_by');
-    }
-
-    /**
-     * Get the user who soft deleted this record.
-     */
-    public function deleter(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'deleted_by');
     }
 
     /**
@@ -172,7 +146,7 @@ class Position extends Model
         return $query->where(function (Builder $subQuery) use ($searchTerm): void {
             $subQuery->where($this->getTable().'.name', 'like', $searchTerm)
                 ->orWhere($this->getTable().'.description', 'like', $searchTerm);
-        })->orWhereHas('grade', function (Builder $gradeQuery) use ($searchTerm): void {
+        })->orWhereHas('grades', function (Builder $gradeQuery) use ($searchTerm): void {
             $gradeQuery->where('name', 'like', $searchTerm);
         });
     }
