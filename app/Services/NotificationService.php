@@ -23,7 +23,6 @@ use App\Notifications\EquipmentReturnedNotification;
 use App\Notifications\EquipmentReturnReminderNotification;
 use App\Notifications\LoanApplicationReadyForIssuanceNotification;
 use App\Notifications\ProvisioningFailedNotification;
-use App\Notifications\EquipmentOverdueNotification;
 use Exception;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model;

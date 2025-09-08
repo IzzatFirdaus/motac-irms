@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "20f3f336f2e7332e2a3acdb69359f1e4",
+    "content-hash": "48c5a33f9f998fa7883c29c08df83877",
     "packages": [
         {
             "name": "asantibanez/livewire-charts",
@@ -9904,29 +9904,29 @@
         },
         {
             "name": "imanghafoori/laravel-microscope",
-            "version": "v1.0.377",
+            "version": "v1.0.417",
             "source": {
                 "type": "git",
                 "url": "https://github.com/imanghafoori1/laravel-microscope.git",
-                "reference": "d880e663e08c51f574975e6d404cb83bea6531c7"
+                "reference": "fc43427ac81fc3b52f437eb89f57938d5e3dd43d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/imanghafoori1/laravel-microscope/zipball/d880e663e08c51f574975e6d404cb83bea6531c7",
-                "reference": "d880e663e08c51f574975e6d404cb83bea6531c7",
+                "url": "https://api.github.com/repos/imanghafoori1/laravel-microscope/zipball/fc43427ac81fc3b52f437eb89f57938d5e3dd43d",
+                "reference": "fc43427ac81fc3b52f437eb89f57938d5e3dd43d",
                 "shasum": ""
             },
             "require": {
                 "composer/class-map-generator": "^1.0.0",
-                "imanghafoori/composer-json": "^2.0.1",
+                "imanghafoori/composer-json": "^2.1.0",
                 "imanghafoori/php-abstract-filesystem": "^0.1.5",
                 "imanghafoori/php-imports-analyzer": "^1.1.0",
                 "imanghafoori/php-search-replace": "^1.1.13",
-                "imanghafoori/php-token-analyzer": "^0.1.85",
+                "imanghafoori/php-token-analyzer": "^0.1.86",
                 "imanghafoori/smart-realtime-facades": "^1.1.8",
                 "jetbrains/phpstorm-attributes": "1.*",
                 "laravel/framework": "5.*|6.*|7.*|8.*|9.*|10.*|11.*|12.*",
-                "php": "^7.2|8.0.*|8.1.*|8.2.*|8.3.*|8.4.*"
+                "php": "^7.4|8.0.*|8.1.*|8.2.*|8.3.*|8.4.*"
             },
             "require-dev": {
                 "orchestra/testbench": ">=3.0.0",
@@ -9970,9 +9970,9 @@
             ],
             "support": {
                 "issues": "https://github.com/imanghafoori1/laravel-microscope/issues",
-                "source": "https://github.com/imanghafoori1/laravel-microscope/tree/v1.0.377"
+                "source": "https://github.com/imanghafoori1/laravel-microscope/tree/v1.0.417"
             },
-            "time": "2025-05-07T10:31:18+00:00"
+            "time": "2025-08-31T22:33:59+00:00"
         },
         {
             "name": "imanghafoori/php-abstract-filesystem",

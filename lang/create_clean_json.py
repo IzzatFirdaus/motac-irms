@@ -9,13 +9,13 @@ with open('valid_lines.txt', 'r', encoding='utf-8') as f:
 pairs = {}
 for line in lines:
     line = line.strip().rstrip(',')
-    
+
     # Match JSON key-value pattern
     match = re.match(r'\s*"([^"]+)"\s*:\s*"([^"]*)"', line)
     if match:
         key = match.group(1)
         value = match.group(2)
-        
+
         # Only add unique keys
         if key not in pairs:
             pairs[key] = value

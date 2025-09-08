@@ -34,7 +34,7 @@
     "driftingly/rector-laravel": "^1.2",
     "fakerphp/faker": "^1.9.1",
     "friendsofphp/php-cs-fixer": "*",
-    "imanghafoori/laravel-microscope": "1.0.377",
+    "imanghafoori/laravel-microscope": "*",
     "larastan/larastan": "^2.0",
     "laravel/boost": "^1.1",
     "laravel/pint": "^1.22",
