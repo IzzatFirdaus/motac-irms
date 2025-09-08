@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Jobs;
@@ -22,7 +21,7 @@ class SyncAppWithGithub extends ProcessWebhookJob
                 $alreadyUpToDate = true;
             }
 
-            info('Deploy Output: '.$buffer);
+            info('Deploy Output: ' . $buffer);
         });
 
         if ($alreadyUpToDate) {
