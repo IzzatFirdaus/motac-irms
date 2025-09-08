@@ -1,0 +1,172 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Models;
+
+use Database\Factories\CategoryFactory;
+// Alias to avoid conflict
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
+
+// Explicit import for User and SubCategory
+// Assuming SubCategory model is for these generic categories
+
+/**
+ * @property int $id
+ * @property string $name
+ * @property string|null $description
+ * @property bool $is_active
+ * @property int|null $created_by
+ * @property int|null $updated_by
+ * @property int|null $deleted_by
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \App\Models\User|null $creator
+ * @property-read \App\Models\User|null $deleter
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\SubCategory> $subCategories
+ * @property-read int|null $sub_categories_count
+ * @property-read \App\Models\User|null $updater
+ *
+ * @method static \Database\Factories\CategoryFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Category newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Category newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Category onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Category query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Category whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Category whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Category whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Category whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Category whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Category whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Category whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Category whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Category whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Category whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Category withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Category withoutTrashed()
+ *
+ * @mixin \Eloquent
+ */
+class Category extends Model
+{
+    use HasFactory;
+    use SoftDeletes;
+
+    /**
+     * The table associated with the model.
+     */
+    protected $table = 'categories';
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'name',
+        'description',
+        'is_active',
+        'created_by', // For audit
+        'updated_by', // For audit
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [ // Corrected: Removed array type
+        'is_active' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'deleted_at' => 'datetime',
+    ];
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function (self $model): void {
+            if (Auth::check()) {
+                /** @var User $currentUser */
+                $currentUser = Auth::user();
+                if (is_null($model->created_by)) {
+                    $model->created_by = $currentUser->id;
+                }
+                if (is_null($model->updated_by)) {
+                    $model->updated_by = $currentUser->id;
+                }
+            }
+        });
+
+        static::updating(function (self $model): void {
+            if (Auth::check() && ! $model->isDirty('updated_by')) {
+                /** @var User $currentUser */
+                $currentUser = Auth::user();
+                $model->updated_by = $currentUser->id;
+            }
+        });
+
+        if (in_array(SoftDeletes::class, class_uses_recursive(static::class))) {
+            static::deleting(function (self $model): void {
+                if (Auth::check() && property_exists($model, 'deleted_by') && is_null($model->deleted_by)) {
+                    /** @var User $currentUser */
+                    $currentUser = Auth::user();
+                    $model->deleted_by = $currentUser->id;
+                    $model->saveQuietly();
+                }
+            });
+            static::restoring(function (self $model): void {
+                if (property_exists($model, 'deleted_by')) {
+                    $model->deleted_by = null;
+                }
+                if (Auth::check() && ! $model->isDirty('updated_by')) {
+                    /** @var User $currentUser */
+                    $currentUser = Auth::user();
+                    $model->updated_by = $currentUser->id;
+                }
+            });
+        }
+    }
+
+    protected static function newFactory(): CategoryFactory
+    {
+        return CategoryFactory::new();
+    }
+
+    /** @return BelongsTo<User, Category> */
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /** @return BelongsTo<User, Category> */
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    /** @return BelongsTo<User, Category> */
+    public function deleter(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deleted_by');
+    }
+
+    /**
+     * Get the subcategories associated with this category.
+     * This assumes a SubCategory model that has a 'category_id' foreign key.
+     *
+     * @return HasMany<SubCategory>
+     */
+    public function subCategories(): HasMany
+    {
+        // Ensure SubCategory model exists and has 'category_id'
+        return $this->hasMany(SubCategory::class, 'category_id');
+    }
+}

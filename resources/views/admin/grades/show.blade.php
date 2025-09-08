@@ -13,14 +13,22 @@
                         {{ __('Butiran Gred') }}: <span class="text-primary">{{ $grade->name ?? 'N/A' }}</span>
                     </h1>
                     <div>
+<<<<<<< HEAD
                         {{-- Corrected route name --}}
                         <a href="{{ route('settings.grades.index') }}"
+=======
+                        <a href="{{ route('admin.grades.index') }}"
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
                             class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center me-2">
                             <i class="bi bi-arrow-left me-1"></i> {{ __('Kembali ke Senarai') }}
                         </a>
                         @can('update', $grade)
+<<<<<<< HEAD
                             {{-- Corrected route name --}}
                             <a href="{{ route('settings.grades.edit', $grade) }}"
+=======
+                            <a href="{{ route('admin.grades.edit', $grade) }}"
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
                                 class="btn btn-sm btn-primary d-inline-flex align-items-center">
                                 <i class="bi bi-pencil-square me-1"></i>{{ __('Kemaskini') }}
                             </a>
@@ -50,6 +58,11 @@
                             <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Nama Gred') }}</dt>
                             <dd class="col-sm-8 col-lg-9 text-dark">{{ $grade->name ?? 'N/A' }}</dd>
 
+<<<<<<< HEAD
+=======
+                            {{-- Removed 'Kod Gred' to align with system design `grades` table which has `name` and `level` --}}
+
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
                             <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Tahap (Angka)') }}</dt>
                             <dd class="col-sm-8 col-lg-9 text-dark">{{ $grade->level ?? 'N/A' }}</dd>
 
@@ -73,6 +86,10 @@
                             <dd class="col-sm-8 col-lg-9 text-dark">
                                 {{ $grade->minApprovalGrade?->name ?? __('Tidak Berkaitan') }}</dd>
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
                             @if ($grade->created_at)
                                 <dt class="col-sm-4 col-lg-3 fw-medium text-muted">{{ __('Dicipta Pada') }}</dt>
                                 <dd class="col-sm-8 col-lg-9 text-dark">
@@ -87,8 +104,12 @@
                     </div>
                     @can('delete', $grade)
                         <div class="card-footer bg-light text-end py-3 border-top">
+<<<<<<< HEAD
                             {{-- Corrected route name --}}
                             <form method="POST" action="{{ route('settings.grades.destroy', $grade) }}"
+=======
+                            <form method="POST" action="{{ route('admin.grades.destroy', $grade) }}"
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
                                 onsubmit="return confirm('{{ __('Adakah anda pasti ingin memadam gred :name? Tindakan ini tidak boleh diundur.', ['name' => $grade->name]) }}');"
                                 class="d-inline">
                                 @csrf

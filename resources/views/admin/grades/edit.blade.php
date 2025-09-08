@@ -12,14 +12,22 @@
                     <h1 class="h2 fw-bold text-dark mb-0">
                         {{ __('Kemaskini Gred') }}: <span class="text-primary">{{ $grade->name ?? 'N/A' }}</span>
                     </h1>
+<<<<<<< HEAD
                     {{-- Corrected route name --}}
                     <a href="{{ route('settings.grades.index') }}"
+=======
+                    <a href="{{ route('admin.grades.index') }}"
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
                         class="btn btn-sm btn-secondary d-inline-flex align-items-center">
                         <i class="bi bi-arrow-left me-1"></i>
                         {{ __('Kembali ke Senarai Gred') }}
                     </a>
                 </div>
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
                 @if ($errors->any())
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <h5 class="alert-heading fw-bold">{{ __('Ralat Pengesahan!') }}</h5>
@@ -43,8 +51,13 @@
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 @endif
+<<<<<<< HEAD
                 {{-- Corrected route name --}}
                 <form action="{{ route('settings.grades.update', $grade) }}" method="POST">
+=======
+
+                <form action="{{ route('admin.grades.update', $grade) }}" method="POST">
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
                     @csrf
                     @method('PUT')
                     <div class="card shadow-sm">
@@ -64,6 +77,11 @@
                                 @enderror
                             </div>
 
+<<<<<<< HEAD
+=======
+                            {{-- Removing 'code' field to align with system design's `grades` table which has `name` and `level`. --}}
+
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
                             <div class="mb-3">
                                 <label for="level" class="form-label fw-medium">{{ __('Tahap Gred (Angka)') }}<span
                                         class="text-danger">*</span></label>
@@ -88,6 +106,10 @@
                                 @enderror
                             </div>
 
+<<<<<<< HEAD
+=======
+                            {{-- System Design fields for `grades` table (PDF pg. 7): name, level, min_approval_grade_id, is_approver_grade --}}
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
                             <div class="mb-3">
                                 <div class="form-check form-switch">
                                     <input type="checkbox" name="is_approver_grade" id="is_approver_grade" value="1"
@@ -114,6 +136,10 @@
                                     <option value="">-- {{ __('Tiada / Tidak Perlu') }} --</option>
                                     @isset($gradesList)
                                         @foreach ($gradesList as $g)
+<<<<<<< HEAD
+=======
+                                            {{-- Exclude current grade from the list of potential min_approval_grades --}}
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
                                             @if ($g->id !== $grade->id)
                                                 <option value="{{ $g->id }}"
                                                     {{ old('min_approval_grade_id', $grade->min_approval_grade_id) == $g->id ? 'selected' : '' }}>
@@ -132,8 +158,12 @@
                             </div>
                         </div>
                         <div class="card-footer text-end bg-light py-3">
+<<<<<<< HEAD
                              {{-- Corrected route name --}}
                             <a href="{{ route('settings.grades.show', $grade) }}" class="btn btn-outline-secondary me-2">
+=======
+                            <a href="{{ route('admin.grades.show', $grade) }}" class="btn btn-outline-secondary me-2">
+>>>>>>> d2dd0a5 (more edited codes and new files 29/5/25)
                                 <i class="bi bi-x-lg me-1"></i> {{ __('Batal') }}
                             </a>
                             <button type="submit" class="btn btn-primary d-inline-flex align-items-center px-4">

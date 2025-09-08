@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 @import url('https://fonts.googleapis.com/css?family=Noto+Sans:400,700&display=swap'); /* Optional: Attempt to load Noto Sans, email client support varies */
 /*-- resources/views/vendor/mail/html/themes/default.css --}}*/
 
@@ -41,3 +42,12 @@ a {
     background-color: #f8f9fa; // MOTAC Background (Light Mode)
 }
 */
+=======
+.button-motac_primary {
+    background-color: #0050A0; /* MOTAC Primary Blue */
+    border-top: 10px solid #0050A0;
+    border-right: 18px solid #0050A0;
+    border-bottom: 10px solid #0050A0;
+    border-left: 18px solid #0050A0;
+}
+>>>>>>> bb90b6b (file edits 280525)
