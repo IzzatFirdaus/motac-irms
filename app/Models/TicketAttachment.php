@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * TicketAttachment Model (Helpdesk Ticket Attachment).
- *
+ * 
  * Represents file attachments for helpdesk tickets and comments.
  *
  * @property int                             $id
@@ -30,15 +30,29 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\Ticket $ticket
  * @property-read \App\Models\TicketComment|null $comment
  * @property-read \App\Models\User $user
- *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment withoutTrashed()
- *
+ * @property int|null $size File size in bytes
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment whereCommentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment whereFilename($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment whereFilepath($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment whereMimeType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment whereSize($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment whereTicketId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment whereUserId($value)
  * @mixin \Eloquent
+ * @mixin IdeHelperTicketAttachment
  */
 class TicketAttachment extends Model
 {

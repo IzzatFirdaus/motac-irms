@@ -11,6 +11,7 @@ use App\Models\HelpdeskTicket;
 use App\Services\HelpdeskService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\Api\StoreHelpdeskTicketRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -34,16 +35,10 @@ class HelpdeskApiController extends Controller
      * Store a newly created ticket via API.
      * Validates input, ensures authenticated user, and returns JSON response.
      */
-    public function store(Request $request): JsonResponse
+    public function store(StoreHelpdeskTicketRequest $request): JsonResponse
     {
         try {
-            $validatedData = $request->validate([
-                'category_id'   => 'required|exists:helpdesk_categories,id',
-                'priority_id'   => 'required|exists:helpdesk_priorities,id',
-                'subject'       => 'required|string|max:255',
-                'description'   => 'required|string',
-                'attachments.*' => 'nullable|file|max:5120', // 5MB max per file
-            ]);
+            $validatedData = $request->validated();
 
             $applicant = Auth::user();
             if (! $applicant) {

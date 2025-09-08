@@ -30,7 +30,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\User|null $creator
  * @property-read \App\Models\User|null $deleter
  * @property-read \App\Models\User|null $updater
- *
  * @method static \Database\Factories\PositionFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Position newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Position newQuery()
@@ -50,8 +49,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Position whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Position withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Position withoutTrashed()
- *
  * @mixin \Eloquent
+ * @mixin IdeHelperPosition
  */
 class Position extends Model
 {

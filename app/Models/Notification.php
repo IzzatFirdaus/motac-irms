@@ -16,7 +16,7 @@ use Illuminate\Support\Str;
 
 /**
  * Notification Model.
- *
+ * 
  * Stores notification records for notifiable entities (users, etc).
  *
  * @property string                          $id
@@ -35,7 +35,6 @@ use Illuminate\Support\Str;
  * @property-read \App\Models\User|null $creator
  * @property-read \App\Models\User|null $updater
  * @property-read \App\Models\User|null $deleter
- *
  * @method static Builder<static>|Notification            byNotifiable(\Illuminate\Database\Eloquent\Model $notifiableModel)
  * @method static Builder<static>|Notification            byType(array|string $type)
  * @method static \Database\Factories\NotificationFactory factory($count = null, $state = [])
@@ -47,8 +46,20 @@ use Illuminate\Support\Str;
  * @method static Builder<static>|Notification            unread()
  * @method static Builder<static>|Notification            withTrashed(bool $withTrashed = true)
  * @method static Builder<static>|Notification            withoutTrashed()
- *
+ * @method static Builder<static>|Notification whereCreatedAt($value)
+ * @method static Builder<static>|Notification whereCreatedBy($value)
+ * @method static Builder<static>|Notification whereData($value)
+ * @method static Builder<static>|Notification whereDeletedAt($value)
+ * @method static Builder<static>|Notification whereDeletedBy($value)
+ * @method static Builder<static>|Notification whereId($value)
+ * @method static Builder<static>|Notification whereNotifiableId($value)
+ * @method static Builder<static>|Notification whereNotifiableType($value)
+ * @method static Builder<static>|Notification whereReadAt($value)
+ * @method static Builder<static>|Notification whereType($value)
+ * @method static Builder<static>|Notification whereUpdatedAt($value)
+ * @method static Builder<static>|Notification whereUpdatedBy($value)
  * @mixin \Eloquent
+ * @mixin IdeHelperNotification
  */
 final class Notification extends Model
 {

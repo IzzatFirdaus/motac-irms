@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * TicketPriority Model (Helpdesk Ticket Priority).
- *
+ * 
  * Represents priority levels for helpdesk tickets (e.g., Low, Medium, High, Critical).
  *
  * @property int                             $id
@@ -25,15 +25,25 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Ticket> $tickets
  * @property-read int|null $tickets_count
- *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketPriority newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketPriority newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketPriority onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketPriority query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketPriority withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketPriority withoutTrashed()
- *
+ * @property string|null $color_code UI color (hex)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketPriority whereColorCode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketPriority whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketPriority whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketPriority whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketPriority whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketPriority whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketPriority whereLevel($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketPriority whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketPriority whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketPriority whereUpdatedBy($value)
  * @mixin \Eloquent
+ * @mixin IdeHelperTicketPriority
  */
 class TicketPriority extends Model
 {

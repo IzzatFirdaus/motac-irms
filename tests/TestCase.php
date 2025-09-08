@@ -17,14 +17,14 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
         // Ensure base tables exist before attempting to seed (in-memory sqlite runs migrations lazily)
-        if (\Illuminate\Support\Facades\Schema::hasTable('users')) {
+        if (!\Illuminate\Support\Facades\Schema::hasTable('users')) {
+            return; // Migrations not yet run for this test; skip global seeding
+        }
             // Ensure at least one user exists for factories
             if (! \App\Models\User::query()->exists()) {
                 \App\Models\User::factory()->create();
             }
-        } else {
-            return; // Migrations not yet run for this test; skip global seeding
-        }
+        
 
         // Do not globally pre-seed helpdesk categories/priorities here to avoid
         // unique constraint conflicts with tests which explicitly create them.

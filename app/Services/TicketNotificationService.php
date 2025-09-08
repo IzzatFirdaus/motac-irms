@@ -75,12 +75,15 @@ class TicketNotificationService
         }
 
         // If an internal comment, notify other IT Admins
-        if ($comment->is_internal) {
+        if (!$comment->is_internal){
+
+        Log::info(sprintf('Ticket Comment Added Notification sent for Ticket ID: %d by User: %s', $ticket->id, $commenter->email));
+    return;} 
             $itAdmins = User::role('IT Admin')
                 ->where('id', '!=', $commenter->id) // Don't notify the commenter themselves
                 ->get();
             Notification::send($itAdmins, new TicketCommentAddedNotification($comment, $commenter, 'internal_admin'));
-        }
+        
 
         Log::info(sprintf('Ticket Comment Added Notification sent for Ticket ID: %d by User: %s', $ticket->id, $commenter->email));
     }

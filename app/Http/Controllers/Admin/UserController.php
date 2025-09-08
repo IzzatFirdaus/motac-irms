@@ -8,13 +8,14 @@ use App\Models\Grade;
 use App\Models\Position;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Http\Requests\Admin\StoreUserRequest;
+use App\Http\Requests\Admin\UpdateUserRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log; // For assigning roles
-use Illuminate\Validation\Rules\Password; // Added for logging
+use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Role;
 
-// Explicitly import Auth facade
+
 
 class UserController extends Controller
 {
@@ -36,42 +37,17 @@ class UserController extends Controller
         // }
         Log::info('Admin UserController@index: Fetching users for administration view.', ['admin_user_id' => Auth::id()]);
 
-        $query = User::with(['department', 'position', 'grade', 'roles']);
-
-        // Example Search Functionality
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where(function ($q) use ($search): void {
-                $q->where('name', 'like', sprintf('%%%s%%', $search))
-                    ->orWhere('email', 'like', sprintf('%%%s%%', $search))
-                    ->orWhere('identification_number', 'like', sprintf('%%%s%%', $search));
-                // Removed 'motac_email' as per refactoring plan.
-            });
-        }
-
-        // Example filtering by department, position, grade, or role
-        if ($request->filled('department_id')) {
-            $query->where('department_id', $request->input('department_id'));
-        }
-
-        if ($request->filled('position_id')) {
-            $query->where('position_id', $request->input('position_id'));
-        }
-
-        if ($request->filled('grade_id')) {
-            $query->where('grade_id', $request->input('grade_id'));
-        }
+        $query = User::with(['department', 'position', 'grade', 'roles'])
+            ->search($request->string('search')->toString())
+            ->filterDepartment($request->integer('department_id'))
+            ->filterPosition($request->integer('position_id'))
+            ->filterGrade($request->integer('grade_id'));
 
         if ($request->filled('role')) {
-            $query->role($request->input('role')); // Assuming role scope is defined in User model
+            $query->role($request->input('role'));
         }
 
-        // Removed filtering by 'status' as per refactoring plan, relying on 'is_active' boolean
-        // if ($request->filled('status')) {
-        //     $query->where('status', $request->input('status'));
-        // }
-
-        $users = $query->orderBy('name', 'asc')->paginate(config('pagination.default_size', 15));
+        $users = $query->orderByName()->paginate(config('pagination.default_size', 15));
 
         $departments = Department::orderBy('name', 'asc')->get();
         $positions   = Position::orderBy('name', 'asc')->get();
@@ -98,20 +74,9 @@ class UserController extends Controller
     /**
      * Store a newly created user in storage.
      */
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        $validatedData = $request->validate([
-            'name'                  => 'required|string|max:255',
-            'email'                 => 'required|string|email|max:255|unique:users',
-            'identification_number' => 'nullable|string|max:255|unique:users',
-            'department_id'         => 'required|exists:departments,id',
-            'position_id'           => 'required|exists:positions,id',
-            'grade_id'              => 'required|exists:grades,id',
-            'is_active'             => 'required|boolean', // Added validation for is_active
-            'roles'                 => 'nullable|array',
-            'roles.*'               => 'exists:roles,name',
-            'password'              => ['required', 'confirmed', Password::defaults()],
-        ]);
+        $validatedData = $request->validated();
 
         $user = User::create([
             'name'                  => $validatedData['name'],
@@ -120,11 +85,11 @@ class UserController extends Controller
             'department_id'         => $validatedData['department_id'],
             'position_id'           => $validatedData['position_id'],
             'grade_id'              => $validatedData['grade_id'],
-            'is_active'             => $validatedData['is_active'], // Assign is_active
+            'status'                => $validatedData['status'],
             'password'              => Hash::make($validatedData['password']),
         ]);
 
-        if ($request->filled('roles')) {
+    if ($request->filled('roles')) {
             $user->assignRole($validatedData['roles']);
         }
 
@@ -164,20 +129,9 @@ class UserController extends Controller
     /**
      * Update the specified user in storage.
      */
-    public function update(Request $request, User $user)
+    public function update(UpdateUserRequest $request, User $user)
     {
-        $validatedData = $request->validate([
-            'name'                  => 'required|string|max:255',
-            'email'                 => 'required|string|email|max:255|unique:users,email,'.$user->id,
-            'identification_number' => 'nullable|string|max:255|unique:users,identification_number,'.$user->id,
-            'department_id'         => 'required|exists:departments,id',
-            'position_id'           => 'required|exists:positions,id',
-            'grade_id'              => 'required|exists:grades,id',
-            'is_active'             => 'required|boolean', // Validate is_active
-            'roles'                 => 'nullable|array',
-            'roles.*'               => 'exists:roles,name',
-            'password'              => ['nullable', 'confirmed', Password::defaults()],
-        ]);
+        $validatedData = $request->validated();
 
         $userData = $validatedData;
         if (! empty($validatedData['password'])) {

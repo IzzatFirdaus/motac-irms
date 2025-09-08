@@ -42,12 +42,15 @@ class UpdateHelpdeskTicketRequest extends FormRequest
 
         // If status is being CHANGED to closed or resolved, require resolution_notes
         // Important: Only enforce when 'status' is present in the incoming payload, not based on current ticket status
-        if ($this->has('status')) {
+        if (!$this->has('status')){
+
+        return $rules;
+    } 
             $incomingStatus = $this->input('status');
             if (in_array($incomingStatus, [HelpdeskTicket::STATUS_CLOSED, HelpdeskTicket::STATUS_RESOLVED], true)) {
                 $rules['resolution_notes'] = ['required', 'string', 'max:2000'];
             }
-        }
+        
 
         return $rules;
     }

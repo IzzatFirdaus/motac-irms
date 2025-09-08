@@ -82,7 +82,8 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Approval withoutTrashed()
  * @mixin \Eloquent
  */
-	class Approval extends \Eloquent {}
+	#[\AllowDynamicProperties]
+	class IdeHelperApproval {}
 }
 
 namespace App\Models{
@@ -111,7 +112,7 @@ namespace App\Models{
  * @property-read int|null $users_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Ticket> $tickets
  * @property-read int|null $tickets_count
- * @method static \Database\Factories\DepartmentFactory factory($count = null, $state = [])
+ * @method static \Database\Factories\DepartmentFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Department newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Department newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Department onlyTrashed()
@@ -131,9 +132,11 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Department whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Department withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Department withoutTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Department search(?string $term)
  * @mixin \Eloquent
  */
-	class Department extends \Eloquent {}
+	#[\AllowDynamicProperties]
+	class IdeHelperDepartment {}
 }
 
 namespace App\Models{
@@ -148,7 +151,8 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailApplication query()
  * @mixin \Eloquent
  */
-	class EmailApplication extends \Eloquent {}
+	#[\AllowDynamicProperties]
+	class IdeHelperEmailApplication {}
 }
 
 namespace App\Models{
@@ -206,7 +210,7 @@ namespace App\Models{
  * @property-read int|null $loan_transaction_items_count
  * @property-read \App\Models\Location|null $location
  * @property-read \App\Models\SubCategory|null $subCategory
- * @method static \Database\Factories\EquipmentFactory factory($count = null, $state = [])
+ * @method static \Database\Factories\EquipmentFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment onlyTrashed()
@@ -243,9 +247,13 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereWarrantyExpiryDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment withoutTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment filterAssetType(?string $assetType)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment filterDepartment(?int $departmentId)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment filterStatus(?string $status)
  * @mixin \Eloquent
  */
-	class Equipment extends \Eloquent {}
+	#[\AllowDynamicProperties]
+	class IdeHelperEquipment {}
 }
 
 namespace App\Models{
@@ -272,7 +280,7 @@ namespace App\Models{
  * @property-read \App\Models\User|null $updater
  * @property-read \App\Models\User|null $deleter
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EquipmentCategory active()
- * @method static \Database\Factories\EquipmentCategoryFactory factory($count = null, $state = [])
+ * @method static \Database\Factories\EquipmentCategoryFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EquipmentCategory newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EquipmentCategory newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EquipmentCategory onlyTrashed()
@@ -291,7 +299,8 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EquipmentCategory withoutTrashed()
  * @mixin \Eloquent
  */
-	class EquipmentCategory extends \Eloquent {}
+	#[\AllowDynamicProperties]
+	class IdeHelperEquipmentCategory {}
 }
 
 namespace App\Models{
@@ -323,7 +332,7 @@ namespace App\Models{
  * @property-read \App\Models\User|null $creator
  * @property-read \App\Models\User|null $updater
  * @property-read \App\Models\User|null $deleter
- * @method static \Database\Factories\GradeFactory factory($count = null, $state = [])
+ * @method static \Database\Factories\GradeFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade onlyTrashed()
@@ -346,7 +355,8 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade withoutTrashed()
  * @mixin \Eloquent
  */
-	class Grade extends \Eloquent {}
+	#[\AllowDynamicProperties]
+	class IdeHelperGrade {}
 }
 
 namespace App\Models{
@@ -372,7 +382,6 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment withoutTrashed()
- * @mixin \Eloquent
  * @property int|null $created_by
  * @property int|null $updated_by
  * @property int|null $deleted_by
@@ -391,8 +400,10 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskAttachment whereUpdatedBy($value)
+ * @mixin \Eloquent
  */
-	class HelpdeskAttachment extends \Eloquent {}
+	#[\AllowDynamicProperties]
+	class IdeHelperHelpdeskAttachment {}
 }
 
 namespace App\Models{
@@ -401,20 +412,20 @@ namespace App\Models{
  * 
  * Represents categories for helpdesk tickets.
  *
- * @property int         $id
- * @property string      $name
- * @property string|null $description
- * @property bool        $is_active
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
+ * @property int                             $id
+ * @property string                          $name
+ * @property string|null                     $description
+ * @property bool                            $is_active
+ * @property int|null                        $created_by
+ * @property int|null                        $updated_by
+ * @property int|null                        $deleted_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\HelpdeskTicket> $tickets
  * @property-read int|null $tickets_count
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskCategory active()
- * @method static \Database\Factories\HelpdeskCategoryFactory factory($count = null, $state = [])
+ * @method static \Database\Factories\HelpdeskCategoryFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskCategory newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskCategory newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskCategory onlyTrashed()
@@ -433,7 +444,8 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskCategory withoutTrashed()
  * @mixin \Eloquent
  */
-	class HelpdeskCategory extends \Eloquent {}
+	#[\AllowDynamicProperties]
+	class IdeHelperHelpdeskCategory {}
 }
 
 namespace App\Models{
@@ -459,7 +471,6 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment withoutTrashed()
- * @mixin \Eloquent
  * @property int|null $created_by
  * @property int|null $updated_by
  * @property int|null $deleted_by
@@ -477,8 +488,10 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskComment whereUserId($value)
+ * @mixin \Eloquent
  */
-	class HelpdeskComment extends \Eloquent {}
+	#[\AllowDynamicProperties]
+	class IdeHelperHelpdeskComment {}
 }
 
 namespace App\Models{
@@ -487,13 +500,13 @@ namespace App\Models{
  * 
  * Represents priority levels for helpdesk tickets.
  *
- * @property int         $id
- * @property string      $name
- * @property int         $level
- * @property string|null $color_code
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
+ * @property int                             $id
+ * @property string                          $name
+ * @property int                             $level
+ * @property string|null                     $color_code
+ * @property int|null                        $created_by
+ * @property int|null                        $updated_by
+ * @property int|null                        $deleted_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
@@ -501,7 +514,7 @@ namespace App\Models{
  * @property-read string $label
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\HelpdeskTicket> $tickets
  * @property-read int|null $tickets_count
- * @method static \Database\Factories\HelpdeskPriorityFactory factory($count = null, $state = [])
+ * @method static \Database\Factories\HelpdeskPriorityFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskPriority newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskPriority newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskPriority onlyTrashed()
@@ -520,7 +533,8 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskPriority withoutTrashed()
  * @mixin \Eloquent
  */
-	class HelpdeskPriority extends \Eloquent {}
+	#[\AllowDynamicProperties]
+	class IdeHelperHelpdeskPriority {}
 }
 
 namespace App\Models{
@@ -538,10 +552,7 @@ namespace App\Models{
  * @property int                             $user_id
  * @property int|null                        $assigned_to_user_id
  * @property \Illuminate\Support\Carbon|null $closed_at
- * @property-read \App\Models\User|null $user
- * @property-read \App\Models\User|null $assignedTo
  * @property string|null                     $resolution_notes
- * @property string|null                     $resolution_details
  * @property \Illuminate\Support\Carbon|null $sla_due_at
  * @property int|null                        $closed_by_id
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -551,6 +562,7 @@ namespace App\Models{
  * @property int|null $updated_by
  * @property int|null $deleted_by
  * @property-read \App\Models\User $applicant
+ * @property-read \App\Models\User|null $assignedTo
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\HelpdeskAttachment> $attachments
  * @property-read int|null $attachments_count
  * @property-read \App\Models\HelpdeskCategory $category
@@ -559,10 +571,10 @@ namespace App\Models{
  * @property-read int|null $comments_count
  * @property-read bool $is_overdue
  * @property-read string $status_label
- * @property-read string $subject
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\HelpdeskComment> $latestComment
  * @property-read int|null $latest_comment_count
  * @property-read \App\Models\HelpdeskPriority $priority
+ * @property-read \App\Models\User $user
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket closed()
  * @method static \Database\Factories\HelpdeskTicketFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket newModelQuery()
@@ -592,7 +604,8 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskTicket withoutTrashed()
  * @mixin \Eloquent
  */
-	class HelpdeskTicket extends \Eloquent {}
+	#[\AllowDynamicProperties]
+	class IdeHelperHelpdeskTicket {}
 }
 
 namespace App\Models{
@@ -621,7 +634,8 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Import withoutTrashed()
  * @mixin \Eloquent
  */
-	class Import extends \Eloquent {}
+	#[\AllowDynamicProperties]
+	class IdeHelperImport {}
 }
 
 namespace App\Models{
@@ -656,9 +670,9 @@ namespace App\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
+ * @property int|null                        $created_by
+ * @property int|null                        $updated_by
+ * @property int|null                        $deleted_by
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Approval> $approvals
  * @property-read int|null $approvals_count
  * @property-read \App\Models\User|null $approvedBy
@@ -686,7 +700,7 @@ namespace App\Models{
  * @property-read \App\Models\User $user
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication active()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication dueInDays(int $days)
- * @method static \Database\Factories\LoanApplicationFactory factory($count = null, $state = [])
+ * @method static \Database\Factories\LoanApplicationFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication onlyTrashed()
@@ -722,9 +736,14 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication whereUserId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication withoutTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication filterCreatedBetween(?string $dateFrom, ?string $dateTo)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication filterDepartment(?int $departmentId)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication filterStatus(?string $status)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplication search(?string $term)
  * @mixin \Eloquent
  */
-	class LoanApplication extends \Eloquent {}
+	#[\AllowDynamicProperties]
+	class IdeHelperLoanApplication {}
 }
 
 namespace App\Models{
@@ -748,16 +767,16 @@ namespace App\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
+ * @property int|null                        $created_by
+ * @property int|null                        $updated_by
+ * @property int|null                        $deleted_by
  * @property-read \App\Models\Equipment|null $equipment
  * @property-read string $equipment_type_label
  * @property-read string $status_label
  * @property-read \App\Models\LoanApplication|null $loanApplication
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanTransactionItem> $loanTransactionItems
  * @property-read int|null $loan_transaction_items_count
- * @method static \Database\Factories\LoanApplicationItemFactory factory($count = null, $state = [])
+ * @method static \Database\Factories\LoanApplicationItemFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem onlyTrashed()
@@ -782,7 +801,8 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanApplicationItem withoutTrashed()
  * @mixin \Eloquent
  */
-	class LoanApplicationItem extends \Eloquent {}
+	#[\AllowDynamicProperties]
+	class IdeHelperLoanApplicationItem {}
 }
 
 namespace App\Models{
@@ -791,28 +811,29 @@ namespace App\Models{
  * 
  * Represents an equipment issue or return record for a loan application.
  *
- * @property int                              $id
- * @property int                              $loan_application_id
- * @property string                           $type
- * @property \Illuminate\Support\Carbon|null  $transaction_date
- * @property array|string|null                $accessories_checklist_on_issue
- * @property int|null                         $issuing_officer_id
- * @property int|null                         $receiving_officer_id
- * @property array|null                       $accessories_checklist_on_issue
- * @property string|null                      $issue_notes
- * @property \Illuminate\Support\Carbon|null  $issue_timestamp
- * @property int|null                         $returning_officer_id
- * @property int|null                         $return_accepting_officer_id
- * @property array|null                       $accessories_checklist_on_return
- * @property string|null                      $return_notes
- * @property \Illuminate\Support\Carbon|null  $return_timestamp
- * @property int|null                         $related_transaction_id
- * @property string                           $status
- * @property \Illuminate\Support\Carbon|null  $due_date
- * @property \Illuminate\Support\Carbon|null  $created_at
- * @property \Illuminate\Support\Carbon|null  $updated_at
- * @property \Illuminate\Support\Carbon|null  $deleted_at
- * @property \App\Models\LoanApplication|null $loanApplication
+ * @property int                             $id
+ * @property int                             $loan_application_id
+ * @property string                          $type
+ * @property \Illuminate\Support\Carbon|null $transaction_date
+ * @property int|null                        $issuing_officer_id
+ * @property int|null                        $receiving_officer_id
+ * @property array|null                      $accessories_checklist_on_issue
+ * @property string|null                     $issue_notes
+ * @property \Illuminate\Support\Carbon|null $issue_timestamp
+ * @property int|null                        $returning_officer_id
+ * @property int|null                        $return_accepting_officer_id
+ * @property array|null                      $accessories_checklist_on_return
+ * @property string|null                     $return_notes
+ * @property \Illuminate\Support\Carbon|null $return_timestamp
+ * @property int|null                        $related_transaction_id
+ * @property string                          $status
+ * @property \Illuminate\Support\Carbon|null $due_date
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property int|null $created_by
+ * @property int|null $updated_by
+ * @property int|null $deleted_by
  * @property-read \App\Models\User|null $creator
  * @property-read \App\Models\User|null $deleter
  * @property-read string $item_name
@@ -824,6 +845,7 @@ namespace App\Models{
  * @property-read \App\Models\User|null $issuingOfficer
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanTransactionItem> $items
  * @property-read int|null $items_count
+ * @property-read \App\Models\LoanApplication $loanApplication
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LoanTransactionItem> $loanTransactionItems
  * @property-read int|null $loan_transaction_items_count
  * @property-read \App\Models\User|null $receivingOfficer
@@ -832,16 +854,13 @@ namespace App\Models{
  * @property-read \App\Models\User|null $returningOfficer
  * @property-read \App\Models\User|null $updater
  * @method static \Database\Factories\LoanTransactionFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction filterDateBetween(?string $dateFrom, ?string $dateTo)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction filterType(?string $type)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction filterUser(?int $userId)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction withTrashed(bool $withTrashed = true)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction withoutTrashed()
- * @mixin \Eloquent
- * @property int|null $created_by
- * @property int|null $updated_by
- * @property int|null $deleted_by
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereAccessoriesChecklistOnIssue($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereAccessoriesChecklistOnReturn($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereCreatedAt($value)
@@ -865,8 +884,12 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransaction withoutTrashed()
+ * @mixin \Eloquent
  */
-	class LoanTransaction extends \Eloquent {}
+	#[\AllowDynamicProperties]
+	class IdeHelperLoanTransaction {}
 }
 
 namespace App\Models{
@@ -904,14 +927,13 @@ namespace App\Models{
  * @property-read string|null $condition_on_transaction
  * @property-read string $status_label
  * @property-read string $status_translated
- * @method static \Database\Factories\LoanTransactionItemFactory factory($count = null, $state = [])
+ * @method static \Database\Factories\LoanTransactionItemFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem withoutTrashed()
- * @mixin \Eloquent
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereAccessoriesChecklistIssue($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereAccessoriesChecklistReturn($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereConditionOnReturn($value)
@@ -928,8 +950,10 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanTransactionItem whereUpdatedBy($value)
+ * @mixin \Eloquent
  */
-	class LoanTransactionItem extends \Eloquent {}
+	#[\AllowDynamicProperties]
+	class IdeHelperLoanTransactionItem {}
 }
 
 namespace App\Models{
@@ -961,14 +985,13 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Location active()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Location byCity(string $city)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Location byCountry(string $country)
- * @method static \Database\Factories\LocationFactory factory($count = null, $state = [])
+ * @method static \Database\Factories\LocationFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Location newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Location newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Location onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Location query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Location withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Location withoutTrashed()
- * @mixin \Eloquent
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Location whereAddress($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Location whereCity($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Location whereCountry($value)
@@ -984,8 +1007,10 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Location whereState($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Location whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Location whereUpdatedBy($value)
+ * @mixin \Eloquent
  */
-	class Location extends \Eloquent {}
+	#[\AllowDynamicProperties]
+	class IdeHelperLocation {}
 }
 
 namespace App\Models{
@@ -1010,32 +1035,33 @@ namespace App\Models{
  * @property-read \App\Models\User|null $creator
  * @property-read \App\Models\User|null $updater
  * @property-read \App\Models\User|null $deleter
- * @method static Builder<static>|Notification byNotifiable(\Illuminate\Database\Eloquent\Model $notifiableModel)
- * @method static Builder<static>|Notification byType(array|string $type)
+ * @method static Builder<static>|Notification            byNotifiable(\Illuminate\Database\Eloquent\Model $notifiableModel)
+ * @method static Builder<static>|Notification            byType(array|string $type)
  * @method static \Database\Factories\NotificationFactory factory($count = null, $state = [])
- * @method static Builder<static>|Notification newModelQuery()
- * @method static Builder<static>|Notification newQuery()
- * @method static Builder<static>|Notification onlyTrashed()
- * @method static Builder<static>|Notification query()
- * @method static Builder<static>|Notification read()
- * @method static Builder<static>|Notification unread()
- * @method static Builder<static>|Notification withTrashed(bool $withTrashed = true)
- * @method static Builder<static>|Notification withoutTrashed()
+ * @method static Builder<static>|Notification            newModelQuery()
+ * @method static Builder<static>|Notification            newQuery()
+ * @method static Builder<static>|Notification            onlyTrashed()
+ * @method static Builder<static>|Notification            query()
+ * @method static Builder<static>|Notification            read()
+ * @method static Builder<static>|Notification            unread()
+ * @method static Builder<static>|Notification            withTrashed(bool $withTrashed = true)
+ * @method static Builder<static>|Notification            withoutTrashed()
+ * @method static Builder<static>|Notification whereCreatedAt($value)
+ * @method static Builder<static>|Notification whereCreatedBy($value)
+ * @method static Builder<static>|Notification whereData($value)
+ * @method static Builder<static>|Notification whereDeletedAt($value)
+ * @method static Builder<static>|Notification whereDeletedBy($value)
+ * @method static Builder<static>|Notification whereId($value)
+ * @method static Builder<static>|Notification whereNotifiableId($value)
+ * @method static Builder<static>|Notification whereNotifiableType($value)
+ * @method static Builder<static>|Notification whereReadAt($value)
+ * @method static Builder<static>|Notification whereType($value)
+ * @method static Builder<static>|Notification whereUpdatedAt($value)
+ * @method static Builder<static>|Notification whereUpdatedBy($value)
  * @mixin \Eloquent
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Notification whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Notification whereCreatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Notification whereData($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Notification whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Notification whereDeletedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Notification whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Notification whereNotifiableId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Notification whereNotifiableType($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Notification whereReadAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Notification whereType($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Notification whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Notification whereUpdatedBy($value)
  */
-	final class Notification extends \Eloquent {}
+	#[\AllowDynamicProperties]
+	final class IdeHelperNotification {}
 }
 
 namespace App\Models{
@@ -1059,7 +1085,7 @@ namespace App\Models{
  * @property-read \App\Models\User|null $creator
  * @property-read \App\Models\User|null $deleter
  * @property-read \App\Models\User|null $updater
- * @method static \Database\Factories\PositionFactory factory($count = null, $state = [])
+ * @method static \Database\Factories\PositionFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Position newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Position newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Position onlyTrashed()
@@ -1080,7 +1106,8 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Position withoutTrashed()
  * @mixin \Eloquent
  */
-	class Position extends \Eloquent {}
+	#[\AllowDynamicProperties]
+	class IdeHelperPosition {}
 }
 
 namespace App\Models{
@@ -1103,14 +1130,15 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Role permission($permissions, $without = false)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Role query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Role withoutPermission($permissions)
- * @mixin \Eloquent
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Role whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Role whereGuardName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Role whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Role whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Role whereUpdatedAt($value)
+ * @mixin \Eloquent
  */
-	class Role extends \Eloquent {}
+	#[\AllowDynamicProperties]
+	class IdeHelperRole {}
 }
 
 namespace App\Models{
@@ -1145,7 +1173,7 @@ namespace App\Models{
  * @property-read \App\Models\User|null $creator
  * @property-read \App\Models\User|null $updater
  * @property-read \App\Models\User|null $deleter
- * @method static \Database\Factories\SettingFactory factory($count = null, $state = [])
+ * @method static \Database\Factories\SettingFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting onlyTrashed()
@@ -1177,7 +1205,8 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Setting withoutTrashed()
  * @mixin \Eloquent
  */
-	class Setting extends \Eloquent {}
+	#[\AllowDynamicProperties]
+	class IdeHelperSetting {}
 }
 
 namespace App\Models{
@@ -1206,7 +1235,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory active()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory byCategory(int $categoryId)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory byName(string $name)
- * @method static \Database\Factories\SubCategoryFactory factory($count = null, $state = [])
+ * @method static \Database\Factories\SubCategoryFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory onlyTrashed()
@@ -1226,7 +1255,8 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SubCategory withoutTrashed()
  * @mixin \Eloquent
  */
-	class SubCategory extends \Eloquent {}
+	#[\AllowDynamicProperties]
+	class IdeHelperSubCategory {}
 }
 
 namespace App\Models{
@@ -1268,7 +1298,6 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket withoutTrashed()
- * @mixin \Eloquent
  * @property string|null $sla_due_at SLA due date
  * @property string|null $resolution_notes
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket whereAssignedTo($value)
@@ -1290,8 +1319,10 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Ticket whereUserId($value)
+ * @mixin \Eloquent
  */
-	class Ticket extends \Eloquent {}
+	#[\AllowDynamicProperties]
+	class IdeHelperTicket {}
 }
 
 namespace App\Models{
@@ -1322,7 +1353,6 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment withoutTrashed()
- * @mixin \Eloquent
  * @property int|null $size File size in bytes
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment whereCommentId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment whereCreatedAt($value)
@@ -1338,8 +1368,10 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketAttachment whereUserId($value)
+ * @mixin \Eloquent
  */
-	class TicketAttachment extends \Eloquent {}
+	#[\AllowDynamicProperties]
+	class IdeHelperTicketAttachment {}
 }
 
 namespace App\Models{
@@ -1361,7 +1393,6 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketCategory newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketCategory newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketCategory query()
- * @mixin \Eloquent
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketCategory whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketCategory whereCreatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketCategory whereDeletedAt($value)
@@ -1372,8 +1403,10 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketCategory whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketCategory whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketCategory whereUpdatedBy($value)
+ * @mixin \Eloquent
  */
-	class TicketCategory extends \Eloquent {}
+	#[\AllowDynamicProperties]
+	class IdeHelperTicketCategory {}
 }
 
 namespace App\Models{
@@ -1402,7 +1435,6 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketComment query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketComment withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketComment withoutTrashed()
- * @mixin \Eloquent
  * @property int $is_internal
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketComment whereComment($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketComment whereCreatedAt($value)
@@ -1415,8 +1447,10 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketComment whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketComment whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketComment whereUserId($value)
+ * @mixin \Eloquent
  */
-	class TicketComment extends \Eloquent {}
+	#[\AllowDynamicProperties]
+	class IdeHelperTicketComment {}
 }
 
 namespace App\Models{
@@ -1444,7 +1478,6 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketPriority query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketPriority withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketPriority withoutTrashed()
- * @mixin \Eloquent
  * @property string|null $color_code UI color (hex)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketPriority whereColorCode($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketPriority whereCreatedAt($value)
@@ -1456,8 +1489,10 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketPriority whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketPriority whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketPriority whereUpdatedBy($value)
+ * @mixin \Eloquent
  */
-	class TicketPriority extends \Eloquent {}
+	#[\AllowDynamicProperties]
+	class IdeHelperTicketPriority {}
 }
 
 namespace App\Models{
@@ -1499,15 +1534,15 @@ namespace App\Models{
  * @property string|null                                                                                               $motac_email
  * @property \Illuminate\Notifications\DatabaseNotificationCollection|\Illuminate\Notifications\DatabaseNotification[] $unreadNotifications
  * @method static \Illuminate\Database\Eloquent\Builder whereHasRole(string $role)
- * @property string|null $level For "Aras" or floor level, as string
- * @property string|null $personal_email If distinct from login email
- * @property string|null $user_id_assigned Assigned User ID if different from email
- * @property string|null $service_status Taraf Perkhidmatan. Keys defined in User model.
- * @property string|null $appointment_type Pelantikan. Keys defined in User model.
- * @property int $is_admin Consider using Spatie roles exclusively.
- * @property int $is_bpm_staff Consider using Spatie roles exclusively.
+ * @property string|null $level                   For "Aras" or floor level, as string
+ * @property string|null $personal_email          If distinct from login email
+ * @property string|null $user_id_assigned        Assigned User ID if different from email
+ * @property string|null $service_status          Taraf Perkhidmatan. Keys defined in User model.
+ * @property string|null $appointment_type        Pelantikan. Keys defined in User model.
+ * @property int         $is_admin                Consider using Spatie roles exclusively.
+ * @property int         $is_bpm_staff            Consider using Spatie roles exclusively.
  * @property string|null $profile_photo_path
- * @property int|null $employee_id
+ * @property int|null    $employee_id
  * @property string|null $two_factor_confirmed_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Approval> $approvalsAsApprover
  * @property-read int|null $approvals_as_approver_count
@@ -1541,7 +1576,14 @@ namespace App\Models{
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
  * @property-read int|null $tokens_count
  * @property-read User|null $updater
- * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
+ * 
+ * Instance helpers from Spatie\Permission HasRoles/HasPermissions
+ * @method bool                                               hasRole(string|array $roles, string|null $guard = null)
+ * @method bool                                               hasAnyRole(string|array $roles, string|null $guard = null)
+ * @method bool                                               hasAllRoles(string|array $roles, string|null $guard = null)
+ * @method bool                                               hasPermissionTo(string|\Spatie\Permission\Contracts\Permission $permission, string|null $guard = null)
+ * @method \Illuminate\Support\Collection                     getRoleNames()
+ * @method static \Database\Factories\UserFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User onlyTrashed()
@@ -1587,8 +1629,15 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutPermission($permissions)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutRole($roles, $guard = null)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User filterDepartment(?int $departmentId)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User filterGrade(?int $gradeId)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User filterPosition(?int $positionId)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User orderByName()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User search(?string $term)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePhoneNumber($value)
  * @mixin \Eloquent
  */
-	class User extends \Eloquent {}
+	#[\AllowDynamicProperties]
+	class IdeHelperUser {}
 }
 

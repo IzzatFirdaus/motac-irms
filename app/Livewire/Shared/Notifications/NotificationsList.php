@@ -73,7 +73,8 @@ class NotificationsList extends Component
             ->where('notifiable_id', Auth::id())
             ->first();
 
-        if ($notification && is_null($notification->read_at)) {
+        if (!($notification && is_null($notification->read_at))){
+    return;} 
             // Use the built-in markAsRead method if available; otherwise, manually set read_at
             if (method_exists($notification, 'markAsRead')) {
                 $notification->markAsRead();
@@ -85,7 +86,7 @@ class NotificationsList extends Component
             // Correct session flash usage
             Session::flash('success', __('messages.notification_marked_read'));
             $this->resetPage();
-        }
+        
     }
 
     /**

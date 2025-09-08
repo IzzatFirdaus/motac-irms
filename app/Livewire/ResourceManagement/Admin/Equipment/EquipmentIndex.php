@@ -127,13 +127,16 @@ class EquipmentIndex extends Component
         $this->classificationOptions  = Equipment::getClassificationOptions();
         $this->departmentOptions      = Department::orderBy('name')->pluck('name', 'id')->toArray();
         // Populate location dropdown options if Location model/table exists
-        if (class_exists(\App\Models\Location::class)) {
+        if (!class_exists(\App\Models\Location::class)){
+
+        $this->resetForm();
+    return;} 
             $this->locationOptions = \App\Models\Location::query()
                 ->active()
                 ->orderBy('name')
                 ->pluck('name', 'id')
                 ->toArray();
-        }
+        
 
         $this->resetForm();
     }

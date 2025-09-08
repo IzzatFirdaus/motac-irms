@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Grade Model (Gred Perkhidmatan).
- *
+ * 
  * Represents job grades in the system. Used for user profiles, positions, and approval levels.
  *
  * @property int                             $id
@@ -36,7 +36,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\User|null $creator
  * @property-read \App\Models\User|null $updater
  * @property-read \App\Models\User|null $deleter
- *
  * @method static \Database\Factories\GradeFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade newQuery()
@@ -58,8 +57,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Grade withoutTrashed()
- *
  * @mixin \Eloquent
+ * @mixin IdeHelperGrade
  */
 class Grade extends Model
 {

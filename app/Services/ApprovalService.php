@@ -119,7 +119,8 @@ class ApprovalService
                             $itemId          = (int) ($item['loan_application_item_id'] ?? 0);
                             $qtyApproved     = (int) ($item['quantity_approved'] ?? 0);
                             $approvalItemRow = $loanApplication->loanApplicationItems()->whereKey($itemId)->first();
-                            if ($approvalItemRow) {
+                            if (!$approvalItemRow){
+                        continue;} 
                                 $approvalItemRow->quantity_approved = $qtyApproved;
                                 // Optional: set item status to awaiting issuance if approved qty > 0
                                 if ($qtyApproved > 0) {
@@ -127,7 +128,7 @@ class ApprovalService
                                 }
 
                                 $approvalItemRow->save();
-                            }
+                            
                         }
                     }
 

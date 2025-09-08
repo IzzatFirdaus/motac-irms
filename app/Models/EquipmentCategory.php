@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * EquipmentCategory Model.
- *
+ * 
  * Represents a type/category of ICT equipment. Used for organizing equipment and subcategories.
  *
  * @property int                             $id
@@ -32,7 +32,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\User|null $creator
  * @property-read \App\Models\User|null $updater
  * @property-read \App\Models\User|null $deleter
- *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EquipmentCategory active()
  * @method static \Database\Factories\EquipmentCategoryFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EquipmentCategory newModelQuery()
@@ -51,8 +50,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EquipmentCategory whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EquipmentCategory withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EquipmentCategory withoutTrashed()
- *
  * @mixin \Eloquent
+ * @mixin IdeHelperEquipmentCategory
  */
 class EquipmentCategory extends Model
 {

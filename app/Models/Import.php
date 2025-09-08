@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Import Model.
- *
+ * 
  * Handles import job/file tracking for the system.
  *
  * @property int                             $id
@@ -24,15 +24,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Import newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Import newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Import onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Import query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Import withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Import withoutTrashed()
- *
  * @mixin \Eloquent
+ * @mixin IdeHelperImport
  */
 class Import extends Model
 {

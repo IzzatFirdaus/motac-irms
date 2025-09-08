@@ -53,9 +53,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string|null                                                                                               $preferred_locale
  * @property string|null                                                                                               $motac_email
  * @property \Illuminate\Notifications\DatabaseNotificationCollection|\Illuminate\Notifications\DatabaseNotification[] $unreadNotifications
- *
  * @method static \Illuminate\Database\Eloquent\Builder whereHasRole(string $role)
- *
  * @property string|null $level                   For "Aras" or floor level, as string
  * @property string|null $personal_email          If distinct from login email
  * @property string|null $user_id_assigned        Assigned User ID if different from email
@@ -98,14 +96,13 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
  * @property-read int|null $tokens_count
  * @property-read User|null $updater
- *
+ * 
  * Instance helpers from Spatie\Permission HasRoles/HasPermissions
- *
- * @method        bool                                               hasRole(string|array $roles, string|null $guard = null)
- * @method        bool                                               hasAnyRole(string|array $roles, string|null $guard = null)
- * @method        bool                                               hasAllRoles(string|array $roles, string|null $guard = null)
- * @method        bool                                               hasPermissionTo(string|\Spatie\Permission\Contracts\Permission $permission, string|null $guard = null)
- * @method        \Illuminate\Support\Collection                     getRoleNames()
+ * @method bool                                               hasRole(string|array $roles, string|null $guard = null)
+ * @method bool                                               hasAnyRole(string|array $roles, string|null $guard = null)
+ * @method bool                                               hasAllRoles(string|array $roles, string|null $guard = null)
+ * @method bool                                               hasPermissionTo(string|\Spatie\Permission\Contracts\Permission $permission, string|null $guard = null)
+ * @method \Illuminate\Support\Collection                     getRoleNames()
  * @method static \Database\Factories\UserFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newQuery()
@@ -152,8 +149,14 @@ use Spatie\Permission\Traits\HasRoles;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutPermission($permissions)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutRole($roles, $guard = null)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutTrashed()
- *
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User filterDepartment(?int $departmentId)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User filterGrade(?int $gradeId)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User filterPosition(?int $positionId)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User orderByName()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User search(?string $term)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePhoneNumber($value)
  * @mixin \Eloquent
+ * @mixin IdeHelperUser
  */
 class User extends Authenticatable
 {
@@ -548,5 +551,54 @@ class User extends Authenticatable
     public static function getTitleOptions(): array
     {
         return self::$TITLE_OPTIONS;
+    }
+
+    // --- Query Scopes ---
+
+    public function scopeSearch($query, ?string $term)
+    {
+        $term = trim((string) $term);
+        if ($term === '') {
+            return $query;
+        }
+
+        $like = '%'.$term.'%';
+        return $query->where(function ($q) use ($like): void {
+            $q->where('name', 'like', $like)
+                ->orWhere('email', 'like', $like)
+                ->orWhere('identification_number', 'like', $like);
+        });
+    }
+
+    public function scopeFilterDepartment($query, ?int $departmentId)
+    {
+        if ($departmentId) {
+            $query->where('department_id', $departmentId);
+        }
+
+        return $query;
+    }
+
+    public function scopeFilterPosition($query, ?int $positionId)
+    {
+        if ($positionId) {
+            $query->where('position_id', $positionId);
+        }
+
+        return $query;
+    }
+
+    public function scopeFilterGrade($query, ?int $gradeId)
+    {
+        if ($gradeId) {
+            $query->where('grade_id', $gradeId);
+        }
+
+        return $query;
+    }
+
+    public function scopeOrderByName($query)
+    {
+        return $query->orderBy('name', 'asc');
     }
 }

@@ -47,33 +47,14 @@ class ReportController extends Controller
     {
         $this->authorize('viewLoanReports', Equipment::class);
 
-        // Filtering logic for export - must mirror Livewire component if used for PDF.
-        $query = Equipment::with(['department']);
-
-        // Filters
-        if ($request->filled('search')) {
-            $searchTerm = $request->input('search');
-            $query->where(function ($q) use ($searchTerm): void {
-                $q->where('tag_id', 'like', sprintf('%%%s%%', $searchTerm))
-                    ->orWhere('brand', 'like', sprintf('%%%s%%', $searchTerm))
-                    ->orWhere('model', 'like', sprintf('%%%s%%', $searchTerm));
-            });
-        }
-
-        if ($request->filled('status') && $request->input('status') !== '') {
-            $query->where('status', $request->input('status'));
-        }
-
-        if ($request->filled('asset_type') && $request->input('asset_type') !== '') {
-            $query->where('asset_type', $request->input('asset_type'));
-        }
-
-        if ($request->filled('department_id') && $request->input('department_id') !== '') {
-            $query->where('department_id', $request->input('department_id'));
-        }
-
-        // Pagination or export
-        $equipmentList = $query->orderBy('tag_id')->paginate(20);
+        // Filtering logic uses model scopes to keep controller thin
+        $equipmentList = Equipment::with(['department'])
+            ->search((string) $request->input('search', ''))
+            ->filterStatus($request->input('status'))
+            ->filterAssetType($request->input('asset_type'))
+            ->filterDepartment($request->integer('department_id'))
+            ->orderBy('tag_id')
+            ->paginate(20);
 
         // For filter dropdowns
         $assetTypes  = Equipment::getAssetTypeOptions();
@@ -97,36 +78,13 @@ class ReportController extends Controller
     {
         $this->authorize('viewLoanReports', LoanApplication::class);
 
-        $query = LoanApplication::with(['user.department', 'loanApplicationItems']);
-
-        // Filters
-        if ($request->filled('search')) {
-            $searchTerm = $request->input('search');
-            $query->where(function ($q) use ($searchTerm): void {
-                $q->where('id', 'like', sprintf('%%%s%%', $searchTerm))
-                    ->orWhere('purpose', 'like', sprintf('%%%s%%', $searchTerm));
-            });
-        }
-
-        if ($request->filled('status') && $request->input('status') !== '') {
-            $query->where('status', $request->input('status'));
-        }
-
-        if ($request->filled('department_id') && $request->input('department_id') !== '') {
-            $query->whereHas('user.department', function ($q) use ($request): void {
-                $q->where('id', $request->input('department_id'));
-            });
-        }
-
-        if ($request->filled('date_from')) {
-            $query->whereDate('created_at', '>=', $request->input('date_from'));
-        }
-
-        if ($request->filled('date_to')) {
-            $query->whereDate('created_at', '<=', $request->input('date_to'));
-        }
-
-        $loanApplications = $query->orderByDesc('created_at')->paginate(20);
+        $loanApplications = LoanApplication::with(['user.department', 'loanApplicationItems'])
+            ->search((string) $request->input('search', ''))
+            ->filterStatus($request->input('status'))
+            ->filterDepartment($request->integer('department_id'))
+            ->filterCreatedBetween($request->input('date_from'), $request->input('date_to'))
+            ->orderByDesc('created_at')
+            ->paginate(20);
 
         // For filter dropdowns
         $statusOptions     = LoanApplication::getStatusOptions();
@@ -148,31 +106,15 @@ class ReportController extends Controller
     {
         $this->authorize('viewLoanReports', LoanTransaction::class);
 
-        $query = LoanTransaction::with([
+        $loanTransactions = LoanTransaction::with([
             'loanApplication.user.department',
             'items.equipment',
-        ]);
-
-        // Filters
-        if ($request->filled('user_id') && $request->input('user_id') !== '') {
-            $query->whereHas('loanApplication.user', function ($q) use ($request): void {
-                $q->where('id', $request->input('user_id'));
-            });
-        }
-
-        if ($request->filled('type') && $request->input('type') !== '') {
-            $query->where('type', $request->input('type'));
-        }
-
-        if ($request->filled('date_from')) {
-            $query->whereDate('transaction_date', '>=', $request->input('date_from'));
-        }
-
-        if ($request->filled('date_to')) {
-            $query->whereDate('transaction_date', '<=', $request->input('date_to'));
-        }
-
-        $loanTransactions = $query->orderByDesc('transaction_date')->paginate(20);
+        ])
+            ->filterUser($request->integer('user_id'))
+            ->filterType($request->input('type'))
+            ->filterDateBetween($request->input('date_from'), $request->input('date_to'))
+            ->orderByDesc('transaction_date')
+            ->paginate(20);
 
         // Users filter for dropdown
         $usersFilter      = User::orderBy('name')->pluck('name', 'id')->toArray();

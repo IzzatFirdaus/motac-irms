@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
 
 /**
  * Equipment model for ICT inventory.
@@ -68,7 +70,6 @@ use Illuminate\Support\Str;
  * @property-read int|null $loan_transaction_items_count
  * @property-read \App\Models\Location|null $location
  * @property-read \App\Models\SubCategory|null $subCategory
- *
  * @method static \Database\Factories\EquipmentFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment newQuery()
@@ -106,8 +107,11 @@ use Illuminate\Support\Str;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment whereWarrantyExpiryDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment withoutTrashed()
- *
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment filterAssetType(?string $assetType)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment filterDepartment(?int $departmentId)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Equipment filterStatus(?string $status)
  * @mixin \Eloquent
+ * @mixin IdeHelperEquipment
  */
 #[ObservedBy(BlameableObserver::class)]
 class Equipment extends Model
@@ -557,5 +561,33 @@ class Equipment extends Model
         })->count();
 
         return $totalEquipment > 0 ? ($onLoanEquipment / $totalEquipment) * 100 : 0.0;
+    }
+
+    // --- Scopes used by reports ---
+    public function scopeFilterStatus($query, ?string $status)
+    {
+        if ($status !== null && $status !== '') {
+            $query->where('status', $status);
+        }
+
+        return $query;
+    }
+
+    public function scopeFilterAssetType($query, ?string $assetType)
+    {
+        if ($assetType !== null && $assetType !== '') {
+            $query->where('asset_type', $assetType);
+        }
+
+        return $query;
+    }
+
+    public function scopeFilterDepartment($query, ?int $departmentId)
+    {
+        if ($departmentId) {
+            $query->where('department_id', $departmentId);
+        }
+
+        return $query;
     }
 }

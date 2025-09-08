@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Location Model.
- *
+ * 
  * Represents a physical location or branch for assets/equipment.
  *
  * @property int                             $id
@@ -36,7 +36,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Equipment> $equipment
  * @property-read int|null $equipment_count
  * @property-read \App\Models\User|null $updater
- *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Location active()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Location byCity(string $city)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Location byCountry(string $country)
@@ -47,8 +46,23 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Location query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Location withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Location withoutTrashed()
- *
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Location whereAddress($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Location whereCity($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Location whereCountry($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Location whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Location whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Location whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Location whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Location whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Location whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Location whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Location whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Location wherePostalCode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Location whereState($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Location whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Location whereUpdatedBy($value)
  * @mixin \Eloquent
+ * @mixin IdeHelperLocation
  */
 class Location extends Model
 {

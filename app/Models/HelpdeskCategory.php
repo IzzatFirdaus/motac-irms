@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * HelpdeskCategory Model.
- *
+ * 
  * Represents categories for helpdesk tickets.
  *
  * @property int                             $id
@@ -25,7 +25,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\HelpdeskTicket> $tickets
  * @property-read int|null $tickets_count
- *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskCategory active()
  * @method static \Database\Factories\HelpdeskCategoryFactory                    factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskCategory newModelQuery()
@@ -44,8 +43,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskCategory whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskCategory withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HelpdeskCategory withoutTrashed()
- *
  * @mixin \Eloquent
+ * @mixin IdeHelperHelpdeskCategory
  */
 class HelpdeskCategory extends Model
 {
