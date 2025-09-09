@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Blameable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -58,6 +59,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Grade extends Model
 {
+    use Blameable;
     use HasFactory;
     use SoftDeletes;
 
@@ -71,6 +73,7 @@ class Grade extends Model
     protected $fillable = [
         'name',
         'level', // As per System Design & Livewire Component
+        'position_id', // Link to Position model based on seeders
         'min_approval_grade_id',
         'is_approver_grade',
         'description', // Kept from your existing model, if still used
@@ -84,6 +87,7 @@ class Grade extends Model
      */
     protected $casts = [
         'level' => 'integer', // Changed from 'grade_level' to 'level'
+        'position_id' => 'integer', // Link to Position model
         'min_approval_grade_id' => 'integer',
         'is_approver_grade' => 'boolean',
         'created_at' => 'datetime',
@@ -99,7 +103,28 @@ class Grade extends Model
         return static::query()->orderBy('level')->orderBy('name')->pluck('name', 'id')->all();
     }
 
+    /**
+     * Get grades for a specific position (for dynamic dropdown filtering).
+     */
+    public static function getGradeOptionsForPosition(int $positionId): array
+    {
+        return static::query()
+            ->where('position_id', $positionId)
+            ->orderBy('level')
+            ->orderBy('name')
+            ->pluck('name', 'id')
+            ->all();
+    }
+
     // Relationships
+
+    /**
+     * Get the position this grade belongs to.
+     */
+    public function position(): BelongsTo
+    {
+        return $this->belongsTo(Position::class, 'position_id');
+    }
 
     /**
      * Defines the relationship to the minimum grade required for approval.
@@ -116,38 +141,5 @@ class Grade extends Model
     public function users(): HasMany
     {
         return $this->hasMany(User::class, 'grade_id');
-    }
-
-    /**
-     * Get the positions associated with this grade.
-     * (Assuming a Position model exists and has a grade_id)
-     */
-    public function positions(): HasMany
-    {
-        return $this->hasMany(Position::class, 'grade_id');
-    }
-
-    /**
-     * Get the user who created this record.
-     */
-    public function creator(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-
-    /**
-     * Get the user who last updated this record.
-     */
-    public function updater(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'updated_by');
-    }
-
-    /**
-     * Get the user who soft deleted this record.
-     */
-    public function deleter(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'deleted_by');
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Blameable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -59,6 +60,7 @@ use Illuminate\Support\Str; // For Str::title
  */
 class Department extends Model
 {
+    use Blameable;
     use HasFactory;
     use SoftDeletes;
 
@@ -122,22 +124,6 @@ class Department extends Model
     public function headOfDepartment(): BelongsTo
     {
         return $this->belongsTo(User::class, 'head_of_department_id'); // Corrected foreign key
-    }
-
-    // Blameable relationships
-    public function creator(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function updater(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'updated_by');
-    }
-
-    public function deleter(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'deleted_by');
     }
 
     // Accessor for branch type label
